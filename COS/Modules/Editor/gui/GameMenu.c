@@ -43,9 +43,14 @@ class GameMenu extends PopupMenu
 		checkBoxLaser.SetName("LaserPointer");
 		checkBoxLaser.SetText("Laser Pointer");
 
+		CheckBoxWidget checkBoxKP = CheckBoxWidget.Cast(GetGame().GetWorkspace().CreateWidgets( checkboxLayout, m_checkboxPanel ));
+		checkBoxKP.SetName("KillPlayer");
+		checkBoxKP.SetText("Kill Player");
+
 		checkBoxMap.Insert( checkBoxGodmode.GetName(), "ToggleGodMode" );
 		checkBoxMap.Insert( checkBoxAiming.GetName(), "ToggleOldAiming" );
 		checkBoxMap.Insert( checkBoxLaser.GetName(), "ToggleLaser" );
+		checkBoxMap.Insert( checkBoxKP.GetName(), "KillPlayer" );
 	}
 
 	override void OnShow()
@@ -94,7 +99,7 @@ class GameMenu extends PopupMenu
 		{
 			m_GodMode = !m_GodMode;
 
-			GetRPCManager().SendRPC( "COS", "SetGodMode", new Param1< bool >( !m_GodMode ), true );
+			GetRPCManager().SendRPC( "COS", "SetGodMode", new Param1< PlayerBase >( GetGame().GetPlayer() ), true );
 		}
 		return m_GodMode;
 	}
@@ -106,6 +111,15 @@ class GameMenu extends PopupMenu
 			bc_Visible = !bc_Visible;
 		}
 		return bc_Visible;
+	}
+
+	bool KillPlayer( CheckBoxWidget widget ) 
+	{
+		if ( widget ) 
+		{
+			GetRPCManager().SendRPC( "COS", "KillEntity", new Param1< EntityAI >( GetGame().GetPlayer() ), true );
+		}
+		return true;
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
