@@ -9,6 +9,7 @@ class ModuleManager
     protected ref array< ref Module > m_Modules;
 	protected ref array< ref MouseButtonInfo > m_MouseButtons;
 
+    protected ref array< ScriptModule > m_ScriptModules;
     protected ScriptModule m_ParentScriptModule;
 
     void ModuleManager()
@@ -19,7 +20,6 @@ class ModuleManager
 
         m_ModuleFolders.Insert("$currentDir:COS\\Modules\\");
 
-		m_Modules 	   = new ref array< ref Module >;
 		m_MouseButtons = new ref array< ref MouseButtonInfo >;
 		m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
 		m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
@@ -29,6 +29,27 @@ class ModuleManager
     void ~ModuleManager()
     {
         Print( "ModuleManager::~ModuleManager()" );
+
+        ReleaseModules();
+
+        delete m_ModuleFolders;
+        delete m_MouseButtons;
+    }
+
+    void ReleaseModules()
+    {
+        for ( int i = 0; i < m_Modules.Count(); i++ )
+        {
+            delete m_Modules.Get( i );
+        }
+
+        for ( int j = 0; j < m_ScriptModules.Count(); j++ )
+        {
+            m_ScriptModules.Get( j ).Release();
+        }
+
+        delete m_Modules;
+        delete m_ScriptModules;
     }
 
     private bool IsValidModule( string path, string name, FileAttr attributes )
@@ -48,7 +69,9 @@ class ModuleManager
         if ( script )
         {
             Param p = new Param;
-            script.CallFunctionParams( NULL, "RegisterModule", p, new Param1< ModuleManager >( this ) );
+            script.CallFunctionParams( NULL, "RegisterModules", p, new Param1< ModuleManager >( this ) );
+
+            m_ScriptModules.Insert( script );
         }
     }
 
@@ -57,9 +80,9 @@ class ModuleManager
         m_Modules.Insert( module );
     }
 
-    private void RegisterModulesPath( string path )
+    private void RegisterModulesByPath( string path )
     {
-        Print( "ModuleManager::RegisterModulesPath()" );
+        Print( "ModuleManager::RegisterModulesByPath()" );
         
         int index = 0;
         string module = "";
@@ -89,12 +112,23 @@ class ModuleManager
     {
         Print( "ModuleManager::RegisterModules()" );
 
+		m_Modules = new ref array< ref Module >;
+		m_ScriptModules = new ref array< ScriptModule >;
+
         m_ParentScriptModule = GetGame().GetMission().MissionScript;
 
         for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
         {
-		    RegisterModulesPath(m_ModuleFolders.Get(i));
+		    RegisterModulesByPath(m_ModuleFolders.Get(i));
         }
+
+        OnInit();
+    }
+
+    void ReloadModules()
+    {
+        ReleaseModules();
+        RegisterModules();
     }
 
 	void OnInit()
@@ -429,4 +463,11 @@ ref ModuleManager GetModuleManager()
     }
 
     return g_com_ModuleManager;
+}
+
+void ModuleManager_OnMissionFinish()
+{
+    g_com_ModuleManager.OnMissionFinish();
+
+    delete g_com_ModuleManager;
 }

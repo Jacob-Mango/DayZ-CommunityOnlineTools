@@ -295,19 +295,19 @@ static string FileAttributeToString( FileAttr attr )
     string fileType = "";
     if ( attr & FileAttr.DIRECTORY )
     {
-        fileType = fileType + "DIRECTORY";
+        fileType = fileType + "DIRECTORY ";
     }
     if ( attr & FileAttr.HIDDEN )
     {
-        fileType = fileType + "HIDDEN";
+        fileType = fileType + "HIDDEN ";
     }
     if ( attr & FileAttr.READONLY )
     {
-        fileType = fileType + "READONLY";
+        fileType = fileType + "READONLY ";
     }
     if ( attr & FileAttr.INVALID )
     {
-        fileType = fileType + "INVALID";
+        fileType = fileType + "INVALID ";
     }
     return fileType;
 }

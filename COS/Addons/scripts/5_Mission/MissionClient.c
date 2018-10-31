@@ -22,6 +22,8 @@ modded class MissionGameplay
 	{
 		super.OnMissionStart();
 	
+        GetModuleManager().RegisterModules();
+
         GetModuleManager().OnMissionStart();
 
 		GetGame().GetUIManager().CloseMenu( MENU_INGAME );
@@ -29,7 +31,7 @@ modded class MissionGameplay
 
 	override void OnMissionFinish()
 	{
-        GetModuleManager().OnMissionFinish();
+		ModuleManager_OnMissionFinish();
 		
 		CloseAllMenus();
 
@@ -80,10 +82,8 @@ modded class MissionGameplay
 		
 		if ( key == KeyCode.KC_PERIOD )
 		{
-			//open gestures menu
 			if ( !GetUIManager().IsMenuOpen( MENU_GESTURES ) )
 			{
-				//TODO reconnect when appropriate
 				GesturesMenu.OpenMenu();
 			}
 		}

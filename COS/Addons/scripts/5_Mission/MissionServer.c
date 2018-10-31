@@ -1,7 +1,5 @@
 modded class MissionServer
 {
-	protected bool HIVE_ENABLED = true; 
-
     protected bool m_bLoaded;
 
 	void MissionServer()
@@ -18,27 +16,20 @@ modded class MissionServer
 	override void OnInit()
 	{
 		super.OnInit();
-
-        InitHive();
-
-        SetupWeather();
 	}
 
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
+
+        GetModuleManager().RegisterModules();
 	
         GetModuleManager().OnMissionStart();
 	}
 
 	override void OnMissionFinish()
 	{
-        GetModuleManager().OnMissionFinish();
-
-		if( GetHive() )
-		{
-			DestroyHive();
-		}
+		ModuleManager_OnMissionFinish();
 
 		super.OnMissionFinish();
 	}
@@ -88,51 +79,4 @@ modded class MissionServer
 
 		GetModuleManager().OnKeyRelease( key );
 	}
-
-	void InitHive()
-	{
-		if ( GetGame().IsClient() && GetGame().IsMultiplayer() ) return;
-
-		// RD /s /q "storage_-1" > nul 2>&1
-		if ( !HIVE_ENABLED ) return;
-	
-		Hive oHive = GetHive();
-		
-		if( !oHive )
-		{
-			oHive = CreateHive();
-		}
-
-		if( oHive )
-		{
-			oHive.InitOffline();
-		}
-
-		oHive.SetShardID("100");
-		oHive.SetEnviroment("stable");
-	}
-
-    static void SetupWeather()
-    {
-        Weather weather = g_Game.GetWeather();
-
-        weather.GetOvercast().SetLimits( 0.0 , 2.0 );
-        weather.GetRain().SetLimits( 0.0 , 2.0 );
-        weather.GetFog().SetLimits( 0.0 , 2.0 );
-
-        weather.GetOvercast().SetForecastChangeLimits( 0.0, 0.0 );
-        weather.GetRain().SetForecastChangeLimits( 0.0, 0.0 );
-        weather.GetFog().SetForecastChangeLimits( 0.0, 0.0 );
-
-        weather.GetOvercast().SetForecastTimeLimits( 1800 , 1800 );
-        weather.GetRain().SetForecastTimeLimits( 600 , 600 );
-        weather.GetFog().SetForecastTimeLimits( 600 , 600 );
-
-        weather.GetOvercast().Set( 0.0, 0, 0 );
-        weather.GetRain().Set( 0.0, 0, 0 );
-        weather.GetFog().Set( 0.0, 0, 0 );
-
-        weather.SetWindMaximumSpeed( 50 );
-        weather.SetWindFunctionParams( 0, 0, 1 );
-    }
 }
