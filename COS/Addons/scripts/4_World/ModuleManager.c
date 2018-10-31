@@ -198,6 +198,8 @@ class ModuleManager
 
     void OnUpdate( float timeslice )
     {
+        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return; 
+
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
 			Module module = m_Modules.Get(i);

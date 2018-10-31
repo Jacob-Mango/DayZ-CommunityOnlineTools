@@ -135,7 +135,7 @@ class PositionMenu extends PopupMenu
 
 			vPlayerPos = SnapToGround( vPlayerPos );
 
-			GetGame().GetPlayer().SetPosition( vPlayerPos );
+            GetRPCManager().SendRPC( "COS", "SetPosition", new Param1< vector >( vPlayerPos ), true, NULL, GetGame().GetPlayer() );
 
 			return true;
 		}

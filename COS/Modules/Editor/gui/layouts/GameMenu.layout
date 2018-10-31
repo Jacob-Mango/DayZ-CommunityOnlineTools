@@ -110,5 +110,18 @@ PanelWidgetClass GameMenu
             vexactsize 1
             text "Execute"
         }
+
+        ButtonWidgetClass reload_scripts_button
+        {
+            position 200 10
+            size 80 20
+            halign left_ref
+            valign bottom_ref
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            text "Reload"
+        }
     }
 }
