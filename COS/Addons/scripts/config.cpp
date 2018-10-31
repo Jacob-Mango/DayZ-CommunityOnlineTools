@@ -7,7 +7,7 @@ class CfgPatches
         requiredVersion=0.1;
         requiredAddons[]=
         {
-            "RPC_Scripts", "DZ_Data"
+            "RPC_Scripts", "COS_GUI", "DZ_Data"
         };
     };
 };
