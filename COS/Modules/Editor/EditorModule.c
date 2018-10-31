@@ -18,6 +18,12 @@ class EditorModule : Module
 
         GetRPCManager().AddRPC( "COS", "SetOldAiming", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS", "SetGodMode", this, SingeplayerExecutionType.Client );
+
+        GetRPCManager().AddRPC( "COS", "Weather_SetStorm", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS", "Weather_SetFog", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS", "Weather_SetOvercast", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS", "Weather_SetDate", this, SingeplayerExecutionType.Server );
     }
 
     void ~EditorModule()
@@ -27,9 +33,9 @@ class EditorModule : Module
 
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleCOMEditor = new KeyMouseBinding( GetModuleType() , "ShowCOMEditor" , "[Y]"    , "Opens the COM Editor."        );
+		KeyMouseBinding toggleCOMEditor = new KeyMouseBinding( GetModuleType(), "ShowCOMEditor", "[Y]", "Opens the COM Editor." );
     
-		toggleCOMEditor.AddKeyBind( KeyCode.KC_Y,    KeyMouseBinding.KB_EVENT_RELEASE );
+		toggleCOMEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
 
 		RegisterKeyMouseBinding( toggleCOMEditor );
     }
@@ -204,6 +210,8 @@ class EditorModule : Module
 		if( type == CallType.Server )
 		{
             m_OldAiming = data.param1;
+
+            GetRPCManager().SendRPC( "COS", "SetOldAiming", new Param1< bool >( m_GodMode ), true );
         }
 
 		if( type == CallType.Client )
@@ -226,6 +234,61 @@ class EditorModule : Module
             {
                 m_GodModePlayers.Insert( data.param1 );
             }
+        }
+    }
+
+    void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param5< int, int, int, int, int > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
+        }
+    }
+
+    void Weather_SetWindFunctionParams( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param3< float, float, float > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
+        }
+    }
+
+    void Weather_SetOvercast( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param3< float, float, float > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
+        }
+    }
+
+    void Weather_SetFog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param3< float, float, float > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+        }
+    }
+
+    void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param3< float, float, float > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
         }
     }
 
