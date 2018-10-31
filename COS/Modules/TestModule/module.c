@@ -7,18 +7,18 @@ class TestModule : Module
 
     void onUpdate( float timeslice )
     {
-        string world = "N/A";
+        //string world = "N/A";
 
-        GetGame().GetWorldName( world );
+        //GetGame().GetWorldName( world );
 
         //Print( "We are on map: " + world );
 
-        if ( GetGame().IsClient() )
-        {
-            PlayerBase player = GetGame().GetPlayer();
-            string name = player.GetIdentity().GetName();
+        //if ( GetGame().IsClient() )
+        //{
+            //PlayerBase player = GetGame().GetPlayer();
+            //string name = player.GetIdentity().GetName();
             //Print( "Player's name is " + name );
-        }
+        //}
     }
 }
 
