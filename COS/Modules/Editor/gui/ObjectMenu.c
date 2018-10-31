@@ -118,86 +118,15 @@ class ObjectMenu extends PopupMenu
 
             if( w == m_btnSpawnCursor )
             {
-                EntityAI oCursorObj = g_Game.CreateObject( strSelection, GetCursorPos(), true, ai );
-                obEditor.addObject( oCursorObj );
-
-                if ( oCursorObj.IsInherited( ItemBase ) )
-                {
-                    oItem = ( ItemBase ) oCursorObj;
-                    SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
-
-					quantity = 0;
-					text = m_QuantityItem.GetText();
-					text.ToUpper();
-
-					if (text == "MAX")
-					{
-						quantity = oItem.GetQuantityMax();
-					} else
-					{
-						quantity = text.ToInt();
-					}
-					oItem.SetQuantity(quantity);
-
-                    return true;
-                }
-                oCursorObj.PlaceOnSurface();
-                ObjectInfoMenu.listBox.AddItem(oCursorObj.GetType(), oCursorObj, 0);
+				GetRPCManager().SendRPC( "COS", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetCursorPos(), m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
             }
             else if ( w == m_btnSpawnGround )
             {
-                EntityAI oObj = g_Game.CreateObject( strSelection, GetGame().GetPlayer().GetPosition(), false, ai );
- 				obEditor.addObject( oObj );
-
-                if ( oObj.IsInherited( ItemBase ) )
-                {
-                    oItem = ( ItemBase ) oObj;
-                    SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
-					
-					quantity = 0;
-					text = m_QuantityItem.GetText();
-					text.ToUpper();
-					
-					if (text == "MAX")
-					{
-						quantity = oItem.GetQuantityMax();
-					} else
-					{
-						quantity = text.ToInt();
-					}
-					oItem.SetQuantity(quantity);
-
-                    return true;
-                }
-                oObj.PlaceOnSurface();
-                ObjectInfoMenu.listBox.AddItem(oObj.GetType(), oObj, 0);
-
+				GetRPCManager().SendRPC( "COS", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
             }
             else if ( w == m_btnSpawnInventory )
             {
-                EntityAI oInvItem = g_Game.GetPlayer().GetInventory().CreateInInventory( strSelection );
-
-                oInvItem.SetHealth( oInvItem.GetMaxHealth() );
-
-                if ( oInvItem.IsInherited( ItemBase ) )
-                {
-                    oItem = ( ItemBase ) oObj;
-                    SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
-
-					quantity = 0;
-					text = m_QuantityItem.GetText();
-					text.ToUpper();
-					
-					if (text == "MAX")
-					{
-						quantity = oItem.GetQuantityMax();
-					} else
-					{
-						quantity = text.ToInt();
-					}
-					oItem.SetQuantity(quantity);
-				}
-                return true;
+				GetRPCManager().SendRPC( "COS", "SpawnObjectInventory", new Param2< string, string >( strSelection, m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
             }
         }
 

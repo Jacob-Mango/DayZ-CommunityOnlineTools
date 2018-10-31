@@ -81,11 +81,9 @@ class GameMenu extends PopupMenu
 
 	bool ToggleOldAiming( CheckBoxWidget widget )
 	{
-		if ( widget ) // Temp work around. I'm lazy xd
+		if ( widget ) // Temp work around. Danny is lazy xd
 		{
-			m_OldAiming = !m_OldAiming;
-
-			GetPlayer().OverrideShootFromCamera( !m_OldAiming );
+			GetRPCManager().SendRPC( "COS", "SetOldAiming", new Param1< bool >( !m_OldAiming ), true );
 		}
 		return m_OldAiming;
 	}
@@ -96,7 +94,7 @@ class GameMenu extends PopupMenu
 		{
 			m_GodMode = !m_GodMode;
 
-			GetPlayer().SetAllowDamage( !m_GodMode );
+			GetRPCManager().SendRPC( "COS", "SetGodMode", new Param1< bool >( !m_GodMode ), true );
 		}
 		return m_GodMode;
 	}
@@ -112,7 +110,6 @@ class GameMenu extends PopupMenu
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
-
 		string param;
 		Param1<string> param1;
 
@@ -218,16 +215,6 @@ class GameMenu extends PopupMenu
 
 	void SpawnVehicle( string vehicle, TStringArray attachments) 
 	{
-		Car oCar = Car.Cast( GetGame().CreateObject( vehicle, GetCursorPos(), false, false ) );
-
-		for (int j = 0; j < attachments.Count(); j++) { oCar.GetInventory().CreateAttachment( attachments.Get(j) ); }
-
-		oCar.Fill( CarFluid.FUEL, 1000 );
-		oCar.Fill( CarFluid.OIL, 1000 );
-		oCar.Fill( CarFluid.BRAKE, 1000 );
-		oCar.Fill( CarFluid.COOLANT, 1000 );
-
-		//oCar.EngineStart();
-		oCar.SwitchLights();
+		GetRPCManager().SendRPC( "COS", "SpawnVehicle", new Param3< string, vector, TStringArray >( vehicle, GetCursorPos(), attachments ), true, NULL, GetGame().GetPlayer() );
 	}
 }
