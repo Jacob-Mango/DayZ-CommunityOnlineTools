@@ -1,5 +1,6 @@
 #include "COS\\Modules\\Editor\\ObjectEditor.c"
 #include "COS\\Modules\\Editor\\COSKeyBinds.c"
+#include "COS\\Modules\\Editor\\EditorModule.c"
 
 #include "COS\\Modules\\Editor\\gui\\EditorMenu.c"
 #include "COS\\Modules\\Editor\\gui\\ObjectMenu.c"
@@ -15,4 +16,6 @@ void RegisterModules( ModuleManager moduleManager )
     moduleManager.RegisterModule( new ObjectEditor );
 
     moduleManager.RegisterModule( new COSKeyBinds );
+
+    moduleManager.RegisterModule( new EditorModule );
 }

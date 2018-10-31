@@ -32,7 +32,7 @@ class EditorMenu extends UIScriptedMenu
 		m_WeatherButton  = ButtonWidget.Cast( layoutRoot.FindAnyWidget("weather_button") );
 		m_GameButton     = ButtonWidget.Cast( layoutRoot.FindAnyWidget("game_button") );
 		m_CameraButton   = ButtonWidget.Cast( layoutRoot.FindAnyWidget("camera_button") );
-		m_ObjectEditorButton = layoutRoot.FindAnyWidget( "objectEditor_button" );
+		m_ObjectEditorButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "objectEditor_button" ) );
 
 		// object menu
 		m_objectMenu   		= GetGame().GetWorkspace().CreateWidgets( "COS\\Modules\\Editor\\gui\\layouts\\ObjectMenu.layout", layoutRoot );

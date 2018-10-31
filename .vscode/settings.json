@@ -1,5 +1,5 @@
 {
-    "discord.enabled": true,
+    "discord.enabled": false,
     "triggerTaskOnSave.on": true,
     "triggerTaskOnSave.tasks": {
         "Deploy": [

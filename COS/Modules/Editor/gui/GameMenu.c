@@ -3,6 +3,7 @@ class GameMenu extends PopupMenu
 	TextListboxWidget m_gameScriptList;
 	Widget 			  m_checkboxPanel;
 	ButtonWidget 	  m_gameScriptButton;
+	ButtonWidget 	  m_reloadScriptButton;
 
 	protected ref map< string, string > checkBoxMap = new map< string, string >; // store widget name
 
@@ -21,6 +22,7 @@ class GameMenu extends PopupMenu
 		m_checkboxPanel = layoutRoot.FindAnyWidget("game_checkbox_panel");
 		m_gameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_list_box"));
 		m_gameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_script_button"));
+		m_reloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("reload_scripts_button"));
 
 		m_gameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
 //		m_gameScriptList.AddItem("Spawn Sedan", 	new Param1<string>("SpawnSedan"), 	  0);
@@ -136,6 +138,11 @@ class GameMenu extends PopupMenu
 			{
 				GetGame().GameScript.CallFunction( this , param , NULL, CheckBoxWidget.Cast( w ) );
 			}
+		}
+
+		if ( w == m_reloadScriptButton )
+		{
+			GetModuleManager().ReloadModules();
 		}
 
 		return false;
