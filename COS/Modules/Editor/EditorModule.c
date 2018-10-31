@@ -19,16 +19,18 @@ class EditorModule : Module
         GetRPCManager().AddRPC( "COS", "SetOldAiming", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS", "SetGodMode", this, SingeplayerExecutionType.Client );
 
-        GetRPCManager().AddRPC( "COS", "Weather_SetStorm", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS", "Weather_SetFog", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS", "Weather_SetOvercast", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS", "Weather_SetDate", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS", "Weather_SetStorm", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COS", "Weather_SetFog", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COS", "Weather_SetOvercast", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COS", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COS", "Weather_SetDate", this, SingeplayerExecutionType.Client );
+
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( this.UpdateGodMode, 100, true );
     }
 
     void ~EditorModule()
     {
-
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( this.UpdateGodMode );
     }
 
 	override void RegisterKeyMouseBindings() 
@@ -40,8 +42,8 @@ class EditorModule : Module
 		RegisterKeyMouseBinding( toggleCOMEditor );
     }
 
-    override void onUpdate( float timeslice )
-	{
+    void UpdateGodMode()
+    {
         for ( int i = 0; i < m_GodModePlayers.Count(); i++ )
         {
             PlayerBase player = m_GodModePlayers.Get( i );
@@ -79,7 +81,10 @@ class EditorModule : Module
                 }
             }
         }
+    }
 
+    override void onUpdate( float timeslice )
+	{
         if ( GetGame().IsClient() )
         {
             if ( m_OldAiming )
@@ -227,12 +232,18 @@ class EditorModule : Module
 		
 		if( type == CallType.Server )
 		{
+            PlayerBase player;
+
+            if ( !PlayerBase.CastTo( player, target ) ) return;
+
             if ( m_GodModePlayers.Find( data.param1 ) > -1 )
             {
                 m_GodModePlayers.RemoveItem( data.param1 );
+                player.MessageStatus("You no longer have god mode.");
             } else
             {
                 m_GodModePlayers.Insert( data.param1 );
+                player.MessageStatus("You now have god mode.");
             }
         }
     }
@@ -242,10 +253,12 @@ class EditorModule : Module
 		Param5< int, int, int, int, int > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
-            GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
+            GetRPCManager().SendRPC( "COS", "Weather_SetDate", new Param5< int, int, int, int, int >( data.param1, data.param2, data.param3, data.param4, data.param5 ), true );
         }
+
+        GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
     }
 
     void Weather_SetWindFunctionParams( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -253,10 +266,12 @@ class EditorModule : Module
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
-            GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
+            GetRPCManager().SendRPC( "COS", "Weather_SetWindFunctionParams", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
         }
+
+        GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
     }
 
     void Weather_SetOvercast( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -264,10 +279,12 @@ class EditorModule : Module
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
-            GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
+            GetRPCManager().SendRPC( "COS", "Weather_SetOvercast", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
         }
+
+        GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
     }
 
     void Weather_SetFog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -275,10 +292,12 @@ class EditorModule : Module
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
-            GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+            GetRPCManager().SendRPC( "COS", "Weather_SetFog", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
         }
+
+        GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
     }
 
     void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -286,10 +305,11 @@ class EditorModule : Module
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
-            GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
+            GetRPCManager().SendRPC( "COS", "Weather_SetStorm", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
         }
-    }
 
+        GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
+    }
 }
