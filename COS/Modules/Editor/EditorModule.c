@@ -232,19 +232,34 @@ class EditorModule : Module
 		
 		if( type == CallType.Server )
 		{
-            PlayerBase player;
-
-            if ( !PlayerBase.CastTo( player, target ) ) return;
-
             if ( m_GodModePlayers.Find( data.param1 ) > -1 )
             {
                 m_GodModePlayers.RemoveItem( data.param1 );
-                player.MessageStatus("You no longer have god mode.");
+                GetGame().ChatMP( data.param1, "You no longer have god mode.", "colorAction" );
             } else
             {
                 m_GodModePlayers.Insert( data.param1 );
-                player.MessageStatus("You now have god mode.");
+                GetGame().ChatMP( data.param1, "You now have god mode.", "colorAction" );
             }
+        }
+    }
+
+    void KillEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+		Param1< EntityAI > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+            PlayerBase player;
+
+            if ( PlayerBase.CastTo( player, data.param1 ) ) 
+            {
+                m_GodModePlayers.RemoveItem( player );
+                GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
+            }
+
+            data.param1.SetHealth( "", "", 0 );
         }
     }
 
