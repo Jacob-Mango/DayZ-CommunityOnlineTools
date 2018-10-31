@@ -94,7 +94,7 @@ class WeatherMenu extends PopupMenu
 			editor.SetWeather(m_CurrOvercast, m_CurrRain, m_CurrFog, m_CurrWindForce);
 			editor.SetDate(m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute);
 
-            GetGame().GetWeather().SetWindFunctionParams( m_OrigWindForce, m_CurrWindForce, 1 );
+			GetRPCManager().SendRPC( "COS", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
 
 			return true;
 		}
@@ -114,7 +114,7 @@ class WeatherMenu extends PopupMenu
 
 			UpdateSliderStartTime( m_CurrHour, m_CurrMinute );
 
-			GetGame().GetWorld().SetDate( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute );
+            GetRPCManager().SendRPC( "COS", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
 
 			return true;
 		}
@@ -141,7 +141,7 @@ class WeatherMenu extends PopupMenu
 
 			UpdateSliderStartDay( m_CurrMonth, m_CurrDay );
 
-			GetGame().GetWorld().SetDate( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute );
+            GetRPCManager().SendRPC( "COS", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
 
 			return true;
 		}
@@ -150,8 +150,10 @@ class WeatherMenu extends PopupMenu
 			UpdateSliderOvercast();
 
 			m_CurrOvercast = m_SldOvercast.GetCurrent() * 0.01;
-			GetGame().GetWeather().GetOvercast().Set( m_CurrOvercast, 0, 0 );
-			GetGame().GetWorld().SetDate( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute+5 );
+
+			GetRPCManager().SendRPC( "COS", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+
+            GetRPCManager().SendRPC( "COS", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute + 5), true );
 
 			return true;
 		}
@@ -166,7 +168,7 @@ class WeatherMenu extends PopupMenu
 			float threshold = 0.8; 
 			float timeOut = 4000;
 
-			GetGame().GetWeather().SetStorm(density, threshold, timeOut);
+			GetRPCManager().SendRPC( "COS", "Weather_SetStorm", new Param3< float, float, float >( density, threshold, timeOut ), true );
 
 			return true;
 		}
@@ -175,7 +177,8 @@ class WeatherMenu extends PopupMenu
 			UpdateSliderFog();
 
 			m_CurrFog = m_SldFog.GetCurrent() * 0.01;
-			GetGame().GetWeather().GetFog().Set( m_CurrFog, 0, 0 );
+
+			GetRPCManager().SendRPC( "COS", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
 
 			return true;
 		}
@@ -185,7 +188,7 @@ class WeatherMenu extends PopupMenu
 
 			m_CurrWindForce = m_SldWindForce.GetCurrent() * 0.01;
 
-            GetGame().GetWeather().SetWindFunctionParams( m_OrigWindForce, m_CurrWindForce, 1 );
+			GetRPCManager().SendRPC( "COS", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
 
 			return true;
 		}
