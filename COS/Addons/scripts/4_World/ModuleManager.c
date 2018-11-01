@@ -7,6 +7,7 @@ class ModuleManager
     protected ref array< string > m_ModuleFolders;
 
     protected ref array< ref Module > m_Modules;
+    protected ref array< ref EditorModule > m_EditorModules;
 	protected ref array< ref MouseButtonInfo > m_MouseButtons;
 
     protected ref array< ScriptModule > m_ScriptModules;
@@ -38,17 +39,13 @@ class ModuleManager
 
     void ReleaseModules()
     {
-        for ( int i = 0; i < m_Modules.Count(); i++ )
-        {
-            delete m_Modules.Get( i );
-        }
-
         for ( int j = 0; j < m_ScriptModules.Count(); j++ )
         {
             m_ScriptModules.Get( j ).Release();
         }
 
         delete m_Modules;
+        delete m_EditorModules;
         delete m_ScriptModules;
     }
 
@@ -78,6 +75,11 @@ class ModuleManager
     void RegisterModule( Module module )
     {
         m_Modules.Insert( module );
+
+        if ( module.IsInherited( EditorModule ) )
+        {
+            m_EditorModules.Insert( module );
+        }
     }
 
     private void RegisterModulesByPath( string path )
@@ -113,9 +115,12 @@ class ModuleManager
         Print( "ModuleManager::RegisterModules()" );
 
 		m_Modules = new ref array< ref Module >;
+        m_EditorModules = new ref array< ref EditorModule >;
 		m_ScriptModules = new ref array< ScriptModule >;
 
         m_ParentScriptModule = GetGame().GetMission().MissionScript;
+
+        RegisterModule( new DefaultModule );
 
         for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
         {
@@ -129,6 +134,16 @@ class ModuleManager
     {
         ReleaseModules();
         RegisterModules();
+    }
+
+    ref array< ref Module > GetModules()
+    {
+        return m_Modules;
+    }
+
+    ref array< ref EditorModule > GetEditorModules()
+    {
+        return m_EditorModules;
     }
 
 	void OnInit()
