@@ -1,45 +1,45 @@
 class PopupMenu extends ScriptedWidgetEventHandler 
 {
-	protected Widget layoutRoot;
+    protected Widget layoutRoot;
 
-	void PopupMenu() 
-	{
+    void PopupMenu() 
+    {
 
-	}
+    }
 
-	void ~PopupMenu() 
-	{
-	}
+    void ~PopupMenu() 
+    {
+    }
 
-	void OnWidgetScriptInit( Widget w )
-	{
-		layoutRoot = w;
-		layoutRoot.SetHandler( this );
+    void OnWidgetScriptInit( Widget w )
+    {
+        layoutRoot = w;
+        layoutRoot.SetHandler( this );
 
-		Init();
-	}
+        Init();
+    }
 
-	void Init() 
-	{
+    void Init() 
+    {
 
-	}
+    }
 
-	void OnShow()
-	{
-	}
+    void OnShow()
+    {
+    }
 
-	void OnHide() 
-	{
-	}
+    void OnHide() 
+    {
+    }
 
-	void Update() 
-	{
-		
-	}
+    void Update() 
+    {
+        
+    }
 
-	Widget GetLayoutRoot() 
-	{
-		return layoutRoot;
-	}
+    Widget GetLayoutRoot() 
+    {
+        return layoutRoot;
+    }
 
 }

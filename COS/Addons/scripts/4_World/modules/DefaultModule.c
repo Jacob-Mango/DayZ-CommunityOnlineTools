@@ -8,18 +8,18 @@ class DefaultModule : Module
     {
     }
 
-	override void RegisterKeyMouseBindings() 
-	{
-		KeyMouseBinding toggleCOMEditor = new KeyMouseBinding( GetModuleType(), "ShowCOMEditor", "[Y]", "Opens the COM Editor." );
+    override void RegisterKeyMouseBindings() 
+    {
+        KeyMouseBinding toggleCOMEditor = new KeyMouseBinding( GetModuleType(), "ShowCOMEditor", "[Y]", "Opens the COM Editor." );
     
-		toggleCOMEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
+        toggleCOMEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
 
-		RegisterKeyMouseBinding( toggleCOMEditor );
+        RegisterKeyMouseBinding( toggleCOMEditor );
     }
 
     override void onUpdate( float timeslice )
-	{
-	}
+    {
+    }
 
     void ShowCOMEditor()
     {

@@ -1,14 +1,14 @@
 class ModuleManager
 {
-	protected const int CLICK_TIME			= 200; //ms
-	protected const int HOLD_CLICK_TIME_MIN	= 200; //ms
-	protected const int DOUBLE_CLICK_TIME	= 300; //ms
+    protected const int CLICK_TIME            = 200; //ms
+    protected const int HOLD_CLICK_TIME_MIN    = 200; //ms
+    protected const int DOUBLE_CLICK_TIME    = 300; //ms
 
     protected ref array< string > m_ModuleFolders;
 
     protected ref array< ref Module > m_Modules;
     protected ref array< ref EditorModule > m_EditorModules;
-	protected ref array< ref MouseButtonInfo > m_MouseButtons;
+    protected ref array< ref MouseButtonInfo > m_MouseButtons;
 
     protected ref array< ScriptModule > m_ScriptModules;
     protected ScriptModule m_ParentScriptModule;
@@ -21,10 +21,10 @@ class ModuleManager
 
         m_ModuleFolders.Insert("$currentDir:COS\\Modules\\");
 
-		m_MouseButtons = new ref array< ref MouseButtonInfo >;
-		m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
-		m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
-		m_MouseButtons.Insert( new MouseButtonInfo( MouseState.MIDDLE ) );
+        m_MouseButtons = new ref array< ref MouseButtonInfo >;
+        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
+        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
+        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.MIDDLE ) );
     }
 
     void ~ModuleManager()
@@ -62,7 +62,7 @@ class ModuleManager
 
     private void LoadModule( string path, string name )
     {
-		ScriptModule script = ScriptModule.LoadScript( m_ParentScriptModule, path + name + "\\module.c", true );
+        ScriptModule script = ScriptModule.LoadScript( m_ParentScriptModule, path + name + "\\module.c", true );
         if ( script )
         {
             Param p = new Param;
@@ -88,35 +88,35 @@ class ModuleManager
         
         int index = 0;
         string module = "";
-		FileAttr oFileAttr = FileAttr.INVALID;
-		FindFileHandle oFileHandle = FindFile( path + "*", module, oFileAttr, FindFileFlags.DIRECTORIES );
+        FileAttr oFileAttr = FileAttr.INVALID;
+        FindFileHandle oFileHandle = FindFile( path + "*", module, oFileAttr, FindFileFlags.DIRECTORIES );
 
-		if ( module != "" )
-		{
+        if ( module != "" )
+        {
             if ( IsValidModule( path, module, oFileAttr ) )
             {
                 LoadModule( path, module );
-			    index++;
+                index++;
             }
 
-			while (FindNextFile(oFileHandle, module, oFileAttr))
-			{
-				if ( IsValidModule( path, module, oFileAttr ) )
-				{
+            while (FindNextFile(oFileHandle, module, oFileAttr))
+            {
+                if ( IsValidModule( path, module, oFileAttr ) )
+                {
                     LoadModule( path, module );
-					index++;
-				}
-			}
-		}
+                    index++;
+                }
+            }
+        }
     }
 
     void RegisterModules()
     {
         Print( "ModuleManager::RegisterModules()" );
 
-		m_Modules = new ref array< ref Module >;
+        m_Modules = new ref array< ref Module >;
         m_EditorModules = new ref array< ref EditorModule >;
-		m_ScriptModules = new ref array< ScriptModule >;
+        m_ScriptModules = new ref array< ScriptModule >;
 
         m_ParentScriptModule = GetGame().GetMission().MissionScript;
 
@@ -124,7 +124,7 @@ class ModuleManager
 
         for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
         {
-		    RegisterModulesByPath(m_ModuleFolders.Get(i));
+            RegisterModulesByPath(m_ModuleFolders.Get(i));
         }
 
         OnInit();
@@ -146,15 +146,15 @@ class ModuleManager
         return m_EditorModules;
     }
 
-	void OnInit()
-	{
-	    Print( "ModuleManager::OnInit()" );
+    void OnInit()
+    {
+        Print( "ModuleManager::OnInit()" );
 
         for ( int i = 0; i < m_Modules.Count(); ++i)
         {
             m_Modules.Get(i).Init();
         }
-	}
+    }
 
     void OnMissionStart()
     {
@@ -180,44 +180,44 @@ class ModuleManager
     {
         Print( "ModuleManager::OnMissionLoaded()" );
 
-		for ( int i = 0; i < m_Modules.Count(); ++i)
-		{
-			m_Modules.Get(i).onMissionLoaded();
-		}
+        for ( int i = 0; i < m_Modules.Count(); ++i)
+        {
+            m_Modules.Get(i).onMissionLoaded();
+        }
     }
 
-	void OnMouseButtonRelease(int button)
-	{
-		moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_RELEASE );
-	}
+    void OnMouseButtonRelease(int button)
+    {
+        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_RELEASE );
+    }
     
     void OnMouseButtonHold( int button )
-	{
-		moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_HOLD );
-	}
+    {
+        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_HOLD );
+    }
 
-	void OnMouseButtonPress( int button )
-	{
-		moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_PRESS );
-	}
+    void OnMouseButtonPress( int button )
+    {
+        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_PRESS );
+    }
 
     void OnKeyPress( int key )
     {
         moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_PRESS );
     }
 
-	void OnKeyRelease(int key)
-	{
-		moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
+    void OnKeyRelease(int key)
+    {
+        moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
     }
 
     void OnUpdate( float timeslice )
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return; 
 
-		for ( int i = 0; i < m_Modules.Count(); ++i)
-		{
-			Module module = m_Modules.Get(i);
+        for ( int i = 0; i < m_Modules.Count(); ++i)
+        {
+            Module module = m_Modules.Get(i);
 
             if ( !module.IsPreventingInput() )
             {
@@ -292,8 +292,8 @@ class ModuleManager
                     }
                 }
             }
-			module.onUpdate( timeslice );
-		}
+            module.onUpdate( timeslice );
+        }
     }
 
     ref Module GetModule( typename module_Type )
@@ -348,11 +348,11 @@ class ModuleManager
 
         if ( mouseEvent == KeyMouseBinding.MB_EVENT_PRESS ) button_info.Press();
 
-        int time_curr			= GetGame().GetTime();
-        int time_last_press		= button_info.GetTimeLastPress();
-        int time_last_release	= button_info.GetTimeLastRelease();
-        int time_delta_press	= time_curr - time_last_press;
-        int time_delta_release	= time_curr - time_last_release;
+        int time_curr            = GetGame().GetTime();
+        int time_last_press        = button_info.GetTimeLastPress();
+        int time_last_release    = button_info.GetTimeLastRelease();
+        int time_delta_press    = time_curr - time_last_press;
+        int time_delta_release    = time_curr - time_last_release;
 
         for ( int i = 0; i < m_Modules.Count(); ++i)
         {

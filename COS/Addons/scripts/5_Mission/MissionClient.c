@@ -2,54 +2,54 @@ modded class MissionGameplay
 {
     protected bool m_bLoaded;
 
-	void MissionSMissionGameplayrver()
-	{
-	    Print( "MissionGameplay::MissionGameplay()" );
-	    m_bLoaded = false;
-	}
+    void MissionSMissionGameplayrver()
+    {
+        Print( "MissionGameplay::MissionGameplay()" );
+        m_bLoaded = false;
+    }
 
-	void ~MissionGameplay()
-	{
-	    Print( "MissionGameplay::~MissionGameplay()" );
-	}
+    void ~MissionGameplay()
+    {
+        Print( "MissionGameplay::~MissionGameplay()" );
+    }
 
-	override void OnInit()
-	{
-		super.OnInit();
-	}
+    override void OnInit()
+    {
+        super.OnInit();
+    }
 
-	override void OnMissionStart()
-	{
-		super.OnMissionStart();
-	
+    override void OnMissionStart()
+    {
+        super.OnMissionStart();
+    
         GetModuleManager().RegisterModules();
 
         GetModuleManager().OnMissionStart();
 
-		GetGame().GetUIManager().CloseMenu( MENU_INGAME );
-	}
+        GetGame().GetUIManager().CloseMenu( MENU_INGAME );
+    }
 
-	override void OnMissionFinish()
-	{
-		ModuleManager_OnMissionFinish();
-		
-		CloseAllMenus();
+    override void OnMissionFinish()
+    {
+        ModuleManager_OnMissionFinish();
+        
+        CloseAllMenus();
 
-		DestroyAllMenus();
+        DestroyAllMenus();
 
-		GetGame().GetUIManager().CloseMenu( MENU_INGAME );
+        GetGame().GetUIManager().CloseMenu( MENU_INGAME );
 
-		super.OnMissionFinish();
-	}
+        super.OnMissionFinish();
+    }
 
     void OnMissionLoaded()
     {
-		GetModuleManager().OnMissionLoaded();
+        GetModuleManager().OnMissionLoaded();
     }
 
-	override void OnUpdate( float timeslice )
-	{
-	    super.OnUpdate( timeslice );
+    override void OnUpdate( float timeslice )
+    {
+        super.OnUpdate( timeslice );
 
         if( !m_bLoaded && !GetDayZGame().IsLoading() )
         {
@@ -58,41 +58,41 @@ modded class MissionGameplay
         } else {
             GetModuleManager().OnUpdate( timeslice );
         }
-	}
+    }
 
-	override void OnMouseButtonRelease( int button )
-	{
-		super.OnMouseButtonRelease( button );
+    override void OnMouseButtonRelease( int button )
+    {
+        super.OnMouseButtonRelease( button );
 
-		GetModuleManager().OnMouseButtonRelease( button );
-	}
+        GetModuleManager().OnMouseButtonRelease( button );
+    }
 
-	override void OnMouseButtonPress( int button )
-	{
-		super.OnMouseButtonPress( button );
+    override void OnMouseButtonPress( int button )
+    {
+        super.OnMouseButtonPress( button );
 
-		GetModuleManager().OnMouseButtonPress( button );
-	}
+        GetModuleManager().OnMouseButtonPress( button );
+    }
 
-	override void OnKeyPress( int key )
-	{
-		super.OnKeyPress(key);
+    override void OnKeyPress( int key )
+    {
+        super.OnKeyPress(key);
 
-		GetModuleManager().OnKeyPress( key );
-		
-		if ( key == KeyCode.KC_PERIOD )
-		{
-			if ( !GetUIManager().IsMenuOpen( MENU_GESTURES ) )
-			{
-				GesturesMenu.OpenMenu();
-			}
-		}
+        GetModuleManager().OnKeyPress( key );
+        
+        if ( key == KeyCode.KC_PERIOD )
+        {
+            if ( !GetUIManager().IsMenuOpen( MENU_GESTURES ) )
+            {
+                GesturesMenu.OpenMenu();
+            }
+        }
     }
 
     override void OnKeyRelease( int key )
-	{
-		super.OnKeyRelease( key );
+    {
+        super.OnKeyRelease( key );
 
-		GetModuleManager().OnKeyRelease( key );
-	}
+        GetModuleManager().OnKeyRelease( key );
+    }
 }
