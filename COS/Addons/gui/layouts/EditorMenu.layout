@@ -1,65 +1,65 @@
 FrameWidgetClass EditorMenu
 {
-	visible 0
-	color 0 0 0 0
-	position 0 0
-	size 1 1
-	hexactpos 0
-	vexactpos 0
-	hexactsize 0
-	vexactsize 0
-	style EditorPanel
-	{
+    visible 0
+    color 0 0 0 0
+    position 0 0
+    size 1 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style EditorPanel
+    {
         PanelWidgetClass RightPanel
         {
-			visible 1
-			color 0 0 0 0.95
-			position 0.005 0.02
-			halign right_ref
-			size 60 550
-			hexactsize 1
-			vexactsize 1
-			style DayZDefaultPanelTop
-			{
-				PanelWidgetClass TitleBar
-				{
-					visible 1
-					position 0 0
-					size 1 25
-					color 0 0 0 0.7843
-					vexactsize 1
-					{
-						TextWidgetClass TitleBarText
-						{
-							visible 1
-							position 0.1 0
-							size 0.8 0.8
-							valign center_ref
-							text "Tools"
-							font "gui/fonts/Metron-Bold58"
-							"text halign" left
-							"exact text" 1
-							"exact text size" 20
-						}
-					}
-				}
-				WrapSpacerWidgetClass Buttons {
-					visible 1
-					clipchildren 0
-					color 1 1 1 0
-					position 0 25
-					size 1 1
-					halign center_ref
-					hexactpos 0
-					vexactpos 1
-					hexactsize 0
-					vexactsize 0
-					priority 90
-					scriptclass ""
-					style Outline
-					"Size To Content V" 1
-				}
-			}
-        }		
-	}
+            visible 1
+            color 0 0 0 0.95
+            position 0.005 0.02
+            halign right_ref
+            size 60 550
+            hexactsize 1
+            vexactsize 1
+            style DayZDefaultPanelTop
+            {
+                PanelWidgetClass TitleBar
+                {
+                    visible 1
+                    position 0 0
+                    size 1 25
+                    color 0 0 0 0.7843
+                    vexactsize 1
+                    {
+                        TextWidgetClass TitleBarText
+                        {
+                            visible 1
+                            position 0.1 0
+                            size 0.8 0.8
+                            valign center_ref
+                            text "Tools"
+                            font "gui/fonts/Metron-Bold58"
+                            "text halign" left
+                            "exact text" 1
+                            "exact text size" 20
+                        }
+                    }
+                }
+                WrapSpacerWidgetClass Buttons {
+                    visible 1
+                    clipchildren 0
+                    color 1 1 1 0
+                    position 0 25
+                    size 1 1
+                    halign center_ref
+                    hexactpos 0
+                    vexactpos 1
+                    hexactsize 0
+                    vexactsize 0
+                    priority 90
+                    scriptclass ""
+                    style Outline
+                    "Size To Content V" 1
+                }
+            }
+        }        
+    }
 }
