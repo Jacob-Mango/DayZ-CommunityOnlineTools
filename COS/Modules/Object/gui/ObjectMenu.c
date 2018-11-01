@@ -41,11 +41,13 @@ class ObjectMenu extends PopupMenu
 
     override void OnShow()
     {
+        super.OnShow();
         UpdateList( "All" );
     }
 
     override void OnHide() 
     {
+        super.OnHide();
         if ( previewItem ) 
         {
             GetGame().ObjectDelete( previewItem );
