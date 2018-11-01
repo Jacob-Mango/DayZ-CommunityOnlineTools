@@ -1,6 +1,8 @@
 class PopupMenu extends ScriptedWidgetEventHandler 
 {
-    protected Widget layoutRoot;
+    protected ref Widget layoutRoot;
+    
+    ref Widget baseWindow;
 
     void PopupMenu() 
     {
@@ -26,10 +28,14 @@ class PopupMenu extends ScriptedWidgetEventHandler
 
     void OnShow()
     {
+        baseWindow.Show( true );
+        layoutRoot.Show( true );
     }
 
     void OnHide() 
     {
+        layoutRoot.Show( false );
+        baseWindow.Show( false );
     }
 
     void Update() 
@@ -37,7 +43,7 @@ class PopupMenu extends ScriptedWidgetEventHandler
         
     }
 
-    Widget GetLayoutRoot() 
+    ref Widget GetLayoutRoot() 
     {
         return layoutRoot;
     }

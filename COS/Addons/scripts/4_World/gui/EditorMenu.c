@@ -25,7 +25,24 @@ class EditorMenu extends UIScriptedMenu
 
             ref Widget button = button_bkg.FindAnyWidget( "btn" );
 
-            ref Widget menu = GetGame().GetWorkspace().CreateWidgets( m_Modules.Get( i ).GetLayoutRoot(), layoutRoot );
+            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\BaseWindow.layout", layoutRoot );
+
+            ref Widget menu = GetGame().GetWorkspace().CreateWidgets( m_Modules.Get( i ).GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
+
+            float width = -1;
+            float height = -1;
+            menu.GetSize( width, height );
+
+            PopupMenu popMenu;
+
+            menu.GetScript( popMenu );
+
+            if ( popMenu )
+            {
+                popMenu.baseWindow = base_window;
+            }
+
+            base_window.SetSize( width, height );
 
             m_Modules.Get( i ).m_Button = button;
             m_Modules.Get( i ).m_Menu = menu;
@@ -90,12 +107,10 @@ class EditorMenu extends UIScriptedMenu
         {
             if ( popMenu.GetLayoutRoot().IsVisible() ) 
             {
-                popMenu.GetLayoutRoot().Show( false );
                 popMenu.OnHide();
             }
             else 
             {
-                popMenu.GetLayoutRoot().Show( true );
                 popMenu.OnShow();
             }
 

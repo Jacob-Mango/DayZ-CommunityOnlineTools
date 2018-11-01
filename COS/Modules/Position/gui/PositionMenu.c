@@ -62,6 +62,7 @@ class PositionMenu extends PopupMenu
 
     override void OnShow()
     {
+        super.OnShow();
         vector player_pos = GetGame().GetPlayer().GetPosition();
 
         m_TxtCurrentX.SetText( player_pos[0].ToString() );
@@ -70,7 +71,7 @@ class PositionMenu extends PopupMenu
 
     override void OnHide()
     {
-
+        super.OnHide();
     }
 
     override bool OnMouseEnter(Widget w, int x, int y)
