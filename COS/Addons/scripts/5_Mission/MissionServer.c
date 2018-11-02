@@ -6,7 +6,6 @@ modded class MissionServer
     {
         Print( "MissionServer::MissionServer()" );
         
-        new WidgetHandler;
         m_bLoaded = false;
     }
 

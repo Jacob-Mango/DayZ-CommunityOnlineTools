@@ -1,15 +1,13 @@
-class PopupMenu extends ScriptedWidgetEventHandler 
+class BaseWindow extends ScriptedWidgetEventHandler 
 {
     protected ref Widget layoutRoot;
-    
-    ref BaseWindow baseWindow;
 
-    void PopupMenu() 
+    void BaseWindow() 
     {
 
     }
 
-    void ~PopupMenu() 
+    void ~BaseWindow() 
     {
     }
 
@@ -28,7 +26,6 @@ class PopupMenu extends ScriptedWidgetEventHandler
 
     void Show()
     {
-        baseWindow.Show();
         layoutRoot.Show( true );
         OnShow();
     }
@@ -37,7 +34,6 @@ class PopupMenu extends ScriptedWidgetEventHandler
     {
         OnHide();
         layoutRoot.Show( false );
-        baseWindow.Hide();
     }
 
     void OnShow()
@@ -56,25 +52,5 @@ class PopupMenu extends ScriptedWidgetEventHandler
     ref Widget GetLayoutRoot() 
     {
         return layoutRoot;
-    }
-
-    string GetTitle()
-    {
-        return "";
-    }
-
-    string GetImageSet()
-    {
-        return "";
-    }
-
-    string GetIconName()
-    {
-        return "";
-    }
-
-    bool ImageIsIcon()
-    {
-        return false;
     }
 }

@@ -12,11 +12,11 @@ PanelWidgetClass base_window
     hexactsize 1
     vexactsize 1
     draggable 1
+    scriptclass "BaseWindow"
     {
         PanelWidgetClass title_wrapper
         {
             visible 1
-            ignorepointer 1
             color 0 0 0 0.7843
             position 0 0
             size 1 25
@@ -28,7 +28,6 @@ PanelWidgetClass base_window
             {
                 TextWidgetClass title_text
                 {
-                    ignorepointer 0
                     position 5 0
                     halign left_ref
                     valign center_ref
@@ -39,31 +38,36 @@ PanelWidgetClass base_window
                     vexactsize 0
                     style Normal
                     text "Placeholder Title"
-                    font "gui/fonts/Metron58"
+                    font "gui/fonts/sdf_MetronLight24"
                     "exact text" 1
                     "exact text size" 18
                     "text halign" left
                     "text valign" center
+                    priority 2
                 }
                 ButtonWidgetClass close_button
                 {
-                    color 1 0 0 1
-                    position 0 0
-                    size 25 25
+                    visible 1
+                    color 0 0 0 1
+                    position 5 0
+                    size 25 1
                     halign right_ref
                     valign center_ref
+                    hexactpos 1
+                    vexactpos 0
                     hexactsize 1
-                    vexactsize 1
+                    vexactsize 0
+                    style Default
                     {
                         ImageWidgetClass close_button_image
                         {
                             ignorepointer 1
                             position 0 0
-                            size 25 25
+                            size 1 1
                             halign right_ref
                             valign center_ref
-                            hexactsize 1
-                            vexactsize 1
+                            hexactsize 0
+                            vexactsize 0
                             image0 "set:dayz_gui image:icon_x"
                             mode additive
                             "src alpha" 1

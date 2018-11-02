@@ -20,12 +20,15 @@ class WidgetHandler: ScriptedWidgetEventHandler
 
 	static WidgetHandler GetInstance()
 	{
+		if ( s_instance == NULL )
+		{
+			s_instance = new ref WidgetHandler;
+		}
 		return s_instance;
 	}
 
 	void WidgetHandler()
 	{
-		s_instance = this;
 		m_OnMouseButtonDownRegister = new map<Widget, ref Param>;
 		m_OnMouseButtonUpRegister = new map<Widget, ref Param>;
 		m_OnMouseWheel = new map<Widget, ref Param>;
