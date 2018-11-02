@@ -482,9 +482,14 @@ ref ModuleManager GetModuleManager()
     return g_com_ModuleManager;
 }
 
-void ModuleManager_OnMissionFinish()
+ref ModuleManager NewModuleManager()
 {
-    g_com_ModuleManager.OnMissionFinish();
+    if ( g_com_ModuleManager )
+    {
+        delete g_com_ModuleManager;
+    }
 
-    delete g_com_ModuleManager;
+    g_com_ModuleManager = new ref ModuleManager();
+
+    return g_com_ModuleManager;
 }

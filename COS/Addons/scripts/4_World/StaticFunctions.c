@@ -1,3 +1,5 @@
+// TODO: MOVE ALL THIS INTO A SEPERATE MOD
+
 static string VectorToString( vector vec )
 {
     string result = vec.ToString();
