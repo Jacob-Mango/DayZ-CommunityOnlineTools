@@ -66,6 +66,16 @@ class BaseWindow extends ScriptedWidgetEventHandler
         return false;
     }
 
+	override bool OnDrop( Widget w, int x, int y, Widget reciever )
+	{
+        if ( reciever == NULL )
+        {
+		    w.SetPos( x, y, true );
+        }
+
+		return true;
+	}
+
     ref Widget GetLayoutRoot() 
     {
         return layoutRoot;
