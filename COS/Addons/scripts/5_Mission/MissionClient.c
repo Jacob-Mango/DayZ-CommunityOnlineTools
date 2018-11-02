@@ -2,9 +2,11 @@ modded class MissionGameplay
 {
     protected bool m_bLoaded;
 
-    void MissionSMissionGameplayrver()
+    void MissionGameplay()
     {
         Print( "MissionGameplay::MissionGameplay()" );
+
+        new WidgetHandler;
         m_bLoaded = false;
     }
 
