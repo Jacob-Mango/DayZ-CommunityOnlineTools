@@ -1,12 +1,12 @@
 modded class MissionGameplay
 {
-    protected bool m_bLoaded;
+    protected ref ServerTools m_ServerTools;
 
     void MissionGameplay()
     {
         Print( "MissionGameplay::MissionGameplay()" );
         
-        m_bLoaded = false;
+        m_ServerTools = new ServerTools();
     }
 
     void ~MissionGameplay()
@@ -23,16 +23,14 @@ modded class MissionGameplay
     {
         super.OnMissionStart();
     
-        GetModuleManager().RegisterModules();
-
-        GetModuleManager().OnMissionStart();
+        m_ServerTools.OnStart();
 
         GetGame().GetUIManager().CloseMenu( MENU_INGAME );
     }
 
     override void OnMissionFinish()
     {
-        ModuleManager_OnMissionFinish();
+        m_ServerTools.OnFinish();
         
         CloseAllMenus();
 
@@ -43,43 +41,32 @@ modded class MissionGameplay
         super.OnMissionFinish();
     }
 
-    void OnMissionLoaded()
-    {
-        GetModuleManager().OnMissionLoaded();
-    }
-
     override void OnUpdate( float timeslice )
     {
         super.OnUpdate( timeslice );
 
-        if( !m_bLoaded && !GetDayZGame().IsLoading() )
-        {
-            m_bLoaded = true;
-            OnMissionLoaded();
-        } else {
-            GetModuleManager().OnUpdate( timeslice );
-        }
+        m_ServerTools.OnUpdate( timeslice );
     }
 
     override void OnMouseButtonRelease( int button )
     {
         super.OnMouseButtonRelease( button );
 
-        GetModuleManager().OnMouseButtonRelease( button );
+        m_ServerTools.OnMouseButtonRelease( button );
     }
 
     override void OnMouseButtonPress( int button )
     {
         super.OnMouseButtonPress( button );
 
-        GetModuleManager().OnMouseButtonPress( button );
+        m_ServerTools.OnMouseButtonPress( button );
     }
 
     override void OnKeyPress( int key )
     {
-        super.OnKeyPress(key);
+        super.OnKeyPress( key );
 
-        GetModuleManager().OnKeyPress( key );
+        m_ServerTools.OnKeyPress( key );
         
         if ( key == KeyCode.KC_PERIOD )
         {
@@ -94,6 +81,6 @@ modded class MissionGameplay
     {
         super.OnKeyRelease( key );
 
-        GetModuleManager().OnKeyRelease( key );
+        m_ServerTools.OnKeyRelease( key );
     }
 }
