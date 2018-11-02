@@ -29,7 +29,7 @@ echo "Copying to DayZ Server"
 RD /s /q "%serverDir%\MPMissions\%missionName%" > NUL
 xcopy /s/e /y /i "%workspaceDir%\Missions\%missionName%" "%serverDir%\MPMissions\%missionName%" > NUL
 
-RD /s /q "%serverDir%\%modName%" > NUL\
+RD /s /q "%serverDir%\%modName%" > NUL
 
 echo "Packaging PBO's for DayZ Server"
 xcopy /s/e /y /i "%workspaceDir%\%modName%" "%serverDir%\%modName%" > NUL

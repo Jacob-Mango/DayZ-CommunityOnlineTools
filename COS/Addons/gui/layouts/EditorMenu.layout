@@ -16,9 +16,9 @@ FrameWidgetClass EditorMenu
             color 0 0 0 0.95
             position 0.005 0.02
             halign right_ref
-            size 60 550
+            size 240 0.96
             hexactsize 1
-            vexactsize 1
+            vexactsize 0
             style DayZDefaultPanelTop
             {
                 PanelWidgetClass TitleBar

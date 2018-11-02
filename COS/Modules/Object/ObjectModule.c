@@ -6,7 +6,7 @@ class ObjectModule: EditorModule
         GetRPCManager().AddRPC( "COS_Object", "SpawnObjectInventory", this, SingeplayerExecutionType.Server );
     }
 
-    string GetLayoutRoot()
+    override string GetLayoutRoot()
     {
         return "COS\\Modules\\Object\\gui\\layouts\\ObjectMenu.layout";
     }

@@ -40,12 +40,18 @@ class EditorMenu extends UIScriptedMenu
             if ( popMenu )
             {
                 popMenu.baseWindow = base_window;
+
+                base_window.SetSize( width, height );
+
+                TextWidget tw = base_window.FindAnyWidget( "title_text" );
+                tw.SetText( popMenu.GetTitle() );
+    
+                TextWidget ttl = button_bkg.FindAnyWidget( "ttl" );
+                ttl.SetText( popMenu.GetTitle() );
+    
+                m_Modules.Get( i ).m_Button = button;
+                m_Modules.Get( i ).m_Menu = menu;
             }
-
-            base_window.SetSize( width, height );
-
-            m_Modules.Get( i ).m_Button = button;
-            m_Modules.Get( i ).m_Menu = menu;
         }
 
         return layoutRoot;
