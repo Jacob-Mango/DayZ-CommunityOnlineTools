@@ -5,8 +5,7 @@ modded class MissionGameplay
     void MissionGameplay()
     {
         Print( "MissionGameplay::MissionGameplay()" );
-
-        new WidgetHandler;
+        
         m_bLoaded = false;
     }
 
