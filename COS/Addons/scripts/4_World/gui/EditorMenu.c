@@ -43,11 +43,30 @@ class EditorMenu extends UIScriptedMenu
 
                 base_window.SetSize( width, height );
 
-                TextWidget tw = base_window.FindAnyWidget( "title_text" );
-                tw.SetText( popMenu.GetTitle() );
+                TextWidget title_text = base_window.FindAnyWidget( "title_text" );
+                title_text.SetText( popMenu.GetTitle() );
     
                 TextWidget ttl = button_bkg.FindAnyWidget( "ttl" );
                 ttl.SetText( popMenu.GetTitle() );
+
+                ImageWidget btn_img = button_bkg.FindAnyWidget( "btn_img" );
+                TextWidget btn_txt = button_bkg.FindAnyWidget( "btn_txt" );
+
+                if ( popMenu.ImageIsIcon() )
+                {
+                    btn_txt.Show( false );
+                    btn_img.Show( true );
+
+		            btn_img.LoadImageFile( 0, "set:" + popMenu.GetImageSet() + " image:" + popMenu.GetIconName() );
+                } else
+                {
+                    btn_txt.Show( true );
+                    btn_img.Show( false );
+
+                    btn_txt.SetText( popMenu.GetIconName() );
+                }
+
+                WidgetHandler.GetInstance().RegisterOnClick( base_window.FindAnyWidget( "close_button" ),  this, "OnClick" );
     
                 m_Modules.Get( i ).m_Button = button;
                 m_Modules.Get( i ).m_Menu = menu;

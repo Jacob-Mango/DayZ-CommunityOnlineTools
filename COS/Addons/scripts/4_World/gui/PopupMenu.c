@@ -53,4 +53,18 @@ class PopupMenu extends ScriptedWidgetEventHandler
         return "";
     }
 
+    string GetImageSet()
+    {
+        return "";
+    }
+
+    string GetIconName()
+    {
+        return "";
+    }
+
+    bool ImageIsIcon()
+    {
+        return false;
+    }
 }

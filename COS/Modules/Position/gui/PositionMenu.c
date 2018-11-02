@@ -48,6 +48,16 @@ class PositionMenu extends PopupMenu
     {
         return "Positions";
     }
+    
+    override string GetIconName()
+    {
+        return "P";
+    }
+
+    override bool ImageIsIcon()
+    {
+        return false;
+    }
 
     void Init()
     {

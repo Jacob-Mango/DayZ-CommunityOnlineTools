@@ -5,6 +5,8 @@ modded class MissionServer
     void MissionServer()
     {
         Print( "MissionServer::MissionServer()" );
+        
+        new WidgetHandler;
         m_bLoaded = false;
     }
 

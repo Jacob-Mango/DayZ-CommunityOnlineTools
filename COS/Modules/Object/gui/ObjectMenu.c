@@ -31,6 +31,16 @@ class ObjectMenu extends PopupMenu
     {
         return "Object Spawner";
     }
+    
+    override string GetIconName()
+    {
+        return "T";
+    }
+
+    override bool ImageIsIcon()
+    {
+        return false;
+    }
 
     void Init()
     {

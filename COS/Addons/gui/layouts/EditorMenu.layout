@@ -33,11 +33,12 @@ FrameWidgetClass EditorMenu
                         {
                             visible 1
                             position 0.1 0
+                            color 1 1 1 1
                             size 0.8 0.8
                             valign center_ref
                             text "Tools"
                             font "gui/fonts/Metron-Bold58"
-                            "text halign" left
+                            "text halign" center
                             "exact text" 1
                             "exact text size" 20
                         }
