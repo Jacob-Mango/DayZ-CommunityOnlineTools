@@ -27,6 +27,11 @@ class ObjectMenu extends PopupMenu
         }
     }
 
+    override string GetTitle()
+    {
+        return "Object Spawner";
+    }
+
     void Init()
     {
         m_classList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "classlist" ) );

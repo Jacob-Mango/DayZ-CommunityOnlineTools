@@ -44,6 +44,11 @@ class PositionMenu extends PopupMenu
     {
     }
 
+    override string GetTitle()
+    {
+        return "Positions";
+    }
+
     void Init()
     {
         m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );

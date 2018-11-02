@@ -5,7 +5,7 @@ class PositionModule: EditorModule
         GetRPCManager().AddRPC( "COS_Teleport", "SetPosition", this, SingeplayerExecutionType.Server );
     }
 
-    string GetLayoutRoot()
+    override string GetLayoutRoot()
     {
         return "COS\\Modules\\Position\\gui\\layouts\\PositionMenu.layout";
     }

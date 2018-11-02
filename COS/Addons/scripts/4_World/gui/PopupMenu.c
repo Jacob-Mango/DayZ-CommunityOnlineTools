@@ -48,4 +48,9 @@ class PopupMenu extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
+    string GetTitle()
+    {
+        return "";
+    }
+
 }

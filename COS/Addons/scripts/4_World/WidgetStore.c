@@ -22,10 +22,16 @@ class WidgetStore
         allWidgets = new ref array < Widget >;
 
         Init();
-    } 
+    }
 
     void ~WidgetStore() 
     {
+        delete textWidgets;
+        delete buttonWidgets;
+        delete editBoxWidgets;
+        delete sliderWidgets;
+        delete textListBoxWidgets;
+        delete allWidgets;
     }
 
     void Init() 

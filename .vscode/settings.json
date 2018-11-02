@@ -4,6 +4,7 @@
     "triggerTaskOnSave.tasks": {
         "Deploy": [
             "**/*.c",
+            "**/*.layout",
             "**/*.cpp"
         ]
     }
