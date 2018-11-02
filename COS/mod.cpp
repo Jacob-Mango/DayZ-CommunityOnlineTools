@@ -28,7 +28,7 @@ class CfgMods
 			class worldScriptModule
 			{
 				value = "";
-				files[] = {"COS/Scripts/4_World"};
+				files[] = {"COS/Scripts/4_World","COS/Weapon"};
 			};
 
 			class missionScriptModule
