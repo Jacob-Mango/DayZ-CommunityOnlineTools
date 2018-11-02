@@ -1,13 +1,3 @@
-void InitHive()
-{
-	Hive oHive = GetHive();
-	
-	if( !oHive )
-	{
-		oHive = CreateHive();
-	}
-}
-
 static void SetupWeather()
 {
     Weather weather = g_Game.GetWeather();
@@ -32,7 +22,10 @@ static void SetupWeather()
 
 void main()
 {
-	// InitHive();
-
 	SetupWeather();
+
+    if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
+    {
+        GetGame().SelectPlayer( NULL, CreateCustomDefaultCharacter() );
+    }
 }
