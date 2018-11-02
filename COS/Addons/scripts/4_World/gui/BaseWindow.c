@@ -8,7 +8,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
     void BaseWindow() 
     {
-
     }
 
     void ~BaseWindow() 
@@ -20,16 +19,12 @@ class BaseWindow extends ScriptedWidgetEventHandler
         layoutRoot = w;
         layoutRoot.SetHandler( this );
 
-        m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-
-        Print( "m_CloseButton: " + m_CloseButton );
-
         Init();
     }
 
     void Init() 
     {
-
+        m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
     }
 
     void Show()
@@ -59,6 +54,8 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
     override bool OnClick( Widget w, int x, int y, int button )
     {
+        super.OnClick( w, x, y, button );
+
         Print( "w: " + w );
 
         if ( w == m_CloseButton )
