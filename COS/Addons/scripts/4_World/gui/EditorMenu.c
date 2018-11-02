@@ -42,6 +42,7 @@ class EditorMenu extends UIScriptedMenu
             if ( popMenu && baseWindow )
             {
                 popMenu.baseWindow = baseWindow;
+                baseWindow.popupMenu = popMenu;
 
                 base_window.SetSize( width, height );
 
@@ -67,12 +68,6 @@ class EditorMenu extends UIScriptedMenu
 
                     btn_txt.SetText( popMenu.GetIconName() );
                 }
-
-                ButtonWidget close_button = base_window.FindAnyWidget( "close_button" );
-
-                Print( "close_button: " + close_button);
-
-                WidgetHandler.GetInstance().RegisterOnClick( close_button, this, "OnClickClose" );
     
                 m_Modules.Get( i ).m_Button = button;
                 m_Modules.Get( i ).m_Menu = menu;
@@ -150,25 +145,6 @@ class EditorMenu extends UIScriptedMenu
         }
 
         return false;
-    }
-
-    bool OnClickClose( Widget w, int x, int y, int button )
-    {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
-
-        Widget root = w.GetParent().GetParent();
-
-        Print( "root: " + root );
-
-        Widget content = root.FindAnyWidget("content");
-
-        Print( "content: " + content );
-
-        Widget child = content.GetChildren();
-
-        Print( "child: " + child );
-
-        return OnClick( child, x, y, button );
     }
 
     void SetButtonFocus( Widget focus ) 
