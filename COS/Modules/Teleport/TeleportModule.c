@@ -1,6 +1,6 @@
-class PositionModule: EditorModule
+class TeleportModule: EditorModule
 {
-    void PositionModule()
+    void TeleportModule()
     {
         GetRPCManager().AddRPC( "COS_Teleport", "SetPosition", this, SingeplayerExecutionType.Server );
     }
