@@ -12,7 +12,7 @@ class TeleportModule: EditorModule
     
     void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionManager().HasPermission( sender, "Position.SetPosition" ) )
+        if ( !GetPermissionManager().HasPermission( sender, "Teleport.SetPosition" ) )
             return;
 
         Param1< vector > data;
