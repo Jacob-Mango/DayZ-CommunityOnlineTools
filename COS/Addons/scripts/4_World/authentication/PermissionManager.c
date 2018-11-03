@@ -42,3 +42,15 @@ class PermissionManager
         return false;
     }
 }
+
+ref PermissionManager g_com_PermissionManager;
+
+ref PermissionManager GetPermissionManager()
+{
+    if( !g_com_PermissionManager )
+    {
+        g_com_PermissionManager = new ref PermissionManager();
+    }
+
+    return g_com_PermissionManager;
+}
