@@ -12,6 +12,9 @@ class PositionModule: EditorModule
     
     void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        if ( !GetPermissionManager().HasPermission( sender, "Position.SetPosition" ) )
+            return;
+
         Param1< vector > data;
         if ( !ctx.Read( data ) ) return;
 
