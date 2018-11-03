@@ -67,4 +67,18 @@ modded class MissionServer
 
         m_ServerTools.OnKeyRelease( key );
     }
+
+    override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
+	{
+        GetPermissionsManager().PlayerJoined( identity );
+
+        super.InvokeOnConnect( player, identity );
+    } 
+
+    override void InvokeOnDisconnect( PlayerBase player )
+	{
+        GetPermissionsManager().PlayerLeft( player.GetIdentity() );
+
+        super.InvokeOnDisconnect( player );
+    } 
 }

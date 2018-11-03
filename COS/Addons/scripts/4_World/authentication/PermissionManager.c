@@ -41,6 +41,41 @@ class PermissionManager
         }
         return false;
     }
+
+    void PlayerJoined( PlayerIdentity player )
+    {
+        bool AuthPlayerExists = false;
+
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            if ( AuthPlayers[i].GUID == player.GetId() )
+            {
+                AuthPlayers[i].Load();
+
+                AuthPlayerExists = true;
+            }
+        }
+
+        if ( !AuthPlayerExists )
+        {
+            AuthPlayer auPlayer = new AuthPlayer( player.GetId() );
+            
+            auPlayer.Load();
+
+            AuthPlayers.Insert( auPlayer );
+        }
+    }
+
+    void PlayerLeft( PlayerIdentity player )
+    {
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            if ( AuthPlayers[i].GUID == player.GetId() )
+            {
+                AuthPlayers[i].Save();
+            }
+        }
+    }
 }
 
 ref PermissionManager g_com_PermissionManager;
