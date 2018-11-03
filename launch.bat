@@ -14,16 +14,16 @@ taskkill /F /IM DayZServer_x64.exe /T
 TIMEOUT /T 1 /NOBREAK
 
 chdir /c "%workspaceDir%"
-CALL deploy.bat "%workspaceDir%" "%gameDir%" "%serverDir%" "%modName%" "%missionName%"
+CALL deploy.bat %1 %2 %3 %4 %5
 
-REM chdir /d "%serverDir%"
+chdir /d "%serverDir%"
 
-REM start DayZServer_x64.exe -config=serverDZ.cfg -port=2302 -profiles=%profiles% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\%missionName% -mod=RPCFramework;%modName%
+start DayZServer_x64.exe -config=serverDZ.cfg -port=2302 -profiles=%profiles% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\%missionName% -mod=RPCFramework;%modName%
 
-REM TIMEOUT /T 2 /NOBREAK
+TIMEOUT /T 2 /NOBREAK
 
 chdir /d "%gameDir%"
 
-REM start DayZ_BE.exe -exe DayZ_x64.exe -password=abc123 -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mod=RPCFramework;%modName%
+start DayZ_BE.exe -exe DayZ_x64.exe -password=abc123 -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mod=RPCFramework;%modName%
 
-start DayZ_BE.exe -exe DayZ_x64.exe -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mod=RPCFramework;%modName% -mission=.\Missions\%missionName%
+REM start DayZ_BE.exe -exe DayZ_x64.exe -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mod=RPCFramework;%modName% -mission=.\Missions\%missionName%

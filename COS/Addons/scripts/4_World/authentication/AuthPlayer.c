@@ -1,19 +1,37 @@
 class AuthPlayer
 {
-    protected string m_GUID;
+    ref Permission RootPermission;
 
-    protected ref array< ref Role > m_Roles;
-    protected ref array< ref Permission > m_Permissions;
+    string GUID;
 
     void AuthPlayer( string guid )
     {
-        m_GUID = guid;
+        GUID = guid;
 
-        LoadData();
+        RootPermission = new ref Permission( GUID, NULL );
     }
 
-    void LoadData()
+    void AddPermission( string permission )
     {
+        RootPermission.AddPermission( permission );
+    }
 
+    bool SavePlayer()
+    {
+	    FileSerializer file = new FileSerializer();
+
+        ref array< string > data = new ref array< string >;
+
+        RootPermission.Serialize( data );
+
+        if ( file.Open( "$profile:Players/" + GUID + ".txt", FileMode.WRITE ) )
+        {
+            file.Write( data );
+            file.Close();
+
+            return true;
+        }
+
+        return false;
     }
 }

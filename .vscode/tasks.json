@@ -17,7 +17,7 @@
             },
             "command": "deploy.bat",
             "args": [
-                "${workspaceRoot}", "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "COS", "COS.ChernarusPlus"
+                "${workspaceRoot}", "C:\\Games\\steamapps\\common\\DayZ", "G:\\Program Files\\Steam\\steamapps\\common\\DayZServer", "COS", "COS.ChernarusPlus"
             ],
             "problemMatcher": []
         },
@@ -35,7 +35,7 @@
             },
             "command": "launch.bat",
             "args": [
-                "${workspaceRoot}", "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "COS", "COS.ChernarusPlus"
+                "${workspaceRoot}", "C:\\Games\\steamapps\\common\\DayZ", "G:\\Program Files\\Steam\\steamapps\\common\\DayZServer", "COS", "COS.ChernarusPlus"
             ],
             "problemMatcher": []
         }
