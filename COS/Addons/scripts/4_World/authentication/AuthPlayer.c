@@ -16,6 +16,11 @@ class AuthPlayer
         RootPermission.AddPermission( permission );
     }
 
+    bool HasPermission( string permission )
+    {
+        return RootPermission.HasPermission( permission );
+    }
+
     bool SavePlayer()
     {
 	    FileSerializer file = new FileSerializer();

@@ -112,7 +112,7 @@ class Permission
         }
     }
 
-    bool CheckPermission( string inp )
+    bool HasPermission( string inp )
     {
         array<string> tokens = new array<string>;
         inp.Split( ".", tokens );
@@ -124,6 +124,9 @@ class Permission
         if ( depth > -1 )
         {
             return Check( tokens, depth + 1 );
+        } else 
+        {
+            return Check( tokens, 0 );
         }
 
         return false;

@@ -29,4 +29,16 @@ class PermissionManager
 
         return false;
     }
+
+    bool HasPermission( PlayerIdentity player, string permission )
+    {
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            if ( AuthPlayers[i].GUID == player.GetId() )
+            {
+                return AuthPlayers[i].HasPermission( permission );
+            }
+        }
+        return false;
+    }
 }
