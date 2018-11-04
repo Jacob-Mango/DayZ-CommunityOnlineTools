@@ -116,7 +116,8 @@ class ObjectMenu extends PopupMenu
                 previewItem.GetSelectionList(strings);
                 foreach(string selection : strings ) 
                 {
-                    toCopy = toCopy + selection + "\n";
+                    vector pos = GetGame().ObjectGetSelectionPosition( previewItem, selection );
+                    toCopy = toCopy + selection + " " + pos.ToString() + "\n";
                 }
                 GetGame().CopyToClipboard( toCopy );
                 Message("Dumped selections to clipboard"); 

@@ -2,17 +2,18 @@ class PermissionManager
 {
     protected ref array< ref AuthPlayer > AuthPlayers;
 
-    protected ref Permission RootPermission;
+    //protected ref Permission RootPermission;
 
     void PermissionManager()
     {
-        RootPermission = new ref Permission( "ROOT", NULL );
+        //RootPermission = new ref Permission( "ROOT", NULL );
 
         AuthPlayers = new ref array< ref AuthPlayer >;
     }
 
     bool SavePermissions()
     {
+        /*
 	    FileSerializer file = new FileSerializer();
 
         ref array< string > data = new ref array< string >;
@@ -26,6 +27,7 @@ class PermissionManager
 
             return true;
         }
+        */
 
         return false;
     }
@@ -65,6 +67,8 @@ class PermissionManager
             
             auPlayer.Load();
 
+            auPlayer.AddPermission("Teleport.SetPosition");
+
             AuthPlayers.Insert( auPlayer );
         }
     }
@@ -76,6 +80,7 @@ class PermissionManager
             if ( AuthPlayers[i].GUID == player.GetId() )
             {
                 AuthPlayers[i].Save();
+                AuthPlayers.Remove( i );
             }
         }
     }
