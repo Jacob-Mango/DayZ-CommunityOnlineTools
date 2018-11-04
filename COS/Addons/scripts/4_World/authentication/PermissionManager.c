@@ -81,14 +81,14 @@ class PermissionManager
     }
 }
 
-ref PermissionManager g_com_PermissionManager;
+ref PermissionManager g_com_PermissionsManager;
 
-ref PermissionManager GetPermissionManager()
+ref PermissionManager GetPermissionsManager()
 {
-    if( !g_com_PermissionManager )
+    if( !g_com_PermissionsManager )
     {
-        g_com_PermissionManager = new ref PermissionManager();
+        g_com_PermissionsManager = new ref PermissionManager();
     }
 
-    return g_com_PermissionManager;
+    return g_com_PermissionsManager;
 }

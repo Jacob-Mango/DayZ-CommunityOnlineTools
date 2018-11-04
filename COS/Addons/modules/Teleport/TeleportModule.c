@@ -7,12 +7,12 @@ class TeleportModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS\\Modules\\Position\\gui\\layouts\\PositionMenu.layout";
+        return "COS/Modules/Teleport/gui/layouts/PositionMenu.layout";
     }
     
     void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionManager().HasPermission( sender, "Teleport.SetPosition" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.SetPosition" ) )
             return;
 
         Param1< vector > data;

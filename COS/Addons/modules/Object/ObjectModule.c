@@ -8,12 +8,12 @@ class ObjectModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS\\Modules\\Object\\gui\\layouts\\ObjectMenu.layout";
+        return "COS/Modules/Object/gui/layouts/ObjectMenu.layout";
     }
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionManager().HasPermission( sender, "Object.SpawnObjectPosition" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Object.SpawnObjectPosition" ) )
             return;
 
         Param3< string, vector, string > data;
@@ -60,7 +60,7 @@ class ObjectModule: EditorModule
 
     void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionManager().HasPermission( sender, "Object.SpawnObjectInventory" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Object.SpawnObjectInventory" ) )
             return;
 
         Param2< string, string > data;

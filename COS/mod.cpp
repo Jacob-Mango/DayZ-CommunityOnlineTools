@@ -28,13 +28,13 @@ class CfgMods
 			class worldScriptModule
 			{
 				value = "";
-				files[] = {"COS/Scripts/4_World","COS/Weapon"};
+				files[] = {"COS/Scripts/4_World"};
 			};
 
 			class missionScriptModule
 			{
 				value = "";
-				files[] = {"COS/Scripts/5_Mission"};
+				files[] = {"COS/Scripts/5_Mission","COS/Modules"};
 			};
 		}
 	};

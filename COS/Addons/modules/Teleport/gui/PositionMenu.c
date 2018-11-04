@@ -46,12 +46,12 @@ class PositionMenu extends PopupMenu
 
     override string GetTitle()
     {
-        return "Positions";
+        return "Teleport";
     }
     
     override string GetIconName()
     {
-        return "P";
+        return "T";
     }
 
     override bool ImageIsIcon()
