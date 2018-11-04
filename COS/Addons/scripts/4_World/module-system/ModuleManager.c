@@ -19,7 +19,7 @@ class ModuleManager
 
         m_ModuleFolders = new ref array< string >;
 
-        m_ModuleFolders.Insert("$currentDir:COS\\Modules\\");
+        // m_ModuleFolders.Insert("COS/Scripts/Modules");
 
         m_MouseButtons = new ref array< ref MouseButtonInfo >;
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
@@ -62,7 +62,7 @@ class ModuleManager
 
     private void LoadModule( string path, string name )
     {
-        ScriptModule script = ScriptModule.LoadScript( m_ParentScriptModule, path + name + "\\module.c", true );
+        ScriptModule script = ScriptModule.LoadScript( m_ParentScriptModule, path + name + "/module.c", true );
         if ( script )
         {
             Param p = new Param;

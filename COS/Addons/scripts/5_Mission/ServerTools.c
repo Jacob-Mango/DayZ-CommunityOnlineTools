@@ -11,6 +11,11 @@ class ServerTools
         NewModuleManager();
     }
 
+    void RegisterModules()
+    {
+
+    }
+
     void ~ServerTools()
     {
         Print("ServerTools::~ServerTools");
@@ -19,6 +24,8 @@ class ServerTools
     void OnStart()
     {
         GetModuleManager().RegisterModules();
+
+        RegisterModules();
 
         GetModuleManager().OnMissionStart();
     }
