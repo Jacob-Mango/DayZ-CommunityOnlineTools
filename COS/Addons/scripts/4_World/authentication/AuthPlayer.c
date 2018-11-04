@@ -29,19 +29,41 @@ class AuthPlayer
 
         RootPermission.Serialize( data );
 
-        if ( file.Open( "$profile:Players/" + GUID + ".txt", FileMode.WRITE ) )
+        if ( file.Open( "$profile:Players/" + GUID + ".perm", FileMode.WRITE ) )
         {
             file.Write( data );
             file.Close();
 
+            Print("Wrote to the players");
             return true;
+        } else
+        {
+            Print("Failed to open the file for the player");
+            return false;
         }
-
-        return false;
     }
 
     bool Load()
     {
+        FileSerializer file = new FileSerializer();
+            
+        ref array< string > data = new ref array< string >;
 
+        if ( file.Open( "$profile:Players/" + GUID + ".perm", FileMode.READ ) )
+        {
+            file.Read(data);
+            file.Close();
+            Print("Read the players");
+        } else {
+            Print("Failed to open the file for the player");
+            return false;
+        }
+        
+        for ( int i = 0; i < data.Count(); i++ )
+        {
+            RootPermission.AddPermission( data[i] );
+        }
+
+        return true;
     }
 }

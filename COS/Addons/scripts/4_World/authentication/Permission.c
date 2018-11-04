@@ -151,18 +151,16 @@ class Permission
 
     void Serialize( ref array< string > output, string prepend = "" )
     {
-        if ( prepend == "" )
-        {
-            prepend = Name;
-        }
-
         for ( int i = 0; i < Children.Count(); i++ )
         {
-            string serialize = prepend + "." + Children[i].Name;
+            string serialize = prepend + Children[i].Name;
 
-            output.Insert( serialize );
+            if ( Children[i].Children.Count() == 0 )
+            {
+                output.Insert( serialize );
+            }
 
-            Serialize( output, serialize );
+            Children[i].Serialize( output, serialize + "." );
         }
     }
 }
