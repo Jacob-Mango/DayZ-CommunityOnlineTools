@@ -6,5 +6,6 @@ modded class ServerTools
         
         GetModuleManager().RegisterModule( new ObjectModule );
         GetModuleManager().RegisterModule( new TeleportModule );
+        GetModuleManager().RegisterModule( new GameModule );
     }
 }
