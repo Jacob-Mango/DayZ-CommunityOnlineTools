@@ -32,6 +32,8 @@ class PermissionManager
 
     bool HasPermission( PlayerIdentity player, string permission )
     {
+        return true;
+        /*
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             if ( AuthPlayers[i].GUID == player.GetId() )
@@ -40,6 +42,7 @@ class PermissionManager
             }
         }
         return false;
+        */
     }
 
     void PlayerJoined( PlayerIdentity player )
