@@ -34,7 +34,7 @@ class ObjectMenu extends PopupMenu
     
     override string GetIconName()
     {
-        return "O";
+        return "OB";
     }
 
     override bool ImageIsIcon()

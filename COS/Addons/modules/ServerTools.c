@@ -8,5 +8,6 @@ modded class ServerTools
         GetModuleManager().RegisterModule( new TeleportModule );
         GetModuleManager().RegisterModule( new GameModule );
         GetModuleManager().RegisterModule( new CameraTool );
+        GetModuleManager().RegisterModule( new WeatherModule );
     }
 }
