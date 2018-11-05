@@ -76,10 +76,17 @@ class ModuleManager
     {
         m_Modules.Insert( module );
 
+        string message = "";
         if ( module.IsInherited( EditorModule ) )
         {
             m_EditorModules.Insert( module );
+            message = " as a EditorModule.";
+        } else
+        {
+            message = " as a Module.";
         }
+
+        Print( "Registered module " + module + message );
     }
 
     private void RegisterModulesByPath( string path )

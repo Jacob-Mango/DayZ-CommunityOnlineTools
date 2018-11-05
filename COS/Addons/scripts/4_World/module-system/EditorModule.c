@@ -1,4 +1,4 @@
-class EditorModule: Module
+class EditorModule extends Module
 {
     // Only accessed by EditorMenu class. Don't use in module.
     ref PopupMenu m_MenuPopup;
