@@ -89,6 +89,7 @@ class CameraTool: EditorModule
 	
 	override void Init() 
 	{
+		Print("CameraTool::Init");
 		super.Init();
 	}
 	
@@ -103,7 +104,8 @@ class CameraTool: EditorModule
 	
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera" , "[Insert]"    , "Toggle camera."  );
+		Print("CameraTool::RegisterKeyMouseBindings");
+		KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera" , "[Insert]"    , "Toggle camera.", true  );
 		KeyMouseBinding freezeCamera  = new KeyMouseBinding( GetModuleType(), "FreezeCamera" , "[BackSlash]" , "Freezes camera." );
 		KeyMouseBinding followTarget  = new KeyMouseBinding( GetModuleType(), "FollowTarget" , "[LBracket]"  , "Follows target." );
 		KeyMouseBinding toggleOrbit   = new KeyMouseBinding( GetModuleType(), "ToggleOrbital", "[RBracket]"  , "Toggle orbital mode", true );
@@ -140,6 +142,7 @@ class CameraTool: EditorModule
 
 	void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+		Print("CameraTool::EnterCamera");
 		bool cont = false;
 
 		if( type == CallType.Server )
@@ -165,6 +168,7 @@ class CameraTool: EditorModule
 
 	void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+		Print("CameraTool::LeaveCamera");
 		bool cont = false;
 
 		if( type == CallType.Server )
@@ -210,6 +214,7 @@ class CameraTool: EditorModule
 
 	void EnableCamera( bool staticCam = false )
 	{
+		Print("CameraTool::EnableCamera");
 		if ( m_oCamera )
 		{
 			return;
@@ -222,6 +227,7 @@ class CameraTool: EditorModule
 
 	void DisableCamera()
 	{
+		Print("CameraTool::DisableCamera");
 		if ( m_oCamera )
 		{
 			SetFreezeMouse(false);
@@ -245,6 +251,7 @@ class CameraTool: EditorModule
 	
 	void ToggleCamera() 
 	{
+		Print("CameraTool::ToggleCamera");
 		if ( m_oCamera )
 		{
 			DisableCamera();
