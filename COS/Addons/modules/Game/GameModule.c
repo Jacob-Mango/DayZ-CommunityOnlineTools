@@ -78,6 +78,9 @@ class GameModule: EditorModule
 
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        if ( !GetPermissionsManager().HasPermission( sender, "Game.SpawnVehicle" ) )
+            return;
+
 		Param3< string, vector, TStringArray > data;
 		if ( !ctx.Read( data ) ) return;
 		
@@ -96,6 +99,9 @@ class GameModule: EditorModule
 
     void SetOldAiming( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        if ( !GetPermissionsManager().HasPermission( sender, "Game.ChangeAimingMode" ) )
+            return;
+
 		Param1< bool > data;
 		if ( !ctx.Read( data ) ) return;
 		
@@ -114,6 +120,9 @@ class GameModule: EditorModule
 
     void SetGodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        if ( !GetPermissionsManager().HasPermission( sender, "Game.EnableGodMode" ) )
+            return;
+
 		Param1< PlayerBase > data;
 		if ( !ctx.Read( data ) ) return;
 		
@@ -133,6 +142,9 @@ class GameModule: EditorModule
 
     void KillEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        if ( !GetPermissionsManager().HasPermission( sender, "Game.KillEntity" ) )
+            return;
+
 		Param1< EntityAI > data;
 		if ( !ctx.Read( data ) ) return;
 		

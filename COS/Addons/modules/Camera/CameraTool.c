@@ -143,6 +143,10 @@ class CameraTool: EditorModule
 	void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
 		Print("CameraTool::EnterCamera");
+
+        if ( !GetPermissionsManager().HasPermission( sender, "CameraTools.EnterCamera" ) )
+            return;
+
 		bool cont = false;
 
 		if( type == CallType.Server )
@@ -169,6 +173,10 @@ class CameraTool: EditorModule
 	void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
 		Print("CameraTool::LeaveCamera");
+
+        if ( !GetPermissionsManager().HasPermission( sender, "CameraTools.LeaveCamera" ) )
+            return;
+
 		bool cont = false;
 
 		if( type == CallType.Server )
@@ -215,6 +223,7 @@ class CameraTool: EditorModule
 	void EnableCamera( bool staticCam = false )
 	{
 		Print("CameraTool::EnableCamera");
+
 		if ( m_oCamera )
 		{
 			return;
@@ -228,6 +237,7 @@ class CameraTool: EditorModule
 	void DisableCamera()
 	{
 		Print("CameraTool::DisableCamera");
+
 		if ( m_oCamera )
 		{
 			SetFreezeMouse(false);
@@ -245,7 +255,6 @@ class CameraTool: EditorModule
 			}
 
 			GetRPCManager().SendRPC( "COS_Camera", "LeaveCamera", new Param1<vector>(position), true, NULL, GetPlayer() );
-
 		}
 	}
 	
