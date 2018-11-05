@@ -6,8 +6,10 @@ class GameMenu extends PopupMenu
     ButtonWidget       m_reloadScriptButton;
 
     protected ref map< string, string > checkBoxMap = new map< string, string >; // store widget name
+    protected ref map< string, string > buttonMap = new map< string, string >; // store widget name
 
     string checkboxLayout = "COS/Modules/Game/gui/layouts/Checkbox.layout";
+    string buttonLayout = "COS/Modules/Game/gui/layouts/Button.layout";
 
     void GameMenu()
     {
@@ -54,9 +56,9 @@ class GameMenu extends PopupMenu
         checkBoxAiming.SetName("OldAiming");
         checkBoxAiming.SetText("Old Aiming");
 
-        CheckBoxWidget checkBoxLaser = CheckBoxWidget.Cast(GetGame().GetWorkspace().CreateWidgets( checkboxLayout, m_checkboxPanel ));
-        checkBoxLaser.SetName("LaserPointer");
-        checkBoxLaser.SetText("Laser Pointer");
+        ButtonWidget buttonKP = ButtonWidget.Cast(GetGame().GetWorkspace().CreateWidgets( buttonLayout, m_checkboxPanel ));
+        buttonKP.SetName("KillPlayer");
+        buttonKP.SetText("Kill Player");
 
         CheckBoxWidget checkBoxKP = CheckBoxWidget.Cast(GetGame().GetWorkspace().CreateWidgets( checkboxLayout, m_checkboxPanel ));
         checkBoxKP.SetName("KillPlayer");
@@ -64,8 +66,8 @@ class GameMenu extends PopupMenu
 
         checkBoxMap.Insert( checkBoxGodmode.GetName(), "ToggleGodMode" );
         checkBoxMap.Insert( checkBoxAiming.GetName(), "ToggleOldAiming" );
-        checkBoxMap.Insert( checkBoxLaser.GetName(), "ToggleLaser" );
         checkBoxMap.Insert( checkBoxKP.GetName(), "KillPlayer" );
+        buttonMap.Insert( buttonKP.GetName(), "KillPlayer" );
     }
 
     override void OnShow()
@@ -103,9 +105,11 @@ class GameMenu extends PopupMenu
     {
         if ( widget ) // Temp work around. Danny is lazy xd
         {
-            GetRPCManager().SendRPC( "COS_Game", "SetOldAiming", new Param1< bool >( !m_OldAiming ), true );
+            m_OldAiming = !m_OldAiming;
+
+            GetRPCManager().SendRPC( "COS_Game", "SetOldAiming", new Param1< bool >( m_OldAiming ), true );
         }
-        return !m_OldAiming;
+        return m_OldAiming;
     }
 
     bool ToggleGodMode( CheckBoxWidget widget ) 
@@ -117,15 +121,6 @@ class GameMenu extends PopupMenu
             GetRPCManager().SendRPC( "COS_Game", "SetGodMode", new Param1< PlayerBase >( GetGame().GetPlayer() ), true );
         }
         return m_GodMode;
-    }
-
-    bool ToggleLaser( CheckBoxWidget widget ) 
-    {
-        if ( widget ) 
-        {
-            bc_Visible = !bc_Visible;
-        }
-        return bc_Visible;
     }
 
     bool KillPlayer( CheckBoxWidget widget ) 
@@ -163,6 +158,16 @@ class GameMenu extends PopupMenu
             if ( param ) 
             {
                 GetGame().GameScript.CallFunction( this , param , NULL, CheckBoxWidget.Cast( w ) );
+            }
+        }
+
+        if ( w.IsInherited( ButtonWidget ) ) 
+        {
+            param = buttonMap.Get( w.GetName() );
+
+            if ( param ) 
+            {
+                GetGame().GameScript.CallFunction( this , param , NULL, ButtonWidget.Cast( w ) );
             }
         }
 

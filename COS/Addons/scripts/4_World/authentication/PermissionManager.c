@@ -49,6 +49,7 @@ class PermissionManager
 
     void PlayerJoined( PlayerIdentity player )
     {
+                /*
         bool AuthPlayerExists = false;
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -63,27 +64,44 @@ class PermissionManager
 
         if ( !AuthPlayerExists )
         {
-            AuthPlayer auPlayer = new AuthPlayer( player.GetId() );
-            
-            if ( auPlayer.Load() )
-            {
-                // auPlayer.AddPermission("Teleport.SetPosition");
-            }
+            ref AuthPlayer auPlayer = new ref AuthPlayer( player.GetId() );
+
+            auPlayer.Load()
 
             AuthPlayers.Insert( auPlayer );
         }
+                */
     }
 
     void PlayerLeft( PlayerIdentity player )
     {
+                /*
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            if ( AuthPlayers[i].GUID == player.GetId() )
+            ref AuthPlayer auPlayer = AuthPlayers[i];
+            if ( auPlayer.GUID == player.GetId() )
             {
-                AuthPlayers[i].Save();
+                auPlayer.AddPermission("Teleport.SetPosition");
+                auPlayer.AddPermission("Object.SpawnObjectPosition");
+                auPlayer.AddPermission("Object.SpawnObjectInventory");
+                auPlayer.AddPermission("Game.SpawnVehicle");
+                auPlayer.AddPermission("Game.ChangeAimingMode");
+                auPlayer.AddPermission("Game.EnableGodMode");
+                auPlayer.AddPermission("Game.KillEntity");
+                auPlayer.AddPermission("CameraTools.LeaveCamera");
+                auPlayer.AddPermission("CameraTools.EnterCamera");
+                auPlayer.AddPermission("Weather.SetStorm");
+                auPlayer.AddPermission("Weather.SetFog");
+                auPlayer.AddPermission("Weather.SetOvercast");
+                auPlayer.AddPermission("Weather.SetWindFunctionParams");
+                auPlayer.AddPermission("Weather.SetDate");
+
+                auPlayer.Save();
+
                 AuthPlayers.Remove( i );
             }
         }
+                */
     }
 }
 
