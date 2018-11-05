@@ -27,6 +27,8 @@ class ServerTools
 
         RegisterModules();
 
+        GetModuleManager().OnInit();
+
         GetModuleManager().OnMissionStart();
     }
 

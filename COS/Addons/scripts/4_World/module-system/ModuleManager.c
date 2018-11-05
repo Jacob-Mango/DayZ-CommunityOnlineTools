@@ -133,8 +133,6 @@ class ModuleManager
         {
             RegisterModulesByPath(m_ModuleFolders.Get(i));
         }
-
-        OnInit();
     }
 
     void ReloadModules()
