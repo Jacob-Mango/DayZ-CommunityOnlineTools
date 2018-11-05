@@ -53,8 +53,11 @@ class AuthPlayer
         {
             file.Read(data);
             file.Close();
+            
             Print("Read the players");
         } else {
+            file.Close();
+
             Print("Failed to open the file for the player");
             return false;
         }

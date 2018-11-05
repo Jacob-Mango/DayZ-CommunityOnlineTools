@@ -65,9 +65,10 @@ class PermissionManager
         {
             AuthPlayer auPlayer = new AuthPlayer( player.GetId() );
             
-            auPlayer.Load();
-
-            auPlayer.AddPermission("Teleport.SetPosition");
+            if ( auPlayer.Load() )
+            {
+                // auPlayer.AddPermission("Teleport.SetPosition");
+            }
 
             AuthPlayers.Insert( auPlayer );
         }
