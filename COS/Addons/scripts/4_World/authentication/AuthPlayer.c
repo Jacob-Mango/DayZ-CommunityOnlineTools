@@ -1,5 +1,7 @@
 class AuthPlayer
 {
+    const string AUTH_DIRECTORY = "$profile:Players\\";
+
     ref Permission RootPermission;
 
     string GUID;
@@ -9,6 +11,8 @@ class AuthPlayer
         GUID = guid;
 
         RootPermission = new ref Permission( GUID, NULL );
+
+        MakeDirectory( AUTH_DIRECTORY );
     }
 
     void AddPermission( string permission )
@@ -23,42 +27,58 @@ class AuthPlayer
 
     bool Save()
     {
-	    FileSerializer file = new FileSerializer();
-
+        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.WRITE );
+            
         ref array< string > data = new ref array< string >;
-
         RootPermission.Serialize( data );
 
-        if ( file.Open( "$profile:Players/" + GUID + ".perm", FileMode.WRITE ) )
+        if ( file != 0 )
         {
-            file.Write( data );
-            file.Close();
-
+            string line;
+            for ( int i = 0; i < data.Count(); i++ )
+            {
+                FPrintln( file, data[i] );
+            }
+            
+            CloseFile(file);
+            
             Print("Wrote to the players");
             return true;
         } else
         {
-            Print("Failed to open the file for the player");
+            Print("Failed to open the file for the player for writing.");
             return false;
         }
     }
 
     bool Load()
     {
-        FileSerializer file = new FileSerializer();
+        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.READ );
             
         ref array< string > data = new ref array< string >;
 
-        if ( file.Open( "$profile:Players/" + GUID + ".perm", FileMode.READ ) )
+        if ( file != 0 )
         {
-            file.Read(data);
-            file.Close();
-            
-            Print("Read the players");
-        } else {
-            file.Close();
+            string line;
+            while ( FGets( file, line ) > 0 )
+            {
+                data.Insert( line );
+            }
 
-            Print("Failed to open the file for the player");
+            CloseFile(file);
+        } else
+        {
+            Print("Failed to open the file for the player to read. Attemping to create.");
+
+            file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.WRITE );
+            if (file != 0)
+            {
+                CloseFile(file);
+                Print("Created the file.");
+            } else
+            {
+                Print("Failed to create the file.");
+            }
             return false;
         }
         

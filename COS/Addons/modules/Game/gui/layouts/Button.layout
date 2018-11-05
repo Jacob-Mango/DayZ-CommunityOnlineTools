@@ -1,0 +1,8 @@
+ButtonWidgettClass buttonTemplate
+{
+    visible 1
+    color 1 1 1 1
+    halign left_ref
+    valign top_ref
+    style Default
+}

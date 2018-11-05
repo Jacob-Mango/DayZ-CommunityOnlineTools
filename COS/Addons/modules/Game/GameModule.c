@@ -121,12 +121,14 @@ class GameModule: EditorModule
         {
             m_OldAiming = data.param1;
 
-            GetRPCManager().SendRPC( "COS_Game", "SetOldAiming", new Param1< bool >( m_GodMode ), true );
+            GetRPCManager().SendRPC( "COS_Game", "SetOldAiming", data, true );
         }
 
         if( type == CallType.Client )
         {
             m_OldAiming = data.param1;
+            
+            GetPlayer().OverrideShootFromCamera( !m_OldAiming );
         }
     }
 
