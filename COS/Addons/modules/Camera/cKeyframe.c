@@ -1,9 +1,9 @@
 class cKeyframe 
 {
-	vector position;
-	vector orientation;
+    vector position;
+    vector orientation;
 
-	float fov;
+    float fov;
 }
 
 // static proto native void InterpolateTo(Camera targetCamera, float time, int type);

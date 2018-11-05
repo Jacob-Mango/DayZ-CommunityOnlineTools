@@ -1,12 +1,9 @@
 class GameModule: EditorModule
 {
-    bool m_OldAiming;
-
     ref array< PlayerBase > m_GodModePlayers;
 
     void GameModule()
-    {   
-        m_OldAiming = false;
+    {
         m_GodModePlayers = new ref array< PlayerBase >;
 
         GetRPCManager().AddRPC( "COS_Game", "SpawnVehicle", this, SingeplayerExecutionType.Server );
@@ -66,26 +63,41 @@ class GameModule: EditorModule
     }
 
     override void onUpdate( float timeslice )
-	{
+    {
         if ( GetGame().IsClient() )
         {
             if ( m_OldAiming )
             {
                 GetPlayer().OverrideShootFromCamera( false );
             }
+        } else
+        {
+            /*
+            ref array<Man> players = new ref array<Man>;
+
+            GetGame().GetPlayers( players );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                if ( players[i].IsInherited( DayZPlayerImplement ) )
+                {
+                    DayZPlayerImplement.Cast( players[i] ).OverrideShootFromCamera( false );
+                }
+            }
+            */
         }
-	}
+    }
 
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Game.SpawnVehicle" ) )
             return;
 
-		Param3< string, vector, TStringArray > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if( type == CallType.Server )
-		{
+        Param3< string, vector, TStringArray > data;
+        if ( !ctx.Read( data ) ) return;
+        
+        if( type == CallType.Server )
+        {
             Car oCar = Car.Cast( GetGame().CreateObject( data.param1, data.param2 ) );
 
             for (int j = 0; j < data.param3.Count(); j++) { oCar.GetInventory().CreateAttachment( data.param3.Get(j) ); }
@@ -102,18 +114,18 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.ChangeAimingMode" ) )
             return;
 
-		Param1< bool > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if( type == CallType.Server )
-		{
+        Param1< bool > data;
+        if ( !ctx.Read( data ) ) return;
+        
+        if( type == CallType.Server )
+        {
             m_OldAiming = data.param1;
 
             GetRPCManager().SendRPC( "COS_Game", "SetOldAiming", new Param1< bool >( m_GodMode ), true );
         }
 
-		if( type == CallType.Client )
-		{
+        if( type == CallType.Client )
+        {
             m_OldAiming = data.param1;
         }
     }
@@ -123,11 +135,11 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.EnableGodMode" ) )
             return;
 
-		Param1< PlayerBase > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if( type == CallType.Server )
-		{
+        Param1< PlayerBase > data;
+        if ( !ctx.Read( data ) ) return;
+        
+        if( type == CallType.Server )
+        {
             if ( m_GodModePlayers.Find( data.param1 ) > -1 )
             {
                 m_GodModePlayers.RemoveItem( data.param1 );
@@ -145,11 +157,11 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.KillEntity" ) )
             return;
 
-		Param1< EntityAI > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if( type == CallType.Server )
-		{
+        Param1< EntityAI > data;
+        if ( !ctx.Read( data ) ) return;
+        
+        if( type == CallType.Server )
+        {
             PlayerBase player;
 
             if ( PlayerBase.CastTo( player, data.param1 ) ) 

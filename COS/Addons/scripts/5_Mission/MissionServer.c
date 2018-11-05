@@ -70,14 +70,14 @@ modded class MissionServer
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
 	{
-        // GetPermissionsManager().PlayerJoined( identity );
+        GetPermissionsManager().PlayerJoined( identity );
 
         super.InvokeOnConnect( player, identity );
     } 
 
     override void InvokeOnDisconnect( PlayerBase player )
 	{
-        // GetPermissionsManager().PlayerLeft( player.GetIdentity() );
+        GetPermissionsManager().PlayerLeft( player.GetIdentity() );
 
         super.InvokeOnDisconnect( player );
     } 

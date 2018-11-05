@@ -1,6 +1,6 @@
 PanelWidgetClass GameMenu 
 {
-	visible 0
+    visible 0
     color 0 0 0 0
     position 0 0
     size 400 350
@@ -11,42 +11,42 @@ PanelWidgetClass GameMenu
     scriptclass "GameMenu"
     style EditorPanel
     {
-		TextListboxWidgetClass game_list_box
-		{
-			visible 1
-			position 5 30
-			size 225 280
-			hexactpos 1
-			vexactpos 1
-			hexactsize 1
-			vexactsize 1
-			style Editor
-			lines 20
-			font "gui/fonts/Metron14"
-		}
+        TextListboxWidgetClass game_list_box
+        {
+            visible 1
+            position 5 30
+            size 225 280
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            style Editor
+            lines 20
+            font "gui/fonts/Metron14"
+        }
 
-		PanelWidgetClass game_checkbox_panel
-		{
-			visible 1
-			color 0 0 0 0.5
-			position 5 30
-			size 160 280
-			halign right_ref
-			hexactpos 1
-			vexactpos 1
-			hexactsize 1
-			vexactsize 1
-			style rover_sim_colorable
-			scriptclass "OverrideVerticalSpacer"
-			{
-				ScriptParamsClass
-				{
-					gap 0
-					border 5
-					maxheight 20
-				}
-			}
-		}
+        PanelWidgetClass game_checkbox_panel
+        {
+            visible 1
+            color 0 0 0 0.5
+            position 5 30
+            size 160 280
+            halign right_ref
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            style rover_sim_colorable
+            scriptclass "OverrideVerticalSpacer"
+            {
+                ScriptParamsClass
+                {
+                    gap 0
+                    border 5
+                    maxheight 20
+                }
+            }
+        }
 
         ButtonWidgetClass game_script_button
         {
