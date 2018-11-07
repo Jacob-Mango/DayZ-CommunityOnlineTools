@@ -29,7 +29,7 @@ class PlayerMenu extends PopupMenu
     override void Init()
     {
         m_PlayerScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
-        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("reload_list"));
+        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
         ReloadPlayers();
     }

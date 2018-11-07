@@ -100,6 +100,11 @@ class ObjectMenu extends PopupMenu
 
     override bool OnClick( Widget w, int x, int y, int button )
     {
+        if ( SELECTED_PLAYER == NULL )
+        {
+            SELECTED_PLAYER = GetGame().GetPlayer();
+        }
+
         string strSelection = GetCurrentSelection();
         bool ai = false;
 
@@ -139,11 +144,11 @@ class ObjectMenu extends PopupMenu
             }
             else if ( w == m_btnSpawnGround )
             {
-                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
+                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true, NULL, SELECTED_PLAYER );
             }
             else if ( w == m_btnSpawnInventory )
             {
-                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param2< string, string >( strSelection, m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
+                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param2< string, string >( strSelection, m_QuantityItem.GetText() ), true, NULL, SELECTED_PLAYER );
             }
         }
 
