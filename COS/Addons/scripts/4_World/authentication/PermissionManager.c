@@ -11,6 +11,11 @@ class PermissionManager
         AuthPlayers = new ref array< ref AuthPlayer >;
     }
 
+    ref array< ref AuthPlayer > GetPlayers()
+    {
+        return AuthPlayers;
+    }
+
     bool SavePermissions()
     {
         /*
@@ -34,6 +39,8 @@ class PermissionManager
 
     bool HasPermission( PlayerIdentity player, string permission )
     {
+        if ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) return true; // Assume there is always permission on the client.
+
         return true;
         /*
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -49,14 +56,13 @@ class PermissionManager
 
     void PlayerJoined( PlayerIdentity player )
     {
-                /*
         bool AuthPlayerExists = false;
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             if ( AuthPlayers[i].GUID == player.GetId() )
             {
-                AuthPlayers[i].Load();
+                // AuthPlayers[i].Load();
 
                 AuthPlayerExists = true;
             }
@@ -66,21 +72,20 @@ class PermissionManager
         {
             ref AuthPlayer auPlayer = new ref AuthPlayer( player.GetId() );
 
-            auPlayer.Load()
+            // auPlayer.Load()
 
             AuthPlayers.Insert( auPlayer );
         }
-                */
     }
 
     void PlayerLeft( PlayerIdentity player )
     {
-                /*
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             ref AuthPlayer auPlayer = AuthPlayers[i];
             if ( auPlayer.GUID == player.GetId() )
             {
+                /*
                 auPlayer.AddPermission("Teleport.SetPosition");
                 auPlayer.AddPermission("Object.SpawnObjectPosition");
                 auPlayer.AddPermission("Object.SpawnObjectInventory");
@@ -97,11 +102,11 @@ class PermissionManager
                 auPlayer.AddPermission("Weather.SetDate");
 
                 auPlayer.Save();
+                */
 
                 AuthPlayers.Remove( i );
             }
         }
-                */
     }
 }
 
