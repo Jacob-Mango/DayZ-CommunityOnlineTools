@@ -43,6 +43,7 @@ RD /s /q "%serverDir%\MPMissions\%missionName%" > NUL
 xcopy /s/e /y /i "%workspaceDir%\Missions\%missionName%" "%serverDir%\MPMissions\%missionName%" > NUL
 
 echo "Copying public key"
+xcopy /y "%keysLoc%\%publicKey%" "%tempFolder%\Keys\%publicKey%*" > NUL
 xcopy /y "%keysLoc%\%publicKey%" "%serverDir%\%modName%\Keys\%publicKey%*" > NUL
 
 echo "Finished copying to DayZ Server"

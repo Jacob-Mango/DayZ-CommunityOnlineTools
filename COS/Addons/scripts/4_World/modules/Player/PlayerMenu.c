@@ -42,8 +42,17 @@ class PlayerMenu extends PopupMenu
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
-    {  
+    {
         if ( w == m_PlayerScriptList )
+        {
+            int selectedRow = m_PlayerScriptList.GetSelectedRow();
+            if ( selectedRow >= 0 && selectedRow < m_PlayerScriptList.GetNumItems() )
+            {
+                m_PlayerScriptList.GetItemData( selectedRow, 0, SELECTED_PLAYER );
+            }
+        }
+        
+        if ( w == m_ReloadScriptButton )
         {
             ReloadPlayers();
         }
@@ -69,7 +78,12 @@ class PlayerMenu extends PopupMenu
             {
                 Man player = playerModule.m_Players.Get( i );
                 PlayerIdentity identity = player.GetIdentity();
-                m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0 );
+                m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0, i );
+
+                if ( identity.GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
+                {
+                    m_PlayerScriptList.SetItemColor( i, 0, COLOR_GREEN );
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ class PlayerModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS/Modules/Player/gui/layouts/PlayerMenu.layout";
+        return "COS/gui/layouts/player/PlayerMenu.layout";
     }
 
     override void onUpdate( float timeslice )
