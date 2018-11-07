@@ -175,74 +175,119 @@ class GameMenu extends PopupMenu
 
     void SpawnHatchback() 
     {
-        TStringArray attArr = {
-        "HatchbackWheel","HatchbackWheel","HatchbackWheel","HatchbackWheel",
-        "CarBattery","CarRadiator","EngineBelt","SparkPlug","HatchbackHood",
-        "HatchbackTrunk","HatchbackDoors_Driver","HatchbackDoors_CoDriver",
-        };
+        ref array< string> attArr = new ref array< string>;
+
+        attArr.Insert("HatchbackHood");
+        attArr.Insert("HatchbackTrunk");
+        attArr.Insert("HatchbackDoors_Driver");
+        attArr.Insert("HatchbackDoors_CoDriver");
+        attArr.Insert("HatchbackWheel");
+        attArr.Insert("HatchbackWheel");
+        attArr.Insert("HatchbackWheel");
+        attArr.Insert("HatchbackWheel");
+        attArr.Insert("CarBattery");
+        attArr.Insert("CarRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("SparkPlug");
+        
+        /*{
+            "HatchbackWheel","HatchbackWheel","HatchbackWheel","HatchbackWheel",
+            "CarBattery","CarRadiator","EngineBelt","SparkPlug","HatchbackHood",
+            "HatchbackTrunk","HatchbackDoors_Driver","HatchbackDoors_CoDriver",
+        };*/
 
         SpawnVehicle( "OffroadHatchback", attArr );
     }
 
     void SpawnSedan() 
     {
-        TStringArray attArr = {
-        "CivSedanWheel","CivSedanWheel","CivSedanWheel","CivSedanWheel",
-        "CarBattery", "CarRadiator","EngineBelt", "SparkPlug","CivSedanHood",
-        "CivSedanTrunk", "CivSedanDoors_Driver","CivSedanDoors_CoDriver",
-        "CivSedanDoors_BackLeft", "CivSedanDoors_BackRight",
-        };
+        ref array< string> attArr = new ref array< string>;
+        
+        /*{
+            "CivSedanWheel","CivSedanWheel","CivSedanWheel","CivSedanWheel",
+            "CarBattery", "CarRadiator","EngineBelt", "SparkPlug","CivSedanHood",
+            "CivSedanTrunk", "CivSedanDoors_Driver","CivSedanDoors_CoDriver",
+            "CivSedanDoors_BackLeft", "CivSedanDoors_BackRight",
+        };*/
 
         SpawnVehicle( "CivilianSedan", attArr );
     }
 
     void SpawnV3SCargo() 
     {
-        TStringArray attArr = {
-        "V3SWheel","V3SWheel", "V3SWheel","V3SWheel", "V3SWheelDouble","V3SWheelDouble", "V3SWheelDouble","V3SWheelDouble",
-        "TruckBattery","TruckRadiator","EngineBelt","GlowPlug","V3SHood",
-        "V3SDoors_Driver_Orange","V3SDoors_CoDriver_Orange",
-        };
+        ref array< string> attArr = new ref array< string>;
+        
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("TruckBattery");
+        attArr.Insert("TruckRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("GlowPlug");
+        attArr.Insert("V3SHood");
+        attArr.Insert("V3SDoors_Driver_Blue");
+        attArr.Insert("V3SDoors_CoDriver_Blue");
 
         SpawnVehicle( "V3S_Cargo_Blue", attArr );
     }
 
     void SpawnV3S() 
     {
-        TStringArray attArr = {
-        "V3SWheel","V3SWheel", "V3SWheel","V3SWheel", "V3SWheelDouble","V3SWheelDouble", "V3SWheelDouble","V3SWheelDouble",
-        "TruckBattery","TruckRadiator","EngineBelt","GlowPlug","V3SHood",
-        "V3SDoors_Driver_Orange","V3SDoors_CoDriver_Orange",
-        };
+        ref array< string> attArr = new ref array< string>;
+        
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("TruckBattery");
+        attArr.Insert("TruckRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("GlowPlug");
+        attArr.Insert("V3SHood");
+        attArr.Insert("V3SDoors_Driver_Blue");
+        attArr.Insert("V3SDoors_CoDriver_Blue");
 
         SpawnVehicle( "V3S_Chassis_Blue", attArr );
     }
 
     void SpawnBus() 
     {
-        TStringArray attArr = {
-        "TransitBusWheel","TransitBusWheel", "TransitBusWheelDouble","TransitBusWheelDouble",
-        "TruckBattery","TruckRadiator","EngineBelt","GlowPlug","BusHood",
-        "BusDoors_Left","BusDoors_Right", "BusDoors_Left","BusDoors_Right", "BusDoors_Left","BusDoors_Right",
-        };
+        ref array< string> attArr = new ref array< string>;
+        
+        /*{
+            "TransitBusWheel","TransitBusWheel", "TransitBusWheelDouble","TransitBusWheelDouble",
+            "TruckBattery","TruckRadiator","EngineBelt","GlowPlug","BusHood",
+            "BusDoors_Left","BusDoors_Right", "BusDoors_Left","BusDoors_Right", "BusDoors_Left","BusDoors_Right",
+        };*/
 
         SpawnVehicle( "TransitBus", attArr );
     }
 
     void SpawnVan() 
     {
-        TStringArray attArr = {
+        ref array< string> attArr = new ref array< string>;
+        
+        /*{
             "CivVanWheel","CivVanWheel","CivVanWheel","CivVanWheel",
             "CarBattery","CarRadiator","EngineBelt","SparkPlug","CivVanTrunk",
             "CivVanDoors_Driver","CivVanDoors_CoDriver","CivVanDoors_BackRight",
             "CivVanDoors_TrumpDown", "CivVanDoors_TrumpUp",
-        };
+        };*/
 
         SpawnVehicle( "CivilianVan", attArr );
     }
 
-    void SpawnVehicle( string vehicle, TStringArray attachments) 
+    void SpawnVehicle( string vehicle, ref array< string> attachments) 
     {
-        GetRPCManager().SendRPC( "COS_Game", "SpawnVehicle", new Param3< string, vector, TStringArray >( vehicle, GetCursorPos(), attachments ), true, NULL, GetGame().GetPlayer() );
+        GetRPCManager().SendRPC( "COS_Game", "SpawnVehicle", new Param3< string, vector, ref array< string> >( vehicle, GetCursorPos(), attachments ), true, NULL, GetGame().GetPlayer() );
     }
 }

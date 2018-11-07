@@ -88,24 +88,36 @@ class GameModule: EditorModule
         }
     }
 
+    private void FillCar( Car car, CarFluid fluid )
+    {
+        float cap = car.GetFluidCapacity( fluid );
+        car.Fill( fluid, cap );
+        Print( "Filling the vehicle by " + cap + " with " + fluid )
+    }
+
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Game.SpawnVehicle" ) )
             return;
 
-        Param3< string, vector, TStringArray > data;
+        Param3< string, vector, ref array< string> > data;
         if ( !ctx.Read( data ) ) return;
         
         if( type == CallType.Server )
         {
             Car oCar = Car.Cast( GetGame().CreateObject( data.param1, data.param2 ) );
 
-            for (int j = 0; j < data.param3.Count(); j++) { oCar.GetInventory().CreateAttachment( data.param3.Get(j) ); }
+            ref array< string> attachments = new ref array< string>;
+            attachments.Copy( data.param3 );
+            
+            for (int j = 0; j < attachments.Count(); j++) {
+                oCar.GetInventory().CreateInInventory( attachments[j] );
+            }
 
-            oCar.Fill( CarFluid.FUEL, 1000 );
-            oCar.Fill( CarFluid.OIL, 1000 );
-            oCar.Fill( CarFluid.BRAKE, 1000 );
-            oCar.Fill( CarFluid.COOLANT, 1000 );
+            FillCar( oCar, CarFluid.FUEL );
+            FillCar( oCar, CarFluid.OIL );
+            FillCar( oCar, CarFluid.BRAKE );
+            FillCar( oCar, CarFluid.COOLANT );
         }
     }
 
