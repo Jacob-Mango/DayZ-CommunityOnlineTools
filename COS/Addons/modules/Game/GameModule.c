@@ -36,7 +36,7 @@ class GameModule: EditorModule
             player.GetStatStamina().Set(player.GetStaminaHandler().GetStaminaCap());
             player.GetStatEnergy().Set(1000);
             player.GetStatWater().Set(1000);
-            player.GetStatStomachSolid().Set(300);     
+            player.GetStatStomachVolume().Set(300);     
             player.GetStatStomachWater().Set(300);
             player.GetStatStomachEnergy().Set(300);
             player.GetStatHeatComfort().Set(0);

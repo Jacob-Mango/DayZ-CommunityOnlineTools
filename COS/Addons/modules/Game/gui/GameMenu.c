@@ -3,7 +3,6 @@ class GameMenu extends PopupMenu
     TextListboxWidget m_gameScriptList;
     Widget               m_checkboxPanel;
     ButtonWidget       m_gameScriptButton;
-    ButtonWidget       m_reloadScriptButton;
 
     protected ref map< string, string > checkBoxMap = new map< string, string >; // store widget name
     protected ref map< string, string > buttonMap = new map< string, string >; // store widget name
@@ -39,7 +38,6 @@ class GameMenu extends PopupMenu
         m_checkboxPanel = layoutRoot.FindAnyWidget("game_checkbox_panel");
         m_gameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_list_box"));
         m_gameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_script_button"));
-        m_reloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("reload_scripts_button"));
 
         m_gameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
 //        m_gameScriptList.AddItem("Spawn Sedan",     new Param1<string>("SpawnSedan"),       0);
@@ -56,10 +54,6 @@ class GameMenu extends PopupMenu
         checkBoxAiming.SetName("OldAiming");
         checkBoxAiming.SetText("Old Aiming");
 
-        ButtonWidget buttonKP = ButtonWidget.Cast(GetGame().GetWorkspace().CreateWidgets( buttonLayout, m_checkboxPanel ));
-        buttonKP.SetName("KillPlayer");
-        buttonKP.SetText("Kill Player");
-
         CheckBoxWidget checkBoxKP = CheckBoxWidget.Cast(GetGame().GetWorkspace().CreateWidgets( checkboxLayout, m_checkboxPanel ));
         checkBoxKP.SetName("KillPlayer");
         checkBoxKP.SetText("Kill Player");
@@ -67,6 +61,11 @@ class GameMenu extends PopupMenu
         checkBoxMap.Insert( checkBoxGodmode.GetName(), "ToggleGodMode" );
         checkBoxMap.Insert( checkBoxAiming.GetName(), "ToggleOldAiming" );
         checkBoxMap.Insert( checkBoxKP.GetName(), "KillPlayer" );
+
+        ButtonWidget buttonKP = ButtonWidget.Cast(GetGame().GetWorkspace().CreateWidgets( buttonLayout, m_checkboxPanel ));
+        buttonKP.SetName("KillPlayer");
+        buttonKP.SetText("Kill Player");
+
         buttonMap.Insert( buttonKP.GetName(), "KillPlayer" );
     }
 
@@ -101,7 +100,7 @@ class GameMenu extends PopupMenu
     {
     }
 
-    bool ToggleOldAiming( CheckBoxWidget widget )
+    bool ToggleOldAiming( Widget widget )
     {
         if ( widget ) // Temp work around. Danny is lazy xd
         {
@@ -112,7 +111,7 @@ class GameMenu extends PopupMenu
         return m_OldAiming;
     }
 
-    bool ToggleGodMode( CheckBoxWidget widget ) 
+    bool ToggleGodMode( Widget widget ) 
     {
         if ( widget ) 
         {
@@ -123,7 +122,7 @@ class GameMenu extends PopupMenu
         return m_GodMode;
     }
 
-    bool KillPlayer( CheckBoxWidget widget ) 
+    bool KillPlayer( Widget widget ) 
     {
         if ( widget ) 
         {
@@ -157,7 +156,7 @@ class GameMenu extends PopupMenu
 
             if ( param ) 
             {
-                GetGame().GameScript.CallFunction( this , param , NULL, CheckBoxWidget.Cast( w ) );
+                GetGame().GameScript.CallFunction( this , param , NULL, w );
             }
         }
 
@@ -167,13 +166,8 @@ class GameMenu extends PopupMenu
 
             if ( param ) 
             {
-                GetGame().GameScript.CallFunction( this , param , NULL, ButtonWidget.Cast( w ) );
+                GetGame().GameScript.CallFunction( this , param , NULL, w );
             }
-        }
-
-        if ( w == m_reloadScriptButton )
-        {
-            GetModuleManager().ReloadModules();
         }
 
         return false;

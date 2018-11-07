@@ -93,7 +93,7 @@ class EditorMenu extends UIScriptedMenu
         
         super.OnShow();
 
-        GetGame().GetInput().ChangeGameFocus( 1, INPUT_DEVICE_MOUSE);
+        GetGame().GetInput().ChangeGameFocus( 1 );
         GetGame().GetUIManager().ShowUICursor( true );
     }
 
@@ -103,7 +103,8 @@ class EditorMenu extends UIScriptedMenu
         
         super.OnHide();
 
-        GetGame().GetInput().ResetGameFocus( INPUT_DEVICE_MOUSE );
+        GetGame().GetInput().ResetGameFocus();
+        
         GetPlayer().GetInputController().OverrideMovementSpeed( false, 0 );
     }
 

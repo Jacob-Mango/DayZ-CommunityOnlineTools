@@ -9,5 +9,6 @@ modded class ServerTools
         GetModuleManager().RegisterModule( new GameModule );
         GetModuleManager().RegisterModule( new CameraTool );
         GetModuleManager().RegisterModule( new WeatherModule );
+        GetModuleManager().RegisterModule( new PlayerModule );
     }
 }

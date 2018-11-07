@@ -1,0 +1,41 @@
+PanelWidgetClass PlayerMenu 
+{
+    visible 0
+    color 0 0 0 0
+    position 0 0
+    size 235 350
+    hexactpos 0
+    vexactpos 0
+    hexactsize 1
+    vexactsize 1
+    scriptclass "PlayerMenu"
+    style EditorPanel
+    {
+        TextListboxWidgetClass player_list
+        {
+            visible 1
+            position 5 30
+            size 225 280
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            style Editor
+            lines 20
+            font "gui/fonts/Metron14"
+        }
+
+        ButtonWidgetClass reload_list
+        {
+            position 80 10
+            size 80 20
+            halign left_ref
+            valign bottom_ref
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            text "Reload"
+        }
+    }
+}
