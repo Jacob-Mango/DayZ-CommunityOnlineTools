@@ -15,18 +15,18 @@ class EditorMenu extends UIScriptedMenu
     
     override Widget Init()
     {
-        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\EditorMenu.layout" );
+        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\EditorMenu.layout" );
 
         m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
             ref EditorModule module = m_Modules.Get( i );
-            Widget button_bkg = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\Button.layout", m_ButtonsContainer );
+            Widget button_bkg = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\Button.layout", m_ButtonsContainer );
 
             ref Widget button = button_bkg.FindAnyWidget( "btn" );
 
-            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\BaseWindow.layout", layoutRoot );
+            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\BaseWindow.layout", layoutRoot );
 
             ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 
