@@ -4,6 +4,8 @@ class PopupMenu extends ScriptedWidgetEventHandler
     
     ref BaseWindow baseWindow;
 
+    ref EditorModule baseModule;
+
     void PopupMenu() 
     {
 

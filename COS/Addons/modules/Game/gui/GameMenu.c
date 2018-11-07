@@ -62,11 +62,11 @@ class GameMenu extends PopupMenu
         checkBoxMap.Insert( checkBoxAiming.GetName(), "ToggleOldAiming" );
         checkBoxMap.Insert( checkBoxKP.GetName(), "KillPlayer" );
 
-        ButtonWidget buttonKP = ButtonWidget.Cast(GetGame().GetWorkspace().CreateWidgets( buttonLayout, m_checkboxPanel ));
-        buttonKP.SetName("KillPlayer");
-        buttonKP.SetText("Kill Player");
+        //ButtonWidget buttonKP = ButtonWidget.Cast(GetGame().GetWorkspace().CreateWidgets( buttonLayout, m_checkboxPanel ));
+        //buttonKP.SetName("KillPlayer");
+        //buttonKP.SetText("Kill Player");
 
-        buttonMap.Insert( buttonKP.GetName(), "KillPlayer" );
+        //buttonMap.Insert( buttonKP.GetName(), "KillPlayer" );
     }
 
     override void OnShow()

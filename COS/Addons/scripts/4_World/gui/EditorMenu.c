@@ -21,13 +21,14 @@ class EditorMenu extends UIScriptedMenu
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
+            ref EditorModule module = m_Modules.Get( i );
             Widget button_bkg = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\Button.layout", m_ButtonsContainer );
 
             ref Widget button = button_bkg.FindAnyWidget( "btn" );
 
             ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\BaseWindow.layout", layoutRoot );
 
-            ref Widget menu = GetGame().GetWorkspace().CreateWidgets( m_Modules.Get( i ).GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
+            ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 
             float width = -1;
             float height = -1;
@@ -42,6 +43,7 @@ class EditorMenu extends UIScriptedMenu
             if ( popMenu && baseWindow )
             {
                 popMenu.baseWindow = baseWindow;
+                popMenu.baseModule = module;
                 baseWindow.popupMenu = popMenu;
 
                 base_window.SetSize( width, height );
@@ -69,8 +71,8 @@ class EditorMenu extends UIScriptedMenu
                     btn_txt.SetText( popMenu.GetIconName() );
                 }
     
-                m_Modules.Get( i ).m_Button = button;
-                m_Modules.Get( i ).m_Menu = menu;
+                module.m_Button = button;
+                module.m_Menu = menu;
             }
         }
 
@@ -104,7 +106,7 @@ class EditorMenu extends UIScriptedMenu
         super.OnHide();
 
         GetGame().GetInput().ResetGameFocus();
-        
+
         GetPlayer().GetInputController().OverrideMovementSpeed( false, 0 );
     }
 
