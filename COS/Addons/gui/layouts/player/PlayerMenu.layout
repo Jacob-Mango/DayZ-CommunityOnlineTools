@@ -3,7 +3,7 @@ PanelWidgetClass PlayerMenu
     visible 0
     color 0 0 0 0
     position 0 0
-    size 235 350
+    size 310 350
     hexactpos 0
     vexactpos 0
     hexactsize 1
@@ -15,7 +15,7 @@ PanelWidgetClass PlayerMenu
         {
             visible 1
             position 5 30
-            size 225 280
+            size 300 280
             hexactpos 1
             vexactpos 1
             hexactsize 1
@@ -27,11 +27,11 @@ PanelWidgetClass PlayerMenu
 
         ButtonWidgetClass reload_list
         {
-            position 80 10
+            position 0 10
             size 80 20
-            halign left_ref
+            halign center_ref
             valign bottom_ref
-            hexactpos 1
+            hexactpos 0
             vexactpos 1
             hexactsize 1
             vexactsize 1

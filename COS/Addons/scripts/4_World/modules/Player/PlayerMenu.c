@@ -28,8 +28,10 @@ class PlayerMenu extends PopupMenu
 
     override void Init()
     {
-        m_PlayerScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_list_box"));
-        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("reload_scripts_button"));
+        m_PlayerScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("reload_list"));
+
+        ReloadPlayers();
     }
 
     override void OnShow()
@@ -69,6 +71,12 @@ class PlayerMenu extends PopupMenu
 
     void UpdateList()
     {
+        Print("PlayerMenu::UpdateList");
+
+        if ( m_PlayerScriptList == NULL ) return;
+
+        Print("Base Module " + baseModule );
+
         m_PlayerScriptList.ClearItems();
 
         ref PlayerModule playerModule = PlayerModule.Cast( baseModule ); 
@@ -79,6 +87,8 @@ class PlayerMenu extends PopupMenu
                 Man player = playerModule.m_Players.Get( i );
                 PlayerIdentity identity = player.GetIdentity();
                 m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0, i );
+
+                Print( "Player: " + identity.GetName() );
 
                 if ( identity.GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
                 {
