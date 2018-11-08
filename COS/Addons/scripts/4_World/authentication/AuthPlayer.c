@@ -89,4 +89,10 @@ class AuthPlayer
 
         return true;
     }
+
+    void DebugPrint()
+    {
+        Print( "Printing permissions for " + GUID );
+        RootPermission.DebugPrint( 0 );
+    }
 }
