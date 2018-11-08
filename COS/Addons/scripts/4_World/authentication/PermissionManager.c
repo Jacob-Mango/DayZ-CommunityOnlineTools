@@ -72,7 +72,24 @@ class PermissionManager
         {
             ref AuthPlayer auPlayer = new ref AuthPlayer( player.GetId() );
 
-            // auPlayer.Load()
+            auPlayer.Load();
+
+            auPlayer.AddPermission("Teleport.SetPosition");
+            auPlayer.AddPermission("Object.SpawnObjectPosition");
+            auPlayer.AddPermission("Object.SpawnObjectInventory");
+            auPlayer.AddPermission("Game.SpawnVehicle");
+            auPlayer.AddPermission("Game.ChangeAimingMode");
+            auPlayer.AddPermission("Game.EnableGodMode");
+            auPlayer.AddPermission("Game.KillEntity");
+            auPlayer.AddPermission("CameraTools.LeaveCamera");
+            auPlayer.AddPermission("CameraTools.EnterCamera");
+            auPlayer.AddPermission("Weather.SetStorm");
+            auPlayer.AddPermission("Weather.SetFog");
+            auPlayer.AddPermission("Weather.SetOvercast");
+            auPlayer.AddPermission("Weather.SetWindFunctionParams");
+            auPlayer.AddPermission("Weather.SetDate");
+
+            auPlayer.DebugPrint();
 
             AuthPlayers.Insert( auPlayer );
         }
@@ -85,24 +102,7 @@ class PermissionManager
             ref AuthPlayer auPlayer = AuthPlayers[i];
             if ( auPlayer.GUID == player.GetId() )
             {
-                /*
-                auPlayer.AddPermission("Teleport.SetPosition");
-                auPlayer.AddPermission("Object.SpawnObjectPosition");
-                auPlayer.AddPermission("Object.SpawnObjectInventory");
-                auPlayer.AddPermission("Game.SpawnVehicle");
-                auPlayer.AddPermission("Game.ChangeAimingMode");
-                auPlayer.AddPermission("Game.EnableGodMode");
-                auPlayer.AddPermission("Game.KillEntity");
-                auPlayer.AddPermission("CameraTools.LeaveCamera");
-                auPlayer.AddPermission("CameraTools.EnterCamera");
-                auPlayer.AddPermission("Weather.SetStorm");
-                auPlayer.AddPermission("Weather.SetFog");
-                auPlayer.AddPermission("Weather.SetOvercast");
-                auPlayer.AddPermission("Weather.SetWindFunctionParams");
-                auPlayer.AddPermission("Weather.SetDate");
-
                 auPlayer.Save();
-                */
 
                 AuthPlayers.Remove( i );
             }
