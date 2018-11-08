@@ -1,6 +1,7 @@
 class AuthPlayer
 {
     const string AUTH_DIRECTORY = "$profile:Players\\";
+    const string FILE_TYPE = "";
 
     ref Permission RootPermission;
 
@@ -27,7 +28,7 @@ class AuthPlayer
 
     bool Save()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.WRITE );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
             
         ref array< string > data = new ref array< string >;
         RootPermission.Serialize( data );
@@ -53,7 +54,7 @@ class AuthPlayer
 
     bool Load()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.READ );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.READ );
             
         ref array< string > data = new ref array< string >;
 
@@ -65,19 +66,19 @@ class AuthPlayer
                 data.Insert( line );
             }
 
-            CloseFile(file);
+            CloseFile( file );
         } else
         {
-            Print("Failed to open the file for the player to read. Attemping to create.");
+            Print( "Failed to open the file for the player to read. Attemping to create." );
 
-            file = OpenFile( AUTH_DIRECTORY + GUID + ".perm", FileMode.WRITE );
-            if (file != 0)
+            file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
+            if ( file != 0 )
             {
-                CloseFile(file);
-                Print("Created the file.");
+                CloseFile( file );
+                Print( "Created the file." );
             } else
             {
-                Print("Failed to create the file.");
+                Print( "Failed to create the file." );
             }
             return false;
         }
@@ -93,6 +94,7 @@ class AuthPlayer
     void DebugPrint()
     {
         Print( "Printing permissions for " + GUID );
+
         RootPermission.DebugPrint( 0 );
     }
 }
