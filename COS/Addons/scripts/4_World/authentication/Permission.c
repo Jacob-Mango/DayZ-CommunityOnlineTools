@@ -16,13 +16,8 @@ class Permission
 
     void AddPermission( string inp )
     {
-        Print( "Permission::AddPermission" );
-        Print( inp );
-
         array<string> tokens = new array<string>;
         inp.Split( ".", tokens );
-
-        Print( tokens );
         
         if ( tokens.Count() == 0 )
         {
@@ -41,26 +36,36 @@ class Permission
         }
     }
 
-    // perm:        cosd.tele.perm.barn
-    // depth:       0    1    2    3
-
     private void AddPermissionInternal( array<string> tokens, int depth )
     {
-        Print( "Permission::AddPermissionInternal" );
-
         if ( depth < tokens.Count() )
         {
-            Print( tokens[depth] );
+            string token = tokens[depth];
 
-            AddPermissionInternal( tokens, depth + 1 );
+            ref Permission nChild = NULL;
+
+            for ( int i = 0; i < Children.Count(); i++ )
+            {
+                if ( token == Children[i].Name )
+                {
+                    nChild = Children[i];
+                    break;
+                }
+            }
+            
+            if ( nChild == NULL )
+            {
+                nChild = new Permission( token, this );
+
+                Children.Insert( nChild );
+            }
+
+            nChild.AddPermissionInternal( tokens, depth + 1 );
         }
     }
 
     private void VerifyAddPermission( string token )
     {
-        Print( "Permission::VerifyAddPermission" );
-        Print( token );
-
         bool permissionExisted = false;
 
         for ( int i = 0; i < Children.Count(); i++ )
@@ -131,19 +136,27 @@ class Permission
 
     bool Check( array<string> tokens, int depth )
     {
-        if ( tokens.Count() == depth )
+        if ( depth < tokens.Count() )
         {
-            return true;
+            ref Permission nChild = NULL;
+
+            for ( int i = 0; i < Children.Count(); i++ )
+            {
+                if ( Children[i].Name == tokens[depth] )
+                {
+                    nChild = Children[i]; 
+                }
+            }
+
+            if ( nChild )
+            {
+                return nChild.Check( tokens, depth + 1 );
+            }
+
+            return false;
         }
 
-        for ( int i = 0; i < Children.Count(); i++ )
-        {
-            if ( tokens[depth] == Children[i].Name )
-            {
-                return Check( tokens, depth + 1 );
-            }
-        }
-        return false;
+        return true;
     }
 
     void Serialize( ref array< string > output, string prepend = "" )
