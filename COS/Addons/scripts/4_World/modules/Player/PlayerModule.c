@@ -7,6 +7,9 @@ class PlayerModule: EditorModule
         m_Players = new ref array< Man >;
 
         GetRPCManager().AddRPC( "COS_Player", "ReloadList", this, SingeplayerExecutionType.Server );
+        
+        GetRPCManager().AddRPC( "COS_Player", "SetPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Player", "LoadPermissions", this, SingeplayerExecutionType.Server );
     }
 
     override string GetLayoutRoot()
@@ -14,9 +17,62 @@ class PlayerModule: EditorModule
         return "COS/gui/layouts/player/PlayerMenu.layout";
     }
 
-    override void onUpdate( float timeslice )
+    void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-            
+        if ( !GetPermissionsManager().HasPermission( sender, "Perms.Set" ) )
+            return;
+   
+        if ( type == CallType.Server )
+        {
+            PlayerIdentity player = Man.Cast( target ).GetIdentity();
+
+            Param1< ref array< string > > data;
+            if ( !ctx.Read( data ) || !player ) return;
+
+            ref AuthPlayer au = GetPermissionsManager().GetPlayer( player );
+
+            if ( au )
+            {
+                ref array< string > perms;
+                perms.Copy( data.param1 );
+
+                au.ClearPermissions();
+
+                for ( int i = 0; i < perms.Count(); i++ )
+                {
+                    au.AddPermission( perms[i] );
+                }
+            }
+        }
+    }
+
+    void LoadPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( sender, "Perms.Load" ) )
+            return;
+   
+        if ( type == CallType.Server )
+        {
+            PlayerIdentity player = Man.Cast( target ).GetIdentity();
+
+            ref AuthPlayer au = GetPermissionsManager().GetPlayer( player );
+
+            if ( au )
+            {
+                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( au.Serialize() ), true, NULL, SELECTED_PLAYER );
+            }
+        }
+
+        if ( type == CallType.Client )
+        {
+            Param1< ref array< string > > data;
+            if ( !ctx.Read( data ) ) return;
+
+            ref array< string > perms;
+            perms.Copy( data.param1 );
+
+            m_MenuPopup.LoadPermissions( perms );
+        }
     }
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

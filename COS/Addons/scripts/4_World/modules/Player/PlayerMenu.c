@@ -1,7 +1,9 @@
 class PlayerMenu extends PopupMenu
 {
-    TextListboxWidget   m_PlayerScriptList;
-    ButtonWidget        m_ReloadScriptButton;
+    TextListboxWidget       m_PlayerScriptList;
+    ButtonWidget            m_ReloadScriptButton;
+    MultilineEditBoxWidget  m_PermissionsText;
+    ButtonWidget            m_SetPermissionsButton;
 
     void PlayerMenu()
     {
@@ -28,10 +30,11 @@ class PlayerMenu extends PopupMenu
 
     override void Init()
     {
-        m_PlayerScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
-        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
+        m_PlayerScriptList      = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_ReloadScriptButton    = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
-        ReloadPlayers();
+        m_PermissionsText       = MultilineEditBoxWidget.Cast(layoutRoot.FindAnyWidget("permissions_list"));
+        m_SetPermissionsButton  = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
     }
 
     override void OnShow()
@@ -51,6 +54,8 @@ class PlayerMenu extends PopupMenu
             if ( selectedRow >= 0 && selectedRow < m_PlayerScriptList.GetNumItems() )
             {
                 m_PlayerScriptList.GetItemData( selectedRow, 0, SELECTED_PLAYER );
+                
+                OnPlayerSelected();
             }
         }
         
@@ -59,7 +64,22 @@ class PlayerMenu extends PopupMenu
             ReloadPlayers();
         }
 
+        if ( w == m_SetPermissionsButton )
+        {
+            SetPermissions();
+        }
+
         return false;
+    }
+
+    void OnPlayerSelected()
+    {
+        layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
+
+        if ( SELECTED_PLAYER != NULL )
+        {
+            GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param, true, NULL, SELECTED_PLAYER );
+        }
     }
 
     void ReloadPlayers()
@@ -67,6 +87,34 @@ class PlayerMenu extends PopupMenu
         GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
             
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( UpdateList, 500 );
+    }
+
+    void LoadPermissions( ref array< string > text )
+    {
+        for ( int i = 0; i < m_PermissionsText.GetLinesCount(); i++ )
+        {
+            if ( i < text.Count() )
+            {
+                m_PermissionsText.SetLine( i, text[i] );
+            } else 
+            {
+                m_PermissionsText.SetLine( i, "" );
+            }
+
+            layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
+        }
+    }
+
+    void SetPermissions()
+    {
+        string permissionText;
+        m_PermissionsText.GetText( permissionText );
+        
+        ref array< string > permsArr = new ref array< string >;
+
+        permissionText.Split( "\N", permsArr );
+
+        GetRPCManager().SendRPC( "COS_Player", "SetPermissions", new Param1< ref array< string > >( permsArr ), true, NULL, SELECTED_PLAYER );
     }
 
     void UpdateList()

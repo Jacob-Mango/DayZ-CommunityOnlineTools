@@ -3,7 +3,7 @@ PanelWidgetClass PlayerMenu
     visible 0
     color 0 0 0 0
     position 0 0
-    size 310 350
+    size 620 350
     hexactpos 0
     vexactpos 0
     hexactsize 1
@@ -11,31 +11,87 @@ PanelWidgetClass PlayerMenu
     scriptclass "PlayerMenu"
     style EditorPanel
     {
-        TextListboxWidgetClass player_list
+        PanelWidgetClass PlayerListContainer
         {
-            visible 1
-            position 5 30
-            size 300 280
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            style Editor
-            lines 20
-            font "gui/fonts/Metron14"
-        }
-
-        ButtonWidgetClass refresh_list
-        {
-            position 0 10
-            size 80 20
-            halign center_ref
-            valign bottom_ref
+            visible 0
+            color 0 0 0 0
+            position 0 0
+            size 310 350
             hexactpos 0
-            vexactpos 1
+            vexactpos 0
             hexactsize 1
             vexactsize 1
-            text "Refresh"
+            style EditorPanel
+            {
+                TextListboxWidgetClass player_list
+                {
+                    visible 1
+                    position 5 30
+                    size 300 280
+                    hexactpos 1
+                    vexactpos 1
+                    hexactsize 1
+                    vexactsize 1
+                    style Editor
+                    lines 20
+                    font "gui/fonts/Metron14"
+                }
+                ButtonWidgetClass refresh_list
+                {
+                    position 0 10
+                    size 80 20
+                    halign center_ref
+                    valign bottom_ref
+                    hexactpos 0
+                    vexactpos 1
+                    hexactsize 1
+                    vexactsize 1
+                    text "Refresh"
+                }
+            }
+        }
+        PanelWidgetClass PlayerPermsContainer
+        {
+            disabled 1
+            visible 0
+            color 0 0 0 0
+            position 0 0
+            size 310 350
+            halign right
+            hexactpos 0
+            vexactpos 0
+            hexactsize 1
+            vexactsize 1
+            style EditorPanel
+            {
+                MultilineEditBoxWidgetClass permissions_list {
+                    position 0 0
+                    size 300 280
+                    halign center_ref
+                    valign center_ref
+                    hexactpos 0
+                    vexactpos 0
+                    hexactsize 0
+                    vexactsize 0
+                    style DayZNormal
+                    text "Print(\"Hello World\");"
+                    font "gui/fonts/Metron16"
+                    "exact text" 1
+                    lines 100
+                }
+                ButtonWidgetClass permissions_set_button
+                {
+                    position 0 10
+                    size 120 20
+                    halign center_ref
+                    valign bottom_ref
+                    hexactpos 0
+                    vexactpos 1
+                    hexactsize 1
+                    vexactsize 1
+                    text "Set Permissions"
+                }
+            }
         }
     }
 }

@@ -1,3 +1,8 @@
+enum PermType 
+{
+    UNKNOWN, DISALLOWED, ALLOWED
+}
+
 class Permission
 {
     ref Permission Parent;
@@ -5,6 +10,8 @@ class Permission
     ref array< ref Permission > Children;
 
     string Name;
+
+    bool Value;
 
     void Permission( string name, ref Permission parent = NULL )
     {
@@ -14,29 +21,59 @@ class Permission
         Children = new ref array< ref Permission >;
     }
 
-    void AddPermission( string inp )
+    void ~Permission()
+    {
+        delete Children;
+    }
+
+    void AddPermission( string inp, PermType type = PermType.UNKNOWN )
     {
         array<string> tokens = new array<string>;
         inp.Split( ".", tokens );
+
+        array<string> spaces = new array<string>;
+        inp.Split( " ", spaces );
+
+        bool value = false;
+
+        if ( type == PermType.UNKNOWN )
+        {
+            if ( spaces.Count() == 2 )
+            {
+                Print("Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\".");
+                return;
+            }
+
+            if ( spaces[1].ToInt() == 1 )
+            {
+                value = true;
+            }
+        } else
+        {
+            if ( type == PermType.ALLOWED )
+            {
+                value = true;
+            }
+        }
         
         if ( tokens.Count() == 0 )
         {
-            VerifyAddPermission( inp );
+            VerifyAddPermission( inp, value );
         } else
         {
             int depth = tokens.Find( Name );
 
             if ( depth > -1 )
             {
-                AddPermissionInternal( tokens, depth + 1 );
+                AddPermissionInternal( tokens, depth + 1, value );
             } else 
             {
-                AddPermissionInternal( tokens, 0 );
+                AddPermissionInternal( tokens, 0, value );
             }
         }
     }
 
-    private void AddPermissionInternal( array<string> tokens, int depth )
+    private void AddPermissionInternal( array<string> tokens, int depth, bool value )
     {
         if ( depth < tokens.Count() )
         {
@@ -61,10 +98,12 @@ class Permission
             }
 
             nChild.AddPermissionInternal( tokens, depth + 1 );
+        } else {
+            Value = value;
         }
     }
 
-    private void VerifyAddPermission( string token )
+    private void VerifyAddPermission( string token, bool value )
     {
         bool permissionExisted = false;
 
@@ -79,7 +118,10 @@ class Permission
         
         if ( permissionExisted == false )
         {
-            Children.Insert( new Permission( token, this ) );
+            ref Permission newPerm = new Permission( token, this );
+            newPerm.Value = value;
+
+            Children.Insert( newPerm );
         }
     }
 
@@ -138,6 +180,11 @@ class Permission
     {
         if ( depth < tokens.Count() )
         {
+            if ( Children.Count() == 0 ) 
+            {
+                return true;
+            }
+
             ref Permission nChild = NULL;
 
             for ( int i = 0; i < Children.Count(); i++ )

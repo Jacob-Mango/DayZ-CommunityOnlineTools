@@ -19,6 +19,8 @@ class PermissionManager
 
     bool HasPermission( PlayerIdentity player, string permission )
     {
+        if ( player == NULL ) return false; // Player couldn't be found, can we trust this person here?
+
         if ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) return true; // Assume there is always permission on the client.
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -28,51 +30,65 @@ class PermissionManager
                 return AuthPlayers[i].HasPermission( permission );
             }
         }
+
         return false;
     }
 
     void PlayerJoined( PlayerIdentity player )
     {
-        bool AuthPlayerExists = false;
+        if ( player == NULL ) return;
+
+        ref AuthPlayer auPlayer = NULL;
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             if ( AuthPlayers[i].GUID == player.GetId() )
             {
-                AuthPlayers[i].Load();
-
-                AuthPlayerExists = true;
+                auPlayer = AuthPlayers[i];
+                break;
             }
         }
 
-        if ( !AuthPlayerExists )
+        if ( auPlayer == NULL )
         {
-            ref AuthPlayer auPlayer = new ref AuthPlayer( player.GetId() );
-
-            auPlayer.Load();
-
-            auPlayer.AddPermission( "Teleport.SetPosition" );
-            auPlayer.AddPermission( "Object.SpawnObjectPosition" );
-            auPlayer.AddPermission( "Game.SpawnVehicle" );
-            auPlayer.AddPermission( "Game.ChangeAimingMode" );
-            auPlayer.AddPermission( "Game.EnableGodMode" );
-            auPlayer.AddPermission( "Game.KillEntity" );
-            auPlayer.AddPermission( "CameraTools.LeaveCamera" );
-            auPlayer.AddPermission( "CameraTools.EnterCamera" );
-            auPlayer.AddPermission( "Weather.SetStorm" );
-            auPlayer.AddPermission( "Weather.SetFog" );
-            auPlayer.AddPermission( "Weather.SetOvercast" );
-            auPlayer.AddPermission( "Weather.SetWindFunctionParams" );
-            auPlayer.AddPermission( "Weather.SetDate" );
-
-            auPlayer.DebugPrint();
+            auPlayer = new ref AuthPlayer( player.GetId() );
 
             AuthPlayers.Insert( auPlayer );
         }
+
+        auPlayer.Load();
+
+        auPlayer.AddPermission( "Perms.Set", PermType.ALLOWED );
+        auPlayer.AddPermission( "Perms.Load", PermType.ALLOWED );
+
+        auPlayer.AddPermission( "COS.UseEditor", PermType.ALLOWED );
+
+        auPlayer.AddPermission( "Teleport.SetPosition", PermType.ALLOWED );
+
+        auPlayer.AddPermission( "Object.SpawnObjectPosition", PermType.ALLOWED );
+        auPlayer.AddPermission( "Object.SpawnObjectInventory", PermType.ALLOWED );
+
+        auPlayer.AddPermission( "Game.SpawnVehicle", PermType.ALLOWED );
+        auPlayer.AddPermission( "Game.ChangeAimingMode", PermType.ALLOWED );
+        auPlayer.AddPermission( "Game.EnableGodMode", PermType.ALLOWED );
+        auPlayer.AddPermission( "Game.KillEntity", PermType.ALLOWED );
+
+        auPlayer.AddPermission( "CameraTools.LeaveCamera", PermType.ALLOWED );
+        auPlayer.AddPermission( "CameraTools.EnterCamera", PermType.ALLOWED );
+        
+        auPlayer.AddPermission( "Weather.SetStorm", PermType.ALLOWED );
+        auPlayer.AddPermission( "Weather.SetFog", PermType.ALLOWED );
+        auPlayer.AddPermission( "Weather.SetOvercast", PermType.ALLOWED );
+        auPlayer.AddPermission( "Weather.SetWindFunctionParams", PermType.ALLOWED );
+        auPlayer.AddPermission( "Weather.SetDate", PermType.ALLOWED );
+
+        auPlayer.DebugPrint();
     }
 
     void PlayerLeft( PlayerIdentity player )
     {
+        if ( player == NULL ) return;
+
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             ref AuthPlayer auPlayer = AuthPlayers[i];
@@ -81,8 +97,26 @@ class PermissionManager
                 auPlayer.Save();
 
                 AuthPlayers.Remove( i );
+
+                break;
             }
         }
+    }
+
+    ref AuthPlayer GetPlayer( PlayerIdentity player )
+    {
+        if ( player == NULL ) return NULL;
+
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            ref AuthPlayer auPlayer = AuthPlayers[i];
+            if ( auPlayer.GUID == player.GetId() )
+            {
+                return auPlayer;
+            }
+        }
+
+        return NULL;
     }
 }
 

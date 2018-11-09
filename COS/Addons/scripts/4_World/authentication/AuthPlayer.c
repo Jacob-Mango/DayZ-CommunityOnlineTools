@@ -16,6 +16,18 @@ class AuthPlayer
         MakeDirectory( AUTH_DIRECTORY );
     }
 
+    void ~AuthPlayer()
+    {
+        delete RootPermission;
+    }
+
+    void ClearPermissions()
+    {
+        delete RootPermission;
+
+        RootPermission = new ref Permission( GUID, NULL );
+    }
+
     void AddPermission( string permission )
     {
         RootPermission.AddPermission( permission );
@@ -26,16 +38,23 @@ class AuthPlayer
         return RootPermission.HasPermission( permission );
     }
 
+    ref array< string > Serialize()
+    {
+        ref array< string > data = new ref array< string >;
+        RootPermission.Serialize( data );
+        return data;
+    }
+
     bool Save()
     {
         FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
             
-        ref array< string > data = new ref array< string >;
-        RootPermission.Serialize( data );
+        ref array< string > data = Serialize();
 
         if ( file != 0 )
         {
             string line;
+            
             for ( int i = 0; i < data.Count(); i++ )
             {
                 FPrintln( file, data[i] );
@@ -61,6 +80,7 @@ class AuthPlayer
         if ( file != 0 )
         {
             string line;
+
             while ( FGets( file, line ) > 0 )
             {
                 data.Insert( line );
@@ -72,6 +92,7 @@ class AuthPlayer
             Print( "Failed to open the file for the player to read. Attemping to create." );
 
             file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
+
             if ( file != 0 )
             {
                 CloseFile( file );
@@ -85,7 +106,7 @@ class AuthPlayer
         
         for ( int i = 0; i < data.Count(); i++ )
         {
-            RootPermission.AddPermission( data[i] );
+            AddPermission( data[i] );
         }
 
         return true;
