@@ -13,25 +13,37 @@ PanelWidgetClass PlayerMenu {
   PanelWidgetClass PlayerListContainer {
    color 0 0 0 0
    position 0 0
-   size 310 350
+   size 310 320
    hexactpos 0
    vexactpos 0
    hexactsize 1
    vexactsize 1
    style EditorPanel
    {
-    TextListboxWidgetClass player_list {
+    ScrollWidgetClass PlayerScroller {
      position 0 5
      size 300 280
      halign center_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     style Editor
-     lines 20
-     font "gui/fonts/Metron14"
+     style blank
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass player_list {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 1000
+      }
+     }
     }
     ButtonWidgetClass refresh_list {
      position 0 10
@@ -47,10 +59,9 @@ PanelWidgetClass PlayerMenu {
    }
   }
   PanelWidgetClass PlayerPermsContainer {
-   disabled 1
    color 0 0 0 0
    position 0 0
-   size 310 350
+   size 310 320
    halign right_ref
    hexactpos 0
    vexactpos 0
@@ -58,8 +69,7 @@ PanelWidgetClass PlayerMenu {
    vexactsize 1
    style EditorPanel
    {
-    ScrollWidgetClass PermsListCont {
-     color 1 1 1 1
+    ScrollWidgetClass PermsScroller {
      position 0 5
      size 300 280
      halign center_ref
@@ -70,7 +80,19 @@ PanelWidgetClass PlayerMenu {
      vexactsize 1
      style blank
      "Scrollbar V" 1
-     Columns 0
+     {
+      GridSpacerWidgetClass PermsListCont {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 1000
+      }
+     }
     }
     ButtonWidgetClass permissions_set_button {
      position 0 10

@@ -1,8 +1,9 @@
 class PlayerMenu extends PopupMenu
 {
     ref array< ref PermissionRow >  m_Permissions;
+    ref array< ref PlayerRow >      m_Players;
 
-    TextListboxWidget               m_PlayerScriptList;
+    GridSpacerWidget                m_PlayerScriptList;
     ButtonWidget                    m_ReloadScriptButton;
     GridSpacerWidget                m_PermsContainer;
     ButtonWidget                    m_SetPermissionsButton;
@@ -10,6 +11,7 @@ class PlayerMenu extends PopupMenu
     void PlayerMenu()
     {
         m_Permissions = new ref array< ref PermissionRow >;
+        m_Players = new ref array< ref PlayerRow >;
     }
 
     void ~PlayerMenu()
@@ -33,10 +35,10 @@ class PlayerMenu extends PopupMenu
 
     override void Init()
     {
-        m_PlayerScriptList      = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_PlayerScriptList      = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
         m_ReloadScriptButton    = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
-        m_PermsContainer        = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("perms_cont"));
+        m_PermsContainer        = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("PermsListCont"));
         m_SetPermissionsButton  = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
     }
 
@@ -50,18 +52,7 @@ class PlayerMenu extends PopupMenu
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
-    {
-        if ( w == m_PlayerScriptList )
-        {
-            int selectedRow = m_PlayerScriptList.GetSelectedRow();
-            if ( selectedRow >= 0 && selectedRow < m_PlayerScriptList.GetNumItems() )
-            {
-                m_PlayerScriptList.GetItemData( selectedRow, 0, SELECTED_PLAYER );
-                
-                OnPlayerSelected();
-            }
-        }
-        
+    {        
         if ( w == m_ReloadScriptButton )
         {
             ReloadPlayers();
@@ -75,8 +66,21 @@ class PlayerMenu extends PopupMenu
         return false;
     }
 
-    void OnPlayerSelected()
+    void OnPlayerSelected( PlayerRow row )
     {
+        for ( int j = 0; j < m_Players.Count(); j++ )
+        {
+            m_Players[j].GetLayoutRoot().SetColor(0xFF000000);
+
+            if ( m_Players[j].m_Player.GetIdentity().GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
+            {
+                row.GetLayoutRoot().SetColor(0x9900AA00);
+            }
+        }
+        row.GetLayoutRoot().SetColor(0x99AAAAAA);
+
+        SELECTED_PLAYER = row.m_Player;
+
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
 
         if ( SELECTED_PLAYER != NULL )
@@ -92,12 +96,10 @@ class PlayerMenu extends PopupMenu
 
     void LoadPermissions( ref array< string > perms )
     {
-        /*
         for ( int j = 0; j < m_Permissions.Count(); j++ )
         {
-            m_Permissions[j].GetLayoutRoot().Close();
+            m_Permissions[j].GetLayoutRoot().Unlink();
         }
-        */
 
         m_Permissions.Clear();
 
@@ -113,6 +115,8 @@ class PlayerMenu extends PopupMenu
                 array<string> spaces = new array<string>;
                 perms[i].Split( " ", spaces );
 
+                if ( spaces.Count() != 2 ) continue;
+
                 bool value = false;
 
                 if ( spaces[1].ToInt() == 1 )
@@ -123,14 +127,6 @@ class PlayerMenu extends PopupMenu
                 rowScript.SetPermission( spaces[0], value );
 
                 m_Permissions.Insert( rowScript );
-
-                /*if ( i > 0 )
-                {
-                    m_PermsContainer.AddChildAfter( permRow, m_Permissions[i - 1].GetLayoutRoot() );
-                } else
-                {
-                    m_PermsContainer.AddChildAfter( permRow, NULL );
-                }*/
             }
         }
     }
@@ -144,9 +140,12 @@ class PlayerMenu extends PopupMenu
 
     void UpdateList( ref array< Man > players )
     {
-        if ( m_PlayerScriptList == NULL ) return;
+        for ( int j = 0; j < m_Players.Count(); j++ )
+        {
+            m_Players[j].GetLayoutRoot().Unlink();
+        }
 
-        m_PlayerScriptList.ClearItems();
+        m_Players.Clear();
 
         for ( int i = 0; i < players.Count(); i++ )
         {
@@ -154,12 +153,24 @@ class PlayerMenu extends PopupMenu
 
             PlayerIdentity identity = player.GetIdentity();
 
-            m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0, i );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
-            if ( identity.GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
+            PlayerRow rowScript;
+            permRow.GetScript( rowScript );
+
+            if ( rowScript )
             {
-                m_PlayerScriptList.SetItemColor( i, 0, COLOR_GREEN );
+                rowScript.SetPlayer( player );
+
+                rowScript.playerMenu = this;
+
+                m_Players.Insert( rowScript );
             }
+        }
+
+        if ( m_Players.Count() > 0 )
+        {
+            OnPlayerSelected( m_Players[0] );
         }
     }
 }
