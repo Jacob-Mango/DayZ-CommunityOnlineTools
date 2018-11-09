@@ -19,9 +19,7 @@ class PermissionManager
 
     bool HasPermission( PlayerIdentity player, string permission )
     {
-        if ( player == NULL ) return false; // Player couldn't be found, can we trust this person here?
-
-        if ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) return true; // Assume there is always permission on the client.
+        if ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) return true; // Assume there is always permission on the client. 
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
@@ -58,6 +56,9 @@ class PermissionManager
 
         auPlayer.Load();
 
+
+        auPlayer.AddPermission( "Player.ReloadList", PermType.ALLOWED );
+
         auPlayer.AddPermission( "Perms.Set", PermType.ALLOWED );
         auPlayer.AddPermission( "Perms.Load", PermType.ALLOWED );
 
@@ -75,7 +76,7 @@ class PermissionManager
 
         auPlayer.AddPermission( "CameraTools.LeaveCamera", PermType.ALLOWED );
         auPlayer.AddPermission( "CameraTools.EnterCamera", PermType.ALLOWED );
-        
+
         auPlayer.AddPermission( "Weather.SetStorm", PermType.ALLOWED );
         auPlayer.AddPermission( "Weather.SetFog", PermType.ALLOWED );
         auPlayer.AddPermission( "Weather.SetOvercast", PermType.ALLOWED );

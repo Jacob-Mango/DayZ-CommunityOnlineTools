@@ -4,6 +4,7 @@ class WeatherModule: EditorModule
     {    
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetStorm", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetFog", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COS_Weather", "Weather_SetRain", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetOvercast", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetDate", this, SingeplayerExecutionType.Client );
@@ -76,6 +77,22 @@ class WeatherModule: EditorModule
         }
 
         GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+    }
+
+    void Weather_SetRain( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( sender, "Weather.SetRain" ) )
+            return;
+        
+        Param3< float, float, float > data;
+        if ( !ctx.Read( data ) ) return;
+        
+        if( type == CallType.Server && GetGame().IsMultiplayer() )
+        {
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetRain", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
+        }
+
+        GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
     }
 
     void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

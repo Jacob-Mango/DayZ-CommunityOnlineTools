@@ -46,7 +46,7 @@ class EditorMenu extends UIScriptedMenu
                 popMenu.baseModule = module;
                 baseWindow.popupMenu = popMenu;
 
-                base_window.SetSize( width, height );
+                base_window.SetSize( width, height + 25 );
 
                 TextWidget title_text = base_window.FindAnyWidget( "title_text" );
                 title_text.SetText( popMenu.GetTitle() );
@@ -73,6 +73,7 @@ class EditorMenu extends UIScriptedMenu
     
                 module.m_Button = button;
                 module.m_Menu = menu;
+                module.m_MenuPopup = popMenu;
             }
         }
 

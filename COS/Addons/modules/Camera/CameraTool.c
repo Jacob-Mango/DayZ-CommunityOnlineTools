@@ -145,11 +145,19 @@ class CameraTool: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "CameraTools.EnterCamera" ) )
             return;
 
+        /*
+        if ( true )
+        {
+            Print( "FreeCam is currently broken in this version of DayZ!" );
+            return;
+        }
+        */
+
         bool cont = false;
 
         if( type == CallType.Server )
         {
-            GetGame().SelectSpectator( sender, "Camera", target.GetPosition() );
+            GetGame().SelectSpectator( sender, "StaticCamera", target.GetPosition() + Vector( 0, 1.8, 0 ) );
 
             GetGame().SelectPlayer( sender, NULL );
 
@@ -342,8 +350,7 @@ class CameraTool: EditorModule
             Input input = GetGame().GetInput();
 
             if ( !m_FreezeCam ) 
-            {    
-
+            {
                 float forward = KeyState(KeyCode.KC_W) - KeyState(KeyCode.KC_S); // -1, 0, 1
                 float strafe = KeyState(KeyCode.KC_D) - KeyState(KeyCode.KC_A);
                 float altitude = KeyState(KeyCode.KC_Q) - KeyState(KeyCode.KC_Z); // change to hardcode keys? these actions can be rebinded via vanilla keybind menu
@@ -354,6 +361,7 @@ class CameraTool: EditorModule
                     strafe *= 10.0;
                     altitude *= 10.0;
                 }
+
                 float cam_speed = CAMERA_SPEED;
 
                 vector up = vector.Up;
@@ -362,11 +370,12 @@ class CameraTool: EditorModule
 
                 vector oldPos = m_oCamera.GetPosition();
 
-                up = up * altitude * cam_speed * timeslice;
-                direction = direction * forward * cam_speed * timeslice;
-                directionAside = directionAside * strafe * cam_speed * timeslice;
+                up = up * altitude * cam_speed;
+                direction = direction * forward * cam_speed;
+                directionAside = directionAside * strafe * cam_speed;
 
-                velocity = (velocity + direction + directionAside + up) * CAMERA_VELDRAG;
+                velocity = velocity * CAMERA_VELDRAG;
+                velocity = velocity + (direction + directionAside + up) * timeslice;
 
                 vector newPos = oldPos + velocity;
 
