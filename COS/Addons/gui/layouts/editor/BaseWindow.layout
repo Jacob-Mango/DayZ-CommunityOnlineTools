@@ -30,10 +30,10 @@ PanelWidgetClass base_window
         {
             visible 1
             color 1 1 1 1
-            position 0 0
+            position 0 25
             size 1 1
             hexactpos 0
-            vexactpos 0
+            vexactpos 1
             hexactsize 0
             vexactsize 0
         }

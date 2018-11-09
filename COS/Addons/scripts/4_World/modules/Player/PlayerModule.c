@@ -29,12 +29,13 @@ class PlayerModule: EditorModule
             Param1< ref array< string > > data;
             if ( !ctx.Read( data ) || !player ) return;
 
+            ref array< string > perms;
+            perms.Copy( data.param1 );
+
             ref AuthPlayer au = GetPermissionsManager().GetPlayer( player );
 
             if ( au )
             {
-                ref array< string > perms;
-                perms.Copy( data.param1 );
 
                 au.ClearPermissions();
 
@@ -51,6 +52,8 @@ class PlayerModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Perms.Load" ) )
             return;
    
+        ref array< string > perms = new ref array< string >;
+
         if ( type == CallType.Server )
         {
             PlayerIdentity player = Man.Cast( target ).GetIdentity();
@@ -59,7 +62,8 @@ class PlayerModule: EditorModule
 
             if ( au )
             {
-                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( au.Serialize() ), true, NULL, SELECTED_PLAYER );
+                perms = au.Serialize();
+                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, NULL, SELECTED_PLAYER );
             }
         }
 
@@ -68,16 +72,19 @@ class PlayerModule: EditorModule
             Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< string > perms;
             perms.Copy( data.param1 );
 
-            m_MenuPopup.LoadPermissions( perms );
+            ref PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
+            
+            if ( menu )
+            {
+                menu.LoadPermissions( perms );
+            }
         }
     }
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print("PlayerModule::ReloadList");
         if ( !GetPermissionsManager().HasPermission( sender, "Player.ReloadList" ) )
             return;
         
@@ -94,8 +101,6 @@ class PlayerModule: EditorModule
                 m_Players.Insert( players[i] );
             }
 
-            Print( "Players: " + m_Players );
-
             GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref array< Man > >( m_Players ), true, sender );
         }
 
@@ -103,11 +108,19 @@ class PlayerModule: EditorModule
         {
             Param1< ref array< Man > > data;
             if ( !ctx.Read( data ) ) return;
-            
+
             m_Players.Clear();
+
             m_Players.Copy( data.param1 );
 
-            Print( "Players: " + m_Players );
+            PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
+
+            Print( m_Players );
+            
+            if ( menu )
+            {
+                menu.UpdateList( m_Players );
+            }
         }
     }
 }

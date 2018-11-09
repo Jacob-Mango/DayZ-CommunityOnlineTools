@@ -28,9 +28,9 @@ class AuthPlayer
         RootPermission = new ref Permission( GUID, NULL );
     }
 
-    void AddPermission( string permission )
+    void AddPermission( string permission, PermType type = PermType.UNKNOWN )
     {
-        RootPermission.AddPermission( permission );
+        RootPermission.AddPermission( permission, type );
     }
 
     bool HasPermission( string permission )
@@ -54,7 +54,7 @@ class AuthPlayer
         if ( file != 0 )
         {
             string line;
-            
+
             for ( int i = 0; i < data.Count(); i++ )
             {
                 FPrintln( file, data[i] );

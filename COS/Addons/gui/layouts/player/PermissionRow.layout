@@ -1,0 +1,47 @@
+GridSpacerWidgetClass PermissionRow {
+ visible 1
+ color 0 0 0 0
+ position 0 0
+ size 300 24
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ "Size To Content H" 1
+ "Size To Content V" 1
+ Columns 3
+ Rows 1
+ scriptclass "PermissionRow"
+ {
+  EditBoxWidgetClass permission_name {
+   ignorepointer 1
+   position 0 0
+   size 250 24
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "{PERMISSION_HERE}"
+  }
+  CheckBoxWidgetClass permission_setting {
+   size 24 24
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   scaled 1
+   draggable 0
+   checked 0
+  }
+  ButtonWidgetClass button_remove {
+   position 0 0
+   size 24 24
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+  }
+ }
+}

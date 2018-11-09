@@ -1,12 +1,15 @@
 class PlayerMenu extends PopupMenu
 {
-    TextListboxWidget       m_PlayerScriptList;
-    ButtonWidget            m_ReloadScriptButton;
-    MultilineEditBoxWidget  m_PermissionsText;
-    ButtonWidget            m_SetPermissionsButton;
+    ref array< ref PermissionRow >  m_Permissions;
+
+    TextListboxWidget               m_PlayerScriptList;
+    ButtonWidget                    m_ReloadScriptButton;
+    GridSpacerWidget                m_PermsContainer;
+    ButtonWidget                    m_SetPermissionsButton;
 
     void PlayerMenu()
     {
+        m_Permissions = new ref array< ref PermissionRow >;
     }
 
     void ~PlayerMenu()
@@ -33,7 +36,7 @@ class PlayerMenu extends PopupMenu
         m_PlayerScriptList      = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
         m_ReloadScriptButton    = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
-        m_PermissionsText       = MultilineEditBoxWidget.Cast(layoutRoot.FindAnyWidget("permissions_list"));
+        m_PermsContainer        = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("perms_cont"));
         m_SetPermissionsButton  = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
     }
 
@@ -85,63 +88,77 @@ class PlayerMenu extends PopupMenu
     void ReloadPlayers()
     {
         GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
-            
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( UpdateList, 500 );
     }
 
-    void LoadPermissions( ref array< string > text )
+    void LoadPermissions( ref array< string > perms )
     {
-        for ( int i = 0; i < m_PermissionsText.GetLinesCount(); i++ )
+        /*
+        for ( int j = 0; j < m_Permissions.Count(); j++ )
         {
-            if ( i < text.Count() )
-            {
-                m_PermissionsText.SetLine( i, text[i] );
-            } else 
-            {
-                m_PermissionsText.SetLine( i, "" );
-            }
+            m_Permissions[j].GetLayoutRoot().Close();
+        }
+        */
 
-            layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
+        m_Permissions.Clear();
+
+        for ( int i = 0; i < perms.Count(); i++ )
+        {
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", m_PermsContainer );
+
+            PermissionRow rowScript;
+            permRow.GetScript( rowScript );
+
+            if ( rowScript )
+            {
+                array<string> spaces = new array<string>;
+                perms[i].Split( " ", spaces );
+
+                bool value = false;
+
+                if ( spaces[1].ToInt() == 1 )
+                {
+                    value = true;
+                }
+
+                rowScript.SetPermission( spaces[0], value );
+
+                m_Permissions.Insert( rowScript );
+
+                /*if ( i > 0 )
+                {
+                    m_PermsContainer.AddChildAfter( permRow, m_Permissions[i - 1].GetLayoutRoot() );
+                } else
+                {
+                    m_PermsContainer.AddChildAfter( permRow, NULL );
+                }*/
+            }
         }
     }
 
     void SetPermissions()
     {
-        string permissionText;
-        m_PermissionsText.GetText( permissionText );
-        
-        ref array< string > permsArr = new ref array< string >;
+        // GetRPCManager().SendRPC( "COS_Player", "SetPermissions", new Param1< ref array< string > >( m_Permissions ), true, NULL, SELECTED_PLAYER );
 
-        permissionText.Split( "\N", permsArr );
-
-        GetRPCManager().SendRPC( "COS_Player", "SetPermissions", new Param1< ref array< string > >( permsArr ), true, NULL, SELECTED_PLAYER );
+        layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
     }
 
-    void UpdateList()
+    void UpdateList( ref array< Man > players )
     {
-        Print("PlayerMenu::UpdateList");
-
         if ( m_PlayerScriptList == NULL ) return;
-
-        Print("Base Module " + baseModule );
 
         m_PlayerScriptList.ClearItems();
 
-        ref PlayerModule playerModule = PlayerModule.Cast( baseModule ); 
-        if ( playerModule )
+        for ( int i = 0; i < players.Count(); i++ )
         {
-            for ( int i = 0; i < playerModule.m_Players.Count(); i++ )
+            Man player = players.Get( i );
+
+            PlayerIdentity identity = player.GetIdentity();
+
+            m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0, i );
+
+            if ( identity.GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
             {
-                Man player = playerModule.m_Players.Get( i );
-                PlayerIdentity identity = player.GetIdentity();
-                m_PlayerScriptList.AddItem( identity.GetName() + " (" + identity.GetId() + ")", player, 0, i );
-
-                Print( "Player: " + identity.GetName() );
-
-                if ( identity.GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
-                {
-                    m_PlayerScriptList.SetItemColor( i, 0, COLOR_GREEN );
-                }
+                m_PlayerScriptList.SetItemColor( i, 0, COLOR_GREEN );
             }
         }
     }

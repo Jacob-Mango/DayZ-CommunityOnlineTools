@@ -404,7 +404,14 @@ class CameraSettings extends PopupMenu
     {
         string cameraTarget = "None";
 
-        Object targetObject = CameraTool.Cast(GetModuleManager().GetModule(CameraTool)).GetTargetObject();
+        CameraTool cameraTool = CameraTool.Cast( GetModuleManager().GetModule(CameraTool) );
+
+        Object targetObject = NULL;
+        
+        if ( cameraTool )
+        {
+            cameraTool.GetTargetObject();
+        }
 
         if ( targetObject ) 
         {

@@ -18,6 +18,8 @@ class Permission
         Name = name;
         Parent = parent;
 
+        Value = false;
+
         Children = new ref array< ref Permission >;
     }
 
@@ -38,7 +40,7 @@ class Permission
 
         if ( type == PermType.UNKNOWN )
         {
-            if ( spaces.Count() == 2 )
+            if ( spaces.Count() != 2 )
             {
                 Print("Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\".");
                 return;
@@ -97,7 +99,7 @@ class Permission
                 Children.Insert( nChild );
             }
 
-            nChild.AddPermissionInternal( tokens, depth + 1 );
+            nChild.AddPermissionInternal( tokens, depth + 1, value );
         } else {
             Value = value;
         }
@@ -212,10 +214,24 @@ class Permission
         {
             string serialize = prepend + Children[i].Name;
 
-            if ( Children[i].Children.Count() == 0 )
+            if ( !Value )
             {
-                output.Insert( serialize );
-            } else 
+                output.Insert( serialize + " 0" );
+            } else if ( Children[i].Children.Count() == 0 )
+            {
+                string append = "";
+                if ( Value )
+                {
+                    append = " 1";
+                } else
+                {
+                    append = " 0";
+                }
+                
+                output.Insert( serialize + append );
+            }
+
+            if ( Children[i].Children.Count() > 0 ) 
             {
                 Children[i].Serialize( output, serialize + "." );
             }

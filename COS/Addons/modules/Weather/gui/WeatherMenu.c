@@ -104,11 +104,12 @@ class WeatherMenu extends PopupMenu
             m_OrigRain = m_CurrRain;
             m_OrigFog = m_CurrFog;
             m_OrigWindForce = m_CurrWindForce;
-
-            PluginSceneManager editor = PluginSceneManager.Cast( GetPlugin(PluginSceneManager) );
-            editor.SetWeather(m_CurrOvercast, m_CurrRain, m_CurrFog, m_CurrWindForce);
-            editor.SetDate(m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute);
-
+            
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
             GetRPCManager().SendRPC( "COS_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
 
             return true;
@@ -177,13 +178,9 @@ class WeatherMenu extends PopupMenu
             UpdateSliderRain();
 
             m_CurrRain = m_SldRain.GetCurrent() * 0.01;
-            GetGame().GetWeather().GetRain().Set( m_CurrRain, 0, 0 );
 
-            float density = m_CurrRain * m_CurrRain; 
-            float threshold = 0.8; 
-            float timeOut = 4000;
-
-            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetStorm", new Param3< float, float, float >( density, threshold, timeOut ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+            GetRPCManager().SendRPC( "COS_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 
             return true;
         }
