@@ -2,30 +2,35 @@ GridSpacerWidgetClass PermissionRow {
  visible 1
  color 0 0 0 0
  position 0 0
- size 300 24
+ size 1 1
  hexactpos 0
  vexactpos 0
- hexactsize 1
- vexactsize 1
+ hexactsize 0
+ vexactsize 0
+ scriptclass "PermissionRow"
  "Size To Content H" 1
  "Size To Content V" 1
  Columns 3
  Rows 1
- scriptclass "PermissionRow"
  {
   EditBoxWidgetClass permission_name {
    ignorepointer 1
    position 0 0
-   size 250 24
+   size 244 18
    hexactpos 1
    vexactpos 1
    hexactsize 1
    vexactsize 1
    text "{PERMISSION_HERE}"
+   font "gui/fonts/MetronLight14"
+   "exact text" 1
+   "exact text size" 14
+   "text halign" left
+   "text valign" center
   }
   CheckBoxWidgetClass permission_setting {
-   size 24 24
-   halign center_ref
+   size 18 18
+   halign right_ref
    valign center_ref
    hexactpos 1
    vexactpos 1
@@ -36,8 +41,9 @@ GridSpacerWidgetClass PermissionRow {
    checked 0
   }
   ButtonWidgetClass button_remove {
-   position 0 0
-   size 24 24
+   size 18 18
+   halign right_ref
+   valign center_ref
    hexactpos 1
    vexactpos 1
    hexactsize 1

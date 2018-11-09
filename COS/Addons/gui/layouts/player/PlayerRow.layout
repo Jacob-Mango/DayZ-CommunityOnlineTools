@@ -1,0 +1,47 @@
+GridSpacerWidgetClass PlayerRow {
+ visible 1
+ color 0 0 0 0
+ position 0 0
+ size 1 1
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ scriptclass "PlayerRow"
+ "Size To Content H" 1
+ "Size To Content V" 1
+ Columns 2
+ Rows 1
+ {
+  TextWidgetClass text_name {
+   ignorepointer 1
+   position 0 0
+   size 0.25 18
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   text "{NAME_HERE}"
+   font "gui/fonts/MetronLight14"
+   "exact text" 1
+   "exact text size" 14
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass text_guid {
+   ignorepointer 1
+   position 0 0
+   size 0.75 18
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   text "{NAME_HERE}"
+   font "gui/fonts/MetronLight14"
+   "exact text" 1
+   "exact text size" 14
+   "text halign" left
+   "text valign" center
+  }
+ }
+}
