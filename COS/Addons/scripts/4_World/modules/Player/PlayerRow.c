@@ -59,18 +59,18 @@ class PlayerRow extends ScriptedWidgetEventHandler
         m_Identity = identity;
         m_Player = player;
 
-        m_Name.SetText( identity.GetName() );
-        m_GUID.SetText( identity.GetId() );
+        m_Name.SetText( m_Identity.GetName() );
+        m_GUID.SetText( m_Identity.GetId() );
     }
 
     string GetName()
     {
-        return ""; //m_Name.GetText():
+        return m_Identity.GetName();
     }
 
     string m_GUID()
     {
-        return ""; //m_GUID.GetText();
+        return m_Identity.GetId();
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)

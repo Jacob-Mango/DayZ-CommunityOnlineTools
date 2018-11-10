@@ -144,8 +144,10 @@ class PlayerMenu extends PopupMenu
 
         m_PlayerList.Clear();
 
+        MapIterator start = players.Begin();
+        MapIterator end = players.End();
         MapIterator it = players.Begin();
-        while ( it <= players.End() )
+        while ( it >= start && it < end )
         {
             PlayerIdentity identity = players.GetIteratorKey( it );
             Man player = players.GetIteratorElement( it );

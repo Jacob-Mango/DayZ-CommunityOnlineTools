@@ -17,6 +17,32 @@ class PlayerModule: EditorModule
         return "COS/gui/layouts/player/PlayerMenu.layout";
     }
 
+    void RefreshPlayers()
+    {
+            m_Players.Clear();
+
+            ref array<Man> players = new ref array<Man>;
+            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
+
+            GetGame().GetPlayers( players );
+
+            GetGame().GetPlayerIndentities( identities );
+
+            for ( int i = 0; i < identities.Count(); i++ )
+            {
+                for ( int j = 0; j < players.Count(); j++ )
+                {
+                    if ( players[j].GetIdentity().GetId() == identities[i].GetId() )
+                    {
+                        m_Players.Insert( identities[i], players[j] );
+                    }
+                }
+            }
+
+            delete players;
+            delete identities;
+    }
+
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Perms.Set" ) )
@@ -90,26 +116,8 @@ class PlayerModule: EditorModule
         
         if ( type == CallType.Server )
         {
-            m_Players.Clear();
-
-            ref array<Man> players = new ref array<Man>;
-            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
-
-            GetGame().GetPlayers( players );
-
-            GetGame().GetPlayerIndentities( identities );
-
-            for ( int i = 0; i < identities.Count(); i++ )
-            {
-                for ( int j = 0; j < players.Count(); j++ )
-                {
-                    if ( players[j].GetIdentity().GetId() == identities[i].GetId() )
-                    {
-                        m_Players.Insert( identities[i], players[j] );
-                    }
-                }
-            }
-
+            RefreshPlayers();
+            
             GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref map< PlayerIdentity, Man > >( m_Players ), true, sender );
         }
 
@@ -128,7 +136,7 @@ class PlayerModule: EditorModule
             
             if ( menu )
             {
-                // menu.UpdateList( m_Players );
+                menu.UpdateList( m_Players );
             }
         }
     }
