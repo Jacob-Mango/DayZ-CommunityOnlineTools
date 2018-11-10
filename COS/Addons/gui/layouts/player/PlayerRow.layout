@@ -10,6 +10,7 @@ ButtonWidgetClass PlayerRow
  scriptclass "PlayerRow"
  {
   GridSpacerWidgetClass player_row {
+   ignorepointer 1
    color 0 0 0 0
    position 0 0
    size 1 18

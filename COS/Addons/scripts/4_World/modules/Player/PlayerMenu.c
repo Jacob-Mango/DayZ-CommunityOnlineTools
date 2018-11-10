@@ -88,7 +88,10 @@ class PlayerMenu extends PopupMenu
 
     void OnPlayerSelected( PlayerRow row )
     {
+        Print("PlayerMenu::OnPlayerSelected");
+
         SELECTED_PLAYER = row.m_Player;
+        SELECTED_IDENTITY = row.m_Identity;
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
 

@@ -104,20 +104,26 @@ class PermissionManager
         }
     }
 
-    ref AuthPlayer GetPlayer( PlayerIdentity player )
+    ref AuthPlayer GetPlayer( PlayerIdentity ident )
     {
-        if ( player == NULL ) return NULL;
+        if ( ident == NULL ) return NULL;
+        
+        Print( "P: " + ident.GetId() );
+
+        ref AuthPlayer auPlayer = NULL;
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            ref AuthPlayer auPlayer = AuthPlayers[i];
-            if ( auPlayer.GUID == player.GetId() )
+            Print( "C: " + AuthPlayers[i].GUID );
+
+            if ( AuthPlayers[i].GUID == ident.GetId() )
             {
-                return auPlayer;
+                auPlayer = AuthPlayers[i];
+                break;
             }
         }
 
-        return NULL;
+        return auPlayer;
     }
 }
 
