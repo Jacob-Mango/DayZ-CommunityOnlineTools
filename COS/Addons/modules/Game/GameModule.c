@@ -13,6 +13,11 @@ class GameModule: EditorModule
         GetRPCManager().AddRPC( "COS_Game", "SetOldAiming", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Game", "SetGodMode", this, SingeplayerExecutionType.Client );
 
+        GetPermissionsManager().RegisterPermission( "Game.SpawnVehicle" );
+        GetPermissionsManager().RegisterPermission( "Game.ChangeAimingMode" );
+        GetPermissionsManager().RegisterPermission( "Game.EnableGodMode" );
+        GetPermissionsManager().RegisterPermission( "Game.KillEntity" );
+
         GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
     }
 

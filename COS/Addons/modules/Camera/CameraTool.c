@@ -74,6 +74,10 @@ class CameraTool: EditorModule
     {
         GetRPCManager().AddRPC( "COS_Camera", "EnterCamera", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COS_Camera", "LeaveCamera", this, SingeplayerExecutionType.Server );
+
+        GetPermissionsManager().RegisterPermission( "Camera.EnterCamera" );
+        GetPermissionsManager().RegisterPermission( "Camera.LeaveCamera" );
+
     }
 
     void ~CameraTool()

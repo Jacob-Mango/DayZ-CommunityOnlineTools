@@ -3,6 +3,8 @@ class TeleportModule: EditorModule
     void TeleportModule()
     {
         GetRPCManager().AddRPC( "COS_Teleport", "SetPosition", this, SingeplayerExecutionType.Server );
+
+        GetPermissionsManager().RegisterPermission( "Teleport.SetPosition" );
     }
 
     override void RegisterKeyMouseBindings() 
