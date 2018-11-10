@@ -50,6 +50,15 @@ class PopupMenu extends ScriptedWidgetEventHandler
     {
     }
 
+	override bool OnUpdate( Widget w )
+    {
+        Update();
+
+        super.OnUpdate( w );
+
+        return true;
+    }
+
     void Update() 
     {
         
