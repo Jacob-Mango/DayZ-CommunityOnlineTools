@@ -2,9 +2,13 @@ class PermissionManager
 {
     protected ref array< ref AuthPlayer > AuthPlayers;
 
+    protected ref Permission RootPermission;
+
     void PermissionManager()
     {
         AuthPlayers = new ref array< ref AuthPlayer >;
+
+        RootPermission = new ref Permission( "ROOT", NULL );
     }
 
     ref array< ref AuthPlayer > GetPlayers()
@@ -12,9 +16,21 @@ class PermissionManager
         return AuthPlayers;
     }
 
-    bool SavePermissions()
+    void RegisterPermission( string permission )
     {
-        return false;
+        RootPermission.AddPermission( permission, PermType.ALLOWED );
+    }
+
+    ref array< string > Serialize()
+    {
+        ref array< string > data = new ref array< string >;
+        RootPermission.Serialize( data );
+        return data;
+    }
+
+    ref Permission GetRootPermission()
+    {
+        return RootPermission;
     }
 
     bool HasPermission( PlayerIdentity player, string permission )
@@ -56,13 +72,11 @@ class PermissionManager
 
         auPlayer.Load();
 
+        auPlayer.AddPermission( "Admin.List.Reload", PermType.ALLOWED );
 
-        auPlayer.AddPermission( "Player.ReloadList", PermType.ALLOWED );
-
-        auPlayer.AddPermission( "Perms.Set", PermType.ALLOWED );
-        auPlayer.AddPermission( "Perms.Load", PermType.ALLOWED );
-
-        auPlayer.AddPermission( "COS.UseEditor", PermType.ALLOWED );
+        auPlayer.AddPermission( "Admin.Permissions.Player.Set", PermType.ALLOWED );
+        auPlayer.AddPermission( "Admin.Permissions.Player.Load", PermType.ALLOWED );
+        auPlayer.AddPermission( "Admin.Permissions.Root.Load", PermType.ALLOWED );
 
         auPlayer.AddPermission( "Teleport.SetPosition", PermType.ALLOWED );
 

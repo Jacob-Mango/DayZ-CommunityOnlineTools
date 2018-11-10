@@ -8,6 +8,13 @@ class WeatherModule: EditorModule
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetOvercast", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COS_Weather", "Weather_SetDate", this, SingeplayerExecutionType.Client );
+
+        GetPermissionsManager().RegisterPermission( "Weather.SetDate" );
+        GetPermissionsManager().RegisterPermission( "Weather.SetWindFunctionParams" );
+        GetPermissionsManager().RegisterPermission( "Weather.SetOvercast" );
+        GetPermissionsManager().RegisterPermission( "Weather.SetFog" );
+        GetPermissionsManager().RegisterPermission( "Weather.SetRain" );
+        GetPermissionsManager().RegisterPermission( "Weather.SetStorm" );
     }
 
     override string GetLayoutRoot()

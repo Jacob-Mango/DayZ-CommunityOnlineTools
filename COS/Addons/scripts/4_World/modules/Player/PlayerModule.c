@@ -6,10 +6,15 @@ class PlayerModule: EditorModule
     {
         Players = new ref array< ref PlayerData >;
 
-        GetRPCManager().AddRPC( "COS_Player", "ReloadList", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
         
-        GetRPCManager().AddRPC( "COS_Player", "SetPermissions", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS_Player", "LoadPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Admin", "LoadPermissions", this, SingeplayerExecutionType.Server );
+
+        GetPermissionsManager().RegisterPermission( "Admin.List.Reload" );
+        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Set" );
+        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Load" );
+        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Root.Load" );
     }
 
     override string GetLayoutRoot()
@@ -20,7 +25,7 @@ class PlayerModule: EditorModule
     // TODO: Change to PlayerIdentity
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Perms.Set" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Permissions.Player.Set" ) )
             return;
    
         if ( type == CallType.Server )
@@ -51,7 +56,7 @@ class PlayerModule: EditorModule
     {
         Print("PlayerModule::LoadPermissions");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Perms.Load" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Permissions.Player.Load" ) )
             return;
 
         bool cont = false;
@@ -75,7 +80,7 @@ class PlayerModule: EditorModule
 
                 if ( GetGame().IsMultiplayer() )
                 {
-                    GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
+                    GetRPCManager().SendRPC( "COS_Admin", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
                 } else
                 {
                     cont = true;
@@ -108,8 +113,10 @@ class PlayerModule: EditorModule
     {
         Print( "PlayerModule::ReloadList" );
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Player.ReloadList" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.List.Reload" ) )
             return;
+            
+        Print( "PlayerModule::ReloadList" );
         
         bool cont = false;
 
@@ -140,7 +147,7 @@ class PlayerModule: EditorModule
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref array< ref PlayerData > >( Players ), true, sender );
+                GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( Players ), true, sender );
             } else
             {
                 cont = true;
@@ -164,8 +171,5 @@ class PlayerModule: EditorModule
                 menu.m_ShouldUpdateList = true;
             }
         }
-
-        Print( "Finished?" );
-        Print( Players );
     }
 }

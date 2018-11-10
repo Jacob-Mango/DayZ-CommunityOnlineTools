@@ -4,6 +4,9 @@ class ObjectModule: EditorModule
     {   
         GetRPCManager().AddRPC( "COS_Object", "SpawnObjectPosition", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COS_Object", "SpawnObjectInventory", this, SingeplayerExecutionType.Server );
+
+        GetPermissionsManager().RegisterPermission( "Object.Spawn.Position" );
+        GetPermissionsManager().RegisterPermission( "Object.Spawn.Inventory" );
     }
 
     override string GetLayoutRoot()

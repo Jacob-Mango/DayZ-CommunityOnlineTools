@@ -51,10 +51,20 @@ class PermissionRow extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
-    void SetPermission( string permission, bool value )
+    string Indent( int depth )
     {
-        edit_name.SetText( permission );
-        perm_state.SetChecked( value );
+        string s "";
+        for ( int i = 0; i < depth; i++ )
+        {
+            s = s + "  ";
+        }
+        return s;
+    }
+
+    void Set( ref Permission permission, int depth )
+    {
+        edit_name.SetText( Indent( depth ) + permission.Name );
+        perm_state.SetChecked( false );
     }
 
     string GetPermission()
