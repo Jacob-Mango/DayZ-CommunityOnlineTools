@@ -70,21 +70,6 @@ class GameModule: EditorModule
             {
                 GetPlayer().OverrideShootFromCamera( false );
             }
-        } else
-        {
-            /*
-            ref array<Man> players = new ref array<Man>;
-
-            GetGame().GetPlayers( players );
-
-            for ( int i = 0; i < players.Count(); i++ )
-            {
-                if ( players[i].IsInherited( DayZPlayerImplement ) )
-                {
-                    DayZPlayerImplement.Cast( players[i] ).OverrideShootFromCamera( false );
-                }
-            }
-            */
         }
     }
 
@@ -148,20 +133,21 @@ class GameModule: EditorModule
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Game.EnableGodMode" ) )
             return;
-
-        Param1< PlayerBase > data;
-        if ( !ctx.Read( data ) ) return;
         
         if( type == CallType.Server )
         {
-            if ( m_GodModePlayers.Find( data.param1 ) > -1 )
+            PlayerBase player = PlayerBase.Cast( target );
+
+            if ( player == NULL ) return;
+
+            if ( m_GodModePlayers.Find( player ) > -1 )
             {
-                m_GodModePlayers.RemoveItem( data.param1 );
-                GetGame().ChatMP( data.param1, "You no longer have god mode.", "colorAction" );
+                m_GodModePlayers.RemoveItem( player );
+                GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
             } else
             {
-                m_GodModePlayers.Insert( data.param1 );
-                GetGame().ChatMP( data.param1, "You now have god mode.", "colorAction" );
+                m_GodModePlayers.Insert( player );
+                GetGame().ChatMP( player, "You now have god mode.", "colorAction" );
             }
         }
     }
@@ -170,21 +156,23 @@ class GameModule: EditorModule
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Game.KillEntity" ) )
             return;
-
-        Param1< EntityAI > data;
-        if ( !ctx.Read( data ) ) return;
         
+        EntityAI entity = EntityAI.Cast( target );
+
+        if ( entity == NULL )
+            return;
+
         if( type == CallType.Server )
         {
             PlayerBase player;
 
-            if ( PlayerBase.CastTo( player, data.param1 ) ) 
+            if ( PlayerBase.CastTo( player, entity ) ) 
             {
                 m_GodModePlayers.RemoveItem( player );
                 GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
             }
 
-            data.param1.SetHealth( "", "", 0 );
+            entity.SetHealth( "", "", 0 );
         }
     }
 }

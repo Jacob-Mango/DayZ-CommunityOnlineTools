@@ -1,6 +1,7 @@
 class EditorMenu extends UIScriptedMenu 
 {
     protected ref Widget m_ButtonsContainer;
+    protected ref Widget m_Windows;
 
     protected ref array< ref EditorModule > m_Modules;
 
@@ -18,6 +19,7 @@ class EditorMenu extends UIScriptedMenu
         layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\EditorMenu.layout" );
 
         m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
+        m_Windows = layoutRoot.FindAnyWidget( "Windows" );
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
@@ -26,7 +28,7 @@ class EditorMenu extends UIScriptedMenu
 
             ref Widget button = button_bkg.FindAnyWidget( "btn" );
 
-            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\BaseWindow.layout", layoutRoot );
+            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\BaseWindow.layout", m_Windows );
 
             ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 

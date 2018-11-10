@@ -56,8 +56,7 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
     bool OnClick( Widget w, int x, int y, int button )
     {
-        Print("BaseWindow::OnClick");
-        Print( "w: " + w );
+        Print( "BaseWindow::OnClick" );
 
         if ( w == m_CloseButton )
         {
@@ -67,15 +66,32 @@ class BaseWindow extends ScriptedWidgetEventHandler
         return false;
     }
 
+	bool OnDrag( Widget w, int x, int y )
+	{
+        Print( "BaseWindow::OnDrag" );
+        Print( "At " + x + ", " + y );
+
+		layoutRoot.SetPos( x, y, true );
+
+		return true;
+	}
+
+	bool OnDragging( Widget w, int x, int y, Widget reciever )
+	{
+        Print( "BaseWindow::OnDragging" );
+        Print( "At " + x + ", " + y );
+
+		layoutRoot.SetPos( x, y, true );
+
+		return true;
+	}
+
 	bool OnDrop( Widget w, int x, int y, Widget reciever )
 	{
-        Print("BaseWindow::OnDrop");
-        Print( "w: " + w );
+        Print( "BaseWindow::OnDrop" );
+        Print( "At " + x + ", " + y );
 
-        if ( reciever == NULL )
-        {
-		    w.SetPos( x, y, true );
-        }
+		layoutRoot.SetPos( x, y, true );
 
 		return true;
 	}
