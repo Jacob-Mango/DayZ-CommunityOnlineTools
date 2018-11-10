@@ -8,8 +8,14 @@ class PlayerMenu extends PopupMenu
     GridSpacerWidget                m_PermsContainer;
     ButtonWidget                    m_SetPermissionsButton;
 
+    bool                            m_ShouldUpdateList;
+    bool                            m_CanUpdateList;
+
     void PlayerMenu()
     {
+        m_CanUpdateList = true;
+        m_ShouldUpdateList = false;
+
         m_Permissions = new ref array< ref PermissionRow >;
         m_PlayerList = new ref array< ref PlayerRow >;
     }
@@ -45,10 +51,24 @@ class PlayerMenu extends PopupMenu
     override void OnShow()
     {
         ReloadPlayers();
+        
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( IncUpdateList, 1000, true );
     }
 
     override void OnHide() 
     {
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( IncUpdateList );
+    }
+
+    void IncUpdateList()
+    {
+        if ( m_ShouldUpdateList && m_CanUpdateList )
+        {
+            m_CanUpdateList = false;
+            m_ShouldUpdateList = false;
+            UpdateList();
+            m_CanUpdateList = true;
+        }
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
@@ -68,17 +88,6 @@ class PlayerMenu extends PopupMenu
 
     void OnPlayerSelected( PlayerRow row )
     {
-        for ( int j = 0; j < m_PlayerList.Count(); j++ )
-        {
-            m_PlayerList[j].GetLayoutRoot().SetColor(0xFF000000);
-
-            if ( m_PlayerList[j].m_Player.GetIdentity().GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
-            {
-                row.GetLayoutRoot().SetColor(0x9900AA00);
-            }
-        }
-        row.GetLayoutRoot().SetColor(0x99AAAAAA);
-
         SELECTED_PLAYER = row.m_Player;
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
@@ -88,7 +97,9 @@ class PlayerMenu extends PopupMenu
 
     void ReloadPlayers()
     {
-        GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
+        // GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
+        
+        m_ShouldUpdateList = true;
     }
 
     void LoadPermissions( ref array< string > perms )
@@ -135,28 +146,42 @@ class PlayerMenu extends PopupMenu
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
     }
 
-    void UpdateList( ref map< PlayerIdentity, Man > players )
+    void UpdateList()
     {
+        Print("PlayerMenu::UpdateList");
+       
         for ( int j = 0; j < m_PlayerList.Count(); j++ )
         {
+            m_PlayerScriptList.RemoveChild( m_PlayerList[j].GetLayoutRoot() );
             m_PlayerList[j].GetLayoutRoot().Unlink();
         }
-
         m_PlayerList.Clear();
+        
+        ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
+        GetGame().GetPlayerIndentities( identities );
+        
+        ref array<Man> players = new ref array<Man>;
+        GetGame().GetPlayers( players );
 
-        MapIterator start = players.Begin();
-        MapIterator end = players.End();
-        MapIterator it = players.Begin();
-        while ( it >= start && it < end )
+        for ( int i = 0; i < identities.Count(); i++ )
         {
-            PlayerIdentity identity = players.GetIteratorKey( it );
-            Man player = players.GetIteratorElement( it );
-
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
             if ( permRow == NULL ) 
             {
+                Print("Skipped player.");
                 continue;
+            }
+
+            PlayerIdentity identity = identities[i]; // players.GetKey( i );
+            Man player = NULL; //players.GetElement( i );
+
+            for ( int k = 0; k < players.Count(); k++ )
+            {
+                if ( players[k].GetIdentity().GetId() == identity.GetId() )
+                {
+                    player = players[k];
+                }
             }
 
             PlayerRow rowScript;
@@ -170,13 +195,6 @@ class PlayerMenu extends PopupMenu
 
                 m_PlayerList.Insert( rowScript );
             }
-
-            it = players.Next( it );
-        }
-
-        if ( m_PlayerList.Count() > 0 )
-        {
-            OnPlayerSelected( m_PlayerList[0] );
         }
     }
 }

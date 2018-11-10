@@ -1,11 +1,7 @@
 class PlayerModule: EditorModule
 {
-    ref map< PlayerIdentity, Man > m_Players;
-
     void PlayerModule()
     {
-        m_Players = new ref map< PlayerIdentity, Man >;
-
         GetRPCManager().AddRPC( "COS_Player", "ReloadList", this, SingeplayerExecutionType.Server );
         
         GetRPCManager().AddRPC( "COS_Player", "SetPermissions", this, SingeplayerExecutionType.Server );
@@ -15,32 +11,6 @@ class PlayerModule: EditorModule
     override string GetLayoutRoot()
     {
         return "COS/gui/layouts/player/PlayerMenu.layout";
-    }
-
-    void RefreshPlayers()
-    {
-            m_Players.Clear();
-
-            ref array<Man> players = new ref array<Man>;
-            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
-
-            GetGame().GetPlayers( players );
-
-            GetGame().GetPlayerIndentities( identities );
-
-            for ( int i = 0; i < identities.Count(); i++ )
-            {
-                for ( int j = 0; j < players.Count(); j++ )
-                {
-                    if ( players[j].GetIdentity().GetId() == identities[i].GetId() )
-                    {
-                        m_Players.Insert( identities[i], players[j] );
-                    }
-                }
-            }
-
-            delete players;
-            delete identities;
     }
 
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -114,29 +84,26 @@ class PlayerModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Player.ReloadList" ) )
             return;
         
+        bool cont = false;
+
         if ( type == CallType.Server )
         {
-            RefreshPlayers();
-            
-            GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref map< PlayerIdentity, Man > >( m_Players ), true, sender );
+            if ( GetGame().IsMultiplayer() )
+            {
+                GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true, sender );
+            } else
+            {
+                cont = true;
+            }
         }
 
-        if ( type == CallType.Client )
+        if ( type == CallType.Client || cont )
         {
-            Param1< ref map< PlayerIdentity, Man > > data;
-            if ( !ctx.Read( data ) ) return;
-
-            m_Players.Clear();
-
-            m_Players.Copy( data.param1 );
-
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
-
-            Print( m_Players );
             
             if ( menu )
             {
-                menu.UpdateList( m_Players );
+                menu.m_ShouldUpdateList = true;
             }
         }
     }

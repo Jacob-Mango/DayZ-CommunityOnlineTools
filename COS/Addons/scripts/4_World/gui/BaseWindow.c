@@ -54,11 +54,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
     {
     }
 
-    void Update() 
-    {
-        
-    }
-
     override bool OnUpdate(Widget w)
     {
         if ( w == m_TitleWrapper )

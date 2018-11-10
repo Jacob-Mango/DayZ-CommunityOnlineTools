@@ -5,6 +5,8 @@ class PlayerRow extends ScriptedWidgetEventHandler
     TextWidget      m_Name;
     TextWidget      m_GUID;
 
+    ButtonWidget    m_Button;
+
     Man             m_Player;
     PlayerIdentity  m_Identity;
 
@@ -22,6 +24,9 @@ class PlayerRow extends ScriptedWidgetEventHandler
     {
         m_Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
         m_GUID = TextWidget.Cast(layoutRoot.FindAnyWidget("text_guid"));
+
+        m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("PlayerRow"));
+        
     }
 
     void Show()
@@ -61,6 +66,12 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
         m_Name.SetText( m_Identity.GetName() );
         m_GUID.SetText( m_Identity.GetId() );
+
+        if ( m_Identity == GetGame().GetPlayer().GetIdentity() )
+        {
+            m_Name.SetColor( COLOR_GREEN );
+            m_GUID.SetColor( COLOR_GREEN );
+        }
     }
 
     string GetName()
@@ -68,7 +79,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
         return m_Identity.GetName();
     }
 
-    string m_GUID()
+    string GetGUID()
     {
         return m_Identity.GetId();
     }
