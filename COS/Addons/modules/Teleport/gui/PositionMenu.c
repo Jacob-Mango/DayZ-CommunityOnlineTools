@@ -122,11 +122,6 @@ class PositionMenu extends PopupMenu
 
     override bool OnClick( Widget w, int x, int y, int button )
     {
-        if ( SELECTED_PLAYER == NULL )
-        {
-            SELECTED_PLAYER = GetGame().GetPlayer();
-        }
-
         if ( w == m_TeleportButton )
         {
             float pos_x = 0;
@@ -156,7 +151,7 @@ class PositionMenu extends PopupMenu
 
             vPlayerPos = SnapToGround( vPlayerPos );
 
-            GetRPCManager().SendRPC( "COS_Teleport", "SetPosition", new Param1< vector >( vPlayerPos ), true, NULL, SELECTED_PLAYER );
+            GetRPCManager().SendRPC( "COS_Teleport", "SetPosition", new Param1< vector >( vPlayerPos ), true, NULL, GetSelectedPlayer() );
 
             return true;
         }

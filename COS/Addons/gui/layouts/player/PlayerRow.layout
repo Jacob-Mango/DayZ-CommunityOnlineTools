@@ -14,7 +14,6 @@ GridSpacerWidgetClass PlayerRow {
  Rows 1
  {
   TextWidgetClass text_name {
-   ignorepointer 1
    position 0 0
    size 0.25 18
    hexactpos 1
@@ -29,7 +28,6 @@ GridSpacerWidgetClass PlayerRow {
    "text valign" center
   }
   TextWidgetClass text_guid {
-   ignorepointer 1
    position 0 0
    size 0.75 18
    hexactpos 1

@@ -1,10 +1,10 @@
 class PlayerModule: EditorModule
 {
-    ref array< Man > m_Players;
+    ref map< PlayerIdentity, Man > m_Players;
 
     void PlayerModule()
     {
-        m_Players = new ref array< Man >;
+        m_Players = new ref map< PlayerIdentity, Man >;
 
         GetRPCManager().AddRPC( "COS_Player", "ReloadList", this, SingeplayerExecutionType.Server );
         
@@ -36,7 +36,6 @@ class PlayerModule: EditorModule
 
             if ( au )
             {
-
                 au.ClearPermissions();
 
                 for ( int i = 0; i < perms.Count(); i++ )
@@ -56,23 +55,24 @@ class PlayerModule: EditorModule
 
         if ( type == CallType.Server )
         {
-            PlayerIdentity player = Man.Cast( target ).GetIdentity();
+            Param1< PlayerIdentity > sdata;
+            if ( !ctx.Read( sdata ) ) return;
 
-            ref AuthPlayer au = GetPermissionsManager().GetPlayer( player );
+            ref AuthPlayer au = GetPermissionsManager().GetPlayer( sdata.param1 );
 
             if ( au )
             {
                 perms = au.Serialize();
-                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, NULL, SELECTED_PLAYER );
+                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
             }
         }
 
         if ( type == CallType.Client )
         {
-            Param1< ref array< string > > data;
-            if ( !ctx.Read( data ) ) return;
+            Param1< ref array< string > > cdata;
+            if ( !ctx.Read( cdata ) ) return;
 
-            perms.Copy( data.param1 );
+            perms.Copy( cdata.param1 );
 
             ref PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
             
@@ -93,20 +93,29 @@ class PlayerModule: EditorModule
             m_Players.Clear();
 
             ref array<Man> players = new ref array<Man>;
+            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
 
             GetGame().GetPlayers( players );
 
-            for ( int i = 0; i < players.Count(); i++ )
+            GetGame().GetPlayerIndentities( identities );
+
+            for ( int i = 0; i < identities.Count(); i++ )
             {
-                m_Players.Insert( players[i] );
+                for ( int j = 0; j < players.Count(); j++ )
+                {
+                    if ( players[j].GetIdentity().GetId() == identities[i].GetId() )
+                    {
+                        m_Players.Insert( identities[i], players[j] );
+                    }
+                }
             }
 
-            GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref array< Man > >( m_Players ), true, sender );
+            GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref map< PlayerIdentity, Man > >( m_Players ), true, sender );
         }
 
         if ( type == CallType.Client )
         {
-            Param1< ref array< Man > > data;
+            Param1< ref map< PlayerIdentity, Man > > data;
             if ( !ctx.Read( data ) ) return;
 
             m_Players.Clear();

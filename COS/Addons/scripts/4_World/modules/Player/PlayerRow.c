@@ -2,12 +2,13 @@ class PlayerRow extends ScriptedWidgetEventHandler
 {
     protected ref Widget layoutRoot;
 
-    TextWidget   m_Name;
-    TextWidget   m_GUID;
+    TextWidget      m_Name;
+    TextWidget      m_GUID;
 
-    Man          m_Player;
+    Man             m_Player;
+    PlayerIdentity  m_Identity;
 
-    ref PlayerMenu playerMenu;
+    ref PlayerMenu  playerMenu;
 
     void OnWidgetScriptInit( Widget w )
     {
@@ -53,12 +54,13 @@ class PlayerRow extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
-    void SetPlayer( Man player )
+    void SetPlayer( PlayerIdentity identity, Man player )
     {
+        m_Identity = identity;
         m_Player = player;
 
-        m_Name.SetText( player.GetIdentity().GetName() );
-        m_GUID.SetText( player.GetIdentity().GetId() );
+        m_Name.SetText( identity.GetName() );
+        m_GUID.SetText( identity.GetId() );
     }
 
     string GetName()

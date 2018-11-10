@@ -2,15 +2,12 @@ PanelWidgetClass base_window
 {
     visible 0
     color 0 0 0 0
-    position 0.1275 0.0425
+    position 0.5 0.5
     size 1 1
-    halign right_ref
-    valign top_ref
     hexactpos 0
     vexactpos 0
     hexactsize 1
     vexactsize 1
-    draggable 1
     scriptclass "BaseWindow"
     {
         PanelWidgetClass background
@@ -39,6 +36,7 @@ PanelWidgetClass base_window
         }
         PanelWidgetClass title_wrapper
         {
+            draggable 1
             visible 1
             color 0 0 0 0.7843
             position 0 0

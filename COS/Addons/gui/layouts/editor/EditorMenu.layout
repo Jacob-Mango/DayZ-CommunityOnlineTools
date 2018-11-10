@@ -10,6 +10,19 @@ FrameWidgetClass EditorMenu
     vexactsize 0
     style EditorPanel
     {
+        PanelWidgetClass Windows
+        {
+            halign left_ref
+            valign top_ref
+            visible 1
+            color 1 1 1 1
+            position 0 0
+            size 1 1
+            hexactpos 0
+            vexactpos 0
+            hexactsize 0
+            vexactsize 0
+        }
         PanelWidgetClass RightPanel
         {
             visible 1
@@ -66,6 +79,6 @@ FrameWidgetClass EditorMenu
                     "Size To Content V" 1
                 }
             }
-        }        
+        }
     }
 }

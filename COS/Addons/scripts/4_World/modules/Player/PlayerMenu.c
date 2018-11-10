@@ -83,10 +83,7 @@ class PlayerMenu extends PopupMenu
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
 
-        if ( SELECTED_PLAYER != NULL )
-        {
-            GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param, true, NULL, SELECTED_PLAYER );
-        }
+        GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1<PlayerIdentity>( row.m_Identity ), true );
     }
 
     void ReloadPlayers()
@@ -133,12 +130,12 @@ class PlayerMenu extends PopupMenu
 
     void SetPermissions()
     {
-        // GetRPCManager().SendRPC( "COS_Player", "SetPermissions", new Param1< ref array< string > >( m_Permissions ), true, NULL, SELECTED_PLAYER );
+        // GetRPCManager().SendRPC( "COS_Player", "SetPermissions", new Param1< ref array< string > >( m_Permissions ), true, NULL, GetSelectedPlayer() );
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
     }
 
-    void UpdateList( ref array< Man > players )
+    void UpdateList( ref map< PlayerIdentity, Man > players )
     {
         for ( int j = 0; j < m_Players.Count(); j++ )
         {
@@ -149,18 +146,18 @@ class PlayerMenu extends PopupMenu
 
         for ( int i = 0; i < players.Count(); i++ )
         {
-            Man player = players.Get( i );
-
-            PlayerIdentity identity = player.GetIdentity();
+            PlayerIdentity identity = players.GetKey( i );
 
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
+
+            if ( permRow == NULL ) continue;
 
             PlayerRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
             {
-                rowScript.SetPlayer( player );
+                rowScript.SetPlayer( identity, players.GetElement( i ) );
 
                 rowScript.playerMenu = this;
 
@@ -168,9 +165,11 @@ class PlayerMenu extends PopupMenu
             }
         }
 
+        /*
         if ( m_Players.Count() > 0 )
         {
             OnPlayerSelected( m_Players[0] );
         }
+        */
     }
 }
