@@ -3,8 +3,12 @@ class BaseWindow extends ScriptedWidgetEventHandler
     protected ref Widget layoutRoot;
 
     protected ref ButtonWidget m_CloseButton;
+    protected ref Widget m_TitleWrapper;
 
     ref PopupMenu popupMenu;
+
+    float offsetX;
+    float offsetY;
 
     void BaseWindow() 
     {
@@ -25,6 +29,7 @@ class BaseWindow extends ScriptedWidgetEventHandler
     void Init() 
     {
         m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
+        m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_wrapper" ) );
 
         WidgetHandler.GetInstance().RegisterOnClick( m_CloseButton, this, "OnClick" );
     }
@@ -54,7 +59,16 @@ class BaseWindow extends ScriptedWidgetEventHandler
         
     }
 
-    bool OnClick( Widget w, int x, int y, int button )
+    override bool OnUpdate(Widget w)
+    {
+        if ( w == m_TitleWrapper )
+        {
+            m_TitleWrapper.SetPos( 0, 0, true );
+        }
+        return true;
+    }
+
+    override bool OnClick( Widget w, int x, int y, int button )
     {
         if ( w == m_CloseButton )
         {
@@ -64,23 +78,41 @@ class BaseWindow extends ScriptedWidgetEventHandler
         return false;
     }
 
-	bool OnDrag( Widget w, int x, int y )
+	override bool OnDrag( Widget w, int x, int y )
 	{
-		layoutRoot.SetPos( x, y, true );
+        if ( w == m_TitleWrapper )
+        {
+		    layoutRoot.GetPos( offsetX, offsetY );
+
+            offsetX = x - offsetX;
+            offsetY = y - offsetY;
+
+            m_TitleWrapper.SetPos( 0, 0, true );
+        }
 
 		return true;
 	}
 
-	bool OnDragging( Widget w, int x, int y, Widget reciever )
+	override bool OnDragging( Widget w, int x, int y, Widget reciever )
 	{
-		layoutRoot.SetPos( x, y, true );
+        if ( w == m_TitleWrapper )
+        {
+		    layoutRoot.SetPos( x - offsetX, y - offsetY, true );
+            m_TitleWrapper.SetPos( 0, 0, true );
+        }
 
 		return true;
 	}
 
-	bool OnDrop( Widget w, int x, int y, Widget reciever )
+	override bool OnDrop( Widget w, int x, int y, Widget reciever )
 	{
-		layoutRoot.SetPos( x, y, true );
+        if ( w == m_TitleWrapper )
+        {
+		    layoutRoot.SetPos( x - offsetX, y - offsetY, true );
+            m_TitleWrapper.SetPos( 0, 0, true );
+        }
+
+        // TODO: Save the position temporarily so it remembers on close. Maybe also permanently when game opens and closes.
 
 		return true;
 	}
