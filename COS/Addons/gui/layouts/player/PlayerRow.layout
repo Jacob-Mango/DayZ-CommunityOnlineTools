@@ -34,7 +34,7 @@ GridSpacerWidgetClass PlayerRow {
    vexactpos 1
    hexactsize 0
    vexactsize 1
-   text "{NAME_HERE}"
+   text "{GUID_HERE}"
    font "gui/fonts/MetronLight14"
    "exact text" 1
    "exact text size" 14

@@ -54,7 +54,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
-    void SetPlayer( PlayerIdentity identity, Man player )
+    void SetPlayer( ref PlayerIdentity identity, ref Man player )
     {
         m_Identity = identity;
         m_Player = player;

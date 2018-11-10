@@ -56,8 +56,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
     bool OnClick( Widget w, int x, int y, int button )
     {
-        Print( "BaseWindow::OnClick" );
-
         if ( w == m_CloseButton )
         {
             popupMenu.Hide();
@@ -68,9 +66,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
 	bool OnDrag( Widget w, int x, int y )
 	{
-        Print( "BaseWindow::OnDrag" );
-        Print( "At " + x + ", " + y );
-
 		layoutRoot.SetPos( x, y, true );
 
 		return true;
@@ -78,9 +73,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
 	bool OnDragging( Widget w, int x, int y, Widget reciever )
 	{
-        Print( "BaseWindow::OnDragging" );
-        Print( "At " + x + ", " + y );
-
 		layoutRoot.SetPos( x, y, true );
 
 		return true;
@@ -88,9 +80,6 @@ class BaseWindow extends ScriptedWidgetEventHandler
 
 	bool OnDrop( Widget w, int x, int y, Widget reciever )
 	{
-        Print( "BaseWindow::OnDrop" );
-        Print( "At " + x + ", " + y );
-
 		layoutRoot.SetPos( x, y, true );
 
 		return true;
