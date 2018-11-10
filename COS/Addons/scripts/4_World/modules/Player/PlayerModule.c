@@ -128,7 +128,7 @@ class PlayerModule: EditorModule
             
             if ( menu )
             {
-                menu.UpdateList( m_Players );
+                // menu.UpdateList( m_Players );
             }
         }
     }

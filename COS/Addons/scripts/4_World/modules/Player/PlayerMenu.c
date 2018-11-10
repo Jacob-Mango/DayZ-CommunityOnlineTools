@@ -1,7 +1,7 @@
 class PlayerMenu extends PopupMenu
 {
     ref array< ref PermissionRow >  m_Permissions;
-    ref array< ref PlayerRow >      m_Players;
+    ref array< ref PlayerRow >      m_PlayerList;
 
     GridSpacerWidget                m_PlayerScriptList;
     ButtonWidget                    m_ReloadScriptButton;
@@ -11,7 +11,7 @@ class PlayerMenu extends PopupMenu
     void PlayerMenu()
     {
         m_Permissions = new ref array< ref PermissionRow >;
-        m_Players = new ref array< ref PlayerRow >;
+        m_PlayerList = new ref array< ref PlayerRow >;
     }
 
     void ~PlayerMenu()
@@ -68,11 +68,11 @@ class PlayerMenu extends PopupMenu
 
     void OnPlayerSelected( PlayerRow row )
     {
-        for ( int j = 0; j < m_Players.Count(); j++ )
+        for ( int j = 0; j < m_PlayerList.Count(); j++ )
         {
-            m_Players[j].GetLayoutRoot().SetColor(0xFF000000);
+            m_PlayerList[j].GetLayoutRoot().SetColor(0xFF000000);
 
-            if ( m_Players[j].m_Player.GetIdentity().GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
+            if ( m_PlayerList[j].m_Player.GetIdentity().GetId() == GetGame().GetPlayer().GetIdentity().GetId() )
             {
                 row.GetLayoutRoot().SetColor(0x9900AA00);
             }
@@ -137,39 +137,44 @@ class PlayerMenu extends PopupMenu
 
     void UpdateList( ref map< PlayerIdentity, Man > players )
     {
-        for ( int j = 0; j < m_Players.Count(); j++ )
+        for ( int j = 0; j < m_PlayerList.Count(); j++ )
         {
-            m_Players[j].GetLayoutRoot().Unlink();
+            m_PlayerList[j].GetLayoutRoot().Unlink();
         }
 
-        m_Players.Clear();
+        m_PlayerList.Clear();
 
-        for ( int i = 0; i < players.Count(); i++ )
+        MapIterator it = players.Begin();
+        while ( it <= players.End() )
         {
-            PlayerIdentity identity = players.GetKey( i );
+            PlayerIdentity identity = players.GetIteratorKey( it );
+            Man player = players.GetIteratorElement( it );
 
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
-            if ( permRow == NULL ) continue;
+            if ( permRow == NULL ) 
+            {
+                continue;
+            }
 
             PlayerRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
             {
-                rowScript.SetPlayer( identity, players.GetElement( i ) );
+                rowScript.SetPlayer( identity, player );
 
                 rowScript.playerMenu = this;
 
-                m_Players.Insert( rowScript );
+                m_PlayerList.Insert( rowScript );
             }
+
+            it = players.Next( it );
         }
 
-        /*
-        if ( m_Players.Count() > 0 )
+        if ( m_PlayerList.Count() > 0 )
         {
-            OnPlayerSelected( m_Players[0] );
+            OnPlayerSelected( m_PlayerList[0] );
         }
-        */
     }
 }
