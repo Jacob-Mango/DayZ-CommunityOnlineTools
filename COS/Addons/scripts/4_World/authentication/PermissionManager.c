@@ -66,8 +66,8 @@ class PermissionManager
 
         auPlayer.AddPermission( "Teleport.SetPosition", PermType.ALLOWED );
 
-        auPlayer.AddPermission( "Object.SpawnObjectPosition", PermType.ALLOWED );
-        auPlayer.AddPermission( "Object.SpawnObjectInventory", PermType.ALLOWED );
+        auPlayer.AddPermission( "Object.Spawn.Position", PermType.ALLOWED );
+        auPlayer.AddPermission( "Object.Spawn.Inventory", PermType.ALLOWED );
 
         auPlayer.AddPermission( "Game.SpawnVehicle", PermType.ALLOWED );
         auPlayer.AddPermission( "Game.ChangeAimingMode", PermType.ALLOWED );
@@ -104,19 +104,13 @@ class PermissionManager
         }
     }
 
-    ref AuthPlayer GetPlayer( PlayerIdentity ident )
+    ref AuthPlayer GetPlayer( string guid )
     {
-        if ( ident == NULL ) return NULL;
-        
-        Print( "P: " + ident.GetId() );
-
         ref AuthPlayer auPlayer = NULL;
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            Print( "C: " + AuthPlayers[i].GUID );
-
-            if ( AuthPlayers[i].GUID == ident.GetId() )
+            if ( AuthPlayers[i].GUID == guid )
             {
                 auPlayer = AuthPlayers[i];
                 break;
@@ -124,6 +118,13 @@ class PermissionManager
         }
 
         return auPlayer;
+    }
+
+    ref AuthPlayer GetPlayer( PlayerIdentity ident )
+    {
+        if ( ident == NULL ) return NULL;
+
+        return GetPlayer( ident.GetId() );
     }
 }
 
