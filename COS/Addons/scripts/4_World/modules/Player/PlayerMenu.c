@@ -90,19 +90,16 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::OnPlayerSelected");
 
-        SELECTED_PLAYER = row.m_Player;
-        SELECTED_IDENTITY = row.m_Identity;
+        SELECTED_PLAYER = row.Player;
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
 
-        GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1<PlayerIdentity>( row.m_Identity ), true );
+        GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1<string>( SELECTED_PLAYER.GetGUID() ), true );
     }
 
     void ReloadPlayers()
     {
-        // GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
-        
-        m_ShouldUpdateList = true;
+        GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true );
     }
 
     void LoadPermissions( ref array< string > perms )
@@ -158,15 +155,12 @@ class PlayerMenu extends PopupMenu
             m_PlayerScriptList.RemoveChild( m_PlayerList[j].GetLayoutRoot() );
             m_PlayerList[j].GetLayoutRoot().Unlink();
         }
-        m_PlayerList.Clear();
-        
-        ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
-        GetGame().GetPlayerIndentities( identities );
-        
-        ref array<Man> players = new ref array<Man>;
-        GetGame().GetPlayers( players );
 
-        for ( int i = 0; i < identities.Count(); i++ )
+        m_PlayerList.Clear();
+
+        ref PlayerModule pm = PlayerModule.Cast( baseModule );
+
+        for ( int i = 0; i < pm.Players.Count(); i++ )
         {
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
@@ -176,23 +170,12 @@ class PlayerMenu extends PopupMenu
                 continue;
             }
 
-            PlayerIdentity identity = identities[i]; // players.GetKey( i );
-            Man player = NULL; //players.GetElement( i );
-
-            for ( int k = 0; k < players.Count(); k++ )
-            {
-                if ( players[k].GetIdentity().GetId() == identity.GetId() )
-                {
-                    player = players[k];
-                }
-            }
-
             PlayerRow rowScript;
             permRow.GetScript( rowScript );
-
+            
             if ( rowScript )
             {
-                rowScript.SetPlayer( identity, player );
+                rowScript.SetPlayer( pm.Players[i] );
 
                 rowScript.playerMenu = this;
 

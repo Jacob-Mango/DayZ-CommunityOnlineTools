@@ -1,7 +1,11 @@
 class PlayerModule: EditorModule
 {
+    ref array< ref PlayerData > Players;
+
     void PlayerModule()
     {
+        Players = new ref array< ref PlayerData >;
+
         GetRPCManager().AddRPC( "COS_Player", "ReloadList", this, SingeplayerExecutionType.Server );
         
         GetRPCManager().AddRPC( "COS_Player", "SetPermissions", this, SingeplayerExecutionType.Server );
@@ -54,14 +58,10 @@ class PlayerModule: EditorModule
    
         ref array< string > perms = new ref array< string >;
 
-        Print("Test -1")
-
         if ( type == CallType.Server )
         {
-            Print("Test 1");
-            ref Param1<PlayerIdentity> sdata;
+            ref Param1< string > sdata;
             if ( !ctx.Read( sdata ) ) return;
-            Print("Test 2");
 
             ref AuthPlayer au = GetPermissionsManager().GetPlayer( sdata.param1 );
 
@@ -69,8 +69,6 @@ class PlayerModule: EditorModule
             Print( au );
             if ( au )
             {
-                Print("Test 4");
-
                 perms = au.Serialize();
 
                 Print( perms );
@@ -108,6 +106,8 @@ class PlayerModule: EditorModule
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        Print( "PlayerModule::ReloadList" );
+
         if ( !GetPermissionsManager().HasPermission( sender, "Player.ReloadList" ) )
             return;
         
@@ -115,9 +115,32 @@ class PlayerModule: EditorModule
 
         if ( type == CallType.Server )
         {
+            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
+            GetGame().GetPlayerIndentities( identities );
+            
+            ref array<Man> ggplayers = new ref array<Man>;
+            GetGame().GetPlayers( ggplayers );
+
+            Players.Clear();
+            
+            for ( int i = 0; i < identities.Count(); i++ )
+            {
+                PlayerBase player = NULL;
+
+                for ( int k = 0; k < ggplayers.Count(); k++ )
+                {
+                    if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
+                    {
+                        player = ggplayers[k];
+                    }
+                }
+
+                Players.Insert( new ref PlayerData( player, identities[i] ) );
+            }
+
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param, true, sender );
+                GetRPCManager().SendRPC( "COS_Player", "ReloadList", new Param1< ref array< ref PlayerData > >( Players ), true, sender );
             } else
             {
                 cont = true;
@@ -126,12 +149,23 @@ class PlayerModule: EditorModule
 
         if ( type == CallType.Client || cont )
         {
+            if ( GetGame().IsMultiplayer() )
+            {
+                Param1< ref array< ref PlayerData > > data;
+                if ( !ctx.Read( data ) ) return;
+
+                Players = data.param1;
+            }
+
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
-            
+
             if ( menu )
             {
                 menu.m_ShouldUpdateList = true;
             }
         }
+
+        Print( "Finished?" );
+        Print( Players );
     }
 }

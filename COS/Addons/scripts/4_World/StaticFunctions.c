@@ -355,16 +355,15 @@ static bool m_GodMode; // move these to player saves? Edit: Jacob says "yes"
 static bool m_OldAiming;
 static bool bc_Visible;
 
-static PlayerBase       SELECTED_PLAYER;
-static PlayerIdentity   SELECTED_IDENTITY;
+static ref PlayerData SELECTED_PLAYER;
 
-PlayerBase GetSelectedPlayer()
+ref PlayerBase GetSelectedPlayer()
 {
-    if ( SELECTED_PLAYER == NULL && SELECTED_IDENTITY == NULL )
+    if ( SELECTED_PLAYER == NULL || SELECTED_PLAYER.player == NULL )
     {
         return GetGame().GetPlayer();
     }
-    return SELECTED_PLAYER;
+    return SELECTED_PLAYER.player;
 }
 
 static void SnapToGroundNew( Object object ) 
