@@ -13,6 +13,7 @@ class PlayerModule: EditorModule
         return "COS/gui/layouts/player/PlayerMenu.layout";
     }
 
+    // TODO: Change to PlayerIdentity
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Perms.Set" ) )
@@ -44,31 +45,57 @@ class PlayerModule: EditorModule
 
     void LoadPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        Print("PlayerModule::LoadPermissions");
+
         if ( !GetPermissionsManager().HasPermission( sender, "Perms.Load" ) )
             return;
+
+        bool cont = false;
    
         ref array< string > perms = new ref array< string >;
 
+        Print("Test -1")
+
         if ( type == CallType.Server )
         {
-            Param1< PlayerIdentity > sdata;
+            Print("Test 1");
+            ref Param1<PlayerIdentity> sdata;
             if ( !ctx.Read( sdata ) ) return;
+            Print("Test 2");
 
             ref AuthPlayer au = GetPermissionsManager().GetPlayer( sdata.param1 );
 
+            Print( sdata.param1 );
+            Print( au );
             if ( au )
             {
+                Print("Test 4");
+
                 perms = au.Serialize();
-                GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
+
+                Print( perms );
+
+                if ( GetGame().IsMultiplayer() )
+                {
+                    GetRPCManager().SendRPC( "COS_Player", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
+                } else
+                {
+                    cont = true;
+                }
             }
         }
 
-        if ( type == CallType.Client )
+        if ( type == CallType.Client || cont )
         {
-            Param1< ref array< string > > cdata;
-            if ( !ctx.Read( cdata ) ) return;
+            if ( GetGame().IsMultiplayer() )
+            {
+                Param1< ref array< string > > cdata;
+                if ( !ctx.Read( cdata ) ) return;
 
-            perms.Copy( cdata.param1 );
+                perms.Copy( cdata.param1 );
+            }
+
+            Print( perms );
 
             ref PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
             
