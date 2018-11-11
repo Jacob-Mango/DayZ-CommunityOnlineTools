@@ -55,7 +55,7 @@ class PlayerMenu extends PopupMenu
         m_ActionModifyPermissions = ButtonWidget.Cast(layoutRoot.FindAnyWidget("actions_modify_permissions"));
 
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
-        m_PermsContainer = layoutRoot.FindAnyWidget("permissions_scroller");
+        m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
         m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
     }
@@ -135,19 +135,10 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::SetPermissionOptions");
 
-        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
-
-        permRow.GetScript( m_PermissionUI );
-
-        if ( m_PermissionUI )
-        {
-            m_PermissionUI.Set( "DEFAULT PERMISSIONS", m_PermsContainer );
-
-            AddPermissionRow( permission, 0, m_PermsContainer, m_PermissionUI );
-        }
+        AddPermissionRow( permission, 0, m_PermsContainer );
     }
 
-    void AddPermissionRow( ref Permission perm, int depth, ref Widget parent, ref PermissionRow parentRow )
+    void AddPermissionRow( ref Permission perm, int depth, ref Widget parent )
     {
         for ( int i = 0; i < perm.Children.Count(); i++ )
         {
@@ -162,16 +153,9 @@ class PlayerMenu extends PopupMenu
 
             if ( rowScript )
             {
-                rowScript.Set( cPerm.Name, parent );
+                rowScript.Set( cPerm, depth );
 
-                rowScript.Parent = parentRow;
-
-                if ( rowScript.Parent )
-                {
-                    rowScript.Parent.Children.Insert( rowScript );
-                }
-
-                AddPermissionRow( cPerm, depth + 1, permRow.FindAnyWidget("permission_children"), rowScript );
+                AddPermissionRow( cPerm, depth + 1, parent );
             }
         }
     }

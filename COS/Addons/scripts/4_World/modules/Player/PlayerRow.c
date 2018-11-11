@@ -3,7 +3,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
     protected ref Widget layoutRoot;
 
     TextWidget      m_Name;
-    TextWidget      m_GUID;
 
     ButtonWidget    m_Button;
 
@@ -22,7 +21,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void Init() 
     {
         m_Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
-        m_GUID = TextWidget.Cast(layoutRoot.FindAnyWidget("text_guid"));
 
         m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("PlayerRow"));
         
@@ -63,12 +61,10 @@ class PlayerRow extends ScriptedWidgetEventHandler
         Player = player;
 
         m_Name.SetText( Player.Name );
-        m_GUID.SetText( Player.GUID );
 
         if ( Player.GUID == GetGame().GetPlayer().GetIdentity().GetId() )
         {
             m_Name.SetColor( COLOR_GREEN );
-            m_GUID.SetColor( COLOR_GREEN );
         }
     }
 

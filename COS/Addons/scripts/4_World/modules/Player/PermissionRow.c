@@ -1,12 +1,13 @@
 class PermissionRow extends ScriptedWidgetEventHandler 
 {
+    private string indent = "";
+
     ref PermissionRow Parent;
     ref array< ref PermissionRow > Children;
 
     ref Permission Perm;
 
     protected ref Widget layoutRoot;
-    protected ref Widget parent;
 
     TextWidget perm_name;
     XComboBoxWidget perm_state;
@@ -55,7 +56,7 @@ class PermissionRow extends ScriptedWidgetEventHandler
     {
         if ( Perm )
         {
-            perm_name.SetText( Perm.Name );
+            perm_name.SetText( indent + Perm.Name );
             perm_state.SetCurrentItem( Perm.Type );
         } else 
         {
@@ -70,17 +71,20 @@ class PermissionRow extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
-    ref Widget GetParent()
+    void Indent( int depth )
     {
-        return parent;
+        for ( int i = 0; i < depth; i++ )
+        {
+            indent = "   " + indent;
+        }
     }
 
-    void Set( string name, ref Widget p )
+    void Set( ref Permission perm, int depth )
     {
-        perm_name.SetText( name );
-        perm_state.SetCurrentItem( 0 );
+        Indent( depth );
 
-        parent = p;
+        perm_name.SetText( indent + perm.Name );
+        perm_state.SetCurrentItem( 0 );
     }
 
     void SetPermission( ref Permission permission )
