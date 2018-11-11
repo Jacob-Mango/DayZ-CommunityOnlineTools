@@ -18,7 +18,7 @@ class PermissionManager
 
     void RegisterPermission( string permission )
     {
-        RootPermission.AddPermission( permission, PermType.ALLOWED );
+        RootPermission.AddPermission( permission, PermissionType.INHERIT );
     }
 
     ref array< string > Serialize()
@@ -70,32 +70,23 @@ class PermissionManager
             AuthPlayers.Insert( auPlayer );
         }
 
+        RootPermission.DebugPrint();
+
+        auPlayer.CopyPermissions( RootPermission );
+
         auPlayer.Load();
 
-        auPlayer.AddPermission( "Admin.List.Reload", PermType.ALLOWED );
+        auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
 
-        auPlayer.AddPermission( "Admin.Permissions.Player.Set", PermType.ALLOWED );
-        auPlayer.AddPermission( "Admin.Permissions.Player.Load", PermType.ALLOWED );
-        auPlayer.AddPermission( "Admin.Permissions.Root.Load", PermType.ALLOWED );
+        auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
 
-        auPlayer.AddPermission( "Teleport.SetPosition", PermType.ALLOWED );
+        auPlayer.AddPermission( "Object", PermissionType.ALLOW );
 
-        auPlayer.AddPermission( "Object.Spawn.Position", PermType.ALLOWED );
-        auPlayer.AddPermission( "Object.Spawn.Inventory", PermType.ALLOWED );
+        auPlayer.AddPermission( "Game", PermissionType.ALLOW );
 
-        auPlayer.AddPermission( "Game.SpawnVehicle", PermType.ALLOWED );
-        auPlayer.AddPermission( "Game.ChangeAimingMode", PermType.ALLOWED );
-        auPlayer.AddPermission( "Game.EnableGodMode", PermType.ALLOWED );
-        auPlayer.AddPermission( "Game.KillEntity", PermType.ALLOWED );
+        auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
 
-        auPlayer.AddPermission( "CameraTools.LeaveCamera", PermType.ALLOWED );
-        auPlayer.AddPermission( "CameraTools.EnterCamera", PermType.ALLOWED );
-
-        auPlayer.AddPermission( "Weather.SetStorm", PermType.ALLOWED );
-        auPlayer.AddPermission( "Weather.SetFog", PermType.ALLOWED );
-        auPlayer.AddPermission( "Weather.SetOvercast", PermType.ALLOWED );
-        auPlayer.AddPermission( "Weather.SetWindFunctionParams", PermType.ALLOWED );
-        auPlayer.AddPermission( "Weather.SetDate", PermType.ALLOWED );
+        auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 
         auPlayer.DebugPrint();
     }

@@ -40,6 +40,17 @@ PanelWidgetClass PermissionRow {
      "text halign" left
      "text valign" center
     }
+    XComboBoxWidgetClass permission_setting {
+     size 0.5 18
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     font "gui/fonts/MetronLight14"
+     items "INHERIT;DISALLOW;ALLOW"
+    }
     CheckBoxWidgetClass permission_setting {
      size 18 18
      halign right_ref

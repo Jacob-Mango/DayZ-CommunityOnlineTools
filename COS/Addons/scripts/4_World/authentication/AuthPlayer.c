@@ -21,6 +21,17 @@ class AuthPlayer
         delete RootPermission;
     }
 
+    void CopyPermissions( ref Permission copy )
+    {
+        ref array< string > data = new ref array< string >;
+        copy.Serialize( data );
+
+        for ( int i = 0; i < data.Count(); i++ )
+        {
+            AddPermission( data[i] );
+        }
+    }
+
     void ClearPermissions()
     {
         delete RootPermission;
@@ -28,7 +39,7 @@ class AuthPlayer
         RootPermission = new ref Permission( GUID, NULL );
     }
 
-    void AddPermission( string permission, PermType type = PermType.UNKNOWN )
+    void AddPermission( string permission, PermissionType type = PermissionType.INHERIT )
     {
         RootPermission.AddPermission( permission, type );
     }
