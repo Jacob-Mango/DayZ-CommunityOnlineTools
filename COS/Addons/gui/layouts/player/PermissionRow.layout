@@ -8,18 +8,16 @@ PanelWidgetClass PermissionRow {
  hexactsize 0
  vexactsize 0
  scriptclass "PermissionRow"
- "Size To Content H" 1
- "Size To Content V" 1
  style EditorPanel
  {
   GridSpacerWidgetClass permission_wrapper {
    color 0 0 0 0
    position 0 0
-   size 1 1
+   size 1 18
    hexactpos 0
    vexactpos 0
    hexactsize 0
-   vexactsize 0
+   vexactsize 1
    "Size To Content H" 1
    "Size To Content V" 1
    Columns 2
@@ -56,13 +54,12 @@ PanelWidgetClass PermissionRow {
    }
   }
   GridSpacerWidgetClass permission_children {
-   position 0 0
+   position 0 18
    size 1 1
    hexactpos 0
-   vexactpos 0
+   vexactpos 1
    hexactsize 0
    vexactsize 0
-   "Size To Content V" 1
    Columns 1
    Rows 1000
   }
