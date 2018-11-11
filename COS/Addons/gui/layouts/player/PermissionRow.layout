@@ -1,4 +1,4 @@
-GridSpacerWidgetClass PermissionRow {
+PanelWidgetClass PermissionRow {
  visible 1
  color 0 0 0 0
  position 0 0
@@ -10,43 +10,61 @@ GridSpacerWidgetClass PermissionRow {
  scriptclass "PermissionRow"
  "Size To Content H" 1
  "Size To Content V" 1
- Columns 3
- Rows 1
+ style EditorPanel
  {
-  EditBoxWidgetClass permission_name {
-   ignorepointer 1
+  GridSpacerWidgetClass permission_wrapper {
+   color 0 0 0 0
    position 0 0
-   size 244 18
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   text "{PERMISSION_HERE}"
-   font "gui/fonts/MetronLight14"
-   "exact text" 1
-   "exact text size" 14
-   "text halign" left
-   "text valign" center
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content H" 1
+   "Size To Content V" 1
+   Columns 2
+   Rows 1
+   {
+    EditBoxWidgetClass permission_name {
+     ignorepointer 1
+     position 0 0
+     size 1 18
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "{PERMISSION_HERE}"
+     font "gui/fonts/MetronLight14"
+     "exact text" 1
+     "exact text size" 14
+     "text halign" left
+     "text valign" center
+    }
+    CheckBoxWidgetClass permission_setting {
+     size 18 18
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     checked 0
+    }
+   }
   }
-  CheckBoxWidgetClass permission_setting {
-   size 18 18
-   halign right_ref
-   valign center_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   scaled 1
-   checked 0
-  }
-  ButtonWidgetClass button_remove {
-   size 18 18
-   halign right_ref
-   valign center_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
+  GridSpacerWidgetClass permission_children {
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Columns 1
+   Rows 1000
   }
  }
 }

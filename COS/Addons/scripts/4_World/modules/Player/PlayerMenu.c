@@ -1,28 +1,29 @@
 class PlayerMenu extends PopupMenu
 {
-    ref array< ref PermissionRow >  m_Permissions;
     ref array< ref PlayerRow >      m_PlayerList;
 
-    GridSpacerWidget                m_PlayerScriptList;
-    ButtonWidget                    m_ReloadScriptButton;
+    ref GridSpacerWidget            m_PlayerScriptList;
+    ref ButtonWidget                m_ReloadScriptButton;
 
-    Widget                          m_ActionsWrapper;
-    ButtonWidget                    m_ActionModifyPermissions;
+    ref Widget                      m_ActionsWrapper;
+    ref ButtonWidget                m_ActionModifyPermissions;
 
-    Widget                          m_PermissionsWrapper;
-    GridSpacerWidget                m_PermsContainer;
-    ButtonWidget                    m_SetPermissionsButton;
-    ButtonWidget                    m_PermissionsBackButton;
+    ref Widget                      m_PermissionsWrapper;
+    ref GridSpacerWidget            m_PermsContainer;
+    ref ButtonWidget                m_SetPermissionsButton;
+    ref ButtonWidget                m_PermissionsBackButton;
 
     bool                            m_ShouldUpdateList;
     bool                            m_CanUpdateList;
+
+    ref Permission                  m_LoadedPermission;
+    ref PermissionRow               m_PermissionUI;
 
     void PlayerMenu()
     {
         m_CanUpdateList = true;
         m_ShouldUpdateList = false;
 
-        m_Permissions = new ref array< ref PermissionRow >;
         m_PlayerList = new ref array< ref PlayerRow >;
     }
 
@@ -68,21 +69,21 @@ class PlayerMenu extends PopupMenu
         m_PermissionsWrapper.Show( false );
         m_ActionsWrapper.Show( true );
         
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( IncUpdateList, 1000, true );
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( UpdateLists, 1000, true );
     }
 
     override void OnHide() 
     {
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( IncUpdateList );
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( UpdateLists );
     }
 
-    void IncUpdateList()
+    void UpdateLists()
     {
         if ( m_ShouldUpdateList && m_CanUpdateList )
         {
             m_CanUpdateList = false;
             m_ShouldUpdateList = false;
-            UpdateList();
+            UpdatePlayerList();
             m_CanUpdateList = true;
         }
     }
@@ -134,17 +135,19 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::SetPermissionOptions");
 
-        for ( int j = 0; j < m_Permissions.Count(); j++ )
+        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", m_PermsContainer );
+
+        permRow.GetScript( m_PermissionUI );
+
+        if ( m_PermissionUI )
         {
-            m_Permissions[j].GetLayoutRoot().Unlink();
+            m_PermissionUI.Set( permission, 0, m_PermsContainer );
+
+            AddPermissionRow( permission, 0, permRow.FindAnyWidget("permission_children"), m_PermissionUI );
         }
-
-        m_Permissions.Clear();
-
-        AddPermissionRow( permission, 0 );
     }
 
-    void AddPermissionRow( ref Permission perm, int depth )
+    void AddPermissionRow( ref Permission perm, int depth, ref Widget parent, ref PermissionRow parentRow )
     {
         for ( int i = 0; i < perm.Children.Count(); i++ )
         {
@@ -152,72 +155,48 @@ class PlayerMenu extends PopupMenu
 
             Print( "Adding permission " + cPerm.Name );
 
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", m_PermsContainer );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", parent );
 
             PermissionRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
             {
-                rowScript.Set( cPerm, depth );
+                rowScript.Set( cPerm, depth, parent );
 
-                m_Permissions.Insert( rowScript );
+                rowScript.Parent = parentRow;
 
-                AddPermissionRow( cPerm, depth + 1 );
+                if ( rowScript.Parent )
+                {
+                    rowScript.Parent.Children.Insert( rowScript );
+                }
+
+                AddPermissionRow( cPerm, depth + 1, permRow.FindAnyWidget("permission_children"), rowScript );
             }
         }
     }
 
-    void LoadPermissions( ref array< string > perms )
+    void LoadPermissions( ref Permission permission )
     {
         Print("PlayerMenu::LoadPermissions");
-        // child_perms
 
-        /*
-
-        for ( int i = 0; i < perms.Count(); i++ )
-        {
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", m_PermsContainer );
-
-            PermissionRow rowScript;
-            permRow.GetScript( rowScript );
-
-            if ( rowScript )
-            {
-                array<string> spaces = new array<string>;
-                perms[i].Split( " ", spaces );
-
-                if ( spaces.Count() != 2 ) continue;
-
-                bool value = false;
-
-                if ( spaces[1] == "1" )
-                {
-                    value = true;
-                }
-
-                Print( spaces[0] + " is " + value );
-
-                rowScript.SetPermission( spaces[0], value );
-
-                m_Permissions.Insert( rowScript );
-            }
-        }
-
-        */
+        m_LoadedPermission = permission;
     }
 
     void SetPermissions()
     {
         Print("PlayerMenu::SetPermissions");
-        // GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param1< ref array< string > >( m_Permissions ), true, NULL, GetSelectedPlayer() );
 
-        layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( true );
+        ref array< string > output = new ref array< string >;
+
+        m_LoadedPermission.Serialize( output );
+
+        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param1< ref array< string > >( output ), true, NULL, GetSelectedPlayer() );
     }
 
-    void UpdateList()
+    void UpdatePlayerList()
     {
-        Print("PlayerMenu::UpdateList");
+        Print("PlayerMenu::UpdatePlayerList");
        
         for ( int j = 0; j < m_PlayerList.Count(); j++ )
         {
