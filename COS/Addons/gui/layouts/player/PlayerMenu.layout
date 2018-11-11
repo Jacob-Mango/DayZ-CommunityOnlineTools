@@ -2,7 +2,7 @@ PanelWidgetClass PlayerMenu {
  visible 0
  color 0 0 0 0
  position 0 0
- size 600 600
+ size 550 600
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -10,10 +10,10 @@ PanelWidgetClass PlayerMenu {
  scriptclass "PlayerMenu"
  style EditorPanel
  {
-  PanelWidgetClass PlayerListContainer {
+  PanelWidgetClass players_list_wrapper {
    color 0 0 0 0
    position 0 0
-   size 0.48 1
+   size 0.35 1
    halign left_ref
    hexactpos 0
    vexactpos 0
@@ -21,7 +21,7 @@ PanelWidgetClass PlayerMenu {
    vexactsize 0
    style EditorPanel
    {
-    ScrollWidgetClass PlayerScroller {
+    ScrollWidgetClass players_list_scroller {
      position 0 5
      size 1 560
      halign center_ref
@@ -47,11 +47,11 @@ PanelWidgetClass PlayerMenu {
      }
     }
     TextWidgetClass text {
-     position 0 5
+     position 5 10
      size 1 20
      halign left_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1
@@ -76,7 +76,7 @@ PanelWidgetClass PlayerMenu {
   PanelWidgetClass actions_wrapper {
    color 0 0 0 0
    position 0 0
-   size 0.48 1
+   size 0.64 1
    halign right_ref
    hexactpos 0
    vexactpos 0
@@ -394,11 +394,11 @@ PanelWidgetClass PlayerMenu {
      }
     }
     TextWidgetClass text {
-     position 0 5
+     position 5 10
      size 1 20
      halign left_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1
@@ -412,32 +412,45 @@ PanelWidgetClass PlayerMenu {
   PanelWidgetClass permissions_wrapper {
    color 0 0 0 0
    position 0 0
-   size 0.48 1
+   size 0.64 1
    halign right_ref
    hexactpos 0
-   vexactpos 0
+   vexactpos 1
    hexactsize 0
    vexactsize 0
    style EditorPanel
    {
     ScrollWidgetClass permissions_scroller {
-     position 0 30
-     size 1 530
+     position 0 40
+     size 1 520
      halign center_ref
-     valign top_ref
+     valign bottom_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1
      style blank
      "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass permissions_container {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 1000
+      }
+     }
     }
     TextWidgetClass text {
-     position 0 5
+     position 5 10
      size 1 20
      halign left_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1

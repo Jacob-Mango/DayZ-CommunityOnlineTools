@@ -53,8 +53,8 @@ FrameWidgetClass EditorMenu {
        size 1 0.8
        halign center_ref
        valign center_ref
-       text "Tools"
-       "exact text" 0
+       text "Community Online Tools"
+       "exact text" 1
        "exact text size" 28
        "text halign" center
       }
