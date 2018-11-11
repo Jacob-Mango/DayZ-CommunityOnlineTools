@@ -60,13 +60,9 @@ class Permission
             Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
             return;
         }
-
-        Print( inp );
-        Print( spaces );
-        Print( tokens );
         
         int depth = tokens.Find( Name );
-        
+
         if ( depth > -1 )
         {
             AddPermissionInternal( tokens, depth + 1, type );
@@ -114,6 +110,45 @@ class Permission
         return nChild;
     }
 
+    ref Permission GetPermission( string inp )
+    {
+        array<string> tokens = new array<string>;
+        inp.Split( ".", tokens );
+        
+        int depth = tokens.Find(Name);
+
+        if ( depth > -1 )
+        {
+            return Get( tokens, depth + 1 );
+        } else 
+        {
+            return Get( tokens, 0 );
+        }
+    }
+
+    private ref Permission Get( array<string> tokens, int depth )
+    {
+        if ( depth < tokens.Count() )
+        {
+            ref Permission nChild = NULL;
+
+            for ( int i = 0; i < Children.Count(); i++ )
+            {
+                if ( Children[i].Name == tokens[depth] )
+                {
+                    nChild = Children[i]; 
+                }
+            }
+
+            if ( nChild )
+            {
+                return nChild.Get( tokens, depth + 1 );
+            }
+        }
+
+        return this;
+    }
+
     bool HasPermission( string inp )
     {
         array<string> tokens = new array<string>;
@@ -140,8 +175,6 @@ class Permission
         {
             return Check( tokens, 0, parentDisallowed );
         }
-
-        return false;
     }
 
     bool Check( array<string> tokens, int depth, bool parentDisallowed )
@@ -156,11 +189,6 @@ class Permission
         if ( Type == PermissionType.INHERIT && parentDisallowed == false )
         {
             ifReturnAs = true;
-        }
-
-        if ( Children.Count() == 0 ) 
-        {
-            return ifReturnAs;
         }
 
         if ( Type == PermissionType.DISALLOW )
@@ -189,8 +217,6 @@ class Permission
             {
                 return nChild.Check( tokens, depth + 1, parentDisallowed );
             }
-
-            return ifReturnAs;
         }
 
         return ifReturnAs;
@@ -206,9 +232,10 @@ class Permission
 
             switch ( Type )
             {
-                case PermissionType.ALLOW:
+                default:
+                case PermissionType.INHERIT:
                 {
-                    append = " 2";
+                    append = " 0";
                     break;
                 }
                 case PermissionType.DISALLOW:
@@ -216,10 +243,9 @@ class Permission
                     append = " 1";
                     break;
                 }
-                default:
-                case PermissionType.INHERIT:
+                case PermissionType.ALLOW:
                 {
-                    append = " 0";
+                    append = " 2";
                     break;
                 }
             }
