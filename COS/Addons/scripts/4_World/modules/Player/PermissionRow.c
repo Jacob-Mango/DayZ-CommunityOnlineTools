@@ -8,10 +8,9 @@ class PermissionRow extends ScriptedWidgetEventHandler
     protected ref Widget layoutRoot;
     protected ref Widget parent;
 
-    EditBoxWidget edit_name;
-    CheckBoxWidget perm_state;
-    ButtonWidget del_perm;
-    
+    TextWidget perm_name;
+    XComboBoxWidget perm_state;
+
     void OnWidgetScriptInit( Widget w )
     {
         layoutRoot = w;
@@ -24,9 +23,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
     {
         Children = new ref array< ref PermissionRow >;
 
-        edit_name = EditBoxWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
-        perm_state = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("permission_setting"));
-        del_perm = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button_remove"));
+        perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
+        perm_state = XComboBoxWidget.Cast(layoutRoot.FindAnyWidget("permission_setting"));
     }
 
     void Show()
@@ -49,9 +47,18 @@ class PermissionRow extends ScriptedWidgetEventHandler
     {
     }
 
-    void Update() 
+	override bool OnUpdate( Widget w )
     {
-        
+        if ( Perm )
+        {
+            perm_name.SetText( Perm.Name );
+            perm_state.SetCurrentItem( Perm.Type );
+        } else 
+        {
+            perm_state.SetCurrentItem( 0 );
+        }
+
+        return true;
     }
 
     ref Widget GetLayoutRoot() 
@@ -64,33 +71,46 @@ class PermissionRow extends ScriptedWidgetEventHandler
         return parent;
     }
 
-    string Indent( int depth )
+    void Set( string name, ref Widget p )
     {
-        string s "";
-        for ( int i = 0; i < depth; i++ )
-        {
-            s = s + "  ";
-        }
-        return s;
-    }
-
-    void Set( ref Permission permission, int depth, ref Widget p )
-    {
-        Perm = permission;
-
-        edit_name.SetText( Indent( depth ) + Perm.Name );
-        perm_state.SetChecked( false );
+        perm_name.SetText( name );
+        perm_state.SetCurrentItem( 0 );
 
         parent = p;
     }
 
-    string GetPermission()
+    void SetPermission( ref Permission permission )
     {
-        return edit_name.GetText():
+        Perm = permission;
     }
 
-    bool GetState()
+    void Enable()
     {
-        return perm_state.IsChecked();
+        for ( int i = 0; i < Children.Count(); i++ )
+        {
+            Children[i].Enable();
+        }
+
+        OnEnable();
+    }
+
+    void Disable()
+    {
+        for ( int i = 0; i < Children.Count(); i++ )
+        {
+            Children[i].Disable();
+        }
+
+        OnDisable();
+    }
+
+    void OnEnable()
+    {
+
+    }
+
+    void OnDisable()
+    {
+
     }
 }

@@ -141,7 +141,7 @@ class PlayerMenu extends PopupMenu
 
         if ( m_PermissionUI )
         {
-            m_PermissionUI.Set( permission, 0, m_PermsContainer );
+            m_PermissionUI.Set( "", m_PermsContainer );
 
             AddPermissionRow( permission, 0, permRow.FindAnyWidget("permission_children"), m_PermissionUI );
         }
@@ -155,14 +155,14 @@ class PlayerMenu extends PopupMenu
 
             Print( "Adding permission " + cPerm.Name );
 
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", parent );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", parent );
 
             PermissionRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
             {
-                rowScript.Set( cPerm, depth, parent );
+                rowScript.Set( cPerm.Name, parent );
 
                 rowScript.Parent = parentRow;
 
@@ -181,6 +181,24 @@ class PlayerMenu extends PopupMenu
         Print("PlayerMenu::LoadPermissions");
 
         m_LoadedPermission = permission;
+
+        LoadPermission( m_LoadedPermission, m_PermissionUI );
+    }
+
+    protected void LoadPermission( ref Permission perm, ref PermissionRow row  )
+    {
+        if ( row.Children.Count() != perm.Children.Count() )
+        {
+            Print( "ERROR: Permissions aren't the same. This indicates a mod mismatch." );
+            return
+        }
+
+        for ( int i = 0; i < row.Children.Count(); i++ )
+        {
+            row.Children[i].SetPermission( perm.Children[i] );
+
+            LoadPermission( perm.Children[i], row.Children[i] );
+        }
     }
 
     void SetPermissions()
