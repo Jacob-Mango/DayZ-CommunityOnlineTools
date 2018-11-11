@@ -27,7 +27,7 @@ class TeleportModule: EditorModule
 
         vector hitPos = GetCursorPos();
 
-        float distance = vector.Distance( GetPlayer().GetPosition(), hitPos );
+        float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );
 
         if ( distance < 5000 )
         {

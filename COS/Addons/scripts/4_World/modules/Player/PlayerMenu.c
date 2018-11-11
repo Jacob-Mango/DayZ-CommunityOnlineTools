@@ -9,7 +9,7 @@ class PlayerMenu extends PopupMenu
     ref ButtonWidget                m_ActionModifyPermissions;
 
     ref Widget                      m_PermissionsWrapper;
-    ref GridSpacerWidget            m_PermsContainer;
+    ref Widget                      m_PermsContainer;
     ref ButtonWidget                m_SetPermissionsButton;
     ref ButtonWidget                m_PermissionsBackButton;
 
@@ -55,7 +55,7 @@ class PlayerMenu extends PopupMenu
         m_ActionModifyPermissions = ButtonWidget.Cast(layoutRoot.FindAnyWidget("actions_modify_permissions"));
 
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
-        m_PermsContainer = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("PermsListCont"));
+        m_PermsContainer = layoutRoot.FindAnyWidget("permissions_scroller");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
         m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
     }
@@ -135,15 +135,15 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::SetPermissionOptions");
 
-        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PermissionRow.layout", m_PermsContainer );
+        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
         permRow.GetScript( m_PermissionUI );
 
         if ( m_PermissionUI )
         {
-            m_PermissionUI.Set( "", m_PermsContainer );
+            m_PermissionUI.Set( "DEFAULT PERMISSIONS", m_PermsContainer );
 
-            AddPermissionRow( permission, 0, permRow.FindAnyWidget("permission_children"), m_PermissionUI );
+            AddPermissionRow( permission, 0, m_PermsContainer, m_PermissionUI );
         }
     }
 

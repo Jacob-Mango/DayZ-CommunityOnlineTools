@@ -1,5 +1,4 @@
-ButtonWidgetClass PlayerRow
-{
+ButtonWidgetClass PlayerRow {
  visible 1
  position 0 0
  size 1 20

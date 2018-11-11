@@ -25,6 +25,10 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
         perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
         perm_state = XComboBoxWidget.Cast(layoutRoot.FindAnyWidget("permission_setting"));
+
+        perm_state.AddItem("INHERIT");
+        perm_state.AddItem("DISALLOW");
+        perm_state.AddItem("ALLOW");
     }
 
     void Show()
