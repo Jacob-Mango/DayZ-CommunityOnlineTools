@@ -2,7 +2,7 @@ PanelWidgetClass PlayerMenu {
  visible 0
  color 0 0 0 0
  position 0 0
- size 620 320
+ size 600 600
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -13,21 +13,22 @@ PanelWidgetClass PlayerMenu {
   PanelWidgetClass PlayerListContainer {
    color 0 0 0 0
    position 0 0
-   size 310 320
+   size 0.48 1
+   halign left_ref
    hexactpos 0
    vexactpos 0
-   hexactsize 1
-   vexactsize 1
+   hexactsize 0
+   vexactsize 0
    style EditorPanel
    {
     ScrollWidgetClass PlayerScroller {
      position 0 5
-     size 300 280
+     size 1 560
      halign center_ref
-     valign top_ref
+     valign bottom_ref
      hexactpos 1
      vexactpos 1
-     hexactsize 1
+     hexactsize 0
      vexactsize 1
      style blank
      "Scrollbar V" 1
@@ -45,11 +46,25 @@ PanelWidgetClass PlayerMenu {
       }
      }
     }
+    TextWidgetClass text {
+     position 0 5
+     size 1 20
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "Player List"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+    }
     ButtonWidgetClass refresh_list {
-     position 0 10
+     position 0 5
      size 80 20
-     halign center_ref
-     valign bottom_ref
+     halign right_ref
+     valign top_ref
      hexactpos 0
      vexactpos 1
      hexactsize 1
@@ -58,25 +73,361 @@ PanelWidgetClass PlayerMenu {
     }
    }
   }
-  PanelWidgetClass PlayerPermsContainer {
+  PanelWidgetClass actions_wrapper {
    color 0 0 0 0
    position 0 0
-   size 310 320
+   size 0.48 1
    halign right_ref
    hexactpos 0
    vexactpos 0
-   hexactsize 1
-   vexactsize 1
+   hexactsize 0
+   vexactsize 0
+   style EditorPanel
+   {
+    ScrollWidgetClass actions_scroller {
+     position 0 5
+     size 1 560
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     style blank
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass actions_int_wrapper {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 1000
+       {
+        GridSpacerWidgetClass actions_details_name {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 2
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "Name:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_name {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{PLAYER_NAME_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+         }
+        }
+        GridSpacerWidgetClass actions_details_guid {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 2
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "GUID:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_guid {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{GUID_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+         }
+        }
+        GridSpacerWidgetClass actions_details_steam {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 2
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "Steam64:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_steam {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{STEAM64ID_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+         }
+        }
+        GridSpacerWidgetClass actions_details_health {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 3
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "Health:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_health {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{HEALTH_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          ButtonWidgetClass actions_button_health {
+           size 1 20
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 1
+           text "Set"
+          }
+         }
+        }
+        GridSpacerWidgetClass actions_details_blood {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 3
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "Blood:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_blood {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{BLOOD_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          ButtonWidgetClass actions_button_blood {
+           size 1 20
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 1
+           text "Set"
+          }
+         }
+        }
+        GridSpacerWidgetClass actions_details_shock {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         Columns 3
+         Rows 1
+         {
+          TextWidgetClass text {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "Shock:"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          TextWidgetClass actions_text_shock {
+           position 0 5
+           size 1 20
+           halign left_ref
+           valign top_ref
+           hexactpos 0
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           text "{SHOCK_HERE}"
+           font "gui/fonts/sdf_MetronLight24"
+           "exact text" 1
+           "exact text size" 14
+          }
+          ButtonWidgetClass actions_button_shock {
+           size 1 20
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 1
+           text "Set"
+          }
+         }
+        }
+        ButtonWidgetClass actions_modify_permissions {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         text "Change Permissions"
+        }
+        ButtonWidgetClass actions_kick_player {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         text "Kick Player"
+        }
+        ButtonWidgetClass actions_ban_player {
+         size 1 20
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         text "Ban Player"
+        }
+       }
+      }
+     }
+    }
+    TextWidgetClass text {
+     position 0 5
+     size 1 20
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "Player Actions"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+    }
+   }
+  }
+  PanelWidgetClass permissions_wrapper {
+   color 0 0 0 0
+   position 0 0
+   size 0.48 1
+   halign right_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
    style EditorPanel
    {
     ScrollWidgetClass PermsScroller {
-     position 0 5
-     size 300 280
+     position 0 30
+     size 1 530
      halign center_ref
      valign top_ref
      hexactpos 1
      vexactpos 1
-     hexactsize 1
+     hexactsize 0
      vexactsize 1
      style blank
      "Scrollbar V" 1
@@ -94,16 +445,41 @@ PanelWidgetClass PlayerMenu {
       }
      }
     }
-    ButtonWidgetClass permissions_set_button {
-     position 0 10
-     size 120 20
-     halign center_ref
-     valign bottom_ref
+    TextWidgetClass text {
+     position 0 5
+     size 1 20
+     halign left_ref
+     valign top_ref
      hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "Player Permissions"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+    }
+    ButtonWidgetClass permissions_back_button {
+     position 5 5
+     size 60 20
+     halign right_ref
+     valign top_ref
+     hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     text "Set Permissions"
+     text "Back"
+    }
+    ButtonWidgetClass permissions_set_button {
+     position 5 10
+     size 150 20
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Apply Permissions"
     }
    }
   }

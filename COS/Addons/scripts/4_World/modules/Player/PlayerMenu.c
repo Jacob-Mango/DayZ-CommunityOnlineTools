@@ -5,8 +5,14 @@ class PlayerMenu extends PopupMenu
 
     GridSpacerWidget                m_PlayerScriptList;
     ButtonWidget                    m_ReloadScriptButton;
+
+    Widget                          m_ActionsWrapper;
+    ButtonWidget                    m_ActionModifyPermissions;
+
+    Widget                          m_PermissionsWrapper;
     GridSpacerWidget                m_PermsContainer;
     ButtonWidget                    m_SetPermissionsButton;
+    ButtonWidget                    m_PermissionsBackButton;
 
     bool                            m_ShouldUpdateList;
     bool                            m_CanUpdateList;
@@ -26,7 +32,7 @@ class PlayerMenu extends PopupMenu
 
     override string GetTitle()
     {
-        return "Players";
+        return "Player Management";
     }
     
     override string GetIconName()
@@ -41,11 +47,16 @@ class PlayerMenu extends PopupMenu
 
     override void Init()
     {
-        m_PlayerScriptList      = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
-        m_ReloadScriptButton    = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
+        m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
-        m_PermsContainer        = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("PermsListCont"));
-        m_SetPermissionsButton  = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
+        m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
+        m_ActionModifyPermissions = ButtonWidget.Cast(layoutRoot.FindAnyWidget("actions_modify_permissions"));
+
+        m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
+        m_PermsContainer = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("PermsListCont"));
+        m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
+        m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
     }
 
     override void OnShow()
@@ -53,6 +64,9 @@ class PlayerMenu extends PopupMenu
         ReloadPlayers();
 
         SetPermissionOptions( GetPermissionsManager().GetRootPermission() );
+
+        m_PermissionsWrapper.Show( false );
+        m_ActionsWrapper.Show( true );
         
         GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( IncUpdateList, 1000, true );
     }
@@ -83,6 +97,18 @@ class PlayerMenu extends PopupMenu
         if ( w == m_SetPermissionsButton )
         {
             SetPermissions();
+        }
+
+        if ( w == m_ActionModifyPermissions )
+        {
+            m_ActionsWrapper.Show( false );
+            m_PermissionsWrapper.Show( true );
+        }
+
+        if ( w == m_PermissionsBackButton )
+        {
+            m_PermissionsWrapper.Show( false );
+            m_ActionsWrapper.Show( true );
         }
 
         return false;
