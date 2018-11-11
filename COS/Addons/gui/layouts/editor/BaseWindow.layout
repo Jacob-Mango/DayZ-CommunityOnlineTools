@@ -13,7 +13,7 @@ PanelWidgetClass base_window
         {
             ignorepointer 1
             visible 1
-            color 0 0 0 0.65
+            color 0 0 0 0.95
             position 0 0
             size 1 1
             hexactpos 1
