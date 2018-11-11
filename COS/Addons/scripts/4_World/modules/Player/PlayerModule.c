@@ -97,14 +97,19 @@ class PlayerModule: EditorModule
 
                 perms.Copy( cdata.param1 );
             }
+            
+            ref Permission permission = new ref Permission( SELECTED_PLAYER.GetGUID() );
 
-            Print( perms );
+            for ( int i = 0; i < perms.Count(); i++ )
+            {
+                permission.AddPermission( perms[i] );
+            }
 
             ref PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
             
             if ( menu )
             {
-                menu.LoadPermissions( perms );
+                menu.LoadPermissions( permission );
             }
         }
     }
