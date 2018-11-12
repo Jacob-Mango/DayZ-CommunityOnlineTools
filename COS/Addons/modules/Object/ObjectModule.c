@@ -66,35 +66,38 @@ class ObjectModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Object.Spawn.Inventory" ) )
             return;
 
-        Param2< string, string > data;
+        ref Param3< string, string, ref array< ref AuthPlayer > > data;
         if ( !ctx.Read( data ) ) return;
         
         if( type == CallType.Server )
         {
-            EntityAI entity = EntityAI.Cast( target ).GetInventory().CreateInInventory( data.param1 );
-
-            entity.SetHealth( entity.GetMaxHealth() );
-
-            if ( entity.IsInherited( ItemBase ) )
+            for ( int i = 0; i < data.param3.Count(); i++ )
             {
-                ItemBase oItem = ( ItemBase ) entity;
-                SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
+                EntityAI entity = data.param3[i].GetPlayerObject().GetInventory().CreateInInventory( data.param1 );
 
-                int quantity = 0;
+                entity.SetHealth( entity.GetMaxHealth() );
 
-                string text = data.param2;
-
-                text.ToUpper();
-
-                if (text == "MAX")
+                if ( entity.IsInherited( ItemBase ) )
                 {
-                    quantity = oItem.GetQuantityMax();
-                } else
-                {
-                    quantity = text.ToInt();
+                    ItemBase oItem = ( ItemBase ) entity;
+                    SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
+
+                    int quantity = 0;
+
+                    string text = data.param2;
+
+                    text.ToUpper();
+
+                    if (text == "MAX")
+                    {
+                        quantity = oItem.GetQuantityMax();
+                    } else
+                    {
+                        quantity = text.ToInt();
+                    }
+
+                    oItem.SetQuantity(quantity);
                 }
-
-                oItem.SetQuantity(quantity);
             }
         }
     }

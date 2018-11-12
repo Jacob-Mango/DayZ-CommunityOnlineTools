@@ -5,20 +5,49 @@ class AuthPlayer
 
     ref Permission RootPermission;
 
-    string GUID;
+    protected Man m_Object;
 
-    void AuthPlayer( string guid )
+    protected string m_Name;
+    protected string m_GUID;
+
+    void AuthPlayer( Man p, PlayerIdentity i )
     {
-        GUID = guid;
+        m_Object = p;
 
-        RootPermission = new ref Permission( GUID, NULL );
+        m_Name = i.GetName();
+        m_GUID = i.GetId();
 
-        MakeDirectory( AUTH_DIRECTORY );
+        RootPermission = new ref Permission( m_GUID, NULL );
+
+        if ( GetGame().IsServer() )
+        {
+            MakeDirectory( AUTH_DIRECTORY );
+        }
     }
 
     void ~AuthPlayer()
     {
         delete RootPermission;
+    }    
+
+    string GetGUID()
+    {
+        return m_GUID;
+    }
+
+    string GetName()
+    {
+        return m_Name;
+    }
+
+    ref Man GetPlayerObject()
+    {
+        return m_Object;
+    }
+
+    void UpdatePlayerObject( ref Man obj )
+    {
+        m_Object = obj;
     }
 
     void CopyPermissions( ref Permission copy )
@@ -36,7 +65,7 @@ class AuthPlayer
     {
         delete RootPermission;
 
-        RootPermission = new ref Permission( GUID, NULL );
+        RootPermission = new ref Permission( m_GUID, NULL );
     }
 
     void AddPermission( string permission, PermissionType type = PermissionType.INHERIT )
@@ -58,7 +87,7 @@ class AuthPlayer
 
     bool Save()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + m_GUID + FILE_TYPE, FileMode.WRITE );
             
         ref array< string > data = Serialize();
 
@@ -84,7 +113,7 @@ class AuthPlayer
 
     bool Load()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.READ );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + m_GUID + FILE_TYPE, FileMode.READ );
             
         ref array< string > data = new ref array< string >;
 
@@ -102,7 +131,7 @@ class AuthPlayer
         {
             Print( "Failed to open the file for the player to read. Attemping to create." );
 
-            file = OpenFile( AUTH_DIRECTORY + GUID + FILE_TYPE, FileMode.WRITE );
+            file = OpenFile( AUTH_DIRECTORY + m_GUID + FILE_TYPE, FileMode.WRITE );
 
             if ( file != 0 )
             {
@@ -125,7 +154,7 @@ class AuthPlayer
 
     void DebugPrint()
     {
-        Print( "Printing permissions for " + GUID );
+        Print( "Printing permissions for " + m_GUID );
 
         RootPermission.DebugPrint( 0 );
     }

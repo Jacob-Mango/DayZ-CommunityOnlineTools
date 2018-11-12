@@ -16,6 +16,19 @@ class PermissionManager
         return AuthPlayers;
     }
 
+    void SetPlayers( ref array< ref AuthPlayer > players )
+    {
+        AuthPlayers.Clear();
+
+        // This doesn't work???
+        //AuthPlayers.Copy( players );
+
+        for ( int i = 0; i < players.Count(); i++ )
+        {
+            AuthPlayers.Insert( players[i] );
+        }
+    }
+
     void RegisterPermission( string permission )
     {
         RootPermission.AddPermission( permission, PermissionType.INHERIT );
@@ -39,7 +52,7 @@ class PermissionManager
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            if ( AuthPlayers[i].GUID == player.GetId() )
+            if ( AuthPlayers[i].GetGUID() == player.GetId() )
             {
                 return AuthPlayers[i].HasPermission( permission );
             }
@@ -56,7 +69,7 @@ class PermissionManager
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            if ( AuthPlayers[i].GUID == player.GetId() )
+            if ( AuthPlayers[i].GetGUID() == player.GetId() )
             {
                 auPlayer = AuthPlayers[i];
                 break;
@@ -65,7 +78,7 @@ class PermissionManager
 
         if ( auPlayer == NULL )
         {
-            auPlayer = new ref AuthPlayer( player.GetId() );
+            auPlayer = new ref AuthPlayer( NULL, player );
 
             AuthPlayers.Insert( auPlayer );
         }
@@ -77,15 +90,10 @@ class PermissionManager
         auPlayer.Load();
 
         auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
-
         auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
-
         auPlayer.AddPermission( "Object", PermissionType.ALLOW );
-
         auPlayer.AddPermission( "Game", PermissionType.ALLOW );
-
         auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
-
         auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 
         auPlayer.DebugPrint();
@@ -98,7 +106,7 @@ class PermissionManager
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             ref AuthPlayer auPlayer = AuthPlayers[i];
-            if ( auPlayer.GUID == player.GetId() )
+            if ( auPlayer.GetGUID() == player.GetId() )
             {
                 auPlayer.Save();
 
@@ -115,7 +123,7 @@ class PermissionManager
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
-            if ( AuthPlayers[i].GUID == guid )
+            if ( AuthPlayers[i].GetGUID() == guid )
             {
                 auPlayer = AuthPlayers[i];
                 break;

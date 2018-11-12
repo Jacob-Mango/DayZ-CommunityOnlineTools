@@ -118,12 +118,14 @@ class PlayerMenu extends PopupMenu
     void OnPlayerSelected( PlayerRow row )
     {
         Print("PlayerMenu::OnPlayerSelected");
-
-        SELECTED_PLAYER = row.Player;
+        
+        int position = AddSelectedPlayer( row.GetPlayer() );
 
         layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
 
-        GetRPCManager().SendRPC( "COS_Admin", "LoadPermissions", new Param1<string>( SELECTED_PLAYER.GetGUID() ), true );
+        if ( GetSelectedPlayers().Count() != 1 ) return;
+
+        GetRPCManager().SendRPC( "COS_Admin", "LoadPermissions", new Param1<string>( row.GetPlayer().GetGUID() ), true );
     }
 
     void ReloadPlayers()
@@ -193,7 +195,9 @@ class PlayerMenu extends PopupMenu
 
         m_LoadedPermission.Serialize( output );
 
-        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param1< ref array< string > >( output ), true, NULL, GetSelectedPlayer() );
+        if ( GetSelectedPlayers().Count() == 0 ) return;
+
+        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param2< ref array< string >, ref array< ref AuthPlayer > >( output, GetSelectedPlayers() ), true );
     }
 
     void UpdatePlayerList()
@@ -208,9 +212,9 @@ class PlayerMenu extends PopupMenu
 
         m_PlayerList.Clear();
 
-        ref PlayerModule pm = PlayerModule.Cast( baseModule );
+        ref array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
-        for ( int i = 0; i < pm.Players.Count(); i++ )
+        for ( int i = 0; i < players.Count(); i++ )
         {
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
@@ -225,7 +229,7 @@ class PlayerMenu extends PopupMenu
             
             if ( rowScript )
             {
-                rowScript.SetPlayer( pm.Players[i] );
+                rowScript.SetPlayer( players[i] );
 
                 rowScript.playerMenu = this;
 
