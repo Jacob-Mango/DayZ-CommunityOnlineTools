@@ -1,13 +1,13 @@
-class CommunityOnlineTools : Module
+class COTModule : Module
 {
-    void CommunityOnlineTools()
+    void COTModule()
     {
         GetRPCManager().AddRPC( "COT", "GetPermission", this, SingeplayerExecutionType.Server );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
     }
 
-    void ~CommunityOnlineTools()
+    void ~COTModule()
     {
     }
 
@@ -47,7 +47,7 @@ class CommunityOnlineTools : Module
 
     void GetPermission( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print( "CommunityOnlineTools::GetPermission" );
+        Print( "COTModule::GetPermission" );
         
         if ( !GetGame().IsMultiplayer() )
             return;

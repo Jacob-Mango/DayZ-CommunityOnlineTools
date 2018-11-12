@@ -23,7 +23,7 @@ class GameModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS/Modules/Game/gui/layouts/GameMenu.layout";
+        return "COS/Modules/Game/layouts/GameMenu.layout";
     }
 
     void UpdateGodMode()

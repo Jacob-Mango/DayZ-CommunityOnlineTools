@@ -1,12 +1,12 @@
 modded class MissionServer
 {
-    protected ref ServerTools m_ServerTools;
+    protected ref CommunityOnlineTools m_Tool;
 
     void MissionServer()
     {
         Print( "MissionServer::MissionServer()" );
         
-        m_ServerTools = new ServerTools();
+        m_Tool = new CommunityOnlineTools();
     }
 
     void ~MissionServer()
@@ -23,12 +23,12 @@ modded class MissionServer
     {
         super.OnMissionStart();
 
-        m_ServerTools.OnStart();
+        m_Tool.OnStart();
     }
 
     override void OnMissionFinish()
     {
-        m_ServerTools.OnFinish();
+        m_Tool.OnFinish();
 
         super.OnMissionFinish();
     }
@@ -37,35 +37,35 @@ modded class MissionServer
     {
         super.OnUpdate( timeslice );
 
-        m_ServerTools.OnUpdate( timeslice );
+        m_Tool.OnUpdate( timeslice );
     }
 
     override void OnMouseButtonRelease( int button )
     {
         super.OnMouseButtonRelease( button );
 
-        m_ServerTools.OnMouseButtonRelease( button );
+        m_Tool.OnMouseButtonRelease( button );
     }
 
     override void OnMouseButtonPress( int button )
     {
         super.OnMouseButtonPress( button );
 
-        m_ServerTools.OnMouseButtonPress( button );
+        m_Tool.OnMouseButtonPress( button );
     }
 
     override void OnKeyPress( int key )
     {
         super.OnKeyPress(key);
 
-        m_ServerTools.OnKeyPress( key );
+        m_Tool.OnKeyPress( key );
     }
 
     override void OnKeyRelease( int key )
     {
         super.OnKeyRelease( key );
 
-        m_ServerTools.OnKeyRelease( key );
+        m_Tool.OnKeyRelease( key );
     }
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)

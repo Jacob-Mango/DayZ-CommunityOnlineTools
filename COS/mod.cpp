@@ -34,7 +34,7 @@ class CfgMods
 			class missionScriptModule
 			{
 				value = "";
-				files[] = {"COS/Scripts/5_Mission","COS/Modules"};
+				files[] = {"COS/Scripts/5_Mission","COS/Modules/Camera","COS/Modules/Game","COS/Modules/Object","COS/Modules/Teleport","COS/Modules/Weather"};
 			};
 		}
 	};

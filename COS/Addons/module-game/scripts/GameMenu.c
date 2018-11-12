@@ -7,8 +7,8 @@ class GameMenu extends Form
     protected ref map< string, string > checkBoxMap = new map< string, string >; // store widget name
     protected ref map< string, string > buttonMap = new map< string, string >; // store widget name
 
-    string checkboxLayout = "COS/Modules/Game/gui/layouts/Checkbox.layout";
-    string buttonLayout = "COS/Modules/Game/gui/layouts/Button.layout";
+    string checkboxLayout = "COS/Modules/Game/layouts/Checkbox.layout";
+    string buttonLayout = "COS/Modules/Game/layouts/Button.layout";
 
     void GameMenu()
     {

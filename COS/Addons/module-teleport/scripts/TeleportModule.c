@@ -20,7 +20,7 @@ class TeleportModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS/Modules/Teleport/gui/layouts/PositionMenu.layout";
+        return "COS/Modules/Teleport/layouts/PositionMenu.layout";
     }
 
     void TeleportCursor()
