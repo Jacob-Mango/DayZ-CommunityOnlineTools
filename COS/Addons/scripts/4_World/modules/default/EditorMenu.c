@@ -109,8 +109,6 @@ class EditorMenu extends UIScriptedMenu
         super.OnHide();
 
         GetGame().GetInput().ResetGameFocus();
-
-        GetPlayer().GetInputController().OverrideMovementSpeed( false, 0 );
     }
 
     override bool OnDoubleClick( Widget w, int x, int y, int button ) 

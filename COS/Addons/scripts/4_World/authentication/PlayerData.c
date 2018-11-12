@@ -4,6 +4,7 @@ class PlayerData
 {
     string SName;
     string SGUID;
+    string SSteam64ID;
 
     ref array< string > APermissions;
 

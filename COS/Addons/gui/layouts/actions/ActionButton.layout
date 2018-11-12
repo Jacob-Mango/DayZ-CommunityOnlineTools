@@ -1,8 +1,0 @@
-ButtonWidgetClass action_button {
- size 1 20
- hexactpos 0
- vexactpos 0
- hexactsize 0
- vexactsize 1
- text "{ACTION}"
-}
