@@ -8,9 +8,10 @@ class PermissionRow extends ScriptedWidgetEventHandler
     ref Permission Perm;
 
     protected ref Widget layoutRoot;
+    protected ref TStringArray stateOptions;
 
-    TextWidget perm_name;
-    XComboBoxWidget perm_state;
+    ref TextWidget perm_name;
+    ref OptionSelectorMultistate perm_state;
 
     void OnWidgetScriptInit( Widget w )
     {
@@ -25,11 +26,14 @@ class PermissionRow extends ScriptedWidgetEventHandler
         Children = new ref array< ref PermissionRow >;
 
         perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
-        perm_state = XComboBoxWidget.Cast(layoutRoot.FindAnyWidget("permission_setting"));
 
-        perm_state.AddItem("INHERIT");
-        perm_state.AddItem("DISALLOW");
-        perm_state.AddItem("ALLOW");
+		stateOptions = new ref TStringArray;
+        stateOptions.Insert("INHERIT");
+        stateOptions.Insert("DISALLOW");
+        stateOptions.Insert("ALLOW");
+
+        perm_state = new ref OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
+		perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
     }
 
     void Show()
@@ -65,12 +69,17 @@ class PermissionRow extends ScriptedWidgetEventHandler
         }
     }
 
+	void OnPermissionStateChanged()
+	{
+		Perm.Type = perm_state.GetValue();
+	}
+
     void Set( ref Permission perm, int depth )
     {
         Indent( depth );
 
         perm_name.SetText( indent + perm.Name );
-        perm_state.SetCurrentItem( 0 );
+        perm_state.SetValue( 0, false );
 
         Perm = NULL;
     }
@@ -80,11 +89,14 @@ class PermissionRow extends ScriptedWidgetEventHandler
         Perm = permission;
 
         if ( Perm )
-        {
-            Print( indent + Perm.Name + " " + Perm.Type );
-            
+        {            
+            Enable();
+
             perm_name.SetText( indent + Perm.Name );
-            perm_state.SetCurrentItem( Perm.Type );
+            perm_state.SetValue( Perm.Type, false );
+        } else 
+        {
+            Disable();
         }
     }
 
@@ -110,11 +122,11 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
     void OnEnable()
     {
-
+        perm_state.Enable();
     }
 
     void OnDisable()
     {
-
+        perm_state.Disable();
     }
 }

@@ -29,6 +29,14 @@ class PermissionManager
         }
     }
 
+    void AddPlayers( ref array< ref AuthPlayer > players )
+    {
+        for ( int i = 0; i < players.Count(); i++ )
+        {
+            AuthPlayers.Insert( players[i] );
+        }
+    }
+
     void RegisterPermission( string permission )
     {
         RootPermission.AddPermission( permission, PermissionType.INHERIT );
@@ -52,6 +60,7 @@ class PermissionManager
 
         if ( player == NULL ) 
         {
+            ClientAuthPlayer.DebugPrint();
             return ClientAuthPlayer.HasPermission( permission );
         } 
 
@@ -59,6 +68,7 @@ class PermissionManager
         {
             if ( AuthPlayers[i].GetGUID() == player.GetId() )
             {
+                AuthPlayers[i].DebugPrint();
                 return AuthPlayers[i].HasPermission( permission );
             }
         }

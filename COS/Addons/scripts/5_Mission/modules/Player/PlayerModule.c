@@ -48,6 +48,8 @@ class PlayerModule: EditorModule
                     }
                 }
             }
+
+            GetPermissionsManager().AddPlayers( players );
         }
     }
 
