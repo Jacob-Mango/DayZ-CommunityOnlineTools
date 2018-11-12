@@ -3,13 +3,15 @@ class PlayerModule: EditorModule
     void PlayerModule()
     {
         GetRPCManager().AddRPC( "COS_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
-        
         GetRPCManager().AddRPC( "COS_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
-        //GetRPCManager().AddRPC( "COS_Admin", "LoadPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
 
-        GetPermissionsManager().RegisterPermission( "Admin.List.Reload" );
-        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Set" );
-        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Load" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.List" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Set" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Load" );
     }
 
     override string GetLayoutRoot()
@@ -19,7 +21,7 @@ class PlayerModule: EditorModule
 
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Permissions.Player.Set" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Permissions.Set" ) )
             return;
    
         if ( type == CallType.Server )
@@ -49,77 +51,53 @@ class PlayerModule: EditorModule
         }
     }
 
-/*
-    void LoadPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void KickPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         Print("PlayerModule::LoadPermissions");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Permissions.Player.Load" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Kick" ) )
             return;
-
-        bool cont = false;
-   
-        ref array< string > perms = new ref array< string >;
 
         if ( type == CallType.Server )
         {
-            ref Param1< string > sdata;
-            if ( !ctx.Read( sdata ) ) return;
+            ref Param1< ref array< ref PlayerData > > data;
+            if ( !ctx.Read( data ) ) return;
 
-            ref AuthPlayer au = GetPermissionsManager().GetPlayer( sdata.param1 );
+            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
 
-            Print( sdata.param1 );
-            Print( au );
-            if ( au )
+            for ( int i = 0; i < auPlayers.Count(); i++ )
             {
-                perms = au.Serialize();
-
-                Print( perms );
-
-                if ( GetGame().IsMultiplayer() )
-                {
-                    GetRPCManager().SendRPC( "COS_Admin", "LoadPermissions", new Param1< ref array< string > >( perms ), true, sender );
-                } else
-                {
-                    cont = true;
-                }
-            }
-        }
-
-        if ( type == CallType.Client || cont )
-        {
-            if ( GetGame().IsMultiplayer() )
-            {
-                Param1< ref array< string > > cdata;
-                if ( !ctx.Read( cdata ) ) return;
-
-                perms.Copy( cdata.param1 );
-            }
-            
-            if ( GetSelectedPlayers().Count() != 1 ) return;
-
-            ref Permission permission = new ref Permission( GetSelectedPlayers()[0].GetGUID() );
-
-            for ( int i = 0; i < perms.Count(); i++ )
-            {
-                permission.AddPermission( perms[i] );
-            }
-
-            ref PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
-            
-            if ( menu )
-            {
-                menu.LoadPermissions( permission );
+                auPlayers[i].Kick();
             }
         }
     }
-*/
+
+    void BanPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Print("PlayerModule::LoadPermissions");
+
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Ban" ) )
+            return;
+
+        if ( type == CallType.Server )
+        {
+            ref Param1< ref array< ref PlayerData > > data;
+            if ( !ctx.Read( data ) ) return;
+
+            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
+
+            for ( int i = 0; i < auPlayers.Count(); i++ )
+            {
+                auPlayers[i].Ban();
+            }
+        }
+    }
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         Print( "PlayerModule::ReloadList" );
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.List.Reload" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.List" ) )
             return;
         
         bool cont = false;
