@@ -227,30 +227,8 @@ class Permission
         for ( int i = 0; i < Children.Count(); i++ )
         {
             string serialize = prepend + Children[i].Name;
-
-            string append = "";
-
-            switch ( Type )
-            {
-                default:
-                case PermissionType.INHERIT:
-                {
-                    append = " 0";
-                    break;
-                }
-                case PermissionType.DISALLOW:
-                {
-                    append = " 1";
-                    break;
-                }
-                case PermissionType.ALLOW:
-                {
-                    append = " 2";
-                    break;
-                }
-            }
                 
-            output.Insert( serialize + append );
+            output.Insert( serialize + " " + Children[i].Type );
 
             if ( Children[i].Children.Count() > 0 ) 
             {
