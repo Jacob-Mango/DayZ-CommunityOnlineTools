@@ -30,7 +30,9 @@ GridSpacerWidgetClass PermissionRow {
    "text halign" left
    "text valign" center
   }
-  XComboBoxWidgetClass permission_setting {
+  PanelWidgetClass permission_setting_wrapper
+  {
+   ignorepointer 1
    position 0 0
    size 0.4 18
    halign right_ref
@@ -39,7 +41,43 @@ GridSpacerWidgetClass PermissionRow {
    vexactpos 0
    hexactsize 0
    vexactsize 1
-   font "gui/fonts/MetronLight24"
+   {
+    FrameWidgetClass permission_setting {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      PanelWidgetClass permission_setting_disable {
+       visible 0
+       ignorepointer 1
+       color 0.1569 0.1569 0.1569 0.902
+       size 1 1
+       position 0 0
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style rover_sim_colorable
+      }
+     }
+    }
+    PanelWidgetClass permission_setting_disable {
+     visible 0
+     ignorepointer 1
+     color 0.1569 0.1569 0.1569 0.902
+     size 1 1
+     position 0 0
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style rover_sim_colorable
+    }
+   }
   }
  }
 }

@@ -266,6 +266,7 @@ class PlayerMenu extends Form
             LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI );
         } else 
         {
+            m_LoadedPermission.DebugPrint();
             LoadPermission( m_LoadedPermission, m_PermissionUI );
         }
     }
