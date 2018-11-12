@@ -6,6 +6,7 @@ class AuthPlayer
     ref Permission RootPermission;
 
     protected Man m_Man;
+    protected PlayerIdentity m_Identity;
 
     protected ref PlayerData m_Data;
 
@@ -26,6 +27,18 @@ class AuthPlayer
     void ~AuthPlayer()
     {
         delete RootPermission;
+    }
+
+    void SetIdentity( PlayerIdentity identity )
+    {
+        m_Identity = identity;
+
+        m_Data.SSteam64ID = m_Identity.GetPlainId();
+    }
+
+    PlayerIdentity GetIdentity()
+    {
+        return m_Identity;
     }
 
     ref PlayerData GetData()
@@ -172,5 +185,23 @@ class AuthPlayer
         Print( "Printing permissions for " + m_Data.SGUID );
 
         RootPermission.DebugPrint( 0 );
+    }
+
+    // TODO: Figure out how to make it work properly?
+    void Kick()
+    {
+        if ( m_Identity )
+        {
+            GetGame().DisconnectPlayer( m_Identity, m_Identity.GetId() );
+        }
+    }
+
+    // TODO: Maybe actually ban the player?
+    void Ban()
+    {
+        if ( m_Identity )
+        {
+            GetGame().DisconnectPlayer( m_Identity, m_Identity.GetId() );
+        }
     }
 }

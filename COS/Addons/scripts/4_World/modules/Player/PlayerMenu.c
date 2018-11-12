@@ -103,10 +103,12 @@ class PlayerMenu extends PopupMenu
 
     void Click_BanPlayer()
     {
+        GetRPCManager().SendRPC( "COS_Admin", "BanPlayer", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void Click_KickPlayer()
     {
+        GetRPCManager().SendRPC( "COS_Admin", "KickPlayer", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetHealth( ref UIActionEditableText action )
