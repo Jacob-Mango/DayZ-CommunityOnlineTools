@@ -11,9 +11,9 @@ class TeleportModule: EditorModule
 
     override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding teleport	    = new KeyMouseBinding( GetModuleType() , "TeleportCursor", "[H]"    , "Teleport to cursor position." );
+		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType() , "TeleportCursor", "[H]"    , "Teleport to cursor position." );
 
-		teleport.AddKeyBind( KeyCode.KC_H,    KeyMouseBinding.KB_EVENT_PRESS   );
+		teleport.AddKeyBind( KeyCode.KC_H, KeyMouseBinding.KB_EVENT_PRESS );
 		
 		RegisterKeyMouseBinding( teleport );
 	}
@@ -60,14 +60,16 @@ class TeleportModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Teleport.Predefined" ) )
             return;
 
-        Param2< vector, ref array< ref AuthPlayer > > data;
+        Param2< vector, ref array< ref PlayerData > > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
-        {    
-            for ( int i = 0; i < data.param2.Count(); i++ )
+        {
+            ref array< ref AuthPlayer > players = DeserializePlayers( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
             {
-                Man player = data.param2[i].GetPlayerObject();
+                Man player = players[i].GetPlayerObject();
 
                 player.SetPosition( data.param1 );
             }

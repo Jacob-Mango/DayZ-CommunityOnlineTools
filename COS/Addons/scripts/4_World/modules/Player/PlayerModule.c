@@ -25,15 +25,17 @@ class PlayerModule: EditorModule
    
         if ( type == CallType.Server )
         {
-            Param2< ref array< string >, ref array< ref AuthPlayer > > data;
+            Param2< ref array< string >, ref array< ref PlayerData > > data;
             if ( !ctx.Read( data ) ) return;
+
+            ref array< ref AuthPlayer > players = DeserializePlayers( data.param2 );
 
             ref array< string > perms;
             perms.Copy( data.param1 );
 
-            for ( int i = 0; i < data.param2.Count(); i++ )
+            for ( int i = 0; i < players.Count(); i++ )
             {
-                ref AuthPlayer player = data.param2[i];
+                ref AuthPlayer player = players[i];
 
                 if ( player )
                 {
@@ -118,8 +120,6 @@ class PlayerModule: EditorModule
 
         if ( !GetPermissionsManager().HasPermission( sender, "Admin.List.Reload" ) )
             return;
-            
-        Print( "PlayerModule::ReloadList" );
         
         bool cont = false;
 
@@ -148,7 +148,11 @@ class PlayerModule: EditorModule
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref AuthPlayer > >( GetPermissionsManager().GetPlayers() ), true, sender );
+                Print( "Here 1" );
+
+                GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );
+
+                Print( "Here 2" );
             } else
             {
                 cont = true;
@@ -159,10 +163,15 @@ class PlayerModule: EditorModule
         {
             if ( GetGame().IsMultiplayer() )
             {
-                Param1< ref array< ref AuthPlayer > > data;
+                ref Param1< ref array< ref PlayerData > > data;
                 if ( !ctx.Read( data ) ) return;
 
-                GetPermissionsManager().SetPlayers( data.param1 );
+                //ref array< ref PlayerData > temp = new ref array< ref PlayerData >;
+                //temp.Copy( data.param1 );
+
+                ref array< ref AuthPlayer > players = DeserializePlayers( data.param1 );
+
+                GetPermissionsManager().SetPlayers( players );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );

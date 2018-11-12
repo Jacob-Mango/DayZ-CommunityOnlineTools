@@ -197,7 +197,7 @@ class PlayerMenu extends PopupMenu
 
         if ( GetSelectedPlayers().Count() == 0 ) return;
 
-        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param2< ref array< string >, ref array< ref AuthPlayer > >( output, GetSelectedPlayers() ), true );
+        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param2< ref array< string >, ref array< ref PlayerData > >( output, SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void UpdatePlayerList()

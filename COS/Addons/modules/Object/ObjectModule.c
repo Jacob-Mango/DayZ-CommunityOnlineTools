@@ -66,14 +66,16 @@ class ObjectModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Object.Spawn.Inventory" ) )
             return;
 
-        ref Param3< string, string, ref array< ref AuthPlayer > > data;
+        ref Param3< string, string, ref array< ref PlayerData > > data;
         if ( !ctx.Read( data ) ) return;
         
         if( type == CallType.Server )
         {
-            for ( int i = 0; i < data.param3.Count(); i++ )
+            ref array< ref AuthPlayer > players = DeserializePlayers( data.param3 );
+
+            for ( int i = 0; i < players.Count(); i++ )
             {
-                EntityAI entity = data.param3[i].GetPlayerObject().GetInventory().CreateInInventory( data.param1 );
+                EntityAI entity = players[i].GetPlayerObject().GetInventory().CreateInInventory( data.param1 );
 
                 entity.SetHealth( entity.GetMaxHealth() );
 
