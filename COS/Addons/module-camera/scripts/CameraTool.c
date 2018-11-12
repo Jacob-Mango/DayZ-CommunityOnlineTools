@@ -86,7 +86,7 @@ class CameraTool: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COS/Modules/Camera/gui/layouts/CameraSettings.layout";
+        return "COS/Modules/Camera/layouts/CameraSettings.layout";
     }
     
     override void Init() 

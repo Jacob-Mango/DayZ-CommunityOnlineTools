@@ -1,10 +1,10 @@
-class ServerTools
+class CommunityOnlineTools
 {
     protected bool m_bLoaded;
 
-    void ServerTools()
+    void CommunityOnlineTools()
     {
-        Print("ServerTools::ServerTools");
+        Print("CommunityOnlineTools::CommunityOnlineTools");
 
         m_bLoaded = false;
 
@@ -16,9 +16,9 @@ class ServerTools
         GetModuleManager().RegisterModule( new PlayerModule );
     }
 
-    void ~ServerTools()
+    void ~CommunityOnlineTools()
     {
-        Print("ServerTools::~ServerTools");
+        Print("CommunityOnlineTools::~CommunityOnlineTools");
     }
     
     void OnStart()

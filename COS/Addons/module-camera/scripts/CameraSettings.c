@@ -83,8 +83,8 @@ class CameraSettings extends Form
         m_TxtChromX = layoutRoot.FindAnyWidget("camera_slider_chrom_value_x");
         m_TxtChromY = layoutRoot.FindAnyWidget("camera_slider_chrom_value_y");
 
-        CAMERA_ROT = GetGame().GetWorkspace().CreateWidgets( "COS/Modules/Camera/gui/layouts/CameraROT.layout" );
-        CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "COS/Modules/Camera/gui/layouts/CameraPHI.layout" );
+        CAMERA_ROT = GetGame().GetWorkspace().CreateWidgets( "COS/Modules/Camera/layouts/CameraROT.layout" );
+        CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "COS/Modules/Camera/layouts/CameraPHI.layout" );
     }
     
     

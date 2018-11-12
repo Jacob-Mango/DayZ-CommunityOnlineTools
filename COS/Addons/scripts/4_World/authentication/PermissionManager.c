@@ -74,8 +74,6 @@ class PermissionManager
 
         auPlayer.SetIdentity( player );
 
-        RootPermission.DebugPrint();
-
         auPlayer.CopyPermissions( RootPermission );
 
         auPlayer.Load();
@@ -87,8 +85,6 @@ class PermissionManager
         auPlayer.AddPermission( "Game", PermissionType.ALLOW );
         auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
         auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
-
-        auPlayer.DebugPrint();
 
         return auPlayer;
     }

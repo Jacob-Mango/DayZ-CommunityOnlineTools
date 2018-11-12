@@ -1,6 +1,6 @@
 class CfgPatches
 {
-    class COS_Modules
+    class COS_Module_Game
     {
         units[]={};
         weapons[]={};
