@@ -139,20 +139,26 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.EnableGodMode" ) )
             return;
         
+        Param1< ref array< ref AuthPlayer > > data;
+        if ( !ctx.Read( data ) ) return;
+
         if( type == CallType.Server )
-        {
-            PlayerBase player = PlayerBase.Cast( target );
-
-            if ( player == NULL ) return;
-
-            if ( m_GodModePlayers.Find( player ) > -1 )
+        {    
+            for ( int i = 0; i < data.param1.Count(); i++ )
             {
-                m_GodModePlayers.RemoveItem( player );
-                GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
-            } else
-            {
-                m_GodModePlayers.Insert( player );
-                GetGame().ChatMP( player, "You now have god mode.", "colorAction" );
+                PlayerBase player = PlayerBase.Cast( data.param1[i].GetPlayerObject() );
+
+                if ( player == NULL ) return;
+
+                if ( m_GodModePlayers.Find( player ) > -1 )
+                {
+                    m_GodModePlayers.RemoveItem( player );
+                    GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
+                } else
+                {
+                    m_GodModePlayers.Insert( player );
+                    GetGame().ChatMP( player, "You now have god mode.", "colorAction" );
+                }
             }
         }
     }
@@ -162,22 +168,21 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.KillEntity" ) )
             return;
         
-        EntityAI entity = EntityAI.Cast( target );
-
-        if ( entity == NULL )
-            return;
+        Param1< ref array< ref AuthPlayer > > data;
+        if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
-        {
-            PlayerBase player;
-
-            if ( PlayerBase.CastTo( player, entity ) ) 
+        {    
+            for ( int i = 0; i < data.param1.Count(); i++ )
             {
-                m_GodModePlayers.RemoveItem( player );
-                GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
-            }
+                PlayerBase player = PlayerBase.Cast( data.param1[i].GetPlayerObject() );
 
-            entity.SetHealth( "", "", 0 );
+                if ( player == NULL ) return;
+
+                m_GodModePlayers.RemoveItem( player );
+      
+                player.SetHealth( "", "", 0 );
+            }
         }
     }
 }

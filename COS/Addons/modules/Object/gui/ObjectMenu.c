@@ -135,15 +135,18 @@ class ObjectMenu extends PopupMenu
 
             if( w == m_btnSpawnCursor )
             {
-                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetCursorPos(), m_QuantityItem.GetText() ), true, NULL, GetGame().GetPlayer() );
+                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetCursorPos(), m_QuantityItem.GetText() ), true, NULL );
             }
             else if ( w == m_btnSpawnGround )
             {
-                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true, NULL, GetSelectedPlayer() );
+                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true );
             }
             else if ( w == m_btnSpawnInventory )
             {
-                GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param2< string, string >( strSelection, m_QuantityItem.GetText() ), true, NULL, GetSelectedPlayer() );
+                if ( GetSelectedPlayers().Count() )
+                {
+                    GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param3< string, string, ref array< ref AuthPlayer > >( strSelection, m_QuantityItem.GetText(), GetSelectedPlayers() ), true );
+                }
             }
         }
 

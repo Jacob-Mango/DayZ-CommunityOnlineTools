@@ -16,6 +16,7 @@ class PositionMenu extends PopupMenu
     {
         m_bOverCurrentPos = false;
 
+        // TODO: Move to Teleport module and only reference position by array index for security. (Maybe read from file?)
         m_oPositions.Insert( "Severograd", "8428.0 0.0 12767.1" );
         m_oPositions.Insert( "Krasnostav", "11172.0 0.0 12314.1" );
         m_oPositions.Insert( "Mogilevka", "7583.0 0.0 5159.4" );
@@ -151,7 +152,7 @@ class PositionMenu extends PopupMenu
 
             vPlayerPos = SnapToGround( vPlayerPos );
 
-            GetRPCManager().SendRPC( "COS_Teleport", "SetPosition", new Param1< vector >( vPlayerPos ), true, NULL, GetSelectedPlayer() );
+            GetRPCManager().SendRPC( "COS_Teleport", "Predefined", new Param2< vector, ref array< ref AuthPlayer > >( vPlayerPos, GetSelectedPlayers() ), true, NULL );
 
             return true;
         }

@@ -1,11 +1,7 @@
 class PlayerModule: EditorModule
 {
-    ref array< ref PlayerData > Players;
-
     void PlayerModule()
     {
-        Players = new ref array< ref PlayerData >;
-
         GetRPCManager().AddRPC( "COS_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
         
         GetRPCManager().AddRPC( "COS_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
@@ -22,7 +18,6 @@ class PlayerModule: EditorModule
         return "COS/gui/layouts/player/PlayerMenu.layout";
     }
 
-    // TODO: Change to PlayerIdentity
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetPermissionsManager().HasPermission( sender, "Admin.Permissions.Player.Set" ) )
@@ -30,23 +25,24 @@ class PlayerModule: EditorModule
    
         if ( type == CallType.Server )
         {
-            PlayerIdentity player = Man.Cast( target ).GetIdentity();
-
-            Param1< ref array< string > > data;
-            if ( !ctx.Read( data ) || !player ) return;
+            Param2< ref array< string >, ref array< ref AuthPlayer > > data;
+            if ( !ctx.Read( data ) ) return;
 
             ref array< string > perms;
             perms.Copy( data.param1 );
 
-            ref AuthPlayer au = GetPermissionsManager().GetPlayer( player );
-
-            if ( au )
+            for ( int i = 0; i < data.param2.Count(); i++ )
             {
-                au.ClearPermissions();
+                ref AuthPlayer player = data.param2[i];
 
-                for ( int i = 0; i < perms.Count(); i++ )
+                if ( player )
                 {
-                    au.AddPermission( perms[i] );
+                    player.ClearPermissions();
+
+                    for ( int j = 0; j < perms.Count(); j++ )
+                    {
+                        player.AddPermission( perms[j] );
+                    }
                 }
             }
         }
@@ -98,7 +94,9 @@ class PlayerModule: EditorModule
                 perms.Copy( cdata.param1 );
             }
             
-            ref Permission permission = new ref Permission( SELECTED_PLAYER.GetGUID() );
+            if ( GetSelectedPlayers().Count() != 1 ) return;
+
+            ref Permission permission = new ref Permission( GetSelectedPlayers()[0].GetGUID() );
 
             for ( int i = 0; i < perms.Count(); i++ )
             {
@@ -132,12 +130,10 @@ class PlayerModule: EditorModule
             
             ref array<Man> ggplayers = new ref array<Man>;
             GetGame().GetPlayers( ggplayers );
-
-            Players.Clear();
             
             for ( int i = 0; i < identities.Count(); i++ )
             {
-                PlayerBase player = NULL;
+                Man player = NULL;
 
                 for ( int k = 0; k < ggplayers.Count(); k++ )
                 {
@@ -147,12 +143,12 @@ class PlayerModule: EditorModule
                     }
                 }
 
-                Players.Insert( new ref PlayerData( player, identities[i] ) );
+                GetPermissionsManager().GetPlayer( identities[i] ).UpdatePlayerObject( player );
             }
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( Players ), true, sender );
+                GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref AuthPlayer > >( GetPermissionsManager().GetPlayers() ), true, sender );
             } else
             {
                 cont = true;
@@ -163,10 +159,10 @@ class PlayerModule: EditorModule
         {
             if ( GetGame().IsMultiplayer() )
             {
-                Param1< ref array< ref PlayerData > > data;
+                Param1< ref array< ref AuthPlayer > > data;
                 if ( !ctx.Read( data ) ) return;
 
-                Players = data.param1;
+                GetPermissionsManager().SetPlayers( data.param1 );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );

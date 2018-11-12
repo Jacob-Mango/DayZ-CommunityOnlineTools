@@ -6,7 +6,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
     ButtonWidget    m_Button;
 
-    ref PlayerData  Player;
+    ref AuthPlayer  Player;
 
     ref PlayerMenu  playerMenu;
 
@@ -56,13 +56,13 @@ class PlayerRow extends ScriptedWidgetEventHandler
         return layoutRoot;
     }
 
-    void SetPlayer( ref PlayerData player )
+    void SetPlayer( ref AuthPlayer player )
     {
         Player = player;
 
-        m_Name.SetText( Player.Name );
+        m_Name.SetText( Player.GetName() );
 
-        if ( Player.GUID == GetGame().GetPlayer().GetIdentity().GetId() )
+        if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
         {
             m_Name.SetColor( COLOR_GREEN );
         }
@@ -70,17 +70,12 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
     string GetName()
     {
-        return Player.Name;
+        return Player.GetName();
     }
 
-    string GetGUID()
+    ref AuthPlayer GetPlayer()
     {
-        return Player.GUID;
-    }
-
-    ref Man GetPlayer()
-    {
-        return Player.player;
+        return Player;
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)

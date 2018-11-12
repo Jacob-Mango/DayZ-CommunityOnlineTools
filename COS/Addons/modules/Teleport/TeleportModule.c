@@ -2,9 +2,11 @@ class TeleportModule: EditorModule
 {
     void TeleportModule()
     {
-        GetRPCManager().AddRPC( "COS_Teleport", "SetPosition", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Teleport", "Cursor", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COS_Teleport", "Predefined", this, SingeplayerExecutionType.Server );
 
-        GetPermissionsManager().RegisterPermission( "Teleport.SetPosition" );
+        GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
+        GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
     }
 
     override void RegisterKeyMouseBindings() 
@@ -31,31 +33,43 @@ class TeleportModule: EditorModule
 
         if ( distance < 5000 )
         {
-            GetRPCManager().SendRPC( "COS_Teleport", "SetPosition", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
+            GetRPCManager().SendRPC( "COS_Teleport", "Cursor", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
         }
         else
         {
             GetPlayer().MessageStatus( "Distance for teleportation is too far!" );
         }
     }
-    
-    void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+
+    void Cursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.SetPosition" ) )
+        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.Cursor" ) )
             return;
 
         Param1< vector > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
-        {    
+        {
             target.SetPosition( data.param1 );
+        }
+    }
+    
+    void Predefined( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.Predefined" ) )
+            return;
 
-            PlayerBase player = target;
+        Param2< vector, ref array< ref AuthPlayer > > data;
+        if ( !ctx.Read( data ) ) return;
 
-            if ( player )
+        if( type == CallType.Server )
+        {    
+            for ( int i = 0; i < data.param2.Count(); i++ )
             {
-                player.MessageImportant( "Teleported!" );
+                Man player = data.param2[i].GetPlayerObject();
+
+                player.SetPosition( data.param1 );
             }
         }
     }
