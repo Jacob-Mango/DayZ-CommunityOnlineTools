@@ -12,6 +12,8 @@ class UIActionEditableText extends UIActionBase
         m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
         m_Text = EditBoxWidget.Cast(layoutRoot.FindAnyWidget("action_editable_text"));
         m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("action_button"));
+
+        WidgetHandler.GetInstance().RegisterOnClick( m_Button, this, "OnClick" );
     }
 
     override void OnShow()

@@ -46,9 +46,14 @@ class PermissionManager
         return RootPermission;
     }
 
-    bool HasPermission( PlayerIdentity player, string permission )
+    bool HasPermission( string permission, PlayerIdentity player = NULL )
     {
-        if ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) return true; // Assume there is always permission on the client. 
+        if ( GetGame().IsServer() && !GetGame().IsMultiplayer() ) return true;
+
+        if ( player == NULL ) 
+        {
+            return ClientAuthPlayer.HasPermission( permission );
+        } 
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
@@ -75,6 +80,7 @@ class PermissionManager
 
         auPlayer.Load();
 
+        auPlayer.AddPermission( "COT", PermissionType.ALLOW );
         auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
         auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
         auPlayer.AddPermission( "Object", PermissionType.ALLOW );

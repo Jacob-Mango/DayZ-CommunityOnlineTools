@@ -24,11 +24,17 @@ class EditorMenu extends UIScriptedMenu
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
             ref EditorModule module = m_Modules.Get( i );
-            Widget button_bkg = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\Button.layout", m_ButtonsContainer );
 
-            ref Widget button = button_bkg.FindAnyWidget( "btn" );
+            ref Widget button_bkg = NULL;
+            ref Widget button = NULL;
 
-            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\BaseWindow.layout", m_Windows );
+            if ( module.HasAccess() )
+            {
+                button_bkg = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\Button.layout", m_ButtonsContainer );
+                button = button_bkg.FindAnyWidget( "btn" );
+            }
+
+            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COS\\gui\\layouts\\editor\\WindowHandle.layout", m_Windows );
 
             ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 
@@ -36,46 +42,48 @@ class EditorMenu extends UIScriptedMenu
             float height = -1;
             menu.GetSize( width, height );
 
-            PopupMenu popMenu;
-            BaseWindow baseWindow;
+            Form form;
+            WindowHandle window;
 
-            menu.GetScript( popMenu );
-            base_window.GetScript( baseWindow );
+            menu.GetScript( form );
+            base_window.GetScript( window );
 
-            if ( popMenu && baseWindow )
+            if ( form && window )
             {
-                popMenu.baseWindow = baseWindow;
-                popMenu.baseModule = module;
-                baseWindow.popupMenu = popMenu;
+                form.window = window;
+                form.module = module;
+                window.form = form;
 
                 base_window.SetSize( width, height + 25 );
 
-                TextWidget title_text = base_window.FindAnyWidget( "title_text" );
-                title_text.SetText( popMenu.GetTitle() );
-    
-                TextWidget ttl = button_bkg.FindAnyWidget( "ttl" );
-                ttl.SetText( popMenu.GetTitle() );
-
-                ImageWidget btn_img = button_bkg.FindAnyWidget( "btn_img" );
-                TextWidget btn_txt = button_bkg.FindAnyWidget( "btn_txt" );
-
-                if ( popMenu.ImageIsIcon() )
+                if ( button_bkg && button )
                 {
-                    btn_txt.Show( false );
-                    btn_img.Show( true );
+                    TextWidget title_text = base_window.FindAnyWidget( "title_text" );
+                    title_text.SetText( form.GetTitle() );
+        
+                    TextWidget ttl = button_bkg.FindAnyWidget( "ttl" );
+                    ttl.SetText( form.GetTitle() );
 
-		            btn_img.LoadImageFile( 0, "set:" + popMenu.GetImageSet() + " image:" + popMenu.GetIconName() );
-                } else
-                {
-                    btn_txt.Show( true );
-                    btn_img.Show( false );
+                    ImageWidget btn_img = button_bkg.FindAnyWidget( "btn_img" );
+                    TextWidget btn_txt = button_bkg.FindAnyWidget( "btn_txt" );
 
-                    btn_txt.SetText( popMenu.GetIconName() );
+                    if ( form.ImageIsIcon() )
+                    {
+                        btn_txt.Show( false );
+                        btn_img.Show( true );
+
+                        btn_img.LoadImageFile( 0, "set:" + form.GetImageSet() + " image:" + form.GetIconName() );
+                    } else
+                    {
+                        btn_txt.Show( true );
+                        btn_img.Show( false );
+
+                        btn_txt.SetText( form.GetIconName() );
+                    }
                 }
     
-                module.m_Button = button;
-                module.m_Menu = menu;
-                module.m_MenuPopup = popMenu;
+                module.menuButton = button;
+                module.form = form;
             }
         }
 
@@ -122,43 +130,36 @@ class EditorMenu extends UIScriptedMenu
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
         
-        PopupMenu popMenu;
+        Form form;
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
             EditorModule module = m_Modules.Get( i );
-            if ( w == module.m_Button )
+
+            if ( w == module.menuButton )
             {
-                module.m_Menu.GetScript( popMenu );
+                form = module.form;
             }
         }
 
-        if ( popMenu ) 
+        if ( form ) 
         {
-            if ( popMenu.GetLayoutRoot().IsVisible() ) 
+            if ( form.GetLayoutRoot().IsVisible() ) 
             {
-                popMenu.Hide();
+                form.Hide();
             }
             else 
             {
-                popMenu.Show();
+                form.Show();
             }
 
             SetButtonFocus( w );
-            HideMenus( popMenu.GetLayoutRoot() );
         }
 
         return false;
     }
 
     void SetButtonFocus( Widget focus ) 
-    {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-
-        // reimplement
-    }
-
-    void HideMenus( Widget focus ) 
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 

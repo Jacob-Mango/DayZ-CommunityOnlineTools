@@ -13,7 +13,7 @@ class ServerTools
 
     void RegisterModules()
     {
-
+        GetModuleManager().RegisterModule( new PlayerModule );
     }
 
     void ~ServerTools()

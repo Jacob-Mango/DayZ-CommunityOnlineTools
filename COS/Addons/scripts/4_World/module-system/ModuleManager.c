@@ -127,8 +127,7 @@ class ModuleManager
 
         m_ParentScriptModule = GetGame().GetMission().MissionScript;
 
-        RegisterModule( new DefaultModule );
-        RegisterModule( new PlayerModule );
+        RegisterModule( new CommunityOnlineTools );
 
         for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
         {

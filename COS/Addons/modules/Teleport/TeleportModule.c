@@ -43,7 +43,7 @@ class TeleportModule: EditorModule
 
     void Cursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.Cursor" ) )
+        if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor", sender ) )
             return;
 
         Param1< vector > data;
@@ -57,7 +57,7 @@ class TeleportModule: EditorModule
     
     void Predefined( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Teleport.Predefined" ) )
+        if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
             return;
 
         Param2< vector, ref array< ref PlayerData > > data;

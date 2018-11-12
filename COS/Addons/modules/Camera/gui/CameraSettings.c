@@ -1,4 +1,4 @@
-class CameraSettings extends PopupMenu 
+class CameraSettings extends Form 
 {
     
     private SliderWidget m_SldCamBlur;

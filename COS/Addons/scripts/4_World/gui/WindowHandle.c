@@ -1,20 +1,20 @@
-class BaseWindow extends ScriptedWidgetEventHandler 
+class WindowHandle extends ScriptedWidgetEventHandler 
 {
     protected ref Widget layoutRoot;
 
     protected ref ButtonWidget m_CloseButton;
     protected ref Widget m_TitleWrapper;
 
-    ref PopupMenu popupMenu;
+    ref Form form;
 
     float offsetX;
     float offsetY;
 
-    void BaseWindow() 
+    void WindowHandle() 
     {
     }
 
-    void ~BaseWindow() 
+    void ~WindowHandle() 
     {
     }
 
@@ -67,7 +67,7 @@ class BaseWindow extends ScriptedWidgetEventHandler
     {
         if ( w == m_CloseButton )
         {
-            popupMenu.Hide();
+            form.Hide();
         }
 
         return false;

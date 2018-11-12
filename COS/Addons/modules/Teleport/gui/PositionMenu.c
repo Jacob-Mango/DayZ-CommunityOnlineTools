@@ -1,4 +1,4 @@
-class PositionMenu extends PopupMenu
+class PositionMenu extends Form
 {
     protected TextListboxWidget m_LstPositionList;
     protected EditBoxWidget m_TxtSelectedX;

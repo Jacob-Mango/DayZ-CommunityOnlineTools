@@ -16,7 +16,7 @@ class ObjectModule: EditorModule
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Object.Spawn.Position" ) )
+        if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Position", sender ) )
             return;
 
         Param3< string, vector, string > data;
@@ -63,7 +63,7 @@ class ObjectModule: EditorModule
 
     void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Object.Spawn.Inventory" ) )
+        if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Inventory", sender ) )
             return;
 
         ref Param3< string, string, ref array< ref PlayerData > > data;

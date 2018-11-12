@@ -1,17 +1,17 @@
-class PopupMenu extends ScriptedWidgetEventHandler 
+class Form extends ScriptedWidgetEventHandler 
 {
     protected ref Widget layoutRoot;
     
-    ref BaseWindow baseWindow;
+    ref WindowHandle window;
 
-    ref EditorModule baseModule;
+    ref EditorModule module;
 
-    void PopupMenu() 
+    void Form() 
     {
 
     }
 
-    void ~PopupMenu() 
+    void ~Form() 
     {
     }
 
@@ -30,7 +30,7 @@ class PopupMenu extends ScriptedWidgetEventHandler
 
     void Show()
     {
-        baseWindow.Show();
+        window.Show();
         layoutRoot.Show( true );
         OnShow();
     }
@@ -39,7 +39,7 @@ class PopupMenu extends ScriptedWidgetEventHandler
     {
         OnHide();
         layoutRoot.Show( false );
-        baseWindow.Hide();
+        window.Hide();
     }
 
     void OnShow()

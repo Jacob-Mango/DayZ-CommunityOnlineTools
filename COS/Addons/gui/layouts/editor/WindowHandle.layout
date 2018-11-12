@@ -6,7 +6,7 @@ PanelWidgetClass base_window {
  vexactpos 1
  hexactsize 1
  vexactsize 1
- scriptclass "BaseWindow"
+ scriptclass "WindowHandle"
  {
   PanelWidgetClass background {
    visible 1
