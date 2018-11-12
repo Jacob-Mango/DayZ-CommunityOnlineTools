@@ -6,6 +6,11 @@ class PlayerData
     string SGUID;
     string SSteam64ID;
 
+    int IPingMax;
+    int IPingMin;
+    int IPingAvg;
+
+    ref array< string > ARoles;
     ref array< string > APermissions;
 
     vector VPosition;
@@ -40,6 +45,7 @@ class PlayerData
 
     void PlayerData()
     {
+        ARoles = new ref array< string >;
         APermissions = new ref array< string >;
     }
 

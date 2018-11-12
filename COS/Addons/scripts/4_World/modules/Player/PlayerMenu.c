@@ -25,6 +25,10 @@ class PlayerMenu extends PopupMenu
     ref UIActionText m_Name;
     ref UIActionText m_Steam64ID;
 
+    ref UIActionText m_PingMin;
+    ref UIActionText m_PingMax;
+    ref UIActionText m_PingAvg;
+
     ref UIActionEditableText m_Health;
     ref UIActionEditableText m_Blood;
 
@@ -73,6 +77,10 @@ class PlayerMenu extends PopupMenu
         m_Name = UIActionManager.CreateText( m_ActionsWrapper, "Name: ", "" );
         m_Steam64ID = UIActionManager.CreateText( m_ActionsWrapper, "Steam64: ", "" );
 
+        m_PingMin = UIActionManager.CreateText( m_ActionsWrapper, "Ping Min: ", "" );
+        m_PingMax = UIActionManager.CreateText( m_ActionsWrapper, "Ping Man: ", "" );
+        m_PingAvg = UIActionManager.CreateText( m_ActionsWrapper, "Ping Avg: ", "" );
+
         m_Health = UIActionManager.CreateEditableText( m_ActionsWrapper, "Health: ", "", "Set", this, "Click_SetHealth" );
         m_Blood = UIActionManager.CreateEditableText( m_ActionsWrapper, "Blood: ", "", "Set", this, "Click_SetBlood" );
 
@@ -116,6 +124,10 @@ class PlayerMenu extends PopupMenu
         m_GUID.SetText( data.SGUID );
         m_Name.SetText( data.SName );
         m_Steam64ID.SetText( data.SSteam64ID );
+
+        m_PingMin.SetText( data.IPingMin.ToString() );
+        m_PingMax.SetText( data.IPingMax.ToString() );
+        m_PingAvg.SetText( data.IPingAvg.ToString() );
     }
 
     override void OnShow()
