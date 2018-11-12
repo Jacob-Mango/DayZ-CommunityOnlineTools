@@ -19,10 +19,14 @@ class PlayerMenu extends PopupMenu
     ref Permission                  m_LoadedPermission;
     ref PermissionRow               m_PermissionUI;
 
+    private bool                    m_PermissionsLoaded;
+
     void PlayerMenu()
     {
         m_CanUpdateList = true;
         m_ShouldUpdateList = false;
+
+        m_PermissionsLoaded = false;
 
         m_PlayerList = new ref array< ref PlayerRow >;
     }
@@ -64,7 +68,12 @@ class PlayerMenu extends PopupMenu
     {
         ReloadPlayers();
 
-        SetPermissionOptions( GetPermissionsManager().GetRootPermission() );
+        if ( m_PermissionsLoaded == false )
+        {
+            SetPermissionOptions( GetPermissionsManager().GetRootPermission() );
+            
+            m_PermissionsLoaded = true;
+        }
 
         m_PermissionsWrapper.Show( false );
         m_ActionsWrapper.Show( true );
@@ -121,11 +130,13 @@ class PlayerMenu extends PopupMenu
         
         int position = AddSelectedPlayer( row.GetPlayer() );
 
-        layoutRoot.FindAnyWidget("PlayerPermsContainer").Enable( false );
-
-        if ( GetSelectedPlayers().Count() != 1 ) return;
-
-        GetRPCManager().SendRPC( "COS_Admin", "LoadPermissions", new Param1<string>( row.GetPlayer().GetGUID() ), true );
+        if ( GetSelectedPlayers().Count() == 1 ) 
+        {
+            LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+        } else 
+        {
+            LoadPermissions( NULL );
+        }
     }
 
     void ReloadPlayers()
@@ -137,10 +148,18 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::SetPermissionOptions");
 
-        AddPermissionRow( permission, 0, m_PermsContainer );
+        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+        permRow.GetScript( m_PermissionUI );
+
+        if ( m_PermissionUI )
+        {
+            m_PermissionUI.Set( permission, 0 );
+
+            AddPermissionRow( permission, 0, m_PermissionUI );
+        }
     }
 
-    void AddPermissionRow( ref Permission perm, int depth, ref Widget parent )
+    void AddPermissionRow( ref Permission perm, int depth, ref PermissionRow parentRow )
     {
         for ( int i = 0; i < perm.Children.Count(); i++ )
         {
@@ -148,7 +167,7 @@ class PlayerMenu extends PopupMenu
 
             Print( "Adding permission " + cPerm.Name );
 
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", parent );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
             PermissionRow rowScript;
             permRow.GetScript( rowScript );
@@ -157,7 +176,10 @@ class PlayerMenu extends PopupMenu
             {
                 rowScript.Set( cPerm, depth );
 
-                AddPermissionRow( cPerm, depth + 1, parent );
+                parentRow.Children.Insert( rowScript );
+                rowScript.Parent = parentRow;
+
+                AddPermissionRow( cPerm, depth + 1, rowScript );
             }
         }
     }
@@ -168,21 +190,21 @@ class PlayerMenu extends PopupMenu
 
         m_LoadedPermission = permission;
 
-        LoadPermission( m_LoadedPermission, m_PermissionUI );
+        if ( m_LoadedPermission == NULL )
+        {
+            LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI );
+        } else 
+        {
+            LoadPermission( m_LoadedPermission, m_PermissionUI );
+        }
     }
 
     protected void LoadPermission( ref Permission perm, ref PermissionRow row  )
     {
-        if ( row.Children.Count() != perm.Children.Count() )
-        {
-            Print( "ERROR: Permissions aren't the same. This indicates a mod mismatch." );
-            return
-        }
+        row.SetPermission( perm );
 
         for ( int i = 0; i < row.Children.Count(); i++ )
         {
-            row.Children[i].SetPermission( perm.Children[i] );
-
             LoadPermission( perm.Children[i], row.Children[i] );
         }
     }
@@ -191,13 +213,9 @@ class PlayerMenu extends PopupMenu
     {
         Print("PlayerMenu::SetPermissions");
 
-        ref array< string > output = new ref array< string >;
-
-        m_LoadedPermission.Serialize( output );
-
         if ( GetSelectedPlayers().Count() == 0 ) return;
 
-        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param2< ref array< string >, ref array< ref PlayerData > >( output, SerializePlayers( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COS_Admin", "SetPermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void UpdatePlayerList()

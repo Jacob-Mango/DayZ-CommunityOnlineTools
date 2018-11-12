@@ -5,13 +5,13 @@ class AuthPlayer
 
     ref Permission RootPermission;
 
-    protected Man m_Object;
+    protected Man m_Man;
 
     protected ref PlayerData m_Data;
 
     void AuthPlayer( PlayerData data )
     {
-        m_Object = NULL;
+        m_Man = NULL;
 
         m_Data = data;
 
@@ -45,12 +45,14 @@ class AuthPlayer
 
     ref Man GetPlayerObject()
     {
-        return m_Object;
+        return m_Man;
     }
 
     void UpdatePlayerObject( ref Man obj )
     {
-        m_Object = obj;
+        m_Man = obj;
+
+        PlayerData.Load( m_Data, m_Man );
     }
 
     void CopyPermissions( ref Permission copy )
@@ -83,12 +85,11 @@ class AuthPlayer
 
     ref array< string > Serialize()
     {
-        ref array< string > data = new ref array< string >;
-        RootPermission.Serialize( data );
+        m_Data.APermissions.Clear();
 
-        m_Data.APermissions = data;
+        RootPermission.Serialize( m_Data.APermissions );
 
-        return data;
+        return m_Data.APermissions;
     }
 
     void Deserialize()

@@ -85,6 +85,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
         perm_name.SetText( indent + perm.Name );
         perm_state.SetCurrentItem( 0 );
+
+        Perm = NULL;
     }
 
     void SetPermission( ref Permission permission )

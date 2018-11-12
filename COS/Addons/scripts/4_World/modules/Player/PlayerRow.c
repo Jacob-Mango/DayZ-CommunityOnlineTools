@@ -5,6 +5,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
     TextWidget      m_Name;
 
     ButtonWidget    m_Button;
+    CheckBoxWidget  m_Checkbox;
 
     ref AuthPlayer  Player;
 
@@ -22,8 +23,8 @@ class PlayerRow extends ScriptedWidgetEventHandler
     {
         m_Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
 
-        m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("PlayerRow"));
-        
+        m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button"));
+        m_Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("button"));
     }
 
     void Show()
@@ -81,7 +82,18 @@ class PlayerRow extends ScriptedWidgetEventHandler
 	override bool OnClick(Widget w, int x, int y, int button)
 	{
         Print( "PlayerRow::OnClick" );
-        playerMenu.OnPlayerSelected( this );
+        
+        if ( w == m_Checkbox )
+        {
+            playerMenu.OnPlayerSelected( this );
+        }
+
+        if ( w == m_Button )
+        {
+            RemoveAllSelectedPlayers();
+
+            playerMenu.OnPlayerSelected( this );
+        }
         return true;
     }
 }
