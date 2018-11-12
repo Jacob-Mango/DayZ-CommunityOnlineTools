@@ -22,9 +22,9 @@ FrameWidgetClass EditorMenu {
   }
   PanelWidgetClass RightPanel {
    visible 1
-   color 0 0 0 0.95
+   color 0 0 0 0.9
    position -1 0
-   size 260 1
+   size 300 1
    halign right_ref
    valign top_ref
    hexactpos 1
@@ -54,8 +54,8 @@ FrameWidgetClass EditorMenu {
        halign center_ref
        valign center_ref
        text "Community Online Tools"
-       "exact text" 1
-       "exact text size" 28
+       "exact text" 0
+       "exact text size" 30
        "text halign" center
       }
      }
@@ -75,6 +75,8 @@ FrameWidgetClass EditorMenu {
      vexactsize 0
      text "Created by Jacob_Mango, Arkensor and DannyDog"
      "exact text" 0
+     "size to text h" 0
+     "size to text v" 0
      "text halign" center
      wrap 1
     }

@@ -2,7 +2,7 @@ PanelWidgetClass btn_bkg {
  visible 1
  color 0 0 0 0.25
  position 5 5
- size 250 50
+ size 290 50
  halign left_ref
  valign bottom_ref
  hexactpos 1
@@ -14,7 +14,7 @@ PanelWidgetClass btn_bkg {
   ButtonWidgetClass btn {
    color 1 0 0 1
    position 5 0
-   size 250 1
+   size 290 1
    hexactpos 1
    vexactpos 1
    hexactsize 1
@@ -76,7 +76,7 @@ PanelWidgetClass btn_bkg {
      ignorepointer 1
      color 1 1 1 1
      position 0 0
-     size 190 50
+     size 230 50
      halign right_ref
      valign center_ref
      hexactpos 1
