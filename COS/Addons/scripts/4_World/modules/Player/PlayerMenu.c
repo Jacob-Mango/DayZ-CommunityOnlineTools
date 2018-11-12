@@ -6,7 +6,7 @@ class PlayerMenu extends PopupMenu
     ref ButtonWidget                m_ReloadScriptButton;
 
     ref Widget                      m_ActionsWrapper;
-    ref ButtonWidget                m_ActionModifyPermissions;
+    ref Widget                      m_ActionsForm;
 
     ref Widget                      m_PermissionsWrapper;
     ref Widget                      m_PermsContainer;
@@ -20,6 +20,17 @@ class PlayerMenu extends PopupMenu
     ref PermissionRow               m_PermissionUI;
 
     private bool                    m_PermissionsLoaded;
+
+    ref UIActionText m_GUID;
+    ref UIActionText m_Name;
+    ref UIActionText m_Steam64ID;
+
+    ref UIActionEditableText m_Health;
+    ref UIActionEditableText m_Blood;
+
+    ref UIActionButton m_ModifyPermissions;
+    ref UIActionButton m_BanPlayer;
+    ref UIActionButton m_KickPlayer;
 
     void PlayerMenu()
     {
@@ -55,13 +66,56 @@ class PlayerMenu extends PopupMenu
         m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
         m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
+        m_ActionsForm = layoutRoot.FindAnyWidget("actions_form");
         m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
-        m_ActionModifyPermissions = ButtonWidget.Cast(layoutRoot.FindAnyWidget("actions_modify_permissions"));
+        
+        m_GUID = UIActionManager.CreateText( m_ActionsWrapper, "GUID: ", "" );
+        m_Name = UIActionManager.CreateText( m_ActionsWrapper, "Name: ", "" );
+        m_Steam64ID = UIActionManager.CreateText( m_ActionsWrapper, "Steam64: ", "" );
+
+        m_Health = UIActionManager.CreateEditableText( m_ActionsWrapper, "Health: ", "", "Set", this, "Click_SetHealth" );
+        m_Blood = UIActionManager.CreateEditableText( m_ActionsWrapper, "Blood: ", "", "Set", this, "Click_SetBlood" );
+
+        m_ModifyPermissions = UIActionManager.CreateButton( m_ActionsWrapper, "Modify Permissions", this, "Click_ModifyPermissions" );
+        m_BanPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Ban Player", this, "Click_BanPlayer" );
+        m_KickPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Kick Player", this, "Click_KickPlayer" );
 
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
         m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
+
+    }
+
+    void Click_ModifyPermissions()
+    {
+        m_ActionsForm.Show( false );
+        m_PermissionsWrapper.Show( true );
+    }
+
+    void Click_BanPlayer()
+    {
+    }
+
+    void Click_KickPlayer()
+    {
+    }
+
+    void Click_SetHealth( ref UIActionEditableText action )
+    {
+        string text = action.GetText();
+    }
+
+    void Click_SetBlood( ref UIActionEditableText action )
+    {
+        string text = action.GetText();
+    }
+
+    void UpdateActionsFields( ref PlayerData data )
+    {
+        m_GUID.SetText( data.SGUID );
+        m_Name.SetText( data.SName );
+        m_Steam64ID.SetText( data.SSteam64ID );
     }
 
     override void OnShow()
@@ -78,15 +132,15 @@ class PlayerMenu extends PopupMenu
         m_PermissionsWrapper.Show( false );
         m_ActionsWrapper.Show( true );
         
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( UpdateLists, 1000, true );
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( UpdateList, 1000, true );
     }
 
     override void OnHide() 
     {
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( UpdateLists );
+        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( UpdateList );
     }
 
-    void UpdateLists()
+    void UpdateList()
     {
         if ( m_ShouldUpdateList && m_CanUpdateList )
         {
@@ -109,16 +163,10 @@ class PlayerMenu extends PopupMenu
             SetPermissions();
         }
 
-        if ( w == m_ActionModifyPermissions )
-        {
-            m_ActionsWrapper.Show( false );
-            m_PermissionsWrapper.Show( true );
-        }
-
         if ( w == m_PermissionsBackButton )
         {
             m_PermissionsWrapper.Show( false );
-            m_ActionsWrapper.Show( true );
+            m_ActionsForm.Show( true );
         }
 
         return false;
@@ -130,7 +178,12 @@ class PlayerMenu extends PopupMenu
         
         int position = AddSelectedPlayer( row.GetPlayer() );
 
-        if ( GetSelectedPlayers().Count() == 1 ) 
+        if ( GetSelectedPlayers().Count() == 1 )
+        {
+            UpdateActionsFields( row.GetPlayer().GetData() );
+        }
+
+        if ( GetSelectedPlayers().Count() != 0 ) 
         {
             LoadPermissions( GetSelectedPlayers()[0].RootPermission );
         } else 
