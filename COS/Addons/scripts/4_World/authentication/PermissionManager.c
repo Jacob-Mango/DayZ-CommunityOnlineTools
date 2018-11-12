@@ -67,6 +67,8 @@ class PermissionManager
 
         ref AuthPlayer auPlayer = GetPlayer( player );
 
+        auPlayer.GetData().SSteam64ID = player.GetPlainId();
+
         RootPermission.DebugPrint();
 
         auPlayer.CopyPermissions( RootPermission );

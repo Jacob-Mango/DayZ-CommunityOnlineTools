@@ -144,7 +144,12 @@ class PlayerModule: EditorModule
                     }
                 }
 
-                GetPermissionsManager().GetPlayer( identities[i] ).UpdatePlayerObject( player );
+                ref AuthPlayer auth = GetPermissionsManager().GetPlayer( identities[i] );
+                auth.UpdatePlayerObject( player );
+
+                auth.GetData().IPingMin = identities[i].GetPingMin();
+                auth.GetData().IPingMax = identities[i].GetPingMax();
+                auth.GetData().IPingAvg = identities[i].GetPingAvg();
             }
 
             if ( GetGame().IsMultiplayer() )
