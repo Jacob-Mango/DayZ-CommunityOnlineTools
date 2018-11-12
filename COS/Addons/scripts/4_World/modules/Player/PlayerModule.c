@@ -166,7 +166,9 @@ class PlayerModule: EditorModule
                 //ref array< ref PlayerData > temp = new ref array< ref PlayerData >;
                 //temp.Copy( data.param1 );
 
-                GetPermissionsManager().SetPlayers( DeserializePlayers( data.param1 ) );
+                ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
+
+                GetPermissionsManager().SetPlayers( auPlayers );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
