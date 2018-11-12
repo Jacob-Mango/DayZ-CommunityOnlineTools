@@ -71,7 +71,7 @@ class PlayerMenu extends PopupMenu
         if ( m_PermissionsLoaded == false )
         {
             SetPermissionOptions( GetPermissionsManager().GetRootPermission() );
-            
+
             m_PermissionsLoaded = true;
         }
 
@@ -149,7 +149,11 @@ class PlayerMenu extends PopupMenu
         Print("PlayerMenu::SetPermissionOptions");
 
         Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COS/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+
         permRow.GetScript( m_PermissionUI );
+
+        permRow.Show( false );
+        permRow.SetSize( 0, 0 );
 
         if ( m_PermissionUI )
         {

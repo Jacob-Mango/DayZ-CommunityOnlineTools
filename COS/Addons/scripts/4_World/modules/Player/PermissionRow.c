@@ -52,20 +52,6 @@ class PermissionRow extends ScriptedWidgetEventHandler
     {
     }
 
-	override bool OnUpdate( Widget w )
-    {
-        if ( Perm )
-        {
-            perm_name.SetText( indent + Perm.Name );
-            perm_state.SetCurrentItem( Perm.Type );
-        } else 
-        {
-            perm_state.SetCurrentItem( 0 );
-        }
-
-        return true;
-    }
-
     ref Widget GetLayoutRoot() 
     {
         return layoutRoot;
@@ -92,6 +78,14 @@ class PermissionRow extends ScriptedWidgetEventHandler
     void SetPermission( ref Permission permission )
     {
         Perm = permission;
+
+        if ( Perm )
+        {
+            Print( indent + Perm.Name + " " + Perm.Type );
+            
+            perm_name.SetText( indent + Perm.Name );
+            perm_state.SetCurrentItem( Perm.Type );
+        }
     }
 
     void Enable()
