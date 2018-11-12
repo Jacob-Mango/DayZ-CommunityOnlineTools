@@ -146,7 +146,7 @@ class CameraTool: EditorModule
     {
         Print("CameraTool::EnterCamera");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "CameraTools.EnterCamera" ) )
+        if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
             return;
 
         /*
@@ -184,7 +184,7 @@ class CameraTool: EditorModule
     {
         Print("CameraTool::LeaveCamera");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "CameraTools.LeaveCamera" ) )
+        if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
             return;
 
         bool cont = false;

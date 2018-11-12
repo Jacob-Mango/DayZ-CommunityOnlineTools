@@ -1,4 +1,4 @@
-class PlayerMenu extends PopupMenu
+class PlayerMenu extends Form
 {
     ref array< ref PlayerRow >      m_PlayerList;
 

@@ -1,4 +1,4 @@
-class ObjectMenu extends PopupMenu
+class ObjectMenu extends Form
 {
     protected TextListboxWidget m_classList;
     protected EditBoxWidget m_SearchBox;

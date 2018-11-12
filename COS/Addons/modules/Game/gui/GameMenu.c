@@ -1,4 +1,4 @@
-class GameMenu extends PopupMenu
+class GameMenu extends Form
 {
     TextListboxWidget m_gameScriptList;
     Widget               m_checkboxPanel;

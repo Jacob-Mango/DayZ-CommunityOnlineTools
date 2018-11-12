@@ -21,7 +21,7 @@ class PlayerModule: EditorModule
 
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Permissions.Set" ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions.Set", sender ) )
             return;
    
         if ( type == CallType.Server )
@@ -55,7 +55,7 @@ class PlayerModule: EditorModule
     {
         Print("PlayerModule::LoadPermissions");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Kick" ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", sender ) )
             return;
 
         if ( type == CallType.Server )
@@ -76,7 +76,7 @@ class PlayerModule: EditorModule
     {
         Print("PlayerModule::LoadPermissions");
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.Ban" ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", sender ) )
             return;
 
         if ( type == CallType.Server )
@@ -97,7 +97,7 @@ class PlayerModule: EditorModule
     {
         Print( "PlayerModule::ReloadList" );
 
-        if ( !GetPermissionsManager().HasPermission( sender, "Admin.Player.List" ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.List", sender ) )
             return;
         
         bool cont = false;
@@ -154,7 +154,7 @@ class PlayerModule: EditorModule
                 GetPermissionsManager().SetPlayers( auPlayers );
             }
 
-            PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
+            PlayerMenu menu = PlayerMenu.Cast( form );
 
             if ( menu )
             {

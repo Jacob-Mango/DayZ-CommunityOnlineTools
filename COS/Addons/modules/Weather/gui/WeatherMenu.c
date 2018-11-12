@@ -1,4 +1,4 @@
-class WeatherMenu extends PopupMenu
+class WeatherMenu extends Form
 {
     private static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 

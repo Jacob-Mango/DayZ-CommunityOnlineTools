@@ -1,3 +1,5 @@
+static ref AuthPlayer ClientAuthPlayer;
+
 static ref array< ref AuthPlayer > SELECTED_PLAYERS;
 
 ref array< ref AuthPlayer > GetSelectedPlayers()
