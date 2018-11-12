@@ -139,14 +139,16 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.EnableGodMode" ) )
             return;
         
-        Param1< ref array< ref AuthPlayer > > data;
+        Param1< ref array< ref PlayerData > > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
-        {    
-            for ( int i = 0; i < data.param1.Count(); i++ )
+        {
+            ref array< ref AuthPlayer > players = DeserializePlayers( data.param1 );
+
+            for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = PlayerBase.Cast( data.param1[i].GetPlayerObject() );
+                PlayerBase player = PlayerBase.Cast( players[i].GetPlayerObject() );
 
                 if ( player == NULL ) return;
 
@@ -168,14 +170,16 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( sender, "Game.KillEntity" ) )
             return;
         
-        Param1< ref array< ref AuthPlayer > > data;
+        Param1< ref array< ref PlayerData > > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
         {    
-            for ( int i = 0; i < data.param1.Count(); i++ )
+            ref array< ref AuthPlayer > players = DeserializePlayers( data.param1 );
+
+            for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = PlayerBase.Cast( data.param1[i].GetPlayerObject() );
+                PlayerBase player = PlayerBase.Cast( players[i].GetPlayerObject() );
 
                 if ( player == NULL ) return;
 

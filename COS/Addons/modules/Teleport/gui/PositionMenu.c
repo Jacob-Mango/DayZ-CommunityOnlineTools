@@ -152,7 +152,7 @@ class PositionMenu extends PopupMenu
 
             vPlayerPos = SnapToGround( vPlayerPos );
 
-            GetRPCManager().SendRPC( "COS_Teleport", "Predefined", new Param2< vector, ref array< ref AuthPlayer > >( vPlayerPos, GetSelectedPlayers() ), true, NULL );
+            GetRPCManager().SendRPC( "COS_Teleport", "Predefined", new Param2< vector, ref array< ref PlayerData > >( vPlayerPos, SerializePlayers( GetSelectedPlayers() ) ), true, NULL );
 
             return true;
         }

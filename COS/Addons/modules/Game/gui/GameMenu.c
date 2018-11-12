@@ -117,7 +117,7 @@ class GameMenu extends PopupMenu
         {
             if ( GetSelectedPlayers().Count() )
             {
-                GetRPCManager().SendRPC( "COS_Game", "SetGodMode", new Param1< ref array< ref AuthPlayer > >( GetSelectedPlayers() ), true );
+                GetRPCManager().SendRPC( "COS_Game", "SetGodMode", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
             }
         }
         return m_GodMode;
@@ -129,7 +129,7 @@ class GameMenu extends PopupMenu
         {
             if ( GetSelectedPlayers().Count() )
             {
-                GetRPCManager().SendRPC( "COS_Game", "KillEntity", new Param1< ref array< ref AuthPlayer > >( GetSelectedPlayers() ), true );
+                GetRPCManager().SendRPC( "COS_Game", "KillEntity", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
             }
         }
         return true;

@@ -61,27 +61,11 @@ class PermissionManager
         return false;
     }
 
-    void PlayerJoined( PlayerIdentity player )
+    ref AuthPlayer PlayerJoined( PlayerIdentity player )
     {
-        if ( player == NULL ) return;
+        if ( player == NULL ) return NULL;
 
-        ref AuthPlayer auPlayer = NULL;
-
-        for ( int i = 0; i < AuthPlayers.Count(); i++ )
-        {
-            if ( AuthPlayers[i].GetGUID() == player.GetId() )
-            {
-                auPlayer = AuthPlayers[i];
-                break;
-            }
-        }
-
-        if ( auPlayer == NULL )
-        {
-            auPlayer = new ref AuthPlayer( NULL, player );
-
-            AuthPlayers.Insert( auPlayer );
-        }
+        ref AuthPlayer auPlayer = GetPlayer( player );
 
         RootPermission.DebugPrint();
 
@@ -97,6 +81,8 @@ class PermissionManager
         auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 
         auPlayer.DebugPrint();
+
+        return auPlayer;
     }
 
     void PlayerLeft( PlayerIdentity player )
@@ -117,7 +103,7 @@ class PermissionManager
         }
     }
 
-    ref AuthPlayer GetPlayer( string guid )
+    ref AuthPlayer GetPlayer( string guid, string name = "" )
     {
         ref AuthPlayer auPlayer = NULL;
 
@@ -130,6 +116,17 @@ class PermissionManager
             }
         }
 
+        if ( auPlayer == NULL )
+        {
+            ref PlayerData data = new ref PlayerData;
+            data.SGUID = guid;
+            data.SName = guid;
+
+            auPlayer = new ref AuthPlayer( data );
+
+            AuthPlayers.Insert( auPlayer );
+        }
+
         return auPlayer;
     }
 
@@ -137,7 +134,32 @@ class PermissionManager
     {
         if ( ident == NULL ) return NULL;
 
-        return GetPlayer( ident.GetId() );
+        return GetPlayer( ident.GetId(), ident.GetName() );
+    }
+
+    ref AuthPlayer GetPlayer( ref PlayerData data )
+    {
+        if ( data == NULL ) return NULL;
+        
+        ref AuthPlayer auPlayer = NULL;
+
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            if ( AuthPlayers[i].GetGUID() == data.SGUID )
+            {
+                auPlayer = AuthPlayers[i];
+                break;
+            }
+        }
+
+        if ( auPlayer == NULL )
+        {
+            auPlayer = new ref AuthPlayer( data );
+
+            AuthPlayers.Insert( auPlayer );
+        }
+
+        return auPlayer;
     }
 }
 

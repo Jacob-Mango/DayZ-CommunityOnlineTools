@@ -145,7 +145,7 @@ class ObjectMenu extends PopupMenu
             {
                 if ( GetSelectedPlayers().Count() )
                 {
-                    GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param3< string, string, ref array< ref AuthPlayer > >( strSelection, m_QuantityItem.GetText(), GetSelectedPlayers() ), true );
+                    GetRPCManager().SendRPC( "COS_Object", "SpawnObjectInventory", new Param3< string, string, ref array< ref PlayerData > >( strSelection, m_QuantityItem.GetText(), SerializePlayers( GetSelectedPlayers() ) ), true );
                 }
             }
         }
