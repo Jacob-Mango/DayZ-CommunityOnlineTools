@@ -119,8 +119,9 @@ class PermissionManager
         if ( auPlayer == NULL )
         {
             ref PlayerData data = new ref PlayerData;
+            
+            data.SName = name;
             data.SGUID = guid;
-            data.SName = guid;
 
             auPlayer = new ref AuthPlayer( data );
 

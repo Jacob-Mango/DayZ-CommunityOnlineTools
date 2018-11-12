@@ -5,12 +5,11 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COS_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
         
         GetRPCManager().AddRPC( "COS_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COS_Admin", "LoadPermissions", this, SingeplayerExecutionType.Server );
+        //GetRPCManager().AddRPC( "COS_Admin", "LoadPermissions", this, SingeplayerExecutionType.Server );
 
         GetPermissionsManager().RegisterPermission( "Admin.List.Reload" );
         GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Set" );
         GetPermissionsManager().RegisterPermission( "Admin.Permissions.Player.Load" );
-        GetPermissionsManager().RegisterPermission( "Admin.Permissions.Root.Load" );
     }
 
     override string GetLayoutRoot()
@@ -50,6 +49,7 @@ class PlayerModule: EditorModule
         }
     }
 
+/*
     void LoadPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         Print("PlayerModule::LoadPermissions");
@@ -113,6 +113,7 @@ class PlayerModule: EditorModule
             }
         }
     }
+*/
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
@@ -148,11 +149,7 @@ class PlayerModule: EditorModule
 
             if ( GetGame().IsMultiplayer() )
             {
-                Print( "Here 1" );
-
                 GetRPCManager().SendRPC( "COS_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );
-
-                Print( "Here 2" );
             } else
             {
                 cont = true;
@@ -169,9 +166,7 @@ class PlayerModule: EditorModule
                 //ref array< ref PlayerData > temp = new ref array< ref PlayerData >;
                 //temp.Copy( data.param1 );
 
-                ref array< ref AuthPlayer > players = DeserializePlayers( data.param1 );
-
-                GetPermissionsManager().SetPlayers( players );
+                GetPermissionsManager().SetPlayers( DeserializePlayers( data.param1 ) );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( m_MenuPopup );
