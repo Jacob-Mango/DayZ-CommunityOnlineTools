@@ -5,7 +5,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
     ref PermissionRow Parent;
     ref array< ref PermissionRow > Children;
 
-    ref Permission Perm;
+    string Name;
+    int Type;
 
     protected ref Widget layoutRoot;
     protected ref TStringArray stateOptions;
@@ -71,29 +72,27 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
 	void OnPermissionStateChanged()
 	{
-		Perm.Type = perm_state.GetValue();
+		Type = perm_state.GetValue();
 	}
 
-    void Set( ref Permission perm, int depth )
+    void Set( ref Permission permission, int depth )
     {
         Indent( depth );
 
-        perm_name.SetText( indent + perm.Name );
-        perm_state.SetValue( 0, false );
+        Name = permission.Name;
 
-        Perm = NULL;
+        perm_name.SetText( indent + Name );
+        perm_state.SetValue( 0, true );
     }
 
     void SetPermission( ref Permission permission )
     {
-        Perm = permission;
-
-        if ( Perm )
-        {            
+        if ( permission )
+        {
             Enable();
 
-            perm_name.SetText( indent + Perm.Name );
-            perm_state.SetValue( Perm.Type, false );
+            perm_name.SetText( indent + permission.Name );
+            perm_state.SetValue( permission.Type, true );
         } else 
         {
             Disable();
@@ -127,6 +126,23 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
     void OnDisable()
     {
+        perm_state.SetValue( 0, true );
+
         perm_state.Disable();
+    }
+
+    void Serialize( ref array< string > output, string prepend = "" )
+    {
+        for ( int i = 0; i < Children.Count(); i++ )
+        {
+            string serialize = prepend + Children[i].Name;
+                
+            output.Insert( serialize + " " + Children[i].Type );
+
+            if ( Children[i].Children.Count() > 0 ) 
+            {
+                Children[i].Serialize( output, serialize + "." );
+            }
+        }
     }
 }

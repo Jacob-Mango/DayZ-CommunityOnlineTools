@@ -138,7 +138,7 @@ class PlayerMenu extends Form
 
         if ( m_PermissionsLoaded == false )
         {
-            SetPermissionOptions( GetPermissionsManager().GetRootPermission() );
+            SetupPermissionsUI();
 
             m_PermissionsLoaded = true;
         }
@@ -211,9 +211,11 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param, true );
     }
 
-    void SetPermissionOptions( ref Permission permission )
+    void SetupPermissionsUI()
     {
-        Print("PlayerMenu::SetPermissionOptions");
+        Print("PlayerMenu::SetupPermissionsUI");
+
+        ref Permission rootPerm = GetPermissionsManager().GetRootPermission() 
 
         Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
@@ -224,13 +226,25 @@ class PlayerMenu extends Form
 
         if ( m_PermissionUI )
         {
-            m_PermissionUI.Set( permission, 0 );
+            m_PermissionUI.Set( rootPerm, 0 );
 
-            AddPermissionRow( permission, 0, m_PermissionUI );
+            InitPermissionUIRow( rootPerm, 0, m_PermissionUI );
         }
     }
 
-    void AddPermissionRow( ref Permission perm, int depth, ref PermissionRow parentRow )
+    void ResetPermissionUI()
+    {
+        m_PermissionUI.Disable();
+    }
+
+    ref array< string > SerializePermissionUI()
+    {
+        ref array< string > output = new ref array< string >;
+        m_PermissionUI.Serialize( output );
+        return output;
+    }
+
+    private void InitPermissionUIRow( ref Permission perm, int depth, ref PermissionRow parentRow )
     {
         for ( int i = 0; i < perm.Children.Count(); i++ )
         {
@@ -250,7 +264,7 @@ class PlayerMenu extends Form
                 parentRow.Children.Insert( rowScript );
                 rowScript.Parent = parentRow;
 
-                AddPermissionRow( cPerm, depth + 1, rowScript );
+                InitPermissionUIRow( cPerm, depth + 1, rowScript );
             }
         }
     }
@@ -266,7 +280,6 @@ class PlayerMenu extends Form
             LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI );
         } else 
         {
-            m_LoadedPermission.DebugPrint();
             LoadPermission( m_LoadedPermission, m_PermissionUI );
         }
     }
@@ -285,9 +298,16 @@ class PlayerMenu extends Form
     {
         Print("PlayerMenu::SetPermissions");
 
-        if ( GetSelectedPlayers().Count() == 0 ) return;
+        ref array< string > guids = new ref array< string >;
 
-        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
+        ref array< ref AuthPlayer > players = GetSelectedPlayers();
+
+        for ( int i = 0; i < players.Count(); i++ )
+        {
+            guids.Insert( players[i].GetGUID() );
+        }
+
+        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), guids ), true );
     }
 
     void UpdatePlayerList()

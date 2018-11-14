@@ -11,9 +11,27 @@ class PermissionManager
         RootPermission = new ref Permission( "ROOT", NULL );
     }
 
-    ref array< ref AuthPlayer > GetPlayers()
+    ref array< ref AuthPlayer > GetPlayers( ref array< string > guids = NULL )
     {
-        return AuthPlayers;
+        if ( guids == NULL )
+        {
+            return AuthPlayers;
+        }
+
+        ref array< ref AuthPlayer > tempArray = new ref array< ref AuthPlayer >;
+
+        for ( int i = 0; i < guids.Count(); i++ )
+        {
+            for ( int k = 0; k < AuthPlayers.Count(); k++ )
+            {
+                if ( guids[i] == AuthPlayers[k].GetGUID() )
+                {
+                    tempArray.Insert( AuthPlayers[k] );
+                }
+            }
+        }
+
+        return tempArray;
     }
 
     void SetPlayers( ref array< ref AuthPlayer > players )
@@ -80,7 +98,7 @@ class PermissionManager
     {
         if ( player == NULL ) return NULL;
 
-        ref AuthPlayer auPlayer = GetPlayer( player );
+        ref AuthPlayer auPlayer = GetPlayerByIdentity( player );
 
         auPlayer.SetIdentity( player );
 
@@ -117,7 +135,7 @@ class PermissionManager
         }
     }
 
-    ref AuthPlayer GetPlayer( string guid, string name = "" )
+    ref AuthPlayer GetPlayerByGUID( string guid, string name = "" )
     {
         ref AuthPlayer auPlayer = NULL;
 
@@ -145,11 +163,11 @@ class PermissionManager
         return auPlayer;
     }
 
-    ref AuthPlayer GetPlayer( PlayerIdentity ident )
+    ref AuthPlayer GetPlayerByIdentity( PlayerIdentity ident )
     {
         if ( ident == NULL ) return NULL;
 
-        return GetPlayer( ident.GetId(), ident.GetName() );
+        return GetPlayerByGUID( ident.GetId(), ident.GetName() );
     }
 
     ref AuthPlayer GetPlayer( ref PlayerData data )
