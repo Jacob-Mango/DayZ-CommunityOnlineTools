@@ -1,13 +1,13 @@
 class CfgMods
 {
-	class COT
+	class CommunityOnlineTools
 	{
-		dir = "@Community Offline Mode";
+		dir = "@CommunityOnlineTools";
 		picture = "";
 		action = "";
 		hideName = 1;
 		hidePicture = 1;
-		name = "";
+		name = "Community Online Tools";
 		credits = "Jacob_Mango";
 		author = "Jacob";
 		authorID = "0"; 

@@ -26,6 +26,6 @@ void main()
 
     if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
     {
-        GetGame().SelectPlayer( NULL, CreateCustomDefaultCharacter() );
+        // GetGame().SelectPlayer( NULL, CreateCustomDefaultCharacter() );
     }
 }

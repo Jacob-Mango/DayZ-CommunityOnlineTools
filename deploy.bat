@@ -23,8 +23,8 @@ RD /s /q "%gameDir%\%modName%" > NUL
 RD /s /q "%serverDir%\%modName%" > NUL
 
 echo "Packaging Addons"
-xcopy /s/e /y /i %workspaceDir%\%modName% %tempFolder% > NUL
-for /D %%s in (%tempFolder%\Addons\*) do (
+xcopy /s/e /y /i "%workspaceDir%\%modName%" "%tempFolder%" > NUL
+for /D %%s in ("%tempFolder%\Addons\*") do (
     %makePBO% -U -P -D -N "%%s" "%%s.pbo"
     %signFile% "%keysLoc%\%privateKey%" "%%s.pbo"
     RD /s /q "%%s" > NUL
