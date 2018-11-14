@@ -26,30 +26,26 @@ class PlayerModule: EditorModule
    
         if ( type == CallType.Server )
         {
-            Param2< ref array< string >, ref array< ref PlayerData > > data;
+            Param2< ref array< string >, ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > players = DeserializePlayers( data.param2 );
-
-            ref array< string > perms;
+            ref array< string > perms = new ref array< string >;
             perms.Copy( data.param1 );
 
-            for ( int i = 0; i < players.Count(); i++ )
+            ref array< string > guids = new ref array< string >;
+            guids.Copy( data.param2 );
+
+            for ( int i = 0; i < guids.Count(); i++ )
             {
-                ref AuthPlayer player = players[i];
+                ref AuthPlayer player = GetPermissionsManager().GetPlayerByGUID( guids[i] );
 
-                if ( player )
+                for ( int j = 0; j < perms.Count(); j++ )
                 {
-                    player.ClearPermissions();
-
-                    for ( int j = 0; j < perms.Count(); j++ )
-                    {
-                        player.AddPermission( perms[j] );
-                    }
+                    player.AddPermission( perms[j] );
                 }
-            }
 
-            GetPermissionsManager().AddPlayers( players );
+                player.DebugPrint();
+            }
         }
     }
 
@@ -124,7 +120,7 @@ class PlayerModule: EditorModule
                     }
                 }
 
-                ref AuthPlayer auth = GetPermissionsManager().GetPlayer( identities[i] );
+                ref AuthPlayer auth = GetPermissionsManager().GetPlayerByIdentity( identities[i] );
                 auth.UpdatePlayerObject( player );
 
                 auth.GetData().IPingMin = identities[i].GetPingMin();
@@ -147,9 +143,6 @@ class PlayerModule: EditorModule
             {
                 ref Param1< ref array< ref PlayerData > > data;
                 if ( !ctx.Read( data ) ) return;
-
-                //ref array< ref PlayerData > temp = new ref array< ref PlayerData >;
-                //temp.Copy( data.param1 );
 
                 ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
 
