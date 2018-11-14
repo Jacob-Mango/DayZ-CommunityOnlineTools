@@ -2,7 +2,8 @@ class COTModule : Module
 {
     void COTModule()
     {
-        GetRPCManager().AddRPC( "COT", "GetPermission", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT", "RequestPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT", "RecievePermissions", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
     }
@@ -13,14 +14,9 @@ class COTModule : Module
 
     override void onMissionLoaded()
     {
-        RequestPermissions();
-    }
-
-    void RequestPermissions( int try = 0 )
-    {
         if ( GetGame().IsClient() )
         {
-            GetRPCManager().SendRPC( "COT", "GetPermission", new Param, true );
+            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
         }
     }
 
@@ -42,13 +38,30 @@ class COTModule : Module
         if ( !GetPermissionsManager().HasPermission( "COT.Show", NULL ) )
             return;
 
-        GetGame().GetUIManager().ShowScriptedMenu( new EditorMenu() , NULL );
+        GetGame().GetUIManager().ShowScriptedMenu( new EditorMenu(), NULL );
     }
 
-    void GetPermission( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void RecievePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print( "COTModule::GetPermission" );
-        
+        if ( !GetGame().IsMultiplayer() )
+            return;
+
+        if ( type == CallType.Client )
+        {
+            ref Param1< ref array< ref PlayerData > > data;
+            if ( !ctx.Read( data ) ) return;
+
+            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
+
+            if ( auPlayers.Count() == 1 )
+            {
+                ClientAuthPlayer = auPlayers[0];
+            }
+        }
+    }
+
+    void RequestPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {        
         if ( !GetGame().IsMultiplayer() )
             return;
 
@@ -68,24 +81,8 @@ class COTModule : Module
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT", "GetPermission", new Param1< ref array< ref PlayerData > >( SerializePlayers( player ) ), true, sender );
+                GetRPCManager().SendRPC( "COT", "RecievePermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( player ) ), true, sender );
             } 
-        }
-
-        if ( type == CallType.Client )
-        {
-            ref Param1< ref array< ref PlayerData > > data;
-            if ( !ctx.Read( data ) ) return;
-
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
-
-            if ( auPlayers.Count() == 1 )
-            {
-                ClientAuthPlayer = auPlayers[0];
-            } else 
-            {
-                RequestPermissions();
-            }
         }
     }
 }

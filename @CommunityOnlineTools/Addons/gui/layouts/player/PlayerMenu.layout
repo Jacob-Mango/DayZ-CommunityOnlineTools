@@ -58,18 +58,30 @@ PanelWidgetClass PlayerMenu {
      text "Player List"
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
-     "exact text size" 14
+     "exact text size" 16
     }
     ButtonWidgetClass refresh_list {
-     position 0 5
+     position 5 10
      size 80 20
      halign right_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     text "Refresh"
+     {
+      TextWidgetClass action_button_text {
+       ignorepointer 1
+       size 1 1
+       style Light
+       "text halign" center
+       "text valign" center
+       text "Refresh"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+      }
+     }
     }
    }
   }
@@ -121,7 +133,7 @@ PanelWidgetClass PlayerMenu {
      text "Player Actions"
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
-     "exact text size" 14
+     "exact text size" 16
     }
    }
   }
@@ -149,6 +161,7 @@ PanelWidgetClass PlayerMenu {
      "Scrollbar V" 1
      {
       GridSpacerWidgetClass permissions_container {
+       clipchildren 1
        position 0 0
        size 1 1
        hexactpos 1
@@ -173,29 +186,53 @@ PanelWidgetClass PlayerMenu {
      text "Player Permissions"
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
-     "exact text size" 14
+     "exact text size" 16
     }
     ButtonWidgetClass permissions_back_button {
-     position 5 5
-     size 60 20
+     position 5 10
+     size 60 24
      halign right_ref
      valign top_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     text "Back"
+     {
+      TextWidgetClass action_button_text {
+       ignorepointer 1
+       size 1 1
+       style Light
+       "text halign" center
+       "text valign" center
+       text "Back"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+      }
+     }
     }
     ButtonWidgetClass permissions_set_button {
      position 5 10
-     size 150 20
+     size 200 24
      halign right_ref
      valign bottom_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     text "Apply Permissions"
+     {
+      TextWidgetClass action_button_text {
+       ignorepointer 1
+       size 1 1
+       style Light
+       "text halign" center
+       "text valign" center
+       text "Apply Permissions"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+      }
+     }
     }
    }
   }
