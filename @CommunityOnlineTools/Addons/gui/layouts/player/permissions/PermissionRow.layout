@@ -1,83 +1,66 @@
-GridSpacerWidgetClass PermissionRow {
- color 0 0 0 0
+PanelWidgetClass PermissionRow
+{
  position 0 0
- size 1 1
+ size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
- vexactsize 0
- Padding 0
- Margin 0
- "Size To Content H" 1
- "Size To Content V" 1
+ vexactsize 1
  scriptclass "PermissionRow"
- Columns 2
- Rows 1
  {
-  TextWidgetClass permission_name {
-   ignorepointer 1
+  GridSpacerWidgetClass permission_setting_wrapper {
+   color 0 0 0 0
    position 0 0
-   size 0.6 18
-   halign left_ref
-   valign center_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 0
-   vexactsize 1
-   text "{PERMISSION_HERE}"
-   "exact text" 1
-   "exact text size" 14
-   "text halign" left
-   "text valign" center
-  }
-  PanelWidgetClass permission_setting_wrapper
-  {
-   ignorepointer 1
-   position 0 0
-   size 0.4 18
-   halign right_ref
-   valign center_ref
+   size 1 1
    hexactpos 0
    vexactpos 0
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
+   Padding 0
+   Margin 0
+   "Size To Content H" 1
+   "Size To Content V" 1
+   Columns 2
+   Rows 1
    {
+    TextWidgetClass permission_name {
+     ignorepointer 1
+     position 0 0
+     size 0.6 30
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "{PERMISSION_HERE}"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" left
+     "text valign" center
+    }
     FrameWidgetClass permission_setting {
      ignorepointer 1
      position 0 0
-     size 1 1
+     size 0.4 30 
      hexactpos 0
      vexactpos 0
      hexactsize 0
-     vexactsize 0
-     {
-      PanelWidgetClass permission_setting_disable {
-       visible 0
-       ignorepointer 1
-       color 0.1569 0.1569 0.1569 0.902
-       size 1 1
-       position 0 0
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       style rover_sim_colorable
-      }
-     }
-    }
-    PanelWidgetClass permission_setting_disable {
-     visible 0
-     ignorepointer 1
-     color 0.1569 0.1569 0.1569 0.902
-     size 1 1
-     position 0 0
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-     style rover_sim_colorable
+     vexactsize 1
     }
    }
+  }
+  PanelWidgetClass permission_setting_wrapper_disable {
+   visible 0
+   ignorepointer 1
+   color 0.1569 0.1569 0.1569 0.902
+   size 1 1
+   position 0 0
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style rover_sim_colorable
   }
  }
 }

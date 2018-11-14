@@ -92,7 +92,6 @@ class PlayerMenu extends Form
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
         m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
-
     }
 
     void Click_ModifyPermissions()
@@ -166,7 +165,7 @@ class PlayerMenu extends Form
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
-    {        
+    {
         if ( w == m_ReloadScriptButton )
         {
             ReloadPlayers();
@@ -190,6 +189,8 @@ class PlayerMenu extends Form
     {
         Print("PlayerMenu::OnPlayerSelected");
         
+        RemoveAllSelectedPlayers();
+
         int position = AddSelectedPlayer( row.GetPlayer() );
 
         if ( GetSelectedPlayers().Count() == 1 )
@@ -254,7 +255,7 @@ class PlayerMenu extends Form
 
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
-            PermissionRow rowScript;
+            ref PermissionRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
@@ -314,36 +315,53 @@ class PlayerMenu extends Form
     {
         Print("PlayerMenu::UpdatePlayerList");
        
-        for ( int j = 0; j < m_PlayerList.Count(); j++ )
-        {
-            m_PlayerScriptList.RemoveChild( m_PlayerList[j].GetLayoutRoot() );
-            m_PlayerList[j].GetLayoutRoot().Unlink();
-        }
-
-        m_PlayerList.Clear();
-
         ref array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
         for ( int i = 0; i < players.Count(); i++ )
         {
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
+            bool exists = false;
 
-            if ( permRow == NULL ) 
+            for ( int j = 0; j < m_PlayerList.Count(); j++ )
             {
-                Print("Skipped player.");
-                continue;
+                if ( m_PlayerList[j].Player.GetGUID() == players[i].GetGUID() )
+                {
+                    exists = true;
+                    break;
+                }
             }
 
-            PlayerRow rowScript;
-            permRow.GetScript( rowScript );
-            
-            if ( rowScript )
+            if ( exists == false )
             {
+                Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
+
+                ref PlayerRow rowScript;
+                permRow.GetScript( rowScript );
+                
                 rowScript.SetPlayer( players[i] );
 
                 rowScript.playerMenu = this;
 
                 m_PlayerList.Insert( rowScript );
+            }
+        }
+
+        
+        for ( int k = 0; k < m_PlayerList.Count(); k++ )
+        {
+            bool found = false;
+
+            for ( int l = 0; l < players.Count(); l++ )
+            {
+                if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
+                {
+                    found = true;
+                }
+            }
+
+            if ( found == false )
+            {
+                m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
+                m_PlayerList[k].GetLayoutRoot().Unlink();
             }
         }
     }

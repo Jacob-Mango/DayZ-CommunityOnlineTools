@@ -41,7 +41,7 @@ class UIActionEditableText extends UIActionBase
 
     void SetButton( string text )
     {
-        m_Button.SetText( text );
+        TextWidget.Cast( layoutRoot.FindAnyWidget("action_button_text") ).SetText( text );
     }
 
     void SetCallback( Class instance, string funcname )

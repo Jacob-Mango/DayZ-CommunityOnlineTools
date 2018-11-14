@@ -13,18 +13,18 @@ GridSpacerWidgetClass action_text_wrapper {
    halign left_ref
    valign top_ref
    text "{LABEL}"
-   font "gui/fonts/MetronLight14"
+   font "gui/fonts/sdf_MetronLight24"
    "exact text" 1
-   "exact text size" 14
+   "exact text size" 16
   }
   TextWidgetClass action_text {
    size 0.7 1
    halign left_ref
    valign top_ref
    text "{TEXT}"
-   font "gui/fonts/MetronLight14"
+   font "gui/fonts/sdf_MetronLight24"
    "exact text" 1
-   "exact text size" 14
+   "exact text size" 16
   }
  }
 }

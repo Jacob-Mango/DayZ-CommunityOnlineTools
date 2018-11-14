@@ -13,25 +13,39 @@ GridSpacerWidgetClass action_editable_text_wrapper {
    halign left_ref
    valign top_ref
    text "{LABEL}"
-   font "gui/fonts/MetronLight14"
+   font "gui/fonts/sdf_MetronLight24"
    "exact text" 1
-   "exact text size" 14
+   "exact text size" 16
   }
   EditBoxWidgetClass action_editable_text {
    size 0.6 1
    halign left_ref
    valign top_ref
    text "{TEXT}"
-   font "gui/fonts/MetronLight14"
+   font "gui/fonts/sdf_MetronLight24"
    "exact text" 1
-   "exact text size" 14
+   "exact text size" 16
   }
   ButtonWidgetClass action_button {
-   size 0.3 1
-   text "{BUTTON}"
-   font "gui/fonts/MetronLight14"
-   "exact text" 1
-   "exact text size" 14
+   size 1 1
+   {
+    TextWidgetClass action_button_text {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     style Light
+     text "{BUTTON}"
+     "text halign" center
+     "text valign" center
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+    }
+   }
   }
  }
 }

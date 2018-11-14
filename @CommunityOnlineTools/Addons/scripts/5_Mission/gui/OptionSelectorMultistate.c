@@ -1,5 +1,6 @@
 modded class OptionSelectorMultistate
 {
+    /*
     override void Enable()
     {
         m_Enabled = true;
@@ -13,4 +14,5 @@ modded class OptionSelectorMultistate
 		
         m_Parent.SetFlags( WidgetFlags.IGNOREPOINTER );
     }
+    */
 }

@@ -43,8 +43,11 @@ class PlayerModule: EditorModule
                 {
                     player.AddPermission( perms[j] );
                 }
+            }
 
-                player.DebugPrint();
+            if ( GetGame().IsMultiplayer() )
+            {
+                GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );
             }
         }
     }
@@ -144,9 +147,7 @@ class PlayerModule: EditorModule
                 ref Param1< ref array< ref PlayerData > > data;
                 if ( !ctx.Read( data ) ) return;
 
-                ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
-
-                GetPermissionsManager().SetPlayers( auPlayers );
+                DeserializePlayers( data.param1 );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( form );
