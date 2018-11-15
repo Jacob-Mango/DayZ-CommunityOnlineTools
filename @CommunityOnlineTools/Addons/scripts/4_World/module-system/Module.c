@@ -70,61 +70,21 @@ class Module
 
     // Override functions 
     
-    void onUpdate( float timeslice ) 
+    void OnUpdate( float timeslice ) 
     {
-    }
-    
-    /* Mouse Functions */ 
-    
-    void onMouseMove() 
-    {
-    }
-    
-    void onMouseDragY ( int state ) 
-    {
-    }
-    
-    void onMouseDragX ( int state )
-    {
-    }
-    
-    void onMouseWheelUp( int state ) 
-    {
-    }
-    
-    void onMouseWheelDown( int state ) 
-    {
-    }
-    
-    void onMouseButtonPress( int button )
-    {
-    }
-    
-    void onMouseButtonRelease( int button )
-    {
-    }
-
-    /* Key Functions */
-    
-    void onKeyPress( int key ) 
-    {
-    }
-    
-    void onKeyRelease( int key )
-    {
-    }
+    }    
     
     /* Mission Functions */
     
-    void onMissionStart()
+    void OnMissionStart()
     {
     }
     
-    void onMissionFinish()
+    void OnMissionFinish()
     {
     }
     
-    void onMissionLoaded()
+    void OnMissionLoaded()
     {
     }
 }

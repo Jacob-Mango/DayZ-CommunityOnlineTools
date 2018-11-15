@@ -188,7 +188,7 @@ class ObjectMenu extends Form
                 GetGame().ObjectDelete( previewItem );
             }
 
-            previewItem = GetGame().CreateObject( strSelection, vector.Zero, false );
+            previewItem = GetGame().CreateObject( strSelection, vector.Zero, true );
 
             m_item_widget.SetItem( previewItem );
             m_item_widget.SetModelPosition( Vector(0,0,0.5) );
@@ -269,6 +269,7 @@ class ObjectMenu extends Form
         configs.Insert( CFG_VEHICLESPATH );
         configs.Insert( CFG_WEAPONSPATH );
         configs.Insert( CFG_MAGAZINESPATH );
+        configs.Insert( "CfgNonAIVehicles" );
 
         string strSearch = m_SearchBox.GetText();
 

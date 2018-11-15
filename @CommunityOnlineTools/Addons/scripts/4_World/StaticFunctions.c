@@ -372,10 +372,10 @@ static void SnapToGroundNew( Object object )
 
     object.SetPosition(pos);
 
-    ForceTargetCollisionUpdate( object );
+    ForceTargetCollisiOnUpdate( object );
 }
 
-static void ForceTargetCollisionUpdate( Object oObj )
+static void ForceTargetCollisiOnUpdate( Object oObj )
 {
     if ( !oObj ) return;
 

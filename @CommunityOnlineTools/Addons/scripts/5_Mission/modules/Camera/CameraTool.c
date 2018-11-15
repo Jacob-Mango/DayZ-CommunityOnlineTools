@@ -95,7 +95,7 @@ class CameraTool: EditorModule
         super.Init();
     }
     
-    override void onUpdate( float timeslice )
+    override void OnUpdate( float timeslice )
     {
         float speed = 0.2;
         m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
@@ -635,48 +635,6 @@ class CameraTool: EditorModule
                 }
             }
         }        
-    }
-    
-    override void onKeyRelease( int key ) // Fix
-    {
-        switch( key ) 
-        {            
-            case KeyCode.KC_W:
-            case KeyCode.KC_A:
-            case KeyCode.KC_S:
-            case KeyCode.KC_D:
-            case KeyCode.KC_Q:
-            case KeyCode.KC_Z:
-            {
-                if ( m_oCamera )
-                {
-                    if ( m_Target ) 
-                    {
-                        m_CamOffset = vector.Direction( GetTargetCenter() , m_oCamera.GetPosition() );
-                        m_CamOffset.Normalize();
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    override void onMouseButtonRelease( int button ) 
-    {
-        if ( m_oCamera ) 
-        {
-            if ( button == MouseState.RIGHT ) 
-            {
-                if ( !m_OrbitalCam ) 
-                {
-                    SetFreezeMouse( false );
-                }
-            }
-        }
-    }
-    
-    override void onMouseButtonPress( int button ) 
-    {
     }
     
     bool IsUsingCamera() 
