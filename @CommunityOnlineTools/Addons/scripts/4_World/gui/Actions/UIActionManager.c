@@ -38,6 +38,25 @@ class UIActionManager
         return NULL;
     }
 
+    static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, bool checked, Class instance, string funcname )
+    {
+        ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionCheckbox.layout", parent );
+
+        ref UIActionCheckbox action;
+        widget.GetScript( action );
+
+        if ( action )
+        {
+            action.SetCallback( instance, funcname );
+            action.SetLabel( label );
+            action.SetChecked( checked );
+
+            return action;
+        }
+
+        return NULL;
+    }
+
     static ref UIActionText CreateText( Widget parent, string label, string text )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionText.layout", parent );

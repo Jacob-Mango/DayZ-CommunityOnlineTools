@@ -21,11 +21,6 @@ int AddSelectedPlayer( ref AuthPlayer player )
     return GetSelectedPlayers().Insert( player );
 }
 
-void RemoveAllSelectedPlayers()
-{
-    GetSelectedPlayers().Clear();
-}
-
 ref array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
 {
     ref array< ref PlayerData > output = new ref array< ref PlayerData >;

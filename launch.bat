@@ -18,7 +18,7 @@ CALL deploy.bat %1 %2 %3 %4 %5
 
 chdir /d "%serverDir%"
 
-start DayZServer_x64.exe -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\%missionName% -mod=@RPCFramework;%modName%
+start DayZServer_x64.exe -scrAllowFileWrite -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\%missionName% -mod=@RPCFramework;%modName%
 
 TIMEOUT /T 2 /NOBREAK
 
