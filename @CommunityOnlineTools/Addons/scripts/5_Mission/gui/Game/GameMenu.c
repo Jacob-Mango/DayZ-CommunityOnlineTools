@@ -29,13 +29,19 @@ class GameMenu extends Form
 
     override void Init()
     {
-        m_GameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_list_box"));
-        m_GameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_script_button"));
-
-        m_GameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
-        m_GameScriptList.AddItem("Spawn V3S",        new Param1<string>("SpawnV3S"),       0);
+        m_GameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_box"));
+        m_GameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_button"));
 
         m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+
+        if ( GetPermissionsManager().HasPermission( "Game.SpawnVehicle" ) )
+        {
+            m_GameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
+            m_GameScriptList.AddItem("Spawn V3S", new Param1<string>("SpawnV3S"), 0);
+            // m_GameScriptList.AddItem("Spawn V3S Cargo", new Param1<string>("SpawnV3SCargo"), 0);
+            m_GameScriptList.AddItem("Spawn Sedan", new Param1<string>("SpawnSedan"), 0);
+            // m_GameScriptList.AddItem("Spawn Van", new Param1<string>("SpawnVan"), 0);
+        }
 
         if ( GetPermissionsManager().HasPermission( "Game.ChangeAimingMode" ) )
         {
@@ -81,6 +87,49 @@ class GameMenu extends Form
         return false;
     }
 
+    void SpawnVan() 
+    {
+        ref array< string> attArr = new ref array< string>;
+
+        attArr.Insert("CivVanDoors_TrumpUp");
+        attArr.Insert("CivVanDoors_BackRight");
+        attArr.Insert("CivVanDoors_TrumpDown");
+        attArr.Insert("CivVanDoors_CoDriver");
+        attArr.Insert("CivVanTrunk");
+        attArr.Insert("CivVanWheel");
+        attArr.Insert("CivVanWheel");
+        attArr.Insert("CivVanWheel");
+        attArr.Insert("CivVanWheel");
+        attArr.Insert("CarBattery");
+        attArr.Insert("CarRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("SparkPlug");
+
+        SpawnVehicle( "CivilianVan", attArr );
+    }
+
+    void SpawnSedan() 
+    {
+        ref array< string> attArr = new ref array< string>;
+        
+        attArr.Insert("CivSedanHood");
+        attArr.Insert("CivSedanTrunk");
+        attArr.Insert("CivSedanDoors_Driver");
+        attArr.Insert("CivSedanDoors_BackRight");
+        attArr.Insert("CivSedanDoors_BackLeft");
+        attArr.Insert("CivSedanDoors_CoDriver");
+        attArr.Insert("CivSedanWheel");
+        attArr.Insert("CivSedanWheel");
+        attArr.Insert("CivSedanWheel");
+        attArr.Insert("CivSedanWheel");
+        attArr.Insert("CarBattery");
+        attArr.Insert("CarRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("SparkPlug");
+
+        SpawnVehicle( "CivilianSedan", attArr );
+    }
+
     void SpawnHatchback() 
     {
         ref array< string> attArr = new ref array< string>;
@@ -99,6 +148,29 @@ class GameMenu extends Form
         attArr.Insert("SparkPlug");
 
         SpawnVehicle( "OffroadHatchback", attArr );
+    }
+
+    void SpawnV3SCargo() 
+    {
+        ref array< string> attArr = new ref array< string>;
+        
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheel");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("V3SWheelDouble");
+        attArr.Insert("TruckBattery");
+        attArr.Insert("TruckRadiator");
+        attArr.Insert("EngineBelt");
+        attArr.Insert("GlowPlug");
+        attArr.Insert("V3SHood");
+        attArr.Insert("V3SDoors_Driver_Blue");
+        attArr.Insert("V3SDoors_CoDriver_Blue");
+
+        SpawnVehicle( "V3S_Cargo_Blue", attArr );
     }
 
     void SpawnV3S() 

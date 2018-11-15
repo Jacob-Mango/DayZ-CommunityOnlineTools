@@ -3,7 +3,7 @@ class COTModule : Module
     void COTModule()
     {
         GetRPCManager().AddRPC( "COT", "RequestPermissions", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COT", "RecievePermissions", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
     }
@@ -12,7 +12,7 @@ class COTModule : Module
     {
     }
 
-    override void onMissionLoaded()
+    override void OnMissionLoaded()
     {
         if ( GetGame().IsClient() )
         {
@@ -29,8 +29,14 @@ class COTModule : Module
         RegisterKeyMouseBinding( toggleCOMEditor );
     }
 
-    override void onUpdate( float timeslice )
+    override void OnUpdate( float timeslice )
     {
+        /*
+		if( GetGame().GetInput().GetActionDown( UAUIOpenCOT, false ) )
+		{
+            ShowCOMEditor();
+        }
+        */
     }
 
     void ShowCOMEditor()
@@ -41,7 +47,7 @@ class COTModule : Module
         GetGame().GetUIManager().ShowScriptedMenu( new EditorMenu(), NULL );
     }
 
-    void RecievePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         if ( !GetGame().IsMultiplayer() )
             return;
@@ -81,7 +87,7 @@ class COTModule : Module
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT", "RecievePermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( player ) ), true, sender );
+                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( player ) ), true, sender );
             } 
         }
     }

@@ -9,7 +9,7 @@ GridSpacerWidgetClass action_checkbox_wrapper {
  scriptclass "UIActionCheckbox"
  {
   TextWidgetClass action_label {
-   size 0.9 20
+   size 1 20
    hexactpos 0
    vexactpos 0
    hexactsize 0
@@ -32,8 +32,7 @@ GridSpacerWidgetClass action_checkbox_wrapper {
    color 1 1 1 1
    halign right_ref
    valign center_ref
-   scaled 1
-   style Default
+   style NewStyle
   }
  }
 }

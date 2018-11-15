@@ -92,12 +92,12 @@ class EditorMenu extends UIScriptedMenu
 
     override bool UseMouse() 
     {
-        return false;
+        return true;
     }
 
     override bool UseKeyboard() 
     {
-        return false;
+        return true;
     }
 
     override void OnShow()
@@ -169,6 +169,8 @@ class EditorMenu extends UIScriptedMenu
     override void Update( float timeslice ) 
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
+
+		GetGame().GetInput().DisableKey(KeyCode.KC_RETURN);
 
         if ( GetMouseState( MouseState.RIGHT ) & MB_PRESSED_MASK ) 
         {

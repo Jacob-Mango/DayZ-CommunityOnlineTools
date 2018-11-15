@@ -36,6 +36,8 @@ class PlayerMenu extends Form
     ref UIActionButton m_BanPlayer;
     ref UIActionButton m_KickPlayer;
 
+    ref UIActionCheckbox m_GodMode;
+
     void PlayerMenu()
     {
         m_CanUpdateList = true;
@@ -88,6 +90,8 @@ class PlayerMenu extends Form
         m_BanPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Ban Player", this, "Click_BanPlayer" );
         m_KickPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Kick Player", this, "Click_KickPlayer" );
 
+        m_GodMode = UIActionManager.CreateCheckbox( m_ActionsWrapper, "Godmode", false, this, "Click_GodMode" );
+
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
@@ -118,6 +122,11 @@ class PlayerMenu extends Form
     void Click_SetBlood( ref UIActionEditableText action )
     {
         string text = action.GetText();
+    }
+
+    void Click_GodMode( ref UIActionCheckbox action )
+    {
+        GetRPCManager().SendRPC( "COT_Game", "GodMode", new Param2< bool, ref array< ref PlayerData > >( action.IsChecked(), SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void UpdateActionsFields( ref PlayerData data )

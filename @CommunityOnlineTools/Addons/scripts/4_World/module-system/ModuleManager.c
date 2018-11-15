@@ -167,7 +167,7 @@ class ModuleManager
 
         for ( int i = 0; i < m_Modules.Count(); ++i)
         {
-            m_Modules.Get(i).onMissionStart();
+            m_Modules.Get(i).OnMissionStart();
         }
     }
 
@@ -177,7 +177,7 @@ class ModuleManager
 
         for ( int i = 0; i < m_Modules.Count(); ++i)
         {
-            m_Modules.Get(i).onMissionFinish();
+            m_Modules.Get(i).OnMissionFinish();
         }
     }
 
@@ -187,7 +187,7 @@ class ModuleManager
 
         for ( int i = 0; i < m_Modules.Count(); ++i)
         {
-            m_Modules.Get(i).onMissionLoaded();
+            m_Modules.Get(i).OnMissionLoaded();
         }
     }
 
@@ -297,7 +297,7 @@ class ModuleManager
                     }
                 }
             }
-            module.onUpdate( timeslice );
+            module.OnUpdate( timeslice );
         }
     }
 
@@ -415,16 +415,6 @@ class ModuleManager
                     }
                 }
             }
-
-            switch ( mouseEvent )
-            {
-                case KeyMouseBinding.MB_EVENT_PRESS:
-                    module.onMouseButtonPress( button );
-                    break;
-                case KeyMouseBinding.MB_EVENT_RELEASE:
-                    module.onMouseButtonRelease( button );
-                    break;
-            }
         }
 
         if ( mouseEvent == KeyMouseBinding.MB_EVENT_RELEASE ) button_info.Release();
@@ -460,16 +450,6 @@ class ModuleManager
                         GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
                     }
                 }
-            }
-
-            switch ( keyEvent )
-            {
-                case KeyMouseBinding.KB_EVENT_PRESS:
-                    module.onKeyPress( key ); //extra utility
-                    break;
-                case KeyMouseBinding.KB_EVENT_RELEASE:
-                    module.onKeyRelease( key );
-                    break;
             }
         }
     }
