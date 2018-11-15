@@ -14,6 +14,11 @@ class CommunityOnlineTools
     void RegisterModules()
     {
         GetModuleManager().RegisterModule( new PlayerModule );
+        GetModuleManager().RegisterModule( new ObjectModule );
+        GetModuleManager().RegisterModule( new TeleportModule );
+        GetModuleManager().RegisterModule( new CameraTool );
+        GetModuleManager().RegisterModule( new GameModule );
+        GetModuleManager().RegisterModule( new WeatherModule );
     }
 
     void ~CommunityOnlineTools()

@@ -22,7 +22,7 @@ GridSpacerWidgetClass action_editable_text_wrapper {
    halign left_ref
    valign top_ref
    text "{TEXT}"
-   font "gui/fonts/sdf_MetronLight24"
+   font "gui/fonts/sdf_MetronLight14"
    "exact text" 1
    "exact text size" 16
   }

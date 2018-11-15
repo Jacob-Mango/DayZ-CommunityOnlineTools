@@ -1,0 +1,39 @@
+GridSpacerWidgetClass action_checkbox_wrapper {
+ size 1 20
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ Columns 2
+ Rows 1
+ scriptclass "UIActionCheckbox"
+ {
+  TextWidgetClass action_label {
+   size 0.9 20
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
+   halign left_ref
+   valign top_ref
+   text "{LABEL}"
+   font "gui/fonts/sdf_MetronLight24"
+   "exact text" 1
+   "exact text size" 16
+  }
+  CheckBoxWidgetClass action_checkbox
+  {
+   size 20 20
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   visible 1
+   color 1 1 1 1
+   halign right_ref
+   valign center_ref
+   scaled 1
+   style Default
+  }
+ }
+}

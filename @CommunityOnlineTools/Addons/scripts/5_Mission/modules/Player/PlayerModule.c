@@ -11,7 +11,7 @@ class PlayerModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.List" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Set" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Load" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Retrieve" );
     }
 
     override string GetLayoutRoot()

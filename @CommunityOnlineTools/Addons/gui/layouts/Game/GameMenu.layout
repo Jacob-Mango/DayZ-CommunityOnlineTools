@@ -1,0 +1,62 @@
+PanelWidgetClass GameMenu {
+ visible 0
+ color 0 0 0 0
+ position 0 0
+ size 400 350
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "GameMenu"
+ style EditorPanel
+ {
+  TextListboxWidgetClass game_list_box {
+   visible 1
+   position 5 5
+   size 225 280
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Editor
+   lines 20
+   font "gui/fonts/Metron14"
+  }
+  ScrollWidgetClass actions_scroller {
+   position 5 5
+   size 160 280
+   halign center_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style blank
+   "Scrollbar V" 1
+   {
+    GridSpacerWidgetClass actions_wrapper {
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content V" 1
+     Columns 1
+     Rows 1000
+    }
+   }
+  }
+  ButtonWidgetClass game_script_button {
+   position 80 10
+   size 80 20
+   halign left_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Execute"
+  }
+ }
+}
