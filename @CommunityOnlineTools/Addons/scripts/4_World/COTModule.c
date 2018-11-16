@@ -1,5 +1,7 @@
 class COTModule : Module
 {
+    protected ref EditorMenu m_EditorMenu;
+
     void COTModule()
     {
         GetRPCManager().AddRPC( "COT", "RequestPermissions", this, SingeplayerExecutionType.Server );
@@ -17,16 +19,19 @@ class COTModule : Module
         if ( GetGame().IsClient() )
         {
             GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
+
         }
     }
 
     override void RegisterKeyMouseBindings() 
     {
-        KeyMouseBinding toggleCOMEditor = new KeyMouseBinding( GetModuleType(), "ShowCOMEditor", "[Y]", "Opens the COM Editor." );
-    
-        toggleCOMEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
+        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleEditor", "[Y]", "Opens the editor." );
+        toggleEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
+        RegisterKeyMouseBinding( toggleEditor );
 
-        RegisterKeyMouseBinding( toggleCOMEditor );
+        KeyMouseBinding closeEditor = new KeyMouseBinding( GetModuleType(), "CloseEditor", "[ESCAPE]", "Closes the editor." );
+        closeEditor.AddKeyBind( KeyCode.KC_ESCAPE, KeyMouseBinding.KB_EVENT_RELEASE );
+        RegisterKeyMouseBinding( closeEditor );
     }
 
     override void OnUpdate( float timeslice )
@@ -39,12 +44,32 @@ class COTModule : Module
         */
     }
 
-    void ShowCOMEditor()
+    void CloseEditor()
+    {
+        if ( m_EditorMenu && m_EditorMenu.IsVisible() )
+        {
+            m_EditorMenu.Hide();
+        }
+    }
+
+    void ToggleEditor()
     {
         if ( !GetPermissionsManager().HasPermission( "COT.Show", NULL ) )
             return;
 
-        GetGame().GetUIManager().ShowScriptedMenu( new EditorMenu(), NULL );
+        if ( m_EditorMenu == NULL )
+        {
+            m_EditorMenu = new ref EditorMenu;
+            m_EditorMenu.Init();
+        }
+
+        if ( m_EditorMenu.IsVisible() )
+        {
+            m_EditorMenu.Hide();
+        } else
+        {
+            m_EditorMenu.Show();
+        }
     }
 
     void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
