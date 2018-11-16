@@ -135,6 +135,18 @@ PanelWidgetClass PlayerMenu {
      "exact text" 1
      "exact text size" 16
     }
+    PanelWidgetClass disabled {
+     visible 0
+     ignorepointer 0
+     color 0 0 0 0.9
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style rover_sim_colorable
+    }
    }
   }
   PanelWidgetClass permissions_wrapper {
@@ -233,6 +245,18 @@ PanelWidgetClass PlayerMenu {
        "exact text size" 14
       }
      }
+    }
+    PanelWidgetClass disabled {
+     visible 0
+     ignorepointer 1
+     color 0 0 0 0.9
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style rover_sim_colorable
     }
    }
   }

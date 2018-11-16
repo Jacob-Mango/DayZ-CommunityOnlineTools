@@ -11,6 +11,25 @@ ref array< ref AuthPlayer > GetSelectedPlayers()
     return SELECTED_PLAYERS;
 }
 
+bool PlayerAlreadySelected( ref AuthPlayer player )
+{
+    int position = GetSelectedPlayers().Find( player );
+
+    return position > -1;
+}
+
+int RemoveSelectedPlayer( ref AuthPlayer player )
+{
+	int position = GetSelectedPlayers().Find( player );
+
+	if ( position > -1 )
+	{
+		GetSelectedPlayers().Remove( position );
+	}
+
+    return position;
+}
+
 int AddSelectedPlayer( ref AuthPlayer player )
 {
     int position = GetSelectedPlayers().Find( player );
@@ -21,15 +40,31 @@ int AddSelectedPlayer( ref AuthPlayer player )
     return GetSelectedPlayers().Insert( player );
 }
 
+ref PlayerData SerializePlayer( ref AuthPlayer player )
+{
+    player.Serialize();
+
+    return player.GetData();
+}
+
+ref AuthPlayer DeserializePlayer( ref PlayerData data )
+{
+    ref AuthPlayer player = GetPermissionsManager().GetPlayer( data );
+    
+    player.Deserialize();
+
+    return player;
+}
+
 ref array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
 {
     ref array< ref PlayerData > output = new ref array< ref PlayerData >;
+
     for ( int i = 0; i < players.Count(); i++)
     {
-        players[i].Serialize();
-
-        output.Insert( players[i].GetData() );
+        output.Insert( SerializePlayer( players[i] ) );
     }
+
     return output;
 }
 
@@ -39,9 +74,7 @@ ref array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > play
 
     for ( int i = 0; i < players.Count(); i++)
     {
-        ref AuthPlayer player = GetPermissionsManager().GetPlayer( players[i] );
-        player.Deserialize();
-        output.Insert( player );
+        output.Insert( DeserializePlayer( players[i] ) );
     }
 
     return output;

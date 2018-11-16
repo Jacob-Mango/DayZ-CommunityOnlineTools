@@ -176,10 +176,12 @@ class WidgetHandler: ScriptedWidgetEventHandler
 			m_OnClick.Remove( w );
 		}
 
-		Param param2 = new Param4<Widget, int, int, int>( w, x, y, button );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
 
-		return true;
+		Param param2 = new Param4<Widget, int, int, int>( w, x, y, button );
+
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnDoubleClick(Widget w, int x, int y, int button)
@@ -196,9 +198,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, int, int, int>( w, x, y, button );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
 
-		return true;
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 	
 	override bool OnUpdate(Widget w)
@@ -215,9 +218,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param1<Widget>( w );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnMouseLeave(Widget w, Widget enterW, int x, int y)
@@ -234,9 +238,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, Widget, int, int>( w, enterW, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -253,9 +258,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<Widget, int, int>( w, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
@@ -272,9 +278,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, int, int, int>( w, x, y, button );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnMouseButtonUp( Widget w, int x, int y, int button )
@@ -291,9 +298,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, int, int, int>( w, x, y, button );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnDrag(Widget w, int x, int y)
@@ -310,9 +318,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<Widget, int, int>( w, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnDrop(Widget w, int x, int y, Widget reciever)
@@ -329,9 +338,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<Widget, int, int>( w, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnDraggingOver(Widget w, int x, int y, Widget reciever)
@@ -348,9 +358,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, int, int, Widget>( w, x, y, reciever );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnDropReceived( Widget w, int x, int y, Widget reciever )
@@ -372,9 +383,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param4<Widget, int, int, Widget>( w, x, y, reciever );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnFocus( Widget w, int x, int y )
@@ -391,9 +403,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<Widget, int, int>( w, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnFocusLost( Widget w, int x, int y )
@@ -410,9 +423,10 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<Widget, int, int>( w, x, y );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
@@ -429,8 +443,9 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		Param param2 = new Param3<int, int, int>( x, y, wheel );
-		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, NULL, param2 );
-
-		return true;
+		
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
 	}
 }

@@ -31,6 +31,12 @@ class TeleportModule: EditorModule
 
         float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );
 
+        if ( GetGame().GetPlayer().IsInTransport() )
+        {
+            GetPlayer().MessageStatus( "Get out of your vehicle first!" );
+            return;
+        }
+
         if ( distance < 5000 )
         {
             GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
@@ -51,6 +57,8 @@ class TeleportModule: EditorModule
 
         if( type == CallType.Server )
         {
+            EntityAI entity = EntityAI.Cast( target );
+
             target.SetPosition( data.param1 );
         }
     }
@@ -69,9 +77,16 @@ class TeleportModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                Man player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].GetPlayerObject();
 
-                player.SetPosition( data.param1 );
+                if ( player.IsInTransport() )
+                {
+                    // TODO: Can't teleport, crashes server. Fix after release.
+                    // player.GetTransport().SetPosition( data.param1 );
+                } else 
+                {
+                    player.SetPosition( data.param1 );
+                }
             }
         }
     }

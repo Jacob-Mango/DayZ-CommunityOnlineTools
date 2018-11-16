@@ -49,19 +49,15 @@ class PlayerData
         APermissions = new ref array< string >;
     }
 
-    static void Load( ref PlayerData data, Man man )
+    static void Load( ref PlayerData data, PlayerBase player )
     {
         //data.SModel = man.GetType();
 
-        data.VPosition = man.GetPosition();
-        data.VDirection = man.GetDirection();
-        data.VOrientation = man.GetOrientation();
+        data.VPosition = player.GetPosition();
+        data.VDirection = player.GetDirection();
+        data.VOrientation = player.GetOrientation();
         
-        data.FHealth = man.GetHealth("","");
-
-        PlayerBase player = PlayerBase.Cast( man );
-
-        if ( player == NULL ) return;
+        data.FHealth = player.GetHealth("","");
 
         data.FBlood = player.GetHealth("GlobalHealth", "Blood");
         data.IBloodStatType = player.GetStatBloodType().Get();

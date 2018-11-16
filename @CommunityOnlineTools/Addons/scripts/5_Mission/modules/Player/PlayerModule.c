@@ -137,15 +137,16 @@ class PlayerModule: EditorModule
             {
                 ref AuthPlayer player = GetPermissionsManager().GetPlayerByGUID( guids[i] );
 
+                player.ClearPermissions();
+
                 for ( int j = 0; j < perms.Count(); j++ )
                 {
                     player.AddPermission( perms[j] );
                 }
-            }
+                
+                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.GetIdentity() );
 
-            if ( GetGame().IsMultiplayer() )
-            {
-                GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );
+                player.Save();
             }
         }
     }
@@ -211,22 +212,18 @@ class PlayerModule: EditorModule
             
             for ( int i = 0; i < identities.Count(); i++ )
             {
-                Man player = NULL;
+                PlayerBase player = NULL;
 
                 for ( int k = 0; k < ggplayers.Count(); k++ )
                 {
                     if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
                     {
-                        player = ggplayers[k];
+                        player = PlayerBase.Cast( ggplayers[k] );
                     }
                 }
 
                 ref AuthPlayer auth = GetPermissionsManager().GetPlayerByIdentity( identities[i] );
-                auth.UpdatePlayerObject( player );
-
-                auth.GetData().IPingMin = identities[i].GetPingMin();
-                auth.GetData().IPingMax = identities[i].GetPingMax();
-                auth.GetData().IPingAvg = identities[i].GetPingAvg();
+                auth.UpdatePlayerData( player );
             }
 
             if ( GetGame().IsMultiplayer() )
