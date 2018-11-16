@@ -79,3 +79,20 @@ ref array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > play
 
     return output;
 }
+
+ref array< string > SerializePlayersGUID( ref array< ref AuthPlayer > players )
+{
+    ref array< string > output = new ref array< string >;
+
+    for ( int i = 0; i < players.Count(); i++)
+    {
+        output.Insert(  players[i].GetGUID() );
+    }
+
+    return output;
+}
+
+ref array< ref AuthPlayer > DeserializePlayersGUID( ref array< string > guids )
+{
+    return GetPermissionsManager().GetPlayers( guids );
+}

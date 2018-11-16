@@ -145,7 +145,7 @@ class ObjectMenu extends Form
             {
                 if ( GetSelectedPlayers().Count() )
                 {
-                    GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< ref PlayerData > >( strSelection, m_QuantityItem.GetText(), SerializePlayers( GetSelectedPlayers() ) ), true );
+                    GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( strSelection, m_QuantityItem.GetText(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
                 }
             }
         }

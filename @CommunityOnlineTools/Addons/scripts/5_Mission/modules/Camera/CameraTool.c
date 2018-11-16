@@ -22,6 +22,8 @@ class CameraTool: EditorModule
     protected bool m_OrbitalCam = false;
     protected bool m_FreezeCam = false;
 
+	protected float m_SendUpdateAcc = 0.0;
+
     protected bool m_FreezeMouse = false;
     
     static float CAMERA_FOV = 1.0;
@@ -97,11 +99,14 @@ class CameraTool: EditorModule
     
     override void OnUpdate( float timeslice )
     {
-        float speed = 0.2;
-        m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
-        PPEffects.SetBlur( m_CurrentSmoothBlur );
+        if ( GetGame().IsClient() )
+        {
+            float speed = 0.2;
+            m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
+            PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-        UpdateCamera( timeslice );
+            UpdateCamera( timeslice );
+        }
     }
     
     override void RegisterKeyMouseBindings() 
@@ -324,34 +329,28 @@ class CameraTool: EditorModule
         }
     }
     
-    void UpdateCamera( float timeslice) 
+    void UpdateCamera( float timeslice ) 
     {
         if ( m_oCamera ) 
         {
-
             if ( m_CamFOV != m_TargetFOV ) 
             {
-                m_CamFOV = Math.Lerp( m_CamFOV, m_TargetFOV, timeslice*CAMERA_FOV_SPEED_MODIFIER );
+                m_CamFOV = Math.Lerp( m_CamFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
                 m_oCamera.SetFOV( m_CamFOV );
-            }
-
-            vector oldOrient = m_oCamera.GetOrientation();
-            if ( oldOrient[2] != m_TargetRoll ) 
-            {
-                //oldOrient[2] = Math.Lerp( oldOrient[2], m_TargetRoll, timeslice*CAMERA_FOV_SPEED_MODIFIER );
-                //m_oCamera.SetOrientation( oldOrient );
             }
 
             // Camera movement
             Input input = GetGame().GetInput();
+            
+            vector oldOrient = m_oCamera.GetOrientation();
 
             if ( !m_FreezeCam ) 
             {
-                float forward = KeyState(KeyCode.KC_W) - KeyState(KeyCode.KC_S); // -1, 0, 1
-                float strafe = KeyState(KeyCode.KC_D) - KeyState(KeyCode.KC_A);
-                float altitude = KeyState(KeyCode.KC_Q) - KeyState(KeyCode.KC_Z); // change to hardcode keys? these actions can be rebinded via vanilla keybind menu
+                float forward = input.GetAction( UAMoveForward ) - input.GetAction( UAMoveBack );
+                float strafe = input.GetAction( UATurnRight ) - input.GetAction( UATurnLeft );
+                float altitude = input.GetAction( UALeanLeft ) - input.GetAction( UALeanRight );
 
-                if( KeyState(KeyCode.KC_LSHIFT) ) 
+                if( input.GetAction( UATurbo ) ) 
                 {
                     forward *= 10.0;
                     strafe *= 10.0;
@@ -427,14 +426,14 @@ class CameraTool: EditorModule
                 else 
                 {
                     vector pos = m_Target.GetPosition();
-                    pos[1] = GetGame().SurfaceY(pos[0], pos[2]);
+                    pos[1] = GetGame().SurfaceY( pos[0], pos[2] );
                     
                     vector clippingInfo;
                     vector objectBBOX;
                     
-                    m_Target.GetCollisionBox(objectBBOX);
+                    m_Target.GetCollisionBox( objectBBOX );
                     
-                    pos[1] = (pos[1] - objectBBOX[1] + clippingInfo[1] - objectBBOX[1]) + 1.5;
+                    pos[1] = ( pos[1] - objectBBOX[1] + clippingInfo[1] - objectBBOX[1] ) + 1.5;
                     
                     targetPos = pos;
                 }
@@ -450,7 +449,7 @@ class CameraTool: EditorModule
                 {
                     if ( m_DistanceToObject == 0.0 )
                     {
-                        m_DistanceToObject = vector.Distance(GetTargetCenter(), m_oCamera.GetPosition());
+                        m_DistanceToObject = vector.Distance( GetTargetCenter(), m_oCamera.GetPosition() );
                         m_CamOffset = vector.Direction( GetTargetCenter() , m_oCamera.GetPosition() );
                         m_CamOffset.Normalize();
                     }
@@ -479,7 +478,7 @@ class CameraTool: EditorModule
 
                 vector newRoll = m_oCamera.GetOrientation();
                 newRoll[2] = roll;
-                m_oCamera.SetOrientation(newRoll);
+                m_oCamera.SetOrientation( newRoll );
                 dist = vector.Distance( from, m_TargetPos );
             }
             
@@ -487,16 +486,24 @@ class CameraTool: EditorModule
             {
                 if ( CAMERA_AFOCUS && !m_Target ) //auto focus
                 {
-                    vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
+                    vector to = from + ( GetGame().GetCurrentCameraDirection() * 9999 );
                     vector contact_pos;
                     
-                    DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
+                    DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire );
                     dist = vector.Distance( from, contact_pos );
                 }
                 if ( dist > 0 ) CAMERA_FDIST = dist;
                 
-                PPEffects.OverrideDOF(true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET);
+                PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
             }
+
+            if ( m_SendUpdateAcc > 0.5 )
+            {
+                GetGame().UpdateSpectatorPosition( m_oCamera.GetPosition() );
+                m_SendUpdateAcc = 0;
+            }
+            
+            m_SendUpdateAcc = m_SendUpdateAcc + timeslice;
         }
     }
     

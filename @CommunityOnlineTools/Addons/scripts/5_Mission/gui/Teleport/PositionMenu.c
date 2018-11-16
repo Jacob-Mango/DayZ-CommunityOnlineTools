@@ -93,7 +93,7 @@ class PositionMenu extends Form
         vPlayerPos[2] = m_PositionZ.GetText().ToFloat();
 
         vPlayerPos = SnapToGround( vPlayerPos );
-        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< vector, ref array< ref PlayerData > >( vPlayerPos, SerializePlayers( GetSelectedPlayers() ) ), true, NULL );
+        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< vector, ref array< string > >( vPlayerPos, SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL );
     }
 
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )

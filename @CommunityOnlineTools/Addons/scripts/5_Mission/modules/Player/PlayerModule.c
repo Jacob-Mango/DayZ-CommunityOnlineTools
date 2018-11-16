@@ -75,7 +75,7 @@ class PlayerModule: EditorModule
     void SetGodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
         
-        Param2< bool, ref array< ref PlayerData > > data;
+        Param2< bool, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
         if ( data.param1 )
@@ -90,7 +90,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayers( data.param2 );
+            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -133,20 +133,20 @@ class PlayerModule: EditorModule
             ref array< string > guids = new ref array< string >;
             guids.Copy( data.param2 );
 
-            for ( int i = 0; i < guids.Count(); i++ )
-            {
-                ref AuthPlayer player = GetPermissionsManager().GetPlayerByGUID( guids[i] );
+            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
-                player.ClearPermissions();
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                players[i].ClearPermissions();
 
                 for ( int j = 0; j < perms.Count(); j++ )
                 {
-                    player.AddPermission( perms[j] );
+                    players[i].AddPermission( perms[j] );
                 }
                 
-                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.GetIdentity() );
+                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( players[i] ) ), true, players[i].GetIdentity() );
 
-                player.Save();
+                players[i].Save();
             }
         }
     }
@@ -160,10 +160,10 @@ class PlayerModule: EditorModule
 
         if ( type == CallType.Server )
         {
-            ref Param1< ref array< ref PlayerData > > data;
+            ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
+            ref array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
@@ -181,10 +181,10 @@ class PlayerModule: EditorModule
 
         if ( type == CallType.Server )
         {
-            ref Param1< ref array< ref PlayerData > > data;
+            ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
+            ref array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
