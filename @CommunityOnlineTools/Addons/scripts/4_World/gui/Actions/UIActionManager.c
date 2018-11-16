@@ -1,5 +1,17 @@
 class UIActionManager
 {
+    static ref GridSpacerWidget CreateGridSpacer( Widget parent, int rows, int columns )
+    {
+        ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/Wrappers/" + rows.ToString() + "/GridSpacer" + columns.ToString() + ".layout", parent );
+
+        if ( widget )
+        {
+            return GridSpacerWidget.Cast( widget );
+        }
+
+        return NULL;
+    }
+
     static ref UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionButton.layout", parent );

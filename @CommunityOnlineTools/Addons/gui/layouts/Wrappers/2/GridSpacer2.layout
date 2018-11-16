@@ -1,0 +1,11 @@
+GridSpacerWidgetClass spacer {
+ position 0 0
+ size 1 1
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ "Size To Content V" 1
+ Columns 2
+ Rows 2
+}

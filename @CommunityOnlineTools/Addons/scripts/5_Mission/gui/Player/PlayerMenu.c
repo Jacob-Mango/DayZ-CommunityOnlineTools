@@ -81,18 +81,21 @@ class PlayerMenu extends Form
         m_Name = UIActionManager.CreateText( m_ActionsWrapper, "Name: ", "" );
         m_Steam64ID = UIActionManager.CreateText( m_ActionsWrapper, "Steam64: ", "" );
 
-        m_PingMin = UIActionManager.CreateText( m_ActionsWrapper, "Ping Min: ", "" );
-        m_PingMax = UIActionManager.CreateText( m_ActionsWrapper, "Ping Max: ", "" );
-        m_PingAvg = UIActionManager.CreateText( m_ActionsWrapper, "Ping Avg: ", "" );
+        ref Widget pings = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+        m_PingMin = UIActionManager.CreateText( pings, "Ping Min: ", "" );
+        m_PingMax = UIActionManager.CreateText( pings, "Ping Max: ", "" );
+        m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
 
-        m_Health = UIActionManager.CreateEditableText( m_ActionsWrapper, "Health: ", "", "Set", this, "Click_SetHealth" );
-        m_Blood = UIActionManager.CreateEditableText( m_ActionsWrapper, "Blood: ", "", "Set", this, "Click_SetBlood" );
-        m_Energy = UIActionManager.CreateEditableText( m_ActionsWrapper, "Energy: ", "", "Set", this, "Click_SetEnergy" );
-        m_Water = UIActionManager.CreateEditableText( m_ActionsWrapper, "Water: ", "", "Set", this, "Click_SetWater" );
+        ref Widget lifeStats = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
+        m_Health = UIActionManager.CreateEditableText( lifeStats, "Health: ", "", "Set", this, "Click_SetHealth" );
+        m_Blood = UIActionManager.CreateEditableText( lifeStats, "Blood: ", "", "Set", this, "Click_SetBlood" );
+        m_Energy = UIActionManager.CreateEditableText( lifeStats, "Energy: ", "", "Set", this, "Click_SetEnergy" );
+        m_Water = UIActionManager.CreateEditableText( lifeStats, "Water: ", "", "Set", this, "Click_SetWater" );
 
-        m_ModifyPermissions = UIActionManager.CreateButton( m_ActionsWrapper, "Modify Permissions", this, "Click_ModifyPermissions" );
-        m_BanPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Ban Player", this, "Click_BanPlayer" );
-        m_KickPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Kick Player", this, "Click_KickPlayer" );
+        ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+        m_ModifyPermissions = UIActionManager.CreateButton( playerActions, "Modify Permissions", this, "Click_ModifyPermissions" );
+        m_BanPlayer = UIActionManager.CreateButton( playerActions, "Ban Player", this, "Click_BanPlayer" );
+        m_KickPlayer = UIActionManager.CreateButton( playerActions, "Kick Player", this, "Click_KickPlayer" );
 
         m_GodMode = UIActionManager.CreateCheckbox( m_ActionsWrapper, "Godmode", false, this, "Click_GodMode" );
 
@@ -110,37 +113,37 @@ class PlayerMenu extends Form
 
     void Click_BanPlayer()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_KickPlayer()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetHealth( ref UIActionEditableText action )
     {
-        string text = action.GetText();
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBlood( ref UIActionEditableText action )
     {
-        string text = action.GetText();
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetEnergy( ref UIActionEditableText action )
     {
-        string text = action.GetText();
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetWater( ref UIActionEditableText action )
     {
-        string text = action.GetText();
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_GodMode( ref UIActionCheckbox action )
     {
-        GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< ref PlayerData > >( action.IsChecked(), SerializePlayers( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void UpdateActionsFields( ref PlayerData data )
@@ -419,16 +422,7 @@ class PlayerMenu extends Form
     {
         Print("PlayerMenu::SetPermissions");
 
-        ref array< string > guids = new ref array< string >;
-
-        ref array< ref AuthPlayer > players = GetSelectedPlayers();
-
-        for ( int i = 0; i < players.Count(); i++ )
-        {
-            guids.Insert( players[i].GetGUID() );
-        }
-
-        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), guids ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void UpdatePlayerList()

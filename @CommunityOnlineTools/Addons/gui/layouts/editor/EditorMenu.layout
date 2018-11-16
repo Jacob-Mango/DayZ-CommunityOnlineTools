@@ -55,7 +55,8 @@ FrameWidgetClass EditorMenu {
        valign center_ref
        text "Community Online Tools"
        "exact text" 1
-       "exact text size" 30
+       "exact text size" 28
+       "bold text" 1
        "text halign" center
       }
      }

@@ -66,12 +66,12 @@ class ObjectModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Inventory", sender ) )
             return;
 
-        ref Param3< string, string, ref array< ref PlayerData > > data;
+        ref Param3< string, string, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
         
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayers( data.param3 );
+            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param3 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {

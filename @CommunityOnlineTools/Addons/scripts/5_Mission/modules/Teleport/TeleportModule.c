@@ -68,12 +68,12 @@ class TeleportModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
             return;
 
-        Param2< vector, ref array< ref PlayerData > > data;
+        Param2< vector, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayers( data.param2 );
+            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
