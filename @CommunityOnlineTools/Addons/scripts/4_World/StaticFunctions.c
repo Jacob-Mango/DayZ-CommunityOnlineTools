@@ -1,5 +1,7 @@
 // TODO: MOVE ALL THIS INTO A SEPERATE MOD
 
+static Camera COTCamera; // active static camera "staticcamera"
+
 static string FormatFloat( float value, int decimals ) 
 {
     string result = "";

@@ -1,10 +1,9 @@
 @echo off
 
-set workspaceDir=%~1
-set gameDir=%~2
-set serverDir=%~3
-set modName=%~4
-set missionName=%~5
+set gameDir=%~1
+set serverDir=%~2
+set modName=%~3
+set missionName=%~4
 
 set profiles=%serverDir%\profiles\Server
 
@@ -14,7 +13,7 @@ taskkill /F /IM DayZServer_x64.exe /T
 TIMEOUT /T 1 /NOBREAK
 
 chdir /c "%workspaceDir%"
-CALL deploy.bat %1 %2 %3 %4 %5
+CALL deploy.bat %1 %2 %3 %4
 
 chdir /d "%serverDir%"
 

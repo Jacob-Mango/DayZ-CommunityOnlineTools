@@ -1,7 +1,7 @@
 class CameraTool: EditorModule
 {
-    protected Camera m_oCamera; // active static camera "staticcamera"
-
+    protected bool m_InCamera;
+    
     protected ref array<vector> m_cKeyframes = new array<vector>;
 
     // float velocity = vector magnitutde
@@ -144,7 +144,7 @@ class CameraTool: EditorModule
 
     Camera GetCamera()
     {
-        return m_oCamera;
+        return COTCamera;
     }
 
     void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -173,7 +173,11 @@ class CameraTool: EditorModule
 
         if( type == CallType.Client || cont )
         {
-            m_oCamera = Camera.GetCurrentCamera();
+            COTCamera = Camera.GetCurrentCamera();
+
+            m_InCamera = true;
+            
+            GetPlayer().GetInputController().SetDisabled( true );
         }
     }
 
@@ -209,9 +213,9 @@ class CameraTool: EditorModule
 
         if( type == CallType.Client || cont )
         {
-            m_oCamera.SetActive( false );
+            COTCamera.SetActive( false );
 
-            m_oCamera = NULL;
+            COTCamera = NULL;
             
             m_CamFOV = 1.0;
             m_TargetFOV = 1.0;
@@ -224,6 +228,10 @@ class CameraTool: EditorModule
             m_TargetPos = vector.Zero;
             
             PPEffects.ResetDOFOverride();
+
+            GetPlayer().GetInputController().SetDisabled( false );
+
+            m_InCamera = false;
         }
     }
 
@@ -231,7 +239,7 @@ class CameraTool: EditorModule
     {
         Print("CameraTool::EnableCamera");
 
-        if ( m_oCamera )
+        if ( m_InCamera )
         {
             return;
         }
@@ -245,15 +253,15 @@ class CameraTool: EditorModule
     {
         Print("CameraTool::DisableCamera");
 
-        if ( m_oCamera )
+        if ( m_InCamera && COTCamera )
         {
             SetFreezeMouse(false);
 
             vector position = "0 0 0";
 
-            if( CTRL() || SHIFT() ) // Extra
+            if( CTRL() || SHIFT() )
             {
-                position = m_oCamera.GetPosition();
+                position = COTCamera.GetPosition();
                 position[1] = GetGame().SurfaceY( position[0], position[2] );
             }
             else
@@ -268,7 +276,7 @@ class CameraTool: EditorModule
     void ToggleCamera() 
     {
         Print("CameraTool::ToggleCamera");
-        if ( m_oCamera )
+        if ( COTCamera )
         {
             DisableCamera();
         }
@@ -280,7 +288,7 @@ class CameraTool: EditorModule
     
     void TargetCamera() 
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( GetGame().GetUIManager().IsCursorVisible() ) 
             {
@@ -331,18 +339,18 @@ class CameraTool: EditorModule
     
     void UpdateCamera( float timeslice ) 
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( m_CamFOV != m_TargetFOV ) 
             {
                 m_CamFOV = Math.Lerp( m_CamFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
-                m_oCamera.SetFOV( m_CamFOV );
+                COTCamera.SetFOV( m_CamFOV );
             }
 
             // Camera movement
             Input input = GetGame().GetInput();
             
-            vector oldOrient = m_oCamera.GetOrientation();
+            vector oldOrient = COTCamera.GetOrientation();
 
             if ( !m_FreezeCam ) 
             {
@@ -360,10 +368,10 @@ class CameraTool: EditorModule
                 float cam_speed = CAMERA_SPEED;
 
                 vector up = vector.Up;
-                vector direction = m_oCamera.GetDirection();
+                vector direction = COTCamera.GetDirection();
                 vector directionAside = vector.Up * direction;
 
-                vector oldPos = m_oCamera.GetPosition();
+                vector oldPos = COTCamera.GetPosition();
 
                 up = up * altitude * cam_speed;
                 direction = direction * forward * cam_speed;
@@ -380,7 +388,7 @@ class CameraTool: EditorModule
                     newPos[1] = surfaceY;
                 }
 
-                m_oCamera.SetPosition(newPos);
+                COTCamera.SetPosition(newPos);
             }
 
             if ( !m_FreezeMouse ) 
@@ -407,7 +415,7 @@ class CameraTool: EditorModule
                 if( newOrient[1] > 89 )
                     newOrient[1] = 89;
 
-                m_oCamera.SetOrientation( newOrient );
+                COTCamera.SetOrientation( newOrient );
             }
 
 
@@ -440,7 +448,7 @@ class CameraTool: EditorModule
                 
                 if ( m_OrbitalCam ) 
                 {
-                    m_oCamera.LookAt( targetPos );
+                    COTCamera.LookAt( targetPos );
                 }
                 
                 dist = vector.Distance( from, targetPos );
@@ -449,14 +457,14 @@ class CameraTool: EditorModule
                 {
                     if ( m_DistanceToObject == 0.0 )
                     {
-                        m_DistanceToObject = vector.Distance( GetTargetCenter(), m_oCamera.GetPosition() );
-                        m_CamOffset = vector.Direction( GetTargetCenter() , m_oCamera.GetPosition() );
+                        m_DistanceToObject = vector.Distance( GetTargetCenter(), COTCamera.GetPosition() );
+                        m_CamOffset = vector.Direction( GetTargetCenter() , COTCamera.GetPosition() );
                         m_CamOffset.Normalize();
                     }
                     
                     if ( m_OrbitalCam ) 
                     {
-                        direction = vector.Direction( GetTargetCenter() , m_oCamera.GetPosition() );
+                        direction = vector.Direction( GetTargetCenter() , COTCamera.GetPosition() );
                         direction.Normalize();
                         newPos = GetTargetCenter() + ( direction * m_DistanceToObject );
                     } 
@@ -465,20 +473,20 @@ class CameraTool: EditorModule
                         newPos = GetTargetCenter() + ( m_CamOffset * m_DistanceToObject );
                     }
                     
-                    m_oCamera.SetPosition( newPos );
+                    COTCamera.SetPosition( newPos );
                     dist = m_DistanceToObject;
                 }
             }
             else if ( m_TargetPos != vector.Zero ) 
             {
-                // m_oCamera.LookAt( m_TargetPos ); // auto orbital
-                vector lookDir = m_TargetPos - m_oCamera.GetPosition();
-                float roll = m_oCamera.GetOrientation()[2];
-                m_oCamera.SetDirection( lookDir );
+                // COTCamera.LookAt( m_TargetPos ); // auto orbital
+                vector lookDir = m_TargetPos - COTCamera.GetPosition();
+                float roll = COTCamera.GetOrientation()[2];
+                COTCamera.SetDirection( lookDir );
 
-                vector newRoll = m_oCamera.GetOrientation();
+                vector newRoll = COTCamera.GetOrientation();
                 newRoll[2] = roll;
-                m_oCamera.SetOrientation( newRoll );
+                COTCamera.SetOrientation( newRoll );
                 dist = vector.Distance( from, m_TargetPos );
             }
             
@@ -499,7 +507,7 @@ class CameraTool: EditorModule
 
             if ( m_SendUpdateAcc > 0.5 )
             {
-                GetGame().UpdateSpectatorPosition( m_oCamera.GetPosition() );
+                GetGame().UpdateSpectatorPosition( COTCamera.GetPosition() );
                 m_SendUpdateAcc = 0;
             }
             
@@ -509,7 +517,7 @@ class CameraTool: EditorModule
     
     void CameraSpeed() 
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( GetGame().GetUIManager().IsCursorVisible() ) 
             {
@@ -519,9 +527,9 @@ class CameraTool: EditorModule
 
             if ( ALT() ) 
             {
-                vector ori = m_oCamera.GetOrientation();
+                vector ori = COTCamera.GetOrientation();
                 ori[2] = ori[2] - i*5;
-                m_oCamera.SetOrientation( ori );
+                COTCamera.SetOrientation( ori );
                 //m_TargetRoll = ori[2] - i*5; // redo this
                 //Message(m_TargetRoll.ToString());
             }
@@ -544,7 +552,7 @@ class CameraTool: EditorModule
 
     void ZoomCamera() 
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( GetGame().GetUIManager().IsCursorVisible() ) 
             {
@@ -562,12 +570,12 @@ class CameraTool: EditorModule
                 {
                     m_TargetFOV = 0.01;
                 }
-                //m_oCamera.SetFOV(m_CamFOV);
+                //COTCamera.SetFOV(m_CamFOV);
             }
         }
         
         /*
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( GetGame().GetUIManager().IsCursorVisible() ) 
             {
@@ -585,7 +593,7 @@ class CameraTool: EditorModule
 
             if ( CTRL() ) 
             {
-                vector ori = m_oCamera.GetOrientation();
+                vector ori = COTCamera.GetOrientation();
                 m_TargetRoll = ori[2] - Math.RAD2DEG * i*0.09;
             }
             else 
@@ -596,14 +604,14 @@ class CameraTool: EditorModule
                     m_TargetFOV = 0.01;
                 }
             }
-            //m_oCamera.SetFOV(m_CamFOV);    
+            //COTCamera.SetFOV(m_CamFOV);    
         }
         */
     }
     
     void FreezeCamera() 
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             SetFreezeCam(!m_FreezeCam);
         }        
@@ -611,7 +619,7 @@ class CameraTool: EditorModule
     
     void FollowTarget()
     {
-        if ( m_oCamera ) 
+        if ( COTCamera ) 
         {
             if ( m_Target || m_TargetPos != vector.Zero ) 
             {
@@ -630,7 +638,7 @@ class CameraTool: EditorModule
     
     void ToggleOrbital() 
     {
-        if ( m_oCamera )
+        if ( COTCamera )
         {
             if ( m_Target || m_TargetPos != vector.Zero ) 
             {
@@ -646,7 +654,7 @@ class CameraTool: EditorModule
     
     bool IsUsingCamera() 
     {
-        return m_oCamera != NULL;
+        return COTCamera != NULL;
     }
     
     vector GetTargetCenter() 

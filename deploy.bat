@@ -1,10 +1,10 @@
 @echo off
 
-set workspaceDir=%~1
-set gameDir=%~2
-set serverDir=%~3
-set modName=%~4
-set missionName=%~5
+set workspaceDir=%cd%
+set gameDir=%~1
+set serverDir=%~2
+set modName=%~3
+set missionName=%~4
 
 set tempFolder=%workspaceDir%\BIN
 
