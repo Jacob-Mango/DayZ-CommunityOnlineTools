@@ -1,22 +1,18 @@
 class PositionMenu extends Form
 {
     protected TextListboxWidget m_LstPositionList;
-    protected EditBoxWidget m_TxtSelectedX;
-    protected EditBoxWidget m_TxtSelectedY;
-    protected EditBoxWidget m_TxtCurrentX;
-    protected EditBoxWidget m_TxtCurrentY;
-    protected ButtonWidget m_TeleportButton;
-    protected ButtonWidget m_CancelButton;
+    protected Widget m_ActionsWrapper;
+
+    protected UIActionEditableText m_PositionX;
+    protected UIActionEditableText m_PositionZ;
+    protected UIActionButton m_Teleport;
 
     protected autoptr map< string, vector > m_oPositions = new map< string, vector >;
 
-    protected bool m_bOverCurrentPos;
-
     void PositionMenu()
     {
-        m_bOverCurrentPos = false;
-
         // TODO: Move to Teleport module and only reference position by array index for security. (Maybe read from file?)
+        // Moved to post release...
         m_oPositions.Insert( "Severograd", "8428.0 0.0 12767.1" );
         m_oPositions.Insert( "Krasnostav", "11172.0 0.0 12314.1" );
         m_oPositions.Insert( "Mogilevka", "7583.0 0.0 5159.4" );
@@ -63,12 +59,12 @@ class PositionMenu extends Form
     void Init()
     {
         m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
-        m_TxtSelectedX = EditBoxWidget.Cast( layoutRoot.FindAnyWidget("pnl_ppp_pm_selected_x_value") );
-        m_TxtSelectedY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget("pnl_ppp_pm_selected_y_value") );
-        m_TxtCurrentX = EditBoxWidget.Cast( layoutRoot.FindAnyWidget("pnl_ppp_pm_current_x_value") );
-        m_TxtCurrentY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget("pnl_ppp_pm_current_y_value") );
-        m_TeleportButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget("btn_ppp_pm_teleport") );
-        m_CancelButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget("btn_ppp_pm_cancel") );
+
+        m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+
+        m_PositionX = UIActionManager.CreateEditableText( m_ActionsWrapper, "X: " );
+        m_PositionZ = UIActionManager.CreateEditableText( m_ActionsWrapper, "Z: " );
+        m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "Teleport", this, "Click_Teleport" );
 
         for ( int nPosition = 0; nPosition < m_oPositions.Count(); nPosition++ )
         {
@@ -81,8 +77,8 @@ class PositionMenu extends Form
         super.OnShow();
         vector player_pos = GetGame().GetPlayer().GetPosition();
 
-        m_TxtCurrentX.SetText( player_pos[0].ToString() );
-        m_TxtCurrentY.SetText( player_pos[2].ToString() );
+        m_PositionX.SetText( player_pos[0].ToString() );
+        m_PositionZ.SetText( player_pos[2].ToString() );
     }
 
     override void OnHide()
@@ -90,74 +86,14 @@ class PositionMenu extends Form
         super.OnHide();
     }
 
-    override bool OnMouseEnter(Widget w, int x, int y)
+    void Click_Teleport()
     {
-        if ( w == m_TxtCurrentX || w == m_TxtCurrentY )
-        {
-            m_bOverCurrentPos = true;
-        }
+        vector vPlayerPos;
+        vPlayerPos[0] = m_PositionX.GetText().ToFloat();
+        vPlayerPos[2] = m_PositionZ.GetText().ToFloat();
 
-        return false;
-    }
-
-    override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
-    {
-        if ( w == m_TxtCurrentX || w == m_TxtCurrentY )
-        {
-            m_bOverCurrentPos = false;
-        }
-
-        return false;
-    }
-
-    override bool OnKeyPress( Widget w, int x, int y, int key )
-    {
-        if ( m_bOverCurrentPos )
-        {
-            m_TxtSelectedX.SetText( "" );
-            m_TxtSelectedY.SetText( "" );
-        }
-
-        return false;
-    }
-
-    override bool OnClick( Widget w, int x, int y, int button )
-    {
-        if ( w == m_TeleportButton )
-        {
-            float pos_x = 0;
-            float pos_y = 0;
-
-            if( ( m_TxtSelectedX.GetText() != "" ) && ( m_TxtSelectedY.GetText() != "" ) )
-            {
-                pos_x = m_TxtSelectedX.GetText().ToFloat();
-                pos_y = m_TxtSelectedY.GetText().ToFloat();
-            }
-            else if( ( m_TxtCurrentX.GetText() != "" ) && ( m_TxtCurrentY.GetText() != "" ) )
-            {
-                pos_x = m_TxtCurrentX.GetText().ToFloat();
-                pos_y = m_TxtCurrentY.GetText().ToFloat();
-            }
-            else
-            {
-                PlayerBase oPlayer = GetGame().GetPlayer();
-                oPlayer.MessageStatus( "Invalid teleportation position!" );
-
-                return true;
-            }
-
-            vector vPlayerPos;
-            vPlayerPos[0] = pos_x;
-            vPlayerPos[2] = pos_y;
-
-            vPlayerPos = SnapToGround( vPlayerPos );
-
-            GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< vector, ref array< ref PlayerData > >( vPlayerPos, SerializePlayers( GetSelectedPlayers() ) ), true, NULL );
-
-            return true;
-        }
-
-        return false;
+        vPlayerPos = SnapToGround( vPlayerPos );
+        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< vector, ref array< ref PlayerData > >( vPlayerPos, SerializePlayers( GetSelectedPlayers() ) ), true, NULL );
     }
 
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
@@ -169,8 +105,8 @@ class PositionMenu extends Form
             position = "0 0 0";
         }
 
-        m_TxtSelectedX.SetText( position[0].ToString() );
-        m_TxtSelectedY.SetText( position[2].ToString() );
+        m_PositionX.SetText( position[0].ToString() );
+        m_PositionZ.SetText( position[2].ToString() );
 
         return true;
     }

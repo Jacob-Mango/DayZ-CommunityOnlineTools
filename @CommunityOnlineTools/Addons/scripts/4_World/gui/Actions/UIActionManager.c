@@ -18,7 +18,7 @@ class UIActionManager
         return NULL;
     }
 
-    static ref UIActionEditableText CreateEditableText( Widget parent, string label, string text, string button, Class instance, string funcname )
+    static ref UIActionEditableText CreateEditableText( Widget parent, string label, string text = "", string button = "", Class instance = NULL, string funcname = "" )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionEditableText.layout", parent );
 
@@ -27,8 +27,17 @@ class UIActionManager
 
         if ( action )
         {
-            action.SetCallback( instance, funcname );
-            action.SetButton( button );
+            if ( button == "" || instance == NULL || funcname == "" )
+            {
+                action.HasButton( false );
+            } else 
+            {
+                action.HasButton( true );
+
+                action.SetButton( button );
+                action.SetCallback( instance, funcname );
+            }
+
             action.SetLabel( label );
             action.SetText( text );
 
