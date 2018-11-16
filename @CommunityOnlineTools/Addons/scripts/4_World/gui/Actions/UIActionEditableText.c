@@ -9,11 +9,6 @@ class UIActionEditableText extends UIActionBase
 
     override void OnInit() 
     {
-        m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
-        m_Text = EditBoxWidget.Cast(layoutRoot.FindAnyWidget("action_editable_text"));
-        m_Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("action_button"));
-
-        WidgetHandler.GetInstance().RegisterOnClick( m_Button, this, "OnClick" );
     }
 
     override void OnShow()
@@ -22,6 +17,29 @@ class UIActionEditableText extends UIActionBase
 
     override void OnHide() 
     {
+    }
+
+    void HasButton( bool enabled )
+    {
+        if ( enabled )
+        {
+            layoutRoot.FindAnyWidget( "action_button_no" ).Show( false );
+
+            layoutRoot = layoutRoot.FindAnyWidget( "action_button_yes" );
+            layoutRoot.Show( true );
+        } else
+        {
+            layoutRoot.FindAnyWidget( "action_button_yes" ).Show( false );
+
+            layoutRoot = layoutRoot.FindAnyWidget( "action_button_no" );
+            layoutRoot.Show( true );
+        }
+
+        m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
+        m_Text = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text" ) );
+        m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
+
+        WidgetHandler.GetInstance().RegisterOnClick( m_Button, this, "OnClick" );
     }
 
     void SetLabel( string text )

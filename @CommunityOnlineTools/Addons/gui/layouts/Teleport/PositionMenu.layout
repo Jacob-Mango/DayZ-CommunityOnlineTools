@@ -1,146 +1,38 @@
-PanelWidgetClass PositionMenu
-{
-    visible 0
-    color 0 0 0 0
-    position 0 0
-    size 250 450
-    hexactpos 0
-    vexactpos 0
-    hexactsize 1
-    vexactsize 1
-    scriptclass "PositionMenu"
-    {
-        TextListboxWidgetClass tls_ppp_pm_positions_list
-        {
-            visible 1
-            position 0.02 30
-            size 0.96 235
-            hexactpos 0
-            vexactpos 1
-            hexactsize 0
-            vexactsize 1
-            style Editor
-            lines 20
-            font "gui/fonts/Metron14"
-        }
-
-        TextWidgetClass txt_ppp_pm_selected_position
-        {
-            position 6.0025 274.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "Teleportation target position:"
-        }
-
-        TextWidgetClass pnl_ppp_pm_selected_x
-        {
-            position 14.0025 298.99689
-            size 16 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "X:"
-        }
-
-        TextWidgetClass pnl_ppp_pm_selected_y
-        {
-            position 14.0025 322.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "Y:"
-        }
-
-        EditBoxWidgetClass pnl_ppp_pm_selected_x_value
-        {
-            position 30 299
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-        }
-
-        EditBoxWidgetClass pnl_ppp_pm_selected_y_value
-        {
-            position 30 323
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-        }
-
-        TextWidgetClass txt_ppp_pm_current_position
-        {
-            position 6.0025 358.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "Your position:"
-        }
-
-        TextWidgetClass pnl_ppp_pm_current_x
-        {
-            position 14.0025 382.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "X:"
-        }
-
-        TextWidgetClass pnl_ppp_pm_current_y
-        {
-            position 14.0025 406.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "Y:"
-        }
-
-        EditBoxWidgetClass pnl_ppp_pm_current_x_value
-        {
-            position 30 382.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-        }
-
-        EditBoxWidgetClass pnl_ppp_pm_current_y_value
-        {
-            position 30 406.99689
-            size 267 17
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-        }
-
-        ButtonWidgetClass btn_ppp_pm_teleport
-        {
-            position 5 5
-            size 80 20
-            halign right_ref
-            valign bottom_ref
-            hexactpos 1
-            vexactpos 1
-            hexactsize 1
-            vexactsize 1
-            text "Teleport"
-        }
-    }
+PanelWidgetClass PositionMenu {
+ visible 0
+ color 0 0 0 0
+ position 0 0
+ size 250 400
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "PositionMenu"
+ {
+  TextListboxWidgetClass tls_ppp_pm_positions_list {
+   visible 1
+   position 5 5
+   size 240 300
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Editor
+   lines 20
+   font "gui/fonts/sdf_MetronLight24"
+   "exact text" 1
+   "exact text size" 16
+  }
+  GridSpacerWidgetClass actions_wrapper {
+   position 0 310
+   size 1 70
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   "Size To Content V" 1
+   Columns 1
+   Rows 3
+  }
+ }
 }
