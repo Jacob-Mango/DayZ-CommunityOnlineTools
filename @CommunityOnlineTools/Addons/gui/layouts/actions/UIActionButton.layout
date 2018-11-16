@@ -1,12 +1,10 @@
-GridSpacerWidgetClass action_button_wrapper {
- size 1 24
+PanelWidgetClass action_button_wrapper {
+ size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
  vexactsize 1
  scriptclass "UIActionButton"
- Columns 1
- Rows 1
  {
   ButtonWidgetClass action_button {
    size 1 1
@@ -21,11 +19,11 @@ GridSpacerWidgetClass action_button_wrapper {
      vexactsize 0
      style Light
      text "{BUTTON}"
-     "text halign" center
-     "text valign" center
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
-     "exact text size" 14
+     "exact text size" 16
+     "text halign" center
+     "text valign" center
     }
    }
   }

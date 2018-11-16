@@ -31,6 +31,8 @@ class PlayerMenu extends Form
 
     ref UIActionEditableText m_Health;
     ref UIActionEditableText m_Blood;
+    ref UIActionEditableText m_Energy;
+    ref UIActionEditableText m_Water;
 
     ref UIActionButton m_ModifyPermissions;
     ref UIActionButton m_BanPlayer;
@@ -80,11 +82,13 @@ class PlayerMenu extends Form
         m_Steam64ID = UIActionManager.CreateText( m_ActionsWrapper, "Steam64: ", "" );
 
         m_PingMin = UIActionManager.CreateText( m_ActionsWrapper, "Ping Min: ", "" );
-        m_PingMax = UIActionManager.CreateText( m_ActionsWrapper, "Ping Man: ", "" );
+        m_PingMax = UIActionManager.CreateText( m_ActionsWrapper, "Ping Max: ", "" );
         m_PingAvg = UIActionManager.CreateText( m_ActionsWrapper, "Ping Avg: ", "" );
 
         m_Health = UIActionManager.CreateEditableText( m_ActionsWrapper, "Health: ", "", "Set", this, "Click_SetHealth" );
         m_Blood = UIActionManager.CreateEditableText( m_ActionsWrapper, "Blood: ", "", "Set", this, "Click_SetBlood" );
+        m_Energy = UIActionManager.CreateEditableText( m_ActionsWrapper, "Energy: ", "", "Set", this, "Click_SetEnergy" );
+        m_Water = UIActionManager.CreateEditableText( m_ActionsWrapper, "Water: ", "", "Set", this, "Click_SetWater" );
 
         m_ModifyPermissions = UIActionManager.CreateButton( m_ActionsWrapper, "Modify Permissions", this, "Click_ModifyPermissions" );
         m_BanPlayer = UIActionManager.CreateButton( m_ActionsWrapper, "Ban Player", this, "Click_BanPlayer" );
@@ -124,9 +128,19 @@ class PlayerMenu extends Form
         string text = action.GetText();
     }
 
+    void Click_SetEnergy( ref UIActionEditableText action )
+    {
+        string text = action.GetText();
+    }
+
+    void Click_SetWater( ref UIActionEditableText action )
+    {
+        string text = action.GetText();
+    }
+
     void Click_GodMode( ref UIActionCheckbox action )
     {
-        GetRPCManager().SendRPC( "COT_Game", "GodMode", new Param2< bool, ref array< ref PlayerData > >( action.IsChecked(), SerializePlayers( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< ref PlayerData > >( action.IsChecked(), SerializePlayers( GetSelectedPlayers() ) ), true );
     }
 
     void UpdateActionsFields( ref PlayerData data )
@@ -137,18 +151,35 @@ class PlayerMenu extends Form
             m_Name.SetText( data.SName );
             m_Steam64ID.SetText( data.SSteam64ID );
 
+            m_Health.SetText( data.FHealth.ToString() );
+            m_Blood.SetText( data.FBlood.ToString() );
+            m_Energy.SetText( data.FEnergy.ToString() );
+            m_Water.SetText( data.FWater.ToString() );
+
             m_PingMin.SetText( data.IPingMin.ToString() );
             m_PingMax.SetText( data.IPingMax.ToString() );
             m_PingAvg.SetText( data.IPingAvg.ToString() );
+
+            m_ActionsForm.FindAnyWidget("disabled").Show( false );
         } else 
         {
             m_GUID.SetText( "" );
             m_Name.SetText( "" );
             m_Steam64ID.SetText( "" );
 
+            m_Health.SetText( "" );
+            m_Blood.SetText( "" );
+            m_Energy.SetText( "" );
+            m_Water.SetText( "" );
+
             m_PingMin.SetText( "" );
             m_PingMax.SetText( "" );
             m_PingAvg.SetText( "" );
+
+            m_ActionsForm.Show( true );
+            m_PermissionsWrapper.Show( false );
+
+            m_ActionsForm.FindAnyWidget("disabled").Show( true );
         }
     }
 
@@ -165,13 +196,21 @@ class PlayerMenu extends Form
 
         m_PermissionsWrapper.Show( false );
         m_ActionsWrapper.Show( true );
-        
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater( UpdateList, 1000, true );
+
+        if ( GetSelectedPlayers().Count() != 0 )
+        {
+            UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
+        } else
+        {
+            UpdateActionsFields( NULL );
+        }
+
+        GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
     }
 
     override void OnHide() 
     {
-        GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Remove( UpdateList );
+        GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
     }
 
     void UpdateList()
@@ -213,7 +252,7 @@ class PlayerMenu extends Form
             OnPlayerSelected( row );
         } else 
         {
-            OnPlayerSelected( NULL );
+            OnPlayerSelected( row, false );
         }
     }
 
@@ -227,7 +266,7 @@ class PlayerMenu extends Form
         }
     }
 
-    bool OnPlayerSelected( ref PlayerRow row )
+    bool OnPlayerSelected( ref PlayerRow row, bool select = true )
     {
         if ( row == NULL )
         {
@@ -245,15 +284,42 @@ class PlayerMenu extends Form
             return false;
         } else 
         {
-            int position = AddSelectedPlayer( row.GetPlayer() );
+            int position = -1;
 
-            if ( GetSelectedPlayers().Count() == 1 )
+            if ( select )
             {
-                UpdateActionsFields( row.GetPlayer().GetData() );
-            }
+                position = AddSelectedPlayer( row.GetPlayer() );
 
-            LoadPermissions( GetSelectedPlayers()[0].RootPermission );
-            return true;
+                if ( GetSelectedPlayers().Count() == 1 )
+                {
+                    UpdateActionsFields( row.GetPlayer().GetData() );
+
+                    LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                }
+
+                row.Checkbox.SetChecked( true );
+
+                return true;
+            } else
+            {
+                position = RemoveSelectedPlayer( row.GetPlayer() );
+
+                if ( position == 0 )
+                {
+                    if (GetSelectedPlayers().Count() > 0 )
+                    {
+                        UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
+                        LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                    } else 
+                    {
+                        UpdateActionsFields( NULL );
+                    }
+                }
+
+                row.Checkbox.SetChecked( false );
+
+                return true;
+            }
         }
     }
 
@@ -396,6 +462,11 @@ class PlayerMenu extends Form
                 rowScript.Menu = this;
 
                 m_PlayerList.Insert( rowScript );
+
+                if ( PlayerAlreadySelected( players[i] ) )
+                {
+                    OnPlayerSelected( rowScript, true );
+                }
             }
         }
 

@@ -5,10 +5,10 @@ class AuthPlayer
 
     ref Permission RootPermission;
 
-    protected Man m_Man;
-    protected PlayerIdentity m_Identity;
+    PlayerBase m_Man;
+    PlayerIdentity m_Identity;
 
-    protected ref PlayerData m_Data;
+    ref PlayerData m_Data;
 
     void AuthPlayer( PlayerData data )
     {
@@ -56,16 +56,20 @@ class AuthPlayer
         return m_Data.SName;
     }
 
-    ref Man GetPlayerObject()
+    ref PlayerBase GetPlayerObject()
     {
         return m_Man;
     }
 
-    void UpdatePlayerObject( ref Man obj )
+    void UpdatePlayerData( ref PlayerBase obj )
     {
         m_Man = obj;
 
         PlayerData.Load( m_Data, m_Man );
+
+        m_Data.IPingMin = m_Identity.GetPingMin();
+        m_Data.IPingMax = m_Identity.GetPingMax();
+        m_Data.IPingAvg = m_Identity.GetPingAvg();
     }
 
     void CopyPermissions( ref Permission copy )
@@ -190,17 +194,28 @@ class AuthPlayer
     // TODO: Figure out how to make it work properly?
     void Kick()
     {
-        if ( m_Identity )
-        {
-            GetGame().DisconnectPlayer( m_Identity, m_Identity.GetId() );
-        }
+        ForceDisconnect();
     }
 
     // TODO: Maybe actually ban the player?
     void Ban()
     {
+        ForceDisconnect();
+    }
+
+    private void ForceDisconnect()
+    {
         if ( m_Identity )
         {
+            if ( m_Man.CanBeDeleted() )
+            {
+                m_Man.Delete();	
+            }
+            else
+            {
+                m_Man.SetHealth( "", "", 0.0 );
+            }
+
             GetGame().DisconnectPlayer( m_Identity, m_Identity.GetId() );
         }
     }

@@ -54,15 +54,10 @@ class COTModule : Module
 
         if ( type == CallType.Client )
         {
-            ref Param1< ref array< ref PlayerData > > data;
+            ref Param1< ref PlayerData > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayers( data.param1 );
-
-            if ( auPlayers.Count() == 1 )
-            {
-                ClientAuthPlayer = auPlayers[0];
-            }
+            ClientAuthPlayer = DeserializePlayer( data.param1 );
         }
     }
 
@@ -75,20 +70,26 @@ class COTModule : Module
         {
             ref array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
-            ref array< ref AuthPlayer > player = new ref array< ref AuthPlayer >;
+            ref AuthPlayer player = NULL;
 
             for ( int i = 0; i < players.Count(); i++ )
             {
                 if ( players[i].GetGUID() == sender.GetId() )
                 {
-                    player.Insert( players[i] );
+                    player = players[i];
                 }
             }
 
-            if ( GetGame().IsMultiplayer() )
+            if ( player )
             {
-                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref array< ref PlayerData > >( SerializePlayers( player ) ), true, sender );
-            } 
+                if ( GetGame().IsMultiplayer() )
+                {
+                    GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, sender );
+                } else
+                {
+                    ClientAuthPlayer = player;
+                }
+            }
         }
     }
 }

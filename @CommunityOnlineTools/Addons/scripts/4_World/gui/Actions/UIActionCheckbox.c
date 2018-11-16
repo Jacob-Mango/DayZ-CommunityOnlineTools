@@ -44,12 +44,14 @@ class UIActionCheckbox extends UIActionBase
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)
-	{    
+	{
+        bool ret = false;
+
         if ( w == m_Checkbox )
         {
-            GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param1< ref UIActionCheckbox >( this ) );
+            GetGame().GameScript.CallFunction( m_Instance, m_FuncName, ret, new Param1< ref UIActionCheckbox >( this ) );
         }
 
-        return false;
+        return ret;
     }
 }

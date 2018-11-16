@@ -24,6 +24,6 @@ TIMEOUT /T 2 /NOBREAK
 
 chdir /d "%gameDir%"
 
-start DayZ_BE.exe -exe DayZ_x64.exe -password=abc123 -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck "-mod=!Workshop\@RPCFramework;%modName%"
+start DayZ_BE.exe -exe DayZ_x64.exe -password=abc123 -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -freezecheck "-mod=!Workshop\@RPCFramework;%modName%"
 
 REM start DayZ_BE.exe -exe DayZ_x64.exe -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mod=!Workshop\RPCFramework;%modName% -mission=.\Missions\%missionName%
