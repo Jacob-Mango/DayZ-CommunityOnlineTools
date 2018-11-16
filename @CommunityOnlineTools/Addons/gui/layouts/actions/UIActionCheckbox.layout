@@ -23,16 +23,18 @@ GridSpacerWidgetClass action_checkbox_wrapper {
   }
   CheckBoxWidgetClass action_checkbox
   {
+   visible 1
+   ignorepointer 0
+   color 1 1 1 1
+   position 0 0
    size 20 20
    hexactpos 0
    vexactpos 0
    hexactsize 1
    vexactsize 1
-   visible 1
-   color 1 1 1 1
-   halign right_ref
-   valign center_ref
-   style NewStyle
+   scaled 0
+   checked 0
+   style Default
   }
  }
 }
