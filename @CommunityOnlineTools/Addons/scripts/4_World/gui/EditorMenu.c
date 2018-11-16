@@ -1,25 +1,35 @@
-class EditorMenu extends UIScriptedMenu 
+class EditorMenu 
 {
-    protected ref Widget m_ButtonsContainer;
-    protected ref Widget m_Windows;
+    protected Widget layoutRoot;
 
-    protected ref array< ref EditorModule > m_Modules;
+    protected Widget m_ButtonsContainer;
+    protected Widget m_Windows;
+
+    protected array< ref EditorModule > m_Modules;
 
     void EditorMenu()
     {
-        m_Modules = GetModuleManager().GetEditorModules();
     }
     
     void ~EditorMenu()
     {
+        Hide();
+    }
+
+    bool IsVisible()
+    {
+        return layoutRoot.IsVisible();
     }
     
-    override Widget Init()
+    Widget Init()
     {
         layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\editor\\EditorMenu.layout" );
+        layoutRoot.Show( false );
 
         m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
         m_Windows = layoutRoot.FindAnyWidget( "Windows" );
+
+        m_Modules = GetModuleManager().GetEditorModules();
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
@@ -84,49 +94,43 @@ class EditorMenu extends UIScriptedMenu
     
                 module.menuButton = button;
                 module.form = form;
+
+                WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
             }
         }
 
         return layoutRoot;
     }
 
-    override bool UseMouse() 
-    {
-        return true;
-    }
-
-    override bool UseKeyboard() 
-    {
-        return true;
-    }
-
-    override void OnShow()
+    void Show()
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-        
-        super.OnShow();
 
+        layoutRoot.Show( true );
+
+        OnShow();
+    }
+
+    void Hide()
+    {
+        layoutRoot.Show( false );
+
+        OnHide();
+    }
+
+    void OnShow()
+    {
         GetGame().GetInput().ChangeGameFocus( 1 );
         GetGame().GetUIManager().ShowUICursor( true );
     }
 
-    override void OnHide()
+    void OnHide()
     {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-        
-        super.OnHide();
-
         GetGame().GetInput().ResetGameFocus();
+        GetGame().GetUIManager().ShowUICursor( false );
     }
 
-    override bool OnDoubleClick( Widget w, int x, int y, int button ) 
-    {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
-
-        return false;
-    }
-
-    override bool OnClick( Widget w, int x, int y, int button )
+    bool OnClick( Widget w, int x, int y, int button )
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
         
@@ -152,32 +156,21 @@ class EditorMenu extends UIScriptedMenu
             {
                 form.Show();
             }
-
-            SetButtonFocus( w );
         }
 
         return false;
     }
 
-    void SetButtonFocus( Widget focus ) 
+    void Update() 
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-
-        // reimplement
-    }
-
-    override void Update( float timeslice ) 
-    {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-
-		GetGame().GetInput().DisableKey(KeyCode.KC_RETURN);
 
         if ( GetMouseState( MouseState.RIGHT ) & MB_PRESSED_MASK ) 
         {
             if ( GetGame().GetUIManager().IsCursorVisible() ) 
             {
                 GetGame().GetUIManager().ShowUICursor( false );
-                GetGame().GetInput().ResetGameFocus( INPUT_DEVICE_MOUSE );
+                GetGame().GetInput().ResetGameFocus();
             }
         }
         else
@@ -185,7 +178,7 @@ class EditorMenu extends UIScriptedMenu
             if ( !GetGame().GetUIManager().IsCursorVisible() ) 
             {
                 GetGame().GetUIManager().ShowUICursor( true );
-                GetGame().GetInput().ChangeGameFocus( 1, INPUT_DEVICE_MOUSE );
+                GetGame().GetInput().ChangeGameFocus( 1 );
             }
         }
     }
