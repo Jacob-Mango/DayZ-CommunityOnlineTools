@@ -4,6 +4,7 @@ PanelWidgetClass action_editable_text_wrapper {
  vexactpos 0
  hexactsize 0
  vexactsize 1
+ valign center_ref
  scriptclass "UIActionEditableText"
  {
   PanelWidgetClass action_button_yes

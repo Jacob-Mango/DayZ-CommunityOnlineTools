@@ -10,40 +10,63 @@ PanelWidgetClass ObjectMenu {
  scriptclass "ObjectMenu"
  style EditorPanel
  {
-  PanelWidgetClass object_spawn_wrapper
-  {
+  PanelWidgetClass object_spawn_wrapper {
    position 0 0
-   size 0.8 1
+   size 0.7 1
    {
-    TextListboxWidgetClass object_spawn_list {
-     position 0 0
+    PanelWidgetClass object_spawn_wrapper_cont {
      size 1 300
+     halign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1
-     style Editor
-     lines 20
-     font "gui/fonts/sdf_MetronLight24"
-     "exact text" 1
-     "exact text size" 16
+     {
+      PanelWidgetClass object_types_actions_wrapper {
+       position 0 0
+       size 80 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 0
+      }
+      TextListboxWidgetClass object_spawn_list {
+       position 80 0
+       size 250 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 0
+       style Editor
+       lines 20
+       font "gui/fonts/sdf_MetronLight24"
+      }
+      PanelWidgetClass object_preview_wrapper {
+       position 330 0
+       size 130 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 0
+      }
+     }
     }
     PanelWidgetClass object_spawn_actions_wrapper {
      position 0 310
      size 1 1
+     halign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 0
-     "Size To Content V" 1
-     Columns 1
-     Rows 1
     }
    }
   }
   ScrollWidgetClass actions_scroller {
-   position 0.8 0
-   size 0.2 1
+   position 0 0
+   size 0.3 1
+   halign right_ref
+   hexactpos 0
    style blank
    "Scrollbar V" 1
    {

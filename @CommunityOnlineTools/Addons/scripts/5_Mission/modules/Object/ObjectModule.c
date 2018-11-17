@@ -13,6 +13,18 @@ class ObjectModule: EditorModule
     {
         return "COT/gui/layouts/Object/ObjectMenu.layout";
     }
+
+    override void OnUpdate( float timeslice ) 
+    {
+        super.OnUpdate( timeslice );
+
+        ref ObjectMenu objForm = ObjectMenu.Cast( form );
+
+        if ( objForm )
+        {
+            objForm.OnUpdate( timeslice );
+        }
+    }   
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {

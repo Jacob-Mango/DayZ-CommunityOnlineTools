@@ -78,7 +78,7 @@ class PermissionManager
 
         if ( player == NULL ) 
         {
-            ClientAuthPlayer.DebugPrint();
+            // ClientAuthPlayer.DebugPrint();
             return ClientAuthPlayer.HasPermission( permission );
         } 
 
@@ -86,7 +86,7 @@ class PermissionManager
         {
             if ( AuthPlayers[i].GetGUID() == player.GetId() )
             {
-                AuthPlayers[i].DebugPrint();
+                // AuthPlayers[i].DebugPrint();
                 return AuthPlayers[i].HasPermission( permission );
             }
         }
