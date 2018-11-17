@@ -60,6 +60,35 @@ class UIActionManager
         return NULL;
     }
 
+    static ref UIActionEditableVector CreateEditableVector( Widget parent, string label, Class instance = NULL, string funcname = "", string button = "" )
+    {
+        ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionEditableVector.layout", parent );
+
+        ref UIActionEditableVector action;
+        widget.GetScript( action );
+
+        if ( action )
+        {
+            if ( button == "" || instance == NULL || funcname == "" )
+            {
+                action.HasButton( false );
+            } else 
+            {
+                action.HasButton( true );
+
+                action.SetButton( button );
+            }
+
+            action.SetCallback( instance, funcname );
+
+            action.SetLabel( label );
+
+            return action;
+        }
+
+        return NULL;
+    }
+
     static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance, string funcname, bool checked )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionCheckbox.layout", parent );

@@ -1,0 +1,132 @@
+PanelWidgetClass action_editable_vector_wrapper {
+ size 1 20
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ valign center_ref
+ scriptclass "UIActionEditableVector"
+ {
+  PanelWidgetClass action_button_yes
+  {
+   position 0 0
+   size 1 1
+   {
+    TextWidgetClass action_label {
+     size 0.3 1
+     halign left_ref
+     valign top_ref
+     text "{LABEL}"
+     font "gui/fonts/sdf_MetronLight24"
+     "text offset" 10 0
+     "bold text" 1
+     "exact text" 1
+     "exact text size" 16
+    }
+    GridSpacerWidgetClass spacer {
+     position 0.3 0
+     size 0.6 1
+     Padding 0
+     Margin 0
+     Columns 3
+     Rows 1
+     {
+      EditBoxWidgetClass action_editable_text_x {
+       position 0 0
+       size 1 1
+       text "{X}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+      EditBoxWidgetClass action_editable_text_y {
+       position 0 0
+       size 1 1
+       text "{Y}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+      EditBoxWidgetClass action_editable_text_z {
+       position 0 0
+       size 1 1
+       text "{Z}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+     }
+    }
+    ButtonWidgetClass action_button {
+     size 0.1 1
+     halign right_ref
+     valign center_ref
+     {
+      TextWidgetClass action_button_text {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       style Light
+       text "{BUTTON}"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_button_no
+  {
+   position 0 0
+   size 1 1
+   {
+    TextWidgetClass action_label {
+     size 0.3 1
+     halign left_ref
+     valign top_ref
+     text "{LABEL}"
+     font "gui/fonts/sdf_MetronLight24"
+     "text offset" 10 0
+     "bold text" 1
+     "exact text" 1
+     "exact text size" 16
+    }
+    GridSpacerWidgetClass spacer {
+     position 0.3 0
+     size 0.7 1
+     Padding 0
+     Margin 0
+     Columns 3
+     Rows 1
+     {
+      EditBoxWidgetClass action_editable_text_x {
+       position 0 0
+       size 1 1
+       text "{X}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+      EditBoxWidgetClass action_editable_text_y {
+       position 0 0
+       size 1 1
+       text "{Y}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+      EditBoxWidgetClass action_editable_text_z {
+       position 0 0
+       size 1 1
+       text "{Z}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -12,6 +12,9 @@ class COTModule : Module
 
     void ~COTModule()
     {
+        CloseEditor();
+
+        delete m_EditorMenu;
     }
 
     override void OnMissionLoaded()
@@ -19,7 +22,6 @@ class COTModule : Module
         if ( GetGame().IsClient() )
         {
             GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
-
         }
     }
 
@@ -29,9 +31,9 @@ class COTModule : Module
         toggleEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
         RegisterKeyMouseBinding( toggleEditor );
 
-        KeyMouseBinding closeEditor = new KeyMouseBinding( GetModuleType(), "CloseEditor", "[ESCAPE]", "Closes the editor." );
-        closeEditor.AddKeyBind( KeyCode.KC_ESCAPE, KeyMouseBinding.KB_EVENT_RELEASE );
-        RegisterKeyMouseBinding( closeEditor );
+        //KeyMouseBinding closeEditor = new KeyMouseBinding( GetModuleType(), "CloseEditor", "[ESCAPE]", "Closes the editor." );
+        //closeEditor.AddKeyBind( KeyCode.KC_ESCAPE, KeyMouseBinding.KB_EVENT_RELEASE );
+        //RegisterKeyMouseBinding( closeEditor );
     }
 
     override void OnUpdate( float timeslice )
@@ -39,7 +41,7 @@ class COTModule : Module
         /*
 		if( GetGame().GetInput().GetActionDown( UAUIOpenCOT, false ) )
 		{
-            ShowCOMEditor();
+            ToggleEditor();
         }
         */
     }

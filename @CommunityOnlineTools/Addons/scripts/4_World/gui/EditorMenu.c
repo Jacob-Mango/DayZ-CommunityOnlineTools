@@ -164,23 +164,6 @@ class EditorMenu
     void Update() 
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-
-        if ( GetMouseState( MouseState.RIGHT ) & MB_PRESSED_MASK ) 
-        {
-            if ( GetGame().GetUIManager().IsCursorVisible() ) 
-            {
-                GetGame().GetUIManager().ShowUICursor( false );
-                GetGame().GetInput().ResetGameFocus();
-            }
-        }
-        else
-        {
-            if ( !GetGame().GetUIManager().IsCursorVisible() ) 
-            {
-                GetGame().GetUIManager().ShowUICursor( true );
-                GetGame().GetInput().ChangeGameFocus( 1 );
-            }
-        }
     }
 }
 
