@@ -2,6 +2,11 @@ class UIActionBase extends ScriptedWidgetEventHandler
 {
     protected ref Widget layoutRoot;
 
+    protected Class m_Instance;
+    protected string m_FuncName;
+
+    protected bool m_HasCallback;
+
     void OnWidgetScriptInit( Widget w )
     {
         layoutRoot = w;
@@ -37,5 +42,24 @@ class UIActionBase extends ScriptedWidgetEventHandler
     ref Widget GetLayoutRoot() 
     {
         return layoutRoot;
+    }
+
+    void SetCallback( Class instance, string funcname )
+    {
+        if ( instance == NULL || funcname == "" ) return;
+
+        m_Instance = instance;
+        m_FuncName = funcname;
+
+        m_HasCallback = true;
+    }
+
+    bool CallEvent( UIEvent eid )
+    {
+        if ( !m_HasCallback ) return false;
+
+        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
+
+        return false;
     }
 }

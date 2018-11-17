@@ -45,7 +45,7 @@ class GameMenu extends Form
 
         if ( GetPermissionsManager().HasPermission( "Game.ChangeAimingMode" ) )
         {
-            UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", false, this, "ToggleOldAiming" );
+            UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", this, "ToggleOldAiming", false );
         }
     }
 
@@ -58,7 +58,7 @@ class GameMenu extends Form
         
     }
 
-    void ToggleOldAiming( ref UIActionCheckbox action )
+    void ToggleOldAiming( UIEvent eid, ref UIActionCheckbox action )
     {
         m_OldAiming = action.IsChecked();
 
