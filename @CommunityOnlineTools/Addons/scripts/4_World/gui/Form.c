@@ -19,8 +19,6 @@ class Form extends ScriptedWidgetEventHandler
     {
         layoutRoot = w;
         layoutRoot.SetHandler( this );
-
-        Init();
     }
 
     void Init() 

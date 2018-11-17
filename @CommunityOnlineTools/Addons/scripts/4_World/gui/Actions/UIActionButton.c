@@ -3,8 +3,6 @@ class UIActionButton extends UIActionBase
     protected ref TextWidget m_Text;
     protected ref ButtonWidget m_Button;
 
-    protected string m_String;
-
     override void OnInit() 
     {
         m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget("action_button") );
@@ -21,13 +19,13 @@ class UIActionButton extends UIActionBase
 
     void SetButton( string text )
     {
-        m_String = text;
+        m_Button.SetName( text );
         m_Text.SetText( text );
     }
 
     string GetButton()
     {
-        return m_String;
+        return m_Button.GetName();
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)

@@ -1,6 +1,7 @@
 class ObjectMenu extends Form
 {
     protected ref map< string, string > m_ObjectTypes;
+    protected string m_CurrentType;
 
     protected Widget m_ActionsWrapper;
     protected Widget m_TypesActionsWrapper;
@@ -20,14 +21,9 @@ class ObjectMenu extends Form
 
     protected string m_ItemsList;
 
-    protected bool m_InEditor;
-    protected Object m_SelectedObject;
-
     protected UIActionText m_SelectedObjectType;
     protected UIActionEditableVector m_SelectedObjectPosition;
     protected UIActionEditableVector m_SelectedObjectRotation;
-
-    protected bool m_MouseButtonPressed;
 
     void ObjectMenu()
     {
@@ -61,6 +57,8 @@ class ObjectMenu extends Form
 
     void Init()
     {
+        ref ObjectModule objModule = ObjectModule.Cast( module );
+
         m_ClassList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "object_spawn_list" ) );
 
         m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
@@ -99,19 +97,11 @@ class ObjectMenu extends Form
 
         ref Widget editorWrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 9, 1 );
 
-        UIActionManager.CreateButton( editorWrapper, "Toggle Editor", this, "ToggleEditorMode" );
+        UIActionManager.CreateButton( editorWrapper, "Toggle Editor", objModule, "ToggleEditor" );
 
         m_SelectedObjectType = UIActionManager.CreateText( editorWrapper, "Name: " );
         m_SelectedObjectPosition = UIActionManager.CreateEditableVector( editorWrapper, "Position: " );
         m_SelectedObjectRotation = UIActionManager.CreateEditableVector( editorWrapper, "Orientation: " );
-    }
-
-    void ToggleEditorMode( UIEvent eid, ref UIActionButton action )
-    {
-        Print( "ToggleEditorMode" )
-        if ( eid != UIEvent.CLICK ) return;
-
-        m_InEditor = !m_InEditor;
     }
 
 	void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
@@ -147,7 +137,6 @@ class ObjectMenu extends Form
 		return true;
 	}
 
-    // HACK FIX UNTIL PROPER INPUT API IS EXPOSED
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
     {
         super.OnMouseButtonDown( w, x, y, button );
@@ -160,19 +149,16 @@ class ObjectMenu extends Form
             return false;
         } 
 
-        // CheckForSelection();
-
         return false;
     }
 
-    void CheckForSelection()
+    void SetSelectedObject( Object object )
     {
-        m_SelectedObject = GetPointerObject( GetPlayer(), 0.2, m_SelectedObject );
-        if ( m_SelectedObject )
+        if ( object )
         {
-            m_SelectedObjectType.SetText( m_SelectedObject.GetType() );
-            m_SelectedObjectPosition.SetVector( m_SelectedObject.GetPosition() );
-            m_SelectedObjectRotation.SetVector( m_SelectedObject.GetOrientation() );
+            m_SelectedObjectType.SetText( object.GetType() );
+            m_SelectedObjectPosition.SetVector( object.GetPosition() );
+            m_SelectedObjectRotation.SetVector( object.GetOrientation() );
         } else 
         {
             m_SelectedObjectType.SetText( "" );
@@ -181,34 +167,13 @@ class ObjectMenu extends Form
         }
     }
 
-    void OnUpdate( float timeslice )
-    {
-        if ( m_InEditor && layoutRoot.IsVisible() )
-        {
-            if ( GetMouseState(MouseState.LEFT) & MB_PRESSED_MASK )
-            {
-                if ( m_MouseButtonPressed == false )
-                {
-                    CheckForSelection();
-                }
-                
-                m_MouseButtonPressed = true;
-            } else {
-                m_MouseButtonPressed = false;
-            }
-
-
-            if ( m_SelectedObject )
-            {
-            }
-        }
-    }
-
     override void OnShow()
     {
         super.OnShow();
 
-        UpdateList( "All" );
+        m_CurrentType = "All";
+        
+        UpdateList();
     }
 
     override void OnHide() 
@@ -220,7 +185,11 @@ class ObjectMenu extends Form
     {
         if ( eid != UIEvent.CLICK ) return;
 
-        UpdateList( m_ObjectTypes.Get( action.GetButton() ) );
+        m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
+
+        Message( "ListType: " + action.GetButton() + ", " + m_ObjectTypes.Get( action.GetButton() ) );
+
+        UpdateList();
     }
 
     void SpawnCursor( UIEvent eid, ref UIActionEditableText action )
@@ -246,10 +215,10 @@ class ObjectMenu extends Form
 
     void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
     {
-        UpdateList( "All" );
+        UpdateList();
     }
 
-    void UpdateList( string classFilter ) // All default
+    void UpdateList()
     {
         m_ClassList.ClearItems();
 
@@ -286,7 +255,7 @@ class ObjectMenu extends Form
 
                 strNameLower.ToLower();
 
-                if ( classFilter == "All" || GetGame().IsKindOf( strNameLower, classFilter ) ) // Fix for weapon_base not being child of "All"
+                if ( m_CurrentType == "All" || GetGame().IsKindOf( strNameLower, m_CurrentType ) ) // Fix for weapon_base not being child of "All"
                 {
                     if ( (strSearch != "" && (!strNameLower.Contains( strSearch ))) ) 
                     {
