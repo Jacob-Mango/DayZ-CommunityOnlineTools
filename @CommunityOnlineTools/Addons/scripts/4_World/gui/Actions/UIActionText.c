@@ -3,9 +3,6 @@ class UIActionText extends UIActionBase
     protected ref TextWidget m_Label;
     protected ref TextWidget m_Text;
 
-    protected Class m_Instance;
-    protected string m_FuncName;
-
     override void OnInit() 
     {
         m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
@@ -28,5 +25,19 @@ class UIActionText extends UIActionBase
     void SetText( string text )
     {
         m_Text.SetText( text );
+    }
+
+	override bool OnClick(Widget w, int x, int y, int button)
+	{    
+        if ( !m_HasCallback ) return false;
+
+        bool ret = false;
+
+        if ( w == m_Text )
+        {
+            ret = CallEvent( UIEvent.CLICK );
+        }
+
+        return ret;
     }
 }

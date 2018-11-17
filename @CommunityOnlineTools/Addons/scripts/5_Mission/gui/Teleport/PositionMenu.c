@@ -86,7 +86,7 @@ class PositionMenu extends Form
         super.OnHide();
     }
 
-    void Click_Teleport()
+    void Click_Teleport( UIEvent eid, ref UIActionButton action )
     {
         vector vPlayerPos;
         vPlayerPos[0] = m_PositionX.GetText().ToFloat();

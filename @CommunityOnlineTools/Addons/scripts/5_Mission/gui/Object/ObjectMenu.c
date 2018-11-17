@@ -1,12 +1,12 @@
 class ObjectMenu extends Form
 {
+    protected Widget m_ActionsWrapper;
+    protected Widget m_SpawnerActionsWrapper;
+
+    protected UIActionEditableText m_QuantityItem;
+    protected UIActionEditableText m_SearchBox;
+
     protected TextListboxWidget m_classList;
-    protected EditBoxWidget m_SearchBox;
-    protected ButtonWidget m_btnSpawnGround;
-    protected ButtonWidget m_btnSpawnCursor;
-    protected ButtonWidget m_btnSpawnInventory;
-    protected ButtonWidget m_btnCancel;
-    protected EditBoxWidget m_QuantityItem;
 
     private ItemPreviewWidget m_item_widget;
     protected EntityAI previewItem;
@@ -44,124 +44,69 @@ class ObjectMenu extends Form
 
     void Init()
     {
-        m_classList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "classlist" ) );
-        m_SearchBox = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "search_input" ) );
-        m_btnSpawnGround = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_spawn_ground" ) );
-        m_btnSpawnCursor = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_spawn_cursorpos" ) );
-        m_btnSpawnInventory = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_spawn_inventory" ) );
-        m_btnCancel = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_cancel" ) );
+        m_classList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "object_spawn_list" ) );
 
-        m_QuantityItem = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "quantity_items" ) );
+        m_SpawnerActionsWrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
+
+        ref Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 3, 1 );
+        m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "Quantity: " );
+        m_QuantityItem.SetText( "MAX" );
+
+        m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "Search: ", this, "SearchInput_OnChange" );
+
+        ref Widget spawnButtons = UIActionManager.CreateGridSpacer( spawnInfo, 1, 4 );
+        UIActionManager.CreateText( spawnButtons, "Spawn on: " )
+        UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
+        UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
+        UIActionManager.CreateButton( spawnButtons, "Selected Players", this, "SpawnInventory" );
+
+        m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
     }
 
     override void OnShow()
     {
         super.OnShow();
+
         UpdateList( "All" );
     }
 
     override void OnHide() 
     {
         super.OnHide();
+
         if ( previewItem ) 
         {
             GetGame().ObjectDelete( previewItem );
         }
     }
 
-    override bool OnChange( Widget w, int x, int y, bool finished )
+    void SpawnCursor( UIEvent eid, ref UIActionEditableText action )
     {
-        if ( w == m_SearchBox )
-        {
-            UpdateList( "All" );
-            return true;
-        }
+        if ( eid != UIEvent.CLICK ) return;
 
-        return false;
+        GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetText() ), true );
     }
 
-    bool OnMouseEnter( Widget w , int x, int y ) 
+    void SpawnPosition( UIEvent eid, ref UIActionEditableText action )
     {
-        if ( w == m_SearchBox ) 
-        {
-            GetPlayer().GetInputController().OverrideMovementSpeed( true, 0 );
-        }
-        return false;
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true );
     }
 
-    bool OnMouseLeave( Widget w, Widget enterW, int x, int y ) 
+    void SpawnInventory( UIEvent eid, ref UIActionEditableText action )
     {
-        if ( w == m_SearchBox ) 
-        {
-            GetPlayer().GetInputController().OverrideMovementSpeed( false, 0 );
-        }
-        return false;
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    override bool OnClick( Widget w, int x, int y, int button )
+    void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
     {
-        string strSelection = GetCurrentSelection();
-        bool ai = false;
-
-        int quantity = 0;
-        string text = "";
-        ItemBase oItem = NULL;
-
-        if ( w.GetName() == "dump_selects" ) 
-        {
-            if ( previewItem ) 
-            {
-                string toCopy = "";
-                TStringArray strings = new TStringArray;
-                previewItem.GetSelectionList(strings);
-                foreach(string selection : strings ) 
-                {
-                    vector pos = GetGame().ObjectGetSelectionPosition( previewItem, selection );
-                    toCopy = toCopy + selection + " " + pos.ToString() + "\n";
-                }
-                GetGame().CopyToClipboard( toCopy );
-                Message("Dumped selections to clipboard"); 
-            }
-        }
-
-        if( strSelection != "" )
-        {
-            strSelection.ToLower();
-
-            if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
-            {
-                ai = true;
-            }
-
-            if( w == m_btnSpawnCursor )
-            {
-                GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetCursorPos(), m_QuantityItem.GetText() ), true, NULL );
-            }
-            else if ( w == m_btnSpawnGround )
-            {
-                GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( strSelection, GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true );
-            }
-            else if ( w == m_btnSpawnInventory )
-            {
-                if ( GetSelectedPlayers().Count() )
-                {
-                    GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( strSelection, m_QuantityItem.GetText(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
-                }
-            }
-        }
-
-        if ( w.GetName().Contains( "btn_filter" ) ) 
-        {
-            string buttonName = w.GetName();
-            buttonName.Replace("btn_filter_", "");
-            UpdateList( buttonName );
-
-            return true;
-        }
-
-        return false;
+        UpdateList( "All" );
     }
 
+/*
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
     {
         if ( w == m_classList ) 
@@ -205,61 +150,7 @@ class ObjectMenu extends Form
 
         return true;
     }
-
-    override bool OnMouseButtonDown( Widget w, int x, int y, int button ) 
-    {
-        if (w == m_item_widget)
-        {
-            GetGame().GetDragQueue().Call(this, "UpdateRotation");
-            g_Game.GetMousePos(m_characterRotationX, m_characterRotationY);
-            return true;
-        }
-        return false;
-    }
-
-    override bool OnMouseWheel( Widget w, int x, int y, int wheel ) 
-    {
-        if ( w == m_item_widget )
-        {
-            GetGame().GetDragQueue().Call(this, "UpdateScale");
-            m_characterScaleDelta = wheel ;
-        }
-        return false;
-    }
-
-    void UpdateScale(int mouse_x, int mouse_y, int wheel, bool is_dragging) // Borrowed from inspect menu
-    {
-        float w, h, x, y;        
-        m_item_widget.GetPos(x, y);
-        m_item_widget.GetSize(w,h);
-        w = w + ( m_characterScaleDelta / 4);
-        h = h + ( m_characterScaleDelta / 4 );
-        if ( w > 0.5 && w < 4 )
-        {
-            m_item_widget.SetSize( w, h );
-    
-            // align to center 
-            int screen_w, screen_h;
-            GetScreenSize(screen_w, screen_h);
-            float new_x = x - ( m_characterScaleDelta / 8 );
-            float new_y = y - ( m_characterScaleDelta / 8 );
-            m_item_widget.SetPos( new_x, new_y );
-        }
-    }
-
-    void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging) // Borrowed from inspect menu
-    {
-        vector o = m_characterOrientation;
-        o[0] = o[0] + (m_characterRotationY - mouse_y);
-        o[1] = o[1] - (m_characterRotationX - mouse_x);
-        
-        m_item_widget.SetModelOrientation( o );
-        
-        if (!is_dragging)
-        {
-            m_characterOrientation = o;
-        }
-    }
+*/
 
     void UpdateList( string classFilter ) // All default
     {
@@ -298,7 +189,7 @@ class ObjectMenu extends Form
 
                 strNameLower.ToLower();
 
-                if ( GetGame().IsKindOf( strNameLower, classFilter ) || classFilter == "All" ) // Fix for weapon_base not being child of "All"
+                if ( classFilter == "All" || GetGame().IsKindOf( strNameLower, classFilter ) ) // Fix for weapon_base not being child of "All"
                 {
                     if ( (strSearch != "" && (!strNameLower.Contains( strSearch ))) ) 
                     {

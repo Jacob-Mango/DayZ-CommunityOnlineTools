@@ -2,10 +2,7 @@ class UIActionCheckbox extends UIActionBase
 {
     protected ref TextWidget m_Label;
     protected ref CheckBoxWidget m_Checkbox;
-
-    protected Class m_Instance;
-    protected string m_FuncName;
-
+    
     override void OnInit() 
     {
         m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
@@ -37,19 +34,13 @@ class UIActionCheckbox extends UIActionBase
         return m_Checkbox.IsChecked();
     }
 
-    void SetCallback( Class instance, string funcname )
-    {
-        m_Instance = instance;
-        m_FuncName = funcname;
-    }
-
 	override bool OnClick(Widget w, int x, int y, int button)
 	{
         bool ret = false;
 
         if ( w == m_Checkbox )
         {
-            GetGame().GameScript.CallFunction( m_Instance, m_FuncName, ret, new Param1< ref UIActionCheckbox >( this ) );
+            ret = CallEvent( UIEvent.CLICK );
         }
 
         return ret;

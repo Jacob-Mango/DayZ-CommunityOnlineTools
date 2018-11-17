@@ -30,7 +30,7 @@ class UIActionManager
         return NULL;
     }
 
-    static ref UIActionEditableText CreateEditableText( Widget parent, string label, string text = "", string button = "", Class instance = NULL, string funcname = "" )
+    static ref UIActionEditableText CreateEditableText( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionEditableText.layout", parent );
 
@@ -47,8 +47,9 @@ class UIActionManager
                 action.HasButton( true );
 
                 action.SetButton( button );
-                action.SetCallback( instance, funcname );
             }
+
+            action.SetCallback( instance, funcname );
 
             action.SetLabel( label );
             action.SetText( text );
@@ -59,7 +60,7 @@ class UIActionManager
         return NULL;
     }
 
-    static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, bool checked, Class instance, string funcname )
+    static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance, string funcname, bool checked )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionCheckbox.layout", parent );
 
@@ -78,7 +79,7 @@ class UIActionManager
         return NULL;
     }
 
-    static ref UIActionText CreateText( Widget parent, string label, string text )
+    static ref UIActionText CreateText( Widget parent, string label, string text = "" )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionText.layout", parent );
 

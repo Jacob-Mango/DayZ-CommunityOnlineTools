@@ -87,17 +87,17 @@ class PlayerMenu extends Form
         m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
 
         ref Widget lifeStats = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
-        m_Health = UIActionManager.CreateEditableText( lifeStats, "Health: ", "", "Set", this, "Click_SetHealth" );
-        m_Blood = UIActionManager.CreateEditableText( lifeStats, "Blood: ", "", "Set", this, "Click_SetBlood" );
-        m_Energy = UIActionManager.CreateEditableText( lifeStats, "Energy: ", "", "Set", this, "Click_SetEnergy" );
-        m_Water = UIActionManager.CreateEditableText( lifeStats, "Water: ", "", "Set", this, "Click_SetWater" );
+        m_Health = UIActionManager.CreateEditableText( lifeStats, "Health: ", this, "Click_SetHealth", "", "Set" );
+        m_Blood = UIActionManager.CreateEditableText( lifeStats, "Blood: ", this, "Click_SetBlood", "", "Set" );
+        m_Energy = UIActionManager.CreateEditableText( lifeStats, "Energy: ", this, "Click_SetEnergy", "", "Set" );
+        m_Water = UIActionManager.CreateEditableText( lifeStats, "Water: ", this, "Click_SetWater", "", "Set" );
 
         ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
         m_ModifyPermissions = UIActionManager.CreateButton( playerActions, "Modify Permissions", this, "Click_ModifyPermissions" );
         m_BanPlayer = UIActionManager.CreateButton( playerActions, "Ban Player", this, "Click_BanPlayer" );
         m_KickPlayer = UIActionManager.CreateButton( playerActions, "Kick Player", this, "Click_KickPlayer" );
 
-        m_GodMode = UIActionManager.CreateCheckbox( m_ActionsWrapper, "Godmode", false, this, "Click_GodMode" );
+        m_GodMode = UIActionManager.CreateCheckbox( m_ActionsWrapper, "Godmode", this, "Click_GodMode", false );
 
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
@@ -111,37 +111,37 @@ class PlayerMenu extends Form
         m_PermissionsWrapper.Show( true );
     }
 
-    void Click_BanPlayer()
+    void Click_BanPlayer( UIEvent eid, ref UIActionButton action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_KickPlayer()
+    void Click_KickPlayer( UIEvent eid, ref UIActionButton action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetHealth( ref UIActionEditableText action )
+    void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetBlood( ref UIActionEditableText action )
+    void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetEnergy( ref UIActionEditableText action )
+    void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetWater( ref UIActionEditableText action )
+    void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_GodMode( ref UIActionCheckbox action )
+    void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
     {
         GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }

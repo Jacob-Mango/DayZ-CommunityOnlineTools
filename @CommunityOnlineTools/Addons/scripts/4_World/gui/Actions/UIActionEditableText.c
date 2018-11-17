@@ -4,9 +4,6 @@ class UIActionEditableText extends UIActionBase
     protected ref EditBoxWidget m_Text;
     protected ref ButtonWidget m_Button;
 
-    protected Class m_Instance;
-    protected string m_FuncName;
-
     override void OnInit() 
     {
     }
@@ -41,6 +38,8 @@ class UIActionEditableText extends UIActionBase
 
         m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
         m_Text = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text" ) );
+
+        WidgetHandler.GetInstance().RegisterOnClick( m_Text, this, "OnChange" );
     }
 
     void SetLabel( string text )
@@ -63,19 +62,31 @@ class UIActionEditableText extends UIActionBase
         TextWidget.Cast( layoutRoot.FindAnyWidget("action_button_text") ).SetText( text );
     }
 
-    void SetCallback( Class instance, string funcname )
+    override bool OnChange( Widget w, int x, int y, bool finished )
     {
-        m_Instance = instance;
-        m_FuncName = funcname;
+        if ( !m_HasCallback ) return false;
+
+        bool ret = false;
+
+        if ( w == m_Text )
+        {
+            ret = CallEvent( UIEvent.CHANGE );
+        }
+
+        return ret;
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{    
+        if ( !m_HasCallback ) return false;
+
+        bool ret = false;
+
         if ( w == m_Button )
         {
-            GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param1< ref UIActionEditableText >( this ) );
+            ret = CallEvent( UIEvent.CLICK );
         }
 
-        return true;
+        return ret;
     }
 }
