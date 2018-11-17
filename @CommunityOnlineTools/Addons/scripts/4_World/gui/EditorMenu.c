@@ -52,8 +52,8 @@ class EditorMenu
             float height = -1;
             menu.GetSize( width, height );
 
-            Form form;
-            WindowHandle window;
+            ref Form form;
+            ref WindowHandle window;
 
             menu.GetScript( form );
             base_window.GetScript( window );
@@ -62,6 +62,9 @@ class EditorMenu
             {
                 form.window = window;
                 form.module = module;
+
+                form.Init();
+
                 window.form = form;
 
                 base_window.SetSize( width, height + 25 );
@@ -91,9 +94,10 @@ class EditorMenu
                         btn_txt.SetText( form.GetIconName() );
                     }
                 }
-    
+                
                 module.menuButton = button;
                 module.form = form;
+
 
                 WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
             }
