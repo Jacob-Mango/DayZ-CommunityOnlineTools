@@ -276,6 +276,9 @@ class CameraTool: EditorModule
     void ToggleCamera() 
     {
         Print("CameraTool::ToggleCamera");
+
+        if ( GetGame().IsMultiplayer() == false ) return;
+
         if ( COTCamera )
         {
             DisableCamera();
