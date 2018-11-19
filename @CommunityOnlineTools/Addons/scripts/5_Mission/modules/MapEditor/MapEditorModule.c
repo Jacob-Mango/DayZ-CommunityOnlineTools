@@ -2,6 +2,8 @@ class MapEditorModule: Module
 {
     protected bool m_InEditor;
 
+    protected ref MapEditorMenu m_Menu;
+
     void MapEditorModule()
     {
         GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Server );
@@ -43,6 +45,8 @@ class MapEditorModule: Module
             m_InEditor = true;
 
             COTForceHud( true );
+
+            m_Menu.Show();
         }
     }
     
@@ -84,6 +88,8 @@ class MapEditorModule: Module
             m_InEditor = false;
 
             COTForceHud( false );
+
+            m_Menu.Hide();
         }
     }
 
@@ -95,6 +101,18 @@ class MapEditorModule: Module
 		
 		RegisterKeyMouseBinding( teleport );
 	}
+    
+    override void OnMissionLoaded()
+    {
+        if ( GetGame().IsClient() )
+        {
+            if ( m_Menu == NULL )
+            {
+                m_Menu = new ref MapEditorMenu;
+                m_Menu.Init();
+            }
+        }
+    }
 
     void ToggleEditor()
     {
@@ -105,7 +123,6 @@ class MapEditorModule: Module
         {
             GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, NULL, GetPlayer() );
         }
-
     }
 
 }
