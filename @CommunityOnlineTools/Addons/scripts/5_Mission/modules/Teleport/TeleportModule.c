@@ -33,7 +33,7 @@ class TeleportModule: EditorModule
 
         if ( GetGame().GetPlayer().IsInTransport() )
         {
-            GetPlayer().MessageStatus( "Get out of your vehicle first!" );
+            Message( GetPlayer(), "Get out of your vehicle first!" );
             return;
         }
 
@@ -43,7 +43,7 @@ class TeleportModule: EditorModule
         }
         else
         {
-            GetPlayer().MessageStatus( "Distance for teleportation is too far!" );
+            Message( GetPlayer(), "Distance for teleportation is too far!" );
         }
     }
 
@@ -73,7 +73,7 @@ class TeleportModule: EditorModule
 
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {

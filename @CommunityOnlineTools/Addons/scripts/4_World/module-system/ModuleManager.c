@@ -209,11 +209,12 @@ class ModuleManager
     void OnKeyPress( int key )
     {
         moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_PRESS );
+        moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
     }
 
     void OnKeyRelease(int key)
     {
-        moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
+        // moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
     }
 
     void OnUpdate( float timeslice )
@@ -230,7 +231,7 @@ class ModuleManager
                 {
                     KeyMouseBinding k_m_Binding = module.GetBindings().Get(kb);
 
-                    if ( GetGame().GetUIManager().GetMenu() )
+                    if ( InCommunityOfflineTools )
                     {
                         if ( !k_m_Binding.canUseInMenu() )
                         {

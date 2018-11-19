@@ -1,8 +1,8 @@
 class PermissionManager
 {
-    protected ref array< ref AuthPlayer > AuthPlayers;
+    ref array< ref AuthPlayer > AuthPlayers;
 
-    protected ref Permission RootPermission;
+    ref Permission RootPermission;
 
     void PermissionManager()
     {
@@ -11,14 +11,14 @@ class PermissionManager
         RootPermission = new ref Permission( "ROOT", NULL );
     }
 
-    ref array< ref AuthPlayer > GetPlayers( ref array< string > guids = NULL )
+    array< ref AuthPlayer > GetPlayers( ref array< string > guids = NULL )
     {
         if ( guids == NULL )
         {
             return AuthPlayers;
         }
 
-        ref array< ref AuthPlayer > tempArray = new ref array< ref AuthPlayer >;
+        array< ref AuthPlayer > tempArray = new array< ref AuthPlayer >;
 
         for ( int i = 0; i < guids.Count(); i++ )
         {

@@ -533,8 +533,6 @@ class CameraTool: EditorModule
                 vector ori = COTCamera.GetOrientation();
                 ori[2] = ori[2] - i*5;
                 COTCamera.SetOrientation( ori );
-                //m_TargetRoll = ori[2] - i*5; // redo this
-                //Message(m_TargetRoll.ToString());
             }
             else 
             {

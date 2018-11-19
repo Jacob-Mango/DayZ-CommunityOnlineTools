@@ -74,7 +74,6 @@ class PlayerModule: EditorModule
 
     void SetGodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        
         Param2< bool, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
@@ -90,7 +89,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -133,20 +132,28 @@ class PlayerModule: EditorModule
             ref array< string > guids = new ref array< string >;
             guids.Copy( data.param2 );
 
-            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
 
-            for ( int i = 0; i < players.Count(); i++ )
+            for ( int i = 0; i < guids.Count(); i++ )
             {
-                players[i].ClearPermissions();
-
-                for ( int j = 0; j < perms.Count(); j++ )
+                for ( int k = 0; k < GetPermissionsManager().AuthPlayers.Count(); k++ )
                 {
-                    players[i].AddPermission( perms[j] );
-                }
-                
-                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( players[i] ) ), true, players[i].GetIdentity() );
+                    ref AuthPlayer player = GetPermissionsManager().AuthPlayers[k];
+                    
+                    if ( guids[i] == player.GetGUID() )
+                    {
+                        player.ClearPermissions();
 
-                players[i].Save();
+                        for ( int j = 0; j < perms.Count(); j++ )
+                        {
+                            player.AddPermission( perms[j] );
+                        }
+                        
+                        GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.GetIdentity() );
+
+                        player.Save();
+                    }
+                }
             }
         }
     }
@@ -163,7 +170,7 @@ class PlayerModule: EditorModule
             ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
@@ -184,7 +191,7 @@ class PlayerModule: EditorModule
             ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            ref array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
@@ -222,8 +229,11 @@ class PlayerModule: EditorModule
                     }
                 }
 
-                ref AuthPlayer auth = GetPermissionsManager().GetPlayerByIdentity( identities[i] );
-                auth.UpdatePlayerData( player );
+                ref AuthPlayer aup = GetPermissionsManager().GetPlayerByIdentity( identities[i] );
+                
+                aup.UpdatePlayerData( player );
+
+                aup.DebugPrint();
             }
 
             if ( GetGame().IsMultiplayer() )

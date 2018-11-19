@@ -6,9 +6,11 @@ class Form extends ScriptedWidgetEventHandler
 
     ref EditorModule module;
 
+    bool HasBeenInitialized;
+
     void Form() 
     {
-
+        HasBeenInitialized = false;
     }
 
     void ~Form() 
@@ -23,7 +25,7 @@ class Form extends ScriptedWidgetEventHandler
 
     void Init() 
     {
-
+        HasBeenInitialized = true;
     }
 
     void Show()
