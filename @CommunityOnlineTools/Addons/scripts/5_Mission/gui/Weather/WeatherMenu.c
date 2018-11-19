@@ -47,9 +47,8 @@ class WeatherMenu extends Form
     {
     }
 
-    void Init()
+    override void OnInit( bool fromMenu )
     {
-
         m_BtnSave            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_save" ) );
         m_BtnCancel            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_cancel" ) );
 
@@ -239,8 +238,11 @@ class WeatherMenu extends Form
 
     void Update()
     {
-        m_TxtWeatherTime.SetText( GetGame().GetWeather().GetTime().ToString() );
-        m_TxtAirTemperature.SetText( GetGame().GetWeather().GetAirTemperature().ToString() );
+        if ( m_TxtWeatherTime )
+            m_TxtWeatherTime.SetText( GetGame().GetWeather().GetTime().ToString() );
+
+        if ( m_TxtAirTemperature )
+            m_TxtAirTemperature.SetText( GetGame().GetWeather().GetAirTemperature().ToString() );
     }
 
     void ResetSliders()

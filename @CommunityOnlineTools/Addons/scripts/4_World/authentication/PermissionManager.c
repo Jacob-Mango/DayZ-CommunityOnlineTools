@@ -111,6 +111,7 @@ class PermissionManager
         auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
         auPlayer.AddPermission( "Object", PermissionType.ALLOW );
         auPlayer.AddPermission( "Game", PermissionType.ALLOW );
+        auPlayer.AddPermission( "MapEditor", PermissionType.ALLOW );
         auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
         auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 

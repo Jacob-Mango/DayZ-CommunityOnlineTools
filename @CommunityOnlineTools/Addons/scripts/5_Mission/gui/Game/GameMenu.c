@@ -27,7 +27,7 @@ class GameMenu extends Form
         return false;
     }
 
-    override void Init()
+    override void OnInit( bool fromMenu )
     {
         m_GameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_box"));
         m_GameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_button"));

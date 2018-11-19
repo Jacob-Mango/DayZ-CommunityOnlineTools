@@ -1,4 +1,4 @@
-FrameWidgetClass EditorMenu {
+FrameWidgetClass COTMenu {
  visible 1
  color 0 0 0 0
  position 0 0

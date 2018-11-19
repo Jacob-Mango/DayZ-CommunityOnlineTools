@@ -74,12 +74,11 @@ class CameraTool: EditorModule
 
     void CameraTool()
     {
-        GetRPCManager().AddRPC( "COT_Camera", "EnterCamera", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COT_Camera", "LeaveCamera", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Camera", "EnterCamera", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COT_Camera", "LeaveCamera", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
-
     }
 
     void ~CameraTool()
@@ -89,12 +88,6 @@ class CameraTool: EditorModule
     override string GetLayoutRoot()
     {
         return "COT/gui/layouts/Camera/CameraSettings.layout";
-    }
-    
-    override void Init() 
-    {
-        Print("CameraTool::Init");
-        super.Init();
     }
     
     override void OnUpdate( float timeslice )
@@ -154,26 +147,39 @@ class CameraTool: EditorModule
         if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
             return;
 
-        bool cont = false;
-
         if( type == CallType.Server )
         {
-            GetGame().SelectSpectator( sender, "StaticCamera", target.GetPosition() + Vector( 0, 1.8, 0 ) );
+            vector position = Vector( 0, 0, 0 );
+
+            if ( target )
+            {
+                position = target.GetPosition();
+            }
+
+            Human human = Human.Cast( target );
+
+            if ( human )
+            {
+                position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
+            }
+            
+            GetGame().SelectSpectator( sender, "StaticCamera", position );
 
             GetGame().SelectPlayer( sender, NULL );
 
-            if ( GetGame().IsMultiplayer() )
-            {
-                GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
-            } else
-            {
-                cont = true;
-            }
+            GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
         }
 
-        if( type == CallType.Client || cont )
+        if( type == CallType.Client )
         {
-            COTCamera = Camera.GetCurrentCamera();
+            if ( GetGame().IsMultiplayer() )
+            {
+                COTCamera = Camera.GetCurrentCamera();
+            } else 
+            {
+                COTCamera = GetGame().CreateObject( "StaticCamera", target.GetPosition(), false );
+		        COTCamera.SetActive( true );
+            }
 
             m_InCamera = true;
             
@@ -188,13 +194,11 @@ class CameraTool: EditorModule
         if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
             return;
 
-        bool cont = false;
+        Param1< vector > data;
+        if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
         {
-            Param1< vector > data;
-            if ( !ctx.Read( data ) ) return;
-
             GetGame().SelectPlayer( sender, target );
 
             if ( target ) 
@@ -204,15 +208,22 @@ class CameraTool: EditorModule
 
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
-            } else
-            {
-                cont = true;
-            }
+                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
+            } 
         }
 
-        if( type == CallType.Client || cont )
+        if( type == CallType.Client )
         {
+            if ( !GetGame().IsMultiplayer() )
+            {
+                GetGame().SelectPlayer( NULL, target );
+
+                if ( target ) 
+                {
+                    target.SetPosition( data.param1 );
+                }
+            }
+
             COTCamera.SetActive( false );
 
             COTCamera = NULL;
@@ -235,7 +246,7 @@ class CameraTool: EditorModule
         }
     }
 
-    void EnableCamera( bool staticCam = false )
+    void EnableCamera()
     {
         Print("CameraTool::EnableCamera");
 

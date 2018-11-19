@@ -57,7 +57,7 @@ class CameraSettings extends Form
         return true;
     }
     
-    override void Init()
+    override void OnInit( bool fromMenu )
     {
         widgetStore = new WidgetStore( layoutRoot );
 
@@ -91,8 +91,6 @@ class CameraSettings extends Form
         {
             CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/Camera/CameraPHI.layout" );
         }
-
-        super.Init();
     }
     
     
@@ -408,6 +406,8 @@ class CameraSettings extends Form
 
     void UpdateSliders() 
     {
+        if ( widgetStore == NULL ) return;
+
         string cameraTarget = "None";
 
         CameraTool cameraTool = CameraTool.Cast( GetModuleManager().GetModule(CameraTool) );

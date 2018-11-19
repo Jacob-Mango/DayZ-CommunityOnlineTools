@@ -23,16 +23,26 @@ class Form extends ScriptedWidgetEventHandler
         layoutRoot.SetHandler( this );
     }
 
-    void Init() 
+    void Init( bool fromMenu )
     {
+        OnInit( fromMenu );
         HasBeenInitialized = true;
+    }
+
+    void OnInit( bool fromMenu )
+    {
+        
     }
 
     void Show()
     {
-        window.Show();
-        layoutRoot.Show( true );
-        OnShow();
+        if ( HasBeenInitialized )
+        {
+            window.Show();
+            layoutRoot.Show( true );
+
+            OnShow();
+        }
     }
 
     void Hide()

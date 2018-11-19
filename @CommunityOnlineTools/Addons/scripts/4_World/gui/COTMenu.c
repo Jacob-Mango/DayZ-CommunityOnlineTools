@@ -1,4 +1,4 @@
-class EditorMenu 
+class COTMenu 
 {
     protected Widget layoutRoot;
 
@@ -7,11 +7,11 @@ class EditorMenu
 
     protected array< ref EditorModule > m_Modules;
 
-    void EditorMenu()
+    void COTMenu()
     {
     }
     
-    void ~EditorMenu()
+    void ~COTMenu()
     {
         Hide();
     }
@@ -23,7 +23,7 @@ class EditorMenu
     
     Widget Init()
     {
-        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\editor\\EditorMenu.layout" );
+        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\COT\\COTMenu.layout" );
         layoutRoot.Show( false );
 
         m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
@@ -40,11 +40,11 @@ class EditorMenu
 
             if ( module.HasAccess() )
             {
-                button_bkg = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\editor\\Button.layout", m_ButtonsContainer );
+                button_bkg = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
                 button = button_bkg.FindAnyWidget( "btn" );
             }
 
-            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\editor\\WindowHandle.layout", m_Windows );
+            ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
 
             ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 
@@ -63,7 +63,7 @@ class EditorMenu
                 form.window = window;
                 form.module = module;
 
-                form.Init();
+                form.Init( true );
 
                 window.form = form;
 
@@ -98,8 +98,8 @@ class EditorMenu
                 module.menuButton = button;
                 module.form = form;
 
-
                 WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
+                WidgetHandler.GetInstance().RegisterOnDoubleClick( module.menuButton, this, "OnDoubleClick" );
             }
         }
 
@@ -130,12 +130,16 @@ class EditorMenu
     {
         GetGame().GetInput().ChangeGameFocus( 1 );
         GetGame().GetUIManager().ShowUICursor( true );
+
+        GetGame().GetMission().GetHud().Show( false );
     }
 
     void OnHide()
     {
         GetGame().GetInput().ResetGameFocus();
         GetGame().GetUIManager().ShowUICursor( false );
+
+        GetGame().GetMission().GetHud().Show( true );
     }
 
     bool OnClick( Widget w, int x, int y, int button )
@@ -169,9 +173,33 @@ class EditorMenu
         return false;
     }
 
-    void Update() 
-    {
-        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
+    // TODO: Fix
+	bool OnDoubleClick(Widget w, int x, int y, int button)
+	{
+        if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
+        
+        Form form;
+
+        for ( int i = 0; i < m_Modules.Count(); i++ )
+        {
+            EditorModule module = m_Modules.Get( i );
+
+            if ( w == module.menuButton )
+            {
+                form = module.form;
+            }
+        }
+
+        if ( form && form.window && !form.GetLayoutRoot().IsVisible() ) 
+        {
+            //form.Show();
+
+            //form.window.SetPosition( 0, 0 );
+
+            return true;
+        }
+
+        return false;
     }
 }
 

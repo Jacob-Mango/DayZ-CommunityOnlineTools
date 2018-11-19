@@ -3,7 +3,6 @@ class ObjectMenu extends Form
     protected ref map< string, string > m_ObjectTypes;
     protected string m_CurrentType;
 
-    protected Widget m_ActionsWrapper;
     protected Widget m_TypesActionsWrapper;
     protected Widget m_SpawnerActionsWrapper;
 
@@ -20,10 +19,6 @@ class ObjectMenu extends Form
     protected int m_MouseY;
 
     protected string m_ItemsList;
-
-    protected UIActionText m_SelectedObjectType;
-    protected UIActionEditableVector m_SelectedObjectPosition;
-    protected UIActionEditableVector m_SelectedObjectRotation;
 
     void ObjectMenu()
     {
@@ -55,10 +50,8 @@ class ObjectMenu extends Form
         m_ObjectTypes.Insert( name, config );
     }
 
-    void Init()
+    override void OnInit( bool fromMenu )
     {
-        ref ObjectModule objModule = ObjectModule.Cast( module );
-
         m_ClassList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "object_spawn_list" ) );
 
         m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
@@ -77,31 +70,33 @@ class ObjectMenu extends Form
         AddObjectType( typesButtons, "Buildings", "house" );
         AddObjectType( typesButtons, "AI", "dz_lightai" );
 
-        m_SpawnerActionsWrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
+        ref Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
-        ref Widget spawnactionswrapper = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 3, 1 );
+        m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 3, 1 );
 
-        ref Widget spawnInfo = UIActionManager.CreateGridSpacer( spawnactionswrapper, 1, 2 );
+        ref Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
         m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "Search: ", this, "SearchInput_OnChange" );
         m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "Quantity: " );
         m_QuantityItem.SetText( "MAX" );
 
-        ref Widget spawnButtons = UIActionManager.CreateGridSpacer( spawnactionswrapper, 1, 4 );
-        UIActionManager.CreateText( spawnButtons, "Spawn on: " )
-        UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
-        UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
-        UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+        ref Widget spawnButtons = NULL;
 
-        m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+        if ( fromMenu )
+        {
+            spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
 
-        ref Widget editorWrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 9, 1 );
+            UIActionManager.CreateText( spawnButtons, "Spawn on: " )
 
-        UIActionManager.CreateButton( editorWrapper, "Toggle Editor", objModule, "ToggleEditor" );
+            UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
+            UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
+            UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+        } else 
+        {
+            spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 1 );
 
-        m_SelectedObjectType = UIActionManager.CreateText( editorWrapper, "Name: " );
-        m_SelectedObjectPosition = UIActionManager.CreateEditableVector( editorWrapper, "Position: " );
-        m_SelectedObjectRotation = UIActionManager.CreateEditableVector( editorWrapper, "Orientation: " );
+            UIActionManager.CreateButton( spawnButtons, "Spawn On Cursor", this, "SpawnCursor" );
+        }
     }
 
 	void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
@@ -150,21 +145,6 @@ class ObjectMenu extends Form
         } 
 
         return false;
-    }
-
-    void SetSelectedObject( Object object )
-    {
-        if ( object )
-        {
-            m_SelectedObjectType.SetText( object.GetType() );
-            m_SelectedObjectPosition.SetVector( object.GetPosition() );
-            m_SelectedObjectRotation.SetVector( object.GetOrientation() );
-        } else 
-        {
-            m_SelectedObjectType.SetText( "" );
-            m_SelectedObjectPosition.SetVector( "0 0 0" );
-            m_SelectedObjectRotation.SetVector( "0 0 0" );
-        }
     }
 
     override void OnShow()

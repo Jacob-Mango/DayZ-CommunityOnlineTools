@@ -92,8 +92,7 @@ class WindowHandle extends ScriptedWidgetEventHandler
 	{
         if ( w == m_TitleWrapper )
         {
-		    layoutRoot.SetPos( x - offsetX, y - offsetY, true );
-            m_TitleWrapper.SetPos( 0, 0, true );
+		    SetPosition( x - offsetX, y - offsetY );
         }
 
 		return true;
@@ -103,14 +102,17 @@ class WindowHandle extends ScriptedWidgetEventHandler
 	{
         if ( w == m_TitleWrapper )
         {
-		    layoutRoot.SetPos( x - offsetX, y - offsetY, true );
-            m_TitleWrapper.SetPos( 0, 0, true );
+		    SetPosition( x - offsetX, y - offsetY );
         }
-
-        // TODO: Save the position temporarily so it remembers on close. Maybe also permanently when game opens and closes.
 
 		return true;
 	}
+
+    void SetPosition( int x, int y )
+    {
+		layoutRoot.SetPos( x, y, true );
+        m_TitleWrapper.SetPos( 0, 0, true );
+    }
 
     ref Widget GetLayoutRoot() 
     {

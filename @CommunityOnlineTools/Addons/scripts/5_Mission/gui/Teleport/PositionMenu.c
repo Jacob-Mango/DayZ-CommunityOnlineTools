@@ -56,7 +56,7 @@ class PositionMenu extends Form
         return false;
     }
 
-    void Init()
+    override void OnInit( bool fromMenu )
     {
         m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
