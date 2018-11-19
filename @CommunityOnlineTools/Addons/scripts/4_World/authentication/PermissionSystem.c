@@ -56,9 +56,9 @@ ref AuthPlayer DeserializePlayer( ref PlayerData data )
     return player;
 }
 
-ref array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
+array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
 {
-    ref array< ref PlayerData > output = new ref array< ref PlayerData >;
+    array< ref PlayerData > output = new array< ref PlayerData >;
 
     for ( int i = 0; i < players.Count(); i++)
     {
@@ -68,9 +68,9 @@ ref array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > player
     return output;
 }
 
-ref array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > players )
+array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > players )
 {
-    ref array< ref AuthPlayer > output = new ref array< ref AuthPlayer >;
+    array< ref AuthPlayer > output = new array< ref AuthPlayer >;
 
     for ( int i = 0; i < players.Count(); i++)
     {
@@ -80,19 +80,19 @@ ref array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > play
     return output;
 }
 
-ref array< string > SerializePlayersGUID( ref array< ref AuthPlayer > players )
+ref array< string > SerializePlayersGUID( array< ref AuthPlayer > players )
 {
     ref array< string > output = new ref array< string >;
 
     for ( int i = 0; i < players.Count(); i++)
     {
-        output.Insert(  players[i].GetGUID() );
+        output.Insert( players[i].GetGUID() );
     }
 
     return output;
 }
 
-ref array< ref AuthPlayer > DeserializePlayersGUID( ref array< string > guids )
+array< ref AuthPlayer > DeserializePlayersGUID( ref array< string > guids )
 {
     return GetPermissionsManager().GetPlayers( guids );
 }

@@ -112,12 +112,16 @@ class EditorMenu
 
         layoutRoot.Show( true );
 
+        InCommunityOfflineTools = true;
+
         OnShow();
     }
 
     void Hide()
     {
         layoutRoot.Show( false );
+
+        InCommunityOfflineTools = false;
 
         OnHide();
     }

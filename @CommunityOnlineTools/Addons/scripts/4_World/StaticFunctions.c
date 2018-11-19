@@ -2,6 +2,8 @@
 
 static Camera COTCamera; // active static camera "staticcamera"
 
+static bool InCommunityOfflineTools;
+
 static string FormatFloat( float value, int decimals ) 
 {
     string result = "";
@@ -220,9 +222,15 @@ static vector GetCursorPos()
     return hitPos;
 }
 
-static void Message( string txt ) 
+static void Message( Man man, string txt ) 
 {
-    GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", txt, ""));
+    if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
+    {
+        GetGame().RPCSingleParam(man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity());
+    } else 
+    {
+        GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", txt, ""));
+    }
 }
 
 static Weapon GetWeaponInHands()

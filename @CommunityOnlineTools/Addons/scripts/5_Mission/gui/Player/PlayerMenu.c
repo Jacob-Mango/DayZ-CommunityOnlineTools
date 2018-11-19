@@ -316,6 +316,7 @@ class PlayerMenu extends Form
                     } else 
                     {
                         UpdateActionsFields( NULL );
+                        LoadPermissions( NULL );
                     }
                 }
 
@@ -429,26 +430,31 @@ class PlayerMenu extends Form
     {
         Print("PlayerMenu::UpdatePlayerList");
        
-        ref array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
+        array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
         for ( int i = 0; i < players.Count(); i++ )
         {
             bool exists = false;
 
+            ref PlayerRow rowScript;
+
             for ( int j = 0; j < m_PlayerList.Count(); j++ )
             {
                 if ( m_PlayerList[j].Player.GetGUID() == players[i].GetGUID() )
                 {
+                    rowScript = m_PlayerList[j];
                     exists = true;
                     break;
                 }
             }
 
-            if ( exists == false )
+            if ( exists )
+            {
+                rowScript.SetPlayer( players[i] );
+            } else
             {
                 Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
-                ref PlayerRow rowScript;
                 permRow.GetScript( rowScript );
                 
                 rowScript.SetPlayer( players[i] );
@@ -463,7 +469,6 @@ class PlayerMenu extends Form
                 }
             }
         }
-
         
         for ( int k = 0; k < m_PlayerList.Count(); k++ )
         {
@@ -474,10 +479,11 @@ class PlayerMenu extends Form
                 if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
                 {
                     found = true;
+                    break;
                 }
             }
 
-            if ( found == false )
+            if ( !found )
             {
                 m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
                 m_PlayerList[k].GetLayoutRoot().Unlink();

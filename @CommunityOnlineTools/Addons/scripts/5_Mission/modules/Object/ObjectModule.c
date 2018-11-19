@@ -120,7 +120,7 @@ class ObjectModule: EditorModule
         
         if( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = DeserializePlayersGUID( data.param3 );
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param3 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {

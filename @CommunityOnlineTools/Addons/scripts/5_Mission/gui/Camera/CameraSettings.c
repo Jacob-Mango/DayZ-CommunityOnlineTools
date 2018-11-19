@@ -57,7 +57,7 @@ class CameraSettings extends Form
         return true;
     }
     
-    void Init()
+    override void Init()
     {
         widgetStore = new WidgetStore( layoutRoot );
 
@@ -91,6 +91,8 @@ class CameraSettings extends Form
         {
             CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/Camera/CameraPHI.layout" );
         }
+
+        super.Init();
     }
     
     
@@ -98,7 +100,10 @@ class CameraSettings extends Form
     {
         super.OnShow();
 
-        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+        if ( HasBeenInitialized )
+        {
+            GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+        }
 
         UpdateEditBox();
     }
@@ -106,6 +111,8 @@ class CameraSettings extends Form
     override void OnHide()
     {
         super.OnHide();
+
+        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 
     }
     
@@ -291,13 +298,6 @@ class CameraSettings extends Form
         {
             CameraTool.EXPOSURE = (m_SldCamExp.GetCurrent() * 0.1) - 5.0;
             GetGame().SetEVUser( CameraTool.EXPOSURE );
-            //PPEffects.SetBlur( exposure );
-            
-            //float color[4];
-            //matColors.SetParam("LensDistort", CameraTool.EXPOSURE );
-            //GetPlayer().MessageStatus( CameraTool.EXPOSURE.ToString() );
-            //matColors.SetParam("PowerX", exposure);
-            // matColors.SetParam("PowerY", exposure);
         }
         else if ( changeSlider.GetName() == "camera_slider_hue" ) 
         {
