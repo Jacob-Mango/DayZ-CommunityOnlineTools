@@ -7,15 +7,18 @@ FrameWidgetClass rootFrame {
  vexactsize 0
  {
   PanelWidgetClass object_info_wrapper {
-   position 18.9339 80
+   color 0 0 0 0.95
+   position 20 80
    size 800 40
    valign bottom_ref
    hexactpos 1
    vexactpos 1
    hexactsize 1
    vexactsize 1
+   style rover_sim_colorable
   }
   PanelWidgetClass object_controls {
+   color 0 0 0 0.95
    position 20 20
    size 800 40
    valign bottom_ref
@@ -23,6 +26,7 @@ FrameWidgetClass rootFrame {
    vexactpos 1
    hexactsize 1
    vexactsize 1
+   style rover_sim_colorable
   }
  }
 }
