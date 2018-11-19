@@ -18,13 +18,15 @@ class ObjectModule: EditorModule
     {
         return "COT/gui/layouts/Object/ObjectMenu.layout";
     }
-    
+
+    /*
     void CheckForSelection( ref ObjectMenu objForm )
     {
         m_SelectedObject = GetPointerObject( GetPlayer(), 0.2, m_SelectedObject );
 
         objForm.SetSelectedObject( m_SelectedObject );
     }
+    */
 
     void ToggleEditor( UIEvent eid, ref UIActionButton action )
     {
@@ -38,6 +40,8 @@ class ObjectModule: EditorModule
     override void OnUpdate( float timeslice ) 
     {
         super.OnUpdate( timeslice );
+
+        /*
 
         ref ObjectMenu objForm = ObjectMenu.Cast( form );
 
@@ -61,6 +65,8 @@ class ObjectModule: EditorModule
             {
             }
         }
+
+        */
     }   
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

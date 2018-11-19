@@ -69,7 +69,7 @@ class PlayerMenu extends Form
         return false;
     }
 
-    override void Init()
+    override void OnInit( bool fromMenu )
     {
         m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
         m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));

@@ -1,9 +1,16 @@
 class COTModule : Module
 {
-    protected ref EditorMenu m_EditorMenu;
+    static ref COTModule COTInstance;
+
+    protected ref COTMenu m_COTMenu;
+
+    protected bool m_PreventOpening; 
+    protected bool m_ForceHUD; 
 
     void COTModule()
     {
+        COTInstance = this;
+
         GetRPCManager().AddRPC( "COT", "RequestPermissions", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
 
@@ -12,9 +19,9 @@ class COTModule : Module
 
     void ~COTModule()
     {
-        CloseEditor();
+        CloseMenu( false );
 
-        delete m_EditorMenu;
+        delete m_COTMenu;
     }
 
     override void OnMissionLoaded()
@@ -22,18 +29,20 @@ class COTModule : Module
         if ( GetGame().IsClient() )
         {
             GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
+
+            if ( m_COTMenu == NULL )
+            {
+                m_COTMenu = new ref COTMenu;
+                m_COTMenu.Init();
+            }
         }
     }
 
     override void RegisterKeyMouseBindings() 
     {
-        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleEditor", "[Y]", "Opens the editor." );
+        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "[Y]", "Opens the editor." );
         toggleEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
         RegisterKeyMouseBinding( toggleEditor );
-
-        //KeyMouseBinding closeEditor = new KeyMouseBinding( GetModuleType(), "CloseEditor", "[ESCAPE]", "Closes the editor." );
-        //closeEditor.AddKeyBind( KeyCode.KC_ESCAPE, KeyMouseBinding.KB_EVENT_RELEASE );
-        //RegisterKeyMouseBinding( closeEditor );
     }
 
     override void OnUpdate( float timeslice )
@@ -44,33 +53,54 @@ class COTModule : Module
             ToggleEditor();
         }
         */
-    }
 
-    void CloseEditor()
-    {
-        if ( m_EditorMenu && m_EditorMenu.IsVisible() )
+        if ( m_ForceHUD )
         {
-            m_EditorMenu.Hide();
+            GetGame().GetMission().GetHud().Show( false );
         }
     }
 
-    void ToggleEditor()
+    void COTForceHud( bool enable )
     {
+        m_ForceHUD = enable;
+        
+        if ( !m_ForceHUD )
+        {
+            GetGame().GetMission().GetHud().Show( true );
+        }
+    }
+
+    void ShowMenu( bool force )
+    {
+        if ( m_PreventOpening ) 
+        {
+            if ( !force )
+            {
+                return;
+            }
+        }
+
         if ( !GetPermissionsManager().HasPermission( "COT.Show", NULL ) )
             return;
+            
+        m_COTMenu.Show();
+    }
 
-        if ( m_EditorMenu == NULL )
-        {
-            m_EditorMenu = new ref EditorMenu;
-            m_EditorMenu.Init();
-        }
+    void CloseMenu( bool prevent )
+    {
+        m_COTMenu.Hide();
 
-        if ( m_EditorMenu.IsVisible() )
+        m_PreventOpening = prevent;
+    }
+
+    void ToggleMenu()
+    {
+        if ( m_COTMenu.IsVisible() )
         {
-            m_EditorMenu.Hide();
+            CloseMenu( false );
         } else
         {
-            m_EditorMenu.Show();
+            ShowMenu( false );
         }
     }
 
@@ -119,4 +149,24 @@ class COTModule : Module
             }
         }
     }
+}
+
+static void COTForceHud( bool enable )
+{
+    COTModule.COTInstance.COTForceHud( enable );
+}
+
+static void ShowCOTMenu( bool force = false )
+{
+    COTModule.COTInstance.ShowMenu( force );
+}
+
+static void CloseCOTMenu( bool prevent = false )
+{
+    COTModule.COTInstance.CloseMenu( prevent );
+}
+
+static void ToggleCOTMenu()
+{
+    COTModule.COTInstance.ToggleMenu();
 }
