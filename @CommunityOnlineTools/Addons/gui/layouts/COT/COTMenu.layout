@@ -31,7 +31,7 @@ FrameWidgetClass COTMenu {
    vexactpos 0
    hexactsize 1
    vexactsize 0
-   priority 100
+   priority 10000
    style DayZDefaultPanelTop
    {
     PanelWidgetClass TitleBar {
