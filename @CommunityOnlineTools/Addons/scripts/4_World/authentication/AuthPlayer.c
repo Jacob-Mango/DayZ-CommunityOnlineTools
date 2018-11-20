@@ -124,9 +124,17 @@ class AuthPlayer
         }
     }
 
+    string FileReadyStripName( string name )
+    {
+        name.Replace( "\\", "" );
+        name.Replace( "/", "" );
+        name.Replace( "=", "" );
+    }
+
     bool Save()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + m_Data.SGUID + FILE_TYPE, FileMode.WRITE );
+        Print( "Saving permissions for " + FileReadyStripName( m_Data.SGUID ) );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + FileReadyStripName( m_Data.SGUID ) + FILE_TYPE, FileMode.WRITE );
             
         ref array< string > data = Serialize();
 
@@ -152,7 +160,8 @@ class AuthPlayer
 
     bool Load()
     {
-        FileHandle file = OpenFile( AUTH_DIRECTORY + m_Data.SGUID + FILE_TYPE, FileMode.READ );
+        Print( "Loading permissions for " + FileReadyStripName( m_Data.SGUID ) );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + FileReadyStripName( m_Data.SGUID ) + FILE_TYPE, FileMode.READ );
             
         ref array< string > data = new ref array< string >;
 
