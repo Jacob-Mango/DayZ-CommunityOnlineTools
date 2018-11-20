@@ -166,28 +166,19 @@ class AuthPlayer
             }
 
             CloseFile( file );
+
+            for ( int i = 0; i < data.Count(); i++ )
+            {
+                AddPermission( data[i] );
+            }
         } else
         {
             Print( "Failed to open the file for the player to read. Attemping to create." );
 
-            file = OpenFile( AUTH_DIRECTORY + m_Data.SGUID + FILE_TYPE, FileMode.WRITE );
-
-            if ( file != 0 )
-            {
-                CloseFile( file );
-                Print( "Created the file." );
-            } else
-            {
-                Print( "Failed to create the file." );
-            }
+            Save();
             return false;
         }
         
-        for ( int i = 0; i < data.Count(); i++ )
-        {
-            AddPermission( data[i] );
-        }
-
         return true;
     }
 
