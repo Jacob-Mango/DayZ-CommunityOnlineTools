@@ -103,8 +103,8 @@ class PermissionManager
 
         ref PlayerData data = new ref PlayerData;
 
-        data.SName = name;
-        data.SGUID = guid;
+        data.SName = player.GetName();
+        data.SGUID = player.GetId();
 
         ref AuthPlayer auPlayer = new ref AuthPlayer( data );
 
