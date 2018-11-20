@@ -15,6 +15,11 @@ class COTModule : Module
         GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
+
+        if ( GetGame().IsClient() )
+        {
+            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
+        }
     }
 
     void ~COTModule()
@@ -28,8 +33,6 @@ class COTModule : Module
     {
         if ( GetGame().IsClient() )
         {
-            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
-
             if ( m_COTMenu == NULL )
             {
                 m_COTMenu = new ref COTMenu;
@@ -106,12 +109,9 @@ class COTModule : Module
 
     void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetGame().IsMultiplayer() )
-            return;
-
         if ( type == CallType.Client )
         {
-            ref Param1< ref PlayerData > data;
+            Param1< ref PlayerData > data;
             if ( !ctx.Read( data ) ) return;
 
             ClientAuthPlayer = DeserializePlayer( data.param1 );
@@ -125,13 +125,7 @@ class COTModule : Module
 
         if ( type == CallType.Server )
         {
-            if ( GetGame().IsMultiplayer() )
-            {
-                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
-            } else
-            {
-                ClientAuthPlayer = GetPermissionsManager().GetPlayerByIdentity( sender );
-            }
+            GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
         }
     }
 }

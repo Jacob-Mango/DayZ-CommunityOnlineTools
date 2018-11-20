@@ -49,11 +49,7 @@ ref PlayerData SerializePlayer( ref AuthPlayer player )
 
 ref AuthPlayer DeserializePlayer( ref PlayerData data )
 {
-    ref AuthPlayer player = GetPermissionsManager().GetPlayer( data );
-    
-    player.Deserialize();
-
-    return player;
+    return GetPermissionsManager().GetPlayer( data );
 }
 
 array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
