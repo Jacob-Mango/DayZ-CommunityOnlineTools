@@ -83,7 +83,7 @@ class PermissionManager
                 return true;
             }
 
-            return ClientAuthPlayer.HasPermission( permission );
+            return true; // ClientAuthPlayer.HasPermission( permission );
         } 
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
