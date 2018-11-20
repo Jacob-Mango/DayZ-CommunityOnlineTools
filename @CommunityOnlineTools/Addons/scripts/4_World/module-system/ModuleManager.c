@@ -39,6 +39,7 @@ class ModuleManager
 
     void ReleaseModules()
     {
+        /*
         for ( int j = 0; j < m_ScriptModules.Count(); j++ )
         {
             m_ScriptModules.Get( j ).Release();
@@ -47,6 +48,7 @@ class ModuleManager
         delete m_Modules;
         delete m_EditorModules;
         delete m_ScriptModules;
+        */
     }
 
     private bool IsValidModule( string path, string name, FileAttr attributes )
@@ -131,7 +133,7 @@ class ModuleManager
 
         for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
         {
-            RegisterModulesByPath(m_ModuleFolders.Get(i));
+            // RegisterModulesByPath(m_ModuleFolders.Get(i));
         }
     }
 

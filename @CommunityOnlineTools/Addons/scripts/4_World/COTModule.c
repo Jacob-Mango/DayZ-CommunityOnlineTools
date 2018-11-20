@@ -125,27 +125,12 @@ class COTModule : Module
 
         if ( type == CallType.Server )
         {
-            ref array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
-
-            ref AuthPlayer player = NULL;
-
-            for ( int i = 0; i < players.Count(); i++ )
+            if ( GetGame().IsMultiplayer() )
             {
-                if ( players[i].GetGUID() == sender.GetId() )
-                {
-                    player = players[i];
-                }
-            }
-
-            if ( player )
+                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
+            } else
             {
-                if ( GetGame().IsMultiplayer() )
-                {
-                    GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, sender );
-                } else
-                {
-                    ClientAuthPlayer = player;
-                }
+                ClientAuthPlayer = GetPermissionsManager().GetPlayerByIdentity( sender );
             }
         }
     }
