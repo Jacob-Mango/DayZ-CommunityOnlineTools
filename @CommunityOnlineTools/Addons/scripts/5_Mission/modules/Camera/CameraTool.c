@@ -14,17 +14,17 @@ class CameraTool: EditorModule
     protected float yawVelocity;
     protected float pitchVelocity;
 
-    protected float m_CamFOV = 1.0; // default FOV
-    protected float m_TargetFOV = 1.0;
-    protected float m_TargetRoll;
-    protected float m_DistanceToObject;
-    protected bool m_FollowTarget = false;
-    protected bool m_OrbitalCam = false;
-    protected bool m_FreezeCam = false;
+    static float m_CamFOV = 1.0; // default FOV
+    static float m_TargetFOV = 1.0;
+    static float m_TargetRoll;
+    static float m_DistanceToObject;
+    static bool m_FollowTarget = false;
+    static bool m_OrbitalCam = false;
+    static bool m_FreezeCam = false;
 
-	protected float m_SendUpdateAcc = 0.0;
+	static float m_SendUpdateAcc = 0.0;
 
-    protected bool m_FreezeMouse = false;
+    static bool m_FreezeMouse = false;
     
     static float CAMERA_FOV = 1.0;
     static float CAMERA_TARGETFOV = 1.0;
@@ -65,12 +65,12 @@ class CameraTool: EditorModule
 
     static int VIEWDISTANCE = 1600; // move later
 
-    protected vector m_CamOffset;
+    static vector m_CamOffset;
     
-    protected Object m_Target;
-    protected vector m_TargetPos; // Static position
+    static Object m_Target;
+    static vector m_TargetPos; // Static position
     
-    protected float m_CurrentSmoothBlur;
+    static float m_CurrentSmoothBlur;
 
     void CameraTool()
     {
@@ -225,7 +225,6 @@ class CameraTool: EditorModule
             }
 
             COTCamera.SetActive( false );
-
             COTCamera = NULL;
             
             m_CamFOV = 1.0;
@@ -339,15 +338,19 @@ class CameraTool: EditorModule
         }
     }
 
-    void SetTarget(Object oObject)
+    static void SetTarget( Object oObject )
     {
-        if (oObject)
+        if ( oObject )
         {
             m_Target = oObject;
             m_TargetPos = oObject.GetPosition();
+
+            FollowTarget();
         } else
         {
             m_Target = NULL;
+
+            FollowTarget();
         }
     }
     
@@ -629,23 +632,24 @@ class CameraTool: EditorModule
         }        
     }
     
-    void FollowTarget()
+    static void FollowTarget()
     {
-        if ( COTCamera ) 
+        if ( m_Target || m_TargetPos != vector.Zero ) 
         {
-            if ( m_Target || m_TargetPos != vector.Zero ) 
-            {
-                m_FollowTarget = !m_FollowTarget;
-                SetFreezeMouse( m_FollowTarget );
-                SetFreezeCam( m_FollowTarget );
-                
-                if ( !m_FollowTarget ) 
-                {
-                    m_DistanceToObject = 0.0;
-                    m_CamOffset = vector.Zero;
-                }
-            }
-        }        
+            m_FollowTarget = true;
+            
+            SetFreezeMouse( true );
+            SetFreezeCam( true );
+        } else 
+        {
+            m_FollowTarget = false;
+            
+            SetFreezeMouse( false );
+            SetFreezeCam( false );
+
+            m_DistanceToObject = 0.0;
+            m_CamOffset = vector.Zero;
+        }     
     }
     
     void ToggleOrbital() 
@@ -704,12 +708,12 @@ class CameraTool: EditorModule
         return m_TargetPos;
     }
     
-    void SetFreezeCam( bool freeze ) 
+    static void SetFreezeCam( bool freeze ) 
     {
         m_FreezeCam = freeze;
     }
     
-    void SetFreezeMouse( bool freeze ) 
+    static void SetFreezeMouse( bool freeze ) 
     {
         m_FreezeMouse = freeze;
     }

@@ -41,6 +41,13 @@ class AuthPlayer
         return m_Identity;
     }
 
+    void SwapData( ref PlayerData newData )
+    {
+        delete m_Data;
+
+        m_Data = newData;
+    }
+
     ref PlayerData GetData()
     {
         return m_Data;
