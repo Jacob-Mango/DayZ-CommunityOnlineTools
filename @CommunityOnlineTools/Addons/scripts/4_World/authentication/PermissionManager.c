@@ -101,7 +101,12 @@ class PermissionManager
     {
         if ( player == NULL ) return NULL;
 
-        ref AuthPlayer auPlayer = new ref AuthPlayer( new ref PlayerData );
+        ref PlayerData data = new ref PlayerData;
+
+        data.SName = name;
+        data.SGUID = guid;
+
+        ref AuthPlayer auPlayer = new ref AuthPlayer( data );
 
         auPlayer.SetIdentity( player );
 
@@ -110,6 +115,8 @@ class PermissionManager
         auPlayer.Load();
 
         AuthPlayers.Insert( auPlayer );
+
+        GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true, player );
 
         return auPlayer;
     }

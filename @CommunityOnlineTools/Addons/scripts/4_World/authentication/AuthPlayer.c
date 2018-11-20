@@ -129,14 +129,17 @@ class AuthPlayer
         name.Replace( "\\", "" );
         name.Replace( "/", "" );
         name.Replace( "=", "" );
+        name.Replace( "+", "" );
 
         return name;
     }
 
     bool Save()
     {
-        Print( "Saving permissions for " + FileReadyStripName( m_Data.SGUID ) );
-        FileHandle file = OpenFile( AUTH_DIRECTORY + FileReadyStripName( m_Data.SGUID ) + FILE_TYPE, FileMode.WRITE );
+        string filename = FileReadyStripName( m_Data.SGUID );
+
+        Print( "Saving permissions for " + filename );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
             
         ref array< string > data = Serialize();
 
@@ -162,8 +165,9 @@ class AuthPlayer
 
     bool Load()
     {
-        Print( "Loading permissions for " + FileReadyStripName( m_Data.SGUID ) );
-        FileHandle file = OpenFile( AUTH_DIRECTORY + FileReadyStripName( m_Data.SGUID ) + FILE_TYPE, FileMode.READ );
+        string filename = FileReadyStripName( m_Data.SGUID );
+        Print( "Loading permissions for " +  );
+        FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
             
         ref array< string > data = new ref array< string >;
 
