@@ -229,11 +229,27 @@ class PlayerModule: EditorModule
                     }
                 }
 
-                ref AuthPlayer aup = GetPermissionsManager().GetPlayerByIdentity( identities[i] );
                 
-                aup.UpdatePlayerData( player );
+                ref AuthPlayer auPlayer = NULL;
 
-                aup.DebugPrint();
+                for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
+                {
+                    if ( GetPermissionsManager().AuthPlayers[i].GetGUID() == identities[i].GetId() )
+                    {
+                        auPlayer = GetPermissionsManager().AuthPlayers[i];
+                        break;
+                    }
+                }
+                
+                if ( auPlayer )
+                {
+                    auPlayer.UpdatePlayerData( player );
+
+                    auPlayer.DebugPrint();
+                } else 
+                {
+                    Print( "ReloadList: Player " + identities[i].GetId() + " permissions data does not exist!" );
+                }
             }
 
             if ( GetGame().IsMultiplayer() )
