@@ -36,7 +36,24 @@ class COTModule : Module
         Print("RequestPermissions");
         if ( type == CallType.Server )
         {
-            GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
+            ref AuthPlayer auPlayer = NULL;
+
+            for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
+            {
+                if ( GetPermissionsManager().AuthPlayers[i].GetGUID() == identities[i].GetId() )
+                {
+                    auPlayer = GetPermissionsManager().AuthPlayers[i];
+                    break;
+                }
+            }
+
+            if ( auPlayer )
+            {
+                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true, sender );
+            } else 
+            {
+                Print( "RequestPermissions: Player " + identities[i].GetId() + " permissions data does not exist!" );
+            }
         }
     }
 

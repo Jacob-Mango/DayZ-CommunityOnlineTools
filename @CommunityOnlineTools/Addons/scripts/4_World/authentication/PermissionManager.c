@@ -101,13 +101,15 @@ class PermissionManager
     {
         if ( player == NULL ) return NULL;
 
-        ref AuthPlayer auPlayer = GetPlayerByIdentity( player );
+        ref AuthPlayer auPlayer = new ref AuthPlayer( new ref PlayerData );
 
         auPlayer.SetIdentity( player );
 
         auPlayer.CopyPermissions( RootPermission );
 
         auPlayer.Load();
+
+        AuthPlayers.Insert( auPlayer );
 
         return auPlayer;
     }
