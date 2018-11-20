@@ -1,4 +1,4 @@
-FrameWidgetClass rootFrame {
+FrameWidgetClass map_editor_menu {
  ignorepointer 1
  position 0 0
  size 1 1

@@ -138,10 +138,11 @@ static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL,
     DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, geom, with, ignore, false, false, ObjIntersectGeom, radius );
     DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, view, with, ignore, false, false, ObjIntersectView, radius );
 
-    if ( geom.Count() > 0 ) 
+    for ( int i = 0; i < geom.Count(); i++ )
     {
-        return geom;
+        view.Insert( geom[i] );
     }
+
     if ( view.Count() > 0 ) 
     {
         return view;
@@ -149,17 +150,17 @@ static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL,
     return NULL;
 }
 
-static Object GetPointerObject( Object ignore = NULL, float radius = 0.5, Object with = NULL )
+static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
     vector dir = GetGame().GetPointerDirection();
 
     vector from = GetGame().GetCurrentCameraPosition();
 
-    vector to = from + ( dir * 10000 );
+    vector to = from + ( dir * distance );
 
     auto objs = GetObjectsAt( from, to, ignore, radius, with );
 
-    if( objs.Count() > 0 )
+    if( objs && objs.Count() > 0 )
     {
         return objs[ 0 ];
     }
@@ -167,10 +168,10 @@ static Object GetPointerObject( Object ignore = NULL, float radius = 0.5, Object
     return NULL;
 }
 
-static Object GetCursorObject()
+static Object GetCursorObject( float distance = 100.0 )
 {
     vector rayStart = GetGame().GetCurrentCameraPosition();
-    vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * 10000;
+    vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * distance;
 
     auto objs = GetObjectsAt( rayStart, rayEnd );
 
@@ -182,7 +183,7 @@ static Object GetCursorObject()
     return NULL;
 }
 
-static vector GetPointerPos()
+static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 {
     if ( !GetPlayer() )
     {
@@ -193,14 +194,14 @@ static vector GetPointerPos()
 
     vector from = GetGame().GetCurrentCameraPosition();
 
-    vector to = from + ( dir * 10000 );
+    vector to = from + ( dir * distance );
 
     vector rayStart = from;
     vector rayEnd = to;
     vector hitPos;
     vector hitNormal;
     int hitComponentIndex;
-    DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, GetPlayer());
+    DayZPhysics.RaycastRV( rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, ignore );
 
     return hitPos;
 }
@@ -224,12 +225,14 @@ static vector GetCursorPos()
 
 static void Message( Man man, string txt ) 
 {
+    Print( txt );
     if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
     {
         GetGame().RPCSingleParam(man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity());
     } else 
     {
-        GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", txt, ""));
+        GetGame().RPCSingleParam(man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity());
+        // GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", txt, ""));
     }
 }
 

@@ -9,8 +9,26 @@ class MapEditorModule: Module
         GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_MapEditor", "LeaveEditor", this, SingeplayerExecutionType.Server );
 
+        GetRPCManager().AddRPC( "COT_MapEditor", "SetPosition", this, SingeplayerExecutionType.Server );
+
         GetPermissionsManager().RegisterPermission( "MapEditor.EnterEditor" );
         GetPermissionsManager().RegisterPermission( "MapEditor.LeaveEditor" );
+        GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
+    }
+    
+    void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( "MapEditor.Transform.Position", sender ) )
+            return;
+
+        Param1< vector > data;
+        if ( !ctx.Read( data ) ) return;
+ 
+        if( type == CallType.Server )
+        {
+            // target.SetOrigin( data.param1 );
+            target.SetPosition( data.param1 );
+        }
     }
     
     void EnterEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -108,7 +126,7 @@ class MapEditorModule: Module
         {
             if ( m_Menu == NULL )
             {
-                m_Menu = new ref MapEditorMenu;
+                m_Menu = new ref MapEditorMenu( this );
                 m_Menu.Init();
             }
         }

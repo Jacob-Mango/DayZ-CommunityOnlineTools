@@ -182,6 +182,8 @@ class PermissionManager
             if ( AuthPlayers[i].GetGUID() == data.SGUID )
             {
                 auPlayer = AuthPlayers[i];
+
+                auPlayer.SwapData( data );
                 break;
             }
         }

@@ -1,10 +1,5 @@
 class ObjectModule: EditorModule
 {
-    protected bool m_InEditor;
-    protected Object m_SelectedObject;
-
-    protected bool m_MouseButtonPressed;
-
     void ObjectModule()
     {   
         GetRPCManager().AddRPC( "COT_Object", "SpawnObjectPosition", this, SingeplayerExecutionType.Server );
@@ -17,57 +12,7 @@ class ObjectModule: EditorModule
     override string GetLayoutRoot()
     {
         return "COT/gui/layouts/Object/ObjectMenu.layout";
-    }
-
-    /*
-    void CheckForSelection( ref ObjectMenu objForm )
-    {
-        m_SelectedObject = GetPointerObject( GetPlayer(), 0.2, m_SelectedObject );
-
-        objForm.SetSelectedObject( m_SelectedObject );
-    }
-    */
-
-    void ToggleEditor( UIEvent eid, ref UIActionButton action )
-    {
-        Print( "ToggleEditor" );
-
-        if ( eid != UIEvent.CLICK ) return;
-
-        m_InEditor = !m_InEditor;
-    }
-
-    override void OnUpdate( float timeslice ) 
-    {
-        super.OnUpdate( timeslice );
-
-        /*
-
-        ref ObjectMenu objForm = ObjectMenu.Cast( form );
-
-        if ( objForm == NULL ) return;
-        
-        if ( m_InEditor && objForm.GetLayoutRoot().IsVisible() && ( GetWidgetUnderCursor() == NULL || GetWidgetUnderCursor().GetName() == "Windows" ) )
-        {
-            if ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK )
-            {
-                if ( m_MouseButtonPressed == false )
-                {
-                    CheckForSelection( objForm );
-                }
-
-                m_MouseButtonPressed = true;
-            } else {
-                m_MouseButtonPressed = false;
-            }
-
-            if ( m_SelectedObject )
-            {
-            }
-        }
-
-        */
-    }   
+    } 
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
