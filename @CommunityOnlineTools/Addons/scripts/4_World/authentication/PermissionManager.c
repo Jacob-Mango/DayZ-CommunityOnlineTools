@@ -82,7 +82,7 @@ class PermissionManager
             {
                 return true;
             }
-            
+
             return ClientAuthPlayer.HasPermission( permission );
         } 
 
@@ -188,6 +188,8 @@ class PermissionManager
 
             AuthPlayers.Insert( auPlayer );
         }
+
+        auPlayer.Deserialize();
 
         return auPlayer;
     }
