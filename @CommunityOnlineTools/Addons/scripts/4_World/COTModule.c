@@ -15,11 +15,6 @@ class COTModule : Module
         GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
-
-        if ( GetGame().IsClient() )
-        {
-            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
-        }
     }
 
     void ReceivePermissions( CallType type, ref ParamsReadContext ctx, PlayerIdentity sender, Object target )
@@ -61,6 +56,8 @@ class COTModule : Module
                 m_COTMenu = new ref COTMenu;
                 m_COTMenu.Init();
             }
+
+            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
         }
     }
 
