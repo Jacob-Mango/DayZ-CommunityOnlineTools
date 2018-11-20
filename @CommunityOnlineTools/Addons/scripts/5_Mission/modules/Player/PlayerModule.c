@@ -232,11 +232,11 @@ class PlayerModule: EditorModule
                 
                 ref AuthPlayer auPlayer = NULL;
 
-                for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
+                for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
                 {
-                    if ( GetPermissionsManager().AuthPlayers[i].GetGUID() == identities[i].GetId() )
+                    if ( GetPermissionsManager().AuthPlayers[j].GetGUID() == identities[i].GetId() )
                     {
-                        auPlayer = GetPermissionsManager().AuthPlayers[i];
+                        auPlayer = GetPermissionsManager().AuthPlayers[j];
                         break;
                     }
                 }

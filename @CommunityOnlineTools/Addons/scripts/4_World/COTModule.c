@@ -11,7 +11,6 @@ class COTModule : Module
     {
         COTInstance = this;
 
-        GetRPCManager().AddRPC( "COT", "RequestPermissions", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
@@ -31,32 +30,6 @@ class COTModule : Module
         }
     }
 
-    void RequestPermissions( CallType type, ref ParamsReadContext ctx, PlayerIdentity sender, Object target )
-    {
-        Print("RequestPermissions");
-        if ( type == CallType.Server )
-        {
-            ref AuthPlayer auPlayer = NULL;
-
-            for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
-            {
-                if ( GetPermissionsManager().AuthPlayers[i].GetGUID() == identities[i].GetId() )
-                {
-                    auPlayer = GetPermissionsManager().AuthPlayers[i];
-                    break;
-                }
-            }
-
-            if ( auPlayer )
-            {
-                GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true, sender );
-            } else 
-            {
-                Print( "RequestPermissions: Player " + identities[i].GetId() + " permissions data does not exist!" );
-            }
-        }
-    }
-
     void ~COTModule()
     {
         CloseMenu( false );
@@ -73,8 +46,6 @@ class COTModule : Module
                 m_COTMenu = new ref COTMenu;
                 m_COTMenu.Init();
             }
-
-            GetRPCManager().SendRPC( "COT", "RequestPermissions", new Param, true );
         }
     }
 
