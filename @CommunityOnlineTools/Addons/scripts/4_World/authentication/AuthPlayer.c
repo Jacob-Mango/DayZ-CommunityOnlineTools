@@ -166,7 +166,7 @@ class AuthPlayer
     bool Load()
     {
         string filename = FileReadyStripName( m_Data.SGUID );
-        Print( "Loading permissions for " +  );
+        Print( "Loading permissions for " + filename );
         FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
             
         ref array< string > data = new ref array< string >;
