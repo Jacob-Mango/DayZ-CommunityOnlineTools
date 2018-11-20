@@ -78,7 +78,6 @@ class PermissionManager
 
         if ( player == NULL ) 
         {
-            // ClientAuthPlayer.DebugPrint();
             return ClientAuthPlayer.HasPermission( permission );
         } 
 
@@ -86,7 +85,6 @@ class PermissionManager
         {
             if ( AuthPlayers[i].GetGUID() == player.GetId() )
             {
-                // AuthPlayers[i].DebugPrint();
                 return AuthPlayers[i].HasPermission( permission );
             }
         }
@@ -105,15 +103,6 @@ class PermissionManager
         auPlayer.CopyPermissions( RootPermission );
 
         auPlayer.Load();
-
-        auPlayer.AddPermission( "COT", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Object", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Game", PermissionType.ALLOW );
-        auPlayer.AddPermission( "MapEditor", PermissionType.ALLOW );
-        auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 
         return auPlayer;
     }
