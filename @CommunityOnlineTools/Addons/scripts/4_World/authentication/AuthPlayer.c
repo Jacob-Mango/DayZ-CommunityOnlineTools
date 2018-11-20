@@ -129,6 +129,8 @@ class AuthPlayer
         name.Replace( "\\", "" );
         name.Replace( "/", "" );
         name.Replace( "=", "" );
+
+        return name;
     }
 
     bool Save()
