@@ -22,7 +22,7 @@ class COTModule : Module
         }
     }
 
-    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         Print("Setting permissions!");
         if ( type == CallType.Client )
@@ -36,12 +36,9 @@ class COTModule : Module
         }
     }
 
-    void RequestPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void RequestPermissions( CallType type, ref ParamsReadContext ctx, PlayerIdentity sender, Object target )
     {
         Print("RequestPermissions");
-        if ( !GetGame().IsMultiplayer() )
-            return;
-
         if ( type == CallType.Server )
         {
             GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
