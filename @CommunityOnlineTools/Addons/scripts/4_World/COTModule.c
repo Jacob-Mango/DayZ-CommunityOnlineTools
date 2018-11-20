@@ -22,6 +22,32 @@ class COTModule : Module
         }
     }
 
+    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Print("Setting permissions!");
+        if ( type == CallType.Client )
+        {
+            Param1< ref PlayerData > data;
+            if ( !ctx.Read( data ) ) return;
+
+            ClientAuthPlayer = DeserializePlayer( data.param1 );
+
+            ClientAuthPlayer.DebugPrint();
+        }
+    }
+
+    void RequestPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Print("RequestPermissions");
+        if ( !GetGame().IsMultiplayer() )
+            return;
+
+        if ( type == CallType.Server )
+        {
+            GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
+        }
+    }
+
     void ~COTModule()
     {
         CloseMenu( false );
@@ -104,28 +130,6 @@ class COTModule : Module
         } else
         {
             ShowMenu( false );
-        }
-    }
-
-    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-    {
-        if ( type == CallType.Client )
-        {
-            Param1< ref PlayerData > data;
-            if ( !ctx.Read( data ) ) return;
-
-            ClientAuthPlayer = DeserializePlayer( data.param1 );
-        }
-    }
-
-    void RequestPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-    {        
-        if ( !GetGame().IsMultiplayer() )
-            return;
-
-        if ( type == CallType.Server )
-        {
-            GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( sender ) ) ), true, sender );
         }
     }
 }
