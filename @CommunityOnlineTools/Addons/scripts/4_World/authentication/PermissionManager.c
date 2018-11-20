@@ -78,6 +78,11 @@ class PermissionManager
 
         if ( player == NULL ) 
         {
+            if ( ClientAuthPlayer == NULL )
+            {
+                return true;
+            }
+            
             return ClientAuthPlayer.HasPermission( permission );
         } 
 
