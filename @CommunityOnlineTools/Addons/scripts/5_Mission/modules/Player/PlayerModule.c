@@ -228,7 +228,6 @@ class PlayerModule: EditorModule
                         player = PlayerBase.Cast( ggplayers[k] );
                     }
                 }
-
                 
                 ref AuthPlayer auPlayer = NULL;
 
@@ -248,7 +247,7 @@ class PlayerModule: EditorModule
                     auPlayer.DebugPrint();
                 } else 
                 {
-                    Print( "ReloadList: Player " + identities[i].GetId() + " permissions data does not exist!" );
+                    Print( "ReloadList: Player " + identities[i].GetId() + " ref does not exist!" );
                 }
             }
 

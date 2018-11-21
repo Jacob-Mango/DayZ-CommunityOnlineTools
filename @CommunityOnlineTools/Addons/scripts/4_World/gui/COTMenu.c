@@ -108,6 +108,8 @@ class COTMenu
 
     void Show()
     {
+        SetFocus( NULL );
+
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 
         layoutRoot.Show( true );
@@ -119,6 +121,8 @@ class COTMenu
 
     void Hide()
     {
+        SetFocus( NULL );
+
         layoutRoot.Show( false );
 
         InCommunityOfflineTools = false;

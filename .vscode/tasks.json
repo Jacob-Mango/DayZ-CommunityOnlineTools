@@ -38,6 +38,24 @@
                 "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@CommunityOnlineTools", "COT.ChernarusPlus"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "Deploy Server",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "deploy.bat",
+            "args": [
+                "@CommunityOnlineTools", "\"@RPCFramework;@CommunityOnlineTools\""
+            ],
+            "problemMatcher": []
         }
     ]
 }

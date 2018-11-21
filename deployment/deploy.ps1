@@ -1,0 +1,1 @@
+Invoke-Command -ComputerName "DESKTOP-TMCUVSS" -credential $cred -ErrorAction Stop -ScriptBlock {Invoke-Expression -Command:"cmd.exe /c '\\DESKTOP-TMCUVSS\Sharing\CopyMods.bat'"}
