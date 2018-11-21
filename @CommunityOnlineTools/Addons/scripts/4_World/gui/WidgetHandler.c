@@ -11,6 +11,7 @@ class WidgetHandler: ScriptedWidgetEventHandler
 	protected ref map<Widget, ref Param> m_OnDraggingOver;
 	protected ref map<Widget, ref Param> m_OnMouseEnter;
 	protected ref map<Widget, ref Param> m_OnMouseButtonLeave;
+	protected ref map<Widget, ref Param> m_OnChange;
 	protected ref map<Widget, ref Param> m_OnClick;
 	protected ref map<Widget, ref Param> m_OnDoubleClick;
 	protected ref map<Widget, ref Param> m_OnFocus;
@@ -38,6 +39,7 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		m_OnDraggingOver = new map<Widget, ref Param>;
 		m_OnMouseEnter = new map<Widget, ref Param>;
 		m_OnMouseButtonLeave = new map<Widget, ref Param>;
+		m_OnChange = new map<Widget, ref Param>;
 		m_OnClick = new map<Widget, ref Param>;
 		m_OnDoubleClick = new map<Widget, ref Param>;
 		m_OnFocus = new map<Widget, ref Param>;
@@ -57,6 +59,7 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		m_OnDraggingOver.Remove( w );
 		m_OnMouseEnter.Remove( w );
 		m_OnMouseButtonLeave.Remove( w );
+		m_OnChange.Remove( w );
 		m_OnClick.Remove( w );
 		m_OnDoubleClick.Remove( w );
 		m_OnDoubleClick.Remove( w );
@@ -137,6 +140,13 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		m_OnMouseButtonLeave.Insert( w, param );
 	}
 
+	void RegisterOnChange(Widget w, Managed eventHandler, string functionName )
+	{
+		w.SetHandler( this );
+		Param param = new Param2<Managed, string>( eventHandler, functionName );
+		m_OnChange.Insert( w, param );
+	}
+
 	void RegisterOnClick(Widget w, Managed eventHandler, string functionName )
 	{
 		w.SetHandler( this );
@@ -163,6 +173,28 @@ class WidgetHandler: ScriptedWidgetEventHandler
 		Param param = new Param2<Managed, string>( eventHandler, functionName );
 		m_OnFocusLost.Insert( w, param );
 	}
+
+	override bool OnChange(Widget w, int x, int y, bool finished)
+	{
+		Param2<Managed, string> param = Param2<Managed, string>.Cast( m_OnChange.Get( w ) );
+		if( param == NULL )
+		{
+			return false;
+		}
+
+		if( !param.param1 )
+		{
+			m_OnChange.Remove( w );
+		}
+
+
+		Param param2 = new Param4<Widget, int, int, bool>( w, x, y, finished );
+
+		bool ret = false;
+		GetGame().GameScript.CallFunctionParams( param.param1, param.param2, ret, param2 );
+		return ret;
+	}
+
 	override bool OnClick(Widget w, int x, int y, int button)
 	{
 		Param2<Managed, string> param = Param2<Managed, string>.Cast( m_OnClick.Get( w ) );

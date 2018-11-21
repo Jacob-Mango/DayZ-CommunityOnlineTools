@@ -29,9 +29,9 @@ class PlayerData
 
     float FStomachWater;
     float FStomachEnergy;
+    float FStomachVolume;
 
     float FHeatComfort;
-    float FStomachSolid;
 
     float FWet;
     float FTremor;
@@ -68,7 +68,7 @@ class PlayerData
         data.FStomachWater = player.GetStatStomachWater().Get();
         data.FStomachEnergy = player.GetStatStomachEnergy().Get();
         data.FHeatComfort = player.GetStatHeatComfort().Get();
-        // data.FStomachSolid = player.GetStatStomachSolid().Get();
+        data.FStomachVolume = player.GetStatStomachVolume().Get();
         data.FWet = player.GetStatWet().Get();
         data.FTremor = player.GetStatTremor().Get();
         data.FStamina = player.GetStatStamina().Get();

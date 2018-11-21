@@ -12,11 +12,20 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
 
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetEnergy", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetWater", this, SingeplayerExecutionType.Server );
+
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Enable" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Disable" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
+
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Blood" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Energy" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Water" );
     }
 
     override string GetLayoutRoot()
@@ -124,20 +133,13 @@ class PlayerModule: EditorModule
         }
     }
 
-    void SetGodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Param2< bool, ref array< string > > data;
+        Param2< float, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
-        if ( data.param1 )
-        {
-            if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode.Enable", sender ) )
-                return;
-        } else
-        {
-            if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode.Disable", sender ) )
-                return;
-        }
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", sender ) )
+            return;
 
         if( type == CallType.Server )
         {
@@ -145,23 +147,115 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = PlayerBase.Cast( players[i].GetPlayerObject() );
+                PlayerBase player = players[i].GetPlayerObject();
 
-                if ( player == NULL ) return;
+                if ( player == NULL ) continue;
+
+                player.SetHealth( "", "", data.param1 );
+            }
+        }
+    }
+
+    void Player_SetBlood( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.SetHealth( "GlobalHealth", "Blood", data.param1 );
+            }
+        }
+    }
+
+    void Player_SetEnergy( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatEnergy().Set( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetWater( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatWater().Set( data.param1 );
+            }
+        }
+    }
+
+    void SetGodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< bool, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
 
                 if ( m_GodModePlayers.Find( player ) > -1 )
                 {
                     if ( !data.param1 )
                     {
                         m_GodModePlayers.RemoveItem( player );
-                        GetGame().ChatMP( player, "You no longer have god mode.", "colorAction" );
+                        Message( player, "You no longer have god mode." );
                     }
                 } else
                 {
                     if ( data.param1 )
                     {
                         m_GodModePlayers.Insert( player );
-                        GetGame().ChatMP( player, "You now have god mode.", "colorAction" );
+                        Message( player, "You now have god mode." );
                     }
                 }
             }
