@@ -71,15 +71,26 @@ class AuthPlayer
         return m_Man;
     }
 
-    void UpdatePlayerData( ref PlayerBase obj )
+    void UpdatePlayerData( ref PlayerBase obj = NULL )
     {
-        m_Man = obj;
+        if ( m_Identity == NULL ) return;
+
+        if ( m_Data == NULL ) m_Data = new ref PlayerData;
+
+        if ( obj != NULL )
+        {
+            m_Man = obj;
+        }
 
         PlayerData.Load( m_Data, m_Man );
 
         m_Data.IPingMin = m_Identity.GetPingMin();
         m_Data.IPingMax = m_Identity.GetPingMax();
         m_Data.IPingAvg = m_Identity.GetPingAvg();
+        
+        m_Data.SSteam64ID = m_Identity.GetPlainId();
+        m_Data.SGUID = m_Identity.GetId();
+        m_Data.SName = m_Identity.GetName();
     }
 
     void CopyPermissions( ref Permission copy )

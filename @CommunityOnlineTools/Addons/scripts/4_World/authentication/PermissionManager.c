@@ -137,7 +137,7 @@ class PermissionManager
         }
     }
 
-    ref AuthPlayer GetPlayerByGUID( string guid, string name = "" )
+    ref AuthPlayer GetPlayerByGUID( string guid )
     {
         ref AuthPlayer auPlayer = NULL;
 
@@ -154,7 +154,6 @@ class PermissionManager
         {
             ref PlayerData data = new ref PlayerData;
             
-            data.SName = name;
             data.SGUID = guid;
 
             auPlayer = new ref AuthPlayer( data );
@@ -169,7 +168,7 @@ class PermissionManager
     {
         if ( ident == NULL ) return NULL;
 
-        return GetPlayerByGUID( ident.GetId(), ident.GetName() );
+        return GetPlayerByGUID( ident.GetId() );
     }
 
     ref AuthPlayer GetPlayer( ref PlayerData data )
@@ -194,11 +193,8 @@ class PermissionManager
             AuthPlayers.Insert( auPlayer );
         }
 
-        if ( data != NULL )
-        {
-            auPlayer.SwapData( data );
-        }
-        
+        auPlayer.SwapData( data );
+
         auPlayer.Deserialize();
 
         return auPlayer;

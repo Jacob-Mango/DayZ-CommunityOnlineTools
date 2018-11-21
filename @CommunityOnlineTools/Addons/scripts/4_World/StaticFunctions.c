@@ -21,6 +21,13 @@ static string FormatFloat( float value, int decimals )
     return result;
 }
 
+static void SelectPlayer( PlayerIdentity identity, PlayerBase player )
+{
+	GetGame().SelectPlayer(identity, player);
+    
+    player.SetAuthPlayer( GetPermissionsManager().GetPlayerByIdentity( identity) );
+}
+
 static string VectorToString( vector vec )
 {
     string result = vec.ToString();

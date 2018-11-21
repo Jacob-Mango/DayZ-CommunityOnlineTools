@@ -14,11 +14,9 @@ class PlayerModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
-        // GetPermissionsManager().RegisterPermission( "Admin.Player.List" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Enable" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Disable" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Set" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Retrieve" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
     }
 
     override string GetLayoutRoot()
@@ -78,41 +76,51 @@ class PlayerModule: EditorModule
     {
         if ( GetGame().IsClient() ) return;
 
-        ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
+
+/*
+// OLD CODE
+        array<PlayerIdentity> identities = new array<PlayerIdentity>;
         GetGame().GetPlayerIndentities( identities );
         
-        ref array<Man> ggplayers = new ref array<Man>;
+        array<Man> ggplayers = new array<Man>;
         GetGame().GetPlayers( ggplayers );
         
         for ( int i = 0; i < identities.Count(); i++ )
         {
-            PlayerBase player = NULL;
+            int oindex = -1;
+            int pindex = -1;
+            
             for ( int k = 0; k < ggplayers.Count(); k++ )
             {
                 if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
                 {
-                    player = PlayerBase.Cast( ggplayers[k] );
+                    pindex = k;
+                    break;
                 }
             }
-            
-            ref AuthPlayer auPlayer = NULL;
 
             for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
             {
                 if ( GetPermissionsManager().AuthPlayers[j].GetGUID() == identities[i].GetId() )
                 {
-                    auPlayer = GetPermissionsManager().AuthPlayers[j];
+                    pindex = j;
                     break;
                 }
             }
             
-            if ( auPlayer )
+            if ( pindex > -1 && oindex > -1 )
             {
-                auPlayer.UpdatePlayerData( player );
+                GetPermissionsManager().AuthPlayers[ pindex ].UpdatePlayerData( PlayerBase.Cast( ggplayers[ oindex ] ) );
             } else 
             {
                 Print( "ReloadList: Player " + identities[i].GetId() + " ref does not exist!" );
             }
+        }
+*/
+
+        for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
+        {
+            GetPermissionsManager().AuthPlayers[j].UpdatePlayerData();
         }
     }
 
@@ -162,7 +170,7 @@ class PlayerModule: EditorModule
 
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions.Set", sender ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", sender ) )
             return;
    
         if ( type == CallType.Server )
