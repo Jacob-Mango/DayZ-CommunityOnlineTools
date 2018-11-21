@@ -128,12 +128,10 @@ class PermissionManager
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
         {
             ref AuthPlayer auPlayer = AuthPlayers[i];
+            
             if ( auPlayer.GetGUID() == player.GetId() )
             {
                 auPlayer.Save();
-
-                AuthPlayers.Remove( i );
-
                 break;
             }
         }
