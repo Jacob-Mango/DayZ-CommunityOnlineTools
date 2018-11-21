@@ -14,7 +14,7 @@ class PlayerModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.List" );
+        // GetPermissionsManager().RegisterPermission( "Admin.Player.List" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Enable" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode.Disable" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions.Set" );
@@ -29,6 +29,8 @@ class PlayerModule: EditorModule
     override void OnMissionLoaded()
     {
         GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
+
+        GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.ReloadPlayerList, 1000, true );
     }
 
     void UpdateGodMode()
@@ -68,6 +70,48 @@ class PlayerModule: EditorModule
                 {
                     oSupressor.SetHealth( oSupressor.GetMaxHealth( "", "" ) );
                 }
+            }
+        }
+    }
+
+    void ReloadPlayerList()
+    {
+        if ( GetGame().IsClient() ) return;
+
+        ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
+        GetGame().GetPlayerIndentities( identities );
+        
+        ref array<Man> ggplayers = new ref array<Man>;
+        GetGame().GetPlayers( ggplayers );
+        
+        for ( int i = 0; i < identities.Count(); i++ )
+        {
+            PlayerBase player = NULL;
+            for ( int k = 0; k < ggplayers.Count(); k++ )
+            {
+                if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
+                {
+                    player = PlayerBase.Cast( ggplayers[k] );
+                }
+            }
+            
+            ref AuthPlayer auPlayer = NULL;
+
+            for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
+            {
+                if ( GetPermissionsManager().AuthPlayers[j].GetGUID() == identities[i].GetId() )
+                {
+                    auPlayer = GetPermissionsManager().AuthPlayers[j];
+                    break;
+                }
+            }
+            
+            if ( auPlayer )
+            {
+                auPlayer.UpdatePlayerData( player );
+            } else 
+            {
+                Print( "ReloadList: Player " + identities[i].GetId() + " ref does not exist!" );
             }
         }
     }
@@ -204,53 +248,13 @@ class PlayerModule: EditorModule
     {
         Print( "PlayerModule::ReloadList" );
 
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.List", sender ) )
-            return;
+        //if ( !GetPermissionsManager().HasPermission( "Admin.Player.List", sender ) )
+        //    return;
         
         bool cont = false;
 
         if ( type == CallType.Server )
         {
-            ref array<PlayerIdentity> identities = new ref array<PlayerIdentity>;
-            GetGame().GetPlayerIndentities( identities );
-            
-            ref array<Man> ggplayers = new ref array<Man>;
-            GetGame().GetPlayers( ggplayers );
-            
-            for ( int i = 0; i < identities.Count(); i++ )
-            {
-                PlayerBase player = NULL;
-
-                for ( int k = 0; k < ggplayers.Count(); k++ )
-                {
-                    if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
-                    {
-                        player = PlayerBase.Cast( ggplayers[k] );
-                    }
-                }
-                
-                ref AuthPlayer auPlayer = NULL;
-
-                for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
-                {
-                    if ( GetPermissionsManager().AuthPlayers[j].GetGUID() == identities[i].GetId() )
-                    {
-                        auPlayer = GetPermissionsManager().AuthPlayers[j];
-                        break;
-                    }
-                }
-                
-                if ( auPlayer )
-                {
-                    auPlayer.UpdatePlayerData( player );
-
-                    auPlayer.DebugPrint();
-                } else 
-                {
-                    Print( "ReloadList: Player " + identities[i].GetId() + " ref does not exist!" );
-                }
-            }
-
             if ( GetGame().IsMultiplayer() )
             {
                 GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );

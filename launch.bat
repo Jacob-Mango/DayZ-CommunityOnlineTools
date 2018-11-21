@@ -24,7 +24,7 @@ IF %multiplayer%==1 (
     TIMEOUT /T 2 /NOBREAK
 
     chdir /d "%gameDir%"
-    start DayZ_BE.exe -exe DayZ_x64.exe -password=abc123 -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -freezecheck "-mod=!Workshop\@RPCFramework;%modName%"
+    start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -freezecheck "-mod=!Workshop\@RPCFramework;%modName%"
 ) ELSE IF %multiplayer%==2 (
     Powershell.exe -File "%cd%\Tools\exit.ps1" @RPCFramework %modName%
 

@@ -24,9 +24,11 @@ class COTModule : Module
             Param1< ref PlayerData > data;
             if ( !ctx.Read( data ) ) return;
 
-            ClientAuthPlayer = DeserializePlayer( data.param1 );
+            Print(  data.param1  );
 
-            ClientAuthPlayer.DebugPrint();
+            // ClientAuthPlayer = DeserializePlayer( data.param1 );
+
+            // ClientAuthPlayer.DebugPrint();
         }
     }
 
