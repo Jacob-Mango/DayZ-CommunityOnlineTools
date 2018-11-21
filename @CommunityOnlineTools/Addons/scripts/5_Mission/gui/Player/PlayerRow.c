@@ -60,13 +60,18 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void SetPlayer( ref AuthPlayer player )
     {
         Player = player;
+        
+        if ( Player == NULL ) return;
 
         Name.SetText( Player.GetName() );
+
+
+        if ( GetGame().GetPlayer() == NULL ) return;
 
         if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
         {
             ClientAuthPlayer = player;
-            
+
             Name.SetColor( COLOR_GREEN );
         }
     }

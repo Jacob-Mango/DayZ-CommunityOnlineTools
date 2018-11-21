@@ -51,7 +51,7 @@ class PlayerData
 
     static void Load( ref PlayerData data, PlayerBase player )
     {
-        //data.SModel = man.GetType();
+        if ( player == NULL ) return;
 
         data.VPosition = player.GetPosition();
         data.VDirection = player.GetDirection();
