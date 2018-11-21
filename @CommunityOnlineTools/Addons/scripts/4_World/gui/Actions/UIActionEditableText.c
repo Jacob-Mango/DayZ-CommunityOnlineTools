@@ -37,7 +37,7 @@ class UIActionEditableText extends UIActionBase
         m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
         m_Text = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text" ) );
 
-        WidgetHandler.GetInstance().RegisterOnClick( m_Text, this, "OnChange" );
+        WidgetHandler.GetInstance().RegisterOnChange( m_Text, this, "OnChange" );
     }
 
     void SetLabel( string text )
@@ -47,6 +47,8 @@ class UIActionEditableText extends UIActionBase
 
     void SetText( string text )
     {
+        if ( m_Text == GetFocus() ) return;
+
         m_Text.SetText( text );
     }
 
@@ -86,5 +88,14 @@ class UIActionEditableText extends UIActionBase
         }
 
         return ret;
+    }
+
+    override bool CallEvent( UIEvent eid )
+    {
+        if ( !m_HasCallback ) return false;
+
+        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionEditableText >( eid, this ) );
+
+        return false;
     }
 }

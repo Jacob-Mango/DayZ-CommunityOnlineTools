@@ -24,7 +24,7 @@ static string FormatFloat( float value, int decimals )
 static void SelectPlayer( PlayerIdentity identity, PlayerBase player )
 {
 	GetGame().SelectPlayer(identity, player);
-    
+
     player.SetAuthPlayer( GetPermissionsManager().GetPlayerByIdentity( identity) );
 }
 
@@ -233,13 +233,13 @@ static vector GetCursorPos()
 static void Message( Man man, string txt ) 
 {
     Print( txt );
+
     if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
     {
-        GetGame().RPCSingleParam(man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity());
+        GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
     } else 
     {
-        GetGame().RPCSingleParam(man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity());
-        // GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", txt, ""));
+        GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, NULL );
     }
 }
 

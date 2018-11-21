@@ -119,24 +119,42 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
+    float ToFloat( string text )
+    {
+        float f = text.ToFloat();
+        int i = text.ToInt();
+
+        if ( f >= i ) return f;
+
+        return i * 1.0;
+    }
+
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
     {
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
     {
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
     {
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
     {
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( action.GetText().ToFloat(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )

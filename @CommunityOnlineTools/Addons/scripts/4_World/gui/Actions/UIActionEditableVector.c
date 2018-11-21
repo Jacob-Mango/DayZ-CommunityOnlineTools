@@ -98,4 +98,13 @@ class UIActionEditableVector extends UIActionBase
 
         return ret;
     }
+
+    override bool CallEvent( UIEvent eid )
+    {
+        if ( !m_HasCallback ) return false;
+
+        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionEditableVector >( eid, this ) );
+
+        return false;
+    }
 }
