@@ -51,9 +51,9 @@
                     }
                 }
             },
-            "command": "deploy.bat",
+            "command": "Tools/deploy-server.bat",
             "args": [
-                "@CommunityOnlineTools", "\"@RPCFramework;@CommunityOnlineTools\""
+                "@CommunityOnlineTools", "@RPCFramework", "@CommunityOnlineTools"
             ],
             "problemMatcher": []
         }

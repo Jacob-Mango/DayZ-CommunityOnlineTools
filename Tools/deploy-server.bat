@@ -1,8 +1,19 @@
 @echo off
 
-set workspaceDir=%~dp0\..
+Powershell.exe -File "%cd%\Tools\exit.ps1"
+
+set workspaceDir=%cd%
 set modName=%~1
-set otherMods=%~2
+
+set OTHER_MODS=
+shift
+:loop
+    set OTHER_MODS=%OTHER_MODS% "%1"
+    shift
+
+    if not "%~1"=="" goto loop
+
+echo "Loading mods for server to copy %OTHER_MODS%"
 
 set tempFolder=%workspaceDir%\BIN
 
@@ -27,6 +38,8 @@ for /D %%s in ("%tempFolder%\Addons\*") do (
 )
 xcopy /s/e /y /i "%tempFolder%" "\\DESKTOP-TMCUVSS\Sharing\%modName%" > NUL
 
-Powershell.exe -File deploy.ps1
+echo "Transferring mods (%OTHER_MODS%) from share folder to server!"
+
+powershell -command "%cd%\Tools\deploy.ps1 \"%OTHER_MODS%\""
 
 echo "Finished copying to DayZ Server"
