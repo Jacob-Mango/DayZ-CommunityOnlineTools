@@ -65,6 +65,8 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
         if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
         {
+            ClientAuthPlayer = player;
+            
             Name.SetColor( COLOR_GREEN );
         }
     }

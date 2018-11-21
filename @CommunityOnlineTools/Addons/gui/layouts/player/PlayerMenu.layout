@@ -60,29 +60,6 @@ PanelWidgetClass PlayerMenu {
      "exact text" 1
      "exact text size" 16
     }
-    ButtonWidgetClass refresh_list {
-     position 5 10
-     size 80 20
-     halign right_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     {
-      TextWidgetClass action_button_text {
-       ignorepointer 1
-       size 1 1
-       style Light
-       "text halign" center
-       "text valign" center
-       text "Refresh"
-       font "gui/fonts/sdf_MetronLight24"
-       "exact text" 1
-       "exact text size" 14
-      }
-     }
-    }
    }
   }
   PanelWidgetClass panel_right {

@@ -10,11 +10,16 @@ class AuthPlayer
 
     ref PlayerData m_Data;
 
-    void AuthPlayer( PlayerData data )
+    void AuthPlayer( ref PlayerData data )
     {
         m_Man = NULL;
 
         m_Data = data;
+
+        if ( m_Data == NULL )
+        {
+            m_Data = new ref PlayerData;
+        }
 
         RootPermission = new ref Permission( m_Data.SGUID, NULL );
 
@@ -43,8 +48,6 @@ class AuthPlayer
 
     void SwapData( ref PlayerData newData )
     {
-        delete m_Data;
-
         m_Data = newData;
     }
 
@@ -108,7 +111,7 @@ class AuthPlayer
     }
 
     ref array< string > Serialize()
-    {
+    {        
         m_Data.APermissions.Clear();
 
         RootPermission.Serialize( m_Data.APermissions );

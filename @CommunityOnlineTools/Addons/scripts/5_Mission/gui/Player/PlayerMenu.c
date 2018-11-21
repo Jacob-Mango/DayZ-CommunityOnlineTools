@@ -3,7 +3,6 @@ class PlayerMenu extends Form
     ref array< ref PlayerRow >      m_PlayerList;
 
     ref GridSpacerWidget            m_PlayerScriptList;
-    ref ButtonWidget                m_ReloadScriptButton;
 
     ref Widget                      m_ActionsWrapper;
     ref Widget                      m_ActionsForm;
@@ -72,7 +71,6 @@ class PlayerMenu extends Form
     override void OnInit( bool fromMenu )
     {
         m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
-        m_ReloadScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("refresh_list"));
 
         m_ActionsForm = layoutRoot.FindAnyWidget("actions_form");
         m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
@@ -218,6 +216,8 @@ class PlayerMenu extends Form
 
     void UpdateList()
     {
+        ReloadPlayers();
+
         if ( m_ShouldUpdateList && m_CanUpdateList )
         {
             m_CanUpdateList = false;
@@ -229,11 +229,6 @@ class PlayerMenu extends Form
 
     override bool OnClick( Widget w, int x, int y, int button )
     {
-        if ( w == m_ReloadScriptButton )
-        {
-            ReloadPlayers();
-        }
-
         if ( w == m_SetPermissionsButton )
         {
             SetPermissions();
@@ -250,13 +245,7 @@ class PlayerMenu extends Form
 
     void OnPlayer_Checked( ref PlayerRow row )
     {
-        if ( row.Checkbox.IsChecked() )
-        {
-            OnPlayerSelected( row );
-        } else 
-        {
-            OnPlayerSelected( row, false );
-        }
+        OnPlayerSelected( row, row.Checkbox.IsChecked() );
     }
 
     void OnPlayer_Button( ref PlayerRow row )
@@ -469,8 +458,10 @@ class PlayerMenu extends Form
                 }
             }
         }
+
+        int max = m_PlayerList.Count();
         
-        for ( int k = 0; k < m_PlayerList.Count(); k++ )
+        for ( int k = 0; k < max; k++ )
         {
             bool found = false;
 
@@ -487,7 +478,17 @@ class PlayerMenu extends Form
             {
                 m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
                 m_PlayerList[k].GetLayoutRoot().Unlink();
+
+                m_PlayerList.Remove( k );
+                k--;
+                max = m_PlayerList.Count();
             }
+        }
+
+        
+        if (GetSelectedPlayers().Count() > 0 )
+        {
+            UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
         }
     }
 }

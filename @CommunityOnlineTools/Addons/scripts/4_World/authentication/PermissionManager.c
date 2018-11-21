@@ -83,7 +83,7 @@ class PermissionManager
                 return true;
             }
 
-            return true; // ClientAuthPlayer.HasPermission( permission );
+            return ClientAuthPlayer.HasPermission( permission );
         } 
 
         for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -183,8 +183,6 @@ class PermissionManager
             if ( AuthPlayers[i].GetGUID() == data.SGUID )
             {
                 auPlayer = AuthPlayers[i];
-
-                auPlayer.SwapData( data );
                 break;
             }
         }
@@ -196,6 +194,11 @@ class PermissionManager
             AuthPlayers.Insert( auPlayer );
         }
 
+        if ( data != NULL )
+        {
+            auPlayer.SwapData( data );
+        }
+        
         auPlayer.Deserialize();
 
         return auPlayer;
