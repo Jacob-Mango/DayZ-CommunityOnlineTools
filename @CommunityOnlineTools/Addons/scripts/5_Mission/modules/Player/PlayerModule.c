@@ -11,6 +11,7 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
 
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
@@ -23,6 +24,11 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetStamina", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetLastShaved", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetBloodyHands", this, SingeplayerExecutionType.Server );
+
+        GetRPCManager().AddRPC( "COT_Admin", "Player_KickTransport", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_RepairTransport", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportToMe", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportMeTo", this, SingeplayerExecutionType.Server );
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
@@ -40,6 +46,14 @@ class PlayerModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Stamina" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.LastShaved" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
+
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Transport.Kick" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Transport.Repair" );
+
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
+
+        
     }
 
     override string GetLayoutRoot()
@@ -98,47 +112,6 @@ class PlayerModule: EditorModule
     void ReloadPlayerList()
     {
         if ( GetGame().IsClient() ) return;
-
-/*
-// OLD CODE
-        array<PlayerIdentity> identities = new array<PlayerIdentity>;
-        GetGame().GetPlayerIndentities( identities );
-        
-        array<Man> ggplayers = new array<Man>;
-        GetGame().GetPlayers( ggplayers );
-        
-        for ( int i = 0; i < identities.Count(); i++ )
-        {
-            int oindex = -1;
-            int pindex = -1;
-            
-            for ( int k = 0; k < ggplayers.Count(); k++ )
-            {
-                if ( ggplayers[k].GetIdentity().GetId() == identities[i].GetId() )
-                {
-                    pindex = k;
-                    break;
-                }
-            }
-
-            for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
-            {
-                if ( GetPermissionsManager().AuthPlayers[j].GetGUID() == identities[i].GetId() )
-                {
-                    pindex = j;
-                    break;
-                }
-            }
-            
-            if ( pindex > -1 && oindex > -1 )
-            {
-                GetPermissionsManager().AuthPlayers[ pindex ].UpdatePlayerData( PlayerBase.Cast( ggplayers[ oindex ] ) );
-            } else 
-            {
-                Print( "ReloadList: Player " + identities[i].GetId() + " ref does not exist!" );
-            }
-        }
-*/
 
         for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
         {
@@ -396,6 +369,133 @@ class PlayerModule: EditorModule
 
                 player.SetBloodyHands( data.param1 );
             }
+        }
+    }
+
+    void Player_KickTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param1< ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Kick", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL || player.GetTransport() == NULL ) continue;
+
+                Transport transport = player.GetTransport();
+
+                int posIdx = transport.CrewMemberIndex( player );
+
+                transport.CrewGetOut( posIdx );
+            }
+        }
+    }
+
+    void Player_RepairTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param1< ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Repair", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< Transport > completedTransports = new array< Transport >;
+
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL || player.GetTransport() == NULL ) continue;
+
+                Transport transport = player.GetTransport();
+
+                if ( completedTransports.Find( transport ) > -1 )
+                {
+                    ItemBase radiator;
+                    Class.CastTo( radiator, transport.FindAttachmentBySlotName("CarRadiator"));
+                    if ( radiator )
+                    {
+                        radiator.SetHealth( "", "", 1 );
+                    }
+                    transport.SetHealth( "Engine", "", 1 );
+                    transport.SetHealth( "FuelTank", "", 1 );
+
+                    CarScript car = CarScript.Cast( transport );
+
+                    if ( car )
+                    {
+                        car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
+                        car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
+                        car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
+                        car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
+                    }
+
+                    completedTransports.Insert( transport );
+                }
+            }
+        }
+    }
+
+    void Player_TeleportToMe( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< vector, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                if ( player.GetTransport() != NULL ) continue;
+
+                player.SetPosition( data.param1 );
+            }
+        }
+    }
+
+    void Player_TeleportMeTo( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param1< ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) )
+            return;
+
+        PlayerBase senderPlayer = PlayerBase.Cast( target );
+
+        if ( senderPlayer == NULL || senderPlayer.GetTransport() != NULL ) return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+
+            if ( players.Count() != 1 ) return;
+
+            PlayerBase player = players[0].GetPlayerObject();
+
+            if ( player == NULL ) return;
+
+            senderPlayer.SetPosition( player.GetPosition() );
         }
     }
 
