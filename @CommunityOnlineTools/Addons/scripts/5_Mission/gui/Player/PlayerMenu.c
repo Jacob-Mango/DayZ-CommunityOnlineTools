@@ -20,6 +20,8 @@ class PlayerMenu extends Form
 
     private bool                    m_PermissionsLoaded;
 
+    private bool                    m_DataJustUpdated;
+
     ref UIActionText m_GUID;
     ref UIActionText m_Name;
     ref UIActionText m_Steam64ID;
@@ -32,6 +34,13 @@ class PlayerMenu extends Form
     ref UIActionEditableText m_Blood;
     ref UIActionEditableText m_Energy;
     ref UIActionEditableText m_Water;
+    ref UIActionEditableText m_Shock;
+    ref UIActionEditableText m_HeatComfort;
+    ref UIActionEditableText m_Wet;
+    ref UIActionEditableText m_Tremor;
+    ref UIActionEditableText m_Stamina;
+    ref UIActionEditableText m_LastShaved;
+    ref UIActionCheckbox m_BloodyHands;
 
     ref UIActionButton m_ModifyPermissions;
     ref UIActionButton m_BanPlayer;
@@ -86,9 +95,16 @@ class PlayerMenu extends Form
 
         ref Widget lifeStats = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
         m_Health = UIActionManager.CreateEditableText( lifeStats, "Health: ", this, "Click_SetHealth", "", "Set" );
+        m_Shock = UIActionManager.CreateEditableText( lifeStats, "Shock: ", this, "Click_SetShock", "", "Set" );
         m_Blood = UIActionManager.CreateEditableText( lifeStats, "Blood: ", this, "Click_SetBlood", "", "Set" );
         m_Energy = UIActionManager.CreateEditableText( lifeStats, "Energy: ", this, "Click_SetEnergy", "", "Set" );
         m_Water = UIActionManager.CreateEditableText( lifeStats, "Water: ", this, "Click_SetWater", "", "Set" );
+        m_HeatComfort = UIActionManager.CreateEditableText( lifeStats, "Heat Comfort: ", this, "Click_SetHeatComfort", "", "Set" );
+        m_Wet = UIActionManager.CreateEditableText( lifeStats, "Wet: ", this, "Click_SetWet", "", "Set" );
+        m_Tremor = UIActionManager.CreateEditableText( lifeStats, "Tremor: ", this, "Click_SetTremor", "", "Set" );
+        m_Stamina = UIActionManager.CreateEditableText( lifeStats, "Stamina: ", this, "Click_SetStamina", "", "Set" );
+        m_LastShaved = UIActionManager.CreateEditableText( lifeStats, "Last Shaved: ", this, "Click_SetLastShaved", "", "Set" );
+        m_BloodyHands = UIActionManager.CreateCheckbox( lifeStats, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
 
         ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
         m_ModifyPermissions = UIActionManager.CreateButton( playerActions, "Modify Permissions", this, "Click_ModifyPermissions" );
@@ -111,119 +127,110 @@ class PlayerMenu extends Form
 
     void Click_BanPlayer( UIEvent eid, ref UIActionButton action )
     {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_KickPlayer( UIEvent eid, ref UIActionButton action )
     {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
-    }
-
-    private int number(string s)
-    {
-        switch(s)
-        {
-            case "0":
-                return 0;
-            case "1":
-                return 1;
-            case "2":
-                return 2;
-            case "3":
-                return 3;
-            case "4":
-                return 4;
-            case "5":
-                return 5;
-            case "6":
-                return 6;
-            case "7":
-                return 7;
-            case "8":
-                return 8;
-            case "9":
-                return 9;
-        }
-        return -1;
-    }
-
-    float ToFloat( string text )
-    {
-        Print( "PlayerMenu::ToFloat" );
-        Print( "  " + text );
-
-        float f = 0;
-        float d = 0;
-
-        int atDec = 0;
-        bool foundDec = false;
-
-        for ( int i = 0; i < text.Length(); i++ )
-        {
-            int n = number( text.Get(i) );
-
-            Print( "  " + text.Get(i) + "(" + i + "): " + n );
-
-            if ( n > -1 )
-            {
-                f = f * 10;
-                f = f + n;
-
-                if ( foundDec )
-                {
-                    atDec = atDec + 1;
-                }
-            } else if (text.Get(i) == ".")
-            {
-                Print( "  Found decimal point" );
-                foundDec = true;
-            }
-        }
-        
-        f = f / Math.Pow( 10, atDec );
-
-        Print( "  Float is: " + f );
-
-        return f;
     }
 
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
-
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetShock( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
-
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
-
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
-
-        Print( action );
-
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetHeatComfort( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetWet( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetTremor( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetStamina( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetLastShaved( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetLastShaved", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< float, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
     {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void UpdateActionsFields( ref PlayerData data )
     {
+        if ( m_DataJustUpdated )
+        {
+            m_DataJustUpdated = false;
+            return;
+        }
+
         if ( data )
         {
             m_GUID.SetText( data.SGUID );
@@ -234,12 +241,19 @@ class PlayerMenu extends Form
             m_Blood.SetText( data.FBlood.ToString() );
             m_Energy.SetText( data.FEnergy.ToString() );
             m_Water.SetText( data.FWater.ToString() );
+            m_Shock.SetText( data.FShock.ToString() );
+            m_HeatComfort.SetText( data.FHeatComfort.ToString() );
+            m_Wet.SetText( data.FWet.ToString() );
+            m_Tremor.SetText( data.FTremor.ToString() );
+            m_Stamina.SetText( data.FStamina.ToString() );
+            m_LastShaved.SetText( data.FLastShaved.ToString() );
+            m_BloodyHands.SetChecked( data.BBloodyHands );
 
             m_PingMin.SetText( data.IPingMin.ToString() );
             m_PingMax.SetText( data.IPingMax.ToString() );
             m_PingAvg.SetText( data.IPingAvg.ToString() );
 
-            m_ActionsForm.FindAnyWidget("disabled").Show( false );
+            m_ActionsForm.FindAnyWidget( "disabled" ).Show( false );
         } else 
         {
             m_GUID.SetText( "" );

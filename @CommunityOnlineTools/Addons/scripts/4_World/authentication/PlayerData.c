@@ -19,29 +19,21 @@ class PlayerData
 
     float FHealth;
     float FBlood;
+    float FShock;
 
     int IBloodStatType;
 
-    float FTemperature;
     float FEnergy;
     float FWater;
-    float FShock;
-
-    float FStomachWater;
-    float FStomachEnergy;
-    float FStomachVolume;
 
     float FHeatComfort;
 
     float FWet;
     float FTremor;
-    
     float FStamina;
     
     float FLastShaved;
-    float FBloodyHands;
-    
-    float FPlayTime;
+    bool BBloodyHands;
 
     void PlayerData()
     {
@@ -57,23 +49,17 @@ class PlayerData
         data.VDirection = player.GetDirection();
         data.VOrientation = player.GetOrientation();
         
-        data.FHealth = player.GetHealth("","");
-
-        data.FBlood = player.GetHealth("GlobalHealth", "Blood");
+        data.FHealth = player.GetHealth( "GlobalHealth","Health" );
+        data.FBlood = player.GetHealth( "GlobalHealth", "Blood" );
+        data.FShock = player.GetHealth( "GlobalHealth", "Shock" );
         data.IBloodStatType = player.GetStatBloodType().Get();
-        //data.FTemperature = player.GetStatTemperature().Get();
-        //data.FShock = player.GetStatShock().Get();
         data.FEnergy = player.GetStatEnergy().Get();
         data.FWater = player.GetStatWater().Get();
-        data.FStomachWater = player.GetStatStomachWater().Get();
-        data.FStomachEnergy = player.GetStatStomachEnergy().Get();
         data.FHeatComfort = player.GetStatHeatComfort().Get();
-        data.FStomachVolume = player.GetStatStomachVolume().Get();
         data.FWet = player.GetStatWet().Get();
         data.FTremor = player.GetStatTremor().Get();
         data.FStamina = player.GetStatStamina().Get();
         data.FLastShaved = player.GetLastShavedSeconds();
-        data.FBloodyHands = player.HasBloodyHands();
-        data.FPlayTime = player.StatGet("playtime");
+        data.BBloodyHands = player.HasBloodyHands();
     }
 }
