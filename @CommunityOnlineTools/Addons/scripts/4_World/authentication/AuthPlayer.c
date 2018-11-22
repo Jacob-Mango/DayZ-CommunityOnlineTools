@@ -69,7 +69,7 @@ class AuthPlayer
 
     void UpdatePlayerData()
     {
-        PlayerData.Load( m_Data, PlayerObject );
+        if ( IdentityPlayer == NULL ) return;
 
         m_Data.IPingMin = IdentityPlayer.GetPingMin();
         m_Data.IPingMax = IdentityPlayer.GetPingMax();
@@ -78,6 +78,10 @@ class AuthPlayer
         m_Data.SSteam64ID = IdentityPlayer.GetPlainId();
         m_Data.SGUID = IdentityPlayer.GetId();
         m_Data.SName = IdentityPlayer.GetName();
+
+        if ( PlayerObject == NULL ) return;
+
+        PlayerData.Load( m_Data, PlayerObject );
     }
 
     void CopyPermissions( ref Permission copy )
