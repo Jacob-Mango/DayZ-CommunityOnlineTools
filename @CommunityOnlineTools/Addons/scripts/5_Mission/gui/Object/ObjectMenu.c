@@ -120,8 +120,6 @@ class ObjectMenu extends Form
 				GetGame().ObjectDelete( m_PreviewItem );
 			}
 
-			if ( strSelection == "Mag_Scout_5Rnd") return false; 
-
 			m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true );
 
 			m_ItemPreview.SetItem( m_PreviewItem );
@@ -242,7 +240,18 @@ class ObjectMenu extends Form
                         continue;
                     }
 
-                    if ( strName == "ItemOptics" ) 
+                    bool shouldCont = false;
+
+                    switch ( strName )
+                    {
+                        case "Mag_Scout_5Rnd":
+                        case "ItemOptics":
+                            shouldCont = true;
+                        default:
+                            shouldCont = false;
+                    }
+
+                    if ( shouldCont ) 
                     {
                         continue; // Fix crash
                     }
