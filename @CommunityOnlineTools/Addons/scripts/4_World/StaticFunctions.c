@@ -28,6 +28,86 @@ static void SelectPlayer( PlayerIdentity identity, PlayerBase player )
     player.SetAuthPlayer( GetPermissionsManager().GetPlayerByIdentity( identity) );
 }
 
+static int ToSingleDigit( string s )
+{
+    if ( s.Length() != 1 ) return -1;
+    
+    switch(s)
+    {
+        case "0":
+            return 0;
+        case "1":
+            return 1;
+        case "2":
+            return 2;
+        case "3":
+            return 3;
+        case "4":
+            return 4;
+        case "5":
+            return 5;
+        case "6":
+            return 6;
+        case "7":
+            return 7;
+        case "8":
+            return 8;
+        case "9":
+            return 9;
+    }
+    return -1;
+}
+
+static float ToFloat( string text, bool onlyPositive = false )
+{
+    float f = 0;
+    float d = 0;
+    int atDec = 0;
+    bool foundDec = false;
+
+    bool isNegative = false;
+
+    int start = 0;
+
+    if ( text.Get(0) == "+" )
+    {
+        start = 1;
+    } else if ( text.Get(0) == "-" )
+    {
+        start = 1;
+        isNegative = true;
+    }
+
+    for ( int i = start; i < text.Length(); i++ )
+    {
+        int n = ToSingleDigit( text.Get(i) );
+
+        if ( n > -1 )
+        {
+            f = f * 10;
+            f = f + n;
+            if ( foundDec )
+            {
+                atDec = atDec + 1;
+            }
+        } else if ( text.Get(i) == "." || text.Get(i) == "," ) 
+        {
+            if ( foundDec ) // we broke but we aren't gonna crash the game... just say what we have is fine.
+                break;
+            foundDec = true;
+        }
+    }
+    
+    f = f / Math.Pow( 10, atDec );
+
+    if ( isNegative && !onlyPositive )
+    {
+        f = f * -1;
+    }
+
+    return f;
+}
+
 static string VectorToString( vector vec )
 {
     string result = vec.ToString();
@@ -37,7 +117,6 @@ static string VectorToString( vector vec )
 
     return result;
 }
-
 
 static string VectorToString( vector vec, int decimals ) 
 {

@@ -16,6 +16,13 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetEnergy", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetWater", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetShock", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetHeatComfort", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetWet", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetTremor", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetStamina", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetLastShaved", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetBloodyHands", this, SingeplayerExecutionType.Server );
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
@@ -23,9 +30,16 @@ class PlayerModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Shock" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Blood" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Energy" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Water" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.HeatComfort" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Wet" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Tremor" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Stamina" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.LastShaved" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
     }
 
     override string GetLayoutRoot()
@@ -150,7 +164,7 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                player.SetHealth( "", "", data.param1 );
+                player.SetHealth( "GlobalHealth", "Health", data.param1 );
             }
         }
     }
@@ -220,6 +234,167 @@ class PlayerModule: EditorModule
                 if ( player == NULL ) continue;
 
                 player.GetStatWater().Set( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetShock( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.SetHealth( "GlobalHealth", "Shock", data.param1 );
+            }
+        }
+    }
+
+    void Player_SetHeatComfort( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatComfort", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatHeatComfort().Set( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetWet( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Wet", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatWet().Set( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetTremor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Tremor", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatTremor().Set( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetStamina( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.GetStatStamina().Set( data.param1 );
+            }
+        }
+    }
+
+    void Click_SetLastShaved( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< float, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.SetLastShavedSeconds( data.param1 );
+            }
+        }
+    }
+
+    void Player_SetBloodyHands( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Param2< bool, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                PlayerBase player = players[i].GetPlayerObject();
+
+                if ( player == NULL ) continue;
+
+                player.SetBloodyHands( data.param1 );
             }
         }
     }
