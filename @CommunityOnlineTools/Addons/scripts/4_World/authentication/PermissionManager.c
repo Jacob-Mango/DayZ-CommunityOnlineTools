@@ -138,6 +138,8 @@ class PermissionManager
             if ( auPlayer.GetGUID() == player.GetId() )
             {
                 auPlayer.Save();
+
+                AuthPlayers.Remove( i );
                 break;
             }
         }
@@ -174,7 +176,23 @@ class PermissionManager
     {
         if ( ident == NULL ) return NULL;
 
-        return GetPlayerByGUID( ident.GetId() );
+        ref AuthPlayer auPlayer = NULL;
+
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            if ( AuthPlayers[i].GetGUID() == ident.GetId() )
+            {
+                auPlayer = AuthPlayers[i];
+                break;
+            }
+        }
+
+        if ( auPlayer == NULL )
+        {
+            auPlayer = PlayerJoined( ident );
+        }
+
+        return auPlayer
     }
 
     ref AuthPlayer GetPlayer( ref PlayerData data )

@@ -77,7 +77,7 @@ class TeleportModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player.IsInTransport() )
                 {

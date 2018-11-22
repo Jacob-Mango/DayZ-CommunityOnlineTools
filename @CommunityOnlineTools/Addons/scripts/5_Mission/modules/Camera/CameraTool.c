@@ -175,6 +175,7 @@ class CameraTool: EditorModule
             if ( GetGame().IsMultiplayer() )
             {
                 COTCamera = Camera.GetCurrentCamera();
+		        COTCamera.SetActive( true );
             } else 
             {
                 COTCamera = GetGame().CreateObject( "StaticCamera", target.GetPosition(), false );
