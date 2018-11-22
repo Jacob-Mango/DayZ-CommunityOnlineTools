@@ -1,5 +1,5 @@
 PanelWidgetClass action_checkbox_wrapper {
- size 1 20
+ size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
@@ -10,7 +10,7 @@ PanelWidgetClass action_checkbox_wrapper {
   TextWidgetClass action_label {
    size 1 20
    halign left_ref
-   valign top_ref
+   valign center_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0

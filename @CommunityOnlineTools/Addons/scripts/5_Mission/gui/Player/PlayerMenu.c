@@ -106,11 +106,11 @@ class PlayerMenu extends Form
         m_Blood = UIActionManager.CreateEditableText( playerActions, "Blood: ", this, "Click_SetBlood", "", "Set" );
         m_Energy = UIActionManager.CreateEditableText( playerActions, "Energy: ", this, "Click_SetEnergy", "", "Set" );
         m_Water = UIActionManager.CreateEditableText( playerActions, "Water: ", this, "Click_SetWater", "", "Set" );
-        m_HeatComfort = UIActionManager.CreateEditableText( playerActions, "Heat Comfort: ", this, "Click_SetHeatComfort", "", "Set" );
+        m_HeatComfort = UIActionManager.CreateEditableText( playerActions, "Temp Change: ", this, "Click_SetHeatComfort", "", "Set" );
         m_Wet = UIActionManager.CreateEditableText( playerActions, "Wet: ", this, "Click_SetWet", "", "Set" );
         m_Tremor = UIActionManager.CreateEditableText( playerActions, "Tremor: ", this, "Click_SetTremor", "", "Set" );
         m_Stamina = UIActionManager.CreateEditableText( playerActions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
-        m_LastShaved = UIActionManager.CreateEditableText( playerActions, "Last Shaved: ", this, "Click_SetLastShaved", "", "Set" );
+        m_LastShaved = UIActionManager.CreateEditableText( playerActions, "Beard: ", this, "Click_SetLifeSpanState", "", "Set" ); // TODO: make select box action box instead
         m_BloodyHands = UIActionManager.CreateCheckbox( playerActions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
         m_KickTransport = UIActionManager.CreateButton( playerActions, "Kick Transport", this, "Click_KickTransport" );
         m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
@@ -185,7 +185,7 @@ class PlayerMenu extends Form
 
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        
+
         GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
     }
 
@@ -252,11 +252,19 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetLastShaved( UIEvent eid, ref UIActionEditableText action )
+    void Click_SetLifeSpanState( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
-        m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetLastShaved", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+
+        if ( action.GetText().Length() != 1 ) return;
+
+        int state = ToSingleDigit( action.GetText().Get( 0 ) );
+
+        if ( state >= LifeSpanState.BEARD_NONE && state < LifeSpanState.COUNT )
+        {
+            m_DataJustUpdated = true;
+            GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        }
     }
 
     void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
@@ -303,7 +311,7 @@ class PlayerMenu extends Form
             m_Wet.SetText( data.FWet.ToString() );
             m_Tremor.SetText( data.FTremor.ToString() );
             m_Stamina.SetText( data.FStamina.ToString() );
-            m_LastShaved.SetText( data.FLastShaved.ToString() );
+            m_LastShaved.SetText( data.ILifeSpanState.ToString() );
             m_BloodyHands.SetChecked( data.BBloodyHands );
 
             m_PingMin.SetText( data.IPingMin.ToString() );

@@ -24,7 +24,7 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetWet", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetTremor", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetStamina", this, SingeplayerExecutionType.Server );
-        GetRPCManager().AddRPC( "COT_Admin", "Player_SetLastShaved", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "Player_SetLifeSpanState", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetBloodyHands", this, SingeplayerExecutionType.Server );
 
         GetRPCManager().AddRPC( "COT_Admin", "Player_KickTransport", this, SingeplayerExecutionType.Server );
@@ -69,29 +69,29 @@ class PlayerModule: EditorModule
 
     override void OnMissionLoaded()
     {
-        GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
+        // GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
 
         GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.ReloadPlayerList, 1000, true );
     }
 
     void UpdateGodMode()
     {
+        /*
         for ( int i = 0; i < m_GodModePlayers.Count(); i++ )
         {
             PlayerBase player = m_GodModePlayers.Get( i );
             player.SetAllowDamage( false );
 
             player.SetHealth( player.GetMaxHealth( "", "" ) );
-            player.SetHealth( "","Blood", player.GetMaxHealth( "", "Blood" ) );
-            player.SetHealth( "","Shock", player.GetMaxHealth( "", "Shock" ) );
+            player.SetHealth( "GlobalHealth","Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
+            player.SetHealth( "GlobalHealth","Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
             
-            player.GetStaminaHandler().SyncStamina(1000, 1000);
             player.GetStatStamina().Set(player.GetStaminaHandler().GetStaminaCap());
-            player.GetStatEnergy().Set(1000);
-            player.GetStatWater().Set(1000);
-            player.GetStatStomachVolume().Set(300);     
-            player.GetStatStomachWater().Set(300);
-            player.GetStatStomachEnergy().Set(300);
+            player.GetStatEnergy().Set(5000);
+            player.GetStatWater().Set(5000);
+            player.GetStatStomachVolume().Set(5000);     
+            player.GetStatStomachWater().Set(5000);
+            player.GetStatStomachEnergy().Set(5000);
             player.GetStatHeatComfort().Set(0);
             
             EntityAI oWeapon = player.GetHumanInventory().GetEntityInHands();
@@ -113,6 +113,7 @@ class PlayerModule: EditorModule
                 }
             }
         }
+        */
     }
 
     void ReloadPlayerList()
@@ -123,8 +124,6 @@ class PlayerModule: EditorModule
 
         GetGame().GetPlayers( m_ServerPlayers );
 
-        Print( m_ServerPlayers );
-
         for ( int i = 0; i < m_ServerPlayers.Count(); i++ )
         {
             PlayerBase player = PlayerBase.Cast( m_ServerPlayers[i] );
@@ -133,13 +132,8 @@ class PlayerModule: EditorModule
 
             auPlayer.PlayerObject = player;
             auPlayer.IdentityPlayer = player.GetIdentity();
-        }
-        
-        // 
 
-        for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
-        {
-            GetPermissionsManager().AuthPlayers[j].UpdatePlayerData();
+            auPlayer.UpdatePlayerData();
         }
     }
 
@@ -350,9 +344,9 @@ class PlayerModule: EditorModule
         }
     }
 
-    void Click_SetLastShaved( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    void Player_SetLifeSpanState( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Param2< float, ref array< string > > data;
+        Param2< int, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
         if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", sender ) )
@@ -368,7 +362,10 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                player.SetLastShavedSeconds( data.param1 );
+                if ( data.param1 >= LifeSpanState.BEARD_NONE && data.param1 < LifeSpanState.COUNT )
+                {
+                    player.SetLifeSpanStateVisible( data.param1 );
+                }
             }
         }
     }
@@ -414,11 +411,7 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL || player.GetTransport() == NULL ) continue;
 
-                Transport transport = player.GetTransport();
-
-                int posIdx = transport.CrewMemberIndex( player );
-
-                transport.CrewGetOut( posIdx );
+                player.GetCommand_Vehicle().GetOutVehicle();
             }
         }
     }
@@ -448,11 +441,14 @@ class PlayerModule: EditorModule
                 if ( completedTransports.Find( transport ) > -1 )
                 {
                     ItemBase radiator;
-                    Class.CastTo( radiator, transport.FindAttachmentBySlotName("CarRadiator"));
+
+                    Class.CastTo( radiator, transport.FindAttachmentBySlotName("CarRadiator") );
+
                     if ( radiator )
                     {
                         radiator.SetHealth( "", "", 1 );
                     }
+
                     transport.SetHealth( "Engine", "", 1 );
                     transport.SetHealth( "FuelTank", "", 1 );
 

@@ -32,7 +32,7 @@ class PlayerData
     float FTremor;
     float FStamina;
     
-    float FLastShaved;
+    int ILifeSpanState;
     bool BBloodyHands;
 
     void PlayerData()
@@ -59,7 +59,7 @@ class PlayerData
         data.FWet = player.GetStatWet().Get();
         data.FTremor = player.GetStatTremor().Get();
         data.FStamina = player.GetStatStamina().Get();
-        data.FLastShaved = player.GetLastShavedSeconds();
+        data.ILifeSpanState = player.GetLifeSpanState();
         data.BBloodyHands = player.HasBloodyHands();
     }
 }

@@ -37,9 +37,9 @@ class GameMenu extends Form
         if ( GetPermissionsManager().HasPermission( "Game.SpawnVehicle" ) )
         {
             m_GameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
-            m_GameScriptList.AddItem("Spawn V3S", new Param1<string>("SpawnV3S"), 0);
-            m_GameScriptList.AddItem("Spawn V3S Cargo", new Param1<string>("SpawnV3SCargo"), 0);
-            m_GameScriptList.AddItem("Spawn Sedan", new Param1<string>("SpawnSedan"), 0);
+            //m_GameScriptList.AddItem("Spawn V3S", new Param1<string>("SpawnV3S"), 0);
+            //m_GameScriptList.AddItem("Spawn V3S Cargo", new Param1<string>("SpawnV3SCargo"), 0);
+            //m_GameScriptList.AddItem("Spawn Sedan", new Param1<string>("SpawnSedan"), 0);
             // m_GameScriptList.AddItem("Spawn Van", new Param1<string>("SpawnVan"), 0);
         }
 

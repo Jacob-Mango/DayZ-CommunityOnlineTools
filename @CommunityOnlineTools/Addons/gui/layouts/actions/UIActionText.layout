@@ -1,14 +1,13 @@
 PanelWidgetClass action_text_wrapper {
- size 1 20
+ size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
  vexactsize 1
- valign center_ref
  scriptclass "UIActionText"
  {
   TextWidgetClass action_label {
-   size 1 1
+   size 1 20
    valign center_ref
    text "{LABEL}"
    font "gui/fonts/sdf_MetronLight24"
@@ -16,9 +15,10 @@ PanelWidgetClass action_text_wrapper {
    "exact text" 1
    "exact text size" 16
    "bold text" 1
+   vexactsize 1
   }
   TextWidgetClass action_text {
-   size 1 1
+   size 1 20
    halign right_ref
    valign center_ref
    text "{TEXT}"
@@ -27,6 +27,7 @@ PanelWidgetClass action_text_wrapper {
    "exact text" 1
    "exact text size" 16
    "text halign" right
+   vexactsize 1
   }
  }
 }

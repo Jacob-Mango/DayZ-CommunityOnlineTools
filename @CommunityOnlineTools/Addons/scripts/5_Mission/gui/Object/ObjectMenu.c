@@ -113,14 +113,19 @@ class ObjectMenu extends Form
         {
         	string strSelection = GetCurrentSelection();
 
-            m_Orientation = vector.Zero;
-
 			if ( m_PreviewItem ) 
 			{
 				GetGame().ObjectDelete( m_PreviewItem );
 			}
 
-			m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true );
+            if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
+            {
+                return true;
+            }
+
+            m_Orientation = vector.Zero;
+
+			m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true, false, false );
 
 			m_ItemPreview.SetItem( m_PreviewItem );
 			m_ItemPreview.SetModelPosition( Vector(0, 0, 0.5) );
@@ -247,8 +252,10 @@ class ObjectMenu extends Form
                         case "Mag_Scout_5Rnd":
                         case "ItemOptics":
                             shouldCont = true;
+                            break;
                         default:
                             shouldCont = false;
+                            break;
                     }
 
                     if ( shouldCont ) 
