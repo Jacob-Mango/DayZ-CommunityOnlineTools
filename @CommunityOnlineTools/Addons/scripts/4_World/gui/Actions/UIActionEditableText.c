@@ -67,7 +67,7 @@ class UIActionEditableText extends UIActionBase
 
         bool ret = false;
 
-        if ( w == m_Text && finished )
+        if ( w == m_Text )
         {
             ret = CallEvent( UIEvent.CHANGE );
         }

@@ -1,19 +1,20 @@
 PanelWidgetClass action_editable_text_wrapper {
- size 1 20
+ size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
  vexactsize 1
- valign center_ref
  scriptclass "UIActionEditableText"
  {
   PanelWidgetClass action_button_yes
   {
    position 0 0
-   size 1 1
+   size 1 20
+   vexactsize 1
+   valign center_ref
    {
     TextWidgetClass action_label {
-     size 0.3 1
+     size 0.45 1
      halign left_ref
      valign top_ref
      text "{LABEL}"
@@ -24,8 +25,8 @@ PanelWidgetClass action_editable_text_wrapper {
      "exact text size" 16
     }
     EditBoxWidgetClass action_editable_text {
-     position 0.3 0
-     size 0.6 1
+     position 0.45 0
+     size 0.40 1
      halign left_ref
      valign top_ref
      text "{TEXT}"
@@ -33,7 +34,7 @@ PanelWidgetClass action_editable_text_wrapper {
      font "gui/fonts/sdf_MetronLight14"
     }
     ButtonWidgetClass action_button {
-     size 0.1 1
+     size 0.15 1
      halign right_ref
      valign center_ref
      {
@@ -60,10 +61,12 @@ PanelWidgetClass action_editable_text_wrapper {
   PanelWidgetClass action_button_no
   {
    position 0 0
-   size 1 1
+   size 1 20
+   vexactsize 1
+   valign center_ref
    {
     TextWidgetClass action_label {
-     size 0.3 1
+     size 0.4 1
      halign left_ref
      valign top_ref
      text "{LABEL}"
@@ -74,8 +77,8 @@ PanelWidgetClass action_editable_text_wrapper {
      "exact text size" 16
     }
     EditBoxWidgetClass action_editable_text {
-     position 0.3 0
-     size 0.7 1
+     position 0.4 0
+     size 0.6 1
      halign left_ref
      valign top_ref
      text "{TEXT}"
