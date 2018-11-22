@@ -44,7 +44,7 @@ ref PlayerData SerializePlayer( ref AuthPlayer player )
 {
     player.Serialize();
 
-    return player.GetData();
+    return player.Data;
 }
 
 ref AuthPlayer DeserializePlayer( ref PlayerData data )

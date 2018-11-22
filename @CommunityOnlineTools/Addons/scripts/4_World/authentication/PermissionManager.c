@@ -139,6 +139,11 @@ class PermissionManager
             {
                 auPlayer.Save();
 
+                if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
+                {
+                    GetRPCManager().SendRPC( "COT_Admin", "RemovePlayer", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true );
+                }
+
                 AuthPlayers.Remove( i );
                 break;
             }

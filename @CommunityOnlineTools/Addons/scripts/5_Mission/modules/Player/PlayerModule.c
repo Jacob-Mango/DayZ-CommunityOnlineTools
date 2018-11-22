@@ -8,7 +8,9 @@ class PlayerModule: EditorModule
         m_GodModePlayers = new ref array< PlayerBase >;
         m_ServerPlayers = new ref array< Man >;
 
-        GetRPCManager().AddRPC( "COT_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "UpdatePlayers", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "UpdatePlayer", this, SingeplayerExecutionType.Client );
+
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
@@ -589,6 +591,8 @@ class PlayerModule: EditorModule
                             player.AddPermission( perms[j] );
                         }
 
+                        GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayer", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.IdentityPlayer );
+
                         player.Save();
                     }
                 }
@@ -638,29 +642,51 @@ class PlayerModule: EditorModule
         }
     }
 
-    void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-    {        
-        bool cont = false;
-
+    void UpdatePlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
         if ( type == CallType.Server )
         {
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param1< ref array< ref PlayerData > >( SerializePlayers( GetPermissionsManager().GetPlayers() ) ), true, sender );
-            } else
-            {
-                cont = true;
+                for ( int i = 0; i < GetPermissionsManager().GetPlayers().Count(); i++ )
+                {
+                    GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayer", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayers().Get( i ) ) ), true, sender );
+                }
             }
         }
+    }
 
-        if ( type == CallType.Client || cont )
+    void RemovePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( type == CallType.Client )
         {
             if ( GetGame().IsMultiplayer() )
             {
-                ref Param1< ref array< ref PlayerData > > data;
+                ref Param1< ref PlayerData > data;
                 if ( !ctx.Read( data ) ) return;
 
-                DeserializePlayers( data.param1 );
+                GetPermissionsManager().AuthPlayers.RemoveItem( DeserializePlayer( data.param1 ) );
+            }
+
+            PlayerMenu menu = PlayerMenu.Cast( form );
+
+            if ( menu )
+            {
+                menu.m_ShouldUpdateList = true;
+            }
+        }
+    }
+
+    void UpdatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( type == CallType.Client )
+        {
+            if ( GetGame().IsMultiplayer() )
+            {
+                ref Param1< ref PlayerData > data;
+                if ( !ctx.Read( data ) ) return;
+
+                DeserializePlayer( data.param1 );
             }
 
             PlayerMenu menu = PlayerMenu.Cast( form );
