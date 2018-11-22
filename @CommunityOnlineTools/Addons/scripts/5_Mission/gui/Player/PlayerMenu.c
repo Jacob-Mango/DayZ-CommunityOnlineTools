@@ -119,14 +119,72 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
+    private int number(string s)
+    {
+        switch(s)
+        {
+            case "0":
+                return 0;
+            case "1":
+                return 1;
+            case "2":
+                return 2;
+            case "3":
+                return 3;
+            case "4":
+                return 4;
+            case "5":
+                return 5;
+            case "6":
+                return 6;
+            case "7":
+                return 7;
+            case "8":
+                return 8;
+            case "9":
+                return 9;
+        }
+        return -1;
+    }
+
     float ToFloat( string text )
     {
-        float f = text.ToFloat();
-        int i = text.ToInt();
+        Print( "PlayerMenu::ToFloat" );
+        Print( "  " + text );
 
-        if ( f >= i ) return f;
+        float f = 0;
+        float d = 0;
 
-        return i * 1.0;
+        int atDec = 0;
+        bool foundDec = false;
+
+        for ( int i = 0; i < text.Length(); i++ )
+        {
+            int n = number( text.Get(i) );
+
+            Print( "  " + text.Get(i) + "(" + i + "): " + n );
+
+            if ( n > -1 )
+            {
+                f = f * 10;
+                f = f + n;
+
+                if ( foundDec )
+                {
+                    atDec = atDec + 1;
+                }
+            } else if (text.Get(i) == ".")
+            {
+                Print( "  Found decimal point" );
+                foundDec = true;
+            }
+        }
+        
+        f = f / Math.Pow( 10, atDec );
+
+        Print( "  Float is: " + f );
+
+        return f;
     }
 
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
@@ -153,6 +211,8 @@ class PlayerMenu extends Form
     void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
+
+        Print( action );
 
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }

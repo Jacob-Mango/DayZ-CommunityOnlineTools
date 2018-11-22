@@ -11,25 +11,9 @@ class COTModule : Module
     {
         COTInstance = this;
 
-        GetRPCManager().AddRPC( "COT", "ReceivePermissions", this, SingeplayerExecutionType.Client );
-
         GetPermissionsManager().RegisterPermission( "COT.Show" );
-    }
 
-    void ReceivePermissions( CallType type, ref ParamsReadContext ctx, PlayerIdentity sender, Object target )
-    {
-        Print("Setting permissions!");
-        if ( type == CallType.Client )
-        {
-            Param1< ref PlayerData > data;
-            if ( !ctx.Read( data ) ) return;
-
-            Print(  data.param1  );
-
-            // ClientAuthPlayer = DeserializePlayer( data.param1 );
-
-            // ClientAuthPlayer.DebugPrint();
-        }
+        GetUApi().RegisterInput( "UAUIOpenCOT", "Open COT Menu", "infantry" );
     }
 
     void ~COTModule()
@@ -41,7 +25,7 @@ class COTModule : Module
 
     override void OnMissionLoaded()
     {
-        if ( GetGame().IsClient() )
+        if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
         {
             if ( m_COTMenu == NULL )
             {
@@ -60,12 +44,11 @@ class COTModule : Module
 
     override void OnUpdate( float timeslice )
     {
-        /*
-		if( GetGame().GetInput().GetActionDown( UAUIOpenCOT, false ) )
-		{
-            ToggleEditor();
-        }
-        */
+		// if( GetUApi().GetInputByName( "UAUIOpenCOT" ).LocalPress() )
+		//if( GetGame().GetInput().GetActionDown( UAUIOpenCOT, false ) )
+		//{
+        //    ToggleEditor();
+        //}
 
         if ( m_ForceHUD )
         {
