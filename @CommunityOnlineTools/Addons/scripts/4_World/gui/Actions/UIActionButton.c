@@ -44,7 +44,7 @@ class UIActionButton extends UIActionBase
     {
         if ( !m_HasCallback ) return false;
 
-        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionButton >( eid, this ) );
+        GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionButton >( eid, this ) );
 
         return false;
     }

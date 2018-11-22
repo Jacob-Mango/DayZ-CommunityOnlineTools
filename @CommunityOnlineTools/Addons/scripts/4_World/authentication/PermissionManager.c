@@ -74,7 +74,7 @@ class PermissionManager
 
     bool HasPermission( string permission, PlayerIdentity player = NULL )
     {
-        if ( GetGame().IsServer() && !GetGame().IsMultiplayer() ) return true;
+        if ( !GetGame().IsMultiplayer() ) return true;
 
         if ( player == NULL ) 
         {
@@ -99,24 +99,30 @@ class PermissionManager
 
     ref AuthPlayer PlayerJoined( PlayerIdentity player )
     {
-        if ( player == NULL ) return NULL;
-
         ref PlayerData data = new ref PlayerData;
 
-        data.SName = player.GetName();
-        data.SGUID = player.GetId();
+        if ( player )
+        {
+            data.SName = player.GetName();
+            data.SGUID = player.GetId();
+        } else 
+        {
+            data.SName = "Offline Mode";
+            data.SGUID = "N/A";
+        }
 
         ref AuthPlayer auPlayer = new ref AuthPlayer( data );
 
-        auPlayer.SetIdentity( player );
+        if ( player )
+        {
+            auPlayer.SetIdentity( player );
+        }
 
         auPlayer.CopyPermissions( RootPermission );
 
         auPlayer.Load();
 
         AuthPlayers.Insert( auPlayer );
-
-        GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true, player );
 
         return auPlayer;
     }

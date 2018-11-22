@@ -50,7 +50,7 @@ class UIActionCheckbox extends UIActionBase
     {
         if ( !m_HasCallback ) return false;
 
-        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionCheckbox >( eid, this ) );
+        GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionCheckbox >( eid, this ) );
 
         return false;
     }

@@ -21,6 +21,11 @@ modded class MissionGameplay
 
     override void OnMissionStart()
     {
+        if ( !GetGame().IsMultiplayer() )
+        {
+            GetPermissionsManager().PlayerJoined( NULL );
+        }
+
         super.OnMissionStart();
     
         m_Tool.OnStart();

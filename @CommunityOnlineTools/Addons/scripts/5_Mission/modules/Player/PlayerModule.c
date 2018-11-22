@@ -85,7 +85,6 @@ class PlayerModule: EditorModule
     {
         if ( GetGame().IsClient() ) return;
 
-
 /*
 // OLD CODE
         array<PlayerIdentity> identities = new array<PlayerIdentity>;
@@ -294,8 +293,6 @@ class PlayerModule: EditorModule
                         {
                             player.AddPermission( perms[j] );
                         }
-                        
-                        GetRPCManager().SendRPC( "COT", "ReceivePermissions", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.GetIdentity() );
 
                         player.Save();
                     }

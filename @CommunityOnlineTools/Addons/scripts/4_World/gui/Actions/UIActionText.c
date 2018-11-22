@@ -45,7 +45,7 @@ class UIActionText extends UIActionBase
     {
         if ( !m_HasCallback ) return false;
 
-        GetGame().GameScript.CallFunction( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionText >( eid, this ) );
+        GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionText >( eid, this ) );
 
         return false;
     }
