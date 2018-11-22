@@ -8,20 +8,20 @@ class AuthPlayer
     PlayerBase PlayerObject;
     PlayerIdentity IdentityPlayer;
 
-    ref PlayerData m_Data;
+    ref PlayerData Data;
 
     void AuthPlayer( ref PlayerData data )
     {
         PlayerObject = NULL;
 
-        m_Data = data;
+        Data = data;
 
-        if ( m_Data == NULL )
+        if ( Data == NULL )
         {
-            m_Data = new ref PlayerData;
+            Data = new ref PlayerData;
         }
 
-        RootPermission = new ref Permission( m_Data.SGUID, NULL );
+        RootPermission = new ref Permission( Data.SGUID, NULL );
 
         if ( GetGame().IsServer() )
         {
@@ -38,27 +38,22 @@ class AuthPlayer
     {
         IdentityPlayer = identity;
 
-        m_Data.SSteam64ID = IdentityPlayer.GetPlainId();
+        Data.SSteam64ID = IdentityPlayer.GetPlainId();
     }
 
     void SwapData( ref PlayerData newData )
     {
-        m_Data = newData;
+        Data = newData;
     }
-
-    ref PlayerData GetData()
-    {
-        return m_Data;
-    }  
 
     string GetGUID()
     {
-        return m_Data.SGUID;
+        return Data.SGUID;
     }
 
     string GetName()
     {
-        return m_Data.SName;
+        return Data.SName;
     }
 
     void SetPlayerObjects( ref PlayerBase obj, ref PlayerIdentity identity )
@@ -71,17 +66,17 @@ class AuthPlayer
     {
         if ( IdentityPlayer == NULL ) return;
 
-        m_Data.IPingMin = IdentityPlayer.GetPingMin();
-        m_Data.IPingMax = IdentityPlayer.GetPingMax();
-        m_Data.IPingAvg = IdentityPlayer.GetPingAvg();
+        Data.IPingMin = IdentityPlayer.GetPingMin();
+        Data.IPingMax = IdentityPlayer.GetPingMax();
+        Data.IPingAvg = IdentityPlayer.GetPingAvg();
         
-        m_Data.SSteam64ID = IdentityPlayer.GetPlainId();
-        m_Data.SGUID = IdentityPlayer.GetId();
-        m_Data.SName = IdentityPlayer.GetName();
+        Data.SSteam64ID = IdentityPlayer.GetPlainId();
+        Data.SGUID = IdentityPlayer.GetId();
+        Data.SName = IdentityPlayer.GetName();
 
         if ( PlayerObject == NULL ) return;
 
-        PlayerData.Load( m_Data, PlayerObject );
+        PlayerData.Load( Data, PlayerObject );
     }
 
     void CopyPermissions( ref Permission copy )
@@ -99,7 +94,7 @@ class AuthPlayer
     {
         delete RootPermission;
 
-        RootPermission = new ref Permission( m_Data.SGUID, NULL );
+        RootPermission = new ref Permission( Data.SGUID, NULL );
     }
 
     void AddPermission( string permission, PermissionType type = PermissionType.INHERIT )
@@ -114,18 +109,18 @@ class AuthPlayer
 
     ref array< string > Serialize()
     {        
-        m_Data.APermissions.Clear();
+        Data.APermissions.Clear();
 
-        RootPermission.Serialize( m_Data.APermissions );
+        RootPermission.Serialize( Data.APermissions );
 
-        return m_Data.APermissions;
+        return Data.APermissions;
     }
 
     void Deserialize()
     {
-        for ( int i = 0; i < m_Data.APermissions.Count(); i++ )
+        for ( int i = 0; i < Data.APermissions.Count(); i++ )
         {
-            AddPermission( m_Data.APermissions[i] );
+            AddPermission( Data.APermissions[i] );
         }
     }
 
@@ -141,7 +136,7 @@ class AuthPlayer
 
     bool Save()
     {
-        string filename = FileReadyStripName( m_Data.SGUID );
+        string filename = FileReadyStripName( Data.SGUID );
 
         Print( "Saving permissions for " + filename );
         FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
@@ -170,7 +165,7 @@ class AuthPlayer
 
     bool Load()
     {
-        string filename = FileReadyStripName( m_Data.SGUID );
+        string filename = FileReadyStripName( Data.SGUID );
         Print( "Loading permissions for " + filename );
         FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
             
@@ -204,7 +199,7 @@ class AuthPlayer
 
     void DebugPrint()
     {
-        Print( "Printing permissions for " + m_Data.SGUID );
+        Print( "Printing permissions for " + Data.SGUID );
 
         RootPermission.DebugPrint( 0 );
     }

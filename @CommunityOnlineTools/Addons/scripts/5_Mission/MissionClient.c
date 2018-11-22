@@ -31,6 +31,8 @@ modded class MissionGameplay
         m_Tool.OnStart();
 
         GetGame().GetUIManager().CloseMenu( MENU_INGAME );
+        
+        GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayers", new Param, true );
     }
 
     override void OnMissionFinish()

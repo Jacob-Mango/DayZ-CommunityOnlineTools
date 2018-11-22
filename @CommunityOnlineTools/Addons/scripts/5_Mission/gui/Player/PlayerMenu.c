@@ -357,7 +357,7 @@ class PlayerMenu extends Form
 
         if ( GetSelectedPlayers().Count() != 0 )
         {
-            UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
+            UpdateActionsFields( GetSelectedPlayers()[0].Data );
         } else
         {
             UpdateActionsFields( NULL );
@@ -441,7 +441,7 @@ class PlayerMenu extends Form
 
                 if ( GetSelectedPlayers().Count() == 1 )
                 {
-                    UpdateActionsFields( row.GetPlayer().GetData() );
+                    UpdateActionsFields( row.GetPlayer().Data );
 
                     LoadPermissions( GetSelectedPlayers()[0].RootPermission );
                 }
@@ -457,7 +457,7 @@ class PlayerMenu extends Form
                 {
                     if (GetSelectedPlayers().Count() > 0 )
                     {
-                        UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
+                        UpdateActionsFields( GetSelectedPlayers()[0].Data );
                         LoadPermissions( GetSelectedPlayers()[0].RootPermission );
                     } else 
                     {
@@ -475,7 +475,7 @@ class PlayerMenu extends Form
 
     void ReloadPlayers()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "ReloadList", new Param, true );
+        GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayers", new Param, true );
     }
 
     void SetupPermissionsUI()
@@ -645,7 +645,7 @@ class PlayerMenu extends Form
         
         if (GetSelectedPlayers().Count() > 0 )
         {
-            UpdateActionsFields( GetSelectedPlayers()[0].GetData() );
+            UpdateActionsFields( GetSelectedPlayers()[0].Data );
         }
     }
 }
