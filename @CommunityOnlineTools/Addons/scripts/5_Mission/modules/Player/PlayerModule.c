@@ -1,10 +1,12 @@
 class PlayerModule: EditorModule
 {
     ref array< PlayerBase > m_GodModePlayers;
+    ref array< Man > m_ServerPlayers;
 
     void PlayerModule()
     {
         m_GodModePlayers = new ref array< PlayerBase >;
+        m_ServerPlayers = new ref array< Man >;
 
         GetRPCManager().AddRPC( "COT_Admin", "ReloadList", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
@@ -52,8 +54,12 @@ class PlayerModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
+    }
 
-        
+    void ~PlayerModule()
+    {
+        delete m_GodModePlayers;
+        delete m_ServerPlayers;
     }
 
     override string GetLayoutRoot()
@@ -113,6 +119,24 @@ class PlayerModule: EditorModule
     {
         if ( GetGame().IsClient() ) return;
 
+        m_ServerPlayers.Clear();
+
+        GetGame().GetPlayers( m_ServerPlayers );
+
+        Print( m_ServerPlayers );
+
+        for ( int i = 0; i < m_ServerPlayers.Count(); i++ )
+        {
+            PlayerBase player = PlayerBase.Cast( m_ServerPlayers[i] );
+
+            ref AuthPlayer auPlayer = GetPermissionsManager().GetPlayerByIdentity( player.GetIdentity() );
+
+            auPlayer.PlayerObject = player;
+            auPlayer.IdentityPlayer = player.GetIdentity();
+        }
+        
+        // 
+
         for ( int j = 0; j < GetPermissionsManager().AuthPlayers.Count(); j++ )
         {
             GetPermissionsManager().AuthPlayers[j].UpdatePlayerData();
@@ -133,7 +157,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -156,7 +180,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -179,7 +203,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -202,7 +226,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -225,7 +249,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -248,7 +272,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -271,7 +295,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -294,7 +318,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -317,7 +341,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -340,7 +364,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -363,7 +387,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -386,7 +410,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL || player.GetTransport() == NULL ) continue;
 
@@ -415,7 +439,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL || player.GetTransport() == NULL ) continue;
 
@@ -462,7 +486,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -491,7 +515,7 @@ class PlayerModule: EditorModule
 
             if ( players.Count() != 1 ) return;
 
-            PlayerBase player = players[0].GetPlayerObject();
+            PlayerBase player = players[0].PlayerObject;
 
             if ( player == NULL ) return;
 
@@ -513,7 +537,7 @@ class PlayerModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                PlayerBase player = players[i].GetPlayerObject();
+                PlayerBase player = players[i].PlayerObject;
 
                 if ( player == NULL ) continue;
 
@@ -619,12 +643,7 @@ class PlayerModule: EditorModule
     }
 
     void ReloadList( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-    {
-        Print( "PlayerModule::ReloadList" );
-
-        //if ( !GetPermissionsManager().HasPermission( "Admin.Player.List", sender ) )
-        //    return;
-        
+    {        
         bool cont = false;
 
         if ( type == CallType.Server )

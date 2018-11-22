@@ -5,14 +5,14 @@ class AuthPlayer
 
     ref Permission RootPermission;
 
-    PlayerBase m_Man;
-    PlayerIdentity m_Identity;
+    PlayerBase PlayerObject;
+    PlayerIdentity IdentityPlayer;
 
     ref PlayerData m_Data;
 
     void AuthPlayer( ref PlayerData data )
     {
-        m_Man = NULL;
+        PlayerObject = NULL;
 
         m_Data = data;
 
@@ -36,14 +36,9 @@ class AuthPlayer
 
     void SetIdentity( PlayerIdentity identity )
     {
-        m_Identity = identity;
+        IdentityPlayer = identity;
 
-        m_Data.SSteam64ID = m_Identity.GetPlainId();
-    }
-
-    PlayerIdentity GetIdentity()
-    {
-        return m_Identity;
+        m_Data.SSteam64ID = IdentityPlayer.GetPlainId();
     }
 
     void SwapData( ref PlayerData newData )
@@ -66,31 +61,23 @@ class AuthPlayer
         return m_Data.SName;
     }
 
-    ref PlayerBase GetPlayerObject()
+    void SetPlayerObjects( ref PlayerBase obj, ref PlayerIdentity identity )
     {
-        return m_Man;
+        IdentityPlayer = identity;
+        PlayerObject = obj;
     }
 
-    void UpdatePlayerData( ref PlayerBase obj = NULL )
+    void UpdatePlayerData()
     {
-        if ( m_Identity == NULL ) return;
+        PlayerData.Load( m_Data, PlayerObject );
 
-        if ( m_Data == NULL ) m_Data = new ref PlayerData;
-
-        if ( obj != NULL )
-        {
-            m_Man = obj;
-        }
-
-        PlayerData.Load( m_Data, m_Man );
-
-        m_Data.IPingMin = m_Identity.GetPingMin();
-        m_Data.IPingMax = m_Identity.GetPingMax();
-        m_Data.IPingAvg = m_Identity.GetPingAvg();
+        m_Data.IPingMin = IdentityPlayer.GetPingMin();
+        m_Data.IPingMax = IdentityPlayer.GetPingMax();
+        m_Data.IPingAvg = IdentityPlayer.GetPingAvg();
         
-        m_Data.SSteam64ID = m_Identity.GetPlainId();
-        m_Data.SGUID = m_Identity.GetId();
-        m_Data.SName = m_Identity.GetName();
+        m_Data.SSteam64ID = IdentityPlayer.GetPlainId();
+        m_Data.SGUID = IdentityPlayer.GetId();
+        m_Data.SName = IdentityPlayer.GetName();
     }
 
     void CopyPermissions( ref Permission copy )
@@ -232,18 +219,18 @@ class AuthPlayer
 
     private void ForceDisconnect()
     {
-        if ( m_Identity )
+        if ( IdentityPlayer )
         {
-            if ( m_Man.CanBeDeleted() )
+            if ( PlayerObject.CanBeDeleted() )
             {
-                m_Man.Delete();	
+                PlayerObject.Delete();	
             }
             else
             {
-                m_Man.SetHealth( "", "", 0.0 );
+                PlayerObject.SetHealth( "", "", 0.0 );
             }
 
-            GetGame().DisconnectPlayer( m_Identity, m_Identity.GetId() );
+            GetGame().DisconnectPlayer( IdentityPlayer, IdentityPlayer.GetId() );
         }
     }
 }

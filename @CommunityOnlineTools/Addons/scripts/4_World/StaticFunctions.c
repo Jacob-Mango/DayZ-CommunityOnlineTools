@@ -21,13 +21,6 @@ static string FormatFloat( float value, int decimals )
     return result;
 }
 
-static void SelectPlayer( PlayerIdentity identity, PlayerBase player )
-{
-	GetGame().SelectPlayer(identity, player);
-
-    player.SetAuthPlayer( GetPermissionsManager().GetPlayerByIdentity( identity) );
-}
-
 static int ToSingleDigit( string s )
 {
     if ( s.Length() != 1 ) return -1;

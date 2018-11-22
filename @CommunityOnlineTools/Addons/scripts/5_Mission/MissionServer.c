@@ -74,16 +74,16 @@ modded class MissionServer
 
         queueTime = 1;
 
-        GetPermissionsManager().PlayerJoined( identity );
+        GetPermissionsManager().GetPlayerByIdentity( identity );
     }
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
 	{
         super.InvokeOnConnect( player, identity );
 
-        // GetPermissionsManager().PlayerJoined( identity );
+        GetPermissionsManager().GetPlayerByIdentity( identity );
 
-        SelectPlayer( identity, player );
+        GetGame().SelectPlayer( identity, player );
     } 
 
     override void InvokeOnDisconnect( PlayerBase player )
@@ -92,21 +92,5 @@ modded class MissionServer
 
         super.InvokeOnDisconnect( player );
     } 
-
-    override PlayerBase CreateCharacter(PlayerIdentity identity, vector pos, ParamsReadContext ctx, string characterName)
-	{		
-		Entity playerEnt;
-		playerEnt = GetGame().CreatePlayer(identity, characterName, pos, 0, "NONE");
-		Class.CastTo(m_player, playerEnt);
-		
-        SelectPlayer( identity, m_player );
-		
-		return m_player;
-	}
-    
-	override void OnClientReadyEvent(PlayerIdentity identity, PlayerBase player)
-	{
-        SelectPlayer( identity, player );
-	}
 
 }

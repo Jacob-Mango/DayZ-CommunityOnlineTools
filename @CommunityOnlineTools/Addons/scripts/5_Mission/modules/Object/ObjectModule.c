@@ -33,6 +33,8 @@ class ObjectModule: EditorModule
 
             EntityAI entity = GetGame().CreateObject( data.param1, data.param2, false, ai );
 
+            if ( entity == NULL ) return;
+
             entity.SetHealth( entity.GetMaxHealth() );
 
             if ( entity.IsInherited( ItemBase ) )
@@ -75,7 +77,7 @@ class ObjectModule: EditorModule
 
             for ( int i = 0; i < players.Count(); i++ )
             {
-                EntityAI entity = players[i].GetPlayerObject().GetInventory().CreateInInventory( data.param1 );
+                EntityAI entity = players[i].PlayerObject.GetInventory().CreateInInventory( data.param1 );
 
                 entity.SetHealth( entity.GetMaxHealth() );
 
