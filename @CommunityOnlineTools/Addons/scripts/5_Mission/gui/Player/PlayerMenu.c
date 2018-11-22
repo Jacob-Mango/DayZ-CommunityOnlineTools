@@ -42,11 +42,18 @@ class PlayerMenu extends Form
     ref UIActionEditableText m_LastShaved;
     ref UIActionCheckbox m_BloodyHands;
 
+    ref UIActionButton m_KickTransport;
+    ref UIActionButton m_RepairTransport;
+    ref UIActionButton m_TeleportToMe;
+    ref UIActionButton m_TeleportMeTo;
+
+
     ref UIActionButton m_ModifyPermissions;
     ref UIActionButton m_BanPlayer;
     ref UIActionButton m_KickPlayer;
-
+    ref UIActionCheckbox m_Freecam;
     ref UIActionCheckbox m_GodMode;
+
 
     void PlayerMenu()
     {
@@ -93,25 +100,30 @@ class PlayerMenu extends Form
         m_PingMax = UIActionManager.CreateText( pings, "Ping Max: ", "" );
         m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
 
-        ref Widget lifeStats = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
-        m_Health = UIActionManager.CreateEditableText( lifeStats, "Health: ", this, "Click_SetHealth", "", "Set" );
-        m_Shock = UIActionManager.CreateEditableText( lifeStats, "Shock: ", this, "Click_SetShock", "", "Set" );
-        m_Blood = UIActionManager.CreateEditableText( lifeStats, "Blood: ", this, "Click_SetBlood", "", "Set" );
-        m_Energy = UIActionManager.CreateEditableText( lifeStats, "Energy: ", this, "Click_SetEnergy", "", "Set" );
-        m_Water = UIActionManager.CreateEditableText( lifeStats, "Water: ", this, "Click_SetWater", "", "Set" );
-        m_HeatComfort = UIActionManager.CreateEditableText( lifeStats, "Heat Comfort: ", this, "Click_SetHeatComfort", "", "Set" );
-        m_Wet = UIActionManager.CreateEditableText( lifeStats, "Wet: ", this, "Click_SetWet", "", "Set" );
-        m_Tremor = UIActionManager.CreateEditableText( lifeStats, "Tremor: ", this, "Click_SetTremor", "", "Set" );
-        m_Stamina = UIActionManager.CreateEditableText( lifeStats, "Stamina: ", this, "Click_SetStamina", "", "Set" );
-        m_LastShaved = UIActionManager.CreateEditableText( lifeStats, "Last Shaved: ", this, "Click_SetLastShaved", "", "Set" );
-        m_BloodyHands = UIActionManager.CreateCheckbox( lifeStats, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
+        ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 8, 2 );
+        m_Health = UIActionManager.CreateEditableText( playerActions, "Health: ", this, "Click_SetHealth", "", "Set" );
+        m_Shock = UIActionManager.CreateEditableText( playerActions, "Shock: ", this, "Click_SetShock", "", "Set" );
+        m_Blood = UIActionManager.CreateEditableText( playerActions, "Blood: ", this, "Click_SetBlood", "", "Set" );
+        m_Energy = UIActionManager.CreateEditableText( playerActions, "Energy: ", this, "Click_SetEnergy", "", "Set" );
+        m_Water = UIActionManager.CreateEditableText( playerActions, "Water: ", this, "Click_SetWater", "", "Set" );
+        m_HeatComfort = UIActionManager.CreateEditableText( playerActions, "Heat Comfort: ", this, "Click_SetHeatComfort", "", "Set" );
+        m_Wet = UIActionManager.CreateEditableText( playerActions, "Wet: ", this, "Click_SetWet", "", "Set" );
+        m_Tremor = UIActionManager.CreateEditableText( playerActions, "Tremor: ", this, "Click_SetTremor", "", "Set" );
+        m_Stamina = UIActionManager.CreateEditableText( playerActions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
+        m_LastShaved = UIActionManager.CreateEditableText( playerActions, "Last Shaved: ", this, "Click_SetLastShaved", "", "Set" );
+        m_BloodyHands = UIActionManager.CreateCheckbox( playerActions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
+        m_KickTransport = UIActionManager.CreateButton( playerActions, "Kick Transport", this, "Click_KickTransport" );
+        m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
+        m_TeleportToMe = UIActionManager.CreateButton( playerActions, "Teleport To Me", this, "Click_TeleportToMe" );
+        m_TeleportMeTo = UIActionManager.CreateButton( playerActions, "Teleport Me To", this, "Click_TeleportMeTo" );
 
-        ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
-        m_ModifyPermissions = UIActionManager.CreateButton( playerActions, "Modify Permissions", this, "Click_ModifyPermissions" );
-        m_BanPlayer = UIActionManager.CreateButton( playerActions, "Ban Player", this, "Click_BanPlayer" );
-        m_KickPlayer = UIActionManager.CreateButton( playerActions, "Kick Player", this, "Click_KickPlayer" );
+        ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
+        m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
+        m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
+        m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
 
-        m_GodMode = UIActionManager.CreateCheckbox( m_ActionsWrapper, "Godmode", this, "Click_GodMode", false );
+        //m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
+        //m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
 
         m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
@@ -137,6 +149,44 @@ class PlayerMenu extends Form
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_KickTransport( UIEvent eid, ref UIActionButton action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_RepairTransport( UIEvent eid, ref UIActionButton action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+    
+    void Click_TeleportToMe( UIEvent eid, ref UIActionButton action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+
+        if ( COTCamera && COTCamera.IsActive() )
+        {
+            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( COTCamera.GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        } else 
+        {
+            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        }
+    }
+
+    void Click_TeleportMeTo( UIEvent eid, ref UIActionButton action )
+    {
+        if ( GetSelectedPlayers().Count() != 1 ) return;
+
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        
+        GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
     }
 
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
@@ -214,6 +264,13 @@ class PlayerMenu extends Form
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< float, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+    }
+
+    void Click_ToggleFreecam( UIEvent eid, ref UIActionCheckbox action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
