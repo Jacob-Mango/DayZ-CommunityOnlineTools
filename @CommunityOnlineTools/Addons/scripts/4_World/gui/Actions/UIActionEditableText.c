@@ -52,7 +52,6 @@ class UIActionEditableText extends UIActionBase
 
     string GetText()
     {
-        Print( "Text is: " + m_Text.GetText() );
         return m_Text.GetText();
     }
 

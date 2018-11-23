@@ -2,7 +2,7 @@ PanelWidgetClass PositionMenu {
  visible 0
  color 0 0 0 0
  position 0 0
- size 250 400
+ size 250 390
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -25,7 +25,7 @@ PanelWidgetClass PositionMenu {
   }
   GridSpacerWidgetClass actions_wrapper {
    position 0 310
-   size 1 70
+   size 1 60
    hexactpos 1
    vexactpos 1
    hexactsize 0

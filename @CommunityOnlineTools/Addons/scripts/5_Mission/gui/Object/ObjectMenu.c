@@ -170,8 +170,6 @@ class ObjectMenu extends Form
 
         m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
 
-        Message( GetPlayer(), "ListType: " + action.GetButton() + ", " + m_ObjectTypes.Get( action.GetButton() ) );
-
         UpdateList();
     }
 

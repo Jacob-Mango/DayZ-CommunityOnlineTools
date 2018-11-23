@@ -1,12 +1,32 @@
 class TeleportModule: EditorModule
 {
+    protected ref TeleportSettings settings;
+    
     void TeleportModule()
     {
         GetRPCManager().AddRPC( "COT_Teleport", "Cursor", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Teleport", "Predefined", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Teleport", "LoadData", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
         GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
+
+        if ( GetGame().IsServer() )
+            settings = TeleportSettings.Load();
+        else
+            settings = new ref TeleportSettings;
+    }
+
+    void OnMissionLoaded()
+    {
+        if ( GetGame().IsClient() )
+            GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param, true );
+    }
+
+    void OnMissionFinished()
+    {
+        if ( GetGame().IsServer() )
+            settings.Save();
     }
 
     override void RegisterKeyMouseBindings() 
@@ -23,6 +43,11 @@ class TeleportModule: EditorModule
         return "COT/gui/layouts/Teleport/PositionMenu.layout";
     }
 
+    autoptr map< string, vector > GetPositions()
+    {
+        return settings.Positions;
+    }
+
     void TeleportCursor()
     {
         Print( "TeleportModule::TeleportCursor()" );
@@ -31,12 +56,6 @@ class TeleportModule: EditorModule
 
         float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );
 
-        if ( GetGame().GetPlayer().IsInTransport() )
-        {
-            Message( GetPlayer(), "Get out of your vehicle first!" );
-            return;
-        }
-
         if ( distance < 5000 )
         {
             GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
@@ -44,6 +63,25 @@ class TeleportModule: EditorModule
         else
         {
             Message( GetPlayer(), "Distance for teleportation is too far!" );
+        }
+    }
+
+    void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if( type == CallType.Server )
+        {
+            if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
+                return;
+
+            GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), true );
+        }
+
+        if( type == CallType.Client )
+        {
+            Param1< ref TeleportSettings > data;
+            if ( !ctx.Read( data ) ) return;
+
+            settings = data.param1;
         }
     }
 
@@ -57,9 +95,15 @@ class TeleportModule: EditorModule
 
         if( type == CallType.Server )
         {
-            EntityAI entity = EntityAI.Cast( target );
+            PlayerBase player = PlayerBase.Cast( target );
 
-            target.SetPosition( data.param1 );
+            if ( player.IsInTransport() )
+            {
+                player.GetTransport().SetPosition( data.param1 );
+            } else 
+            {
+                player.SetPosition( data.param1 );
+            }
         }
     }
     
@@ -68,12 +112,23 @@ class TeleportModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
             return;
 
-        Param2< vector, ref array< string > > data;
+        Param2< string, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
         {
             array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            vector position = "0 0 0";
+
+            string name = data.param1;
+
+            if ( !GetPositions().Find( name, position ) )
+            {
+                return;
+            }
+
+            position = SnapToGround( position );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -81,11 +136,10 @@ class TeleportModule: EditorModule
 
                 if ( player.IsInTransport() )
                 {
-                    // TODO: Can't teleport, crashes server. Fix after release.
-                    // player.GetTransport().SetPosition( data.param1 );
+                    player.GetTransport().SetPosition( position );
                 } else 
                 {
-                    player.SetPosition( data.param1 );
+                    player.SetPosition( position );
                 }
             }
         }

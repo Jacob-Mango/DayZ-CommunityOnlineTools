@@ -1,4 +1,6 @@
-// TODO: MOVE ALL THIS INTO A SEPERATE MOD
+// TODO: MOVE MOST OF THIS INTO A SEPERATE MOD
+
+const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
 
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
