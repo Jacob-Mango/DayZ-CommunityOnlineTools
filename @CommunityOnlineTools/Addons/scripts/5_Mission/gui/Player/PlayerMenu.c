@@ -47,13 +47,12 @@ class PlayerMenu extends Form
     ref UIActionButton m_TeleportToMe;
     ref UIActionButton m_TeleportMeTo;
 
-
     ref UIActionButton m_ModifyPermissions;
     ref UIActionButton m_BanPlayer;
     ref UIActionButton m_KickPlayer;
     ref UIActionCheckbox m_Freecam;
     ref UIActionCheckbox m_GodMode;
-
+    ref UIActionButton m_SpectatePlayer;
 
     void PlayerMenu()
     {
@@ -121,6 +120,7 @@ class PlayerMenu extends Form
         m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
         m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
         m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
+        m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate Player", this, "Click_SpectatePlayer" );
 
         //m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
         //m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
@@ -135,6 +135,28 @@ class PlayerMenu extends Form
     {
         m_ActionsForm.Show( false );
         m_PermissionsWrapper.Show( true );
+    }
+
+    void Click_SpectatePlayer( UIEvent eid, ref UIActionButton action )
+    {
+        if ( GetSelectedPlayers().Count() != 1 ) return;
+
+        if ( eid != UIEvent.CLICK ) return;
+        m_DataJustUpdated = true;
+
+        bool shouldSpectate = true;
+
+        if ( CurrentActiveCamera )
+        {
+			SpectatorCamera cam = SpectatorCamera.Cast( CurrentActiveCamera );
+			
+			if ( cam )
+			{
+                shouldSpectate = false;
+			}
+        }
+
+        GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
     }
 
     void Click_BanPlayer( UIEvent eid, ref UIActionButton action )

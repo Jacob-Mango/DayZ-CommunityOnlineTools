@@ -7,7 +7,6 @@ class CinematicCamera extends COTCamera
 	
 	void CinematicCamera()
 	{
-        
 		SetEventMask( EntityEvent.FRAME );
 	}
 
@@ -35,22 +34,24 @@ class CinematicCamera extends COTCamera
 
         if ( !MoveFreeze )
         {
+            float cam_speed = CAMERA_SPEED;
+
             if ( !shouldRoll && CAMERA_BOOST_MULT > 0 )
             {
                 CAMERA_SPEED = CAMERA_SPEED + ( CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT );
+                
                 if ( CAMERA_SPEED < 0.001 ) 
                 {
                     CAMERA_SPEED = 0.001;
                 }
+                
+                cam_speed = CAMERA_SPEED;
 
                 if( increaseSpeeds ) 
                 {
                     cam_speed = cam_speed * CAMERA_BOOST_MULT;
                 }
             }
-
-            float cam_speed = CAMERA_SPEED
-
 
             vector up = vector.Up;
             vector direction = GetDirection();
@@ -100,7 +101,7 @@ class CinematicCamera extends COTCamera
                 {
                     speedInc = speedInc * CAMERA_BOOST_MULT;
                 }
-                
+
                 newOrient[2] = newOrient[2] - ( speedInc );
             }
 
