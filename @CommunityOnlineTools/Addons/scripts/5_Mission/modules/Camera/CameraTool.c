@@ -100,16 +100,18 @@ class CameraTool: EditorModule
             return;
 
         Param1< vector > data;
-        if ( !ctx.Read( data ) ) return;
 
         if( type == CallType.Server )
         {
             GetGame().SelectPlayer( sender, target );
 
-            if ( target ) 
+            if ( ctx.Read( data ) ) 
             {
-                target.SetPosition( data.param1 );
-            }
+                if ( target ) 
+                {
+                    target.SetPosition( data.param1 );
+                }
+            } 
 
             if ( GetGame().IsMultiplayer() )
             {
@@ -121,12 +123,15 @@ class CameraTool: EditorModule
         {
             if ( !GetGame().IsMultiplayer() )
             {
-                GetGame().SelectPlayer( NULL, target );
+                GetGame().SelectPlayer( sender, target );
 
-                if ( target ) 
+                if ( ctx.Read( data ) ) 
                 {
-                    target.SetPosition( data.param1 );
-                }
+                    if ( target ) 
+                    {
+                        target.SetPosition( data.param1 );
+                    }
+                } 
             }
 
             CurrentActiveCamera.SetActive( false );

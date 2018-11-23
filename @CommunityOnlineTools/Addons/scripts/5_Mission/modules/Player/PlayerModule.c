@@ -15,6 +15,7 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "SpectatePlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
 
         GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
@@ -38,6 +39,7 @@ class PlayerModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
+        GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Shock" );
@@ -518,6 +520,55 @@ class PlayerModule: EditorModule
             if ( player == NULL ) return;
 
             senderPlayer.SetPosition( player.GetPosition() );
+        }
+    }
+
+    void SpectatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        Print( "PlayerModule::SpectatePlayer" );
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", sender ) )
+            return;
+
+        if( type == CallType.Server )
+        {
+            Param2< bool, ref array< string > > data;
+            if ( !ctx.Read( data ) ) return;
+
+            if ( !data.param1 )
+            {
+                GetGame().SelectPlayer( sender, target );
+                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
+                return;
+            }
+
+            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+            if ( players.Count() != 1 ) return;
+
+            PlayerBase player = players[0].PlayerObject;
+
+            if ( player == NULL ) return;
+
+            GetGame().SelectSpectator( sender, "SpectatorCamera", player.GetPosition() );
+
+            GetGame().SelectPlayer( sender, NULL );
+
+            GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param, true, sender, player );
+        }    
+
+        if( type == CallType.Client )
+        {
+            if ( GetGame().IsMultiplayer() )
+            {
+                CurrentActiveCamera = COTCamera.Cast( Camera.GetCurrentCamera() );
+            }
+            
+            if ( CurrentActiveCamera )
+            {
+                CurrentActiveCamera.SelectedTarget( target );
+		        CurrentActiveCamera.SetActive( true );
+                GetPlayer().GetInputController().SetDisabled( true );
+            }
         }
     }
 
