@@ -75,14 +75,13 @@ class PlayerModule: EditorModule
 
     override void OnMissionLoaded()
     {
-        // GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
+        GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
 
         GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.ReloadPlayerList, 1000, true );
     }
 
     void UpdateGodMode()
     {
-        /*
         for ( int i = 0; i < m_GodModePlayers.Count(); i++ )
         {
             PlayerBase player = m_GodModePlayers.Get( i );
@@ -92,34 +91,13 @@ class PlayerModule: EditorModule
             player.SetHealth( "GlobalHealth","Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
             player.SetHealth( "GlobalHealth","Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
             
-            player.GetStatStamina().Set(player.GetStaminaHandler().GetStaminaCap());
-            player.GetStatEnergy().Set(5000);
-            player.GetStatWater().Set(5000);
-            player.GetStatStomachVolume().Set(5000);     
-            player.GetStatStomachWater().Set(5000);
-            player.GetStatStomachEnergy().Set(5000);
-            player.GetStatHeatComfort().Set(0);
-            
-            EntityAI oWeapon = player.GetHumanInventory().GetEntityInHands();
-
-            if( oWeapon )
-            {
-                Magazine oMag = ( Magazine ) oWeapon.GetAttachmentByConfigTypeName( "DefaultMagazine" );
-
-                if( oMag && oMag.IsMagazine() )
-                {
-                    oMag.LocalSetAmmoMax();
-                }
-                
-                Object oSupressor = ( Object ) oWeapon.GetAttachmentByConfigTypeName( "SuppressorBase" );
-
-                if( oSupressor )
-                {
-                    oSupressor.SetHealth( oSupressor.GetMaxHealth( "", "" ) );
-                }
-            }
+            player.GetStatStamina().Set( player.GetStaminaHandler().GetStaminaCap() );
+            player.GetStatEnergy().Set( 5000 );
+            player.GetStatWater().Set( 5000 );
+            player.GetStatStomachVolume().Set( 5000 );     
+            player.GetStatStomachWater().Set( 5000 );
+            player.GetStatStomachEnergy().Set( 5000 );
         }
-        */
     }
 
     void ReloadPlayerList()
@@ -135,6 +113,8 @@ class PlayerModule: EditorModule
             PlayerBase player = PlayerBase.Cast( m_ServerPlayers[i] );
 
             ref AuthPlayer auPlayer = GetPermissionsManager().GetPlayerByIdentity( player.GetIdentity() );
+
+            player.authenticatedPlayer = auPlayer;
 
             auPlayer.PlayerObject = player;
             auPlayer.IdentityPlayer = player.GetIdentity();
@@ -527,7 +507,6 @@ class PlayerModule: EditorModule
 
     void SpectatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print( "PlayerModule::SpectatePlayer" );
         if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", sender ) )
             return;
 
@@ -655,8 +634,6 @@ class PlayerModule: EditorModule
 
     void KickPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print("PlayerModule::LoadPermissions");
-
         if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", sender ) )
             return;
 
@@ -676,8 +653,6 @@ class PlayerModule: EditorModule
 
     void BanPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print("PlayerModule::LoadPermissions");
-
         if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", sender ) )
             return;
 

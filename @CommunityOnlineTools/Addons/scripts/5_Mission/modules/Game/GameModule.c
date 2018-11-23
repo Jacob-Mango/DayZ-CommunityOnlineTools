@@ -29,7 +29,6 @@ class GameModule: EditorModule
     {
         float cap = car.GetFluidCapacity( fluid );
         car.Fill( fluid, cap );
-        Print( "Filling the vehicle by " + cap + " with " + fluid )
     }
 
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

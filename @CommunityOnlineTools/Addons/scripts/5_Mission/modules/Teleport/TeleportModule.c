@@ -10,11 +10,11 @@ class TeleportModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
         GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
-
-        if ( GetGame().IsServer() )
-            settings = TeleportSettings.Load();
-        else
-            settings = new ref TeleportSettings;
+    }
+    
+    void ReloadSettings()
+    {
+        settings = TeleportSettings.Load();
     }
 
     void OnMissionLoaded()
@@ -50,8 +50,6 @@ class TeleportModule: EditorModule
 
     void TeleportCursor()
     {
-        Print( "TeleportModule::TeleportCursor()" );
-
         vector hitPos = GetCursorPos();
 
         float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );

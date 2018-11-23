@@ -143,6 +143,14 @@ class ModuleManager
         RegisterModules();
     }
 
+    void ReloadSettings()
+    {
+        for ( int i = 0; i < m_Modules.Count(); ++i)
+        {
+            m_Modules.Get(i).ReloadSettings();
+        }
+    }
+
     ref array< ref Module > GetModules()
     {
         return m_Modules;
