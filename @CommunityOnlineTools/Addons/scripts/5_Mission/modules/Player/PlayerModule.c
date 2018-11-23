@@ -35,10 +35,11 @@ class PlayerModule: EditorModule
         GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportToMe", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportMeTo", this, SingeplayerExecutionType.Server );
 
+        GetPermissionsManager().RegisterPermission( "Admin.Permissions" );
+        
         GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
-        GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
@@ -592,7 +593,7 @@ class PlayerModule: EditorModule
 
     void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", sender ) )
+        if ( !GetPermissionsManager().HasPermission( "Admin.Permissions", sender ) )
             return;
    
         if ( type == CallType.Server )
