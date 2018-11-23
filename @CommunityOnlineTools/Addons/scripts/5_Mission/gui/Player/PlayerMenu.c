@@ -502,8 +502,6 @@ class PlayerMenu extends Form
 
     void SetupPermissionsUI()
     {
-        Print("PlayerMenu::SetupPermissionsUI");
-
         ref Permission rootPerm = GetPermissionsManager().GetRootPermission() 
 
         Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
@@ -539,8 +537,6 @@ class PlayerMenu extends Form
         {
             ref Permission cPerm = perm.Children[i];
 
-            Print( "Adding permission " + cPerm.Name );
-
             Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
             ref PermissionRow rowScript;
@@ -560,8 +556,6 @@ class PlayerMenu extends Form
 
     void LoadPermissions( ref Permission permission )
     {
-        Print("PlayerMenu::LoadPermissions");
-
         if ( permission == NULL )
         {
             LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI, false );
@@ -589,15 +583,11 @@ class PlayerMenu extends Form
 
     void SetPermissions()
     {
-        Print("PlayerMenu::SetPermissions");
-
         GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void UpdatePlayerList()
-    {
-        Print("PlayerMenu::UpdatePlayerList");
-       
+    {       
         array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
         for ( int i = 0; i < players.Count(); i++ )

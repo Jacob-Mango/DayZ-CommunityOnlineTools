@@ -31,6 +31,9 @@ class PlayerData
     float FWet;
     float FTremor;
     float FStamina;
+
+    int Kills;
+    int TotalKills;
     
     int ILifeSpanState;
     bool BBloodyHands;

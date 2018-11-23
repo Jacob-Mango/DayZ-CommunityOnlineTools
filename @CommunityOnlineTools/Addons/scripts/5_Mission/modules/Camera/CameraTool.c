@@ -27,6 +27,29 @@ class CameraTool: EditorModule
             float speed = 0.2;
             m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
             PPEffects.SetBlur( m_CurrentSmoothBlur );
+
+ 			if ( CAMERA_DOF && CurrentActiveCamera ) // DOF enabled
+			{
+			    vector from = GetGame().GetCurrentCameraPosition();
+
+			    float dist = 0.0;
+
+                if ( CurrentActiveCamera.SelectedTarget )
+                {
+				    dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
+                } else if ( CAMERA_AFOCUS )
+				{
+					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
+					vector contact_pos;
+					
+					DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
+					dist = vector.Distance( from, contact_pos );
+				}
+
+				if ( dist > 0 ) CAMERA_FDIST = dist;
+				
+				PPEffects.OverrideDOF(true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET);
+			}
         }
     }
     
@@ -46,8 +69,6 @@ class CameraTool: EditorModule
 
     void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print("CameraTool::EnterCamera");
-
         if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
             return;
 
@@ -94,8 +115,6 @@ class CameraTool: EditorModule
 
     void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        Print("CameraTool::LeaveCamera");
-
         if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
             return;
 
@@ -145,8 +164,6 @@ class CameraTool: EditorModule
 
     void EnableCamera()
     {
-        Print("CameraTool::EnableCamera");
-
         if ( CurrentActiveCamera )
         {
             return;
@@ -157,8 +174,6 @@ class CameraTool: EditorModule
 
     void DisableCamera()
     {
-        Print("CameraTool::DisableCamera");
-
         if ( CurrentActiveCamera )
         {
             SetFreezeMouse(false);
@@ -181,8 +196,6 @@ class CameraTool: EditorModule
     
     void ToggleCamera() 
     {
-        Print("CameraTool::ToggleCamera");
-
         if ( GetGame().IsMultiplayer() == false ) return;
 
         if ( CurrentActiveCamera )

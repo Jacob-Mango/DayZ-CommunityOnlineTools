@@ -3,15 +3,12 @@ modded class MissionServer
     protected ref CommunityOnlineTools m_Tool;
 
     void MissionServer()
-    {
-        Print( "MissionServer::MissionServer()" );
-        
+    {        
         m_Tool = new CommunityOnlineTools();
     }
 
     void ~MissionServer()
     {
-        Print( "MissionServer::~MissionServer()" );
     }
 
     override void OnInit()

@@ -233,11 +233,11 @@ class CameraSettings extends Form
         SliderWidget changeSlider = widgetStore.GetSliderWidget( w.GetName() );
         EditBoxWidget editBox = widgetStore.GetEditBoxWidget( w.GetName() );
 
-        string text = editBox.GetText();
-        float value = text.ToFloat();
-
         if ( editBox ) 
         {
+            string text = editBox.GetText();
+            float value = text.ToFloat();
+
             if ( editBox.GetName() == "camera_input_chrom_x" ) 
             {
                 CHROMABERX = value;
@@ -251,12 +251,6 @@ class CameraSettings extends Form
             }
             return false;
         }
-        /*
-        switch ( changeSlider.GetName() ) 
-        {
-            case 
-        }
-        */
 
         if ( w == m_SldCamBlur ) 
         {

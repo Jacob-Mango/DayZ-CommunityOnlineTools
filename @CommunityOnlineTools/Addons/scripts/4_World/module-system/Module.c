@@ -72,7 +72,11 @@ class Module
     
     void OnUpdate( float timeslice ) 
     {
-    }    
+    }
+
+    void ReloadSettings()
+    {
+    }
     
     /* Mission Functions */
     
