@@ -64,6 +64,8 @@ class PlayerModule: EditorModule
     {
         delete m_GodModePlayers;
         delete m_ServerPlayers;
+        
+        GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.ReloadPlayerList );
     }
 
     override string GetLayoutRoot()

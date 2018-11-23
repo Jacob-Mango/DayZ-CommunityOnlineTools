@@ -11,6 +11,8 @@ class COTModule : Module
     {
         COTInstance = this;
 
+        MakeDirectory( ROOT_COT_DIR );
+
         GetPermissionsManager().RegisterPermission( "COT.Show" );
 
         GetUApi().RegisterInput( "UAUIOpenCOT", "Open COT Menu", "infantry" );

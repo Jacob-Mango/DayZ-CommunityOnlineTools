@@ -1,6 +1,6 @@
 class AuthPlayer
 {
-    const string AUTH_DIRECTORY = "$profile:Players\\";
+    const string AUTH_DIRECTORY = ROOT_COT_DIR + "Players\\";
     const string FILE_TYPE = "";
 
     ref Permission RootPermission;
