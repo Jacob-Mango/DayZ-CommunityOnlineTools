@@ -170,9 +170,9 @@ class PlayerMenu extends Form
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
 
-        if ( COTCamera && COTCamera.IsActive() )
+        if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
         {
-            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( COTCamera.GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
         } else 
         {
             GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );

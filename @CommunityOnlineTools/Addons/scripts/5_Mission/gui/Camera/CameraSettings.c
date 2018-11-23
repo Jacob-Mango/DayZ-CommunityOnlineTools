@@ -121,8 +121,8 @@ class CameraSettings extends Form
 
     void UpdateEditBox() 
     {
-        widgetStore.GetEditBoxWidget("camera_input_chrom_x").SetText( CameraTool.CHROMABERX.ToString());
-        widgetStore.GetEditBoxWidget("camera_input_chrom_y").SetText( CameraTool.CHROMABERY.ToString());
+        widgetStore.GetEditBoxWidget("camera_input_chrom_x").SetText( CHROMABERX.ToString());
+        widgetStore.GetEditBoxWidget("camera_input_chrom_y").SetText( CHROMABERY.ToString());
     }
 
     override bool OnMouseLeave(Widget w, Widget enterW, int x, int y)
@@ -177,47 +177,47 @@ class CameraSettings extends Form
 
         if ( w.GetName() == "camera_fov_speed_btn_inc" ) 
         {
-            CameraTool.CAMERA_FOV_SPEED_MODIFIER += 1;
+            CAMERA_FOV_SPEED_MODIFIER += 1;
         }
 
         if ( w.GetName() == "camera_fov_speed_btn_dec" ) 
         {
-            CameraTool.CAMERA_FOV_SPEED_MODIFIER -= 1;
-            if ( CameraTool.CAMERA_FOV_SPEED_MODIFIER < 0 ) CameraTool.CAMERA_FOV_SPEED_MODIFIER = 0;
+            CAMERA_FOV_SPEED_MODIFIER -= 1;
+            if ( CAMERA_FOV_SPEED_MODIFIER < 0 ) CAMERA_FOV_SPEED_MODIFIER = 0;
         }
 
         if ( w.GetName() == "camera_smooth_btn_inc" )
         {
-            CameraTool.CAMERA_SMOOTH += 0.025;
-            CameraTool.CAMERA_SMOOTH = Math.Clamp(CameraTool.CAMERA_SMOOTH, 0.0, 1.0); // ugh
+            CAMERA_SMOOTH += 0.025;
+            CAMERA_SMOOTH = Math.Clamp(CAMERA_SMOOTH, 0.0, 1.0); // ugh
         }
 
         if ( w.GetName() == "camera_smooth_btn_dec" )
         {
-            CameraTool.CAMERA_SMOOTH -= 0.025;
-            CameraTool.CAMERA_SMOOTH = Math.Clamp(CameraTool.CAMERA_SMOOTH, 0.0, 1.0);
+            CAMERA_SMOOTH -= 0.025;
+            CAMERA_SMOOTH = Math.Clamp(CAMERA_SMOOTH, 0.0, 1.0);
         }
 
         if ( w.GetName() == "camera_msens_btn_inc" ) 
         {
-            CameraTool.CAMERA_MSENS += 0.05;
-            CameraTool.CAMERA_MSENS = Math.Clamp(CameraTool.CAMERA_MSENS, 0.0, 1.5);
+            CAMERA_MSENS += 0.05;
+            CAMERA_MSENS = Math.Clamp(CAMERA_MSENS, 0.0, 1.5);
         }
 
         if ( w.GetName() == "camera_msens_btn_dec" ) 
         {
-            CameraTool.CAMERA_MSENS -= 0.05;
-            CameraTool.CAMERA_MSENS = Math.Clamp(CameraTool.CAMERA_MSENS, 0.0, 1.5);
+            CAMERA_MSENS -= 0.05;
+            CAMERA_MSENS = Math.Clamp(CAMERA_MSENS, 0.0, 1.5);
         }
         if ( w.GetName() == "camera_msmooth_btn_inc" ) 
         {
-            CameraTool.CAMERA_VELDRAG += 0.01; // percent
-            CameraTool.CAMERA_VELDRAG = Math.Clamp(CameraTool.CAMERA_VELDRAG, 0.9, 1.0);
+            CAMERA_VELDRAG += 0.01; // percent
+            CAMERA_VELDRAG = Math.Clamp(CAMERA_VELDRAG, 0.9, 1.0);
         }
         if ( w.GetName() == "camera_msmooth_btn_dec" ) 
         {
-            CameraTool.CAMERA_VELDRAG -= 0.01;
-            CameraTool.CAMERA_VELDRAG = Math.Clamp(CameraTool.CAMERA_VELDRAG, 0.9, 1.0); // 10 clicks
+            CAMERA_VELDRAG -= 0.01;
+            CAMERA_VELDRAG = Math.Clamp(CAMERA_VELDRAG, 0.9, 1.0); // 10 clicks
         }
 
         return false;
@@ -240,14 +240,14 @@ class CameraSettings extends Form
         {
             if ( editBox.GetName() == "camera_input_chrom_x" ) 
             {
-                CameraTool.CHROMABERX = value;
-                chromAber.SetParam( "PowerX", CameraTool.CHROMABERX );
+                CHROMABERX = value;
+                chromAber.SetParam( "PowerX", CHROMABERX );
             }
 
             if ( editBox.GetName() == "camera_input_chrom_y" ) 
             {
-                CameraTool.CHROMABERY = value;
-                chromAber.SetParam( "PowerY", CameraTool.CHROMABERY );
+                CHROMABERY = value;
+                chromAber.SetParam( "PowerY", CHROMABERY );
             }
             return false;
         }
@@ -260,127 +260,127 @@ class CameraSettings extends Form
 
         if ( w == m_SldCamBlur ) 
         {
-            CameraTool.CAMERA_BLUR = 4.0 * (m_SldCamBlur.GetCurrent() * 0.01); // percent
+            CAMERA_BLUR = 4.0 * (m_SldCamBlur.GetCurrent() * 0.01); // percent
             
             if ( m_SldCamBlur.GetCurrent() == 0 ) 
             {
-                CameraTool.CAMERA_DOF = false;
+                CAMERA_DOF = false;
                 PPEffects.ResetDOFOverride();
             } 
             else 
             {
-                CameraTool.CAMERA_DOF = true;
+                CAMERA_DOF = true;
             }
         } 
         else if ( w == m_SldCamDist ) 
         {
             if ( m_SldCamDist.GetCurrent() == 0 ) 
             {
-                CameraTool.CAMERA_AFOCUS = true;
+                CAMERA_AFOCUS = true;
             } 
             else 
             {
-                CameraTool.CAMERA_AFOCUS = false;
-                CameraTool.CAMERA_FDIST = m_SldCamDist.GetCurrent() * 15;
+                CAMERA_AFOCUS = false;
+                CAMERA_FDIST = m_SldCamDist.GetCurrent() * 15;
             }
         }
         else if ( w == m_SldCamFLen ) 
         {
-            CameraTool.CAMERA_FLENGTH = (m_SldCamFLen.GetCurrent() * 2.0);
+            CAMERA_FLENGTH = (m_SldCamFLen.GetCurrent() * 2.0);
         }
         else if ( w == m_SldCamFnear ) 
         {
-            CameraTool.CAMERA_FNEAR = (m_SldCamFnear.GetCurrent() * 2.0);
+            CAMERA_FNEAR = (m_SldCamFnear.GetCurrent() * 2.0);
         }
         else if ( w == m_SldCamExp ) 
         {
-            CameraTool.EXPOSURE = (m_SldCamExp.GetCurrent() * 0.1) - 5.0;
-            GetGame().SetEVUser( CameraTool.EXPOSURE );
+            EXPOSURE = (m_SldCamExp.GetCurrent() * 0.1) - 5.0;
+            GetGame().SetEVUser( EXPOSURE );
         }
         else if ( changeSlider.GetName() == "camera_slider_hue" ) 
         {
-            CameraTool.HUESHIFT = (changeSlider.GetCurrent() * 0.1) - 5.0;
-            matColors.SetParam( "Saturation", CameraTool.HUESHIFT );
+            HUESHIFT = (changeSlider.GetCurrent() * 0.1) - 5.0;
+            matColors.SetParam( "Saturation", HUESHIFT );
         }
         else if ( changeSlider.GetName() == "camera_slider_rotblur_power" ) 
         {
-            CameraTool.ROTBLUR = 0.5 * (changeSlider.GetCurrent() * 0.01);
-            rotBlur.SetParam( "Power", CameraTool.ROTBLUR );
+            ROTBLUR = 0.5 * (changeSlider.GetCurrent() * 0.01);
+            rotBlur.SetParam( "Power", ROTBLUR );
         }
         else if ( changeSlider.GetName() == "camera_slider_rotblur_mindepth" ) 
         {
-            CameraTool.MINDEPTH = 2.5 * (changeSlider.GetCurrent() * 0.01);
-            rotBlur.SetParam( "MinDepth", CameraTool.MINDEPTH );
+            MINDEPTH = 2.5 * (changeSlider.GetCurrent() * 0.01);
+            rotBlur.SetParam( "MinDepth", MINDEPTH );
         }
         else if ( changeSlider.GetName() == "camera_slider_rotblur_maxdepth" ) 
         {
-            CameraTool.MAXDEPTH = (changeSlider.GetCurrent() * 0.1);
-            rotBlur.SetParam( "MaxDepth", CameraTool.MAXDEPTH );
+            MAXDEPTH = (changeSlider.GetCurrent() * 0.1);
+            rotBlur.SetParam( "MaxDepth", MAXDEPTH );
         }
         else if ( changeSlider.GetName() == "camera_slider_radblur_x" ) 
         {
-            CameraTool.RADBLURX = (changeSlider.GetCurrent() * 0.01);
-            radBlur.SetParam( "PowerX", CameraTool.RADBLURX );
+            RADBLURX = (changeSlider.GetCurrent() * 0.01);
+            radBlur.SetParam( "PowerX", RADBLURX );
         }
         else if ( changeSlider.GetName() == "camera_slider_radblur_y" ) 
         {
-            CameraTool.RADBLURY = (changeSlider.GetCurrent() * 0.01);
-            radBlur.SetParam( "PowerY", CameraTool.RADBLURY );
+            RADBLURY = (changeSlider.GetCurrent() * 0.01);
+            radBlur.SetParam( "PowerY", RADBLURY );
         }
         else if ( changeSlider.GetName() == "camera_slider_radblur_offsetx" ) 
         {
-            CameraTool.RADBLUROFFX = (changeSlider.GetCurrent() * 0.01);
-            radBlur.SetParam( "OffsetX", CameraTool.RADBLUROFFX );
+            RADBLUROFFX = (changeSlider.GetCurrent() * 0.01);
+            radBlur.SetParam( "OffsetX", RADBLUROFFX );
         }
         else if ( changeSlider.GetName() == "camera_slider_radblur_offsety" ) 
         {
-            CameraTool.RADBLUROFFY = (changeSlider.GetCurrent() * 0.01);
-            radBlur.SetParam( "OffsetY", CameraTool.RADBLUROFFY );
+            RADBLUROFFY = (changeSlider.GetCurrent() * 0.01);
+            radBlur.SetParam( "OffsetY", RADBLUROFFY );
         }
         else if ( changeSlider.GetName() == "camera_slider_vign" ) 
         {
-            CameraTool.VIGNETTE = (changeSlider.GetCurrent() * 0.02);
-            matColors.SetParam( "Vignette", CameraTool.VIGNETTE );
+            VIGNETTE = (changeSlider.GetCurrent() * 0.02);
+            matColors.SetParam( "Vignette", VIGNETTE );
         }
         else if ( changeSlider.GetName() == "camera_slider_vign_r" ) 
         {
-            CameraTool.VARGB[0] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("VignetteColor", CameraTool.VARGB );
+            VARGB[0] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("VignetteColor", VARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_vign_g" ) 
         {
-            CameraTool.VARGB[1] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("VignetteColor", CameraTool.VARGB );
+            VARGB[1] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("VignetteColor", VARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_vign_b" ) 
         {
-            CameraTool.VARGB[2] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("VignetteColor", CameraTool.VARGB );
+            VARGB[2] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("VignetteColor", VARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_color_r" ) 
         {
-            CameraTool.CARGB[0] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("OverlayColor", CameraTool.CARGB );
+            CARGB[0] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("OverlayColor", CARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_color_g" ) 
         {
-            CameraTool.CARGB[1] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("OverlayColor", CameraTool.CARGB );
+            CARGB[1] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("OverlayColor", CARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_color_b" ) 
         {
-            CameraTool.CARGB[2] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
-            matColors.SetParam("OverlayColor", CameraTool.CARGB );
+            CARGB[2] = ((changeSlider.GetCurrent() * 0.1) - 5.0);
+            matColors.SetParam("OverlayColor", CARGB );
         }
         else if ( changeSlider.GetName() == "camera_slider_color_a" ) 
         {
-            CameraTool.CARGB[3] = ((changeSlider.GetCurrent() * 0.05) - 4.0);
-            matColors.SetParam("OverlayFactor", CameraTool.CARGB[3] );
+            CARGB[3] = ((changeSlider.GetCurrent() * 0.05) - 4.0);
+            matColors.SetParam("OverlayFactor", CARGB[3] );
         }
         else if ( changeSlider.GetName() == "camera_slider_view" )
         {
-            CameraTool.VIEWDISTANCE = 100*changeSlider.GetCurrent();
-            GetGame().GetWorld().SetPreferredViewDistance(CameraTool.VIEWDISTANCE);
+            VIEWDISTANCE = 100*changeSlider.GetCurrent();
+            GetGame().GetWorld().SetPreferredViewDistance(VIEWDISTANCE);
         }
         return false;
     }
@@ -416,15 +416,16 @@ class CameraSettings extends Form
         
         if ( cameraTool )
         {
-            cameraTool.GetTargetObject();
-        }
-
-        if ( targetObject ) 
-        {
-            cameraTarget = targetObject.GetType();
+            targetObject = cameraTool.GetTargetObject();
+            
+            if ( targetObject ) 
+            {
+                cameraTarget = targetObject.GetType();
+            }
         }
 
         vector targetPos = CameraTool.Cast(GetModuleManager().GetModule(CameraTool)).GetTargetPos();
+        
         if ( targetPos != vector.Zero ) 
         {
             cameraTarget = VectorToString( targetPos, 1 );
@@ -432,61 +433,61 @@ class CameraSettings extends Form
 
         widgetStore.GetTextWidget("camera_target_txt").SetText("Target: " + cameraTarget );
 
-        m_TxtCamBlur.SetText(((CameraTool.CAMERA_BLUR / 4.0) * 100.0).ToString() + "%");
+        m_TxtCamBlur.SetText(((CAMERA_BLUR / 4.0) * 100.0).ToString() + "%");
 
         string autoF = "";
-        if ( CameraTool.CAMERA_AFOCUS ) 
+        if ( CAMERA_AFOCUS ) 
         {
             autoF = " (AUTO)";
         }
-        m_TxtCamDist.SetText(CameraTool.CAMERA_FDIST.ToString()+"m" + autoF);
-        m_TxtCamFlen.SetText(CameraTool.CAMERA_FLENGTH.ToString());
-        m_TxtCamFnear.SetText(CameraTool.CAMERA_FNEAR.ToString());
-        m_TxtCamExp.SetText( CameraTool.EXPOSURE.ToString() );
+        m_TxtCamDist.SetText(CAMERA_FDIST.ToString()+"m" + autoF);
+        m_TxtCamFlen.SetText(CAMERA_FLENGTH.ToString());
+        m_TxtCamFnear.SetText(CAMERA_FNEAR.ToString());
+        m_TxtCamExp.SetText( EXPOSURE.ToString() );
 
-        widgetStore.GetTextWidget("camera_slider_hue_value").SetText( CameraTool.HUESHIFT.ToString() ); // make script param that updates child textwidget of slider based on vvariable?
-        widgetStore.GetTextWidget("camera_slider_rotblur_power_value").SetText( CameraTool.ROTBLUR.ToString() );
-        widgetStore.GetTextWidget("camera_slider_rotblur_mindepth_value").SetText( CameraTool.MINDEPTH.ToString() );
-        widgetStore.GetTextWidget("camera_slider_rotblur_maxdepth_value").SetText( CameraTool.MAXDEPTH.ToString() );
-        widgetStore.GetTextWidget("camera_slider_radblur_value_x").SetText( CameraTool.RADBLURX.ToString() );
-        widgetStore.GetTextWidget("camera_slider_radblur_value_y").SetText( CameraTool.RADBLURY.ToString() );
-        widgetStore.GetTextWidget("camera_slider_radblur_value_offsetx").SetText( CameraTool.RADBLUROFFX.ToString() );
-        widgetStore.GetTextWidget("camera_slider_radblur_value_offsety").SetText( CameraTool.RADBLUROFFY.ToString() );
-        widgetStore.GetTextWidget("camera_slider_vign_value").SetText( CameraTool.VIGNETTE.ToString() );
-        widgetStore.GetTextWidget("camera_slider_vign_value_r").SetText( CameraTool.VARGB[0].ToString() );
-        widgetStore.GetTextWidget("camera_slider_vign_value_g").SetText( CameraTool.VARGB[1].ToString() );
-        widgetStore.GetTextWidget("camera_slider_vign_value_b").SetText( CameraTool.VARGB[2].ToString() );
-        widgetStore.GetTextWidget("camera_slider_color_value_r").SetText( CameraTool.CARGB[0].ToString() );
-        widgetStore.GetTextWidget("camera_slider_color_value_g").SetText( CameraTool.CARGB[1].ToString() );
-        widgetStore.GetTextWidget("camera_slider_color_value_b").SetText( CameraTool.CARGB[2].ToString() );
-        widgetStore.GetTextWidget("camera_slider_color_value_a").SetText( CameraTool.CARGB[3].ToString() );
-        widgetStore.GetTextWidget("camera_slider_view_value").SetText( CameraTool.VIEWDISTANCE.ToString() );
+        widgetStore.GetTextWidget("camera_slider_hue_value").SetText( HUESHIFT.ToString() ); // make script param that updates child textwidget of slider based on vvariable?
+        widgetStore.GetTextWidget("camera_slider_rotblur_power_value").SetText( ROTBLUR.ToString() );
+        widgetStore.GetTextWidget("camera_slider_rotblur_mindepth_value").SetText( MINDEPTH.ToString() );
+        widgetStore.GetTextWidget("camera_slider_rotblur_maxdepth_value").SetText( MAXDEPTH.ToString() );
+        widgetStore.GetTextWidget("camera_slider_radblur_value_x").SetText( RADBLURX.ToString() );
+        widgetStore.GetTextWidget("camera_slider_radblur_value_y").SetText( RADBLURY.ToString() );
+        widgetStore.GetTextWidget("camera_slider_radblur_value_offsetx").SetText( RADBLUROFFX.ToString() );
+        widgetStore.GetTextWidget("camera_slider_radblur_value_offsety").SetText( RADBLUROFFY.ToString() );
+        widgetStore.GetTextWidget("camera_slider_vign_value").SetText( VIGNETTE.ToString() );
+        widgetStore.GetTextWidget("camera_slider_vign_value_r").SetText( VARGB[0].ToString() );
+        widgetStore.GetTextWidget("camera_slider_vign_value_g").SetText( VARGB[1].ToString() );
+        widgetStore.GetTextWidget("camera_slider_vign_value_b").SetText( VARGB[2].ToString() );
+        widgetStore.GetTextWidget("camera_slider_color_value_r").SetText( CARGB[0].ToString() );
+        widgetStore.GetTextWidget("camera_slider_color_value_g").SetText( CARGB[1].ToString() );
+        widgetStore.GetTextWidget("camera_slider_color_value_b").SetText( CARGB[2].ToString() );
+        widgetStore.GetTextWidget("camera_slider_color_value_a").SetText( CARGB[3].ToString() );
+        widgetStore.GetTextWidget("camera_slider_view_value").SetText( VIEWDISTANCE.ToString() );
 
         // get child and update text?
 
         // Set slider current to value
-        widgetStore.GetSliderWidget("camera_slider_hue").SetCurrent( (CameraTool.HUESHIFT + 5.0) / 0.1); // this could probably be moved to a proper system
-        widgetStore.GetSliderWidget("camera_slider_rotblur_power").SetCurrent( (CameraTool.ROTBLUR / 0.5) / 0.01);
-        widgetStore.GetSliderWidget("camera_slider_rotblur_mindepth").SetCurrent( (CameraTool.MINDEPTH / 0.01) / 2.5);
-        widgetStore.GetSliderWidget("camera_slider_rotblur_maxdepth").SetCurrent( CameraTool.MAXDEPTH / 0.1);
-        widgetStore.GetSliderWidget("camera_slider_radblur_x").SetCurrent( CameraTool.RADBLURX / 0.01);
-        widgetStore.GetSliderWidget("camera_slider_radblur_y").SetCurrent( CameraTool.RADBLURY / 0.01);
-        widgetStore.GetSliderWidget("camera_slider_radblur_offsetx").SetCurrent( CameraTool.RADBLUROFFX / 0.01);
-        widgetStore.GetSliderWidget("camera_slider_radblur_offsety").SetCurrent( CameraTool.RADBLUROFFY / 0.01);
-        widgetStore.GetSliderWidget("camera_slider_view").SetCurrent( CameraTool.VIEWDISTANCE / 100.0);
+        widgetStore.GetSliderWidget("camera_slider_hue").SetCurrent( (HUESHIFT + 5.0) / 0.1); // this could probably be moved to a proper system
+        widgetStore.GetSliderWidget("camera_slider_rotblur_power").SetCurrent( (ROTBLUR / 0.5) / 0.01);
+        widgetStore.GetSliderWidget("camera_slider_rotblur_mindepth").SetCurrent( (MINDEPTH / 0.01) / 2.5);
+        widgetStore.GetSliderWidget("camera_slider_rotblur_maxdepth").SetCurrent( MAXDEPTH / 0.1);
+        widgetStore.GetSliderWidget("camera_slider_radblur_x").SetCurrent( RADBLURX / 0.01);
+        widgetStore.GetSliderWidget("camera_slider_radblur_y").SetCurrent( RADBLURY / 0.01);
+        widgetStore.GetSliderWidget("camera_slider_radblur_offsetx").SetCurrent( RADBLUROFFX / 0.01);
+        widgetStore.GetSliderWidget("camera_slider_radblur_offsety").SetCurrent( RADBLUROFFY / 0.01);
+        widgetStore.GetSliderWidget("camera_slider_view").SetCurrent( VIEWDISTANCE / 100.0);
 
         // fk me ok im lazy. cbf doing this for all the sliders.
 
         TextWidget speedTxt = layoutRoot.FindAnyWidget( "camera_fov_speed_text" );
-        speedTxt.SetText("FOV Smooth: " + CameraTool.CAMERA_FOV_SPEED_MODIFIER );
+        speedTxt.SetText("FOV Smooth: " + CAMERA_FOV_SPEED_MODIFIER );
 
         TextWidget smoothTxt = layoutRoot.FindAnyWidget( "camera_smooth_text" );
-        smoothTxt.SetText("Cam Smooth: " + CameraTool.CAMERA_SMOOTH );
+        smoothTxt.SetText("Cam Smooth: " + CAMERA_SMOOTH );
 
         TextWidget sensTxt = layoutRoot.FindAnyWidget( "camera_msens_text" );
-        sensTxt.SetText("Cam Sens: " + CameraTool.CAMERA_MSENS );
+        sensTxt.SetText("Cam Sens: " + CAMERA_MSENS );
 
         TextWidget flySpeed = layoutRoot.FindAnyWidget("camera_msmooth_text");
-        flySpeed.SetText("Fly smooth: " + (CameraTool.CAMERA_VELDRAG - 0.9) / 0.1);
+        flySpeed.SetText("Fly smooth: " + (CAMERA_VELDRAG - 0.9) / 0.1);
     }    
 }

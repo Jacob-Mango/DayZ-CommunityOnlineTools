@@ -1,6 +1,6 @@
 // TODO: MOVE ALL THIS INTO A SEPERATE MOD
 
-static Camera COTCamera; // active static camera "staticcamera"
+static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
 static bool InCommunityOfflineTools;
 
@@ -512,3 +512,39 @@ static bool CheckStringType( string str, int type )
     }
     return false;
 }
+
+static float CAMERA_FOV = 1.0;
+static float CAMERA_TARGETFOV = 1.0;
+static float CAMERA_FOV_SPEED_MODIFIER = 5.0;
+static float CAMERA_SPEED = 5.0;
+static float CAMERA_BOOST_MULT = 10.0;
+static float CAMERA_VELDRAG = 0.9;
+static float CAMERA_MSENS = 0.8;
+static float CAMERA_SMOOTH = 0.8;
+static bool  CAMERA_DOF = false;
+static bool  CAMERA_AFOCUS = true;
+static float CAMERA_BLUR = 0.0;
+static float CAMERA_FLENGTH = 50.0;
+static float CAMERA_FNEAR = 50.0;
+static float CAMERA_FDIST = 0.0;
+static float CAMERA_DOFFSET = 0.0;
+static float CAMERA_SMOOTH_BLUR = 0.0;
+
+static float EXPOSURE = 0.0;
+static float CHROMABERX = 0.0;
+static float CHROMABERY = 0.0;
+
+static float HUESHIFT = 0.0;
+static float ROTBLUR = 0.0;
+static float MINDEPTH = 2.5;
+static float MAXDEPTH = 4.5;
+static float RADBLURX = 0.0;
+static float RADBLURY = 0.0;
+static float RADBLUROFFX = 0.0;
+static float RADBLUROFFY = 0.0;
+static float VIGNETTE = 0.0;
+
+static float VARGB[4] = { 0, 0, 0, 0 };
+static float CARGB[4] = { 0, 0, 0, 1 };
+
+static int VIEWDISTANCE = 1600;

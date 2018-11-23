@@ -1,3 +1,4 @@
+/*
 class MapEditorMenu 
 {
     protected Widget layoutRoot;
@@ -132,3 +133,4 @@ class MapEditorMenu
 
     }
 }
+*/
