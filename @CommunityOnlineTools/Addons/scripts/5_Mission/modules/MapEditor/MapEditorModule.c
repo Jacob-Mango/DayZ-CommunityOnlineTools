@@ -1,3 +1,4 @@
+/*
 class MapEditorModule: Module
 {
     protected bool m_InEditor;
@@ -134,7 +135,7 @@ class MapEditorModule: Module
 
     void ToggleEditor()
     {
-        if ( COTCamera )
+        if ( CurrentActiveCamera )
         {
             GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param1<vector>(GetPlayer().GetPosition()), true, NULL, GetPlayer() );
         } else 
@@ -144,3 +145,4 @@ class MapEditorModule: Module
     }
 
 }
+*/

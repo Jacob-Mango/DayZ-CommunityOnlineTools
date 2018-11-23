@@ -22,6 +22,8 @@ static void SetupWeather()
 
 void main()
 {
+    // CreateHive();
+
 	SetupWeather();
 
     if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
