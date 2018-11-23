@@ -9,11 +9,27 @@ class SpectatorCamera extends COTCamera
 	{
         super.OnUpdate( timeslice );
 
-        if ( SelectedTarget )
+        Human human = Human.Cast( SelectedTarget );
+
+        if ( human )
         {
-            SetPosition( SelectedTarget.GetPosition() );
-            SetDirection( SelectedTarget.GetDirection() )
-            SetOrientation( SelectedTarget.GetOrientation() );
+            vector pos;
+			float rot[4];
+
+            int bone = human.GetBoneIndexByName( "Head" )
+
+            pos = human.GetBonePositionWS( bone );
+
+			human.GetBoneRotationWS( bone, rot );
+            
+			vector orientation = Math3D.QuatToAngles( rot );
+
+            orientation[0] = orientation[0] + 220;
+            orientation[1] = orientation[1];
+            orientation[2] = 0;
+
+            SetOrientation( orientation );
+            SetPosition( pos );
         }
     }
 }
