@@ -34,6 +34,8 @@ class CommunityOnlineTools
         RegisterModules();
 
         GetModuleManager().OnInit();
+        
+        GetModuleManager().ReloadSettings();
 
         GetModuleManager().OnMissionStart();
     }
