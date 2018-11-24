@@ -43,10 +43,8 @@ class GameMenu extends Form
             // m_GameScriptList.AddItem("Spawn Van", new Param1<string>("SpawnVan"), 0);
         }
 
-        if ( GetPermissionsManager().HasPermission( "Game.ChangeAimingMode" ) )
-        {
-            UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", this, "ToggleOldAiming", false );
-        }
+        UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", this, "ToggleOldAiming", false );
+        UIActionManager.CreateButton( m_ActionsWrapper, "Throw Apple", this, "ThrowApple" );
     }
 
     override void OnShow()
@@ -56,6 +54,11 @@ class GameMenu extends Form
     override void OnHide() 
     {
         
+    }
+
+    void ThrowApple( UIEvent eid, ref UIActionCheckbox action )
+    {
+        GetRPCManager().SendRPC( "COT_Game", "ThrowApple", new Param, true, NULL, GetPlayer() );
     }
 
     void ToggleOldAiming( UIEvent eid, ref UIActionCheckbox action )
