@@ -124,7 +124,7 @@ class PermissionManager
 
         auPlayer.AddPermission( "COT", PermissionType.ALLOW );
         auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Admin.Permissions", PermissionType.DISALLOW );
+        //auPlayer.AddPermission( "Admin.Permissions", PermissionType.DISALLOW );
         auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
         auPlayer.AddPermission( "Object", PermissionType.ALLOW );
         auPlayer.AddPermission( "Game", PermissionType.ALLOW );

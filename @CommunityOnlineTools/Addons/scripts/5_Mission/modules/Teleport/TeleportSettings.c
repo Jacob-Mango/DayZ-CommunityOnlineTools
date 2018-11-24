@@ -12,7 +12,8 @@ class TeleportSettings
         {
 		    JsonFileLoader<TeleportSettings>.JsonLoadFile( TELEPORT_SETTINGS_FILE, settings );
         } else {
-            settings.SaveDefaults();
+            settings.Defaults();
+            settings.Save();
         }
 
         return settings;
@@ -23,7 +24,7 @@ class TeleportSettings
 		JsonFileLoader<TeleportSettings>.JsonSaveFile( TELEPORT_SETTINGS_FILE, this );
     }
 
-    void SaveDefaults()
+    void Defaults()
     {
         Positions.Insert( "Severograd", "8428.0 0.0 12767.1" );
         Positions.Insert( "Krasnostav", "11172.0 0.0 12314.1" );
@@ -47,7 +48,5 @@ class TeleportSettings
         Positions.Insert( "Svetlojarsk Center", "13835.3 0.0 13202.3" );
         Positions.Insert( "Zelenogorsk Center", "2660.99 0.0 5299.28" );
         Positions.Insert( "Zelenogorsk West", "2489.45 0.0 5080.41" );
-
-        Save();
     }
 }
