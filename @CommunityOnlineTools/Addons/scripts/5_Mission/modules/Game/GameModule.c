@@ -4,9 +4,11 @@ class GameModule: EditorModule
     {
         GetRPCManager().AddRPC( "COT_Game", "SpawnVehicle", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Game", "SetOldAiming", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COT_Game", "ThrowApple", this, SingeplayerExecutionType.Client );
 
         GetPermissionsManager().RegisterPermission( "Game.SpawnVehicle" );
         GetPermissionsManager().RegisterPermission( "Game.ChangeAimingMode" );
+        GetPermissionsManager().RegisterPermission( "Game.ThrowApple" );
     }
 
     override string GetLayoutRoot()
@@ -29,6 +31,43 @@ class GameModule: EditorModule
     {
         float cap = car.GetFluidCapacity( fluid );
         car.Fill( fluid, cap );
+    }
+
+    void ThrowApple( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( "Game.ThrowApple", sender ) )
+            return;
+            
+        if( type == CallType.Server )
+        {
+            vector direction = target.GetDirection();
+            vector position = target.GetPosition();
+
+            Human human = Human.Cast( target );
+
+            if ( human )
+            {
+                int index = human.GetBoneIndexByName("Camera3rd_Helper");
+
+                float pQuat[];
+                human.GetBoneRotationWS( index, pQuat )
+                vector rotation = Math3D.QuatToAngles( pQuat );
+
+                position = human.GetBonePositionWS( index );
+                direction = rotation.AnglesToVector();
+            }
+
+            position = position + ( direction * 2 ) + "0 1.5 0";
+            
+           	Object physicsObj = GetGame().CreateObject( "Apple", position );
+
+			if ( physicsObj == NULL ) return;
+
+			dBodyDestroy( physicsObj );
+
+			autoptr PhysicsGeomDef geoms[] = { PhysicsGeomDef("", dGeomCreateSphere( 0.1 ), "material/default", 0xffffffff )};
+			dBodyCreateDynamicEx( physicsObj, "0 0 0", 1.0, geoms );
+        }
     }
 
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
