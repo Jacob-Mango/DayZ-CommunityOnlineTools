@@ -33,6 +33,7 @@ class TeleportModule: EditorModule
 	{
 		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
 		teleport.AddBinding( "kH" );
+        teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
 		RegisterKeyMouseBinding( teleport );
 	}
 
