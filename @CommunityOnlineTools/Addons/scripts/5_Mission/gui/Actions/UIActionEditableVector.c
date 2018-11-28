@@ -22,25 +22,25 @@ class UIActionEditableVector extends UIActionBase
     {
         if ( enabled )
         {
-            layoutRoot.FindAnyWidget( "action_button_no" ).Show( false );
+            layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
 
-            layoutRoot = layoutRoot.FindAnyWidget( "action_button_yes" );
+            layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_check" );
             layoutRoot.Show( true );
 
             m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
         } else
         {
-            layoutRoot.FindAnyWidget( "action_button_yes" ).Show( false );
+            layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
 
-            layoutRoot = layoutRoot.FindAnyWidget( "action_button_no" );
+            layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_input" );
             layoutRoot.Show( true );
         }
 
         m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
 
-        m_TextX = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text_x" ) );
-        m_TextY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text_y" ) );
-        m_TextZ = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_editable_text_z" ) );
+        m_TextX = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_x" ) );
+        m_TextY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_y" ) );
+        m_TextZ = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_z" ) );
 
         WidgetHandler.GetInstance().RegisterOnClick( m_TextX, this, "OnChange" );
         WidgetHandler.GetInstance().RegisterOnClick( m_TextY, this, "OnChange" );
@@ -68,7 +68,7 @@ class UIActionEditableVector extends UIActionBase
 
     void SetButton( string text )
     {
-        TextWidget.Cast( layoutRoot.FindAnyWidget("action_button_text") ).SetText( text );
+        TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
     }
 
     override bool OnChange( Widget w, int x, int y, bool finished )

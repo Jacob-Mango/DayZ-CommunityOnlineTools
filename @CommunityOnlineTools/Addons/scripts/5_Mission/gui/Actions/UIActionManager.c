@@ -108,7 +108,7 @@ class UIActionManager
         return NULL;
     }
 
-    static ref UIActionText CreateText( Widget parent, string label, string text = "" )
+    static ref UIActionText CreateText( Widget parent, string label, string text = "", Class instance = NULL, string funcname = "" )
     {
         ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionText.layout", parent );
 
@@ -117,8 +117,28 @@ class UIActionManager
 
         if ( action )
         {
+            action.SetCallback( instance, funcname );
             action.SetLabel( label );
             action.SetText( text );
+
+            return action;
+        }
+
+        return NULL;
+    }
+
+    static ref UIActionSelectBox CreateSelectionBox( Widget parent, string label, notnull ref array<string> options, Class instance = NULL, string funcname = "" )
+    {
+        ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/actions/UIActionSelectBox.layout", parent );
+
+        ref UIActionSelectBox action;
+        widget.GetScript( action );
+
+        if ( action )
+        {
+            action.SetCallback( instance, funcname );
+            action.SetLabel( label );
+            action.SetSelections( options );
 
             return action;
         }

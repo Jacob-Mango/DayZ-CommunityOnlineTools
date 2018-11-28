@@ -1,4 +1,4 @@
-PanelWidgetClass action_editable_text_wrapper {
+PanelWidgetClass action_wrapper {
  size 1 30
  hexactpos 0
  vexactpos 0
@@ -6,86 +6,103 @@ PanelWidgetClass action_editable_text_wrapper {
  vexactsize 1
  scriptclass "UIActionEditableText"
  {
-  PanelWidgetClass action_button_yes
+  PanelWidgetClass action_wrapper
   {
    position 0 0
    size 1 20
    vexactsize 1
    valign center_ref
    {
-    TextWidgetClass action_label {
-     size 0.45 1
-     halign left_ref
-     valign top_ref
-     text "{LABEL}"
-     font "gui/fonts/sdf_MetronLight24"
-     "text offset" 10 0
-     "bold text" 1
-     "exact text" 1
-     "exact text size" 16
-    }
-    EditBoxWidgetClass action_editable_text {
-     position 0.45 0
-     size 0.40 1
-     halign left_ref
-     valign top_ref
-     text "{TEXT}"
-     "exact text" 1
-     font "gui/fonts/sdf_MetronLight14"
-    }
-    ButtonWidgetClass action_button {
-     size 0.15 1
-     halign right_ref
-     valign center_ref
+    PanelWidgetClass action_wrapper_check
+    {
+     position 0 0
+     size 1 1
      {
-      TextWidgetClass action_button_text {
-       ignorepointer 1
-       position 0 0
-       size 1 1
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 0
-       style Light
-       text "{BUTTON}"
+      TextWidgetClass action_label {
+       size 0.45 1
+       halign left_ref
+       valign top_ref
+       text "{LABEL}"
        font "gui/fonts/sdf_MetronLight24"
+       "text offset" 10 0
+       "bold text" 1
        "exact text" 1
-       "exact text size" 14
-       "text halign" center
-       "text valign" center
+       "exact text size" 16
+      }
+      EditBoxWidgetClass action {
+       position 0.45 0
+       size 0.40 1
+       halign left_ref
+       valign top_ref
+       text "{TEXT}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
+      }
+      ButtonWidgetClass action_button {
+       size 0.15 1
+       halign right_ref
+       valign center_ref
+       {
+        TextWidgetClass action_button_text {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Light
+         text "{BUTTON}"
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 14
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    PanelWidgetClass action_wrapper_input
+    {
+     position 0 0
+     size 1 1
+     {
+      TextWidgetClass action_label {
+       size 0.4 1
+       halign left_ref
+       valign top_ref
+       text "{LABEL}"
+       font "gui/fonts/sdf_MetronLight24"
+       "text offset" 10 0
+       "bold text" 1
+       "exact text" 1
+       "exact text size" 16
+      }
+      EditBoxWidgetClass action {
+       position 0.4 0
+       size 0.6 1
+       halign left_ref
+       valign top_ref
+       text "{TEXT}"
+       "exact text" 1
+       font "gui/fonts/sdf_MetronLight14"
       }
      }
     }
    }
   }
-  PanelWidgetClass action_button_no
-  {
+  FrameWidgetClass action_wrapper_disable {
+   visible 0
+   ignorepointer 1
+   color 0.1569 0.1569 0.1569 0.902
+   size 1 1
    position 0 0
-   size 1 20
-   vexactsize 1
-   valign center_ref
-   {
-    TextWidgetClass action_label {
-     size 0.4 1
-     halign left_ref
-     valign top_ref
-     text "{LABEL}"
-     font "gui/fonts/sdf_MetronLight24"
-     "text offset" 10 0
-     "bold text" 1
-     "exact text" 1
-     "exact text size" 16
-    }
-    EditBoxWidgetClass action_editable_text {
-     position 0.4 0
-     size 0.6 1
-     halign left_ref
-     valign top_ref
-     text "{TEXT}"
-     "exact text" 1
-     font "gui/fonts/sdf_MetronLight14"
-    }
-   }
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style rover_sim_colorable
   }
  }
 }

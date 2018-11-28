@@ -39,7 +39,7 @@ class PlayerMenu extends Form
     ref UIActionEditableText m_Wet;
     ref UIActionEditableText m_Tremor;
     ref UIActionEditableText m_Stamina;
-    ref UIActionEditableText m_LastShaved;
+    ref UIActionSelectBox m_LastShaved;
     ref UIActionCheckbox m_BloodyHands;
 
     ref UIActionButton m_KickTransport;
@@ -109,7 +109,14 @@ class PlayerMenu extends Form
         m_Wet = UIActionManager.CreateEditableText( playerActions, "Wet: ", this, "Click_SetWet", "", "Set" );
         m_Tremor = UIActionManager.CreateEditableText( playerActions, "Tremor: ", this, "Click_SetTremor", "", "Set" );
         m_Stamina = UIActionManager.CreateEditableText( playerActions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
-        m_LastShaved = UIActionManager.CreateEditableText( playerActions, "Beard: ", this, "Click_SetLifeSpanState", "", "Set" ); // TODO: make select box action box instead
+
+        ref array< string > lifeSpanOptions = new ref array< string >;
+        lifeSpanOptions.Insert( "No" );
+        lifeSpanOptions.Insert( "Medium " );
+        lifeSpanOptions.Insert( "Large" );
+        lifeSpanOptions.Insert( "Extra" );
+
+        m_LastShaved = UIActionManager.CreateSelectionBox( playerActions, "Beard: ", lifeSpanOptions, this, "Click_SetLifeSpanState" );
         m_BloodyHands = UIActionManager.CreateCheckbox( playerActions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
         m_KickTransport = UIActionManager.CreateButton( playerActions, "Kick Transport", this, "Click_KickTransport" );
         m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
@@ -274,19 +281,14 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
-    void Click_SetLifeSpanState( UIEvent eid, ref UIActionEditableText action )
+    void Click_SetLifeSpanState( UIEvent eid, ref UIActionSelectBox action )
     {
-        if ( eid != UIEvent.CLICK ) return;
+        if ( eid != UIEvent.CHANGE ) return;
 
-        if ( action.GetText().Length() != 1 ) return;
+        int state = action.GetSelection();
 
-        int state = ToSingleDigit( action.GetText().Get( 0 ) );
-
-        if ( state >= LifeSpanState.BEARD_NONE && state < LifeSpanState.COUNT )
-        {
-            m_DataJustUpdated = true;
-            GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
-        }
+        m_DataJustUpdated = true;
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
@@ -333,7 +335,7 @@ class PlayerMenu extends Form
             m_Wet.SetText( data.FWet.ToString() );
             m_Tremor.SetText( data.FTremor.ToString() );
             m_Stamina.SetText( data.FStamina.ToString() );
-            m_LastShaved.SetText( data.ILifeSpanState.ToString() );
+            m_LastShaved.SetSelection( data.ILifeSpanState );
             m_BloodyHands.SetChecked( data.BBloodyHands );
 
             m_PingMin.SetText( data.IPingMin.ToString() );

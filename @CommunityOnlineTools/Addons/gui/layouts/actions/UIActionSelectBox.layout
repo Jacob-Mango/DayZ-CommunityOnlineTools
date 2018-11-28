@@ -1,15 +1,15 @@
-PanelWidgetClass UIActionText {
+PanelWidgetClass UIActionSelectBox {
  size 1 30
  hexactpos 0
  vexactpos 0
  hexactsize 0
  vexactsize 1
- scriptclass "UIActionText"
+ scriptclass "UIActionSelectBox"
  {
   FrameWidgetClass action_wrapper {
    ignorepointer 1
-   size 1 1
    position 0 0
+   size 1 1 
    hexactpos 0
    vexactpos 0
    hexactsize 0
@@ -26,16 +26,12 @@ PanelWidgetClass UIActionText {
      "bold text" 1
      vexactsize 1
     }
-    TextWidgetClass action {
-     size 1 20
-     halign right_ref
-     valign center_ref
-     text "{TEXT}"
-     font "gui/fonts/sdf_MetronLight24"
-     "text offset" -10 0
-     "exact text" 1
-     "exact text size" 16
-     "text halign" right
+    FrameWidgetClass action {
+     position 0.3 0
+     size 0.7 20 
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
      vexactsize 1
     }
    }
