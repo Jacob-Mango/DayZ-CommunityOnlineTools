@@ -98,14 +98,14 @@ class TeleportModule: EditorModule
 
             if ( player.IsInTransport() )
             {
-                player.GetTransport().SetOrigin( data.param1 );
+                // player.GetTransport().SetOrigin( data.param1 );
                 player.GetTransport().SetPosition( data.param1 );
             } else
             {
                 player.SetPosition( data.param1 );
             }
 
-            COTLog( sender, "Teleported to cursor" );
+            // COTLog( sender, "Teleported to cursor" );
         }
     }
     
