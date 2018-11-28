@@ -26,8 +26,7 @@ class ModuleManager
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.MIDDLE ) );
 
-        //GetUApi().RegisterGroup( COT_INPUT_GROUP, "Community Online Tools" );
-        //GetUApi().ActivateGroup( COT_INPUT_GROUP );
+        // GetUApi().RegisterGroup( COT_INPUT_GROUP, "Community Online Tools" );
     }
 
     void ~ModuleManager()
@@ -226,7 +225,11 @@ class ModuleManager
                         }
                     }
 
-                    if ( GetUApi().GetInputByName( k_m_Binding.GetUAInputName() ).LocalPress() )
+                    UAInput input = GetUApi().GetInputByName( k_m_Binding.GetUAInputName() );
+
+                    // input.Unlock();
+
+                    if ( input.LocalPress() )
                     {
                         GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
                     }
