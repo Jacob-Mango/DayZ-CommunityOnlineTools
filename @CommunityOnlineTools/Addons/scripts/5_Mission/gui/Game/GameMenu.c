@@ -44,7 +44,7 @@ class GameMenu extends Form
         }
 
         UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", this, "ToggleOldAiming", false );
-        UIActionManager.CreateButton( m_ActionsWrapper, "Throw Apple", this, "ThrowApple" );
+        // UIActionManager.CreateButton( m_ActionsWrapper, "Throw Apple", this, "ThrowApple" );
     }
 
     override void OnShow()

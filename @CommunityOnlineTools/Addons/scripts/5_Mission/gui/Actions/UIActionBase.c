@@ -2,6 +2,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 {
     protected ref Widget layoutRoot;
 
+    protected ref Widget m_Disable;
+
     protected Class m_Instance;
     protected string m_FuncName;
 
@@ -11,6 +13,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
     {
         layoutRoot = w;
         layoutRoot.SetHandler( this );
+
+        m_Disable = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_wrapper_disable" ) );
 
         OnInit();
     }
@@ -37,6 +41,18 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
     void OnHide() 
     {
+    }
+
+    void Disable()
+    {
+        layoutRoot.SetFlags( WidgetFlags.IGNOREPOINTER );
+		m_Disable.Show( false );
+    }
+
+    void Enable()
+    {
+        layoutRoot.ClearFlags( WidgetFlags.IGNOREPOINTER );
+		m_Disable.Show( false );
     }
 
     ref Widget GetLayoutRoot() 

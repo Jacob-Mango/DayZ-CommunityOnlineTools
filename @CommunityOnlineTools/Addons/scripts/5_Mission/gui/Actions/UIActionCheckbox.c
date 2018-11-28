@@ -6,7 +6,7 @@ class UIActionCheckbox extends UIActionBase
     override void OnInit() 
     {
         m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
-        m_Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("action_checkbox"));
+        m_Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("action"));
 
         WidgetHandler.GetInstance().RegisterOnClick( m_Checkbox, this, "OnClick" );
     }
