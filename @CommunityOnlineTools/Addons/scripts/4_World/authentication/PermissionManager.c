@@ -159,6 +159,15 @@ class PermissionManager
         }
     }
 
+    void DebugPrint()
+    {
+        Print( "Printing all authenticated players!" );
+        for ( int i = 0; i < AuthPlayers.Count(); i++ )
+        {
+            AuthPlayers[i].DebugPrint();
+        }
+    }
+
     ref AuthPlayer GetPlayerByGUID( string guid )
     {
         ref AuthPlayer auPlayer = NULL;

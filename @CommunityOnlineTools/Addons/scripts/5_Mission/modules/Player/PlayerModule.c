@@ -418,11 +418,32 @@ class PlayerModule: EditorModule
             {
                 PlayerBase player = players[i].PlayerObject;
 
-                if ( player == NULL || player.GetTransport() == NULL ) continue;
+                if ( player == NULL ) continue;
 
-                player.GetCommand_Vehicle().GetOutVehicle();
+                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
-                COTLog( sender, "Kicked " + players[i].GetGUID() + " out of transport" );
+                if ( vehCommand == NULL ) continue;
+
+                Transport trans = vehCommand.GetTransport();
+                
+                if ( trans )
+                {
+                    Car car;
+                    if ( Class.CastTo(car, trans) )
+                    {
+                        float speed = car.GetSpeedometer();
+                        if ( speed <= 8 )
+                        {
+                            vehCommand.GetOutVehicle();
+                        }
+                        else
+                        {
+                            vehCommand.JumpOutVehicle();
+                        }
+
+                        COTLog( sender, "Kicked " + players[i].GetGUID() + " out of transport" );
+                    }
+                }
             }
         }
     }
