@@ -7,8 +7,11 @@ class CameraTool: EditorModule
         GetRPCManager().AddRPC( "COT_Camera", "EnterCamera", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COT_Camera", "LeaveCamera", this, SingeplayerExecutionType.Client );
 
+        GetRPCManager().AddRPC( "COT_Camera", "UpdateCameraNetworkBubble", this, SingeplayerExecutionType.Server );
+
         GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
+        GetPermissionsManager().RegisterPermission( "CameraTools.UpdateNetworkBubble" );
     }
 
     void ~CameraTool()
@@ -63,6 +66,20 @@ class CameraTool: EditorModule
     Camera GetCamera()
     {
         return CurrentActiveCamera;
+    }
+
+    void UpdateCameraNetworkBubble( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( "CameraTools.UpdateNetworkBubble", sender ) )
+            return;
+
+        Param1< vector > data;
+        if ( !ctx.Read( data ) ) return;
+
+        if( type == CallType.Server )
+        {
+            GetGame().UpdateSpectatorPosition( data.param1 );
+        }
     }
 
     void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

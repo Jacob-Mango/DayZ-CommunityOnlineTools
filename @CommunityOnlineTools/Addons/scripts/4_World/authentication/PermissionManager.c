@@ -122,14 +122,14 @@ class PermissionManager
 
         auPlayer.Load();
 
-        auPlayer.AddPermission( "COT", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "COT", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "Admin", PermissionType.ALLOW );
         //auPlayer.AddPermission( "Admin.Permissions", PermissionType.DISALLOW );
-        auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Object", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Game", PermissionType.ALLOW );
-        auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
-        auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "Teleport", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "Object", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "Game", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "CameraTools", PermissionType.ALLOW );
+        //auPlayer.AddPermission( "Weather", PermissionType.ALLOW );
 
         AuthPlayers.Insert( auPlayer );
 

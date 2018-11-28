@@ -36,7 +36,10 @@ class COTCamera extends Camera
 	{
         if ( SendUpdateAccumalator > 0.5 )
         {
+            GetRPCManager().SendRPC( "COT_Camera", "UpdateCameraNetworkBubble", new Param1<vector>( GetPosition() ), true );
+
             GetGame().UpdateSpectatorPosition( GetPosition() );
+
             SendUpdateAccumalator = 0;
         }
             
