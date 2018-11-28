@@ -114,7 +114,7 @@ class COTMenu
 
         layoutRoot.Show( true );
 
-        InCommunityOfflineTools = true;
+        COTMenuOpen = true;
 
         OnShow();
     }
@@ -125,23 +125,23 @@ class COTMenu
 
         layoutRoot.Show( false );
 
-        InCommunityOfflineTools = false;
+        COTMenuOpen = false;
 
         OnHide();
     }
 
     void OnShow()
     {
-        GetGame().GetInput().ChangeGameFocus( 1 );
-        GetGame().GetUIManager().ShowUICursor( true );
+        //GetGame().GetInput().ChangeGameFocus( 1 );
+        //GetGame().GetUIManager().ShowUICursor( true );
 
         GetGame().GetMission().GetHud().Show( false );
     }
 
     void OnHide()
     {
-        GetGame().GetInput().ResetGameFocus();
-        GetGame().GetUIManager().ShowUICursor( false );
+        //GetGame().GetInput().ResetGameFocus();
+        //GetGame().GetUIManager().ShowUICursor( false );
 
         GetGame().GetMission().GetHud().Show( true );
     }

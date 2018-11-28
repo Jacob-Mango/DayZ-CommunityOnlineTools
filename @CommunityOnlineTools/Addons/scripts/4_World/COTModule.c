@@ -14,8 +14,6 @@ class COTModule : Module
         MakeDirectory( ROOT_COT_DIR );
 
         GetPermissionsManager().RegisterPermission( "COT.Show" );
-
-        GetUApi().RegisterInput( "UAUIOpenCOT", "Open COT Menu", "infantry" );
     }
 
     void ~COTModule()
@@ -39,19 +37,13 @@ class COTModule : Module
 
     override void RegisterKeyMouseBindings() 
     {
-        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "[Y]", "Opens the editor." );
-        toggleEditor.AddKeyBind( KeyCode.KC_Y, KeyMouseBinding.KB_EVENT_RELEASE );
+        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor." );
+        toggleEditor.AddBinding( "kY" );
         RegisterKeyMouseBinding( toggleEditor );
     }
 
     override void OnUpdate( float timeslice )
     {
-		// if( GetUApi().GetInputByName( "UAUIOpenCOT" ).LocalPress() )
-		//if( GetGame().GetInput().GetActionDown( UAUIOpenCOT, false ) )
-		//{
-        //    ToggleEditor();
-        //}
-
         if ( m_ForceHUD )
         {
             GetGame().GetMission().GetHud().Show( false );
