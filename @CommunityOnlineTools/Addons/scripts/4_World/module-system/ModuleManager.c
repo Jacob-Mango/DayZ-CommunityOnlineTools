@@ -227,11 +227,26 @@ class ModuleManager
 
                     UAInput input = GetUApi().GetInputByName( k_m_Binding.GetUAInputName() );
 
-                    // input.Unlock();
+                    int action = k_m_Binding.GetActionType();
 
-                    if ( input.LocalPress() )
+                    if ( action & KeyMouseActionType.PRESS && input.LocalPress() )
                     {
-                        GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+                        GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+                    }
+
+                    if ( action & KeyMouseActionType.RELEASE && input.LocalRelease() )
+                    {
+                        GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+                    }
+
+                    if ( action & KeyMouseActionType.HOLD && input.LocalHold() )
+                    {
+                        GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+                    }
+
+                    if ( action & KeyMouseActionType.DOUBLECLICK && input.LocalDoubleClick() )
+                    {
+                        GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
                     }
                 }
             }

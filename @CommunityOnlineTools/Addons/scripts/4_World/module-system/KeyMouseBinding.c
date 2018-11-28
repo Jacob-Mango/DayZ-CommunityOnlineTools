@@ -8,6 +8,8 @@ class KeyMouseBinding
     protected string m_Description;
 
     protected bool m_CanBeUsedInMenu;
+
+    protected int m_ActionType;
     
     void KeyMouseBinding( typename object, string callback, string description, bool menu = false ) 
     {
@@ -20,6 +22,8 @@ class KeyMouseBinding
         m_Description = description;
         
         m_CanBeUsedInMenu = menu;
+
+        m_ActionType = KeyMouseActionType.PRESS;
     }
     
     bool CanBeUsedInMenu() 
@@ -35,6 +39,16 @@ class KeyMouseBinding
     ref array< string > GetBindings() 
     {
         return m_KeyBinds;
+    }
+
+    void SetActionType( int type ) 
+    {
+        m_ActionType = type;
+    }
+
+    int GetActionType()
+    {
+        return m_ActionType;
     }
     
     typename GetObject() 

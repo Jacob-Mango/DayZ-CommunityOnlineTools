@@ -7,6 +7,8 @@ class COTMenu
 
     protected array< ref EditorModule > m_Modules;
 
+    protected bool m_GameFocus;
+
     void COTMenu()
     {
     }
@@ -123,27 +125,56 @@ class COTMenu
     {
         SetFocus( NULL );
 
+        OnHide();
+
         layoutRoot.Show( false );
 
         COTMenuOpen = false;
-
-        OnHide();
     }
 
     void OnShow()
     {
-        //GetGame().GetInput().ChangeGameFocus( 1 );
-        //GetGame().GetUIManager().ShowUICursor( true );
+        SetInputFocus( false );
+
+        GetGame().GetInput().ChangeGameFocus( 1 );
+        GetGame().GetUIManager().ShowUICursor( true );
 
         GetGame().GetMission().GetHud().Show( false );
     }
 
     void OnHide()
     {
-        //GetGame().GetInput().ResetGameFocus();
-        //GetGame().GetUIManager().ShowUICursor( false );
+        SetInputFocus( true );
+
+        GetGame().GetInput().ResetGameFocus();
+        GetGame().GetUIManager().ShowUICursor( false );
 
         GetGame().GetMission().GetHud().Show( true );
+    }
+
+    void ToggleInputFocus()
+    {
+        m_GameFocus = !m_GameFocus;
+    }
+
+    void SetInputFocus( bool focus )
+    {
+        m_GameFocus = focus;
+    }
+
+    void OnUpdate( float timeslice )
+    {
+        if ( !IsVisible() ) return;
+
+        if ( m_GameFocus )
+        {
+            GetGame().GetInput().ResetGameFocus();
+            GetGame().GetUIManager().ShowUICursor( false );
+        } else
+        {
+            GetGame().GetInput().ChangeGameFocus( 1 );
+            GetGame().GetUIManager().ShowUICursor( true );
+        }
     }
 
     bool OnClick( Widget w, int x, int y, int button )

@@ -40,10 +40,22 @@ class COTModule : Module
         KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor.", true );
         toggleEditor.AddBinding( "kY" );
         RegisterKeyMouseBinding( toggleEditor );
+
+        KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", "Focuses the game instead of the UI while in editor.", true );
+        focusGame.AddBinding( "mBLeft" );
+        focusGame.SetActionType( KeyMouseActionType.PRESS );
+        RegisterKeyMouseBinding( focusGame );
+
+        KeyMouseBinding focusUI = new KeyMouseBinding( GetModuleType(), "FocusUI", "Focuses the UI instead of the game while in editor.", true );
+        focusUI.AddBinding( "mBLeft" );
+        focusUI.SetActionType( KeyMouseActionType.RELEASE );
+        RegisterKeyMouseBinding( focusUI );
     }
 
     override void OnUpdate( float timeslice )
     {
+        m_COTMenu.OnUpdate( timeslice );
+
         if ( m_ForceHUD )
         {
             GetGame().GetMission().GetHud().Show( false );
@@ -91,6 +103,29 @@ class COTModule : Module
         } else
         {
             ShowMenu( false );
+        }
+    }
+
+    void FocusUI()
+    {
+        if( m_COTMenu.IsVisible() )
+        {
+            m_COTMenu.SetInputFocus( false );
+        }
+    }
+
+    void FocusGame()
+    {
+        if( m_COTMenu.IsVisible() )
+        {
+            Widget w = GetWidgetUnderCursor();
+
+            if ( w.GetName() != "Windows" && w.GetName() != "map_editor_menu" )
+            {
+                return;
+            }
+
+            m_COTMenu.SetInputFocus( true );
         }
     }
 }
