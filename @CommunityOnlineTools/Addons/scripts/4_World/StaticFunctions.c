@@ -8,6 +8,18 @@ static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
 static bool COTMenuOpen;
 
+static void COTLog( AuthPlayer player, string text )
+{
+    string name = player.GetGUID();
+    GetGame().AdminLog( name + ": " + text );
+}
+
+static void COTLog( PlayerIdentity player, string text )
+{
+    string name = player.GetId();
+    GetGame().AdminLog( name + ": " + text );
+}
+
 static string FormatFloat( float value, int decimals ) 
 {
     string result = "";

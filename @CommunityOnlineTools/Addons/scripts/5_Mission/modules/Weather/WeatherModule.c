@@ -41,6 +41,8 @@ class WeatherModule: EditorModule
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( data.param1, data.param2, data.param3, data.param4, data.param5 ), true );
 
             GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
+
+            COTLog( sender, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
         }
     }
 
@@ -63,6 +65,8 @@ class WeatherModule: EditorModule
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
             GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
+
+            COTLog( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
         }
     }
 
@@ -85,6 +89,8 @@ class WeatherModule: EditorModule
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
             GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
+
+            COTLog( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
         }
     }
 
@@ -107,6 +113,8 @@ class WeatherModule: EditorModule
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
             GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+
+            COTLog( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
         }
     }
 
@@ -129,6 +137,8 @@ class WeatherModule: EditorModule
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
             GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
+
+            COTLog( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
         }
     }
 
@@ -149,7 +159,10 @@ class WeatherModule: EditorModule
         if( type == CallType.Server && GetGame().IsMultiplayer() )
         {
             GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
+
             GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
+
+            COTLog( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
         }
     }
 

@@ -94,13 +94,18 @@ class TeleportModule: EditorModule
         {
             PlayerBase player = PlayerBase.Cast( target );
 
+            if ( !player ) return;
+
             if ( player.IsInTransport() )
             {
+                player.GetTransport().SetOrigin( data.param1 );
                 player.GetTransport().SetPosition( data.param1 );
-            } else 
+            } else
             {
                 player.SetPosition( data.param1 );
             }
+
+            COTLog( sender, "Teleported to cursor" );
         }
     }
     
@@ -133,11 +138,14 @@ class TeleportModule: EditorModule
 
                 if ( player.IsInTransport() )
                 {
+                    player.GetTransport().SetOrigin( position );
                     player.GetTransport().SetPosition( position );
                 } else 
                 {
                     player.SetPosition( position );
                 }
+                
+                COTLog( sender, "Teleported player " + player.authenticatedPlayer.GetGUID() );
             }
         }
     }

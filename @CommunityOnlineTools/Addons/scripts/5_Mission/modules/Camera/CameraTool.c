@@ -91,6 +91,8 @@ class CameraTool: EditorModule
             GetGame().SelectPlayer( sender, NULL );
 
             GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
+
+            COTLog( sender, "Entered the Free Camera");
         }
 
         if( type == CallType.Client )
@@ -134,6 +136,8 @@ class CameraTool: EditorModule
             {
                 GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
             } 
+
+            COTLog( sender, "Left the Free Camera");
         }
 
         if( type == CallType.Client )
