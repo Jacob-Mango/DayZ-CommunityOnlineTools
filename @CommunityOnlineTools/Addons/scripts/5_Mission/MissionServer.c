@@ -59,6 +59,8 @@ modded class MissionServer
 	{
         GetPermissionsManager().PlayerLeft( player.GetIdentity() );
 
+        GetPermissionsManager().DebugPrint();
+
         super.InvokeOnDisconnect( player );
     } 
 

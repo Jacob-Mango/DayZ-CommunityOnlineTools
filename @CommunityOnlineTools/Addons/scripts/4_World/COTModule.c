@@ -54,7 +54,10 @@ class COTModule : Module
 
     override void OnUpdate( float timeslice )
     {
-        m_COTMenu.OnUpdate( timeslice );
+        if ( m_COTMenu )
+        {
+            m_COTMenu.OnUpdate( timeslice );
+        }
 
         if ( m_ForceHUD )
         {
