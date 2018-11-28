@@ -53,41 +53,7 @@ modded class MissionGameplay
         super.OnUpdate( timeslice );
 
         m_Tool.OnUpdate( timeslice );
-    }
 
-    override void OnMouseButtonRelease( int button )
-    {
-        super.OnMouseButtonRelease( button );
-
-        m_Tool.OnMouseButtonRelease( button );
-    }
-
-    override void OnMouseButtonPress( int button )
-    {
-        super.OnMouseButtonPress( button );
-
-        m_Tool.OnMouseButtonPress( button );
-    }
-
-    override void OnKeyPress( int key )
-    {
-        super.OnKeyPress( key );
-
-        m_Tool.OnKeyPress( key );
-        
-        if ( key == KeyCode.KC_PERIOD )
-        {
-            if ( !GetUIManager().IsMenuOpen( MENU_GESTURES ) )
-            {
-                GesturesMenu.OpenMenu();
-            }
-        }
-    }
-
-    override void OnKeyRelease( int key )
-    {
-        super.OnKeyRelease( key );
-
-        m_Tool.OnKeyRelease( key );
+        // PlayerControlEnable();
     }
 }

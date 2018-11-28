@@ -25,6 +25,9 @@ class ModuleManager
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
         m_MouseButtons.Insert( new MouseButtonInfo( MouseState.MIDDLE ) );
+
+        //GetUApi().RegisterGroup( COT_INPUT_GROUP, "Community Online Tools" );
+        //GetUApi().ActivateGroup( COT_INPUT_GROUP );
     }
 
     void ~ModuleManager()
@@ -201,32 +204,6 @@ class ModuleManager
         }
     }
 
-    void OnMouseButtonRelease(int button)
-    {
-        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_RELEASE );
-    }
-    
-    void OnMouseButtonHold( int button )
-    {
-        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_HOLD );
-    }
-
-    void OnMouseButtonPress( int button )
-    {
-        moduleMouseCheck( button, KeyMouseBinding.MB_EVENT_PRESS );
-    }
-
-    void OnKeyPress( int key )
-    {
-        moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_PRESS );
-        moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
-    }
-
-    void OnKeyRelease(int key)
-    {
-        // moduleKeyCheck( key, KeyMouseBinding.KB_EVENT_RELEASE );
-    }
-
     void OnUpdate( float timeslice )
     {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return; 
@@ -241,70 +218,17 @@ class ModuleManager
                 {
                     KeyMouseBinding k_m_Binding = module.GetBindings().Get(kb);
 
-                    if ( InCommunityOfflineTools )
+                    if ( COTMenuOpen )
                     {
-                        if ( !k_m_Binding.canUseInMenu() )
+                        if ( !k_m_Binding.CanBeUsedInMenu() )
                         {
                             continue;
                         }
                     }
 
-                    if ( k_m_Binding.IsRecurring() )
+                    if ( GetUApi().GetInputByName( k_m_Binding.GetUAInputName() ).LocalPress() )
                     {
-                        if (k_m_Binding.Check())
-                        {
-                            int mouseButton = -1;
-
-                            bool hasDrag = false;
-                            for ( int mb = 0; mb < k_m_Binding.GetMouseBinds().Count(); ++mb)
-                            {
-                                int mouseBind = k_m_Binding.GetMouseBinds().GetKey(mb);
-                                int mouseEvent = k_m_Binding.GetMouseBinds().Get(mouseBind);
-
-                                if ( mouseEvent == KeyMouseBinding.MB_EVENT_DRAG )
-                                {
-                                    hasDrag = true;
-                                    mouseButton = mouseBind;
-                                }
-                                else if ( mouseEvent == KeyMouseBinding.MB_EVENT_HOLD )
-                                {
-                                    mouseButton = mouseBind;
-                                }
-                            }
-
-                            if ( mouseButton > -1 )
-                            {
-                                MouseButtonInfo info = m_MouseButtons.Get( mouseButton );
-                                if ( info )
-                                {
-                                    if ( info.IsButtonDown() )
-                                    {
-                                        int time_curr = GetGame().GetTime();
-                                        int time_hold = info.GetTimeLastPress() + HOLD_CLICK_TIME_MIN;
-
-                                        if ( time_hold < time_curr )
-                                        {
-                                            if ( hasDrag )
-                                            {
-                                                GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                                            }
-                                            else if ( k_m_Binding.ContainsButtonEvent( mouseButton, KeyMouseBinding.MB_EVENT_HOLD) )
-                                            {
-                                                GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            if ( k_m_Binding.ContainsButton( MouseState.WHEEL ) )
-                            {
-                                if ( GetMouseState (MouseState.WHEEL) != 0 )
-                                {
-                                    GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, GetMouseState( MouseState.WHEEL ) );
-                                }
-                            }
-                        }
+                        GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
                     }
                 }
             }
@@ -354,115 +278,6 @@ class ModuleManager
             }
         }
         return NULL;
-    }
-
-    void moduleMouseCheck( int button, int mouseEvent )
-    {
-        MouseButtonInfo button_info = GetMouseButtonInfo( button );
-
-        if ( button_info == NULL ) return;
-
-        if ( mouseEvent == KeyMouseBinding.MB_EVENT_PRESS ) button_info.Press();
-
-        int time_curr            = GetGame().GetTime();
-        int time_last_press        = button_info.GetTimeLastPress();
-        int time_last_release    = button_info.GetTimeLastRelease();
-        int time_delta_press    = time_curr - time_last_press;
-        int time_delta_release    = time_curr - time_last_release;
-
-        for ( int i = 0; i < m_Modules.Count(); ++i)
-        {
-            Module module = m_Modules.Get(i);
-
-            if ( module.IsPreventingInput() )
-            {
-                continue;
-            }
-
-            for ( int kb = 0; kb < module.GetBindings().Count(); ++kb )
-            {
-                KeyMouseBinding k_m_Binding = module.GetBindings().Get(kb);
-
-                if ( GetGame().GetUIManager().GetMenu() )
-                {
-                    if ( !k_m_Binding.canUseInMenu() )
-                    {
-                        continue;
-                    }
-                }
-
-                if ( k_m_Binding.ContainsButton( button ) )
-                {
-                    if ( k_m_Binding.Check() )
-                    {
-                        if ( mouseEvent == KeyMouseBinding.MB_EVENT_RELEASE )
-                        {
-                            if ( time_delta_release < DOUBLE_CLICK_TIME )
-                            {
-                                if ( k_m_Binding.ContainsButtonEvent( button, KeyMouseBinding.MB_EVENT_DOUBLECLICK ) )
-                                {
-                                    GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                                }
-                            }
-                            else if ( time_delta_press < CLICK_TIME )
-                            {
-                                if ( k_m_Binding.ContainsButtonEvent( button, KeyMouseBinding.MB_EVENT_CLICK ) )
-                                {
-                                    GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                                }
-                            }
-                            else
-                            {
-                                if ( k_m_Binding.ContainsButtonEvent( button, KeyMouseBinding.MB_EVENT_RELEASE ) )
-                                {
-                                    GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                                }
-                            }
-                        }
-                        else if ( k_m_Binding.ContainsButtonEvent( button, KeyMouseBinding.MB_EVENT_PRESS ) )
-                        {
-                                GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                        }
-                    }
-                }
-            }
-        }
-
-        if ( mouseEvent == KeyMouseBinding.MB_EVENT_RELEASE ) button_info.Release();
-    }
-
-    void moduleKeyCheck( int key, int keyEvent )
-    {
-        for ( int i = 0; i < m_Modules.Count(); ++i)
-        {
-            Module module = m_Modules.Get(i);
-
-            if ( module.IsPreventingInput() )
-            {
-                continue;
-            }
-
-            for ( int kb = 0; kb < module.GetBindings().Count(); ++kb )
-            {
-                KeyMouseBinding k_m_Binding = module.GetBindings().Get(kb);
-
-                if ( GetGame().GetUIManager().GetMenu() )
-                {
-                    if ( !k_m_Binding.canUseInMenu() )
-                    {
-                        continue;
-                    }
-                }
-
-                if ( k_m_Binding.ContainsKeyEvent( key, keyEvent ) )
-                {
-                    if ( k_m_Binding.Check() )
-                    {
-                        GetGame().GameScript.CallFunction(GetModule(k_m_Binding.GetObject()), k_m_Binding.GetCallBackFunction(), NULL, 0 );
-                    }
-                }
-            }
-        }
     }
 }
 

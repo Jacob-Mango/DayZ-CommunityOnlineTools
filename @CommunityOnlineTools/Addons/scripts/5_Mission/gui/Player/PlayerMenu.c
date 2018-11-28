@@ -592,6 +592,32 @@ class PlayerMenu extends Form
     {       
         array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
+        int max = m_PlayerList.Count();
+        
+        for ( int k = 0; k < max; k++ )
+        {
+            bool found = false;
+
+            for ( int l = 0; l < players.Count(); l++ )
+            {
+                if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if ( !found )
+            {
+                m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
+                m_PlayerList[k].GetLayoutRoot().Unlink();
+
+                m_PlayerList.Remove( k );
+                k--;
+                max = m_PlayerList.Count();
+            }
+        }
+
         for ( int i = 0; i < players.Count(); i++ )
         {
             bool exists = false;
@@ -630,33 +656,6 @@ class PlayerMenu extends Form
             }
         }
 
-        int max = m_PlayerList.Count();
-        
-        for ( int k = 0; k < max; k++ )
-        {
-            bool found = false;
-
-            for ( int l = 0; l < players.Count(); l++ )
-            {
-                if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if ( !found )
-            {
-                m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
-                m_PlayerList[k].GetLayoutRoot().Unlink();
-
-                m_PlayerList.Remove( k );
-                k--;
-                max = m_PlayerList.Count();
-            }
-        }
-
-        
         if (GetSelectedPlayers().Count() > 0 )
         {
             UpdateActionsFields( GetSelectedPlayers()[0].Data );

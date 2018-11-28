@@ -62,24 +62,4 @@ class CommunityOnlineTools
             GetModuleManager().OnUpdate( timeslice );
         }
     }
-
-    void OnMouseButtonRelease( int button )
-    {
-        GetModuleManager().OnMouseButtonRelease( button );
-    }
-
-    void OnMouseButtonPress( int button )
-    {
-        GetModuleManager().OnMouseButtonPress( button );
-    }
-
-    void OnKeyPress( int key )
-    {
-        GetModuleManager().OnKeyPress( key );
-    }
-
-    void OnKeyRelease( int key )
-    {
-        GetModuleManager().OnKeyRelease( key );
-    }
 }

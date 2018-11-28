@@ -2,9 +2,11 @@
 
 const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
 
+const string COT_INPUT_GROUP = "infantry";
+
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
-static bool InCommunityOfflineTools;
+static bool COTMenuOpen;
 
 static string FormatFloat( float value, int decimals ) 
 {
