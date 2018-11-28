@@ -639,9 +639,9 @@ class PlayerMenu extends Form
                 rowScript.SetPlayer( players[i] );
             } else
             {
-                Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
+                Widget playerRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
-                permRow.GetScript( rowScript );
+                playerRow.GetScript( rowScript );
                 
                 rowScript.SetPlayer( players[i] );
 

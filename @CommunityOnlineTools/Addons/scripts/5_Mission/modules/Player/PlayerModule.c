@@ -9,6 +9,7 @@ class PlayerModule: EditorModule
         m_ServerPlayers = new ref array< Man >;
 
         GetRPCManager().AddRPC( "COT_Admin", "UpdatePlayers", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "RemovePlayer", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COT_Admin", "UpdatePlayer", this, SingeplayerExecutionType.Client );
 
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
