@@ -93,6 +93,8 @@ class GameModule: EditorModule
             FillCar( oCar, CarFluid.OIL );
             FillCar( oCar, CarFluid.BRAKE );
             FillCar( oCar, CarFluid.COOLANT );
+
+            COTLog( sender, "Spawned vehicle " + data.param1 + " at " + data.param2.ToString() );
         }
     }
 
@@ -109,6 +111,8 @@ class GameModule: EditorModule
             m_OldAiming = data.param1;
 
             GetRPCManager().SendRPC( "COT_Game", "SetOldAiming", data, true );
+
+            COTLog( sender, "Set the server aiming mode to " + data.param1 );
         }
 
         if( type == CallType.Client )
