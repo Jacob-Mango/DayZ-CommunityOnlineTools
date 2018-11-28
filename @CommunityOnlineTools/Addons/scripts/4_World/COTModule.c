@@ -37,7 +37,7 @@ class COTModule : Module
 
     override void RegisterKeyMouseBindings() 
     {
-        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor." );
+        KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor.", true );
         toggleEditor.AddBinding( "kY" );
         RegisterKeyMouseBinding( toggleEditor );
     }
