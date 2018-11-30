@@ -29,18 +29,9 @@ for /D %%s in ("%tempFolder%\Addons\*") do (
     %signFile% "%keysLoc%\%privateKey%" "%%s.pbo"
     RD /s /q "%%s" > NUL
 )
+
 xcopy /s/e /y /i "%tempFolder%" "%gameDir%\%modName%" > NUL
 xcopy /s/e /y /i "%tempFolder%" "%serverDir%\%modName%" > NUL
-
-echo "Copying to DayZ Client"
-
-RD /s /q "%gameDir%\Missions\%missionName%" > NUL
-xcopy /s/e /y /i "%workspaceDir%\Missions\%missionName%" "%gameDir%\Missions\%missionName%" > NUL
-
-echo "Copying to DayZ Server"
-
-RD /s /q "%serverDir%\MPMissions\%missionName%" > NUL
-xcopy /s/e /y /i "%workspaceDir%\Missions\%missionName%" "%serverDir%\MPMissions\%missionName%" > NUL
 
 echo "Copying public key"
 xcopy /y "%keysLoc%\%publicKey%" "%tempFolder%\Keys\%publicKey%*" > NUL

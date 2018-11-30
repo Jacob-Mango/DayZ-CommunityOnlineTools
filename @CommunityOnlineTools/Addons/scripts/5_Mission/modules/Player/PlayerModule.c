@@ -5,7 +5,6 @@ class PlayerModule: EditorModule
     void PlayerModule()
     {
         m_GodModePlayers = new ref array< PlayerBase >;
-        m_ServerPlayers = new ref array< Man >;
 
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
@@ -60,8 +59,6 @@ class PlayerModule: EditorModule
     void ~PlayerModule()
     {
         delete m_GodModePlayers;
-        delete m_ServerPlayers;
-        
     }
 
     override string GetLayoutRoot()
