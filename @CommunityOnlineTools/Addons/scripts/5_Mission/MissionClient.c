@@ -21,29 +21,14 @@ modded class MissionGameplay
 
     override void OnMissionStart()
     {
-        if ( !GetGame().IsMultiplayer() )
-        {
-            GetPermissionsManager().PlayerJoined( NULL );
-        }
-
         super.OnMissionStart();
     
         m_Tool.OnStart();
-
-        GetGame().GetUIManager().CloseMenu( MENU_INGAME );
-        
-        GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayers", new Param, true );
     }
 
     override void OnMissionFinish()
     {
         m_Tool.OnFinish();
-        
-        CloseAllMenus();
-
-        DestroyAllMenus();
-
-        GetGame().GetUIManager().CloseMenu( MENU_INGAME );
 
         super.OnMissionFinish();
     }
@@ -53,7 +38,5 @@ modded class MissionGameplay
         super.OnUpdate( timeslice );
 
         m_Tool.OnUpdate( timeslice );
-
-        // PlayerControlEnable();
     }
 }
