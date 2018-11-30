@@ -12,18 +12,18 @@ set profiles=%serverDir%\profiles\Server
 IF %multiplayer%==1 (
     taskkill /F /IM DayZ_x64.exe /T
     taskkill /F /IM DayZServer_x64.exe /T
-    taskkill /F /IM DZSALModServer.exe /T
+    REM taskkill /F /IM DZSALModServer.exe /T
 
     chdir /c "%workspaceDir%"
     CALL deploy.bat %1 %2 %3 %4
 
     chdir /d "%serverDir%"
-    start DZSALModServer.exe -scrAllowFileWrite -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -password=abc123 -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\%missionName% "-mod=@RPCFramework;%modName%"
+    start DayZServer_x64.exe -scrAllowFileWrite -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -password=abc123 -scriptDebug=true -cpuCount=4 -mission=.\Missions\dayzOffline.ChernarusPlus "-mod=@RPCFramework;@PermissionsFramework;%modName%"
 
     TIMEOUT /T 4 /NOBREAK
 
     chdir /d "%gameDir%"
-    start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -password=abc123 -freezecheck "-mod=!Workshop\@RPCFramework;%modName%"
+    start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -password=abc123 -freezecheck "-mod=!Workshop\@RPCFramework;@PermissionsFramework;%modName%"
 ) ELSE IF %multiplayer%==2 (
     Powershell.exe -File "%cd%\Tools\exit.ps1" @RPCFramework %modName%
 
@@ -43,5 +43,5 @@ IF %multiplayer%==1 (
     CALL deploy.bat %1 %2 %3 %4
 
     chdir /d "%gameDir%"
-    start DayZ_BE.exe -exe DayZ_x64.exe -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mission=.\Missions\%missionName% "-mod=!Workshop\@RPCFramework;%modName%"
+    start DayZ_BE.exe -exe DayZ_x64.exe -noPause -noBenchmark -dologs -adminlog -netlog -scriptDebug=true -name=Jacob_Mango -freezecheck -mission=.\Missions\dayzOffline.ChernarusPlus "-mod=!Workshop\@RPCFramework;%modName%"
 )
