@@ -225,10 +225,10 @@ class CameraSettings extends Form
 
     override bool OnChange( Widget w, int x, int y, bool finished )
     {
-        Material chromAber = GetGame().GetWorld().GetMaterial("graphics/materials/postprocess/chromaber");
-        Material matColors = GetGame().GetWorld().GetMaterial("graphics/materials/postprocess/glow");
-        Material rotBlur = GetGame().GetWorld().GetMaterial("graphics/materials/postprocess/rotblur");
-        Material radBlur = GetGame().GetWorld().GetMaterial("graphics/materials/postprocess/radialblur");
+        Material chromAber = GetGame().GetWorld().GetMaterial( "Graphics/Materials/postprocess/chromaber" );
+        Material matColors = GetGame().GetWorld().GetMaterial( "Graphics/Materials/postprocess/glow" );
+        Material rotBlur = GetGame().GetWorld().GetMaterial( "Graphics/Materials/postprocess/rotblur" );
+        Material radBlur = GetGame().GetWorld().GetMaterial( "Graphics/Materials/postprocess/radialblur" );
 
         SliderWidget changeSlider = widgetStore.GetSliderWidget( w.GetName() );
         EditBoxWidget editBox = widgetStore.GetEditBoxWidget( w.GetName() );

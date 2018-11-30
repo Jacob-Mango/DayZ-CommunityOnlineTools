@@ -1,12 +1,5 @@
 modded class PlayerBase
-{
-	ref AuthPlayer authenticatedPlayer;
-
-    bool CanBeDeleted()
-    {
-        return IsAlive() && !IsRestrained() && !IsUnconscious();
-    }
-	
+{	
 	void HandleDeath( Object killerItem ) 
 	{
         PlayerBase killer = PlayerBase.Cast( killerItem );

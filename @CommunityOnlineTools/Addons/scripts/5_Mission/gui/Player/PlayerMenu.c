@@ -12,7 +12,6 @@ class PlayerMenu extends Form
     ref ButtonWidget                m_SetPermissionsButton;
     ref ButtonWidget                m_PermissionsBackButton;
 
-    bool                            m_ShouldUpdateList;
     bool                            m_CanUpdateList;
 
     ref Permission                  m_LoadedPermission;
@@ -57,7 +56,6 @@ class PlayerMenu extends Form
     void PlayerMenu()
     {
         m_CanUpdateList = true;
-        m_ShouldUpdateList = false;
 
         m_PermissionsLoaded = false;
 
@@ -399,10 +397,9 @@ class PlayerMenu extends Form
     {
         ReloadPlayers();
 
-        if ( m_ShouldUpdateList && m_CanUpdateList )
+        if ( m_CanUpdateList )
         {
             m_CanUpdateList = false;
-            m_ShouldUpdateList = false;
             UpdatePlayerList();
             m_CanUpdateList = true;
         }

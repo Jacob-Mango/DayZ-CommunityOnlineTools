@@ -59,14 +59,14 @@ class GameModule: EditorModule
 
             position = position + ( direction * 2 ) + "0 1.5 0";
             
-           	Object physicsObj = GetGame().CreateObject( "Apple", position );
+            Object physicsObj = GetGame().CreateObject( "Apple", position );
 
-			if ( physicsObj == NULL ) return;
+            if ( physicsObj == NULL ) return;
 
-			dBodyDestroy( physicsObj );
+            dBodyDestroy( physicsObj );
 
-			autoptr PhysicsGeomDef geoms[] = { PhysicsGeomDef("", dGeomCreateSphere( 0.1 ), "material/default", 0xffffffff )};
-			dBodyCreateDynamicEx( physicsObj, "0 0 0", 1.0, geoms );
+            autoptr PhysicsGeomDef geoms[] = { PhysicsGeomDef("", dGeomCreateSphere( 0.1 ), "material/default", 0xffffffff )};
+            dBodyCreateDynamicEx( physicsObj, "0 0 0", 1.0, geoms );
         }
     }
 
@@ -75,17 +75,18 @@ class GameModule: EditorModule
         if ( !GetPermissionsManager().HasPermission( "Game.SpawnVehicle", sender ) )
             return;
 
-        Param3< string, vector, ref array< string> > data;
+        ref Param3< string, vector, ref array< string> > data;
         if ( !ctx.Read( data ) ) return;
+
+        ref array< string> attachments = new ref array< string>;
+        attachments.Copy( data.param3 );
         
         if( type == CallType.Server )
         {
             Car oCar = Car.Cast( GetGame().CreateObject( data.param1, data.param2 ) );
 
-            ref array< string> attachments = new ref array< string>;
-            attachments.Copy( data.param3 );
-            
-            for (int j = 0; j < attachments.Count(); j++) {
+            for (int j = 0; j < attachments.Count(); j++)
+            {
                 oCar.GetInventory().CreateInInventory( attachments[j] );
             }
 

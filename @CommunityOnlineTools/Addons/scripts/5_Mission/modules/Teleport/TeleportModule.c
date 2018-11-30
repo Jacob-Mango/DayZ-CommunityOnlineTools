@@ -145,7 +145,7 @@ class TeleportModule: EditorModule
                     player.SetPosition( position );
                 }
                 
-                COTLog( sender, "Teleported player " + player.authenticatedPlayer.GetGUID() );
+                COTLog( sender, "Teleported player " + players[i].GetGUID() );
             }
         }
     }

@@ -40,27 +40,17 @@ modded class MissionServer
 	override void OnPreloadEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int queueTime)
 	{
         super.OnPreloadEvent( identity, useDB, pos, yaw, queueTime );
-
-        queueTime = 1;
-
-        GetPermissionsManager().GetPlayerByIdentity( identity );
     }
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
 	{
         super.InvokeOnConnect( player, identity );
 
-        GetPermissionsManager().GetPlayerByIdentity( identity );
-
         GetGame().SelectPlayer( identity, player );
     } 
 
     override void InvokeOnDisconnect( PlayerBase player )
 	{
-        GetPermissionsManager().PlayerLeft( player.GetIdentity() );
-
-        GetPermissionsManager().DebugPrint();
-
         super.InvokeOnDisconnect( player );
     } 
 
