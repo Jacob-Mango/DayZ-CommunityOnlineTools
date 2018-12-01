@@ -42,10 +42,6 @@ class UIActionEditableVector extends UIActionBase
         m_TextY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_y" ) );
         m_TextZ = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_z" ) );
 
-        WidgetHandler.GetInstance().RegisterOnClick( m_TextX, this, "OnChange" );
-        WidgetHandler.GetInstance().RegisterOnClick( m_TextY, this, "OnChange" );
-        WidgetHandler.GetInstance().RegisterOnClick( m_TextZ, this, "OnChange" );
-
         SetVector( vector.Zero );
     }
 
