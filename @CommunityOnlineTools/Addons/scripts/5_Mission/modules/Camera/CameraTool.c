@@ -31,28 +31,28 @@ class CameraTool: EditorModule
             m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
             PPEffects.SetBlur( m_CurrentSmoothBlur );
 
- 			if ( CAMERA_DOF && CurrentActiveCamera ) // DOF enabled
-			{
-			    vector from = GetGame().GetCurrentCameraPosition();
+             if ( CAMERA_DOF && CurrentActiveCamera ) // DOF enabled
+            {
+                vector from = GetGame().GetCurrentCameraPosition();
 
-			    float dist = 0.0;
+                float dist = 0.0;
 
                 if ( CurrentActiveCamera.SelectedTarget )
                 {
-				    dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
+                    dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
                 } else if ( CAMERA_AFOCUS )
-				{
-					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
-					vector contact_pos;
-					
-					DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
-					dist = vector.Distance( from, contact_pos );
-				}
+                {
+                    vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
+                    vector contact_pos;
+                    
+                    DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
+                    dist = vector.Distance( from, contact_pos );
+                }
 
-				if ( dist > 0 ) CAMERA_FDIST = dist;
-				
-				PPEffects.OverrideDOF(true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET);
-			}
+                if ( dist > 0 ) CAMERA_FDIST = dist;
+                
+                PPEffects.OverrideDOF(true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET);
+            }
         }
     }
     
@@ -124,7 +124,7 @@ class CameraTool: EditorModule
             
             if ( CurrentActiveCamera )
             {
-		        CurrentActiveCamera.SetActive( true );
+                CurrentActiveCamera.SetActive( true );
                 GetPlayer().GetInputController().SetDisabled( true );
             }
         }

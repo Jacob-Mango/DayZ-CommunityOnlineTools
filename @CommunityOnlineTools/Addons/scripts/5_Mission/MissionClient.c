@@ -37,7 +37,7 @@ modded class MissionGameplay
     {
         super.OnUpdate( timeslice );
 
-		UIScriptedMenu menu = m_UIManager.GetMenu();
+        UIScriptedMenu menu = m_UIManager.GetMenu();
         Input input = GetGame().GetInput();
 
         m_Tool.OnUpdate( timeslice );

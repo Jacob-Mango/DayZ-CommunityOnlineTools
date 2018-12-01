@@ -73,15 +73,15 @@ class UIActionEditableText extends UIActionBase
         {
             DISABLE_ALL_INPUT = true;
             CallEvent( UIEvent.CHANGE );
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
+            GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
             return true;
         }
         
         return false;
     }
 
-	override bool OnClick(Widget w, int x, int y, int button)
-	{    
+    override bool OnClick(Widget w, int x, int y, int button)
+    {    
         if ( !m_HasCallback ) return false;
 
         bool ret = false;

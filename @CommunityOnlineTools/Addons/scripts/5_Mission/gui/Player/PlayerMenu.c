@@ -153,12 +153,12 @@ class PlayerMenu extends Form
 
         if ( CurrentActiveCamera )
         {
-			SpectatorCamera cam = SpectatorCamera.Cast( CurrentActiveCamera );
-			
-			if ( cam )
-			{
+            SpectatorCamera cam = SpectatorCamera.Cast( CurrentActiveCamera );
+            
+            if ( cam )
+            {
                 shouldSpectate = false;
-			}
+            }
         }
 
         GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );

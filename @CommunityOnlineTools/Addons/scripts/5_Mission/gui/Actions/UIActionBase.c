@@ -46,13 +46,13 @@ class UIActionBase extends ScriptedWidgetEventHandler
     void Disable()
     {
         layoutRoot.SetFlags( WidgetFlags.IGNOREPOINTER );
-		m_Disable.Show( false );
+        m_Disable.Show( false );
     }
 
     void Enable()
     {
         layoutRoot.ClearFlags( WidgetFlags.IGNOREPOINTER );
-		m_Disable.Show( false );
+        m_Disable.Show( false );
     }
 
     ref Widget GetLayoutRoot() 

@@ -60,7 +60,7 @@ class Form extends ScriptedWidgetEventHandler
     {
     }
 
-	override bool OnUpdate( Widget w )
+    override bool OnUpdate( Widget w )
     {
         Update();
 

@@ -4,14 +4,14 @@ class CinematicCamera extends COTCamera
 
     float yawVelocity;
     float pitchVelocity;
-	
-	void CinematicCamera()
-	{
-		SetEventMask( EntityEvent.FRAME );
-	}
+    
+    void CinematicCamera()
+    {
+        SetEventMask( EntityEvent.FRAME );
+    }
 
-	override void OnUpdate( float timeslice )
-	{
+    override void OnUpdate( float timeslice )
+    {
         super.OnUpdate( timeslice );
         
         vector oldOrient = GetOrientation();

@@ -28,8 +28,8 @@ class UIActionButton extends UIActionBase
         return m_Button.GetName();
     }
 
-	override bool OnClick(Widget w, int x, int y, int button)
-	{
+    override bool OnClick(Widget w, int x, int y, int button)
+    {
         bool ret = false;
 
         if ( w == m_Button )

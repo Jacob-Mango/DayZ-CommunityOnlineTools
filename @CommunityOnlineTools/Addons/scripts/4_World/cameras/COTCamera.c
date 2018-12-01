@@ -1,6 +1,6 @@
 class COTCamera extends Camera
 {
-	float SendUpdateAccumalator = 0.0;
+    float SendUpdateAccumalator = 0.0;
     
     bool LookFreeze;
     bool MoveFreeze;
@@ -8,12 +8,12 @@ class COTCamera extends Camera
     Object SelectedTarget;
     vector TargetPosition;
 
-	void COTCamera()
-	{
-		SetEventMask( EntityEvent.FRAME );
+    void COTCamera()
+    {
+        SetEventMask( EntityEvent.FRAME );
 
         SelectedTarget( NULL );
-	}
+    }
 
     void SelectedTarget( Object target )
     {
@@ -32,8 +32,8 @@ class COTCamera extends Camera
         }
     }
 
-	override void EOnFrame( IEntity other, float timeSlice )
-	{
+    override void EOnFrame( IEntity other, float timeSlice )
+    {
         if ( SendUpdateAccumalator > 0.5 )
         {
             GetRPCManager().SendRPC( "COT_Camera", "UpdateCameraNetworkBubble", new Param1<vector>( GetPosition() ), true );

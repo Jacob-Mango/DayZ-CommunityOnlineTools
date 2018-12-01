@@ -12,8 +12,8 @@ class ObjectMenu extends Form
     protected TextListboxWidget m_ClassList;
 
     protected ItemPreviewWidget m_ItemPreview;
-	protected EntityAI m_PreviewItem;
-	protected vector m_Orientation;
+    protected EntityAI m_PreviewItem;
+    protected vector m_Orientation;
 
     protected int m_MouseX;
     protected int m_MouseY;
@@ -99,24 +99,24 @@ class ObjectMenu extends Form
         }
     }
 
-	void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
-	{		
+    void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
+    {        
         m_Orientation[0] = m_Orientation[0] + ( m_MouseY - mouse_y );
         m_Orientation[1] = m_Orientation[1] - ( m_MouseX - mouse_x );
             
         m_ItemPreview.SetModelOrientation( m_Orientation );
-	}
+    }
 
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
-	{
+    {
         if ( w == m_ClassList ) 
         {
-        	string strSelection = GetCurrentSelection();
+            string strSelection = GetCurrentSelection();
 
-			if ( m_PreviewItem ) 
-			{
-				GetGame().ObjectDelete( m_PreviewItem );
-			}
+            if ( m_PreviewItem ) 
+            {
+                GetGame().ObjectDelete( m_PreviewItem );
+            }
 
             if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
             {
@@ -125,24 +125,24 @@ class ObjectMenu extends Form
 
             m_Orientation = vector.Zero;
 
-			m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true, false, false );
+            m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true, false, false );
 
-			m_ItemPreview.SetItem( m_PreviewItem );
-			m_ItemPreview.SetModelPosition( Vector(0, 0, 0.5) );
-			m_ItemPreview.SetModelOrientation( m_Orientation );
+            m_ItemPreview.SetItem( m_PreviewItem );
+            m_ItemPreview.SetModelPosition( Vector(0, 0, 0.5) );
+            m_ItemPreview.SetModelOrientation( m_Orientation );
         }
 
-		return true;
-	}
+        return true;
+    }
 
-	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
+    override bool OnMouseButtonDown( Widget w, int x, int y, int button )
     {
         super.OnMouseButtonDown( w, x, y, button );
 
-		if ( w == m_PreviewItem )
-		{
-			GetGame().GetDragQueue().Call(this, "UpdateRotation");
-			GetGame().GetMousePos( m_MouseX, m_MouseY );
+        if ( w == m_PreviewItem )
+        {
+            GetGame().GetDragQueue().Call(this, "UpdateRotation");
+            GetGame().GetMousePos( m_MouseX, m_MouseY );
 
             return false;
         } 

@@ -74,9 +74,9 @@ class MapEditorMenu
 
     void Update()
     {
-		int currentTime = GetGame().GetTime();
-		OnUpdate( ( m_PreviousTime - currentTime ) / 1000.0);
-		m_PreviousTime = currentTime;
+        int currentTime = GetGame().GetTime();
+        OnUpdate( ( m_PreviousTime - currentTime ) / 1000.0);
+        m_PreviousTime = currentTime;
     }
 
     void OnShow()
@@ -100,7 +100,7 @@ class MapEditorMenu
             return;
         }
 
-		if ( input.GetActionUp( UADefaultAction, false ) )
+        if ( input.GetActionUp( UADefaultAction, false ) )
         {
             GetRPCManager().SendRPC( "COT_MapEditor", "SetPosition", new Param1<vector>( m_SelectedObject.GetPosition() ), false, NULL, m_SelectedObject );
 
@@ -109,7 +109,7 @@ class MapEditorMenu
             CameraTool.SetTarget( NULL );
         }
 
-		if ( input.GetActionDown( UADefaultAction, false ) )
+        if ( input.GetActionDown( UADefaultAction, false ) )
         {
             m_SelectedObject = GetPointerObject( m_Distance );
 
