@@ -37,6 +37,34 @@ modded class MissionGameplay
     {
         super.OnUpdate( timeslice );
 
+		UIScriptedMenu menu = m_UIManager.GetMenu();
+        Input input = GetGame().GetInput();
+
         m_Tool.OnUpdate( timeslice );
+
+        if ( DISABLE_ALL_INPUT )
+        {            
+            if( input.GetActionDown(UAUIQuickbarRadialOpen, false) )
+            {
+                if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
+                {
+                    RadialQuickbarMenu.CloseMenu();
+                }
+            }
+        }
+    }
+    
+    override void ShowInventory()
+    {
+        if ( DISABLE_ALL_INPUT ) return;
+
+        super.ShowInventory();
+    }
+
+    override void ShowChat()
+    {
+        if ( DISABLE_ALL_INPUT ) return;
+
+        super.ShowChat();
     }
 }

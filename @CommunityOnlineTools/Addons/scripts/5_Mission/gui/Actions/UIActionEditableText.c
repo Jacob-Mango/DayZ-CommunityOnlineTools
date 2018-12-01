@@ -60,37 +60,23 @@ class UIActionEditableText extends UIActionBase
         TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
     }
 
+    void RemoveDisableInput()
+    {
+        DISABLE_ALL_INPUT = false;
+    }
+
     override bool OnChange( Widget w, int x, int y, bool finished )
     {
         if ( !m_HasCallback ) return false;
 
-        bool ret = false;
-
         if ( w == m_Text )
         {
-            ret = CallEvent( UIEvent.CHANGE );
+            DISABLE_ALL_INPUT = true;
+            CallEvent( UIEvent.CHANGE );
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
+            return true;
         }
-
-        return ret;
-    }
-
-    override bool OnFocus(Widget w, int x, int y)
-    {
-        if ( w == layoutRoot )
-        {
-            return false;
-        }
-
-        return false;
-    }
-
-	override bool OnFocusLost(Widget w, int x, int y)
-    {
-        if ( w == layoutRoot )
-        {
-            return false;
-        }
-
+        
         return false;
     }
 
