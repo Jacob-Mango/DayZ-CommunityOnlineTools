@@ -3,6 +3,15 @@ modded class PlayerBase
 {
     protected bool m_HasGodeMode;
 
+    override void Init()
+    {
+        super.Init();
+
+        m_HasGodeMode = false;
+
+        RegisterNetSyncVariableBool( "m_HasGodeMode" );
+    }
+
     /*
     void HandleDeath( Object killerItem ) 
     {
@@ -76,30 +85,102 @@ modded class PlayerBase
 
     override void EOnFrame( IEntity other, float timeSlice )
     {
+        super.EOnFrame( other, timeSlice );
+
         if ( m_HasGodeMode )
         {
-            SetHealth( "GlobalHealth", "Health", GetMaxHealth( "GlobalHealth", "Health") );
-            SetHealth( "GlobalHealth", "Blood", GetMaxHealth( "GlobalHealth", "Blood" ) );
-            SetHealth( "GlobalHealth", "Shock", GetMaxHealth( "GlobalHealth", "Shock" ) );
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+        }
+    }
+
+    override void EOnPostFrame( IEntity other, int extra )
+    {
+        super.EOnPostFrame( other, extra );
+
+        if ( m_HasGodeMode )
+        {
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+        }
+    }
+
+    override void EEHitBy( TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos )
+	{
+        Print( "PlayerBase::EEHitBy" );
+        if ( m_HasGodeMode ) 
+        {
+            Print( "Godmode should've prevented this!" );
+
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+        } else 
+        {
+		    super.EEHitBy( damageResult, damageType, source, component, dmgZone, ammo, modelPos );
         }
     }
 
     override void EEKilled( Object killer )
-    {        
-        // HandleDeath( killer );
+    {
+        Print( "PlayerBase::EEKilled" );
+        if ( m_HasGodeMode ) 
+        {
+            Print( "Godmode should've prevented this!" );
 
-        super.EEKilled( killer );
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+        } else 
+        {
+            super.EEKilled( killer );
+        }
     }
 
-    void ToggleGodMode()
+    override void CheckDeath()
     {
-        m_HasGodeMode = !m_HasGodeMode;
+        if ( m_HasGodeMode ) 
+        {
+            Print( "Godmode should've prevented this!" );
+
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+        } else
+        {
+            super.CheckDeath();
+        }
+    }
+    
+    override void SimulateDeath( bool state )
+    {
+        if ( m_HasGodeMode ) 
+        {
+            Print( "Godmode should've prevented this!" );
+
+            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+            super.SimulateDeath( false );
+        } else
+        {
+            super.SimulateDeath( state );
+        }
+    }
+
+    void SetGodMode( bool mode )
+    {
+        m_HasGodeMode = mode;
 
         if ( m_HasGodeMode )
         {
+            SetAllowDamage( false );
             Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
+            SetAllowDamage( true );
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
