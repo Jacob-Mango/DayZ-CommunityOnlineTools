@@ -34,8 +34,8 @@ class UIActionCheckbox extends UIActionBase
         return m_Checkbox.IsChecked();
     }
 
-	override bool OnClick(Widget w, int x, int y, int button)
-	{
+    override bool OnClick(Widget w, int x, int y, int button)
+    {
         bool ret = false;
 
         if ( w == m_Checkbox )

@@ -1,11 +1,7 @@
 class PlayerModule: EditorModule
 {
-    ref array< PlayerBase > m_GodModePlayers;
-
     void PlayerModule()
     {
-        m_GodModePlayers = new ref array< PlayerBase >;
-
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
@@ -58,7 +54,6 @@ class PlayerModule: EditorModule
 
     void ~PlayerModule()
     {
-        delete m_GodModePlayers;
     }
 
     override string GetLayoutRoot()
@@ -68,27 +63,6 @@ class PlayerModule: EditorModule
 
     override void OnMissionLoaded()
     {
-        // GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
-    }
-
-    void UpdateGodMode()
-    {
-        for ( int i = 0; i < m_GodModePlayers.Count(); i++ )
-        {
-            PlayerBase player = m_GodModePlayers.Get( i );
-            player.SetAllowDamage( false );
-
-            player.SetHealth( player.GetMaxHealth( "", "" ) );
-            player.SetHealth( "GlobalHealth","Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
-            player.SetHealth( "GlobalHealth","Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
-            
-            player.GetStatStamina().Set( player.GetStaminaHandler().GetStaminaCap() );
-            player.GetStatEnergy().Set( 5000 );
-            player.GetStatWater().Set( 5000 );
-            player.GetStatStomachVolume().Set( 5000 );     
-            player.GetStatStomachWater().Set( 5000 );
-            player.GetStatStomachEnergy().Set( 5000 );
-        }
     }
 
     void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -570,7 +544,7 @@ class PlayerModule: EditorModule
             if ( CurrentActiveCamera )
             {
                 CurrentActiveCamera.SelectedTarget( target );
-		        CurrentActiveCamera.SetActive( true );
+                CurrentActiveCamera.SetActive( true );
                 GetPlayer().GetInputController().SetDisabled( true );
             }
         }
@@ -594,21 +568,7 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                if ( m_GodModePlayers.Find( player ) > -1 )
-                {
-                    if ( !data.param1 )
-                    {
-                        m_GodModePlayers.RemoveItem( player );
-                        Message( player, "You no longer have god mode." );
-                    }
-                } else
-                {
-                    if ( data.param1 )
-                    {
-                        m_GodModePlayers.Insert( player );
-                        Message( player, "You now have god mode." );
-                    }
-                }
+                player.ToggleGodMode();
  
                 COTLog( sender, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
             }

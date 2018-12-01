@@ -19,7 +19,7 @@ class UIActionSelectBox extends UIActionBase
     void SetSelections( notnull ref array< string > options )
     {
         m_Selection = new ref OptionSelectorMultistate( layoutRoot.FindAnyWidget( "action" ), 0, NULL, true, options );
-		m_Selection.m_OptionChanged.Insert( OnSelectionChange );
+        m_Selection.m_OptionChanged.Insert( OnSelectionChange );
     }
 
     override void Disable()
@@ -47,15 +47,15 @@ class UIActionSelectBox extends UIActionBase
         return m_Selection.GetValue();
     }
 
-	bool OnSelectionChange()
-	{    
+    bool OnSelectionChange()
+    {    
         if ( !m_HasCallback ) return false;
 
         return CallEvent( UIEvent.CHANGE );
     }
 
-	override bool OnClick( Widget w, int x, int y, int button )
-	{    
+    override bool OnClick( Widget w, int x, int y, int button )
+    {    
         if ( !m_HasCallback ) return false;
 
         bool ret = false;

@@ -28,13 +28,13 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
         perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
 
-		stateOptions = new ref TStringArray;
+        stateOptions = new ref TStringArray;
         stateOptions.Insert("INHERIT");
         stateOptions.Insert("DISALLOW");
         stateOptions.Insert("ALLOW");
 
         perm_state = new ref OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
-		perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
+        perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
     }
 
     void Show()
@@ -70,10 +70,10 @@ class PermissionRow extends ScriptedWidgetEventHandler
         }
     }
 
-	void OnPermissionStateChanged()
-	{
-		Type = perm_state.GetValue();
-	}
+    void OnPermissionStateChanged()
+    {
+        Type = perm_state.GetValue();
+    }
 
     void Set( ref Permission permission, int depth )
     {

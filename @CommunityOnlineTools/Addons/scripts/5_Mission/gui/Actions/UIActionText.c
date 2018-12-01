@@ -30,8 +30,8 @@ class UIActionText extends UIActionBase
         m_Text.SetText( text );
     }
 
-	override bool OnClick(Widget w, int x, int y, int button)
-	{    
+    override bool OnClick(Widget w, int x, int y, int button)
+    {    
         if ( !m_HasCallback )
         {
             if ( w == m_Text )

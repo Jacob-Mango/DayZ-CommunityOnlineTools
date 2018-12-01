@@ -209,8 +209,8 @@ class COTMenu
     }
 
     // TODO: Fix
-	bool OnDoubleClick(Widget w, int x, int y, int button)
-	{
+    bool OnDoubleClick(Widget w, int x, int y, int button)
+    {
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
         
         Form form;

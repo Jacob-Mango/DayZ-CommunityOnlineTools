@@ -95,8 +95,8 @@ class PlayerRow extends ScriptedWidgetEventHandler
         return Player;
     }
 
-	override bool OnClick(Widget w, int x, int y, int button)
-	{        
+    override bool OnClick(Widget w, int x, int y, int button)
+    {        
         if ( w == Checkbox )
         {
             Menu.OnPlayer_Checked( this );

@@ -37,20 +37,20 @@ modded class MissionServer
         m_Tool.OnUpdate( timeslice );
     }
 
-	override void OnPreloadEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int queueTime)
-	{
+    override void OnPreloadEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int queueTime)
+    {
         super.OnPreloadEvent( identity, useDB, pos, yaw, queueTime );
     }
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
-	{
+    {
         super.InvokeOnConnect( player, identity );
 
         GetGame().SelectPlayer( identity, player );
     } 
 
     override void InvokeOnDisconnect( PlayerBase player )
-	{
+    {
         super.InvokeOnDisconnect( player );
     } 
 

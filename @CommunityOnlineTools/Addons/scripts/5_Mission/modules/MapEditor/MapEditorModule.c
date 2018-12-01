@@ -113,13 +113,13 @@ class MapEditorModule: Module
     }
 
     override void RegisterKeyMouseBindings() 
-	{
-		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType() , "ToggleEditor", "[U]"    , "Teleport to cursor position." );
+    {
+        KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType() , "ToggleEditor", "[U]"    , "Teleport to cursor position." );
 
-		teleport.AddKeyBind( KeyCode.KC_U, KeyMouseBinding.KB_EVENT_PRESS );
-		
-		RegisterKeyMouseBinding( teleport );
-	}
+        teleport.AddKeyBind( KeyCode.KC_U, KeyMouseBinding.KB_EVENT_PRESS );
+        
+        RegisterKeyMouseBinding( teleport );
+    }
     
     override void OnMissionLoaded()
     {

@@ -71,11 +71,11 @@ class WindowHandle extends ScriptedWidgetEventHandler
         return false;
     }
 
-	override bool OnDrag( Widget w, int x, int y )
-	{
+    override bool OnDrag( Widget w, int x, int y )
+    {
         if ( w == m_TitleWrapper )
         {
-		    layoutRoot.GetPos( offsetX, offsetY );
+            layoutRoot.GetPos( offsetX, offsetY );
 
             offsetX = x - offsetX;
             offsetY = y - offsetY;
@@ -83,32 +83,32 @@ class WindowHandle extends ScriptedWidgetEventHandler
             m_TitleWrapper.SetPos( 0, 0, true );
         }
 
-		return true;
-	}
+        return true;
+    }
 
-	override bool OnDragging( Widget w, int x, int y, Widget reciever )
-	{
+    override bool OnDragging( Widget w, int x, int y, Widget reciever )
+    {
         if ( w == m_TitleWrapper )
         {
-		    SetPosition( x - offsetX, y - offsetY );
+            SetPosition( x - offsetX, y - offsetY );
         }
 
-		return true;
-	}
+        return true;
+    }
 
-	override bool OnDrop( Widget w, int x, int y, Widget reciever )
-	{
+    override bool OnDrop( Widget w, int x, int y, Widget reciever )
+    {
         if ( w == m_TitleWrapper )
         {
-		    SetPosition( x - offsetX, y - offsetY );
+            SetPosition( x - offsetX, y - offsetY );
         }
 
-		return true;
-	}
+        return true;
+    }
 
     void SetPosition( int x, int y )
     {
-		layoutRoot.SetPos( x, y, true );
+        layoutRoot.SetPos( x, y, true );
         m_TitleWrapper.SetPos( 0, 0, true );
     }
 

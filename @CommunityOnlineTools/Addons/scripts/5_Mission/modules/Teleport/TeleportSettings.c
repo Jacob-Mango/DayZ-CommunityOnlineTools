@@ -6,11 +6,11 @@ class TeleportSettings
 
     static ref TeleportSettings Load()
     {
-		ref TeleportSettings settings = new TeleportSettings();
+        ref TeleportSettings settings = new TeleportSettings();
 
         if ( FileExist( TELEPORT_SETTINGS_FILE ) )
         {
-		    JsonFileLoader<TeleportSettings>.JsonLoadFile( TELEPORT_SETTINGS_FILE, settings );
+            JsonFileLoader<TeleportSettings>.JsonLoadFile( TELEPORT_SETTINGS_FILE, settings );
         } else {
             settings.Defaults();
             settings.Save();
@@ -21,7 +21,7 @@ class TeleportSettings
 
     void Save()
     {
-		JsonFileLoader<TeleportSettings>.JsonSaveFile( TELEPORT_SETTINGS_FILE, this );
+        JsonFileLoader<TeleportSettings>.JsonSaveFile( TELEPORT_SETTINGS_FILE, this );
     }
 
     void Defaults()

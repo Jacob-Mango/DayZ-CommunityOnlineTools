@@ -30,12 +30,12 @@ class TeleportModule: EditorModule
     }
 
     override void RegisterKeyMouseBindings() 
-	{
-		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
-		teleport.AddBinding( "kH" );
+    {
+        KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
+        teleport.AddBinding( "kH" );
         teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
-		RegisterKeyMouseBinding( teleport );
-	}
+        RegisterKeyMouseBinding( teleport );
+    }
 
     override string GetLayoutRoot()
     {
