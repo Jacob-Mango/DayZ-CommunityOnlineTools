@@ -86,7 +86,7 @@ modded class PlayerBase
 
     override void EEKilled( Object killer )
     {        
-        HandleDeath( killer );
+        // HandleDeath( killer );
 
         super.EEKilled( killer );
     }
@@ -97,10 +97,10 @@ modded class PlayerBase
 
         if ( m_HasGodeMode )
         {
-            Notify( player.authenticatedPlayer, "You now have god mode." );
+            Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
-            Notify( player.authenticatedPlayer, "You no longer have god mode." );
+            Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
 }
