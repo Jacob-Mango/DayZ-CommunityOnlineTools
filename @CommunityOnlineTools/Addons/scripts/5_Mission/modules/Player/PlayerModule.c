@@ -68,7 +68,7 @@ class PlayerModule: EditorModule
 
     override void OnMissionLoaded()
     {
-        GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
+        // GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateGodMode, 100, true );
     }
 
     void UpdateGodMode()

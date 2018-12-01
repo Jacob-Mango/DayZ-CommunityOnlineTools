@@ -60,14 +60,19 @@ class Module
     
     void RegisterKeyMouseBinding( KeyMouseBinding binding ) 
     {
-        UAInput input = GetUApi().RegisterInput( binding.GetUAInputName(), binding.GetDescription(), COT_INPUT_GROUP );
-        input.AddAlternative();
+        UAInput input = GetUApi().GetInputByName( binding.GetUAInputName() );
 
-        ref array< string > bindings = binding.GetBindings();
-        for ( int i = 0; i < bindings.Count(); i++ )
-        {
-            input.BindCombo( bindings[i] );
-        }
+        //if ( input == NULL )
+        //{
+            input = GetUApi().RegisterInput( binding.GetUAInputName(), binding.GetDescription(), COT_INPUT_GROUP );
+            input.AddAlternative();
+
+            ref array< string > bindings = binding.GetBindings();
+            for ( int i = 0; i < bindings.Count(); i++ )
+            {
+                input.BindCombo( bindings[i] );
+            }
+        //}
 
         m_KeyBindings.Insert( binding );
     }

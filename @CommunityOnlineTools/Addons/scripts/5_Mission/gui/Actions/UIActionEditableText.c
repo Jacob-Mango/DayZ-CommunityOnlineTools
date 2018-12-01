@@ -74,6 +74,26 @@ class UIActionEditableText extends UIActionBase
         return ret;
     }
 
+    override bool OnFocus(Widget w, int x, int y)
+    {
+        if ( w == layoutRoot )
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+	override bool OnFocusLost(Widget w, int x, int y)
+    {
+        if ( w == layoutRoot )
+        {
+            return false;
+        }
+
+        return false;
+    }
+
 	override bool OnClick(Widget w, int x, int y, int button)
 	{    
         if ( !m_HasCallback ) return false;
