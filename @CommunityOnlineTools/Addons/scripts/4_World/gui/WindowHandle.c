@@ -30,8 +30,6 @@ class WindowHandle extends ScriptedWidgetEventHandler
     {
         m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
         m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_wrapper" ) );
-
-        WidgetHandler.GetInstance().RegisterOnClick( m_CloseButton, this, "OnClick" );
     }
 
     void Show()

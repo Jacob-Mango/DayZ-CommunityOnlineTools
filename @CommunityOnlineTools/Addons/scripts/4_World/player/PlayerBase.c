@@ -1,8 +1,11 @@
+/*
 modded class PlayerBase
 {	
 	void HandleDeath( Object killerItem ) 
 	{
         PlayerBase killer = PlayerBase.Cast( killerItem );
+
+		if ( !authenticatedPlayer ) return;
         
         if ( !killer )
         {
@@ -13,6 +16,14 @@ modded class PlayerBase
                 return;
             }
         }
+
+		if ( !killer.authenticatedPlayer ) return;
+
+		if ( killer.authenticatedPlayer.GetGUID() == authenticatedPlayer.GetGUID() )
+		{
+			killer.RPCSingleParam(ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>( killer.authenticatedPlayer.GetName() + " has killed themselves." ), false, NULL);
+			return;
+		}
 
         authenticatedPlayer.Data.Kills = 0;
 
@@ -66,3 +77,4 @@ modded class PlayerBase
         super.EEKilled( killer );
     }
 }
+*/

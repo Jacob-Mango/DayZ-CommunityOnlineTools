@@ -10,14 +10,26 @@ static bool COTMenuOpen;
 
 static void COTLog( AuthPlayer player, string text )
 {
-    string name = player.GetGUID();
-    GetGame().AdminLog( name + ": " + text );
+    text = player.GetGUID() + ": " + text
+    if ( GetGame().IsServer() )
+    {
+        GetGame().AdminLog( text );
+    } else
+    {
+        Print( text );
+    }
 }
 
 static void COTLog( PlayerIdentity player, string text )
 {
-    string name = player.GetId();
-    GetGame().AdminLog( name + ": " + text );
+    text = player.GetId() + ": " + text
+    if ( GetGame().IsServer() )
+    {
+        GetGame().AdminLog( text );
+    } else
+    {
+        Print( text );
+    }
 }
 
 static string FormatFloat( float value, int decimals ) 

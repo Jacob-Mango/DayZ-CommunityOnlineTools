@@ -171,6 +171,10 @@ class ModuleManager
         {
             m_Modules.Get(i).Init();
         }
+
+        //GetUApi().PresetSelect( 0 );
+
+        //GetUApi().Export();
     }
 
     void OnMissionStart()

@@ -395,14 +395,14 @@ class PlayerMenu extends Form
 
     void UpdateList()
     {
-        ReloadPlayers();
-
         if ( m_CanUpdateList )
         {
             m_CanUpdateList = false;
             UpdatePlayerList();
             m_CanUpdateList = true;
         }
+
+        ReloadPlayers();
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
@@ -496,7 +496,7 @@ class PlayerMenu extends Form
 
     void ReloadPlayers()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "UpdatePlayers", new Param, true );
+        GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param, true );
     }
 
     void SetupPermissionsUI()
