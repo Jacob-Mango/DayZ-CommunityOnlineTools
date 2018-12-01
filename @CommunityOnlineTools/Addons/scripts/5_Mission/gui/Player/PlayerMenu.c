@@ -114,7 +114,7 @@ class PlayerMenu extends Form
         lifeSpanOptions.Insert( "Large" );
         lifeSpanOptions.Insert( "Extra" );
 
-        m_LastShaved = UIActionManager.CreateSelectionBox( playerActions, "Beard: ", lifeSpanOptions, this, "Click_SetLifeSpanState" );
+        // m_LastShaved = UIActionManager.CreateSelectionBox( playerActions, "Beard: ", lifeSpanOptions, this, "Click_SetLifeSpanState" );
         m_BloodyHands = UIActionManager.CreateCheckbox( playerActions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
         // m_KickTransport = UIActionManager.CreateButton( playerActions, "Kick Transport", this, "Click_KickTransport" );
         m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
@@ -329,11 +329,11 @@ class PlayerMenu extends Form
             m_Energy.SetText( data.FEnergy.ToString() );
             m_Water.SetText( data.FWater.ToString() );
             m_Shock.SetText( data.FShock.ToString() );
-            m_HeatComfort.SetText( data.FHeatComfort.ToString() );
-            m_Wet.SetText( data.FWet.ToString() );
-            m_Tremor.SetText( data.FTremor.ToString() );
+            //m_HeatComfort.SetText( data.FHeatComfort.ToString() );
+            //m_Wet.SetText( data.FWet.ToString() );
+            //m_Tremor.SetText( data.FTremor.ToString() );
             m_Stamina.SetText( data.FStamina.ToString() );
-            m_LastShaved.SetSelection( data.ILifeSpanState );
+            //m_LastShaved.SetSelection( data.ILifeSpanState );
             m_BloodyHands.SetChecked( data.BBloodyHands );
 
             m_PingMin.SetText( data.IPingMin.ToString() );
