@@ -89,6 +89,7 @@ modded class PlayerBase
 
         if ( m_HasGodeMode )
         {
+            SetAllowDamage( false );
             SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
             SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
@@ -101,6 +102,7 @@ modded class PlayerBase
 
         if ( m_HasGodeMode )
         {
+            SetAllowDamage( false );
             SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
             SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
