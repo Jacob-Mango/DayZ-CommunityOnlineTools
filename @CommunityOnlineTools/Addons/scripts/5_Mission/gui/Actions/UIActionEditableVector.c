@@ -71,18 +71,24 @@ class UIActionEditableVector extends UIActionBase
         TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
     }
 
+    void RemoveDisableInput()
+    {
+        DISABLE_ALL_INPUT = false;
+    }
+
     override bool OnChange( Widget w, int x, int y, bool finished )
     {
         if ( !m_HasCallback ) return false;
 
-        bool ret = false;
-
         if ( w == m_TextX || w == m_TextY || w == m_TextZ )
         {
-            ret = CallEvent( UIEvent.CHANGE );
+            DISABLE_ALL_INPUT = true;
+            CallEvent( UIEvent.CHANGE );
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
+            return true;
         }
-
-        return ret;
+        
+        return false;
     }
 
 	override bool OnClick(Widget w, int x, int y, int button)

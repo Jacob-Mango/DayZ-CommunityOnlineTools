@@ -223,7 +223,7 @@ class ModuleManager
 
                     if ( COTMenuOpen )
                     {
-                        if ( !k_m_Binding.CanBeUsedInMenu() )
+                        if ( !k_m_Binding.CanBeUsedInMenu() || DISABLE_ALL_INPUT)
                         {
                             continue;
                         }

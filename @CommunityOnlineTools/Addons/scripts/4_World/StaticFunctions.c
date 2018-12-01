@@ -6,7 +6,9 @@ const string COT_INPUT_GROUP = "infantry";
 
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
-static bool COTMenuOpen;
+static bool COTMenuOpen = false;
+
+static bool DISABLE_ALL_INPUT = false;
 
 static void COTLog( AuthPlayer player, string text )
 {
