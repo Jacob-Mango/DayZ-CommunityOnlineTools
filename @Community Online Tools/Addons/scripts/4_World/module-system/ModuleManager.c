@@ -1,75 +1,22 @@
 class ModuleManager
 {
-    protected ref array< string > m_ModuleFolders;
-
     protected ref array< ref Module > m_Modules;
     protected ref array< ref EditorModule > m_EditorModules;
-    protected ref array< ref MouseButtonInfo > m_MouseButtons;
-
-    protected ref array< ScriptModule > m_ScriptModules;
-    protected ScriptModule m_ParentScriptModule;
 
     void ModuleManager()
     {
         Print( "ModuleManager::ModuleManager()" );
-
-        m_ModuleFolders = new ref array< string >;
-
-        // m_ModuleFolders.Insert("COT/Scripts/Modules");
-
-        m_MouseButtons = new ref array< ref MouseButtonInfo >;
-        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.LEFT ) );
-        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.RIGHT ) );
-        m_MouseButtons.Insert( new MouseButtonInfo( MouseState.MIDDLE ) );
-
-        // GetUApi().RegisterGroup( COT_INPUT_GROUP, "Community Online Tools" );
     }
 
     void ~ModuleManager()
     {
         Print( "ModuleManager::~ModuleManager()" );
 
-        ReleaseModules();
-
-        delete m_ModuleFolders;
-        delete m_MouseButtons;
-    }
-
-    void ReleaseModules()
-    {
-        /*
-        for ( int j = 0; j < m_ScriptModules.Count(); j++ )
-        {
-            m_ScriptModules.Get( j ).Release();
-        }
+        m_Modules.Clear();
+        m_EditorModules.Clear();
 
         delete m_Modules;
         delete m_EditorModules;
-        delete m_ScriptModules;
-        */
-    }
-
-    private bool IsValidModule( string path, string name, FileAttr attributes )
-    {
-        Print( "Found: " + path + name + " as a " + FileAttributeToString( attributes ) );
-
-        if ( ! (attributes & FileAttr.DIRECTORY ) ) return false;
-
-        if ( name == "" ) return false;
-
-        return true;
-    }
-
-    private void LoadModule( string path, string name )
-    {
-        ScriptModule script = ScriptModule.LoadScript( m_ParentScriptModule, path + name + "/module.c", true );
-        if ( script )
-        {
-            Param p = new Param;
-            script.CallFunctionParams( NULL, "RegisterModules", p, new Param1< ModuleManager >( this ) );
-
-            m_ScriptModules.Insert( script );
-        }
     }
 
     void RegisterModule( Module module )
@@ -77,6 +24,7 @@ class ModuleManager
         m_Modules.Insert( module );
 
         string message = "";
+        
         if ( module.IsInherited( EditorModule ) )
         {
             m_EditorModules.Insert( EditorModule.Cast( module ) );
@@ -89,56 +37,14 @@ class ModuleManager
         Print( "Registered module " + module + message );
     }
 
-    private void RegisterModulesByPath( string path )
-    {
-        Print( "ModuleManager::RegisterModulesByPath()" );
-        
-        int index = 0;
-        string module = "";
-        FileAttr oFileAttr = FileAttr.INVALID;
-        FindFileHandle oFileHandle = FindFile( path + "*", module, oFileAttr, FindFileFlags.DIRECTORIES );
-
-        if ( module != "" )
-        {
-            if ( IsValidModule( path, module, oFileAttr ) )
-            {
-                LoadModule( path, module );
-                index++;
-            }
-
-            while (FindNextFile(oFileHandle, module, oFileAttr))
-            {
-                if ( IsValidModule( path, module, oFileAttr ) )
-                {
-                    LoadModule( path, module );
-                    index++;
-                }
-            }
-        }
-    }
-
     void RegisterModules()
     {
         Print( "ModuleManager::RegisterModules()" );
 
         m_Modules = new ref array< ref Module >;
         m_EditorModules = new ref array< ref EditorModule >;
-        m_ScriptModules = new ref array< ScriptModule >;
-
-        m_ParentScriptModule = GetGame().GetMission().MissionScript;
 
         RegisterModule( new COTModule );
-
-        for ( int i = 0; i < m_ModuleFolders.Count(); i++ )
-        {
-            // RegisterModulesByPath(m_ModuleFolders.Get(i));
-        }
-    }
-
-    void ReloadModules()
-    {
-        ReleaseModules();
-        RegisterModules();
     }
 
     void ReloadSettings()
@@ -167,10 +73,6 @@ class ModuleManager
         {
             m_Modules.Get(i).Init();
         }
-
-        //GetUApi().PresetSelect( 0 );
-
-        //GetUApi().Export();
     }
 
     void OnMissionStart()
@@ -281,20 +183,6 @@ class ModuleManager
             }
         }
 
-        return NULL;
-    }
-
-    MouseButtonInfo GetMouseButtonInfo( int button )
-    {
-        for ( int i = 0; i < m_MouseButtons.Count(); ++i )
-        {
-            MouseButtonInfo info = m_MouseButtons.Get(i);
-
-            if ( info.GetButtonID() == button )
-            {
-                return info;
-            }
-        }
         return NULL;
     }
 }

@@ -3,10 +3,12 @@ class GameMenu extends Form
     protected Widget m_ActionsWrapper;
 
     protected ref array< ref UIActionButton > m_VehicleButtons;
+    protected ref array< ref UIActionButton > m_BaseBuildingButtons;
 
     void GameMenu()
     {
         m_VehicleButtons = new ref array< ref UIActionButton >;
+        m_BaseBuildingButtons = new ref array< ref UIActionButton >;
     }
 
     void ~GameMenu()
@@ -39,26 +41,32 @@ class GameMenu extends Form
 
     override void OnShow()
     {
-        GameModule module = GameModule.Cast( module );
+        GameModule gm = GameModule.Cast( module );
 
-        if ( module == NULL ) return;
+        if ( gm == NULL ) return;
 
-        Print( "gamemenu: count " + module.GetVehicles().Count() );
+        string name;
+        ref UIActionButton button;
 
-        for ( int i = 0; i < module.GetVehicles().Count(); i++ )
+        for ( int i = 0; i < gm.GetVehicles().Count(); i++ )
         {
-            string name = module.GetVehicles().GetKey( i );
+            name = gm.GetVehicles()[i];
 
-            Print( "Name: " + name );
-
-            GM_VehicleData data = new GM_VehicleData;
-            data.ClassName = name;
-
-            ref UIActionButton button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name, this, "SpawnVehicle" );
-            button.SetData( data );
+            button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnVehicle" );
+            button.SetData( new GM_Button_Data( name ) );
 
             m_VehicleButtons.Insert( button );
         }
+
+        for ( int j = 0; j < gm.GetBaseBuilding().Count(); j++ )
+        {
+            name = gm.GetBaseBuilding()[j];
+
+            button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnBaseBuilding" );
+            button.SetData( new GM_Button_Data( name ) );
+
+            m_BaseBuildingButtons.Insert( button );
+        }        
     }
 
     override void OnHide() 
@@ -70,6 +78,14 @@ class GameMenu extends Form
         }
 
         m_VehicleButtons.Clear();
+
+        for ( int k = 0; k < m_BaseBuildingButtons.Count(); k++ )
+        {
+            m_ActionsWrapper.RemoveChild( m_BaseBuildingButtons[k].GetLayoutRoot() );
+            m_BaseBuildingButtons[k].GetLayoutRoot().Unlink()
+        }
+
+        m_BaseBuildingButtons.Clear();
     }
 
     void ThrowApple( UIEvent eid, ref UIActionButton action )
@@ -86,9 +102,17 @@ class GameMenu extends Form
 
     void SpawnVehicle( UIEvent eid, ref UIActionButton action ) 
     {
-        GM_VehicleData data = GM_VehicleData.Cast( action.GetData() );
+        ref GM_Button_Data data = GM_Button_Data.Cast( action.GetData() );
         if ( !data ) return;
 
         GetRPCManager().SendRPC( "COT_Game", "SpawnVehicle", new Param2< string, vector >( data.ClassName, GetCursorPos() ), true, NULL, GetGame().GetPlayer() );
+    }
+
+    void SpawnBaseBuilding( UIEvent eid, ref UIActionButton action ) 
+    {
+        ref GM_Button_Data data = GM_Button_Data.Cast( action.GetData() );
+        if ( !data ) return;
+
+        GetRPCManager().SendRPC( "COT_Game", "SpawnBaseBuilding", new Param2< string, ref array< string > >( data.ClassName, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
     }
 }
