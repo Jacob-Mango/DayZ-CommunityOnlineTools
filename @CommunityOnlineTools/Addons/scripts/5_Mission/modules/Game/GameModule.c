@@ -1,19 +1,54 @@
 class GameModule: EditorModule
 {
+    protected ref GameSettings settings;
+
     void GameModule()
     {
+        GetRPCManager().AddRPC( "COT_Game", "LoadData", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COT_Game", "SpawnVehicle", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Game", "SetOldAiming", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COT_Game", "ThrowApple", this, SingeplayerExecutionType.Client );
 
-        GetPermissionsManager().RegisterPermission( "Game.SpawnVehicle" );
         GetPermissionsManager().RegisterPermission( "Game.ChangeAimingMode" );
         GetPermissionsManager().RegisterPermission( "Game.ThrowApple" );
+    }
+
+    override void OnMissionLoaded()
+    {
+        super.OnMissionLoaded();
+
+        if ( GetGame().IsClient() )
+            GetRPCManager().SendRPC( "COT_Game", "LoadData", new Param, true );
+    }
+
+    override void ReloadSettings()
+    {
+        super.ReloadSettings();
+
+        settings = GameSettings.Load();
+
+        for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+        {
+            GetPermissionsManager().RegisterPermission( "Game.Spawn.Vehicle." + settings.Vehicles.GetKey( i ) );
+        }
+    }
+
+    override void OnMissionFinish()
+    {
+        super.OnMissionFinish();
+
+        if ( GetGame().IsServer() )
+            settings.Save();
     }
 
     override string GetLayoutRoot()
     {
         return "COT/gui/layouts/Game/GameMenu.layout";
+    }
+
+    autoptr map< string, ref array< string > > GetVehicles()
+    {
+        return settings.Vehicles;
     }
 
     override void OnUpdate( float timeslice )
@@ -31,6 +66,22 @@ class GameModule: EditorModule
     {
         float cap = car.GetFluidCapacity( fluid );
         car.Fill( fluid, cap );
+    }
+    
+    void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if( type == CallType.Server )
+        {
+            GetRPCManager().SendRPC( "COT_Game", "LoadData", new Param1< string >( JsonFileLoader<GameSettings>.JsonMakeData( settings ) ), true );
+        }
+
+        if( type == CallType.Client )
+        {
+            Param1< string > data;
+            if ( !ctx.Read( data ) ) return;
+
+            JsonFileLoader<GameSettings>.JsonLoadData( data.param1, settings );
+        }
     }
 
     void ThrowApple( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -72,14 +123,16 @@ class GameModule: EditorModule
 
     void SpawnVehicle( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        if ( !GetPermissionsManager().HasPermission( "Game.SpawnVehicle", sender ) )
-            return;
-
-        ref Param3< string, vector, ref array< string> > data;
+        ref Param2< string, vector > data;
         if ( !ctx.Read( data ) ) return;
 
-        ref array< string> attachments = new ref array< string>;
-        attachments.Copy( data.param3 );
+        ref array< string > attachments = new ref array< string>;
+        if ( !GetVehicles().Find( data.param1, attachments ) )
+        {
+            return;
+        }
+
+        if ( !GetPermissionsManager().HasPermission( "Game.Spawn.Vehicle." + data.param1, sender ) )
         
         if( type == CallType.Server )
         {

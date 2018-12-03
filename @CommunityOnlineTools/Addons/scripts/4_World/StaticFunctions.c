@@ -12,7 +12,8 @@ static bool DISABLE_ALL_INPUT = false;
 
 static void COTLog( AuthPlayer player, string text )
 {
-    text = player.GetGUID() + ": " + text
+    text = player.GetGUID() + ": " + text;
+
     if ( GetGame().IsServer() )
     {
         GetGame().AdminLog( text );
@@ -24,7 +25,8 @@ static void COTLog( AuthPlayer player, string text )
 
 static void COTLog( PlayerIdentity player, string text )
 {
-    text = player.GetId() + ": " + text
+    text = player.GetId() + ": " + text;
+
     if ( GetGame().IsServer() )
     {
         GetGame().AdminLog( text );
@@ -355,7 +357,7 @@ static Weapon GetWeaponInHands()
 
 static ref PlayerBase GetPlayer()
 {
-    return GetGame().GetPlayer();
+    return PlayerBase.Cast( GetGame().GetPlayer() );
 }
 
 static bool SHIFT()

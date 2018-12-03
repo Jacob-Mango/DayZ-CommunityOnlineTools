@@ -38,12 +38,12 @@ class COTMenu
             ref EditorModule module = m_Modules.Get( i );
 
             ref Widget button_bkg = NULL;
-            ref Widget button = NULL;
+            ref ButtonWidget button = NULL;
 
             if ( module.HasAccess() )
             {
                 button_bkg = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
-                button = button_bkg.FindAnyWidget( "btn" );
+                button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
             }
 
             ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
@@ -73,14 +73,14 @@ class COTMenu
 
                 if ( button_bkg && button )
                 {
-                    TextWidget title_text = base_window.FindAnyWidget( "title_text" );
+                    TextWidget title_text = TextWidget.Cast( base_window.FindAnyWidget( "title_text" ) );
                     title_text.SetText( form.GetTitle() );
         
-                    TextWidget ttl = button_bkg.FindAnyWidget( "ttl" );
+                    TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
                     ttl.SetText( form.GetTitle() );
 
-                    ImageWidget btn_img = button_bkg.FindAnyWidget( "btn_img" );
-                    TextWidget btn_txt = button_bkg.FindAnyWidget( "btn_txt" );
+                    ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
+                    TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
 
                     if ( form.ImageIsIcon() )
                     {
