@@ -12,19 +12,25 @@ class TeleportModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
     }
     
-    void ReloadSettings()
+    override void ReloadSettings()
     {
+        super.ReloadSettings();
+
         settings = TeleportSettings.Load();
     }
 
-    void OnMissionLoaded()
+    override void OnMissionLoaded()
     {
+        super.OnMissionLoaded();
+
         if ( GetGame().IsClient() )
             GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param, true );
     }
 
-    void OnMissionFinished()
+    override void OnMissionFinish()
     {
+        super.OnMissionFinish();
+
         if ( GetGame().IsServer() )
             settings.Save();
     }

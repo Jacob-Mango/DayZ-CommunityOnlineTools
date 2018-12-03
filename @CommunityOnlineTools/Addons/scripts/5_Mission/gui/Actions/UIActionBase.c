@@ -9,6 +9,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
     protected bool m_HasCallback;
 
+    protected Class m_Data;
+
     void OnWidgetScriptInit( Widget w )
     {
         layoutRoot = w;
@@ -73,5 +75,15 @@ class UIActionBase extends ScriptedWidgetEventHandler
     bool CallEvent( UIEvent eid )
     {
         return false;
+    }
+
+    void SetData( Class cls )
+    {
+        m_Data = cls;
+    }
+
+    Class GetData()
+    {
+        return m_Data;
     }
 }

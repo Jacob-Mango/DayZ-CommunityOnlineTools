@@ -15,7 +15,7 @@ class SpectatorCamera extends COTCamera
             vector pos;
             float rot[4];
 
-            int bone = human.GetBoneIndexByName( "Head" )
+            int bone = human.GetBoneIndexByName( "Head" );
 
             pos = human.GetBonePositionWS( bone );
 

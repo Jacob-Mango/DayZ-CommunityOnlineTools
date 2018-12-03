@@ -96,23 +96,23 @@ class WidgetStore
     {
         if ( widget.IsInherited( TextWidget ) ) 
         {
-            textWidgets.Insert( widget );
+            textWidgets.Insert( TextWidget.Cast( widget ) );
         }
         if ( widget.IsInherited( ButtonWidget ) ) 
         {
-            buttonWidgets.Insert( widget );
+            buttonWidgets.Insert( ButtonWidget.Cast( widget ) );
         }
         if ( widget.IsInherited( EditBoxWidget ) ) 
         {
-            editBoxWidgets.Insert( widget );
+            editBoxWidgets.Insert( EditBoxWidget.Cast( widget ) );
         }
         if ( widget.IsInherited( SliderWidget ) ) 
         {
-            sliderWidgets.Insert( widget );
+            sliderWidgets.Insert( SliderWidget.Cast( widget ) );
         }
         if ( widget.IsInherited( TextListboxWidget )) 
         {
-            textListBoxWidgets.Insert( widget );
+            textListBoxWidgets.Insert( TextListboxWidget.Cast( widget ) );
         }
     }
 
@@ -130,7 +130,7 @@ class WidgetStore
 
     ref TextWidget GetTextWidget( string name ) 
     {
-        foreach( ref Widget widget : textWidgets ) 
+        foreach( ref TextWidget widget : textWidgets ) 
         {
             if ( widget.GetName() == name ) 
             {
@@ -142,7 +142,7 @@ class WidgetStore
 
     ref ButtonWidget GetButtonWidget( string name ) 
     {
-        foreach( ref Widget widget : buttonWidgets ) 
+        foreach( ref ButtonWidget widget : buttonWidgets ) 
         {
             if ( widget.GetName() == name ) 
             {
@@ -154,7 +154,7 @@ class WidgetStore
 
     ref EditBoxWidget GetEditBoxWidget( string name ) 
     {
-        foreach( ref Widget widget : editBoxWidgets ) 
+        foreach( ref EditBoxWidget widget : editBoxWidgets ) 
         {
             if ( widget.GetName() == name ) 
             {
@@ -166,7 +166,7 @@ class WidgetStore
 
     ref SliderWidget GetSliderWidget( string name ) 
     {
-        foreach( ref Widget widget : sliderWidgets ) 
+        foreach( ref SliderWidget widget : sliderWidgets ) 
         {
             if ( widget.GetName() == name ) 
             {
@@ -178,7 +178,7 @@ class WidgetStore
 
     ref TextListboxWidget GetListboxWidget( string name ) 
     {
-        foreach( ref Widget widget : textListBoxWidgets ) 
+        foreach( ref TextListboxWidget widget : textListBoxWidgets ) 
         {
             if ( widget.GetName() == name ) 
             {

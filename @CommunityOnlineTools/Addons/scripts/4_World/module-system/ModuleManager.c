@@ -1,9 +1,5 @@
 class ModuleManager
 {
-    protected const int CLICK_TIME            = 200; //ms
-    protected const int HOLD_CLICK_TIME_MIN    = 200; //ms
-    protected const int DOUBLE_CLICK_TIME    = 300; //ms
-
     protected ref array< string > m_ModuleFolders;
 
     protected ref array< ref Module > m_Modules;
@@ -83,7 +79,7 @@ class ModuleManager
         string message = "";
         if ( module.IsInherited( EditorModule ) )
         {
-            m_EditorModules.Insert( module );
+            m_EditorModules.Insert( EditorModule.Cast( module ) );
             message = " as a EditorModule.";
         } else
         {

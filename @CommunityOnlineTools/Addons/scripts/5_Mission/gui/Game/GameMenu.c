@@ -1,11 +1,12 @@
 class GameMenu extends Form
 {
-    TextListboxWidget  m_GameScriptList;
-    Widget             m_ActionsWrapper;
-    ButtonWidget       m_GameScriptButton;
+    protected Widget m_ActionsWrapper;
+
+    protected ref array< ref UIActionButton > m_VehicleButtons;
 
     void GameMenu()
     {
+        m_VehicleButtons = new ref array< ref UIActionButton >;
     }
 
     void ~GameMenu()
@@ -29,34 +30,49 @@ class GameMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
-        m_GameScriptList = TextListboxWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_box"));
-        m_GameScriptButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("game_spawn_button"));
-
         m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
-
-        if ( GetPermissionsManager().HasPermission( "Game.SpawnVehicle" ) )
-        {
-            m_GameScriptList.AddItem("Spawn Hatchback", new Param1<string>("SpawnHatchback"), 0);
-            //m_GameScriptList.AddItem("Spawn V3S", new Param1<string>("SpawnV3S"), 0);
-            //m_GameScriptList.AddItem("Spawn V3S Cargo", new Param1<string>("SpawnV3SCargo"), 0);
-            //m_GameScriptList.AddItem("Spawn Sedan", new Param1<string>("SpawnSedan"), 0);
-            // m_GameScriptList.AddItem("Spawn Van", new Param1<string>("SpawnVan"), 0);
-        }
 
         UIActionManager.CreateCheckbox( m_ActionsWrapper, "Enable 0.62 Aiming", this, "ToggleOldAiming", false );
         // UIActionManager.CreateButton( m_ActionsWrapper, "Throw Apple", this, "ThrowApple" );
+
     }
 
     override void OnShow()
     {
+        GameModule module = GameModule.Cast( module );
+
+        if ( module == NULL ) return;
+
+        Print( "gamemenu: count " + module.GetVehicles().Count() );
+
+        for ( int i = 0; i < module.GetVehicles().Count(); i++ )
+        {
+            string name = module.GetVehicles().GetKey( i );
+
+            Print( "Name: " + name );
+
+            GM_VehicleData data = new GM_VehicleData;
+            data.ClassName = name;
+
+            ref UIActionButton button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name, this, "SpawnVehicle" );
+            button.SetData( data );
+
+            m_VehicleButtons.Insert( button );
+        }
     }
 
     override void OnHide() 
     {
-        
+        for ( int j = 0; j < m_VehicleButtons.Count(); j++ )
+        {
+            m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
+            m_VehicleButtons[j].GetLayoutRoot().Unlink()
+        }
+
+        m_VehicleButtons.Clear();
     }
 
-    void ThrowApple( UIEvent eid, ref UIActionCheckbox action )
+    void ThrowApple( UIEvent eid, ref UIActionButton action )
     {
         GetRPCManager().SendRPC( "COT_Game", "ThrowApple", new Param, true, NULL, GetPlayer() );
     }
@@ -68,139 +84,11 @@ class GameMenu extends Form
         GetRPCManager().SendRPC( "COT_Game", "SetOldAiming", new Param1< bool >( m_OldAiming ), true );
     }
 
-    override bool OnClick( Widget w, int x, int y, int button )
+    void SpawnVehicle( UIEvent eid, ref UIActionButton action ) 
     {
-        string param;
-        Param1<string> param1;
+        GM_VehicleData data = GM_VehicleData.Cast( action.GetData() );
+        if ( !data ) return;
 
-        if ( w == m_GameScriptButton ) 
-        {
-            int selectRow = m_GameScriptList.GetSelectedRow();
-
-            if ( selectRow == -1 ) return false;
-
-            m_GameScriptList.GetItemData( selectRow, 0, param1 );
-
-            if ( param1 )
-            {
-                GetGame().GameScript.CallFunction( this , param1.param1 , NULL, 0 );
-            }
-        }
-
-        return false;
-    }
-
-    void SpawnVan() 
-    {
-        ref array< string> attArr = new ref array< string>;
-
-        attArr.Insert("CivVanDoors_TrumpUp");
-        attArr.Insert("CivVanDoors_BackRight");
-        attArr.Insert("CivVanDoors_TrumpDown");
-        attArr.Insert("CivVanDoors_CoDriver");
-        attArr.Insert("CivVanTrunk");
-        attArr.Insert("CivVanWheel");
-        attArr.Insert("CivVanWheel");
-        attArr.Insert("CivVanWheel");
-        attArr.Insert("CivVanWheel");
-        attArr.Insert("CarBattery");
-        attArr.Insert("CarRadiator");
-        attArr.Insert("EngineBelt");
-        attArr.Insert("SparkPlug");
-
-        SpawnVehicle( "CivilianVan", attArr );
-    }
-
-    void SpawnSedan() 
-    {
-        ref array< string> attArr = new ref array< string>;
-        
-        attArr.Insert("CivSedanHood");
-        attArr.Insert("CivSedanTrunk");
-        attArr.Insert("CivSedanDoors_Driver");
-        attArr.Insert("CivSedanDoors_BackRight");
-        attArr.Insert("CivSedanDoors_BackLeft");
-        attArr.Insert("CivSedanDoors_CoDriver");
-        attArr.Insert("CivSedanWheel");
-        attArr.Insert("CivSedanWheel");
-        attArr.Insert("CivSedanWheel");
-        attArr.Insert("CivSedanWheel");
-        attArr.Insert("CarBattery");
-        attArr.Insert("CarRadiator");
-        attArr.Insert("EngineBelt");
-        attArr.Insert("SparkPlug");
-
-        SpawnVehicle( "CivilianSedan", attArr );
-    }
-
-    void SpawnHatchback() 
-    {
-        ref array< string> attArr = new ref array< string>;
-
-        attArr.Insert("HatchbackHood");
-        attArr.Insert("HatchbackTrunk");
-        attArr.Insert("HatchbackDoors_Driver");
-        attArr.Insert("HatchbackDoors_CoDriver");
-        attArr.Insert("HatchbackWheel");
-        attArr.Insert("HatchbackWheel");
-        attArr.Insert("HatchbackWheel");
-        attArr.Insert("HatchbackWheel");
-        attArr.Insert("CarBattery");
-        attArr.Insert("CarRadiator");
-        attArr.Insert("EngineBelt");
-        attArr.Insert("SparkPlug");
-
-        SpawnVehicle( "OffroadHatchback", attArr );
-    }
-
-    void SpawnV3SCargo() 
-    {
-        ref array< string> attArr = new ref array< string>;
-        
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("TruckBattery");
-        attArr.Insert("TruckRadiator");
-        attArr.Insert("EngineBelt");
-        attArr.Insert("GlowPlug");
-        attArr.Insert("V3SHood");
-        attArr.Insert("V3SDoors_Driver_Blue");
-        attArr.Insert("V3SDoors_CoDriver_Blue");
-
-        SpawnVehicle( "V3S_Cargo_Blue", attArr );
-    }
-
-    void SpawnV3S() 
-    {
-        ref array< string> attArr = new ref array< string>;
-        
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheel");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("V3SWheelDouble");
-        attArr.Insert("TruckBattery");
-        attArr.Insert("TruckRadiator");
-        attArr.Insert("EngineBelt");
-        attArr.Insert("GlowPlug");
-        attArr.Insert("V3SHood");
-        attArr.Insert("V3SDoors_Driver_Blue");
-        attArr.Insert("V3SDoors_CoDriver_Blue");
-
-        SpawnVehicle( "V3S_Chassis_Blue", attArr );
-    }
-
-    void SpawnVehicle( string vehicle, ref array< string> attachments) 
-    {
-        GetRPCManager().SendRPC( "COT_Game", "SpawnVehicle", new Param3< string, vector, ref array< string> >( vehicle, GetCursorPos(), attachments ), true, NULL, GetGame().GetPlayer() );
+        GetRPCManager().SendRPC( "COT_Game", "SpawnVehicle", new Param2< string, vector >( data.ClassName, GetCursorPos() ), true, NULL, GetGame().GetPlayer() );
     }
 }
