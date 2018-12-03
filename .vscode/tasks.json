@@ -17,7 +17,7 @@
             },
             "command": "deploy.bat",
             "args": [
-                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@CommunityOnlineTools"
+                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@Community Online Tools"
             ],
             "problemMatcher": []
         },
@@ -35,7 +35,7 @@
             },
             "command": "launch.bat",
             "args": [
-                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@CommunityOnlineTools"
+                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@Community Online Tools"
             ],
             "problemMatcher": []
         },
