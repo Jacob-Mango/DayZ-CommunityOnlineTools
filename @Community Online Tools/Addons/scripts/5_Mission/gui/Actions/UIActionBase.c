@@ -9,7 +9,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
     protected bool m_HasCallback;
 
-    protected Class m_Data;
+    protected ref UIActionData m_Data;
 
     void OnWidgetScriptInit( Widget w )
     {
@@ -77,12 +77,12 @@ class UIActionBase extends ScriptedWidgetEventHandler
         return false;
     }
 
-    void SetData( Class cls )
+    void SetData( ref UIActionData data )
     {
-        m_Data = cls;
+        m_Data = data;
     }
 
-    Class GetData()
+    ref UIActionData GetData()
     {
         return m_Data;
     }

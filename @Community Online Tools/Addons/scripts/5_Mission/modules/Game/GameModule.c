@@ -1,10 +1,12 @@
 class GameModule: EditorModule
 {
     protected ref GameSettings settings;
+    protected ref GameMeta meta;
 
     void GameModule()
     {
         GetRPCManager().AddRPC( "COT_Game", "LoadData", this, SingeplayerExecutionType.Client );
+        GetRPCManager().AddRPC( "COT_Game", "SpawnBaseBuilding", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Game", "SpawnVehicle", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Game", "SetOldAiming", this, SingeplayerExecutionType.Client );
         GetRPCManager().AddRPC( "COT_Game", "ThrowApple", this, SingeplayerExecutionType.Client );
@@ -27,9 +29,18 @@ class GameModule: EditorModule
 
         settings = GameSettings.Load();
 
-        for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+        for ( int i = 0; i < GameSettings_Vehicles.Count(); i++ )
         {
-            GetPermissionsManager().RegisterPermission( "Game.Spawn.Vehicle." + settings.Vehicles.GetKey( i ) );
+            string vehicle = GameSettings_Vehicles.GetKey( i );
+            vehicle.Replace( " ", "." );
+            GetPermissionsManager().RegisterPermission( "Game.Spawn.Vehicle." + vehicle );
+        }
+
+        for ( int j = 0; j < GameSettings_BaseBuilding.Count(); j++ )
+        {
+            string base = GameSettings_BaseBuilding.GetKey( j );
+            base.Replace( " ", "." );
+            GetPermissionsManager().RegisterPermission( "Game.Spawn.BaseBuilding." + base );
         }
     }
 
@@ -46,9 +57,14 @@ class GameModule: EditorModule
         return "COT/gui/layouts/Game/GameMenu.layout";
     }
 
-    autoptr map< string, ref array< string > > GetVehicles()
+    ref array< string > GetVehicles()
     {
-        return settings.Vehicles;
+        return meta.Vehicles;
+    }
+
+    ref array< string > GetBaseBuilding()
+    {
+        return meta.BaseBuilding;
     }
 
     override void OnUpdate( float timeslice )
@@ -72,7 +88,7 @@ class GameModule: EditorModule
     {
         if( type == CallType.Server )
         {
-            GetRPCManager().SendRPC( "COT_Game", "LoadData", new Param1< string >( JsonFileLoader<GameSettings>.JsonMakeData( settings ) ), true );
+            GetRPCManager().SendRPC( "COT_Game", "LoadData", new Param1< string >( JsonFileLoader< GameMeta >.JsonMakeData( GameMeta.DeriveFromSettings( settings ) ) ), true );
         }
 
         if( type == CallType.Client )
@@ -80,7 +96,7 @@ class GameModule: EditorModule
             Param1< string > data;
             if ( !ctx.Read( data ) ) return;
 
-            JsonFileLoader<GameSettings>.JsonLoadData( data.param1, settings );
+            JsonFileLoader< GameMeta >.JsonLoadData( data.param1, meta );
         }
     }
 
@@ -126,13 +142,21 @@ class GameModule: EditorModule
         ref Param2< string, vector > data;
         if ( !ctx.Read( data ) ) return;
 
-        ref array< string > attachments = new ref array< string>;
-        if ( !GetVehicles().Find( data.param1, attachments ) )
+        ref GameVehicleFile file = GameSettings_Vehicles.Get( data.param1 );
+
+        if ( file == NULL ) return;
+
+        ref array< string > attachments = file.VehicleParts;
+
+        if ( attachments.Count() == 0 )
         {
             return;
         }
 
         if ( !GetPermissionsManager().HasPermission( "Game.Spawn.Vehicle." + data.param1, sender ) )
+        {
+            return;
+        }
         
         if( type == CallType.Server )
         {
@@ -174,6 +198,69 @@ class GameModule: EditorModule
             m_OldAiming = data.param1;
             
             GetPlayer().OverrideShootFromCamera( !m_OldAiming );
+        }
+    }
+
+    private void SpawnItemAroundPlayer( PlayerBase player, string ClassName, float numStacks, float stackSize )
+    {
+        EntityAI item;
+        ItemBase itemBs
+
+        vector NewPosition;
+        vector OldPosition;
+
+        for ( float i = 0; i < numStacks; i++ )
+        {
+            OldPosition = player.GetPosition();
+
+            NewPosition[0] = OldPosition[0] + ( ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0 );
+            NewPosition[1] = OldPosition[1] + 0.1;
+            NewPosition[2] = OldPosition[2] + ( ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0 );
+
+            item = EntityAI.Cast( GetGame().CreateObject( ClassName, NewPosition, false, true ) );
+            itemBs = ItemBase.Cast( item );
+
+            itemBs.SetQuantity( stackSize );
+        }
+    }
+
+    void SpawnBaseBuilding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        ref Param2< string, ref array< string > > data;
+        if ( !ctx.Read( data ) ) return;
+
+        array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+
+        ref GameBaseBuildingFile file = GameSettings_BaseBuilding.Get( data.param1 );
+
+        if ( file == NULL ) return;
+
+        ref array< ref GameBaseBuildingSpawn > parts = file.BaseBuildingAttachments;
+
+        if ( parts.Count() == 0 )
+        {
+            return;
+        }
+
+        string perm = file.Name;
+        perm.Replace( " ", "." );
+
+        if ( !GetPermissionsManager().HasPermission( "Game.Spawn.BaseBuilding." + perm, sender ) )
+        {
+            return;
+        }
+        
+        if( type == CallType.Server )
+        {
+            for ( int i = 0; i < players.Count(); i++ )
+            {
+                for (int j = 0; j < parts.Count(); j++)
+                {
+                    SpawnItemAroundPlayer( players[i].PlayerObject, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
+                }
+                COTLog( sender, "Spawned basebuilding " + data.param1 + " on " + players[i].GetGUID() );
+            }
+
         }
     }
 }
