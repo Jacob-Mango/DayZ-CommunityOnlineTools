@@ -85,7 +85,7 @@ class COTModule : Module
             }
         }
 
-        if ( !GetPermissionsManager().HasPermission( "COT.Show", NULL ) )
+        if ( !GetPermissionsManager().HasPermission( "COT.Show" ) )
             return;
             
         m_COTMenu.Show();
