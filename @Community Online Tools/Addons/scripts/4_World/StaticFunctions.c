@@ -12,7 +12,7 @@ static bool DISABLE_ALL_INPUT = false;
 
 static void COTLog( AuthPlayer player, string text )
 {
-    text = player.GetGUID() + ": " + text;
+    text = "[COT] " + player.GetGUID() + ": " + text;
 
     if ( GetGame().IsServer() )
     {
@@ -25,7 +25,7 @@ static void COTLog( AuthPlayer player, string text )
 
 static void COTLog( PlayerIdentity player, string text )
 {
-    text = player.GetId() + ": " + text;
+    text = "[COT] " + player.GetId() + ": " + text;
 
     if ( GetGame().IsServer() )
     {
