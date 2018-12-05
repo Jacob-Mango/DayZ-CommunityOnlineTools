@@ -97,6 +97,20 @@ class GameModule: EditorModule
             if ( !ctx.Read( data ) ) return;
 
             JsonFileLoader< GameMeta >.JsonLoadData( data.param1, meta );
+
+            for ( int i = 0; i < meta.Vehicles.Count(); i++ )
+            {
+                string vehicle = meta.Vehicles[i];
+                vehicle.Replace( " ", "." );
+                GetPermissionsManager().RegisterPermission( "Game.Spawn.Vehicle." + vehicle );
+            }
+
+            for ( int j = 0; j < meta.BaseBuilding.Count(); j++ )
+            {
+                string base = meta.BaseBuilding[i];
+                base.Replace( " ", "." );
+                GetPermissionsManager().RegisterPermission( "Game.Spawn.BaseBuilding." + base );
+            }
         }
     }
 

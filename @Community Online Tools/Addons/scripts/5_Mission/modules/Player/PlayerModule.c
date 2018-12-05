@@ -552,6 +552,8 @@ class PlayerModule: EditorModule
 
     void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
+        return;
+
         Param2< bool, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
@@ -568,7 +570,7 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                player.SetGodMode( data.param1 );
+                // player.SetGodMode( data.param1 );
  
                 COTLog( sender, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
             }

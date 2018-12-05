@@ -1,15 +1,15 @@
 
 modded class PlayerBase
 {
-    protected bool m_HasGodeMode;
+    //protected bool m_HasGodeMode;
 
     override void Init()
     {
         super.Init();
 
-        m_HasGodeMode = false;
+        //m_HasGodeMode = false;
 
-        RegisterNetSyncVariableBool( "m_HasGodeMode" );
+        //RegisterNetSyncVariableBool( "m_HasGodeMode" );
     }
 
     /*
@@ -83,6 +83,7 @@ modded class PlayerBase
     }
     */
 
+    /*
     override void EOnFrame( IEntity other, float timeSlice )
     {
         super.EOnFrame( other, timeSlice );
@@ -186,4 +187,5 @@ modded class PlayerBase
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
+    */ 
 }
