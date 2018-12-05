@@ -2,6 +2,8 @@ modded class MissionGameplay
 {
     protected ref CommunityOnlineTools m_Tool;
 
+    protected ref CustomDebugMonitor m_CDebugMonitor;
+
     void MissionGameplay()
     {
         Print( "MissionGameplay::MissionGameplay()" );
@@ -31,6 +33,9 @@ modded class MissionGameplay
         m_Tool.OnFinish();
 
         super.OnMissionFinish();
+
+		if (m_CDebugMonitor)
+			m_CDebugMonitor.Hide();
     }
 
     override void OnUpdate( float timeslice )
@@ -43,7 +48,7 @@ modded class MissionGameplay
         m_Tool.OnUpdate( timeslice );
 
         if ( DISABLE_ALL_INPUT )
-        {            
+        {
             if( input.GetActionDown(UAUIQuickbarRadialOpen, false) )
             {
                 if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
@@ -52,8 +57,56 @@ modded class MissionGameplay
                 }
             }
         }
+
+        if ( m_CDebugMonitor )
+        {
+            if ( COTMenuOpen )
+            {
+                m_CDebugMonitor.Hide();
+            } else 
+            {
+                m_CDebugMonitor.Show();
+            }
+        }
     }
-    
+
+
+	override void CreateDebugMonitor()
+	{
+        super.CreateDebugMonitor();
+
+        if ( m_DebugMonitor )
+        {
+            m_DebugMonitor.Hide();
+            delete m_DebugMonitor;
+        }
+
+		if (!m_CDebugMonitor)
+		{
+			m_CDebugMonitor = new CustomDebugMonitor();
+			m_CDebugMonitor.Init();
+            m_CDebugMonitor.Show();
+		}
+	}
+
+    override void UpdateDebugMonitor()
+    {
+		if (!m_CDebugMonitor) return;
+		
+		PlayerBase player = PlayerBase.Cast( GetGame().GetPlayer() );
+		if (player)
+		{
+			DebugMonitorValues values = player.GetDebugMonitorValues();
+			if (values)
+			{
+				m_CDebugMonitor.SetHealth(values.GetHealth());
+				m_CDebugMonitor.SetBlood(values.GetBlood());
+				m_CDebugMonitor.SetLastDamage(values.GetLastDamage());
+				m_CDebugMonitor.SetPosition(player.GetPosition());
+			}
+		}
+    }
+
     override void ShowInventory()
     {
         if ( DISABLE_ALL_INPUT ) return;

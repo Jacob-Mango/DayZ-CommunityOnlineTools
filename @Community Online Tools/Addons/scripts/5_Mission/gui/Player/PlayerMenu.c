@@ -438,6 +438,7 @@ class PlayerMenu extends Form
 
     bool OnPlayerSelected( ref PlayerRow row, bool select = true )
     {
+        Print("Failing here? 1");
         if ( row == NULL )
         {
             UpdateActionsFields( NULL );
@@ -451,44 +452,57 @@ class PlayerMenu extends Form
 
             LoadPermissions( NULL );
 
+        Print("Failing here? 2");
             return false;
         } else 
         {
+        Print("Failing here? 3");
             int position = -1;
 
             if ( select )
             {
+        Print("Failing here? 4");
                 position = AddSelectedPlayer( row.GetPlayer() );
+        Print("Failing here? 4.1");
 
                 if ( GetSelectedPlayers().Count() == 1 )
                 {
                     UpdateActionsFields( row.GetPlayer().Data );
 
+        Print("Failing here? 4.2");
                     LoadPermissions( GetSelectedPlayers()[0].RootPermission );
                 }
+        Print("Failing here? 5");
 
                 row.Checkbox.SetChecked( true );
+        Print("Failing here? 7");
 
                 return true;
             } else
             {
+        Print("Failing here? 8");
                 position = RemoveSelectedPlayer( row.GetPlayer() );
 
                 if ( position == 0 )
                 {
+        Print("Failing here? 9");
                     if (GetSelectedPlayers().Count() > 0 )
                     {
+        Print("Failing here? 10");
                         UpdateActionsFields( GetSelectedPlayers()[0].Data );
                         LoadPermissions( GetSelectedPlayers()[0].RootPermission );
                     } else 
                     {
+        Print("Failing here? 11");
                         UpdateActionsFields( NULL );
                         LoadPermissions( NULL );
                     }
+        Print("Failing here? 12");
                 }
 
                 row.Checkbox.SetChecked( false );
 
+        Print("Failing here? 13");
                 return true;
             }
         }
@@ -555,17 +569,21 @@ class PlayerMenu extends Form
 
     void LoadPermissions( ref Permission permission )
     {
+        Print(" Failer 1" );
         if ( permission == NULL )
         {
             LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI, false );
         } else 
         {
+        Print(" Failer 2" );
             LoadPermission( permission, m_PermissionUI, true );
         }
     }
 
     protected void LoadPermission( ref Permission perm, ref PermissionRow row, bool enabled  )
     {
+        if ( !row ) return;
+
         if ( enabled )
         {
             row.SetPermission( perm );
@@ -574,7 +592,19 @@ class PlayerMenu extends Form
             row.SetPermission( NULL );
         }
 
-        for ( int i = 0; i < row.Children.Count(); i++ )
+        int count = 0;
+
+        if ( row.Children.Count() < perm.Children.Count() )
+        {
+            count = row.Children.Count();
+        }
+
+        if ( row.Children.Count() >= perm.Children.Count() )
+        {
+            count = perm.Children.Count();
+        }
+
+        for ( int i = 0; i < count; i++ )
         {
             LoadPermission( perm.Children[i], row.Children[i], enabled );
         }
