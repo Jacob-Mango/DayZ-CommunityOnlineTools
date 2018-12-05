@@ -41,7 +41,7 @@ modded class MissionServer
     {
         super.OnPreloadEvent( identity, useDB, pos, yaw, queueTime );
 
-        queueTime = 0;
+        // queueTime = 0;
     }
 
     override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
