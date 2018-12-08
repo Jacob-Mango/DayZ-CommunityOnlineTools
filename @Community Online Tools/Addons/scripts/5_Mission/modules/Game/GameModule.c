@@ -215,27 +215,75 @@ class GameModule: EditorModule
         }
     }
 
-    private void SpawnItemAroundPlayer( PlayerBase player, string ClassName, float numStacks, float stackSize )
+    private bool DetermineWillFit( EntityAI fittingCargo, string ClassName )
+    {
+        TIntArray values = new TIntArray;
+        GetGame().ConfigGetIntArray( "CfgVehicles " + ClassName + " itemSize", values );
+
+        if ( values.Count() != 2 ) return false;
+
+        int iwidth = values[0];
+        int iheight = values[1];
+
+        CargoBase cargo = fittingCargo.GetInventory().GetCargo();
+
+        int cwidth = cargo.GetWidth();
+        int cheight = cargo.GetHeight();
+
+        if ( iwidth > cwidth ) return false;
+        if ( iheight > cheight ) return false;
+
+        return true;
+    }
+
+    private EntityAI SpawnItem( PlayerBase player, string ClassName )
+    {
+        vector position = player.GetPosition();
+
+        position[0] = position[0] + ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0;
+        position[1] = position[1] + 0.1;
+        position[2] = position[2] + ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0;
+
+        return EntityAI.Cast( GetGame().CreateObject( ClassName, position, false, true, true ) );
+    }
+
+    private EntityAI SpawnItemInSeaChest( PlayerBase player, EntityAI chest, string ClassName, float numStacks, float stackSize )
     {
         EntityAI item;
-        ItemBase itemBs
-
-        vector NewPosition;
-        vector OldPosition;
+        ItemBase itemBs;
 
         for ( float i = 0; i < numStacks; i++ )
         {
-            OldPosition = player.GetPosition();
+            item = EntityAI.Cast( chest.GetInventory().CreateInInventory( ClassName ) );
 
-            NewPosition[0] = OldPosition[0] + ( ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0 );
-            NewPosition[1] = OldPosition[1] + 0.1;
-            NewPosition[2] = OldPosition[2] + ( ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0 );
+            if ( item )
+            {
+                itemBs = ItemBase.Cast( item );
 
-            item = EntityAI.Cast( GetGame().CreateObject( ClassName, NewPosition, false, true ) );
-            itemBs = ItemBase.Cast( item );
+                itemBs.SetQuantity( stackSize );
+            } else 
+            {
+                if ( DetermineWillFit( chest, ClassName ) )
+                {
+                    chest = SpawnItem( player, "SeaChest" );
 
-            itemBs.SetQuantity( stackSize );
+                    item = EntityAI.Cast( chest.GetInventory().CreateInInventory( ClassName ) );
+
+                    itemBs = ItemBase.Cast( item );
+
+                    itemBs.SetQuantity( stackSize );
+                } else
+                {
+                    item = SpawnItem( player, ClassName );
+
+                    itemBs = ItemBase.Cast( item );
+
+                    itemBs.SetQuantity( stackSize );
+                }
+            }
         }
+
+        return chest;
     }
 
     void SpawnBaseBuilding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -268,10 +316,13 @@ class GameModule: EditorModule
         {
             for ( int i = 0; i < players.Count(); i++ )
             {
+                EntityAI chest = SpawnItem( players[i].PlayerObject, "SeaChest" );
+
                 for (int j = 0; j < parts.Count(); j++)
                 {
-                    SpawnItemAroundPlayer( players[i].PlayerObject, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
+                    chest = SpawnItemInSeaChest( players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
                 }
+
                 COTLog( sender, "Spawned basebuilding " + data.param1 + " on " + players[i].GetGUID() );
             }
 
