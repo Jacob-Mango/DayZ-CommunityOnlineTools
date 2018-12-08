@@ -291,7 +291,7 @@ class GameModule: EditorModule
         ref Param2< string, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
-        array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+        array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
         ref GameBaseBuildingFile file = GameSettings_BaseBuilding.Get( data.param1 );
 

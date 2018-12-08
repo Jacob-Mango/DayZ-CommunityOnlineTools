@@ -75,7 +75,7 @@ class ObjectModule: EditorModule
         
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param3 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param3 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
