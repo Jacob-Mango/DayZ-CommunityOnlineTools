@@ -125,7 +125,7 @@ class TeleportModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             vector position = "0 0 0";
 

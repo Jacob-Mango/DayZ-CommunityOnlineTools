@@ -75,7 +75,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -100,7 +100,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -125,7 +125,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -150,7 +150,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -175,7 +175,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -200,7 +200,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -225,7 +225,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -250,7 +250,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -275,7 +275,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -300,7 +300,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -328,7 +328,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -353,7 +353,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param1 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -401,7 +401,7 @@ class PlayerModule: EditorModule
         {
             array< Transport > completedTransports = new array< Transport >;
 
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param1 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -453,7 +453,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -484,7 +484,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param1 );
 
             if ( players.Count() != 1 ) return;
 
@@ -517,7 +517,7 @@ class PlayerModule: EditorModule
                 return;
             }
 
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             if ( players.Count() != 1 ) return;
 
@@ -562,7 +562,7 @@ class PlayerModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < players.Count(); i++ )
             {
@@ -593,7 +593,7 @@ class PlayerModule: EditorModule
             ref array< string > guids = new ref array< string >;
             guids.Copy( data.param2 );
 
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             for ( int i = 0; i < guids.Count(); i++ )
             {
@@ -631,7 +631,7 @@ class PlayerModule: EditorModule
             ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > auPlayers = DeserializePlayersID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
@@ -651,7 +651,7 @@ class PlayerModule: EditorModule
             ref Param1< ref array< string > > data;
             if ( !ctx.Read( data ) ) return;
 
-            array< ref AuthPlayer > auPlayers = DeserializePlayersGUID( data.param1 );
+            array< ref AuthPlayer > auPlayers = DeserializePlayersID( data.param1 );
 
             for ( int i = 0; i < auPlayers.Count(); i++ )
             {
