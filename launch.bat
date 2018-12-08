@@ -6,7 +6,7 @@ set modName=%~3
 
 set multiplayer=1
 
-set profiles=%serverDir%\profiles\Server
+set profiles=%serverDir%\ServerProfile
 
 IF %multiplayer%==1 (
     taskkill /F /IM DayZ_x64.exe /T
