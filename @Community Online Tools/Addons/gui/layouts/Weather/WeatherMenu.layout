@@ -3,7 +3,7 @@ PanelWidgetClass WeatherMenu
     visible 0
     color 0 0 0 0
     position 0 0
-    size 570 250
+    size 570 190
     hexactpos 0
     vexactpos 0
     hexactsize 1
@@ -11,72 +11,14 @@ PanelWidgetClass WeatherMenu
     scriptclass "WeatherMenu"
     style EditorPanel
     {
-        TextWidgetClass txt_ppp_st_w_time
-        {
-            position 5 30
-            size 1 20
-            hexactpos 1
-            vexactpos 1
-            hexactsize 0
-            vexactsize 1
-            text "Weather Time:"
-            font "gui/fonts/Metron"
-            "exact text" 1
-            "text valign" center
-            {
-                TextWidgetClass txt_ppp_st_w_time_value
-                {
-                    position 0.3 0
-                    size 0.7 1
-                    hexactpos 0
-                    vexactpos 1
-                    hexactsize 0
-                    vexactsize 0
-                    text "153"
-                    "exact text" 1
-                    "text valign" center
-                }
-            }
-        }
-
-        TextWidgetClass txt_ppp_st_w_air_temp
-        {
-            position 5 50
-            size 1 20
-            hexactpos 1
-            vexactpos 1
-            hexactsize 0
-            vexactsize 1
-            text "Air Temperature:"
-            font "gui/fonts/Metron"
-            "exact text" 1
-            "text valign" center
-
-            {
-                TextWidgetClass txt_ppp_st_w_air_temp_value
-                {
-                    position 0.3 0
-                    size 0.7 1
-                    hexactpos 0
-                    vexactpos 1
-                    hexactsize 0
-                    vexactsize 0
-                    text "18"
-                    "exact text" 1
-                    "text valign" center
-                }
-            }
-        }
-
         PanelWidgetClass slider_wrapper
         {
-            position 5 72
+            position 5 5
             size 560 1
             hexactpos 1
             vexactpos 1
             hexactsize 1
             vexactsize 0
-
             {
                 TextWidgetClass txt_ppp_st_start_time
                 {
@@ -90,7 +32,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_start_time
                         {
@@ -101,7 +42,6 @@ PanelWidgetClass WeatherMenu
                             hexactsize 0
                             vexactsize 0
                             style Editor
-
                             {
                                 TextWidgetClass txt_ppp_st_start_time_value
                                 {
@@ -122,7 +62,6 @@ PanelWidgetClass WeatherMenu
                         }
                     }
                 }
-
                 TextWidgetClass txt_ppp_st_start_day
                 {
                     position 0 25
@@ -135,7 +74,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_start_day
                         {
@@ -146,7 +84,6 @@ PanelWidgetClass WeatherMenu
                             hexactsize 0
                             vexactsize 0
                             style Editor
-
                             {
                                 TextWidgetClass txt_ppp_st_start_day_value
                                 {
@@ -167,7 +104,6 @@ PanelWidgetClass WeatherMenu
                         }
                     }
                 }
-
                 TextWidgetClass txt_ppp_st_overcast
                 {
                     position 0 50
@@ -180,7 +116,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_overcast
                         {
@@ -191,7 +126,6 @@ PanelWidgetClass WeatherMenu
                             hexactsize 0
                             vexactsize 0
                             style Editor
-
                             {
                                 TextWidgetClass txt_ppp_st_overcast_value
                                 {
@@ -212,7 +146,6 @@ PanelWidgetClass WeatherMenu
                         }
                     }
                 }
-
                 TextWidgetClass txt_ppp_st_rain
                 {
                     position 0 75
@@ -225,7 +158,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_rain
                         {
@@ -236,9 +168,7 @@ PanelWidgetClass WeatherMenu
                             hexactsize 0
                             vexactsize 0
                             style Editor
-
                             {
-
                                 TextWidgetClass txt_ppp_st_rain_value
                                 {
                                     size 1 1
@@ -258,7 +188,6 @@ PanelWidgetClass WeatherMenu
                         }
                     }
                 }
-
                 TextWidgetClass txt_ppp_st_fog
                 {
                     position 0 100
@@ -271,7 +200,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_fog
                         {
@@ -282,7 +210,6 @@ PanelWidgetClass WeatherMenu
                             hexactsize 0
                             vexactsize 0
                             style Editor
-
                             {
                                 TextWidgetClass txt_ppp_st_fog_value
                                 {
@@ -303,7 +230,6 @@ PanelWidgetClass WeatherMenu
                         }
                     }
                 }
-
                 TextWidgetClass txt_ppp_st_wind_force
                 {
                     position 0 125
@@ -316,7 +242,6 @@ PanelWidgetClass WeatherMenu
                     font "gui/fonts/Metron"
                     "exact text" 1
                     "text valign" center
-
                     {
                         SliderWidgetClass sld_ppp_st_wind_force
                         {
@@ -349,7 +274,6 @@ PanelWidgetClass WeatherMenu
                 }
             }
         }
-
         ButtonWidgetClass btn_save
         {
             position 5 5
