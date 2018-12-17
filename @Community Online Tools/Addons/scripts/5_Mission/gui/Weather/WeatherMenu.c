@@ -4,8 +4,6 @@ class WeatherMenu extends Form
 
     protected ButtonWidget m_BtnSave;
     protected ButtonWidget m_BtnCancel;
-    protected TextWidget m_TxtWeatherTime;
-    protected TextWidget m_TxtAirTemperature;
     protected SliderWidget m_SldStartTime;
     protected TextWidget m_TxtStartTimeValue;
     protected SliderWidget m_SldStartDay;
@@ -51,9 +49,6 @@ class WeatherMenu extends Form
     {
         m_BtnSave            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_save" ) );
         m_BtnCancel            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_cancel" ) );
-
-        m_TxtWeatherTime    = TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_w_time_value" ) );
-        m_TxtAirTemperature    = TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_w_air_temp_value" ) );
 
         m_SldStartTime        = SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_start_time" ) );
         m_TxtStartTimeValue    = TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_start_time_value" ) );
@@ -238,11 +233,6 @@ class WeatherMenu extends Form
 
     void Update()
     {
-        if ( m_TxtWeatherTime )
-            m_TxtWeatherTime.SetText( GetGame().GetWeather().GetTime().ToString() );
-
-        if ( m_TxtAirTemperature )
-            m_TxtAirTemperature.SetText( GetGame().GetWeather().GetAirTemperature().ToString() );
     }
 
     void ResetSliders()
