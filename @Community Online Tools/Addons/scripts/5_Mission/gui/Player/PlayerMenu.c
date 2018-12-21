@@ -400,6 +400,11 @@ class PlayerMenu extends Form
             m_CanUpdateList = false;
             UpdatePlayerList();
             m_CanUpdateList = true;
+
+            if ( GetSelectedPlayers().Count() > 0 )
+            {
+                GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ), true );
+            }
         }
 
         ReloadPlayers();
@@ -436,9 +441,9 @@ class PlayerMenu extends Form
         }
     }
 
-    bool OnPlayerSelected( ref PlayerRow row, bool select = true )
+    bool OnPlayerSelected( ref AuthPlayer player, bool select = true )
     {
-        if ( row == NULL )
+        if ( player == NULL )
         {
             UpdateActionsFields( NULL );
 
@@ -458,21 +463,19 @@ class PlayerMenu extends Form
 
             if ( select )
             {
-                position = AddSelectedPlayer( row.GetPlayer() );
+                position = AddSelectedPlayer( player );
 
                 if ( GetSelectedPlayers().Count() == 1 )
                 {
-                    UpdateActionsFields( row.GetPlayer().Data );
+                    UpdateActionsFields( player.Data );
 
                     LoadPermissions( GetSelectedPlayers()[0].RootPermission );
                 }
 
-                row.Checkbox.SetChecked( true );
-
                 return true;
             } else
             {
-                position = RemoveSelectedPlayer( row.GetPlayer() );
+                position = RemoveSelectedPlayer( player );
 
                 if ( position == 0 )
                 {
@@ -486,8 +489,6 @@ class PlayerMenu extends Form
                         LoadPermissions( NULL );
                     }
                 }
-
-                row.Checkbox.SetChecked( false );
 
                 return true;
             }
@@ -662,7 +663,12 @@ class PlayerMenu extends Form
 
                 if ( PlayerAlreadySelected( players[i] ) )
                 {
-                    OnPlayerSelected( rowScript, true );
+                    OnPlayerSelected( rowScript.GetPlayer(), true );
+                    rowScript.Checkbox.SetChecked( true );
+                } else
+                {
+                    OnPlayerSelected( rowScript.GetPlayer(), false );
+                    rowScript.Checkbox.SetChecked( false );
                 }
             }
         }

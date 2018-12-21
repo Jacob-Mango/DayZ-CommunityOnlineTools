@@ -4,7 +4,7 @@ set gameDir=%~1
 set serverDir=%~2
 set modName=%~3
 
-set multiplayer=0
+set multiplayer=1
 
 set profiles=%serverDir%\ServerProfile
 
@@ -22,7 +22,7 @@ IF %multiplayer%==1 (
     TIMEOUT /T 5 /NOBREAK
 
     chdir /d "%gameDir%"
-    start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -password=abc123 -freezecheck "-mod=!Workshop\@RPCFramework;!Workshop\@Permissions Framework;%modName%"
+    start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -password=abc123 -freezecheck "-mod=!Workshop\@RPCFramework;@Permissions Framework;%modName%"
 ) ELSE IF %multiplayer%==2 (
     Powershell.exe -File "%cd%\Tools\exit.ps1" @RPCFramework %modName%
 
