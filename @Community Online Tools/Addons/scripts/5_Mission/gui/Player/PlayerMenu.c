@@ -428,14 +428,14 @@ class PlayerMenu extends Form
 
     void OnPlayer_Checked( ref PlayerRow row )
     {
-        OnPlayerSelected( row, row.Checkbox.IsChecked() );
+        OnPlayerSelected( row.GetPlayer(), row.Checkbox.IsChecked() );
     }
 
     void OnPlayer_Button( ref PlayerRow row )
     {
         OnPlayerSelected( NULL );
 
-        if ( OnPlayerSelected( row ) )
+        if ( OnPlayerSelected( row.GetPlayer() ) )
         {
             row.Checkbox.SetChecked( true );
         }
@@ -558,40 +558,26 @@ class PlayerMenu extends Form
     {
         if ( permission == NULL )
         {
-            LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI, false );
+            LoadPermission( GetPermissionsManager().GetRootPermission(), false );
         } else 
         {
-            LoadPermission( permission, m_PermissionUI, true );
+            LoadPermission( permission, true );
         }
     }
 
-    protected void LoadPermission( ref Permission perm, ref PermissionRow row, bool enabled  )
+    protected void LoadPermission( ref Permission perm, bool enabled  )
     {
-        if ( !row ) return;
-
         if ( enabled )
         {
-            row.SetPermission( perm );
+            m_PermissionUI.GetPermission( perm.GetFullName() ).SetPermission( perm );
         } else 
         {
-            row.SetPermission( NULL );
+            m_PermissionUI.GetPermission( perm.GetFullName() ).SetPermission( NULL );
         }
 
-        int count = 0;
-
-        if ( row.Children.Count() < perm.Children.Count() )
+        for ( int i = 0; i < perm.Children.Count(); i++ )
         {
-            count = row.Children.Count();
-        }
-
-        if ( row.Children.Count() >= perm.Children.Count() )
-        {
-            count = perm.Children.Count();
-        }
-
-        for ( int i = 0; i < count; i++ )
-        {
-            LoadPermission( perm.Children[i], row.Children[i], enabled );
+            LoadPermission( perm.Children[i], enabled );
         }
     }
 
