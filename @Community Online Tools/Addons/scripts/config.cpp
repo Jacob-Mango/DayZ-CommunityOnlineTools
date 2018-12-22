@@ -7,7 +7,7 @@ class CfgPatches
         requiredVersion=0.1;
         requiredAddons[]=
         {
-            "RPC_Scripts", "Permissions_Framework_Scripts", "COT_GUI", "DZ_Data"
+            "RPC_Scripts", "JM_Permissions_Framework_Scripts", "COT_GUI", "DZ_Data"
         };
     };
 };

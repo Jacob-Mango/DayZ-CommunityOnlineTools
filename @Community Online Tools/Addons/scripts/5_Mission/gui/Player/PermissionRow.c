@@ -145,4 +145,42 @@ class PermissionRow extends ScriptedWidgetEventHandler
             }
         }
     }
+    
+    ref PermissionRow GetPermission( string inp )
+    {
+        array<string> tokens = new array<string>;
+        inp.Split( ".", tokens );
+        
+        int depth = tokens.Find( Name );
+
+        if ( depth > -1 )
+        {
+            return Get( tokens, depth + 1 );
+        } else 
+        {
+            return Get( tokens, 0 );
+        }
+    }
+
+    private ref PermissionRow Get( array<string> tokens, int depth )
+    {
+        if ( depth < tokens.Count() )
+        {
+            for ( int i = 0; i < Children.Count(); i++ )
+            {
+                if ( Children[i].Name == tokens[depth] )
+                {
+                    if ( depth < tokens.Count() - 1 )
+                    {
+                        return Children[i].Get( tokens, depth + 1 );
+                    } else
+                    {
+                        return Children[i];
+                    }
+                }
+            }
+        }
+        Print("Should not be reached!");
+        return NULL;
+    }
 }
