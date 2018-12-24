@@ -2,10 +2,9 @@ class PlayerRow extends ScriptedWidgetEventHandler
 {
     protected ref Widget layoutRoot;
 
-    TextWidget      Name;
-
-    ButtonWidget    Button;
-    CheckBoxWidget  Checkbox;
+    ref TextWidget      Name;
+    ref ButtonWidget    Button;
+    ref CheckBoxWidget  Checkbox;
 
     ref AuthPlayer  Player;
 
@@ -22,7 +21,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void Init() 
     {
         Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
-
         Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button"));
         Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("checkbox"));
     }
@@ -30,12 +28,18 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void Show()
     {
         layoutRoot.Show( true );
+        Button.Show( true );
+        Checkbox.Show( true );
+        Name.Show( true );
         OnShow();
     }
 
     void Hide()
     {
         OnHide();
+        Name.Show( false );
+        Button.Show( false );
+        Checkbox.Show( false );
         layoutRoot.Show( false );
     }
 
