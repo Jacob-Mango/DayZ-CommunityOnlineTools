@@ -7,6 +7,12 @@ class ObjectModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Object.Spawn.Position" );
         GetPermissionsManager().RegisterPermission( "Object.Spawn.Inventory" );
+        GetPermissionsManager().RegisterPermission( "Object.View" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Object.View" );
     }
 
     override string GetLayoutRoot()

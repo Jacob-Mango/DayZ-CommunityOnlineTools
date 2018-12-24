@@ -182,14 +182,16 @@ class COTMenu
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
         
         Form form;
+        EditorModule module;
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
-            EditorModule module = m_Modules.Get( i );
+            module = m_Modules.Get( i );
 
             if ( w == module.menuButton )
             {
                 form = module.form;
+                break;
             }
         }
 
@@ -199,7 +201,7 @@ class COTMenu
             {
                 form.Hide();
             }
-            else 
+            else if ( module.HasAccess() )
             {
                 form.Show();
             }
