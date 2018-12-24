@@ -111,6 +111,8 @@ class COTModule : Module
 
     void FocusUI()
     {
+        if ( m_COTMenu == NULL ) return;
+        
         if( m_COTMenu.IsVisible() )
         {
             m_COTMenu.SetInputFocus( false );
@@ -119,6 +121,8 @@ class COTModule : Module
 
     void FocusGame()
     {
+        if ( m_COTMenu == NULL ) return;
+
         if( m_COTMenu.IsVisible() )
         {
             Widget w = GetWidgetUnderCursor();

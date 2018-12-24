@@ -517,7 +517,7 @@ class PlayerMenu extends Form
         {
             m_PermissionList.Clear();
 
-            m_PermissionUI.Set( rootPerm, 0 );
+            m_PermissionUI.InitPermission( rootPerm, 0 );
 
             InitPermissionUIRow( rootPerm, 0, m_PermissionUI );
         }
@@ -549,7 +549,7 @@ class PlayerMenu extends Form
             if ( rowScript )
             {
                 m_PermissionList.Insert( rowScript );
-                rowScript.Set( cPerm, depth );
+                rowScript.InitPermission( cPerm, depth );
 
                 parentRow.Children.Insert( rowScript );
                 rowScript.Parent = parentRow;
