@@ -587,6 +587,7 @@ class PlayerMenu extends Form
             {
                 m_PermissionUI.SetPermission( permissions[j] );
             }
+            m_PermissionUI.Enable();
         }
     }
 
@@ -662,7 +663,7 @@ class PlayerMenu extends Form
 
             if ( PlayerAlreadySelected( players[i] ) )
             {
-                OnPlayerSelected( players[i], true );
+                // OnPlayerSelected( players[i], true );
                 m_PlayerList[i].Checkbox.SetChecked( true );
             } else
             {
