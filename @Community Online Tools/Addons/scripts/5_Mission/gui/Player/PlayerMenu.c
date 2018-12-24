@@ -109,6 +109,7 @@ class PlayerMenu extends Form
         m_PingMin = UIActionManager.CreateText( pings, "Ping Min: ", "" );
         m_PingMax = UIActionManager.CreateText( pings, "Ping Max: ", "" );
         m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
+        pings.Show( false ); // because this doesn't work
 
         ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 3, 2 );
         m_Health = UIActionManager.CreateEditableText( playerActions, "Health: ", this, "Click_SetHealth", "", "Set" );
@@ -649,10 +650,8 @@ class PlayerMenu extends Form
     void UpdatePlayerList()
     {
         array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
-
-        int max = m_PlayerList.Count();
         
-        for ( int k = 0; k < m_PlayerList; k++ )
+        for ( int k = 0; k < m_PlayerList.Count(); k++ )
         {
             m_PlayerList[k].SetPlayer( NULL );
         }
