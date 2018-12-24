@@ -4,7 +4,11 @@ class PlayerMenu extends Form
     ref array< ref PermissionRow >  m_PermissionList;
 
     ref TextWidget                  m_PlayerCount;
-    ref GridSpacerWidget            m_PlayerScriptList;
+    ref GridSpacerWidget            m_PlayerScriptListFirst;
+    int                             m_PlayersInFirst;
+    ref GridSpacerWidget            m_PlayerScriptListSecond;
+    int                             m_PlayersInSecond;
+    int                             m_UserID;
 
     ref Widget                      m_ActionsWrapper;
     ref Widget                      m_ActionsForm;
@@ -86,7 +90,11 @@ class PlayerMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
-        m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_PlayerScriptListFirst = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_first"));
+        m_PlayerScriptListSecond = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_second"));
+        m_PlayersInFirst = 0;
+        m_PlayersInSecond = 0;
+        m_UserID = 2000;
 
         m_PlayerCount = TextWidget.Cast(layoutRoot.FindAnyWidget("player_count"));
 
@@ -376,6 +384,8 @@ class PlayerMenu extends Form
         {
             SetupPermissionsUI();
 
+            CreatePlayerList();
+
             m_PermissionsLoaded = true;
         }
 
@@ -584,76 +594,81 @@ class PlayerMenu extends Form
         GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
+    void CreatePlayerList()
+    {
+        ref Widget playerRow = NULL;
+        ref PlayerRow rowScript = NULL;
+
+        for ( int i = 0; i < 100; i++ )
+        {
+            rowScript = NULL;
+            playerRow = NULL;
+
+            playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListFirst );
+            
+            if ( playerRow == NULL ) continue;
+
+            m_UserID++;
+
+            playerRow.SetUserID( m_UserID );
+            playerRow.GetScript( rowScript );
+
+            if ( rowScript == NULL ) continue;
+
+            rowScript.SetPlayer( NULL );
+
+            rowScript.Menu = this;
+
+            m_PlayerList.Insert( rowScript );
+        }
+
+        for ( i = 0; i < 100; i++ )
+        {
+            rowScript = NULL;
+            playerRow = NULL;
+
+            playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListSecond );
+            
+            if ( playerRow == NULL ) continue;
+
+            m_UserID++;
+
+            playerRow.SetUserID( m_UserID );
+            playerRow.GetScript( rowScript );
+
+            if ( rowScript == NULL ) continue;
+
+            rowScript.SetPlayer( NULL );
+
+            rowScript.Menu = this;
+
+            m_PlayerList.Insert( rowScript );
+        }                
+    }
+
     void UpdatePlayerList()
-    {       
+    {
         array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
 
         int max = m_PlayerList.Count();
         
-        for ( int k = 0; k < max; k++ )
+        for ( int k = 0; k < m_PlayerList; k++ )
         {
-            bool found = false;
-
-            for ( int l = 0; l < players.Count(); l++ )
-            {
-                if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if ( !found )
-            {
-                m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
-                m_PlayerList[k].GetLayoutRoot().Unlink();
-
-                m_PlayerList.Remove( k );
-                k--;
-                max = m_PlayerList.Count();
-            }
+            m_PlayerList[k].SetPlayer( NULL );
         }
 
         for ( int i = 0; i < players.Count(); i++ )
         {
-            bool exists = false;
+            m_PlayerList[i].SetPlayer( players[i] );
 
-            ref PlayerRow rowScript;
-
-            for ( int j = 0; j < m_PlayerList.Count(); j++ )
+            if ( PlayerAlreadySelected( players[i] ) )
             {
-                if ( m_PlayerList[j].Player.GetGUID() == players[i].GetGUID() )
-                {
-                    rowScript = m_PlayerList[j];
-                    exists = true;
-                    break;
-                }
-            }
-
-            if ( exists )
-            {
-                rowScript.SetPlayer( players[i] );
+                OnPlayerSelected( players[i], true );
+                m_PlayerList[i].Checkbox.SetChecked( true );
             } else
             {
-                Widget playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
-
-                playerRow.GetScript( rowScript );
-                
-                rowScript.SetPlayer( players[i] );
-
-                rowScript.Menu = this;
-
-                m_PlayerList.Insert( rowScript );
-
-                if ( PlayerAlreadySelected( players[i] ) )
-                {
-                    OnPlayerSelected( rowScript.GetPlayer(), true );
-                    rowScript.Checkbox.SetChecked( true );
-                } else
-                {
-                    OnPlayerSelected( rowScript.GetPlayer(), false );
-                    rowScript.Checkbox.SetChecked( false );
-                }
+                OnPlayerSelected( players[i], false );
+                m_PlayerList[i].Checkbox.SetChecked( false );
             }
         }
 
@@ -666,10 +681,10 @@ class PlayerMenu extends Form
 
         if ( playerCount == 1 )
         {
-            m_PlayerCount.SetText( "1 PLAYER" );
+            m_PlayerCount.SetText( "1 Online" );
         } else 
         {
-            m_PlayerCount.SetText( playerCount + " PLAYERS" );
+            m_PlayerCount.SetText( "" + playerCount + " Online" );
         }
     }
 }
