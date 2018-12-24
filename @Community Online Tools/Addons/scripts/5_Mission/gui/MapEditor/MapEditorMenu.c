@@ -29,7 +29,7 @@ class MapEditorMenu
     
     Widget Init()
     {
-        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "COT\\gui\\layouts\\Map\\MapMenu.layout" );
+        layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\Map\\MapMenu.layout" );
         layoutRoot.Show( false );
 
         ref Widget objectInfoWrapper = layoutRoot.FindAnyWidget( "object_info_wrapper" );

@@ -54,7 +54,7 @@ class GameModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Game/GameMenu.layout";
+        return "JM/COT/gui/layouts/Game/GameMenu.layout";
     }
 
     ref array< string > GetVehicles()
@@ -174,6 +174,20 @@ class GameModule: EditorModule
         
         if( type == CallType.Server )
         {
+            #ifdef HELICOPTERS
+            PlayerBase player = PlayerBase.Cast( target );
+			JM_UH1Y heli = GetGame().CreateObject( "JM_UH1Y", data.param2 + "0 2 0" );
+		
+			HumanCommandVehicle vehCommand = player.StartCommand_Vehicle(heli, 0, 0);
+			if( vehCommand )
+			{
+				vehCommand.SetVehicleType(heli.GetAnimInstance());
+				player.GetItemAccessor().HideItemInHands(true);
+
+				heli.EngineStart();
+				heli.AutohoverOn();
+			}
+            #else
             Car oCar = Car.Cast( GetGame().CreateObject( data.param1, data.param2 ) );
 
             for (int j = 0; j < attachments.Count(); j++)
@@ -185,6 +199,8 @@ class GameModule: EditorModule
             FillCar( oCar, CarFluid.OIL );
             FillCar( oCar, CarFluid.BRAKE );
             FillCar( oCar, CarFluid.COOLANT );
+            #endif
+
 
             COTLog( sender, "Spawned vehicle " + data.param1 + " at " + data.param2.ToString() );
         }
@@ -291,7 +307,7 @@ class GameModule: EditorModule
         ref Param2< string, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
-        array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+        array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
         ref GameBaseBuildingFile file = GameSettings_BaseBuilding.Get( data.param1 );
 

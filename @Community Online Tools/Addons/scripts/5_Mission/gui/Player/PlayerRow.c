@@ -2,10 +2,9 @@ class PlayerRow extends ScriptedWidgetEventHandler
 {
     protected ref Widget layoutRoot;
 
-    TextWidget      Name;
-
-    ButtonWidget    Button;
-    CheckBoxWidget  Checkbox;
+    ref TextWidget      Name;
+    ref ButtonWidget    Button;
+    ref CheckBoxWidget  Checkbox;
 
     ref AuthPlayer  Player;
 
@@ -22,7 +21,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void Init() 
     {
         Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
-
         Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button"));
         Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("checkbox"));
     }
@@ -30,12 +28,18 @@ class PlayerRow extends ScriptedWidgetEventHandler
     void Show()
     {
         layoutRoot.Show( true );
+        Button.Show( true );
+        Checkbox.Show( true );
+        Name.Show( true );
         OnShow();
     }
 
     void Hide()
     {
         OnHide();
+        Name.Show( false );
+        Button.Show( false );
+        Checkbox.Show( false );
         layoutRoot.Show( false );
     }
 
@@ -61,23 +65,30 @@ class PlayerRow extends ScriptedWidgetEventHandler
     {
         Player = player;
         
-        if ( Player == NULL ) return;
-
-        Name.SetText( Player.GetName() );
-
-
-        if ( GetGame().GetPlayer() == NULL ) return;
-
-        if ( !GetGame().IsMultiplayer() )
+        if ( Player == NULL ) 
         {
-            Name.SetColor( COLOR_GREEN );
-            return;
-        }
-
-        if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
+            Hide();
+        } else 
         {
-            Name.SetColor( COLOR_GREEN );
-            return;
+            Show();
+
+            Name.SetText( Player.GetName() );
+
+            if ( GetGame().GetPlayer() == NULL ) return;
+
+            if ( !GetGame().IsMultiplayer() )
+            {
+                Name.SetColor( 0xFF4B77BE );
+                return;
+            }
+
+            if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
+            {
+                Name.SetColor( 0xFF2ECC71 );
+            } else
+            {
+                Name.SetColor( 0xFFFFFFFF );
+            }
         }
     }
 

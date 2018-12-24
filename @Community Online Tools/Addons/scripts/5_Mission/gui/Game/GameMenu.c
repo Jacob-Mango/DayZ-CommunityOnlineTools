@@ -113,6 +113,6 @@ class GameMenu extends Form
         ref GM_Button_Data data = GM_Button_Data.Cast( action.GetData() );
         if ( !data ) return;
 
-        GetRPCManager().SendRPC( "COT_Game", "SpawnBaseBuilding", new Param2< string, ref array< string > >( data.ClassName, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Game", "SpawnBaseBuilding", new Param2< string, ref array< string > >( data.ClassName, SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 }

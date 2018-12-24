@@ -75,7 +75,7 @@ class PermissionRow extends ScriptedWidgetEventHandler
         Type = perm_state.GetValue();
     }
 
-    void Set( ref Permission permission, int depth )
+    void InitPermission( ref Permission permission, int depth )
     {
         Indent( depth );
 
@@ -83,20 +83,6 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
         perm_name.SetText( indent + Name );
         perm_state.SetValue( 0, true );
-    }
-
-    void SetPermission( ref Permission permission )
-    {
-        if ( permission )
-        {
-            Enable();
-
-            perm_name.SetText( indent + permission.Name );
-            perm_state.SetValue( permission.Type, true );
-        } else 
-        {
-            Disable();
-        }
     }
 
     void Enable()
@@ -144,5 +130,70 @@ class PermissionRow extends ScriptedWidgetEventHandler
                 Children[i].Serialize( output, serialize + "." );
             }
         }
+    }
+    
+    void SetPermission( string inp )
+    {
+        array<string> tokens = new array<string>;
+
+        array<string> spaces = new array<string>;
+        inp.Split( " ", spaces );
+
+        int type;
+
+        if ( spaces.Count() == 2 )
+        {
+            if ( spaces[1].Contains( "2" ) )
+            {
+                type = 2;
+            } else if ( spaces[1].Contains( "1" ) )
+            {
+                type = 1;
+            } else 
+            {
+                type = 0;
+            }
+
+            spaces[0].Split( ".", tokens );
+        } else if ( spaces.Count() < 2 )
+        {
+            type = 0;
+
+            inp.Split( ".", tokens );
+        } else {
+            Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+            return;
+        }
+
+        Print( inp + " with type " + type );
+        
+        int depth = tokens.Find( Name );
+
+        if ( depth > -1 )
+        {
+            Set( tokens, depth + 1, type );
+        } else 
+        {
+            Set( tokens, 0, type );
+        }
+    }
+
+    private ref PermissionRow Set( array<string> tokens, int depth, int type )
+    {
+        if ( depth < tokens.Count() )
+        {
+            for ( int i = 0; i < Children.Count(); i++ )
+            {
+                if ( Children[i].Name == tokens[depth] )
+                {
+                    return Children[i].Set( tokens, depth + 1, type );
+                }
+            }
+            return NULL;
+        }
+        
+        Enable();
+        perm_state.SetValue( type, true );
+        return this;
     }
 }

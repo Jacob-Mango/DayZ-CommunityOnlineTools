@@ -32,9 +32,21 @@ PanelWidgetClass PlayerMenu {
      vexactsize 1
      style blank
      "Scrollbar V" 1
+     Rows 2
      {
-      GridSpacerWidgetClass player_list {
+      GridSpacerWidgetClass player_list_first {
        position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 1000
+      }
+      GridSpacerWidgetClass player_list_second {
+       position 0 3200
        size 1 1
        hexactpos 1
        vexactpos 1
@@ -59,6 +71,21 @@ PanelWidgetClass PlayerMenu {
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
      "exact text size" 16
+    }
+    TextWidgetClass player_count {
+     position 5 10
+     size 1 20
+     halign right_ref
+     valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "00 PLAYERS"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" right
     }
    }
   }

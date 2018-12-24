@@ -38,14 +38,14 @@ class TeleportModule: EditorModule
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
-        teleport.AddBinding( "kH" );
-        teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
+        teleport.AddBinding( "kEnd" );
+        teleport.SetActionType( KeyMouseActionType.PRESS );
         RegisterKeyMouseBinding( teleport );
     }
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Teleport/PositionMenu.layout";
+        return "JM/COT/gui/layouts/Teleport/PositionMenu.layout";
     }
 
     autoptr map< string, vector > GetPositions()
@@ -125,7 +125,7 @@ class TeleportModule: EditorModule
 
         if( type == CallType.Server )
         {
-            array< ref AuthPlayer > players = DeserializePlayersGUID( data.param2 );
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
 
             vector position = "0 0 0";
 

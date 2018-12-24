@@ -1,8 +1,14 @@
 class PlayerMenu extends Form
 {
     ref array< ref PlayerRow >      m_PlayerList;
+    ref array< ref PermissionRow >  m_PermissionList;
 
-    ref GridSpacerWidget            m_PlayerScriptList;
+    ref TextWidget                  m_PlayerCount;
+    ref GridSpacerWidget            m_PlayerScriptListFirst;
+    int                             m_PlayersInFirst;
+    ref GridSpacerWidget            m_PlayerScriptListSecond;
+    int                             m_PlayersInSecond;
+    int                             m_UserID;
 
     ref Widget                      m_ActionsWrapper;
     ref Widget                      m_ActionsForm;
@@ -60,6 +66,7 @@ class PlayerMenu extends Form
         m_PermissionsLoaded = false;
 
         m_PlayerList = new ref array< ref PlayerRow >;
+        m_PermissionList = new ref array< ref PermissionRow >;
     }
 
     void ~PlayerMenu()
@@ -83,7 +90,13 @@ class PlayerMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
-        m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+        m_PlayerScriptListFirst = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_first"));
+        m_PlayerScriptListSecond = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_second"));
+        m_PlayersInFirst = 0;
+        m_PlayersInSecond = 0;
+        m_UserID = 2000;
+
+        m_PlayerCount = TextWidget.Cast(layoutRoot.FindAnyWidget("player_count"));
 
         m_ActionsForm = layoutRoot.FindAnyWidget("actions_form");
         m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
@@ -96,6 +109,7 @@ class PlayerMenu extends Form
         m_PingMin = UIActionManager.CreateText( pings, "Ping Min: ", "" );
         m_PingMax = UIActionManager.CreateText( pings, "Ping Max: ", "" );
         m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
+        pings.Show( false ); // because this doesn't work
 
         ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 3, 2 );
         m_Health = UIActionManager.CreateEditableText( playerActions, "Health: ", this, "Click_SetHealth", "", "Set" );
@@ -161,35 +175,35 @@ class PlayerMenu extends Form
             }
         }
 
-        GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
+        GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, SerializePlayersID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
     }
 
     void Click_BanPlayer( UIEvent eid, ref UIActionButton action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_KickPlayer( UIEvent eid, ref UIActionButton action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_KickTransport( UIEvent eid, ref UIActionButton action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_RepairTransport( UIEvent eid, ref UIActionButton action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
     
     void Click_TeleportToMe( UIEvent eid, ref UIActionButton action )
@@ -199,10 +213,10 @@ class PlayerMenu extends Form
 
         if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
         {
-            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ), true );
         } else 
         {
-            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+            GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ), true );
         }
     }
 
@@ -213,70 +227,70 @@ class PlayerMenu extends Form
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
 
-        GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
     }
 
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetShock( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetHeatComfort( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetWet( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetTremor( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetStamina( UIEvent eid, ref UIActionEditableText action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetLifeSpanState( UIEvent eid, ref UIActionSelectBox action )
@@ -286,28 +300,28 @@ class PlayerMenu extends Form
         int state = action.GetSelection();
 
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< float, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< float, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_ToggleFreecam( UIEvent eid, ref UIActionCheckbox action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void UpdateActionsFields( ref PlayerData data )
@@ -371,6 +385,8 @@ class PlayerMenu extends Form
         {
             SetupPermissionsUI();
 
+            CreatePlayerList();
+
             m_PermissionsLoaded = true;
         }
 
@@ -400,6 +416,11 @@ class PlayerMenu extends Form
             m_CanUpdateList = false;
             UpdatePlayerList();
             m_CanUpdateList = true;
+
+            if ( GetSelectedPlayers().Count() > 0 )
+            {
+                GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ), true );
+            }
         }
 
         ReloadPlayers();
@@ -423,23 +444,22 @@ class PlayerMenu extends Form
 
     void OnPlayer_Checked( ref PlayerRow row )
     {
-        OnPlayerSelected( row, row.Checkbox.IsChecked() );
+        OnPlayerSelected( row.GetPlayer(), row.Checkbox.IsChecked() );
     }
 
     void OnPlayer_Button( ref PlayerRow row )
     {
         OnPlayerSelected( NULL );
 
-        if ( OnPlayerSelected( row ) )
+        if ( OnPlayerSelected( row.GetPlayer() ) )
         {
             row.Checkbox.SetChecked( true );
         }
     }
 
-    bool OnPlayerSelected( ref PlayerRow row, bool select = true )
+    bool OnPlayerSelected( ref AuthPlayer player, bool select = true )
     {
-        Print("Failing here? 1");
-        if ( row == NULL )
+        if ( player == NULL )
         {
             UpdateActionsFields( NULL );
 
@@ -452,57 +472,40 @@ class PlayerMenu extends Form
 
             LoadPermissions( NULL );
 
-        Print("Failing here? 2");
             return false;
         } else 
         {
-        Print("Failing here? 3");
             int position = -1;
 
             if ( select )
             {
-        Print("Failing here? 4");
-                position = AddSelectedPlayer( row.GetPlayer() );
-        Print("Failing here? 4.1");
+                position = AddSelectedPlayer( player );
 
                 if ( GetSelectedPlayers().Count() == 1 )
                 {
-                    UpdateActionsFields( row.GetPlayer().Data );
+                    UpdateActionsFields( player.Data );
 
-        Print("Failing here? 4.2");
-                    LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                    LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
                 }
-        Print("Failing here? 5");
-
-                row.Checkbox.SetChecked( true );
-        Print("Failing here? 7");
 
                 return true;
             } else
             {
-        Print("Failing here? 8");
-                position = RemoveSelectedPlayer( row.GetPlayer() );
+                position = RemoveSelectedPlayer( player );
 
                 if ( position == 0 )
                 {
-        Print("Failing here? 9");
                     if (GetSelectedPlayers().Count() > 0 )
                     {
-        Print("Failing here? 10");
                         UpdateActionsFields( GetSelectedPlayers()[0].Data );
-                        LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                        LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
                     } else 
                     {
-        Print("Failing here? 11");
                         UpdateActionsFields( NULL );
                         LoadPermissions( NULL );
                     }
-        Print("Failing here? 12");
                 }
 
-                row.Checkbox.SetChecked( false );
-
-        Print("Failing here? 13");
                 return true;
             }
         }
@@ -517,7 +520,7 @@ class PlayerMenu extends Form
     {
         ref Permission rootPerm = GetPermissionsManager().GetRootPermission() 
 
-        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
         permRow.GetScript( m_PermissionUI );
 
@@ -526,7 +529,9 @@ class PlayerMenu extends Form
 
         if ( m_PermissionUI )
         {
-            m_PermissionUI.Set( rootPerm, 0 );
+            m_PermissionList.Clear();
+
+            m_PermissionUI.InitPermission( rootPerm, 0 );
 
             InitPermissionUIRow( rootPerm, 0, m_PermissionUI );
         }
@@ -550,14 +555,15 @@ class PlayerMenu extends Form
         {
             ref Permission cPerm = perm.Children[i];
 
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
             ref PermissionRow rowScript;
             permRow.GetScript( rowScript );
 
             if ( rowScript )
             {
-                rowScript.Set( cPerm, depth );
+                m_PermissionList.Insert( rowScript );
+                rowScript.InitPermission( cPerm, depth );
 
                 parentRow.Children.Insert( rowScript );
                 rowScript.Parent = parentRow;
@@ -567,125 +573,118 @@ class PlayerMenu extends Form
         }
     }
 
-    void LoadPermissions( ref Permission permission )
+    void LoadPermissions( ref array< string > permissions = NULL )
     {
-        Print(" Failer 1" );
-        if ( permission == NULL )
+        if ( permissions == NULL )
         {
-            LoadPermission( GetPermissionsManager().GetRootPermission(), m_PermissionUI, false );
+            for ( int i = 0; i < m_PermissionList.Count(); i++ )
+            {
+                m_PermissionList[i].Disable();
+            }
         } else 
         {
-        Print(" Failer 2" );
-            LoadPermission( permission, m_PermissionUI, true );
-        }
-    }
-
-    protected void LoadPermission( ref Permission perm, ref PermissionRow row, bool enabled  )
-    {
-        if ( !row ) return;
-
-        if ( enabled )
-        {
-            row.SetPermission( perm );
-        } else 
-        {
-            row.SetPermission( NULL );
-        }
-
-        int count = 0;
-
-        if ( row.Children.Count() < perm.Children.Count() )
-        {
-            count = row.Children.Count();
-        }
-
-        if ( row.Children.Count() >= perm.Children.Count() )
-        {
-            count = perm.Children.Count();
-        }
-
-        for ( int i = 0; i < count; i++ )
-        {
-            LoadPermission( perm.Children[i], row.Children[i], enabled );
+            for ( int j = 0; j < permissions.Count(); j++ )
+            {
+                m_PermissionUI.SetPermission( permissions[j] );
+            }
+            m_PermissionUI.Enable();
         }
     }
 
     void SetPermissions()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersGUID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersID( GetSelectedPlayers() ) ), true );
+    }
+
+    void CreatePlayerList()
+    {
+        ref Widget playerRow = NULL;
+        ref PlayerRow rowScript = NULL;
+
+        for ( int i = 0; i < 100; i++ )
+        {
+            rowScript = NULL;
+            playerRow = NULL;
+
+            playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListFirst );
+            
+            if ( playerRow == NULL ) continue;
+
+            m_UserID++;
+
+            playerRow.SetUserID( m_UserID );
+            playerRow.GetScript( rowScript );
+
+            if ( rowScript == NULL ) continue;
+
+            rowScript.SetPlayer( NULL );
+
+            rowScript.Menu = this;
+
+            m_PlayerList.Insert( rowScript );
+        }
+
+        for ( i = 0; i < 100; i++ )
+        {
+            rowScript = NULL;
+            playerRow = NULL;
+
+            playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListSecond );
+            
+            if ( playerRow == NULL ) continue;
+
+            m_UserID++;
+
+            playerRow.SetUserID( m_UserID );
+            playerRow.GetScript( rowScript );
+
+            if ( rowScript == NULL ) continue;
+
+            rowScript.SetPlayer( NULL );
+
+            rowScript.Menu = this;
+
+            m_PlayerList.Insert( rowScript );
+        }                
     }
 
     void UpdatePlayerList()
-    {       
+    {
         array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
-
-        int max = m_PlayerList.Count();
         
-        for ( int k = 0; k < max; k++ )
+        for ( int k = 0; k < m_PlayerList.Count(); k++ )
         {
-            bool found = false;
-
-            for ( int l = 0; l < players.Count(); l++ )
-            {
-                if ( m_PlayerList[k].Player.GetGUID() == players[l].GetGUID() )
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if ( !found )
-            {
-                m_PlayerScriptList.RemoveChild( m_PlayerList[k].GetLayoutRoot() );
-                m_PlayerList[k].GetLayoutRoot().Unlink();
-
-                m_PlayerList.Remove( k );
-                k--;
-                max = m_PlayerList.Count();
-            }
+            m_PlayerList[k].SetPlayer( NULL );
         }
 
         for ( int i = 0; i < players.Count(); i++ )
         {
-            bool exists = false;
+            m_PlayerList[i].SetPlayer( players[i] );
 
-            ref PlayerRow rowScript;
-
-            for ( int j = 0; j < m_PlayerList.Count(); j++ )
+            if ( PlayerAlreadySelected( players[i] ) )
             {
-                if ( m_PlayerList[j].Player.GetGUID() == players[i].GetGUID() )
-                {
-                    rowScript = m_PlayerList[j];
-                    exists = true;
-                    break;
-                }
-            }
-
-            if ( exists )
-            {
-                rowScript.SetPlayer( players[i] );
+                // OnPlayerSelected( players[i], true );
+                m_PlayerList[i].Checkbox.SetChecked( true );
             } else
             {
-                Widget playerRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
-
-                playerRow.GetScript( rowScript );
-                
-                rowScript.SetPlayer( players[i] );
-
-                rowScript.Menu = this;
-
-                m_PlayerList.Insert( rowScript );
-
-                if ( PlayerAlreadySelected( players[i] ) )
-                {
-                    OnPlayerSelected( rowScript, true );
-                }
+                OnPlayerSelected( players[i], false );
+                m_PlayerList[i].Checkbox.SetChecked( false );
             }
         }
 
         if (GetSelectedPlayers().Count() > 0 )
         {
             UpdateActionsFields( GetSelectedPlayers()[0].Data );
+        }
+
+        int playerCount = players.Count();
+
+        if ( playerCount == 1 )
+        {
+            m_PlayerCount.SetText( "1 Online" );
+        } else 
+        {
+            m_PlayerCount.SetText( "" + playerCount + " Online" );
         }
     }
 }
