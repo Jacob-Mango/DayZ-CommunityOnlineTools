@@ -36,7 +36,7 @@ class CommunityOnlineTools
                 return;
             }
 
-            if ( data.param3 == JM_COT_CURRENT_VERSION_REVISION )
+            if ( data.param3 != JM_COT_CURRENT_VERSION_REVISION )
             {
                 Print( "" + sender.GetPlainId() + " is running a different revision of Community Online Tools." );       
                 return;

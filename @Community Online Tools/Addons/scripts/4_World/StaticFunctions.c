@@ -12,28 +12,26 @@ static bool DISABLE_ALL_INPUT = false;
 
 static void COTLog( AuthPlayer player, string text )
 {
-    text = "[COT] " + player.GetGUID() + ": " + text;
+    text = "[COT] " + player.GetSteam64ID() + ": " + text;
 
     if ( GetGame().IsServer() )
     {
         GetGame().AdminLog( text );
-    } else
-    {
-        Print( text );
     }
+
+    Print( text );
 }
 
 static void COTLog( PlayerIdentity player, string text )
 {
-    text = "[COT] " + player.GetId() + ": " + text;
+    text = "[COT] " + player.GetPlainId() + ": " + text;
 
     if ( GetGame().IsServer() )
     {
         GetGame().AdminLog( text );
-    } else
-    {
-        Print( text );
     }
+    
+    Print( text );
 }
 
 static string FormatFloat( float value, int decimals ) 

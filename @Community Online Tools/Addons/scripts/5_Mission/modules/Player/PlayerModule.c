@@ -610,7 +610,7 @@ class PlayerModule: EditorModule
                             player.AddPermission( perms[j] );
                         }
 
-                        GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayer", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.IdentityPlayer );
+                        GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.IdentityPlayer );
 
                         player.Save();
 
