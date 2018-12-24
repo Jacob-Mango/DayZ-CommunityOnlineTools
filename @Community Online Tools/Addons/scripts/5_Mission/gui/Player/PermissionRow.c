@@ -75,7 +75,7 @@ class PermissionRow extends ScriptedWidgetEventHandler
         Type = perm_state.GetValue();
     }
 
-    void Set( ref Permission permission, int depth )
+    void InitPermission( ref Permission permission, int depth )
     {
         Indent( depth );
 
@@ -83,20 +83,6 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
         perm_name.SetText( indent + Name );
         perm_state.SetValue( 0, true );
-    }
-
-    void SetPermission( ref Permission permission )
-    {
-        if ( permission )
-        {
-            Enable();
-
-            perm_name.SetText( indent + permission.Name );
-            perm_state.SetValue( permission.Type, true );
-        } else 
-        {
-            Disable();
-        }
     }
 
     void Enable()
@@ -153,31 +139,33 @@ class PermissionRow extends ScriptedWidgetEventHandler
         array<string> spaces = new array<string>;
         inp.Split( " ", spaces );
 
-        PermissionType type;
+        int type;
 
         if ( spaces.Count() == 2 )
         {
             if ( spaces[1].Contains( "2" ) )
             {
-                type = PermissionType.ALLOW;
+                type = 2;
             } else if ( spaces[1].Contains( "1" ) )
             {
-                type = PermissionType.DISALLOW;
+                type = 1;
             } else 
             {
-                type = PermissionType.INHERIT;
+                type = 0;
             }
 
             spaces[0].Split( ".", tokens );
         } else if ( spaces.Count() < 2 )
         {
-            type = PermissionType.INHERIT;
+            type = 0;
 
             inp.Split( ".", tokens );
         } else {
             Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
             return;
         }
+
+        Print( inp + " with type " + type );
         
         int depth = tokens.Find( Name );
 
@@ -198,19 +186,14 @@ class PermissionRow extends ScriptedWidgetEventHandler
             {
                 if ( Children[i].Name == tokens[depth] )
                 {
-                    if ( depth < tokens.Count() - 1 )
-                    {
-                        return Children[i].Set( tokens, depth + 1, type );
-                    } else
-                    {
-                        Children[i].Enable();
-                        Children[i].Type = type;
-                        return Children[i];
-                    }
+                    return Children[i].Set( tokens, depth + 1, type );
                 }
             }
+            return NULL;
         }
-        Print("Should not be reached!");
-        return NULL;
+        
+        Enable();
+        perm_state.SetValue( type, true );
+        return this;
     }
 }
