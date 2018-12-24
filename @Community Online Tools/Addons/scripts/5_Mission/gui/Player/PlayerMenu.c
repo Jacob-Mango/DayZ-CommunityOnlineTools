@@ -3,6 +3,7 @@ class PlayerMenu extends Form
     ref array< ref PlayerRow >      m_PlayerList;
     ref array< ref PermissionRow >  m_PermissionList;
 
+    ref TextWidget                  m_PlayerCount;
     ref GridSpacerWidget            m_PlayerScriptList;
 
     ref Widget                      m_ActionsWrapper;
@@ -86,6 +87,8 @@ class PlayerMenu extends Form
     override void OnInit( bool fromMenu )
     {
         m_PlayerScriptList = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list"));
+
+        m_PlayerCount = TextWidget.Cast(layoutRoot.FindAnyWidget("player_count"));
 
         m_ActionsForm = layoutRoot.FindAnyWidget("actions_form");
         m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
@@ -657,6 +660,16 @@ class PlayerMenu extends Form
         if (GetSelectedPlayers().Count() > 0 )
         {
             UpdateActionsFields( GetSelectedPlayers()[0].Data );
+        }
+
+        int playerCount = players.Count();
+
+        if ( playerCount == 1 )
+        {
+            m_PlayerCount.SetText( "1 PLAYER" );
+        } else 
+        {
+            m_PlayerCount.SetText( playerCount + " PLAYERS" );
         }
     }
 }
