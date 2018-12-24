@@ -146,23 +146,51 @@ class PermissionRow extends ScriptedWidgetEventHandler
         }
     }
     
-    ref PermissionRow GetPermission( string inp )
+    void SetPermission( string inp )
     {
         array<string> tokens = new array<string>;
-        inp.Split( ".", tokens );
+
+        array<string> spaces = new array<string>;
+        inp.Split( " ", spaces );
+
+        PermissionType type;
+
+        if ( spaces.Count() == 2 )
+        {
+            if ( spaces[1].Contains( "2" ) )
+            {
+                type = PermissionType.ALLOW;
+            } else if ( spaces[1].Contains( "1" ) )
+            {
+                type = PermissionType.DISALLOW;
+            } else 
+            {
+                type = PermissionType.INHERIT;
+            }
+
+            spaces[0].Split( ".", tokens );
+        } else if ( spaces.Count() < 2 )
+        {
+            type = PermissionType.INHERIT;
+
+            inp.Split( ".", tokens );
+        } else {
+            Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+            return;
+        }
         
         int depth = tokens.Find( Name );
 
         if ( depth > -1 )
         {
-            return Get( tokens, depth + 1 );
+            Set( tokens, depth + 1, type );
         } else 
         {
-            return Get( tokens, 0 );
+            Set( tokens, 0, type );
         }
     }
 
-    private ref PermissionRow Get( array<string> tokens, int depth )
+    private ref PermissionRow Set( array<string> tokens, int depth, int type )
     {
         if ( depth < tokens.Count() )
         {
@@ -172,9 +200,11 @@ class PermissionRow extends ScriptedWidgetEventHandler
                 {
                     if ( depth < tokens.Count() - 1 )
                     {
-                        return Children[i].Get( tokens, depth + 1 );
+                        return Children[i].Set( tokens, depth + 1, type );
                     } else
                     {
+                        Children[i].Enable();
+                        Children[i].Type = type;
                         return Children[i];
                     }
                 }

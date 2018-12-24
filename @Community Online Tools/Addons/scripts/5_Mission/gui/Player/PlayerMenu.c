@@ -1,6 +1,7 @@
 class PlayerMenu extends Form
 {
     ref array< ref PlayerRow >      m_PlayerList;
+    ref array< ref PermissionRow >  m_PermissionList;
 
     ref GridSpacerWidget            m_PlayerScriptList;
 
@@ -60,6 +61,7 @@ class PlayerMenu extends Form
         m_PermissionsLoaded = false;
 
         m_PlayerList = new ref array< ref PlayerRow >;
+        m_PermissionList = new ref array< ref PermissionRow >;
     }
 
     void ~PlayerMenu()
@@ -469,7 +471,7 @@ class PlayerMenu extends Form
                 {
                     UpdateActionsFields( player.Data );
 
-                    LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                    LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
                 }
 
                 return true;
@@ -482,7 +484,7 @@ class PlayerMenu extends Form
                     if (GetSelectedPlayers().Count() > 0 )
                     {
                         UpdateActionsFields( GetSelectedPlayers()[0].Data );
-                        LoadPermissions( GetSelectedPlayers()[0].RootPermission );
+                        LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
                     } else 
                     {
                         UpdateActionsFields( NULL );
@@ -513,6 +515,8 @@ class PlayerMenu extends Form
 
         if ( m_PermissionUI )
         {
+            m_PermissionList.Clear();
+
             m_PermissionUI.Set( rootPerm, 0 );
 
             InitPermissionUIRow( rootPerm, 0, m_PermissionUI );
@@ -544,6 +548,7 @@ class PlayerMenu extends Form
 
             if ( rowScript )
             {
+                m_PermissionList.Insert( rowScript );
                 rowScript.Set( cPerm, depth );
 
                 parentRow.Children.Insert( rowScript );
@@ -554,30 +559,20 @@ class PlayerMenu extends Form
         }
     }
 
-    void LoadPermissions( ref Permission permission )
+    void LoadPermissions( ref array< string > permissions = NULL )
     {
-        if ( permission == NULL )
+        if ( permissions == NULL )
         {
-            LoadPermission( GetPermissionsManager().GetRootPermission(), false );
+            for ( int i = 0; i < m_PermissionList.Count(); i++ )
+            {
+                m_PermissionList[i].Disable();
+            }
         } else 
         {
-            LoadPermission( permission, true );
-        }
-    }
-
-    protected void LoadPermission( ref Permission perm, bool enabled  )
-    {
-        if ( enabled )
-        {
-            m_PermissionUI.GetPermission( perm.GetFullName() ).SetPermission( perm );
-        } else 
-        {
-            m_PermissionUI.GetPermission( perm.GetFullName() ).SetPermission( NULL );
-        }
-
-        for ( int i = 0; i < perm.Children.Count(); i++ )
-        {
-            LoadPermission( perm.Children[i], enabled );
+            for ( int j = 0; j < permissions.Count(); j++ )
+            {
+                m_PermissionUI.SetPermission( permissions[j] );
+            }
         }
     }
 
