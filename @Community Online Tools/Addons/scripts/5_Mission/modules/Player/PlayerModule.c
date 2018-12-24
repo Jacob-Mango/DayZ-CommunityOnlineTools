@@ -601,7 +601,7 @@ class PlayerModule: EditorModule
                 {
                     ref AuthPlayer player = GetPermissionsManager().AuthPlayers[k];
                     
-                    if ( guids[i] == player.GetGUID() )
+                    if ( guids[i] == player.GetSteam64ID() )
                     {
                         player.ClearPermissions();
 
@@ -614,7 +614,7 @@ class PlayerModule: EditorModule
 
                         player.Save();
 
-                        COTLog( sender, "Set and saved permissions for " + players[i].GetGUID() );
+                        COTLog( sender, "Set and saved permissions for " + players[i].GetSteam64ID() );
                     }
                 }
             }
