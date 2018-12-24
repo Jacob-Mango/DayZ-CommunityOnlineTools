@@ -60,6 +60,21 @@ PanelWidgetClass PlayerMenu {
      "exact text" 1
      "exact text size" 16
     }
+    TextWidgetClass player_count {
+     position 5 10
+     size 1 20
+     halign right_ref
+     valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "00 PLAYERS"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" right
+    }
    }
   }
   PanelWidgetClass panel_right {
