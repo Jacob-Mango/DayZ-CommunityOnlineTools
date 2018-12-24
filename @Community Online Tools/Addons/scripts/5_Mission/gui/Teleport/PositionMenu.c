@@ -73,7 +73,7 @@ class PositionMenu extends Form
 
     void Click_Teleport( UIEvent eid, ref UIActionButton action )
     {
-        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersGUID( GetSelectedPlayers() ) ), true, NULL );
+        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ), true, NULL );
     }
 
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )

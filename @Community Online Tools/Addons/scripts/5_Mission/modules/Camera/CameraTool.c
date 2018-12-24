@@ -20,7 +20,7 @@ class CameraTool: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Camera/CameraSettings.layout";
+        return "JM/COT/gui/layouts/Camera/CameraSettings.layout";
     }
     
     override void OnUpdate( float timeslice )
@@ -59,7 +59,7 @@ class CameraTool: EditorModule
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", "Toggle camera.", true );
-        toggleCamera.AddBinding( "kInsert" );
+        toggleCamera.AddBinding( "kPrior" );
         RegisterKeyMouseBinding( toggleCamera );
     }
 

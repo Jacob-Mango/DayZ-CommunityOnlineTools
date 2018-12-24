@@ -1,13 +1,13 @@
 class CfgPatches
 {
-    class COT_Scripts
+    class JM_COT_Scripts
     {
         units[]={};
         weapons[]={};
         requiredVersion=0.1;
         requiredAddons[]=
         {
-            "RPC_Scripts", "Permissions_Framework_Scripts", "COT_GUI", "DZ_Data"
+            "RPC_Scripts", "JM_Permissions_Framework_Scripts", "JM_COT_GUI", "DZ_Data"
         };
     };
 };
@@ -16,7 +16,7 @@ class CfgMods
 {
     class CommunityOnlineTools
     {
-        dir = "COT";
+        dir = "JM";
         picture = "";
         action = "";
         hideName = 1;
@@ -36,19 +36,19 @@ class CfgMods
             class gameScriptModule
             {
                 value = "";
-                files[] = {"COT/Scripts/3_Game"};
+                files[] = {"JM/COT/Scripts/3_Game"};
             };
 
             class worldScriptModule
             {
                 value = "";
-                files[] = {"COT/Scripts/4_World"};
+                files[] = {"JM/COT/Scripts/4_World"};
             };
 
             class missionScriptModule
             {
                 value = "";
-                files[] = {"COT/Scripts/5_Mission"};
+                files[] = {"JM/COT/Scripts/5_Mission"};
             };
         }
     };

@@ -38,7 +38,7 @@ class COTModule : Module
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor.", true );
-        toggleEditor.AddBinding( "kY" );
+        toggleEditor.AddBinding( "kHome" );
         RegisterKeyMouseBinding( toggleEditor );
 
         KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", "Focuses the game instead of the UI while in editor.", true );
@@ -111,6 +111,8 @@ class COTModule : Module
 
     void FocusUI()
     {
+        if ( m_COTMenu == NULL ) return;
+        
         if( m_COTMenu.IsVisible() )
         {
             m_COTMenu.SetInputFocus( false );
@@ -119,6 +121,8 @@ class COTModule : Module
 
     void FocusGame()
     {
+        if ( m_COTMenu == NULL ) return;
+
         if( m_COTMenu.IsVisible() )
         {
             Widget w = GetWidgetUnderCursor();

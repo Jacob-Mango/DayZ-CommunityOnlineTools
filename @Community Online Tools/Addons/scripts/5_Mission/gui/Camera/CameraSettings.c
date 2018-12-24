@@ -84,12 +84,12 @@ class CameraSettings extends Form
 
         if ( CAMERA_ROT == NULL )
         {
-            CAMERA_ROT = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/Camera/CameraROT.layout" );
+            CAMERA_ROT = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/Camera/CameraROT.layout" );
         }
         
         if ( CAMERA_PHI == NULL )
         {
-            CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/Camera/CameraPHI.layout" );
+            CAMERA_PHI = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/Camera/CameraPHI.layout" );
         }
     }
     
