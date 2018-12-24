@@ -54,7 +54,7 @@ class GameModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Game/GameMenu.layout";
+        return "JM/COT/gui/layouts/Game/GameMenu.layout";
     }
 
     ref array< string > GetVehicles()

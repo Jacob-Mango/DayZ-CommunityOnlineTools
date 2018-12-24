@@ -11,7 +11,7 @@ class ObjectModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Object/ObjectMenu.layout";
+        return "JM/COT/gui/layouts/Object/ObjectMenu.layout";
     } 
     
     void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

@@ -504,7 +504,7 @@ class PlayerMenu extends Form
     {
         ref Permission rootPerm = GetPermissionsManager().GetRootPermission() 
 
-        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+        Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
         permRow.GetScript( m_PermissionUI );
 
@@ -537,7 +537,7 @@ class PlayerMenu extends Form
         {
             ref Permission cPerm = perm.Children[i];
 
-            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+            Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
             ref PermissionRow rowScript;
             permRow.GetScript( rowScript );
@@ -637,7 +637,7 @@ class PlayerMenu extends Form
                 rowScript.SetPlayer( players[i] );
             } else
             {
-                Widget playerRow = GetGame().GetWorkspace().CreateWidgets( "COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
+                Widget playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptList );
 
                 playerRow.GetScript( rowScript );
                 

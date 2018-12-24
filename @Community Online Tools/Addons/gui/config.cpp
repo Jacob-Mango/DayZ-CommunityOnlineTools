@@ -1,6 +1,6 @@
 class CfgPatches
 {
-    class COT_GUI
+    class JM_COT_GUI
     {
         units[]={};
         weapons[]={};

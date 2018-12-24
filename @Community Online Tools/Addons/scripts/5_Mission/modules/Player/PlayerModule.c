@@ -58,7 +58,7 @@ class PlayerModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/player/PlayerMenu.layout";
+        return "JM/COT/gui/layouts/player/PlayerMenu.layout";
     }
 
     override void OnMissionLoaded()
