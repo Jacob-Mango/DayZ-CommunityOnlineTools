@@ -15,6 +15,13 @@ class WeatherModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Weather.SetFog" );
         GetPermissionsManager().RegisterPermission( "Weather.SetRain" );
         GetPermissionsManager().RegisterPermission( "Weather.SetStorm" );
+    
+        GetPermissionsManager().RegisterPermission( "Weather.View" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Weather.View" );
     }
 
     override string GetLayoutRoot()

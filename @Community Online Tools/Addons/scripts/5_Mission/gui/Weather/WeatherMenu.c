@@ -2,8 +2,6 @@ class WeatherMenu extends Form
 {
     private static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-    protected ButtonWidget m_BtnSave;
-    protected ButtonWidget m_BtnCancel;
     protected SliderWidget m_SldStartTime;
     protected TextWidget m_TxtStartTimeValue;
     protected SliderWidget m_SldStartDay;
@@ -47,9 +45,6 @@ class WeatherMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
-        m_BtnSave            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_save" ) );
-        m_BtnCancel            = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_cancel" ) );
-
         m_SldStartTime        = SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_start_time" ) );
         m_TxtStartTimeValue    = TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_start_time_value" ) );
 
@@ -81,33 +76,6 @@ class WeatherMenu extends Form
 
     override bool ImageIsIcon()
     {
-        return false;
-    }
-
-    override bool OnClick( Widget w, int x, int y, int button )
-    {
-        if ( w == m_BtnSave )
-        {
-            m_OrigYear = m_CurrYear;
-            m_OrigMonth = m_CurrMonth;
-            m_OrigDay = m_CurrDay;
-            m_OrigHour = m_CurrHour;
-            m_OrigMinute = m_CurrMinute;
-            m_OrigOvercast = m_CurrOvercast;
-            m_OrigRain = m_CurrRain;
-            m_OrigFog = m_CurrFog;
-            m_OrigWindForce = m_CurrWindForce;
-            
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
-            GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
-
-            return true;
-        }
-
         return false;
     }
 

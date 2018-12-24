@@ -50,6 +50,13 @@ class PlayerModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
         GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
+        
+        GetPermissionsManager().RegisterPermission( "Admin.View" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Admin.View" );
     }
 
     void ~PlayerModule()
