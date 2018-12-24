@@ -45,7 +45,7 @@ class TeleportModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Teleport/PositionMenu.layout";
+        return "JM/COT/gui/layouts/Teleport/PositionMenu.layout";
     }
 
     autoptr map< string, vector > GetPositions()

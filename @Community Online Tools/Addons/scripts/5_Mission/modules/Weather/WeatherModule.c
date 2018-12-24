@@ -19,7 +19,7 @@ class WeatherModule: EditorModule
 
     override string GetLayoutRoot()
     {
-        return "COT/gui/layouts/Weather/WeatherMenu.layout";
+        return "JM/COT/gui/layouts/Weather/WeatherMenu.layout";
     }
     
     void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
