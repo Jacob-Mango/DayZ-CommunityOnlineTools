@@ -40,11 +40,8 @@ class COTMenu
             ref Widget button_bkg = NULL;
             ref ButtonWidget button = NULL;
 
-            if ( module.HasAccess() )
-            {
-                button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
-                button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
-            }
+            button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
+            button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
 
             ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
 
