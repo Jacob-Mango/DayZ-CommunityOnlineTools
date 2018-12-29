@@ -200,7 +200,7 @@ class ObjectMenu extends Form
     {
         if ( eid != UIEvent.CLICK ) return;
 
-        GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, true, NULL, GetCursorObject( 2.0 ) );
+        GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, true, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
     }
 
     void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )

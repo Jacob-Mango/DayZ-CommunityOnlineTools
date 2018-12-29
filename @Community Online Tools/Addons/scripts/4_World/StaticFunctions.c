@@ -277,12 +277,12 @@ static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, fl
     return NULL;
 }
 
-static Object GetCursorObject( float distance = 100.0 )
+static Object GetCursorObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
     vector rayStart = GetGame().GetCurrentCameraPosition();
     vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * distance;
 
-    auto objs = GetObjectsAt( rayStart, rayEnd );
+    auto objs = GetObjectsAt( rayStart, rayEnd, ignore, radius, with );
 
     if( objs.Count() > 0 )
     {
