@@ -72,7 +72,7 @@ class ObjectMenu extends Form
 
         ref Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
-        m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 3, 1 );
+        m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 4, 1 );
 
         ref Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -97,6 +97,8 @@ class ObjectMenu extends Form
 
             UIActionManager.CreateButton( spawnButtons, "Spawn On Cursor", this, "SpawnCursor" );
         }
+
+        UIActionManager.CreateButton( m_SpawnerActionsWrapper, "Delete On Cursor", this, "DeleteOnCursor" );
     }
 
     void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
@@ -192,6 +194,13 @@ class ObjectMenu extends Form
         if ( eid != UIEvent.CLICK ) return;
 
         GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), SerializePlayersID( GetSelectedPlayers() ) ), true );
+    }
+
+    void DeleteOnCursor( UIEvent eid, ref UIActionButton action )
+    {
+        if ( eid != UIEvent.CLICK ) return;
+
+        GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, true, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
     }
 
     void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
