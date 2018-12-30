@@ -9,5 +9,7 @@ modded class PlayerFile
         {
             Roles.Insert( "everyone" );
         }
+
+        return foundFile;
     }
 }
