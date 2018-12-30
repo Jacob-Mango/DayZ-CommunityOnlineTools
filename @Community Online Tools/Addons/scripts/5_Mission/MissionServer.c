@@ -21,6 +21,24 @@ modded class MissionServer
         super.OnMissionStart();
 
         m_Tool.OnStart();
+
+        ref array< string > data = new ref array< string >;
+        GetPermissionsManager().RootPermission.Serialize( data );
+
+        if ( !GetPermissionsManager().RoleExists( "everyone" ) )
+        {
+            GetPermissionsManager().CreateRole( "everyone", data );
+        }
+
+        if ( !GetPermissionsManager().RoleExists( "admin" ) )
+        {
+            for ( int i = 0; i < data.Count(); i++ )
+            {
+                data[i].Replace( " 0", " 2" );
+            }
+
+            GetPermissionsManager().CreateRole( "admin", data );
+        }
     }
 
     override void OnMissionFinish()
