@@ -705,7 +705,11 @@ class PlayerMenu extends Form
         for ( int i = 0; i < players.Count(); i++ )
         {
             m_PlayerRowList[i].SetPlayer( players[i] );
-            m_PlayerBoxList[i].SetPlayer( players[i] );
+
+            if ( COTMenuOpen )
+            {
+                m_PlayerBoxList[i].SetPlayer( players[i] );
+            }
 
             if ( PlayerAlreadySelected( players[i] ) )
             {
