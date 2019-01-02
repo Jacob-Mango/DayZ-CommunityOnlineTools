@@ -10,6 +10,8 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     ref PlayerMenu  Menu;
 
+    bool ShowOnScreen;
+
     void OnWidgetScriptInit( Widget w )
     {
         layoutRoot = w;
@@ -49,18 +51,20 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void OnShow()
     {
+        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
     }
 
     void OnHide() 
     {
+        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
     void Update() 
     {
-        if ( Player )
+        if ( ShowOnScreen && Player )
         {
-            //vector pos = GetGame().GetScreenPos( Player.Data.VPosition );
-            //layoutRoot.SetPos( pos[0], pos[1], true );
+            vector pos = GetGame().GetScreenPos( Player.Data.VPosition );
+            layoutRoot.SetPos( -pos[0], -pos[1], true );
         }
     }
 
@@ -75,6 +79,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
         
         if ( Player == NULL ) 
         {
+            ShowOnScreen = false;
             Hide();
         } else 
         {
@@ -92,9 +97,11 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
             if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
             {
+                ShowOnScreen = false;
                 Name.SetColor( 0xFF2ECC71 );
             } else
             {
+                ShowOnScreen = true;
                 Name.SetColor( 0xFFFFFFFF );
             }
         }

@@ -73,8 +73,6 @@ class PlayerMenu extends Form
         m_PlayerRowList = new ref array< ref PlayerRow >;
         m_PlayerBoxList = new ref array< ref PlayerBox >;
         m_PermissionList = new ref array< ref PermissionRow >;
-
-        GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 100, true );
     }
 
     void ~PlayerMenu()
@@ -166,6 +164,17 @@ class PlayerMenu extends Form
         m_PermsContainer = layoutRoot.FindAnyWidget("permissions_container");
         m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
         m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
+
+        if ( m_PermissionsLoaded == false )
+        {
+            SetupPermissionsUI();
+
+            CreatePlayerList();
+
+            m_PermissionsLoaded = true;
+        }
+        
+        GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 100, true );
     }
 
     void Click_ModifyPermissions()
@@ -402,15 +411,6 @@ class PlayerMenu extends Form
     override void OnShow()
     {
         GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param, true );
-
-        if ( m_PermissionsLoaded == false )
-        {
-            SetupPermissionsUI();
-
-            CreatePlayerList();
-
-            m_PermissionsLoaded = true;
-        }
 
         m_PermissionsWrapper.Show( false );
         m_ActionsWrapper.Show( true );
@@ -659,7 +659,6 @@ class PlayerMenu extends Form
             m_PlayerRowList.Insert( rowScript );
         }
 
-        /*
         ref Widget playerBox = NULL;
         ref PlayerBox boxScript = NULL;
 
@@ -685,7 +684,6 @@ class PlayerMenu extends Form
 
             m_PlayerBoxList.Insert( boxScript );
         }
-        */
     }
 
     void UpdatePlayerList()
@@ -697,7 +695,11 @@ class PlayerMenu extends Form
         for ( int k = 0; k < m_PlayerRowList.Count(); k++ )
         {
             m_PlayerRowList[k].SetPlayer( NULL );
-            m_PlayerBoxList[k].SetPlayer( NULL );
+        }
+
+        for ( int j = 0; j < m_PlayerBoxList.Count(); j++ )
+        {
+            m_PlayerBoxList[j].SetPlayer( NULL );
         }
 
         for ( int i = 0; i < players.Count(); i++ )
