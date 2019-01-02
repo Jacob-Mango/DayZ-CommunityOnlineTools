@@ -31,6 +31,10 @@ class PlayerMenu extends Form
     ref UIActionText m_Name;
     ref UIActionText m_Steam64ID;
 
+    ref UIActionText m_PosX;
+    ref UIActionText m_PosY;
+    ref UIActionText m_PosZ;
+
     ref UIActionText m_PingMin;
     ref UIActionText m_PingMax;
     ref UIActionText m_PingAvg;
@@ -104,6 +108,11 @@ class PlayerMenu extends Form
         m_GUID = UIActionManager.CreateText( m_ActionsWrapper, "GUID: ", "" );
         m_Name = UIActionManager.CreateText( m_ActionsWrapper, "Name: ", "" );
         m_Steam64ID = UIActionManager.CreateText( m_ActionsWrapper, "Steam64: ", "" );
+
+        ref Widget playerPosition = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+        m_PosX = UIActionManager.CreateText( playerPosition, "Pos X: ", "" );
+        m_PosY = UIActionManager.CreateText( playerPosition, "Pos Y: ", "" );
+        m_PosZ = UIActionManager.CreateText( playerPosition, "Pos Z: ", "" );
 
         ref Widget pings = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
         m_PingMin = UIActionManager.CreateText( pings, "Ping Min: ", "" );
@@ -349,6 +358,10 @@ class PlayerMenu extends Form
             m_Stamina.SetText( data.FStamina.ToString() );
             //m_LastShaved.SetSelection( data.ILifeSpanState );
             m_BloodyHands.SetChecked( data.BBloodyHands );
+
+            m_PosX.SetText( "" + data.VPosition[0] );
+            m_PosY.SetText( "" + data.VPosition[1] );
+            m_PosZ.SetText( "" + data.VPosition[2] );
 
             m_PingMin.SetText( data.IPingMin.ToString() );
             m_PingMax.SetText( data.IPingMax.ToString() );
