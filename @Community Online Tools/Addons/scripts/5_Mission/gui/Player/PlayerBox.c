@@ -59,12 +59,36 @@ class PlayerBox extends ScriptedWidgetEventHandler
         GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
+    float AngleBetween( vector a, vector b)
+    {
+        vector c = a - b;
+        vector d = a + b;
+
+        float e = c.Length();
+        float f = d.Length();
+
+        return 2.0 * Math.Atan2( e, f );
+    }
+
     void Update() 
     {
         if ( ShowOnScreen && Player )
         {
+            Camera camera = Camera.GetCurrentCamera();
+            if ( AngleBetween( camera.GetPosition(), Player.Data.VPosition ) > 2 )
+            {
+                return;
+            }
+
+            float fov = Camera.GetCurrentFOV();
+			int w, h;
+            float x, y;
+			GetScreenSize( w, h );
+			x = w / 2;
+			y = h / 2;
+
             vector pos = GetGame().GetScreenPos( Player.Data.VPosition );
-            layoutRoot.SetPos( -pos[0], -pos[1], true );
+            layoutRoot.SetPos( pos[0], pos[1] - y, true );
         }
     }
 
@@ -91,7 +115,9 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
             if ( !GetGame().IsMultiplayer() )
             {
+                ShowOnScreen = false;
                 Name.SetColor( 0xFF4B77BE );
+                Hide();
                 return;
             }
 
@@ -99,6 +125,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
             {
                 ShowOnScreen = false;
                 Name.SetColor( 0xFF2ECC71 );
+                Hide();
             } else
             {
                 ShowOnScreen = true;
