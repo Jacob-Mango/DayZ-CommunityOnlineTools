@@ -4,8 +4,8 @@ PanelWidgetClass PlayerBox {
  position 0 0
  size 100 30
  valign center_ref
- hexactpos 0
- vexactpos 0
+ hexactpos 1
+ vexactpos 1
  hexactsize 1
  vexactsize 1
  scriptclass "PlayerBox"
