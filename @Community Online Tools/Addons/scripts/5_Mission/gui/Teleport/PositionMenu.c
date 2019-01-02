@@ -60,9 +60,9 @@ class PositionMenu extends Form
 
         m_LstPositionList.ClearItems();
 
-        for ( int nPosition = 0; nPosition < tm.GetPositions().Count(); nPosition++ )
+        for ( int nPosition = 0; nPosition < tm.GetLocations().Count(); nPosition++ )
         {
-            m_LstPositionList.AddItem( tm.GetPositions().GetKey( nPosition ), NULL, 0 );
+            m_LstPositionList.AddItem( tm.GetLocations()[nPosition].Name, NULL, 0 );
         }
     }
 
@@ -84,9 +84,23 @@ class PositionMenu extends Form
 
         if ( tm == NULL ) return false;
 
-        if ( !tm.GetPositions().Find( GetCurrentPositionName(), position ) )
+        ref TeleportLocation location = NULL;
+
+        for ( int i = 0; i < tm.GetLocations().Count(); i++ )
+        {
+            if ( tm.GetLocations()[i].Name == GetCurrentPositionName() )
+            {
+                location = tm.GetLocations()[i];
+                break;
+            }
+        }
+
+        if ( location == NULL )
         {
             position = "0 0 0";
+        } else 
+        {
+            position = location.Position;
         }
 
         m_PositionX.SetText( position[0].ToString() );
