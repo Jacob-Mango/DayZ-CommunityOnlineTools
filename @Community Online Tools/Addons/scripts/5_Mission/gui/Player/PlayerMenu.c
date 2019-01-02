@@ -75,6 +75,8 @@ class PlayerMenu extends Form
 
     void ~PlayerMenu()
     {
+        delete m_PlayerList;
+        delete m_PermissionList;
     }
 
     override string GetTitle()

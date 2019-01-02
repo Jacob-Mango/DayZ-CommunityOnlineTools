@@ -22,6 +22,11 @@ class PermissionRow extends ScriptedWidgetEventHandler
         Init();
     }
 
+    void ~PermissionRow()
+    {
+        delete Children;
+    }
+
     void Init() 
     {
         Children = new ref array< ref PermissionRow >;
