@@ -6,6 +6,7 @@ class COTModule : Module
 
     protected bool m_PreventOpening; 
     protected bool m_ForceHUD; 
+    bool m_isActive = true;
 
     void COTModule()
     {
@@ -50,6 +51,10 @@ class COTModule : Module
         focusUI.AddBinding( "mBLeft" );
         focusUI.SetActionType( KeyMouseActionType.RELEASE );
         RegisterKeyMouseBinding( focusUI );
+
+        KeyMouseBinding toggleCOT = new KeyMouseBinding( GetModuleType(), "ToggleCOT", "Toggles the ability to use COT features.", false );
+        toggleCOT.AddBinding( "kEnd" );
+        RegisterKeyMouseBinding( toggleCOT );
     }
 
     override void OnUpdate( float timeslice )
@@ -100,6 +105,11 @@ class COTModule : Module
 
     void ToggleMenu()
     {
+        if ( !m_isActive ) {
+            DisabledMessage( GetPlayer() );
+            return;
+        }
+
         if ( m_COTMenu.IsVisible() )
         {
             CloseMenu( false );
@@ -134,6 +144,26 @@ class COTModule : Module
 
             m_COTMenu.SetInputFocus( true );
         }
+    }
+
+    void ToggleCOT()
+    {
+        if ( m_COTMenu == NULL ) return;
+
+        m_isActive = !m_isActive;
+
+        string message = "COT toggled ";
+        string color;
+
+        if (m_isActive) {
+            message += "on.";
+            color = "colorFriendly";
+        } else {
+            message += "off.";
+            color = "colorImportant";
+        }
+        
+        GetPlayer().Message(message, color);
     }
 }
 

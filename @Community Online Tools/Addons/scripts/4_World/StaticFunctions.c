@@ -345,6 +345,11 @@ static void Message( Man man, string txt )
     }
 }
 
+static void DisabledMessage( PlayerBase player )
+{
+    player.MessageImportant("COT is toggled off.");
+}
+
 static Weapon GetWeaponInHands()
 {
     Weapon weapon_in_hands;
