@@ -12,6 +12,11 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     bool ShowOnScreen;
 
+    int Width;
+    int Height;
+    float FOV;
+    vector ScreenPos;
+
     void OnWidgetScriptInit( Widget w )
     {
         layoutRoot = w;
@@ -22,6 +27,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void ~PlayerBox()
     {
+        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
     void Init() 
@@ -29,6 +35,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
         Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
         Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button"));
         Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("checkbox"));
+
     }
 
     void Show()
@@ -51,44 +58,55 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void OnShow()
     {
-        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
     }
 
     void OnHide() 
     {
-        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
-    float AngleBetween( vector a, vector b)
+    float ATan( float a )
     {
-        vector c = a - b;
-        vector d = a + b;
-
-        float e = c.Length();
-        float f = d.Length();
-
-        return 2.0 * Math.Atan2( e, f );
+        return Math.Sin( a ) / Math.Cos( a );
     }
 
     void Update() 
     {
+        vector normalize = ( Player.Data.VPosition - GetGame().GetCurrentCameraPosition() );
+        float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
+        
+        Print( "dot " + dot + " fov " + FOV );
+
+        if ( dot < 0 )
+        {
+            Hide();
+            ShowOnScreen = false;
+        }
+
+        if ( dot < Math.Cos( Math.PI - ( FOV / 2 ) ) )
+        {
+            Hide();
+            ShowOnScreen = false;
+        }
+            
+        ScreenPos = GetGame().GetScreenPos( Player.Data.VPosition );
+
+        if ( ShowOnScreen )
+        {
+            if ( ScreenPos[2] > 1000 )
+            {
+                Hide();
+                ShowOnScreen = false;
+            }
+            
+            if ( !layoutRoot.IsVisible() )
+            {
+                Show();
+            }
+        }
+
         if ( ShowOnScreen && Player )
         {
-            Camera camera = Camera.GetCurrentCamera();
-            if ( AngleBetween( camera.GetPosition(), Player.Data.VPosition ) > 2 )
-            {
-                return;
-            }
-
-            float fov = Camera.GetCurrentFOV();
-			int w, h;
-            float x, y;
-			GetScreenSize( w, h );
-			x = w / 2;
-			y = h / 2;
-
-            vector pos = GetGame().GetScreenPos( Player.Data.VPosition );
-            layoutRoot.SetPos( pos[0], pos[1] - y, true );
+            layoutRoot.SetPos( ScreenPos[0], ScreenPos[1] - ( Height / 2 ), true );
         }
     }
 
@@ -105,10 +123,9 @@ class PlayerBox extends ScriptedWidgetEventHandler
         {
             ShowOnScreen = false;
             Hide();
+            GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
         } else 
         {
-            Show();
-
             Name.SetText( Player.GetName() );
 
             if ( GetGame().GetPlayer() == NULL ) return;
@@ -128,8 +145,26 @@ class PlayerBox extends ScriptedWidgetEventHandler
                 Hide();
             } else
             {
-                ShowOnScreen = true;
                 Name.SetColor( 0xFFFFFFFF );
+            
+                ScreenPos = GetGame().GetScreenPos( Player.Data.VPosition );
+
+                if ( ScreenPos[2] > 1000 )
+                {
+                    Hide();
+                    ShowOnScreen = false;
+                } else 
+                {
+                    ShowOnScreen = true;
+
+                    GetScreenSize( Width, Height );
+
+                    FOV = 2.0 * ATan( Math.Tan( Camera.GetCurrentFOV() * 0.5 ) * ( Width / Height ) );
+
+                    GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+
+                    Show();
+                }
             }
         }
     }
