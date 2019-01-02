@@ -18,6 +18,10 @@ class PlayerRow extends ScriptedWidgetEventHandler
         Init();
     }
 
+    void ~PlayerRow()
+    {
+    }
+
     void Init() 
     {
         Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
