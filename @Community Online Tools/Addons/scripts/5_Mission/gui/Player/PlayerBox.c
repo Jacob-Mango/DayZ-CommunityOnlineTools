@@ -1,4 +1,4 @@
-class PlayerRow extends ScriptedWidgetEventHandler 
+class PlayerBox extends ScriptedWidgetEventHandler 
 {
     protected ref Widget layoutRoot;
 
@@ -18,7 +18,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
         Init();
     }
 
-    void ~PlayerRow()
+    void ~PlayerBox()
     {
     }
 
@@ -57,6 +57,11 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
     void Update() 
     {
+        if ( Player )
+        {
+            //vector pos = GetGame().GetScreenPos( Player.Data.VPosition );
+            //layoutRoot.SetPos( pos[0], pos[1], true );
+        }
     }
 
     ref Widget GetLayoutRoot() 
