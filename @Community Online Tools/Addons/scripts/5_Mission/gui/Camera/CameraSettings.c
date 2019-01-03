@@ -111,7 +111,6 @@ class CameraSettings extends Form
         super.OnHide();
 
         GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
-
     }
     
     void Update()
