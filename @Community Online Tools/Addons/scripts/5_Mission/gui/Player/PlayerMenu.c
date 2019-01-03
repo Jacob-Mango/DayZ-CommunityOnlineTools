@@ -441,8 +441,10 @@ class PlayerMenu extends Form
                 GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ), true );
             }
         }
-
+        
         GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param, true );
+        
+        GetRPCManager().SendRPC( "PermissionsFramework", "UpdateAllPlayerObjects", new Param, true );
     }
 
     override bool OnClick( Widget w, int x, int y, int button )
