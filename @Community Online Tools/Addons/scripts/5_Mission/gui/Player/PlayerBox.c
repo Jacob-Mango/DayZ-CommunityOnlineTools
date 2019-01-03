@@ -27,7 +27,6 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void ~PlayerBox()
     {
-        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
     void Init() 
@@ -62,6 +61,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void OnHide() 
     {
+        GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
     }
 
     float ATan( float a )
@@ -71,10 +71,10 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     void Update() 
     {
-        vector normalize = ( Player.Data.VPosition - GetGame().GetCurrentCameraPosition() );
+        vector normalize = ( Player.PlayerObject.GetPosition() - GetGame().GetCurrentCameraPosition() );
         float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
         
-        Print( "dot " + dot + " fov " + FOV );
+        // Message( GetPlayer(), "dot " + dot + " fov " + FOV );
 
         if ( dot < 0 )
         {
@@ -82,13 +82,13 @@ class PlayerBox extends ScriptedWidgetEventHandler
             ShowOnScreen = false;
         }
 
-        if ( dot < Math.Cos( Math.PI - ( FOV / 2 ) ) )
-        {
-            Hide();
-            ShowOnScreen = false;
-        }
+        //if ( dot < Math.Cos( Math.PI - ( FOV / 2 ) ) )
+        //{
+        //    Hide();
+        //    ShowOnScreen = false;
+        //}
             
-        ScreenPos = GetGame().GetScreenPos( Player.Data.VPosition );
+        ScreenPos = GetGame().GetScreenPos( Player.PlayerObject.GetPosition() + "0 2 0");
 
         if ( ShowOnScreen )
         {
@@ -126,6 +126,13 @@ class PlayerBox extends ScriptedWidgetEventHandler
             GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
         } else 
         {
+            if ( Player.PlayerObject == NULL )
+            {
+                Hide();
+                ShowOnScreen = false;
+                return;
+            }
+
             Name.SetText( Player.GetName() );
 
             if ( GetGame().GetPlayer() == NULL ) return;
@@ -147,7 +154,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
             {
                 Name.SetColor( 0xFFFFFFFF );
             
-                ScreenPos = GetGame().GetScreenPos( Player.Data.VPosition );
+                ScreenPos = GetGame().GetScreenPos( Player.PlayerObject.GetPosition() );
 
                 if ( ScreenPos[2] > 1000 )
                 {
