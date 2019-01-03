@@ -57,7 +57,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
     void Update() 
     {
-        
     }
 
     ref Widget GetLayoutRoot() 
@@ -110,12 +109,12 @@ class PlayerRow extends ScriptedWidgetEventHandler
     {        
         if ( w == Checkbox )
         {
-            Menu.OnPlayer_Checked( this );
+            Menu.OnPlayer_Checked( Player, Checkbox.IsChecked() );
         }
 
         if ( w == Button )
         {
-            Menu.OnPlayer_Button( this );
+            Checkbox.SetChecked( Menu.OnPlayer_Button( Player ) );
         }
 
         return true;
