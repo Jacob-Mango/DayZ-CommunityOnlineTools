@@ -3,9 +3,13 @@ class PlayerModule: EditorModule
     void PlayerModule()
     {
         GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
+        GetRPCManager().AddRPC( "COT_Admin", "SetRoles", this, SingeplayerExecutionType.Server );
+
         GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
+
         GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
+
         GetRPCManager().AddRPC( "COT_Admin", "SpectatePlayer", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
 
@@ -622,6 +626,50 @@ class PlayerModule: EditorModule
                         player.Save();
 
                         COTLog( sender, "Set and saved permissions for " + players[i].GetSteam64ID() );
+                    }
+                }
+            }
+        }
+    }
+    
+    void SetRoles( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( "Admin.Roles", sender ) )
+            return;
+   
+        if ( type == CallType.Server )
+        {
+            Param2< ref array< string >, ref array< string > > data;
+            if ( !ctx.Read( data ) ) return;
+
+            ref array< string > roles = new ref array< string >;
+            roles.Copy( data.param1 );
+
+            ref array< string > guids = new ref array< string >;
+            guids.Copy( data.param2 );
+
+            array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
+
+            for ( int i = 0; i < guids.Count(); i++ )
+            {
+                for ( int k = 0; k < GetPermissionsManager().AuthPlayers.Count(); k++ )
+                {
+                    ref AuthPlayer player = GetPermissionsManager().AuthPlayers[k];
+                    
+                    if ( guids[i] == player.GetSteam64ID() )
+                    {
+                        player.ClearRoles();
+
+                        for ( int j = 0; j < roles.Count(); j++ )
+                        {
+                            player.AddStringRole( roles[j] );
+                        }
+
+                        GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< ref PlayerData >( SerializePlayer( player ) ), true, player.IdentityPlayer );
+
+                        player.Save();
+
+                        COTLog( sender, "Set and saved roles for " + players[i].GetSteam64ID() );
                     }
                 }
             }
