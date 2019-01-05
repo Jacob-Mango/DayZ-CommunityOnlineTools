@@ -62,6 +62,11 @@ class TeleportModule: EditorModule
 
     void TeleportCursor()
     {
+        if ( !COTModule.COTInstance.m_isActive ) {
+            DisabledMessage( GetPlayer() );
+            return;
+        }
+
         vector hitPos = GetCursorPos();
 
         float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );
