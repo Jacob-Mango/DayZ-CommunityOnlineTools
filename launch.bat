@@ -24,6 +24,8 @@ IF %multiplayer%==1 (
 
     chdir /d "%gameDir%"
     start DayZ_BE.exe -exe DayZ_x64.exe -connect=127.0.0.1 -port=2302 -noPause -noBenchmark -scriptDebug=true -name=Jacob_Mango -password=abc123 -freezecheck "-mod=@RPCFramework;@Permissions Framework;%modName%"
+
+    goto:eof
 ) ELSE IF %multiplayer%==2 (
     Powershell.exe -File "%cd%\Tools\exit.ps1" @RPCFramework %modName%
 

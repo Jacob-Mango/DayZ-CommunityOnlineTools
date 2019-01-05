@@ -74,14 +74,17 @@ class PlayerBox extends ScriptedWidgetEventHandler
         vector normalize = ( Player.PlayerObject.GetPosition() - GetGame().GetCurrentCameraPosition() );
         float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
         
-        Notify( GetPlayer(), "dot " + dot + " fov " + FOV );
+        float limit = FOV;
 
-        float limit = FOV / 4.0;
+        Notify( Player, "dot " + dot + " fov " + FOV + " limit " + limit );
 
         if ( dot < limit )
         {
             Hide();
             ShowOnScreen = false;
+        } else
+        {
+            ShowOnScreen = true;
         }
             
         ScreenPos = GetGame().GetScreenPos( Player.PlayerObject.GetPosition() + "0 2 0");
@@ -170,9 +173,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
                     GetScreenSize( Width, Height );
 
-                    float aspect = ( Width * 1.0 ) / ( Height * 1.0 );
-
-                    FOV = 2.0 * ATan( Math.Tan( Camera.GetCurrentFOV() * 0.5 ) * aspect );
+                    FOV = Camera.GetCurrentFOV() * ( Height * 1.0 ) / ( Width * 1.0 );
 
                     GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
 
