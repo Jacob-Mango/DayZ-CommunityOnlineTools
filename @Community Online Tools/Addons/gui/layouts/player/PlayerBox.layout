@@ -2,7 +2,7 @@ PanelWidgetClass PlayerBox {
  ignorepointer 1
  color 0.4 0.4 0.4 0.85
  position 0 0
- size 120 22
+ size 150 22
  valign center_ref
  hexactpos 1
  vexactpos 1
