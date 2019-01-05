@@ -66,7 +66,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
     float ATan( float a )
     {
-        return Math.Sin( a ) / Math.Cos( a );
+        return Math.Asin( a ) / Math.Acos( a );
     }
 
     void Update() 
@@ -74,19 +74,15 @@ class PlayerBox extends ScriptedWidgetEventHandler
         vector normalize = ( Player.PlayerObject.GetPosition() - GetGame().GetCurrentCameraPosition() );
         float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
         
-        // Message( GetPlayer(), "dot " + dot + " fov " + FOV );
+        Notify( GetPlayer(), "dot " + dot + " fov " + FOV );
 
-        if ( dot < 0 )
+        float limit = FOV / 4.0;
+
+        if ( dot < limit )
         {
             Hide();
             ShowOnScreen = false;
         }
-
-        //if ( dot < Math.Cos( Math.PI - ( FOV / 2 ) ) )
-        //{
-        //    Hide();
-        //    ShowOnScreen = false;
-        //}
             
         ScreenPos = GetGame().GetScreenPos( Player.PlayerObject.GetPosition() + "0 2 0");
 
@@ -126,6 +122,8 @@ class PlayerBox extends ScriptedWidgetEventHandler
             GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
         } else 
         {
+            ShowOnScreen = true;
+
             if ( Player.PlayerObject == NULL )
             {
                 Hide();
@@ -147,10 +145,16 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
             if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
             {
-                ShowOnScreen = false;
+                if ( CurrentActiveCamera == NULL )
+                {
+                    ShowOnScreen = false
+                    Hide();
+                }
+
                 Name.SetColor( 0xFF2ECC71 );
-                Hide();
-            } else
+            } 
+
+            if ( ShowOnScreen )
             {
                 Name.SetColor( 0xFFFFFFFF );
             
@@ -166,11 +170,13 @@ class PlayerBox extends ScriptedWidgetEventHandler
 
                     GetScreenSize( Width, Height );
 
-                    FOV = 2.0 * ATan( Math.Tan( Camera.GetCurrentFOV() * 0.5 ) * ( Width / Height ) );
+                    float aspect = ( Width * 1.0 ) / ( Height * 1.0 );
+
+                    FOV = 2.0 * ATan( Math.Tan( Camera.GetCurrentFOV() * 0.5 ) * aspect );
 
                     GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
 
-                    Show();
+                    Update();
                 }
             }
         }

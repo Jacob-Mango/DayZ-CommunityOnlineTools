@@ -1,29 +1,30 @@
 PanelWidgetClass PlayerBox {
  ignorepointer 1
- color 0 0 0 0
+ color 0.4 0.4 0.4 0.85
  position 0 0
- size 100 30
+ size 120 22
  valign center_ref
  hexactpos 1
  vexactpos 1
  hexactsize 1
  vexactsize 1
+ style rover_sim_colorable
  scriptclass "PlayerBox"
  {
   ButtonWidgetClass button {
    ignorepointer 0
    position 0 0
-   size 1 30
+   size 1 1
    halign left_ref
    valign center_ref
    hexactpos 1
    vexactpos 1
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
    {
     TextWidgetClass text_name {
      ignorepointer 1
-     position 30 0
+     position 24 0
      size 1 0.55
      valign center_ref
      halign center_ref
@@ -34,7 +35,6 @@ PanelWidgetClass PlayerBox {
      text ""
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 0
-     "exact text size" 18
      "text halign" left
      "text valign" center
     }
@@ -45,7 +45,7 @@ PanelWidgetClass PlayerBox {
    ignorepointer 0
    color 0 0 0 0
    position 0 0
-   size 30 30
+   size 22 22
    hexactpos 1
    vexactpos 1
    hexactsize 1
@@ -57,7 +57,7 @@ PanelWidgetClass PlayerBox {
      ignorepointer 0
      color 1 1 1 1
      position 0 0
-     size 24 24
+     size 20 20
      halign center_ref
      valign center_ref
      hexactpos 0
