@@ -18,7 +18,7 @@ IF %multiplayer%==1 (
     CALL deploy.bat %1 %2 %3
 
     chdir /d "%serverDir%"
-    start DZSALModServer.exe -scrAllowFileWrite -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -password=abc123 -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\dayzOffline.ChernarusPlus "-mod=@RPCFramework;@Permissions Framework;%modName%"
+    start DayZServer_x64.exe -scrAllowFileWrite -config=serverDZ.cfg -port=2302 "-profiles=%profiles%" -dologs -adminlog -freezecheck -password=abc123 -scriptDebug=true -cpuCount=4 -mission=.\MPMissions\dayzOffline.ChernarusPlus "-mod=@RPCFramework;@Permissions Framework;%modName%"
 
     TIMEOUT /T 5 /NOBREAK
 
