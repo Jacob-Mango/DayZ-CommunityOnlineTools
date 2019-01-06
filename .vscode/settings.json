@@ -1,10 +1,10 @@
 {
-    "discord.enabled": false,
+    "discord.enabled": true,
     "triggerTaskOnSave.on": true,
     "triggerTaskOnSave.tasks": {
         "Deploy": [
-            //"**/*.c",
-            //"**/*.cpp",
+            "**/*.c",
+            "**/*.cpp",
             "**/*.layout"
         ]
     }
