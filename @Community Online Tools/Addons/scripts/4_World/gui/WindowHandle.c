@@ -32,6 +32,11 @@ class WindowHandle extends ScriptedWidgetEventHandler
         m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_wrapper" ) );
     }
 
+    void SetSize( float w, float h )
+    {
+        layoutRoot.SetSize( w, h + 25 );
+    }
+
     void Show()
     {
         layoutRoot.Show( true );

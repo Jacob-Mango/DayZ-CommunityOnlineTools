@@ -91,9 +91,9 @@ PanelWidgetClass PlayerMenu {
   }
   PanelWidgetClass panel_right {
    color 0 0 0 0
-   position 0 0
+   position 0.31 0
    size 0.69 1
-   halign right_ref
+   halign left_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0

@@ -5,6 +5,7 @@ class PlayerMenu extends Form
     ref array< ref PermissionRow >  m_PermissionsList;
     ref array< ref RoleRow >        m_RolesList;
 
+    ref Widget                      m_PlayerListWrapper;
     ref TextWidget                  m_PlayerCount;
     ref GridSpacerWidget            m_PlayerScriptListFirst;
     int                             m_PlayersInFirst;
@@ -69,6 +70,11 @@ class PlayerMenu extends Form
     ref UIActionCheckbox m_GodMode;
     ref UIActionButton m_SpectatePlayer;
 
+    float plwidth = -1;
+    float plheight = -1;
+    float awidth = -1;
+    float aheight = -1;
+
     void PlayerMenu()
     {
         m_CanUpdateList = true;
@@ -105,8 +111,9 @@ class PlayerMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
-        m_PlayerScriptListFirst = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_first"));
-        m_PlayerScriptListSecond = GridSpacerWidget.Cast(layoutRoot.FindAnyWidget("player_list_second"));
+        m_PlayerListWrapper = layoutRoot.FindAnyWidget("players_list_wrapper");
+        m_PlayerScriptListFirst = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_first"));
+        m_PlayerScriptListSecond = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_second"));
         m_PlayersInFirst = 0;
         m_PlayersInSecond = 0;
         m_UserID = 2000;
@@ -174,6 +181,13 @@ class PlayerMenu extends Form
         m_RolesContainer = layoutRoot.FindAnyWidget("roles_container");
         m_SetRolesButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("roles_set_button"));
         m_RolesBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("roles_back_button"));
+        
+        layoutRoot.GetSize( awidth, aheight );
+
+        m_PlayerListWrapper.GetSize( plwidth, plheight );
+
+        plwidth = plwidth * awidth;
+        plheight = plheight * aheight;
 
         CreatePermissionsUI();
 
@@ -195,6 +209,20 @@ class PlayerMenu extends Form
     {
         m_ActionsForm.Show( false );
         m_RolesWrapper.Show( true );
+        m_PermissionsWrapper.Show( false );
+    }
+
+    void Click_ShowActions()
+    {
+        m_ActionsForm.Show( true );
+        m_RolesWrapper.Show( false );
+        m_PermissionsWrapper.Show( false );
+    }
+
+    void Click_CloseActions()
+    {
+        m_ActionsForm.Show( false );
+        m_RolesWrapper.Show( false );
         m_PermissionsWrapper.Show( false );
     }
 
@@ -368,14 +396,16 @@ class PlayerMenu extends Form
 
     void UpdateActionsFields( ref PlayerData data )
     {
-        if ( m_DataJustUpdated )
-        {
-            m_DataJustUpdated = false;
-            return;
-        }
-
         if ( data )
         {
+            SetSize( awidth, plheight );
+
+            if ( m_DataJustUpdated )
+            {
+                m_DataJustUpdated = false;
+                return;
+            }
+
             m_GUID.SetText( data.SGUID );
             m_Name.SetText( data.SName );
             m_Steam64ID.SetText( data.SSteam64ID );
@@ -403,24 +433,23 @@ class PlayerMenu extends Form
             m_ActionsForm.FindAnyWidget( "disabled" ).Show( false );
         } else 
         {
-            m_GUID.SetText( "" );
-            m_Name.SetText( "" );
-            m_Steam64ID.SetText( "" );
+            if ( m_ActionsForm.IsVisible() )
+            {
+                SetSize( plwidth, plheight );
 
-            m_Health.SetText( "" );
-            m_Blood.SetText( "" );
-            m_Energy.SetText( "" );
-            m_Water.SetText( "" );
+                m_GUID.SetText( "" );
+                m_Name.SetText( "" );
+                m_Steam64ID.SetText( "" );
 
-            m_PingMin.SetText( "" );
-            m_PingMax.SetText( "" );
-            m_PingAvg.SetText( "" );
+                m_Health.SetText( "" );
+                m_Blood.SetText( "" );
+                m_Energy.SetText( "" );
+                m_Water.SetText( "" );
 
-            m_ActionsForm.Show( true );
-            m_RolesWrapper.Show( false );
-            m_PermissionsWrapper.Show( false );
-
-            m_ActionsForm.FindAnyWidget("disabled").Show( true );
+                m_PingMin.SetText( "" );
+                m_PingMax.SetText( "" );
+                m_PingAvg.SetText( "" );
+            }
         }
     }
 
@@ -428,9 +457,7 @@ class PlayerMenu extends Form
     {
         GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param, true );
 
-        m_RolesWrapper.Show( false );
-        m_PermissionsWrapper.Show( false );
-        m_ActionsWrapper.Show( true );
+        Click_ShowActions();
 
         if ( GetSelectedPlayers().Count() != 0 )
         {
@@ -479,16 +506,12 @@ class PlayerMenu extends Form
 
         if ( w == m_PermissionsBackButton )
         {
-            m_RolesWrapper.Show( false );
-            m_PermissionsWrapper.Show( false );
-            m_ActionsForm.Show( true );
+            Click_ShowActions();
         }
 
         if ( w == m_RolesBackButton )
         {
-            m_RolesWrapper.Show( false );
-            m_PermissionsWrapper.Show( false );
-            m_ActionsForm.Show( true );
+            Click_ShowActions();
         }
 
         return false;
@@ -501,6 +524,19 @@ class PlayerMenu extends Form
 
     bool OnPlayer_Button( ref AuthPlayer player )
     {
+        if ( player == NULL )
+        {
+            return OnPlayerSelected( NULL );
+        }
+
+        if ( GetSelectedPlayers().Count() == 1 )
+        {
+            if ( GetSelectedPlayers()[0] == player )
+            {
+                return OnPlayerSelected( NULL );
+            }
+        }
+
         OnPlayerSelected( NULL );
 
         return OnPlayerSelected( player );
