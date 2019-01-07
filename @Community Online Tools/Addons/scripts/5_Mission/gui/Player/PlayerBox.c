@@ -74,9 +74,7 @@ class PlayerBox extends ScriptedWidgetEventHandler
         vector normalize = ( Player.PlayerObject.GetPosition() - GetGame().GetCurrentCameraPosition() );
         float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
         
-        float limit = FOV;
-
-        Notify( Player, "dot " + dot + " fov " + FOV + " limit " + limit );
+        float limit = FOV / 1.5;
 
         if ( dot < limit )
         {
