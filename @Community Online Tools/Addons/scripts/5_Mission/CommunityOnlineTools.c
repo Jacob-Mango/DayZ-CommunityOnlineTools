@@ -1,6 +1,6 @@
 int JM_COT_CURRENT_VERSION_MAJOR = 0;
-int JM_COT_CURRENT_VERSION_MINOR = 7;
-int JM_COT_CURRENT_VERSION_REVISION = 6;
+int JM_COT_CURRENT_VERSION_MINOR = 8;
+int JM_COT_CURRENT_VERSION_REVISION = 0;
 
 class CommunityOnlineTools
 {
@@ -46,6 +46,7 @@ class CommunityOnlineTools
 
     void RegisterModules()
     {
+        // GetModuleManager().RegisterModule( new COTManagerModule );
         GetModuleManager().RegisterModule( new PlayerModule );
         GetModuleManager().RegisterModule( new ObjectModule );
         // GetModuleManager().RegisterModule( new MapEditorModule );

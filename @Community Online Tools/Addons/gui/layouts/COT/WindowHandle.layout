@@ -11,7 +11,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass background {
    visible 1
    ignorepointer 1
-   color 0 0 0 0.95
+   color 0.06 0.08 0.11 0.8
    position 0 0
    size 1 1
    hexactpos 1
@@ -32,7 +32,7 @@ PanelWidgetClass base_window {
   }
   PanelWidgetClass title_wrapper {
    visible 1
-   color 0 0 0 0.7843
+   color 0.02 0.02 0.06 1
    position 0 0
    size 1 25
    hexactpos 1

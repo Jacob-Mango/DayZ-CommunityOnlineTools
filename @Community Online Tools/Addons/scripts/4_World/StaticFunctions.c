@@ -341,7 +341,7 @@ static void Message( Man man, string txt )
         GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
     } else 
     {
-        GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, NULL );
+        GetPlayer().Message( txt, "colorImportant" );
     }
 }
 

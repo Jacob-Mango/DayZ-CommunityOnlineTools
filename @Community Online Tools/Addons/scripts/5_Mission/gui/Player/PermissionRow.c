@@ -169,8 +169,6 @@ class PermissionRow extends ScriptedWidgetEventHandler
             Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
             return;
         }
-
-        Print( inp + " with type " + type );
         
         int depth = tokens.Find( Name );
 

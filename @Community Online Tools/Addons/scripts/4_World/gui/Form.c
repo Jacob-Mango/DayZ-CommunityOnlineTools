@@ -45,6 +45,11 @@ class Form extends ScriptedWidgetEventHandler
         }
     }
 
+    void SetSize( float w, float h )
+    {
+        window.SetSize( w, h );
+    }
+
     void Hide()
     {
         OnHide();

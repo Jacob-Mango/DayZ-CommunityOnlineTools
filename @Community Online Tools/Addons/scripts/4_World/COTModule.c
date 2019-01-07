@@ -14,7 +14,7 @@ class COTModule : Module
 
         MakeDirectory( ROOT_COT_DIR );
 
-        GetPermissionsManager().RegisterPermission( "COT.Show" );
+        GetPermissionsManager().RegisterPermission( "COT.Taskbar.View" );
     }
 
     void ~COTModule()
@@ -90,7 +90,7 @@ class COTModule : Module
             }
         }
 
-        if ( !GetPermissionsManager().HasPermission( "COT.Show" ) )
+        if ( !GetPermissionsManager().HasPermission( "COT.Taskbar.View" ) )
             return;
             
         m_COTMenu.Show();
