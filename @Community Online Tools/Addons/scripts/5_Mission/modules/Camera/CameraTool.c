@@ -102,16 +102,19 @@ class CameraTool: EditorModule
                 position = target.GetPosition();
             }
 
-            Human human = Human.Cast( target );
+            GetGame().SelectPlayer( sender, NULL );
+
+            PlayerBase human = PlayerBase.Cast( target );
 
             if ( human )
             {
+                //human.Save();
+                //human.Delete();
+
                 position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
             }
-            
-            GetGame().SelectSpectator( sender, "CinematicCamera", position );
 
-            GetGame().SelectPlayer( sender, NULL );
+            GetGame().SelectSpectator( sender, "CinematicCamera", position );
 
             GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
 
@@ -141,23 +144,13 @@ class CameraTool: EditorModule
         if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
             return;
 
-        Param1< vector > data;
-
         if( type == CallType.Server )
         {
             GetGame().SelectPlayer( sender, target );
 
-            if ( ctx.Read( data ) ) 
-            {
-                if ( target ) 
-                {
-                    target.SetPosition( data.param1 );
-                }
-            } 
-
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
+                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
             } 
 
             COTLog( sender, "Left the Free Camera");
@@ -168,14 +161,6 @@ class CameraTool: EditorModule
             if ( !GetGame().IsMultiplayer() )
             {
                 GetGame().SelectPlayer( sender, target );
-
-                if ( ctx.Read( data ) ) 
-                {
-                    if ( target ) 
-                    {
-                        target.SetPosition( data.param1 );
-                    }
-                } 
             }
 
             CurrentActiveCamera.SetActive( false );
@@ -203,19 +188,7 @@ class CameraTool: EditorModule
         {
             SetFreezeMouse(false);
 
-            vector position = "0 0 0";
-
-            if( CTRL() || SHIFT() )
-            {
-                position = CurrentActiveCamera.GetPosition();
-                position[1] = GetGame().SurfaceY( position[0], position[2] );
-            }
-            else
-            {
-                position = GetCursorPos();
-            }
-
-            GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>( position ), true, NULL, GetPlayer() );
+            GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, NULL, GetPlayer() );
         }
     }
     
