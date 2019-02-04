@@ -414,9 +414,15 @@ class PlayerModule: EditorModule
             {
                 PlayerBase player = players[i].PlayerObject;
 
-                if ( player == NULL || player.GetTransport() == NULL ) continue;
+                if ( player == NULL) continue;
 
-                Transport transport = player.GetTransport();
+                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+                if ( vehCommand == NULL ) continue;
+
+                Transport transport = vehCommand.GetTransport();
+
+                if ( transport == NULL ) continue;
 
                 if ( completedTransports.Find( transport ) > -1 )
                 {
@@ -468,7 +474,13 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                if ( player.GetTransport() != NULL ) continue;
+                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+                if ( vehCommand == NULL ) continue;
+
+                Transport transport = vehCommand.GetTransport();
+
+                if ( transport != NULL ) continue;
 
                 player.SetPosition( data.param1 );
 
@@ -487,7 +499,15 @@ class PlayerModule: EditorModule
 
         PlayerBase senderPlayer = PlayerBase.Cast( target );
 
-        if ( senderPlayer == NULL || senderPlayer.GetTransport() != NULL ) return;
+        if ( senderPlayer == NULL ) return;
+
+        HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
+
+        if ( vehCommand == NULL ) return;
+
+        Transport transport = vehCommand.GetTransport();
+
+        if ( transport == NULL ) return;
 
         if( type == CallType.Server )
         {

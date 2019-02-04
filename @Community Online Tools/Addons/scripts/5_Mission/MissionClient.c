@@ -49,7 +49,7 @@ modded class MissionGameplay
 
         if ( DISABLE_ALL_INPUT )
         {
-            if( input.GetActionDown(UAUIQuickbarRadialOpen, false) )
+            if( input.GetActionDown("UAUIQuickbarRadialOpen", false) )
             {
                 if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
                 {
