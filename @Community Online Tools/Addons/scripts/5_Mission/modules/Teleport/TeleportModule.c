@@ -112,7 +112,15 @@ class TeleportModule: EditorModule
             if ( player.IsInTransport() )
             {
                 // player.GetTransport().SetOrigin( data.param1 );
-                player.GetTransport().SetPosition( data.param1 );
+                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+                if ( vehCommand == NULL ) return;
+
+                Transport transport = vehCommand.GetTransport();
+
+                if ( transport == NULL ) return;
+
+                transport.SetPosition( data.param1 );
             } else
             {
                 player.SetPosition( data.param1 );
@@ -151,8 +159,15 @@ class TeleportModule: EditorModule
 
                 if ( player.IsInTransport() )
                 {
-                    player.GetTransport().SetOrigin( position );
-                    player.GetTransport().SetPosition( position );
+                    HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+                    if ( vehCommand == NULL ) return;
+
+                    Transport transport = vehCommand.GetTransport();
+
+                    if ( transport == NULL ) return;
+                    transport.SetOrigin( position );
+                    transport.SetPosition( position );
                 } else 
                 {
                     player.SetPosition( position );
