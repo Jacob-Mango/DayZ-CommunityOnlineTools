@@ -20,17 +20,17 @@ class CinematicCamera extends COTCamera
 
         Input input = GetGame().GetInput();
 
-        float forward = input.GetAction( UAMoveForward ) - input.GetAction( UAMoveBack );
-        float strafe = input.GetAction( UATurnRight ) - input.GetAction( UATurnLeft );
-        float altitude = input.GetAction( UALeanLeft ) - input.GetAction( UALeanRight );
+        float forward = input.GetAction( "UAMoveForward" ) - input.GetAction( "UAMoveBack" );
+        float strafe = input.GetAction( "UATurnRight" ) - input.GetAction( "UATurnLeft" );
+        float altitude = input.GetAction( "UALeanLeft" ) - input.GetAction( "UALeanRight" );
 
-        float yawDiff = input.GetAction( UAAimLeft ) - input.GetAction( UAAimRight );
-        float pitchDiff = input.GetAction( UAAimDown ) - input.GetAction( UAAimUp );
+        float yawDiff = input.GetAction( "UAAimLeft" ) - input.GetAction( "UAAimRight" );
+        float pitchDiff = input.GetAction( "UAAimDown" ) - input.GetAction( "UAAimUp" );
 
-        float speedInc = input.GetAction( UAPrevAction ) - input.GetAction( UANextAction );
+        float speedInc = input.GetAction( "UAPrevAction" ) - input.GetAction( "UANextAction" );
 
-        bool shouldRoll = input.GetAction( UALookAround );
-        bool increaseSpeeds = input.GetAction( UATurbo );
+        bool shouldRoll = input.GetAction( "UALookAround" );
+        bool increaseSpeeds = input.GetAction( "UATurbo" );
 
         if ( !MoveFreeze )
         {
