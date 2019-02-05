@@ -29,7 +29,7 @@ class COTManagerMenu extends Form
     {
         m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-        UIActionManager.CreateCheckbox( m_ActionsWrapper, "ESP", this, "Click_ESP" );
+        UIActionManager.CreateCheckbox( m_ActionsWrapper, "ESP", this, "Click_ESP", false );
     }
 
     void Click_ESP( UIEvent eid, ref UIActionCheckbox action )
