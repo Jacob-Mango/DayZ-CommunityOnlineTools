@@ -9,7 +9,6 @@ class CameraTool: EditorModule
 
         GetRPCManager().AddRPC( "COT_Camera", "UpdateCameraNetworkBubble", this, SingeplayerExecutionType.Server );
 
-        GetPermissionsManager().RegisterPermission( "CameraTools.View" );
         GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.UpdateNetworkBubble" );
@@ -17,11 +16,6 @@ class CameraTool: EditorModule
 
     void ~CameraTool()
     {
-    }
-
-    override bool HasAccess()
-    {
-        return GetPermissionsManager().HasPermission( "CameraTools.View" );
     }
 
     override string GetLayoutRoot()
@@ -65,7 +59,7 @@ class CameraTool: EditorModule
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", "Toggle camera.", true );
-        toggleCamera.AddBinding( "kInsert" );
+        toggleCamera.AddBinding( "kPrior" );
         RegisterKeyMouseBinding( toggleCamera );
     }
 

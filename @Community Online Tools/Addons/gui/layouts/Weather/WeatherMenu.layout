@@ -3,7 +3,7 @@ PanelWidgetClass WeatherMenu
     visible 0
     color 0 0 0 0
     position 0 0
-    size 570 170
+    size 570 190
     hexactpos 0
     vexactpos 0
     hexactsize 1
@@ -273,6 +273,18 @@ PanelWidgetClass WeatherMenu
                     }
                 }
             }
+        }
+        ButtonWidgetClass btn_save
+        {
+            position 5 5
+            size 80 20
+            halign right_ref
+            valign bottom_ref
+            hexactpos 1
+            vexactpos 1
+            hexactsize 1
+            vexactsize 1
+            text "Save"
         }
     }
 }

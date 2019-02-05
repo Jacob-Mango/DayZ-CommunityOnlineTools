@@ -40,8 +40,11 @@ class COTMenu
             ref Widget button_bkg = NULL;
             ref ButtonWidget button = NULL;
 
-            button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
-            button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+            if ( module.HasAccess() )
+            {
+                button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
+                button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+            }
 
             ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
 
@@ -179,16 +182,14 @@ class COTMenu
         if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
         
         Form form;
-        EditorModule module;
 
         for ( int i = 0; i < m_Modules.Count(); i++ )
         {
-            module = m_Modules.Get( i );
+            EditorModule module = m_Modules.Get( i );
 
             if ( w == module.menuButton )
             {
                 form = module.form;
-                break;
             }
         }
 
@@ -198,7 +199,7 @@ class COTMenu
             {
                 form.Hide();
             }
-            else if ( module.HasAccess() )
+            else 
             {
                 form.Show();
             }
