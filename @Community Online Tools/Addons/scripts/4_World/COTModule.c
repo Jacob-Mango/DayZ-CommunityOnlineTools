@@ -6,7 +6,6 @@ class COTModule : Module
 
     protected bool m_PreventOpening; 
     protected bool m_ForceHUD; 
-    bool m_isActive = true;
 
     void COTModule()
     {
@@ -105,7 +104,7 @@ class COTModule : Module
 
     void ToggleMenu()
     {
-        if ( !m_isActive ) {
+        if ( !COTIsActive ) {
             DisabledMessage( GetPlayer() );
             return;
         }
@@ -150,12 +149,12 @@ class COTModule : Module
     {
         if ( m_COTMenu == NULL ) return;
 
-        m_isActive = !m_isActive;
+        COTIsActive = !COTIsActive;
 
-        string message = "COT toggled ";
+        string message = "Community Online Tools has been toggled ";
         string color;
 
-        if (m_isActive) {
+        if (COTIsActive) {
             message += "on.";
             color = "colorFriendly";
         } else {
