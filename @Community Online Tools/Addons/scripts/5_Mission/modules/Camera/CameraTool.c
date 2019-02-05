@@ -9,6 +9,7 @@ class CameraTool: EditorModule
 
         GetRPCManager().AddRPC( "COT_Camera", "UpdateCameraNetworkBubble", this, SingeplayerExecutionType.Server );
 
+        GetPermissionsManager().RegisterPermission( "CameraTools.View" );
         GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
         GetPermissionsManager().RegisterPermission( "CameraTools.UpdateNetworkBubble" );
@@ -16,6 +17,11 @@ class CameraTool: EditorModule
 
     void ~CameraTool()
     {
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "CameraTools.View" );
     }
 
     override string GetLayoutRoot()
@@ -59,7 +65,7 @@ class CameraTool: EditorModule
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", "Toggle camera.", true );
-        toggleCamera.AddBinding( "kPrior" );
+        toggleCamera.AddBinding( "kInsert" );
         RegisterKeyMouseBinding( toggleCamera );
     }
 
@@ -96,16 +102,19 @@ class CameraTool: EditorModule
                 position = target.GetPosition();
             }
 
-            Human human = Human.Cast( target );
+            GetGame().SelectPlayer( sender, NULL );
+
+            PlayerBase human = PlayerBase.Cast( target );
 
             if ( human )
             {
+                // human.Save();
+                // human.Delete();
+
                 position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
             }
-            
-            GetGame().SelectSpectator( sender, "CinematicCamera", position );
 
-            GetGame().SelectPlayer( sender, NULL );
+            GetGame().SelectSpectator( sender, "CinematicCamera", position );
 
             GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
 
@@ -125,7 +134,11 @@ class CameraTool: EditorModule
             if ( CurrentActiveCamera )
             {
                 CurrentActiveCamera.SetActive( true );
-                GetPlayer().GetInputController().SetDisabled( true );
+                
+                if ( GetPlayer() )
+                {
+                    GetPlayer().GetInputController().SetDisabled( true );
+                }
             }
         }
     }
@@ -135,23 +148,13 @@ class CameraTool: EditorModule
         if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
             return;
 
-        Param1< vector > data;
-
         if( type == CallType.Server )
         {
             GetGame().SelectPlayer( sender, target );
 
-            if ( ctx.Read( data ) ) 
-            {
-                if ( target ) 
-                {
-                    target.SetPosition( data.param1 );
-                }
-            } 
-
             if ( GetGame().IsMultiplayer() )
             {
-                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
+                GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
             } 
 
             COTLog( sender, "Left the Free Camera");
@@ -162,14 +165,6 @@ class CameraTool: EditorModule
             if ( !GetGame().IsMultiplayer() )
             {
                 GetGame().SelectPlayer( sender, target );
-
-                if ( ctx.Read( data ) ) 
-                {
-                    if ( target ) 
-                    {
-                        target.SetPosition( data.param1 );
-                    }
-                } 
             }
 
             CurrentActiveCamera.SetActive( false );
@@ -177,7 +172,10 @@ class CameraTool: EditorModule
             
             PPEffects.ResetDOFOverride();
 
-            GetPlayer().GetInputController().SetDisabled( false );
+            if ( GetPlayer() )
+            {
+                GetPlayer().GetInputController().SetDisabled( false );
+            }
         }
     }
 
@@ -197,25 +195,18 @@ class CameraTool: EditorModule
         {
             SetFreezeMouse(false);
 
-            vector position = "0 0 0";
-
-            if( CTRL() || SHIFT() )
-            {
-                position = CurrentActiveCamera.GetPosition();
-                position[1] = GetGame().SurfaceY( position[0], position[2] );
-            }
-            else
-            {
-                position = GetCursorPos();
-            }
-
-            GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>( position ), true, NULL, GetPlayer() );
+            GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, NULL, GetPlayer() );
         }
     }
     
     void ToggleCamera() 
     {
         if ( GetGame().IsMultiplayer() == false ) return;
+
+        if ( !COTModule.COTInstance.m_isActive ) {
+            DisabledMessage( GetPlayer() );
+            return;
+        }
 
         if ( CurrentActiveCamera )
         {

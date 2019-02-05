@@ -34,6 +34,11 @@ class Form extends ScriptedWidgetEventHandler
         
     }
 
+    bool IsVisible()
+    {
+        return window.IsVisible();
+    }
+
     void Show()
     {
         if ( HasBeenInitialized )
@@ -43,6 +48,11 @@ class Form extends ScriptedWidgetEventHandler
 
             OnShow();
         }
+    }
+
+    void SetSize( float w, float h )
+    {
+        window.SetSize( w, h );
     }
 
     void Hide()

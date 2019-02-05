@@ -10,6 +10,13 @@ class TeleportModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
         GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
+    
+        GetPermissionsManager().RegisterPermission( "Teleport.View" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Teleport.View" );
     }
     
     override void ReloadSettings()
@@ -37,9 +44,9 @@ class TeleportModule: EditorModule
 
     override void RegisterKeyMouseBindings() 
     {
-        KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
-        teleport.AddBinding( "kEnd" );
-        teleport.SetActionType( KeyMouseActionType.PRESS );
+        KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position.", true );
+        teleport.AddBinding( "kH" );
+        teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
         RegisterKeyMouseBinding( teleport );
     }
 
@@ -48,18 +55,32 @@ class TeleportModule: EditorModule
         return "JM/COT/gui/layouts/Teleport/PositionMenu.layout";
     }
 
-    autoptr map< string, vector > GetPositions()
+    ref array< ref TeleportLocation > GetLocations()
     {
-        return settings.Positions;
+        return settings.Locations;
     }
 
     void TeleportCursor()
     {
+        if ( !COTModule.COTInstance.m_isActive ) {
+            DisabledMessage( GetPlayer() );
+            return;
+        }
+
+        vector currentPosition = "0 0 0";
         vector hitPos = GetCursorPos();
 
-        float distance = vector.Distance( GetGame().GetPlayer().GetPosition(), hitPos );
+        if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
+        {
+            currentPosition = CurrentActiveCamera.GetPosition();
+        } else 
+        {
+            currentPosition = GetPlayer().GetPosition();
+        }
 
-        if ( distance < 5000 )
+        float distance = vector.Distance( currentPosition, hitPos );
+
+        if ( distance < 1000 )
         {
             GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
         }
@@ -105,7 +126,7 @@ class TeleportModule: EditorModule
             if ( player.IsInTransport() )
             {
                 // player.GetTransport().SetOrigin( data.param1 );
-                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+               HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
                 if ( vehCommand == NULL ) return;
 
@@ -139,16 +160,27 @@ class TeleportModule: EditorModule
 
             string name = data.param1;
 
-            if ( !GetPositions().Find( name, position ) )
+            ref TeleportLocation location = NULL;
+
+            for ( int i = 0; i < GetLocations().Count(); i++ )
+            {
+                if ( GetLocations()[i].Name == name )
+                {
+                    location = GetLocations()[i];
+                    break;
+                }
+            }
+
+            if ( location == NULL )
             {
                 return;
             }
 
-            position = SnapToGround( position );
+            position = SnapToGround( location.Position );
 
-            for ( int i = 0; i < players.Count(); i++ )
+            for ( int j = 0; j < players.Count(); j++ )
             {
-                PlayerBase player = players[i].PlayerObject;
+                PlayerBase player = players[j].PlayerObject;
 
                 if ( player.IsInTransport() )
                 {
@@ -166,7 +198,7 @@ class TeleportModule: EditorModule
                     player.SetPosition( position );
                 }
                 
-                COTLog( sender, "Teleported player " + players[i].GetGUID() );
+                COTLog( sender, "Teleported " + players[j].GetSteam64ID() + " to " + location.Name );
             }
         }
     }

@@ -21,7 +21,7 @@ class CinematicCamera extends COTCamera
         Input input = GetGame().GetInput();
 
         float forward = input.GetAction( "UAMoveForward" ) - input.GetAction( "UAMoveBack" );
-        float strafe = input.GetAction( "UATurnRight" ) - input.GetAction( "UATurnLeft" );
+        float strafe = input.GetAction( "UAMoveRight" ) - input.GetAction( "UAMoveLeft" );
         float altitude = input.GetAction( "UALeanLeft" ) - input.GetAction( "UALeanRight" );
 
         float yawDiff = input.GetAction( "UAAimLeft" ) - input.GetAction( "UAAimRight" );

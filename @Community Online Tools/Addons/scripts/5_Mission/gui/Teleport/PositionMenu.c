@@ -1,6 +1,10 @@
 class PositionMenu extends Form
 {
+    protected Widget m_ActionsFilterWrapper;
+    protected UIActionEditableText m_Filter;
+
     protected TextListboxWidget m_LstPositionList;
+
     protected Widget m_ActionsWrapper;
 
     protected UIActionText m_PositionX;
@@ -32,6 +36,10 @@ class PositionMenu extends Form
 
     override void OnInit( bool fromMenu )
     {
+        m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
+
+        m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "Filter: ", this, "Type_UpdateList" );
+
         m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
         m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
@@ -49,21 +57,11 @@ class PositionMenu extends Form
     override void OnShow()
     {
         super.OnShow();
-        vector player_pos = GetGame().GetPlayer().GetPosition();
 
-        m_PositionX.SetText( player_pos[0].ToString() );
-        m_PositionZ.SetText( player_pos[2].ToString() );
-        
-        TeleportModule tm = TeleportModule.Cast( module );
+        m_PositionX.SetText( "N/A" );
+        m_PositionZ.SetText( "N/A" );
 
-        if ( tm == NULL ) return;
-
-        m_LstPositionList.ClearItems();
-
-        for ( int nPosition = 0; nPosition < tm.GetPositions().Count(); nPosition++ )
-        {
-            m_LstPositionList.AddItem( tm.GetPositions().GetKey( nPosition ), NULL, 0 );
-        }
+        UpdateList();
     }
 
     override void OnHide()
@@ -76,21 +74,65 @@ class PositionMenu extends Form
         GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ), true, NULL );
     }
 
+    void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )
+    {
+        if ( eid != UIEvent.CHANGE ) return;
+
+        UpdateList();
+    }
+
+    void UpdateList()
+    {
+        TeleportModule tm = TeleportModule.Cast( module );
+
+        if ( tm == NULL ) return;
+
+        m_LstPositionList.ClearItems();
+
+        string filter = "" + m_Filter.GetText();
+        filter.ToLower();
+
+        for ( int nPosition = 0; nPosition < tm.GetLocations().Count(); nPosition++ )
+        {
+            string name = "" + tm.GetLocations()[nPosition].Name;
+            name.ToLower();
+
+            if ( (filter != "" && (!name.Contains( filter ))) ) 
+            {
+                continue;
+            }
+
+            m_LstPositionList.AddItem( tm.GetLocations()[nPosition].Name, NULL, 0 );
+        }
+    }
+
     override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
     {
-        vector position = "0 0 0";
-
         TeleportModule tm = TeleportModule.Cast( module );
 
         if ( tm == NULL ) return false;
 
-        if ( !tm.GetPositions().Find( GetCurrentPositionName(), position ) )
+        ref TeleportLocation location = NULL;
+
+        for ( int i = 0; i < tm.GetLocations().Count(); i++ )
         {
-            position = "0 0 0";
+            if ( tm.GetLocations()[i].Name == GetCurrentPositionName() )
+            {
+                location = tm.GetLocations()[i];
+                break;
+            }
         }
 
-        m_PositionX.SetText( position[0].ToString() );
-        m_PositionZ.SetText( position[2].ToString() );
+        if ( location == NULL )
+        {
+            m_PositionX.SetText( "N/A" );
+            m_PositionZ.SetText( "N/A" );
+        } else 
+        {
+            m_PositionX.SetText( location.Position[0].ToString() );
+            m_PositionZ.SetText( location.Position[2].ToString() );
+        }
+
 
         return true;
     }
