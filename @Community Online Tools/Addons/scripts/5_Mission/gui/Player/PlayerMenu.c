@@ -429,6 +429,7 @@ class PlayerMenu extends Form
         ReloadPlayers();
 
         m_PermissionsWrapper.Show( false );
+        m_RolesWrapper.Show( false );
         m_ActionsWrapper.Show( true );
 
         if ( GetSelectedPlayers().Count() != 0 )
@@ -737,7 +738,7 @@ class PlayerMenu extends Form
 
     void SetRoles()
     {
-        GetRPCManager().SendRPC( "COT_Admin", "SetRoles", new Param2< ref array< string >, ref array< string > >( SerializeRolesUI(), GetSelectedGUIDs() ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "SetRoles", new Param2< ref array< string >, ref array< string > >( SerializeRolesUI(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void CreatePlayerList()
