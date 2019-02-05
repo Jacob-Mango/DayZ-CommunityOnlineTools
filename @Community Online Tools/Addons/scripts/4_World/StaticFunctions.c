@@ -11,6 +11,8 @@ static bool COT_ESP_Toggled = false;
 
 static bool DISABLE_ALL_INPUT = false;
 
+static bool COTIsActive = true;
+
 static void COTLog( AuthPlayer player, string text )
 {
     text = "[COT] " + player.GetSteam64ID() + ": " + text;

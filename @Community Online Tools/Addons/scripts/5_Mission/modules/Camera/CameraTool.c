@@ -203,7 +203,7 @@ class CameraTool: EditorModule
     {
         if ( GetGame().IsMultiplayer() == false ) return;
 
-        if ( !COTModule.COTInstance.m_isActive ) {
+        if ( !COTIsActive ) {
             DisabledMessage( GetPlayer() );
             return;
         }

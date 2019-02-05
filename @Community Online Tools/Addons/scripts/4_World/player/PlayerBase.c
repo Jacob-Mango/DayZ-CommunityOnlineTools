@@ -113,10 +113,10 @@ modded class PlayerBase
 
     override void EEHitBy( TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos )
 	{
-        Print( "PlayerBase::EEHitBy" );
+        //Print( "PlayerBase::EEHitBy" );
         if ( m_HasGodeMode ) 
         {
-            Print( "Godmode should've prevented this!" );
+            //Print( "Godmode should've prevented this!" );
 
             SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
@@ -129,10 +129,10 @@ modded class PlayerBase
 
     override void EEKilled( Object killer )
     {
-        Print( "PlayerBase::EEKilled" );
+        //Print( "PlayerBase::EEKilled" );
         if ( m_HasGodeMode ) 
         {
-            Print( "Godmode should've prevented this!" );
+            //Print( "Godmode should've prevented this!" );
 
             SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
@@ -162,7 +162,7 @@ modded class PlayerBase
     {
         if ( m_HasGodeMode ) 
         {
-            Print( "Godmode should've prevented this!" );
+            //Print( "Godmode should've prevented this!" );
 
             SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
@@ -180,11 +180,11 @@ modded class PlayerBase
 
         if ( m_HasGodeMode )
         {
-            SetAllowDamage( false );
+            SetCanBeDestroyed( false );
             Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
-            SetAllowDamage( true );
+            SetCanBeDestroyed( true );
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }

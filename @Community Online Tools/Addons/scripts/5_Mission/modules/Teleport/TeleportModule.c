@@ -62,7 +62,7 @@ class TeleportModule: EditorModule
 
     void TeleportCursor()
     {
-        if ( !COTModule.COTInstance.m_isActive ) {
+        if ( !COTIsActive ) {
             DisabledMessage( GetPlayer() );
             return;
         }
