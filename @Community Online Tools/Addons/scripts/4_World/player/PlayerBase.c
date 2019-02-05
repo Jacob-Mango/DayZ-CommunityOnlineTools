@@ -1,13 +1,13 @@
 
 modded class PlayerBase
 {
-    //protected bool m_HasGodeMode;
+    protected bool m_HasGodeMode;
 
     override void Init()
     {
         super.Init();
 
-        //m_HasGodeMode = false;
+        m_HasGodeMode = false;
 
         //RegisterNetSyncVariableBool( "m_HasGodeMode" );
     }
@@ -109,6 +109,7 @@ modded class PlayerBase
             SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
         }
     }
+    */
 
     override void EEHitBy( TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos )
 	{
@@ -187,5 +188,4 @@ modded class PlayerBase
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
-    */ 
 }

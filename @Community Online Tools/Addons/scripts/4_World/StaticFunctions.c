@@ -7,6 +7,7 @@ const string COT_INPUT_GROUP = "infantry";
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 
 static bool COTMenuOpen = false;
+static bool COT_ESP_Toggled = false;
 
 static bool DISABLE_ALL_INPUT = false;
 
@@ -277,12 +278,12 @@ static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, fl
     return NULL;
 }
 
-static Object GetCursorObject( float distance = 100.0 )
+static Object GetCursorObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
     vector rayStart = GetGame().GetCurrentCameraPosition();
     vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * distance;
 
-    auto objs = GetObjectsAt( rayStart, rayEnd );
+    auto objs = GetObjectsAt( rayStart, rayEnd, ignore, radius, with );
 
     if( objs.Count() > 0 )
     {
@@ -341,8 +342,13 @@ static void Message( Man man, string txt )
         GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
     } else 
     {
-        GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, NULL );
+        GetPlayer().Message( txt, "colorImportant" );
     }
+}
+
+static void DisabledMessage( PlayerBase player )
+{
+    player.MessageImportant("COT is toggled off.");
 }
 
 static Weapon GetWeaponInHands()
@@ -356,26 +362,6 @@ static Weapon GetWeaponInHands()
 static ref PlayerBase GetPlayer()
 {
     return PlayerBase.Cast( GetGame().GetPlayer() );
-}
-
-static bool SHIFT()
-{
-    return( ( KeyState( KeyCode.KC_LSHIFT ) > 0 ) || ( KeyState( KeyCode.KC_RSHIFT ) > 0 ) );
-}
-
-static bool CTRL()
-{
-    return( ( KeyState( KeyCode.KC_LCONTROL ) > 0 ) || ( KeyState( KeyCode.KC_RCONTROL ) > 0 ) );
-}
-
-static bool ALT()
-{
-    return( ( KeyState( KeyCode.KC_LMENU ) > 0 ) || ( KeyState( KeyCode.KC_RMENU ) > 0 ) );
-}
-
-static bool WINKEY()
-{
-    return( ( KeyState( KeyCode.KC_LWIN ) > 0 ) || ( KeyState( KeyCode.KC_RWIN ) > 0 ) );
 }
 
 static ZombieBase SpawnInfected(vector pos)

@@ -27,6 +27,37 @@ modded class MissionServer
         m_Tool.OnStart();
     }
 
+    override void OnMissionFinish()
+    {
+        m_Tool.OnFinish();
+
+        super.OnMissionFinish();
+    }
+
+    void OnLoaded()
+    {
+        ref array< string > data = new ref array< string >;
+        GetPermissionsManager().RootPermission.Serialize( data );
+
+        if ( !GetPermissionsManager().RoleExists( "everyone" ) )
+        {
+            GetPermissionsManager().CreateRole( "everyone", data );
+        }
+
+        if ( !GetPermissionsManager().RoleExists( "admin" ) )
+        {
+            for ( int i = 0; i < data.Count(); i++ )
+            {
+                string s = data[i];
+                s.Replace( "0", "2" );
+                data.Remove( i );
+                data.InsertAt( s, i );
+            }
+
+            GetPermissionsManager().CreateRole( "admin", data );
+        }
+    }
+
     override void OnUpdate( float timeslice )
     {
         if( !m_bLoaded && !GetDayZGame().IsLoading() )

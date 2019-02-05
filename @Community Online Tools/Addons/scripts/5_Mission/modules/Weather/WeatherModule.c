@@ -15,6 +15,13 @@ class WeatherModule: EditorModule
         GetPermissionsManager().RegisterPermission( "Weather.SetFog" );
         GetPermissionsManager().RegisterPermission( "Weather.SetRain" );
         GetPermissionsManager().RegisterPermission( "Weather.SetStorm" );
+    
+        GetPermissionsManager().RegisterPermission( "Weather.View" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Weather.View" );
     }
 
     override string GetLayoutRoot()
@@ -42,7 +49,7 @@ class WeatherModule: EditorModule
 
             GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 
-            COTLog( sender, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
+            COTLog( sender, "Set date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
         }
     }
 

@@ -23,7 +23,7 @@ FrameWidgetClass COTMenu {
   }
   PanelWidgetClass RightPanel {
    visible 1
-   color 0 0 0 0.9
+   color 0.03 0.04 0.06 0.9
    position -1 0
    size 300 1
    halign right_ref

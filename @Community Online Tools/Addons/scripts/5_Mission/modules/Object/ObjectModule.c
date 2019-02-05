@@ -5,8 +5,18 @@ class ObjectModule: EditorModule
         GetRPCManager().AddRPC( "COT_Object", "SpawnObjectPosition", this, SingeplayerExecutionType.Server );
         GetRPCManager().AddRPC( "COT_Object", "SpawnObjectInventory", this, SingeplayerExecutionType.Server );
 
+        GetRPCManager().AddRPC( "COT_Object", "DeleteObject", this, SingeplayerExecutionType.Server );
+
         GetPermissionsManager().RegisterPermission( "Object.Spawn.Position" );
         GetPermissionsManager().RegisterPermission( "Object.Spawn.Inventory" );
+        GetPermissionsManager().RegisterPermission( "Object.View" );
+
+        GetPermissionsManager().RegisterPermission( "Object.Delete" );
+    }
+
+    override bool HasAccess()
+    {
+        return GetPermissionsManager().HasPermission( "Object.View" );
     }
 
     override string GetLayoutRoot()
@@ -61,7 +71,7 @@ class ObjectModule: EditorModule
 
             entity.PlaceOnSurface();
 
-            COTLog( sender, "Spawned object " + data.param1 + " at " + data.param2.ToString() + " with amount " + data.param3 );
+            COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + data.param3 );
         }
     }
 
@@ -105,8 +115,23 @@ class ObjectModule: EditorModule
                     oItem.SetQuantity(quantity);
                 }
 
-                COTLog( sender, "Spawned object " + data.param1 + " on " + players[i].GetGUID() + " with amount " + data.param3 );
+                COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") on " + players[i].GetSteam64ID() + " with amount " + data.param3 );
             }
+        }
+    }
+
+    void DeleteObject( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+    {
+        if ( !GetPermissionsManager().HasPermission( "Object.Delete", sender ) )
+            return;
+        
+        if( type == CallType.Server )
+        {
+            string obtype;
+            GetGame().ObjectGetType( target, obtype );
+
+            COTLog( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
+            GetGame().ObjectDelete( target );
         }
     }
 }

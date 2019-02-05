@@ -28,7 +28,7 @@ class SpectatorCamera extends COTCamera
             orientation[2] = 0;
 
             SetOrientation( orientation );
-            SetPosition( pos + "0.04 0.04 0" );
+            SetPosition( pos + "0.1 0.04 0" );
         }
     }
 }
