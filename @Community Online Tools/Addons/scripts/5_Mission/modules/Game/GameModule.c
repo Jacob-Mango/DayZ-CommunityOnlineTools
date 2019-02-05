@@ -13,12 +13,6 @@ class GameModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Game.ChangeAimingMode" );
         GetPermissionsManager().RegisterPermission( "Game.ThrowApple" );
-        GetPermissionsManager().RegisterPermission( "Game.View" );
-    }
-
-    override bool HasAccess()
-    {
-        return GetPermissionsManager().HasPermission( "Game.View" );
     }
 
     override void OnMissionLoaded()

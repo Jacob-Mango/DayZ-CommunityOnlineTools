@@ -38,7 +38,7 @@ class COTModule : Module
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor.", true );
-        toggleEditor.AddBinding( "kY" );
+        toggleEditor.AddBinding( "kHome" );
         RegisterKeyMouseBinding( toggleEditor );
 
         KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", "Focuses the game instead of the UI while in editor.", true );

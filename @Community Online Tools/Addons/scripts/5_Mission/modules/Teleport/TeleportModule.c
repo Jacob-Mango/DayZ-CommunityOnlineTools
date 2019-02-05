@@ -10,13 +10,6 @@ class TeleportModule: EditorModule
 
         GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
         GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
-    
-        GetPermissionsManager().RegisterPermission( "Teleport.View" );
-    }
-
-    override bool HasAccess()
-    {
-        return GetPermissionsManager().HasPermission( "Teleport.View" );
     }
     
     override void ReloadSettings()
@@ -45,8 +38,8 @@ class TeleportModule: EditorModule
     override void RegisterKeyMouseBindings() 
     {
         KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", "Teleport to cursor position." );
-        teleport.AddBinding( "kH" );
-        teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
+        teleport.AddBinding( "kEnd" );
+        teleport.SetActionType( KeyMouseActionType.PRESS );
         RegisterKeyMouseBinding( teleport );
     }
 

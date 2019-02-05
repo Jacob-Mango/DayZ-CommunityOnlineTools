@@ -53,6 +53,7 @@ class CommunityOnlineTools
         GetModuleManager().RegisterModule( new CameraTool );
         GetModuleManager().RegisterModule( new GameModule );
         GetModuleManager().RegisterModule( new WeatherModule );
+		GetModuleManager().RegisterModule( new COTMap );
     }
 
     void ~CommunityOnlineTools()
