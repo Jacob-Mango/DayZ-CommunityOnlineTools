@@ -1,9 +1,13 @@
 modded class MissionServer
 {
+    protected bool m_bLoaded;
+
     protected ref CommunityOnlineTools m_Tool;
 
     void MissionServer()
     {        
+        m_bLoaded = false;
+
         m_Tool = new CommunityOnlineTools();
     }
 
@@ -23,18 +27,17 @@ modded class MissionServer
         m_Tool.OnStart();
     }
 
-    override void OnMissionFinish()
-    {
-        m_Tool.OnFinish();
-
-        super.OnMissionFinish();
-    }
-
     override void OnUpdate( float timeslice )
     {
-        super.OnUpdate( timeslice );
+        if( !m_bLoaded && !GetDayZGame().IsLoading() )
+        {
+            m_bLoaded = true;
+            OnLoaded();
+        } else {
+            super.OnUpdate( timeslice );
 
-        m_Tool.OnUpdate( timeslice );
+            m_Tool.OnUpdate( timeslice );
+        }
     }
 
     override void OnPreloadEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int queueTime)
