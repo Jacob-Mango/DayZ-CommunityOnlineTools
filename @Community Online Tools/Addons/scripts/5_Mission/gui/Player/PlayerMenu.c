@@ -156,6 +156,7 @@ class PlayerMenu extends Form
 
         ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
         m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
+        m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
         //m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
         m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
         m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate Player", this, "Click_SpectatePlayer" );
@@ -187,8 +188,16 @@ class PlayerMenu extends Form
 
     void Click_ModifyPermissions()
     {
+        m_RolesWrapper.Show( false );
         m_ActionsForm.Show( false );
         m_PermissionsWrapper.Show( true );
+    }
+    
+    void Click_ModifyRoles()
+    {
+        m_ActionsForm.Show( false );
+        m_RolesWrapper.Show( true );
+        m_PermissionsWrapper.Show( false );
     }
 
     void Click_SpectatePlayer( UIEvent eid, ref UIActionButton action )
@@ -448,8 +457,30 @@ class PlayerMenu extends Form
         GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
     }
 
+    bool UpdateFirstUIData()
+    {
+        if ( GetSelectedPlayers().Count() > 0 )
+        {
+            PlayerData data = NULL;
+            data = GetSelectedPlayers()[0].Data;
+
+            UpdateActionsFields( data );
+            LoadPermissions( data.APermissions );
+            LoadRoles( data.ARoles );
+            return true;
+        } else 
+        {
+            UpdateActionsFields( NULL );
+            LoadPermissions( NULL );
+            LoadRoles( NULL );
+            return false;
+        }
+    }
+
     void UpdateList()
     {
+        UpdateFirstUIData();
+
         if ( m_CanUpdateList )
         {
             m_CanUpdateList = false;
