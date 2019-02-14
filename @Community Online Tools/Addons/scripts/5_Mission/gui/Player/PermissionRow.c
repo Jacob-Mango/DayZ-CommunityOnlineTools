@@ -165,7 +165,7 @@ class PermissionRow extends ScriptedWidgetEventHandler
             return;
         }
 
-        Print( inp + " with type " + type );
+        //Print( inp + " with type " + type );
         
         int depth = tokens.Find( Name );
 

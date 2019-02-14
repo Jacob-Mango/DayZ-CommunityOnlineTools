@@ -454,8 +454,7 @@ class PlayerModule: EditorModule
         Param2< vector, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", sender ) )
-            return;
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", sender ) ) return;
 
         if( type == CallType.Server )
         {
@@ -465,15 +464,15 @@ class PlayerModule: EditorModule
             {
                 PlayerBase player = players[i].PlayerObject;
 
-                if ( player == NULL ) continue;
+                if ( player == NULL ) return;
 
                 HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
-                if ( vehCommand == NULL ) continue;
+                if ( vehCommand != NULL ) return;
 
                 Transport transport = vehCommand.GetTransport();
 
-                if ( transport != NULL ) continue;
+                if ( transport != NULL ) return;
 
                 player.SetPosition( data.param1 );
 
@@ -487,8 +486,7 @@ class PlayerModule: EditorModule
         Param1< ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) )
-            return;
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) ) return;
 
         PlayerBase senderPlayer = PlayerBase.Cast( target );
 
@@ -496,11 +494,11 @@ class PlayerModule: EditorModule
 
         HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
 
-        if ( vehCommand == NULL ) return;
+        if ( vehCommand != NULL ) return;
 
         Transport transport = vehCommand.GetTransport();
 
-        if ( transport == NULL ) return;
+        if ( transport != NULL ) return;
 
         if( type == CallType.Server )
         {

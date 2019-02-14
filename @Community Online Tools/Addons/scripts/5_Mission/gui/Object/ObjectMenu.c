@@ -256,7 +256,6 @@ class ObjectMenu extends Form
 
                     switch ( strName )
                     {
-                        case "Mag_Scout_5Rnd":
                         case "ItemOptics":
                             shouldCont = true;
                             break;

@@ -80,6 +80,7 @@ class PlayerMenu extends Form
 
         m_PlayerList = new ref array< ref PlayerRow >;
         m_PermissionList = new ref array< ref PermissionRow >;
+        m_RolesList = new ref array< ref RoleRow >;
     }
 
     void ~PlayerMenu()
@@ -252,48 +253,29 @@ class PlayerMenu extends Form
     
     void Click_TeleportToMe( UIEvent eid, ref UIActionButton action )
     {
-        Print("PlayerMenu::Click_TeleportToMe: Init // Called");
-        if ( eid != UIEvent.CLICK ) {
-            Print("PlayerMenu::Click_TeleportToMe: eid != UIEvent.CLICK");
-            return;
-        }
+        if ( eid != UIEvent.CLICK ) return;
 
         m_DataJustUpdated = true;
 
-        Print("PlayerMenu::Click_TeleportToMe: m_DataJustUpdated = true");
-
         if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
         {
-            Print("PlayerMenu::Click_TeleportToMe: CurrentActiveCamera && CurrentActiveCamera.IsActive() // Sending RPC");
             GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ), true );
-            Print("PlayerMenu::Click_TeleportToMe: CurrentActiveCamera && CurrentActiveCamera.IsActive() // RPC Sent");
         } else 
         {
-            Print("PlayerMenu::Click_TeleportToMe: !CurrentActiveCamera && CurrentActiveCamera.IsActive() -- NOT TRUE // Sending RPC");
             GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ), true );
-            Print("PlayerMenu::Click_TeleportToMe: !CurrentActiveCamera && CurrentActiveCamera.IsActive() -- NOT TRUE // RPC Sent");
         }
     }
 
     void Click_TeleportMeTo( UIEvent eid, ref UIActionButton action )
     {
-        Print("PlayerMenu::Click_TeleportMeTo: Init // Called");
-        if ( GetSelectedPlayers().Count() != 1 ) {
-            Print("PlayerMenu::Click_TeleportMeTo: Count != 1");
-            return;
-        }
+        if ( GetSelectedPlayers().Count() != 1 ) return;
 
-        if ( eid != UIEvent.CLICK ) {
-            Print("PlayerMenu::Click_TeleportMeTo: eid != UIDEvent.CLICK");
-            return;
-        }
+        if ( eid != UIEvent.CLICK ) return;
 
         m_DataJustUpdated = true;
-        Print("PlayerMenu::Click_TeleportMeTo: m_DataJustUpdated = true");
 
-        Print("PlayerMenu::Click_TeleportMeTo: Sending RPC");
         GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), true, NULL, GetPlayer() );
-        Print("PlayerMenu::Click_TeleportMeTo: RPC Sent");
+
     }
 
     void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
