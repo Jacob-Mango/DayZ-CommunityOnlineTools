@@ -467,12 +467,13 @@ class PlayerModule: EditorModule
                 if ( player == NULL ) return;
 
                 HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+                
+                if ( vehCommand )
+                {
+                    Transport transport = vehCommand.GetTransport();
 
-                if ( vehCommand != NULL ) return;
-
-                Transport transport = vehCommand.GetTransport();
-
-                if ( transport != NULL ) return;
+                    if ( transport != NULL ) return;
+                }
 
                 player.SetPosition( data.param1 );
 
@@ -494,11 +495,12 @@ class PlayerModule: EditorModule
 
         HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
 
-        if ( vehCommand != NULL ) return;
+        if ( vehCommand )
+        {
+            Transport transport = vehCommand.GetTransport();
 
-        Transport transport = vehCommand.GetTransport();
-
-        if ( transport != NULL ) return;
+            if ( transport != NULL ) return;
+        }
 
         if( type == CallType.Server )
         {
