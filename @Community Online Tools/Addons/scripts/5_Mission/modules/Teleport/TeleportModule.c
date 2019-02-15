@@ -128,13 +128,14 @@ class TeleportModule: EditorModule
                 // player.GetTransport().SetOrigin( data.param1 );
                HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
-                if ( vehCommand == NULL ) return;
+                if ( vehCommand )
+                {
+                    Transport transport = vehCommand.GetTransport();
 
-                Transport transport = vehCommand.GetTransport();
+                    if ( transport == NULL ) return;
 
-                if ( transport == NULL ) return;
-
-                transport.SetPosition( data.param1 );
+                    transport.SetPosition( data.param1 );
+                }
             } else
             {
                 player.SetPosition( data.param1 );
@@ -186,13 +187,15 @@ class TeleportModule: EditorModule
                 {
                     HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
-                    if ( vehCommand == NULL ) return;
+                    if ( vehCommand )
+                    {
+                        Transport transport = vehCommand.GetTransport();
 
-                    Transport transport = vehCommand.GetTransport();
+                        if ( transport == NULL ) return;
 
-                    if ( transport == NULL ) return;
-                    transport.SetOrigin( position );
-                    transport.SetPosition( position );
+                        transport.SetOrigin( position );
+                        transport.SetPosition( position );
+                    }
                 } else 
                 {
                     player.SetPosition( position );
