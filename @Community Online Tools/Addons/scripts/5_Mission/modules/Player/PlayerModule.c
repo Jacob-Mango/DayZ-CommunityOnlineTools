@@ -464,7 +464,7 @@ class PlayerModule: EditorModule
             {
                 PlayerBase player = players[i].PlayerObject;
 
-                if ( player == NULL ) return;
+                if ( player == NULL ) continue;
 
                 HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
                 
@@ -472,7 +472,7 @@ class PlayerModule: EditorModule
                 {
                     Transport transport = vehCommand.GetTransport();
 
-                    if ( transport != NULL ) return;
+                    if ( transport != NULL ) continue;
                 }
 
                 player.SetPosition( data.param1 );
