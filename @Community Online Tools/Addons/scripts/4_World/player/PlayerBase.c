@@ -113,14 +113,14 @@ modded class PlayerBase
 
     override void EEHitBy( TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos )
 	{
-        //Print( "PlayerBase::EEHitBy" );
+        Print( "PlayerBase::EEHitBy" );
         if ( m_HasGodeMode ) 
         {
             //Print( "Godmode should've prevented this!" );
 
-            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
-            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
-            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+            // SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            // SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            // SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
         } else 
         {
 		    super.EEHitBy( damageResult, damageType, source, component, dmgZone, ammo, modelPos );
@@ -129,14 +129,14 @@ modded class PlayerBase
 
     override void EEKilled( Object killer )
     {
-        //Print( "PlayerBase::EEKilled" );
+        Print( "PlayerBase::EEKilled" );
         if ( m_HasGodeMode ) 
         {
-            //Print( "Godmode should've prevented this!" );
+            Print( "Godmode should've prevented this!" );
 
-            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
-            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
-            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+            //SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            //SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            //SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
         } else 
         {
             super.EEKilled( killer );
@@ -149,9 +149,9 @@ modded class PlayerBase
         {
             Print( "Godmode should've prevented this!" );
 
-            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
-            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
-            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+            //SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            //SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            //SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
         } else
         {
             super.CheckDeath();
@@ -162,11 +162,11 @@ modded class PlayerBase
     {
         if ( m_HasGodeMode ) 
         {
-            //Print( "Godmode should've prevented this!" );
+            Print( "Godmode should've prevented this!" );
 
-            SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
-            SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
-            SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
+            //SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
+            //SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );
+            //SetHealth( "", "Shock", GetMaxHealth( "", "Shock" ) );
             super.SimulateDeath( false );
         } else
         {
@@ -180,11 +180,13 @@ modded class PlayerBase
 
         if ( m_HasGodeMode )
         {
-            SetCanBeDestroyed( false );
+            //SetCanBeDestroyed( false );
+            SetAllowDamage(false);
             Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
-            SetCanBeDestroyed( true );
+            //SetCanBeDestroyed( true );
+            SetAllowDamage(true);
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
