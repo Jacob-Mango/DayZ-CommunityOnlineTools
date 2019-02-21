@@ -590,7 +590,7 @@ class PlayerModule: EditorModule
 
                 if ( player == NULL ) continue;
 
-                // player.SetGodMode( data.param1 );
+                player.SetGodMode( data.param1 );
  
                 COTLog( sender, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
             }
