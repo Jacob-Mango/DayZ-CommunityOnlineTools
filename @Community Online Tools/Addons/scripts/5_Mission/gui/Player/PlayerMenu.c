@@ -399,7 +399,7 @@ class PlayerMenu extends Form
             m_Stamina.SetText( data.FStamina.ToString() );
             //m_LastShaved.SetSelection( data.ILifeSpanState );
             m_BloodyHands.SetChecked( data.BBloodyHands );
-            m_GodMode.SetChecked( data.BGodMode ); //<- UNCOMMENT THIS WHEN YOU EDIT PF #THURSTON
+            m_GodMode.SetChecked( data.BGodMode );
             
             m_PosX.SetText( "" + data.VPosition[0] );
             m_PosY.SetText( "" + data.VPosition[1] );
@@ -436,7 +436,7 @@ class PlayerMenu extends Form
                 m_PingAvg.SetText( "" );
 
                 m_BloodyHands.SetChecked( false );
-                m_GodMode.SetChecked( false ); //<- UNCOMMENT THIS WHEN YOU EDIT PF #THURSTON
+                m_GodMode.SetChecked( false );
             }
         }
     }
