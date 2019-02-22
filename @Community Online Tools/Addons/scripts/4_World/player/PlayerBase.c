@@ -116,7 +116,7 @@ modded class PlayerBase
         Print( "PlayerBase::EEHitBy" );
         if ( m_HasGodeMode ) 
         {
-            //Print( "Godmode should've prevented this!" );
+            Print( "Godmode should've prevented this!" );
 
             // SetHealth( "", "Health", GetMaxHealth( "", "Health" ) );
             // SetHealth( "", "Blood", GetMaxHealth( "", "Blood" ) );

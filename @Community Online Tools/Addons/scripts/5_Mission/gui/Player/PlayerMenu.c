@@ -355,7 +355,7 @@ class PlayerMenu extends Form
     {
         if ( eid != UIEvent.CLICK ) return;
         m_DataJustUpdated = true;
-        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< float, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ), true );
+        GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ), true );
     }
 
     void Click_ToggleFreecam( UIEvent eid, ref UIActionCheckbox action )
@@ -399,6 +399,7 @@ class PlayerMenu extends Form
             m_Stamina.SetText( data.FStamina.ToString() );
             //m_LastShaved.SetSelection( data.ILifeSpanState );
             m_BloodyHands.SetChecked( data.BBloodyHands );
+            //m_GodMode.SetChecked( data.GGodMode ); <- UNCOMMENT THIS WHEN YOU EDIT PF #THURSTON
             
             m_PosX.SetText( "" + data.VPosition[0] );
             m_PosY.SetText( "" + data.VPosition[1] );
