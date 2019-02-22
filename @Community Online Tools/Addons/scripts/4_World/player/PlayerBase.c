@@ -1,13 +1,11 @@
 
 modded class PlayerBase
 {
-    protected bool m_HasGodeMode;
+    bool m_HasGodeMode;
 
     override void Init()
     {
         super.Init();
-
-        m_HasGodeMode = false;
 
         //RegisterNetSyncVariableBool( "m_HasGodeMode" );
     }
@@ -86,17 +84,16 @@ modded class PlayerBase
     void SetGodMode( bool mode )
     {
         m_HasGodeMode = mode;
-        this.authenticatedPlayer.Data.BGodMode = mode;
 
         if ( m_HasGodeMode )
         {
             SetAllowDamage(false);
-            this.authenticatedPlayer.Data.BGodMode = false;
+            m_HasGodeMode = true;
             Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
             SetAllowDamage(true);
-            this.authenticatedPlayer.Data.BGodMode = true;
+            m_HasGodeMode = false;
             Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
