@@ -572,8 +572,6 @@ class PlayerModule: EditorModule
 
     void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
     {
-        return;
-
         Param2< bool, ref array< string > > data;
         if ( !ctx.Read( data ) ) return;
 
