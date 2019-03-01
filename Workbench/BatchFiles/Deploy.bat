@@ -138,35 +138,14 @@ mklink /J "%workDrive%%prefixLinkRoot%\" "%githubDirectory%%prefixLinkRoot%\"
 mklink /J "%gameDirectory%%modName%\" "%temporaryDirectory%%modName%\"
 mklink /J "%serverDirectory%%modName%\" "%temporaryDirectory%%modName%\"
 
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Data" "%temporaryDirectory%%modName%\Addons\Data.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Data.pbo"
+%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\gui" "%temporaryDirectory%%modName%\Addons\gui.pbo"
+%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\gui.pbo"
 
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\GUI" "%temporaryDirectory%%modName%\Addons\GUI.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\GUI.pbo"
+%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\scripts" "%temporaryDirectory%%modName%\Addons\scripts.pbo"
+%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\scripts.pbo"
 
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\languagecore" "%temporaryDirectory%%modName%\Addons\languagecore.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\languagecore.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Objects" "%temporaryDirectory%%modName%\Addons\Objects.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Objects.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Particles" "%temporaryDirectory%%modName%\Addons\Particles.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Particles.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Scripts" "%temporaryDirectory%%modName%\Addons\Scripts.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Scripts.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Sounds" "%temporaryDirectory%%modName%\Addons\Sounds.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Sounds.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Vehicles\Air" "%temporaryDirectory%%modName%\Addons\Air.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Air.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Vehicles\Ground" "%temporaryDirectory%%modName%\Addons\Ground.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Ground.pbo"
-
-%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\Vehicles\Tracked" "%temporaryDirectory%%modName%\Addons\Tracked.pbo"
-%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\Tracked.pbo"
+%makePBO% -U -P -D -N "%workDrive%%prefixLinkRoot%\inputsdefault" "%temporaryDirectory%%modName%\Addons\inputsdefault.pbo"
+%signFile% "%privateKey%" "%temporaryDirectory%%modName%\Addons\inputsdefault.pbo"
 
 endlocal
 
