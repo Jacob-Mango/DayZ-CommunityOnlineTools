@@ -1,0 +1,21 @@
+{
+    "Name": "ExpansionVan",
+    "VehicleParts": [
+        "CivVanWheel",
+        "CivVanWheel",
+        "CivVanWheel",
+        "CivVanWheel",
+        "CivVanDoors_TrunkDown",
+        "CivVanDoors_BackRight",
+        "CivVanDoors_BackLeft",
+        "CivVanDoors_CoDriver",
+        "CivVanDoors_Driver",
+        "CivVanDoors_TrunkUp",
+        "CarBattery",
+        "CarRadiator",
+        "EngineBelt",
+        "SparkPlug",
+        "HeadlightH7",
+        "HeadlightH7"
+    ]
+}
