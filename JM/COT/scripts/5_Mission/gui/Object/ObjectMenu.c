@@ -126,9 +126,10 @@ class ObjectMenu extends Form
 
             m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true, false, false );
 
-            m_ItemPreview.SetItem( m_PreviewItem );
-            m_ItemPreview.SetModelPosition( Vector(0, 0, 0.5) );
-            m_ItemPreview.SetModelOrientation( m_Orientation );
+			m_ItemPreview.SetItem( m_PreviewItem );
+			m_ItemPreview.SetView( m_PreviewItem.GetViewIndex() );
+			m_ItemPreview.SetModelPosition( Vector(0, 0, 0.5) );
+            // m_ItemPreview.SetModelOrientation( m_Orientation );
         }
 
         return true;

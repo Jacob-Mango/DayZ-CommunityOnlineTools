@@ -62,8 +62,12 @@ class TeleportModule: EditorModule
 
     void TeleportCursor()
     {
+        if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
+            return;
+        }
+
         if ( !COTIsActive ) {
-            DisabledMessage( GetPlayer() );
+            Message( GetPlayer(), "Community Online Tools is currently toggled off." );
             return;
         }
 

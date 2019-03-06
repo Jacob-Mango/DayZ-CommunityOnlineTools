@@ -79,7 +79,7 @@ class COTModule : Module
         }
     }
 
-    void ShowMenu( bool force )
+    void ShowMenu( bool force, bool checkForPerms = true )
     {
         if ( m_PreventOpening ) 
         {
@@ -89,7 +89,7 @@ class COTModule : Module
             }
         }
 
-        if ( !GetPermissionsManager().HasPermission( "COT.Taskbar.View" ) )
+        if ( checkForPerms && !GetPermissionsManager().HasPermission( "COT.Taskbar.View" ) )
             return;
             
         m_COTMenu.Show();
@@ -104,8 +104,12 @@ class COTModule : Module
 
     void ToggleMenu()
     {
+        if ( !GetPermissionsManager().HasPermission( "COT.Taskbar.View" ) )
+            return;
+        }
+
         if ( !COTIsActive ) {
-            DisabledMessage( GetPlayer() );
+            Message( GetPlayer(), "Community Online Tools is currently toggled off." );
             return;
         }
 
@@ -114,7 +118,7 @@ class COTModule : Module
             CloseMenu( false );
         } else
         {
-            ShowMenu( false );
+            ShowMenu( false, false );
         }
     }
 
