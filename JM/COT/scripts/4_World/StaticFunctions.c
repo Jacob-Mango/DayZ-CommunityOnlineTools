@@ -335,22 +335,18 @@ static vector GetCursorPos()
     return hitPos;
 }
 
-static void Message( Man man, string txt ) 
+static void Message( PlayerBase player, string txt ) 
 {
     Print( txt );
 
     if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
     {
-        GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
+        player.MessageImportant( txt);
+        //GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
     } else 
     {
         GetPlayer().Message( txt, "colorImportant" );
     }
-}
-
-static void DisabledMessage( PlayerBase player )
-{
-    player.MessageImportant("COT is toggled off.");
 }
 
 static Weapon GetWeaponInHands()

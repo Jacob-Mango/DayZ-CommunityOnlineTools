@@ -204,7 +204,7 @@ class CameraTool: EditorModule
         if ( GetGame().IsMultiplayer() == false ) return;
 
         if ( !COTIsActive ) {
-            DisabledMessage( GetPlayer() );
+            Message( GetPlayer(), "Community Online Tools is currently toggled off." );
             return;
         }
 

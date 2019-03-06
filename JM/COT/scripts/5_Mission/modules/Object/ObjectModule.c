@@ -41,7 +41,7 @@ class ObjectModule: EditorModule
                 ai = true;
             }
 
-            EntityAI entity = GetGame().CreateObject( data.param1, data.param2, false, ai );
+            EntityAI entity = EntityAI.Cast( GetGame().CreateObject( data.param1, data.param2, false, ai ) );
 
             if ( entity == NULL ) return;
 
@@ -49,7 +49,7 @@ class ObjectModule: EditorModule
 
             if ( entity.IsInherited( ItemBase ) )
             {
-                ItemBase oItem = ( ItemBase ) entity;
+                ItemBase oItem = ItemBase.Cast( entity );
                 SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
 
                 int quantity = 0;
@@ -95,7 +95,7 @@ class ObjectModule: EditorModule
 
                 if ( entity.IsInherited( ItemBase ) )
                 {
-                    ItemBase oItem = ( ItemBase ) entity;
+                    ItemBase oItem = ItemBase.Cast( entity );
                     SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
 
                     int quantity = 0;
@@ -128,7 +128,7 @@ class ObjectModule: EditorModule
         if( type == CallType.Server )
         {
             if ( target == NULL ) return;
-            
+
             string obtype;
             GetGame().ObjectGetType( target, obtype );
 
