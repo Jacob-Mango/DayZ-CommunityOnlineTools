@@ -127,6 +127,8 @@ class ObjectModule: EditorModule
         
         if( type == CallType.Server )
         {
+            if ( target == NULL ) return;
+            
             string obtype;
             GetGame().ObjectGetType( target, obtype );
 

@@ -29,7 +29,7 @@ class WindowHandle extends ScriptedWidgetEventHandler
     void Init() 
     {
         m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-        m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_wrapper" ) );
+        m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
     }
 
     void SetSize( float w, float h )
@@ -91,6 +91,9 @@ class WindowHandle extends ScriptedWidgetEventHandler
             offsetY = y - offsetY;
 
             m_TitleWrapper.SetPos( 0, 0, true );
+            m_TitleWrapper.SetPos( 0, 0, false );
+            
+            return false;
         }
 
         return true;
@@ -101,6 +104,8 @@ class WindowHandle extends ScriptedWidgetEventHandler
         if ( w == m_TitleWrapper )
         {
             SetPosition( x - offsetX, y - offsetY );
+
+            return false;
         }
 
         return true;
@@ -111,6 +116,8 @@ class WindowHandle extends ScriptedWidgetEventHandler
         if ( w == m_TitleWrapper )
         {
             SetPosition( x - offsetX, y - offsetY );
+            
+            return false;
         }
 
         return true;
@@ -119,6 +126,7 @@ class WindowHandle extends ScriptedWidgetEventHandler
     void SetPosition( int x, int y )
     {
         layoutRoot.SetPos( x, y, true );
+        
         m_TitleWrapper.SetPos( 0, 0, true );
     }
 

@@ -1,6 +1,8 @@
 
 modded class PlayerBase
 {
+	ref AuthPlayer authenticatedPlayer;
+
     bool m_HasGodeMode;
 
     override void Init()

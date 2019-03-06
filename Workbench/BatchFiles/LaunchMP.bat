@@ -173,6 +173,7 @@ if %failed%==1 (
     echo Failed to package the mod.
 
     cd %batchFileDirectory%
+    pause
     goto:eof
 )
 
