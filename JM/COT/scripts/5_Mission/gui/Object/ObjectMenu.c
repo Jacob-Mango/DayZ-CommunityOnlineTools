@@ -56,10 +56,7 @@ class ObjectMenu extends Form
 
         m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
 
-        ref Widget object_preview_wrapper = layoutRoot.FindAnyWidget( "object_preview_wrapper" );
-
-        if ( object_preview_wrapper )
-            m_ItemPreview = ItemPreviewWidget.Cast( GetGame().GetWorkspace().CreateWidget(ItemPreviewWidgetTypeID, 0, 0, 1, 1, WidgetFlags.VISIBLE, ARGB(255, 255, 255, 255), 10, object_preview_wrapper ) );
+        m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
 
         ref Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 7, 1 );
         AddObjectType( typesButtons, "ALL", "All" );
