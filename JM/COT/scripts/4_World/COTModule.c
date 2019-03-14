@@ -105,10 +105,12 @@ class COTModule : Module
     void ToggleMenu()
     {
         if ( !GetPermissionsManager().HasPermission( "COT.Taskbar.View" ) )
+        {
             return;
         }
 
-        if ( !COTIsActive ) {
+        if ( !COTIsActive )
+        {
             Message( GetPlayer(), "Community Online Tools is currently toggled off." );
             return;
         }

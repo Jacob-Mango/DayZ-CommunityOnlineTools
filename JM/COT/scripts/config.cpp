@@ -23,6 +23,7 @@ class CfgMods
         hidePicture = 1;
         name = "Community Online Tools";
         credits = "Jacob_Mango, DannyDog, Arkensor";
+		creditsJson = "JM/COT/Scripts/Data/Credits.json";
         author = "Jacob_Mango, DannyDog, Arkensor";
         authorID = "0"; 
         version = "1.0"; 
