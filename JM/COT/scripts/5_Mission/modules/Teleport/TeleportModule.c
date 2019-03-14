@@ -63,6 +63,7 @@ class TeleportModule: EditorModule
     void TeleportCursor()
     {
         if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
+        {
             return;
         }
 
