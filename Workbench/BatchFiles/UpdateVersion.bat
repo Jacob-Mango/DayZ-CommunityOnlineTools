@@ -1,0 +1,98 @@
+@echo off
+
+set /a failed=0
+
+if exist ../../project.cfg (
+    echo Found the project.cfg
+    cd ../../
+) else (
+    echo project.cfg doesn't exist in first directory, trying the next possible directory.
+    if exist project.cfg (
+        echo Found the project.cfg
+    ) else (
+        echo Failed to find the project.cfg
+        set /a failed=1
+    )
+)
+
+if %failed%==1 (
+    endlocal
+
+    echo Failed to package the mod.
+
+    cd %batchFileDirectory%
+    goto:eof
+)
+
+set githubDirectory=%cd%\
+set workbenchDataDirectory=%githubDirectory%Workbench\
+set toolsDirectory=%workbenchDataDirectory%Tools\
+set batchFileDirectory=%workbenchDataDirectory%BatchFiles\
+
+set workDrive=
+set /a majorVersion=0
+set /a minorVersion=0
+set versionFileLocation=
+
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg WorkDrive') do (
+    set workDrive=%%a
+)
+
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg MajorVersion') do (
+    set /a majorVersion=%%a
+)
+
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg MinorVersion') do (
+    set /a minorVersion=%%a
+)
+
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg VersionFileLocation') do (
+    set versionFileLocation=%%a
+)
+
+setlocal enableextensions enabledelayedexpansion
+
+echo WorkDrive is: "%workDrive%"
+if "%workDrive%"=="" (
+    set /a failed=1
+    echo WorkDrive parameter was not set in the project.cfg
+)
+
+echo MajorVersion is: "%majorVersion%"
+if "%majorVersion%"==0 (
+    set /a failed=1
+    echo MajorVersion parameter was not set in the project.cfg
+)
+
+echo MinorVersion is: "%minorVersion%"
+if "%minorVersion%"==0 (
+    set /a failed=1
+    echo MinorVersion parameter was not set in the project.cfg
+)
+
+echo VersionFileLocation is: "%versionFileLocation%"
+if "%versionFileLocation%"=="" (
+    set /a failed=1
+    echo VersionFileLocation parameter was not set in the project.cfg
+)
+
+if %failed%==1 (
+    endlocal
+
+    echo Failed to package the mod.
+
+    cd %batchFileDirectory%
+    pause
+    
+    goto:eof
+)
+
+for /f "tokens=1-3 delims=." %%a in (%workDrive%%versionFileLocation%) do (
+    set /a build=%%c+1
+    set version=%majorVersion%.%minorVersion%.!build!
+)
+
+echo %version%>%workDrive%%versionFileLocation%
+echo %version%
+
+cd %batchFileDirectory%
