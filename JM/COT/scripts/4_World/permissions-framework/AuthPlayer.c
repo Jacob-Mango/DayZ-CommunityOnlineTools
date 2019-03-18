@@ -139,170 +139,170 @@ class AuthPlayer
 	{
 		ref Role r = GetPermissionsManager().RolesMap.Get( role );
 
-	    Print( "Adding role " + role + ": " + r );
+		Print( "Adding role " + role + ": " + r );
 
-        if ( Roles.Find( r ) < 0 ) 
-        {
-            AddRole( r );
-        }
-    }
+		if ( Roles.Find( r ) < 0 ) 
+		{
+			AddRole( r );
+		}
+	}
 
-    void AddRole( Role role )
-    {
-        Print( "Adding role " + role );
+	void AddRole( Role role )
+	{
+		Print( "Adding role " + role );
 
-        m_HasPlayerData = true;
+		m_HasPlayerData = true;
 
-        Roles.Insert( role );
-    }
+		Roles.Insert( role );
+	}
 
-    void Serialize()
-    {
-        Data.APermissions.Clear();
-        Data.ARoles.Clear();
+	void Serialize()
+	{
+		Data.APermissions.Clear();
+		Data.ARoles.Clear();
 
-        RootPermission.Serialize( Data.APermissions );
+		RootPermission.Serialize( Data.APermissions );
 
-        for ( int j = 0; j < Roles.Count(); j++ )
-        {
-            Data.ARoles.Insert( Roles[j].Name );
-        }
-    }
+		for ( int j = 0; j < Roles.Count(); j++ )
+		{
+			Data.ARoles.Insert( Roles[j].Name );
+		}
+	}
 
-    void Deserialize()
-    {
-        for ( int i = 0; i < Data.APermissions.Count(); i++ )
-        {
-            AddPermission( Data.APermissions[i] );
-        }
+	void Deserialize()
+	{
+		for ( int i = 0; i < Data.APermissions.Count(); i++ )
+		{
+			AddPermission( Data.APermissions[i] );
+		}
 
-        for ( int j = 0; j < Data.ARoles.Count(); j++ )
-        {
-            AddStringRole( Data.ARoles[j] );
-        }
-    }
+		for ( int j = 0; j < Data.ARoles.Count(); j++ )
+		{
+			AddStringRole( Data.ARoles[j] );
+		}
+	}
 
-    string FileReadyStripName( string name )
-    {
-        name.Replace( "\\", "" );
-        name.Replace( "/", "" );
-        name.Replace( "=", "" );
-        name.Replace( "+", "" );
+	string FileReadyStripName( string name )
+	{
+		name.Replace( "\\", "" );
+		name.Replace( "/", "" );
+		name.Replace( "=", "" );
+		name.Replace( "+", "" );
 
-        return name;
-    }
+		return name;
+	}
 
-    void Save()
-    {
-        if ( m_HasPlayerData )
-        {   
-            if ( m_PlayerFile.Steam64ID != GetSteam64ID() )
-            {
-                m_PlayerFile.Steam64ID = GetSteam64ID();
-            }
+	void Save()
+	{
+		if ( m_HasPlayerData )
+		{   
+			if ( m_PlayerFile.Steam64ID != GetSteam64ID() )
+			{
+				m_PlayerFile.Steam64ID = GetSteam64ID();
+			}
 
-            if ( m_PlayerFile.GUID != GetGUID() )
-            {
-                m_PlayerFile.GUID = GetGUID();
-            }
+			if ( m_PlayerFile.GUID != GetGUID() )
+			{
+				m_PlayerFile.GUID = GetGUID();
+			}
 
-            if ( m_PlayerFile.Names.Find( GetName() ) < 0 )
-            {   
-                m_PlayerFile.Names.Insert( GetName() );
-            }
+			if ( m_PlayerFile.Names.Find( GetName() ) < 0 )
+			{   
+				m_PlayerFile.Names.Insert( GetName() );
+			}
 
-            m_PlayerFile.Roles.Clear();
+			m_PlayerFile.Roles.Clear();
 
-            for ( int j = 0; j < Roles.Count(); j++ )
-            {
-                m_PlayerFile.Roles.Insert( Roles[j].Name );
-            }
+			for ( int j = 0; j < Roles.Count(); j++ )
+			{
+				m_PlayerFile.Roles.Insert( Roles[j].Name );
+			}
 
-            m_PlayerFile.Save();
-        }
+			m_PlayerFile.Save();
+		}
 
-        if ( m_HasPermissions )
-        {
-            string filename = FileReadyStripName( Data.SSteam64ID );
+		if ( m_HasPermissions )
+		{
+			string filename = FileReadyStripName( Data.SSteam64ID );
 
-            Serialize();
+			Serialize();
 
-            Print( "Saving permissions and player data for " + filename );
-            FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
+			Print( "Saving permissions and player data for " + filename );
+			FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
 
-            if ( file != 0 )
-            {
-                string line;
+			if ( file != 0 )
+			{
+				string line;
 
-                for ( int i = 0; i < Data.APermissions.Count(); i++ )
-                {
-                    FPrintln( file, Data.APermissions[i] );
-                }
-                
-                CloseFile(file);
-            }
-        }
-    }
+				for ( int i = 0; i < Data.APermissions.Count(); i++ )
+				{
+					FPrintln( file, Data.APermissions[i] );
+				}
+				
+				CloseFile(file);
+			}
+		}
+	}
 
-    bool Load()
-    {
-        string filename = FileReadyStripName( Data.SSteam64ID );
-        Print( "Loading permissions for " + filename );
-        FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
-            
-        ref array< string > data = new ref array< string >;
+	bool Load()
+	{
+		string filename = FileReadyStripName( Data.SSteam64ID );
+		Print( "Loading permissions for " + filename );
+		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
+			
+		ref array< string > data = new ref array< string >;
 
-        m_HasPlayerData = m_PlayerFile.Load( IdentityPlayer );
+		m_HasPlayerData = m_PlayerFile.Load( IdentityPlayer );
 
-        Print( m_HasPlayerData );
-        Print( m_PlayerFile.Roles );
+		Print( m_HasPlayerData );
+		Print( m_PlayerFile.Roles );
 
-        for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
-        {
-            AddStringRole( m_PlayerFile.Roles[j] );
-        }
+		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
+		{
+			AddStringRole( m_PlayerFile.Roles[j] );
+		}
 
-        if ( file != 0 )
-        {
-            string line;
+		if ( file != 0 )
+		{
+			string line;
 
-            while ( FGets( file, line ) > 0 )
-            {
-                data.Insert( line );
-            }
+			while ( FGets( file, line ) > 0 )
+			{
+				data.Insert( line );
+			}
 
-            CloseFile( file );
+			CloseFile( file );
 
-            for ( int i = 0; i < data.Count(); i++ )
-            {
-                AddPermission( data[i] );
-            }
+			for ( int i = 0; i < data.Count(); i++ )
+			{
+				AddPermission( data[i] );
+			}
 
-            m_HasPermissions = true;
-        } else
-        {
-            m_HasPermissions = false;
+			m_HasPermissions = true;
+		} else
+		{
+			m_HasPermissions = false;
 
-            return false;
-        }
-        
-        return true;
-    }
+			return false;
+		}
+		
+		return true;
+	}
 
-    void DebugPrint()
-    {
-        Print( "Printing permissions for " + Data.SSteam64ID );
+	void DebugPrint()
+	{
+		Print( "Printing permissions for " + Data.SSteam64ID );
 
-        RootPermission.DebugPrint( 0 );
-    }
+		RootPermission.DebugPrint( 0 );
+	}
 
-    // TODO: Figure out how to make it work properly?
-    void Kick()
-    {
-    }
+	// TODO: Figure out how to make it work properly?
+	void Kick()
+	{
+	}
 
-    // TODO: Maybe actually ban the player?
-    void Ban()
-    {
-    }
+	// TODO: Maybe actually ban the player?
+	void Ban()
+	{
+	}
 }

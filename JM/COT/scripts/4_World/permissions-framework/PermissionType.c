@@ -1,4 +1,4 @@
 enum PermissionType 
 {
-    INHERIT, DISALLOW, ALLOW
+	INHERIT, DISALLOW, ALLOW
 }

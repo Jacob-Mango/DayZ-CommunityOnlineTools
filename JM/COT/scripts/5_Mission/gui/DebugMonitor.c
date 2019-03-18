@@ -63,8 +63,8 @@ class CustomDebugMonitor
 		layoutRoot.Show(false);
 	}
 
-    void Show()
-    {
+	void Show()
+	{
 		layoutRoot.Show(true);
-    }
+	}
 };

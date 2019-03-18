@@ -1,151 +1,151 @@
 class PositionMenu extends Form
 {
-    protected Widget m_ActionsFilterWrapper;
-    protected UIActionEditableText m_Filter;
+	protected Widget m_ActionsFilterWrapper;
+	protected UIActionEditableText m_Filter;
 
-    protected TextListboxWidget m_LstPositionList;
+	protected TextListboxWidget m_LstPositionList;
 
-    protected Widget m_ActionsWrapper;
+	protected Widget m_ActionsWrapper;
 
-    protected UIActionText m_PositionX;
-    protected UIActionText m_PositionZ;
-    protected UIActionButton m_Teleport;
+	protected UIActionText m_PositionX;
+	protected UIActionText m_PositionZ;
+	protected UIActionButton m_Teleport;
 
-    void PositionMenu()
-    {
-    }
+	void PositionMenu()
+	{
+	}
 
-    void ~PositionMenu()
-    {
-    }
+	void ~PositionMenu()
+	{
+	}
 
-    override string GetTitle()
-    {
-        return "Teleport";
-    }
-    
-    override string GetIconName()
-    {
-        return "T";
-    }
+	override string GetTitle()
+	{
+		return "Teleport";
+	}
+	
+	override string GetIconName()
+	{
+		return "T";
+	}
 
-    override bool ImageIsIcon()
-    {
-        return false;
-    }
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
 
-    override void OnInit( bool fromMenu )
-    {
-        m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
+	override void OnInit( bool fromMenu )
+	{
+		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-        m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "Filter: ", this, "Type_UpdateList" );
+		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "Filter: ", this, "Type_UpdateList" );
 
-        m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
+		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
-        m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-        ref Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
+		ref Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
 
-        ref Widget coords = UIActionManager.CreateGridSpacer( rows, 1, 2 );
+		ref Widget coords = UIActionManager.CreateGridSpacer( rows, 1, 2 );
 
-        m_PositionX = UIActionManager.CreateText( coords, "X: " );
-        m_PositionZ = UIActionManager.CreateText( coords, "Z: " );
+		m_PositionX = UIActionManager.CreateText( coords, "X: " );
+		m_PositionZ = UIActionManager.CreateText( coords, "Z: " );
 
-        m_Teleport = UIActionManager.CreateButton( rows, "Teleport Selected Player(s)", this, "Click_Teleport" );
-    }
+		m_Teleport = UIActionManager.CreateButton( rows, "Teleport Selected Player(s)", this, "Click_Teleport" );
+	}
 
-    override void OnShow()
-    {
-        super.OnShow();
+	override void OnShow()
+	{
+		super.OnShow();
 
-        m_PositionX.SetText( "N/A" );
-        m_PositionZ.SetText( "N/A" );
+		m_PositionX.SetText( "N/A" );
+		m_PositionZ.SetText( "N/A" );
 
-        UpdateList();
-    }
+		UpdateList();
+	}
 
-    override void OnHide()
-    {
-        super.OnHide();
-    }
+	override void OnHide()
+	{
+		super.OnHide();
+	}
 
-    void Click_Teleport( UIEvent eid, ref UIActionButton action )
-    {
-        GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ), true, NULL );
-    }
+	void Click_Teleport( UIEvent eid, ref UIActionButton action )
+	{
+		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ), true, NULL );
+	}
 
-    void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )
-    {
-        if ( eid != UIEvent.CHANGE ) return;
+	void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )
+	{
+		if ( eid != UIEvent.CHANGE ) return;
 
-        UpdateList();
-    }
+		UpdateList();
+	}
 
-    void UpdateList()
-    {
-        TeleportModule tm = TeleportModule.Cast( module );
+	void UpdateList()
+	{
+		TeleportModule tm = TeleportModule.Cast( module );
 
-        if ( tm == NULL ) return;
+		if ( tm == NULL ) return;
 
-        m_LstPositionList.ClearItems();
+		m_LstPositionList.ClearItems();
 
-        string filter = "" + m_Filter.GetText();
-        filter.ToLower();
+		string filter = "" + m_Filter.GetText();
+		filter.ToLower();
 
-        for ( int nPosition = 0; nPosition < tm.GetLocations().Count(); nPosition++ )
-        {
-            string name = "" + tm.GetLocations()[nPosition].Name;
-            name.ToLower();
+		for ( int nPosition = 0; nPosition < tm.GetLocations().Count(); nPosition++ )
+		{
+			string name = "" + tm.GetLocations()[nPosition].Name;
+			name.ToLower();
 
-            if ( (filter != "" && (!name.Contains( filter ))) ) 
-            {
-                continue;
-            }
+			if ( (filter != "" && (!name.Contains( filter ))) ) 
+			{
+				continue;
+			}
 
-            m_LstPositionList.AddItem( tm.GetLocations()[nPosition].Name, NULL, 0 );
-        }
-    }
+			m_LstPositionList.AddItem( tm.GetLocations()[nPosition].Name, NULL, 0 );
+		}
+	}
 
-    override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
-    {
-        TeleportModule tm = TeleportModule.Cast( module );
+	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
+	{
+		TeleportModule tm = TeleportModule.Cast( module );
 
-        if ( tm == NULL ) return false;
+		if ( tm == NULL ) return false;
 
-        ref TeleportLocation location = NULL;
+		ref TeleportLocation location = NULL;
 
-        for ( int i = 0; i < tm.GetLocations().Count(); i++ )
-        {
-            if ( tm.GetLocations()[i].Name == GetCurrentPositionName() )
-            {
-                location = tm.GetLocations()[i];
-                break;
-            }
-        }
+		for ( int i = 0; i < tm.GetLocations().Count(); i++ )
+		{
+			if ( tm.GetLocations()[i].Name == GetCurrentPositionName() )
+			{
+				location = tm.GetLocations()[i];
+				break;
+			}
+		}
 
-        if ( location == NULL )
-        {
-            m_PositionX.SetText( "N/A" );
-            m_PositionZ.SetText( "N/A" );
-        } else 
-        {
-            m_PositionX.SetText( location.Position[0].ToString() );
-            m_PositionZ.SetText( location.Position[2].ToString() );
-        }
+		if ( location == NULL )
+		{
+			m_PositionX.SetText( "N/A" );
+			m_PositionZ.SetText( "N/A" );
+		} else 
+		{
+			m_PositionX.SetText( location.Position[0].ToString() );
+			m_PositionZ.SetText( location.Position[2].ToString() );
+		}
 
 
-        return true;
-    }
+		return true;
+	}
 
-    string GetCurrentPositionName()
-    {
-        if ( m_LstPositionList.GetSelectedRow() != -1 )
-        {
-            string position_name;
-            m_LstPositionList.GetItemText( m_LstPositionList.GetSelectedRow(), 0, position_name );
-            return position_name;
-        }
+	string GetCurrentPositionName()
+	{
+		if ( m_LstPositionList.GetSelectedRow() != -1 )
+		{
+			string position_name;
+			m_LstPositionList.GetItemText( m_LstPositionList.GetSelectedRow(), 0, position_name );
+			return position_name;
+		}
 
-        return "";
-    }
+		return "";
+	}
 }

@@ -1,86 +1,86 @@
 class RoleRow extends ScriptedWidgetEventHandler 
 {
-    string Name;
-    int Type;
+	string Name;
+	int Type;
 
-    protected ref TextWidget Text;
-    protected ref CheckBoxWidget  Checkbox;
+	protected ref TextWidget Text;
+	protected ref CheckBoxWidget  Checkbox;
 
-    protected ref Widget layoutRoot;
+	protected ref Widget layoutRoot;
 
-    void OnWidgetScriptInit( Widget w )
-    {
-        layoutRoot = w;
-        layoutRoot.SetHandler( this );
+	void OnWidgetScriptInit( Widget w )
+	{
+		layoutRoot = w;
+		layoutRoot.SetHandler( this );
 
-        Init();
-    }
+		Init();
+	}
 
 
-    void Init() 
-    {
-        Text = TextWidget.Cast(layoutRoot.FindAnyWidget("role_name"));
-        Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("role_setting"));
-    }
+	void Init() 
+	{
+		Text = TextWidget.Cast(layoutRoot.FindAnyWidget("role_name"));
+		Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("role_setting"));
+	}
 
-    void Show()
-    {
-        layoutRoot.Show( true );
-        OnShow();
-    }
+	void Show()
+	{
+		layoutRoot.Show( true );
+		OnShow();
+	}
 
-    void Hide()
-    {
-        OnHide();
-        layoutRoot.Show( false );
-    }
+	void Hide()
+	{
+		OnHide();
+		layoutRoot.Show( false );
+	}
 
-    void OnShow()
-    {
-    }
+	void OnShow()
+	{
+	}
 
-    void OnHide() 
-    {
-    }
+	void OnHide() 
+	{
+	}
 
-    ref Widget GetLayoutRoot() 
-    {
-        return layoutRoot;
-    }
+	ref Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
 
-    bool IsChecked()
-    {
-        return Checkbox.IsChecked();
-    }
+	bool IsChecked()
+	{
+		return Checkbox.IsChecked();
+	}
 
-    void SetChecked( bool checked )
-    {
-        Checkbox.SetChecked( checked );
-    }
+	void SetChecked( bool checked )
+	{
+		Checkbox.SetChecked( checked );
+	}
 
-    void InitRole( string role )
-    {
-        Name = role;
+	void InitRole( string role )
+	{
+		Name = role;
 
-        Text.SetText( Name );
-    }
+		Text.SetText( Name );
+	}
 
-    void Enable()
-    {
-        OnEnable();
-    }
+	void Enable()
+	{
+		OnEnable();
+	}
 
-    void Disable()
-    {
-        OnDisable();
-    }
+	void Disable()
+	{
+		OnDisable();
+	}
 
-    void OnEnable()
-    {
-    }
+	void OnEnable()
+	{
+	}
 
-    void OnDisable()
-    {
-    }
+	void OnDisable()
+	{
+	}
 
 }

@@ -1,6 +1,6 @@
 class ESPInfoMetaData
 {
-    string name;
-    bool isPlayer;
-    string steamid;
+	string name;
+	bool isPlayer;
+	string steamid;
 }
