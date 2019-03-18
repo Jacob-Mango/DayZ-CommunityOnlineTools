@@ -1,5 +1,3 @@
-const string PERMISSION_FRAMEWORK_DIRECTORY = "$profile:PermissionsFramework\\";
-
 class PermissionManager
 {
     ref array< ref AuthPlayer > AuthPlayers;

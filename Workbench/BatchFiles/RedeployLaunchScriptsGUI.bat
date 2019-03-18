@@ -65,7 +65,7 @@ for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg G
     set guiPrefix=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg AdditionalSPMods') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg AdditionalMPMods') do (
     set mods=%%a
 )
 
@@ -183,9 +183,9 @@ if "%modName%"=="" (
     echo ModName parameter was not set in the project.cfg
 )
 
-echo AdditionalSPMods is: "%mods%"
+echo AdditionalMPMods is: "%mods%"
 if "%mods%"=="" (
-    echo AdditionalSPMods parameter was not set in the project.cfg, ignoring.
+    echo AdditionalMPMods parameter was not set in the project.cfg, ignoring.
     
     set mods=%modName%
 ) else (
@@ -245,6 +245,7 @@ if %failed%==1 (
 )
 
 CALL %batchFileDirectory%Exit.bat
+CALL %batchFileDirectory%UpdateVersion.bat
 
 set makePBO=%toolsDirectory%MakePbo.exe
 set signFile=%toolsDirectory%DSSignFile.exe
