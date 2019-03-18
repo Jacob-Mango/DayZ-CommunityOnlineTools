@@ -1,145 +1,145 @@
 class AuthPlayer
 {
-    const string AUTH_DIRECTORY = PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\";
-    const string FILE_TYPE = ".txt";
+	const string AUTH_DIRECTORY = PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\";
+	const string FILE_TYPE = ".txt";
 
-    ref Permission RootPermission;
-    ref array< Role > Roles;
+	ref Permission RootPermission;
+	ref array< Role > Roles;
 
-    PlayerBase PlayerObject;
-    PlayerIdentity IdentityPlayer;
+	PlayerBase PlayerObject;
+	PlayerIdentity IdentityPlayer;
 
-    ref PlayerData Data;
+	ref PlayerData Data;
 
-    protected ref PlayerFile m_PlayerFile;
+	protected ref PlayerFile m_PlayerFile;
 
-    protected bool m_HasPermissions;
-    protected bool m_HasPlayerData;
+	protected bool m_HasPermissions;
+	protected bool m_HasPlayerData;
 
-    void AuthPlayer( ref PlayerData data )
-    {
-        PlayerObject = NULL;
+	void AuthPlayer( ref PlayerData data )
+	{
+		PlayerObject = NULL;
 
-        Data = data;
+		Data = data;
 
-        if ( Data == NULL )
-        {
-            Data = new ref PlayerData;
-        }
+		if ( Data == NULL )
+		{
+			Data = new ref PlayerData;
+		}
 
-        RootPermission = new ref Permission( Data.SSteam64ID );
-        Roles = new ref array< Role >;
+		RootPermission = new ref Permission( Data.SSteam64ID );
+		Roles = new ref array< Role >;
 
-        m_PlayerFile = new ref PlayerFile;
+		m_PlayerFile = new ref PlayerFile;
 
-        if ( GetGame().IsServer() )
-        {
-            MakeDirectory( AUTH_DIRECTORY );
-            MakeDirectory( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" );
-        }
-    }
+		if ( GetGame().IsServer() )
+		{
+			MakeDirectory( AUTH_DIRECTORY );
+			MakeDirectory( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" );
+		}
+	}
 
-    void ~AuthPlayer()
-    {
-        delete RootPermission;
-    }
+	void ~AuthPlayer()
+	{
+		delete RootPermission;
+	}
 
-    void SwapData( ref PlayerData newData )
-    {
-        Data = newData;
-    }
+	void SwapData( ref PlayerData newData )
+	{
+		Data = newData;
+	}
 
-    string GetGUID()
-    {
-        return Data.SGUID;
-    }
+	string GetGUID()
+	{
+		return Data.SGUID;
+	}
 
-    string GetSteam64ID()
-    {
-        return Data.SSteam64ID;
-    }
+	string GetSteam64ID()
+	{
+		return Data.SSteam64ID;
+	}
 
-    string GetName()
-    {
-        return Data.SName;
-    }
+	string GetName()
+	{
+		return Data.SName;
+	}
 
-    void UpdatePlayerData()
-    {
-        if ( IdentityPlayer == NULL ) return;
+	void UpdatePlayerData()
+	{
+		if ( IdentityPlayer == NULL ) return;
 
-        Data.IPingMin = IdentityPlayer.GetPingMin();
-        Data.IPingMax = IdentityPlayer.GetPingMax();
-        Data.IPingAvg = IdentityPlayer.GetPingAvg();
-        
-        Data.SSteam64ID = IdentityPlayer.GetPlainId();
-        Data.SGUID = IdentityPlayer.GetId();
-        Data.SName = IdentityPlayer.GetName();
+		Data.IPingMin = IdentityPlayer.GetPingMin();
+		Data.IPingMax = IdentityPlayer.GetPingMax();
+		Data.IPingAvg = IdentityPlayer.GetPingAvg();
+		
+		Data.SSteam64ID = IdentityPlayer.GetPlainId();
+		Data.SGUID = IdentityPlayer.GetId();
+		Data.SName = IdentityPlayer.GetName();
 
-        if ( PlayerObject == NULL ) return;
+		if ( PlayerObject == NULL ) return;
 
-        PlayerData.Load( Data, PlayerObject );
-    }
+		PlayerData.Load( Data, PlayerObject );
+	}
 
-    void CopyPermissions( ref Permission copy )
-    {
-        ref array< string > data = new ref array< string >;
-        copy.Serialize( data );
+	void CopyPermissions( ref Permission copy )
+	{
+		ref array< string > data = new ref array< string >;
+		copy.Serialize( data );
 
-        for ( int i = 0; i < data.Count(); i++ )
-        {
-            AddPermission( data[i] );
-        }
-    }
+		for ( int i = 0; i < data.Count(); i++ )
+		{
+			AddPermission( data[i] );
+		}
+	}
 
-    void ClearPermissions()
-    {
-        delete RootPermission;
+	void ClearPermissions()
+	{
+		delete RootPermission;
 
-        RootPermission = new ref Permission( Data.SSteam64ID, NULL );
+		RootPermission = new ref Permission( Data.SSteam64ID, NULL );
 
-        m_HasPermissions = false;
-    }
+		m_HasPermissions = false;
+	}
 
-    void AddPermission( string permission, PermissionType type = PermissionType.INHERIT )
-    {
-        RootPermission.AddPermission( permission, type );
+	void AddPermission( string permission, PermissionType type = PermissionType.INHERIT )
+	{
+		RootPermission.AddPermission( permission, type );
 
-        m_HasPermissions = true;
-    }
+		m_HasPermissions = true;
+	}
 
-    bool HasPermission( string permission )
-    {
-        PermissionType permType;
-        PermissionType rolePermType;
+	bool HasPermission( string permission )
+	{
+		PermissionType permType;
+		PermissionType rolePermType;
 
-        bool has = RootPermission.HasPermission( permission, permType );
+		bool has = RootPermission.HasPermission( permission, permType );
 
-        Print( "Player " +  GetName() + " is " + has + " with perm type " + permType );
+		Print( "Player " +  GetName() + " is " + has + " with perm type " + permType );
 
-        if ( has )
-            return true;
+		if ( has )
+			return true;
 
-        for ( int j = 0; j < Roles.Count(); j++ )
-        {
-            bool roleHas = Roles[j].HasPermission( permission, rolePermType );
+		for ( int j = 0; j < Roles.Count(); j++ )
+		{
+			bool roleHas = Roles[j].HasPermission( permission, rolePermType );
 
-            Print( "Role " +  Roles[j].Name + " is " + roleHas + " with perm type " + rolePermType );
+			Print( "Role " +  Roles[j].Name + " is " + roleHas + " with perm type " + rolePermType );
 
-            if ( roleHas )
-            {
-                return true;
-            }
-        }
+			if ( roleHas )
+			{
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    void AddStringRole( string role )
-    {
-        ref Role r = GetPermissionsManager().RolesMap.Get( role );
+	void AddStringRole( string role )
+	{
+		ref Role r = GetPermissionsManager().RolesMap.Get( role );
 
-        Print( "Adding role " + role + ": " + r );
+	    Print( "Adding role " + role + ": " + r );
 
         if ( Roles.Find( r ) < 0 ) 
         {

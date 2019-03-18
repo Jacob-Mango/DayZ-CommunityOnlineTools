@@ -1,111 +1,111 @@
 class Form extends ScriptedWidgetEventHandler 
 {
-    protected ref Widget layoutRoot;
-    
-    ref WindowHandle window;
+	protected ref Widget layoutRoot;
+	
+	ref WindowHandle window;
 
-    ref EditorModule module;
+	ref EditorModule module;
 
-    bool HasBeenInitialized;
+	bool HasBeenInitialized;
 
-    void Form() 
-    {
-        HasBeenInitialized = false;
-    }
+	void Form() 
+	{
+		HasBeenInitialized = false;
+	}
 
-    void ~Form() 
-    {
-    }
+	void ~Form() 
+	{
+	}
 
-    void OnWidgetScriptInit( Widget w )
-    {
-        layoutRoot = w;
-        layoutRoot.SetHandler( this );
-    }
+	void OnWidgetScriptInit( Widget w )
+	{
+		layoutRoot = w;
+		layoutRoot.SetHandler( this );
+	}
 
-    void Init( bool fromMenu )
-    {
-        OnInit( fromMenu );
-        HasBeenInitialized = true;
-    }
+	void Init( bool fromMenu )
+	{
+		OnInit( fromMenu );
+		HasBeenInitialized = true;
+	}
 
-    void OnInit( bool fromMenu )
-    {
-        
-    }
+	void OnInit( bool fromMenu )
+	{
+		
+	}
 
-    bool IsVisible()
-    {
-        return window.IsVisible();
-    }
+	bool IsVisible()
+	{
+		return window.IsVisible();
+	}
 
-    void Show()
-    {
-        if ( HasBeenInitialized )
-        {
-            window.Show();
-            layoutRoot.Show( true );
+	void Show()
+	{
+		if ( HasBeenInitialized )
+		{
+			window.Show();
+			layoutRoot.Show( true );
 
-            OnShow();
-        }
-    }
+			OnShow();
+		}
+	}
 
-    void SetSize( float w, float h )
-    {
-        window.SetSize( w, h );
-    }
+	void SetSize( float w, float h )
+	{
+		window.SetSize( w, h );
+	}
 
-    void Hide()
-    {
-        OnHide();
-        layoutRoot.Show( false );
-        window.Hide();
-    }
+	void Hide()
+	{
+		OnHide();
+		layoutRoot.Show( false );
+		window.Hide();
+	}
 
-    void OnShow()
-    {
-    }
+	void OnShow()
+	{
+	}
 
-    void OnHide() 
-    {
-    }
+	void OnHide() 
+	{
+	}
 
-    override bool OnUpdate( Widget w )
-    {
-        Update();
+	override bool OnUpdate( Widget w )
+	{
+		Update();
 
-        super.OnUpdate( w );
+		super.OnUpdate( w );
 
-        return true;
-    }
+		return true;
+	}
 
-    void Update() 
-    {
-        
-    }
+	void Update() 
+	{
+		
+	}
 
-    ref Widget GetLayoutRoot() 
-    {
-        return layoutRoot;
-    }
+	ref Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
 
-    string GetTitle()
-    {
-        return "";
-    }
+	string GetTitle()
+	{
+		return "";
+	}
 
-    string GetImageSet()
-    {
-        return "";
-    }
+	string GetImageSet()
+	{
+		return "";
+	}
 
-    string GetIconName()
-    {
-        return "";
-    }
+	string GetIconName()
+	{
+		return "";
+	}
 
-    bool ImageIsIcon()
-    {
-        return false;
-    }
+	bool ImageIsIcon()
+	{
+		return false;
+	}
 }

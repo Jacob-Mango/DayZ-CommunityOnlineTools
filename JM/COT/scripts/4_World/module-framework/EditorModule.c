@@ -1,15 +1,15 @@
 class EditorModule extends Module
 {
-    ref Form form;
-    ref ButtonWidget menuButton;
+	ref Form form;
+	ref ButtonWidget menuButton;
 
-    string GetLayoutRoot()
-    {
-        return "";
-    }
+	string GetLayoutRoot()
+	{
+		return "";
+	}
 
-    bool HasAccess()
-    {
-        return true;
-    }
+	bool HasAccess()
+	{
+		return true;
+	}
 }
