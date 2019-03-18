@@ -248,6 +248,11 @@ class PermissionsFramework
                 if ( !ctx.Read( cdata ) ) return;
 
                 DeserializePlayer( cdata.param1 );
+
+                if (cdata.param1.SGUID == ClientAuthPlayer.Data.SGUID )
+                {
+                    GetModuleManager().OnClientPermissionsUpdated();
+                }
             }
         }
     }
@@ -262,6 +267,8 @@ class PermissionsFramework
                 if ( !ctx.Read( data ) ) return;
 
                 ClientAuthPlayer = DeserializePlayer( data.param1 );
+                
+                GetModuleManager().OnClientPermissionsUpdated();
             }
         }
     }

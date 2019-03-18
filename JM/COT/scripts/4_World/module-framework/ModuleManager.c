@@ -185,6 +185,14 @@ class ModuleManager
 
         return NULL;
     }
+
+    void OnClientPermissionsUpdated()
+    {
+        for ( int i = 0; i < m_Modules.Count(); ++i )
+        {
+            m_Modules.Get( i ).OnClientPermissionsUpdated();
+        }
+    }
 }
 
 ref ModuleManager g_com_ModuleManager;

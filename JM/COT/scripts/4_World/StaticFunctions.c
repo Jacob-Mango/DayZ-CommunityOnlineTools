@@ -13,6 +13,21 @@ static bool DISABLE_ALL_INPUT = false;
 
 static bool COTIsActive = true;
 
+static vector GetCurrentPosition()
+{
+    if ( CurrentActiveCamera != NULL )
+    {
+        return CurrentActiveCamera.GetPosition();
+    }
+
+    if ( GetGame().GetPlayer() != NULL )
+    {
+        return GetGame().GetPlayer().GetPosition();
+    }
+
+    return "0 0 0";
+}
+
 static void COTLog( AuthPlayer player, string text )
 {
     text = "[COT] " + player.GetSteam64ID() + ": " + text;

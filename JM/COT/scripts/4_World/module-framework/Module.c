@@ -89,6 +89,10 @@ class Module
     void ReloadSettings()
     {
     }
+
+    void OnClientPermissionsUpdated()
+    {
+    }
     
     /* Mission Functions */
     
