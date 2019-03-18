@@ -85,6 +85,7 @@ class CommunityOnlineTools
         GetModuleManager().RegisterModule( new GameModule );
         GetModuleManager().RegisterModule( new WeatherModule );
 		GetModuleManager().RegisterModule( new COTMapModule );
+		GetModuleManager().RegisterModule( new ESPModule );
     }
 
     void ~CommunityOnlineTools()
