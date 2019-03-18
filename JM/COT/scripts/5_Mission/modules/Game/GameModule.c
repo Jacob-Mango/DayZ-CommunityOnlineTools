@@ -137,7 +137,7 @@ class GameModule: EditorModule
 				int index = human.GetBoneIndexByName("Camera3rd_Helper");
 
 				float pQuat[];
-				human.GetBoneRotationWS( index, pQuat )
+				human.GetBoneRotationWS( index, pQuat );
 				vector rotation = Math3D.QuatToAngles( pQuat );
 
 				position = human.GetBonePositionWS( index );

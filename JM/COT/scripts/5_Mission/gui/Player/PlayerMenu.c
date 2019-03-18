@@ -85,11 +85,6 @@ class PlayerMenu extends Form
 
 	void ~PlayerMenu()
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
-
-		delete m_PlayerRowList;
-		delete m_PlayerBoxList;
-		delete m_PermissionsList;
 	}
 
 	override string GetTitle()
@@ -109,6 +104,8 @@ class PlayerMenu extends Form
 
 	override void OnInit( bool fromMenu )
 	{
+		ESPBox.playerMenu = this;
+
 		m_PlayerListWrapper = layoutRoot.FindAnyWidget("players_list_wrapper");
 		m_PlayerScriptListFirst = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_first"));
 		m_PlayerScriptListSecond = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_second"));
@@ -160,7 +157,7 @@ class PlayerMenu extends Form
 		m_TeleportToMe = UIActionManager.CreateButton( playerActions, "Teleport To Me", this, "Click_TeleportToMe" );
 		m_TeleportMeTo = UIActionManager.CreateButton( playerActions, "Teleport Me To", this, "Click_TeleportMeTo" );
 
-		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
+		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
 		m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
 		m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
@@ -196,7 +193,6 @@ class PlayerMenu extends Form
 	{
 		m_RolesWrapper.Show( false );
 		m_ActionsForm.Show( false );
-		m_RolesWrapper.Show( false );
 		m_PermissionsWrapper.Show( true );
 	}
 	
@@ -204,27 +200,6 @@ class PlayerMenu extends Form
 	{
 		m_ActionsForm.Show( false );
 		m_RolesWrapper.Show( true );
-		m_PermissionsWrapper.Show( false );
-	}
-
-	void Click_ModifyRoles()
-	{
-		m_ActionsForm.Show( false );
-		m_RolesWrapper.Show( true );
-		m_PermissionsWrapper.Show( false );
-	}
-
-	void Click_ShowActions()
-	{
-		m_ActionsForm.Show( true );
-		m_RolesWrapper.Show( false );
-		m_PermissionsWrapper.Show( false );
-	}
-
-	void Click_CloseActions()
-	{
-		m_ActionsForm.Show( false );
-		m_RolesWrapper.Show( false );
 		m_PermissionsWrapper.Show( false );
 	}
 
@@ -401,6 +376,12 @@ class PlayerMenu extends Form
 
 	void UpdateActionsFields( ref PlayerData data )
 	{
+		if ( m_DataJustUpdated )
+		{
+			m_DataJustUpdated = false;
+			return;
+		}
+
 		if ( data )
 		{
 			SetSize( awidth, plheight );
@@ -422,10 +403,6 @@ class PlayerMenu extends Form
 			m_BloodyHands.SetChecked( data.BBloodyHands );
 			m_GodMode.SetChecked( data.BGodMode );
 			
-			m_PosX.SetText( "" + data.VPosition[0] );
-			m_PosY.SetText( "" + data.VPosition[1] );
-			m_PosZ.SetText( "" + data.VPosition[2] );
-
 			m_PosX.SetText( "" + data.VPosition[0] );
 			m_PosY.SetText( "" + data.VPosition[1] );
 			m_PosZ.SetText( "" + data.VPosition[2] );
@@ -481,10 +458,13 @@ class PlayerMenu extends Form
 		{
 			UpdateActionsFields( NULL );
 		}
+
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
 	}
 
 	override void OnHide() 
 	{
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
 	}
 
 	bool UpdateFirstUIData()
@@ -523,10 +503,8 @@ class PlayerMenu extends Form
 				GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ), true );
 			}
 		}
-		
-		GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param, true );
-		
-		GetRPCManager().SendRPC( "PermissionsFramework", "UpdateAllPlayerObjects", new Param, true );
+
+		ReloadPlayers();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -558,29 +536,34 @@ class PlayerMenu extends Form
 		return false;
 	}
 
-	bool OnPlayer_Checked( ref AuthPlayer player, bool isChecked = true )
+	void OnPlayer_Checked_ESP( ref ESPBox box )
 	{
-		return OnPlayerSelected( player, isChecked );
+		OnPlayerSelected( box.Info.player, box.Checkbox.IsChecked() );
 	}
 
-	bool OnPlayer_Button( ref AuthPlayer player )
+	void OnPlayer_Button_ESP( ref ESPBox box )
 	{
-		if ( player == NULL )
-		{
-			return OnPlayerSelected( NULL );
-		}
-
-		if ( GetSelectedPlayers().Count() == 1 )
-		{
-			if ( GetSelectedPlayers()[0] == player )
-			{
-				return OnPlayerSelected( NULL );
-			}
-		}
-
 		OnPlayerSelected( NULL );
 
-		return OnPlayerSelected( player );
+		if ( OnPlayerSelected( box.Info.player ) )
+		{
+			box.Checkbox.SetChecked( true );
+		}
+	}
+
+	void OnPlayer_Checked( ref PlayerRow row )
+	{
+		OnPlayerSelected( row.GetPlayer(), row.Checkbox.IsChecked() );
+	}
+
+	void OnPlayer_Button( ref PlayerRow row )
+	{
+		OnPlayerSelected( NULL );
+
+		if ( OnPlayerSelected( row.GetPlayer() ) )
+		{
+			row.Checkbox.SetChecked( true );
+		}
 	}
 
 	bool OnPlayerSelected( ref AuthPlayer player, bool select = true )
@@ -591,10 +574,9 @@ class PlayerMenu extends Form
 
 			GetSelectedPlayers().Clear();
 
-			for ( int i = 0; i < m_PlayerRowList.Count(); i++ )
+			for ( int i = 0; i < m_PlayerList.Count(); i++ )
 			{
-				m_PlayerRowList[i].Checkbox.SetChecked( false );
-				m_PlayerBoxList[i].Checkbox.SetChecked( false );
+				m_PlayerList[i].Checkbox.SetChecked( false );
 			}
 
 			LoadPermissions( NULL );
@@ -650,7 +632,7 @@ class PlayerMenu extends Form
 
 	void CreatePermissionsUI()
 	{
-		ref Permission rootPerm = GetPermissionsManager().GetRootPermission() 
+		ref Permission rootPerm = GetPermissionsManager().GetRootPermission();
 
 		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
@@ -661,7 +643,7 @@ class PlayerMenu extends Form
 
 		if ( m_PermissionUI )
 		{
-			m_PermissionsList.Clear();
+			m_PermissionList.Clear();
 
 			m_PermissionUI.InitPermission( rootPerm, 0 );
 
@@ -694,7 +676,7 @@ class PlayerMenu extends Form
 
 			if ( rowScript )
 			{
-				m_PermissionsList.Insert( rowScript );
+				m_PermissionList.Insert( rowScript );
 				rowScript.InitPermission( cPerm, depth );
 
 				parentRow.Children.Insert( rowScript );
@@ -705,20 +687,13 @@ class PlayerMenu extends Form
 		}
 	}
 
-	ref array< string > SerializePermissionUI()
-	{
-		ref array< string > output = new ref array< string >;
-		m_PermissionUI.Serialize( output );
-		return output;
-	}
-
 	void LoadPermissions( ref array< string > permissions = NULL )
 	{
 		if ( permissions == NULL )
 		{
-			for ( int i = 0; i < m_PermissionsList.Count(); i++ )
+			for ( int i = 0; i < m_PermissionList.Count(); i++ )
 			{
-				m_PermissionsList[i].Disable();
+				m_PermissionList[i].Disable();
 			}
 		} else 
 		{
@@ -847,7 +822,7 @@ class PlayerMenu extends Form
 
 			rowScript.Menu = this;
 
-			m_PlayerRowList.Insert( rowScript );
+			m_PlayerList.Insert( rowScript );
 		}
 
 		for ( i = 0; i < 100; i++ )
@@ -870,71 +845,31 @@ class PlayerMenu extends Form
 
 			rowScript.Menu = this;
 
-			m_PlayerRowList.Insert( rowScript );
-		}
-
-		ref Widget playerBox = NULL;
-		ref PlayerBox boxScript = NULL;
-
-		for ( i = 0; i < 200; i++ )
-		{
-			boxScript = NULL;
-			playerBox = NULL;
-
-			playerBox = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerBox.layout" );
-			
-			if ( playerBox == NULL ) continue;
-
-			m_UserID++;
-
-			playerBox.SetUserID( m_UserID );
-			playerBox.GetScript( boxScript );
-
-			if ( boxScript == NULL ) continue;
-
-			boxScript.SetPlayer( NULL );
-
-			boxScript.Menu = this;
-
-			m_PlayerBoxList.Insert( boxScript );
-		}
+			m_PlayerList.Insert( rowScript );
+		}				
 	}
 
 	void UpdatePlayerList()
 	{
 		array< ref AuthPlayer > players = GetPermissionsManager().GetPlayers();
-
-		if ( players == NULL ) return;
 		
-		for ( int k = 0; k < m_PlayerRowList.Count(); k++ )
+		for ( int k = 0; k < m_PlayerList.Count(); k++ )
 		{
-			m_PlayerRowList[k].SetPlayer( NULL );
-		}
-
-		for ( int j = 0; j < m_PlayerBoxList.Count(); j++ )
-		{
-			m_PlayerBoxList[j].SetPlayer( NULL );
+			m_PlayerList[k].SetPlayer( NULL );
 		}
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			m_PlayerRowList[i].SetPlayer( players[i] );
-
-			if ( COTMenuOpen )
-			{
-				m_PlayerBoxList[i].SetPlayer( players[i] );
-			}
+			m_PlayerList[i].SetPlayer( players[i] );
 
 			if ( PlayerAlreadySelected( players[i] ) )
 			{
-				OnPlayerSelected( players[i], true );
-				m_PlayerRowList[i].Checkbox.SetChecked( true );
-				m_PlayerBoxList[i].Checkbox.SetChecked( true );
+				// OnPlayerSelected( players[i], true );
+				m_PlayerList[i].Checkbox.SetChecked( true );
 			} else
 			{
 				OnPlayerSelected( players[i], false );
-				m_PlayerRowList[i].Checkbox.SetChecked( false );
-				m_PlayerBoxList[i].Checkbox.SetChecked( false );
+				m_PlayerList[i].Checkbox.SetChecked( false );
 			}
 		}
 

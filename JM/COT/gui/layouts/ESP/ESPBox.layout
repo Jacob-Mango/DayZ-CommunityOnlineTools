@@ -1,4 +1,4 @@
-PanelWidgetClass PlayerBox {
+PanelWidgetClass ESPBox {
  ignorepointer 1
  color 0.08 0.10 0.13 0.7
  position 0 0
@@ -9,7 +9,7 @@ PanelWidgetClass PlayerBox {
  hexactsize 1
  vexactsize 1
  style rover_sim_colorable
- scriptclass "PlayerBox"
+ scriptclass "ESPBox"
  {
   ButtonWidgetClass button {
    ignorepointer 0

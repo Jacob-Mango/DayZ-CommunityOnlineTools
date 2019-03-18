@@ -1,21 +1,27 @@
 class ESPModule: EditorModule
 {
 	protected ref array< ref ESPInfo > m_ESPObjects;
-
-	protected float m_ESPRadius;
+	protected ref array< ref ESPBox > m_ESPBoxes;
 
 	protected bool m_CanViewPlayers;
 	protected bool m_CanViewBaseBuilding;
 	protected bool m_CanViewVehicles;
 
+	protected int m_UserID;
+
 	bool ViewPlayers;
 	bool ViewBaseBuilding;
 	bool ViewVehicles;
 
+	float ESPRadius;
+
 	void ESPModule()
 	{
 		m_ESPObjects = new ref array< ref ESPInfo >;
-		m_ESPRadius = 200;
+		m_ESPBoxes = new ref array< ref ESPBox >;
+		m_UserID = 0;
+
+		ESPRadius = 200;
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestESPData", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ShowESPData", this, SingeplayerExecutionType.Client );
@@ -43,12 +49,31 @@ class ESPModule: EditorModule
 		m_CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
 	}
 
-	void UpdateESP()
+	override void OnMissionStart()
 	{
+		ESPBox.espModule = this;
+	}
+
+	void HideESP()
+	{
+		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
+		{
+			m_ESPBoxes[j].Unlink();
+		}
+
+		m_ESPBoxes.Clear();
+
 		m_ESPObjects.Clear();
 
+		m_UserID = 0;
+	}
+
+	void UpdateESP()
+	{
+		HideESP();
+
 		ref array<Object> objects = new ref array<Object>;
-		GetGame().GetObjectsAtPosition3D( GetCurrentPosition(), m_ESPRadius, objects, NULL );
+		GetGame().GetObjectsAtPosition3D( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 		Object currentObj;
 
@@ -95,6 +120,7 @@ class ESPModule: EditorModule
 				if ( !player ) return;
 
 				metadata.isPlayer = true;
+				metadata.name = player.GetIdentity().GetName();
 				metadata.steamid = player.GetIdentity().GetPlainId();
 			} else if ( target != NULL )
 			{
@@ -129,7 +155,28 @@ class ESPModule: EditorModule
 				}
 			}
 
+			CreateESPBox( info );
+
 			m_ESPObjects.Insert( info );
 		}
+	}
+
+	void CreateESPBox( ref ESPInfo info )
+	{
+		ref ESPBox boxScript = NULL;
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/ESP/ESPBox.layout" );
+
+		if ( widget == NULL ) return;
+
+		m_UserID++;
+
+		widget.SetUserID( m_UserID );
+		widget.GetScript( boxScript );
+
+		if ( boxScript == NULL ) return;
+
+		boxScript.SetInfo( info );
+
+		m_ESPBoxes.Insert( boxScript );
 	}
 }

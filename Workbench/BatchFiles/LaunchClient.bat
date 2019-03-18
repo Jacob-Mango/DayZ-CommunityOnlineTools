@@ -177,7 +177,7 @@ if %failed%==1 (
 )
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
-start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
+echo start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mod=%mods%"
+start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mod=%mods%"
 
 TIMEOUT /T 5 /NOBREAK
