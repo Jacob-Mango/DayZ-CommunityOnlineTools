@@ -83,7 +83,7 @@ class ObjectMenu extends Form
 		{
 			spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
 
-			UIActionManager.CreateText( spawnButtons, "Spawn on: " )
+			UIActionManager.CreateText( spawnButtons, "Spawn on: " );
 
 			UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
 			UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
@@ -124,7 +124,7 @@ class ObjectMenu extends Form
 
 			m_Orientation = vector.Zero;
 
-			m_PreviewItem = GetGame().CreateObject( strSelection, vector.Zero, true, false, false );
+			m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false, false ) );
 
 			m_ItemPreview.SetItem( m_PreviewItem );
 			m_ItemPreview.SetView( m_PreviewItem.GetViewIndex() );

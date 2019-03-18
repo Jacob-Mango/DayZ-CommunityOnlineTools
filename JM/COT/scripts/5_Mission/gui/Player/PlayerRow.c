@@ -18,10 +18,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
 		Init();
 	}
 
-	void ~PlayerRow()
-	{
-	}
-
 	void Init() 
 	{
 		Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
@@ -57,6 +53,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
 	void Update() 
 	{
+		
 	}
 
 	ref Widget GetLayoutRoot() 
@@ -109,12 +106,12 @@ class PlayerRow extends ScriptedWidgetEventHandler
 	{		
 		if ( w == Checkbox )
 		{
-			Menu.OnPlayer_Checked( Player, Checkbox.IsChecked() );
+			Menu.OnPlayer_Checked( this );
 		}
 
 		if ( w == Button )
 		{
-			Checkbox.SetChecked( Menu.OnPlayer_Button( Player ) );
+			Menu.OnPlayer_Button( this );
 		}
 
 		return true;

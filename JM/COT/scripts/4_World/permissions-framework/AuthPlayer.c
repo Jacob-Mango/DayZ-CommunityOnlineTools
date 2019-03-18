@@ -115,7 +115,7 @@ class AuthPlayer
 
 		bool has = RootPermission.HasPermission( permission, permType );
 
-		Print( "Player " +  GetName() + " is " + has + " with perm type " + permType );
+		//Print( "Player " +  GetName() + " is " + has + " with perm type " + permType );
 
 		if ( has )
 			return true;
@@ -124,7 +124,7 @@ class AuthPlayer
 		{
 			bool roleHas = Roles[j].HasPermission( permission, rolePermType );
 
-			Print( "Role " +  Roles[j].Name + " is " + roleHas + " with perm type " + rolePermType );
+			//Print( "Role " +  Roles[j].Name + " is " + roleHas + " with perm type " + rolePermType );
 
 			if ( roleHas )
 			{

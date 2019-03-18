@@ -27,9 +27,10 @@ class ESPMenu extends Form
 
 	override void OnInit( bool fromMenu )
 	{
-		m_ActionsWrapper = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
+		m_ActionsWrapper = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 5, 1 );
 
-		UIActionManager.CreateButton( m_ActionsWrapper, "Update ESP", this, "Click_UpdateESP" );
+		UIActionManager.CreateButton( m_ActionsWrapper, "Show/Update ESP", this, "Click_UpdateESP" );
+		UIActionManager.CreateButton( m_ActionsWrapper, "Hide ESP", this, "Click_HideESP" );
 		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Player ESP", this, "Click_PlayerESP", false );
 		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Base Building ESP", this, "Click_BaseBuildingESP", false );
 		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
@@ -40,6 +41,13 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).UpdateESP();
+	}
+
+	void Click_HideESP( UIEvent eid, ref UIActionCheckbox action )
+	{
+		if ( eid != UIEvent.CLICK ) return;
+		
+		ESPModule.Cast( module ).HideESP();
 	}
 
 	void Click_PlayerESP( UIEvent eid, ref UIActionCheckbox action )

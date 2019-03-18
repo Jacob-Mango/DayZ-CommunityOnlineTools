@@ -74,7 +74,7 @@ class GameMenu extends Form
 		for ( int j = 0; j < m_VehicleButtons.Count(); j++ )
 		{
 			m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
-			m_VehicleButtons[j].GetLayoutRoot().Unlink()
+			m_VehicleButtons[j].GetLayoutRoot().Unlink();
 		}
 
 		m_VehicleButtons.Clear();
@@ -82,7 +82,7 @@ class GameMenu extends Form
 		for ( int k = 0; k < m_BaseBuildingButtons.Count(); k++ )
 		{
 			m_ActionsWrapper.RemoveChild( m_BaseBuildingButtons[k].GetLayoutRoot() );
-			m_BaseBuildingButtons[k].GetLayoutRoot().Unlink()
+			m_BaseBuildingButtons[k].GetLayoutRoot().Unlink();
 		}
 
 		m_BaseBuildingButtons.Clear();
