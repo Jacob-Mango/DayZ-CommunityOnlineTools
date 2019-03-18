@@ -1,137 +1,137 @@
 modded class MissionGameplay
 {
-    protected ref CommunityOnlineTools m_COT;
-    protected ref PermissionsFramework m_PF;
+	protected ref CommunityOnlineTools m_COT;
+	protected ref PermissionsFramework m_PF;
 
-    protected ref CustomDebugMonitor m_CDebugMonitor;
-
-	// ------------------------------------------------------------
-    // Constructor
-	// ------------------------------------------------------------
-    void MissionGameplay()
-    {
-        Print( "MissionGameplay::MissionGameplay()" );
-        
-        m_COT = new ref CommunityOnlineTools;
-        m_PF = new ref PermissionsFramework;
-    }
+	protected ref CustomDebugMonitor m_CDebugMonitor;
 
 	// ------------------------------------------------------------
-    // Deconstructor
+	// Constructor
 	// ------------------------------------------------------------
-    void ~MissionGameplay()
-    {
-        Print( "MissionGameplay::~MissionGameplay()" );
-
-        delete m_PF;
-        delete m_COT;
-    }
-
-	// ------------------------------------------------------------
-    // Override OnInit
-	// ------------------------------------------------------------
-    override void OnInit()
-    {
-        super.OnInit();
-    }
+	void MissionGameplay()
+	{
+		Print( "MissionGameplay::MissionGameplay()" );
+		
+		m_COT = new ref CommunityOnlineTools;
+		m_PF = new ref PermissionsFramework;
+	}
 
 	// ------------------------------------------------------------
-    // Override OnMissionStart
+	// Deconstructor
 	// ------------------------------------------------------------
-    override void OnMissionStart()
-    {
-        super.OnMissionStart();
-    
-        // If game is not multiplayer, add a default offline player
-        if ( !GetGame().IsMultiplayer() )
-        {
-            GetPermissionsManager().PlayerJoined( NULL );
-        }
-        
-        m_PF.OnStart();
-        m_COT.OnStart();
-    }
+	void ~MissionGameplay()
+	{
+		Print( "MissionGameplay::~MissionGameplay()" );
+
+		delete m_PF;
+		delete m_COT;
+	}
 
 	// ------------------------------------------------------------
-    // Override OnMissionStart
+	// Override OnInit
 	// ------------------------------------------------------------
-    override void OnMissionFinish()
-    {
-        m_PF.OnFinish();
+	override void OnInit()
+	{
+		super.OnInit();
+	}
 
-        m_COT.OnFinish();
+	// ------------------------------------------------------------
+	// Override OnMissionStart
+	// ------------------------------------------------------------
+	override void OnMissionStart()
+	{
+		super.OnMissionStart();
+	
+		// If game is not multiplayer, add a default offline player
+		if ( !GetGame().IsMultiplayer() )
+		{
+			GetPermissionsManager().PlayerJoined( NULL );
+		}
+		
+		m_PF.OnStart();
+		m_COT.OnStart();
+	}
 
-        super.OnMissionFinish();
+	// ------------------------------------------------------------
+	// Override OnMissionStart
+	// ------------------------------------------------------------
+	override void OnMissionFinish()
+	{
+		m_PF.OnFinish();
+
+		m_COT.OnFinish();
+
+		super.OnMissionFinish();
 
 		if (m_CDebugMonitor)
 			m_CDebugMonitor.Hide();
-    }
+	}
 
 	// ------------------------------------------------------------
-    // Override OnUpdate
+	// Override OnUpdate
 	// ------------------------------------------------------------
-    override void OnUpdate( float timeslice )
-    {
-        super.OnUpdate( timeslice );
+	override void OnUpdate( float timeslice )
+	{
+		super.OnUpdate( timeslice );
 
-        UIScriptedMenu menu = m_UIManager.GetMenu();
-        Input input = GetGame().GetInput();
+		UIScriptedMenu menu = m_UIManager.GetMenu();
+		Input input = GetGame().GetInput();
 
-        m_COT.OnUpdate( timeslice );
+		m_COT.OnUpdate( timeslice );
 
-        // Disable openning radial menu
-        if ( DISABLE_ALL_INPUT )
-        {
-            if( input.GetActionDown("UAUIQuickbarRadialOpen", false) )
-            {
-                if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
-                {
-                    RadialQuickbarMenu.CloseMenu();
-                }
-            }
-        }
+		// Disable openning radial menu
+		if ( DISABLE_ALL_INPUT )
+		{
+			if( input.GetActionDown("UAUIQuickbarRadialOpen", false) )
+			{
+				if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
+				{
+					RadialQuickbarMenu.CloseMenu();
+				}
+			}
+		}
 
-        // Force the custom debug monitor to show instead
-        if ( m_CDebugMonitor )
-        {
-            if ( COTMenuOpen )
-            {
-                m_CDebugMonitor.Hide();
-            } else 
-            {
-                m_CDebugMonitor.Show();
-            }
-        }
+		// Force the custom debug monitor to show instead
+		if ( m_CDebugMonitor )
+		{
+			if ( COTMenuOpen )
+			{
+				m_CDebugMonitor.Hide();
+			} else 
+			{
+				m_CDebugMonitor.Show();
+			}
+		}
 
-        m_PF.Update( timeslice );
-    }
+		m_PF.Update( timeslice );
+	}
 
 	// ------------------------------------------------------------
-    // Override CreateDebugMonitor
+	// Override CreateDebugMonitor
 	// ------------------------------------------------------------
 	override void CreateDebugMonitor()
 	{
-        super.CreateDebugMonitor();
+		super.CreateDebugMonitor();
 
-        if ( m_DebugMonitor )
-        {
-            m_DebugMonitor.Hide();
-            delete m_DebugMonitor;
-        }
+		if ( m_DebugMonitor )
+		{
+			m_DebugMonitor.Hide();
+			delete m_DebugMonitor;
+		}
 
 		if (!m_CDebugMonitor)
 		{
 			m_CDebugMonitor = new CustomDebugMonitor();
 			m_CDebugMonitor.Init();
-            m_CDebugMonitor.Show();
+			m_CDebugMonitor.Show();
 		}
 	}
 
 	// ------------------------------------------------------------
-    // Override UpdateDebugMonitor
+	// Override UpdateDebugMonitor
 	// ------------------------------------------------------------
-    override void UpdateDebugMonitor()
-    {
+	override void UpdateDebugMonitor()
+	{
 		if (!m_CDebugMonitor) return;
 		
 		PlayerBase player = PlayerBase.Cast( GetGame().GetPlayer() );
@@ -146,25 +146,25 @@ modded class MissionGameplay
 				m_CDebugMonitor.SetPosition(player.GetPosition());
 			}
 		}
-    }
+	}
 
 	// ------------------------------------------------------------
-    // Override ShowInventory
+	// Override ShowInventory
 	// ------------------------------------------------------------
-    override void ShowInventory()
-    {
-        if ( DISABLE_ALL_INPUT ) return;
+	override void ShowInventory()
+	{
+		if ( DISABLE_ALL_INPUT ) return;
 
-        super.ShowInventory();
-    }
+		super.ShowInventory();
+	}
 
 	// ------------------------------------------------------------
-    // Override ShowChat
+	// Override ShowChat
 	// ------------------------------------------------------------
-    override void ShowChat()
-    {
-        if ( DISABLE_ALL_INPUT ) return;
+	override void ShowChat()
+	{
+		if ( DISABLE_ALL_INPUT ) return;
 
-        super.ShowChat();
-    }
+		super.ShowChat();
+	}
 }
