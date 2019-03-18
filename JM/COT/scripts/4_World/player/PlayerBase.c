@@ -91,12 +91,12 @@ modded class PlayerBase
         {
             SetAllowDamage(false);
             m_HasGodeMode = true;
-            Notify( authenticatedPlayer, "You now have god mode." );
+            //Notify( authenticatedPlayer, "You now have god mode." );
         } else
         {
             SetAllowDamage(true);
             m_HasGodeMode = false;
-            Notify( authenticatedPlayer, "You no longer have god mode." );
+            //Notify( authenticatedPlayer, "You no longer have god mode." );
         }
     }
 }
