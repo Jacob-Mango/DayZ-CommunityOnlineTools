@@ -31,7 +31,7 @@
                     }
                 }
             },
-            "command": "Workbench/BatchFiles/LaunchMP.bat",
+            "command": "Workbench/BatchFiles/LaunchLocalMP.bat",
             "args": [],
             "problemMatcher": []
         },
@@ -47,7 +47,7 @@
                     }
                 }
             },
-            "command": "Workbench/BatchFiles/LaunchSP.bat",
+            "command": "Workbench/BatchFiles/LaunchOffline.bat",
             "args": [],
             "problemMatcher": []
         },
@@ -64,6 +64,38 @@
                 }
             },
             "command": "Workbench/BatchFiles/Exit.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Redeploy Scripts GUI Launch",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/RedeployLaunchScriptsGUI.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Update Version",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/UpdateVersion.bat",
             "args": [],
             "problemMatcher": []
         }

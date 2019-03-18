@@ -25,8 +25,8 @@ class CfgMods
         credits = "Jacob_Mango, DannyDog, Arkensor";
 		creditsJson = "JM/COT/Scripts/Data/Credits.json";
         author = "Jacob_Mango, DannyDog, Arkensor";
-        authorID = "0"; 
-        version = "1.0"; 
+        authorID = "0";
+        version = "JM/COT/scripts/Data/Version.hpp";
         extra = 0;
         type = "mod";
         
