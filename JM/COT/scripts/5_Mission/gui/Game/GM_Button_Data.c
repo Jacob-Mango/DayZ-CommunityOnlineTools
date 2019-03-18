@@ -1,9 +1,9 @@
 class GM_Button_Data: UIActionData
 {
-    string ClassName;
+	string ClassName;
 
-    void GM_Button_Data( string clsName )
-    {
-        ClassName = clsName;
-    }
+	void GM_Button_Data( string clsName )
+	{
+		ClassName = clsName;
+	}
 }

@@ -1,5 +1,5 @@
 enum UIEvent 
 {
-    CLICK = 0,
-    CHANGE
+	CLICK = 0,
+	CHANGE
 }

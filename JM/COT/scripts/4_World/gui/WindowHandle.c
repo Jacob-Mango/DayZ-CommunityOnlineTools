@@ -1,137 +1,137 @@
 class WindowHandle extends ScriptedWidgetEventHandler 
 {
-    protected ref Widget layoutRoot;
+	protected ref Widget layoutRoot;
 
-    protected ref ButtonWidget m_CloseButton;
-    protected ref Widget m_TitleWrapper;
+	protected ref ButtonWidget m_CloseButton;
+	protected ref Widget m_TitleWrapper;
 
-    ref Form form;
+	ref Form form;
 
-    float offsetX;
-    float offsetY;
+	float offsetX;
+	float offsetY;
 
-    void WindowHandle() 
-    {
-    }
+	void WindowHandle() 
+	{
+	}
 
-    void ~WindowHandle() 
-    {
-    }
+	void ~WindowHandle() 
+	{
+	}
 
-    void OnWidgetScriptInit( Widget w )
-    {
-        layoutRoot = w;
-        layoutRoot.SetHandler( this );
+	void OnWidgetScriptInit( Widget w )
+	{
+		layoutRoot = w;
+		layoutRoot.SetHandler( this );
 
-        Init();
-    }
+		Init();
+	}
 
-    void Init() 
-    {
-        m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-        m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
-    }
+	void Init() 
+	{
+		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
+		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
+	}
 
-    void SetSize( float w, float h )
-    {
-        layoutRoot.SetSize( w, h + 25 );
-    }
+	void SetSize( float w, float h )
+	{
+		layoutRoot.SetSize( w, h + 25 );
+	}
 
-    bool IsVisible()
-    {
-        return layoutRoot.IsVisible();
-    }
-    
-    void Show()
-    {
-        layoutRoot.Show( true );
-        OnShow();
-    }
+	bool IsVisible()
+	{
+		return layoutRoot.IsVisible();
+	}
+	
+	void Show()
+	{
+		layoutRoot.Show( true );
+		OnShow();
+	}
 
-    void Hide()
-    {
-        OnHide();
-        layoutRoot.Show( false );
-    }
+	void Hide()
+	{
+		OnHide();
+		layoutRoot.Show( false );
+	}
 
-    void OnShow()
-    {
-    }
+	void OnShow()
+	{
+	}
 
-    void OnHide() 
-    {
-    }
+	void OnHide() 
+	{
+	}
 
-    override bool OnUpdate(Widget w)
-    {
-        if ( w == m_TitleWrapper )
-        {
-            m_TitleWrapper.SetPos( 0, 0, true );
-        }
-        return true;
-    }
+	override bool OnUpdate(Widget w)
+	{
+		if ( w == m_TitleWrapper )
+		{
+			m_TitleWrapper.SetPos( 0, 0, true );
+		}
+		return true;
+	}
 
-    override bool OnClick( Widget w, int x, int y, int button )
-    {
-        if ( w == m_CloseButton )
-        {
-            form.Hide();
-        }
+	override bool OnClick( Widget w, int x, int y, int button )
+	{
+		if ( w == m_CloseButton )
+		{
+			form.Hide();
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    override bool OnDrag( Widget w, int x, int y )
-    {
-        if ( w == m_TitleWrapper )
-        {
-            layoutRoot.GetPos( offsetX, offsetY );
+	override bool OnDrag( Widget w, int x, int y )
+	{
+		if ( w == m_TitleWrapper )
+		{
+			layoutRoot.GetPos( offsetX, offsetY );
 
-            offsetX = x - offsetX;
-            offsetY = y - offsetY;
+			offsetX = x - offsetX;
+			offsetY = y - offsetY;
 
-            m_TitleWrapper.SetPos( 0, 0, true );
-            m_TitleWrapper.SetPos( 0, 0, false );
-            
-            return false;
-        }
+			m_TitleWrapper.SetPos( 0, 0, true );
+			m_TitleWrapper.SetPos( 0, 0, false );
+			
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    override bool OnDragging( Widget w, int x, int y, Widget reciever )
-    {
-        if ( w == m_TitleWrapper )
-        {
-            SetPosition( x - offsetX, y - offsetY );
+	override bool OnDragging( Widget w, int x, int y, Widget reciever )
+	{
+		if ( w == m_TitleWrapper )
+		{
+			SetPosition( x - offsetX, y - offsetY );
 
-            return false;
-        }
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    override bool OnDrop( Widget w, int x, int y, Widget reciever )
-    {
-        if ( w == m_TitleWrapper )
-        {
-            SetPosition( x - offsetX, y - offsetY );
-            
-            return false;
-        }
+	override bool OnDrop( Widget w, int x, int y, Widget reciever )
+	{
+		if ( w == m_TitleWrapper )
+		{
+			SetPosition( x - offsetX, y - offsetY );
+			
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    void SetPosition( int x, int y )
-    {
-        layoutRoot.SetPos( x, y, true );
-        
-        m_TitleWrapper.SetPos( 0, 0, true );
-    }
+	void SetPosition( int x, int y )
+	{
+		layoutRoot.SetPos( x, y, true );
+		
+		m_TitleWrapper.SetPos( 0, 0, true );
+	}
 
-    ref Widget GetLayoutRoot() 
-    {
-        return layoutRoot;
-    }
+	ref Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
 }

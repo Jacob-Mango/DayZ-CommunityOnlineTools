@@ -1,7 +1,7 @@
 class ESPInfo
 {
-    string name;
-    bool isPlayer;
-    ref AuthPlayer player;
-    Object target;
+	string name;
+	bool isPlayer;
+	ref AuthPlayer player;
+	Object target;
 }

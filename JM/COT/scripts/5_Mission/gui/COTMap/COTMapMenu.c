@@ -3,45 +3,45 @@ class COTMapMenu extends Form
 	protected ref MapWidget map_widget;
 	protected ref Widget basewindow_background;
 	
-    void COTMapMenu()
-    {
-    }
+	void COTMapMenu()
+	{
+	}
 
-    void ~COTMapMenu()
-    {
-    }
+	void ~COTMapMenu()
+	{
+	}
 
-    override string GetTitle()
-    {
-        return "Map";
-    }
-    
-    override string GetIconName()
-    {
-        return "M";
-    }
+	override string GetTitle()
+	{
+		return "Map";
+	}
 	
-    override bool ImageIsIcon()
-    {
-        return false;
-    }
+	override string GetIconName()
+	{
+		return "M";
+	}
+	
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
 	
 	override void OnInit( bool fromMenu )
-    {
-        map_widget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
+	{
+		map_widget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
 		basewindow_background = window.GetLayoutRoot().FindAnyWidget("background");
 		basewindow_background.Show(false);
-    }
+	}
 	
 	override void OnShow()
-    {
+	{
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayers, 500, true );
-    }
+	}
 
-    override void OnHide() 
-    {
+	override void OnHide() 
+	{
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayers );
-    }
+	}
 
 	void UpdatePlayers() 
 	{
