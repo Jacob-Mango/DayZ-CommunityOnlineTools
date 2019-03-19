@@ -1,7 +1,5 @@
 class ESPMenu extends Form
 {
-	protected Widget m_ActionsWrapper;
-
 	void ESPMenu()
 	{
 	}
@@ -27,13 +25,21 @@ class ESPMenu extends Form
 
 	override void OnInit( bool fromMenu )
 	{
-		m_ActionsWrapper = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 5, 1 );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 2, 1 );
 
-		UIActionManager.CreateButton( m_ActionsWrapper, "Show/Update ESP", this, "Click_UpdateESP" );
-		UIActionManager.CreateButton( m_ActionsWrapper, "Hide ESP", this, "Click_HideESP" );
-		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Player ESP", this, "Click_PlayerESP", false );
-		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Base Building ESP", this, "Click_BaseBuildingESP", false );
-		UIActionManager.CreateCheckbox( m_ActionsWrapper, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
+		Widget upperSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
+		Widget leftSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 7, 1 );
+
+		UIActionManager.CreateButton( leftSpacer, "Show/Update ESP", this, "Click_UpdateESP" );
+		UIActionManager.CreateButton( leftSpacer, "Hide ESP", this, "Click_HideESP" );
+		UIActionManager.CreateCheckbox( leftSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
+		UIActionManager.CreateCheckbox( leftSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
+		UIActionManager.CreateCheckbox( leftSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
+		UIActionManager.CreateCheckbox( leftSpacer, "Item ESP", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
+
+		ref UIActionSlider rangeSlider = UIActionManager.CreateSlider( mainSpacer, "ESP Range", 0, 1000, this, "Click_UpdateRange" );
+		rangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
+		rangeSlider.SetAppend(" metres");
 	}
 
 	void Click_UpdateESP( UIEvent eid, ref UIActionCheckbox action )
@@ -69,6 +75,20 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewVehicles = action.IsChecked();
+	}
+
+	void Click_ItemESP( UIEvent eid, ref UIActionCheckbox action )
+	{
+		if ( eid != UIEvent.CLICK ) return;
+		
+		ESPModule.Cast( module ).ViewItems = action.IsChecked();
+	}
+
+	void Click_UpdateRange( UIEvent eid, ref UIActionSlider action )
+	{
+		if ( eid != UIEvent.CHANGE ) return;
+		
+		ESPModule.Cast( module ).ESPRadius = action.GetValue();
 	}
 
 	override void OnShow()
