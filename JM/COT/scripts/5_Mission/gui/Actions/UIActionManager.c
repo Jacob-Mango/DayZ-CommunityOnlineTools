@@ -145,4 +145,23 @@ class UIActionManager
 
 		return NULL;
 	}
+
+	static ref UIActionSlider CreateSlider( Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "" )
+	{
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/actions/UIActionSlider.layout", parent );
+
+		ref UIActionSlider action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+			action.SetLabel( label );
+			action.SetMinMax( min, max );
+
+			return action;
+		}
+
+		return NULL;
+	}
 }

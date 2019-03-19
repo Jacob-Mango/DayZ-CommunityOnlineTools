@@ -248,7 +248,7 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{		
-		if ( Info.player )
+		if ( Info.isPlayer && Info.player )
 		{
 			if ( w == Checkbox )
 			{
@@ -259,6 +259,9 @@ class ESPBox extends ScriptedWidgetEventHandler
 			{
 				playerMenu.OnPlayer_Button_ESP( this );
 			}
+		} else
+		{
+			// TODO: make an object menu to allow deletion of objects through that
 		}
 
 		return true;

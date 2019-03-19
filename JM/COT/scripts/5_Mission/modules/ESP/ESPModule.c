@@ -6,12 +6,14 @@ class ESPModule: EditorModule
 	protected bool m_CanViewPlayers;
 	protected bool m_CanViewBaseBuilding;
 	protected bool m_CanViewVehicles;
+	protected bool m_CanViewItems;
 
 	protected int m_UserID;
 
 	bool ViewPlayers;
 	bool ViewBaseBuilding;
 	bool ViewVehicles;
+	bool ViewItems;
 
 	float ESPRadius;
 
@@ -29,6 +31,7 @@ class ESPModule: EditorModule
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Vehicles" );
+		GetPermissionsManager().RegisterPermission( "ESP.View.Items" );
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
 	}
 
@@ -47,6 +50,7 @@ class ESPModule: EditorModule
 		m_CanViewPlayers = GetPermissionsManager().HasPermission( "ESP.View.Player" );
 		m_CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
 		m_CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
+		m_CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
 	}
 
 	override void OnMissionStart()
@@ -76,25 +80,65 @@ class ESPModule: EditorModule
 		GetGame().GetObjectsAtPosition3D( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 		Object currentObj;
+		PlayerBase player;
+		ref ESPInfo espInfo;
 
 		for (int i = 0; i < objects.Count(); ++i)
 		{
 			currentObj = Object.Cast( objects.Get(i) );
 
-			if ( ViewPlayers && m_CanViewPlayers && GetGame().ObjectIsKindOf( currentObj, "SurvivorBase" ) )
+			if ( !currentObj.HasNetworkID() )
 			{
-				PlayerBase player = PlayerBase.Cast( currentObj );
+				continue;
+			}
 
+			player = PlayerBase.Cast( currentObj );
+
+			bool isPlayer = player != NULL;
+			
+			if ( ViewPlayers && m_CanViewPlayers && isPlayer )
+			{
 				if ( player )
 				{
 					GetRPCManager().SendRPC( "COT_ESP", "RequestESPData", new Param1< string >( "Player" ), false, NULL, currentObj );
 				}
-			} else if ( ViewVehicles && m_CanViewVehicles && GetGame().ObjectIsKindOf( currentObj, "Transport" ) )
+				continue;
+			}
+			
+			bool isTransport = !isPlayer && GetGame().ObjectIsKindOf( currentObj, "Transport" );
+			if ( ViewVehicles && m_CanViewVehicles && isTransport )
 			{
-				GetRPCManager().SendRPC( "COT_ESP", "RequestESPData", new Param1< string >( "Vehicles" ), false, NULL, currentObj );
-			} else if ( ViewBaseBuilding && m_CanViewBaseBuilding && ( GetGame().ObjectIsKindOf( currentObj, "BaseBuildingBase" ) || GetGame().ObjectIsKindOf( currentObj, "Barrel_ColorBase" ) || GetGame().ObjectIsKindOf( currentObj, "Tent_Base" ) ) )
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.isPlayer = false;
+
+				CreateESPBox( espInfo );
+				continue;
+			}
+
+			bool isBaseBuilding = !isTransport && ( GetGame().ObjectIsKindOf( currentObj, "BaseBuildingBase" ) || GetGame().ObjectIsKindOf( currentObj, "Barrel_ColorBase" ) || GetGame().ObjectIsKindOf( currentObj, "Tent_Base" ) );
+			if ( ViewBaseBuilding && m_CanViewBaseBuilding && isBaseBuilding )
 			{
-				GetRPCManager().SendRPC( "COT_ESP", "RequestESPData", new Param1< string >( "BaseBuilding" ), false, NULL, currentObj );
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.isPlayer = false;
+
+				CreateESPBox( espInfo );
+				continue;
+			}
+
+			bool isItem = !isBaseBuilding && GetGame().ObjectIsKindOf( currentObj, "Inventory_Base" );
+			if ( ViewItems && m_CanViewItems && isItem )
+			{
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.isPlayer = false;
+
+				CreateESPBox( espInfo );
+				continue;
 			} 
 		}
 
@@ -144,6 +188,7 @@ class ESPModule: EditorModule
 			ref ESPInfo info = new ref ESPInfo;
 			info.name = data.param1.name;
 			info.target = target;
+			info.isPlayer = false;
 
 			if ( data.param1.isPlayer )
 			{
@@ -156,8 +201,6 @@ class ESPModule: EditorModule
 			}
 
 			CreateESPBox( info );
-
-			m_ESPObjects.Insert( info );
 		}
 	}
 
@@ -178,5 +221,6 @@ class ESPModule: EditorModule
 		boxScript.SetInfo( info );
 
 		m_ESPBoxes.Insert( boxScript );
+		m_ESPObjects.Insert( info );
 	}
 }
