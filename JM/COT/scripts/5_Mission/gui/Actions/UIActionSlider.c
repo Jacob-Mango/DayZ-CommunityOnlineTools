@@ -44,9 +44,15 @@ class UIActionSlider extends UIActionBase
 		m_Label.SetText( text );
 	}
 
-    void SetMinMax( float min, float max )
+    void SetMin( float min )
     {
         m_Min = min;
+
+        CalculateValue();
+    }
+
+    void SetMax( float max )
+    {
         m_Max = max;
 
         CalculateValue();
@@ -72,7 +78,7 @@ class UIActionSlider extends UIActionBase
         CalculateValue();
     }
 
-    protected void CalculateValue()
+    void CalculateValue()
     {
         float x = m_Slider.GetCurrent();
         float a = m_Min;

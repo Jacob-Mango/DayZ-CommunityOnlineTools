@@ -27,6 +27,9 @@ class ESPModule: EditorModule
 	vector Position;
 	vector Rotation;
 
+	float MaxHealth;
+	float Health;
+
 	void ESPModule()
 	{
 		m_ESPObjects = new ref array< ref ESPInfo >;
@@ -121,7 +124,7 @@ class ESPModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Set", sender ) )
 			return;
 
-		ref Param2< vector, vector > data;
+		ref Param3< vector, vector, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
 		if( type == CallType.Server )
@@ -131,10 +134,11 @@ class ESPModule: EditorModule
 			string obtype;
 			GetGame().ObjectGetType( target, obtype );
 
-			COTLog( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "]" );
+			COTLog( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
 
 			target.SetPosition( data.param1 );
 			target.SetYawPitchRoll( data.param2 );
+			target.SetHealth( "", "", data.param3 );
 		}
 	}
 
@@ -142,7 +146,7 @@ class ESPModule: EditorModule
 	{
 		if ( m_SelectedBoxes.Count() > 0 ) 
 		{
-			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param2< vector, vector >( Position, Rotation ), true, NULL, m_SelectedBoxes[0].Info.target );
+			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param3< vector, vector, float >( Position, Rotation, Health ), true, NULL, m_SelectedBoxes[0].Info.target );
 		}
 	}
 
@@ -197,6 +201,8 @@ class ESPModule: EditorModule
 		{
 			Position = m_SelectedBoxes[0].Info.target.GetPosition();
 			Rotation = m_SelectedBoxes[0].Info.target.GetYawPitchRoll();
+			MaxHealth = m_SelectedBoxes[0].Info.target.GetMaxHealth( "", "" );
+			Health = m_SelectedBoxes[0].Info.target.GetHealth( "", "" );
 		}
 	}
 
@@ -286,7 +292,7 @@ class ESPModule: EditorModule
 					espInfo.name = currentObj.GetDisplayName();
 					if ( espInfo.name == "" )
 						espInfo.name = currentObj.GetType();
-						
+
 					espInfo.target = currentObj;
 					espInfo.type = ESPType.CREATURE;
 

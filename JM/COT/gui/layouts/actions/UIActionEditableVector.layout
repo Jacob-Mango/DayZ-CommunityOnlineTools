@@ -93,17 +93,19 @@ PanelWidgetClass UIActionEditableVector {
       TextWidgetClass action_label {
        size 0.3 1
        halign left_ref
-       valign top_ref
+       valign center_ref
        text "{LABEL}"
        font "gui/fonts/sdf_MetronLight24"
        "text offset" 10 0
        "bold text" 1
        "exact text" 1
        "exact text size" 16
+       "text valign" center
       }
       GridSpacerWidgetClass spacer {
        position 0.3 0
        size 0.7 1
+       valign top_ref
        Padding 0
        Margin 0
        Columns 3
