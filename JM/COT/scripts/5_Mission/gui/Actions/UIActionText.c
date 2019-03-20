@@ -7,6 +7,8 @@ class UIActionText extends UIActionBase
 
 	override void OnInit() 
 	{
+		super.OnInit();
+		
 		m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
 		m_Text = TextWidget.Cast(layoutRoot.FindAnyWidget("action"));
 	}

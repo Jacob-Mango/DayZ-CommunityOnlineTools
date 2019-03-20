@@ -8,6 +8,9 @@ class ESPModule: EditorModule
 	protected bool m_CanViewBaseBuilding;
 	protected bool m_CanViewVehicles;
 	protected bool m_CanViewItems;
+	protected bool m_CanViewInfected;
+	protected bool m_CanViewCreature;
+	protected bool m_CanViewEverything;
 
 	protected int m_UserID;
 
@@ -15,8 +18,14 @@ class ESPModule: EditorModule
 	bool ViewBaseBuilding;
 	bool ViewVehicles;
 	bool ViewItems;
+	bool ViewInfected;
+	bool ViewCreature;
+	bool ViewEverything;
 
 	float ESPRadius;
+
+	vector Position;
+	vector Rotation;
 
 	void ESPModule()
 	{
@@ -27,23 +36,24 @@ class ESPModule: EditorModule
 
 		ESPRadius = 200;
 
-		GetRPCManager().AddRPC( "COT_ESP", "RequestESPData", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ShowESPData", this, SingeplayerExecutionType.Client );
+		Position = "0 0 0";
+		Rotation = "0 0 0";
+
+		GetRPCManager().AddRPC( "COT_ESP", "RequestPlayerESPData", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ShowPlayerESPData", this, SingeplayerExecutionType.Client );
 
 		GetRPCManager().AddRPC( "COT_ESP", "ServerDeleteSelected", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ServerSetPosition", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ServerSetPitch", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ServerSetYaw", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ServerSetRoll", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ServerSetSelected", this, SingeplayerExecutionType.Server );
 
-		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Position" );
-		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Rotation" );
+		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Set" );
 		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Delete" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Vehicles" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Items" );
+		GetPermissionsManager().RegisterPermission( "ESP.View.Infected" );
+		GetPermissionsManager().RegisterPermission( "ESP.View.Creature" );
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
 	}
 
@@ -63,11 +73,19 @@ class ESPModule: EditorModule
 		m_CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
 		m_CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
 		m_CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
+		m_CanViewInfected = GetPermissionsManager().HasPermission( "ESP.View.Infected" );
+		m_CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
+		m_CanViewEverything = GetPermissionsManager().HasPermission( "ESP.View" );
 	}
 
 	override void OnMissionStart()
 	{
 		ESPBox.espModule = this;
+	}
+
+	int GetSelectedCount()
+	{
+		return m_SelectedBoxes.Count();
 	}
 
 	void ServerDeleteSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -98,208 +116,34 @@ class ESPModule: EditorModule
 		delete copy;
 	}
 
-	void ServerSetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void ServerSetSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Position", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Set", sender ) )
 			return;
 
-		ref Param2< vector, ref array< Object > > data;
+		ref Param2< vector, vector > data;
 		if ( !ctx.Read( data ) ) return;
-
-		ref array< Object > copy = new ref array< Object >;
-		copy.Copy( data.param2 );
 		
 		if( type == CallType.Server )
 		{
-			for ( int i = 0; i < copy.Count(); i++ )
-			{
-				if ( copy[i] == NULL ) continue;
+			if ( target == NULL ) return;
 
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
+			string obtype;
+			GetGame().ObjectGetType( target, obtype );
 
-				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") position from " + copy[i].GetPosition() + " to " + data.param1 );
-				copy[i].SetPosition( data.param1 );
-			}
-		}
+			COTLog( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "]" );
 
-		delete copy;
-	}
-
-	void ServerSetPitch( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Pitch", sender ) )
-			return;
-
-		ref Param2< float, ref array< Object > > data;
-		if ( !ctx.Read( data ) ) return;
-
-		ref array< Object > copy = new ref array< Object >;
-		copy.Copy( data.param2 );
-		
-		if( type == CallType.Server )
-		{
-			for ( int i = 0; i < copy.Count(); i++ )
-			{
-				if ( copy[i] == NULL ) continue;
-
-				vector angles = copy[i].GetYawPitchRoll();
-
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
-
-				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") pitch from " + angles[1] + " to " + data.param1 );
-
-				angles[1] = data.param1;
-				copy[i].SetYawPitchRoll( angles );
-			}
-		}
-
-		delete copy;
-	}
-
-	void ServerSetYaw( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Yaw", sender ) )
-			return;
-
-		ref Param2< float, ref array< Object > > data;
-		if ( !ctx.Read( data ) ) return;
-
-		ref array< Object > copy = new ref array< Object >;
-		copy.Copy( data.param2 );
-		
-		if( type == CallType.Server )
-		{
-			for ( int i = 0; i < copy.Count(); i++ )
-			{
-				if ( copy[i] == NULL ) continue;
-
-				vector angles = copy[i].GetYawPitchRoll();
-
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
-
-				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") yaw from " + angles[0] + " to " + data.param1 );
-
-				angles[0] = data.param1;
-				copy[i].SetYawPitchRoll( angles );
-			}
-		}
-
-		delete copy;
-	}
-
-	void ServerSetRoll( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Roll", sender ) )
-			return;
-
-		ref Param2< float, ref array< Object > > data;
-		if ( !ctx.Read( data ) ) return;
-
-		ref array< Object > copy = new ref array< Object >;
-		copy.Copy( data.param2 );
-		
-		if( type == CallType.Server )
-		{
-			for ( int i = 0; i < copy.Count(); i++ )
-			{
-				if ( copy[i] == NULL ) continue;
-
-				vector angles = copy[i].GetYawPitchRoll();
-
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
-
-				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") roll from " + angles[2] + " to " + data.param1 );
-
-				angles[2] = data.param1;
-				copy[i].SetYawPitchRoll( angles );
-			}
-		}
-
-		delete copy;
-	}
-
-	void SelectBox( ref ESPBox box, bool checked, bool button )
-	{
-		if ( button )
-		{
-			for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-			{
-				m_SelectedBoxes[j].Checkbox.SetChecked( false );
-			}
-
-			box.Checkbox.SetChecked( true );
-			m_SelectedBoxes.Insert( box );
-		} else
-		{
-			box.Checkbox.SetChecked( checked );
-			if ( checked )
-			{
-				m_SelectedBoxes.Insert( box );
-			} else 
-			{
-				m_SelectedBoxes.RemoveItem( box );
-			}
+			target.SetPosition( data.param1 );
+			target.SetYawPitchRoll( data.param2 );
 		}
 	}
 
-	void SetPosition( vector position )
+	void SetSelected()
 	{
-		array< Object > objects = new array< Object >;
-
-		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		if ( m_SelectedBoxes.Count() > 0 ) 
 		{
-			objects.Insert( m_SelectedBoxes[j].Info.target );
+			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param2< vector, vector >( Position, Rotation ), true, NULL, m_SelectedBoxes[0].Info.target );
 		}
-
-		GetRPCManager().SendRPC( "COT_Object", "ServerSetPosition", new Param2< vector, ref array< Object > >( position, objects ), true );
-
-		// delete objects;
-	}
-
-	void SetPitch( float pitch )
-	{
-		array< Object > objects = new array< Object >;
-
-		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-		{
-			objects.Insert( m_SelectedBoxes[j].Info.target );
-		}
-
-		GetRPCManager().SendRPC( "COT_Object", "ServerSetPitch", new Param2< float, ref array< Object > >( pitch, objects ), true );
-
-		// delete objects;
-	}
-
-	void SetYaw( float yaw )
-	{
-		array< Object > objects = new array< Object >;
-
-		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-		{
-			objects.Insert( m_SelectedBoxes[j].Info.target );
-		}
-
-		GetRPCManager().SendRPC( "COT_Object", "ServerSetYaw", new Param2< float, ref array< Object > >( yaw, objects ), true );
-
-		// delete objects;
-	}
-
-	void SetRoll( float roll )
-	{
-		array< Object > objects = new array< Object >;
-
-		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-		{
-			objects.Insert( m_SelectedBoxes[j].Info.target );
-		}
-
-		GetRPCManager().SendRPC( "COT_Object", "ServerSetRoll", new Param2< float, ref array< Object > >( roll, objects ), true );
-
-		// delete objects;
 	}
 
 	void DeleteSelected()
@@ -315,10 +159,45 @@ class ESPModule: EditorModule
 
 			m_SelectedBoxes[j].Unlink();
 		}
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param1< ref array< Object > >( objects ), true );
+
+		GetRPCManager().SendRPC( "COT_ESP", "ServerDeleteSelected", new Param1< ref array< Object > >( objects ), true );
 
 		m_SelectedBoxes.Clear();
-		// delete objects;
+		delete objects;
+	}
+
+	void SelectBox( ref ESPBox box, bool checked, bool button )
+	{
+		int existsAt = m_SelectedBoxes.Find( box );
+
+		if ( button )
+		{
+			for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+			{
+				m_SelectedBoxes[j].Checkbox.SetChecked( false );
+			}
+
+			m_SelectedBoxes.Clear();
+
+			box.Checkbox.SetChecked( true );
+			m_SelectedBoxes.Insert( box );
+		} else
+		{
+			box.Checkbox.SetChecked( checked );
+			if ( checked )
+			{
+				m_SelectedBoxes.Insert( box );
+			} else if ( existsAt >= 0 )
+			{
+				m_SelectedBoxes.Remove( existsAt );
+			}
+		}
+
+		if ( m_SelectedBoxes.Count() > 0 && m_SelectedBoxes[0].Info.target != NULL )
+		{
+			Position = m_SelectedBoxes[0].Info.target.GetPosition();
+			Rotation = m_SelectedBoxes[0].Info.target.GetYawPitchRoll();
+		}
 	}
 
 	void HideESP()
@@ -361,46 +240,81 @@ class ESPModule: EditorModule
 
 			bool isPlayer = player != NULL;
 			
-			if ( ViewPlayers && m_CanViewPlayers && isPlayer )
+			if ( (ViewPlayers || ViewEverything) && (m_CanViewPlayers || m_CanViewEverything) && isPlayer )
 			{
 				if ( player )
 				{
-					GetRPCManager().SendRPC( "COT_ESP", "RequestESPData", new Param1< string >( "Player" ), false, NULL, currentObj );
+					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, currentObj );
 				}
 				continue;
 			}
 			
 			bool isTransport = !isPlayer && GetGame().ObjectIsKindOf( currentObj, "Transport" );
-			if ( ViewVehicles && m_CanViewVehicles && isTransport )
+			if ( (ViewVehicles || ViewEverything) && (m_CanViewVehicles || m_CanViewEverything) && isTransport )
 			{
 				espInfo = new ref ESPInfo;
 				espInfo.name = currentObj.GetDisplayName();
 				espInfo.target = currentObj;
-				espInfo.isPlayer = false;
+				espInfo.type = ESPType.VEHICLE;
 
 				CreateESPBox( espInfo );
 				continue;
 			}
 
 			bool isBaseBuilding = !isTransport && ( GetGame().ObjectIsKindOf( currentObj, "BaseBuildingBase" ) || GetGame().ObjectIsKindOf( currentObj, "Barrel_ColorBase" ) || GetGame().ObjectIsKindOf( currentObj, "Tent_Base" ) );
-			if ( ViewBaseBuilding && m_CanViewBaseBuilding && isBaseBuilding )
+			if ( (ViewBaseBuilding || ViewEverything) && (m_CanViewBaseBuilding || m_CanViewEverything) && isBaseBuilding )
 			{
 				espInfo = new ref ESPInfo;
 				espInfo.name = currentObj.GetDisplayName();
 				espInfo.target = currentObj;
-				espInfo.isPlayer = false;
+				espInfo.type = ESPType.BASEBUILDING;
 
 				CreateESPBox( espInfo );
 				continue;
 			}
 
 			bool isItem = !isBaseBuilding && GetGame().ObjectIsKindOf( currentObj, "Inventory_Base" );
-			if ( ViewItems && m_CanViewItems && isItem )
+			if ( (ViewItems || ViewEverything) && (m_CanViewItems || m_CanViewEverything) && isItem )
 			{
 				espInfo = new ref ESPInfo;
 				espInfo.name = currentObj.GetDisplayName();
 				espInfo.target = currentObj;
-				espInfo.isPlayer = false;
+				espInfo.type = ESPType.ITEM;
+
+				CreateESPBox( espInfo );
+				continue;
+			} 
+
+			bool isInfected = !isItem && GetGame().ObjectIsKindOf( currentObj, "DayZInfected" );
+			if ( (ViewInfected || ViewEverything) && (m_CanViewInfected || m_CanViewEverything) && isItem )
+			{
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.type = ESPType.INFECTED;
+
+				CreateESPBox( espInfo );
+				continue;
+			} 
+
+			bool isCreature = !isInfected && GetGame().ObjectIsKindOf( currentObj, "DayZCreature" );
+			if ( (ViewCreature || ViewEverything) && (m_CanViewCreature || m_CanViewEverything) && isItem )
+			{
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.type = ESPType.CREATURE;
+
+				CreateESPBox( espInfo );
+				continue;
+			} 
+
+			if ( ViewEverything && m_CanViewEverything )
+			{
+				espInfo = new ref ESPInfo;
+				espInfo.name = currentObj.GetDisplayName();
+				espInfo.target = currentObj;
+				espInfo.type = ESPType.ALL;
 
 				CreateESPBox( espInfo );
 				continue;
@@ -411,39 +325,27 @@ class ESPModule: EditorModule
 		delete objects;
 	}
 
-	void RequestESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RequestPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		ref Param1< string > data;
-		if ( !ctx.Read( data ) ) return;
-
-		if ( data.param1 == "" || !GetPermissionsManager().HasPermission( "ESP.View." + data.param1, sender ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.View.Player", sender ) )
 			return;
 		
 		if( type == CallType.Server )
 		{
 			ESPInfoMetaData metadata = new ESPInfoMetaData;
 
-			if ( data.param1 == "Player" )
-			{
-				PlayerBase player = PlayerBase.Cast( target );
-				if ( !player ) return;
+			PlayerBase player = PlayerBase.Cast( target );
+			if ( !player ) return;
 
-				metadata.isPlayer = true;
-				metadata.name = player.GetIdentity().GetName();
-				metadata.steamid = player.GetIdentity().GetPlainId();
-			} else if ( target != NULL )
-			{
-				metadata.name = target.GetDisplayName();
-				metadata.isPlayer = false;
-			} else {
-				return;
-			}
+			metadata.isPlayer = true;
+			metadata.name = player.GetIdentity().GetName();
+			metadata.steamid = player.GetIdentity().GetPlainId();
 
-			GetRPCManager().SendRPC( "COT_ESP", "RequestESPData", new Param1< ESPInfoMetaData >( metadata ), false, sender, target );
+			GetRPCManager().SendRPC( "COT_ESP", "ShowPlayerESPData", new Param1< ESPInfoMetaData >( metadata ), false, sender, target );
 		}
 	}
 
-	void ShowESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void ShowPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		ref Param1< ESPInfoMetaData > data;
 		if ( !ctx.Read( data ) ) return;
@@ -452,17 +354,12 @@ class ESPModule: EditorModule
 		{
 			ref ESPInfo info = new ref ESPInfo;
 			info.name = data.param1.name;
-			info.target = target;
-			info.isPlayer = false;
-
-			if ( data.param1.isPlayer )
+			
+			ref AuthPlayer player = GetPlayerForID( data.param1.steamid );
+			if ( player )
 			{
-				ref AuthPlayer player = GetPlayerForID( data.param1.steamid );
-				if ( player )
-				{
-					info.isPlayer = true;
-					info.player = player;
-				}
+				info.type = ESPType.PLAYER;
+				info.player = player;
 			}
 
 			CreateESPBox( info );

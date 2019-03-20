@@ -6,6 +6,7 @@ class UIActionEditableText extends UIActionBase
 
 	override void OnInit() 
 	{
+		super.OnInit();
 	}
 
 	override void OnShow()

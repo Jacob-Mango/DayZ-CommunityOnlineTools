@@ -1,7 +1,10 @@
 class ESPBox extends ScriptedWidgetEventHandler 
 {
 	static ref ESPModule espModule;
+	static ref ESPMenu espMenu;
 	static ref PlayerMenu playerMenu;
+
+	static bool ShowJustName = false;
 
 	protected ref Widget layoutRoot;
 
@@ -15,9 +18,6 @@ class ESPBox extends ScriptedWidgetEventHandler
 	int Height;
 	float FOV;
 	vector ScreenPos;
-
-	float BoxWidth;
-	float BoxHeight;
 
 	ref ESPInfo Info;
 
@@ -35,37 +35,49 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
-		Name = TextWidget.Cast(layoutRoot.FindAnyWidget("text_name"));
-		Button = ButtonWidget.Cast(layoutRoot.FindAnyWidget("button"));
-		Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("checkbox"));
+		Widget checkboxStyle = layoutRoot.FindAnyWidget("CheckboxStyle");
+		Widget justName = layoutRoot.FindAnyWidget("JustName");
+		if ( ShowJustName )
+		{
+			checkboxStyle.Show(false);
+			justName.Show(true);
 
-		layoutRoot.GetScreenSize( BoxWidth, BoxHeight );
+			Name = TextWidget.Cast(justName.FindAnyWidget("text_name"));
+		} else 
+		{
+			checkboxStyle.Show(true);
+			justName.Show(false);
+
+			Name = TextWidget.Cast(checkboxStyle.FindAnyWidget("text_name"));
+			Button = ButtonWidget.Cast(checkboxStyle.FindAnyWidget("button"));
+			Checkbox = CheckBoxWidget.Cast(checkboxStyle.FindAnyWidget("checkbox"));
+		}
 	}
 
 	void Show()
 	{
-		layoutRoot.Show( true );
-		Button.Show( true );
-		Checkbox.Show( true );
-		Name.Show( true );
+		if (layoutRoot) layoutRoot.Show( true );
+		if (Button) Button.Show( true );
+		if (Checkbox) Checkbox.Show( true );
+		if (Name) Name.Show( true );
 		OnShow();
 	}
 
 	void Hide()
 	{
 		OnHide();
-		Name.Show( false );
-		Button.Show( false );
-		Checkbox.Show( false );
-		layoutRoot.Show( false );
+		if (Name) Name.Show( false );
+		if (Button) Button.Show( false );
+		if (Checkbox) Checkbox.Show( false );
+		if (layoutRoot) layoutRoot.Show( false );
 	}
 
 	void Unlink()
 	{
-		Name.Unlink();
-		Button.Unlink();
-		Checkbox.Unlink();
-		layoutRoot.Unlink();
+		if (Name) Name.Unlink();
+		if (Button) Button.Unlink();
+		if (Checkbox) Checkbox.Unlink();
+		if (layoutRoot) layoutRoot.Unlink();
 	}
 
 	void OnShow()
@@ -85,7 +97,7 @@ class ESPBox extends ScriptedWidgetEventHandler
 	{
 		if ( Info.target )
 		{
-			if ( Info.isPlayer )
+			if ( Info.type == ESPType.PLAYER )
 			{
 				Human man = Human.Cast( Info.target );
 
@@ -136,17 +148,14 @@ class ESPBox extends ScriptedWidgetEventHandler
 			
 		ScreenPos = GetGame().GetScreenPos( position );
 
-		if ( ShowOnScreen )
+		if ( ShowOnScreen && ( ScreenPos[2] > espModule.ESPRadius || ScreenPos[2] < 0 ) )
 		{
-			if ( ScreenPos[2] > 1000 || ScreenPos[2] < 0 )
-			{
-				ShowOnScreen = false;
-			}
+			ShowOnScreen = false;
 		}
 
 		if ( ShowOnScreen && Info )
 		{
-			layoutRoot.SetPos( ScreenPos[0] - ( BoxWidth / 8 ), ScreenPos[1] - ( Height / 2 ) - ( BoxHeight / 2 ), true );
+			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1] - ( Height / 2 ), true );
 			Show();
 		} else 
 		{
@@ -163,112 +172,98 @@ class ESPBox extends ScriptedWidgetEventHandler
 	{
 		Info = info;
 		
-		if ( Info == NULL ) 
+		if ( Info == NULL || Info.target == NULL ) 
 		{
 			ShowOnScreen = false;
 			Hide();
 			GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
-		} else 
+			return
+		}
+
+		Name.SetText( Info.name );
+
+		switch ( Info.type )
 		{
-			ShowOnScreen = true;
-
-			if ( Info.target == NULL )
+			case ESPType.PLAYER:
 			{
-				Hide();
-				ShowOnScreen = false;
-				GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
-				return;
+				Name.SetColor( 0x00FFFFFF );
+				break;
 			}
-
-			Name.SetText( Info.name );
-
-			if ( !GetGame().IsMultiplayer() )
+			case ESPType.VEHICLE:
 			{
-				ShowOnScreen = false;
-				Name.SetColor( 0xFF4B77BE );
-				Hide();
-				return;
+				Name.SetColor( 0xA020F0FF );
+				break;
 			}
-
-/*
-			PlayerBase controllingPlayer = PlayerBase.Cast( GetGame().GetPlayer() );
-
-			if ( controllingPlayer && Player.GetGUID() == controllingPlayer.GetIdentity().GetId() )
+			case ESPType.BASEBUILDING:
 			{
-				Name.SetColor( 0xFF2ECC71 );
-
-				bool cameraExists = controllingPlayer.GetCurrentCamera() != NULL;
-
-				if ( cameraExists && controllingPlayer.GetCurrentCamera().IsInherited( DayZPlayerCamera3rdPerson ) )
-				{
-					ShowOnScreen = true;
-				} else if ( cameraExists && controllingPlayer.GetCurrentCamera().IsInherited( DayZPlayerCamera3rdPersonVehicle ) )
-				{
-					ShowOnScreen = true;
-				} else if ( CurrentActiveCamera )
-				{
-					ShowOnScreen = true;
-				} else 
-				{
-					ShowOnScreen = false;
-					Hide();
-				}
-			} 
-*/
-
-			ShowOnScreen = true;
-
-			if ( ShowOnScreen )
+				Name.SetColor( 0xFF0000FF );
+				break;
+			}
+			case ESPType.ITEM:
+			{
+				Name.SetColor( 0xFFA500FF );
+				break;
+			}
+			case ESPType.INFECTED:
+			{
+				Name.SetColor( 0x0000FFFF );
+				break;
+			}
+			case ESPType.CREATURE:
+			{
+				Name.SetColor( 0x00FF00FF );
+				break;
+			}
+			case ESPType.ALL:
 			{
 				Name.SetColor( 0xFFFFFFFF );
-			
-				ScreenPos = GetGame().GetScreenPos( GetPosition() );
-
-				if ( ScreenPos[2] > espModule.ESPRadius || ScreenPos[2] < 0 )
-				{
-					Hide();
-					ShowOnScreen = false;
-				} else 
-				{
-					Show();
-
-					ShowOnScreen = true;
-
-					GetScreenSize( Width, Height );
-
-					FOV = Camera.GetCurrentFOV() * ( Height * 1.0 ) / ( Width * 1.0 );
-
-					GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
-
-					Update();
-				}
+				break;
 			}
 		}
+
+		ScreenPos = GetGame().GetScreenPos( GetPosition() );
+
+		Show();
+			
+		ShowOnScreen = true;
+			
+		GetScreenSize( Width, Height );
+			
+		FOV = Camera.GetCurrentFOV() * ( Height * 1.0 ) / ( Width * 1.0 );
+			
+		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+			
+		Update();
 	}
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{		
-		if ( Info.isPlayer && Info.player )
+		if ( Info.type == ESPType.PLAYER && Info.player && playerMenu )
 		{
-			if ( w == Checkbox )
+			if ( w == Checkbox && Checkbox != NULL )
 			{
 				playerMenu.OnPlayer_Checked_ESP( this );
 			}
 
-			if ( w == Button )
+			if ( w == Button && Checkbox != NULL )
 			{
 				playerMenu.OnPlayer_Button_ESP( this );
 			}
-		} else
+		} else if ( espModule )
 		{
-			if ( w == Checkbox )
+			if ( w == Checkbox && Checkbox != NULL )
 			{
 				espModule.SelectBox( this, Checkbox.IsChecked(), false );
 			}
 
-			if ( w == Button )
+			if ( w == Button && Button != NULL )
 			{
 				espModule.SelectBox( this, true, true );
+			}
+
+			if ( espMenu )
+			{
+				espMenu.OnSelect();
 			}
 		}
 
