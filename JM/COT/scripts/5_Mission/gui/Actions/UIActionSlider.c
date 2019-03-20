@@ -14,6 +14,8 @@ class UIActionSlider extends UIActionBase
 
 	override void OnInit() 
 	{
+		super.OnInit();
+        
 		m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
 		m_Slider = SliderWidget.Cast(layoutRoot.FindAnyWidget("action"));
 		m_Value = TextWidget.Cast(layoutRoot.FindAnyWidget("action_value"));

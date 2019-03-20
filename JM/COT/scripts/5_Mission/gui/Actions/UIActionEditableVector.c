@@ -8,6 +8,7 @@ class UIActionEditableVector extends UIActionBase
 
 	override void OnInit() 
 	{
+		super.OnInit();
 	}
 
 	override void OnShow()
@@ -42,7 +43,7 @@ class UIActionEditableVector extends UIActionBase
 		m_TextY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_y" ) );
 		m_TextZ = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_z" ) );
 
-		SetVector( vector.Zero );
+		SetValue( vector.Zero );
 	}
 
 	void SetLabel( string text )
@@ -50,14 +51,14 @@ class UIActionEditableVector extends UIActionBase
 		m_Label.SetText( text );
 	}
 
-	void SetVector( vector v )
+	void SetValue( vector v )
 	{
 		m_TextX.SetText( v[0].ToString() );
 		m_TextY.SetText( v[1].ToString() );
 		m_TextZ.SetText( v[2].ToString() );
 	}
 
-	vector GetVector()
+	vector GetValue()
 	{
 		return Vector( m_TextX.GetText().ToFloat(), m_TextY.GetText().ToFloat(), m_TextZ.GetText().ToFloat() );
 	}

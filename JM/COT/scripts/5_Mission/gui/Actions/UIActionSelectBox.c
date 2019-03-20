@@ -5,6 +5,8 @@ class UIActionSelectBox extends UIActionBase
 
 	override void OnInit() 
 	{
+		super.OnInit();
+		
 		m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
 	}
 
