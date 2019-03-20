@@ -6,6 +6,8 @@ class ESPMenu extends Form
 	protected ref UIActionSlider m_Yaw;
 	protected ref UIActionSlider m_Roll;
 
+	protected ref UIActionSlider m_Health;
+
 	protected ref UIActionButton m_Set;
 	protected ref UIActionButton m_Delete;
 
@@ -50,7 +52,7 @@ class ESPMenu extends Form
 		Widget leftUpperSpacer = UIActionManager.CreateGridSpacer( leftSpacer, 9, 1 );
 		Widget leftLowerSpacer = UIActionManager.CreateGridSpacer( leftSpacer, 5, 1 );
 
-		Widget rightSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 7, 1 );
+		Widget rightSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 8, 1 );
 
 		UIActionManager.CreateButton( leftUpperSpacer, "Show/Update ESP", this, "Click_UpdateESP" );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Just Text", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
@@ -77,6 +79,10 @@ class ESPMenu extends Form
 		m_Roll.SetValue( 0 );
 		m_Roll.SetAppend("°");
 
+		m_Health = UIActionManager.CreateSlider( rightSpacer, "Health", 0, 100, this, "Change_Health" );
+		m_Health.SetValue( 0 );
+		m_Health.SetAppend(" HP");
+
 		m_Set = UIActionManager.CreateButton( rightSpacer, "Set", this, "Click_Set" );
 		m_Delete = UIActionManager.CreateButton( rightSpacer, "Delete", this, "Click_Delete" );
 	}
@@ -91,6 +97,8 @@ class ESPMenu extends Form
 		m_Pitch.SetValue( ESPModule.Cast( module ).Rotation[1] );
 		m_Yaw.SetValue( ESPModule.Cast( module ).Rotation[0] );
 		m_Roll.SetValue( ESPModule.Cast( module ).Rotation[2] );
+		m_Health.SetMax( ESPModule.Cast( module ).MaxHealth );
+		m_Health.SetValue( ESPModule.Cast( module ).Health );
 		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
 	}
 
@@ -121,6 +129,8 @@ class ESPMenu extends Form
 		m_Pitch.SetValue( ESPModule.Cast( module ).Rotation[1] );
 		m_Yaw.SetValue( ESPModule.Cast( module ).Rotation[0] );
 		m_Roll.SetValue( ESPModule.Cast( module ).Rotation[2] );
+		m_Health.SetMax( ESPModule.Cast( module ).MaxHealth );
+		m_Health.SetValue( ESPModule.Cast( module ).Health );
 	}
 
 	void Click_UpdateESP( UIEvent eid, ref UIActionButton action )
@@ -219,6 +229,13 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CHANGE ) return;
 		
 		ESPModule.Cast( module ).Rotation[2] = action.GetValue();
+	}
+
+	void Change_Health( UIEvent eid, ref UIActionSlider action )
+	{
+		if ( eid != UIEvent.CHANGE ) return;
+		
+		ESPModule.Cast( module ).Health = action.GetValue();
 	}
 
 	void Click_Set( UIEvent eid, ref UIActionButton action )

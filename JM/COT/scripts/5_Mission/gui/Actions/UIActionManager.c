@@ -157,7 +157,8 @@ class UIActionManager
 		{
 			action.SetCallback( instance, funcname );
 			action.SetLabel( label );
-			action.SetMinMax( min, max );
+			action.SetMin( min );
+			action.SetMax( max );
 
 			return action;
 		}
