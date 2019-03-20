@@ -36,12 +36,16 @@ class COTMenu
 		for ( int i = 0; i < m_Modules.Count(); i++ )
 		{
 			ref EditorModule module = m_Modules.Get( i );
+			bool hasButton = module.HasButton();
 
 			ref Widget button_bkg = NULL;
 			ref ButtonWidget button = NULL;
 
-			button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
-			button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+			if ( hasButton )
+			{
+				button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
+				button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+			}
 
 			ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
 
@@ -68,7 +72,7 @@ class COTMenu
 
 				base_window.SetSize( width, height + 25 );
 
-				if ( button_bkg && button )
+				if ( hasButton && button_bkg && button )
 				{
 					TextWidget title_text = TextWidget.Cast( base_window.FindAnyWidget( "title_text" ) );
 					title_text.SetText( form.GetTitle() );
@@ -92,13 +96,17 @@ class COTMenu
 
 						btn_txt.SetText( form.GetIconName() );
 					}
+
+					module.menuButton = button;
 				}
 				
-				module.menuButton = button;
 				module.form = form;
 
-				WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
-				WidgetHandler.GetInstance().RegisterOnDoubleClick( module.menuButton, this, "OnDoubleClick" );
+				if ( hasButton )
+				{
+					WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
+					WidgetHandler.GetInstance().RegisterOnDoubleClick( module.menuButton, this, "OnDoubleClick" );
+				}
 			}
 		}
 
@@ -178,7 +186,6 @@ class COTMenu
 	{
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
 		
-		Form form;
 		EditorModule module;
 
 		for ( int i = 0; i < m_Modules.Count(); i++ )
@@ -187,50 +194,9 @@ class COTMenu
 
 			if ( w == module.menuButton )
 			{
-				form = module.form;
+				module.ToggleShow( button != MouseState.LEFT );
 				break;
 			}
-		}
-
-		if ( form ) 
-		{
-			if ( form.GetLayoutRoot().IsVisible() ) 
-			{
-				form.Hide();
-			}
-			else if ( module.HasAccess() )
-			{
-				form.Show();
-			}
-		}
-
-		return false;
-	}
-
-	// TODO: Fix
-	bool OnDoubleClick(Widget w, int x, int y, int button)
-	{
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return false;
-		
-		Form form;
-
-		for ( int i = 0; i < m_Modules.Count(); i++ )
-		{
-			EditorModule module = m_Modules.Get( i );
-
-			if ( w == module.menuButton )
-			{
-				form = module.form;
-			}
-		}
-
-		if ( form && form.window && !form.GetLayoutRoot().IsVisible() ) 
-		{
-			//form.Show();
-
-			//form.window.SetPosition( 0, 0 );
-
-			return true;
 		}
 
 		return false;

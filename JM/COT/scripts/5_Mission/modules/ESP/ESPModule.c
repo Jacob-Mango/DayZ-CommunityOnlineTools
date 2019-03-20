@@ -2,6 +2,7 @@ class ESPModule: EditorModule
 {
 	protected ref array< ref ESPInfo > m_ESPObjects;
 	protected ref array< ref ESPBox > m_ESPBoxes;
+	protected ref array< ref ESPBox > m_SelectedBoxes;
 
 	protected bool m_CanViewPlayers;
 	protected bool m_CanViewBaseBuilding;
@@ -21,12 +22,23 @@ class ESPModule: EditorModule
 	{
 		m_ESPObjects = new ref array< ref ESPInfo >;
 		m_ESPBoxes = new ref array< ref ESPBox >;
+		m_SelectedBoxes = new ref array< ref ESPBox >;
 		m_UserID = 0;
 
 		ESPRadius = 200;
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestESPData", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ShowESPData", this, SingeplayerExecutionType.Client );
+
+		GetRPCManager().AddRPC( "COT_ESP", "ServerDeleteSelected", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ServerSetPosition", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ServerSetPitch", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ServerSetYaw", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_ESP", "ServerSetRoll", this, SingeplayerExecutionType.Server );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Position" );
+		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Rotation" );
+		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Delete" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
@@ -58,6 +70,257 @@ class ESPModule: EditorModule
 		ESPBox.espModule = this;
 	}
 
+	void ServerDeleteSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", sender ) )
+			return;
+
+		ref Param1< ref array< Object > > data;
+		if ( !ctx.Read( data ) ) return;
+
+		ref array< Object > copy = new ref array< Object >;
+		copy.Copy( data.param1 );
+		
+		if( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL ) continue;
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				COTLog( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
+				GetGame().ObjectDelete( copy[i] );
+			}
+		}
+
+		delete copy;
+	}
+
+	void ServerSetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Position", sender ) )
+			return;
+
+		ref Param2< vector, ref array< Object > > data;
+		if ( !ctx.Read( data ) ) return;
+
+		ref array< Object > copy = new ref array< Object >;
+		copy.Copy( data.param2 );
+		
+		if( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL ) continue;
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") position from " + copy[i].GetPosition() + " to " + data.param1 );
+				copy[i].SetPosition( data.param1 );
+			}
+		}
+
+		delete copy;
+	}
+
+	void ServerSetPitch( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Pitch", sender ) )
+			return;
+
+		ref Param2< float, ref array< Object > > data;
+		if ( !ctx.Read( data ) ) return;
+
+		ref array< Object > copy = new ref array< Object >;
+		copy.Copy( data.param2 );
+		
+		if( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL ) continue;
+
+				vector angles = copy[i].GetYawPitchRoll();
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") pitch from " + angles[1] + " to " + data.param1 );
+
+				angles[1] = data.param1;
+				copy[i].SetYawPitchRoll( angles );
+			}
+		}
+
+		delete copy;
+	}
+
+	void ServerSetYaw( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Yaw", sender ) )
+			return;
+
+		ref Param2< float, ref array< Object > > data;
+		if ( !ctx.Read( data ) ) return;
+
+		ref array< Object > copy = new ref array< Object >;
+		copy.Copy( data.param2 );
+		
+		if( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL ) continue;
+
+				vector angles = copy[i].GetYawPitchRoll();
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") yaw from " + angles[0] + " to " + data.param1 );
+
+				angles[0] = data.param1;
+				copy[i].SetYawPitchRoll( angles );
+			}
+		}
+
+		delete copy;
+	}
+
+	void ServerSetRoll( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Roll", sender ) )
+			return;
+
+		ref Param2< float, ref array< Object > > data;
+		if ( !ctx.Read( data ) ) return;
+
+		ref array< Object > copy = new ref array< Object >;
+		copy.Copy( data.param2 );
+		
+		if( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL ) continue;
+
+				vector angles = copy[i].GetYawPitchRoll();
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				COTLog( sender, "Set object " + copy[i].GetDisplayName() + " (" + obtype + ") roll from " + angles[2] + " to " + data.param1 );
+
+				angles[2] = data.param1;
+				copy[i].SetYawPitchRoll( angles );
+			}
+		}
+
+		delete copy;
+	}
+
+	void SelectBox( ref ESPBox box, bool checked, bool button )
+	{
+		if ( button )
+		{
+			for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+			{
+				m_SelectedBoxes[j].Checkbox.SetChecked( false );
+			}
+
+			box.Checkbox.SetChecked( true );
+			m_SelectedBoxes.Insert( box );
+		} else
+		{
+			box.Checkbox.SetChecked( checked );
+			if ( checked )
+			{
+				m_SelectedBoxes.Insert( box );
+			} else 
+			{
+				m_SelectedBoxes.RemoveItem( box );
+			}
+		}
+	}
+
+	void SetPosition( vector position )
+	{
+		array< Object > objects = new array< Object >;
+
+		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		{
+			objects.Insert( m_SelectedBoxes[j].Info.target );
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "ServerSetPosition", new Param2< vector, ref array< Object > >( position, objects ), true );
+
+		// delete objects;
+	}
+
+	void SetPitch( float pitch )
+	{
+		array< Object > objects = new array< Object >;
+
+		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		{
+			objects.Insert( m_SelectedBoxes[j].Info.target );
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "ServerSetPitch", new Param2< float, ref array< Object > >( pitch, objects ), true );
+
+		// delete objects;
+	}
+
+	void SetYaw( float yaw )
+	{
+		array< Object > objects = new array< Object >;
+
+		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		{
+			objects.Insert( m_SelectedBoxes[j].Info.target );
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "ServerSetYaw", new Param2< float, ref array< Object > >( yaw, objects ), true );
+
+		// delete objects;
+	}
+
+	void SetRoll( float roll )
+	{
+		array< Object > objects = new array< Object >;
+
+		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		{
+			objects.Insert( m_SelectedBoxes[j].Info.target );
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "ServerSetRoll", new Param2< float, ref array< Object > >( roll, objects ), true );
+
+		// delete objects;
+	}
+
+	void DeleteSelected()
+	{
+		array< Object > objects = new array< Object >;
+
+		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
+		{
+			objects.Insert( m_SelectedBoxes[j].Info.target );
+
+			m_ESPBoxes.RemoveItem( m_SelectedBoxes[j] );
+			m_ESPObjects.RemoveItem( m_SelectedBoxes[j].Info );
+
+			m_SelectedBoxes[j].Unlink();
+		}
+		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param1< ref array< Object > >( objects ), true );
+
+		m_SelectedBoxes.Clear();
+		// delete objects;
+	}
+
 	void HideESP()
 	{
 		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
@@ -66,6 +329,8 @@ class ESPModule: EditorModule
 		}
 
 		m_ESPBoxes.Clear();
+
+		m_SelectedBoxes.Clear();
 
 		m_ESPObjects.Clear();
 

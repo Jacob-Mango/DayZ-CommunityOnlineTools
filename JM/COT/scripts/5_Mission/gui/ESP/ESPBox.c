@@ -261,7 +261,15 @@ class ESPBox extends ScriptedWidgetEventHandler
 			}
 		} else
 		{
-			// TODO: make an object menu to allow deletion of objects through that
+			if ( w == Checkbox )
+			{
+				espModule.SelectBox( this, Checkbox.IsChecked(), false );
+			}
+
+			if ( w == Button )
+			{
+				espModule.SelectBox( this, true, true );
+			}
 		}
 
 		return true;
