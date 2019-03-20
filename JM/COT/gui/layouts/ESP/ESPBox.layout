@@ -1,7 +1,7 @@
 PanelWidgetClass ESPBox {
 	ignorepointer 1
  valign center_ref
-	size 150 22
+	size 180 22
 	position 0 0
  hexactpos 1
  vexactpos 1

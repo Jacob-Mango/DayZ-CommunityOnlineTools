@@ -224,36 +224,86 @@ class ESPModule: EditorModule
 		GetGame().GetObjectsAtPosition3D( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 		Object currentObj;
-		PlayerBase player;
+		EntityAI entity;
 		ref ESPInfo espInfo;
 
 		for (int i = 0; i < objects.Count(); ++i)
 		{
 			currentObj = Object.Cast( objects.Get(i) );
 
-			if ( !currentObj.HasNetworkID() )
-			{
+			if ( currentObj == NULL )
 				continue;
-			}
 
-			player = PlayerBase.Cast( currentObj );
+			if ( !currentObj.HasNetworkID() )
+				continue;
 
-			bool isPlayer = player != NULL;
+			if ( currentObj.IsRock() )
+				continue;
+			if ( currentObj.IsWoodBase() )
+				continue;
+			if ( currentObj.IsBush() )
+				continue;
+			if ( currentObj.IsTree() )
+				continue;
+			if ( currentObj.IsBuilding() )
+				continue;
+
+			entity = EntityAI.Cast( currentObj );
+
+			bool isPlayer = false;
 			
-			if ( (ViewPlayers || ViewEverything) && (m_CanViewPlayers || m_CanViewEverything) && isPlayer )
+			if ( entity != NULL )
 			{
-				if ( player )
+				isPlayer = entity.IsPlayer();
+			
+				if ( (ViewPlayers || ViewEverything) && (m_CanViewPlayers || m_CanViewEverything) && isPlayer )
 				{
 					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, currentObj );
+					continue;
 				}
-				continue;
+
+				bool isInfected = !isPlayer && ( entity.IsZombie() || entity.IsZombieMilitary() );
+				if ( (ViewInfected || ViewEverything) && (m_CanViewInfected || m_CanViewEverything) && isInfected )
+				{
+					espInfo = new ref ESPInfo;
+
+					espInfo.name = currentObj.GetDisplayName();
+					if ( espInfo.name == "" )
+						espInfo.name = currentObj.GetType();
+
+					espInfo.target = currentObj;
+					espInfo.type = ESPType.INFECTED;
+
+					CreateESPBox( espInfo );
+					continue;
+				} 
+
+				bool isCreature = !isInfected && entity.IsAnimal();
+				if ( (ViewCreature || ViewEverything) && (m_CanViewCreature || m_CanViewEverything) && isCreature )
+				{
+					espInfo = new ref ESPInfo;
+
+					espInfo.name = currentObj.GetDisplayName();
+					if ( espInfo.name == "" )
+						espInfo.name = currentObj.GetType();
+						
+					espInfo.target = currentObj;
+					espInfo.type = ESPType.CREATURE;
+
+					CreateESPBox( espInfo );
+					continue;
+				}
 			}
-			
-			bool isTransport = !isPlayer && GetGame().ObjectIsKindOf( currentObj, "Transport" );
+
+			bool isTransport = !isPlayer && currentObj.IsTransport();
 			if ( (ViewVehicles || ViewEverything) && (m_CanViewVehicles || m_CanViewEverything) && isTransport )
 			{
 				espInfo = new ref ESPInfo;
+				
 				espInfo.name = currentObj.GetDisplayName();
+				if ( espInfo.name == "" )
+					espInfo.name = currentObj.GetType();
+
 				espInfo.target = currentObj;
 				espInfo.type = ESPType.VEHICLE;
 
@@ -261,11 +311,15 @@ class ESPModule: EditorModule
 				continue;
 			}
 
-			bool isBaseBuilding = !isTransport && ( GetGame().ObjectIsKindOf( currentObj, "BaseBuildingBase" ) || GetGame().ObjectIsKindOf( currentObj, "Barrel_ColorBase" ) || GetGame().ObjectIsKindOf( currentObj, "Tent_Base" ) );
+			bool isBaseBuilding = !isTransport && ( currentObj.IsContainer() || currentObj.CanUseConstruction() || currentObj.IsFireplace() );
 			if ( (ViewBaseBuilding || ViewEverything) && (m_CanViewBaseBuilding || m_CanViewEverything) && isBaseBuilding )
 			{
 				espInfo = new ref ESPInfo;
+				
 				espInfo.name = currentObj.GetDisplayName();
+				if ( espInfo.name == "" )
+					espInfo.name = currentObj.GetType();
+
 				espInfo.target = currentObj;
 				espInfo.type = ESPType.BASEBUILDING;
 
@@ -273,37 +327,17 @@ class ESPModule: EditorModule
 				continue;
 			}
 
-			bool isItem = !isBaseBuilding && GetGame().ObjectIsKindOf( currentObj, "Inventory_Base" );
+			bool isItem = !isBaseBuilding && ( currentObj.IsItemBase() || currentObj.IsInventoryItem() );
 			if ( (ViewItems || ViewEverything) && (m_CanViewItems || m_CanViewEverything) && isItem )
 			{
 				espInfo = new ref ESPInfo;
+				
 				espInfo.name = currentObj.GetDisplayName();
+				if ( espInfo.name == "" )
+					espInfo.name = currentObj.GetType();
+
 				espInfo.target = currentObj;
 				espInfo.type = ESPType.ITEM;
-
-				CreateESPBox( espInfo );
-				continue;
-			} 
-
-			bool isInfected = !isItem && GetGame().ObjectIsKindOf( currentObj, "DayZInfected" );
-			if ( (ViewInfected || ViewEverything) && (m_CanViewInfected || m_CanViewEverything) && isItem )
-			{
-				espInfo = new ref ESPInfo;
-				espInfo.name = currentObj.GetDisplayName();
-				espInfo.target = currentObj;
-				espInfo.type = ESPType.INFECTED;
-
-				CreateESPBox( espInfo );
-				continue;
-			} 
-
-			bool isCreature = !isInfected && GetGame().ObjectIsKindOf( currentObj, "DayZCreature" );
-			if ( (ViewCreature || ViewEverything) && (m_CanViewCreature || m_CanViewEverything) && isItem )
-			{
-				espInfo = new ref ESPInfo;
-				espInfo.name = currentObj.GetDisplayName();
-				espInfo.target = currentObj;
-				espInfo.type = ESPType.CREATURE;
 
 				CreateESPBox( espInfo );
 				continue;
@@ -312,7 +346,11 @@ class ESPModule: EditorModule
 			if ( ViewEverything && m_CanViewEverything )
 			{
 				espInfo = new ref ESPInfo;
+				
 				espInfo.name = currentObj.GetDisplayName();
+				if ( espInfo.name == "" )
+					espInfo.name = currentObj.GetType();
+
 				espInfo.target = currentObj;
 				espInfo.type = ESPType.ALL;
 
@@ -330,7 +368,7 @@ class ESPModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "ESP.View.Player", sender ) )
 			return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			ESPInfoMetaData metadata = new ESPInfoMetaData;
 
@@ -341,16 +379,16 @@ class ESPModule: EditorModule
 			metadata.name = player.GetIdentity().GetName();
 			metadata.steamid = player.GetIdentity().GetPlainId();
 
-			GetRPCManager().SendRPC( "COT_ESP", "ShowPlayerESPData", new Param1< ESPInfoMetaData >( metadata ), false, sender, target );
+			GetRPCManager().SendRPC( "COT_ESP", "ShowPlayerESPData", new Param1< ref ESPInfoMetaData >( metadata ), false, sender, target );
 		}
 	}
 
 	void ShowPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		ref Param1< ESPInfoMetaData > data;
+		ref Param1< ref ESPInfoMetaData > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			ref ESPInfo info = new ref ESPInfo;
 			info.name = data.param1.name;
@@ -360,9 +398,10 @@ class ESPModule: EditorModule
 			{
 				info.type = ESPType.PLAYER;
 				info.player = player;
-			}
+				info.target = target;
 
-			CreateESPBox( info );
+				CreateESPBox( info );
+			}
 		}
 	}
 

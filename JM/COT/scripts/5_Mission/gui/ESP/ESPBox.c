@@ -6,11 +6,16 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	static bool ShowJustName = false;
 
-	protected ref Widget layoutRoot;
+	protected ref Widget 			layoutRoot;
 
-	ref TextWidget		Name;
-	ref ButtonWidget	Button;
-	ref CheckBoxWidget	Checkbox;
+	protected ref Widget			m_CheckboxStyle;
+	protected ref Widget			m_JustName;
+
+	protected ref TextWidget		m_Name1;
+
+	protected ref TextWidget		m_Name2;
+	protected ref ButtonWidget		m_Button;
+	ref CheckBoxWidget				Checkbox;
 
 	bool ShowOnScreen;
 
@@ -31,53 +36,44 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	void ~ESPBox()
 	{
+		Unlink();
 	}
 
 	void Init() 
 	{
-		Widget checkboxStyle = layoutRoot.FindAnyWidget("CheckboxStyle");
-		Widget justName = layoutRoot.FindAnyWidget("JustName");
-		if ( ShowJustName )
-		{
-			checkboxStyle.Show(false);
-			justName.Show(true);
+		m_CheckboxStyle = layoutRoot.FindAnyWidget("CheckboxStyle");
+		m_JustName = layoutRoot.FindAnyWidget("JustName");
+		
+		m_Name1 = TextWidget.Cast( m_JustName.FindAnyWidget("text_name") );
 
-			Name = TextWidget.Cast(justName.FindAnyWidget("text_name"));
-		} else 
-		{
-			checkboxStyle.Show(true);
-			justName.Show(false);
+		m_Name2 = TextWidget.Cast( m_CheckboxStyle.FindAnyWidget("text_name") );
 
-			Name = TextWidget.Cast(checkboxStyle.FindAnyWidget("text_name"));
-			Button = ButtonWidget.Cast(checkboxStyle.FindAnyWidget("button"));
-			Checkbox = CheckBoxWidget.Cast(checkboxStyle.FindAnyWidget("checkbox"));
-		}
+		m_Button = ButtonWidget.Cast( m_CheckboxStyle.FindAnyWidget("button") );
+		Checkbox = CheckBoxWidget.Cast( m_CheckboxStyle.FindAnyWidget("checkbox") );
+		
 	}
 
 	void Show()
 	{
-		if (layoutRoot) layoutRoot.Show( true );
-		if (Button) Button.Show( true );
-		if (Checkbox) Checkbox.Show( true );
-		if (Name) Name.Show( true );
+		layoutRoot.Show( true );
 		OnShow();
 	}
 
 	void Hide()
 	{
 		OnHide();
-		if (Name) Name.Show( false );
-		if (Button) Button.Show( false );
-		if (Checkbox) Checkbox.Show( false );
-		if (layoutRoot) layoutRoot.Show( false );
+		layoutRoot.Show( false );
 	}
 
 	void Unlink()
 	{
-		if (Name) Name.Unlink();
-		if (Button) Button.Unlink();
-		if (Checkbox) Checkbox.Unlink();
-		if (layoutRoot) layoutRoot.Unlink();
+		if ( layoutRoot ) layoutRoot.Unlink();
+
+		delete m_Name1;
+		delete m_Name2;
+		delete m_Button;
+		delete Checkbox;
+		delete layoutRoot;
 	}
 
 	void OnShow()
@@ -131,6 +127,9 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	void Update() 
 	{
+		m_CheckboxStyle.Show( !ShowJustName );
+		m_JustName.Show( ShowJustName );
+
 		vector position = GetPosition();
 
 		vector normalize = ( position - GetGame().GetCurrentCameraPosition() );
@@ -156,6 +155,13 @@ class ESPBox extends ScriptedWidgetEventHandler
 		if ( ShowOnScreen && Info )
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1] - ( Height / 2 ), true );
+
+			float distance = Math.Round( ScreenPos[2] * 10.0 ) / 10.0;
+
+			string text = Info.name + " (" + distance + "m)"
+
+			m_Name1.SetText( text );
+			m_Name2.SetText( text );
 			Show();
 		} else 
 		{
@@ -177,49 +183,52 @@ class ESPBox extends ScriptedWidgetEventHandler
 			ShowOnScreen = false;
 			Hide();
 			GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
-			return
+			return;
 		}
 
-		Name.SetText( Info.name );
+		int colour = 0xFFFFFFFF;
 
 		switch ( Info.type )
 		{
 			case ESPType.PLAYER:
 			{
-				Name.SetColor( 0x00FFFFFF );
+				colour = 0xFF00FFFF;
 				break;
 			}
 			case ESPType.VEHICLE:
 			{
-				Name.SetColor( 0xA020F0FF );
+				colour = 0xFF00FFDD;
 				break;
 			}
 			case ESPType.BASEBUILDING:
 			{
-				Name.SetColor( 0xFF0000FF );
+				colour = 0xFFF75B18;
 				break;
 			}
 			case ESPType.ITEM:
 			{
-				Name.SetColor( 0xFFA500FF );
+				colour = 0xFFF7F71D;
 				break;
 			}
 			case ESPType.INFECTED:
 			{
-				Name.SetColor( 0x0000FFFF );
+				colour = 0xFF23FF44;
 				break;
 			}
 			case ESPType.CREATURE:
 			{
-				Name.SetColor( 0x00FF00FF );
+				colour = 0xFF54F7BB;
 				break;
 			}
 			case ESPType.ALL:
 			{
-				Name.SetColor( 0xFFFFFFFF );
+				colour = 0xFFFFFFFF;
 				break;
 			}
 		}
+
+		m_Name1.SetColor( colour );
+		m_Name2.SetColor( colour );
 
 		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 
@@ -238,25 +247,30 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{		
-		if ( Info.type == ESPType.PLAYER && Info.player && playerMenu )
+		if ( Info.type == ESPType.PLAYER )
 		{
-			if ( w == Checkbox && Checkbox != NULL )
+			if ( Info.player && playerMenu ) 
 			{
-				playerMenu.OnPlayer_Checked_ESP( this );
-			}
+				if ( w == Checkbox && Checkbox != NULL )
+				{
+					playerMenu.OnPlayer_Checked_ESP( this );
+				}
 
-			if ( w == Button && Checkbox != NULL )
-			{
-				playerMenu.OnPlayer_Button_ESP( this );
+				if ( w == m_Button && Checkbox != NULL )
+				{
+					playerMenu.OnPlayer_Button_ESP( this );
+				}
 			}
-		} else if ( espModule )
+		}
+		
+		if ( espModule )
 		{
 			if ( w == Checkbox && Checkbox != NULL )
 			{
 				espModule.SelectBox( this, Checkbox.IsChecked(), false );
 			}
 
-			if ( w == Button && Button != NULL )
+			if ( w == m_Button && m_Button != NULL )
 			{
 				espModule.SelectBox( this, true, true );
 			}
