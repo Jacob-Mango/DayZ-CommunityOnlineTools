@@ -135,10 +135,13 @@ class PermissionsFramework
 				player.authenticatedPlayer = auPlayer;
 			}
 
-			auPlayer.PlayerObject = player;
-			auPlayer.IdentityPlayer = man.GetIdentity();
+			if ( auPlayer )
+			{
+				auPlayer.PlayerObject = player;
+				auPlayer.IdentityPlayer = man.GetIdentity();
 
-			auPlayer.UpdatePlayerData();
+				auPlayer.UpdatePlayerData();
+			}
 		}
 
 		m_ServerPlayers.Clear();

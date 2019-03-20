@@ -1,21 +1,22 @@
 PanelWidgetClass ESPBox {
 	ignorepointer 1
- valign center_ref
-	size 180 22
+	valign center_ref
+	size 300 22
 	position 0 0
- hexactpos 1
- vexactpos 1
- hexactsize 1
- vexactsize 1
+	hexactpos 1
+	vexactpos 1
+	hexactsize 1
+	vexactsize 1
 	color 0 0 0 0
- scriptclass "ESPBox"
- {
+	scriptclass "ESPBox"
+	{
 		PanelWidgetClass CheckboxStyle {
 			ignorepointer 1
 			color 0.08 0.10 0.13 0.7
 			position 0 0
-			size 1 1
- 		style rover_sim_colorable
+			size 150 1
+			hexactsize 1
+			style rover_sim_colorable
 			{
 				ButtonWidgetClass button {
 					ignorepointer 0
@@ -83,7 +84,7 @@ PanelWidgetClass ESPBox {
 			color 0 0 0 0
 			position 0 0
 			size 1 1
- 		style rover_sim_colorable
+			style rover_sim_colorable
 			{
 				TextWidgetClass text_name {
 					ignorepointer 1
