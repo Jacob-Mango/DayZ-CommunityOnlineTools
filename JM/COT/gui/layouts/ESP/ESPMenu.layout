@@ -2,7 +2,7 @@ PanelWidgetClass ESPMenu {
  visible 0
  color 0 0 0 0
  position 0 0
- size 750 350
+ size 600 500
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -12,7 +12,7 @@ PanelWidgetClass ESPMenu {
  {
   GridSpacerWidgetClass actions_wrapper {
    position 5 5
-   size 640 240
+   size 590 490
    hexactpos 1
    vexactpos 1
    hexactsize 1

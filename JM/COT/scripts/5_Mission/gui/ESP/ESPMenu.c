@@ -53,8 +53,8 @@ class ESPMenu extends Form
 		Widget rightSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 7, 1 );
 
 		UIActionManager.CreateButton( leftUpperSpacer, "Show/Update ESP", this, "Click_UpdateESP" );
+		UIActionManager.CreateCheckbox( leftUpperSpacer, "Just Text", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
 		UIActionManager.CreateButton( leftUpperSpacer, "Hide ESP", this, "Click_HideESP" );
-		UIActionManager.CreateCheckbox( leftUpperSpacer, "Minified ESP Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
