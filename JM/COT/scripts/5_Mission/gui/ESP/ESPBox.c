@@ -5,6 +5,7 @@ class ESPBox extends ScriptedWidgetEventHandler
 	static ref PlayerMenu playerMenu;
 
 	static bool ShowJustName = false;
+	static bool UseClassName = false;
 
 	protected ref Widget 			layoutRoot;
 
@@ -156,10 +157,19 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 			float distance = Math.Round( ScreenPos[2] * 10.0 ) / 10.0;
 
-			string text = Info.name + " (" + distance + "m)"
+			string text = "";
+
+			if ( Info.type != ESPType.PLAYER && UseClassName )
+			{
+				text = Info.target.GetType() + " (" + distance + "m)";
+			} else 
+			{
+				text = Info.name + " (" + distance + "m)";
+			}
 
 			m_Name1.SetText( text );
 			m_Name2.SetText( text );
+			
 			Show();
 		} else 
 		{

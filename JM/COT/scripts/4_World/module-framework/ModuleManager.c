@@ -37,14 +37,14 @@ class ModuleManager
 		Print( "Registered module " + module + message );
 	}
 
-	void RegisterModules()
+	void RegisterModules( string version )
 	{
 		Print( "ModuleManager::RegisterModules()" );
 
 		m_Modules = new ref array< ref Module >;
 		m_EditorModules = new ref array< ref EditorModule >;
 
-		RegisterModule( new COTModule );
+		RegisterModule( new COTModule( version ) );
 	}
 
 	void ReloadSettings()

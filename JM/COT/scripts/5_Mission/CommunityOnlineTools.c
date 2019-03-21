@@ -95,7 +95,7 @@ class CommunityOnlineTools
 	
 	void OnStart()
 	{
-		GetModuleManager().RegisterModules();
+		GetModuleManager().RegisterModules( m_Version );
 
 		RegisterModules();
 

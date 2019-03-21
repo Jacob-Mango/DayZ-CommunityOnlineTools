@@ -177,6 +177,19 @@ class ESPModule: EditorModule
 		delete objects;
 	}
 
+	void EnableFullMap()
+	{
+		if ( CurrentActiveCamera == NULL ) return;
+
+		array< Object > objects = new array< Object >;
+		objects.Insert( GetGame().GetPlayer() );
+
+		// No point making an RPC
+		GetRPCManager().SendRPC( "COT_ESP", "ServerDeleteSelected", new Param1< ref array< Object > >( objects ), true );
+		
+		delete objects;
+	}
+
 	void SelectBox( ref ESPBox box, bool checked, bool button )
 	{
 		int existsAt = m_SelectedBoxes.Find( box );
