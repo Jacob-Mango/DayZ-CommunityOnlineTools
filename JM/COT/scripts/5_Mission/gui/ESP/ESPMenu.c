@@ -13,6 +13,9 @@ class ESPMenu extends Form
 
 	protected ref UIActionSlider m_RangeSlider;
 
+	protected ref UIActionButton m_UpdateShow;
+	protected ref UIActionSlider m_UpdateRate;
+
 	void ESPMenu()
 	{
 	}
@@ -44,25 +47,22 @@ class ESPMenu extends Form
 
 		Widget upperSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_RangeSlider = UIActionManager.CreateSlider( mainSpacer, "ESP Range", 0, 1000, this, "Change_Range" );
-		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
-		m_RangeSlider.SetAppend(" metres");
-
 		Widget leftSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 2, 1 );
 		Widget leftUpperSpacer = UIActionManager.CreateGridSpacer( leftSpacer, 9, 1 );
 		Widget leftLowerSpacer = UIActionManager.CreateGridSpacer( leftSpacer, 5, 1 );
 
 		Widget rightSpacer = UIActionManager.CreateGridSpacer( upperSpacer, 8, 1 );
 
-		UIActionManager.CreateButton( leftUpperSpacer, "Show/Update ESP", this, "Click_UpdateESP" );
-		UIActionManager.CreateCheckbox( leftUpperSpacer, "Just Text", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
-		UIActionManager.CreateButton( leftUpperSpacer, "Hide ESP", this, "Click_HideESP" );
+		m_UpdateShow = UIActionManager.CreateButton( leftUpperSpacer, "Show ESP", this, "Click_UpdateESP" );
+
+		UIActionManager.CreateCheckbox( leftUpperSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
+
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
 		UIActionManager.CreateCheckbox( leftUpperSpacer, "Item ESP", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
-		UIActionManager.CreateCheckbox( leftUpperSpacer, "Infected ESP", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
-		UIActionManager.CreateCheckbox( leftUpperSpacer, "Creature ESP", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
+		UIActionManager.CreateCheckbox( leftLowerSpacer, "Infected ESP", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
+		UIActionManager.CreateCheckbox( leftLowerSpacer, "Creature ESP", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
 		UIActionManager.CreateCheckbox( leftLowerSpacer, "All ESP", this, "Click_AllESP", ESPModule.Cast( module ).ViewEverything );
 
 		m_Position = UIActionManager.CreateEditableVector( rightSpacer, "Position: ", this, "Change_Position" );
@@ -85,6 +85,17 @@ class ESPMenu extends Form
 
 		m_Set = UIActionManager.CreateButton( rightSpacer, "Set", this, "Click_Set" );
 		m_Delete = UIActionManager.CreateButton( rightSpacer, "Delete", this, "Click_Delete" );
+
+		Widget lowerSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 1 );
+
+		m_UpdateRate = UIActionManager.CreateSlider( lowerSpacer, "Update Rate", 0, 10, this, "Change_UpdateRate" );
+		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetAppend(" seconds");
+		m_UpdateRate.SetStepValue( 0.5 );
+
+		m_RangeSlider = UIActionManager.CreateSlider( lowerSpacer, "Radius", 0, 1000, this, "Change_Range" );
+		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
+		m_RangeSlider.SetAppend(" metres");
 	}
 
 	override void OnShow()
@@ -100,6 +111,9 @@ class ESPMenu extends Form
 		m_Health.SetMax( ESPModule.Cast( module ).MaxHealth );
 		m_Health.SetValue( ESPModule.Cast( module ).Health );
 		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
+		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
+
+		UpdateESPButtonName();
 	}
 
 	override void OnHide()
@@ -133,13 +147,41 @@ class ESPMenu extends Form
 		m_Health.SetValue( ESPModule.Cast( module ).Health );
 	}
 
+	void UpdateESPButtonName()
+	{
+		bool isShowing = ESPModule.Cast( module ).IsShowing;
+
+		if ( ESPModule.Cast( module ).ESPUpdateTime > 0 )
+		{
+			if ( isShowing )
+			{
+				m_UpdateShow.SetButton( "Stop Updating ESP" );
+			} else
+			{
+				m_UpdateShow.SetButton( "Start Updating ESP" );
+			}
+		} else
+		{
+			if ( isShowing )
+			{
+				m_UpdateShow.SetButton( "Hide ESP" );
+			} else
+			{
+				m_UpdateShow.SetButton( "Show ESP" );
+			}
+		}
+	}
+
 	void Click_UpdateESP( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).UpdateESP();
+
+		UpdateESPButtonName();
 	}
 
+	// Removed.
 	void Click_HideESP( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
@@ -250,6 +292,15 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).DeleteSelected();
+	}
+
+	void Change_UpdateRate( UIEvent eid, ref UIActionSlider action )
+	{
+		if ( eid != UIEvent.CHANGE ) return;
+		
+		ESPModule.Cast( module ).ESPUpdateTime = action.GetValue();
+
+		UpdateESPButtonName();
 	}
 
 	void Change_Range( UIEvent eid, ref UIActionSlider action )

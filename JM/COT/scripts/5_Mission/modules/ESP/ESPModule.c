@@ -30,6 +30,10 @@ class ESPModule: EditorModule
 	float MaxHealth;
 	float Health;
 
+	float ESPUpdateTime;
+
+	bool IsShowing;
+
 	void ESPModule()
 	{
 		m_ESPObjects = new ref array< ref ESPInfo >;
@@ -41,6 +45,9 @@ class ESPModule: EditorModule
 
 		Position = "0 0 0";
 		Rotation = "0 0 0";
+
+		ESPUpdateTime = 0;
+		IsShowing = false;
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestPlayerESPData", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ShowPlayerESPData", this, SingeplayerExecutionType.Client );
@@ -206,8 +213,15 @@ class ESPModule: EditorModule
 		}
 	}
 
-	void HideESP()
+	void HideESP( bool fromUpdate = false )
 	{
+		if ( !fromUpdate )
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+
+			IsShowing = false;
+		}
+
 		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
 		{
 			m_ESPBoxes[j].Unlink();
@@ -224,10 +238,12 @@ class ESPModule: EditorModule
 
 	void UpdateESP()
 	{
-		HideESP();
+		HideESP( true );
+
+		IsShowing = true;
 
 		ref array<Object> objects = new ref array<Object>;
-		GetGame().GetObjectsAtPosition3D( GetCurrentPosition(), ESPRadius, objects, NULL );
+		GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 		Object currentObj;
 		EntityAI entity;
@@ -367,6 +383,13 @@ class ESPModule: EditorModule
 
 		objects.Clear();
 		delete objects;
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+
+		if ( ESPUpdateTime > 0 )
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateESP, ESPUpdateTime * 1000.0 );
+		}
 	}
 
 	void RequestPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )

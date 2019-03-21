@@ -7,6 +7,8 @@ class UIActionSlider extends UIActionBase
     protected float m_Min;
     protected float m_Max;
 
+    protected float m_StepValue;
+
     protected float m_Current;
 
     protected string m_Prepend;
@@ -43,6 +45,13 @@ class UIActionSlider extends UIActionBase
 	{
 		m_Label.SetText( text );
 	}
+
+    void SetStepValue( float step )
+    {
+        m_StepValue = step;
+
+        CalculateValue();
+    }
 
     void SetMin( float min )
     {
@@ -90,6 +99,11 @@ class UIActionSlider extends UIActionBase
         float bottom = ( max - min );
 
         m_Current = ( top / bottom ) + a;
+
+        if ( m_StepValue != 0 )
+        {
+            m_Current = Math.Round( m_Current / m_StepValue ) * m_StepValue;
+        }
 
         m_Value.SetText( m_Prepend + m_Current + m_Append );
     }

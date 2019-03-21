@@ -50,7 +50,6 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 		m_Button = ButtonWidget.Cast( m_CheckboxStyle.FindAnyWidget("button") );
 		Checkbox = CheckBoxWidget.Cast( m_CheckboxStyle.FindAnyWidget("checkbox") );
-		
 	}
 
 	void Show()
@@ -67,6 +66,8 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 	void Unlink()
 	{
+		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
+
 		if ( layoutRoot ) layoutRoot.Unlink();
 
 		delete m_Name1;
@@ -129,25 +130,22 @@ class ESPBox extends ScriptedWidgetEventHandler
 	{
 		m_CheckboxStyle.Show( !ShowJustName );
 		m_JustName.Show( ShowJustName );
+			
+		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 
-		vector position = GetPosition();
+		GetScreenSize( Width, Height );
 
-		vector normalize = ( position - GetGame().GetCurrentCameraPosition() );
-		float dot = vector.Dot( normalize.Normalized(), GetGame().GetCurrentCameraDirection().Normalized() );
-		
-		float limit = FOV / 1.5;
-
-		if ( dot < limit )
+		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
 		{
 			ShowOnScreen = false;
-		} else
-		{
-			ShowOnScreen = true;
 		}
-			
-		ScreenPos = GetGame().GetScreenPos( position );
 
-		if ( ShowOnScreen && ( ScreenPos[2] > espModule.ESPRadius || ScreenPos[2] < 0 ) )
+		if ( ShowOnScreen && ( ScreenPos[0] >= Width || ScreenPos[1] >= Height ) )
+		{
+			ShowOnScreen = false;
+		}
+
+		if ( ShowOnScreen && ( ScreenPos[2] > ( espModule.ESPRadius  * 2 ) || ScreenPos[2] < 0 ) )
 		{
 			ShowOnScreen = false;
 		}
@@ -229,20 +227,10 @@ class ESPBox extends ScriptedWidgetEventHandler
 
 		m_Name1.SetColor( colour );
 		m_Name2.SetColor( colour );
-
-		ScreenPos = GetGame().GetScreenPos( GetPosition() );
-
-		Show();
 			
 		ShowOnScreen = true;
 			
-		GetScreenSize( Width, Height );
-			
-		FOV = Camera.GetCurrentFOV() * ( Height * 1.0 ) / ( Width * 1.0 );
-			
 		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
-			
-		Update();
 	}
 
 	override bool OnClick(Widget w, int x, int y, int button)

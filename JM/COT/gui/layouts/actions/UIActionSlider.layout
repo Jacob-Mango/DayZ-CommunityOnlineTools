@@ -1,40 +1,40 @@
 PanelWidgetClass UIActionSlider {
- size 1 30
- hexactpos 0
- vexactpos 0
- hexactsize 0
- vexactsize 1
- scriptclass "UIActionSlider"
- {
-  FrameWidgetClass action_wrapper {
-   ignorepointer 1
-   size 1 1
-   position 0 0
-   hexactpos 0
-   vexactpos 0
-   hexactsize 0
-   vexactsize 0
-   {
-    TextWidgetClass action_label {
-     size 1 20
-     valign center_ref
-     text "{LABEL}"
-     font "gui/fonts/sdf_MetronLight24"
-     "text offset" 10 0
-     "exact text" 1
-     "exact text size" 16
-     "bold text" 1
-     vexactsize 1
-    }
+	size 1 30
+	hexactpos 0
+	vexactpos 0
+	hexactsize 0
+	vexactsize 1
+	scriptclass "UIActionSlider"
+	{
+		FrameWidgetClass action_wrapper {
+			ignorepointer 1
+			size 1 1
+			position 0 0
+			hexactpos 0
+			vexactpos 0
+			hexactsize 0
+			vexactsize 0
+			{
+				TextWidgetClass action_label {
+					size 1 20
+					valign center_ref
+					text "{LABEL}"
+					font "gui/fonts/sdf_MetronLight24"
+					"text offset" 10 0
+					"exact text" 1
+					"exact text size" 16
+					"bold text" 1
+					vexactsize 1
+				}
 				SliderWidgetClass action
-    {
-     size 0.7 20
-     halign right_ref
-     valign center_ref
-     vexactsize 1
+				{
+					size 0.7 20
+					halign right_ref
+					valign center_ref
+					vexactsize 1
 					step 0.01
-     style Editor
-     {
+					style Editor
+					{
 						TextWidgetClass action_value
 						{
 							ignorepointer 1
@@ -51,21 +51,21 @@ PanelWidgetClass UIActionSlider {
 							"text halign" center
 							"text valign" center
 						}
-     }
-    }
-   }
-  }
-  FrameWidgetClass action_wrapper_disable {
-   visible 0
-   ignorepointer 1
-   color 0.1569 0.1569 0.1569 0.902
-   size 1 1
-   position 0 0
-   hexactpos 0
-   vexactpos 0
-   hexactsize 0
-   vexactsize 0
-   style rover_sim_colorable
-  }
- }
+					}
+				}
+			}
+		}
+		FrameWidgetClass action_wrapper_disable {
+			visible 0
+			ignorepointer 1
+			color 0.1569 0.1569 0.1569 0.902
+			size 1 1
+			position 0 0
+			hexactpos 0
+			vexactpos 0
+			hexactsize 0
+			vexactsize 0
+			style rover_sim_colorable
+		}
+	}
 }
