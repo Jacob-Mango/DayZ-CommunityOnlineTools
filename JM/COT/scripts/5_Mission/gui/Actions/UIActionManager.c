@@ -159,6 +159,7 @@ class UIActionManager
 			action.SetLabel( label );
 			action.SetMin( min );
 			action.SetMax( max );
+			action.SetStepValue( 0 );
 
 			return action;
 		}
