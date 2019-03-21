@@ -23,10 +23,12 @@ class COTMenu
 		return layoutRoot.IsVisible();
 	}
 	
-	Widget Init()
+	Widget Init( string version )
 	{
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTMenu.layout" );
 		layoutRoot.Show( false );
+
+		TextWidget.Cast( layoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "Version: " + version );
 
 		m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
 		m_Windows = layoutRoot.FindAnyWidget( "Windows" );
