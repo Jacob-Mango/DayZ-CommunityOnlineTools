@@ -207,6 +207,8 @@ class ESPMenu extends Form
 			ESPModule.Cast( module ).UpdateESP();
 		}
 
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + ESPModule.Cast( module ).IsShowing ) );
+
 		UpdateESPButtonName();
 	}
 
@@ -237,6 +239,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewPlayers = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Players " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_BaseBuildingESP( UIEvent eid, ref UIActionCheckbox action )
@@ -244,6 +248,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewBaseBuilding = action.IsChecked();
+
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Base Building " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_VehicleESP( UIEvent eid, ref UIActionCheckbox action )
@@ -251,6 +257,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewVehicles = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Vehicles " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_ItemESP( UIEvent eid, ref UIActionCheckbox action )
@@ -258,6 +266,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewItems = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Items " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_InfectedESP( UIEvent eid, ref UIActionCheckbox action )
@@ -265,6 +275,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewInfected = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Infected " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_CreatureESP( UIEvent eid, ref UIActionCheckbox action )
@@ -272,6 +284,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewCreature = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View Creature " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Click_AllESP( UIEvent eid, ref UIActionCheckbox action )
@@ -279,6 +293,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ViewEverything = action.IsChecked();
+		
+		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View All " + ESPModule.Cast( module ).ViewVehicles ) );
 	}
 
 	void Change_Position( UIEvent eid, ref UIActionEditableVector action )

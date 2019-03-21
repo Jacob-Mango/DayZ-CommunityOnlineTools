@@ -87,7 +87,7 @@ modded class MissionServer
 
 		GetPermissionsManager().GetPlayerByIdentity( identity );
 
-		queueTime = 0;
+		// queueTime = 0;
 	}
 
 	override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
