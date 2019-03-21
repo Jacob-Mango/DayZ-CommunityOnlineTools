@@ -26,12 +26,12 @@ class ESPMenu extends Form
 
 	override string GetTitle()
 	{
-		return "ESP";
+		return "X-Ray Vision";
 	}
 	
 	override string GetIconName()
 	{
-		return "ESP";
+		return "X";
 	}
 
 	override bool ImageIsIcon()
@@ -49,8 +49,8 @@ class ESPMenu extends Form
 		UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
 		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", ESPBox.UseClassName );
 
-		UIActionManager.CreateText( mainSpacer, "Info: Enabling full map ESP requires you to be in Free Cam." );
-		UIActionManager.CreateText( mainSpacer, "Warning: Enabling full map ESP removes your player, relog to fix." );
+		UIActionManager.CreateText( mainSpacer, "Information: ", "Enabling full map ESP requires you to be in Free Cam." );
+		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your player, relog to fix." );
 
 		m_UpdateRate = UIActionManager.CreateSlider( mainSpacer, "Update Rate", 0, 10, this, "Change_UpdateRate" );
 		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );

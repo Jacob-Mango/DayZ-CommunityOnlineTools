@@ -139,6 +139,8 @@ class ESPBox extends ScriptedWidgetEventHandler
 		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
 		{
 			ShowOnScreen = false;
+		} else {
+			ShowOnScreen = true;
 		}
 
 		if ( ShowOnScreen && ( ScreenPos[0] >= Width || ScreenPos[1] >= Height ) )
@@ -170,10 +172,10 @@ class ESPBox extends ScriptedWidgetEventHandler
 			m_Name1.SetText( text );
 			m_Name2.SetText( text );
 			
-			Show();
+			layoutRoot.Show( true );
 		} else 
 		{
-			Hide();
+			layoutRoot.Show( false );
 		}
 	}
 
