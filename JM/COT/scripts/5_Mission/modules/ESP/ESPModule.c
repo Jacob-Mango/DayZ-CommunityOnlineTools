@@ -14,6 +14,8 @@ class ESPModule: EditorModule
 
 	protected int m_UserID;
 
+	string Filter;
+
 	bool ViewPlayers;
 	bool ViewBaseBuilding;
 	bool ViewVehicles;
@@ -258,32 +260,46 @@ class ESPModule: EditorModule
 		ref array<Object> objects = new ref array<Object>;
 		GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
 
-		Object currentObj;
+		Object obj;
 		EntityAI entity;
 		ref ESPInfo espInfo;
 
+		bool isUsingFilter = false;
+
+		if ( Filter != "" ) 
+			isUsingFilter = true;
+
+		string filter = Filter + "";
+		filter.ToLower();
+
 		for (int i = 0; i < objects.Count(); ++i)
 		{
-			currentObj = Object.Cast( objects.Get(i) );
-
-			if ( currentObj == NULL )
+			obj = Object.Cast( objects.Get(i) );
+			entity = EntityAI.Cast( obj );
+			
+			if ( obj == NULL )
 				continue;
 
-			if ( !currentObj.HasNetworkID() )
+			string type = obj.GetType();
+			type.ToLower();
+
+			if ( isUsingFilter && !type.Contains( filter ) )
+				continue;
+				
+			if ( !obj.HasNetworkID() )
+				continue;
+			if ( obj.IsRock() )
+				continue;
+			if ( obj.IsWoodBase() )
+				continue;
+			if ( obj.IsBush() )
+				continue;
+			if ( obj.IsTree() )
+				continue;
+			if ( obj.IsBuilding() )
 				continue;
 
-			if ( currentObj.IsRock() )
-				continue;
-			if ( currentObj.IsWoodBase() )
-				continue;
-			if ( currentObj.IsBush() )
-				continue;
-			if ( currentObj.IsTree() )
-				continue;
-			if ( currentObj.IsBuilding() )
-				continue;
-
-			entity = EntityAI.Cast( currentObj );
+			entity = EntityAI.Cast( obj );
 
 			bool isPlayer = false;
 			
@@ -293,7 +309,7 @@ class ESPModule: EditorModule
 			
 				if ( (ViewPlayers || ViewEverything) && (m_CanViewPlayers || m_CanViewEverything) && isPlayer )
 				{
-					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, currentObj );
+					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, obj );
 					continue;
 				}
 
@@ -302,11 +318,11 @@ class ESPModule: EditorModule
 				{
 					espInfo = new ref ESPInfo;
 
-					espInfo.name = currentObj.GetDisplayName();
+					espInfo.name = obj.GetDisplayName();
 					if ( espInfo.name == "" )
-						espInfo.name = currentObj.GetType();
+						espInfo.name = obj.GetType();
 
-					espInfo.target = currentObj;
+					espInfo.target = obj;
 					espInfo.type = ESPType.INFECTED;
 
 					CreateESPBox( espInfo );
@@ -318,11 +334,11 @@ class ESPModule: EditorModule
 				{
 					espInfo = new ref ESPInfo;
 
-					espInfo.name = currentObj.GetDisplayName();
+					espInfo.name = obj.GetDisplayName();
 					if ( espInfo.name == "" )
-						espInfo.name = currentObj.GetType();
+						espInfo.name = obj.GetType();
 
-					espInfo.target = currentObj;
+					espInfo.target = obj;
 					espInfo.type = ESPType.CREATURE;
 
 					CreateESPBox( espInfo );
@@ -330,48 +346,48 @@ class ESPModule: EditorModule
 				}
 			}
 
-			bool isTransport = !isPlayer && currentObj.IsTransport();
+			bool isTransport = !isPlayer && obj.IsTransport();
 			if ( (ViewVehicles || ViewEverything) && (m_CanViewVehicles || m_CanViewEverything) && isTransport )
 			{
 				espInfo = new ref ESPInfo;
 				
-				espInfo.name = currentObj.GetDisplayName();
+				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
-					espInfo.name = currentObj.GetType();
+					espInfo.name = obj.GetType();
 
-				espInfo.target = currentObj;
+				espInfo.target = obj;
 				espInfo.type = ESPType.VEHICLE;
 
 				CreateESPBox( espInfo );
 				continue;
 			}
 
-			bool isBaseBuilding = !isTransport && ( currentObj.IsContainer() || currentObj.CanUseConstruction() || currentObj.IsFireplace() );
+			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() );
 			if ( (ViewBaseBuilding || ViewEverything) && (m_CanViewBaseBuilding || m_CanViewEverything) && isBaseBuilding )
 			{
 				espInfo = new ref ESPInfo;
 				
-				espInfo.name = currentObj.GetDisplayName();
+				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
-					espInfo.name = currentObj.GetType();
+					espInfo.name = obj.GetType();
 
-				espInfo.target = currentObj;
+				espInfo.target = obj;
 				espInfo.type = ESPType.BASEBUILDING;
 
 				CreateESPBox( espInfo );
 				continue;
 			}
 
-			bool isItem = !isBaseBuilding && ( currentObj.IsItemBase() || currentObj.IsInventoryItem() );
+			bool isItem = !isBaseBuilding && ( obj.IsItemBase() || obj.IsInventoryItem() );
 			if ( (ViewItems || ViewEverything) && (m_CanViewItems || m_CanViewEverything) && isItem )
 			{
 				espInfo = new ref ESPInfo;
 				
-				espInfo.name = currentObj.GetDisplayName();
+				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
-					espInfo.name = currentObj.GetType();
+					espInfo.name = obj.GetType();
 
-				espInfo.target = currentObj;
+				espInfo.target = obj;
 				espInfo.type = ESPType.ITEM;
 
 				CreateESPBox( espInfo );
@@ -382,11 +398,11 @@ class ESPModule: EditorModule
 			{
 				espInfo = new ref ESPInfo;
 				
-				espInfo.name = currentObj.GetDisplayName();
+				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
-					espInfo.name = currentObj.GetType();
+					espInfo.name = obj.GetType();
 
-				espInfo.target = currentObj;
+				espInfo.target = obj;
 				espInfo.type = ESPType.ALL;
 
 				CreateESPBox( espInfo );

@@ -83,8 +83,14 @@ class UIActionSlider extends UIActionBase
         float top = ( b - a ) * ( x - min );
         float bottom = ( max - min );
 
-        m_Slider.SetCurrent( ( top / bottom ) + a );
-        CalculateValue();
+        if ( bottom != 0 )
+        {
+            m_Slider.SetCurrent( ( top / bottom ) + a );
+            CalculateValue();
+            return;
+        }
+
+        m_Slider.SetCurrent( 0 );
     }
 
     void CalculateValue()
@@ -98,11 +104,14 @@ class UIActionSlider extends UIActionBase
         float top = ( b - a ) * ( x - min );
         float bottom = ( max - min );
 
-        m_Current = ( top / bottom ) + a;
-
-        if ( m_StepValue != 0 )
+        if ( bottom != 0 )
         {
-            m_Current = Math.Round( m_Current / m_StepValue ) * m_StepValue;
+            m_Current = ( top / bottom ) + a;
+
+            if ( m_StepValue != 0 )
+            {
+                m_Current = Math.Round( m_Current / m_StepValue ) * m_StepValue;
+            }
         }
 
         m_Value.SetText( m_Prepend + m_Current + m_Append );

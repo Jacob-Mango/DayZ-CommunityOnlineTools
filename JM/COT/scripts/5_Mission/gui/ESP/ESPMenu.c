@@ -39,73 +39,84 @@ class ESPMenu extends Form
 		return false;
 	}
 
+	void ESPControls( Widget mainSpacer )
+	{
+		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );
+		
+		m_UpdateShow = UIActionManager.CreateButton( quadSpacer, "Show ESP", this, "Click_UpdateESP" );
+		UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
+
+		UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
+		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", ESPBox.UseClassName );
+
+		UIActionManager.CreateText( mainSpacer, "Info: Enabling full map ESP requires you to be in Free Cam." );
+		UIActionManager.CreateText( mainSpacer, "Warning: Enabling full map ESP removes your player, relog to fix." );
+
+		m_UpdateRate = UIActionManager.CreateSlider( mainSpacer, "Update Rate", 0, 10, this, "Change_UpdateRate" );
+		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetAppend(" seconds");
+		m_UpdateRate.SetStepValue( 0.5 );
+
+		m_RangeSlider = UIActionManager.CreateSlider( mainSpacer, "Radius", 0, 1000, this, "Change_Range" );
+		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
+		m_RangeSlider.SetAppend(" metres");
+		m_RangeSlider.SetStepValue( 10 );
+	}
+
+	void ESPFilters( Widget mainSpacer )
+	{
+		UIActionManager.CreateCheckbox( mainSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
+		UIActionManager.CreateCheckbox( mainSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
+		UIActionManager.CreateCheckbox( mainSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
+		UIActionManager.CreateCheckbox( mainSpacer, "Item ESP", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
+		UIActionManager.CreateCheckbox( mainSpacer, "Infected ESP", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
+		UIActionManager.CreateCheckbox( mainSpacer, "Creature ESP", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
+		UIActionManager.CreateCheckbox( mainSpacer, "All ESP", this, "Click_AllESP", ESPModule.Cast( module ).ViewEverything );
+
+		UIActionManager.CreateEditableText( mainSpacer, "Type Filter: ", this, "Change_Filter", ESPModule.Cast( module ).Filter );
+	}
+
+	void ESPObjectControl( Widget mainSpacer )
+	{
+		m_Position = UIActionManager.CreateEditableVector( mainSpacer, "Position: ", this, "Change_Position" );
+		
+		m_Pitch = UIActionManager.CreateSlider( mainSpacer, "Pitch", -180, 180, this, "Change_Pitch" );
+		m_Pitch.SetValue( 0 );
+		m_Pitch.SetAppend("°");
+		m_Pitch.SetStepValue( 0.5 );
+
+		m_Yaw = UIActionManager.CreateSlider( mainSpacer, "Yaw", -180, 180, this, "Change_Yaw" );
+		m_Yaw.SetValue( 0 );
+		m_Yaw.SetAppend("°");
+		m_Yaw.SetStepValue( 0.5 );
+
+		m_Roll = UIActionManager.CreateSlider( mainSpacer, "Roll", -180, 180, this, "Change_Roll" );
+		m_Roll.SetValue( 0 );
+		m_Roll.SetAppend("°");
+		m_Roll.SetStepValue( 0.5 );
+
+		m_Health = UIActionManager.CreateSlider( mainSpacer, "Health", 0, 100, this, "Change_Health" );
+		m_Health.SetValue( 0 );
+		m_Health.SetAppend(" HP");
+		m_Health.SetStepValue( 1 );
+
+		m_Set = UIActionManager.CreateButton( mainSpacer, "Set", this, "Click_Set" );
+		m_Delete = UIActionManager.CreateButton( mainSpacer, "Delete", this, "Click_Delete" );
+	}
+
 	override void OnInit( bool fromMenu )
 	{
 		ESPBox.espMenu = this;
 
 		Widget mainSpacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 2, 1 );
 
-		Widget upperSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 1 );
+		ESPControls( UIActionManager.CreateGridSpacer( mainSpacer, 3, 1 ) );
 
-		Widget lowerSpacerQuad = UIActionManager.CreateGridSpacer( upperSpacer, 2, 2 );
-		
-		m_UpdateShow = UIActionManager.CreateButton( lowerSpacerQuad, "Show ESP", this, "Click_UpdateESP" );
-		UIActionManager.CreateCheckbox( lowerSpacerQuad, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
+		Widget splitSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		UIActionManager.CreateButton( lowerSpacerQuad, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
-		UIActionManager.CreateCheckbox( lowerSpacerQuad, "Use Class Name", this, "Click_UseClassName", ESPBox.UseClassName );
+		ESPFilters( UIActionManager.CreateGridSpacer( splitSpacer, 8, 1 ) );
 
-		UIActionManager.CreateText( upperSpacer, "Info: Enabling full map ESP requires you to be in Free Cam." );
-		UIActionManager.CreateText( upperSpacer, "Warning: Enabling full map ESP removes your player, relog to fix." );
-
-		m_UpdateRate = UIActionManager.CreateSlider( upperSpacer, "Update Rate", 0, 10, this, "Change_UpdateRate" );
-		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
-		m_UpdateRate.SetAppend(" seconds");
-		m_UpdateRate.SetStepValue( 0.5 );
-
-		m_RangeSlider = UIActionManager.CreateSlider( upperSpacer, "Radius", 0, 1000, this, "Change_Range" );
-		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
-		m_RangeSlider.SetAppend(" metres");
-		m_RangeSlider.SetStepValue( 10 );
-
-		Widget lowerSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
-
-		Widget leftSpacer = UIActionManager.CreateGridSpacer( lowerSpacer, 8, 1 );
-
-		UIActionManager.CreateCheckbox( leftSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
-		UIActionManager.CreateCheckbox( leftSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
-		UIActionManager.CreateCheckbox( leftSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
-		UIActionManager.CreateCheckbox( leftSpacer, "Item ESP", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
-		UIActionManager.CreateCheckbox( leftSpacer, "Infected ESP", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
-		UIActionManager.CreateCheckbox( leftSpacer, "Creature ESP", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
-		UIActionManager.CreateCheckbox( leftSpacer, "All ESP", this, "Click_AllESP", ESPModule.Cast( module ).ViewEverything );
-
-		Widget rightSpacer = UIActionManager.CreateGridSpacer( lowerSpacer, 8, 1 );
-
-		m_Position = UIActionManager.CreateEditableVector( rightSpacer, "Position: ", this, "Change_Position" );
-		
-		m_Pitch = UIActionManager.CreateSlider( rightSpacer, "Pitch", -180, 180, this, "Change_Pitch" );
-		m_Pitch.SetValue( 0 );
-		m_Pitch.SetAppend("°");
-		m_Pitch.SetStepValue( 0.5 );
-
-		m_Yaw = UIActionManager.CreateSlider( rightSpacer, "Yaw", -180, 180, this, "Change_Yaw" );
-		m_Yaw.SetValue( 0 );
-		m_Yaw.SetAppend("°");
-		m_Yaw.SetStepValue( 0.5 );
-
-		m_Roll = UIActionManager.CreateSlider( rightSpacer, "Roll", -180, 180, this, "Change_Roll" );
-		m_Roll.SetValue( 0 );
-		m_Roll.SetAppend("°");
-		m_Roll.SetStepValue( 0.5 );
-
-		m_Health = UIActionManager.CreateSlider( rightSpacer, "Health", 0, 100, this, "Change_Health" );
-		m_Health.SetValue( 0 );
-		m_Health.SetAppend(" HP");
-		m_Health.SetStepValue( 1 );
-
-		m_Set = UIActionManager.CreateButton( rightSpacer, "Set", this, "Click_Set" );
-		m_Delete = UIActionManager.CreateButton( rightSpacer, "Delete", this, "Click_Delete" );
+		ESPObjectControl( UIActionManager.CreateGridSpacer( splitSpacer, 8, 1 ) );
 	}
 
 	override void OnShow()
@@ -122,6 +133,8 @@ class ESPMenu extends Form
 		m_Health.SetValue( ESPModule.Cast( module ).Health );
 		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
 		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
+
+		ESPModule.Cast( module ).Filter
 
 		UpdateESPButtonName();
 	}
@@ -185,8 +198,14 @@ class ESPMenu extends Form
 	void Click_UpdateESP( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		
-		ESPModule.Cast( module ).UpdateESP();
+
+		if ( ESPModule.Cast( module ).IsShowing )
+		{
+			ESPModule.Cast( module ).HideESP();
+		} else
+		{
+			ESPModule.Cast( module ).UpdateESP();
+		}
 
 		UpdateESPButtonName();
 	}
@@ -204,6 +223,13 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPBox.ShowJustName = action.IsChecked();
+	}
+	
+	void Change_Filter( UIEvent eid, ref UIActionEditableText action )
+	{
+		if ( eid != UIEvent.CHANGE ) return;
+
+		ESPModule.Cast( module ).Filter = action.GetText();
 	}
 
 	void Click_PlayerESP( UIEvent eid, ref UIActionCheckbox action )
@@ -309,8 +335,6 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CHANGE ) return;
 		
 		ESPModule.Cast( module ).ESPUpdateTime = action.GetValue();
-
-		UpdateESPButtonName();
 	}
 
 	void Change_Range( UIEvent eid, ref UIActionSlider action )
