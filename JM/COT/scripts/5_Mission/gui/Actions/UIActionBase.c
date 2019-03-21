@@ -16,9 +16,9 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
 
-		m_Disable = layoutRoot.FindAnyWidget( "action_wrapper_disable" );
-
 		OnInit();
+
+		m_Disable = layoutRoot.FindAnyWidget( "action_wrapper_disable" );
 	}
 
 	void OnInit() 
@@ -47,13 +47,17 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Disable()
 	{
-		layoutRoot.SetFlags( WidgetFlags.IGNOREPOINTER );
+		layoutRoot.Enable( false );
+
+		m_Disable.SetFlags( WidgetFlags.IGNOREPOINTER );
 		m_Disable.Show( true );
 	}
 
 	void Enable()
 	{
-		layoutRoot.ClearFlags( WidgetFlags.IGNOREPOINTER );
+		layoutRoot.Enable( true );
+
+		m_Disable.ClearFlags( WidgetFlags.IGNOREPOINTER );
 		m_Disable.Show( false );
 	}
 
