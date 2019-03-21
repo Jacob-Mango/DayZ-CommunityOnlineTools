@@ -121,7 +121,7 @@ class CameraTool: EditorModule
 			COTLog( sender, "Entered the Free Camera");
 		}
 
-		if( type == CallType.Client )
+		if( type == CallType.Client && !COTPlayerIsRemoved )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
@@ -160,7 +160,7 @@ class CameraTool: EditorModule
 			COTLog( sender, "Left the Free Camera");
 		}
 
-		if( type == CallType.Client )
+		if( type == CallType.Client && !COTPlayerIsRemoved )
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
@@ -181,7 +181,7 @@ class CameraTool: EditorModule
 
 	void EnableCamera()
 	{
-		if ( CurrentActiveCamera )
+		if ( CurrentActiveCamera || COTPlayerIsRemoved )
 		{
 			return;
 		}
@@ -191,7 +191,7 @@ class CameraTool: EditorModule
 
 	void DisableCamera()
 	{
-		if ( CurrentActiveCamera )
+		if ( CurrentActiveCamera && !COTPlayerIsRemoved )
 		{
 			SetFreezeMouse(false);
 
