@@ -53,6 +53,8 @@ class ESPModule: EditorModule
 
 		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
 
+		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
+
 		GetRPCManager().AddRPC( "COT_ESP", "RequestPlayerESPData", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ShowPlayerESPData", this, SingeplayerExecutionType.Client );
 
@@ -206,7 +208,7 @@ class ESPModule: EditorModule
 	{
 		if ( CurrentActiveCamera == NULL ) return;
 
-		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param, true, GetGame().GetPlayer() );
+		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param, true, NULL, GetGame().GetPlayer() );
 	}
 
 	void SelectBox( ref ESPBox box, bool checked, bool button )
