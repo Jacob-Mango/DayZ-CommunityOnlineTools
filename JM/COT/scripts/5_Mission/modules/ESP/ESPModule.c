@@ -51,6 +51,8 @@ class ESPModule: EditorModule
 		ESPUpdateTime = 0;
 		IsShowing = false;
 
+		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
+
 		GetRPCManager().AddRPC( "COT_ESP", "RequestPlayerESPData", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ShowPlayerESPData", this, SingeplayerExecutionType.Client );
 
@@ -460,6 +462,17 @@ class ESPModule: EditorModule
 
 				CreateESPBox( info );
 			}
+		}
+	}
+
+	void ESPLog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		ref Param1< string > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if ( type == CallType.Server )
+		{
+			COTLog( sender, "ESP " + data.param1 );
 		}
 	}
 

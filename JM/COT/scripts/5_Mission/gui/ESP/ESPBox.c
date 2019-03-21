@@ -172,10 +172,10 @@ class ESPBox extends ScriptedWidgetEventHandler
 			m_Name1.SetText( text );
 			m_Name2.SetText( text );
 			
-			layoutRoot.Show( true );
+			Show();
 		} else 
 		{
-			layoutRoot.Show( false );
+			Hide();
 		}
 	}
 
