@@ -73,6 +73,48 @@ class UIActionEditableVector extends UIActionBase
 		DISABLE_ALL_INPUT = false;
 	}
 
+	override bool OnMouseEnter( Widget w, int x, int y )
+	{
+		if ( w == m_TextX )
+		{
+			SetFocus( m_TextX );
+			return true;
+		}
+		if ( w == m_TextY )
+		{
+			SetFocus( m_TextY );
+			return true;
+		}
+		if ( w == m_TextZ )
+		{
+			SetFocus( m_TextZ );
+			return true;
+		}
+
+		return false;
+	}
+
+	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
+	{
+		if ( w == m_TextX )
+		{
+			SetFocus( NULL );
+			return true;
+		}
+		if ( w == m_TextY )
+		{
+			SetFocus( NULL );
+			return true;
+		}
+		if ( w == m_TextZ )
+		{
+			SetFocus( NULL );
+			return true;
+		}
+
+		return false;
+	}
+
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( !m_HasCallback ) return false;

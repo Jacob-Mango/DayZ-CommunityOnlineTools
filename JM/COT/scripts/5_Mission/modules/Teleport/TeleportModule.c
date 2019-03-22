@@ -146,7 +146,7 @@ class TeleportModule: EditorModule
 				player.SetPosition( data.param1 );
 			}
 
-			// COTLog( sender, "Teleported to cursor" );
+			COTLog( sender, "Teleported to cursor " + data.param1 );
 		}
 	}
 	

@@ -28,6 +28,8 @@ class ESPModule: EditorModule
 
 	float ESPRadius;
 
+	string Name;
+
 	vector Position;
 	vector Rotation;
 
@@ -35,6 +37,7 @@ class ESPModule: EditorModule
 	float Health;
 
 	float ESPUpdateTime;
+	bool ESPIsUpdating;
 
 	bool IsShowing;
 
@@ -50,7 +53,7 @@ class ESPModule: EditorModule
 		Position = "0 0 0";
 		Rotation = "0 0 0";
 
-		ESPUpdateTime = 0;
+		ESPUpdateTime = 0.5;
 		IsShowing = false;
 
 		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
@@ -247,6 +250,7 @@ class ESPModule: EditorModule
 
 		if ( m_SelectedBoxes.Count() > 0 && m_SelectedBoxes[0].Info.target != NULL )
 		{
+			Name = m_SelectedBoxes[0].Info.target.GetType();
 			Position = m_SelectedBoxes[0].Info.target.GetPosition();
 			Rotation = m_SelectedBoxes[0].Info.target.GetYawPitchRoll();
 			MaxHealth = m_SelectedBoxes[0].Info.target.GetMaxHealth( "", "" );
@@ -261,8 +265,6 @@ class ESPModule: EditorModule
 
 	void HideESP()
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
-
 		IsShowing = false;
 
 		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
@@ -420,8 +422,9 @@ class ESPModule: EditorModule
 
 				CreateESPBox( espInfo );
 				continue;
-			} 
+			}
 
+			/*
 			if ( ViewEverything && m_CanViewEverything )
 			{
 				espInfo = new ref ESPInfo;
@@ -436,14 +439,37 @@ class ESPModule: EditorModule
 				CreateESPBox( espInfo );
 				continue;
 			} 
+			*/
 		}
 
 		objects.Clear();
 		delete objects;
 
-		if ( ESPUpdateTime > 0 )
+		if ( ESPIsUpdating )
 		{
 			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateESP, ESPUpdateTime * 1000.0 );
+		} else
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+		}
+	}
+
+	void ESPUpdateLoop( bool isDoing )
+	{
+		ESPIsUpdating = isDoing;
+
+		if ( ESPIsUpdating )
+		{
+			if ( IsShowing )
+			{
+				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateESP, ESPUpdateTime * 1000.0 );
+			} else
+			{
+				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+			}
+		} else 
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
 		}
 	}
 

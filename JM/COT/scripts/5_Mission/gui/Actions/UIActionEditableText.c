@@ -66,6 +66,28 @@ class UIActionEditableText extends UIActionBase
 		DISABLE_ALL_INPUT = false;
 	}
 
+	override bool OnMouseEnter( Widget w, int x, int y )
+	{
+		if ( w == m_Text )
+		{
+			SetFocus( m_Text );
+			return true;
+		}
+
+		return false;
+	}
+
+	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
+	{
+		if ( w == m_Text )
+		{
+			SetFocus( NULL );
+			return true;
+		}
+
+		return false;
+	}
+
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( !m_HasCallback ) return false;
