@@ -1,5 +1,7 @@
 class ESPModule: EditorModule
 {
+	protected const int m_UserIDStart = 10000;
+
 	protected ref array< ref ESPInfo > m_ESPObjects;
 	protected ref array< ref ESPBox > m_ESPBoxes;
 	protected ref array< ref ESPBox > m_SelectedBoxes;
@@ -41,7 +43,7 @@ class ESPModule: EditorModule
 		m_ESPObjects = new ref array< ref ESPInfo >;
 		m_ESPBoxes = new ref array< ref ESPBox >;
 		m_SelectedBoxes = new ref array< ref ESPBox >;
-		m_UserID = 0;
+		m_UserID = m_UserIDStart;
 
 		ESPRadius = 200;
 
@@ -71,6 +73,11 @@ class ESPModule: EditorModule
 		GetPermissionsManager().RegisterPermission( "ESP.View.Infected" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Creature" );
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
+	}
+
+	void ~ESPModule()
+	{
+		Hide();
 	}
 
 	override bool HasAccess()
@@ -247,14 +254,16 @@ class ESPModule: EditorModule
 		}
 	}
 
-	void HideESP( bool fromUpdate = false )
+	override void OnMissionFinish()
 	{
-		if ( !fromUpdate )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+		HideESP();
+	}
 
-			IsShowing = false;
-		}
+	void HideESP()
+	{
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+
+		IsShowing = false;
 
 		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
 		{
@@ -267,12 +276,12 @@ class ESPModule: EditorModule
 
 		m_ESPObjects.Clear();
 
-		m_UserID = 0;
+		m_UserID = m_UserIDStart;
 	}
 
 	void UpdateESP()
 	{
-		HideESP( true );
+		HideESP();
 
 		IsShowing = true;
 
@@ -431,8 +440,6 @@ class ESPModule: EditorModule
 
 		objects.Clear();
 		delete objects;
-
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
 
 		if ( ESPUpdateTime > 0 )
 		{
