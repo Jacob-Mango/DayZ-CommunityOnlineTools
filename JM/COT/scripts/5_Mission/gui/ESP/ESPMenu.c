@@ -16,8 +16,11 @@ class ESPMenu extends Form
 	protected ref UIActionSlider m_RangeSlider;
 
 	protected ref UIActionButton m_UpdateShow;
+	protected ref UIActionCheckbox m_TextMode;
 	protected ref UIActionSlider m_UpdateRate;
 	protected ref UIActionCheckbox m_ESPIsUpdating;
+
+	protected ref UIActionButton m_FullMapESP;
 
 	protected ref UIActionCheckbox m_ViewEverything;
 	protected ref UIActionCheckbox m_ViewPlayers;
@@ -55,13 +58,13 @@ class ESPMenu extends Form
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );
 		
 		m_UpdateShow = UIActionManager.CreateButton( quadSpacer, "Show ESP", this, "Click_UpdateESP" );
-		UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
+		m_TextMode = UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
 
-		UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
+		m_FullMapESP = UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
 		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", ESPBox.UseClassName );
 
 		UIActionManager.CreateText( mainSpacer, "Information: ", "Enabling full map ESP requires you to be in Free Cam." );
-		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your player, relog to fix." );
+		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your character from the server, relog to fix." );
 
 		m_RangeSlider = UIActionManager.CreateSlider( mainSpacer, "Radius", 0, 1000, this, "Change_Range" );
 		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
@@ -80,15 +83,16 @@ class ESPMenu extends Form
 
 	void ESPFilters( Widget mainSpacer )
 	{
-		m_ViewEverything = UIActionManager.CreateCheckbox( mainSpacer, "All ESP", this, "Click_AllESP", ESPModule.Cast( module ).ViewEverything );
-		m_ViewPlayers = UIActionManager.CreateCheckbox( mainSpacer, "Player ESP", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
-		m_ViewBaseBuilding = UIActionManager.CreateCheckbox( mainSpacer, "Base Building ESP", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
-		m_ViewVehicles = UIActionManager.CreateCheckbox( mainSpacer, "Vehicle ESP", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
-		m_ViewItems = UIActionManager.CreateCheckbox( mainSpacer, "Item ESP", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
-		m_ViewInfected = UIActionManager.CreateCheckbox( mainSpacer, "Infected ESP", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
-		m_ViewCreature = UIActionManager.CreateCheckbox( mainSpacer, "Creature ESP", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
+		m_ViewEverything = UIActionManager.CreateCheckbox( mainSpacer, "Include Everything", this, "Click_AllESP", ESPModule.Cast( module ).ViewEverything );
 
-		UIActionManager.CreateEditableText( mainSpacer, "Type Filter: ", this, "Change_Filter", ESPModule.Cast( module ).Filter );
+		UIActionManager.CreateEditableText( mainSpacer, "Class Filter: ", this, "Change_Filter", ESPModule.Cast( module ).Filter );
+
+		m_ViewPlayers = UIActionManager.CreateCheckbox( mainSpacer, "Include Players", this, "Click_PlayerESP", ESPModule.Cast( module ).ViewPlayers );
+		m_ViewBaseBuilding = UIActionManager.CreateCheckbox( mainSpacer, "Include Base Building", this, "Click_BaseBuildingESP", ESPModule.Cast( module ).ViewBaseBuilding );
+		m_ViewVehicles = UIActionManager.CreateCheckbox( mainSpacer, "Include Vehicles", this, "Click_VehicleESP", ESPModule.Cast( module ).ViewVehicles );
+		m_ViewItems = UIActionManager.CreateCheckbox( mainSpacer, "Include Items", this, "Click_ItemESP", ESPModule.Cast( module ).ViewItems );
+		m_ViewInfected = UIActionManager.CreateCheckbox( mainSpacer, "Include Infected", this, "Click_InfectedESP", ESPModule.Cast( module ).ViewInfected );
+		m_ViewCreature = UIActionManager.CreateCheckbox( mainSpacer, "Include Animals", this, "Click_CreatureESP", ESPModule.Cast( module ).ViewCreature );
 	}
 
 	void ESPObjectControl( Widget mainSpacer )
@@ -154,6 +158,11 @@ class ESPMenu extends Form
 		m_RangeSlider.SetValue( ESPModule.Cast( module ).ESPRadius );
 		m_UpdateRate.SetValue( ESPModule.Cast( module ).ESPUpdateTime );
 		m_ESPIsUpdating.SetChecked( ESPModule.Cast( module ).ESPIsUpdating );
+
+		if ( COTPlayerIsRemoved )
+		{
+			m_FullMapESP.Disable();
+		}
 
 		// ESPModule.Cast( module ).Filter
 
@@ -246,7 +255,7 @@ class ESPMenu extends Form
 		} else
 		{
 			ESPModule.Cast( module ).ESPIsUpdating = m_ESPIsUpdating.IsChecked();
-			
+
 			ESPModule.Cast( module ).UpdateESP();
 		}
 
@@ -431,6 +440,8 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).EnableFullMap();
+		
+		m_FullMapESP.Disable();
 	}
 
 	void Click_UpdateAtRate( UIEvent eid, ref UIActionCheckbox action )
@@ -438,5 +449,17 @@ class ESPMenu extends Form
 		if ( eid != UIEvent.CLICK ) return;
 		
 		ESPModule.Cast( module ).ESPUpdateLoop( action.IsChecked() );
+
+		if ( ESPModule.Cast( module ).ESPIsUpdating )
+		{
+			m_TextMode.Disable();
+
+			ESPBox.ShowJustName = true;
+		} else
+		{
+			m_TextMode.Enable();
+
+			ESPBox.ShowJustName = m_TextMode.IsChecked();
+		}
 	}
 }
