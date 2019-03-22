@@ -11,6 +11,13 @@ class UIActionManager
 
 		return NULL;
 	}
+	
+	static ref Widget CreateSpacer( Widget parent )
+	{
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/actions/UISpacer.layout", parent );
+
+		return widget;
+	}
 
 	static ref UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname )
 	{
