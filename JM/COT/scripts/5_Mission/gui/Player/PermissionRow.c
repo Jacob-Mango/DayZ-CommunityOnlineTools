@@ -14,6 +14,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
 	ref TextWidget perm_name;
 	ref OptionSelectorMultistate perm_state;
 
+	protected bool m_IsEnabled = false;
+
 	void OnWidgetScriptInit( Widget w )
 	{
 		layoutRoot = w;
@@ -40,6 +42,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
 
 		perm_state = new ref OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
 		perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
+
+		Disable();
 	}
 
 	void Show()
@@ -90,36 +94,51 @@ class PermissionRow extends ScriptedWidgetEventHandler
 		perm_state.SetValue( 0, true );
 	}
 
+	bool IsEnabled()
+	{
+		return m_IsEnabled;
+	}
+
 	void Enable()
 	{
-		for ( int i = 0; i < Children.Count(); i++ )
-		{
-			Children[i].Enable();
-		}
+		m_IsEnabled = OnEnable();
 
-		OnEnable();
+		if ( m_IsEnabled )
+		{
+			for ( int i = 0; i < Children.Count(); i++ )
+			{
+				Children[i].Enable();
+			}
+		}
 	}
 
 	void Disable()
 	{
-		for ( int i = 0; i < Children.Count(); i++ )
-		{
-			Children[i].Disable();
-		}
+		m_IsEnabled = !OnDisable();
 
-		OnDisable();
+		if ( !m_IsEnabled )
+		{
+			for ( int i = 0; i < Children.Count(); i++ )
+			{
+				Children[i].Disable();
+			}
+		}
 	}
 
-	void OnEnable()
+	bool OnEnable()
 	{
 		perm_state.Enable();
+
+		return true;
 	}
 
-	void OnDisable()
+	bool OnDisable()
 	{
 		perm_state.SetValue( 0, true );
 
 		perm_state.Disable();
+
+		return true;
 	}
 
 	void Serialize( ref array< string > output, string prepend = "" )

@@ -16,6 +16,12 @@ class WindowHandle extends ScriptedWidgetEventHandler
 
 	void ~WindowHandle() 
 	{
+		layoutRoot.Unlink();
+
+		delete m_CloseButton;
+		delete m_TitleWrapper;
+
+		delete layoutRoot;
 	}
 
 	void OnWidgetScriptInit( Widget w )

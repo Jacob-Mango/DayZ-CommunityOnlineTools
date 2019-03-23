@@ -190,7 +190,7 @@ class ModuleManager
 	{
 		for ( int i = 0; i < m_Modules.Count(); ++i )
 		{
-			m_Modules.Get( i ).OnClientPermissionsUpdated();
+			m_Modules[i].OnClientPermissionsUpdated();
 		}
 	}
 }
