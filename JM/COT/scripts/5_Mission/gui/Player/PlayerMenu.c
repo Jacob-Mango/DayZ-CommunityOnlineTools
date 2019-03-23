@@ -74,6 +74,8 @@ class PlayerMenu extends Form
 	float awidth = -1;
 	float aheight = -1;
 
+	bool newPlayerSelected = false;
+
 	void PlayerMenu()
 	{
 		m_CanUpdateList = true;
@@ -445,11 +447,9 @@ class PlayerMenu extends Form
 
 	override void OnShow()
 	{
-		ReloadPlayers();
+		super.OnShow();
 
-		m_PermissionsWrapper.Show( false );
-		m_RolesWrapper.Show( false );
-		m_ActionsWrapper.Show( true );
+		ReloadPlayers();
 
 		if ( GetSelectedPlayers().Count() != 0 )
 		{
@@ -460,6 +460,10 @@ class PlayerMenu extends Form
 		}
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
+
+		m_PermissionsWrapper.Show( false );
+		m_RolesWrapper.Show( false );
+		m_ActionsWrapper.Show( true );
 	}
 
 	override void OnHide() 
@@ -568,6 +572,7 @@ class PlayerMenu extends Form
 
 	bool OnPlayerSelected( ref AuthPlayer player, bool select = true )
 	{
+		newPlayerSelected = true;
 		if ( player == NULL )
 		{
 			UpdateActionsFields( NULL );
@@ -697,11 +702,19 @@ class PlayerMenu extends Form
 			}
 		} else 
 		{
+			if ( !newPlayerSelected )
+			{
+				return;
+			}
+
 			for ( int j = 0; j < permissions.Count(); j++ )
 			{
 				m_PermissionUI.SetPermission( permissions[j] );
 			}
+
 			m_PermissionUI.Enable();
+
+			newPlayerSelected = false;
 		}
 	}
 

@@ -219,7 +219,12 @@ class PermissionsFramework
 				ref AuthPlayer ap = GetPermissionsManager().GetPlayerBySteam64ID( data.param1 );
 
 				ap.Data.SName = data.param2;
-				ap.Data.SGUID = data.param3; 
+				ap.Data.SGUID = data.param3;
+
+				if ( ClientAuthPlayer.Data.SGUID == data.param3 )
+				{
+					GetModuleManager().OnClientPermissionsUpdated();
+				}
 			}
 		}
 	}
@@ -252,7 +257,7 @@ class PermissionsFramework
 
 				DeserializePlayer( cdata.param1 );
 
-				if (cdata.param1.SGUID == ClientAuthPlayer.Data.SGUID )
+				if ( cdata.param1.SGUID == ClientAuthPlayer.Data.SGUID )
 				{
 					GetModuleManager().OnClientPermissionsUpdated();
 				}

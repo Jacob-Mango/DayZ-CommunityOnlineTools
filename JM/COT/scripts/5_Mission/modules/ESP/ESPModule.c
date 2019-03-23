@@ -6,13 +6,13 @@ class ESPModule: EditorModule
 	protected ref array< ref ESPBox > m_ESPBoxes;
 	protected ref array< ref ESPBox > m_SelectedBoxes;
 
-	protected bool m_CanViewPlayers;
-	protected bool m_CanViewBaseBuilding;
-	protected bool m_CanViewVehicles;
-	protected bool m_CanViewItems;
-	protected bool m_CanViewInfected;
-	protected bool m_CanViewCreature;
-	protected bool m_CanViewEverything;
+	bool CanViewPlayers;
+	bool CanViewBaseBuilding;
+	bool CanViewVehicles;
+	bool CanViewItems;
+	bool CanViewInfected;
+	bool CanViewCreature;
+	bool CanViewEverything;
 
 	protected int m_UserID;
 
@@ -95,13 +95,18 @@ class ESPModule: EditorModule
 
 	override void OnClientPermissionsUpdated()
 	{
-		m_CanViewPlayers = GetPermissionsManager().HasPermission( "ESP.View.Player" );
-		m_CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
-		m_CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
-		m_CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
-		m_CanViewInfected = GetPermissionsManager().HasPermission( "ESP.View.Infected" );
-		m_CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
-		m_CanViewEverything = GetPermissionsManager().HasPermission( "ESP.View" );
+		CanViewPlayers = GetPermissionsManager().HasPermission( "ESP.View.Player" );
+		CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
+		CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
+		CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
+		CanViewInfected = GetPermissionsManager().HasPermission( "ESP.View.Infected" );
+		CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
+		CanViewEverything = GetPermissionsManager().HasPermission( "ESP.View" );
+
+		if ( ESPMenu.Cast( form ) )
+		{
+			ESPMenu.Cast( form ).DisableToggleableOptions();
+		}
 	}
 
 	override void OnMissionStart()
@@ -337,14 +342,14 @@ class ESPModule: EditorModule
 			{
 				isPlayer = entity.IsPlayer();
 			
-				if ( (ViewPlayers || ViewEverything) && (m_CanViewPlayers || m_CanViewEverything) && isPlayer )
+				if ( (ViewPlayers || ViewEverything) && (CanViewPlayers || CanViewEverything) && isPlayer )
 				{
 					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, obj );
 					continue;
 				}
 
 				bool isInfected = !isPlayer && ( entity.IsZombie() || entity.IsZombieMilitary() );
-				if ( (ViewInfected || ViewEverything) && (m_CanViewInfected || m_CanViewEverything) && isInfected )
+				if ( (ViewInfected || ViewEverything) && (CanViewInfected || CanViewEverything) && isInfected )
 				{
 					espInfo = new ref ESPInfo;
 
@@ -360,7 +365,7 @@ class ESPModule: EditorModule
 				} 
 
 				bool isCreature = !isInfected && entity.IsAnimal();
-				if ( (ViewCreature || ViewEverything) && (m_CanViewCreature || m_CanViewEverything) && isCreature )
+				if ( (ViewCreature || ViewEverything) && (CanViewCreature || CanViewEverything) && isCreature )
 				{
 					espInfo = new ref ESPInfo;
 
@@ -377,7 +382,7 @@ class ESPModule: EditorModule
 			}
 
 			bool isTransport = !isPlayer && obj.IsTransport();
-			if ( (ViewVehicles || ViewEverything) && (m_CanViewVehicles || m_CanViewEverything) && isTransport )
+			if ( (ViewVehicles || ViewEverything) && (CanViewVehicles || CanViewEverything) && isTransport )
 			{
 				espInfo = new ref ESPInfo;
 				
@@ -393,7 +398,7 @@ class ESPModule: EditorModule
 			}
 
 			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() );
-			if ( (ViewBaseBuilding || ViewEverything) && (m_CanViewBaseBuilding || m_CanViewEverything) && isBaseBuilding )
+			if ( (ViewBaseBuilding || ViewEverything) && (CanViewBaseBuilding || CanViewEverything) && isBaseBuilding )
 			{
 				espInfo = new ref ESPInfo;
 				
@@ -409,7 +414,7 @@ class ESPModule: EditorModule
 			}
 
 			bool isItem = !isBaseBuilding && ( obj.IsItemBase() || obj.IsInventoryItem() );
-			if ( (ViewItems || ViewEverything) && (m_CanViewItems || m_CanViewEverything) && isItem )
+			if ( (ViewItems || ViewEverything) && (CanViewItems || CanViewEverything) && isItem )
 			{
 				espInfo = new ref ESPInfo;
 				
@@ -425,7 +430,7 @@ class ESPModule: EditorModule
 			}
 
 			/*
-			if ( ViewEverything && m_CanViewEverything )
+			if ( ViewEverything && CanViewEverything )
 			{
 				espInfo = new ref ESPInfo;
 				

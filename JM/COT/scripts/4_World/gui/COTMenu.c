@@ -22,6 +22,40 @@ class COTMenu
 	{
 		return layoutRoot.IsVisible();
 	}
+
+	void MakeMenuForModule( ref EditorModule module )
+	{
+		ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
+
+		ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
+
+		float width = -1;
+		float height = -1;
+		menu.GetSize( width, height );
+
+		ref Form form;
+		ref WindowHandle window;
+
+		menu.GetScript( form );
+		base_window.GetScript( window );
+
+		if ( form && window )
+		{
+			form.window = window;
+			form.module = module;
+
+			form.Init( true );
+
+			window.form = form;
+
+			base_window.SetSize( width, height + 25 );
+
+			TextWidget title_text = TextWidget.Cast( base_window.FindAnyWidget( "title_text" ) );
+			title_text.SetText( form.GetTitle() );
+
+			module.form = form;
+		}
+	}
 	
 	Widget Init( string version )
 	{
@@ -38,78 +72,46 @@ class COTMenu
 		for ( int i = 0; i < m_Modules.Count(); i++ )
 		{
 			ref EditorModule module = m_Modules.Get( i );
-			bool hasButton = module.HasButton();
+			MakeMenuForModule( module );
+
+			if ( !module.HasButton() )
+			{
+				continue;
+			}
 
 			ref Widget button_bkg = NULL;
 			ref ButtonWidget button = NULL;
 
-			if ( hasButton )
+			button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
+			button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+
+			if ( button_bkg && button )
 			{
-				button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
-				button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
+				TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
+				ttl.SetText( module.form.GetTitle() );
+
+				ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
+				TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
+
+				if ( module.form.ImageIsIcon() )
+				{
+					btn_txt.Show( false );
+					btn_img.Show( true );
+
+					btn_img.LoadImageFile( 0, "set:" + module.form.GetImageSet() + " image:" + module.form.GetIconName() );
+				} else
+				{
+					btn_txt.Show( true );
+					btn_img.Show( false );
+
+					btn_txt.SetText( module.form.GetIconName() );
+				}
+
+				module.menuButton = button;
 			}
 
-			ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
-
-			ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
-
-			float width = -1;
-			float height = -1;
-			menu.GetSize( width, height );
-
-			ref Form form;
-			ref WindowHandle window;
-
-			menu.GetScript( form );
-			base_window.GetScript( window );
-
-			if ( form && window )
-			{
-				form.window = window;
-				form.module = module;
-
-				form.Init( true );
-
-				window.form = form;
-
-				base_window.SetSize( width, height + 25 );
-
-				if ( hasButton && button_bkg && button )
-				{
-					TextWidget title_text = TextWidget.Cast( base_window.FindAnyWidget( "title_text" ) );
-					title_text.SetText( form.GetTitle() );
-		
-					TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
-					ttl.SetText( form.GetTitle() );
-
-					ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
-					TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
-
-					if ( form.ImageIsIcon() )
-					{
-						btn_txt.Show( false );
-						btn_img.Show( true );
-
-						btn_img.LoadImageFile( 0, "set:" + form.GetImageSet() + " image:" + form.GetIconName() );
-					} else
-					{
-						btn_txt.Show( true );
-						btn_img.Show( false );
-
-						btn_txt.SetText( form.GetIconName() );
-					}
-
-					module.menuButton = button;
-				}
-				
-				module.form = form;
-
-				if ( hasButton )
-				{
-					WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
-					WidgetHandler.GetInstance().RegisterOnDoubleClick( module.menuButton, this, "OnDoubleClick" );
-				}
-			}
+			WidgetHandler.GetInstance().RegisterOnClick( module.menuButton, this, "OnClick" );
+			WidgetHandler.GetInstance().RegisterOnDoubleClick( module.menuButton, this, "OnDoubleClick" );
 		}
 
 		return layoutRoot;
@@ -196,7 +198,15 @@ class COTMenu
 
 			if ( w == module.menuButton )
 			{
-				module.ToggleShow( button != MouseState.LEFT );
+				if ( button != MouseState.LEFT )
+				{
+					module.DeleteForm();
+
+					MakeMenuForModule( module );
+				} else 
+				{
+					module.ToggleShow( false );
+				}
 				break;
 			}
 		}

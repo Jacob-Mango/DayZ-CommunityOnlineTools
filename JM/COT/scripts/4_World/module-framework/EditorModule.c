@@ -3,6 +3,11 @@ class EditorModule extends Module
 	ref Form form;
 	ref ButtonWidget menuButton;
 
+	void DeleteForm()
+	{
+		delete form;
+	}
+
 	string GetLayoutRoot()
 	{
 		return "";

@@ -220,6 +220,66 @@ class ESPMenu extends Form
 		}
 	}
 
+	void DisableToggleableOptions()
+	{
+		if ( ESPModule.Cast( module ).CanViewPlayers )
+		{
+			m_ViewPlayers.Enable();
+		} else
+		{
+			m_ViewPlayers.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewBaseBuilding )
+		{
+			m_ViewBaseBuilding.Enable();
+		} else
+		{
+			m_ViewBaseBuilding.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewVehicles )
+		{
+			m_ViewVehicles.Enable();
+		} else
+		{
+			m_ViewVehicles.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewItems )
+		{
+			m_ViewItems.Enable();
+		} else
+		{
+			m_ViewItems.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewInfected )
+		{
+			m_ViewInfected.Enable();
+		} else
+		{
+			m_ViewInfected.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewCreature )
+		{
+			m_ViewCreature.Enable();
+		} else
+		{
+			m_ViewCreature.Disable();
+		}
+
+		if ( ESPModule.Cast( module ).CanViewEverything )
+		{
+			m_ViewEverything.Enable();
+		} else
+		{
+			m_ViewEverything.Disable();
+		}
+		
+	}
+
 	void UpdateCheckboxStates()
 	{
 		if ( ESPModule.Cast( module ).ViewEverything )
@@ -232,12 +292,7 @@ class ESPMenu extends Form
 			m_ViewCreature.Disable();
 		} else
 		{
-			m_ViewPlayers.Enable();
-			m_ViewBaseBuilding.Enable();
-			m_ViewVehicles.Enable();
-			m_ViewItems.Enable();
-			m_ViewInfected.Enable();
-			m_ViewCreature.Enable();
+			DisableToggleableOptions();
 		}
 	}
 

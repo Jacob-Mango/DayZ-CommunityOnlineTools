@@ -139,7 +139,7 @@ class AuthPlayer
 	{
 		ref Role r = GetPermissionsManager().RolesMap.Get( role );
 
-		Print( "Adding role " + role + ": " + r );
+		// Print( "Adding role " + role + ": " + r );
 
 		if ( Roles.Find( r ) < 0 ) 
 		{
@@ -149,7 +149,7 @@ class AuthPlayer
 
 	void AddRole( Role role )
 	{
-		Print( "Adding role " + role );
+		// Print( "Adding role " + role );
 
 		m_HasPlayerData = true;
 
