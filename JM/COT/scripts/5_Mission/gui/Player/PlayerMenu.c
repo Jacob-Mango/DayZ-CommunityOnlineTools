@@ -106,7 +106,7 @@ class PlayerMenu extends Form
 
 	override void OnInit( bool fromMenu )
 	{
-		ESPBox.playerMenu = this;
+		ESPRenderBox.playerMenu = this;
 
 		m_PlayerListWrapper = layoutRoot.FindAnyWidget("players_list_wrapper");
 		m_PlayerScriptListFirst = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_first"));
@@ -540,12 +540,12 @@ class PlayerMenu extends Form
 		return false;
 	}
 
-	void OnPlayer_Checked_ESP( ref ESPBox box )
+	void OnPlayer_Checked_ESP( ref ESPRenderBox box )
 	{
 		OnPlayerSelected( box.Info.player, box.Checkbox.IsChecked() );
 	}
 
-	void OnPlayer_Button_ESP( ref ESPBox box )
+	void OnPlayer_Button_ESP( ref ESPRenderBox box )
 	{
 		OnPlayerSelected( NULL );
 

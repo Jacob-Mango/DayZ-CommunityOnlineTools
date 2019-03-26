@@ -1,4 +1,4 @@
-PanelWidgetClass ESPBox {
+PanelWidgetClass ESPRenderBox {
 	ignorepointer 1
 	valign center_ref
 	size 300 22
@@ -8,7 +8,7 @@ PanelWidgetClass ESPBox {
 	hexactsize 1
 	vexactsize 1
 	color 0 0 0 0
-	scriptclass "ESPBox"
+	scriptclass "ESPRenderBox"
 	{
 		PanelWidgetClass CheckboxStyle {
 			ignorepointer 1

@@ -58,10 +58,10 @@ class ESPMenu extends Form
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );
 		
 		m_UpdateShow = UIActionManager.CreateButton( quadSpacer, "Show ESP", this, "Click_UpdateESP" );
-		m_TextMode = UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPBox.ShowJustName );
+		m_TextMode = UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", ESPRenderBox.ShowJustName );
 
 		m_FullMapESP = UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
-		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", ESPBox.UseClassName );
+		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", ESPRenderBox.UseClassName );
 
 		UIActionManager.CreateText( mainSpacer, "Information: ", "Enabling full map ESP requires you to be in Free Cam." );
 		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your character from the server, relog to fix." );
@@ -127,7 +127,7 @@ class ESPMenu extends Form
 
 	override void OnInit( bool fromMenu )
 	{
-		ESPBox.espMenu = this;
+		ESPRenderBox.espMenu = this;
 
 		Widget mainSpacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 3, 1 );
 
@@ -333,7 +333,7 @@ class ESPMenu extends Form
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		ESPBox.ShowJustName = action.IsChecked();
+		ESPRenderBox.ShowJustName = action.IsChecked();
 	}
 	
 	void Change_Filter( UIEvent eid, ref UIActionEditableText action )
@@ -487,7 +487,7 @@ class ESPMenu extends Form
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		ESPBox.UseClassName = action.IsChecked();
+		ESPRenderBox.UseClassName = action.IsChecked();
 	}
 
 	void Click_EnableFullMap( UIEvent eid, ref UIActionButton action )
@@ -509,12 +509,12 @@ class ESPMenu extends Form
 		{
 			m_TextMode.Disable();
 
-			ESPBox.ShowJustName = true;
+			ESPRenderBox.ShowJustName = true;
 		} else
 		{
 			m_TextMode.Enable();
 
-			ESPBox.ShowJustName = m_TextMode.IsChecked();
+			ESPRenderBox.ShowJustName = m_TextMode.IsChecked();
 		}
 	}
 }
