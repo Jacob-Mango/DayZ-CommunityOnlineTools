@@ -1,4 +1,4 @@
-class ESPBox extends ScriptedWidgetEventHandler 
+class ESPRenderBox extends ScriptedWidgetEventHandler 
 {
 	static ref ESPModule espModule;
 	static ref ESPMenu espMenu;
@@ -35,7 +35,7 @@ class ESPBox extends ScriptedWidgetEventHandler
 		Init();
 	}
 
-	void ~ESPBox()
+	void ~ESPRenderBox()
 	{
 		Unlink();
 	}

@@ -3,8 +3,8 @@ class ESPModule: EditorModule
 	protected const int m_UserIDStart = 10000;
 
 	protected ref array< ref ESPInfo > m_ESPObjects;
-	protected ref array< ref ESPBox > m_ESPBoxes;
-	protected ref array< ref ESPBox > m_SelectedBoxes;
+	protected ref array< ref ESPRenderBox > m_ESPBoxes;
+	protected ref array< ref ESPRenderBox > m_SelectedBoxes;
 
 	bool CanViewPlayers;
 	bool CanViewBaseBuilding;
@@ -44,8 +44,8 @@ class ESPModule: EditorModule
 	void ESPModule()
 	{
 		m_ESPObjects = new ref array< ref ESPInfo >;
-		m_ESPBoxes = new ref array< ref ESPBox >;
-		m_SelectedBoxes = new ref array< ref ESPBox >;
+		m_ESPBoxes = new ref array< ref ESPRenderBox >;
+		m_SelectedBoxes = new ref array< ref ESPRenderBox >;
 		m_UserID = m_UserIDStart;
 
 		ESPRadius = 200;
@@ -111,7 +111,7 @@ class ESPModule: EditorModule
 
 	override void OnMissionStart()
 	{
-		ESPBox.espModule = this;
+		ESPRenderBox.espModule = this;
 	}
 
 	int GetSelectedCount()
@@ -226,7 +226,7 @@ class ESPModule: EditorModule
 		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param, true, NULL, GetGame().GetPlayer() );
 	}
 
-	void SelectBox( ref ESPBox box, bool checked, bool button )
+	void SelectBox( ref ESPRenderBox box, bool checked, bool button )
 	{
 		int existsAt = m_SelectedBoxes.Find( box );
 
@@ -533,8 +533,8 @@ class ESPModule: EditorModule
 
 	void CreateESPBox( ref ESPInfo info )
 	{
-		ref ESPBox boxScript = NULL;
-		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/ESP/ESPBox.layout" );
+		ref ESPRenderBox boxScript = NULL;
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/ESP/ESPRenderBox.layout" );
 
 		if ( widget == NULL ) return;
 
