@@ -70,12 +70,15 @@ class GameSettings
 	}
 
 	void Defaults()
-	{
-		// DefaultVan();
-		// DefaultSedan();
+	{		
+		DefaultCivHatchback();
+		DefaultUtilityVehicle();
+		DefaultS120();
+		DefaultVan();
+		DefaultSedan();
 		DefaultHatchback();
-		// DefaultV3SCargo();
-		// DefaultV3S();
+		DefaultV3SCargo();
+		DefaultV3S();
 
 		DefaultFenceMetal();
 		DefaultFenceWood();
@@ -261,15 +264,91 @@ class GameSettings
 		SaveSetBaseBuildingFile( file );
 	}
 
+	void DefaultUtilityVehicle()
+	{
+		ref array< string> attArr = new ref array< string>;
+
+		attArr.Insert("UtilityVehicleWheelDoors_Driver");
+		attArr.Insert("UtilityVehicleWheelDoors_CoDriver");
+		attArr.Insert("UtilityVehicleWheel");
+		attArr.Insert("UtilityVehicleWheel");
+		attArr.Insert("UtilityVehicleWheel");
+		attArr.Insert("UtilityVehicleWheel");
+		attArr.Insert("CarBattery");
+		attArr.Insert("CarRadiator");
+		attArr.Insert("EngineBelt");
+		attArr.Insert("SparkPlug");
+
+		ref GameVehicleFile file = new GameVehicleFile;
+
+		file.Name = "UtilityVehicle";
+		file.VehicleParts = attArr;
+
+		SaveSetVehicleFile( file );
+	}
+
+	void DefaultCivHatchback()
+	{
+		ref array< string> attArr = new ref array< string>;
+
+		attArr.Insert("CivHatchbackDoors_Driver");
+		attArr.Insert("CivHatchbackDoors_Trunk");
+		attArr.Insert("CivHatchbackDoors_Hood");
+		attArr.Insert("CivHatchbackDoors_CoDriver");
+		attArr.Insert("CivHatchbackDoors_Cargo01");
+		attArr.Insert("CivHatchbackDoors_Cargo02");
+		attArr.Insert("CivHatchbackWheel");
+		attArr.Insert("CivHatchbackWheel");
+		attArr.Insert("CivHatchbackWheel");
+		attArr.Insert("CivHatchbackWheel");
+		attArr.Insert("CarBattery");
+		attArr.Insert("CarRadiator");
+		attArr.Insert("EngineBelt");
+		attArr.Insert("SparkPlug");
+
+		ref GameVehicleFile file = new GameVehicleFile;
+
+		file.Name = "CivilianHatchback";
+		file.VehicleParts = attArr;
+
+		SaveSetVehicleFile( file );
+	}
+
+	void DefaultS120()
+	{
+		ref array< string> attArr = new ref array< string>;
+
+		attArr.Insert("S120Trunk");
+		attArr.Insert("S120Hood");
+		attArr.Insert("S120Doors_Driver");
+		attArr.Insert("S120Doors_CoDriver");
+		attArr.Insert("S120Doors_BackLeft");
+		attArr.Insert("S120Doors_BackRight");
+		attArr.Insert("S120Wheel");
+		attArr.Insert("S120Wheel");
+		attArr.Insert("S120Wheel");
+		attArr.Insert("S120Wheel");
+		attArr.Insert("CarBattery");
+		attArr.Insert("CarRadiator");
+		attArr.Insert("EngineBelt");
+		attArr.Insert("SparkPlug");
+
+		ref GameVehicleFile file = new GameVehicleFile;
+
+		file.Name = "S120";
+		file.VehicleParts = attArr;
+
+		SaveSetVehicleFile( file );
+	}
+
 	void DefaultVan()
 	{
 		ref array< string> attArr = new ref array< string>;
 
-		attArr.Insert("CivVanDoors_TrumpUp");
+		attArr.Insert("CivVanDoors_TrunkDown");
+		attArr.Insert("CivVanDoors_TrunkUp");
 		attArr.Insert("CivVanDoors_BackRight");
-		attArr.Insert("CivVanDoors_TrumpDown");
 		attArr.Insert("CivVanDoors_CoDriver");
-		attArr.Insert("CivVanTrunk");
 		attArr.Insert("CivVanWheel");
 		attArr.Insert("CivVanWheel");
 		attArr.Insert("CivVanWheel");
