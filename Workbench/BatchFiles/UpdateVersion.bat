@@ -88,11 +88,14 @@ if %failed%==1 (
 )
 
 for /f "tokens=1-3 delims=." %%a in (%workDrive%%versionFileLocation%) do (
+    echo BuildVersion was: %%c
     set /a build=%%c+1
     set version=%majorVersion%.%minorVersion%.!build!
+    echo BuildVersion is: !build!
 )
 
+
 echo %version%>%workDrive%%versionFileLocation%
-echo %version%
+echo Version: %version%
 
 cd %batchFileDirectory%
