@@ -2,7 +2,7 @@
 
 const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
 
-const string COT_INPUT_GROUP = "infantry";
+const string COT_INPUT_GROUP = "core";
 
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 static bool COTPlayerIsRemoved = false;

@@ -133,22 +133,27 @@ class ModuleManager
 
 					if ( action & KeyMouseActionType.PRESS && input.LocalPress() )
 					{
-						GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
 					}
 
 					if ( action & KeyMouseActionType.RELEASE && input.LocalRelease() )
 					{
-						GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
 					}
 
 					if ( action & KeyMouseActionType.HOLD && input.LocalHold() )
 					{
-						GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
 					}
 
 					if ( action & KeyMouseActionType.DOUBLECLICK && input.LocalDoubleClick() )
 					{
-						GetGame().GameScript.CallFunction( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, 0 );
+						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+					}
+
+					if ( action & KeyMouseActionType.CLICK && input.LocalClick() )
+					{
+						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
 					}
 				}
 			}
