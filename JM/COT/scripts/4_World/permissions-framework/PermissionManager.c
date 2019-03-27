@@ -87,11 +87,11 @@ class PermissionManager
 		return RootPermission;
 	}
 
-	bool HasPermission( string permission, PlayerIdentity player = NULL )
+	bool HasPermission( string permission, PlayerIdentity identity = NULL )
 	{
 		if ( !GetGame().IsMultiplayer() ) return true;
 
-		if ( player == NULL ) 
+		if ( identity == NULL ) 
 		{
 			if ( ClientAuthPlayer == NULL )
 			{
@@ -102,9 +102,16 @@ class PermissionManager
 			return ClientAuthPlayer.HasPermission( permission );
 		}
 
+		PlayerBase player = GetPlayerObjectByIdentity( identity );
+
+		if ( player != NULL )
+		{
+			return player.authenticatedPlayer.HasPermission( permission );
+		}
+
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
 		{
-			if ( AuthPlayers[i].GetGUID() == player.GetId() )
+			if ( AuthPlayers[i].GetGUID() == identity.GetId() )
 			{
 				return AuthPlayers[i].HasPermission( permission );
 			}

@@ -14,6 +14,18 @@ static bool DISABLE_ALL_INPUT = false;
 
 static bool COTIsActive = true;
 
+static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
+{
+	if ( identity == NULL )
+		return NULL;
+
+	int networkIdLowBits;
+	int networkIdHighBits;
+	GetGame().GetPlayerNetworkIDByIdentityID( identity.GetPlayerId(), networkIdLowBits, networkIdHighBits );
+
+	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
+}
+
 static vector GetCurrentPosition()
 {
 	if ( CurrentActiveCamera != NULL )

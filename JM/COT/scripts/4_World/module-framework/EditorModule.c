@@ -25,6 +25,9 @@ class EditorModule extends Module
 
 	bool IsVisible()
 	{
+		if ( !form ) return false;
+		if ( !form.GetLayoutRoot() ) return false;
+		
 		return form.GetLayoutRoot().IsVisible();
 	}
 

@@ -489,6 +489,7 @@ class ESPModule: EditorModule
 
 			PlayerBase player = PlayerBase.Cast( target );
 			if ( !player ) return;
+			if ( !player.GetIdentity() ) return;
 
 			metadata.isPlayer = true;
 			metadata.name = player.GetIdentity().GetName();
