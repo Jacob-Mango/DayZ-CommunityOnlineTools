@@ -127,20 +127,20 @@ class GameModule: EditorModule
 			
 		if( type == CallType.Server )
 		{
-			vector direction = target.GetDirection();
-			vector position = target.GetPosition();
+			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
-			Human human = Human.Cast( target );
+			vector direction = player.GetDirection();
+			vector position = player.GetPosition();
 
-			if ( human )
+			if ( player )
 			{
-				int index = human.GetBoneIndexByName("Camera3rd_Helper");
+				int index = player.GetBoneIndexByName("Camera3rd_Helper");
 
 				float pQuat[];
-				human.GetBoneRotationWS( index, pQuat );
+				player.GetBoneRotationWS( index, pQuat );
 				vector rotation = Math3D.QuatToAngles( pQuat );
 
-				position = human.GetBonePositionWS( index );
+				position = player.GetBonePositionWS( index );
 				direction = rotation.AnglesToVector();
 			}
 

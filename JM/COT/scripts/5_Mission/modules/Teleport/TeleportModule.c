@@ -87,7 +87,7 @@ class TeleportModule: EditorModule
 
 		if ( distance < 1000 )
 		{
-			GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true, NULL, GetGame().GetPlayer() );
+			GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true );
 		}
 		else
 		{
@@ -124,7 +124,7 @@ class TeleportModule: EditorModule
 
 		if( type == CallType.Server )
 		{
-			PlayerBase player = PlayerBase.Cast( target );
+			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
 			if ( !player ) return;
 

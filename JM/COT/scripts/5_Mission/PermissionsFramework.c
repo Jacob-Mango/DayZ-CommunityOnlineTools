@@ -221,6 +221,16 @@ class PermissionsFramework
 				ap.Data.SName = data.param2;
 				ap.Data.SGUID = data.param3;
 
+				if ( ClientAuthPlayer == NULL )
+				{
+					return;
+				}
+
+				if ( ClientAuthPlayer.Data == NULL )
+				{
+					return;
+				}
+
 				if ( ClientAuthPlayer.Data.SGUID == data.param3 )
 				{
 					GetModuleManager().OnClientPermissionsUpdated();
