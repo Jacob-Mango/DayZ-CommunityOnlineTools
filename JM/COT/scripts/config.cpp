@@ -7,7 +7,7 @@ class CfgPatches
 		requiredVersion=0.1;
 		requiredAddons[]=
 		{
-			"RPC_Scripts", "JM_COT_GUI", "JM_COT_InputsDefault", "DZ_Data"
+			"JM_CF_Scripts", "JM_COT_GUI", "JM_COT_InputsDefault", "DZ_Data"
 		};
 	};
 };
