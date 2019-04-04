@@ -96,7 +96,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance, string funcname, bool checked = false )
+	static ref UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false )
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/actions/UIActionCheckbox.layout", parent );
 
