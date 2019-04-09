@@ -107,7 +107,15 @@ class ModuleManager
 
 	void OnUpdate( float timeslice )
 	{
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return; 
+		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
+
+		bool inputIsFocused = false;
+
+		ref Widget focusedWidget = GetFocus();
+		if ( focusedWidget && focusedWidget.ClassName().Contains("EditBoxWidget") )
+		{
+			inputIsFocused = true;
+		}
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -119,12 +127,17 @@ class ModuleManager
 				{
 					KeyMouseBinding k_m_Binding = module.GetBindings().Get(kb);
 
-					if ( COTMenuOpen )
+					if ( COTMenuOpen || GetGame().GetUIManager().GetMenu() )
 					{
-						if ( !k_m_Binding.CanBeUsedInMenu() || DISABLE_ALL_INPUT)
+						if ( !k_m_Binding.CanBeUsedInMenu() )
 						{
 							continue;
 						}
+					}
+
+					if ( DISABLE_ALL_INPUT || inputIsFocused )
+					{
+						continue;
 					}
 
 					UAInput input = GetUApi().GetInputByName( k_m_Binding.GetUAInputName() );
