@@ -14,7 +14,7 @@ class PermissionManager
 
 		RootPermission = new ref Permission( "ROOT" );
 
-/*
+		/*
 		for ( int i = 0; i < 180; i++ )
 		{
 			ref PlayerData data = new ref PlayerData;
@@ -23,7 +23,7 @@ class PermissionManager
 
 			AuthPlayers.Insert( new ref AuthPlayer( data ) );
 		}
-*/
+		*/
 	}
 
 	array< ref AuthPlayer > GetPlayers( ref array< string > steamIds = NULL )

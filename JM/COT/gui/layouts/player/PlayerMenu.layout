@@ -32,30 +32,42 @@ PanelWidgetClass PlayerMenu {
      vexactsize 1
      style blank
      "Scrollbar V" 1
-     Rows 2
      {
-      GridSpacerWidgetClass player_list_first {
-       position 0 0
-       size 1 1
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 1000
-      }
-      GridSpacerWidgetClass player_list_second {
-       position 0 3200
-       size 1 1
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 1000
-      }
+      GridSpacerWidgetClass player_list_scroller_container {
+							position 0 0
+							size 1 1
+							hexactpos 1
+							vexactpos 1
+							hexactsize 0
+							vexactsize 0
+							"Size To Content V" 1
+							Columns 1
+     		Rows 2
+							{
+								GridSpacerWidgetClass player_list_first {
+									position 0 0
+									size 1 1
+									hexactpos 1
+									vexactpos 1
+									hexactsize 0
+									vexactsize 0
+									"Size To Content V" 1
+									Columns 1
+									Rows 1000
+								}
+								GridSpacerWidgetClass player_list_second {
+									position 0 0
+									size 1 1
+									hexactpos 1
+									vexactpos 1
+									hexactsize 0
+									vexactsize 0
+									"Size To Content V" 1
+									Columns 1
+									Rows 1000
+								}
+							}
+						}
      }
     }
     TextWidgetClass text {
