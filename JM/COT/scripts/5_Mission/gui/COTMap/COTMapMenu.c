@@ -35,7 +35,7 @@ class COTMapMenu extends Form
 	
 	override void OnShow()
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayers, 500, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayers, 1000, true );
 	}
 
 	override void OnHide() 
@@ -45,7 +45,7 @@ class COTMapMenu extends Form
 
 	void UpdatePlayers() 
 	{
-		GetRPCManager().SendRPC( "COT_Admin", "Request_Map_PlayerPositions", new Param, true );
+		GetRPCManager().SendRPC( "COT_Map", "Request_Map_PlayerPositions", new Param, true );
 	}
 	
 	void ShowPlayers( ref array<ref PlayerData> data ) 
@@ -54,7 +54,7 @@ class COTMapMenu extends Form
 		
 		foreach( ref PlayerData playerData : data ) 
 		{
-			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 0, 0, 0), "");
+			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 230, 20, 20), "\\JM\\COT\\gui\\textures\\dot.paa");
 		}
 	}
 }
