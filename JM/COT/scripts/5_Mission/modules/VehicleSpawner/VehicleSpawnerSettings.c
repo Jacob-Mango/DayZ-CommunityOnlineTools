@@ -8,7 +8,7 @@ class VehicleSpawnerSettings
 
 		MakeDirectory( VEHICLE_SPAWNER_FOLDER );
 
-		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER );
+		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER + "/" );
 
 		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
 		{
@@ -28,6 +28,8 @@ class VehicleSpawnerSettings
 				settings.Vehicles.Insert( name, VehicleSpawnerFile.Load( name ) );
 			}
 		} else {
+			DeleteFiles( VEHICLE_SPAWNER_FOLDER, files );
+
 			settings.Defaults();
 			settings.Save();
 		}

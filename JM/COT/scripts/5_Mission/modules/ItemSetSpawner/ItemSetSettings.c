@@ -8,7 +8,7 @@ class ItemSetSettings
 
 		MakeDirectory( ITEM_SETS_FOLDER );
 
-		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER );
+		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER + "/" );
 
 		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
 		{
@@ -28,6 +28,8 @@ class ItemSetSettings
 				settings.ItemSets.Insert( name, ItemSetFile.Load( name ) );
 			}
 		} else {
+			DeleteFiles( ITEM_SETS_FOLDER, files );
+
 			settings.Defaults();
 			settings.Save();
 		}
