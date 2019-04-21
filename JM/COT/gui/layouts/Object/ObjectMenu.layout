@@ -41,17 +41,21 @@ PanelWidgetClass ObjectMenu {
        lines 20
        font "gui/fonts/sdf_MetronLight24"
       }
-      ItemPreviewWidgetClass object_preview {
-       color 1 1 1 1
+      PanelWidgetClass object_preview_wrapper {
        visible 1
        ignorepointer 1
+       color 0 0 0 1
        position 0.5 0
        size 0.5 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       priority 100
+       style rover_sim_colorable
+       {
+        ItemPreviewWidgetClass object_preview {
+         inheritalpha 1
+         visible 1
+         position 0.5 0
+         size 0.5 1
+        }
+       }
       }
      }
     }

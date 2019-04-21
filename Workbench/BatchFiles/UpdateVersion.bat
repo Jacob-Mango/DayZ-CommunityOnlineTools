@@ -6,11 +6,22 @@ if exist ../../project.cfg (
     echo Found the project.cfg
     cd ../../
 ) else (
-    echo project.cfg doesn't exist in first directory, trying the next possible directory.
     if exist project.cfg (
         echo Found the project.cfg
     ) else (
-        echo Failed to find the project.cfg
+        echo Failed to find the project.cfg file, exitting.
+        set /a failed=1
+    )
+)
+
+if exist ../../user.cfg (
+    echo Found the user.cfg
+    cd ../../
+) else (
+    if exist user.cfg (
+        echo Found the user.cfg
+    ) else (
+        echo Failed to find the user.cfg file, exitting.
         set /a failed=1
     )
 )
@@ -34,19 +45,19 @@ set /a majorVersion=0
 set /a minorVersion=0
 set versionFileLocation=
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg WorkDrive') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg WorkDrive') do (
     set workDrive=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg MajorVersion') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg MajorVersion') do (
     set /a majorVersion=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg MinorVersion') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg MinorVersion') do (
     set /a minorVersion=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg VersionFileLocation') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg VersionFileLocation') do (
     set versionFileLocation=%%a
 )
 
