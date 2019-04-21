@@ -32,6 +32,71 @@ class UIActionText extends UIActionBase
 		m_Text.SetText( text );
 	}
 
+
+	void SetLabelHAlign( UIActionHAlign type )
+    {
+		switch ( type )
+		{
+		case UIActionHAlign.CENTER:
+			m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.CENTER );
+			break;
+		case UIActionHAlign.LEFT:
+			// m_Label.SetFlags( m_Label.GetFlags() );
+			break;
+		case UIActionHAlign.RIGHT:
+			m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.RALIGN );
+			break;
+		}
+    }
+    
+    void SetLabelVAlign( UIActionVAlign type )
+    {
+		switch ( type )
+		{
+		case UIActionVAlign.CENTER:
+			m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.VCENTER );
+			break;
+		case UIActionVAlign.TOP:
+			// m_Label.SetFlags( m_Label.GetFlags() );
+			break;
+		case UIActionVAlign.BOTTOM:
+			// m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.RALIGN );
+			break;
+		}
+    }
+    
+    void SetTextHAlign( UIActionHAlign type )
+    {
+		switch ( type )
+		{
+		case UIActionHAlign.CENTER:
+			m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.CENTER );
+			break;
+		case UIActionHAlign.LEFT:
+			// m_Text.SetFlags( m_Text.GetFlags() );
+			break;
+		case UIActionHAlign.RIGHT:
+			m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.RALIGN );
+			break;
+		}
+    }
+    
+    void SetTextVAlign( UIActionVAlign type )
+    {
+		switch ( type )
+		{
+		case UIActionVAlign.CENTER:
+			m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.VCENTER );
+			break;
+		case UIActionVAlign.TOP:
+			// m_Text.SetFlags( m_Text.GetFlags() );
+			break;
+		case UIActionVAlign.BOTTOM:
+			// m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.RALIGN );
+			break;
+		}
+    }
+
 	override bool OnClick(Widget w, int x, int y, int button)
 	{	
 		if ( !m_HasCallback )

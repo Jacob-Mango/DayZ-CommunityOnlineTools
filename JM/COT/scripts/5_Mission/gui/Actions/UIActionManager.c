@@ -115,7 +115,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static ref UIActionText CreateText( Widget parent, string label, string text = "", Class instance = NULL, string funcname = "" )
+	static ref UIActionText CreateText( Widget parent, string label, string text = "", Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/actions/UIActionText.layout", parent );
 
@@ -127,6 +127,12 @@ class UIActionManager
 			action.SetCallback( instance, funcname );
 			action.SetLabel( label );
 			action.SetText( text );
+
+			action.SetLabelHAlign( lha );
+            action.SetLabelVAlign( lva );
+
+            action.SetTextHAlign( tha );
+            action.SetTextVAlign( tva );
 
 			return action;
 		}
