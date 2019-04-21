@@ -633,7 +633,7 @@ static string COT_FILE_EXIST = "do-not-delete";
 
 static void CreateFilesExist( string folder )
 {
-	FileHandle file = OpenFile( folder + COT_FILE_EXIST, FileMode.WRITE );
+	FileHandle file = OpenFile( folder + "/" + COT_FILE_EXIST, FileMode.WRITE );
 
 	if ( file == 0 )
 	{

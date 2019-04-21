@@ -11,14 +11,14 @@ class ItemSetFile
 	{
 		ref ItemSetFile settings = new ref ItemSetFile;
 
-		JsonFileLoader< ItemSetFile >.JsonLoadFile( ITEM_SETS_FOLDER + "/" + file, settings );
+		JsonFileLoader< ItemSetFile >.JsonLoadFile( ITEM_SETS_FOLDER + "/" + file + ".json", settings );
 
 		return settings;
 	}
 
 	void Save()
 	{
-		JsonFileLoader< ItemSetFile >.JsonSaveFile( ITEM_SETS_FOLDER + "/" + Name, this );
+		JsonFileLoader< ItemSetFile >.JsonSaveFile( ITEM_SETS_FOLDER + "/" + Name + ".json", this );
 	}
 
 	void Defaults()

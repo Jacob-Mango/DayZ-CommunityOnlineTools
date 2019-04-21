@@ -11,14 +11,14 @@ class VehicleSpawnerFile
 	{
 		ref VehicleSpawnerFile settings = new ref VehicleSpawnerFile;
 
-		JsonFileLoader< VehicleSpawnerFile >.JsonLoadFile( VEHICLE_SPAWNER_FOLDER + "/" + file, settings );
+		JsonFileLoader< VehicleSpawnerFile >.JsonLoadFile( VEHICLE_SPAWNER_FOLDER + "/" + file + ".json", settings );
 
 		return settings;
 	}
 
 	void Save()
 	{
-		JsonFileLoader< VehicleSpawnerFile >.JsonSaveFile( VEHICLE_SPAWNER_FOLDER + "/" + VehicleName, this );
+		JsonFileLoader< VehicleSpawnerFile >.JsonSaveFile( VEHICLE_SPAWNER_FOLDER + "/" + VehicleName + ".json", this );
 	}
 
 	void Defaults()
