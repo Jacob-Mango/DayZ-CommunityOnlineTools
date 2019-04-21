@@ -489,7 +489,7 @@ class PlayerModule: EditorModule
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) ) return;
 
-		PlayerBase senderPlayer = PlayerBase.Cast( target );
+		PlayerBase senderPlayer = GetPlayerObjectByIdentity( sender );
 
 		if ( senderPlayer == NULL ) return;
 
