@@ -528,9 +528,14 @@ class PlayerModule: EditorModule
 			Param2< bool, ref array< string > > data;
 			if ( !ctx.Read( data ) ) return;
 
+			PlayerBase player;
+			
 			if ( !data.param1 )
 			{
-				GetGame().SelectPlayer( sender, target );
+				player = GetPlayerObjectByIdentity( sender );
+				if ( !player ) return;
+
+				GetGame().SelectPlayer( sender, player );
 				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
 
 				COTLog( sender, "Left spectating/free camera" );
@@ -541,7 +546,7 @@ class PlayerModule: EditorModule
 
 			if ( players.Count() != 1 ) return;
 
-			PlayerBase player = players[0].PlayerObject;
+			player = players[0].PlayerObject;
 
 			if ( player == NULL ) return;
 

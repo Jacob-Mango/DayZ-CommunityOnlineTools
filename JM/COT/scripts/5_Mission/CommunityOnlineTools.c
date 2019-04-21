@@ -83,7 +83,8 @@ class CommunityOnlineTools
 		// GetModuleManager().RegisterModule( new MapEditorModule );
 		GetModuleManager().RegisterModule( new TeleportModule );
 		GetModuleManager().RegisterModule( new CameraTool );
-		GetModuleManager().RegisterModule( new GameModule );
+		GetModuleManager().RegisterModule( new ItemSetSpawnerModule );
+		GetModuleManager().RegisterModule( new VehicleSpawnerModule );
 		GetModuleManager().RegisterModule( new WeatherModule );
 		GetModuleManager().RegisterModule( new COTMapModule );
 	}

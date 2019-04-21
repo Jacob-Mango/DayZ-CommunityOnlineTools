@@ -1,10 +1,10 @@
-class GameBaseBuildingSpawn
+class ItemSetItemInformation
 {
 	string Item;
 	int NumberOfStacks;
 	int StackSize;
 
-	void GameBaseBuildingSpawn( string item, int numStacks, int stackSize )
+	void ItemSetItemInformation( string item, int numStacks, int stackSize )
 	{
 		Item = item;
 		NumberOfStacks = numStacks;

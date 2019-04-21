@@ -49,7 +49,7 @@ class COTMapModule: EditorModule
 			
 	 	  	m_ServerPlayers.Clear();
 			
-			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref PlayerData >>( playerDataArray ), true, sender );
+			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref PlayerData >>( playerDataArray ), false, sender );
 		}
 	}
 	
