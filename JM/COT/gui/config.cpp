@@ -13,8 +13,8 @@ class CfgPatches
 };
 class RscMapControl
 {
-	scaleMin=0.08;
-	scaleMax=0.60000002;
+	scaleMin=0.02;
+	scaleMax=3.000;
 	scaleDefault=1;
 	ptsPerSquareSea=8;
 	ptsPerSquareTxt=10;
