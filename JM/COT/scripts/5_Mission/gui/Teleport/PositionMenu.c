@@ -71,7 +71,7 @@ class PositionMenu extends Form
 
 	void Click_Teleport( UIEvent eid, ref UIActionButton action )
 	{
-		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ), true, NULL );
+		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )

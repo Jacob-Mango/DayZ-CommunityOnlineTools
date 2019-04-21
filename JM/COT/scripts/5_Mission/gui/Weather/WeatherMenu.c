@@ -91,7 +91,7 @@ class WeatherMenu extends Form
 
 			UpdateSliderStartTime( m_CurrHour, m_CurrMinute );
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ) );
 
 			return true;
 		}
@@ -118,7 +118,7 @@ class WeatherMenu extends Form
 
 			UpdateSliderStartDay( m_CurrMonth, m_CurrDay );
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ) );
 
 			return true;
 		}
@@ -128,9 +128,9 @@ class WeatherMenu extends Form
 
 			m_CurrOvercast = m_SldOvercast.GetCurrent() * 0.01;
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ) );
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute + 5), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute + 5) );
 
 			return true;
 		}
@@ -140,8 +140,8 @@ class WeatherMenu extends Form
 
 			m_CurrRain = m_SldRain.GetCurrent() * 0.01;
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ) );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ) );
 
 			return true;
 		}
@@ -151,7 +151,7 @@ class WeatherMenu extends Form
 
 			m_CurrFog = m_SldFog.GetCurrent() * 0.01;
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ) );
 
 			return true;
 		}
@@ -161,7 +161,7 @@ class WeatherMenu extends Form
 
 			m_CurrWindForce = m_SldWindForce.GetCurrent() * 0.01;
 
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ) );
 
 			return true;
 		}

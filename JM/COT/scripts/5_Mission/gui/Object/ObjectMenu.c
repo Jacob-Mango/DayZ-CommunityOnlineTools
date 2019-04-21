@@ -175,28 +175,28 @@ class ObjectMenu extends Form
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetText() ), true );
+		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetText() ) );
 	}
 
 	void SpawnPosition( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ), true );
+		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ) );
 	}
 
 	void SpawnInventory( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), SerializePlayersID( GetSelectedPlayers() ) ), true );
+		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void DeleteOnCursor( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, true, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
+		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )

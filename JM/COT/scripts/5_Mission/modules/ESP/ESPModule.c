@@ -177,12 +177,13 @@ class ESPModule: EditorModule
 
 		if ( type == CallType.Server )
 		{
-			if ( !target ) return;
+			PlayerBase player = GetPlayerObjectByIdentity( sender );
+			if ( !player ) return;
 
 			COTLog( sender, "Entering Full Map ESP" );
-			GetGame().ObjectDelete( target );
+			GetGame().ObjectDelete( player );
 			
-			GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param, true );
+			GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 		}
 		
 		if ( type == CallType.Client )
@@ -195,7 +196,7 @@ class ESPModule: EditorModule
 	{
 		if ( m_SelectedBoxes.Count() > 0 ) 
 		{
-			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param3< vector, vector, float >( Position, Rotation, Health ), true, NULL, m_SelectedBoxes[0].Info.target );
+			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param3< vector, vector, float >( Position, Rotation, Health ), false, NULL, m_SelectedBoxes[0].Info.target );
 		}
 	}
 
@@ -213,7 +214,7 @@ class ESPModule: EditorModule
 			m_SelectedBoxes[j].Unlink();
 		}
 
-		GetRPCManager().SendRPC( "COT_ESP", "ServerDeleteSelected", new Param1< ref array< Object > >( objects ), true );
+		GetRPCManager().SendRPC( "COT_ESP", "ServerDeleteSelected", new Param1< ref array< Object > >( objects ) );
 
 		m_SelectedBoxes.Clear();
 		delete objects;
@@ -223,7 +224,7 @@ class ESPModule: EditorModule
 	{
 		if ( CurrentActiveCamera == NULL ) return;
 
-		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param, true, NULL, GetGame().GetPlayer() );
+		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 	}
 
 	void SelectBox( ref ESPRenderBox box, bool checked, bool button )

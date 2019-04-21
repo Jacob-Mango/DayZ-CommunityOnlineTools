@@ -45,7 +45,7 @@ class COTMapMenu extends Form
 
 	void UpdatePlayers() 
 	{
-		GetRPCManager().SendRPC( "COT_Map", "Request_Map_PlayerPositions", new Param, true );
+		GetRPCManager().SendRPC( "COT_Map", "Request_Map_PlayerPositions", new Param );
 	}
 	
 	void ShowPlayers( ref array<ref PlayerData> data ) 

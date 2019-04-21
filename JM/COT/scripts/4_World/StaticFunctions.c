@@ -589,3 +589,71 @@ static float VARGB[4] = { 0, 0, 0, 0 };
 static float CARGB[4] = { 0, 0, 0, 1 };
 
 static int VIEWDISTANCE = 1600;
+
+static array< string > FindFilesInLocation( string folder )
+{
+	//Print("FindFilesInLocation( " + folder + " ) Start");
+	array< string > files = new array< string >;
+	string fileName;
+	FileAttr fileAttr;
+	FindFileHandle findFileHandle = FindFile( folder + "*", fileName, fileAttr, 0 );
+	if ( findFileHandle )
+	{
+		//Print( "File: " + fileName );
+		if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
+		{
+			files.Insert( fileName );
+		}
+		while ( FindNextFile( findFileHandle, fileName, fileAttr ) )
+		{
+			//Print( "File: " + fileName );
+			if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
+			{
+				files.Insert( fileName );
+			}
+		}
+	}
+	CloseFindFile( findFileHandle );
+	//Print("FindFilesInLocation( " + folder + " ) Finished");
+	return files;
+}
+
+static void DeleteFiles( string folder, array< string > files )
+{
+	//Print("DeleteFiles( " + folder + " ) Start");
+	for ( int i = 0; i < files.Count(); i++ )
+	{
+		//Print( "File: " + folder + files[i] );
+		DeleteFile( folder + files[i] );
+	}
+	//Print("DeleteFiles( " + folder + " ) Finished");
+}
+
+static string COT_FILE_EXIST = "do-not-delete";
+
+static void CreateFilesExist( string folder )
+{
+	FileHandle file = OpenFile( folder + COT_FILE_EXIST, FileMode.WRITE );
+
+	if ( file == 0 )
+	{
+		Error( "[COT::StaticFunctions] Can't write to the default file in " + folder );
+		return;
+	}
+
+	FPrint( file, "Do not delete this file, this file allows the other files to be read. If it can't find this file the folder is cleared!" );
+	CloseFile( file );
+}
+
+static bool ArrayContains( array< string > arr, string match )
+{
+	if ( arr.Count() == 0 ) return false;
+
+	for ( int i = 0; i < arr.Count(); i++ )
+	{
+		if ( arr[i] == match )
+			return true;
+	}
+
+	return false;
+}
