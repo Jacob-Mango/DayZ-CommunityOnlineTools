@@ -19,7 +19,6 @@ FrameWidgetClass COTMenu {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   priority 100000
   }
   PanelWidgetClass RightPanel {
    visible 1
@@ -32,7 +31,6 @@ FrameWidgetClass COTMenu {
    vexactpos 0
    hexactsize 1
    vexactsize 0
-   priority 200000
    style DayZDefaultPanelTop
    {
     PanelWidgetClass TitleBar {

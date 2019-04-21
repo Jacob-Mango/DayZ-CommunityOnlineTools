@@ -26,10 +26,6 @@ GameProjectClass {
 	  "gui/imagesets/playstation_buttons.imageset"
 	  "gui/imagesets/selection.imageset"
 	  "gui/imagesets/console_toolbar.imageset"
-	  "DayZExpansion/GUI/imagesets/expansion_gui.imageset"
-	  "DayZExpansion/GUI/imagesets/expansion_helicopter_ui.imageset"
-	  "DayZExpansion/GUI/imagesets/expansion_iconset.imageset"
-	  "DayZExpansion/GUI/imagesets/expansion_newsfeed.imageset"
 	 }
 	 widgetStyles {
 	  "gui/looknfeel/dayzwidgets.styles" 
@@ -54,32 +50,33 @@ GameProjectClass {
 			Name "game"
 			Paths {
 				"scripts/3_Game"
-				"RPCFramework/scripts/3_Game"
-				"DayZExpansion/Scripts/3_Game"
+				"JM/CF/Scripts/3_Game"
+				"JM/COT/Scripts/5_Mission"
 			}
 			EntryPoint "CreateGame"
 		}
 		ScriptModulePathClass {
 			Name "world"
 			Paths {
-			 "scripts/4_World"
-			 "DayZExpansion/Scripts/4_World"
-			 }
+				"scripts/4_World"
+				"JM/COT/Scripts/5_Mission"
+			}
 			EntryPoint ""
 		}
 		ScriptModulePathClass {
 			Name "mission"
 			Paths {
-			 "scripts/5_Mission"
-			 "DayZExpansion/Scripts/5_Mission"
-			 }
+				"scripts/5_Mission"
+				"JM/CF/Scripts/5_Mission"
+				"JM/COT/Scripts/5_Mission"
+			}
 			EntryPoint "CreateMission"
 		}
 		ScriptModulePathClass {
 			Name "workbench"
 			Paths {
-			 "scripts/editor/Workbench"
-			 "scripts/editor/plugins"
+				"scripts/editor/Workbench"
+				"scripts/editor/plugins"
 			}
 			EntryPoint ""
 		} 

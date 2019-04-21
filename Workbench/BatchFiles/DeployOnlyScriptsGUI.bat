@@ -76,7 +76,7 @@ for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg u
     set guiPrefix=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg AdditionalMPMods') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg AdditionalSPMods') do (
     set mods=%%a
 )
 
@@ -84,7 +84,7 @@ for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg u
     set serverProfileDirectory=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg MPMission') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg SPMission') do (
     set mission=%%a
 )
 
@@ -140,10 +140,10 @@ if "%scriptsPrefix%"=="" (
     echo ScriptsPrefix parameter was not set in the project.cfg
 )
 
-echo MPMission is: "%mission%"
+echo SPMission is: "%mission%"
 if "%mission%"=="" (
     set /a failed=1
-    echo MPMission parameter was not set in the project.cfg
+    echo SPMission parameter was not set in the project.cfg
 )
 
 echo GUIPrefix is: "%guiPrefix%"
@@ -194,9 +194,9 @@ if "%modName%"=="" (
     echo ModName parameter was not set in the project.cfg
 )
 
-echo AdditionalMPMods is: "%mods%"
+echo AdditionalSPMods is: "%mods%"
 if "%mods%"=="" (
-    echo AdditionalMPMods parameter was not set in the project.cfg, ignoring.
+    echo AdditionalSPMods parameter was not set in the project.cfg, ignoring.
     
     set mods=%modName%
 ) else (
@@ -269,12 +269,6 @@ echo "Packaging Addons"
 %makePBO% -B -U -P -D -N "%workDrive%%prefixLinkRoot%\%scriptsPrefix%" "%modSymlinkDirectory%%modName%\Addons\%scriptsPrefix%.pbo" 
 %signFile% "%privateKey%" "%modSymlinkDirectory%%modName%\Addons\%scriptsPrefix%.pbo"
 
-chdir /d "%serverDirectory%"
-echo start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
-start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
-
-TIMEOUT /T 5 /NOBREAK
-
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% "-connectDefer=127.0.0.1" "-portDefer=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
-start %clientEXE% %clientLaunchParams% "-connectDefer=127.0.0.1" "-portDefer=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
+echo start %clientEXE% %clientLaunchParams% "-mod=%mods%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
+start %clientEXE% %clientLaunchParams% "-mod=%mods%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true

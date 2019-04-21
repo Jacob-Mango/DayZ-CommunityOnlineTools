@@ -6,11 +6,22 @@ if exist ../../project.cfg (
     echo Found the project.cfg
     cd ../../
 ) else (
-    echo project.cfg doesn't exist in first directory, trying the next possible directory.
     if exist project.cfg (
         echo Found the project.cfg
     ) else (
-        echo Failed to find the project.cfg
+        echo Failed to find the project.cfg file, exitting.
+        set /a failed=1
+    )
+)
+
+if exist ../../user.cfg (
+    echo Found the user.cfg
+    cd ../../
+) else (
+    if exist user.cfg (
+        echo Found the user.cfg
+    ) else (
+        echo Failed to find the user.cfg file, exitting.
         set /a failed=1
     )
 )
@@ -40,51 +51,51 @@ set mission=
 set serverEXE=
 set serverLaunchParams=
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ModName') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ModName') do (
     set modName=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg AdditionalMPMods') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg AdditionalMPMods') do (
     set mods=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg Port') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg Port') do (
     set /a port=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ServerPassword') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerPassword') do (
     set password=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg GameDirectory') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg GameDirectory') do (
     set gameDirectory=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ServerDirectory') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerDirectory') do (
     set serverDirectory=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ServerProfileDirectory') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerProfileDirectory') do (
     set serverProfileDirectory=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg SPMission') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg SPMission') do (
     set mission=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ClientEXE') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ClientEXE') do (
     set clientEXE=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ServerEXE') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerEXE') do (
     set serverEXE=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ClientLaunchParams') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ClientLaunchParams') do (
     set clientLaunchParams=%%a
 )
 
-for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg ServerLaunchParams') do (
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerLaunchParams') do (
     set serverLaunchParams=%%a
 )
 
