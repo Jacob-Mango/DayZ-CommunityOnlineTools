@@ -181,7 +181,10 @@ class COTModule : Module
 
 	void CloseCOT()
 	{
-		CloseMenu( false );
+		if ( m_COTMenu.IsVisible() )
+		{
+			CloseMenu( false );
+		}
 	}
 }
 
