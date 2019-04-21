@@ -5,22 +5,28 @@ class COTMapModule: EditorModule
 	void COTMapModule() 
 	{
 		m_ServerPlayers = new ref array< Man >;
+
+		GetPermissionsManager().RegisterPermission( "Map.ShowPlayers" );
+		GetPermissionsManager().RegisterPermission( "Map.Hidden" );
+		GetPermissionsManager().RegisterPermission( "Map.View" );
 		
-		GetPermissionsManager().RegisterPermission( "Admin.Map.ShowPlayers" );
-		GetPermissionsManager().RegisterPermission( "Admin.Map.Hidden" );
-		
-		GetRPCManager().AddRPC( "COT_Admin", "Request_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Receive_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_Map", "Request_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_Map", "Receive_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
 	}
 	
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/gui/layouts/Map/COTMap.layout";
 	}
+
+	override bool HasAccess()
+	{
+		return GetPermissionsManager().HasPermission( "Map.View" );
+	}
 	
 	void Request_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.ShowPlayers", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", sender ) )
 			return;
 
 		if( type == CallType.Server )
@@ -43,7 +49,7 @@ class COTMapModule: EditorModule
 			
 	 	  	m_ServerPlayers.Clear();
 			
-			GetRPCManager().SendRPC("COT_Admin", "Receive_Map_PlayerPositions", new Param1< ref array<ref PlayerData >>( playerDataArray ), true, sender );
+			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref PlayerData >>( playerDataArray ), true, sender );
 		}
 	}
 	
@@ -55,7 +61,7 @@ class COTMapModule: EditorModule
 		
 		if ( !ctx.Read( data ) ) return;
 		
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.ShowPlayers", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", sender ) )
 			return;
 		
 		COTMapMenu.Cast(form).ShowPlayers( data.param1 );

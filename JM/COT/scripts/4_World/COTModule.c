@@ -58,6 +58,10 @@ class COTModule : Module
 		KeyMouseBinding toggleCOT = new KeyMouseBinding( GetModuleType(), "ToggleCOT", "Toggles the ability to use COT features.", false );
 		toggleCOT.AddBinding( "kEnd" );
 		RegisterKeyMouseBinding( toggleCOT );
+
+		KeyMouseBinding closeCOT = new KeyMouseBinding( GetModuleType(), "CloseCOT", "Closes COT.", true );
+		closeCOT.AddBinding( "kEscape" );
+		RegisterKeyMouseBinding( closeCOT );
 	}
 
 	override void OnUpdate( float timeslice )
@@ -173,6 +177,11 @@ class COTModule : Module
 		}
 		
 		GetPlayer().Message(message, color);
+	}
+
+	void CloseCOT()
+	{
+		CloseMenu( false );
 	}
 }
 
