@@ -1,0 +1,21 @@
+{
+    "Name": "ExpansionSarka",
+    "VehicleParts": [
+        "ExpansionSarkaWheel",
+        "ExpansionSarkaWheel",
+        "ExpansionSarkaWheel",
+        "ExpansionSarkaWheel",
+        "ExpansionSarkaDoorsDriver",
+        "ExpansionSarkaDoorsCoDriver",
+        "ExpansionSarkaDoorsCargo1",
+        "ExpansionSarkaDoorsCargo2",
+        "ExpansionSarkaHood",
+        "ExpansionSarkaBoot",
+        "CarBattery",
+        "CarRadiator",
+        "EngineBelt",
+        "SparkPlug",
+        "HeadlightH7",
+        "HeadlightH7"
+    ]
+}

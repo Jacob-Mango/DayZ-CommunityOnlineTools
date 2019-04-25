@@ -1,0 +1,51 @@
+{
+	"Departments": [
+		{
+			"DepartmentName": "Community Online Tools",
+			"Sections": [
+				{
+					"SectionName": "Sr. Developers",
+					"SectionLines": [
+						"Jacob_Mango",
+						"Arkensor",
+						"DannyDog68"
+					]
+				},
+				{
+					"SectionName": "Jr. Developers",
+					"SectionLines": [
+						"Thurston",
+						"GrosTon1"
+					]
+				},
+				{
+					"SectionName": "Thank you to the following communities",
+					"SectionLines": [
+						"PIPSI.NET AU/NZ",
+						"1SKGaming",
+						"AWG",
+						"r/DayZUnderground",
+						"Trumps Wall"
+					]
+				},
+				{
+					"SectionName": "Thank you for being guinea pigs",
+					"SectionLines": [
+						"Thurston",
+						"Not A Banana",
+						"Zombie",
+						"odizzzle",
+						"wydox",
+						"DM4",
+						"Dingo57",
+						"Grim",
+						"Cleetus",
+						"GrosTon1",
+						"DirtySanchez",
+						"Diesel"
+					]
+				}
+			]
+		}
+	]
+}
