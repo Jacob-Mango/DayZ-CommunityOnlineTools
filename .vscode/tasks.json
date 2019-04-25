@@ -15,14 +15,12 @@
                     }
                 }
             },
-            "command": "deploy.bat",
-            "args": [
-                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@Community Online Tools"
-            ],
+            "command": "Workbench/BatchFiles/Deploy.bat",
+            "args": [],
             "problemMatcher": []
         },
         {
-            "label": "Launch",
+            "label": "Launch MP",
             "windows": {
                 "options": {
                     "shell": {
@@ -33,14 +31,12 @@
                     }
                 }
             },
-            "command": "launch.bat",
-            "args": [
-                "C:\\Games\\steamapps\\common\\DayZ", "C:\\Games\\steamapps\\common\\DayZServer", "@Community Online Tools"
-            ],
+            "command": "Workbench/BatchFiles/LaunchLocalMP.bat",
+            "args": [],
             "problemMatcher": []
         },
         {
-            "label": "Deploy Server",
+            "label": "Launch SP",
             "windows": {
                 "options": {
                     "shell": {
@@ -51,10 +47,56 @@
                     }
                 }
             },
-            "command": "Tools/deploy-server.bat",
-            "args": [
-                "@CommunityOnlineTools", "@RPCFramework", "@CommunityOnlineTools"
-            ],
+            "command": "Workbench/BatchFiles/LaunchOffline.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Exit",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/Exit.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Redeploy Scripts GUI Launch",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/RedeployLaunchScriptsGUI.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "Update Version",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/UpdateVersion.bat",
+            "args": [],
             "problemMatcher": []
         }
     ]
