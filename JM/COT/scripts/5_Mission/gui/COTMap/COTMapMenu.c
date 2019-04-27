@@ -57,4 +57,11 @@ class COTMapMenu extends Form
 			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 230, 20, 20), "\\JM\\COT\\gui\\textures\\dot.paa");
 		}
 	}
+	
+	override bool OnDoubleClick(Widget w, int x, int y, int button)
+	{
+		GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( SnapToGround(map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) ), true );
+
+		return true;
+	}
 }
