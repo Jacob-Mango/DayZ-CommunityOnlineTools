@@ -98,6 +98,22 @@
             "command": "Workbench/BatchFiles/UpdateVersion.bat",
             "args": [],
             "problemMatcher": []
+        },
+        {
+            "label": "Run Workbench",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": [
+                            "/d", "/c"
+                        ]
+                    }
+                }
+            },
+            "command": "Workbench/BatchFiles/RunWorkbench.bat",
+            "args": [],
+            "problemMatcher": []
         }
     ]
 }

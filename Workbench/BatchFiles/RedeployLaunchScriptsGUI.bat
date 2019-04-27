@@ -100,6 +100,10 @@ for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg u
     set clientLaunchParams=%%a
 )
 
+for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg ServerLaunchParams') do (
+    set serverLaunchParams=%%a
+)
+
 for /f "delims=" %%a in ('call %batchFileDirectory%ExtractData.bat project.cfg user.cfg WorkDrive') do (
     set workDrive=%%a
 )
@@ -188,6 +192,12 @@ if "%clientLaunchParams%"=="" (
     echo ClientLaunchParams parameter was not set in the project.cfg
 )
 
+echo ServerLaunchParams is: "%serverLaunchParams%"
+if "%serverLaunchParams%"=="" (
+    set /a failed=1
+    echo ServerLaunchParams parameter was not set in the project.cfg
+)
+
 echo ModName is: "%modName%"
 if "%modName%"=="" (
     set /a failed=1
@@ -270,11 +280,11 @@ echo "Packaging Addons"
 %signFile% "%privateKey%" "%modSymlinkDirectory%%modName%\Addons\%scriptsPrefix%.pbo"
 
 chdir /d "%serverDirectory%"
-echo start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
-start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
+echo start %serverEXE% %serverLaunchParams% -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
+start %serverEXE% %serverLaunchParams% -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" "-password=%password%" -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%mods%"
 
 TIMEOUT /T 5 /NOBREAK
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% "-connectDefer=127.0.0.1" "-portDefer=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
-start %clientEXE% %clientLaunchParams% "-connectDefer=127.0.0.1" "-portDefer=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
+echo start %clientEXE% %clientLaunchParams% "-connect=127.0.0.1" "-port=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
+start %clientEXE% %clientLaunchParams% "-connect=127.0.0.1" "-port=%port%" "-password=%password%" "-mod=%mods%" -dologs -adminlog -freezecheck -scriptDebug=true
