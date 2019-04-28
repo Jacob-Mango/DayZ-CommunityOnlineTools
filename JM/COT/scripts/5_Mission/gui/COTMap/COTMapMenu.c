@@ -60,7 +60,7 @@ class COTMapMenu extends Form
 	
 	override bool OnDoubleClick(Widget w, int x, int y, int button)
 	{
-		GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( SnapToGround(map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) ), true );
+		GetRPCManager().SendRPC( "COT_Map", "MapTeleport", new Param1< vector >( SnapToGround(map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) ), true );
 
 		return true;
 	}

@@ -127,18 +127,18 @@ class TeleportModule: EditorModule
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
 			if ( !player ) return;
-
+	
 			if ( player.IsInTransport() )
 			{
 				// player.GetTransport().SetOrigin( data.param1 );
 			   HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
+	
 				if ( vehCommand )
 				{
 					Transport transport = vehCommand.GetTransport();
-
+	
 					if ( transport == NULL ) return;
-
+	
 					transport.SetPosition( data.param1 );
 				}
 			} else

@@ -195,8 +195,15 @@ class ObjectMenu extends Form
 	void DeleteOnCursor( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
+		
+		Object o = GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 );
+		
+		if ( o != NULL ) {
+			GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, o );
+		} else {
+			
+			GetPlayer().MessageImportant( "No object aimed at." );
+		}
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
