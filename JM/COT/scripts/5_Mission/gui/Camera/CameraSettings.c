@@ -113,8 +113,10 @@ class CameraSettings extends Form
 		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 	}
 	
-	void Update()
+	override void Update()
 	{
+		super.Update();
+		
 		UpdateSliders();
 	}
 

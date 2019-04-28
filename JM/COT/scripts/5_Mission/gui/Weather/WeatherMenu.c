@@ -199,8 +199,9 @@ class WeatherMenu extends Form
 	{
 	}
 
-	void Update()
+	override void Update()
 	{
+		super.Update();
 	}
 
 	void ResetSliders()

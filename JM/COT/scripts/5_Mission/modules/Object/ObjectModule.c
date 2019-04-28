@@ -47,12 +47,13 @@ class ObjectModule: EditorModule
 
 			entity.SetHealth( entity.GetMaxHealth() );
 
+			int quantity = 0;
+			
 			if ( entity.IsInherited( ItemBase ) )
 			{
 				ItemBase oItem = ItemBase.Cast( entity );
 				SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
 
-				int quantity = 0;
 
 				string text = data.param3;
 
@@ -71,8 +72,37 @@ class ObjectModule: EditorModule
 
 			entity.PlaceOnSurface();
 
-			COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + data.param3 );
+			COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
 		}
+	}
+	
+	protected void SpawnItemOnPlayer( ref PlayerIdentity sender, PlayerBase player, string item, string quantText )
+	{
+		EntityAI entity = player.GetInventory().CreateInInventory( item );
+
+		entity.SetHealth( entity.GetMaxHealth() );
+
+		int quantity = 0;
+				
+		if ( entity.IsInherited( ItemBase ) )
+		{
+			ItemBase oItem = ItemBase.Cast( entity );
+			SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
+
+			quantText.ToUpper();
+
+			if ( quantText == "MAX")
+			{
+				quantity = oItem.GetQuantityMax();
+			} else
+			{
+				quantity = quantText.ToInt();
+			}
+
+			oItem.SetQuantity(quantity);
+		}
+		
+		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.authenticatedPlayer.GetSteam64ID() + " with amount " + quantity );
 	}
 
 	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -85,37 +115,17 @@ class ObjectModule: EditorModule
 		
 		if( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = DeserializePlayersID( data.param3 );
-
-			for ( int i = 0; i < players.Count(); i++ )
+			if ( !GetGame().IsMultiplayer() )
 			{
-				EntityAI entity = players[i].PlayerObject.GetInventory().CreateInInventory( data.param1 );
-
-				entity.SetHealth( entity.GetMaxHealth() );
-
-				if ( entity.IsInherited( ItemBase ) )
+				SpawnItemOnPlayer( sender, GetGame().GetPlayer(), data.param1, data.param2 );
+			} else
+			{
+				array< ref AuthPlayer > players = DeserializePlayersID( data.param3 );
+	
+				for ( int i = 0; i < players.Count(); i++ )
 				{
-					ItemBase oItem = ItemBase.Cast( entity );
-					SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
-
-					int quantity = 0;
-
-					string text = data.param2;
-
-					text.ToUpper();
-
-					if (text == "MAX")
-					{
-						quantity = oItem.GetQuantityMax();
-					} else
-					{
-						quantity = text.ToInt();
-					}
-
-					oItem.SetQuantity(quantity);
+					SpawnItemOnPlayer( sender, players[i].PlayerObject, data.param1, data.param2 );
 				}
-
-				COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") on " + players[i].GetSteam64ID() + " with amount " + data.param3 );
 			}
 		}
 	}

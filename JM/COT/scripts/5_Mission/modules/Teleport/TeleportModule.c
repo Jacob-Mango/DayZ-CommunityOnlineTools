@@ -160,8 +160,6 @@ class TeleportModule: EditorModule
 
 		if( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
-
 			vector position = "0 0 0";
 
 			string name = data.param1;
@@ -183,18 +181,48 @@ class TeleportModule: EditorModule
 			}
 
 			position = SnapToGround( location.Position );
-
-			for ( int j = 0; j < players.Count(); j++ )
+			PlayerBase player;
+			HumanCommandVehicle vehCommand;
+			Transport transport;
+			
+			if ( !GetGame().IsMultiplayer() )
 			{
-				PlayerBase player = players[j].PlayerObject;
-
+				player = GetGame().GetPlayer();
+				
 				if ( player.IsInTransport() )
 				{
-					HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+					vehCommand = player.GetCommand_Vehicle();
 
 					if ( vehCommand )
 					{
-						Transport transport = vehCommand.GetTransport();
+						transport = vehCommand.GetTransport();
+
+						if ( transport == NULL ) return;
+
+						transport.SetOrigin( position );
+						transport.SetPosition( position );
+					}
+				} else 
+				{
+					player.SetPosition( position );
+				}
+				
+				return;
+			}
+
+			array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
+			
+			for ( int j = 0; j < players.Count(); j++ )
+			{
+				player = players[j].PlayerObject;
+
+				if ( player.IsInTransport() )
+				{
+					vehCommand = player.GetCommand_Vehicle();
+
+					if ( vehCommand )
+					{
+						transport = vehCommand.GetTransport();
 
 						if ( transport == NULL ) return;
 
