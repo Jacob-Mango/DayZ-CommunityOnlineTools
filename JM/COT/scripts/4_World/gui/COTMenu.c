@@ -123,6 +123,8 @@ class COTMenu
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 
+		if ( !layoutRoot ) return;
+		
 		layoutRoot.Show( true );
 
 		COTMenuOpen = true;
@@ -135,6 +137,8 @@ class COTMenu
 		SetFocus( NULL );
 
 		OnHide();
+		
+		if ( !layoutRoot ) return;
 
 		layoutRoot.Show( false );
 

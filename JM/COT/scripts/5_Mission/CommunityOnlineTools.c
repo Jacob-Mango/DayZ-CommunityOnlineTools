@@ -53,23 +53,23 @@ class CommunityOnlineTools
 
 		if( type == CallType.Server )
 		{
-			Print( "" + sender.GetPlainId() + " is loading in with version " + data.param1 + "." + data.param2 + "." + data.param3 );
+			COTLog( sender, "Loading in with version " + data.param1 + "." + data.param2 + "." + data.param3 );
 
 			if ( data.param1 != m_MajorVersion )
 			{
-				Print( "" + sender.GetPlainId() + " is running a different major version of Community Online Tools." );
+				COTLog( sender, " Running a different major version of Community Online Tools." );
 				return;
 			}
 
 			if ( data.param2 != m_MinorVersion )
 			{
-				Print( "" + sender.GetPlainId() + " is running a different minor version of Community Online Tools." );
+				COTLog( sender, " Running a different minor version of Community Online Tools." );
 				return;
 			}
 
 			if ( data.param3 != m_BuildVersion )
 			{
-				Print( "" + sender.GetPlainId() + " is running a different revision of Community Online Tools." );	   
+				COTLog( sender, " Running a different revision of Community Online Tools." );	   
 				return;
 			}
 		}

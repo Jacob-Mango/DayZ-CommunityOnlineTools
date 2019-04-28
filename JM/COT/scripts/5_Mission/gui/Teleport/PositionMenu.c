@@ -51,7 +51,13 @@ class PositionMenu extends Form
 		m_PositionX = UIActionManager.CreateText( coords, "X: " );
 		m_PositionZ = UIActionManager.CreateText( coords, "Z: " );
 
-		m_Teleport = UIActionManager.CreateButton( rows, "Teleport Selected Player(s)", this, "Click_Teleport" );
+		if ( GetGame().IsServer() )
+		{
+			m_Teleport = UIActionManager.CreateButton( rows, "Teleport", this, "Click_Teleport" );
+		} else
+		{
+			m_Teleport = UIActionManager.CreateButton( rows, "Teleport Selected Player(s)", this, "Click_Teleport" );
+		}
 	}
 
 	override void OnShow()
