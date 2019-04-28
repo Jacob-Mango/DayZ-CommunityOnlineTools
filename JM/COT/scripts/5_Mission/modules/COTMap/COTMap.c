@@ -9,9 +9,11 @@ class COTMapModule: EditorModule
 		GetPermissionsManager().RegisterPermission( "Map.ShowPlayers" );
 		GetPermissionsManager().RegisterPermission( "Map.Hidden" );
 		GetPermissionsManager().RegisterPermission( "Map.View" );
+		GetPermissionsManager().RegisterPermission( "Map.Teleport" );
 		
 		GetRPCManager().AddRPC( "COT_Map", "Request_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Map", "Receive_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_Map", "MapTeleport", this, SingeplayerExecutionType.Server );
 	}
 	
 	override string GetLayoutRoot()
@@ -65,5 +67,40 @@ class COTMapModule: EditorModule
 			return;
 		
 		COTMapMenu.Cast(form).ShowPlayers( data.param1 );
+	}
+	
+	void MapTeleport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Map.Teleport", sender ) )
+			return;
+
+		Param1< vector > data;
+		if ( !ctx.Read( data ) ) return;
+
+		if( type == CallType.Server )
+		{
+			PlayerBase player = GetPlayerObjectByIdentity( sender );
+
+			if ( !player ) return;
+
+			if ( player.IsInTransport() )
+			{
+				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+				if ( vehCommand )
+				{
+					Transport transport = vehCommand.GetTransport();
+
+					if ( transport == NULL ) return;
+
+					transport.SetPosition( data.param1 );
+				}
+			} else
+			{
+				player.SetPosition( data.param1 );
+			}
+
+			COTLog( sender, "Teleported to position " + data.param1 + " from map." );
+		}
 	}
 }
