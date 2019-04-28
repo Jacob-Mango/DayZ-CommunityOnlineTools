@@ -22,6 +22,8 @@ class ItemSetSpawnerModule: EditorModule
 
 		if ( GetGame().IsClient() )
 			GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param, true );
+		
+		meta = ItemSetSpawnerMeta.DeriveFromSettings( settings );
 	}
 
 	override void ReloadSettings()
@@ -161,8 +163,6 @@ class ItemSetSpawnerModule: EditorModule
 		ref Param2< string, ref array< string > > data;
 		if ( !ctx.Read( data ) ) return;
 
-		array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
-
 		ref ItemSetFile file = settings.ItemSets.Get( data.param1 );
 
 		if ( file == NULL ) return;
@@ -182,25 +182,42 @@ class ItemSetSpawnerModule: EditorModule
 			return;
 		}
 		
-		if( type == CallType.Server )
+		EntityAI chest;
+		
+		if ( GetGame().IsMultiplayer() )
 		{
-			for ( int i = 0; i < players.Count(); i++ )
+			array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
+			
+			if( type == CallType.Server )
 			{
-				EntityAI chest;
-
-				if ( file.ContainerClassName != "" )
+				for ( int i = 0; i < players.Count(); i++ )
 				{
-					chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
+					if ( file.ContainerClassName != "" )
+					{
+						chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
+					}
+	
+					for (int j = 0; j < parts.Count(); j++)
+					{
+						chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
+					}
+	
+					COTLog( sender, "Loot chest " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
 				}
-
-				for (int j = 0; j < parts.Count(); j++)
-				{
-					chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
-				}
-
-				COTLog( sender, "Loot chest " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
 			}
-
+		} else
+		{	
+			if ( file.ContainerClassName != "" )
+			{
+				chest = SpawnItem( GetGame().GetPlayer(), file.ContainerClassName );
+			}
+	
+			for (int k = 0; k < parts.Count(); k++)
+			{
+				chest = SpawnItemInContainer( file.ContainerClassName, GetGame().GetPlayer(), chest, parts[k].Item, parts[k].NumberOfStacks, parts[k].StackSize );
+			}
+	
+			COTLog( sender, "Loot chest " + data.param1 + " spawned" );
 		}
 	}
 }

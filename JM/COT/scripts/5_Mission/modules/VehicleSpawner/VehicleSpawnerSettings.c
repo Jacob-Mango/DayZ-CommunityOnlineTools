@@ -6,6 +6,12 @@ class VehicleSpawnerSettings
 	{
 		ref VehicleSpawnerSettings settings = new VehicleSpawnerSettings();
 
+		if ( !GetGame().IsMultiplayer() || GetGame().IsClient() )
+		{
+			settings.Defaults();
+			return settings;
+		}
+		
 		MakeDirectory( VEHICLE_SPAWNER_FOLDER );
 
 		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER + "/" );
