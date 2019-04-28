@@ -16,6 +16,9 @@ static bool COTIsActive = true;
 
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 {
+	if ( !GetGame().IsMultiplayer() )
+		return GetGame().GetPlayer();
+	
 	if ( identity == NULL )
 		return NULL;
 
@@ -55,7 +58,13 @@ static void COTLog( AuthPlayer player, string text )
 
 static void COTLog( PlayerIdentity player, string text )
 {
-	text = "[COT] " + player.GetPlainId() + ": " + text;
+	if ( GetGame().IsMultiplayer() )
+	{
+		text = "[COT] " + player.GetPlainId() + ": " + text;
+	} else
+	{
+		text = "[COT] Offline: " + text;
+	}
 
 	if ( GetGame().IsServer() )
 	{

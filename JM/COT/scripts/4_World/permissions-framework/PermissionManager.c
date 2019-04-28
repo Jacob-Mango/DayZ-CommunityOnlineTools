@@ -28,7 +28,7 @@ class PermissionManager
 
 	array< ref AuthPlayer > GetPlayers( ref array< string > steamIds = NULL )
 	{
-		if ( steamIds == NULL )
+		if ( steamIds == NULL || !GetGame().IsMultiplayer() )
 		{
 			return AuthPlayers;
 		}
@@ -91,7 +91,7 @@ class PermissionManager
 	{
 		if ( !GetGame().IsMultiplayer() ) return true;
 
-		if ( identity == NULL ) 
+		if ( identity == NULL && GetGame().IsClient() ) 
 		{
 			if ( ClientAuthPlayer == NULL )
 			{
@@ -100,6 +100,11 @@ class PermissionManager
 			}
 
 			return ClientAuthPlayer.HasPermission( permission );
+		}
+		
+		if ( identity == NULL )
+		{
+			return false;
 		}
 
 		PlayerBase player = GetPlayerObjectByIdentity( identity );
@@ -225,6 +230,11 @@ class PermissionManager
 
 	ref AuthPlayer GetPlayerBySteam64ID( string steam64 )
 	{
+		if ( !GetGame().IsMultiplayer() )
+		{
+			return AuthPlayers[0];
+		}
+		
 		ref AuthPlayer auPlayer = NULL;
 
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -252,6 +262,11 @@ class PermissionManager
 
 	ref AuthPlayer GetPlayerByIdentity( PlayerIdentity ident )
 	{
+		if ( !GetGame().IsMultiplayer() )
+		{
+			return AuthPlayers[0];
+		}
+		
 		if ( ident == NULL ) return NULL;
 
 		ref AuthPlayer auPlayer = NULL;
@@ -275,6 +290,11 @@ class PermissionManager
 
 	ref AuthPlayer GetPlayer( ref PlayerData data )
 	{
+		if ( !GetGame().IsMultiplayer() )
+		{
+			return AuthPlayers[0];
+		}
+		
 		if ( data == NULL ) return NULL;
 		
 		ref AuthPlayer auPlayer = NULL;
