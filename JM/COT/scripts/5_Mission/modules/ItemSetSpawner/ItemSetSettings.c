@@ -6,6 +6,12 @@ class ItemSetSettings
 	{
 		ref ItemSetSettings settings = new ItemSetSettings();
 
+		if ( !GetGame().IsMultiplayer() || GetGame().IsClient() )
+		{
+			settings.Defaults();
+			return settings;
+		}
+		
 		MakeDirectory( ITEM_SETS_FOLDER );
 
 		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER + "/" );

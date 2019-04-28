@@ -22,6 +22,8 @@ class VehicleSpawnerModule: EditorModule
 
 		if ( GetGame().IsClient() )
 			GetRPCManager().SendRPC( "COT_VehicleSpawner", "LoadData", new Param, true );
+		
+		meta = VehicleSpawnerMeta.DeriveFromSettings( settings );
 	}
 
 	override void ReloadSettings()
