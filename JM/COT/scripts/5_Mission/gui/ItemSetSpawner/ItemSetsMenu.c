@@ -45,8 +45,14 @@ class ItemSetsMenu extends Form
 		for ( int j = 0; j < iss.GetItemSets().Count(); j++ )
 		{
 			name = iss.GetItemSets()[j];
-
-			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnBaseBuilding" );
+			
+			if ( GetGame().IsServer() )
+			{
+				button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " around self", this, "SpawnBaseBuilding" );
+			} else
+			{
+				button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnBaseBuilding" );
+			}
 			button.SetData( new IS_Button_Data( name ) );
 
 			m_ItemSetButtons.Insert( button );

@@ -87,7 +87,14 @@ class ObjectMenu extends Form
 
 			UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
 			UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
-			UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+			
+			if ( GetGame().IsServer() )
+			{
+				UIActionManager.CreateButton( spawnButtons, "Inventory", this, "SpawnInventory" );
+			} else
+			{
+				UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+			}
 		} else 
 		{
 			spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 1 );
