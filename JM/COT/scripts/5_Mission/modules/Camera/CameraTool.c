@@ -201,7 +201,7 @@ class CameraTool: EditorModule
 	
 	void ToggleCamera() 
 	{
-		if ( GetGame().IsMultiplayer() == false ) return;
+		// if ( GetGame().IsMultiplayer() == false ) return;
 
 		if ( !COTIsActive ) {
 			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
