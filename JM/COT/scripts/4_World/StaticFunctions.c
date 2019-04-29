@@ -399,6 +399,26 @@ static ref PlayerBase GetPlayer()
 	return PlayerBase.Cast( GetGame().GetPlayer() );
 }
 
+static bool SHIFT()
+{
+    return( ( KeyState( KeyCode.KC_LSHIFT ) > 0 ) || ( KeyState( KeyCode.KC_RSHIFT ) > 0 ) );
+}
+
+static bool CTRL()
+{
+    return( ( KeyState( KeyCode.KC_LCONTROL ) > 0 ) || ( KeyState( KeyCode.KC_RCONTROL ) > 0 ) );
+}
+
+static bool ALT()
+{
+    return( ( KeyState( KeyCode.KC_LMENU ) > 0 ) || ( KeyState( KeyCode.KC_RMENU ) > 0 ) );
+}
+
+static bool WINKEY()
+{
+    return( ( KeyState( KeyCode.KC_LWIN ) > 0 ) || ( KeyState( KeyCode.KC_RWIN ) > 0 ) );
+}
+
 static ZombieBase SpawnInfected(vector pos)
 {
 	return ZombieBase.Cast(GetGame().CreateObject( WorkingZombieClasses().GetRandomElement(), pos, false, true ));
@@ -494,6 +514,7 @@ static vector SnapToGround(vector pos)
 	return tmp_pos;
 }
 
+static bool m_GodMode; // move these to player saves? Edit: Jacob says "yes"
 static bool m_OldAiming;
 static bool bc_Visible;
 
@@ -514,10 +535,10 @@ static void SnapToGroundNew( Object object )
 
 	object.SetPosition(pos);
 
-	ForceTargetCollisiOnUpdate( object );
+	ForceTargetCollisionUpdate( object );
 }
 
-static void ForceTargetCollisiOnUpdate( Object oObj )
+static void ForceTargetCollisionUpdate( Object oObj )
 {
 	if ( !oObj ) return;
 
@@ -561,6 +582,25 @@ static bool CheckStringType( string str, int type )
 		if ( result == type ) return true;
 	}
 	return false;
+}
+
+string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass )
+{
+    string child_name = "";
+    int count = GetGame().ConfigGetChildrenCount ( strConfigName );
+    array<string> class_names = new array<string>;
+
+    for (int p = 0; p < count; p++)
+    {
+        GetGame().ConfigGetChildName ( strConfigName, p, child_name );
+
+        if ( GetGame().IsKindOf(child_name, strBaseClass ) && ( child_name != strBaseClass ) )
+        {
+            class_names.Insert(child_name);
+        }
+    }
+
+    return class_names.GetRandomElement();
 }
 
 static float CAMERA_FOV = 1.0;
