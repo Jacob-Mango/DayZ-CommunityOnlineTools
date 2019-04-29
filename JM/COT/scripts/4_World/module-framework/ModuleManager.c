@@ -213,26 +213,26 @@ class ModuleManager
 	}
 }
 
-ref ModuleManager g_com_ModuleManager;
+ref ModuleManager g_cot_ModuleManager;
 
 ref ModuleManager GetModuleManager()
 {
-	if( !g_com_ModuleManager )
+	if( !g_cot_ModuleManager )
 	{
-		g_com_ModuleManager = new ref ModuleManager();
+		g_cot_ModuleManager = new ref ModuleManager();
 	}
 
-	return g_com_ModuleManager;
+	return g_cot_ModuleManager;
 }
 
 ref ModuleManager NewModuleManager()
 {
-	if ( g_com_ModuleManager )
+	if ( g_cot_ModuleManager )
 	{
-		delete g_com_ModuleManager;
+		delete g_cot_ModuleManager;
 	}
 
-	g_com_ModuleManager = new ref ModuleManager();
+	g_cot_ModuleManager = new ref ModuleManager();
 
-	return g_com_ModuleManager;
+	return g_cot_ModuleManager;
 }
