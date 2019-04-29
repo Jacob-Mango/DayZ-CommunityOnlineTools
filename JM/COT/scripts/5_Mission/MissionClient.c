@@ -41,31 +41,33 @@ modded class MissionGameplay
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
-	
+		
+		m_PF.OnStart();
+		m_COT.OnStart();
+		
 		// If game is not multiplayer, add a default offline player
 		if ( !GetGame().IsMultiplayer() )
 		{
 			PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
-			
-		    EntityAI item = NULL;
-		
-		    item = player.GetInventory().CreateInInventory( "AviatorGlasses" );
-		    item = player.GetInventory().CreateInInventory( "MilitaryBeret_UN" );
-		    item = player.GetInventory().CreateInInventory( "M65Jacket_Black" );
-		    item = player.GetInventory().CreateInInventory( "TacticalGloves_Black" );
-		    item = player.GetInventory().CreateInInventory( "HunterPants_Autumn" );
-		    item = player.GetInventory().CreateInInventory( "MilitaryBoots_Black" );
-		    item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
-		    item = player.GetInventory().CreateInInventory( "Shovel" );
-			
 			GetGame().SelectPlayer( NULL, player );
+
+			if ( player )
+			{
+				EntityAI item = NULL;
 			
-			AuthPlayer auPlayer = GetPermissionsManager().PlayerJoined( NULL );
-			auPlayer.PlayerObject = player;
+				item = player.GetInventory().CreateInInventory( "AviatorGlasses" );
+				item = player.GetInventory().CreateInInventory( "MilitaryBeret_UN" );
+				item = player.GetInventory().CreateInInventory( "M65Jacket_Black" );
+				item = player.GetInventory().CreateInInventory( "TacticalGloves_Black" );
+				item = player.GetInventory().CreateInInventory( "HunterPants_Autumn" );
+				item = player.GetInventory().CreateInInventory( "MilitaryBoots_Black" );
+				item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
+				item = player.GetInventory().CreateInInventory( "Shovel" );
+				
+				AuthPlayer auPlayer = GetPermissionsManager().PlayerJoined( NULL );
+				auPlayer.PlayerObject = player;
+			}
 		}
-		
-		m_PF.OnStart();
-		m_COT.OnStart();
 	}
 
 	// ------------------------------------------------------------
