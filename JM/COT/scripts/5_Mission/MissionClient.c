@@ -36,9 +36,9 @@ modded class MissionGameplay
 	}
 
 	// ------------------------------------------------------------
-	// COT OfflineMisssionStart
+	// COT OfflineMissionStart
 	// ------------------------------------------------------------
-	void OfflineMisssionStart()
+	void OfflineMissionStart()
 	{
 		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
 		GetGame().SelectPlayer( NULL, player );
