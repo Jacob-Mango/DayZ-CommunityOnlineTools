@@ -74,7 +74,7 @@ modded class MissionGameplay
 		// If game is not multiplayer, add a default offline player
 		if ( !GetGame().IsMultiplayer() )
 		{
-			OfflineMisssionStart();
+			OfflineMissionStart();
 		}
 	}
 
