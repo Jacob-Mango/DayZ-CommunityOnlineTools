@@ -14,7 +14,7 @@ class VehicleSpawnerSettings
 		
 		MakeDirectory( VEHICLE_SPAWNER_FOLDER );
 
-		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER + "/" );
+		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER );
 
 		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
 		{
@@ -84,6 +84,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "UtilityVehicle";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -112,6 +113,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "CivilianHatchback";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -140,6 +142,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "S120";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -166,6 +169,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "CivilianVan";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -194,6 +198,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "CivilianSedan";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -220,6 +225,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "OffroadHatchback";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -249,6 +255,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "V3S_Cargo_Blue";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
@@ -278,6 +285,7 @@ class VehicleSpawnerSettings
 
 		file.VehicleName = "V3S_Chassis_Blue";
 		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
 
 		Vehicles.Insert( file.VehicleName, file );
