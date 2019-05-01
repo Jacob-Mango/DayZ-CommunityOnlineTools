@@ -14,7 +14,7 @@ class ItemSetSettings
 		
 		MakeDirectory( ITEM_SETS_FOLDER );
 
-		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER + "/" );
+		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER );
 
 		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
 		{
