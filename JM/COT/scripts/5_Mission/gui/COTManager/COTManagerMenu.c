@@ -35,7 +35,10 @@ class COTManagerMenu extends Form
 
 		m_DebugMode = UIActionManager.CreateCheckbox( settings, "Debug Mode" );
 
-		UIActionManager.CreateButton( settings, "Apply Settings", this, "Click_Set" );
+		if ( GetPermissionsManager().HasPermission( "COT.Apply" ) )
+		{
+			UIActionManager.CreateButton( settings, "Apply Settings", this, "Click_Set" );
+		}
 	}
 
 	override void OnShow()

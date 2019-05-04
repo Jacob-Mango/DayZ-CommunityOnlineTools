@@ -145,7 +145,7 @@ class PermissionManager
 
 		auPlayer.IdentityPlayer = player;
 
-		// auPlayer.CopyPermissions( RootPermission );
+		auPlayer.CopyPermissions( RootPermission );
 
 		auPlayer.Load();
 

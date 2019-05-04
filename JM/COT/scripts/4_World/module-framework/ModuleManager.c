@@ -1,7 +1,7 @@
 class ModuleManager
 {
-	protected ref array< ref Module > m_Modules;
-	protected ref array< ref EditorModule > m_EditorModules;
+	protected autoptr array< ref Module > m_Modules;
+	protected autoptr array< ref EditorModule > m_EditorModules;
 
 	void ModuleManager()
 	{
@@ -11,12 +11,6 @@ class ModuleManager
 	void ~ModuleManager()
 	{
 		COT_Debug( "ModuleManager::~ModuleManager()" );
-
-		m_Modules.Clear();
-		m_EditorModules.Clear();
-
-		delete m_Modules;
-		delete m_EditorModules;
 	}
 
 	void RegisterModule( Module module )

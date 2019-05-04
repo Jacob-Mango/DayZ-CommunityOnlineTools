@@ -88,7 +88,7 @@ class AuthPlayer
 
 		for ( int i = 0; i < data.Count(); i++ )
 		{
-			AddPermission( data[i] );
+			RootPermission.AddPermission( data[i], PermissionType.INHERIT );
 		}
 	}
 
@@ -110,6 +110,8 @@ class AuthPlayer
 
 	bool HasPermission( string permission )
 	{
+		RootPermission.DebugPrint( 0 );
+
 		PermissionType permType;
 
 		bool has = RootPermission.HasPermission( permission, permType );
@@ -118,6 +120,9 @@ class AuthPlayer
 
 		if ( has )
 			return true;
+
+		if ( permType == PermissionType.DISALLOW )
+			return false;
 
 		for ( int j = 0; j < Roles.Count(); j++ )
 		{
