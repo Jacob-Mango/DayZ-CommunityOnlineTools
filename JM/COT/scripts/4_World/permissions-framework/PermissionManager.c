@@ -96,7 +96,7 @@ class PermissionManager
 			if ( ClientAuthPlayer == NULL )
 			{
 				COT_Debug( "ClientAuth is NULL!" );
-				return true;
+				return false;
 			}
 
 			return ClientAuthPlayer.HasPermission( permission );
