@@ -186,7 +186,7 @@ class Permission
 		{
 			// magic fuckery to figure this out...
 		}
-
+		
 		if ( depth > -1 )
 		{
 			return Check( tokens, depth + 1, parentDisallowed, permType );
@@ -289,7 +289,7 @@ class Permission
 			}
 		}
 
-		COT_Debug( message + append );
+		Print( message + append );
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
