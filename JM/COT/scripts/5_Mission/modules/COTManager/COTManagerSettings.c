@@ -23,11 +23,16 @@ class COTManagerSettings
 		return settings;
 	}
 
+	void RegisterSettings()
+	{
+		COT_DEBUG_MODE = DebugMode;
+	}
+
 	void Save()
 	{
 		JsonFileLoader<COTManagerSettings>.JsonSaveFile( COT_MANAGER_SETTINGS_FILE, this );
 
-		COT_DEBUG_MODE = DebugMode;
+		RegisterSettings();
 	}
 
 	void Defaults()
