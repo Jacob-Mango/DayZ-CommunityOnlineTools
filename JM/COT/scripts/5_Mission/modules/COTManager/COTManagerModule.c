@@ -27,6 +27,8 @@ class COTManagerModule: EditorModule
 		super.ReloadSettings();
 
 		settings = COTManagerSettings.Load();
+
+		settings.RegisterSettings();
 	}
 
 	override void OnMissionFinish()
@@ -78,6 +80,8 @@ class COTManagerModule: EditorModule
 			{
 				form.OnShow();
 			}
+
+			settings.RegisterSettings();
 		}
 	}
 }
