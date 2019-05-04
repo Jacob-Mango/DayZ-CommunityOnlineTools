@@ -76,7 +76,7 @@ class Permission
 
 			inp.Split( ".", tokens );
 		} else {
-			Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+			COT_Debug( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
 			return;
 		}
 		
@@ -289,7 +289,7 @@ class Permission
 			}
 		}
 
-		Print( message + append );
+		COT_Debug( message + append );
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{

@@ -53,7 +53,7 @@ static void COTLog( AuthPlayer player, string text )
 		GetGame().AdminLog( text );
 	}
 
-	Print( text );
+	COT_Debug( text );
 }
 
 static void COTLog( PlayerIdentity player, string text )
@@ -71,7 +71,7 @@ static void COTLog( PlayerIdentity player, string text )
 		GetGame().AdminLog( text );
 	}
 	
-	Print( text );
+	COT_Debug( text );
 }
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
@@ -116,7 +116,7 @@ static vector GetCursorPos()
 
 static void Message( PlayerBase player, string txt ) 
 {
-	Print( txt );
+	COT_Debug( txt );
 
 	if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 	{

@@ -97,13 +97,13 @@ class TeleportModule: EditorModule
 
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if( type == CallType.Server )
-		{
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
-				return;
-
-			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), true );
-		}
+		//if( type == CallType.Server )
+		//{
+		//	if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
+		//		return;
+		//
+		//	GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), true );
+		//}
 
 		if( type == CallType.Client )
 		{

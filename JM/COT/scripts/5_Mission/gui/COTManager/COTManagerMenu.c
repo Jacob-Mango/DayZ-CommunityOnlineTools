@@ -2,6 +2,8 @@ class COTManagerMenu extends Form
 {
 	protected Widget m_ActionsWrapper;
 
+	protected UIActionCheckbox m_DebugMode;
+
 	void COTManagerMenu()
 	{
 	}
@@ -29,19 +31,37 @@ class COTManagerMenu extends Form
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		UIActionManager.CreateCheckbox( m_ActionsWrapper, "ESP", this, "Click_ESP", false );
-	}
+		ref Widget settings = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
 
-	void Click_ESP( UIEvent eid, ref UIActionCheckbox action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		COT_ESP_Toggled = !COT_ESP_Toggled;
+		m_DebugMode = UIActionManager.CreateCheckbox( settings, "Debug Mode" );
+
+		UIActionManager.CreateButton( settings, "Apply Settings", this, "Click_Set" );
 	}
 
 	override void OnShow()
 	{
 		super.OnShow();
+
+		COTManagerModule cm = COTManagerModule.Cast( module );
+
+		if ( !cm ) return;
+
+		m_DebugMode.SetChecked( cm.GetSettings().DebugMode );
+	}
+
+	void Click_Set( UIEvent eid, ref UIActionButton action )
+	{
+		COTManagerModule cm = COTManagerModule.Cast( module );
+
+		if ( !cm ) return;
+
+        COTManagerSettings settings = cm.GetSettings();
+
+		if ( !settings ) return;
+
+		settings.DebugMode = m_DebugMode.IsChecked();
+
+		GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< string >( JsonFileLoader< COTManagerSettings >.JsonMakeData( settings ) ), false );
 	}
 
 	override void OnHide()

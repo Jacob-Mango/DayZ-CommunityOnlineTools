@@ -87,7 +87,7 @@ class Role
 	{
 		string filename = FileReadyStripName( Name );
 
-		Print( "Saving role for " + filename );
+		COT_Debug( "Saving role for " + filename );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
 			
 		Serialize();
@@ -103,11 +103,11 @@ class Role
 			
 			CloseFile(file);
 			
-			Print("Wrote to the roles");
+			COT_Debug("Wrote to the roles");
 			return true;
 		} else
 		{
-			Print("Failed to open the file for the role for writing.");
+			COT_Debug("Failed to open the file for the role for writing.");
 			return false;
 		}
 	}
@@ -115,7 +115,7 @@ class Role
 	bool Load()
 	{
 		string filename = FileReadyStripName( Name );
-		Print( "Loading role " + filename );
+		COT_Debug( "Loading role " + filename );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
 			
 		ref array< string > data = new ref array< string >;
@@ -147,7 +147,7 @@ class Role
 
 	void DebugPrint()
 	{
-		Print( "Printing permissions for role " + Name );
+		COT_Debug( "Printing permissions for role " + Name );
 
 		RootPermission.DebugPrint( 0 );
 	}

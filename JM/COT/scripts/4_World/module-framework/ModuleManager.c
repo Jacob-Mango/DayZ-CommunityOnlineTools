@@ -5,12 +5,12 @@ class ModuleManager
 
 	void ModuleManager()
 	{
-		Print( "ModuleManager::ModuleManager()" );
+		COT_Debug( "ModuleManager::ModuleManager()" );
 	}
 
 	void ~ModuleManager()
 	{
-		Print( "ModuleManager::~ModuleManager()" );
+		COT_Debug( "ModuleManager::~ModuleManager()" );
 
 		m_Modules.Clear();
 		m_EditorModules.Clear();
@@ -34,12 +34,12 @@ class ModuleManager
 			message = " as a Module.";
 		}
 
-		Print( "Registered module " + module + message );
+		COT_Debug( "Registered module " + module + message );
 	}
 
 	void RegisterModules( string version )
 	{
-		Print( "ModuleManager::RegisterModules()" );
+		COT_Debug( "ModuleManager::RegisterModules()" );
 
 		m_Modules = new ref array< ref Module >;
 		m_EditorModules = new ref array< ref EditorModule >;
@@ -67,7 +67,7 @@ class ModuleManager
 
 	void OnInit()
 	{
-		Print( "ModuleManager::OnInit()" );
+		COT_Debug( "ModuleManager::OnInit()" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -77,7 +77,7 @@ class ModuleManager
 
 	void OnMissionStart()
 	{
-		Print( "ModuleManager::OnMissionStart()" );
+		COT_Debug( "ModuleManager::OnMissionStart()" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -87,7 +87,7 @@ class ModuleManager
 
 	void OnMissionFinish()
 	{
-		Print( "ModuleManager::OnMissionFinish()" );
+		COT_Debug( "ModuleManager::OnMissionFinish()" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -97,7 +97,7 @@ class ModuleManager
 
 	void OnMissionLoaded()
 	{
-		Print( "ModuleManager::OnMissionLoaded()" );
+		COT_Debug( "ModuleManager::OnMissionLoaded()" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
