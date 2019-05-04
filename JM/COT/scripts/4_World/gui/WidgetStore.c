@@ -83,13 +83,13 @@ class WidgetStore
 				}
 				if ( count > 1 ) 
 				{
-					Print( "Found duplicate: " + name );
+					COT_Debug( "Found duplicate: " + name );
 					duplicates++;
 					break;
 				}
 			}
 		}
-		Print( "Duplicates: " + duplicates );
+		COT_Debug( "Duplicates: " + duplicates );
 	}
 
 	void AddWidget( Widget widget ) 

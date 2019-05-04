@@ -10,7 +10,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void MissionGameplay()
 	{
-		Print( "MissionGameplay::MissionGameplay()" );
+		COT_Debug( "MissionGameplay::MissionGameplay()" );
 		
 		m_COT = new ref CommunityOnlineTools;
 		m_PF = new ref PermissionsFramework;
@@ -21,7 +21,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void ~MissionGameplay()
 	{
-		Print( "MissionGameplay::~MissionGameplay()" );
+		COT_Debug( "MissionGameplay::~MissionGameplay()" );
 
 		delete m_PF;
 		delete m_COT;

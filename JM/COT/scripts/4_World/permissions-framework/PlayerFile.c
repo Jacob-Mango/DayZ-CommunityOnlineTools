@@ -14,7 +14,11 @@ class PlayerFile
 
 	bool Load( PlayerIdentity identity )
 	{
-		if ( identity == NULL ) return false;
+		if ( identity == NULL ) 
+		{
+			Roles.Insert( "everyone" );
+			return false;
+		}
 		
 		ref PlayerFile playerFile = new ref PlayerFile;
 		string file = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + identity.GetPlainId() + ".json";

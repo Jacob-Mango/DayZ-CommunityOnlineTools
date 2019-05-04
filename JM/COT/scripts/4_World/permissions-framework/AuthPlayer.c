@@ -111,22 +111,21 @@ class AuthPlayer
 	bool HasPermission( string permission )
 	{
 		PermissionType permType;
-		PermissionType rolePermType;
 
 		bool has = RootPermission.HasPermission( permission, permType );
 
-		//Print( "Player " +  GetName() + " is " + has + " with perm type " + permType );
+		COT_Debug( "" +  GetSteam64ID() + " returned " + has + " for permission " + permission + " with perm type " + permType );
 
 		if ( has )
 			return true;
 
 		for ( int j = 0; j < Roles.Count(); j++ )
 		{
-			bool roleHas = Roles[j].HasPermission( permission, rolePermType );
+			has = Roles[j].HasPermission( permission, permType );
 
-			//Print( "Role " +  Roles[j].Name + " is " + roleHas + " with perm type " + rolePermType );
+			COT_Debug( "    Role " +  Roles[j].Name + " returned " + has + " for permission " + permission + " with perm type " + permType );
 
-			if ( roleHas )
+			if ( has )
 			{
 				return true;
 			}
@@ -139,17 +138,17 @@ class AuthPlayer
 	{
 		ref Role r = GetPermissionsManager().RolesMap.Get( role );
 
-		// Print( "Adding role " + role + ": " + r );
+		COT_Debug( "Adding role " + role + ": " + r );
 
 		if ( Roles.Find( r ) < 0 ) 
 		{
-			AddRole( r );
+			Roles.Insert( r );
 		}
 	}
 
 	void AddRole( Role role )
 	{
-		// Print( "Adding role " + role );
+		COT_Debug( "Adding role " + role.Name + ": " + role );
 
 		m_HasPlayerData = true;
 
@@ -227,7 +226,7 @@ class AuthPlayer
 
 			Serialize();
 
-			Print( "Saving permissions and player data for " + filename );
+			COT_Debug( "Saving permissions and player data for " + filename );
 			FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
 
 			if ( file != 0 )
@@ -247,7 +246,7 @@ class AuthPlayer
 	bool Load()
 	{
 		string filename = FileReadyStripName( Data.SSteam64ID );
-		Print( "Loading permissions for " + filename );
+		COT_Debug( "Loading permissions for " + filename );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
 			
 		ref array< string > data = new ref array< string >;
@@ -291,7 +290,7 @@ class AuthPlayer
 
 	void DebugPrint()
 	{
-		Print( "Printing permissions for " + Data.SSteam64ID );
+		COT_Debug( "Printing permissions for " + Data.SSteam64ID );
 
 		RootPermission.DebugPrint( 0 );
 	}

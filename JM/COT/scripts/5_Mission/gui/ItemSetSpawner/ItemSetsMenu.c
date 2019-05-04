@@ -56,7 +56,7 @@ class ItemSetsMenu extends Form
 			button.SetData( new IS_Button_Data( name ) );
 
 			m_ItemSetButtons.Insert( button );
-		}		
+		}
 	}
 
 	override void OnHide() 

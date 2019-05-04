@@ -91,11 +91,11 @@ class PermissionManager
 	{
 		if ( !GetGame().IsMultiplayer() ) return true;
 
-		if ( identity == NULL && GetGame().IsClient() ) 
+		if ( GetGame().IsClient() ) 
 		{
 			if ( ClientAuthPlayer == NULL )
 			{
-				Print( "ClientAuth is NULL!" );
+				COT_Debug( "ClientAuth is NULL!" );
 				return true;
 			}
 
@@ -194,7 +194,7 @@ class PermissionManager
 
 	void DebugPrint()
 	{
-		Print( "Printing all authenticated players!" );
+		COT_Debug( "Printing all authenticated players!" );
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
 		{
 			AuthPlayers[i].DebugPrint();
