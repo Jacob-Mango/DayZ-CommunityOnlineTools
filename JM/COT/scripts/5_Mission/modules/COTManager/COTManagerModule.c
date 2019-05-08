@@ -41,7 +41,7 @@ class COTManagerModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/COTManager/COTManagerMenu.layout";
+		return "JM/COT/GUI/layouts/COTManager/COTManagerMenu.layout";
 	}
 
 	COTManagerSettings GetSettings()

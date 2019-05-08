@@ -639,7 +639,7 @@ class PlayerMenu extends Form
 	{
 		ref Permission rootPerm = GetPermissionsManager().GetRootPermission();
 
-		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
 		permRow.GetScript( m_PermissionUI );
 
@@ -674,7 +674,7 @@ class PlayerMenu extends Form
 		{
 			ref Permission cPerm = perm.Children[i];
 
-			Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
+			Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player/permissions/PermissionRow.layout", m_PermsContainer );
 
 			ref PermissionRow rowScript;
 			permRow.GetScript( rowScript );
@@ -735,7 +735,7 @@ class PlayerMenu extends Form
 
 	private void CreateRoleUIRow()
 	{
-		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/permissions/RoleRow.layout", m_RolesContainer );
+		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player/permissions/RoleRow.layout", m_RolesContainer );
 
 		ref RoleRow rowScript;
 		permRow.GetScript( rowScript );
@@ -820,7 +820,7 @@ class PlayerMenu extends Form
 			rowScript = NULL;
 			playerRow = NULL;
 
-			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListFirst );
+			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player/PlayerRow.layout", m_PlayerScriptListFirst );
 			
 			if ( playerRow == NULL ) continue;
 
@@ -843,7 +843,7 @@ class PlayerMenu extends Form
 			rowScript = NULL;
 			playerRow = NULL;
 
-			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/player/PlayerRow.layout", m_PlayerScriptListSecond );
+			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player/PlayerRow.layout", m_PlayerScriptListSecond );
 			
 			if ( playerRow == NULL ) continue;
 

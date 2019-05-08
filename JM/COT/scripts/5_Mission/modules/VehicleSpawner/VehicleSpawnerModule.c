@@ -50,7 +50,7 @@ class VehicleSpawnerModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/VehicleSpawner/VehicleSpawner.layout";
+		return "JM/COT/GUI/layouts/VehicleSpawner/VehicleSpawner.layout";
 	}
 
 	ref array< string > GetVehicles()

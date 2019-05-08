@@ -26,7 +26,7 @@ class CameraTool: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/Camera/CameraSettings.layout";
+		return "JM/COT/GUI/layouts/Camera/CameraSettings.layout";
 	}
 	
 	override void OnUpdate( float timeslice )

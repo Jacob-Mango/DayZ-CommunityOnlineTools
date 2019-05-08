@@ -25,7 +25,7 @@ class COTMenu
 
 	void MakeMenuForModule( ref EditorModule module )
 	{
-		ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\WindowHandle.layout", m_Windows );
+		ref Widget base_window = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\GUI\\layouts\\COT\\WindowHandle.layout", m_Windows );
 
 		ref Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), base_window.FindAnyWidget( "content" ) );
 
@@ -59,7 +59,7 @@ class COTMenu
 	
 	Widget Init( string version )
 	{
-		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTMenu.layout" );
+		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\GUI\\layouts\\COT\\COTMenu.layout" );
 		layoutRoot.Show( false );
 
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "Version: " + version );
@@ -82,7 +82,7 @@ class COTMenu
 			ref Widget button_bkg = NULL;
 			ref ButtonWidget button = NULL;
 
-			button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\gui\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
+			button_bkg = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\GUI\\layouts\\COT\\COTButton.layout", m_ButtonsContainer );
 			button = ButtonWidget.Cast( button_bkg.FindAnyWidget( "btn" ) );
 
 			if ( button_bkg && button )

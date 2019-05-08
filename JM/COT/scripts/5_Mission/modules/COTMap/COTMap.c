@@ -18,7 +18,7 @@ class COTMapModule: EditorModule
 	
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/Map/COTMap.layout";
+		return "JM/COT/GUI/layouts/Map/COTMap.layout";
 	}
 
 	override bool HasAccess()
