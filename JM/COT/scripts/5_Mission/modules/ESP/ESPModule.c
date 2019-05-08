@@ -90,7 +90,7 @@ class ESPModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/ESP/ESPMenu.layout";
+		return "JM/COT/GUI/layouts/ESP/ESPMenu.layout";
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -536,7 +536,7 @@ class ESPModule: EditorModule
 	void CreateESPBox( ref ESPInfo info )
 	{
 		ref ESPRenderBox boxScript = NULL;
-		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/ESP/ESPRenderBox.layout" );
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/ESP/ESPRenderBox.layout" );
 
 		if ( widget == NULL ) return;
 

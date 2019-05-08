@@ -8,7 +8,7 @@ class CustomDebugMonitor
 		
 	void CustomDebugMonitor()
 	{		
-		layoutRoot = GetGame().GetWorkspace().CreateWidgets("gui/layouts/debug/day_z_debug_monitor.layout");
+		layoutRoot = GetGame().GetWorkspace().CreateWidgets("GUI/layouts/debug/day_z_debug_monitor.layout");
 		layoutRoot.Show(false);
 		
 		WindowLabelText = TextWidget.Cast( layoutRoot.FindAnyWidget("WindowLabel") );

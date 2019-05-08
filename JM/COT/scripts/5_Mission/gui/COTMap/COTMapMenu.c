@@ -54,7 +54,7 @@ class COTMapMenu extends Form
 		
 		foreach( ref PlayerData playerData : data ) 
 		{
-			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 230, 20, 20), "\\JM\\COT\\gui\\textures\\dot.paa");
+			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 230, 20, 20), "\\JM\\COT\\GUI\\textures\\dot.paa");
 		}
 	}
 	

@@ -52,7 +52,7 @@ class TeleportModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/Teleport/PositionMenu.layout";
+		return "JM/COT/GUI/layouts/Teleport/PositionMenu.layout";
 	}
 
 	ref array< ref TeleportLocation > GetLocations()

@@ -50,7 +50,7 @@ class ItemSetSpawnerModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/ItemSets/ItemSetsMenu.layout";
+		return "JM/COT/GUI/layouts/ItemSets/ItemSetsMenu.layout";
 	}
 
 	ref array< string > GetItemSets()
