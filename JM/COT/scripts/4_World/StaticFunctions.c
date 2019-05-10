@@ -12,7 +12,7 @@ static bool COT_ESP_Toggled = false;
 
 static bool DISABLE_ALL_INPUT = false;
 
-static bool COTIsActive = true;
+static bool COTIsActive = false;
 
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 {
