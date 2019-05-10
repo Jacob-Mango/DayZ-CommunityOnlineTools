@@ -63,6 +63,7 @@ class VehicleSpawnerSettings
 		DefaultHatchback();
 		DefaultV3SCargo();
 		DefaultV3S();
+		DefaultHatchback02();
 	}
 
 	void DefaultUtilityVehicle()
@@ -224,6 +225,33 @@ class VehicleSpawnerSettings
 		ref VehicleSpawnerFile file = new VehicleSpawnerFile;
 
 		file.VehicleName = "OffroadHatchback";
+		file.DisplayName = file.VehicleName;
+		file.m_FileName = file.VehicleName;
+		file.Parts = attArr;
+
+		Vehicles.Insert( file.VehicleName, file );
+	}
+
+	void DefaultHatchback02()
+	{
+		ref array< string> attArr = new ref array< string>;
+
+		attArr.Insert("Hatchback_02_Hood");
+		attArr.Insert("Hatchback_02_Trunk");
+		attArr.Insert("Hatchback_02_Doors_Driver");
+		attArr.Insert("Hatchback_02_Doors_CoDriver");
+		attArr.Insert("Hatchback_02_Wheel");
+		attArr.Insert("Hatchback_02_Wheel");
+		attArr.Insert("Hatchback_02_Wheel");
+		attArr.Insert("Hatchback_02_Wheel");
+		attArr.Insert("CarBattery");
+		attArr.Insert("CarRadiator");
+		attArr.Insert("EngineBelt");
+		attArr.Insert("SparkPlug");
+
+		ref VehicleSpawnerFile file = new VehicleSpawnerFile;
+
+		file.VehicleName = "Hatchback_02";
 		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;
