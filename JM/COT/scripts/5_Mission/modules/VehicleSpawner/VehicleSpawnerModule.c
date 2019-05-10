@@ -92,6 +92,7 @@ class VehicleSpawnerModule: EditorModule
 		ref Param2< string, vector > data;
 		if ( !ctx.Read( data ) ) return;
 
+		Print("debug : " + data.param1 + " - " + data.param2);
 		ref VehicleSpawnerFile file = settings.Vehicles.Get( data.param1 );
 
 		if ( file == NULL ) return;
