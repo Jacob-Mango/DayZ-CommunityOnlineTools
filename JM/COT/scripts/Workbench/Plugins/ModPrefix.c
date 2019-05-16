@@ -4,9 +4,9 @@ static string GetWorkDriveDirectory()
 {
     if ( g_ModPrefix != "" ) return g_ModPrefix;
 
-    if ( IsCLIParam( "gproj" ) )
+    if ( IsCLIParam( "test" ) )
 	{ 
-        GetCLIParam( "gproj", g_ModPrefix );
+        GetCLIParam( "test", g_ModPrefix );
 
         array<string> tokens = new array<string>;
         g_ModPrefix.Split("\\", tokens);
