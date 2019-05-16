@@ -49,7 +49,7 @@ class COTManagerMenu extends Form
 
 		if ( !cm ) return;
 
-		m_DebugMode.SetChecked( cm.GetSettings().DebugMode );
+		m_DebugMode.SetChecked( cm.GetSettings().DebugModeTemp );
 	}
 
 	void Click_Set( UIEvent eid, ref UIActionButton action )
@@ -62,7 +62,7 @@ class COTManagerMenu extends Form
 
 		if ( !settings ) return;
 
-		settings.DebugMode = m_DebugMode.IsChecked();
+		settings.DebugModeTemp = m_DebugMode.IsChecked();
 
 		GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< string >( JsonFileLoader< COTManagerSettings >.JsonMakeData( settings ) ), false );
 	}
