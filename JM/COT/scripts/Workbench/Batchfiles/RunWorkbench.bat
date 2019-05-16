@@ -130,8 +130,8 @@ for %%a in ("%mods:;=" "%") do (
 
 chdir /D "%workbenchDirectory%"
 
-echo start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+echo start %workbenchEXE% -test=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+start %workbenchEXE% -test=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 
 REM echo start %workbenchEXE% "-mod=%modList%"
 REM start %workbenchEXE% "-mod=%modList%"

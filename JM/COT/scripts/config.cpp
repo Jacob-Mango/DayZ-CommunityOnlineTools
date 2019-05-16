@@ -24,7 +24,7 @@ class CfgMods
 		name = "Community Online Tools";
 		credits = "Jacob_Mango, DannyDog, Arkensor";
 		creditsJson = "JM/COT/Scripts/Data/Credits.json";
-		author = "Jacob_Mango, DannyDog, Arkensor";
+		author = "Jacob_Mango";
 		authorID = "0";
 		version = "JM/COT/scripts/Data/Version.hpp";
 		extra = 0;
