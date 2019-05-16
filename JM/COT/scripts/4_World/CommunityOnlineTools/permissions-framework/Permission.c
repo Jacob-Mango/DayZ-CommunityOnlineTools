@@ -76,7 +76,7 @@ class Permission
 
 			inp.Split( ".", tokens );
 		} else {
-			COT_Debug( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+			GetDebugging().Log( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\".", "JM_COT_PermissionFramework" );
 			return;
 		}
 		

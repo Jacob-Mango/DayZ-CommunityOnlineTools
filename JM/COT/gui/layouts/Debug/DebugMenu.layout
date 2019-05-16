@@ -1,4 +1,4 @@
-PanelWidgetClass COTManagerMenu {
+PanelWidgetClass DebugMenu {
  visible 0
  color 0 0 0 0
  position 0 0
@@ -7,7 +7,7 @@ PanelWidgetClass COTManagerMenu {
  vexactpos 0
  hexactsize 1
  vexactsize 1
- scriptclass "COTManagerMenu"
+ scriptclass "DebugMenu"
  {
   GridSpacerWidgetClass actions_wrapper {
    position 0 0

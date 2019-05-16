@@ -53,7 +53,7 @@ static void COTLog( AuthPlayer player, string text )
 		GetGame().AdminLog( text );
 	}
 
-	COT_Debug( text );
+	GetDebugging().Log( text, "JM_COT_StaticFunctions" );
 }
 
 static void COTLog( PlayerIdentity player, string text )
@@ -71,7 +71,7 @@ static void COTLog( PlayerIdentity player, string text )
 		GetGame().AdminLog( text );
 	}
 	
-	COT_Debug( text );
+	GetDebugging().Log( text, "JM_COT_StaticFunctions" );
 }
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
@@ -116,7 +116,7 @@ static vector GetCursorPos()
 
 static void Message( PlayerBase player, string txt ) 
 {
-	COT_Debug( txt );
+	GetDebugging().Log( txt, "JM_COT_StaticFunctions" );
 
 	if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 	{

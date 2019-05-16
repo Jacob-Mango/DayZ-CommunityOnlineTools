@@ -5,12 +5,12 @@ class ModuleManager
 
 	void ModuleManager()
 	{
-		COT_Debug( "ModuleManager::ModuleManager()" );
+		GetDebugging().Log( "ModuleManager::ModuleManager()", "JM_COT_ModuleFramework" );
 	}
 
 	void ~ModuleManager()
 	{
-		COT_Debug( "ModuleManager::~ModuleManager()" );
+		GetDebugging().Log( "ModuleManager::~ModuleManager()", "JM_COT_ModuleFramework" );
 	}
 
 	void RegisterModule( Module module )
@@ -28,12 +28,12 @@ class ModuleManager
 			message = " as a Module.";
 		}
 
-		COT_Debug( "Registered module " + module + message );
+		GetDebugging().Log( "Registered module " + module + message, "JM_COT_ModuleFramework" );
 	}
 
 	void RegisterModules( string version )
 	{
-		COT_Debug( "ModuleManager::RegisterModules()" );
+		GetDebugging().Log( "ModuleManager::RegisterModules()", "JM_COT_ModuleFramework" );
 
 		m_Modules = new ref array< ref Module >;
 		m_EditorModules = new ref array< ref EditorModule >;
@@ -61,7 +61,7 @@ class ModuleManager
 
 	void OnInit()
 	{
-		COT_Debug( "ModuleManager::OnInit()" );
+		GetDebugging().Log( "ModuleManager::OnInit()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -71,7 +71,7 @@ class ModuleManager
 
 	void OnMissionStart()
 	{
-		COT_Debug( "ModuleManager::OnMissionStart()" );
+		GetDebugging().Log( "ModuleManager::OnMissionStart()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -81,7 +81,7 @@ class ModuleManager
 
 	void OnMissionFinish()
 	{
-		COT_Debug( "ModuleManager::OnMissionFinish()" );
+		GetDebugging().Log( "ModuleManager::OnMissionFinish()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -91,7 +91,7 @@ class ModuleManager
 
 	void OnMissionLoaded()
 	{
-		COT_Debug( "ModuleManager::OnMissionLoaded()" );
+		GetDebugging().Log( "ModuleManager::OnMissionLoaded()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
