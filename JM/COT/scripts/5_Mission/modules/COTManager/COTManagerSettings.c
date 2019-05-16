@@ -2,7 +2,7 @@ const string COT_MANAGER_SETTINGS_FILE = ROOT_COT_DIR + "COTManager.json";
 
 class COTManagerSettings
 {
-	bool DebugMode;
+	bool DebugModeTemp;
 
 	void COTManagerSettings()
 	{
@@ -25,7 +25,7 @@ class COTManagerSettings
 
 	void RegisterSettings()
 	{
-		COT_DEBUG_MODE = DebugMode;
+		COT_DEBUG_MODE = DebugModeTemp;
 	}
 
 	void Save()
@@ -37,6 +37,6 @@ class COTManagerSettings
 
 	void Defaults()
 	{
-		DebugMode = false;
+		DebugModeTemp = false;
 	}
 }
