@@ -83,13 +83,13 @@ class WidgetStore
 				}
 				if ( count > 1 ) 
 				{
-					COT_Debug( "Found duplicate: " + name );
+					GetDebugging().Log( "Found duplicate: " + name, "JM_COT_WidgetStore" );
 					duplicates++;
 					break;
 				}
 			}
 		}
-		COT_Debug( "Duplicates: " + duplicates );
+		GetDebugging().Log( "Duplicates: " + duplicates, "JM_COT_WidgetStore" );
 	}
 
 	void AddWidget( Widget widget ) 

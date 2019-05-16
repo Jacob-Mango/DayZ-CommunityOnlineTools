@@ -1,8 +1,6 @@
-class COTManagerModule: EditorModule
+class DebugModule: EditorModule
 {
-	protected ref COTManagerSettings settings;
-
-	void COTManagerModule()
+	void DebugModule()
 	{
 		GetRPCManager().AddRPC( "COT_Manager", "LoadData", this, SingeplayerExecutionType.Client );
 
@@ -25,10 +23,6 @@ class COTManagerModule: EditorModule
 	override void ReloadSettings()
 	{
 		super.ReloadSettings();
-
-		settings = COTManagerSettings.Load();
-
-		settings.RegisterSettings();
 	}
 
 	override void OnMissionFinish()
@@ -36,17 +30,12 @@ class COTManagerModule: EditorModule
 		super.OnMissionFinish();
 
 		if ( GetGame().IsServer() )
-			settings.Save();
+			GetDebugging().Save();
 	}
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/GUI/layouts/COTManager/COTManagerMenu.layout";
-	}
-
-	COTManagerSettings GetSettings()
-	{
-		return settings;
+		return "JM/COT/GUI/layouts/Debug/DebugMenu.layout";
 	}
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -61,12 +50,12 @@ class COTManagerModule: EditorModule
 					return;
 				}
 
-				delete settings;
-				JsonFileLoader< COTManagerSettings >.JsonLoadData( data.param1, settings );
-				settings.Save();
+				//delete settings;
+				//JsonFileLoader< DebugSettings >.JsonLoadData( data.param1, settings );
+				//settings.Save();
 			} else 
 			{
-				GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< string >( JsonFileLoader< COTManagerSettings >.JsonMakeData( settings ) ), true );
+				//GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< string >( JsonFileLoader< DebugSettings >.JsonMakeData( settings ) ), true );
 			}
 		}
 
@@ -74,14 +63,14 @@ class COTManagerModule: EditorModule
 		{
 			if ( !ctx.Read( data ) ) return;
 
-			JsonFileLoader< COTManagerSettings >.JsonLoadData( data.param1, settings );
+			//JsonFileLoader< DebugSettings >.JsonLoadData( data.param1, settings );
 
 			if ( form && form.IsVisible() )
 			{
 				form.OnShow();
 			}
 
-			settings.RegisterSettings();
+			//settings.RegisterSettings();
 		}
 	}
 }
