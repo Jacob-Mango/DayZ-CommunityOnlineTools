@@ -14,7 +14,6 @@ class PlayerRow extends ScriptedWidgetEventHandler
 	{
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
-
 		Init();
 	}
 
