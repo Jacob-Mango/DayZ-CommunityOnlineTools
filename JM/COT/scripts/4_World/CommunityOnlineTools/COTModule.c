@@ -41,25 +41,25 @@ class COTModule : Module
 
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", "Opens the editor.", true );
+		KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", true );
 		toggleEditor.AddBinding( "kY" );
 		RegisterKeyMouseBinding( toggleEditor );
 
-		KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", "Focuses the game instead of the UI while in editor.", true );
+		KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", true );
 		focusGame.AddBinding( "mBLeft" );
 		focusGame.SetActionType( KeyMouseActionType.PRESS );
 		RegisterKeyMouseBinding( focusGame );
 
-		KeyMouseBinding focusUI = new KeyMouseBinding( GetModuleType(), "FocusUI", "Focuses the UI instead of the game while in editor.", true );
+		KeyMouseBinding focusUI = new KeyMouseBinding( GetModuleType(), "FocusUI", true );
 		focusUI.AddBinding( "mBLeft" );
 		focusUI.SetActionType( KeyMouseActionType.RELEASE );
 		RegisterKeyMouseBinding( focusUI );
 
-		KeyMouseBinding toggleCOT = new KeyMouseBinding( GetModuleType(), "ToggleCOT", "Toggles the ability to use COT features.", false );
+		KeyMouseBinding toggleCOT = new KeyMouseBinding( GetModuleType(), "ToggleCOT", false );
 		toggleCOT.AddBinding( "kEnd" );
 		RegisterKeyMouseBinding( toggleCOT );
 
-		KeyMouseBinding closeCOT = new KeyMouseBinding( GetModuleType(), "CloseCOT", "Closes COT.", true );
+		KeyMouseBinding closeCOT = new KeyMouseBinding( GetModuleType(), "CloseCOT", true );
 		closeCOT.AddBinding( "kEscape" );
 		RegisterKeyMouseBinding( closeCOT );
 	}

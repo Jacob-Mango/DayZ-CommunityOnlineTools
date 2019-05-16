@@ -100,6 +100,9 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	override void OnUpdate( float timeslice )
 	{
+		GetUApi().ActivateGroup( COT_INPUT_GROUP );
+		// GetUApi().ActivateGroup("buldozer");
+
 		super.OnUpdate( timeslice );
 
 		UIScriptedMenu menu = m_UIManager.GetMenu();
