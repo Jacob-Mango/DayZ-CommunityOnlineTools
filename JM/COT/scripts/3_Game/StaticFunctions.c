@@ -409,21 +409,21 @@ string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass )
 
 static array< string > FindFilesInLocation( string folder )
 {
-	COT_Debug("FindFilesInLocation( " + folder + " ) Start");
+	COT_Debug( "FindFilesInLocation( " + folder + " ) Start" );
 	array< string > files = new array< string >;
 	string fileName;
 	FileAttr fileAttr;
 	FindFileHandle findFileHandle = FindFile( folder + "*", fileName, fileAttr, 0 );
 	if ( findFileHandle )
 	{
-		COT_Debug( "File: " + fileName );
+		COT_Debug( "  File: " + fileName );
 		if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 		{
 			files.Insert( fileName );
 		}
 		while ( FindNextFile( findFileHandle, fileName, fileAttr ) )
 		{
-			COT_Debug( "File: " + fileName );
+			COT_Debug( "  File: " + fileName );
 			if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 			{
 				files.Insert( fileName );
@@ -431,19 +431,19 @@ static array< string > FindFilesInLocation( string folder )
 		}
 	}
 	CloseFindFile( findFileHandle );
-	COT_Debug("FindFilesInLocation( " + folder + " ) Finished");
+	COT_Debug( "FindFilesInLocation( " + folder + " ) Finished" );
 	return files;
 }
 
 static void DeleteFiles( string folder, array< string > files )
 {
-	COT_Debug("DeleteFiles( " + folder + " ) Start");
+	COT_Debug( "DeleteFiles( " + folder + " ) Start" );
 	for ( int i = 0; i < files.Count(); i++ )
 	{
-		COT_Debug( "File: " + folder + files[i] );
+		COT_Debug( "  File: " + folder + files[i] );
 		DeleteFile( folder + files[i] );
 	}
-	COT_Debug("DeleteFiles( " + folder + " ) Finished");
+	COT_Debug( "DeleteFiles( " + folder + " ) Finished" );
 }
 
 static string COT_FILE_EXIST = "do-not-delete";

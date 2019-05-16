@@ -7,10 +7,6 @@ GameProjectClass {
 			skeletonDefinitions "DZ/Anims/cfg/skeletons.anim.xml"
 			FileSystem {
 				FileSystemPathClass {
-					Name "Game Root"
-					Directory "P:"
-				}
-				FileSystemPathClass {
 					Name "Community Framework"
 					Directory "P:\JM\CF"
 				}
