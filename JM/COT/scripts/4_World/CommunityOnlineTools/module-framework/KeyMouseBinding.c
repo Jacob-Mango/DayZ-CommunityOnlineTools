@@ -11,7 +11,7 @@ class KeyMouseBinding
 
 	protected int m_ActionType;
 	
-	void KeyMouseBinding( typename object, string callback, string description, bool menu = false ) 
+	void KeyMouseBinding( typename object, string callback, bool menu = false ) 
 	{
 		m_Object = object;
 		m_KeyBinds = new array< string >;
@@ -19,7 +19,7 @@ class KeyMouseBinding
 		m_CallbackFunction = callback;
 		m_UAInputName = "UA" + object.ToString() + callback;
 
-		m_Description = description;
+		m_Description = "";
 		
 		m_CanBeUsedInMenu = menu;
 

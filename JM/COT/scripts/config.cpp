@@ -14,7 +14,7 @@ class CfgPatches
 
 class CfgMods
 {
-	class CommunityOnlineTools
+	class JM_CommunityOnlineTools
 	{
 		dir = "JM";
 		picture = "";

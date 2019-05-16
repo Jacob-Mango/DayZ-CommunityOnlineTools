@@ -64,7 +64,7 @@ class CameraTool: EditorModule
 	
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", "Toggle camera.", true );
+		KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", true );
 		toggleCamera.AddBinding( "kInsert" );
 		RegisterKeyMouseBinding( toggleCamera );
 	}
