@@ -26,7 +26,9 @@ class CfgMods
 		creditsJson = "JM/COT/Scripts/Data/Credits.json";
 		author = "Jacob_Mango";
 		authorID = "0";
-		version = "JM/COT/scripts/Data/Version.hpp";
+		version = "0.0.0";
+		versionPath = "JM/COT/scripts/Data/Version.hpp";
+		inputs = "JM/COT/scripts/Data/Inputs.xml";
 		extra = 0;
 		type = "mod";
 		

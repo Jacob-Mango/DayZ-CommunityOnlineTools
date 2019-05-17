@@ -136,34 +136,53 @@ class ModuleManager
 
 					UAInput input = GetUApi().GetInputByName( k_m_Binding.GetUAInputName() );
 
-					int action = k_m_Binding.GetActionType();
+					bool localPress = input.LocalPress();
+					bool localRelease = input.LocalRelease();
+					bool localHold = input.LocalHold();
+					bool localClick = input.LocalClick();
+					bool localDoubleClick = input.LocalDoubleClick();
 
-					if ( action & KeyMouseActionType.PRESS && input.LocalPress() )
-					{
-						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
-					}
+					bool canLocalPress = input.IsPressLimit();
+					bool canLocalRelease = input.IsReleaseLimit();
+					bool canLocalHold = input.IsHoldLimit();
+					bool canLocalClick = input.IsClickLimit();
+					bool canLocalDoubleClick = input.IsDoubleClickLimit();
 
-					if ( action & KeyMouseActionType.RELEASE && input.LocalRelease() )
-					{
-						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
-					}
+					bool isLimited = canLocalPress || canLocalRelease || canLocalHold || canLocalClick || canLocalDoubleClick;
 
-					if ( action & KeyMouseActionType.HOLD && input.LocalHold() )
+					if ( isLimited )
 					{
-						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
-					}
+						if ( canLocalPress && localPress )
+						{
+							GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						}
+						
+						if ( canLocalRelease && localRelease )
+						{
+							GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						}
 
-					if ( action & KeyMouseActionType.DOUBLECLICK && input.LocalDoubleClick() )
-					{
-						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
-					}
+						if ( canLocalHold && localHold )
+						{
+							GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						}
 
-					if ( action & KeyMouseActionType.CLICK && input.LocalClick() )
+						if ( canLocalClick && localClick )
+						{
+							GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						}
+
+						if ( canLocalDoubleClick && localDoubleClick )
+						{
+							GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						}
+					} else
 					{
-						GetGame().GameScript.CallFunctionParams( GetModule( k_m_Binding.GetObject() ), k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
+						GetGame().GameScript.CallFunctionParams( module, k_m_Binding.GetCallBackFunction(), NULL, new Param1< UAInput >( input ) );
 					}
 				}
 			}
+			
 			module.OnUpdate( timeslice );
 		}
 	}

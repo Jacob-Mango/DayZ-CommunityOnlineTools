@@ -41,27 +41,11 @@ class COTModule : Module
 
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleEditor = new KeyMouseBinding( GetModuleType(), "ToggleMenu", true );
-		toggleEditor.AddBinding( "kY" );
-		RegisterKeyMouseBinding( toggleEditor );
-
-		KeyMouseBinding focusGame = new KeyMouseBinding( GetModuleType(), "FocusGame", true );
-		focusGame.AddBinding( "mBLeft" );
-		focusGame.SetActionType( KeyMouseActionType.PRESS );
-		RegisterKeyMouseBinding( focusGame );
-
-		KeyMouseBinding focusUI = new KeyMouseBinding( GetModuleType(), "FocusUI", true );
-		focusUI.AddBinding( "mBLeft" );
-		focusUI.SetActionType( KeyMouseActionType.RELEASE );
-		RegisterKeyMouseBinding( focusUI );
-
-		KeyMouseBinding toggleCOT = new KeyMouseBinding( GetModuleType(), "ToggleCOT", false );
-		toggleCOT.AddBinding( "kEnd" );
-		RegisterKeyMouseBinding( toggleCOT );
-
-		KeyMouseBinding closeCOT = new KeyMouseBinding( GetModuleType(), "CloseCOT", true );
-		closeCOT.AddBinding( "kEscape" );
-		RegisterKeyMouseBinding( closeCOT );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleMenu",		"UACOTModuleToggleMenu",	true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
 
 	override void OnUpdate( float timeslice )
@@ -110,12 +94,13 @@ class COTModule : Module
 		m_PreventOpening = prevent;
 	}
 
-	void ToggleMenu()
+	void ToggleMenu( UAInput input = NULL )
 	{
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-		{
+		if ( input != NULL && !( input.LocalPress() ) )
 			return;
-		}
+
+		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+			return;
 
 		if ( !COTIsActive )
 		{
@@ -132,9 +117,13 @@ class COTModule : Module
 		}
 	}
 
-	void FocusUI()
+	void FocusUI( UAInput input )
 	{
-		if ( m_COTMenu == NULL ) return;
+		if ( !( input.LocalPress() ) )
+			return;
+
+		if ( m_COTMenu == NULL )
+			return;
 		
 		if( m_COTMenu.IsVisible() )
 		{
@@ -142,9 +131,13 @@ class COTModule : Module
 		}
 	}
 
-	void FocusGame()
+	void FocusGame( UAInput input )
 	{
-		if ( m_COTMenu == NULL ) return;
+		if ( !( input.LocalRelease() ) )
+			return;
+			
+		if ( m_COTMenu == NULL )
+			return;
 
 		if( m_COTMenu.IsVisible() )
 		{
@@ -159,9 +152,13 @@ class COTModule : Module
 		}
 	}
 
-	void ToggleCOT()
+	void ToggleCOT( UAInput input )
 	{
-		if ( m_COTMenu == NULL ) return;
+		if ( !( input.LocalPress() ) )
+			return;
+
+		if ( m_COTMenu == NULL )
+			return;
 
 		COTIsActive = !COTIsActive;
 
@@ -179,8 +176,11 @@ class COTModule : Module
 		GetPlayer().Message(message, color);
 	}
 
-	void CloseCOT()
+	void CloseCOT( UAInput input )
 	{
+		if ( !( input.LocalPress() ) )
+			return;
+
 		if ( m_COTMenu.IsVisible() )
 		{
 			CloseMenu( false );
