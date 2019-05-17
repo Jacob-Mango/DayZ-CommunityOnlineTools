@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<modded_inputs>
+    <inputs>
+        <actions>
+            <input name="UACOTModuleFocusGame" loc="" visible="false" />
+            <input name="UACOTModuleFocusUI" loc="" visible="false" />
+            <input name="UACOTModuleToggleCOT" loc="Toggle COT" />
+            <input name="UACOTModuleToggleMenu" loc="Show Side Menu" />
+            <input name="UATeleportModuleTeleportCursor" loc="Teleport To Cursor" />
+            <input name="UACameraToolToggleCamera" loc="Toggles Freecam" />
+        </actions>
+    </inputs>
+
+    <preset>
+        <input name="UACOTModuleFocusGame">
+            <btn name="mBLeft">
+            </btn>
+        </input>
+        <input name="UACOTModuleFocusUI">
+            <btn name="mBLeft">
+            </btn>
+        </input>
+        <input name="UACOTModuleToggleCOT">
+            <btn name="kEnd">
+            </btn>
+        </input>
+        <input name="UACOTModuleToggleMenu">
+            <btn name="kY">
+            </btn>
+        </input>
+        <input name="UATeleportModuleTeleportCursor">
+            <btn name="kH">
+            </btn>
+        </input>
+        <input name="UACameraToolToggleCamera">
+            <btn name="kInsert">>
+            </btn>
+        </input>
+    </preset>
+</modded_inputs>

@@ -64,9 +64,7 @@ class CameraTool: EditorModule
 	
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding toggleCamera  = new KeyMouseBinding( GetModuleType(), "ToggleCamera", true );
-		toggleCamera.AddBinding( "kInsert" );
-		RegisterKeyMouseBinding( toggleCamera );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
 	}
 
 	Camera GetCamera()
@@ -199,9 +197,10 @@ class CameraTool: EditorModule
 		}
 	}
 	
-	void ToggleCamera() 
+	void ToggleCamera( UAInput input )
 	{
-		// if ( GetGame().IsMultiplayer() == false ) return;
+		if ( !( input.LocalPress() ) )
+			return;
 
 		if ( !COTIsActive ) {
 			Message( GetPlayer(), "Community Online Tools is currently toggled off." );

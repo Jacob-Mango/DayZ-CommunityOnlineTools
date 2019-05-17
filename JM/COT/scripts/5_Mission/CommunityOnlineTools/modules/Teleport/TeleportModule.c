@@ -44,10 +44,7 @@ class TeleportModule: EditorModule
 
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType(), "TeleportCursor", true );
-		teleport.AddBinding( "kH" );
-		teleport.SetActionType( KeyMouseActionType.PRESS | KeyMouseActionType.HOLD );
-		RegisterKeyMouseBinding( teleport );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "TeleportCursor",		"UATeleportModuleTeleportCursor",	true 	) );
 	}
 
 	override string GetLayoutRoot()
@@ -60,12 +57,13 @@ class TeleportModule: EditorModule
 		return settings.Locations;
 	}
 
-	void TeleportCursor()
+	void TeleportCursor( UAInput input )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
-		{
+		if ( !(input.LocalPress() || input.LocalHold()) )
 			return;
-		}
+
+		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
+			return;
 
 		if ( !COTIsActive ) {
 			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
