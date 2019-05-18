@@ -53,6 +53,6 @@ class CfgMods
 				value = "";
 				files[] = {"JM/COT/Scripts/5_Mission"};
 			};
-		}
+		};
 	};
 };
