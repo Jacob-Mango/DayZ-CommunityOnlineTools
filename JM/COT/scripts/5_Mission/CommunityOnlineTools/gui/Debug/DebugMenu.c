@@ -32,35 +32,16 @@ class DebugMenu extends Form
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		int numOfModes = GetDebugging().Modes.Count() + 2;
+		UIActionManager.CreateButton( m_ActionsWrapper, "Apply Settings", this, "OnClick_Apply" );
 
-		int numberOfPanels = Math.Ceil( numOfModes / 9.0 );
+		m_CheckBoxes.Insert( "EnableDebug", UIActionManager.CreateCheckbox( m_ActionsWrapper, "EnableDebug" ) );
 
-		ref Widget panel = UIActionManager.CreateGridSpacer( m_ActionsWrapper, numberOfPanels, 1 );
-
-		array< ref Widget > settings = new array< ref Widget >;
-
-		for ( int j = 0; j < numberOfPanels - 1; j++ )
+		for ( int i = 0; i < GetDebugging().Modes.Count(); i++ )
 		{
-			settings.Insert( UIActionManager.CreateGridSpacer( panel, 9, 1 ) );
-		}
-
-		settings.Insert( UIActionManager.CreateGridSpacer( panel, numOfModes - ( ( numberOfPanels - 1 ) * 9 ), 1 ) );
-
-		int parent = 0;
-
-		m_CheckBoxes.Insert( "EnableDebug", UIActionManager.CreateCheckbox( settings[parent], "EnableDebug" ) );
-
-		for ( int i = 0; i < numOfModes - 2; i++ )
-		{
-			parent = Math.Floor( i / 9.0 );
-
 			string name = GetDebugging().Modes.GetKey( i );
 			
-			m_CheckBoxes.Insert( name, UIActionManager.CreateCheckbox( settings[parent], name ) );
+			m_CheckBoxes.Insert( name, UIActionManager.CreateCheckbox( m_ActionsWrapper, name ) );
 		}
-
-		UIActionManager.CreateButton( settings[parent], "Apply Settings", this, "OnClick_Apply" );
 	}
 
 	override void OnShow()
