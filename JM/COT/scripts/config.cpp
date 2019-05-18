@@ -7,14 +7,14 @@ class CfgPatches
 		requiredVersion=0.1;
 		requiredAddons[]=
 		{
-			"JM_CF_Scripts", "JM_COT_GUI", "JM_COT_InputsDefault", "DZ_Data"
+			"JM_CF_Scripts", "JM_COT_GUI", "DZ_Data"
 		};
 	};
 };
 
 class CfgMods
 {
-	class CommunityOnlineTools
+	class JM_CommunityOnlineTools
 	{
 		dir = "JM";
 		picture = "";
@@ -24,9 +24,11 @@ class CfgMods
 		name = "Community Online Tools";
 		credits = "Jacob_Mango, DannyDog, Arkensor";
 		creditsJson = "JM/COT/Scripts/Data/Credits.json";
-		author = "Jacob_Mango, DannyDog, Arkensor";
+		author = "Jacob_Mango";
 		authorID = "0";
-		version = "JM/COT/scripts/Data/Version.hpp";
+		version = "0.0.0";
+		versionPath = "JM/COT/scripts/Data/Version.hpp";
+		inputs = "JM/COT/scripts/Data/Inputs.xml";
 		extra = 0;
 		type = "mod";
 		
@@ -51,6 +53,6 @@ class CfgMods
 				value = "";
 				files[] = {"JM/COT/Scripts/5_Mission"};
 			};
-		}
+		};
 	};
 };
