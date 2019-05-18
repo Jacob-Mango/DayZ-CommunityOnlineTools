@@ -5,6 +5,13 @@ class DebugModule: EditorModule
 		GetRPCManager().AddRPC( "COT_Manager", "LoadData", this, SingeplayerExecutionType.Client );
 
 		GetPermissionsManager().RegisterPermission( "COT.Apply" );
+
+		Debugging.OnUpdate.Insert( this.ReloadSettings );
+	}
+
+	void ~DebugModule()
+	{
+		Debugging.OnUpdate.Remove( this.ReloadSettings );
 	}
 
 	override bool HasAccess()
@@ -15,14 +22,15 @@ class DebugModule: EditorModule
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
-
-		if ( GetGame().IsClient() )
-			GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param, true );
 	}
 
 	override void ReloadSettings()
 	{
-		super.ReloadSettings();
+		if ( !GetGame().IsClient() || ( GetGame().IsServer() && GetGame().IsMultiplayer() ) )
+			return;
+
+		if ( form && form.IsVisible() )
+			form.OnShow();
 	}
 
 	override void OnMissionFinish()
@@ -40,37 +48,15 @@ class DebugModule: EditorModule
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		Param1< string > data;
-		if( type == CallType.Server )
+		Param1< ref Debugging > data;
+		if ( !ctx.Read( data ) ) return;
+
+		if ( type == CallType.Server )
 		{
-			if ( ctx.Read( data ) )
-			{
-				if ( !GetPermissionsManager().HasPermission( "COT.Apply", sender ) )
-				{
-					return;
-				}
+			if ( !GetPermissionsManager().HasPermission( "COT.Apply", sender ) )
+				return;
 
-				//delete settings;
-				//JsonFileLoader< DebugSettings >.JsonLoadData( data.param1, settings );
-				//settings.Save();
-			} else 
-			{
-				//GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< string >( JsonFileLoader< DebugSettings >.JsonMakeData( settings ) ), true );
-			}
-		}
-
-		if( type == CallType.Client )
-		{
-			if ( !ctx.Read( data ) ) return;
-
-			//JsonFileLoader< DebugSettings >.JsonLoadData( data.param1, settings );
-
-			if ( form && form.IsVisible() )
-			{
-				form.OnShow();
-			}
-
-			//settings.RegisterSettings();
+			GetDebugging().Copy( data.param1 );
 		}
 	}
 }
