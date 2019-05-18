@@ -55,7 +55,7 @@ class VehicleSpawnerSettings
 
 	void Defaults()
 	{		
-		DefaultCivHatchback();
+		//DefaultCivHatchback();
 		DefaultUtilityVehicle();
 		DefaultS120();
 		DefaultVan();
