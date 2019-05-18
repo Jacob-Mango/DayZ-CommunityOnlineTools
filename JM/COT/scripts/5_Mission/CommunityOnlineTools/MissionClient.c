@@ -10,7 +10,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void MissionGameplay()
 	{
-		GetDebugging().Log( "MissionGameplay::MissionGameplay()", "JM_COT_Mission" );
+		GetLogger().Log( "MissionGameplay::MissionGameplay()", "JM_COT_Mission" );
 		
 		m_COT = new ref CommunityOnlineTools;
 		m_PF = new ref PermissionsFramework;
@@ -21,7 +21,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void ~MissionGameplay()
 	{
-		GetDebugging().Log( "MissionGameplay::~MissionGameplay()", "JM_COT_Mission" );
+		GetLogger().Log( "MissionGameplay::~MissionGameplay()", "JM_COT_Mission" );
 
 		delete m_PF;
 		delete m_COT;
@@ -40,7 +40,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void OfflineMissionStart()
 	{
-		GetDebugging().Log( "MissionGameplay::OfflineMissionStart()", "JM_COT_Mission" );
+		GetLogger().Log( "MissionGameplay::OfflineMissionStart()", "JM_COT_Mission" );
 
 		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
 		GetGame().SelectPlayer( NULL, player );

@@ -6,12 +6,12 @@ class DebugModule: EditorModule
 
 		GetPermissionsManager().RegisterPermission( "COT.Apply" );
 
-		Debugging.OnUpdate.Insert( this.ReloadSettings );
+		CFLogger.OnUpdate.Insert( this.ReloadSettings );
 	}
 
 	void ~DebugModule()
 	{
-		Debugging.OnUpdate.Remove( this.ReloadSettings );
+		CFLogger.OnUpdate.Remove( this.ReloadSettings );
 	}
 
 	override bool HasAccess()
@@ -38,7 +38,7 @@ class DebugModule: EditorModule
 		super.OnMissionFinish();
 
 		if ( GetGame().IsServer() )
-			GetDebugging().Save();
+			GetLogger().Save();
 	}
 
 	override string GetLayoutRoot()
@@ -48,7 +48,7 @@ class DebugModule: EditorModule
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		Param1< ref Debugging > data;
+		Param1< ref CFLogger > data;
 		if ( !ctx.Read( data ) ) return;
 
 		if ( type == CallType.Server )
@@ -56,7 +56,7 @@ class DebugModule: EditorModule
 			if ( !GetPermissionsManager().HasPermission( "COT.Apply", sender ) )
 				return;
 
-			GetDebugging().Copy( data.param1 );
+			GetLogger().Copy( data.param1 );
 		}
 	}
 }
