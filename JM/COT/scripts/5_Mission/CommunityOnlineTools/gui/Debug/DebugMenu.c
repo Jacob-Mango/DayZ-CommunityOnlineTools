@@ -36,9 +36,9 @@ class DebugMenu extends Form
 
 		m_CheckBoxes.Insert( "EnableDebug", UIActionManager.CreateCheckbox( m_ActionsWrapper, "EnableDebug" ) );
 
-		for ( int i = 0; i < GetDebugging().Modes.Count(); i++ )
+		for ( int i = 0; i < GetLogger().Modes.Count(); i++ )
 		{
-			string name = GetDebugging().Modes.GetKey( i );
+			string name = GetLogger().Modes.GetKey( i );
 			
 			m_CheckBoxes.Insert( name, UIActionManager.CreateCheckbox( m_ActionsWrapper, name ) );
 		}
@@ -48,30 +48,30 @@ class DebugMenu extends Form
 	{
 		super.OnShow();
 
-		m_CheckBoxes.Get( "EnableDebug" ).SetChecked( GetDebugging().EnableDebug );
+		m_CheckBoxes.Get( "EnableDebug" ).SetChecked( GetLogger().EnableDebug );
 
 		for ( int i = 0; i < m_CheckBoxes.Count(); i++)
 		{
 			if ( m_CheckBoxes.GetKey( i ).Contains( "EnableDebug" ) )
 				continue;
 
-			m_CheckBoxes.GetElement( i ).SetChecked( GetDebugging().Modes.Get( m_CheckBoxes.GetKey( i ) ) );
+			m_CheckBoxes.GetElement( i ).SetChecked( GetLogger().Modes.Get( m_CheckBoxes.GetKey( i ) ) );
 		}
 	}
 
 	void OnClick_Apply( UIEvent eid, ref UIActionButton action )
 	{
-		GetDebugging().EnableDebug = m_CheckBoxes.Get( "EnableDebug" ).IsChecked();
+		GetLogger().EnableDebug = m_CheckBoxes.Get( "EnableDebug" ).IsChecked();
 
 		for ( int i = 0; i < m_CheckBoxes.Count(); i++)
 		{
 			if ( m_CheckBoxes.GetKey( i ).Contains( "EnableDebug" ) )
 				continue;
 
-			GetDebugging().Modes.Set( m_CheckBoxes.GetKey( i ), m_CheckBoxes.GetElement( i ).IsChecked() );
+			GetLogger().Modes.Set( m_CheckBoxes.GetKey( i ), m_CheckBoxes.GetElement( i ).IsChecked() );
 		}
 
-		GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< ref Debugging >( GetDebugging() ), false );
+		GetRPCManager().SendRPC( "COT_Manager", "LoadData", new Param1< ref CFLogger >( GetLogger() ), false );
 	}
 
 	override void OnHide()

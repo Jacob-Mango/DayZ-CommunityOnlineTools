@@ -87,7 +87,7 @@ class Role
 	{
 		string filename = FileReadyStripName( Name );
 
-		GetDebugging().Log( "Saving role for " + filename, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Saving role for " + filename, "JM_COT_PermissionFramework" );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
 			
 		Serialize();
@@ -103,11 +103,11 @@ class Role
 			
 			CloseFile(file);
 			
-			GetDebugging().Log( "Wrote to the roles", "JM_COT_PermissionFramework" );
+			GetLogger().Log( "Wrote to the roles", "JM_COT_PermissionFramework" );
 			return true;
 		} else
 		{
-			GetDebugging().Log( "Failed to open the file for the role for writing.", "JM_COT_PermissionFramework" );
+			GetLogger().Log( "Failed to open the file for the role for writing.", "JM_COT_PermissionFramework" );
 			return false;
 		}
 	}
@@ -115,7 +115,7 @@ class Role
 	bool Load()
 	{
 		string filename = FileReadyStripName( Name );
-		GetDebugging().Log( "Loading role " + filename, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Loading role " + filename, "JM_COT_PermissionFramework" );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
 			
 		ref array< string > data = new ref array< string >;
@@ -147,7 +147,7 @@ class Role
 
 	void DebugPrint()
 	{
-		GetDebugging().Log( "Printing permissions for role " + Name, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Printing permissions for role " + Name, "JM_COT_PermissionFramework" );
 
 		RootPermission.DebugPrint( 0 );
 	}

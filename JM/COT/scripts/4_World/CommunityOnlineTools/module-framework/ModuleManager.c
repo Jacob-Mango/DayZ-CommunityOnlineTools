@@ -5,12 +5,12 @@ class ModuleManager
 
 	void ModuleManager()
 	{
-		GetDebugging().Log( "ModuleManager::ModuleManager()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::ModuleManager()", "JM_COT_ModuleFramework" );
 	}
 
 	void ~ModuleManager()
 	{
-		GetDebugging().Log( "ModuleManager::~ModuleManager()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::~ModuleManager()", "JM_COT_ModuleFramework" );
 	}
 
 	void RegisterModule( Module module )
@@ -28,12 +28,12 @@ class ModuleManager
 			message = " as a Module.";
 		}
 
-		GetDebugging().Log( "Registered module " + module + message, "JM_COT_ModuleFramework" );
+		GetLogger().Log( "Registered module " + module + message, "JM_COT_ModuleFramework" );
 	}
 
 	void RegisterModules( string version )
 	{
-		GetDebugging().Log( "ModuleManager::RegisterModules()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::RegisterModules()", "JM_COT_ModuleFramework" );
 
 		m_Modules = new ref array< ref Module >;
 		m_EditorModules = new ref array< ref EditorModule >;
@@ -61,7 +61,7 @@ class ModuleManager
 
 	void OnInit()
 	{
-		GetDebugging().Log( "ModuleManager::OnInit()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::OnInit()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -71,7 +71,7 @@ class ModuleManager
 
 	void OnMissionStart()
 	{
-		GetDebugging().Log( "ModuleManager::OnMissionStart()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::OnMissionStart()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -81,7 +81,7 @@ class ModuleManager
 
 	void OnMissionFinish()
 	{
-		GetDebugging().Log( "ModuleManager::OnMissionFinish()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::OnMissionFinish()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
@@ -91,7 +91,7 @@ class ModuleManager
 
 	void OnMissionLoaded()
 	{
-		GetDebugging().Log( "ModuleManager::OnMissionLoaded()", "JM_COT_ModuleFramework" );
+		GetLogger().Log( "ModuleManager::OnMissionLoaded()", "JM_COT_ModuleFramework" );
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{

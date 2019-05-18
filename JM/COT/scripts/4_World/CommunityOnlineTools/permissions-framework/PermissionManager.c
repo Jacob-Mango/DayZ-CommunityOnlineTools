@@ -95,7 +95,7 @@ class PermissionManager
 		{
 			if ( ClientAuthPlayer == NULL )
 			{
-				GetDebugging().Log( "ClientAuth is NULL!", "JM_COT_PermissionFramework" );
+				GetLogger().Log( "ClientAuth is NULL!", "JM_COT_PermissionFramework" );
 				return false;
 			}
 
@@ -194,7 +194,7 @@ class PermissionManager
 
 	void DebugPrint()
 	{
-		GetDebugging().Log( "Printing all authenticated players!", "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Printing all authenticated players!", "JM_COT_PermissionFramework" );
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
 		{
 			AuthPlayers[i].DebugPrint();

@@ -401,21 +401,21 @@ string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass )
 
 static array< string > FindFilesInLocation( string folder )
 {
-	GetDebugging().Log( "FindFilesInLocation( " + folder + " ) Start", "JM_COT_StaticFunctions" );
+	GetLogger().Log( "FindFilesInLocation( " + folder + " ) Start", "JM_COT_StaticFunctions" );
 	array< string > files = new array< string >;
 	string fileName;
 	FileAttr fileAttr;
 	FindFileHandle findFileHandle = FindFile( folder + "*", fileName, fileAttr, 0 );
 	if ( findFileHandle )
 	{
-		GetDebugging().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
+		GetLogger().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
 		if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 		{
 			files.Insert( fileName );
 		}
 		while ( FindNextFile( findFileHandle, fileName, fileAttr ) )
 		{
-			GetDebugging().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
+			GetLogger().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
 			if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 			{
 				files.Insert( fileName );
@@ -423,19 +423,19 @@ static array< string > FindFilesInLocation( string folder )
 		}
 	}
 	CloseFindFile( findFileHandle );
-	GetDebugging().Log( "FindFilesInLocation( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
+	GetLogger().Log( "FindFilesInLocation( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
 	return files;
 }
 
 static void DeleteFiles( string folder, array< string > files )
 {
-	GetDebugging().Log( "DeleteFiles( " + folder + " ) Start", "JM_COT_StaticFunctions" );
+	GetLogger().Log( "DeleteFiles( " + folder + " ) Start", "JM_COT_StaticFunctions" );
 	for ( int i = 0; i < files.Count(); i++ )
 	{
-		GetDebugging().Log( "  File: " + folder + files[i], "JM_COT_StaticFunctions" );
+		GetLogger().Log( "  File: " + folder + files[i], "JM_COT_StaticFunctions" );
 		DeleteFile( folder + files[i] );
 	}
-	GetDebugging().Log( "DeleteFiles( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
+	GetLogger().Log( "DeleteFiles( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
 }
 
 static string COT_FILE_EXIST = "do-not-delete";
@@ -446,7 +446,7 @@ static void CreateFilesExist( string folder )
 
 	if ( file == 0 )
 	{
-		GetDebugging().Err( "[COT::StaticFunctions] Can't write to the default file in " + folder, "JM_COT_StaticFunctions" );
+		GetLogger().Err( "[COT::StaticFunctions] Can't write to the default file in " + folder, "JM_COT_StaticFunctions" );
 		return;
 	}
 

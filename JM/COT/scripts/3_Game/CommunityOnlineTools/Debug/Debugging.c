@@ -1,6 +1,6 @@
-modded class Debugging
+modded class CFLogger
 {	
-    void Debugging()
+    void CFLogger()
 	{
 		Modes.Insert( "JM_COT_StaticFunctions", false );
 		Modes.Insert( "JM_COT_WidgetStore", false );

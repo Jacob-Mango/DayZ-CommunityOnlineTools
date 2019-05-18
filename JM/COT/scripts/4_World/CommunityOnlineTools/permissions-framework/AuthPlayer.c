@@ -116,7 +116,7 @@ class AuthPlayer
 
 		bool has = RootPermission.HasPermission( permission, permType );
 
-		GetDebugging().Log( "" +  GetSteam64ID() + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "" +  GetSteam64ID() + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
 
 		if ( has )
 			return true;
@@ -128,7 +128,7 @@ class AuthPlayer
 		{
 			has = Roles[j].HasPermission( permission, permType );
 
-			GetDebugging().Log( "    Role " +  Roles[j].Name + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
+			GetLogger().Log( "    Role " +  Roles[j].Name + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
 
 			if ( has )
 			{
@@ -143,7 +143,7 @@ class AuthPlayer
 	{
 		ref Role r = GetPermissionsManager().RolesMap.Get( role );
 
-		GetDebugging().Log( "Adding role " + role + ": " + r, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Adding role " + role + ": " + r, "JM_COT_PermissionFramework" );
 
 		if ( Roles.Find( r ) < 0 ) 
 		{
@@ -153,7 +153,7 @@ class AuthPlayer
 
 	void AddRole( Role role )
 	{
-		GetDebugging().Log( "Adding role " + role.Name + ": " + role, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Adding role " + role.Name + ": " + role, "JM_COT_PermissionFramework" );
 
 		m_HasPlayerData = true;
 
@@ -231,7 +231,7 @@ class AuthPlayer
 
 			Serialize();
 
-			GetDebugging().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
+			GetLogger().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
 			FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
 
 			if ( file != 0 )
@@ -251,7 +251,7 @@ class AuthPlayer
 	bool Load()
 	{
 		string filename = FileReadyStripName( Data.SSteam64ID );
-		GetDebugging().Log( "Loading permissions for " + filename, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Loading permissions for " + filename, "JM_COT_PermissionFramework" );
 		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
 			
 		ref array< string > data = new ref array< string >;
@@ -295,7 +295,7 @@ class AuthPlayer
 
 	void DebugPrint()
 	{
-		GetDebugging().Log( "Printing permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );
+		GetLogger().Log( "Printing permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );
 
 		RootPermission.DebugPrint( 0 );
 	}
