@@ -110,7 +110,7 @@ class AuthPlayer
 
 	bool HasPermission( string permission )
 	{
-		RootPermission.DebugPrint( 0 );
+		// RootPermission.DebugPrint( 0 );
 
 		PermissionType permType;
 
