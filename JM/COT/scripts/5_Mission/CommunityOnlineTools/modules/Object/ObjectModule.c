@@ -5,13 +5,23 @@ class ObjectModule: EditorModule
 		GetRPCManager().AddRPC( "COT_Object", "SpawnObjectPosition", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Object", "SpawnObjectInventory", this, SingeplayerExecutionType.Server );
 
+		GetRPCManager().AddRPC( "COT_Object", "SpawnEntity", this, SingeplayerExecutionType.Server );
+
 		GetRPCManager().AddRPC( "COT_Object", "DeleteObject", this, SingeplayerExecutionType.Server );
 
 		GetPermissionsManager().RegisterPermission( "Object.Spawn.Position" );
 		GetPermissionsManager().RegisterPermission( "Object.Spawn.Inventory" );
+		GetPermissionsManager().RegisterPermission( "Object.Spawn.Entity" );
 		GetPermissionsManager().RegisterPermission( "Object.View" );
 
 		GetPermissionsManager().RegisterPermission( "Object.Delete" );
+	}
+
+	override void RegisterKeyMouseBindings() 
+	{
+		RegisterKeyMouseBinding( new KeyMouseBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
 	}
 
 	override bool HasAccess()
@@ -22,7 +32,73 @@ class ObjectModule: EditorModule
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/Object/ObjectMenu.layout";
-	} 
+	}
+	
+	void SpawnRandomInfected( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+			return;
+
+		if ( !COTIsActive ){
+			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			return;
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( WorkingZombieClasses().GetRandomElement(), GetPointerPos() ) );
+	}
+
+	void SpawnRandomAnimal( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+			return;
+
+		if ( !COTIsActive ){
+			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			return;
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( GetRandomChildFromBaseClass( "cfgVehicles", "AnimalBase", 2, "Animal_CanisLupus" ), GetPointerPos() ) );
+	}
+
+	void SpawnRandomWolf( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+			return;
+
+		if ( !COTIsActive ){
+			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			return;
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( GetRandomChildFromBaseClass( "cfgVehicles", "Animal_CanisLupus" ), GetPointerPos() ) );
+	}
+
+	void SpawnEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity", sender ) )
+			return;
+
+		Param2< string, vector > data;
+		if ( !ctx.Read( data ) ) return;
+		
+		if( type == CallType.Server )
+		{
+			EntityAI entity = EntityAI.Cast( GetGame().CreateObject( data.param1, data.param2, false, GetGame().IsKindOf( data.param1, "DZ_LightAI" ) ) );
+
+			if ( entity == NULL ) return;
+
+			COTLog( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
+		}
+	}
 	
 	void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{

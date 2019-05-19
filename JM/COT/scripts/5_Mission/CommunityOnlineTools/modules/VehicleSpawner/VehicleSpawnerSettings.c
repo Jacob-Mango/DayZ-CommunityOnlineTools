@@ -6,7 +6,7 @@ class VehicleSpawnerSettings
 	{
 		ref VehicleSpawnerSettings settings = new VehicleSpawnerSettings();
 
-		if ( !GetGame().IsMultiplayer() || GetGame().IsClient() )
+		if ( GetGame().IsClient() || ( !GetGame().IsMultiplayer() && GetGame().IsServer() ) )
 		{
 			settings.Defaults();
 			return settings;
@@ -16,24 +16,25 @@ class VehicleSpawnerSettings
 
 		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER );
 
-		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
+		if ( FileExist( VEHICLE_SPAWNER_FOLDER + COT_FILE_EXIST ) ) 
 		{
+			GetLogger().Log( "Found existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
 			for ( int i = 0; i < files.Count(); i++ )
 			{
-				if ( files[i] == COT_FILE_EXIST )
+				if ( files[i].Contains( COT_FILE_EXIST ) )
 					continue;
 
 				string name = files[i];
 				int pos = files[i].IndexOf(".");
 				
 				if ( pos > -1 )
-				{
 					name = files[i].Substring( 0, pos );
-				}
 
 				settings.Vehicles.Insert( name, VehicleSpawnerFile.Load( name ) );
+				GetLogger().Log( "	Loading vehicle file ( " + name + " )", "JM_COT_VehicleSpawner" );
 			}
 		} else {
+			GetLogger().Log( "Didn't find existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
 			DeleteFiles( VEHICLE_SPAWNER_FOLDER, files );
 
 			settings.Defaults();
@@ -54,8 +55,7 @@ class VehicleSpawnerSettings
 	}
 
 	void Defaults()
-	{		
-		//DefaultCivHatchback();
+	{
 		DefaultUtilityVehicle();
 		DefaultS120();
 		DefaultVan();
@@ -84,35 +84,6 @@ class VehicleSpawnerSettings
 		ref VehicleSpawnerFile file = new VehicleSpawnerFile;
 
 		file.VehicleName = "UtilityVehicle";
-		file.DisplayName = file.VehicleName;
-		file.m_FileName = file.VehicleName;
-		file.Parts = attArr;
-
-		Vehicles.Insert( file.VehicleName, file );
-	}
-
-	void DefaultCivHatchback()
-	{
-		ref array< string> attArr = new ref array< string>;
-
-		attArr.Insert("CivHatchbackDoors_Driver");
-		attArr.Insert("CivHatchbackDoors_Trunk");
-		attArr.Insert("CivHatchbackDoors_Hood");
-		attArr.Insert("CivHatchbackDoors_CoDriver");
-		attArr.Insert("CivHatchbackDoors_Cargo01");
-		attArr.Insert("CivHatchbackDoors_Cargo02");
-		attArr.Insert("CivHatchbackWheel");
-		attArr.Insert("CivHatchbackWheel");
-		attArr.Insert("CivHatchbackWheel");
-		attArr.Insert("CivHatchbackWheel");
-		attArr.Insert("CarBattery");
-		attArr.Insert("CarRadiator");
-		attArr.Insert("EngineBelt");
-		attArr.Insert("SparkPlug");
-
-		ref VehicleSpawnerFile file = new VehicleSpawnerFile;
-
-		file.VehicleName = "CivilianHatchback";
 		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
 		file.Parts = attArr;

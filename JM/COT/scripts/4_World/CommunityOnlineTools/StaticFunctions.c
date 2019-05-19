@@ -76,9 +76,9 @@ static void COTLog( PlayerIdentity player, string text )
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 {
-	if ( !GetPlayer() )
+	if ( !ignore )
 	{
-		return "0 0 0";
+		ignore = GetGame().GetPlayer();
 	}
 
 	vector dir = GetGame().GetPointerDirection();
@@ -124,7 +124,7 @@ static void Message( PlayerBase player, string txt )
 		//GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
 	} else 
 	{
-		GetPlayer().Message( txt, "colorImportant" );
+    	GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
 	}
 }
 

@@ -6,7 +6,7 @@ class ItemSetSettings
 	{
 		ref ItemSetSettings settings = new ItemSetSettings();
 
-		if ( !GetGame().IsMultiplayer() || GetGame().IsClient() )
+		if ( GetGame().IsClient() || ( !GetGame().IsMultiplayer() && GetGame().IsServer() ) )
 		{
 			settings.Defaults();
 			return settings;
@@ -16,8 +16,9 @@ class ItemSetSettings
 
 		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER );
 
-		if ( ArrayContains( files, COT_FILE_EXIST ) ) 
+		if ( FileExist( ITEM_SETS_FOLDER + COT_FILE_EXIST ) ) 
 		{
+			GetLogger().Log( "Found existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
 			for ( int i = 0; i < files.Count(); i++ )
 			{
 				if ( files[i] == COT_FILE_EXIST )
@@ -32,8 +33,10 @@ class ItemSetSettings
 				}
 
 				settings.ItemSets.Insert( name, ItemSetFile.Load( name ) );
+				GetLogger().Log( "	Loading item set file ( " + name + " )", "JM_COT_ItemSetSpawner" );
 			}
 		} else {
+			GetLogger().Log( "Didn't find existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
 			DeleteFiles( ITEM_SETS_FOLDER, files );
 
 			settings.Defaults();

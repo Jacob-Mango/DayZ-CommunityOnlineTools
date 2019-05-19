@@ -66,10 +66,10 @@ class ItemSetSpawnerModule: EditorModule
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		//if( type == CallType.Server )
-		//{
-		//	GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param1< string >( JsonFileLoader< ItemSetSpawnerMeta >.JsonMakeData( ItemSetSpawnerMeta.DeriveFromSettings( settings ) ) ), true );
-		//}
+		if( type == CallType.Server )
+		{
+			GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param1< string >( JsonFileLoader< ItemSetSpawnerMeta >.JsonMakeData( ItemSetSpawnerMeta.DeriveFromSettings( settings ) ) ) );
+		}
 
 		if( type == CallType.Client )
 		{

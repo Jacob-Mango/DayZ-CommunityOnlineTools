@@ -380,23 +380,33 @@ static bool CheckStringType( string str, int type )
 	return false;
 }
 
-string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass )
+string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, int minScope = -1, string strIgnoreClass = "" )
 {
     string child_name = "";
     int count = GetGame().ConfigGetChildrenCount ( strConfigName );
-    array<string> class_names = new array<string>;
 
-    for (int p = 0; p < count; p++)
+	if ( count == 0 )
+		return strBaseClass;
+
+    array< string > class_names = new array<string>;
+
+    for ( int p = 0; p < count; p++ )
     {
         GetGame().ConfigGetChildName ( strConfigName, p, child_name );
 
-        if ( GetGame().IsKindOf(child_name, strBaseClass ) && ( child_name != strBaseClass ) )
+		if ( child_name.Contains( strIgnoreClass ) )
+			continue;
+
+        if( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
+			continue;
+
+        if ( GetGame().IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )
         {
-            class_names.Insert(child_name);
+            class_names.Insert( child_name );
         }
     }
 
-    return class_names.GetRandomElement();
+    return class_names.GetRandomElement(); // GetRandomChildFromBaseClass( strConfigName, class_names.GetRandomElement(), minScope, strIgnoreClass );
 }
 
 static array< string > FindFilesInLocation( string folder )
@@ -413,6 +423,7 @@ static array< string > FindFilesInLocation( string folder )
 		{
 			files.Insert( fileName );
 		}
+		
 		while ( FindNextFile( findFileHandle, fileName, fileAttr ) )
 		{
 			GetLogger().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
