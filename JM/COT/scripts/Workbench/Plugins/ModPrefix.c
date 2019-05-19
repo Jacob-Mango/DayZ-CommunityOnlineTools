@@ -2,11 +2,12 @@ static string g_ModPrefix;
 
 static string GetWorkDriveDirectory()
 {
-    if ( g_ModPrefix != "" ) return g_ModPrefix;
+    if ( g_ModPrefix != "" ) 
+		return g_ModPrefix;
 
-    if ( IsCLIParam( "test" ) )
+    if ( IsCLIParam( "" ) )
 	{ 
-        GetCLIParam( "test", g_ModPrefix );
+        GetCLIParam( "", g_ModPrefix );
 
         array<string> tokens = new array<string>;
         g_ModPrefix.Split("\\", tokens);
@@ -19,7 +20,7 @@ static string GetWorkDriveDirectory()
         }
 	} else
     {
-        return "P:\\";
+        g_ModPrefix = "P:\\JM\COT\\";
     }
 
     return g_ModPrefix;

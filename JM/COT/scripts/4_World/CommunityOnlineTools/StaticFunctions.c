@@ -2,8 +2,6 @@
 
 const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
 
-const string COT_INPUT_GROUP = "communityonlinetools";
-
 static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
 static bool COTPlayerIsRemoved = false;
 
