@@ -189,7 +189,7 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
+start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
 
 endlocal

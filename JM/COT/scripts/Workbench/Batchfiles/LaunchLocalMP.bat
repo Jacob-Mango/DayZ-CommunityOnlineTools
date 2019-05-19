@@ -193,11 +193,11 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%serverDirectory%"
-echo start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%" -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%" -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+echo start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%" 
+start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%" 
 
 TIMEOUT /T 5 /NOBREAK
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% -connect=127.0.0.1 -port=%port% -password=%password% "-mod=%modList%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-start %clientEXE% %clientLaunchParams% -connect=127.0.0.1 -port=%port% -password=%password% "-mod=%modList%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+echo start %clientEXE% %clientLaunchParams% -connect=127.0.0.1 -port=%port% -password=%password% "-mod=%modList%" -dologs -adminlog -freezecheck -scriptDebug=true 
+start %clientEXE% %clientLaunchParams% -connect=127.0.0.1 -port=%port% -password=%password% "-mod=%modList%" -dologs -adminlog -freezecheck -scriptDebug=true 
