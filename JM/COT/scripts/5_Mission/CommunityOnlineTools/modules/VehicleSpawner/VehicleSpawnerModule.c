@@ -60,12 +60,12 @@ class VehicleSpawnerModule: EditorModule
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		//if( type == CallType.Server )
-		//{
-		//	GetRPCManager().SendRPC( "COT_VehicleSpawner", "LoadData", new Param1< string >( JsonFileLoader< VehicleSpawnerMeta >.JsonMakeData( VehicleSpawnerMeta.DeriveFromSettings( settings ) ) ), true );
-		//}
+		if ( type == CallType.Server )
+		{
+			GetRPCManager().SendRPC( "COT_VehicleSpawner", "LoadData", new Param1< string >( JsonFileLoader< VehicleSpawnerMeta >.JsonMakeData( VehicleSpawnerMeta.DeriveFromSettings( settings ) ) ) );
+		}
 
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			Param1< string > data;
 			if ( !ctx.Read( data ) ) return;

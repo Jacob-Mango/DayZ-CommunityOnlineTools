@@ -6,8 +6,11 @@
             <input name="UACOTModuleFocusUI" loc="" visible="false" />
             <input name="UACOTModuleToggleCOT" loc="Toggle COT" />
             <input name="UACOTModuleToggleMenu" loc="Show Side Menu" />
-            <input name="UATeleportModuleTeleportCursor" loc="Teleport To Cursor" />
+            <input name="UATeleportModuleTeleportCursor" loc="Teleport Self (Crosshair)" />
             <input name="UACameraToolToggleCamera" loc="Toggles Freecam" />
+            <input name="UAObjectModuleSpawnInfected" loc="Spawn Infected (Crosshair)" />
+            <input name="UAObjectModuleSpawnAnimal" loc="Spawn Animal (Crosshair)" />
+            <input name="UAObjectModuleSpawnWolf" loc="Spawn Wolf (Crosshair)" />
         </actions>
     </inputs>
 
@@ -35,6 +38,13 @@
         <input name="UACameraToolToggleCamera">
             <btn name="kInsert">>
             </btn>
+        </input>
+        
+        <input name="UAObjectModuleSpawnInfected">
+        </input>
+        <input name="UAObjectModuleSpawnAnimal">
+        </input>
+        <input name="UAObjectModuleSpawnWolf">
         </input>
     </preset>
 </modded_inputs>

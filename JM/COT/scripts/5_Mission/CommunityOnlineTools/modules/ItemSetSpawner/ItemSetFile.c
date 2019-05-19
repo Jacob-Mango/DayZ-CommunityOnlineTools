@@ -1,4 +1,4 @@
-const string ITEM_SETS_FOLDER = ROOT_COT_DIR + "ItemSets/";
+const string ITEM_SETS_FOLDER = ROOT_COT_DIR + "ItemSets\\";
 
 class ItemSetFile
 {

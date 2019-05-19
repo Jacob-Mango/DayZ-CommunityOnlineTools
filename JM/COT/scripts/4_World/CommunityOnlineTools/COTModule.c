@@ -119,13 +119,13 @@ class COTModule : Module
 
 	void FocusUI( UAInput input )
 	{
-		if ( !( input.LocalPress() ) )
+		if ( !( input.LocalRelease() ) )
 			return;
 
 		if ( m_COTMenu == NULL )
 			return;
 		
-		if( m_COTMenu.IsVisible() )
+		if ( m_COTMenu.IsVisible() )
 		{
 			m_COTMenu.SetInputFocus( false );
 		}
@@ -133,13 +133,13 @@ class COTModule : Module
 
 	void FocusGame( UAInput input )
 	{
-		if ( !( input.LocalRelease() ) )
+		if ( !( input.LocalPress() ) )
 			return;
 			
 		if ( m_COTMenu == NULL )
 			return;
 
-		if( m_COTMenu.IsVisible() )
+		if ( m_COTMenu.IsVisible() )
 		{
 			Widget w = GetWidgetUnderCursor();
 

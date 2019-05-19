@@ -38,6 +38,8 @@ set serverEXE=
 set clientLaunchParams=
 set serverLaunchParams=
 set modBuildDirectory=
+set workDrive=
+set prefixLinkRoot=
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
     set modName=%%a
@@ -81,6 +83,14 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Client
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
 	set modBuildDirectory=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
+	set workDrive=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PrefixLinkRoot') do (
+    set prefixLinkRoot=%%a
 )
 
 setlocal enableextensions enabledelayedexpansion
@@ -148,6 +158,18 @@ if "%modBuildDirectory%"=="" (
 	echo ModBuildDirectory parameter was not set in the project.cfg
 )
 
+echo WorkDrive is: "%workDrive%"
+if "%workDrive%"=="" (
+	set /a failed=1
+	echo WorkDrive parameter was not set in the project.cfg
+)
+
+echo PrefixLinkRoot is: "%prefixLinkRoot%"
+if "%prefixLinkRoot%"=="" (
+    set /a failed=1
+    echo PrefixLinkRoot parameter was not set in the project.cfg
+)
+
 if %failed%==1 (
     endlocal
 
@@ -167,7 +189,7 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
-start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
+echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 
 endlocal

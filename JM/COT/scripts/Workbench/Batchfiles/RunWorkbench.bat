@@ -29,7 +29,7 @@ if %failed%==1 (
 
 set workbenchDirectory=
 set workbenchEXE=
-set workdrive=
+set workDrive=
 set prefixLinkRoot=
 set modBuildDirectory=
 set modName=
@@ -117,7 +117,7 @@ if %failed%==1 (
     goto:eof
 )
 
-call CopyProject.bat
+REM call CopyProject.bat
 
 for %%a in ("%mods:;=" "%") do (
     set mod=%%~a
@@ -130,13 +130,16 @@ for %%a in ("%mods:;=" "%") do (
 
 chdir /D "%workbenchDirectory%"
 
-echo start %workbenchEXE% -test=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-start %workbenchEXE% -test=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+echo start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
+start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 
 REM echo start %workbenchEXE% "-mod=%modList%"
 REM start %workbenchEXE% "-mod=%modList%"
 
 REM echo start %workbenchEXE% 
 REM start %workbenchEXE%
+
+REM echo start %workbenchEXE% -filePatching "-mod=P:\JM\CF\Scripts;P:\JM\COT\Scripts"
+REM start %workbenchEXE% -filePatching "-mod=P:\JM\CF\Scripts;P:\JM\COT\Scripts"
 
 endlocal

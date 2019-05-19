@@ -85,7 +85,7 @@ class TeleportModule: EditorModule
 
 		if ( distance < 1000 )
 		{
-			GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ), true );
+			GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ) );
 		}
 		else
 		{

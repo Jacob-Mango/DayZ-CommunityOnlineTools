@@ -1,4 +1,4 @@
-const string VEHICLE_SPAWNER_FOLDER = ROOT_COT_DIR + "Vehicles/";
+const string VEHICLE_SPAWNER_FOLDER = ROOT_COT_DIR + "Vehicles\\";
 
 class VehicleSpawnerFile
 {
