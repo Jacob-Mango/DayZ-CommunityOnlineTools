@@ -101,21 +101,22 @@ class ModuleManager
 
 	void OnUpdate( float timeslice )
 	{
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
-
 		bool inputIsFocused = false;
 
-		ref Widget focusedWidget = GetFocus();
-		if ( focusedWidget && focusedWidget.ClassName().Contains("EditBoxWidget") )
+		if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
 		{
-			inputIsFocused = true;
+			ref Widget focusedWidget = GetFocus();
+			if ( focusedWidget && focusedWidget.ClassName().Contains("EditBoxWidget") )
+			{
+				inputIsFocused = true;
+			}
 		}
 
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
 			Module module = m_Modules.Get(i);
 
-			if ( !module.IsPreventingInput() )
+			if ( !module.IsPreventingInput() && ( GetGame().IsClient() || !GetGame().IsMultiplayer() ) )
 			{
 				for ( int kb = 0; kb < module.GetBindings().Count(); ++kb )
 				{

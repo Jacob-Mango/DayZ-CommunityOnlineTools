@@ -117,7 +117,7 @@ if %failed%==1 (
     goto:eof
 )
 
-REM call CopyProject.bat
+call CopyProject.bat
 
 for %%a in ("%mods:;=" "%") do (
     set mod=%%~a
