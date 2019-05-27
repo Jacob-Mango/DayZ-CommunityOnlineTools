@@ -56,7 +56,10 @@ static void COTLog( AuthPlayer player, string text )
 
 static void COTLog( PlayerIdentity player, string text )
 {
-	if ( GetGame().IsMultiplayer() )
+	if ( player == NULL )
+	{
+		text = "[COT] Game: " + text;
+	} else if ( GetGame().IsMultiplayer() )
 	{
 		text = "[COT] " + player.GetPlainId() + ": " + text;
 	} else

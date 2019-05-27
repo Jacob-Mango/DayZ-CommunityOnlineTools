@@ -87,42 +87,57 @@ class VehicleSpawnerModule: EditorModule
 		car.Fill( fluid, cap );
 	}
 
-	void SpawnCursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	Car SpawnVehicle( string type, vector position, PlayerIdentity sender = NULL )
 	{
-		ref Param2< string, vector > data;
-		if ( !ctx.Read( data ) ) return;
+		ref VehicleSpawnerFile file = settings.Vehicles.Get( type );
 
-		ref VehicleSpawnerFile file = settings.Vehicles.Get( data.param1 );
-
-		if ( file == NULL ) return;
+		if ( file == NULL ) 
+			return NULL;
 
 		ref array< string > attachments = file.Parts;
 
 		if ( attachments.Count() == 0 )
+			return NULL;
+
+		Car oCar = Car.Cast( GetGame().CreateObject( type, position ) );
+
+		for (int j = 0; j < attachments.Count(); j++)
 		{
-			return;
+			oCar.GetInventory().CreateInInventory( attachments[j] );
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "VehicleSpawner.Vehicle." + data.param1, sender ) )
-		{
+		FillCar( oCar, CarFluid.FUEL );
+		FillCar( oCar, CarFluid.OIL );
+		FillCar( oCar, CarFluid.BRAKE );
+		FillCar( oCar, CarFluid.COOLANT );
+
+		COTLog( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
+
+		return oCar;
+	}
+
+	void SpawnCursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		ref Param2< string, vector > data;
+		if ( !ctx.Read( data ) )
 			return;
-		}
+
+		if ( !GetPermissionsManager().HasPermission( "VehicleSpawner.Vehicle." + data.param1, sender ) )
+			return;
 		
 		if( type == CallType.Server )
 		{
-			Car oCar = Car.Cast( GetGame().CreateObject( data.param1, data.param2 ) );
-
-			for (int j = 0; j < attachments.Count(); j++)
-			{
-				oCar.GetInventory().CreateInInventory( attachments[j] );
-			}
-
-			FillCar( oCar, CarFluid.FUEL );
-			FillCar( oCar, CarFluid.OIL );
-			FillCar( oCar, CarFluid.BRAKE );
-			FillCar( oCar, CarFluid.COOLANT );
-
-			COTLog( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
+			SpawnVehicle( data.param1, data.param2, sender );
 		}
 	}
+}
+
+static Car SpawnVehicleAtPosition( string type, vector position, PlayerIdentity sender = NULL )
+{
+	VehicleSpawnerModule module = VehicleSpawnerModule.Cast( GetModuleManager().GetModule( VehicleSpawnerModule ) );
+	if ( module )
+	{
+		return module.SpawnVehicle( type, position, sender );
+	}
+	return NULL;
 }
