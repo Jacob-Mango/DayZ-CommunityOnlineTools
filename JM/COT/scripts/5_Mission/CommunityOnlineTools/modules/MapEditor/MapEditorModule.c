@@ -1,4 +1,3 @@
-/*
 class MapEditorModule: Module
 {
 	protected bool m_InEditor;
@@ -42,7 +41,7 @@ class MapEditorModule: Module
 
 		bool cont = false;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
@@ -59,7 +58,7 @@ class MapEditorModule: Module
 			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender, target );
 		}
 
-		if( type == CallType.Client || cont )
+		if ( type == CallType.Client || cont )
 		{
 			m_InEditor = true;
 
@@ -79,7 +78,7 @@ class MapEditorModule: Module
 
 		bool cont = false;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			Param1< vector > data;
 			if ( !ctx.Read( data ) ) return;
@@ -102,7 +101,7 @@ class MapEditorModule: Module
 			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
 		}
 
-		if( type == CallType.Client || cont )
+		if ( type == CallType.Client || cont )
 		{
 			m_InEditor = false;
 
@@ -114,11 +113,7 @@ class MapEditorModule: Module
 
 	override void RegisterKeyMouseBindings() 
 	{
-		KeyMouseBinding teleport = new KeyMouseBinding( GetModuleType() , "ToggleEditor", "[U]"	, "Teleport to cursor position." );
-
-		teleport.AddKeyBind( KeyCode.KC_U, KeyMouseBinding.KB_EVENT_PRESS );
-		
-		RegisterKeyMouseBinding( teleport );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleEditor",		"UAMapEditorModuleToggleEditor",	true 	) );
 	}
 	
 	override void OnMissionLoaded()
@@ -133,11 +128,14 @@ class MapEditorModule: Module
 		}
 	}
 
-	void ToggleEditor()
+	void ToggleEditor( UAInput input )
 	{
+		if ( !( input.LocalPress() ) )
+			return;
+			
 		if ( CurrentActiveCamera )
 		{
-			GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param1<vector>(GetPlayer().GetPosition()), true, NULL, GetPlayer() );
+			GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param1<vector>( GetPlayer().GetPosition() ), true, NULL, GetPlayer() );
 		} else 
 		{
 			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, NULL, GetPlayer() );
@@ -145,4 +143,3 @@ class MapEditorModule: Module
 	}
 
 }
-*/

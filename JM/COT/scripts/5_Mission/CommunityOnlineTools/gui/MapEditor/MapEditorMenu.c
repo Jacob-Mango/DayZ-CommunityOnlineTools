@@ -1,4 +1,3 @@
-/*
 class MapEditorMenu 
 {
 	protected Widget layoutRoot;
@@ -100,29 +99,25 @@ class MapEditorMenu
 			return;
 		}
 
-		if ( input.LocalRelease( UADefaultAction, false ) )
+		if ( input.LocalRelease( "UADefaultAction", false ) )
 		{
 			GetRPCManager().SendRPC( "COT_MapEditor", "SetPosition", new Param1<vector>( m_SelectedObject.GetPosition() ), false, NULL, m_SelectedObject );
 
 			m_SelectedObject = NULL;
-
-			CameraTool.SetTarget( NULL );
 		}
 
-		if ( input.LocalPress( UADefaultAction, false ) )
+		if ( input.LocalPress( "UADefaultAction", false ) )
 		{
 			m_SelectedObject = GetPointerObject( m_Distance );
-
-			CameraTool.SetTarget( m_SelectedObject );
 		}
 
 		if ( m_SelectedObject )
 		{
 			vector position = m_SelectedObject.GetPosition();
 
-			float forward = input.LocalValue( UAMoveForward ) - input.LocalValue( UAMoveBack );
-			float strafe = input.LocalValue( UATurnRight ) - input.LocalValue( UATurnLeft );
-			float altitude = input.LocalValue( UALeanLeft ) - input.LocalValue( UALeanRight );
+			float forward = input.LocalValue( "UAMoveForward" ) - input.LocalValue( "UAMoveBack" );
+			float strafe = input.LocalValue( "UATurnRight" ) - input.LocalValue( "UATurnLeft" );
+			float altitude = input.LocalValue( "UALeanLeft" ) - input.LocalValue( "UALeanRight" );
 
 			position[0] = position[0] + strafe;
 			position[1] = position[1] + altitude;
@@ -133,4 +128,3 @@ class MapEditorMenu
 
 	}
 }
-*/
