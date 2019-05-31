@@ -9,14 +9,14 @@ class AuthPlayer
 	PlayerBase PlayerObject;
 	PlayerIdentity IdentityPlayer;
 
-	PlayerData Data;
+	ref PlayerData Data;
 
 	protected ref PlayerFile m_PlayerFile;
 
 	protected bool m_HasPermissions;
 	protected bool m_HasPlayerData;
 
-	void AuthPlayer( PlayerData data )
+	void AuthPlayer( ref PlayerData data )
 	{
 		PlayerObject = NULL;
 
@@ -234,7 +234,7 @@ class AuthPlayer
 			
 		ref array< string > data = new ref array< string >;
 
-		PlayerFile.Load( Data, m_HasPlayerData );
+		m_PlayerFile = PlayerFile.Load( Data, m_HasPlayerData );
 
 		Print( m_HasPlayerData );
 		Print( m_PlayerFile.Roles );
