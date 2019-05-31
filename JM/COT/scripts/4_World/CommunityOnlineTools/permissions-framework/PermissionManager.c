@@ -127,7 +127,7 @@ class PermissionManager
 
 	ref AuthPlayer PlayerJoined( PlayerIdentity player )
 	{
-		PlayerData data = new PlayerData;
+		ref PlayerData data = new ref PlayerData;
 
 		if ( player )
 		{
@@ -214,7 +214,7 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			PlayerData data = new PlayerData;
+			ref PlayerData data = new ref PlayerData;
 			data.SGUID = guid;
 
 			auPlayer = new AuthPlayer( data );
@@ -245,7 +245,7 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			PlayerData data = new PlayerData;
+			ref PlayerData data = new ref PlayerData;
 			data.SSteam64ID = steam64;
 
 			auPlayer = new AuthPlayer( data );
@@ -284,7 +284,7 @@ class PermissionManager
 		return auPlayer;
 	}
 
-	ref AuthPlayer GetPlayer( PlayerData data )
+	ref AuthPlayer GetPlayer( ref PlayerData data )
 	{
 		if ( !GetGame().IsMultiplayer() )
 			return AuthPlayers[0];
