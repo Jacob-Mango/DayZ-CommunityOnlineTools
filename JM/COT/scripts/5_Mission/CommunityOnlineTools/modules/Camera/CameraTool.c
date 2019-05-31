@@ -1,6 +1,8 @@
 class CameraTool: EditorModule
 {
-	static float m_CurrentSmoothBlur;
+	protected float m_CurrentSmoothBlur;
+	protected float m_CurrentFOV;
+	protected float m_TargetFOV;
 
 	void CameraTool()
 	{
@@ -13,6 +15,10 @@ class CameraTool: EditorModule
 		GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
 		GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
 		GetPermissionsManager().RegisterPermission( "CameraTools.UpdateNetworkBubble" );
+
+		m_CurrentSmoothBlur = 0.0;
+		m_CurrentFOV = 1.0;
+		m_TargetFOV = 1.0;
 	}
 
 	void ~CameraTool()
@@ -31,13 +37,19 @@ class CameraTool: EditorModule
 	
 	override void OnUpdate( float timeslice )
 	{
-		if ( GetGame().IsClient() )
+		if ( GetGame().IsClient() && CurrentActiveCamera )
 		{
 			float speed = 0.2;
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-			 if ( CAMERA_DOF && CurrentActiveCamera ) // DOF enabled
+			if ( m_CurrentFOV != m_TargetFOV ) 
+			{
+				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
+				CurrentActiveCamera.SetFOV( m_CurrentFOV );
+			}
+
+			if ( CAMERA_DOF )
 			{
 				vector from = GetGame().GetCurrentCameraPosition();
 
@@ -57,7 +69,7 @@ class CameraTool: EditorModule
 
 				if ( dist > 0 ) CAMERA_FDIST = dist;
 				
-				PPEffects.OverrideDOF(true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET);
+				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
 			}
 		}
 	}
@@ -65,6 +77,8 @@ class CameraTool: EditorModule
 	override void RegisterKeyMouseBindings() 
 	{
 		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
+		RegisterKeyMouseBinding( new KeyMouseBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
 	}
 
 	Camera GetCamera()
@@ -146,7 +160,7 @@ class CameraTool: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
 			return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			GetGame().SelectPlayer( sender, target );
 
@@ -158,7 +172,7 @@ class CameraTool: EditorModule
 			COTLog( sender, "Left the Free Camera");
 		}
 
-		if( type == CallType.Client && !COTPlayerIsRemoved )
+		if ( type == CallType.Client && !COTPlayerIsRemoved )
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
@@ -191,9 +205,30 @@ class CameraTool: EditorModule
 	{
 		if ( CurrentActiveCamera && !COTPlayerIsRemoved )
 		{
-			SetFreezeMouse(false);
+			SetFreezeMouse( false );
 
 			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, NULL, GetPlayer() );
+		}
+	}
+
+	void ZoomForwards( UAInput input )
+	{
+		if ( input.LocalValue() != 0 )
+		{
+			m_TargetFOV += input.LocalValue() * 0.01;
+		}
+	}
+
+	void ZoomBackwards( UAInput input )
+	{
+		if ( input.LocalValue() != 0 )
+		{
+			m_TargetFOV -= input.LocalValue() * 0.01;
+					
+			if ( m_TargetFOV < 0.01 ) 
+			{
+				m_TargetFOV = 0.01;
+			}
 		}
 	}
 	

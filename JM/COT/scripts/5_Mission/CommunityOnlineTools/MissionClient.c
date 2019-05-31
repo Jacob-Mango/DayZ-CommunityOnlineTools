@@ -102,36 +102,39 @@ modded class MissionGameplay
 	{
 		super.OnUpdate( timeslice );
 
-		UIScriptedMenu menu = m_UIManager.GetMenu();
-		Input input = GetGame().GetInput();
-
-		m_COT.OnUpdate( timeslice );
-
-		// Disable openning radial menu
-		if ( DISABLE_ALL_INPUT )
+		if ( m_bLoaded )
 		{
-			if( input.LocalPress("UAUIQuickbarRadialOpen", false) )
+			UIScriptedMenu menu = m_UIManager.GetMenu();
+			Input input = GetGame().GetInput();
+
+			m_COT.OnUpdate( timeslice );
+
+			// Disable openning radial menu
+			if ( DISABLE_ALL_INPUT )
 			{
-				if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
+				if( input.LocalPress("UAUIQuickbarRadialOpen", false) )
 				{
-					RadialQuickbarMenu.CloseMenu();
+					if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
+					{
+						RadialQuickbarMenu.CloseMenu();
+					}
 				}
 			}
-		}
 
-		// Force the custom debug monitor to show instead
-		if ( m_CDebugMonitor )
-		{
-			if ( COTMenuOpen )
+			// Force the custom debug monitor to show instead
+			if ( m_CDebugMonitor )
 			{
-				m_CDebugMonitor.Hide();
-			} else 
-			{
-				m_CDebugMonitor.Show();
+				if ( COTMenuOpen )
+				{
+					m_CDebugMonitor.Hide();
+				} else 
+				{
+					m_CDebugMonitor.Show();
+				}
 			}
-		}
 
-		m_PF.Update( timeslice );
+			m_PF.Update( timeslice );
+		}
 	}
 
 	// ------------------------------------------------------------
