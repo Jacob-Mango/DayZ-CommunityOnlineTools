@@ -25,21 +25,15 @@ if %failed%==1 (
     goto:eof
 )
 
-set /a port=0
-set password=
 set gameDirectory=
-set serverDirectory=
-set serverProfileDirectory=
 set modName=
 set mods=
 set mission=
 set clientEXE=
 set serverEXE=
 set clientLaunchParams=
-set serverLaunchParams=
 set modBuildDirectory=
-set workDrive=
-set prefixLinkRoot=
+set playerName=
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
     set modName=%%a
@@ -49,24 +43,8 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Additi
     set mods=%%a
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Port') do (
-    set /a port=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerPassword') do (
-    set password=%%a
-)
-
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg GameDirectory') do (
     set gameDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerDirectory') do (
-    set serverDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerProfileDirectory') do (
-    set serverProfileDirectory=%%a
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg SPMission') do (
@@ -81,16 +59,12 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Client
     set clientLaunchParams=%%a
 )
 
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PlayerName') do (
+    set playerName=%%a
+)
+
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
 	set modBuildDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
-	set workDrive=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PrefixLinkRoot') do (
-    set prefixLinkRoot=%%a
 )
 
 setlocal enableextensions enabledelayedexpansion
@@ -122,52 +96,23 @@ if "%mods%"=="" (
     set mods=%mods%;%modName%
 )
 
-echo Port is: "%port%"
-if "%port%"==0 (
-    set /a failed=1
-    echo Port parameter was not set in the project.cfg
-)
-
-echo ServerPassword is: "%password%"
-if "%password%"=="" (
-    set /a failed=1
-    echo ServerPassword parameter was not set in the project.cfg
-)
-
 echo GameDirectory is: "%gameDirectory%"
 if "%gameDirectory%"=="" (
     set /a failed=1
     echo GameDirectory parameter was not set in the project.cfg
 )
 
-echo ServerDirectory is: "%serverDirectory%"
-if "%serverDirectory%"=="" (
-    set /a failed=1
-    echo ServerDirectory parameter was not set in the project.cfg
-)
-
-echo ServerProfileDirectory is: "%serverProfileDirectory%"
-if "%serverProfileDirectory%"=="" (
-    set /a failed=1
-    echo ServerProfileDirectory parameter was not set in the project.cfg
+echo PlayerName is: "%playerName%"
+if "%playerName%"=="" (
+    echo PlayerName parameter was not set in the project.cfg, continuing.
+) else (
+    set playerName=-name=%playerName%
 )
 
 echo ModBuildDirectory is: "%modBuildDirectory%"
 if "%modBuildDirectory%"=="" (
 	set /a failed=1
 	echo ModBuildDirectory parameter was not set in the project.cfg
-)
-
-echo WorkDrive is: "%workDrive%"
-if "%workDrive%"=="" (
-	set /a failed=1
-	echo WorkDrive parameter was not set in the project.cfg
-)
-
-echo PrefixLinkRoot is: "%prefixLinkRoot%"
-if "%prefixLinkRoot%"=="" (
-    set /a failed=1
-    echo PrefixLinkRoot parameter was not set in the project.cfg
 )
 
 if %failed%==1 (
@@ -189,7 +134,7 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
-start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" -dologs -adminlog -freezecheck -scriptDebug=true
+echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
+start %clientEXE% %clientLaunchParams% "-mod=%modList%" "-mission=%mission%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
 
 endlocal

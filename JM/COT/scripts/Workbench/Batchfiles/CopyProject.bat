@@ -70,9 +70,8 @@ if %failed%==1 (
     goto:eof
 )
 
-REM echo Copying "%cd%\..\dayz.gproj" to "%workbenchDirectory%dayz.gproj"
-REM copy "%cd%\..\dayz.gproj" "%workbenchDirectory%dayz.gproj"
-
+echo Copying "%cd%\..\dayz.gproj" to "%workbenchDirectory%dayz.gproj"
+copy "%cd%\..\dayz.gproj" "%workbenchDirectory%dayz.gproj"
 echo Copying "%cd%\..\dayz.gproj" to "%gameDirectory%dayz.gproj"
 copy "%cd%\..\dayz.gproj" "%gameDirectory%dayz.gproj"
 echo Copying "%cd%\..\dayz.gproj" to "%serverDirectory%dayz.gproj"

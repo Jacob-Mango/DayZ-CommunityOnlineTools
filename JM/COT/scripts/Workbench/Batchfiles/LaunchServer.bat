@@ -25,11 +25,12 @@ if %failed%==1 (
     goto:eof
 )
 
-set /a port=0
+set port=0
 set password=
 set gameDirectory=
 set serverDirectory=
 set serverProfileDirectory=
+set serverConfig=
 set modName=
 set mods=
 set mission=
@@ -46,7 +47,7 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Additi
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Port') do (
-    set /a port=%%a
+    set port=%%a
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerPassword') do (
@@ -63,6 +64,10 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Server
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerProfileDirectory') do (
     set serverProfileDirectory=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerConfig') do (
+    set serverConfig=%%a
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg MPMission') do (
@@ -138,14 +143,17 @@ if "%mods%"=="" (
 
 echo Port is: "%port%"
 if "%port%"==0 (
-    set /a failed=1
-    echo Port parameter was not set in the project.cfg
+    echo Port parameter was not set in the project.cfg, using 2302.
+    set port=-port=2302
+) else (
+    set port=-port=%port%
 )
 
 echo ServerPassword is: "%password%"
 if "%password%"=="" (
-    set /a failed=1
-    echo ServerPassword parameter was not set in the project.cfg
+    echo ServerPassword parameter was not set in the project.cfg, continuing.
+) else (
+    set password=-password=%password%
 )
 
 echo GameDirectory is: "%gameDirectory%"
@@ -164,6 +172,12 @@ echo ServerProfileDirectory is: "%serverProfileDirectory%"
 if "%serverProfileDirectory%"=="" (
     set /a failed=1
     echo ServerProfileDirectory parameter was not set in the project.cfg
+)
+
+echo ServerConfig is: "%serverConfig%"
+if "%serverConfig%"=="" (
+    set /a failed=1
+    echo ServerConfig parameter was not set in the project.cfg
 )
 
 echo ModBuildDirectory is: "%modBuildDirectory%"
@@ -189,7 +203,7 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%serverDirectory%"
-echo start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%"
-start %serverEXE% %serverLaunchParams% -scrAllowFileWrite -config=serverDZ.cfg -port=%port% "-profiles=%serverProfileDirectory%" -password=%password% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mission=%mission%" "-mod=%modList%"
+echo start %serverEXE% %serverLaunchParams% "-config=%serverConfig%" "%port%" "-profiles=%serverProfileDirectory%" -dologs -adminlog -freezecheck "-scriptDebug=true" "-cpuCount=4" "-mission=%mission%" "-mod=%modList%"
+start %serverEXE% %serverLaunchParams% "-config=%serverConfig%" "%port%" "-profiles=%serverProfileDirectory%" -dologs -adminlog -freezecheck "-scriptDebug=true" "-cpuCount=4" "-mission=%mission%" "-mod=%modList%"
 
 TIMEOUT /T 5 /NOBREAK

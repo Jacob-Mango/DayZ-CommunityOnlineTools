@@ -25,7 +25,6 @@ if %failed%==1 (
     goto:eof
 )
 
-set /a port=0
 set password=
 set gameDirectory=
 set serverDirectory=
@@ -36,6 +35,7 @@ set mission=
 set serverEXE=
 set serverLaunchParams=
 set modBuildDirectory=
+set playerName=
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
     set modName=%%a
@@ -43,10 +43,6 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModNam
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg AdditionalMPMods') do (
     set mods=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Port') do (
-    set /a port=%%a
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerPassword') do (
@@ -81,8 +77,8 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Client
     set clientLaunchParams=%%a
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerLaunchParams') do (
-    set serverLaunchParams=%%a
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PlayerName') do (
+    set playerName=%%a
 )
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
@@ -95,12 +91,6 @@ echo ClientLaunchParams is: "%clientLaunchParams%"
 if "%clientLaunchParams%"=="" (
     set /a failed=1
     echo ClientLaunchParams parameter was not set in the project.cfg
-)
-
-echo ServerLaunchParams is: "%serverLaunchParams%"
-if "%serverLaunchParams%"=="" (
-    set /a failed=1
-    echo ServerLaunchParams parameter was not set in the project.cfg
 )
 
 echo ClientEXE is: "%clientEXE%"
@@ -136,12 +126,6 @@ if "%mods%"=="" (
     set mods=%mods%;%modName%
 )
 
-echo Port is: "%port%"
-if "%port%"==0 (
-    set /a failed=1
-    echo Port parameter was not set in the project.cfg
-)
-
 echo ServerPassword is: "%password%"
 if "%password%"=="" (
     set /a failed=1
@@ -164,6 +148,13 @@ echo ServerProfileDirectory is: "%serverProfileDirectory%"
 if "%serverProfileDirectory%"=="" (
     set /a failed=1
     echo ServerProfileDirectory parameter was not set in the project.cfg
+)
+
+echo PlayerName is: "%playerName%"
+if "%playerName%"=="" (
+    echo PlayerName parameter was not set in the project.cfg, continuing.
+) else (
+    set playerName=-name=%playerName%
 )
 
 echo ModBuildDirectory is: "%modBuildDirectory%"
@@ -189,7 +180,7 @@ for %%a in ("%mods:;=" "%") do (
 )
 
 chdir /d "%gameDirectory%"
-echo start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mod=%modList%"
-start %clientEXE% %clientLaunchParams% -dologs -adminlog -freezecheck -scriptDebug=true -cpuCount=4 "-mod=%modList%"
+echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
+start %clientEXE% %clientLaunchParams% "-mod=%modList%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
 
 TIMEOUT /T 5 /NOBREAK
