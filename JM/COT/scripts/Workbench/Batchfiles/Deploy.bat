@@ -22,7 +22,6 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	pause
 	goto:eof
 )
 
@@ -128,7 +127,6 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	pause
 	goto:eof
 )
 

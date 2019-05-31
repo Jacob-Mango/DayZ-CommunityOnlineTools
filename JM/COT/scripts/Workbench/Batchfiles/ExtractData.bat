@@ -7,7 +7,7 @@ for /F "usebackq eol=: tokens=1,2* delims==" %%i in ("!userfile!") do (
     set currkey=%%i
     set currval=%%j
     if "!key!"=="!currkey!" (
-        echo !currval!
+        echo.!currval!
         endlocal
         goto:eof
     )
@@ -17,7 +17,7 @@ for /F "usebackq eol=: tokens=1,2* delims==" %%i in ("!projectfile!") do (
     set currkey=%%i
     set currval=%%j
     if "!key!"=="!currkey!" (
-        echo !currval!
+        echo.!currval!
         endlocal
         goto:eof
     )

@@ -29,23 +29,8 @@ if %failed%==1 (
 
 set workbenchDirectory=
 set workbenchEXE=
-set workDrive=
+set workdrive=
 set prefixLinkRoot=
-set modBuildDirectory=
-set modName=
-set mods=
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
-    set modName=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg AdditionalSPMods') do (
-    set mods=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
-	set modBuildDirectory=%%a
-)
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchDirectory') do (
     set workbenchDirectory=%%a
@@ -89,27 +74,6 @@ if "%prefixLinkRoot%"=="" (
     echo PrefixLinkRoot parameter was not set in the project.cfg
 )
 
-echo ModName is: "%modName%"
-if "%modName%"=="" (
-    set /a failed=1
-    echo ModName parameter was not set in the project.cfg
-)
-
-echo AdditionalSPMods is: "%mods%"
-if "%mods%"=="" (
-    echo AdditionalSPMods parameter was not set in the project.cfg, ignoring.
-    
-    set mods=%modName%
-) else (
-    set mods=%mods%;%modName%
-)
-
-echo ModBuildDirectory is: "%modBuildDirectory%"
-if "%modBuildDirectory%"=="" (
-	set /a failed=1
-	echo ModBuildDirectory parameter was not set in the project.cfg
-)
-
 if %failed%==1 (
     endlocal
 
@@ -119,27 +83,10 @@ if %failed%==1 (
 
 call CopyProject.bat
 
-for %%a in ("%mods:;=" "%") do (
-    set mod=%%~a
-    if not defined modList (
-        set modList=%modBuildDirectory%!mod!
-    ) else (
-        set modList=!modList!;%modBuildDirectory%!mod!
-    )
-)
-
 chdir /D "%workbenchDirectory%"
-
 echo start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 
-REM echo start %workbenchEXE% "-mod=%modList%"
-REM start %workbenchEXE% "-mod=%modList%"
-
-REM echo start %workbenchEXE% 
-REM start %workbenchEXE%
-
-REM echo start %workbenchEXE% -filePatching "-mod=P:\JM\CF\Scripts;P:\JM\COT\Scripts"
-REM start %workbenchEXE% -filePatching "-mod=P:\JM\CF\Scripts;P:\JM\COT\Scripts"
+TIMEOUT /T 10 /NOBREAK
 
 endlocal
