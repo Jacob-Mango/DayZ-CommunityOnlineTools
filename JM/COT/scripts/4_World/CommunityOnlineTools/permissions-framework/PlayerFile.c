@@ -19,6 +19,7 @@ class PlayerFile
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			playerFile.Save();
 			exists = true;
 			return playerFile;
 		}
@@ -28,6 +29,7 @@ class PlayerFile
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			playerFile.Save();
 			exists = true;
 			return playerFile;
 		}
@@ -39,6 +41,6 @@ class PlayerFile
 
 	void Save()
 	{
-		JsonFileLoader<PlayerFile>.JsonSaveFile( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + m_FileName + ".json", this );
+		JsonFileLoader<PlayerFile>.JsonSaveFile( m_FileName, this );
 	}
 }
