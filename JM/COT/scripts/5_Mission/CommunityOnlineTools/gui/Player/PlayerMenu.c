@@ -1,73 +1,71 @@
 class PlayerMenu extends Form
 {
-	ref array< ref PlayerRow >	  m_PlayerList;
-	ref array< ref PermissionRow >  m_PermissionList;
+	ref array< ref PlayerRow >		m_PlayerList;
+	ref array< ref PermissionRow >	m_PermissionList;
 	ref array< ref RoleRow >		m_RolesList;
 
-	ref Widget					  m_PlayerListWrapper;
-	ref TextWidget				  m_PlayerCount;
+	ref Widget						m_PlayerListWrapper;
+	ref TextWidget					m_PlayerCount;
 	ref GridSpacerWidget			m_PlayerScriptListFirst;
-	int							 m_PlayersInFirst;
+	int								m_PlayersInFirst;
 	ref GridSpacerWidget			m_PlayerScriptListSecond;
-	int							 m_PlayersInSecond;
-	int							 m_UserID;
+	int								m_PlayersInSecond;
+	int								m_UserID;
 
-	ref Widget					  m_ActionsWrapper;
-	ref Widget					  m_ActionsForm;
+	ref Widget						m_ActionsWrapper;
+	ref Widget						m_ActionsForm;
 
-	ref Widget					  m_PermissionsWrapper;
-	ref Widget					  m_PermsContainer;
+	ref Widget						m_PermissionsWrapper;
+	ref Widget						m_PermsContainer;
 	ref ButtonWidget				m_SetPermissionsButton;
 	ref ButtonWidget				m_PermissionsBackButton;
 
-	ref Widget					  m_RolesWrapper;
-	ref Widget					  m_RolesContainer;
+	ref Widget						m_RolesWrapper;
+	ref Widget						m_RolesContainer;
 	ref ButtonWidget				m_SetRolesButton;
 	ref ButtonWidget				m_RolesBackButton;
 
 	bool							m_CanUpdateList;
 
-	ref Permission				  m_LoadedPermission;
-	ref PermissionRow			   m_PermissionUI;
+	ref Permission					m_LoadedPermission;
+	ref PermissionRow				m_PermissionUI;
 
-	private bool					m_DataJustUpdated;
+	ref UIActionText				m_GUID;
+	ref UIActionText				m_Name;
+	ref UIActionText				m_Steam64ID;
 
-	ref UIActionText m_GUID;
-	ref UIActionText m_Name;
-	ref UIActionText m_Steam64ID;
+	ref UIActionText				m_PosX;
+	ref UIActionText				m_PosY;
+	ref UIActionText				m_PosZ;
 
-	ref UIActionText m_PosX;
-	ref UIActionText m_PosY;
-	ref UIActionText m_PosZ;
+	ref UIActionText				m_PingMin;
+	ref UIActionText				m_PingMax;
+	ref UIActionText				m_PingAvg;
 
-	ref UIActionText m_PingMin;
-	ref UIActionText m_PingMax;
-	ref UIActionText m_PingAvg;
+	ref UIActionEditableText		m_Health;
+	ref UIActionEditableText		m_Blood;
+	ref UIActionEditableText		m_Energy;
+	ref UIActionEditableText		m_Water;
+	ref UIActionEditableText		m_Shock;
+	ref UIActionEditableText		m_HeatComfort;
+	ref UIActionEditableText		m_Wet;
+	ref UIActionEditableText		m_Tremor;
+	ref UIActionEditableText		m_Stamina;
+	ref UIActionSelectBox			m_LastShaved;
+	ref UIActionCheckbox			m_BloodyHands;
 
-	ref UIActionEditableText m_Health;
-	ref UIActionEditableText m_Blood;
-	ref UIActionEditableText m_Energy;
-	ref UIActionEditableText m_Water;
-	ref UIActionEditableText m_Shock;
-	ref UIActionEditableText m_HeatComfort;
-	ref UIActionEditableText m_Wet;
-	ref UIActionEditableText m_Tremor;
-	ref UIActionEditableText m_Stamina;
-	ref UIActionSelectBox m_LastShaved;
-	ref UIActionCheckbox m_BloodyHands;
+	ref UIActionButton				m_KickTransport;
+	ref UIActionButton				m_RepairTransport;
+	ref UIActionButton				m_TeleportToMe;
+	ref UIActionButton				m_TeleportMeTo;
 
-	ref UIActionButton m_KickTransport;
-	ref UIActionButton m_RepairTransport;
-	ref UIActionButton m_TeleportToMe;
-	ref UIActionButton m_TeleportMeTo;
-
-	ref UIActionButton m_ModifyPermissions;
-	ref UIActionButton m_ModifyRoles;
-	ref UIActionButton m_BanPlayer;
-	ref UIActionButton m_KickPlayer;
-	ref UIActionCheckbox m_Freecam;
-	ref UIActionCheckbox m_GodMode;
-	ref UIActionButton m_SpectatePlayer;
+	ref UIActionButton				m_ModifyPermissions;
+	ref UIActionButton				m_ModifyRoles;
+	ref UIActionButton				m_BanPlayer;
+	ref UIActionButton				m_KickPlayer;
+	ref UIActionCheckbox			m_Freecam;
+	ref UIActionCheckbox			m_GodMode;
+	ref UIActionButton				m_SpectatePlayer;
 
 	float plwidth = -1;
 	float plheight = -1;
@@ -210,7 +208,6 @@ class PlayerMenu extends Form
 		if ( GetSelectedPlayers().Count() != 1 ) return;
 
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
 
 		bool shouldSpectate = true;
 
@@ -230,36 +227,34 @@ class PlayerMenu extends Form
 	void Click_BanPlayer( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_KickPlayer( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_KickTransport( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_RepairTransport( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 	
 	void Click_TeleportToMe( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-
-		m_DataJustUpdated = true;
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
@@ -276,8 +271,6 @@ class PlayerMenu extends Form
 
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_DataJustUpdated = true;
-
 		GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), false );
 
 	}
@@ -285,63 +278,63 @@ class PlayerMenu extends Form
 	void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetShock( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetHeatComfort( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetWet( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetTremor( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetStamina( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
@@ -351,39 +344,32 @@ class PlayerMenu extends Form
 
 		int state = action.GetSelection();
 
-		m_DataJustUpdated = true;
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_ToggleFreecam( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		m_DataJustUpdated = true;
+
 		GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void UpdateActionsFields( ref PlayerData data )
 	{
-		if ( m_DataJustUpdated )
-		{
-			m_DataJustUpdated = false;
-			return;
-		}
-
 		if ( data )
 		{
 			SetSize( awidth, plheight );
