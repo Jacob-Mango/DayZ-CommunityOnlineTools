@@ -1,7 +1,5 @@
 modded class MissionServer
 {
-	protected bool m_bLoaded;
-
 	protected ref CommunityOnlineTools m_COT;
 	protected ref PermissionsFramework m_PF;
 
@@ -42,8 +40,10 @@ modded class MissionServer
 		super.OnMissionFinish();
 	}
 
-	void OnLoaded()
+	override void OnMissionLoaded()
 	{
+		super.OnMissionLoaded();
+
 		ref array< string > data = new ref array< string >;
 		GetPermissionsManager().RootPermission.Serialize( data );
 
@@ -68,13 +68,10 @@ modded class MissionServer
 
 	override void OnUpdate( float timeslice )
 	{
-		if( !m_bLoaded && !GetDayZGame().IsLoading() )
-		{
-			m_bLoaded = true;
-			OnLoaded();
-		} else {
-			super.OnUpdate( timeslice );
+		super.OnUpdate( timeslice );
 
+		if ( m_bLoaded )
+		{
 			m_PF.Update( timeslice );
 
 			m_COT.OnUpdate( timeslice );

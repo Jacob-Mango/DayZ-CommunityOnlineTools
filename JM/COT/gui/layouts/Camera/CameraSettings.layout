@@ -609,15 +609,15 @@ PanelWidgetClass CameraMenu {
   FrameWidgetClass camera_settings_frame {
    visible 1
    ignorepointer 1
-   position 0 30
-   size 1 250
-   hexactpos 1
-   vexactpos 1
+   position 0 0.117
+   size 1 240
+   hexactpos 0
+   vexactpos 0
    vexactsize 1
    {
     PanelWidgetClass camera_sliders {
      position 0 0
-     size 1 0.5
+     size 1 0.6
      hexactpos 1
      vexactpos 1
      hexactsize 0
@@ -818,18 +818,17 @@ PanelWidgetClass CameraMenu {
     }
     PanelWidgetClass camera_options_pnl {
      color 1 1 1 0
-     position 0 0.5
-     size 1 0.5
-     halign left_ref
-     valign top_ref
+     size 1 0.4
+     halign center_ref
+     valign bottom_ref
      style EditorPanel
      {
       TextWidgetClass camera_smooth_text {
-       position 0.025 41
+       position 0.025 0.451
        size 1 20
        halign left_ref
        valign top_ref
-       vexactpos 1
+       vexactpos 0
        vexactsize 1
        text "Cam Smooth:"
        font "gui/fonts/MetronBook16"
@@ -838,10 +837,10 @@ PanelWidgetClass CameraMenu {
        "text halign" left
       }
       ButtonWidgetClass camera_smooth_btn_dec {
-       position 0.3 35
+       position 0.3 0.385
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -867,10 +866,10 @@ PanelWidgetClass CameraMenu {
        }
       }
       ButtonWidgetClass camera_smooth_btn_inc {
-       position 0.375 35
+       position 0.375 0.385
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -896,11 +895,11 @@ PanelWidgetClass CameraMenu {
        }
       }
       TextWidgetClass camera_msens_text {
-       position 0.025 15
+       position 0.025 0.165
        size 1 20
        halign left_ref
        valign top_ref
-       vexactpos 1
+       vexactpos 0
        vexactsize 1
        text "Cam Sens:"
        font "gui/fonts/MetronBook16"
@@ -909,10 +908,10 @@ PanelWidgetClass CameraMenu {
        "text halign" left
       }
       ButtonWidgetClass camera_msens_btn_dec {
-       position 0.3 12
+       position 0.3 0.132
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -938,10 +937,10 @@ PanelWidgetClass CameraMenu {
        }
       }
       ButtonWidgetClass camera_msens_btn_inc {
-       position 0.375 12
+       position 0.375 0.132
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -967,11 +966,11 @@ PanelWidgetClass CameraMenu {
        }
       }
       TextWidgetClass camera_fov_speed_text {
-       position 0.5 15
+       position 0.5 0.165
        size 1 20
        halign left_ref
        valign top_ref
-       vexactpos 1
+       vexactpos 0
        vexactsize 1
        text "FOV Smooth:"
        font "gui/fonts/MetronBook16"
@@ -980,10 +979,10 @@ PanelWidgetClass CameraMenu {
        "text halign" left
       }
       ButtonWidgetClass camera_fov_speed_btn_inc {
-       position 0.825 12
+       position 0.825 0.132
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1009,10 +1008,10 @@ PanelWidgetClass CameraMenu {
        }
       }
       ButtonWidgetClass camera_fov_speed_btn_dec {
-       position 0.75 12
+       position 0.75 0.132
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1038,11 +1037,11 @@ PanelWidgetClass CameraMenu {
        }
       }
       TextWidgetClass camera_msmooth_text {
-       position 0.5 41
+       position 0.5 0.451
        size 1 20
        halign left_ref
        valign top_ref
-       vexactpos 1
+       vexactpos 0
        vexactsize 1
        text "Fly smooth:"
        font "gui/fonts/MetronBook16"
@@ -1051,10 +1050,10 @@ PanelWidgetClass CameraMenu {
        "text halign" left
       }
       ButtonWidgetClass camera_msmooth_btn_dec {
-       position 0.75 35
+       position 0.75 0.385
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1080,10 +1079,10 @@ PanelWidgetClass CameraMenu {
        }
       }
       ButtonWidgetClass camera_msmooth_btn_inc {
-       position 0.825 35
+       position 0.825 0.385
        size 25 25
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1111,12 +1110,11 @@ PanelWidgetClass CameraMenu {
       ButtonWidgetClass camera_btn_rot {
        visible 1
        color 1 1 1 1
-       position 0.025 64
+       position 0.025 0.11
        size 100 25
-       halign left
-       valign top_ref
+       valign bottom_ref
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1136,12 +1134,12 @@ PanelWidgetClass CameraMenu {
       ButtonWidgetClass camera_btn_phi {
        visible 1
        color 1 1 1 1
-       position 0.3 64
+       position 0.025 0.11
        size 100 25
-       halign left
-       valign top_ref
+       halign right_ref
+       valign bottom_ref
        hexactpos 0
-       vexactpos 1
+       vexactpos 0
        hexactsize 1
        vexactsize 1
        style Default
@@ -1153,32 +1151,6 @@ PanelWidgetClass CameraMenu {
          text "PHI Grid"
          "exact text" 1
          "exact text size" 14
-         "text halign" center
-         "text valign" center
-        }
-       }
-      }
-      ButtonWidgetClass camera_toggle {
-       visible 1
-       color 1 1 1 1
-       position 0.6 64
-       size 150 25
-       halign left
-       valign top_ref
-       hexactpos 0
-       vexactpos 1
-       hexactsize 1
-       vexactsize 1
-       style Default
-       {
-        TextWidgetClass camera_toggle_text {
-         ignorepointer 1
-         position 0 0
-         size 1 1
-         text "Toggle Camera"
-         font "gui/fonts/MetronBook-Bold28"
-         "exact text" 1
-         "exact text size" 16
          "text halign" center
          "text valign" center
         }

@@ -134,18 +134,6 @@ class CameraSettings extends Form
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{
-		if ( w.GetName() == "close_button" ) 
-		{
-			GetLayoutRoot().Show( false );
-			OnHide();
-		}
-
-		if ( w.GetName() == "camera_toggle" ) 
-		{
-			ref CameraTool cmt = CameraTool.Cast( GetModuleManager().GetModule( CameraTool ) );
-			GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).Call(cmt.ToggleCamera ); // Fix crash
-		}
-
 		Widget effectsFrame = widgetStore.GetWidget( "camera_effects_frame" );
 		Widget settingsFrame = widgetStore.GetWidget( "camera_settings_frame" );
 

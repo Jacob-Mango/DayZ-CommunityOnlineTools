@@ -27,7 +27,7 @@ class CinematicCamera extends COTCamera
 		float yawDiff = input.LocalValue( "UAAimLeft" ) - input.LocalValue( "UAAimRight" );
 		float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
 
-		float speedInc = input.LocalValue( "UAPrevAction" ) - input.LocalValue( "UANextAction" );
+		float speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
 
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
@@ -47,7 +47,7 @@ class CinematicCamera extends COTCamera
 				
 				cam_speed = CAMERA_SPEED;
 
-				if( increaseSpeeds ) 
+				if ( increaseSpeeds ) 
 				{
 					cam_speed = cam_speed * CAMERA_BOOST_MULT;
 				}
@@ -107,5 +107,8 @@ class CinematicCamera extends COTCamera
 
 			SetOrientation( newOrient );
 		}
+
+		//LookFreeze = false;
+		//MoveFreeze = false;
 	}
 }
