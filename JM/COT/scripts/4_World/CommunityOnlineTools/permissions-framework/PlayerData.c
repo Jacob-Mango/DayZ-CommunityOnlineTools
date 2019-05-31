@@ -45,24 +45,27 @@ class PlayerData
 		APermissions = new ref array< string >;
 	}
 
-	static void Load( out PlayerData data, ref PlayerBase player )
+	void Load( PlayerBase player )
 	{
-		data.VPosition = player.GetPosition();
-		data.VDirection = player.GetDirection();
-		data.VOrientation = player.GetOrientation();
-		
-		data.FHealth = player.GetHealth( "GlobalHealth","Health" );
-		data.FBlood = player.GetHealth( "GlobalHealth", "Blood" );
-		data.FShock = player.GetHealth( "GlobalHealth", "Shock" );
-		data.IBloodStatType = player.GetStatBloodType().Get();
-		data.FEnergy = player.GetStatEnergy().Get();
-		data.FWater = player.GetStatWater().Get();
-		data.FHeatComfort = player.GetStatHeatComfort().Get();
-		data.FWet = player.GetStatWet().Get();
-		data.FTremor = player.GetStatTremor().Get();
-		data.FStamina = player.GetStatStamina().Get();
-		data.ILifeSpanState = player.GetLifeSpanState();
-		data.BBloodyHands = player.HasBloodyHands();
-		data.BGodMode = player.m_HasGodeMode;
+		if ( player == NULL )
+			return;
+
+		VPosition = player.GetPosition();
+		VDirection = player.GetDirection();
+		VOrientation = player.GetOrientation();
+	
+		FHealth = player.GetHealth( "GlobalHealth","Health" );
+		FBlood = player.GetHealth( "GlobalHealth", "Blood" );
+		FShock = player.GetHealth( "GlobalHealth", "Shock" );
+		IBloodStatType = player.GetStatBloodType().Get();
+		FEnergy = player.GetStatEnergy().Get();
+		FWater = player.GetStatWater().Get();
+		FHeatComfort = player.GetStatHeatComfort().Get();
+		FWet = player.GetStatWet().Get();
+		FTremor = player.GetStatTremor().Get();
+		FStamina = player.GetStatStamina().Get();
+		ILifeSpanState = player.GetLifeSpanState();
+		BBloodyHands = player.HasBloodyHands();
+		BGodMode = player.m_HasGodeMode;
 	}
 }

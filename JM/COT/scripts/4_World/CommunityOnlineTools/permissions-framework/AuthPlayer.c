@@ -9,28 +9,21 @@ class AuthPlayer
 	PlayerBase PlayerObject;
 	PlayerIdentity IdentityPlayer;
 
-	ref PlayerData Data;
+	PlayerData Data;
 
 	protected ref PlayerFile m_PlayerFile;
 
 	protected bool m_HasPermissions;
 	protected bool m_HasPlayerData;
 
-	void AuthPlayer( ref PlayerData data )
+	void AuthPlayer( PlayerData data )
 	{
 		PlayerObject = NULL;
 
 		Data = data;
 
-		if ( Data == NULL )
-		{
-			Data = new ref PlayerData;
-		}
-
 		RootPermission = new ref Permission( Data.SSteam64ID );
-		Roles = new ref array< Role >;
-
-		m_PlayerFile = new ref PlayerFile;
+		Roles = new array< Role >;
 
 		if ( GetGame().IsServer() )
 		{
@@ -78,7 +71,7 @@ class AuthPlayer
 
 		if ( PlayerObject == NULL ) return;
 
-		PlayerData.Load( Data, PlayerObject );
+		Data.Load( PlayerObject );
 	}
 
 	void CopyPermissions( ref Permission copy )
@@ -200,21 +193,6 @@ class AuthPlayer
 	{
 		if ( m_HasPlayerData )
 		{   
-			if ( m_PlayerFile.Steam64ID != GetSteam64ID() )
-			{
-				m_PlayerFile.Steam64ID = GetSteam64ID();
-			}
-
-			if ( m_PlayerFile.GUID != GetGUID() )
-			{
-				m_PlayerFile.GUID = GetGUID();
-			}
-
-			if ( m_PlayerFile.Names.Find( GetName() ) < 0 )
-			{   
-				m_PlayerFile.Names.Insert( GetName() );
-			}
-
 			m_PlayerFile.Roles.Clear();
 
 			for ( int j = 0; j < Roles.Count(); j++ )
@@ -256,7 +234,7 @@ class AuthPlayer
 			
 		ref array< string > data = new ref array< string >;
 
-		m_HasPlayerData = m_PlayerFile.Load( IdentityPlayer );
+		PlayerFile.Load( Data, m_HasPlayerData );
 
 		Print( m_HasPlayerData );
 		Print( m_PlayerFile.Roles );

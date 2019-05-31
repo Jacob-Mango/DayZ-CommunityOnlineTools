@@ -1,77 +1,44 @@
 class PlayerFile
 {
-	ref array< string > Names;
-	string GUID;
-	string Steam64ID;
+	[NonSerialized()]
+	string m_FileName;
 
 	ref array< string > Roles;
 
 	void PlayerFile()
 	{
-		Names = new ref array< string >;
 		Roles = new ref array< string >;
 	}
 
-	bool Load( PlayerIdentity identity )
+	static PlayerFile Load( PlayerData data, out bool exists )
 	{
-		if ( identity == NULL ) 
+		ref PlayerFile playerFile = new ref PlayerFile;
+
+		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
+		
+		if ( FileExist( playerFile.m_FileName ) )
 		{
-			Roles.Insert( "everyone" );
-			return false;
+			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			exists = true;
+			return playerFile;
 		}
 		
-		ref PlayerFile playerFile = new ref PlayerFile;
-		string file = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + identity.GetPlainId() + ".json";
-		if ( FileExist( file ) )
+		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json";
+
+		if ( FileExist( playerFile.m_FileName ) )
 		{
-			JsonFileLoader<PlayerFile>.JsonLoadFile( file, playerFile );
-
-			if ( playerFile == NULL )
-			{
-				Roles.Insert( "everyone" );
-				return false;
-			}
-
-			Names = playerFile.Names;
-			GUID = playerFile.GUID;
-			Steam64ID = playerFile.Steam64ID;
-			Roles = playerFile.Roles;
-
-			bool requiresSaving = false;
-
-			if ( Steam64ID != identity.GetPlainId() )
-			{
-				Steam64ID = identity.GetPlainId();
-				requiresSaving = true;
-			}
-
-			if ( GUID != identity.GetId() )
-			{
-				GUID = identity.GetId();
-				requiresSaving = true;
-			}
-
-			if ( Names.Find( identity.GetName() ) < 0 )
-			{   
-				Names.Insert( identity.GetName() );
-				requiresSaving = true;
-			}
-
-			if ( requiresSaving )
-			{
-				Save();
-			}
-			
-			return true;
-		} else 
-		{
-			Roles.Insert( "everyone" );
-			return false;
+			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+			exists = true;
+			return playerFile;
 		}
+
+		playerFile.Roles.Insert( "everyone" );
+		exists = false;
+		return playerFile;
 	}
 
 	void Save()
 	{
-		JsonFileLoader<PlayerFile>.JsonSaveFile( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + Steam64ID + ".json", this );
+		JsonFileLoader<PlayerFile>.JsonSaveFile( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + m_FileName + ".json", this );
 	}
 }
