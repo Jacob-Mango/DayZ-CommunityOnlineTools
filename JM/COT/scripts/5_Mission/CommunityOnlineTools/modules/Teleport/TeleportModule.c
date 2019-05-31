@@ -120,11 +120,12 @@ class TeleportModule: EditorModule
 		Param1< vector > data;
 		if ( !ctx.Read( data ) ) return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
-			if ( !player ) return;
+			if ( !player )
+				return;
 
 			if ( player.IsInTransport() )
 			{
@@ -137,7 +138,9 @@ class TeleportModule: EditorModule
 
 					if ( transport == NULL ) return;
 
+					transport.SetOrigin( data.param1 );
 					transport.SetPosition( data.param1 );
+					transport.Update();
 				}
 			} else
 			{
@@ -186,6 +189,9 @@ class TeleportModule: EditorModule
 			if ( !GetGame().IsMultiplayer() )
 			{
 				player = GetGame().GetPlayer();
+
+				if ( player == NULL )
+					return;
 				
 				if ( player.IsInTransport() )
 				{
@@ -199,6 +205,7 @@ class TeleportModule: EditorModule
 
 						transport.SetOrigin( position );
 						transport.SetPosition( position );
+						transport.Update();
 					}
 				} else 
 				{
@@ -214,6 +221,9 @@ class TeleportModule: EditorModule
 			{
 				player = players[j].PlayerObject;
 
+				if ( player == NULL )
+					continue;
+
 				if ( player.IsInTransport() )
 				{
 					vehCommand = player.GetCommand_Vehicle();
@@ -226,6 +236,7 @@ class TeleportModule: EditorModule
 
 						transport.SetOrigin( position );
 						transport.SetPosition( position );
+						transport.Update();
 					}
 				} else 
 				{

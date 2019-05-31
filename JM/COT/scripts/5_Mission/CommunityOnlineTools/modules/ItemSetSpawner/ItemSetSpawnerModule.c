@@ -192,32 +192,27 @@ class ItemSetSpawnerModule: EditorModule
 			{
 				for ( int i = 0; i < players.Count(); i++ )
 				{
+					if ( players[i].PlayerObject == NULL )
+						continue;
+
 					if ( file.ContainerClassName != "" )
-					{
 						chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
-					}
 	
 					for (int j = 0; j < parts.Count(); j++)
-					{
 						chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
-					}
 	
-					COTLog( sender, "Loot chest " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
+					COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
 				}
 			}
 		} else
 		{	
 			if ( file.ContainerClassName != "" )
-			{
 				chest = SpawnItem( GetGame().GetPlayer(), file.ContainerClassName );
-			}
 	
 			for (int k = 0; k < parts.Count(); k++)
-			{
 				chest = SpawnItemInContainer( file.ContainerClassName, GetGame().GetPlayer(), chest, parts[k].Item, parts[k].NumberOfStacks, parts[k].StackSize );
-			}
 	
-			COTLog( sender, "Loot chest " + data.param1 + " spawned" );
+			COTLog( sender, "Item set " + data.param1 + " spawned." );
 		}
 	}
 }

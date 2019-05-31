@@ -8,9 +8,9 @@ class PermissionManager
 
 	void PermissionManager()
 	{
-		AuthPlayers = new ref array< ref AuthPlayer >;
-		Roles = new ref array< ref Role >;
-		RolesMap = new ref map< string, ref Role >;
+		AuthPlayers = new array< ref AuthPlayer >;
+		Roles = new array< ref Role >;
+		RolesMap = new map< string, ref Role >;
 
 		RootPermission = new ref Permission( "ROOT" );
 
@@ -21,7 +21,7 @@ class PermissionManager
 			data.SName = "Player " + i;
 			data.SGUID = "Player" + i;
 
-			AuthPlayers.Insert( new ref AuthPlayer( data ) );
+			AuthPlayers.Insert( new AuthPlayer( data ) );
 		}
 		*/
 	}
@@ -127,7 +127,7 @@ class PermissionManager
 
 	ref AuthPlayer PlayerJoined( PlayerIdentity player )
 	{
-		ref PlayerData data = new ref PlayerData;
+		PlayerData data = new PlayerData;
 
 		if ( player )
 		{
@@ -141,12 +141,10 @@ class PermissionManager
 			data.SSteam64ID = "N/A";
 		}
 
-		ref AuthPlayer auPlayer = new ref AuthPlayer( data );
-
+		AuthPlayer auPlayer = new AuthPlayer( data );
 		auPlayer.IdentityPlayer = player;
 
 		auPlayer.CopyPermissions( RootPermission );
-
 		auPlayer.Load();
 
 		AuthPlayers.Insert( auPlayer );
@@ -216,11 +214,10 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			ref PlayerData data = new ref PlayerData;
-			
+			PlayerData data = new PlayerData;
 			data.SGUID = guid;
 
-			auPlayer = new ref AuthPlayer( data );
+			auPlayer = new AuthPlayer( data );
 
 			AuthPlayers.Insert( auPlayer );
 		}
@@ -248,11 +245,10 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			ref PlayerData data = new ref PlayerData;
-			
+			PlayerData data = new PlayerData;
 			data.SSteam64ID = steam64;
 
-			auPlayer = new ref AuthPlayer( data );
+			auPlayer = new AuthPlayer( data );
 
 			AuthPlayers.Insert( auPlayer );
 		}
@@ -288,14 +284,13 @@ class PermissionManager
 		return auPlayer;
 	}
 
-	ref AuthPlayer GetPlayer( ref PlayerData data )
+	ref AuthPlayer GetPlayer( PlayerData data )
 	{
 		if ( !GetGame().IsMultiplayer() )
-		{
 			return AuthPlayers[0];
-		}
 		
-		if ( data == NULL ) return NULL;
+		if ( data == NULL )
+			return NULL;
 		
 		ref AuthPlayer auPlayer = NULL;
 
@@ -310,7 +305,7 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			auPlayer = new ref AuthPlayer( data );
+			auPlayer = new AuthPlayer( data );
 
 			AuthPlayers.Insert( auPlayer );
 		}
@@ -327,11 +322,14 @@ class PermissionManager
 		string extenstion = ".txt";
 		int strLength = name.Length();
 
-		if ( name == extenstion ) return false;
+		if ( name == extenstion )
+			return false;
 
-		if ( (attributes & FileAttr.DIRECTORY ) ) return false;
+		if ( (attributes & FileAttr.DIRECTORY ) )
+			return false;
 
-		if ( name == "" ) return false;
+		if ( name == "" )
+			return false;
 
 		return true;
 	}
