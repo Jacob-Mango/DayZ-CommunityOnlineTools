@@ -1,0 +1,61 @@
+"workshopitem"
+{
+    "appid"                 "221100"
+    "publishedfileid"	    "1564026768"
+    "contentfolder"         "/var/lib/jenkins/workspace/Community-Online-Tools/@Community-Online-Tools/"
+    "previewfile"		    "/var/lib/jenkins/workspace/Community-Online-Tools/PreviewImage.png"
+    "visibility"		    "0"
+    "title"                 "Community-Online-Tools"
+    "description"           "This is the first set of GUI based admin tools created by the developers of DayZ Community Offline Mode. This makes use of a modular design which allows other mods such as DayZ Expansion or DayZ HypeTrain to add their own menu's for admins to have further control of their servers. Community Online Tools allows you to teleport players, set player health, blood, shock, change the weather of the server and even spawn in vehicles. Also, this mod allows you to set the aiming mode for players to the old 0.62 system if you, the server admin wishes to use it.
+
+[h1]NOTICE[/h1]
+
+This mod is in it's early state. Many features are planned to be made and released at a later stage. There may be some small bugs. If you find some, report them in the #cot-discussion channel in this [url=https://discord.gg/NEX27Gx]discord server[/url]. 
+
+[h1]Server Installation Instructions:[/h1]
+
+Video instructions for installing this mod will be re-recorded soon. It is now outdated due to recent changes.
+
+1. In your DayZ client directory enter the folder “!Workshop” and then find the folder named “@Community-Online-Tools” and “@CF”. Copy those folders and paste it into your server directory. 
+2. In your startup batch file for the server, add the following “-mod=@CF;@Community-Online-Tools”.
+3. Enter your profiles directory for the server and then create the following folder setup.
+    - {PROFILE}\PermissionsFramework\Players
+    - {PROFILE}\PermissionsFramework\Permissions
+    - {PROFILE}\PermissionsFramework\Roles
+    - {PROFILE}\CommunityOnlineTools\ItemSets
+    - {PROFILE}\CommunityOnlineTools\Vehicles
+4. Make a new text file (with .txt extension) with your steam 64 ID and place this text (inside the link) into it: https://pastebin.com/ktf1Z3Hq.
+5. You may now start up the server. You have successfully started the server and have given yourself full permissions. You can use the Player Management tool found within COT to modify other player's permissions from now.
+
+[h1]Controls:[/h1]
+
+Y - Open the toolbar menu.
+INSERT - Toggle free camera. This teleports your player to the position you looked at when turning it off
+H - This teleports you to the position you are looking at.
+END - Toggle COT on or off.
+
+[h1]Planned features:[/h1]
+
+- Ability to recolour any menu to a users choice
+- Key framing for the Cinematic camera position and settings (would most likely be moved into another mod).
+
+[h1]Known issues:[/h1]
+- Can't teleport a player inside a vehicle (GAME ISSUE)
+- Objects placed may seem to have a different positiion in the client compared to the server (GAME ISSUE)
+- Objects placed may render at a different position than where the server thinks it is (GAME ISSUE)
+- Sometimes permissions may not set correctly, requiring a relog or restart of the server.
+
+[h1]Logfiles:[/h1]
+
+In case you want to report errors to us or the offical dayz dev team, you might need logfile info. We also save the positions you printed ingame in it so that you might revisit them later on by saving them in some textfile. Locations are stored inside the script.log for now.
+You find your logfiles here: Press WINDOWS + R -> Type in %localappdata%/DayZ -> Hit enter.
+
+[h1]Monetization:[/h1]
+
+Monetization is allowed but it is recommended that a small percentage is sent as a donation. This is not enforced but would be greatly appreciated.
+
+[h1]Donate:[/h1]
+
+If you like this mod do feel free to send a donation to my paypal [url=https://www.paypal.me/JacobMango]here[/url]. This mod is released for free for all to use and monetize of but any donation would be greatly appreciated."
+    "changenote"            ""
+}
