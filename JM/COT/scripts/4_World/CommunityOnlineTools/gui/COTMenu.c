@@ -57,12 +57,12 @@ class COTMenu
 		}
 	}
 	
-	Widget Init( string version )
+	Widget Init()
 	{
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM\\COT\\GUI\\layouts\\COT\\COTMenu.layout" );
 		layoutRoot.Show( false );
 
-		TextWidget.Cast( layoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "Version: " + version );
+		TextWidget.Cast( layoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "PayPal.Me/JacobMango" );
 
 		m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
 		m_Windows = layoutRoot.FindAnyWidget( "Windows" );

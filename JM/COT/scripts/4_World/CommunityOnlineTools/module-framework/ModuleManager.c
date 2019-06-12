@@ -31,14 +31,14 @@ class ModuleManager
 		GetLogger().Log( "Registered module " + module + message, "JM_COT_ModuleFramework" );
 	}
 
-	void RegisterModules( string version )
+	void RegisterModules()
 	{
 		GetLogger().Log( "ModuleManager::RegisterModules()", "JM_COT_ModuleFramework" );
 
 		m_Modules = new ref array< ref Module >;
 		m_EditorModules = new ref array< ref EditorModule >;
 
-		RegisterModule( new COTModule( version ) );
+		RegisterModule( new COTModule );
 	}
 
 	void ReloadSettings()
