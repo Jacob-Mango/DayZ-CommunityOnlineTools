@@ -10,33 +10,55 @@ class PlayerFile
 		Roles = new ref array< string >;
 	}
 
-	static PlayerFile Load( PlayerData data, out bool exists )
+	static bool Load( PlayerData data, out PlayerFile playerFile )
 	{
-		ref PlayerFile playerFile = new ref PlayerFile;
+		playerFile = new ref PlayerFile;
 
 		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
-		
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+
 			playerFile.Save();
-			exists = true;
-			return playerFile;
+			return true;
 		}
 		
 		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json";
-
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+
 			playerFile.Save();
-			exists = true;
-			return playerFile;
+			return true;
 		}
 
+		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json.txt";
+		if ( FileExist( playerFile.m_FileName ) )
+		{
+			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+
+			DeleteFile( playerFile.m_FileName );
+			playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
+
+			playerFile.Save();
+			return true;
+		}
+		
+		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json.txt";
+		if ( FileExist( playerFile.m_FileName ) )
+		{
+			JsonFileLoader<PlayerFile>.JsonLoadFile( playerFile.m_FileName, playerFile );
+
+			DeleteFile( playerFile.m_FileName );
+			playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json";
+
+			playerFile.Save();
+			return true;
+		}
+
+		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
 		playerFile.Roles.Insert( "everyone" );
-		exists = false;
-		return playerFile;
+		return false;
 	}
 
 	void Save()

@@ -66,12 +66,12 @@ class ItemSetSpawnerModule: EditorModule
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param1< string >( JsonFileLoader< ItemSetSpawnerMeta >.JsonMakeData( ItemSetSpawnerMeta.DeriveFromSettings( settings ) ) ) );
 		}
 
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			Param1< string > data;
 			if ( !ctx.Read( data ) ) return;
@@ -186,9 +186,9 @@ class ItemSetSpawnerModule: EditorModule
 		
 		if ( GetGame().IsMultiplayer() )
 		{
-			array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
 			
-			if( type == CallType.Server )
+			if ( type == CallType.Server )
 			{
 				for ( int i = 0; i < players.Count(); i++ )
 				{
@@ -201,7 +201,12 @@ class ItemSetSpawnerModule: EditorModule
 					for (int j = 0; j < parts.Count(); j++)
 						chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
 	
-					COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
+					COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].Data.SSteam64ID );
+				
+					SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
+
+					if ( sender.GetPlainId() != players[i].IdentityPlayer.GetPlainId() )
+						SendAdminNotification( players[i].IdentityPlayer, sender, "You gave item set " + data.param1 );
 				}
 			}
 		} else

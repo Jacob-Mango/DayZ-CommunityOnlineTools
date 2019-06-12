@@ -16,7 +16,8 @@ class TeleportSettings
 		if ( FileExist( TELEPORT_SETTINGS_FILE ) )
 		{
 			JsonFileLoader<TeleportSettings>.JsonLoadFile( TELEPORT_SETTINGS_FILE, settings );
-		} else {
+		} else 
+		{
 			settings.Defaults();
 			settings.Save();
 		}

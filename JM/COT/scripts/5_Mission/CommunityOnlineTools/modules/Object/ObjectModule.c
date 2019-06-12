@@ -43,7 +43,7 @@ class ObjectModule: EditorModule
 			return;
 
 		if ( !COTIsActive ){
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -59,7 +59,7 @@ class ObjectModule: EditorModule
 			return;
 
 		if ( !COTIsActive ){
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -75,7 +75,7 @@ class ObjectModule: EditorModule
 			return;
 
 		if ( !COTIsActive ){
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -90,13 +90,15 @@ class ObjectModule: EditorModule
 		Param2< string, vector > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			EntityAI entity = EntityAI.Cast( GetGame().CreateObject( data.param1, data.param2, false, GetGame().IsKindOf( data.param1, "DZ_LightAI" ) ) );
 
 			if ( entity == NULL ) return;
 
 			COTLog( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
+
+			SendAdminNotification( sender, NULL, "You have spawned a " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) );
 		}
 	}
 	
@@ -108,7 +110,7 @@ class ObjectModule: EditorModule
 		Param3< string, vector, string > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			bool ai = false;
 
@@ -149,11 +151,16 @@ class ObjectModule: EditorModule
 			entity.PlaceOnSurface();
 
 			COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
+
+			SendAdminNotification( sender, NULL, "You have spawned " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) + ", quantity " + quantity );
 		}
 	}
 	
 	protected void SpawnItemOnPlayer( ref PlayerIdentity sender, PlayerBase player, string item, string quantText )
 	{
+		if ( !player )
+			return;
+
 		EntityAI entity = player.GetInventory().CreateInInventory( item );
 
 		entity.SetHealth( entity.GetMaxHealth() );
@@ -178,7 +185,12 @@ class ObjectModule: EditorModule
 			oItem.SetQuantity(quantity);
 		}
 		
-		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.authenticatedPlayer.GetSteam64ID() + " with amount " + quantity );
+		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.authenticatedPlayer.Data.SSteam64ID + " with amount " + quantity );
+
+		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
+
+		if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
+			SendAdminNotification( player.GetIdentity(), sender, entity.GetDisplayName() + " has been added to their inventory, quantity " + quantity );
 	}
 
 	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -189,14 +201,14 @@ class ObjectModule: EditorModule
 		ref Param3< string, string, ref array< string > > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
 				SpawnItemOnPlayer( sender, GetGame().GetPlayer(), data.param1, data.param2 );
 			} else
 			{
-				array< ref AuthPlayer > players = DeserializePlayersID( data.param3 );
+				array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param3 );
 	
 				for ( int i = 0; i < players.Count(); i++ )
 				{
@@ -211,7 +223,7 @@ class ObjectModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Object.Delete", sender ) )
 			return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			if ( target == NULL ) return;
 
@@ -219,6 +231,8 @@ class ObjectModule: EditorModule
 			GetGame().ObjectGetType( target, obtype );
 
 			COTLog( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
+			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
+
 			GetGame().ObjectDelete( target );
 		}
 	}

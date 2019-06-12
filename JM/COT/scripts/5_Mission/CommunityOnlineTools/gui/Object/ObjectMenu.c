@@ -178,21 +178,21 @@ class ObjectMenu extends Form
 		UpdateList();
 	}
 
-	void SpawnCursor( UIEvent eid, ref UIActionEditableText action )
+	void SpawnCursor( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
 		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetText() ) );
 	}
 
-	void SpawnPosition( UIEvent eid, ref UIActionEditableText action )
+	void SpawnPosition( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
 		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ) );
 	}
 
-	void SpawnInventory( UIEvent eid, ref UIActionEditableText action )
+	void SpawnInventory( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 

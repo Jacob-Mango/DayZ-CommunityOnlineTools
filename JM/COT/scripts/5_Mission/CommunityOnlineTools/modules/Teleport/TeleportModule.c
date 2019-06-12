@@ -65,8 +65,9 @@ class TeleportModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
 			return;
 
-		if ( !COTIsActive ) {
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+		if ( !COTIsActive ) 
+		{
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -89,13 +90,13 @@ class TeleportModule: EditorModule
 		}
 		else
 		{
-			Message( GetPlayer(), "Distance for teleportation is too far!" );
+			CreateLocalAdminNotification( "Distance for teleportation is too far!" );
 		}
 	}
 
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
 				return;
@@ -103,7 +104,7 @@ class TeleportModule: EditorModule
 			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), true );
 		}
 
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			Param1< ref TeleportSettings > data;
 			if ( !ctx.Read( data ) ) return;
@@ -148,6 +149,7 @@ class TeleportModule: EditorModule
 			}
 
 			COTLog( sender, "Teleported to cursor " + data.param1 );
+			SendAdminNotification( sender, NULL, "You have teleported to " + VectorToString( data.param1, 1 ) );
 		}
 	}
 	
@@ -159,7 +161,7 @@ class TeleportModule: EditorModule
 		Param2< string, ref array< string > > data;
 		if ( !ctx.Read( data ) ) return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			vector position = "0 0 0";
 
@@ -215,7 +217,7 @@ class TeleportModule: EditorModule
 				return;
 			}
 
-			array< ref AuthPlayer > players = DeserializePlayersID( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
 			
 			for ( int j = 0; j < players.Count(); j++ )
 			{
@@ -243,7 +245,12 @@ class TeleportModule: EditorModule
 					player.SetPosition( position );
 				}
 				
-				COTLog( sender, "Teleported " + players[j].GetSteam64ID() + " to " + location.Name );
+				COTLog( sender, "Teleported " + players[j].Data.SSteam64ID + " to " + location.Name );
+				
+				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
+
+				if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
+					SendAdminNotification( player.GetIdentity(), sender, "Teleported to " + data.param1 );
 			}
 		}
 	}

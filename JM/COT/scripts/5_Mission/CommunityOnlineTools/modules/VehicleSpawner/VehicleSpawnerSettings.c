@@ -33,7 +33,8 @@ class VehicleSpawnerSettings
 				settings.Vehicles.Insert( name, VehicleSpawnerFile.Load( name ) );
 				GetLogger().Log( "	Loading vehicle file ( " + name + " )", "JM_COT_VehicleSpawner" );
 			}
-		} else {
+		} else 
+		{
 			GetLogger().Log( "Didn't find existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
 			DeleteFiles( VEHICLE_SPAWNER_FOLDER, files );
 

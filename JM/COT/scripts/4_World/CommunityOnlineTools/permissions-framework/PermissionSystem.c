@@ -92,7 +92,7 @@ ref array< string > SerializePlayersID( array< ref AuthPlayer > players )
 
 array< ref AuthPlayer > DeserializePlayersID( ref array< string > steam64Ids )
 {
-	return GetPermissionsManager().GetPlayers( steam64Ids );
+	return GetPermissionsManager().GetPlayersFromArray( steam64Ids );
 }
 
 ref AuthPlayer GetPlayerForID( string steam )

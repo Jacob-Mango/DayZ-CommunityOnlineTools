@@ -35,7 +35,8 @@ class ItemSetSettings
 				settings.ItemSets.Insert( name, ItemSetFile.Load( name ) );
 				GetLogger().Log( "	Loading item set file ( " + name + " )", "JM_COT_ItemSetSpawner" );
 			}
-		} else {
+		} else 
+		{
 			GetLogger().Log( "Didn't find existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
 			DeleteFiles( ITEM_SETS_FOLDER, files );
 

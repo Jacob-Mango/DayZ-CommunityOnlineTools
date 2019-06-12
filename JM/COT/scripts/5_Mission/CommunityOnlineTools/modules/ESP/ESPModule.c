@@ -130,7 +130,7 @@ class ESPModule: EditorModule
 		ref array< Object > copy = new ref array< Object >;
 		copy.Copy( data.param1 );
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			for ( int i = 0; i < copy.Count(); i++ )
 			{
@@ -155,7 +155,7 @@ class ESPModule: EditorModule
 		ref Param3< vector, vector, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			if ( target == NULL ) return;
 
@@ -332,7 +332,7 @@ class ESPModule: EditorModule
 				continue;
 			if ( obj.IsTree() )
 				continue;
-			if ( obj.IsBuilding() )
+			if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
 				continue;
 
 			entity = EntityAI.Cast( obj );
@@ -398,7 +398,7 @@ class ESPModule: EditorModule
 				continue;
 			}
 
-			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() );
+			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase ) );
 			if ( (ViewBaseBuilding || ViewEverything) && (CanViewBaseBuilding || CanViewEverything) && isBaseBuilding )
 			{
 				espInfo = new ref ESPInfo;
@@ -510,7 +510,7 @@ class ESPModule: EditorModule
 			ref ESPInfo info = new ref ESPInfo;
 			info.name = data.param1.name;
 			
-			ref AuthPlayer player = GetPlayerForID( data.param1.steamid );
+			ref AuthPlayer player = GetPermissionsManager().GetPlayerBySteam64ID( data.param1.steamid );
 			if ( player )
 			{
 				info.type = ESPType.PLAYER;
