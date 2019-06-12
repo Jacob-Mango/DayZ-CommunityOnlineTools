@@ -24,47 +24,77 @@ class MapEditorModule: Module
 		Param1< vector > data;
 		if ( !ctx.Read( data ) ) return;
  
-		if( type == CallType.Server )
+		if ( target == NULL )
+			return;
+
+		if ( type == CallType.Server )
 		{
 			// target.SetOrigin( data.param1 );
 			target.SetPosition( data.param1 );
+			target.Update();
+
+			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been given the position " + VectorToString( data.param1, 1 ) );
 		}
 	}
 	
 	void EnterEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
-			return;
-			
+	{			
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.EnterEditor", sender ) )
 			return;
 
-		bool cont = false;
-
 		if ( type == CallType.Server )
+		{
+			vector position = Vector( 0, 0, 0 );
+
+			if ( target )
+			{
+				position = target.GetPosition();
+			}
+
+			GetGame().SelectPlayer( sender, NULL );
+
+			PlayerBase human = PlayerBase.Cast( target );
+
+			if ( human )
+			{
+				// human.Save();
+				// human.Delete();
+
+				position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
+			}
+
+			GetGame().SelectSpectator( sender, "CinematicCamera", position );
+
+			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, sender );
+
+			COTLog( sender, "Entered the Map Editor");
+		}
+
+		if ( type == CallType.Client )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
-				GetGame().SelectSpectator( sender, "StaticCamera", target.GetPosition() + Vector( 0, 1.8, 0 ) );
-
-				GetGame().SelectPlayer( sender, NULL );
-
-				GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, sender, NULL );
+				CurrentActiveCamera = COTCamera.Cast( Camera.GetCurrentCamera() );
 			} else 
 			{
-				cont = true;
+				CurrentActiveCamera = COTCamera.Cast( GetGame().CreateObject( "CinematicCamera", target.GetPosition(), false ) );
 			}
 
-			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender, target );
-		}
+			if ( CurrentActiveCamera )
+			{
+				m_InEditor = true;
 
-		if ( type == CallType.Client || cont )
-		{
-			m_InEditor = true;
+				COTForceHud( true );
 
-			COTForceHud( true );
+				m_Menu.Show();
 
-			m_Menu.Show();
+				CurrentActiveCamera.SetActive( true );
+				
+				if ( GetPlayer() )
+				{
+					GetPlayer().GetInputController().SetDisabled( true );
+				}
+			}
 		}
 	}
 	
@@ -80,29 +110,33 @@ class MapEditorModule: Module
 
 		if ( type == CallType.Server )
 		{
-			Param1< vector > data;
-			if ( !ctx.Read( data ) ) return;
+			GetGame().SelectPlayer( sender, target );
 
 			if ( GetGame().IsMultiplayer() )
 			{
-				GetGame().SelectPlayer( sender, target );
+				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, sender );
+			} 
 
-				if ( target ) 
-				{
-					target.SetPosition( data.param1 );
-				}
-
-				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, sender, NULL );
-			} else 
-			{
-				cont = true;
-			}
-
-			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param1<vector>(data.param1), true, sender );
+			COTLog( sender, "Left the Map Editor");
 		}
 
-		if ( type == CallType.Client || cont )
+		if ( type == CallType.Client )
 		{
+			if ( !GetGame().IsMultiplayer() )
+			{
+				GetGame().SelectPlayer( sender, target );
+			}
+
+			CurrentActiveCamera.SetActive( false );
+			CurrentActiveCamera = NULL;
+			
+			PPEffects.ResetDOFOverride();
+
+			if ( GetPlayer() )
+			{
+				GetPlayer().GetInputController().SetDisabled( false );
+			}
+
 			m_InEditor = false;
 
 			COTForceHud( false );
@@ -133,12 +167,12 @@ class MapEditorModule: Module
 		if ( !( input.LocalPress() ) )
 			return;
 			
-		if ( CurrentActiveCamera )
+		if ( CurrentActiveCamera || m_InEditor )
 		{
-			GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param1<vector>( GetPlayer().GetPosition() ), true, NULL, GetPlayer() );
+			GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, false, NULL, GetPlayer() );
 		} else 
 		{
-			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, NULL, GetPlayer() );
+			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, false, NULL, GetPlayer() );
 		}
 	}
 

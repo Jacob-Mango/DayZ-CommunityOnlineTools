@@ -69,7 +69,8 @@ class CameraTool: EditorModule
 
 				if ( dist > 0 ) CAMERA_FDIST = dist;
 				
-				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+				CurrentActiveCamera.SetFocus(CAMERA_FDIST, CAMERA_BLUR);
+				// PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
 			}
 		}
 	}
@@ -94,7 +95,7 @@ class CameraTool: EditorModule
 		Param1< vector > data;
 		if ( !ctx.Read( data ) ) return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			GetGame().UpdateSpectatorPosition( data.param1 );
 		}
@@ -105,7 +106,7 @@ class CameraTool: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
 			return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			vector position = Vector( 0, 0, 0 );
 
@@ -133,7 +134,7 @@ class CameraTool: EditorModule
 			COTLog( sender, "Entered the Free Camera");
 		}
 
-		if( type == CallType.Client && !COTPlayerIsRemoved )
+		if ( type == CallType.Client && !COTPlayerIsRemoved )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
@@ -198,7 +199,7 @@ class CameraTool: EditorModule
 			return;
 		}
 
-		GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, NULL, GetPlayer() );
+		GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, false, NULL, GetPlayer() );
 	}
 
 	void DisableCamera()
@@ -207,7 +208,7 @@ class CameraTool: EditorModule
 		{
 			SetFreezeMouse( false );
 
-			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, NULL, GetPlayer() );
+			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, false, NULL, GetPlayer() );
 		}
 	}
 
@@ -237,8 +238,9 @@ class CameraTool: EditorModule
 		if ( !( input.LocalPress() ) )
 			return;
 
-		if ( !COTIsActive ) {
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+		if ( !COTIsActive ) 
+		{
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -254,25 +256,33 @@ class CameraTool: EditorModule
 	
 	Object GetTargetObject()
 	{
-		if ( !CurrentActiveCamera ) return NULL;
+		if ( !CurrentActiveCamera )
+			return NULL;
+
 		return CurrentActiveCamera.SelectedTarget;
 	}
 
 	vector GetTargetPos() 
 	{
-		if ( !CurrentActiveCamera ) return "0 0 0";
+		if ( !CurrentActiveCamera )
+			return "0 0 0";
+
 		return CurrentActiveCamera.TargetPosition;
 	}
 	
 	static void SetFreezeCam( bool freeze ) 
 	{
-		if ( !CurrentActiveCamera ) return;
+		if ( !CurrentActiveCamera )
+			return;
+
 		CurrentActiveCamera.MoveFreeze = freeze;
 	}
 	
 	static void SetFreezeMouse( bool freeze ) 
 	{
-		if ( !CurrentActiveCamera ) return;
+		if ( !CurrentActiveCamera )
+			return;
+
 		CurrentActiveCamera.LookFreeze = freeze;
 	}
 }

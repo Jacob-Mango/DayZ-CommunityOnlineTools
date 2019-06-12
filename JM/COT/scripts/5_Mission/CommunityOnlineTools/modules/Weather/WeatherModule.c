@@ -34,7 +34,7 @@ class WeatherModule: EditorModule
 		Param5< int, int, int, int, int > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 			return;
@@ -43,7 +43,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetDate", sender ) )
 			return;
 
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( data.param1, data.param2, data.param3, data.param4, data.param5 ), true );
 
@@ -58,7 +58,7 @@ class WeatherModule: EditorModule
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 			return;
@@ -67,7 +67,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetWindFunctionParams", sender ) )
 			return;
 
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
@@ -82,7 +82,7 @@ class WeatherModule: EditorModule
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 			return;
@@ -91,7 +91,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetOvercast", sender ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
@@ -106,7 +106,7 @@ class WeatherModule: EditorModule
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 			return;
@@ -115,7 +115,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetFog", sender ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
@@ -130,7 +130,7 @@ class WeatherModule: EditorModule
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 			return;
@@ -139,7 +139,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetRain", sender ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
@@ -154,7 +154,7 @@ class WeatherModule: EditorModule
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
 		
-		if( type == CallType.Client )
+		if ( type == CallType.Client )
 		{
 			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 			return;
@@ -163,7 +163,7 @@ class WeatherModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Weather.SetStorm", sender ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if ( type == CallType.Server && GetGame().IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 

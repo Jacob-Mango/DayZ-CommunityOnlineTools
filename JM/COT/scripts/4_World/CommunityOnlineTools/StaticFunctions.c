@@ -27,6 +27,32 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
 }
 
+static void CreateLocalAdminNotification( string message, string icon = "set:ccgui_enforce image:HudBuild" )
+{
+	NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
+}
+
+static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, string message, string icon = "set:ccgui_enforce image:HudBuild" )
+{
+	string title = "Admin";
+
+	if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
+	{
+		NotificationSystem.AddNotificationExtended( 1.5, title, message, icon );
+	} else 
+	{
+		if ( to != NULL )
+		{
+			title = "From " + from.GetName();
+
+			NotificationSystem.SendNotificationToPlayerIdentityExtended( to, 1.5, title, message, icon );
+		} else 
+		{
+			NotificationSystem.SendNotificationToPlayerIdentityExtended( from, 1.5, title, message, icon );
+		}
+	}
+}
+
 static vector GetCurrentPosition()
 {
 	if ( CurrentActiveCamera != NULL )
@@ -44,7 +70,7 @@ static vector GetCurrentPosition()
 
 static void COTLog( AuthPlayer player, string text )
 {
-	text = "[COT] " + player.GetSteam64ID() + ": " + text;
+	text = "[COT] " + player.Data.SSteam64ID + ": " + text;
 
 	if ( GetGame().IsServer() )
 	{
@@ -132,7 +158,7 @@ static void Message( PlayerBase player, string txt )
 static Weapon GetWeaponInHands()
 {
 	Weapon weapon_in_hands;
-	if( GetPlayer() && GetPlayer().GetItemInHands() ) Class.CastTo(weapon_in_hands,  GetPlayer().GetItemInHands());
+	if ( GetPlayer() && GetPlayer().GetItemInHands() ) Class.CastTo(weapon_in_hands,  GetPlayer().GetItemInHands());
 
 	return weapon_in_hands;
 }

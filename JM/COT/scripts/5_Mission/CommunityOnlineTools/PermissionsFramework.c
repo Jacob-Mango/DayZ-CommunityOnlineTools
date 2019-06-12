@@ -148,9 +148,9 @@ class PermissionsFramework
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
-				for ( int i = 0; i < GetPermissionsManager().GetPlayers().Count(); i++ )
+				for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
 				{
-					ref AuthPlayer ap = GetPermissionsManager().GetPlayers()[i];
+					ref AuthPlayer ap = GetPermissionsManager().AuthPlayers[i];
 					GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayer", new Param3< string, string, string >( ap.GetSteam64ID(), ap.GetName(), ap.GetGUID() ), true, sender );
 				}
 			}

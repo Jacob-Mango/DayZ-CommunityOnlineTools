@@ -6,6 +6,9 @@ static string m_COT_ZeroPad[COT_ZERO_PAD_SIZE] = {"", "0", "00", "000", "0000", 
 // ------------------------------------------------------------
 static string FormatFloat( float value, int decimals ) 
 {
+	if ( decimals == -1 )
+		return "" + value;
+
 	int power = Math.Pow( 10, decimals );
 	float number = Math.Round( value * power ) / power;
 	string result = "" + number;
@@ -100,22 +103,9 @@ static float ToFloat( string text, bool onlyPositive = false )
 	return f;
 }
 
-static string VectorToString( vector vec )
+static string VectorToString( vector vec, int decimals = -1 ) 
 {
-	string result = vec.ToString();
-	result.Replace( "<", "" );
-	result.Replace( ">", "" );
-	result.Replace( ",", "" );
-
-	return result;
-}
-
-static string VectorToString( vector vec, int decimals ) 
-{
-	string result = "";
-	result = FormatFloat(vec[0], decimals) + "|" + FormatFloat(vec[1], decimals) + "|" + FormatFloat(vec[2], decimals);
-
-	return result;
+	return "" + FormatFloat(vec[0], decimals) + ", " + FormatFloat(vec[1], decimals) + ", " + FormatFloat(vec[2], decimals);
 }
 
 static TStringArray GetChildrenFromBaseClass( string strConfigName, string strBaseClass )
@@ -221,11 +211,7 @@ static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL,
 		view.Insert( geom[i] );
 	}
 
-	if ( view.Count() > 0 ) 
-	{
-		return view;
-	}
-	return NULL;
+	return view;
 }
 
 static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
@@ -238,7 +224,7 @@ static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, fl
 
 	auto objs = GetObjectsAt( from, to, ignore, radius, with );
 
-	if( objs && objs.Count() > 0 )
+	if ( objs && objs.Count() > 0 )
 	{
 		return objs[ 0 ];
 	}
@@ -253,7 +239,7 @@ static Object GetCursorObject( float distance = 100.0, Object ignore = NULL, flo
 
 	auto objs = GetObjectsAt( rayStart, rayEnd, ignore, radius, with );
 
-	if( objs.Count() > 0 )
+	if ( objs && objs.Count() > 0 )
 	{
 		return objs[ 0 ];
 	}
@@ -397,7 +383,7 @@ string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, i
 		if ( child_name.Contains( strIgnoreClass ) )
 			continue;
 
-        if( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
+        if ( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
 			continue;
 
         if ( GetGame().IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )

@@ -139,7 +139,8 @@ class ESPRenderBox extends ScriptedWidgetEventHandler
 		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
 		{
 			ShowOnScreen = false;
-		} else {
+		} else 
+		{
 			ShowOnScreen = true;
 		}
 

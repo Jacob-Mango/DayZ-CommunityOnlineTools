@@ -1,14 +1,14 @@
 class PlayerRow extends ScriptedWidgetEventHandler 
 {
-	protected ref Widget layoutRoot;
+	protected Widget layoutRoot;
 
-	ref TextWidget	  Name;
-	ref ButtonWidget	Button;
-	ref CheckBoxWidget  Checkbox;
+	TextWidget Name;
+	ButtonWidget Button;
+	CheckBoxWidget Checkbox;
 
-	ref AuthPlayer  Player;
+	AuthPlayer Player;
 
-	ref PlayerMenu  Menu;
+	PlayerMenu Menu;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -60,7 +60,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetPlayer( ref AuthPlayer player )
+	void SetPlayer( AuthPlayer player )
 	{
 		Player = player;
 		
@@ -71,7 +71,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 		{
 			Show();
 
-			Name.SetText( Player.GetName() );
+			Name.SetText( Player.Data.SName );
 
 			if ( GetGame().GetPlayer() == NULL ) return;
 
@@ -81,7 +81,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 				return;
 			}
 
-			if ( Player.GetGUID() == GetGame().GetPlayer().GetIdentity().GetId() )
+			if ( Player.Data.SGUID == GetGame().GetPlayer().GetIdentity().GetPlainId() )
 			{
 				Name.SetColor( 0xFF2ECC71 );
 			} else
@@ -93,7 +93,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 
 	string GetName()
 	{
-		return Player.GetName();
+		return Player.Data.SName;
 	}
 
 	ref AuthPlayer GetPlayer()

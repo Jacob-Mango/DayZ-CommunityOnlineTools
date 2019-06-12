@@ -98,10 +98,10 @@ class CameraSettings extends Form
 	{
 		super.OnShow();
 
-		if ( HasBeenInitialized )
-		{
+		//if ( m_HasBeenInitialized )
+		//{
 			GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
-		}
+		//}
 
 		UpdateEditBox();
 	}

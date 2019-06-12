@@ -242,7 +242,7 @@ class WeatherMenu extends Form
 
 		float slider_wind_value = ( weather.GetWindSpeed() / weather.GetWindMaximumSpeed() ) * 100;
 
-		if( weather.GetWindSpeed() < 0.01 )
+		if ( weather.GetWindSpeed() < 0.01 )
 		{
 			slider_wind_value = 0.0;
 		}

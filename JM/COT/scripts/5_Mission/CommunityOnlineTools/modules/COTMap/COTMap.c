@@ -31,7 +31,7 @@ class COTMapModule: EditorModule
 		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", sender ) )
 			return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			GetGame().GetPlayers( m_ServerPlayers );
 			
@@ -57,7 +57,7 @@ class COTMapModule: EditorModule
 	
 	void Receive_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if( type == CallType.Server ) return;
+		if ( type == CallType.Server ) return;
 		
 		ref Param1< ref array<ref PlayerData> > data;
 		
@@ -77,7 +77,7 @@ class COTMapModule: EditorModule
 		Param1< vector > data;
 		if ( !ctx.Read( data ) ) return;
 
-		if( type == CallType.Server )
+		if ( type == CallType.Server )
 		{
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
@@ -101,6 +101,8 @@ class COTMapModule: EditorModule
 			}
 
 			COTLog( sender, "Teleported to position " + data.param1 + " from map." );
+
+			SendAdminNotification( sender, NULL, "Teleported to " + VectorToString( data.param1, 1 ) );
 		}
 	}
 }

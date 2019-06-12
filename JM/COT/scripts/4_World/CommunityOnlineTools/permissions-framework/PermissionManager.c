@@ -26,7 +26,7 @@ class PermissionManager
 		*/
 	}
 
-	array< ref AuthPlayer > GetPlayers( ref array< string > steamIds = NULL )
+	array< ref AuthPlayer > GetPlayersFromArray( ref array< string > steamIds = NULL )
 	{
 		if ( steamIds == NULL || !GetGame().IsMultiplayer() )
 		{

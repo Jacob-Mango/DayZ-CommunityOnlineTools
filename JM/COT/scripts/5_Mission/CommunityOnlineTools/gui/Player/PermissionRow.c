@@ -184,7 +184,8 @@ class PermissionRow extends ScriptedWidgetEventHandler
 			type = 0;
 
 			inp.Split( ".", tokens );
-		} else {
+		} else 
+		{
 			Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
 			return;
 		}
