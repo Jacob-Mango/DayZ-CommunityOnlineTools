@@ -161,6 +161,9 @@ class TeleportModule: EditorModule
 		Param2< string, ref array< string > > data;
 		if ( !ctx.Read( data ) ) return;
 
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
+
 		if ( type == CallType.Server )
 		{
 			vector position = "0 0 0";
@@ -217,7 +220,7 @@ class TeleportModule: EditorModule
 				return;
 			}
 
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 			
 			for ( int j = 0; j < players.Count(); j++ )
 			{
@@ -234,7 +237,8 @@ class TeleportModule: EditorModule
 					{
 						transport = vehCommand.GetTransport();
 
-						if ( transport == NULL ) return;
+						if ( transport == NULL )
+							return;
 
 						transport.SetOrigin( position );
 						transport.SetPosition( position );

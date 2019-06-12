@@ -28,6 +28,8 @@ class PermissionManager
 
 	array< ref AuthPlayer > GetPlayersFromArray( ref array< string > steamIds = NULL )
 	{
+		Print( steamIds );
+
 		if ( steamIds == NULL || !GetGame().IsMultiplayer() )
 		{
 			return AuthPlayers;
@@ -47,27 +49,6 @@ class PermissionManager
 		}
 
 		return tempArray;
-	}
-
-	void SetPlayers( ref array< ref AuthPlayer > players )
-	{
-		AuthPlayers.Clear();
-
-		// This doesn't work??? wtf
-		//AuthPlayers.Copy( players );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			AuthPlayers.Insert( players[i] );
-		}
-	}
-
-	void AddPlayers( ref array< ref AuthPlayer > players )
-	{
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			AuthPlayers.Insert( players[i] );
-		}
 	}
 
 	void RegisterPermission( string permission )

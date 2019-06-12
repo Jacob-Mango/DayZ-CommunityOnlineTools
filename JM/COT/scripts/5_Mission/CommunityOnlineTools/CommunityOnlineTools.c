@@ -17,7 +17,7 @@ class CommunityOnlineTools
 		GetModuleManager().RegisterModule( new PlayerModule );
 		GetModuleManager().RegisterModule( new ObjectModule );
 		GetModuleManager().RegisterModule( new ESPModule );
-		// GetModuleManager().RegisterModule( new MapEditorModule );
+		GetModuleManager().RegisterModule( new MapEditorModule );
 		GetModuleManager().RegisterModule( new TeleportModule );
 		GetModuleManager().RegisterModule( new CameraTool );
 		GetModuleManager().RegisterModule( new ItemSetSpawnerModule );

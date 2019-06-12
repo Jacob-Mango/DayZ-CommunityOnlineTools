@@ -161,7 +161,11 @@ class ItemSetSpawnerModule: EditorModule
 	void SpawnSelectedPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		ref Param2< string, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+		
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		ref ItemSetFile file = settings.ItemSets.Get( data.param1 );
 
@@ -186,7 +190,7 @@ class ItemSetSpawnerModule: EditorModule
 		
 		if ( GetGame().IsMultiplayer() )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 			
 			if ( type == CallType.Server )
 			{
