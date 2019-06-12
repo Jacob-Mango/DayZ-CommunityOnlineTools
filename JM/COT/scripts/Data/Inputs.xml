@@ -12,7 +12,7 @@
             <input name="UACameraToolZoomBackwards" loc="Zoom Freecam Backwards" />
             <input name="UACameraToolSpeedIncrease" loc="Increase Freecam Speed" />
             <input name="UACameraToolSpeedDecrease" loc="Decrease Freecam Speed" />
-            <input name="UAMapEditorModuleToggleEditor" loc="Toggles Freecam" />
+            <input name="UAMapEditorModuleToggleEditor" loc="Toggle Map Editor" />
             <input name="UAObjectModuleSpawnInfected" loc="Spawn Infected (Crosshair)" />
             <input name="UAObjectModuleSpawnAnimal" loc="Spawn Animal (Crosshair)" />
             <input name="UAObjectModuleSpawnWolf" loc="Spawn Wolf (Crosshair)" />
@@ -75,8 +75,6 @@
         </input>
 
         <input name="UAMapEditorModuleToggleEditor">
-            <btn name="kU">
-            </btn>
         </input>
     </preset>
 </modded_inputs>

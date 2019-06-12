@@ -199,8 +199,12 @@ class ObjectModule: EditorModule
 			return;
 
 		ref Param3< string, string, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
 		
+		array< string > guids = new array< string >;
+		guids.Copy( data.param3 );
+
 		if ( type == CallType.Server )
 		{
 			if ( !GetGame().IsMultiplayer() )
@@ -208,7 +212,7 @@ class ObjectModule: EditorModule
 				SpawnItemOnPlayer( sender, GetGame().GetPlayer(), data.param1, data.param2 );
 			} else
 			{
-				array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param3 );
+				array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 	
 				for ( int i = 0; i < players.Count(); i++ )
 				{

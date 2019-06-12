@@ -71,14 +71,18 @@ class PlayerModule: EditorModule
 	void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -101,14 +105,18 @@ class PlayerModule: EditorModule
 	void Player_SetBlood( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -131,14 +139,18 @@ class PlayerModule: EditorModule
 	void Player_SetEnergy( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -161,14 +173,18 @@ class PlayerModule: EditorModule
 	void Player_SetWater( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -191,14 +207,18 @@ class PlayerModule: EditorModule
 	void Player_SetShock( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -221,14 +241,18 @@ class PlayerModule: EditorModule
 	void Player_SetHeatComfort( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatComfort", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -251,14 +275,18 @@ class PlayerModule: EditorModule
 	void Player_SetWet( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Wet", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -281,14 +309,18 @@ class PlayerModule: EditorModule
 	void Player_SetTremor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Tremor", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -311,14 +343,18 @@ class PlayerModule: EditorModule
 	void Player_SetStamina( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -341,14 +377,18 @@ class PlayerModule: EditorModule
 	void Player_SetLifeSpanState( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< int, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -374,14 +414,18 @@ class PlayerModule: EditorModule
 	void Player_SetBloodyHands( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< bool, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -410,14 +454,18 @@ class PlayerModule: EditorModule
 	void Player_KickTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param1 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Kick", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param1 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -460,7 +508,11 @@ class PlayerModule: EditorModule
 	void Player_RepairTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param1 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Repair", sender ) )
 			return;
@@ -469,7 +521,7 @@ class PlayerModule: EditorModule
 		{
 			array< Transport > completedTransports = new array< Transport >;
 
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param1 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -525,19 +577,24 @@ class PlayerModule: EditorModule
 	void Player_TeleportToMe( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< vector, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", sender ) ) return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
 				PlayerBase player = players[i].PlayerObject;
 
-				if ( player == NULL ) continue;
+				if ( player == NULL )
+					continue;
 
 				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 				
@@ -545,7 +602,12 @@ class PlayerModule: EditorModule
 				{
 					Transport transport = vehCommand.GetTransport();
 
-					if ( transport != NULL ) continue;
+					if ( transport )
+					{
+						transport.SetOrigin( data.param1 );
+						transport.SetPosition( data.param1 );
+						transport.Update();
+					}
 				}
 
 				player.SetPosition( data.param1 );
@@ -563,7 +625,11 @@ class PlayerModule: EditorModule
 	void Player_TeleportMeTo( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param1 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) ) return;
 
@@ -571,26 +637,35 @@ class PlayerModule: EditorModule
 
 		if ( senderPlayer == NULL ) return;
 
-		HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
-
-		if ( vehCommand )
-		{
-			Transport transport = vehCommand.GetTransport();
-
-			if ( transport != NULL ) return;
-		}
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param1 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
-			if ( players.Count() != 1 ) return;
+			if ( players.Count() == 0 )
+				return;
 
 			PlayerBase player = players[0].PlayerObject;
 
-			if ( player == NULL ) return;
+			if ( player == NULL )
+				return;
+			
+			HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
 
-			senderPlayer.SetPosition( player.GetPosition() );
+			if ( vehCommand )
+			{
+				Transport transport = vehCommand.GetTransport();
+
+				if ( transport == NULL )
+					return;
+
+				transport.SetOrigin( player.GetPosition() );
+				transport.SetPosition( player.GetPosition() );
+				transport.Update();
+			} else
+			{
+				senderPlayer.SetPosition( player.GetPosition() );
+			}
 
 			COTLog( sender, "Teleported self to " + players[0].Data.SGUID );
 
@@ -609,7 +684,11 @@ class PlayerModule: EditorModule
 		if ( type == CallType.Server )
 		{
 			Param2< bool, ref array< string > > data;
-			if ( !ctx.Read( data ) ) return;
+			if ( !ctx.Read( data ) )
+				return;
+
+			array< string > guids = new array< string >;
+			guids.Copy( data.param2 );
 
 			PlayerBase player;
 			
@@ -625,7 +704,7 @@ class PlayerModule: EditorModule
 				return;
 			}
 
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			if ( players.Count() != 1 ) return;
 
@@ -661,14 +740,18 @@ class PlayerModule: EditorModule
 	void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		Param2< bool, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		if ( !ctx.Read( data ) )
+			return;
+
+		array< string > guids = new array< string >;
+		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode", sender ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -712,14 +795,12 @@ class PlayerModule: EditorModule
 
 			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
 
-			for ( int i = 0; i < guids.Count(); i++ )
-			{
-				for ( int k = 0; k < GetPermissionsManager().AuthPlayers.Count(); k++ )
+				for ( int k = 0; k < players.Count(); k++ )
 				{
-					AuthPlayer player = GetPermissionsManager().AuthPlayers[k];
+					AuthPlayer player = players[k];
 					
-					if ( guids[i] == player.Data.SSteam64ID )
-					{
+					//if ( guids[i] == player.Data.SSteam64ID )
+					//{
 						player.ClearPermissions();
 
 						for ( int j = 0; j < perms.Count(); j++ )
@@ -731,15 +812,14 @@ class PlayerModule: EditorModule
 
 						player.Save();
 
-						COTLog( sender, "Updates permissions for " + players[i].Data.SSteam64ID );
+						COTLog( sender, "Updates permissions for " + players[j].Data.SSteam64ID );
 
 						SendAdminNotification( sender, player.IdentityPlayer, "Your permissions have been updated." );
 
 						if ( sender.GetPlainId() != player.IdentityPlayer.GetPlainId() )
 							SendAdminNotification( player.IdentityPlayer, sender, "Updated permissions." );
-					}
+					//}
 				}
-			}
 		}
 	}
 
@@ -761,14 +841,12 @@ class PlayerModule: EditorModule
 
 			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
 
-			for ( int i = 0; i < guids.Count(); i++ )
-			{
-				for ( int k = 0; k < GetPermissionsManager().AuthPlayers.Count(); k++ )
+				for ( int k = 0; k < players.Count(); k++ )
 				{
-					AuthPlayer player = GetPermissionsManager().AuthPlayers[k];
+					AuthPlayer player = players[k];
 					
-					if ( guids[i] == player.Data.SSteam64ID )
-					{
+					//if ( guids[i] == player.Data.SSteam64ID )
+					//{
 						player.ClearRoles();
 
 						for ( int j = 0; j < roles.Count(); j++ )
@@ -780,15 +858,14 @@ class PlayerModule: EditorModule
 
 						player.Save();
 
-						COTLog( sender, "Updates roles for " + players[i].Data.SSteam64ID );
+						COTLog( sender, "Updates roles for " + players[j].Data.SSteam64ID );
 
 						SendAdminNotification( sender, player.IdentityPlayer, "Your roles have been updated." );
 
 						if ( sender.GetPlainId() != player.IdentityPlayer.GetPlainId() )
 							SendAdminNotification( player.IdentityPlayer, sender, "Updated roles." );
-					}
+					//}
 				}
-			}
 		}
 	}
 
@@ -800,9 +877,13 @@ class PlayerModule: EditorModule
 		if ( type == CallType.Server )
 		{
 			ref Param1< ref array< string > > data;
-			if ( !ctx.Read( data ) ) return;
+			if ( !ctx.Read( data ) )
+				return;
 
-			array< ref AuthPlayer > auPlayers = GetPermissionsManager().GetPlayersFromArray( data.param1 );
+			array< string > guids = new array< string >;
+			guids.Copy( data.param1 );
+
+			array< ref AuthPlayer > auPlayers = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < auPlayers.Count(); i++ )
 			{
@@ -826,9 +907,13 @@ class PlayerModule: EditorModule
 		if ( type == CallType.Server )
 		{
 			ref Param1< ref array< string > > data;
-			if ( !ctx.Read( data ) ) return;
+			if ( !ctx.Read( data ) )
+				return;
 
-			array< ref AuthPlayer > auPlayers = GetPermissionsManager().GetPlayersFromArray( data.param1 );
+			array< string > guids = new array< string >;
+			guids.Copy( data.param1 );
+
+			array< ref AuthPlayer > auPlayers = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < auPlayers.Count(); i++ )
 			{
