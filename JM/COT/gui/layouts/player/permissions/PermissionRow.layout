@@ -1,7 +1,7 @@
 PanelWidgetClass PermissionRow
 {
  position 0 0
- size 1 30
+ size 1 25
  hexactpos 0
  vexactpos 0
  hexactsize 0
@@ -26,7 +26,7 @@ PanelWidgetClass PermissionRow
     TextWidgetClass permission_name {
      ignorepointer 1
      position 0 0
-     size 0.6 30
+     size 0.6 25
      halign left_ref
      valign center_ref
      hexactpos 1
@@ -42,7 +42,7 @@ PanelWidgetClass PermissionRow
     FrameWidgetClass permission_setting {
      ignorepointer 1
      position 0 0
-     size 0.4 30 
+     size 0.4 25 
      hexactpos 0
      vexactpos 0
      hexactsize 0

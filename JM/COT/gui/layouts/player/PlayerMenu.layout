@@ -34,40 +34,40 @@ PanelWidgetClass PlayerMenu {
      "Scrollbar V" 1
      {
       GridSpacerWidgetClass player_list_scroller_container {
-							position 0 0
-							size 1 1
-							hexactpos 1
-							vexactpos 1
-							hexactsize 0
-							vexactsize 0
-							"Size To Content V" 1
-							Columns 1
-     		Rows 2
-							{
-								GridSpacerWidgetClass player_list_first {
-									position 0 0
-									size 1 1
-									hexactpos 1
-									vexactpos 1
-									hexactsize 0
-									vexactsize 0
-									"Size To Content V" 1
-									Columns 1
-									Rows 1000
-								}
-								GridSpacerWidgetClass player_list_second {
-									position 0 0
-									size 1 1
-									hexactpos 1
-									vexactpos 1
-									hexactsize 0
-									vexactsize 0
-									"Size To Content V" 1
-									Columns 1
-									Rows 1000
-								}
-							}
-						}
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 2
+       {
+        GridSpacerWidgetClass player_list_first {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 1000
+        }
+        GridSpacerWidgetClass player_list_second {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 1000
+        }
+       }
+      }
      }
     }
     TextWidgetClass text {
@@ -174,7 +174,6 @@ PanelWidgetClass PlayerMenu {
       }
      }
     }
-    
     PanelWidgetClass permissions_wrapper {
      color 0 0 0 0
      position 0 0
@@ -186,19 +185,18 @@ PanelWidgetClass PlayerMenu {
      style EditorPanel
      {
       ScrollWidgetClass permissions_scroller {
-       position 0 40
-       size 1 520
+       position 0 35
+       size 1 0.85
        halign center_ref
-       valign bottom_ref
+       valign top_ref
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 1
+       vexactsize 0
        style blank
        "Scrollbar V" 1
        {
         GridSpacerWidgetClass permissions_container {
-         clipchildren 1
          position 0 0
          size 1 1
          hexactpos 1
@@ -207,7 +205,31 @@ PanelWidgetClass PlayerMenu {
          vexactsize 0
          "Size To Content V" 1
          Columns 1
-         Rows 1000
+         Rows 2
+         {
+          GridSpacerWidgetClass permissions_container_first {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 1000
+          }
+          GridSpacerWidgetClass permissions_container_second {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 1000
+          }
+         }
         }
        }
       }
