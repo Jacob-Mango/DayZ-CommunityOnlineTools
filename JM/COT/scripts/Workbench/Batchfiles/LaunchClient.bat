@@ -182,5 +182,3 @@ for %%a in ("%mods:;=" "%") do (
 chdir /d "%gameDirectory%"
 echo start %clientEXE% %clientLaunchParams% "-mod=%modList%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
 start %clientEXE% %clientLaunchParams% "-mod=%modList%" "%playerName%" -dologs -adminlog -freezecheck "-scriptDebug=true"
-
-TIMEOUT /T 5 /NOBREAK

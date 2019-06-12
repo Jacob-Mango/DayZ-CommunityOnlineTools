@@ -7,13 +7,9 @@ class COTModule : Module
 	protected bool m_PreventOpening; 
 	protected bool m_ForceHUD;
 
-	protected string m_Version;
-
-	void COTModule( string version )
+	void COTModule()
 	{
 		COTInstance = this;
-
-		m_Version = version;
 
 		MakeDirectory( ROOT_COT_DIR );
 
@@ -34,7 +30,7 @@ class COTModule : Module
 			if ( m_COTMenu == NULL )
 			{
 				m_COTMenu = new ref COTMenu;
-				m_COTMenu.Init( m_Version );
+				m_COTMenu.Init();
 			}
 		}
 	}
