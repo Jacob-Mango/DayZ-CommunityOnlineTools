@@ -81,7 +81,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 				return;
 			}
 
-			if ( Player.Data.SGUID == GetGame().GetPlayer().GetIdentity().GetPlainId() )
+			if ( Player.Data.SSteam64ID == GetGame().GetPlayer().GetIdentity().GetPlainId() )
 			{
 				Name.SetColor( 0xFF2ECC71 );
 			} else
