@@ -9,19 +9,19 @@ class MapEditorModule: Module
 		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_MapEditor", "LeaveEditor", this, SingeplayerExecutionType.Server );
 
-		GetRPCManager().AddRPC( "COT_MapEditor", "SetPosition", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_MapEditor", "SetTransform", this, SingeplayerExecutionType.Server );
 
 		GetPermissionsManager().RegisterPermission( "MapEditor.EnterEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.LeaveEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
 	}
 	
-	void SetPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetTransform( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.Transform.Position", sender ) )
 			return;
 
-		Param1< vector > data;
+		Param2< vector, vector > data;
 		if ( !ctx.Read( data ) ) return;
  
 		if ( target == NULL )
@@ -29,11 +29,12 @@ class MapEditorModule: Module
 
 		if ( type == CallType.Server )
 		{
-			// target.SetOrigin( data.param1 );
+			//target.SetOrigin( data.param1 );
 			target.SetPosition( data.param1 );
-			target.Update();
+			target.SetOrientation( data.param2 );
+			//target.Update();
 
-			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been given the position " + VectorToString( data.param1, 1 ) );
+			//SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been given the position " + VectorToString( data.param1, 1 ) );
 		}
 	}
 	
