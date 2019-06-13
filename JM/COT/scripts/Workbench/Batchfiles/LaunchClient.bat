@@ -126,22 +126,10 @@ if "%mods%"=="" (
     set mods=%mods%;%modName%
 )
 
-echo ServerPassword is: "%password%"
-if "%password%"=="" (
-    set /a failed=1
-    echo ServerPassword parameter was not set in the project.cfg
-)
-
 echo GameDirectory is: "%gameDirectory%"
 if "%gameDirectory%"=="" (
     set /a failed=1
     echo GameDirectory parameter was not set in the project.cfg
-)
-
-echo ServerDirectory is: "%serverDirectory%"
-if "%serverDirectory%"=="" (
-    set /a failed=1
-    echo ServerDirectory parameter was not set in the project.cfg
 )
 
 echo ServerProfileDirectory is: "%serverProfileDirectory%"
