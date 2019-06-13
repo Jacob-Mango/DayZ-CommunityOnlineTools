@@ -18,6 +18,7 @@ FrameWidgetClass COTMap {
    vexactpos 0
    hexactsize 0
    vexactsize 0
+   scriptclass "JM_COT_MapMenu"
   }
  }
 }
