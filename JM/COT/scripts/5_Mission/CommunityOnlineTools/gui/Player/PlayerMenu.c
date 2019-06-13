@@ -397,7 +397,7 @@ class PlayerMenu extends Form
 			//m_LastShaved.SetSelection( data.ILifeSpanState );
 			m_BloodyHands.SetChecked( data.BBloodyHands );
 			m_GodMode.SetChecked( data.BGodMode );
-			m_Invisibility.SetChecked(data.BInvisibility)
+			m_Invisibility.SetChecked(data.BInvisibility);
 			
 			m_PosX.SetText( "" + data.VPosition[0] );
 			m_PosY.SetText( "" + data.VPosition[1] );
