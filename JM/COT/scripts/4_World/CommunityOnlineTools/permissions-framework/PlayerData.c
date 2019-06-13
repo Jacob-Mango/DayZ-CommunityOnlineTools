@@ -37,7 +37,8 @@ class PlayerData
 	
 	int ILifeSpanState;
 	bool BBloodyHands;
-	bool BGodMode
+	bool BGodMode;
+	bool BInvisibility;
 
 	void PlayerData()
 	{
@@ -67,5 +68,6 @@ class PlayerData
 		ILifeSpanState = player.GetLifeSpanState();
 		BBloodyHands = player.HasBloodyHands();
 		BGodMode = player.m_HasGodeMode;
+		BInvisibility = player.m_IsInvisible;
 	}
 }

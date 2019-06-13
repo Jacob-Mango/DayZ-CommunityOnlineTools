@@ -4,12 +4,20 @@ modded class PlayerBase
 	ref AuthPlayer authenticatedPlayer;
 
 	bool m_HasGodeMode;
+	bool m_IsInvisible;
 
 	override void Init()
 	{
 		super.Init();
 
 		//RegisterNetSyncVariableBool( "m_HasGodeMode" );
+		RegisterNetSyncVariableBool("m_IsInvisible");
+	}
+
+	override void OnVariablesSynchronized()
+	{
+		super.OnVariablesSynchronized();
+		SetInvisibility(m_IsInvisible);
 	}
 
 	/*
@@ -97,6 +105,22 @@ modded class PlayerBase
 			SetAllowDamage(true);
 			m_HasGodeMode = false;
 			//Notify( authenticatedPlayer, "You no longer have god mode." );
+		}
+	}
+
+	void SetInvisibility(bool mode)
+	{
+		m_IsInvisible = mode
+		if (m_IsInvisible)
+		{
+			SetInvisible(true);
+			m_IsInvisible = true;
+			Print("Player should now be invis!");
+		} else 
+		{
+			SetInvisible(false);
+			m_IsInvisible = false;
+			Print("Player should not be invis!");
 		}
 	}
 }

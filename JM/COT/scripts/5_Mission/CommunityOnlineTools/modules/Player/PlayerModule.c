@@ -10,6 +10,7 @@ class PlayerModule: EditorModule
 		GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "SpectatePlayer", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
+		GetRPCManager().AddRPC( "COT_Admin", "Invisibility", this, SingeplayerExecutionType.Server);
 
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
@@ -35,6 +36,7 @@ class PlayerModule: EditorModule
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Shock" );
@@ -774,6 +776,50 @@ class PlayerModule: EditorModule
 				//if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
 				//	SendAdminNotification( player.GetIdentity(), sender, "God mode has been set to " + data.param1 );
 			}
+		}
+	}
+
+	void Invisibility(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
+	{
+		if (type == CallType.Server)
+		{
+			Param2<bool, ref array<string>> data;
+			if (!ctx.Read(data))
+				return;
+	
+			array<string> guids = new array<string>;
+			guids.Copy(data.param2);
+
+			if (!GetPermissionsManager().HasPermission( "Admin.Player.Invisible", sender))
+				return;
+
+
+			array<ref AuthPlayer> players = GetPermissionsManager().GetPlayersFromArray(guids);
+			for (int i = 0; i < players.Count(); i++)
+			{
+				PlayerBase player = players[i].PlayerObject;
+
+				if (player == NULL) continue;
+
+				player.SetInvisibility(data.param1);
+
+				//if (GetGame().IsMultiplayer())
+				//	GetRPCManager().SendRPC("COT_Admin", "Invisibility", new Param1<bool> (data.param1), false, NULL, player);
+
+				COTLog(sender, "Set invisibility to " + data.param1 + " for " + players[i].Data.SGUID);
+			}
+		}
+
+		if (type == CallType.Client)
+		{
+			Param1<bool> cdata;
+			if (!ctx.Read(cdata))
+				return;
+
+			PlayerBase cplayer = PlayerBase.Cast(target);
+
+			if (cplayer)
+				cplayer.SetInvisibility(cdata.param1);
 		}
 	}
 
