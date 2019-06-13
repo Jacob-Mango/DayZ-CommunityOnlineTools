@@ -12,8 +12,7 @@ class CfgPatches
     };
 };
 
-class RscMapControl;
-class JM_COT_MapMenu: RscMapControl
+class RscMapControl
 {
 	scaleMin=0.02;
 	scaleMax=3.000;
@@ -349,4 +348,8 @@ class JM_COT_MapMenu: RscMapControl
 		coefMin=1;
 		coefMax=4;
 	};
+};
+class JM_COT_MapMenu: RscMapControl
+{
+
 };
