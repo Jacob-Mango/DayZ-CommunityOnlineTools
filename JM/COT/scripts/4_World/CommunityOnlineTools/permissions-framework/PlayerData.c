@@ -67,7 +67,7 @@ class PlayerData
 		FStamina = player.GetStatStamina().Get();
 		ILifeSpanState = player.GetLifeSpanState();
 		BBloodyHands = player.HasBloodyHands();
-		BGodMode = player.m_HasGodeMode;
+		BGodMode = player.m_HasGodMode;
 		BInvisibility = player.m_IsInvisible;
 	}
 }
