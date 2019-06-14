@@ -81,12 +81,10 @@ if %failed%==1 (
     goto:eof
 )
 
-call CopyProject.bat
+REM call CopyProject.bat
 
 chdir /D "%workbenchDirectory%"
 echo start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
 start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Scripts\Workbench\dayz.gproj
-
-TIMEOUT /T 10 /NOBREAK
 
 endlocal
