@@ -100,7 +100,7 @@ class COTModule : Module
 
 		if ( !COTIsActive )
 		{
-			Message( GetPlayer(), "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
 
@@ -156,20 +156,18 @@ class COTModule : Module
 		if ( m_COTMenu == NULL )
 			return;
 
+		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+			return;
+
 		COTIsActive = !COTIsActive;
 
-		string message = "Community Online Tools has been toggled ";
-		string color;
-
-		if (COTIsActive) {
-			message += "on.";
-			color = "colorFriendly";
-		} else {
-			message += "off.";
-			color = "colorImportant";
+		if ( COTIsActive )
+		{
+			CreateLocalAdminNotification( "Community Online Tools has been toggled on." );
+		} else
+		{
+			CreateLocalAdminNotification( "Community Online Tools has been toggled off." );
 		}
-		
-		GetPlayer().Message(message, color);
 	}
 
 	void CloseCOT( UAInput input )

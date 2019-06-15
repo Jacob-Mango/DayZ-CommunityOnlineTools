@@ -1,4 +1,4 @@
-class AuthPlayer
+class AuthPlayer: Managed
 {
 	const string AUTH_DIRECTORY = PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\";
 	const string FILE_TYPE = ".txt";

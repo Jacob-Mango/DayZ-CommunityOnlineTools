@@ -29,6 +29,7 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 
 static void CreateLocalAdminNotification( string message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
+	Message( NULL, message );
 	//NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
 }
 

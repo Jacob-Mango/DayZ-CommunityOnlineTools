@@ -1,6 +1,4 @@
-// STORE ALL PLAYERS DATA HERE FOR OUTSIDE NETWORK BUBBLE!
-
-class PlayerData
+class PlayerData: Managed
 {
 	string SName;
 	string SGUID;
@@ -67,7 +65,7 @@ class PlayerData
 		FStamina = player.GetStatStamina().Get();
 		ILifeSpanState = player.GetLifeSpanState();
 		BBloodyHands = player.HasBloodyHands();
-		BGodMode = player.m_HasGodMode;
-		BInvisibility = player.m_IsInvisible;
+		BGodMode = player.HasGodMode();
+		BInvisibility = player.IsInvisible();
 	}
 }

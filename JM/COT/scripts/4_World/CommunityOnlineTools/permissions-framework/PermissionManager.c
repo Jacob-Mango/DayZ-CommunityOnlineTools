@@ -92,7 +92,7 @@ class PermissionManager
 
 		if ( player != NULL )
 		{
-			return player.authenticatedPlayer.HasPermission( permission );
+			return player.GetAuthenticatedPlayer().HasPermission( permission );
 		}
 
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
@@ -139,7 +139,7 @@ class PermissionManager
 
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
 		{
-			ref AuthPlayer auPlayer = AuthPlayers[i];
+			AuthPlayer auPlayer = AuthPlayers[i];
 			
 			if ( auPlayer.GetGUID() == player.GetId() )
 			{

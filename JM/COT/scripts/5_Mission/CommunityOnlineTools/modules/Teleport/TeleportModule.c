@@ -149,7 +149,7 @@ class TeleportModule: EditorModule
 			}
 
 			COTLog( sender, "Teleported to cursor " + data.param1 );
-			SendAdminNotification( sender, NULL, "You have teleported to " + VectorToString( data.param1, 1 ) );
+			//SendAdminNotification( sender, NULL, "You have teleported to " + VectorToString( data.param1, 1 ) );
 		}
 	}
 	

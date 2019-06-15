@@ -98,7 +98,7 @@ class ObjectModule: EditorModule
 
 			COTLog( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
 
-			SendAdminNotification( sender, NULL, "You have spawned a " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) );
+			//SendAdminNotification( sender, NULL, "You have spawned a " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) );
 		}
 	}
 	
@@ -152,7 +152,7 @@ class ObjectModule: EditorModule
 
 			COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
 
-			SendAdminNotification( sender, NULL, "You have spawned " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) + ", quantity " + quantity );
+			//SendAdminNotification( sender, NULL, "You have spawned " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) + ", quantity " + quantity );
 		}
 	}
 	
@@ -185,12 +185,12 @@ class ObjectModule: EditorModule
 			oItem.SetQuantity(quantity);
 		}
 		
-		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.authenticatedPlayer.Data.SSteam64ID + " with amount " + quantity );
+		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().Data.SSteam64ID + " with amount " + quantity );
 
-		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
+		//SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
 
-		if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
-			SendAdminNotification( player.GetIdentity(), sender, entity.GetDisplayName() + " has been added to their inventory, quantity " + quantity );
+		//if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
+		//	SendAdminNotification( player.GetIdentity(), sender, entity.GetDisplayName() + " has been added to their inventory, quantity " + quantity );
 	}
 
 	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -235,7 +235,7 @@ class ObjectModule: EditorModule
 			GetGame().ObjectGetType( target, obtype );
 
 			COTLog( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
-			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
+			//SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
 
 			GetGame().ObjectDelete( target );
 		}
