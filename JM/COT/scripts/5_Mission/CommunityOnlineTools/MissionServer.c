@@ -1,5 +1,7 @@
 modded class MissionServer
 {
+	static ref ScriptInvoker EVENT_INVOKER = new ScriptInvoker();
+
 	protected ref CommunityOnlineTools m_COT;
 	protected ref PermissionsFramework m_PF;
 
@@ -64,6 +66,13 @@ modded class MissionServer
 
 			GetPermissionsManager().CreateRole( "admin", data );
 		}
+	}
+
+	override void OnEvent(EventType eventTypeId, Param params) 
+	{
+		EVENT_INVOKER.Invoke( eventTypeId, params );
+
+		super.OnEvent( eventTypeId, params );
 	}
 
 	override void OnUpdate( float timeslice )

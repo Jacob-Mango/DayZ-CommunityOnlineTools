@@ -101,7 +101,7 @@ class TeleportModule: EditorModule
 			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
 				return;
 		
-			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), true );
+			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref TeleportSettings >( settings ), false, sender );
 		}
 
 		if ( type == CallType.Client )
