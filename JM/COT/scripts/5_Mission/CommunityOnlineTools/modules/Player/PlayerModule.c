@@ -933,11 +933,8 @@ class PlayerModule: EditorModule
 
 			for ( int i = 0; i < auPlayers.Count(); i++ )
 			{
-				auPlayers[i].Kick();
+				GetGame().ChatPlayer( "#kick " + auPlayers[i].IdentityPlayer.GetPlayerId() );
 				COTLog( sender, "Kicked " + auPlayers[i].Data.SGUID );
-
-				// won't ever send
-				//SendAdminNotification( sender, auPlayers[i].IdentityPlayer, "You have been kicked." );
 
 				//if ( sender.GetPlainId() != auPlayers[i].IdentityPlayer.GetPlainId() )
 				//	SendAdminNotification( auPlayers[i].IdentityPlayer, sender, "Kicked player." );
@@ -963,11 +960,8 @@ class PlayerModule: EditorModule
 
 			for ( int i = 0; i < auPlayers.Count(); i++ )
 			{
-				auPlayers[i].Ban();
+				GetGame().ChatPlayer( "#ban " + auPlayers[i].IdentityPlayer.GetPlayerId() );
 				COTLog( sender, "Banned " + auPlayers[i].Data.SGUID );
-
-				// won't ever send
-				//SendAdminNotification( sender, auPlayers[i].IdentityPlayer, "You have been banned." );
 
 				//if ( sender.GetPlainId() != auPlayers[i].IdentityPlayer.GetPlainId() )
 				//	SendAdminNotification( auPlayers[i].IdentityPlayer, sender, "Banned player." );
