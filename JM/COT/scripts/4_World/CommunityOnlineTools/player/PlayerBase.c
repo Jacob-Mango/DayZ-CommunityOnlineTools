@@ -1,15 +1,16 @@
 
 modded class PlayerBase
 {
-	ref AuthPlayer authenticatedPlayer;
+	protected AuthPlayer m_AuthenticatedPlayer;
 
-	bool m_HasGodMode;
-	bool m_IsInvisible;
+	protected bool m_HasGodMode;
+	protected bool m_IsInvisible;
 
 	override void Init()
 	{
 		super.Init();
 
+		RegisterNetSyncVariableBool( "m_HasGodMode" );
 		RegisterNetSyncVariableBool( "m_IsInvisible" );
 	}
 
@@ -18,6 +19,26 @@ modded class PlayerBase
 		super.OnVariablesSynchronized();
 
 		SetInvisible( m_IsInvisible );
+	}
+
+	void SetAuthenticatedPlayer( ref AuthPlayer player )
+	{
+		m_AuthenticatedPlayer = player;
+	}
+
+	AuthPlayer GetAuthenticatedPlayer()
+	{
+		return m_AuthenticatedPlayer;
+	}
+
+	bool HasGodMode()
+	{
+		return m_HasGodMode;
+	}
+
+	bool IsInvisible()
+	{
+		return m_IsInvisible;
 	}
 
 	void SetGodMode( bool mode )

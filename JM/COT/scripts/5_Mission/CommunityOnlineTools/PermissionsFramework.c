@@ -126,7 +126,7 @@ class PermissionsFramework
 
 			if ( player )
 			{
-				player.authenticatedPlayer = auPlayer;
+				player.SetAuthenticatedPlayer( auPlayer );
 			}
 
 			if ( auPlayer )

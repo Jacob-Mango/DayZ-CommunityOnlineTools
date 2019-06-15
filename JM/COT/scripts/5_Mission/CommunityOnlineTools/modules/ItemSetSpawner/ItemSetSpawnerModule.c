@@ -207,10 +207,10 @@ class ItemSetSpawnerModule: EditorModule
 	
 					COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].Data.SSteam64ID );
 				
-					SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
+					//SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
 
-					if ( sender.GetPlainId() != players[i].IdentityPlayer.GetPlainId() )
-						SendAdminNotification( players[i].IdentityPlayer, sender, "You gave item set " + data.param1 );
+					//if ( sender.GetPlainId() != players[i].IdentityPlayer.GetPlainId() )
+					//	SendAdminNotification( players[i].IdentityPlayer, sender, "You gave item set " + data.param1 );
 				}
 			}
 		} else
