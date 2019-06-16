@@ -14,12 +14,12 @@ class ServerInformationModule: EditorModule
 
 		m_Data = new ServerInformationData;
 
-		MissionServer.EVENT_INVOKER.Insert( OnEvent );
+		//MissionServer.EVENT_INVOKER.Insert( OnEvent );
 	}
 
 	void ~ServerInformationModule()
 	{
-		MissionServer.EVENT_INVOKER.Remove( OnEvent );
+		//MissionServer.EVENT_INVOKER.Remove( OnEvent );
 	}
 
 	override void RegisterKeyMouseBindings() 
