@@ -3,20 +3,17 @@ modded class MissionServer
 	static ref ScriptInvoker EVENT_INVOKER = new ScriptInvoker();
 
 	protected ref CommunityOnlineTools m_COT;
-	protected ref PermissionsFramework m_PF;
 
 	void MissionServer()
 	{		
 		m_bLoaded = false;
 
-		m_COT = new ref CommunityOnlineTools;
-
-		m_PF = new ref PermissionsFramework;
+		m_COT = new CommunityOnlineTools;
 	}
 
 	void ~MissionServer()
 	{
-		delete m_PF;
+		delete m_COT;
 	}
 
 	override void OnInit()
@@ -29,14 +26,10 @@ modded class MissionServer
 		super.OnMissionStart();
 
 		m_COT.OnStart();
-
-		m_PF.OnStart();
 	}
 
 	override void OnMissionFinish()
 	{
-		m_PF.OnFinish();
-
 		m_COT.OnFinish();
 
 		super.OnMissionFinish();
@@ -81,8 +74,6 @@ modded class MissionServer
 
 		if ( m_bLoaded )
 		{
-			m_PF.Update( timeslice );
-
 			m_COT.OnUpdate( timeslice );
 		}
 	}
@@ -90,8 +81,6 @@ modded class MissionServer
 	override void OnPreloadEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int queueTime)
 	{
 		super.OnPreloadEvent( identity, useDB, pos, yaw, queueTime );
-
-		GetPermissionsManager().GetPlayerByIdentity( identity );
 
 		// queueTime = 0;
 	}
@@ -102,20 +91,18 @@ modded class MissionServer
 
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			ref Role role = GetPermissionsManager().Roles[i];
+			Role role = GetPermissionsManager().Roles[i];
 			role.Serialize();
-			GetRPCManager().SendRPC( "PermissionsFramework", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
+			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
 		}
 
-		GetRPCManager().SendRPC( "PermissionsFramework", "SetClientPlayer", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().GetPlayerByIdentity( identity ) ) ), true, identity );
+		GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param1< ref PlayerData >( SerializePlayer( GetPermissionsManager().PlayerJoined( identity ) ) ), true, identity );
 
 		GetGame().SelectPlayer( identity, player );
 	} 
 
 	override void InvokeOnDisconnect( PlayerBase player )
 	{
-		GetPermissionsManager().PlayerLeft( player.GetIdentity() );
-
 		super.InvokeOnDisconnect( player );
 	} 
 

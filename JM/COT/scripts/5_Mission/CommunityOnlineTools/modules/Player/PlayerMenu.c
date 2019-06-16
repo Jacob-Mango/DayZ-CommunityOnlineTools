@@ -505,7 +505,7 @@ class PlayerMenu extends Form
 
 			if ( GetSelectedPlayers().Count() > 0 )
 			{
-				GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].Data.SGUID ) );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].Data.SGUID ) );
 			}
 		}
 
@@ -633,7 +633,7 @@ class PlayerMenu extends Form
 
 	void ReloadPlayers()
 	{
-		GetRPCManager().SendRPC( "PermissionsFramework", "UpdatePlayers", new Param );
+		GetRPCManager().SendRPC( "COT", "UpdatePlayers", new Param );
 	}
 
 	void CreatePermissionsUI()

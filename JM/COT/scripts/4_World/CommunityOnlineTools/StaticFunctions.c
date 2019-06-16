@@ -29,8 +29,7 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 
 static void CreateLocalAdminNotification( string message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
-	Message( NULL, message );
-	//NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
+	NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
 }
 
 static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, string message, string icon = "set:ccgui_enforce image:HudBuild" )
@@ -39,17 +38,17 @@ static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, strin
 
 	if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
 	{
-		//NotificationSystem.AddNotificationExtended( 1.5, title, message, icon );
+		NotificationSystem.AddNotificationExtended( 1.5, title, message, icon );
 	} else 
 	{
 		if ( to != NULL )
 		{
 			title = "From " + from.GetName();
 
-			//NotificationSystem.SendNotificationToPlayerIdentityExtended( to, 1.5, title, message, icon );
+			NotificationSystem.SendNotificationToPlayerIdentityExtended( to, 1.5, title, message, icon );
 		} else 
 		{
-			//NotificationSystem.SendNotificationToPlayerIdentityExtended( from, 1.5, title, message, icon );
+			NotificationSystem.SendNotificationToPlayerIdentityExtended( from, 1.5, title, message, icon );
 		}
 	}
 }
