@@ -13,17 +13,6 @@ class PermissionManager
 		RolesMap = new map< string, ref Role >;
 
 		RootPermission = new ref Permission( "ROOT" );
-
-		/*
-		for ( int i = 0; i < 180; i++ )
-		{
-			ref PlayerData data = new ref PlayerData;
-			data.SName = "Player " + i;
-			data.SGUID = "Player" + i;
-
-			AuthPlayers.Insert( new AuthPlayer( data ) );
-		}
-		*/
 	}
 
 	array< ref AuthPlayer > GetPlayersFromArray( ref array< string > steamIds = NULL )
@@ -108,22 +97,7 @@ class PermissionManager
 
 	ref AuthPlayer PlayerJoined( PlayerIdentity player )
 	{
-		ref PlayerData data = new ref PlayerData;
-
-		if ( player )
-		{
-			data.SName = player.GetName();
-			data.SGUID = player.GetId();
-			data.SSteam64ID = player.GetPlainId();
-		} else 
-		{
-			data.SName = "Offline Mode";
-			data.SGUID = "N/A";
-			data.SSteam64ID = "N/A";
-		}
-
-		AuthPlayer auPlayer = new AuthPlayer( data );
-		auPlayer.IdentityPlayer = player;
+		AuthPlayer auPlayer = new AuthPlayer( player );
 
 		auPlayer.CopyPermissions( RootPermission );
 		auPlayer.Load();
@@ -131,44 +105,6 @@ class PermissionManager
 		AuthPlayers.Insert( auPlayer );
 
 		return auPlayer;
-	}
-
-	void PlayerLeft( PlayerIdentity player )
-	{
-		if ( player == NULL ) return;
-
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
-		{
-			AuthPlayer auPlayer = AuthPlayers[i];
-			
-			if ( auPlayer.GetGUID() == player.GetId() )
-			{
-				auPlayer.Save();
-
-				GetRPCManager().SendRPC( "PermissionsFramework", "RemovePlayer", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true );
-
-				AuthPlayers.Remove( i );
-				break;
-			}
-		}
-	}
-
-	void PlayerLeftID( string id )
-	{
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
-		{
-			ref AuthPlayer auPlayer = AuthPlayers[i];
-			
-			if ( auPlayer.GetSteam64ID() == id )
-			{
-				auPlayer.Save();
-
-				GetRPCManager().SendRPC( "PermissionsFramework", "RemovePlayer", new Param1< ref PlayerData >( SerializePlayer( auPlayer ) ), true );
-
-				AuthPlayers.Remove( i );
-				break;
-			}
-		}
 	}
 
 	void DebugPrint()
@@ -195,10 +131,8 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			ref PlayerData data = new ref PlayerData;
-			data.SGUID = guid;
-
-			auPlayer = new AuthPlayer( data );
+			auPlayer = new AuthPlayer( NULL );
+			auPlayer.Data.SGUID = guid;
 
 			AuthPlayers.Insert( auPlayer );
 		}
@@ -208,6 +142,8 @@ class PermissionManager
 
 	ref AuthPlayer GetPlayerBySteam64ID( string steam64 )
 	{
+		Error( "Deprecated method." );
+
 		if ( !GetGame().IsMultiplayer() )
 		{
 			return AuthPlayers[0];
@@ -226,10 +162,8 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			ref PlayerData data = new ref PlayerData;
-			data.SSteam64ID = steam64;
-
-			auPlayer = new AuthPlayer( data );
+			auPlayer = new AuthPlayer( NULL );
+			auPlayer.Data.SSteam64ID = steam64;
 
 			AuthPlayers.Insert( auPlayer );
 		}
@@ -286,7 +220,8 @@ class PermissionManager
 
 		if ( auPlayer == NULL )
 		{
-			auPlayer = new AuthPlayer( data );
+			auPlayer = new AuthPlayer( NULL );
+			auPlayer.Data.Copy( data, GetGame().IsClient() );
 
 			AuthPlayers.Insert( auPlayer );
 		}

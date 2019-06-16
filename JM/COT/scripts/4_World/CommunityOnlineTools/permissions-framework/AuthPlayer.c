@@ -16,11 +16,20 @@ class AuthPlayer: Managed
 	protected bool m_HasPermissions;
 	protected bool m_HasPlayerData;
 
-	void AuthPlayer( ref PlayerData data )
+	void AuthPlayer( PlayerIdentity identity )
 	{
 		PlayerObject = NULL;
 
-		Data = data;
+		Data = new PlayerData;
+
+		IdentityPlayer = identity;
+
+		if ( IdentityPlayer )
+		{
+			Data.SName = IdentityPlayer.GetName();
+			Data.SGUID = IdentityPlayer.GetId();
+			Data.SSteam64ID = IdentityPlayer.GetPlainId();
+		}
 
 		RootPermission = new ref Permission( Data.SSteam64ID );
 		Roles = new array< Role >;
@@ -59,8 +68,6 @@ class AuthPlayer: Managed
 
 	void UpdatePlayerData()
 	{
-		if ( IdentityPlayer == NULL ) return;
-
 		Data.IPingMin = IdentityPlayer.GetPingMin();
 		Data.IPingMax = IdentityPlayer.GetPingMax();
 		Data.IPingAvg = IdentityPlayer.GetPingAvg();
@@ -69,9 +76,13 @@ class AuthPlayer: Managed
 		Data.SGUID = IdentityPlayer.GetId();
 		Data.SName = IdentityPlayer.GetName();
 
-		if ( PlayerObject == NULL ) return;
+		PlayerObject = GetPlayerObjectByIdentity( IdentityPlayer );
 
-		Data.Load( PlayerObject );
+		if ( PlayerObject )
+		{
+			PlayerObject.SetAuthenticatedPlayer( this );
+			Data.Load( PlayerObject );
+		}
 	}
 
 	void CopyPermissions( ref Permission copy )

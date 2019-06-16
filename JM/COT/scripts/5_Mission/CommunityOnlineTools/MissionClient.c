@@ -1,7 +1,6 @@
 modded class MissionGameplay
 {
 	protected ref CommunityOnlineTools m_COT;
-	protected ref PermissionsFramework m_PF;
 
 	protected ref CustomDebugMonitor m_CDebugMonitor;
 
@@ -12,8 +11,7 @@ modded class MissionGameplay
 	{
 		GetLogger().Log( "MissionGameplay::MissionGameplay()", "JM_COT_Mission" );
 		
-		m_COT = new ref CommunityOnlineTools;
-		m_PF = new ref PermissionsFramework;
+		m_COT = new CommunityOnlineTools;
 	}
 
 	// ------------------------------------------------------------
@@ -23,7 +21,6 @@ modded class MissionGameplay
 	{
 		GetLogger().Log( "MissionGameplay::~MissionGameplay()", "JM_COT_Mission" );
 
-		delete m_PF;
 		delete m_COT;
 	}
 
@@ -70,7 +67,6 @@ modded class MissionGameplay
 	{
 		super.OnMissionStart();
 		
-		m_PF.OnStart();
 		m_COT.OnStart();
 		
 		// If game is not multiplayer, add a default offline player
@@ -85,8 +81,6 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	override void OnMissionFinish()
 	{
-		m_PF.OnFinish();
-
 		m_COT.OnFinish();
 
 		super.OnMissionFinish();
@@ -132,8 +126,6 @@ modded class MissionGameplay
 					m_CDebugMonitor.Show();
 				}
 			}
-
-			m_PF.Update( timeslice );
 		}
 	}
 

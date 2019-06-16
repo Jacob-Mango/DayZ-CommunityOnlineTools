@@ -854,7 +854,7 @@ class PlayerModule: EditorModule
 							player.AddPermission( perms[j] );
 						}
 
-						GetRPCManager().SendRPC( "PermissionsFramework", "SetClientPlayer", new Param1< ref PlayerData >( player.Data ), true, player.IdentityPlayer );
+						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param1< ref PlayerData >( player.Data ), true, player.IdentityPlayer );
 
 						player.Save();
 
@@ -900,7 +900,7 @@ class PlayerModule: EditorModule
 							player.AddStringRole( roles[j] );
 						}
 
-						GetRPCManager().SendRPC( "PermissionsFramework", "SetClientPlayer", new Param1< ref PlayerData >( player.Data ), false, player.IdentityPlayer );
+						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param1< ref PlayerData >( player.Data ), false, player.IdentityPlayer );
 
 						player.Save();
 

@@ -68,4 +68,81 @@ class PlayerData: Managed
 		BGodMode = player.HasGodMode();
 		BInvisibility = player.IsInvisible();
 	}
+
+	void Copy( PlayerData data, bool isClient )
+	{
+		if ( isClient )
+		{
+			SName	    	= "" + data.SName;
+			SGUID	    	= "" + data.SGUID;
+			SSteam64ID		= "" + data.SSteam64ID;
+
+			IPingMax		= data.IPingMax;
+			IPingMin		= data.IPingMin;
+			IPingAvg		= data.IPingAvg;
+		}
+
+		ARoles.Copy( data.ARoles );
+		APermissions.Copy( data.APermissions );
+
+		VPosition		= data.VPosition;
+		VDirection		= data.VDirection;
+		VOrientation	= data.VOrientation;
+
+		FHealth	    	= data.FHealth;
+		FBlood	    	= data.FBlood;
+		FShock	    	= data.FShock;
+
+		IBloodStatType  = data.IBloodStatType;
+
+		FEnergy	    	= data.FEnergy;
+		FWater		    = data.FWater;
+
+		FHeatComfort    = data.FHeatComfort;
+
+		FWet	       	= data.FWater;
+		FTremor         = data.FTremor;
+		FStamina		= data.FStamina;
+
+		Kills		    = data.Kills;
+		TotalKills		= data.TotalKills;
+
+		ILifeSpanState	= data.ILifeSpanState;
+		BBloodyHands	= data.BBloodyHands;
+		BGodMode		= data.BGodMode;
+		BInvisibility	= data.BInvisibility;
+	}
+
+	void DebugPrint()
+	{
+		Print( "-------------------------------" );
+		Print( SName );
+		Print( SGUID );
+		Print( SSteam64ID );
+		Print( IPingMax );
+		Print( IPingMin );
+		Print( IPingAvg );
+		Print( ARoles );
+		Print( APermissions	);
+		Print( VPosition );
+		Print( VDirection );
+		Print( VOrientation	);
+		Print( FHealth );
+		Print( FBlood );
+		Print( FShock );
+		Print( IBloodStatType );
+		Print( FEnergy );
+		Print( FWater );
+		Print( FHeatComfort );
+		Print( FWet );
+		Print( FTremor );
+		Print( FStamina );
+		Print( Kills );
+		Print( TotalKills );
+		Print( ILifeSpanState );
+		Print( BBloodyHands );
+		Print( BGodMode );
+		Print( BInvisibility );
+		Print( "-------------------------------" );
+	}
 }
