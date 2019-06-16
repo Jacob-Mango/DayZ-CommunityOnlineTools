@@ -52,6 +52,7 @@ class ServerInformationMenu extends Form
 		m_UIMissionTickTime = UIActionManager.CreateText( m_ActionsWrapper, "Mission Tick Time: ", "" );
 
 		UIActionManager.CreateButton( m_ActionsWrapper, "Refresh Data", this, "RefreshData" );
+		//UIActionManager.CreateButton( m_ActionsWrapper, "Restart Mission", this, "RestartMission" );
 	}
 
 	void UpdateData( ref ServerInformationData data )
@@ -73,5 +74,13 @@ class ServerInformationMenu extends Form
 			return;
 		
 		GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", NULL, false, NULL );
+	}
+
+	void RestartMission( UIEvent eid, ref UIActionButton action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		GetRPCManager().SendRPC( "COT_ServerInformation", "Restart", NULL, false, NULL );
 	}
 }
