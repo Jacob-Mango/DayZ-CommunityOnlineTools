@@ -9,8 +9,10 @@ class ServerInformationModule: EditorModule
 	void ServerInformationModule()
 	{
 		GetRPCManager().AddRPC( "COT_ServerInformation", "LoadData", this, SingeplayerExecutionType.Client );
+		GetRPCManager().AddRPC( "COT_ServerInformation", "Restart", this, SingeplayerExecutionType.Server );
 
 		GetPermissionsManager().RegisterPermission( "Admin.View" );
+		GetPermissionsManager().RegisterPermission( "Admin.Restart" );
 
 		m_Data = new ServerInformationData;
 
@@ -114,4 +116,15 @@ class ServerInformationModule: EditorModule
 			ServerInformationModule.DATA_UPDATED.Invoke( m_Data );
 		}
 	}
+
+	void Restart( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( type == CallType.Server )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Restart", sender ) )
+				return;
+		
+			GetGame().RestartMission();
+		}
+	}	
 }
