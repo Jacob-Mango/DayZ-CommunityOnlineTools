@@ -37,7 +37,7 @@ class CameraTool: EditorModule
 	
 	override void OnUpdate( float timeslice )
 	{
-		if ( GetGame().IsClient() && CurrentActiveCamera )
+		if ( !GetGame().IsMultiplayer() && CurrentActiveCamera )
 		{
 			float speed = 0.2;
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
@@ -67,9 +67,10 @@ class CameraTool: EditorModule
 					dist = vector.Distance( from, contact_pos );
 				}
 
-				if ( dist > 0 ) CAMERA_FDIST = dist;
+				if ( dist > 0 )
+					CAMERA_FDIST = dist;
 				
-				CurrentActiveCamera.SetFocus(CAMERA_FDIST, CAMERA_BLUR);
+				CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
 				// PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
 			}
 		}
