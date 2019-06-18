@@ -90,9 +90,9 @@ class CinematicCamera extends COTCamera
 			yawVelocity *= CAMERA_SMOOTH;
 			pitchVelocity *= CAMERA_SMOOTH;
 
-			if( newOrient[1] < -89 )
+			if ( newOrient[1] < -89 )
 				newOrient[1] = -89;
-			if( newOrient[1] > 89 )
+			if ( newOrient[1] > 89 )
 				newOrient[1] = 89;
 
 			if ( shouldRoll ) 
