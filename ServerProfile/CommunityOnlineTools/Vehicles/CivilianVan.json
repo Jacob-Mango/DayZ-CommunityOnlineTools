@@ -1,0 +1,18 @@
+{
+    "VehicleName": "CivilianVan",
+    "DisplayName": "CivilianVan",
+    "Parts": [
+        "CivVanDoors_TrunkDown",
+        "CivVanDoors_TrunkUp",
+        "CivVanDoors_BackRight",
+        "CivVanDoors_CoDriver",
+        "CivVanWheel",
+        "CivVanWheel",
+        "CivVanWheel",
+        "CivVanWheel",
+        "CarBattery",
+        "CarRadiator",
+        "EngineBelt",
+        "SparkPlug"
+    ]
+}
