@@ -9,6 +9,7 @@ ServerProfile/PermissionsFramework/Roles/
 ServerProfile/PermissionsFramework/Permissions/
 ServerProfile/BattlEye/
 ServerProfile/Users/
+ServerProfile/DataCache/
 ServerProfile/*.RPT
 ServerProfile/*.log
 ServerProfile/*.ADM
