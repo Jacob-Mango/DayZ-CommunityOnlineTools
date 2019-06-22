@@ -5,6 +5,8 @@ user.cfg
 .vscode/
 .vs/
 
+ServerProfile/PermissionsFramework/Roles/
+ServerProfile/PermissionsFramework/Permissions/
 ServerProfile/BattlEye/
 ServerProfile/Users/
 ServerProfile/*.RPT
