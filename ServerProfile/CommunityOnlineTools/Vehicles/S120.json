@@ -1,0 +1,20 @@
+{
+    "VehicleName": "S120",
+    "DisplayName": "S120",
+    "Parts": [
+        "S120Trunk",
+        "S120Hood",
+        "S120Doors_Driver",
+        "S120Doors_CoDriver",
+        "S120Doors_BackLeft",
+        "S120Doors_BackRight",
+        "S120Wheel",
+        "S120Wheel",
+        "S120Wheel",
+        "S120Wheel",
+        "CarBattery",
+        "CarRadiator",
+        "EngineBelt",
+        "SparkPlug"
+    ]
+}

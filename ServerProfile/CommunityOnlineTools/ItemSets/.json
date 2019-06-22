@@ -1,0 +1,66 @@
+{
+    "Name": "Watchtower Metal",
+    "ContainerClassName": "SeaChest",
+    "Items": [
+        {
+            "Item": "WatchtowerKit",
+            "NumberOfStacks": 5,
+            "StackSize": 1
+        },
+        {
+            "Item": "Woodenlog",
+            "NumberOfStacks": 1,
+            "StackSize": 2
+        },
+        {
+            "Item": "WoodenPlank",
+            "NumberOfStacks": 1,
+            "StackSize": 8
+        },
+        {
+            "Item": "Nail",
+            "NumberOfStacks": 3,
+            "StackSize": 100
+        },
+        {
+            "Item": "MetalPlate",
+            "NumberOfStacks": 3,
+            "StackSize": 12
+        },
+        {
+            "Item": "Hammer",
+            "NumberOfStacks": 4,
+            "StackSize": 1
+        },
+        {
+            "Item": "Shovel",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "Item": "Pliers",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "Item": "BarbedWire",
+            "NumberOfStacks": 6,
+            "StackSize": 1
+        },
+        {
+            "Item": "CamoNet",
+            "NumberOfStacks": 9,
+            "StackSize": 1
+        },
+        {
+            "Item": "Crowbar",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "Item": "DuctTape",
+            "NumberOfStacks": 5,
+            "StackSize": 100
+        }
+    ]
+}

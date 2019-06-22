@@ -4,3 +4,11 @@ user.cfg
 
 .vscode/
 .vs/
+
+ServerProfile/BattlEye/
+ServerProfile/Users/
+ServerProfile/*.RPT
+ServerProfile/*.log
+ServerProfile/*.ADM
+ServerProfile/*.cfg
+ServerProfile/*.mdmp

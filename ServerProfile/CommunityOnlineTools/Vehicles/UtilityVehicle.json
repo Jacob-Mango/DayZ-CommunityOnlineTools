@@ -1,0 +1,16 @@
+{
+    "VehicleName": "UtilityVehicle",
+    "DisplayName": "UtilityVehicle",
+    "Parts": [
+        "UtilityVehicleWheelDoors_Driver",
+        "UtilityVehicleWheelDoors_CoDriver",
+        "UtilityVehicleWheel",
+        "UtilityVehicleWheel",
+        "UtilityVehicleWheel",
+        "UtilityVehicleWheel",
+        "CarBattery",
+        "CarRadiator",
+        "EngineBelt",
+        "SparkPlug"
+    ]
+}

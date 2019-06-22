@@ -1,0 +1,21 @@
+{
+    "VehicleName": "V3S_Chassis_Blue",
+    "DisplayName": "V3S_Chassis_Blue",
+    "Parts": [
+        "V3SWheel",
+        "V3SWheel",
+        "V3SWheel",
+        "V3SWheel",
+        "V3SWheelDouble",
+        "V3SWheelDouble",
+        "V3SWheelDouble",
+        "V3SWheelDouble",
+        "TruckBattery",
+        "TruckRadiator",
+        "EngineBelt",
+        "GlowPlug",
+        "V3SHood",
+        "V3SDoors_Driver_Blue",
+        "V3SDoors_CoDriver_Blue"
+    ]
+}
