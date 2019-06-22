@@ -47,7 +47,7 @@ modded class PlayerBase
 		{
 			m_HasGodMode = mode;
 
-			SetAllowDamage( m_HasGodMode );
+			SetAllowDamage( !m_HasGodMode );
 		}
 	}
 
