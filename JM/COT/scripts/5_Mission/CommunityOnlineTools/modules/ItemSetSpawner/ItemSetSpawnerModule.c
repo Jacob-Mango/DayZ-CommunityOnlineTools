@@ -57,12 +57,6 @@ class ItemSetSpawnerModule: EditorModule
 	{
 		return meta.ItemSets;
 	}
-
-	private void FillCar( Car car, CarFluid fluid )
-	{
-		float cap = car.GetFluidCapacity( fluid );
-		car.Fill( fluid, cap );
-	}
 	
 	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
@@ -87,6 +81,7 @@ class ItemSetSpawnerModule: EditorModule
 		}
 	}
 
+	//TODO: Rotate item to try fit
 	private bool DetermineWillFit( EntityAI fittingCargo, string ClassName )
 	{
 		TIntArray values = new TIntArray;
@@ -102,8 +97,10 @@ class ItemSetSpawnerModule: EditorModule
 		int cwidth = cargo.GetWidth();
 		int cheight = cargo.GetHeight();
 
-		if ( iwidth > cwidth ) return false;
-		if ( iheight > cheight ) return false;
+		if ( iwidth > cwidth )
+			return false;
+		if ( iheight > cheight )
+			return false;
 
 		return true;
 	}
@@ -122,36 +119,29 @@ class ItemSetSpawnerModule: EditorModule
 	private EntityAI SpawnItemInContainer( string container, PlayerBase player, EntityAI chest, string ClassName, float numStacks, float stackSize )
 	{
 		EntityAI item;
-		ItemBase itemBs;
 
 		for ( float i = 0; i < numStacks; i++ )
 		{
 			item = EntityAI.Cast( chest.GetInventory().CreateInInventory( ClassName ) );
 
-			if ( item )
-			{
-				itemBs = ItemBase.Cast( item );
-
-				itemBs.SetQuantity( stackSize );
-			} else 
+			if ( !item )
 			{
 				if ( DetermineWillFit( chest, ClassName ) && container != "" && chest )
 				{
 					chest = SpawnItem( player, container );
 
 					item = EntityAI.Cast( chest.GetInventory().CreateInInventory( ClassName ) );
-
-					itemBs = ItemBase.Cast( item );
-
-					itemBs.SetQuantity( stackSize );
 				} else
 				{
 					item = SpawnItem( player, ClassName );
-
-					itemBs = ItemBase.Cast( item );
-
-					itemBs.SetQuantity( stackSize );
 				}
+			}
+			
+			ItemBase itemBs = ItemBase.Cast( item );
+
+			if ( itemBs )
+			{
+				itemBs.SetQuantity( stackSize );
 			}
 		}
 
@@ -169,49 +159,40 @@ class ItemSetSpawnerModule: EditorModule
 
 		ref ItemSetFile file = settings.ItemSets.Get( data.param1 );
 
-		if ( file == NULL ) return;
+		if ( file == NULL )
+			return;
 
 		ref array< ref ItemSetItemInformation > parts = file.Items;
 
 		if ( parts.Count() == 0 )
-		{
 			return;
-		}
 
 		string perm = file.Name;
 		perm.Replace( " ", "." );
 
 		if ( !GetPermissionsManager().HasPermission( "ItemSets.Spawn.ItemSets." + perm, sender ) )
-		{
 			return;
-		}
 		
 		EntityAI chest;
 		
-		if ( GetGame().IsMultiplayer() )
+		if ( GetGame().IsMultiplayer() && type == CallType.Server )
 		{
 			array< ref AuthPlayer > players = GetPermissionsManager().GetPlayersFromArray( guids );
-			
-			if ( type == CallType.Server )
+
+			for ( int i = 0; i < players.Count(); i++ )
 			{
-				for ( int i = 0; i < players.Count(); i++ )
-				{
-					if ( players[i].PlayerObject == NULL )
-						continue;
+				if ( players[i].PlayerObject == NULL )
+					continue;
 
-					if ( file.ContainerClassName != "" )
-						chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
+				if ( file.ContainerClassName != "" )
+					chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
 	
-					for (int j = 0; j < parts.Count(); j++)
-						chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
+				for (int j = 0; j < parts.Count(); j++)
+					chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].Item, parts[j].NumberOfStacks, parts[j].StackSize );
 	
-					COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].Data.SSteam64ID );
-				
-					//SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
-
-					//if ( sender.GetPlainId() != players[i].IdentityPlayer.GetPlainId() )
-					//	SendAdminNotification( players[i].IdentityPlayer, sender, "You gave item set " + data.param1 );
-				}
+				COTLog( sender, "Item set " + data.param1 + " spawned on " + players[i].Data.SSteam64ID );
+			
+				SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
 			}
 		} else
 		{	

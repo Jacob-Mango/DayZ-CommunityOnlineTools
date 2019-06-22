@@ -251,10 +251,7 @@ class TeleportModule: EditorModule
 				
 				COTLog( sender, "Teleported " + players[j].Data.SSteam64ID + " to " + location.Name );
 				
-				//SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
-
-				//if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
-				//	SendAdminNotification( player.GetIdentity(), sender, "Teleported to " + data.param1 );
+				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
 			}
 		}
 	}

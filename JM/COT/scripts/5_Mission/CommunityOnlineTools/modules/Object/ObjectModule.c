@@ -187,7 +187,7 @@ class ObjectModule: EditorModule
 		
 		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().Data.SSteam64ID + " with amount " + quantity );
 
-		//SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
+		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
 
 		//if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
 		//	SendAdminNotification( player.GetIdentity(), sender, entity.GetDisplayName() + " has been added to their inventory, quantity " + quantity );
@@ -235,7 +235,7 @@ class ObjectModule: EditorModule
 			GetGame().ObjectGetType( target, obtype );
 
 			COTLog( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
-			//SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
+			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
 
 			GetGame().ObjectDelete( target );
 		}

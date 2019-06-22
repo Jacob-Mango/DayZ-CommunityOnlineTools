@@ -113,7 +113,7 @@ class VehicleSpawnerModule: EditorModule
 
 		COTLog( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
 
-		//SendAdminNotification( sender, NULL, "You have spawned a " + oCar.GetDisplayName() + " at " + VectorToString( position, 1 ) );
+		// SendAdminNotification( sender, NULL, "You have spawned a " + oCar.GetDisplayName() + " at " + VectorToString( position, 1 ) );
 
 		return oCar;
 	}
