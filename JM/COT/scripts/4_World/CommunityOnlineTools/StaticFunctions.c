@@ -34,7 +34,7 @@ static void CreateLocalAdminNotification( string message, string icon = "set:ccg
 
 static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, string message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
-	string title = "Admin";
+	string title = "Community Online Tools";
 
 	if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
 	{
@@ -43,7 +43,7 @@ static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, strin
 	{
 		if ( to != NULL )
 		{
-			title = "From " + from.GetName();
+			title = "Community Online Tools - " + from.GetName();
 
 			NotificationSystem.SendNotificationToPlayerIdentityExtended( to, 1.5, title, message, icon );
 		} else 

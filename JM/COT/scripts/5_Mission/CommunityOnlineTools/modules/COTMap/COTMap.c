@@ -102,7 +102,7 @@ class COTMapModule: EditorModule
 
 			COTLog( sender, "Teleported to position " + data.param1 + " from map." );
 
-			//SendAdminNotification( sender, NULL, "Teleported to " + VectorToString( data.param1, 1 ) );
+			SendAdminNotification( sender, NULL, "Teleported to " + VectorToString( data.param1, 1 ) );
 		}
 	}
 }
