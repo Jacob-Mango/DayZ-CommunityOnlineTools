@@ -26,7 +26,7 @@ class CommunityOnlineTools
 	void RegisterModules()
 	{
 		GetModuleManager().RegisterModule( new DebugModule );
-		GetModuleManager().RegisterModule( new ServerInformationModule );
+		// GetModuleManager().RegisterModule( new ServerInformationModule );
 		GetModuleManager().RegisterModule( new PlayerModule );
 		GetModuleManager().RegisterModule( new ObjectModule );
 		GetModuleManager().RegisterModule( new ESPModule );

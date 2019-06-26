@@ -160,10 +160,10 @@ class PlayerMenu extends Form
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
 		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
 		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate Player", this, "Click_SpectatePlayer" );
-		m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
+		//m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
 
-		m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
-		m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
+		//m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
+		//m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
 
 		m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
 		m_PermissionListFirst = GridSpacerWidget.Cast(m_PermissionsWrapper.FindAnyWidget("permissions_container_first"));

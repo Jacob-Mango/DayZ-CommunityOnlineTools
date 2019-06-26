@@ -42,8 +42,8 @@ class ServerInformationModule: EditorModule
 	{
 		super.OnMissionLoaded();
 
-		if ( GetGame().IsServer() )
-			GetGame().ChatPlayer( "#login" );
+		//if ( GetGame().IsServer() )
+		//	GetGame().ChatPlayer( "#login" );
 
 		if ( GetGame().IsClient() )
 			GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", new Param, false );
