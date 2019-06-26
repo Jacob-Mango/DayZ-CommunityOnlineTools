@@ -72,6 +72,12 @@ class COTMenu
 		for ( int i = 0; i < m_Modules.Count(); i++ )
 		{
 			ref EditorModule module = m_Modules.Get( i );
+
+			if ( !module.HasButton() )
+			{
+				continue;
+			}
+			
 			MakeMenuForModule( module );
 
 			if ( !module.HasButton() )
