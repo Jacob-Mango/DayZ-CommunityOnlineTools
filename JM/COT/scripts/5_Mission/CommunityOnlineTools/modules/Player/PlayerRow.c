@@ -71,22 +71,31 @@ class PlayerRow extends ScriptedWidgetEventHandler
 		{
 			Show();
 
-			Name.SetText( Player.Data.SName );
-
-			if ( GetGame().GetPlayer() == NULL ) return;
-
 			if ( !GetGame().IsMultiplayer() )
 			{
-				Name.SetColor( 0xFF4B77BE );
+				Name.SetText( "Offline Mode" );
+				Name.SetColor( 0xFF2ECC71 );
 				return;
 			}
 
-			if ( Player.Data.SSteam64ID == GetGame().GetPlayer().GetIdentity().GetPlainId() )
+			Name.SetText( Player.Data.SName );
+			Name.SetColor( 0xFFFFFFFF );
+
+			if ( ClientAuthPlayer == NULL )
+				return;
+
+			if ( ClientAuthPlayer.IdentityPlayer == NULL )
+				return;
+
+			if ( !GetGame().IsMultiplayer() )
+				return;
+
+			//Message( GetGame().GetPlayer(), "CSID: " + ClientAuthPlayer.IdentityPlayer.GetPlainId() );
+			//Message( GetGame().GetPlayer(), "SSID: " + Player.Data.SSteam64ID );
+
+			if ( Player.Data.SSteam64ID == ClientAuthPlayer.IdentityPlayer.GetPlainId() )
 			{
 				Name.SetColor( 0xFF2ECC71 );
-			} else
-			{
-				Name.SetColor( 0xFFFFFFFF );
 			}
 		}
 	}
@@ -96,7 +105,7 @@ class PlayerRow extends ScriptedWidgetEventHandler
 		return Player.Data.SName;
 	}
 
-	ref AuthPlayer GetPlayer()
+	AuthPlayer GetPlayer()
 	{
 		return Player;
 	}

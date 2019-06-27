@@ -40,6 +40,20 @@ class PermissionManager
 		return tempArray;
 	}
 
+	void SortPlayersArray()
+	{
+		for ( int k = 0; k < AuthPlayers.Count(); k++ )
+		{
+			for ( int j = 0; j < AuthPlayers.Count(); j++ )
+			{
+				if ( AuthPlayers[k].Data.SName < AuthPlayers[j].Data.SName )
+					AuthPlayers.SwapItems( k, j );
+				else if ( AuthPlayers[k].Data.SName > AuthPlayers[j].Data.SName )
+					AuthPlayers.SwapItems( j, k );
+			}
+		}
+	}
+
 	void RegisterPermission( string permission )
 	{
 		RootPermission.AddPermission( permission, PermissionType.INHERIT );
