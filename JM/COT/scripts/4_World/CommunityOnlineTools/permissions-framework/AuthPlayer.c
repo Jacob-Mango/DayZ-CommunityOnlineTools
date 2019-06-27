@@ -24,7 +24,7 @@ class AuthPlayer: Managed
 
 		IdentityPlayer = identity;
 
-		if ( IdentityPlayer )
+		if ( IdentityPlayer && GetGame().IsServer() )
 		{
 			Data.SName = IdentityPlayer.GetName();
 			Data.SGUID = IdentityPlayer.GetId();
@@ -68,20 +68,26 @@ class AuthPlayer: Managed
 
 	void UpdatePlayerData()
 	{
-		Data.IPingMin = IdentityPlayer.GetPingMin();
-		Data.IPingMax = IdentityPlayer.GetPingMax();
-		Data.IPingAvg = IdentityPlayer.GetPingAvg();
-		
-		Data.SSteam64ID = IdentityPlayer.GetPlainId();
-		Data.SGUID = IdentityPlayer.GetId();
-		Data.SName = IdentityPlayer.GetName();
+		if ( !GetGame().IsServer() )
+			return;
 
-		PlayerObject = GetPlayerObjectByIdentity( IdentityPlayer );
-
-		if ( PlayerObject )
+		if ( IdentityPlayer )
 		{
-			PlayerObject.SetAuthenticatedPlayer( this );
-			Data.Load( PlayerObject );
+			Data.IPingMin = IdentityPlayer.GetPingMin();
+			Data.IPingMax = IdentityPlayer.GetPingMax();
+			Data.IPingAvg = IdentityPlayer.GetPingAvg();
+			
+			Data.SSteam64ID = IdentityPlayer.GetPlainId();
+			Data.SGUID = IdentityPlayer.GetId();
+			Data.SName = IdentityPlayer.GetName();
+
+			PlayerObject = GetPlayerObjectByIdentity( IdentityPlayer );
+
+			if ( PlayerObject )
+			{
+				PlayerObject.SetAuthenticatedPlayer( this );
+				Data.Load( PlayerObject );
+			}
 		}
 	}
 
@@ -215,6 +221,9 @@ class AuthPlayer: Managed
 
 	void Save()
 	{
+		if ( !GetGame().IsServer() )
+			return;
+
 		if ( m_HasPlayerData )
 		{   
 			m_PlayerFile.Roles.Clear();
@@ -281,6 +290,9 @@ class AuthPlayer: Managed
 
 	void Load()
 	{
+		if ( !GetGame().IsServer() )
+			return;
+
 		m_HasPlayerData = PlayerFile.Load( Data, m_PlayerFile );
 
 		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
@@ -322,15 +334,5 @@ class AuthPlayer: Managed
 		GetLogger().Log( "Printing permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );
 
 		RootPermission.DebugPrint( 0 );
-	}
-
-	// TODO: Figure out how to make it work properly?
-	void Kick()
-	{
-	}
-
-	// TODO: Maybe actually ban the player?
-	void Ban()
-	{
 	}
 }

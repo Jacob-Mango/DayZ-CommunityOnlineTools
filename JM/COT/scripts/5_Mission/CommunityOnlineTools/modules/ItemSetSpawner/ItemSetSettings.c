@@ -89,6 +89,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Fence Metal";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -112,6 +113,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Fence Wood";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -137,6 +139,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Gate Metal";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -161,6 +164,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Gate Wood";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -179,6 +183,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Platform";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -205,6 +210,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Watchtower Metal";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 
@@ -230,6 +236,7 @@ class ItemSetSettings
 		ref ItemSetFile file = new ItemSetFile;
 
 		file.Name = "Watchtower Wood";
+		file.m_FileName = file.Name;
 		file.ContainerClassName = "SeaChest";
 		file.Items = attArr;
 

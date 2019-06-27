@@ -435,7 +435,7 @@ class PlayerMenu extends Form
 
 				m_BloodyHands.SetChecked( false );
 				m_GodMode.SetChecked( false );
-				m_Invisibility.SetChecked(false);
+				// m_Invisibility.SetChecked(false);
 			}
 		}
 	}
@@ -873,6 +873,9 @@ class PlayerMenu extends Form
 
 	void UpdatePlayerList()
 	{
+		if ( COT_IsUsingTestSort() )
+			GetPermissionsManager().SortPlayersArray();
+
 		array< ref AuthPlayer > players = GetPermissionsManager().AuthPlayers;
 		
 		for ( int k = 0; k < m_PlayerList.Count(); k++ )

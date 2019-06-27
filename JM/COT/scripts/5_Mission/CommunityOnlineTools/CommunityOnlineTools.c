@@ -25,6 +25,7 @@ class CommunityOnlineTools
 
 	void RegisterModules()
 	{
+		GetModuleManager().RegisterModule( new CommunityOnlineToolsModule );
 		GetModuleManager().RegisterModule( new DebugModule );
 		// GetModuleManager().RegisterModule( new ServerInformationModule );
 		GetModuleManager().RegisterModule( new PlayerModule );
@@ -102,13 +103,14 @@ class CommunityOnlineTools
 		for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
 		{
 			AuthPlayer ap = GetPermissionsManager().AuthPlayers[i];
-
-			ap.UpdatePlayerData();
-
+			
 			if ( ap.IdentityPlayer == NULL )
 			{
 				toRemove.Insert( ap );
+				continue;
 			}
+
+			ap.UpdatePlayerData();
 		}
 
 		for ( int j = 0; j < toRemove.Count(); j++ )
@@ -132,10 +134,10 @@ class CommunityOnlineTools
 				{
 					if ( sender && GetPermissionsManager().AuthPlayers[i].Data.SGUID == sender.GetPlainId() )
 					{
-						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param1< ref PlayerData >( GetPermissionsManager().AuthPlayers[i].Data ), false, sender );
+						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref PlayerData, PlayerIdentity >( GetPermissionsManager().AuthPlayers[i].Data, GetPermissionsManager().AuthPlayers[i].IdentityPlayer ), false, sender );
 					} else 
 					{
-						GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param1< ref PlayerData >( GetPermissionsManager().AuthPlayers[i].Data ), false, sender );
+						GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param2< ref PlayerData, PlayerIdentity >( GetPermissionsManager().AuthPlayers[i].Data, GetPermissionsManager().AuthPlayers[i].IdentityPlayer ), false, sender );
 					}
 				}
 			}
@@ -179,10 +181,10 @@ class CommunityOnlineTools
 
 				if ( data.param1 == sender.GetPlainId() )
 				{
-					GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param1< ref PlayerData >( player.Data ), false, sender );
+					GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref PlayerData, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 				} else 
 				{
-					GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param1< ref PlayerData >( player.Data ), false, sender );
+					GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param2< ref PlayerData, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 				}
 			}
 		}
@@ -191,11 +193,11 @@ class CommunityOnlineTools
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
-				ref Param1< ref PlayerData > cdata;
+				ref Param2< ref PlayerData, PlayerIdentity > cdata;
 				if ( !ctx.Read( cdata ) )
 					return;
 
-				GetPermissionsManager().GetPlayer( cdata.param1 );
+				GetPermissionsManager().GetPlayer( cdata.param1 ).IdentityPlayer = cdata.param2;
 			}
 		}
 	}
@@ -206,11 +208,13 @@ class CommunityOnlineTools
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
-				ref Param1< ref PlayerData > data;
+				ref Param2< ref PlayerData, PlayerIdentity > data;
 				if ( !ctx.Read( data ) )
 					return;
 
 				ClientAuthPlayer = GetPermissionsManager().GetPlayer( data.param1 );
+
+				ClientAuthPlayer.IdentityPlayer = data.param2;
 
 				// ClientAuthPlayer.Data.DebugPrint();
 
