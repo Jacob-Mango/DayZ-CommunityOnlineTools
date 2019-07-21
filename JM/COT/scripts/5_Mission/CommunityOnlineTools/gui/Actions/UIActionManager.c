@@ -2,7 +2,7 @@ class UIActionManager
 {
 	static ref GridSpacerWidget CreateGridSpacer( Widget parent, int rows, int columns )
 	{
-		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/Wrappers/" + rows.ToString() + "/GridSpacer" + columns.ToString() + ".layout", parent );
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/" + rows.ToString() + "/GridSpacer" + columns.ToString() + ".layout", parent );
 
 		if ( widget )
 		{
