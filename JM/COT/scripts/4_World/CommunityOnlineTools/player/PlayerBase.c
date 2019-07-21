@@ -1,7 +1,7 @@
 
 modded class PlayerBase
 {
-	protected AuthPlayer m_AuthenticatedPlayer;
+	protected JMPlayerInstance m_AuthenticatedPlayer;
 
 	protected bool m_HasGodMode;
 	protected bool m_IsInvisible;
@@ -21,12 +21,12 @@ modded class PlayerBase
 		SetInvisible( m_IsInvisible );
 	}
 
-	void SetAuthenticatedPlayer( ref AuthPlayer player )
+	void SetAuthenticatedPlayer( ref JMPlayerInstance player )
 	{
 		m_AuthenticatedPlayer = player;
 	}
 
-	AuthPlayer GetAuthenticatedPlayer()
+	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		return m_AuthenticatedPlayer;
 	}

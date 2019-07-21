@@ -1,0 +1,89 @@
+PanelWidgetClass JMRoleRowWidget
+{
+ position 0 0
+ size 1 30
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ scriptclass "JMRoleRowWidget"
+ {
+  GridSpacerWidgetClass role_setting_wrapper {
+   color 0 0 0 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   Padding 0
+   Margin 0
+   "Size To Content H" 1
+   "Size To Content V" 1
+   Columns 2
+   Rows 1
+   {
+    PanelWidgetClass checkbox_wrapper
+    {
+     ignorepointer 0
+     color 0 0 0 0
+     position 0 0
+     size 30 30
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     halign left_ref
+     valign center_ref
+     {
+      CheckBoxWidgetClass role_setting {
+       ignorepointer 0
+       color 1 1 1 1
+       position 0 0
+       size 24 24
+       halign center_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       scaled 0
+       style Default
+       checked 0
+      }
+     }
+    }
+    TextWidgetClass role_name {
+     ignorepointer 1
+     position 0 0
+     size 0.6 30
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text ""
+     "exact text" 1
+     "exact text size" 16
+     "text halign" left
+     "text valign" center
+    }
+   }
+  }
+  PanelWidgetClass role_setting_wrapper_disable {
+   visible 0
+   ignorepointer 1
+   color 0.1569 0.1569 0.1569 0.902
+   size 1 1
+   position 0 0
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   Padding 0
+   Margin 0
+   style rover_sim_colorable
+  }
+ }
+}

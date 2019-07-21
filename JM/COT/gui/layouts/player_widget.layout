@@ -1,0 +1,74 @@
+PanelWidgetClass JMPlayerRowWidget {
+ ignorepointer 1
+ color 0 0 0 0
+ position 0 0
+ size 1 30
+ valign center_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ scriptclass "JMPlayerRowWidget"
+ {
+  ButtonWidgetClass button {
+   ignorepointer 0
+   position 0 0
+   size 1 30
+   halign left_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   {
+    TextWidgetClass text_name {
+     ignorepointer 1
+     position 30 0
+     size 1 0.55
+     valign center_ref
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     text ""
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 0
+     "exact text size" 18
+     "text halign" left
+     "text valign" center
+    }
+   }
+  }
+  PanelWidgetClass checkbox_wrapper
+  {
+   ignorepointer 0
+   color 0 0 0 0
+   position 0 0
+   size 30 30
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   halign left_ref
+   valign center_ref
+   {
+    CheckBoxWidgetClass checkbox {
+     ignorepointer 0
+     color 1 1 1 1
+     position 0 0
+     size 24 24
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     scaled 0
+     style Default
+     checked 0
+    }
+   }
+  }
+ }
+}

@@ -84,12 +84,12 @@ modded class MissionServer
 
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			Role role = GetPermissionsManager().Roles[i];
+			JMRole role = GetPermissionsManager().Roles[i];
 			role.Serialize();
 			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
 		}
 
-		GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref PlayerData, PlayerIdentity >( SerializePlayer( GetPermissionsManager().PlayerJoined( identity ) ), identity ), true, identity );
+		GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( SerializePlayer( GetPermissionsManager().PlayerJoined( identity ) ), identity ), true, identity );
 
 		GetGame().SelectPlayer( identity, player );
 	} 

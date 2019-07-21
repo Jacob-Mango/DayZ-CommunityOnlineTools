@@ -1,0 +1,68 @@
+PanelWidgetClass JMPermissionRowWidget
+{
+ position 0 0
+ size 1 25
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ scriptclass "JMPermissionRowWidget"
+ {
+  GridSpacerWidgetClass permission_setting_wrapper {
+   color 0 0 0 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   Padding 0
+   Margin 0
+   "Size To Content H" 1
+   "Size To Content V" 1
+   Columns 2
+   Rows 1
+   {
+    TextWidgetClass permission_name {
+     ignorepointer 1
+     position 0 0
+     size 0.6 25
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "{PERMISSION_HERE}"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" left
+     "text valign" center
+    }
+    FrameWidgetClass permission_setting {
+     ignorepointer 1
+     position 0 0
+     size 0.4 25 
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 1
+    }
+   }
+  }
+  PanelWidgetClass permission_setting_wrapper_disable {
+   visible 0
+   ignorepointer 1
+   color 0.1569 0.1569 0.1569 0.902
+   size 1 1
+   position 0 0
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   Padding 0
+   Margin 0
+   style rover_sim_colorable
+  }
+ }
+}
