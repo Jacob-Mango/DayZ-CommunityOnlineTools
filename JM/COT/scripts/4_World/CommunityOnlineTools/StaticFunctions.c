@@ -2,7 +2,7 @@
 
 const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
 
-static COTCamera CurrentActiveCamera; // active static camera "staticcamera"
+static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
 static bool COTPlayerIsRemoved = false;
 
 static bool COTMenuOpen = false;
@@ -68,7 +68,7 @@ static vector GetCurrentPosition()
 	return "0 0 0";
 }
 
-static void COTLog( AuthPlayer player, string text )
+static void COTLog( JMPlayerInstance player, string text )
 {
 	text = "[COT] " + player.Data.SSteam64ID + ": " + text;
 

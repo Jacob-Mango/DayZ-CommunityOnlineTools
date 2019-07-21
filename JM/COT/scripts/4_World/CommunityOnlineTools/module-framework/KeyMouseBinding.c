@@ -1,4 +1,4 @@
-class KeyMouseBinding
+class JMModuleBinding
 {
 	protected string m_CallbackFunction;
 
@@ -6,7 +6,7 @@ class KeyMouseBinding
 
 	protected bool m_CanBeUsedInMenu;
 	
-	void KeyMouseBinding( string callback, string input, bool menu = false ) 
+	void JMModuleBinding( string callback, string input, bool menu = false ) 
 	{		
 		m_CallbackFunction = callback;
 

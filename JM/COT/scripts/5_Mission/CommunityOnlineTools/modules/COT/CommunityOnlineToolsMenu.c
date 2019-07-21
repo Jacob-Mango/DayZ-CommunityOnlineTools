@@ -1,15 +1,15 @@
-class CommunityOnlineToolsMenu extends Form
+class CommunityOnlineToolsForm extends JMFormBase
 {
 	protected Widget m_ActionsWrapper;
 
 	protected ref UIActionCheckbox m_UITestSort;
 
-	void CommunityOnlineToolsMenu()
+	void CommunityOnlineToolsForm()
 	{
 		CommunityOnlineToolsModule.DATA_UPDATED.Insert( UpdateData );
 	}
 
-	void ~CommunityOnlineToolsMenu()
+	void ~CommunityOnlineToolsForm()
 	{
 		CommunityOnlineToolsModule.DATA_UPDATED.Remove( UpdateData );
 	}

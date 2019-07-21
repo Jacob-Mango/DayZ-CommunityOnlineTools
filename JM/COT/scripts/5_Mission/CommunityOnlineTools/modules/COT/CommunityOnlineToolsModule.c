@@ -1,4 +1,4 @@
-class CommunityOnlineToolsModule: EditorModule
+class CommunityOnlineToolsModule: JMRenderableModuleBase
 {
 	static ref ScriptInvoker DATA_UPDATED = new ScriptInvoker();
 
@@ -34,7 +34,7 @@ class CommunityOnlineToolsModule: EditorModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/COTModule/cotmodule.layout";
+		return "JM/COT/gui/layouts/cot_form.layout";
 	}
 
 	override void OnMissionLoaded()

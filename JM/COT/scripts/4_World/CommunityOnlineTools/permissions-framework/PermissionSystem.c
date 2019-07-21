@@ -1,26 +1,26 @@
-static ref AuthPlayer ClientAuthPlayer;
+static ref JMPlayerInstance ClientAuthPlayer;
 
-static ref array< ref AuthPlayer > SELECTED_PLAYERS;
+static ref array< ref JMPlayerInstance > SELECTED_PLAYERS;
 
 static const string PERMISSION_FRAMEWORK_DIRECTORY = "$profile:PermissionsFramework\\";
 
-ref array< ref AuthPlayer > GetSelectedPlayers()
+ref array< ref JMPlayerInstance > GetSelectedPlayers()
 {
 	if ( SELECTED_PLAYERS == NULL )
 	{
-		SELECTED_PLAYERS = new ref array< ref AuthPlayer >;
+		SELECTED_PLAYERS = new ref array< ref JMPlayerInstance >;
 	}
 	return SELECTED_PLAYERS;
 }
 
-bool PlayerAlreadySelected( ref AuthPlayer player )
+bool PlayerAlreadySelected( ref JMPlayerInstance player )
 {
 	int position = GetSelectedPlayers().Find( player );
 
 	return position > -1;
 }
 
-int RemoveSelectedPlayer( ref AuthPlayer player )
+int RemoveSelectedPlayer( ref JMPlayerInstance player )
 {
 	int position = GetSelectedPlayers().Find( player );
 
@@ -32,7 +32,7 @@ int RemoveSelectedPlayer( ref AuthPlayer player )
 	return position;
 }
 
-int AddSelectedPlayer( ref AuthPlayer player )
+int AddSelectedPlayer( ref JMPlayerInstance player )
 {
 	int position = GetSelectedPlayers().Find( player );
 	
@@ -42,21 +42,21 @@ int AddSelectedPlayer( ref AuthPlayer player )
 	return GetSelectedPlayers().Insert( player );
 }
 
-ref PlayerData SerializePlayer( ref AuthPlayer player )
+ref JMPlayerInformation SerializePlayer( ref JMPlayerInstance player )
 {
 	player.Serialize();
 
 	return player.Data;
 }
 
-ref AuthPlayer DeserializePlayer( ref PlayerData data )
+ref JMPlayerInstance DeserializePlayer( ref JMPlayerInformation data )
 {
 	return GetPermissionsManager().GetPlayer( data );
 }
 
-array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
+array< ref JMPlayerInformation > SerializePlayers( ref array< ref JMPlayerInstance > players )
 {
-	array< ref PlayerData > output = new array< ref PlayerData >;
+	array< ref JMPlayerInformation > output = new array< ref JMPlayerInformation >;
 
 	for ( int i = 0; i < players.Count(); i++)
 	{
@@ -66,9 +66,9 @@ array< ref PlayerData > SerializePlayers( ref array< ref AuthPlayer > players )
 	return output;
 }
 
-array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > players )
+array< ref JMPlayerInstance > DeserializePlayers( ref array< ref JMPlayerInformation > players )
 {
-	array< ref AuthPlayer > output = new array< ref AuthPlayer >;
+	array< ref JMPlayerInstance > output = new array< ref JMPlayerInstance >;
 
 	for ( int i = 0; i < players.Count(); i++)
 	{
@@ -78,7 +78,7 @@ array< ref AuthPlayer > DeserializePlayers( ref array< ref PlayerData > players 
 	return output;
 }
 
-ref array< string > SerializePlayersID( array< ref AuthPlayer > players )
+ref array< string > SerializePlayersID( array< ref JMPlayerInstance > players )
 {
 	ref array< string > output = new ref array< string >;
 
@@ -90,12 +90,12 @@ ref array< string > SerializePlayersID( array< ref AuthPlayer > players )
 	return output;
 }
 
-array< ref AuthPlayer > DeserializePlayersID( ref array< string > steam64Ids )
+array< ref JMPlayerInstance > DeserializePlayersID( ref array< string > steam64Ids )
 {
 	return GetPermissionsManager().GetPlayersFromArray( steam64Ids );
 }
 
-ref AuthPlayer GetPlayerForID( string steam )
+ref JMPlayerInstance GetPlayerForID( string steam )
 {
 	return GetPermissionsManager().GetPlayerBySteam64ID( steam );
 }

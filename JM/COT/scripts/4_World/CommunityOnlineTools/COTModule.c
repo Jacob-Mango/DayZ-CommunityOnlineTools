@@ -1,8 +1,8 @@
-class COTModule : Module
+class COTModule : JMModuleBase
 {
 	static ref COTModule COTInstance;
 
-	protected ref COTMenu m_COTMenu;
+	protected ref JMCOTSideBar m_COTMenu;
 
 	protected bool m_PreventOpening; 
 	protected bool m_ForceHUD;
@@ -29,7 +29,7 @@ class COTModule : Module
 		{
 			if ( m_COTMenu == NULL )
 			{
-				m_COTMenu = new ref COTMenu;
+				m_COTMenu = new ref JMCOTSideBar;
 				m_COTMenu.Init();
 			}
 		}
@@ -37,11 +37,11 @@ class COTModule : Module
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleMenu",		"UACOTModuleToggleMenu",	true 	) );
-		RegisterKeyMouseBinding( new KeyMouseBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
-		RegisterKeyMouseBinding( new KeyMouseBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
-		RegisterKeyMouseBinding( new KeyMouseBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
-		RegisterKeyMouseBinding( new KeyMouseBinding( "CloseCOT",		"UAUIBack",					true 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleMenu",		"UACOTModuleToggleMenu",	true 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
 
 	override void OnUpdate( float timeslice )
