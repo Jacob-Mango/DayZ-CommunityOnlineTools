@@ -23,7 +23,7 @@ class JMWidgetHandler: ScriptedWidgetEventHandler
 	{
 		if ( s_instance == NULL )
 		{
-			s_instance = new ref JMWidgetHandler;
+			s_instance = new JMWidgetHandler;
 		}
 		return s_instance;
 	}

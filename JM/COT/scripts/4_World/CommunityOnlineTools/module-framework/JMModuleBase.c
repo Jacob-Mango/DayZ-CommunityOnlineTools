@@ -8,7 +8,7 @@ class JMModuleBase
 	{
 		m_Enabled = true;
 		m_PreventInput = false;
-		m_KeyBindings = new ref set< ref JMModuleBinding >;
+		m_KeyBindings = new set< ref JMModuleBinding >;
 	}
 	
 	void ~JMModuleBase()

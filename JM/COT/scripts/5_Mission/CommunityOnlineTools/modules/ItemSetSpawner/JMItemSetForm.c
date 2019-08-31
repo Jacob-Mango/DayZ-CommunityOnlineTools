@@ -6,7 +6,7 @@ class JMItemSetForm extends JMFormBase
 
 	void JMItemSetForm()
 	{
-		m_ItemSetButtons = new ref array< ref UIActionButton >;
+		m_ItemSetButtons = new array< ref UIActionButton >;
 	}
 
 	void ~JMItemSetForm()

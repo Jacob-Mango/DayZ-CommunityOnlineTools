@@ -6,7 +6,7 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	void JMVehicleSpawnerForm()
 	{
-		m_VehicleButtons = new ref array< ref UIActionButton >;
+		m_VehicleButtons = new array< ref UIActionButton >;
 	}
 
 	void ~JMVehicleSpawnerForm()

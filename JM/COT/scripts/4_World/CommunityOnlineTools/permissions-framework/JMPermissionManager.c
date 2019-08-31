@@ -12,7 +12,16 @@ class JMPermissionManager
 		Roles = new array< ref JMRole >;
 		RolesMap = new map< string, ref JMRole >;
 
-		RootPermission = new ref JMPermission( "ROOT" );
+		RootPermission = new JMPermission( "ROOT" );
+		
+		if ( GetGame().IsServer() )
+		{
+			MakeDirectory( JMConstants.DIR_PF );
+
+			MakeDirectory( JMConstants.DIR_PERMISSIONS );
+			MakeDirectory( JMConstants.DIR_PLAYERS );
+			MakeDirectory( JMConstants.DIR_ROLES );
+		}
 	}
 
 	array< ref JMPlayerInstance > GetPlayersFromArray( ref array< string > steamIds = NULL )
@@ -61,7 +70,7 @@ class JMPermissionManager
 
 	ref array< string > Serialize()
 	{
-		ref array< string > data = new ref array< string >;
+		ref array< string > data = new array< string >;
 		RootPermission.Serialize( data );
 		return data;
 	}
@@ -73,13 +82,16 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity identity = NULL )
 	{
-		if ( !GetGame().IsMultiplayer() ) return true;
+		if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
+		{
+			return true;
+		}
 
 		if ( GetGame().IsClient() ) 
 		{
 			if ( ClientAuthPlayer == NULL )
 			{
-				GetLogger().Log( "ClientAuth is NULL!", "JM_COT_PermissionFramework" );
+				GetLogger().Log( "ClientAuthPlayer: " + ClientAuthPlayer, "JM_COT_PermissionFramework" );
 				return false;
 			}
 
@@ -192,13 +204,16 @@ class JMPermissionManager
 			return AuthPlayers[0];
 		}
 		
-		if ( ident == NULL ) return NULL;
+		if ( ident == NULL )
+		{
+			return NULL;
+		}
 
 		ref JMPlayerInstance auPlayer = NULL;
 
 		for ( int i = 0; i < AuthPlayers.Count(); i++ )
 		{
-			if ( AuthPlayers[i].GetGUID() == ident.GetId() )
+			if ( AuthPlayers[i].IdentityPlayer == ident )
 			{
 				auPlayer = AuthPlayers[i];
 				break;
@@ -266,7 +281,7 @@ class JMPermissionManager
 	
 	ref JMRole CreateRole( string name, ref array< string > data )
 	{
-		ref JMRole role = new ref JMRole( name );
+		ref JMRole role = new JMRole( name );
 
 		role.SerializedData.Copy( data );
 		role.Deserialize();
@@ -281,7 +296,7 @@ class JMPermissionManager
 
 	ref JMRole LoadRole( string name, ref array< string > data = NULL )
 	{
-		ref JMRole role = new ref JMRole( name );
+		ref JMRole role = new JMRole( name );
 
 		if ( data == NULL )
 		{
@@ -311,9 +326,9 @@ class JMPermissionManager
 	{
 		string sName = "";
 		FileAttr oFileAttr = FileAttr.INVALID;
-		FindFileHandle oFileHandle = FindFile(PERMISSION_FRAMEWORK_DIRECTORY + "Roles\\*.txt", sName, oFileAttr, FindFileFlags.ALL);
+		FindFileHandle oFileHandle = FindFile( JMConstants.DIR_ROLES + "*" + JMConstants.EXT_ROLE, sName, oFileAttr, FindFileFlags.ALL );
 
-		if (sName != "")
+		if ( sName != "" )
 		{
 			if ( IsValidFolderForRoles( sName, oFileAttr ) )
 			{
@@ -342,7 +357,7 @@ ref JMPermissionManager GetPermissionsManager()
 {
 	if( !g_com_PermissionsManager )
 	{
-		g_com_PermissionsManager = new ref JMPermissionManager();
+		g_com_PermissionsManager = new JMPermissionManager();
 	}
 
 	return g_com_PermissionsManager;

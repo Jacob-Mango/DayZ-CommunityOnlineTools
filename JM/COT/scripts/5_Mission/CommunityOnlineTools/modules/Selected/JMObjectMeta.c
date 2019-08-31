@@ -1,4 +1,4 @@
-class JMESPInfo
+class JMObjectMeta
 {
 	string name;
 	JMESPType type;

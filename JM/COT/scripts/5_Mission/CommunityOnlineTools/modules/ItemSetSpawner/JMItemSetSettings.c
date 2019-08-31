@@ -73,7 +73,7 @@ class JMItemSetSettings
 
 	void DefaultFenceMetal()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "FenceKit", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 1, 2 ) );
@@ -98,7 +98,7 @@ class JMItemSetSettings
 
 	void DefaultFenceWood()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "FenceKit", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 1, 2 ) );
@@ -122,7 +122,7 @@ class JMItemSetSettings
 
 	void DefaultGateMetal()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "FenceKit", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 1, 2 ) );
@@ -148,7 +148,7 @@ class JMItemSetSettings
 
 	void DefaultGateWood()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "FenceKit", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 1, 2 ) );
@@ -173,7 +173,7 @@ class JMItemSetSettings
 
 	void DefaultPlatform()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "WoodenPlank", 1, 18 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Nail", 1, 30 ) );
@@ -192,7 +192,7 @@ class JMItemSetSettings
 
 	void DefaultWatchtowerMetal()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "WatchtowerKit", 5, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 1, 2 ) );
@@ -219,7 +219,7 @@ class JMItemSetSettings
 
 	void DefaultWatchtowerWood()
 	{
-		ref array< ref JMItemSetItemInfo > attArr = new ref array< ref JMItemSetItemInfo >;
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
 
 		attArr.Insert( new JMItemSetItemInfo( "WatchtowerKit", 5, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "Woodenlog", 3, 4 ) );

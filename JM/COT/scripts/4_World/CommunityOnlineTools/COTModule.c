@@ -29,7 +29,7 @@ class COTModule : JMModuleBase
 		{
 			if ( m_COTMenu == NULL )
 			{
-				m_COTMenu = new ref JMCOTSideBar;
+				m_COTMenu = new JMCOTSideBar;
 				m_COTMenu.Init();
 			}
 		}

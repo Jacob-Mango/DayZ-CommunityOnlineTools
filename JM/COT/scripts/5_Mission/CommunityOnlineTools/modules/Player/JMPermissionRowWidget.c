@@ -31,16 +31,16 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
-		Children = new ref array< ref JMPermissionRowWidget >;
+		Children = new array< ref JMPermissionRowWidget >;
 
 		perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
 
-		stateOptions = new ref TStringArray;
+		stateOptions = new TStringArray;
 		stateOptions.Insert("INHERIT");
 		stateOptions.Insert("DISALLOW");
 		stateOptions.Insert("ALLOW");
 
-		perm_state = new ref OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
+		perm_state = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
 		perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
 
 		Disable();

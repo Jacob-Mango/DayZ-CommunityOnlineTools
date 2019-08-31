@@ -39,7 +39,7 @@ class JMServerInfoForm extends JMFormBase
 
 	override void OnInit( bool fromMenu )
 	{
-		m_ActionsWrapper = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
+		m_ActionsWrapper	= UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
 
 		m_UIServerFPS 		= UIActionManager.CreateText( m_ActionsWrapper, "Server FPS: ", "" );
 		m_UIOnlinePlayers 	= UIActionManager.CreateText( m_ActionsWrapper, "Online Players: ", "" );

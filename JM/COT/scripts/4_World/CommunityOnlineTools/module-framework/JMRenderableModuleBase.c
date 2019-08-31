@@ -3,6 +3,11 @@ class JMRenderableModuleBase extends JMModuleBase
 	ref JMFormBase form;
 	ref ButtonWidget menuButton;
 
+	JMFormBase GetForm()
+	{
+		return form;
+	}
+
 	void DeleteForm()
 	{
 		delete form;

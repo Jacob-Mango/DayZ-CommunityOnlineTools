@@ -8,11 +8,11 @@ class JMVehicleSpawnerSerialize
 	string VehicleName;
 	string DisplayName;
 
-	ref array< string > Parts = new ref array< string >;
+	ref array< string > Parts = new array< string >;
 
 	static ref JMVehicleSpawnerSerialize Load( string file )
 	{
-		ref JMVehicleSpawnerSerialize settings = new ref JMVehicleSpawnerSerialize;
+		ref JMVehicleSpawnerSerialize settings = new JMVehicleSpawnerSerialize;
 		settings.m_FileName = file;
 
 		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( VEHICLE_SPAWNER_FOLDER + settings.m_FileName + ".json", settings );

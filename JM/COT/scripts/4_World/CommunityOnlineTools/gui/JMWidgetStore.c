@@ -14,12 +14,12 @@ class JMWidgetStore
 	{
 		layoutRoot = root;
 
-		textWidgets = new ref array< TextWidget >;
-		buttonWidgets = new ref array < ButtonWidget >;
-		editBoxWidgets = new ref array < EditBoxWidget >;
-		sliderWidgets = new ref array < SliderWidget >;
-		textListBoxWidgets = new ref array < TextListboxWidget >;
-		allWidgets = new ref array < Widget >;
+		textWidgets = new array< TextWidget >;
+		buttonWidgets = new array < ButtonWidget >;
+		editBoxWidgets = new array < EditBoxWidget >;
+		sliderWidgets = new array < SliderWidget >;
+		textListBoxWidgets = new array < TextListboxWidget >;
+		allWidgets = new array < Widget >;
 
 		Init();
 	}

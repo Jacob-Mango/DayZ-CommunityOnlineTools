@@ -7,14 +7,14 @@ class JMPlayerSerialize
 
 	void JMPlayerSerialize()
 	{
-		Roles = new ref array< string >;
+		Roles = new array< string >;
 	}
 
 	static bool Load( JMPlayerInformation data, out JMPlayerSerialize playerFile )
 	{
-		playerFile = new ref JMPlayerSerialize;
+		playerFile = new JMPlayerSerialize;
 
-		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
@@ -23,7 +23,7 @@ class JMPlayerSerialize
 			return true;
 		}
 		
-		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json";
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SGUID + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
@@ -32,31 +32,31 @@ class JMPlayerSerialize
 			return true;
 		}
 
-		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json.txt";
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;
 		}
 		
-		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json.txt";
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SGUID + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SGUID + ".json";
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SGUID + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;
 		}
 
-		playerFile.m_FileName = PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" + data.SSteam64ID + ".json";
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
 		playerFile.Roles.Insert( "everyone" );
 		return false;
 	}

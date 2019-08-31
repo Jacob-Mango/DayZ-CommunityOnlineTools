@@ -1,0 +1,203 @@
+GridSpacerWidgetClass JMSelectedForm {
+ visible 0
+ color 0 0 0 0
+ position 0 0
+ size 250 600
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMSelectedForm"
+ style EditorPanel
+ Columns 1
+ Rows 1
+ {
+  PanelWidgetClass object_list_wrapper {
+   color 0 0 0 0
+   position 0 0
+   size 1 480
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
+   style EditorPanel
+   {
+    TextWidgetClass object_count {
+     position 0 10
+     size 1 20
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "N/A Selected"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" center
+    }
+    ScrollWidgetClass object_list_scroller {
+     position 0 40
+     size 1 440
+     halign center_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     style blank
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass object_list_grid_spacer {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 10
+       {
+        GridSpacerWidgetClass object_list_00 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_01 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_02 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_03 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_04 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_05 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_06 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_07 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_08 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass object_list_09 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  ScrollWidgetClass actions_scroller {
+   position 0 0
+   size 1 1
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 0
+   style blank
+   "Scrollbar V" 1
+   {
+    GridSpacerWidgetClass actions_wrapper {
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content V" 1
+     Columns 1
+     Rows 1000
+    }
+   }
+  }
+ }
+}

@@ -20,7 +20,7 @@ class JMPermission
 			Type = JMPermissionType.DISALLOW;
 		}
 
-		Children = new ref array< ref JMPermission >;
+		Children = new array< ref JMPermission >;
 	}
 
 	void ~JMPermission()

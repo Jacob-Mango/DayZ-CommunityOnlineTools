@@ -25,7 +25,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	float FOV;
 	vector ScreenPos;
 
-	ref JMESPInfo Info;
+	ref JMObjectMeta Info;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -185,7 +185,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetInfo( ref JMESPInfo info )
+	void SetInfo( ref JMObjectMeta info )
 	{
 		Info = info;
 		
@@ -264,22 +264,21 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			}
 		}
 		
-		if ( espModule )
+		if ( w == Checkbox && Checkbox != NULL )
 		{
-			if ( w == Checkbox && Checkbox != NULL )
+			if ( Checkbox.IsChecked() )
 			{
-				espModule.SelectBox( this, Checkbox.IsChecked(), false );
+				GetObjectSelectedModule().AddObject( Info.target );
+			} else
+			{
+				GetObjectSelectedModule().RemoveObject( Info.target );
 			}
+		}
 
-			if ( w == m_Button && m_Button != NULL )
-			{
-				espModule.SelectBox( this, true, true );
-			}
-
-			if ( espMenu )
-			{
-				espMenu.OnSelect();
-			}
+		if ( w == m_Button && m_Button != NULL )
+		{
+			GetObjectSelectedModule().ClearObjects();
+			GetObjectSelectedModule().AddObject( Info.target );
 		}
 
 		return true;

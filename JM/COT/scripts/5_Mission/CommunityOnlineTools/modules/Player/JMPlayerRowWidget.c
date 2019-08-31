@@ -71,31 +71,18 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		{
 			Show();
 
-			if ( !GetGame().IsMultiplayer() )
+			if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
 			{
 				Name.SetText( "Offline Mode" );
 				Name.SetColor( 0xFF2ECC71 );
-				return;
-			}
-
-			Name.SetText( Player.Data.SName );
-			Name.SetColor( 0xFFFFFFFF );
-
-			if ( ClientAuthPlayer == NULL )
-				return;
-
-			if ( ClientAuthPlayer.IdentityPlayer == NULL )
-				return;
-
-			if ( !GetGame().IsMultiplayer() )
-				return;
-
-			//Message( GetGame().GetPlayer(), "CSID: " + ClientAuthPlayer.IdentityPlayer.GetPlainId() );
-			//Message( GetGame().GetPlayer(), "SSID: " + Player.Data.SSteam64ID );
-
-			if ( Player.Data.SSteam64ID == ClientAuthPlayer.IdentityPlayer.GetPlainId() )
+			} else if ( ClientAuthPlayer == player )
 			{
+				Name.SetText( Player.Data.SName );
 				Name.SetColor( 0xFF2ECC71 );
+			} else 
+			{
+				Name.SetText( Player.Data.SName );
+				Name.SetColor( 0xFFFFFFFF );
 			}
 		}
 	}

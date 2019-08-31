@@ -69,7 +69,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultUtilityVehicle()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("UtilityVehicleWheelDoors_Driver");
 		attArr.Insert("UtilityVehicleWheelDoors_CoDriver");
@@ -94,7 +94,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultS120()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("S120Trunk");
 		attArr.Insert("S120Hood");
@@ -123,7 +123,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultVan()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("CivVanDoors_TrunkDown");
 		attArr.Insert("CivVanDoors_TrunkUp");
@@ -150,7 +150,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultSedan()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("CivSedanHood");
 		attArr.Insert("CivSedanTrunk");
@@ -179,7 +179,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultHatchback()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("HatchbackHood");
 		attArr.Insert("HatchbackTrunk");
@@ -206,7 +206,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultHatchback02()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("Hatchback_02_Hood");
 		attArr.Insert("Hatchback_02_Trunk");
@@ -233,7 +233,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultV3SCargo()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("V3SWheel");
 		attArr.Insert("V3SWheel");
@@ -263,7 +263,7 @@ class JMVehicleSpawnerSettings
 
 	void DefaultV3S()
 	{
-		ref array< string> attArr = new ref array< string>;
+		ref array< string> attArr = new array< string>;
 
 		attArr.Insert("V3SWheel");
 		attArr.Insert("V3SWheel");

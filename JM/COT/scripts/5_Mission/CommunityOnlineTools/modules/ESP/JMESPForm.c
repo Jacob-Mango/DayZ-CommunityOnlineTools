@@ -1,18 +1,5 @@
 class JMESPForm extends JMFormBase
 {
-	protected ref UIActionEditableVector m_Position;
-
-	protected ref UIActionText m_Name;
-
-	protected ref UIActionSlider m_Pitch;
-	protected ref UIActionSlider m_Yaw;
-	protected ref UIActionSlider m_Roll;
-
-	protected ref UIActionSlider m_Health;
-
-	protected ref UIActionButton m_Set;
-	protected ref UIActionButton m_Delete;
-
 	protected ref UIActionSlider m_RangeSlider;
 
 	protected ref UIActionButton m_UpdateShow;
@@ -40,7 +27,7 @@ class JMESPForm extends JMFormBase
 
 	override string GetTitle()
 	{
-		return "X-Ray Vision";
+		return "ESP Viewer";
 	}
 	
 	override string GetIconName()
@@ -95,35 +82,6 @@ class JMESPForm extends JMFormBase
 		m_ViewCreature = UIActionManager.CreateCheckbox( mainSpacer, "Include Animals", this, "Click_CreatureESP", JMESPModule.Cast( module ).ViewCreature );
 	}
 
-	void ESPObjectControl( Widget mainSpacer )
-	{
-		m_Name = UIActionManager.CreateText( mainSpacer, "Name: ", "" );
-
-		m_Position = UIActionManager.CreateEditableVector( mainSpacer, "Position: ", this, "Change_Position" );
-		
-		m_Pitch = UIActionManager.CreateSlider( mainSpacer, "Pitch", -180, 180, this, "Change_Pitch" );
-		m_Pitch.SetValue( 0 );
-		m_Pitch.SetAppend("°");
-		m_Pitch.SetStepValue( 0.5 );
-
-		m_Yaw = UIActionManager.CreateSlider( mainSpacer, "Yaw", -180, 180, this, "Change_Yaw" );
-		m_Yaw.SetValue( 0 );
-		m_Yaw.SetAppend("°");
-		m_Yaw.SetStepValue( 0.5 );
-
-		m_Roll = UIActionManager.CreateSlider( mainSpacer, "Roll", -180, 180, this, "Change_Roll" );
-		m_Roll.SetValue( 0 );
-		m_Roll.SetAppend("°");
-		m_Roll.SetStepValue( 0.5 );
-
-		m_Health = UIActionManager.CreateSlider( mainSpacer, "Health", 0, 100, this, "Change_Health" );
-		m_Health.SetValue( 0 );
-		m_Health.SetAppend(" HP");
-		m_Health.SetStepValue( 1 );
-
-		m_Set = UIActionManager.CreateButton( mainSpacer, "Set", this, "Click_Set" );
-		m_Delete = UIActionManager.CreateButton( mainSpacer, "Delete", this, "Click_Delete" );
-	}
 
 	override void OnInit( bool fromMenu )
 	{
@@ -135,26 +93,13 @@ class JMESPForm extends JMFormBase
 
 		UIActionManager.CreateSpacer( mainSpacer );
 
-		Widget splitSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
-
-		ESPFilters( UIActionManager.CreateGridSpacer( splitSpacer, 8, 1 ) );
-
-		ESPObjectControl( UIActionManager.CreateGridSpacer( splitSpacer, 8, 1 ) );
+		ESPFilters( UIActionManager.CreateGridSpacer( mainSpacer, 8, 1 ) );
 	}
 
 	override void OnShow()
 	{
 		super.OnShow();
 
-		OnSelect();
-
-		m_Name.SetText( JMESPModule.Cast( module ).Name );
-		m_Position.SetValue( JMESPModule.Cast( module ).Position );
-		m_Pitch.SetValue( JMESPModule.Cast( module ).Rotation[1] );
-		m_Yaw.SetValue( JMESPModule.Cast( module ).Rotation[0] );
-		m_Roll.SetValue( JMESPModule.Cast( module ).Rotation[2] );
-		m_Health.SetMax( JMESPModule.Cast( module ).MaxHealth );
-		m_Health.SetValue( JMESPModule.Cast( module ).Health );
 		m_RangeSlider.SetValue( JMESPModule.Cast( module ).ESPRadius );
 		m_UpdateRate.SetValue( JMESPModule.Cast( module ).ESPUpdateTime );
 		m_ESPIsUpdating.SetChecked( JMESPModule.Cast( module ).ESPIsUpdating );
@@ -164,8 +109,6 @@ class JMESPForm extends JMFormBase
 			m_FullMapESP.Disable();
 		}
 
-		// JMESPModule.Cast( module ).Filter
-
 		UpdateESPButtonName();
 
 		UpdateCheckboxStates();
@@ -174,37 +117,6 @@ class JMESPForm extends JMFormBase
 	override void OnHide()
 	{
 		super.OnHide();
-	}
-
-	void OnSelect()
-	{
-		if ( JMESPModule.Cast( module ).GetSelectedCount() != 1 || JMESPModule.Cast( module ).ESPIsUpdating )
-		{
-			m_Name.Disable();
-			m_Position.Disable();
-			m_Pitch.Disable();
-			m_Yaw.Disable();
-			m_Roll.Disable();
-			m_Health.Disable();
-			m_Set.Disable();
-		} else
-		{
-			m_Name.Enable();
-			m_Position.Enable();
-			m_Pitch.Enable();
-			m_Yaw.Enable();
-			m_Roll.Enable();
-			m_Health.Enable();
-			m_Set.Enable();
-
-			m_Name.SetText( JMESPModule.Cast( module ).Name );
-			m_Position.SetValue( JMESPModule.Cast( module ).Position );
-			m_Pitch.SetValue( JMESPModule.Cast( module ).Rotation[1] );
-			m_Yaw.SetValue( JMESPModule.Cast( module ).Rotation[0] );
-			m_Roll.SetValue( JMESPModule.Cast( module ).Rotation[2] );
-			m_Health.SetMax( JMESPModule.Cast( module ).MaxHealth );
-			m_Health.SetValue( JMESPModule.Cast( module ).Health );
-		}
 	}
 
 	void UpdateESPButtonName()
@@ -418,55 +330,6 @@ class JMESPForm extends JMFormBase
 		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "View All [" + JMESPModule.Cast( module ).ViewEverything + "]" ) );
 
 		UpdateCheckboxStates();
-	}
-
-	void Change_Position( UIEvent eid, ref UIActionEditableVector action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-		
-		JMESPModule.Cast( module ).Position = action.GetValue();
-	}
-
-	void Change_Pitch( UIEvent eid, ref UIActionSlider action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-		
-		JMESPModule.Cast( module ).Rotation[1] = action.GetValue();
-	}
-
-	void Change_Yaw( UIEvent eid, ref UIActionSlider action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-		
-		JMESPModule.Cast( module ).Rotation[0] = action.GetValue();
-	}
-
-	void Change_Roll( UIEvent eid, ref UIActionSlider action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-		
-		JMESPModule.Cast( module ).Rotation[2] = action.GetValue();
-	}
-
-	void Change_Health( UIEvent eid, ref UIActionSlider action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-		
-		JMESPModule.Cast( module ).Health = action.GetValue();
-	}
-
-	void Click_Set( UIEvent eid, ref UIActionButton action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		JMESPModule.Cast( module ).SetSelected();
-	}
-
-	void Click_Delete( UIEvent eid, ref UIActionButton action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		JMESPModule.Cast( module ).DeleteSelected();
 	}
 
 	void Change_UpdateRate( UIEvent eid, ref UIActionSlider action )
