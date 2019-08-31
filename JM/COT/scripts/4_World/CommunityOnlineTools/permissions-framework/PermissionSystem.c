@@ -2,13 +2,11 @@ static ref JMPlayerInstance ClientAuthPlayer;
 
 static ref array< ref JMPlayerInstance > SELECTED_PLAYERS;
 
-static const string PERMISSION_FRAMEWORK_DIRECTORY = "$profile:PermissionsFramework\\";
-
 ref array< ref JMPlayerInstance > GetSelectedPlayers()
 {
 	if ( SELECTED_PLAYERS == NULL )
 	{
-		SELECTED_PLAYERS = new ref array< ref JMPlayerInstance >;
+		SELECTED_PLAYERS = new array< ref JMPlayerInstance >;
 	}
 	return SELECTED_PLAYERS;
 }
@@ -80,7 +78,7 @@ array< ref JMPlayerInstance > DeserializePlayers( ref array< ref JMPlayerInforma
 
 ref array< string > SerializePlayersID( array< ref JMPlayerInstance > players )
 {
-	ref array< string > output = new ref array< string >;
+	ref array< string > output = new array< string >;
 
 	for ( int i = 0; i < players.Count(); i++)
 	{

@@ -78,9 +78,9 @@ class JMPlayerForm extends JMFormBase
 	{
 		m_CanUpdateList = true;
 
-		m_PlayerList = new ref array< ref JMPlayerRowWidget >;
-		m_PermissionList = new ref array< ref JMPermissionRowWidget >;
-		m_RolesList = new ref array< ref JMRoleRowWidget >;
+		m_PlayerList = new array< ref JMPlayerRowWidget >;
+		m_PermissionList = new array< ref JMPermissionRowWidget >;
+		m_RolesList = new array< ref JMRoleRowWidget >;
 	}
 
 	void ~JMPlayerForm()
@@ -141,7 +141,7 @@ class JMPlayerForm extends JMFormBase
 		//m_Tremor = UIActionManager.CreateEditableText( playerActions, "Tremor: ", this, "Click_SetTremor", "", "Set" );
 		m_Stamina = UIActionManager.CreateEditableText( playerActions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
 
-		ref array< string > lifeSpanOptions = new ref array< string >;
+		ref array< string > lifeSpanOptions = new array< string >;
 		lifeSpanOptions.Insert( "No" );
 		lifeSpanOptions.Insert( "Medium " );
 		lifeSpanOptions.Insert( "Large" );
@@ -397,7 +397,7 @@ class JMPlayerForm extends JMFormBase
 			//m_LastShaved.SetSelection( data.ILifeSpanState );
 			m_BloodyHands.SetChecked( data.BBloodyHands );
 			m_GodMode.SetChecked( data.BGodMode );
-			m_Invisibility.SetChecked(data.BInvisibility);
+			//m_Invisibility.SetChecked(data.BInvisibility);
 			
 			m_PosX.SetText( "" + data.VPosition[0] );
 			m_PosY.SetText( "" + data.VPosition[1] );
@@ -435,7 +435,7 @@ class JMPlayerForm extends JMFormBase
 
 				m_BloodyHands.SetChecked( false );
 				m_GodMode.SetChecked( false );
-				// m_Invisibility.SetChecked(false);
+				//m_Invisibility.SetChecked(false);
 			}
 		}
 	}
@@ -664,7 +664,7 @@ class JMPlayerForm extends JMFormBase
 
 	ref array< string > SerializePermissionUI()
 	{
-		ref array< string > output = new ref array< string >;
+		ref array< string > output = new array< string >;
 		m_PermissionUI.Serialize( output );
 		return output;
 	}

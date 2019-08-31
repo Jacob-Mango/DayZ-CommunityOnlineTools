@@ -6,7 +6,7 @@ class JMTeleportSerialize
 
 	void JMTeleportSerialize()
 	{
-		Locations = new ref array< ref JMTeleportLocation >;
+		Locations = new array< ref JMTeleportLocation >;
 	}
 
 	static ref JMTeleportSerialize Load()
@@ -32,7 +32,7 @@ class JMTeleportSerialize
 
 	void AddLocation( string name, vector position, float radius = 4.0 )
 	{
-		Locations.Insert( new ref JMTeleportLocation( name, position, radius ) );
+		Locations.Insert( new JMTeleportLocation( name, position, radius ) );
 	}
 
 	void Defaults()

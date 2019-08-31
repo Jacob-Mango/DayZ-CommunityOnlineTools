@@ -22,7 +22,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void JMObjectSpawnerForm()
 	{
-		m_ObjectTypes = new ref map< string, string >;
+		m_ObjectTypes = new map< string, string >;
 	}
 
 	void ~JMObjectSpawnerForm()

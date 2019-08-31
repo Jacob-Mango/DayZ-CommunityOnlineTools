@@ -40,8 +40,8 @@ class JMPlayerInformation
 
 	void JMPlayerInformation()
 	{
-		ARoles = new ref array< string >;
-		APermissions = new ref array< string >;
+		ARoles = new array< string >;
+		APermissions = new array< string >;
 	}
 
 	void Load( PlayerBase player )

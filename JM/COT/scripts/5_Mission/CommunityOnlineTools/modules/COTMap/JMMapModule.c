@@ -4,7 +4,7 @@ class JMMapModule: JMRenderableModuleBase
 	
 	void JMMapModule() 
 	{
-		m_ServerPlayers = new ref array< Man >;
+		m_ServerPlayers = new array< Man >;
 
 		GetPermissionsManager().RegisterPermission( "Map.ShowPlayers" );
 		GetPermissionsManager().RegisterPermission( "Map.Hidden" );
@@ -35,7 +35,7 @@ class JMMapModule: JMRenderableModuleBase
 		{
 			GetGame().GetPlayers( m_ServerPlayers );
 			
-			ref array<ref JMPlayerInformation> playerDataArray = new ref array<ref JMPlayerInformation>;
+			ref array<ref JMPlayerInformation> playerDataArray = new array<ref JMPlayerInformation>;
 			
 			for ( int j = 0; j < m_ServerPlayers.Count(); j++ )
 	   		{

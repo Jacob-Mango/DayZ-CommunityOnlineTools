@@ -1,8 +1,5 @@
 class JMRole
 {
-	const string AUTH_DIRECTORY = PERMISSION_FRAMEWORK_DIRECTORY + "Roles\\";
-	const string FILE_TYPE = ".txt";
-
 	ref JMPermission RootPermission;
 
 	string Name;
@@ -13,14 +10,9 @@ class JMRole
 	{
 		Name = name;
 
-		RootPermission = new ref JMPermission( Name );
+		RootPermission = new JMPermission( Name );
 		
-		SerializedData = new ref array< string >;
-
-		if ( GetGame().IsServer() )
-		{
-			MakeDirectory( AUTH_DIRECTORY );
-		}
+		SerializedData = new array< string >;
 	}
 
 	void ~JMRole()
@@ -30,7 +22,7 @@ class JMRole
 
 	void CopyPermissions( ref JMPermission copy )
 	{
-		ref array< string > data = new ref array< string >;
+		ref array< string > data = new array< string >;
 		copy.Serialize( data );
 
 		for ( int i = 0; i < data.Count(); i++ )
@@ -43,7 +35,7 @@ class JMRole
 	{
 		delete RootPermission;
 
-		RootPermission = new ref JMPermission( Name, NULL );
+		RootPermission = new JMPermission( Name, NULL );
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
@@ -88,7 +80,7 @@ class JMRole
 		string filename = FileReadyStripName( Name );
 
 		GetLogger().Log( "Saving role for " + filename, "JM_COT_PermissionFramework" );
-		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
+		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );
 			
 		Serialize();
 
@@ -116,9 +108,9 @@ class JMRole
 	{
 		string filename = FileReadyStripName( Name );
 		GetLogger().Log( "Loading role " + filename, "JM_COT_PermissionFramework" );
-		FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.READ );
+		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );
 			
-		ref array< string > data = new ref array< string >;
+		ref array< string > data = new array< string >;
 
 		if ( file != 0 )
 		{

@@ -35,8 +35,8 @@ class JMModuleManager
 	{
 		GetLogger().Log( "JMModuleManager::RegisterModules()", "JM_COT_ModuleFramework" );
 
-		m_Modules = new ref array< ref JMModuleBase >;
-		m_EditorModules = new ref array< ref JMRenderableModuleBase >;
+		m_Modules = new array< ref JMModuleBase >;
+		m_EditorModules = new array< ref JMRenderableModuleBase >;
 
 		RegisterModule( new COTModule );
 	}
@@ -233,7 +233,7 @@ ref JMModuleManager GetModuleManager()
 {
 	if( !g_cot_ModuleManager )
 	{
-		g_cot_ModuleManager = new ref JMModuleManager();
+		g_cot_ModuleManager = new JMModuleManager();
 	}
 
 	return g_cot_ModuleManager;
@@ -246,7 +246,7 @@ ref JMModuleManager NewModuleManager()
 		delete g_cot_ModuleManager;
 	}
 
-	g_cot_ModuleManager = new ref JMModuleManager();
+	g_cot_ModuleManager = new JMModuleManager();
 
 	return g_cot_ModuleManager;
 }

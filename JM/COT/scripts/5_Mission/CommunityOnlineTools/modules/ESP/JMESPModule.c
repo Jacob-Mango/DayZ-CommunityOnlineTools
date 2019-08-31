@@ -2,9 +2,8 @@ class JMESPModule: JMRenderableModuleBase
 {
 	protected const int m_UserIDStart = 10000;
 
-	protected ref array< ref JMESPInfo > m_ESPObjects;
+	protected ref array< ref JMObjectMeta > m_ESPObjects;
 	protected ref array< ref JMESPWidget > m_ESPBoxes;
-	protected ref array< ref JMESPWidget > m_SelectedBoxes;
 
 	bool CanViewPlayers;
 	bool CanViewBaseBuilding;
@@ -43,9 +42,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	void JMESPModule()
 	{
-		m_ESPObjects = new ref array< ref JMESPInfo >;
-		m_ESPBoxes = new ref array< ref JMESPWidget >;
-		m_SelectedBoxes = new ref array< ref JMESPWidget >;
+		m_ESPObjects = new array< ref JMObjectMeta >;
+		m_ESPBoxes = new array< ref JMESPWidget >;
 		m_UserID = m_UserIDStart;
 
 		ESPRadius = 200;
@@ -116,7 +114,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	int GetSelectedCount()
 	{
-		return m_SelectedBoxes.Count();
+		return 0;
 	}
 
 	void ServerDeleteSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -127,7 +125,7 @@ class JMESPModule: JMRenderableModuleBase
 		ref Param1< ref array< Object > > data;
 		if ( !ctx.Read( data ) ) return;
 
-		ref array< Object > copy = new ref array< Object >;
+		ref array< Object > copy = new array< Object >;
 		copy.Copy( data.param1 );
 		
 		if ( type == CallType.Server )
@@ -192,76 +190,11 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void SetSelected()
-	{
-		if ( m_SelectedBoxes.Count() > 0 ) 
-		{
-			GetRPCManager().SendRPC( "COT_ESP", "ServerSetSelected", new Param3< vector, vector, float >( Position, Rotation, Health ), false, NULL, m_SelectedBoxes[0].Info.target );
-		}
-	}
-
-	void DeleteSelected()
-	{
-		array< Object > objects = new array< Object >;
-
-		for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-		{
-			objects.Insert( m_SelectedBoxes[j].Info.target );
-
-			m_ESPBoxes.RemoveItem( m_SelectedBoxes[j] );
-			m_ESPObjects.RemoveItem( m_SelectedBoxes[j].Info );
-
-			m_SelectedBoxes[j].Unlink();
-		}
-
-		GetRPCManager().SendRPC( "COT_ESP", "ServerDeleteSelected", new Param1< ref array< Object > >( objects ) );
-
-		m_SelectedBoxes.Clear();
-		delete objects;
-	}
-
 	void EnableFullMap()
 	{
 		if ( CurrentActiveCamera == NULL ) return;
 
 		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
-	}
-
-	void SelectBox( ref JMESPWidget box, bool checked, bool button )
-	{
-		int existsAt = m_SelectedBoxes.Find( box );
-
-		if ( button )
-		{
-			for (int j = 0; j < m_SelectedBoxes.Count(); j++ )
-			{
-				m_SelectedBoxes[j].Checkbox.SetChecked( false );
-			}
-
-			m_SelectedBoxes.Clear();
-
-			box.Checkbox.SetChecked( true );
-			m_SelectedBoxes.Insert( box );
-		} else
-		{
-			box.Checkbox.SetChecked( checked );
-			if ( checked )
-			{
-				m_SelectedBoxes.Insert( box );
-			} else if ( existsAt >= 0 )
-			{
-				m_SelectedBoxes.Remove( existsAt );
-			}
-		}
-
-		if ( m_SelectedBoxes.Count() > 0 && m_SelectedBoxes[0].Info.target != NULL )
-		{
-			Name = m_SelectedBoxes[0].Info.target.GetType();
-			Position = m_SelectedBoxes[0].Info.target.GetPosition();
-			Rotation = m_SelectedBoxes[0].Info.target.GetYawPitchRoll();
-			MaxHealth = m_SelectedBoxes[0].Info.target.GetMaxHealth( "", "" );
-			Health = m_SelectedBoxes[0].Info.target.GetHealth( "", "" );
-		}
 	}
 
 	override void OnMissionFinish()
@@ -280,8 +213,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_ESPBoxes.Clear();
 
-		m_SelectedBoxes.Clear();
-
 		m_ESPObjects.Clear();
 
 		m_UserID = m_UserIDStart;
@@ -293,17 +224,19 @@ class JMESPModule: JMRenderableModuleBase
 
 		IsShowing = true;
 
-		ref array<Object> objects = new ref array<Object>;
+		array<Object> objects = new array<Object>;
 		GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 		Object obj;
 		EntityAI entity;
-		ref JMESPInfo espInfo;
+		JMObjectMeta espInfo;
 
 		bool isUsingFilter = false;
 
 		if ( Filter != "" ) 
+		{
 			isUsingFilter = true;
+		}
 
 		string filter = Filter + "";
 		filter.ToLower();
@@ -342,17 +275,36 @@ class JMESPModule: JMRenderableModuleBase
 			if ( entity != NULL )
 			{
 				isPlayer = entity.IsPlayer();
+
+				Man man = Man.Cast( entity );
 			
 				if ( (ViewPlayers || ViewEverything) && (CanViewPlayers || CanViewEverything) && isPlayer )
 				{
-					GetRPCManager().SendRPC( "COT_ESP", "RequestPlayerESPData", new Param, false, NULL, obj );
+					espInfo = new JMObjectMeta;
+
+					espInfo.name = obj.GetDisplayName();
+					if ( espInfo.name == "" )
+						espInfo.name = obj.GetType();
+
+					espInfo.type = JMESPType.PLAYER;
+					
+					if ( man && man.GetIdentity() )
+					{
+						PlayerIdentity identity = man.GetIdentity();
+						espInfo.player = GetPermissionsManager().GetPlayerByIdentity( identity );
+						espInfo.name = identity.GetName();
+					}
+
+					espInfo.target = obj;
+
+					CreateESPBox( espInfo );
 					continue;
 				}
 
 				bool isInfected = !isPlayer && ( entity.IsZombie() || entity.IsZombieMilitary() );
 				if ( (ViewInfected || ViewEverything) && (CanViewInfected || CanViewEverything) && isInfected )
 				{
-					espInfo = new ref JMESPInfo;
+					espInfo = new JMObjectMeta;
 
 					espInfo.name = obj.GetDisplayName();
 					if ( espInfo.name == "" )
@@ -368,7 +320,7 @@ class JMESPModule: JMRenderableModuleBase
 				bool isCreature = !isInfected && entity.IsAnimal();
 				if ( (ViewCreature || ViewEverything) && (CanViewCreature || CanViewEverything) && isCreature )
 				{
-					espInfo = new ref JMESPInfo;
+					espInfo = new JMObjectMeta;
 
 					espInfo.name = obj.GetDisplayName();
 					if ( espInfo.name == "" )
@@ -385,7 +337,7 @@ class JMESPModule: JMRenderableModuleBase
 			bool isTransport = !isPlayer && obj.IsTransport();
 			if ( (ViewVehicles || ViewEverything) && (CanViewVehicles || CanViewEverything) && isTransport )
 			{
-				espInfo = new ref JMESPInfo;
+				espInfo = new JMObjectMeta;
 				
 				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
@@ -401,7 +353,7 @@ class JMESPModule: JMRenderableModuleBase
 			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase ) );
 			if ( (ViewBaseBuilding || ViewEverything) && (CanViewBaseBuilding || CanViewEverything) && isBaseBuilding )
 			{
-				espInfo = new ref JMESPInfo;
+				espInfo = new JMObjectMeta;
 				
 				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
@@ -417,7 +369,7 @@ class JMESPModule: JMRenderableModuleBase
 			bool isItem = !isBaseBuilding && ( obj.IsItemBase() || obj.IsInventoryItem() );
 			if ( (ViewItems || ViewEverything) && (CanViewItems || CanViewEverything) && isItem )
 			{
-				espInfo = new ref JMESPInfo;
+				espInfo = new JMObjectMeta;
 				
 				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
@@ -433,7 +385,7 @@ class JMESPModule: JMRenderableModuleBase
 			/*
 			if ( ViewEverything && CanViewEverything )
 			{
-				espInfo = new ref JMESPInfo;
+				espInfo = new JMObjectMeta;
 				
 				espInfo.name = obj.GetDisplayName();
 				if ( espInfo.name == "" )
@@ -479,49 +431,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void RequestPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.View.Player", sender ) )
-			return;
-		
-		if ( type == CallType.Server )
-		{
-			JMESPInfoMeta metadata = new JMESPInfoMeta;
-
-			PlayerBase player = PlayerBase.Cast( target );
-			if ( !player ) return;
-			if ( !player.GetIdentity() ) return;
-
-			metadata.isPlayer = true;
-			metadata.name = player.GetIdentity().GetName();
-			metadata.steamid = player.GetIdentity().GetPlainId();
-
-			GetRPCManager().SendRPC( "COT_ESP", "ShowPlayerESPData", new Param1< ref JMESPInfoMeta >( metadata ), false, sender, target );
-		}
-	}
-
-	void ShowPlayerESPData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		ref Param1< ref JMESPInfoMeta > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Client )
-		{
-			ref JMESPInfo info = new ref JMESPInfo;
-			info.name = data.param1.name;
-			
-			ref JMPlayerInstance player = GetPermissionsManager().GetPlayerBySteam64ID( data.param1.steamid );
-			if ( player )
-			{
-				info.type = JMESPType.PLAYER;
-				info.player = player;
-				info.target = target;
-
-				CreateESPBox( info );
-			}
-		}
-	}
-
 	void ESPLog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		ref Param1< string > data;
@@ -533,7 +442,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void CreateESPBox( ref JMESPInfo info )
+	void CreateESPBox( ref JMObjectMeta info )
 	{
 		ref JMESPWidget boxScript = NULL;
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout" );

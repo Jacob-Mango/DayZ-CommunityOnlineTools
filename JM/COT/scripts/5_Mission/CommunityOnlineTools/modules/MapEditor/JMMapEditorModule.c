@@ -157,7 +157,7 @@ class JMMapEditorModule: JMModuleBase
 		{
 			if ( m_Menu == NULL )
 			{
-				m_Menu = new ref JMMapEditorForm( this );
+				m_Menu = new JMMapEditorForm( this );
 				m_Menu.Init();
 			}
 		}

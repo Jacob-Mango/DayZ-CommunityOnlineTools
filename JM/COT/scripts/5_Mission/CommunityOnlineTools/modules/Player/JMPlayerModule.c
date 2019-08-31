@@ -785,10 +785,10 @@ class JMPlayerModule: JMRenderableModuleBase
 			Param2< ref array< string >, ref array< string > > data;
 			if ( !ctx.Read( data ) ) return;
 
-			ref array< string > perms = new ref array< string >;
+			ref array< string > perms = new array< string >;
 			perms.Copy( data.param1 );
 
-			ref array< string > guids = new ref array< string >;
+			ref array< string > guids = new array< string >;
 			guids.Copy( data.param2 );
 
 			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
@@ -825,10 +825,10 @@ class JMPlayerModule: JMRenderableModuleBase
 			Param2< ref array< string >, ref array< string > > data;
 			if ( !ctx.Read( data ) ) return;
 
-			ref array< string > roles = new ref array< string >;
+			ref array< string > roles = new array< string >;
 			roles.Copy( data.param1 );
 
-			ref array< string > guids = new ref array< string >;
+			ref array< string > guids = new array< string >;
 			guids.Copy( data.param2 );
 
 			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );

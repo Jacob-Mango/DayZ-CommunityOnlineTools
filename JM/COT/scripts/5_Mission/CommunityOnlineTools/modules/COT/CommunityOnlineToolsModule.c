@@ -34,7 +34,7 @@ class CommunityOnlineToolsModule: JMRenderableModuleBase
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/cot_form.layout";
+		return "JM/COT/GUI/layouts/cot_form.layout";
 	}
 
 	override void OnMissionLoaded()

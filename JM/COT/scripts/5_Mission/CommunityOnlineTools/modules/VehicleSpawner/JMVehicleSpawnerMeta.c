@@ -1,10 +1,10 @@
 class JMVehicleSpawnerMeta
 {
-	autoptr ref array< string > Vehicles = new ref array< string >;
+	autoptr ref array< string > Vehicles = new array< string >;
 
 	static ref JMVehicleSpawnerMeta DeriveFromSettings( ref JMVehicleSpawnerSettings settings )
 	{
-		ref JMVehicleSpawnerMeta meta = new ref JMVehicleSpawnerMeta;
+		ref JMVehicleSpawnerMeta meta = new JMVehicleSpawnerMeta;
 
 		for ( int i = 0; i < settings.Vehicles.Count(); i++ )
 		{

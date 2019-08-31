@@ -12,6 +12,8 @@ class CfgPatches
 	};
 };
 
+#define JM_COT_LOADED
+
 class CfgMods
 {
 	class JM_CommunityOnlineTools
@@ -27,8 +29,8 @@ class CfgMods
 		author = "Jacob_Mango";
 		authorID = "0";
 		version = "0.0.0";
-		versionPath = "JM/COT/scripts/Data/Version.hpp";
-		inputs = "JM/COT/scripts/Data/Inputs.xml";
+		versionPath = "JM/COT/Scripts/Data/Version.hpp";
+		inputs = "JM/COT/Scripts/Data/Inputs.xml";
 		extra = 0;
 		type = "mod";
 		
@@ -39,19 +41,25 @@ class CfgMods
 			class gameScriptModule
 			{
 				value = "";
-				files[] = {"JM/COT/Scripts/3_Game"};
+				files[] = {
+					"JM/COT/Scripts/3_Game"
+				};
 			};
 
 			class worldScriptModule
 			{
 				value = "";
-				files[] = {"JM/COT/Scripts/4_World"};
+				files[] = {
+					"JM/COT/Scripts/4_World"
+				};
 			};
 
 			class missionScriptModule
 			{
 				value = "";
-				files[] = {"JM/COT/Scripts/5_Mission"};
+				files[] = {
+					"JM/COT/Scripts/5_Mission"
+				};
 			};
 		};
 	};

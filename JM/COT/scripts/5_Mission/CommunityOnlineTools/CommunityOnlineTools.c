@@ -6,7 +6,7 @@ class CommunityOnlineTools
 	{
 		Print("CommunityOnlineTools::CommunityOnlineTools");
 
-		MakeDirectory( PERMISSION_FRAMEWORK_DIRECTORY );
+		MakeDirectory( JMConstants.DIR_PF );
 
 		m_bLoaded = false;
 
@@ -28,6 +28,7 @@ class CommunityOnlineTools
 		GetModuleManager().RegisterModule( new CommunityOnlineToolsModule );
 		GetModuleManager().RegisterModule( new JMDebugModule );
 		// GetModuleManager().RegisterModule( new JMServerInfoModule );
+		GetModuleManager().RegisterModule( new JMSelectedModule );
 		GetModuleManager().RegisterModule( new JMPlayerModule );
 		GetModuleManager().RegisterModule( new JMObjectSpawnerModule );
 		GetModuleManager().RegisterModule( new JMESPModule );
@@ -123,7 +124,6 @@ class CommunityOnlineTools
 		}
 	}
 
-	
 	void UpdatePlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Server )
@@ -132,7 +132,7 @@ class CommunityOnlineTools
 			{
 				for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
 				{
-					if ( sender && GetPermissionsManager().AuthPlayers[i].Data.SGUID == sender.GetPlainId() )
+					if ( sender && GetPermissionsManager().AuthPlayers[i].IdentityPlayer == sender )
 					{
 						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( GetPermissionsManager().AuthPlayers[i].Data, GetPermissionsManager().AuthPlayers[i].IdentityPlayer ), false, sender );
 					} else 
@@ -179,7 +179,7 @@ class CommunityOnlineTools
 				if ( !player )
 					return;
 
-				if ( data.param1 == sender.GetPlainId() )
+				if ( player.IdentityPlayer == sender )
 				{
 					GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 				} else 
@@ -229,7 +229,7 @@ class CommunityOnlineTools
 		if ( !ctx.Read( data ) )
 			return;
 
-		ref array< string > arr = new ref array< string >;
+		ref array< string > arr = new array< string >;
 		arr.Copy( data.param2 );
 
 		ref JMRole role = NULL;

@@ -1,8 +1,5 @@
 class JMPlayerInstance: Managed
 {
-	const string AUTH_DIRECTORY = PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\";
-	const string FILE_TYPE = ".txt";
-
 	ref JMPermission RootPermission;
 	ref array< JMRole > Roles;
 
@@ -31,14 +28,8 @@ class JMPlayerInstance: Managed
 			Data.SSteam64ID = IdentityPlayer.GetPlainId();
 		}
 
-		RootPermission = new ref JMPermission( Data.SSteam64ID );
+		RootPermission = new JMPermission( Data.SSteam64ID );
 		Roles = new array< JMRole >;
-
-		if ( GetGame().IsServer() )
-		{
-			MakeDirectory( AUTH_DIRECTORY );
-			MakeDirectory( PERMISSION_FRAMEWORK_DIRECTORY + "Players\\" );
-		}
 	}
 
 	void ~JMPlayerInstance()
@@ -93,7 +84,7 @@ class JMPlayerInstance: Managed
 
 	void CopyPermissions( ref JMPermission copy )
 	{
-		ref array< string > data = new ref array< string >;
+		ref array< string > data = new array< string >;
 		copy.Serialize( data );
 
 		for ( int i = 0; i < data.Count(); i++ )
@@ -106,7 +97,7 @@ class JMPlayerInstance: Managed
 	{
 		delete RootPermission;
 
-		RootPermission = new ref JMPermission( Data.SSteam64ID, NULL );
+		RootPermission = new JMPermission( Data.SSteam64ID, NULL );
 
 		m_HasPermissions = false;
 	}
@@ -121,31 +112,40 @@ class JMPlayerInstance: Managed
 	bool HasPermission( string permission )
 	{
 		// RootPermission.DebugPrint( 0 );
-
+		
+		GetLogger().Log( "Checking " + GetSteam64ID() + " for permission " + permission, "JM_COT_PermissionFramework" );
+		
 		JMPermissionType permType;
+		bool hasPermission = RootPermission.HasPermission( permission, permType );
+		
+		GetLogger().Log( "    " +  GetSteam64ID() + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
 
-		bool has = RootPermission.HasPermission( permission, permType );
-
-		GetLogger().Log( "" +  GetSteam64ID() + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
-
-		if ( has )
+		if ( hasPermission )
+		{
+			GetLogger().Log( "Returned " + GetSteam64ID() + " true", "JM_COT_PermissionFramework" );
 			return true;
+		}
 
 		if ( permType == JMPermissionType.DISALLOW )
+		{
+			GetLogger().Log( "Returned " + GetSteam64ID() + " false", "JM_COT_PermissionFramework" );
 			return false;
+		}
 
 		for ( int j = 0; j < Roles.Count(); j++ )
 		{
-			has = Roles[j].HasPermission( permission, permType );
+			hasPermission = Roles[j].HasPermission( permission, permType );
 
-			GetLogger().Log( "    JMRole " +  Roles[j].Name + " returned " + has + " for permission " + permission + " with perm type " + permType, "JM_COT_PermissionFramework" );
+			GetLogger().Log( "    " +  Roles[j].Name + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
 
-			if ( has )
+			if ( hasPermission )
 			{
+				GetLogger().Log( "Returned " + GetSteam64ID() + " true", "JM_COT_PermissionFramework" );
 				return true;
 			}
 		}
 
+		GetLogger().Log( "Returned " + GetSteam64ID() + " false", "JM_COT_PermissionFramework" );
 		return false;
 	}
 
@@ -243,7 +243,7 @@ class JMPlayerInstance: Managed
 			Serialize();
 
 			GetLogger().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
-			FileHandle file = OpenFile( AUTH_DIRECTORY + filename + FILE_TYPE, FileMode.WRITE );
+			FileHandle file = OpenFile( JMConstants.DIR_PLAYERS + filename + JMConstants.EXT_PLAYER, FileMode.WRITE );
 
 			if ( file != 0 )
 			{
@@ -304,24 +304,24 @@ class JMPlayerInstance: Managed
 
 		m_HasPermissions = false;
 
-		if ( ReadPermissions( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SSteam64ID + ".txt" ) )
+		if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION ) )
 		{
 			m_HasPermissions = true;
-		} else if ( ReadPermissions( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SSteam64ID + ".txt.txt" ) )
+		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 		{
 			m_HasPermissions = true;
 
-			DeleteFile( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SSteam64ID + ".txt.txt" );
+			DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
 			
 			Save();
-		} else if ( ReadPermissions( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SGUID + ".txt" ) )
+		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION ) )
 		{
 			m_HasPermissions = true;
-		} else if ( ReadPermissions( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SGUID + ".txt.txt" ) )
+		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 		{
 			m_HasPermissions = true;
 
-			DeleteFile( PERMISSION_FRAMEWORK_DIRECTORY + "Permissions\\" + Data.SGUID + ".txt.txt" );
+			DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
 			
 			Save();
 		}
