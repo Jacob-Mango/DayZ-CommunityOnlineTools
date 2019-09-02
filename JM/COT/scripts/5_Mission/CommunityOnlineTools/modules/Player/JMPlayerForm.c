@@ -66,6 +66,7 @@ class JMPlayerForm extends JMFormBase
 	ref UIActionCheckbox m_GodMode;
 	ref UIActionCheckbox m_Invisibility;
 	ref UIActionButton m_SpectatePlayer;
+	ref UIActionButton m_HealPlayer;
 
 	float plwidth = -1;
 	float plheight = -1;
@@ -154,13 +155,14 @@ class JMPlayerForm extends JMFormBase
 		m_TeleportToMe = UIActionManager.CreateButton( playerActions, "Teleport To Me", this, "Click_TeleportToMe" );
 		m_TeleportMeTo = UIActionManager.CreateButton( playerActions, "Teleport Me To", this, "Click_TeleportMeTo" );
 
-		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
 		m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
 		m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
 		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
 		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate Player", this, "Click_SpectatePlayer" );
-		//m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
+		m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
+		m_HealPlayer = UIActionManager.CreateButton( serverActions, "Heal Player", this, "Click_HealPlayer" );
 
 		//m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
 		//m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
@@ -203,11 +205,24 @@ class JMPlayerForm extends JMFormBase
 		m_PermissionsWrapper.Show( false );
 	}
 
+	void Click_HealPlayer( UIEvent eid, ref UIActionButton action )
+	{
+		if ( GetSelectedPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetRPCManager().SendRPC( "COT_Admin", "HealPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+	}
+
 	void Click_SpectatePlayer( UIEvent eid, ref UIActionButton action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 ) return;
+		if ( GetSelectedPlayers().Count() != 1 )
+			return;
 
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		bool shouldSpectate = true;
 
@@ -397,7 +412,7 @@ class JMPlayerForm extends JMFormBase
 			//m_LastShaved.SetSelection( data.ILifeSpanState );
 			m_BloodyHands.SetChecked( data.BBloodyHands );
 			m_GodMode.SetChecked( data.BGodMode );
-			//m_Invisibility.SetChecked(data.BInvisibility);
+			m_Invisibility.SetChecked(data.BInvisibility);
 			
 			m_PosX.SetText( "" + data.VPosition[0] );
 			m_PosY.SetText( "" + data.VPosition[1] );
@@ -435,7 +450,7 @@ class JMPlayerForm extends JMFormBase
 
 				m_BloodyHands.SetChecked( false );
 				m_GodMode.SetChecked( false );
-				//m_Invisibility.SetChecked(false);
+				m_Invisibility.SetChecked(false);
 			}
 		}
 	}
