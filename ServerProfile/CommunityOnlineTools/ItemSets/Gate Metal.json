@@ -1,0 +1,61 @@
+{
+    "Name": "Gate Metal",
+    "ContainerClassName": "SeaChest",
+    "Items": [
+        {
+            "ItemName": "FenceKit",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "Woodenlog",
+            "NumberOfStacks": 1,
+            "StackSize": 2
+        },
+        {
+            "ItemName": "WoodenPlank",
+            "NumberOfStacks": 1,
+            "StackSize": 8
+        },
+        {
+            "ItemName": "Nail",
+            "NumberOfStacks": 1,
+            "StackSize": 56
+        },
+        {
+            "ItemName": "MetalPlate",
+            "NumberOfStacks": 1,
+            "StackSize": 6
+        },
+        {
+            "ItemName": "Hammer",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "Shovel",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "Pliers",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "BarbedWire",
+            "NumberOfStacks": 2,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "CamoNet",
+            "NumberOfStacks": 1,
+            "StackSize": 1
+        },
+        {
+            "ItemName": "DuctTape",
+            "NumberOfStacks": 5,
+            "StackSize": 100
+        }
+    ]
+}

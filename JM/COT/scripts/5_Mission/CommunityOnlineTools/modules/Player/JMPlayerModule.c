@@ -755,7 +755,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				if (player == NULL) continue;
 
 				player.SetHealth( "GlobalHealth", "Health", 100 );
-				player.SetHealth( "GlobalHealth", "Blood", 100 );
+				player.SetHealth( "GlobalHealth", "Blood", 5000 );
 				player.SetHealth( "GlobalHealth", "Shock", 100 );
 				player.GetStatEnergy().Set( 20000 );
 				player.GetStatWater().Set( 5000 );

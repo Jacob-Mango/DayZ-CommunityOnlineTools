@@ -1,64 +1,59 @@
 {
-    "Name": "Watchtower Metal",
+    "Name": "Watchtower Wood",
     "ContainerClassName": "SeaChest",
     "Items": [
         {
-            "Item": "WatchtowerKit",
+            "ItemName": "WatchtowerKit",
             "NumberOfStacks": 5,
             "StackSize": 1
         },
         {
-            "Item": "Woodenlog",
-            "NumberOfStacks": 1,
-            "StackSize": 2
+            "ItemName": "Woodenlog",
+            "NumberOfStacks": 3,
+            "StackSize": 4
         },
         {
-            "Item": "WoodenPlank",
-            "NumberOfStacks": 1,
-            "StackSize": 8
+            "ItemName": "WoodenPlank",
+            "NumberOfStacks": 3,
+            "StackSize": 20
         },
         {
-            "Item": "Nail",
+            "ItemName": "Nail",
             "NumberOfStacks": 3,
             "StackSize": 100
         },
         {
-            "Item": "MetalPlate",
-            "NumberOfStacks": 3,
-            "StackSize": 12
-        },
-        {
-            "Item": "Hammer",
+            "ItemName": "Hammer",
             "NumberOfStacks": 4,
             "StackSize": 1
         },
         {
-            "Item": "Shovel",
+            "ItemName": "Shovel",
             "NumberOfStacks": 1,
             "StackSize": 1
         },
         {
-            "Item": "Pliers",
+            "ItemName": "Pliers",
             "NumberOfStacks": 1,
             "StackSize": 1
         },
         {
-            "Item": "BarbedWire",
+            "ItemName": "BarbedWire",
             "NumberOfStacks": 6,
             "StackSize": 1
         },
         {
-            "Item": "CamoNet",
+            "ItemName": "CamoNet",
             "NumberOfStacks": 9,
             "StackSize": 1
         },
         {
-            "Item": "Crowbar",
+            "ItemName": "Crowbar",
             "NumberOfStacks": 1,
             "StackSize": 1
         },
         {
-            "Item": "DuctTape",
+            "ItemName": "DuctTape",
             "NumberOfStacks": 5,
             "StackSize": 100
         }
