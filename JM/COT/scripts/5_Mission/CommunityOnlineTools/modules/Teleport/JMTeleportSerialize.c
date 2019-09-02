@@ -1,4 +1,4 @@
-const string TELEPORT_SETTINGS_FILE = ROOT_COT_DIR + "JMTeleportModule.json";
+const string TELEPORT_SETTINGS_FILE = ROOT_COT_DIR + "TeleportModule.json";
 
 class JMTeleportSerialize
 {
