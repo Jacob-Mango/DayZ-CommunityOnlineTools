@@ -3,10 +3,10 @@
     "Modes": {
         "JM_COT_StaticFunctions": 1,
         "JM_COT_ItemSetSpawner": 0,
-        "JM_COT_Mission": 0,
+        "JM_CF_KeyBindings": 0,
         "JM_CF_RPC": 1,
         "JM_CF_Credits": 0,
-        "JM_CF_KeyBindings": 0,
+        "JM_COT_Mission": 0,
         "JM_CF_Mods": 0,
         "JM_COT_WidgetStore": 0,
         "JM_CF_RPC_Client": 1,
