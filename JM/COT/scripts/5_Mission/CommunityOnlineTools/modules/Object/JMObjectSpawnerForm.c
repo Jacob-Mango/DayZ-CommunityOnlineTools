@@ -203,7 +203,7 @@ class JMObjectSpawnerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 ) );
+		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
