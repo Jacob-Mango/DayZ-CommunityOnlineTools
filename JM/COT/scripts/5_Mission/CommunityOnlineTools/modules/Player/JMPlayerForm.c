@@ -67,6 +67,8 @@ class JMPlayerForm extends JMFormBase
 	ref UIActionCheckbox m_Invisibility;
 	ref UIActionButton m_SpectatePlayer;
 	ref UIActionButton m_HealPlayer;
+	ref UIActionButton m_StopBleeding;
+	ref UIActionButton m_StripPlayer;
 
 	float plwidth = -1;
 	float plheight = -1;
@@ -160,9 +162,11 @@ class JMPlayerForm extends JMFormBase
 		m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
 		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
-		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate Player", this, "Click_SpectatePlayer" );
+		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate", this, "Click_SpectatePlayer" );
 		m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
-		m_HealPlayer = UIActionManager.CreateButton( serverActions, "Heal Player", this, "Click_HealPlayer" );
+		m_HealPlayer = UIActionManager.CreateButton( serverActions, "Heal", this, "Click_HealPlayer" );
+		m_StopBleeding = UIActionManager.CreateButton( serverActions, "Stop Bleeding", this, "Click_StopBleeding" );
+		m_StripPlayer = UIActionManager.CreateButton( serverActions, "Strip", this, "Click_StripPlayer" );
 
 		//m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
 		//m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
@@ -203,6 +207,28 @@ class JMPlayerForm extends JMFormBase
 		m_ActionsForm.Show( false );
 		m_RolesWrapper.Show( true );
 		m_PermissionsWrapper.Show( false );
+	}
+
+	void Click_StripPlayer( UIEvent eid, ref UIActionButton action )
+	{
+		if ( GetSelectedPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetRPCManager().SendRPC( "COT_Admin", "StripPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+	}
+
+	void Click_StopBleeding( UIEvent eid, ref UIActionButton action )
+	{
+		if ( GetSelectedPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetRPCManager().SendRPC( "COT_Admin", "StopBleeding", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
 	}
 
 	void Click_HealPlayer( UIEvent eid, ref UIActionButton action )
