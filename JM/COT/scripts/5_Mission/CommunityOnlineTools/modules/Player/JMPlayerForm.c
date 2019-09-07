@@ -57,6 +57,7 @@ class JMPlayerForm extends JMFormBase
 	ref UIActionButton m_RepairTransport;
 	ref UIActionButton m_TeleportToMe;
 	ref UIActionButton m_TeleportMeTo;
+	ref UIActionButton m_TeleportPrevious;
 
 	ref UIActionButton m_ModifyPermissions;
 	ref UIActionButton m_ModifyRoles;
@@ -133,7 +134,7 @@ class JMPlayerForm extends JMFormBase
 		m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
 		pings.Show( false ); // because this doesn't work
 
-		ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 3, 2 );
+		ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 6, 2 );
 		m_Health = UIActionManager.CreateEditableText( playerActions, "Health: ", this, "Click_SetHealth", "", "Set" );
 		m_Shock = UIActionManager.CreateEditableText( playerActions, "Shock: ", this, "Click_SetShock", "", "Set" );
 		m_Blood = UIActionManager.CreateEditableText( playerActions, "Blood: ", this, "Click_SetBlood", "", "Set" );
@@ -156,8 +157,9 @@ class JMPlayerForm extends JMFormBase
 		m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
 		m_TeleportToMe = UIActionManager.CreateButton( playerActions, "Teleport To Me", this, "Click_TeleportToMe" );
 		m_TeleportMeTo = UIActionManager.CreateButton( playerActions, "Teleport Me To", this, "Click_TeleportMeTo" );
+		m_TeleportPrevious = UIActionManager.CreateButton( playerActions, "Teleport Previous", this, "Click_TeleportPrevious" );
 
-		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 4, 2 );
 		m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
 		m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
@@ -313,7 +315,15 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK ) return;
 
 		GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), false );
+	}
 
+	void Click_TeleportPrevious( UIEvent eid, ref UIActionButton action )
+	{
+		if ( GetSelectedPlayers().Count() != 1 ) return;
+
+		if ( eid != UIEvent.CLICK ) return;
+
+		GetRPCManager().SendRPC( "COT_Admin", "TPLastPosition", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), false );
 	}
 
 	void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
