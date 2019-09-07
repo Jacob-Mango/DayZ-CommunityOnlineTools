@@ -22,6 +22,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
+		RegisterKeyMouseBinding( new JMModuleBinding( "DeleteOnCursor",				"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
@@ -80,6 +81,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( GetRandomChildFromBaseClass( "cfgVehicles", "Animal_CanisLupus" ), GetPointerPos() ) );
+	}
+
+	void DeleteOnCursor( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Object.Delete" ) )
+			return;
+
+		if ( !COTIsActive ){
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			return;
+		}
+
+		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
 	}
 
 	void SpawnEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
