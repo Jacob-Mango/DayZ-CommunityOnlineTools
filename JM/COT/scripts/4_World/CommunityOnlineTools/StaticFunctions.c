@@ -1,16 +1,11 @@
 // TODO: MOVE MOST OF THIS INTO A SEPERATE MOD
 
-const string ROOT_COT_DIR = "$profile:CommunityOnlineTools\\";
-
 static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
 static bool COTPlayerIsRemoved = false;
 
-static bool COTMenuOpen = false;
 static bool COT_ESP_Toggled = false;
 
 static bool DISABLE_ALL_INPUT = false;
-
-static bool COTIsActive = false;
 
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 {
@@ -66,39 +61,6 @@ static vector GetCurrentPosition()
 	}
 
 	return "0 0 0";
-}
-
-static void COTLog( JMPlayerInstance player, string text )
-{
-	text = "[COT] " + player.Data.SSteam64ID + ": " + text;
-
-	if ( GetGame().IsServer() )
-	{
-		GetGame().AdminLog( text );
-	}
-
-	GetLogger().Log( text, "JM_COT_StaticFunctions" );
-}
-
-static void COTLog( PlayerIdentity player, string text )
-{
-	if ( player == NULL )
-	{
-		text = "[COT] Game: " + text;
-	} else if ( GetGame().IsMultiplayer() )
-	{
-		text = "[COT] " + player.GetPlainId() + ": " + text;
-	} else
-	{
-		text = "[COT] Offline: " + text;
-	}
-
-	if ( GetGame().IsServer() )
-	{
-		GetGame().AdminLog( text );
-	}
-	
-	GetLogger().Log( text, "JM_COT_StaticFunctions" );
 }
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
@@ -229,10 +191,6 @@ static PlayerBase CreateCustomDefaultCharacter()
 
 	return oPlayer;
 }
-
-static bool m_GodMode; // move these to player saves? Edit: Jacob says "yes"
-static bool m_OldAiming;
-static bool bc_Visible;
 
 static float CAMERA_FOV = 1.0;
 static float CAMERA_TARGETFOV = 1.0;

@@ -137,7 +137,7 @@ class JMESPModule: JMRenderableModuleBase
 				string obtype;
 				GetGame().ObjectGetType( copy[i], obtype );
 
-				COTLog( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
+				GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
 				GetGame().ObjectDelete( copy[i] );
 			}
 		}
@@ -160,7 +160,7 @@ class JMESPModule: JMRenderableModuleBase
 			string obtype;
 			GetGame().ObjectGetType( target, obtype );
 
-			COTLog( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
+			GetCommunityOnlineToolsBase().Log( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
 
 			target.SetPosition( data.param1 );
 			target.SetYawPitchRoll( data.param2 );
@@ -178,7 +178,7 @@ class JMESPModule: JMRenderableModuleBase
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
 			if ( !player ) return;
 
-			COTLog( sender, "Entering Full Map ESP" );
+			GetCommunityOnlineToolsBase().Log( sender, "Entering Full Map ESP" );
 			GetGame().ObjectDelete( player );
 			
 			GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
@@ -438,7 +438,7 @@ class JMESPModule: JMRenderableModuleBase
 		
 		if ( type == CallType.Server )
 		{
-			COTLog( sender, "ESP " + data.param1 );
+			GetCommunityOnlineToolsBase().Log( sender, "ESP " + data.param1 );
 		}
 	}
 

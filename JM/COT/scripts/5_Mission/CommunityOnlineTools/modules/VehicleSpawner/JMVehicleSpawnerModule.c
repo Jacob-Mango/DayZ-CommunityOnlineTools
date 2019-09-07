@@ -111,7 +111,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		FillCar( oCar, CarFluid.BRAKE );
 		FillCar( oCar, CarFluid.COOLANT );
 
-		COTLog( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
 
 		// SendAdminNotification( sender, NULL, "You have spawned a " + oCar.GetDisplayName() + " at " + VectorToString( position, 1 ) );
 

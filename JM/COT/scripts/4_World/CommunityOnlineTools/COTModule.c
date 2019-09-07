@@ -4,21 +4,24 @@ class COTModule : JMModuleBase
 
 	protected ref JMCOTSideBar m_COTMenu;
 
-	protected bool m_PreventOpening; 
 	protected bool m_ForceHUD;
 
 	void COTModule()
 	{
 		COTInstance = this;
 
-		MakeDirectory( ROOT_COT_DIR );
+		MakeDirectory( JMConstants.DIR_COT );
+
+		CommunityOnlineToolsBase.SI_OPEN.Insert( SetMenuState );
 
 		GetPermissionsManager().RegisterPermission( "COT.View" );
 	}
 
 	void ~COTModule()
 	{
-		CloseMenu( false );
+		m_COTMenu.Hide();
+
+		CommunityOnlineToolsBase.SI_OPEN.Remove( SetMenuState );
 
 		delete m_COTMenu;
 	}
@@ -67,27 +70,37 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	void ShowMenu( bool force, bool checkForPerms = true )
+	void SetMenuState( bool show )
 	{
-		if ( m_PreventOpening ) 
+		if ( show )
 		{
-			if ( !force )
+			if ( !m_COTMenu.IsVisible() )
 			{
-				return;
+				m_COTMenu.Show();
+			}
+		} else
+		{
+			if ( m_COTMenu.IsVisible() )
+			{
+				m_COTMenu.Hide();
 			}
 		}
+	}
 
+	void ShowMenu( bool force, bool checkForPerms = true )
+	{
 		if ( checkForPerms && !GetPermissionsManager().HasPermission( "COT.View" ) )
 			return;
 			
 		m_COTMenu.Show();
 	}
 
-	void CloseMenu( bool prevent )
+	void CloseCOT( UAInput input )
 	{
-		m_COTMenu.Hide();
+		if ( !( input.LocalPress() ) )
+			return;
 
-		m_PreventOpening = prevent;
+		GetCommunityOnlineToolsBase().SetOpen( false );
 	}
 
 	void ToggleMenu( UAInput input = NULL )
@@ -95,22 +108,7 @@ class COTModule : JMModuleBase
 		if ( input != NULL && !( input.LocalPress() ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-			return;
-
-		if ( !COTIsActive )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
-
-		if ( m_COTMenu.IsVisible() )
-		{
-			CloseMenu( false );
-		} else
-		{
-			ShowMenu( false, false );
-		}
+		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
 	void FocusUI( UAInput input )
@@ -159,9 +157,9 @@ class COTModule : JMModuleBase
 		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
 			return;
 
-		COTIsActive = !COTIsActive;
+		GetCommunityOnlineToolsBase().ToggleActive();
 
-		if ( COTIsActive )
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			CreateLocalAdminNotification( "Community Online Tools has been toggled on." );
 		} else
@@ -169,35 +167,4 @@ class COTModule : JMModuleBase
 			CreateLocalAdminNotification( "Community Online Tools has been toggled off." );
 		}
 	}
-
-	void CloseCOT( UAInput input )
-	{
-		if ( !( input.LocalPress() ) )
-			return;
-
-		if ( m_COTMenu.IsVisible() )
-		{
-			CloseMenu( false );
-		}
-	}
-}
-
-static void COTForceHud( bool enable )
-{
-	COTModule.COTInstance.COTForceHud( enable );
-}
-
-static void ShowCOTMenu( bool force = false )
-{
-	COTModule.COTInstance.ShowMenu( force );
-}
-
-static void CloseCOTMenu( bool prevent = false )
-{
-	COTModule.COTInstance.CloseMenu( prevent );
-}
-
-static void ToggleCOTMenu()
-{
-	COTModule.COTInstance.ToggleMenu();
 }

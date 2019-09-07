@@ -49,7 +49,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 
-			COTLog( sender, "Set date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
 		}
 	}
 
@@ -73,7 +73,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 
-			COTLog( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -97,7 +97,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 
-			COTLog( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -121,7 +121,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 
-			COTLog( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -145,7 +145,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 
-			COTLog( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -169,7 +169,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 
-			COTLog( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 

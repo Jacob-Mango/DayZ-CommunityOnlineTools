@@ -2,18 +2,18 @@ modded class MissionServer
 {
 	static ref ScriptInvoker EVENT_INVOKER = new ScriptInvoker();
 
-	protected ref CommunityOnlineTools m_COT;
-
 	void MissionServer()
 	{		
 		m_bLoaded = false;
-
-		m_COT = new CommunityOnlineTools;
+		
+		if ( !g_cotBase )
+		{
+			g_cotBase = new CommunityOnlineTools;
+		}
 	}
 
 	void ~MissionServer()
 	{
-		delete m_COT;
 	}
 
 	override void OnInit()
@@ -25,12 +25,12 @@ modded class MissionServer
 	{
 		super.OnMissionStart();
 
-		m_COT.OnStart();
+		GetCommunityOnlineTools().OnStart();
 	}
 
 	override void OnMissionFinish()
 	{
-		m_COT.OnFinish();
+		GetCommunityOnlineTools().OnFinish();
 
 		super.OnMissionFinish();
 	}
@@ -74,7 +74,7 @@ modded class MissionServer
 
 		if ( m_bLoaded )
 		{
-			m_COT.OnUpdate( timeslice );
+			GetCommunityOnlineTools().OnUpdate( timeslice );
 		}
 	}
 

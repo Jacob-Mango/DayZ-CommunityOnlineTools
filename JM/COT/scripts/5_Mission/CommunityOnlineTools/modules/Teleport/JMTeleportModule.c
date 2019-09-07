@@ -65,7 +65,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
 			return;
 
-		if ( !COTIsActive ) 
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
@@ -148,7 +148,7 @@ class JMTeleportModule: JMRenderableModuleBase
 				player.SetPosition( data.param1 );
 			}
 
-			COTLog( sender, "Teleported to cursor " + data.param1 );
+			GetCommunityOnlineToolsBase().Log( sender, "Teleported to cursor " + data.param1 );
 			//SendAdminNotification( sender, NULL, "You have teleported to " + VectorToString( data.param1, 1 ) );
 		}
 	}
@@ -249,7 +249,7 @@ class JMTeleportModule: JMRenderableModuleBase
 					player.SetPosition( position );
 				}
 				
-				COTLog( sender, "Teleported " + players[j].Data.SSteam64ID + " to " + location.Name );
+				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].Data.SSteam64ID + " to " + location.Name );
 				
 				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
 			}

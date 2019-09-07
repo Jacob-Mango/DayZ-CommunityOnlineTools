@@ -132,7 +132,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
 
-			COTLog( sender, "Entered the Free Camera");
+			GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
 		}
 
 		if ( type == CallType.Client && !COTPlayerIsRemoved )
@@ -171,7 +171,7 @@ class JMCameraModule: JMRenderableModuleBase
 				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
 			} 
 
-			COTLog( sender, "Left the Free Camera");
+			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
 		}
 
 		if ( type == CallType.Client && !COTPlayerIsRemoved )
@@ -239,7 +239,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
-		if ( !COTIsActive ) 
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
