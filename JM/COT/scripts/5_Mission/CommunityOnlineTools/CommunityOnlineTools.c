@@ -1,14 +1,8 @@
-class CommunityOnlineTools
+class CommunityOnlineTools: CommunityOnlineToolsBase
 {
-	protected bool m_bLoaded;
-
 	void CommunityOnlineTools()
 	{
 		Print("CommunityOnlineTools::CommunityOnlineTools");
-
-		MakeDirectory( JMConstants.DIR_PF );
-
-		m_bLoaded = false;
 
 		GetRPCManager().AddRPC( "COT", "UpdatePlayers", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT", "RemovePlayer", this, SingeplayerExecutionType.Client );
@@ -23,8 +17,15 @@ class CommunityOnlineTools
 		NewModuleManager();
 	}
 
-	void RegisterModules()
+	void ~CommunityOnlineTools()
 	{
+		Print("CommunityOnlineTools::~CommunityOnlineTools");
+	}
+
+	override void RegisterModules()
+	{
+		super.RegisterModules();
+
 		GetModuleManager().RegisterModule( new CommunityOnlineToolsModule );
 		GetModuleManager().RegisterModule( new JMDebugModule );
 		// GetModuleManager().RegisterModule( new JMServerInfoModule );
@@ -40,38 +41,18 @@ class CommunityOnlineTools
 		GetModuleManager().RegisterModule( new JMWeatherModule );
 		GetModuleManager().RegisterModule( new JMMapModule );
 	}
-
-	void ~CommunityOnlineTools()
-	{
-		Print("CommunityOnlineTools::~CommunityOnlineTools");
-	}
 	
-	void OnStart()
+	override void OnStart()
 	{
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
-		{
-			GetPermissionsManager().LoadRoles();
-		}
-
-		GetModuleManager().RegisterModules();
-
-		RegisterModules();
-
-		GetModuleManager().OnInit();
-		
-		GetModuleManager().ReloadSettings();
-
-		GetModuleManager().OnMissionStart();
+		super.OnStart();
 	}
 
-	void OnFinish()
+	override void OnFinish()
 	{
-		GetModuleManager().OnMissionFinish();
-
-		NewModuleManager();
+		super.OnFinish();
 	}
 
-	void OnLoaded()
+	override void OnLoaded()
 	{
 		if ( GetGame().IsClient() && GetGame().IsMultiplayer() )
 		{
@@ -83,18 +64,12 @@ class CommunityOnlineTools
 			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.ReloadPlayerList, 1000, true );
 		}
 
-		GetModuleManager().OnMissionLoaded();
+		super.OnLoaded();
 	}
 
-	void OnUpdate( float timeslice )
+	override void OnUpdate( float timeslice )
 	{
-		if( !m_bLoaded && !GetDayZGame().IsLoading() )
-		{
-			m_bLoaded = true;
-			OnLoaded();
-		} else {
-			GetModuleManager().OnUpdate( timeslice );
-		}
+		super.OnUpdate( timeslice );
 	}
 
 	void ReloadPlayerList()
@@ -275,4 +250,9 @@ class CommunityOnlineTools
 			}
 		}
 	}
+}
+
+CommunityOnlineTools GetCommunityOnlineTools()
+{
+    return CommunityOnlineTools.Cast( g_cotBase );
 }

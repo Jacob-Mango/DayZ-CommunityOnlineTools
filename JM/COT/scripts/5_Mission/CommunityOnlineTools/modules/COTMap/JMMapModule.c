@@ -100,7 +100,7 @@ class JMMapModule: JMRenderableModuleBase
 				player.SetPosition( data.param1 );
 			}
 
-			COTLog( sender, "Teleported to position " + data.param1 + " from map." );
+			GetCommunityOnlineToolsBase().Log( sender, "Teleported to position " + data.param1 + " from map." );
 
 			SendAdminNotification( sender, NULL, "Teleported to " + VectorToString( data.param1, 1 ) );
 		}

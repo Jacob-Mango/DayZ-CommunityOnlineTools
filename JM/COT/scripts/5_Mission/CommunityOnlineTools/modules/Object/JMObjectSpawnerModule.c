@@ -43,7 +43,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
 			return;
 
-		if ( !COTIsActive ){
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
@@ -59,7 +60,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
 			return;
 
-		if ( !COTIsActive ){
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
@@ -75,7 +77,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
 			return;
 
-		if ( !COTIsActive ){
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
@@ -91,7 +94,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Object.Delete" ) )
 			return;
 
-		if ( !COTIsActive ){
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
 			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
 			return;
 		}
@@ -113,7 +117,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			if ( entity == NULL ) return;
 
-			COTLog( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
+			GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
 
 			//SendAdminNotification( sender, NULL, "You have spawned a " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) );
 		}
@@ -170,7 +174,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			entity.PlaceOnSurface();
 
-			COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
+			GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
 
 			//SendAdminNotification( sender, NULL, "You have spawned " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) + ", quantity " + quantity );
 		}
@@ -205,7 +209,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			oItem.SetQuantity(quantity);
 		}
 		
-		COTLog( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().Data.SSteam64ID + " with amount " + quantity );
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().Data.SSteam64ID + " with amount " + quantity );
 
 		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
 
@@ -254,7 +258,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			string obtype;
 			GetGame().ObjectGetType( target, obtype );
 
-			COTLog( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
+			GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
 			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
 
 			GetGame().ObjectDelete( target );

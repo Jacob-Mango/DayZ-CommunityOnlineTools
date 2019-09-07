@@ -122,7 +122,7 @@ class JMModuleManager
 				{
 					JMModuleBinding k_m_Binding = module.GetBindings().Get(kb);
 
-					if ( COTMenuOpen || GetGame().GetUIManager().GetMenu() )
+					if ( GetCommunityOnlineToolsBase().IsOpen() || GetGame().GetUIManager().GetMenu() )
 					{
 						if ( !k_m_Binding.CanBeUsedInMenu() )
 						{

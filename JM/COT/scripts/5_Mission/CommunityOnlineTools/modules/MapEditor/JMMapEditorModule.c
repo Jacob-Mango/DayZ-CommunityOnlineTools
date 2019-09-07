@@ -68,7 +68,7 @@ class JMMapEditorModule: JMModuleBase
 
 			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, sender );
 
-			COTLog( sender, "Entered the Map Editor");
+			GetCommunityOnlineToolsBase().Log( sender, "Entered the Map Editor");
 		}
 
 		if ( type == CallType.Client )
@@ -84,8 +84,6 @@ class JMMapEditorModule: JMModuleBase
 			if ( CurrentActiveCamera )
 			{
 				m_InEditor = true;
-
-				COTForceHud( true );
 
 				m_Menu.Show();
 
@@ -118,7 +116,7 @@ class JMMapEditorModule: JMModuleBase
 				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, sender );
 			} 
 
-			COTLog( sender, "Left the Map Editor");
+			GetCommunityOnlineToolsBase().Log( sender, "Left the Map Editor");
 		}
 
 		if ( type == CallType.Client )
@@ -139,8 +137,6 @@ class JMMapEditorModule: JMModuleBase
 			}
 
 			m_InEditor = false;
-
-			COTForceHud( false );
 
 			m_Menu.Hide();
 		}

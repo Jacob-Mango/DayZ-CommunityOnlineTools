@@ -1,7 +1,5 @@
 modded class MissionGameplay
 {
-	protected ref CommunityOnlineTools m_COT;
-
 	protected ref JMDebugMonitor m_CDebugMonitor;
 
 	// ------------------------------------------------------------
@@ -9,9 +7,12 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void MissionGameplay()
 	{
-		GetLogger().Log( "MissionGameplay::MissionGameplay()", "JM_COT_Mission" );
+		GetLogger().Log( "MissionGameplay::MissionGameplay()", "JGetCommunityOnlineTools()_Mission" );
 		
-		m_COT = new CommunityOnlineTools;
+		if ( !g_cotBase )
+		{
+			g_cotBase = new CommunityOnlineTools;
+		}
 	}
 
 	// ------------------------------------------------------------
@@ -19,9 +20,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void ~MissionGameplay()
 	{
-		GetLogger().Log( "MissionGameplay::~MissionGameplay()", "JM_COT_Mission" );
-
-		delete m_COT;
+		GetLogger().Log( "MissionGameplay::~MissionGameplay()", "JGetCommunityOnlineTools()_Mission" );
 	}
 
 	// ------------------------------------------------------------
@@ -37,7 +36,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void OfflineMissionStart()
 	{
-		GetLogger().Log( "MissionGameplay::OfflineMissionStart()", "JM_COT_Mission" );
+		GetLogger().Log( "MissionGameplay::OfflineMissionStart()", "JGetCommunityOnlineTools()_Mission" );
 
 		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
 		GetGame().SelectPlayer( NULL, player );
@@ -67,7 +66,7 @@ modded class MissionGameplay
 	{
 		super.OnMissionStart();
 		
-		m_COT.OnStart();
+		GetCommunityOnlineTools().OnStart();
 		
 		// If game is not multiplayer, add a default offline player
 		if ( !GetGame().IsMultiplayer() )
@@ -81,7 +80,7 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	override void OnMissionFinish()
 	{
-		m_COT.OnFinish();
+		GetCommunityOnlineTools().OnFinish();
 
 		super.OnMissionFinish();
 
@@ -101,7 +100,7 @@ modded class MissionGameplay
 			UIScriptedMenu menu = m_UIManager.GetMenu();
 			Input input = GetGame().GetInput();
 
-			m_COT.OnUpdate( timeslice );
+			GetCommunityOnlineTools().OnUpdate( timeslice );
 
 			// Disable openning radial menu
 			if ( DISABLE_ALL_INPUT )
@@ -118,7 +117,7 @@ modded class MissionGameplay
 			// Force the custom debug monitor to show instead
 			if ( m_CDebugMonitor )
 			{
-				if ( COTMenuOpen )
+				if ( GetCommunityOnlineToolsBase().IsOpen() )
 				{
 					m_CDebugMonitor.Hide();
 				} else 

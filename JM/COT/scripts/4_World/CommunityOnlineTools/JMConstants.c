@@ -1,5 +1,6 @@
 class JMConstants
 {
+	static const string DIR_COT = "$profile:CommunityOnlineTools\\"
     static const string DIR_PF = "$profile:PermissionsFramework\\";
 
 	static const string DIR_PERMISSIONS = DIR_PF + "Permissions\\";

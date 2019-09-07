@@ -133,8 +133,6 @@ class JMCOTSideBar
 		
 		layoutRoot.Show( true );
 
-		COTMenuOpen = true;
-
 		OnShow();
 	}
 
@@ -147,8 +145,6 @@ class JMCOTSideBar
 		if ( !layoutRoot ) return;
 
 		layoutRoot.Show( false );
-
-		COTMenuOpen = false;
 	}
 
 	void OnShow()
