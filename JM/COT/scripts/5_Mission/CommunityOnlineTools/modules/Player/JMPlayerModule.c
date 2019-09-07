@@ -12,6 +12,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "Invisibility", this, SingeplayerExecutionType.Server);
 		GetRPCManager().AddRPC( "COT_Admin", "HealPlayer", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC( "COT_Admin", "StripPlayer", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC( "COT_Admin", "StopBleeding", this, SingeplayerExecutionType.Server);
 
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
@@ -732,35 +734,105 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	void HealPlayer(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
+	void HealPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
-		if (type == CallType.Server)
+		if ( type == CallType.Server )
+		{
+			Param1<ref array<string>> data;
+			if ( !ctx.Read( data ) )
+				return;
+	
+			array<string> guids = new array<string>;
+			guids.Copy( data.param1 );
+
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
+				return;
+
+			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+
+			for ( int i = 0; i < players.Count(); i++ )
+			{
+				PlayerBase player = players[i].PlayerObject;
+
+				if ( player == NULL )
+					continue;
+
+				player.GetBleedingManagerServer().RemoveAllSources();
+
+				player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
+				player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
+				player.SetHealth( "GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
+
+				player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
+				player.GetStatWater().Set( player.GetStatWater().GetMax() );
+
+				COTLog( sender, "Healing player for " + players[i].Data.SGUID );
+
+				SendAdminNotification( sender, player.GetIdentity(), "You have been fully healed." );
+			}
+		}
+	}
+
+	void StripPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( type == CallType.Server )
 		{
 			Param1<ref array<string>> data;
 			if (!ctx.Read(data))
 				return;
 	
 			array<string> guids = new array<string>;
-			guids.Copy(data.param1);
+			guids.Copy( data.param1 );
 
-			if (!GetPermissionsManager().HasPermission( "Admin.Player.Set", sender))
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray(guids);
+			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
 				PlayerBase player = players[i].PlayerObject;
 
-				if (player == NULL) continue;
+				if ( player == NULL )
+					continue;
 
-				player.SetHealth( "GlobalHealth", "Health", 100 );
-				player.SetHealth( "GlobalHealth", "Blood", 5000 );
-				player.SetHealth( "GlobalHealth", "Shock", 100 );
-				player.GetStatEnergy().Set( 20000 );
-				player.GetStatWater().Set( 5000 );
+				player.RemoveAllItems();
 
-				COTLog( sender, "Healing player for " + players[i].Data.SGUID );
+				COTLog( sender, "Stripping items from " + players[i].Data.SGUID );
+
+				SendAdminNotification( sender, player.GetIdentity(), "Your items have been stripped." );
+			}
+		}
+	}
+
+	void StopBleeding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( type == CallType.Server )
+		{
+			Param1<ref array<string>> data;
+			if (!ctx.Read(data))
+				return;
+	
+			array<string> guids = new array<string>;
+			guids.Copy( data.param1 );
+
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
+				return;
+
+			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+
+			for ( int i = 0; i < players.Count(); i++ )
+			{
+				PlayerBase player = players[i].PlayerObject;
+
+				if ( player == NULL )
+					continue;
+
+				player.GetBleedingManagerServer().RemoveAllSources();
+
+				COTLog( sender, "Bleeding stopped for " + players[i].Data.SGUID );
+
+				SendAdminNotification( sender, player.GetIdentity(), "You are no longer bleeding." );
 			}
 		}
 	}
@@ -786,7 +858,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				if (player == NULL) continue;
 
-				player.SetInvisibility(data.param1);
+				player.SetInvisibility( data.param1 );
 
 				COTLog(sender, "Set invisibility to " + data.param1 + " for " + players[i].Data.SGUID);
 			}
@@ -826,7 +898,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.Save();
 
-				COTLog( sender, "Updates permissions for " + players[j].Data.SSteam64ID );
+				COTLog( sender, "Updated permissions for " + players[j].Data.SSteam64ID );
 
 				SendAdminNotification( sender, player.IdentityPlayer, "Your permissions have been updated." );
 			}
@@ -853,22 +925,19 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			for ( int k = 0; k < players.Count(); k++ )
 			{
-				JMPlayerInstance player = players[k];
-				
-				player.ClearRoles();
-
+				players[k].ClearRoles();
 				for ( int j = 0; j < roles.Count(); j++ )
 				{
-					player.AddStringRole( roles[j] );
+					players[k].AddStringRole( roles[j] );
 				}
 
-				GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, player.IdentityPlayer );
+				players[k].Save();
 
-				player.Save();
+				GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
 
-				COTLog( sender, "Updates roles for " + players[j].Data.SSteam64ID );
+				COTLog( sender, "Updated roles for " + players[k].Data.SSteam64ID );
 
-				SendAdminNotification( sender, player.IdentityPlayer, "Your roles have been updated." );
+				SendAdminNotification( sender, players[k].IdentityPlayer, "Your roles have been updated." );
 			}
 		}
 	}

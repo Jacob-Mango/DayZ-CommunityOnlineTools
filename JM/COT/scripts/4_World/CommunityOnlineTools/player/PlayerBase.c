@@ -18,7 +18,14 @@ modded class PlayerBase
 	{
 		super.OnVariablesSynchronized();
 
-		SetInvisible( m_IsInvisible );
+		if ( m_IsInvisible )
+		{
+			ClearFlags( EntityFlags.VISIBLE, true );
+		} else
+		{
+			SetFlags( EntityFlags.VISIBLE, true );
+		}
+		//SetInvisible( m_IsInvisible );
 	}
 
 	void SetAuthenticatedPlayer( ref JMPlayerInstance player )
