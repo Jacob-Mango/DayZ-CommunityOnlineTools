@@ -14,6 +14,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_Admin", "HealPlayer", this, SingeplayerExecutionType.Server);
 		GetRPCManager().AddRPC( "COT_Admin", "StripPlayer", this, SingeplayerExecutionType.Server);
 		GetRPCManager().AddRPC( "COT_Admin", "StopBleeding", this, SingeplayerExecutionType.Server);
+		GetRPCManager().AddRPC( "COT_Admin", "TPLastPosition", this, SingeplayerExecutionType.Server);
 
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
@@ -58,6 +59,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Previous" );
 	}
 
 	void ~JMPlayerModule()
@@ -773,6 +775,49 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
+	void TPLastPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( type == CallType.Server )
+		{
+			Param1<ref array<string>> data;
+			if (!ctx.Read(data))
+				return;
+	
+			array<string> guids = new array<string>;
+			guids.Copy( data.param1 );
+
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", sender ) )
+				return;
+
+			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+
+			for ( int i = 0; i < players.Count(); i++ )
+			{
+				PlayerBase player = players[i].PlayerObject;
+
+				if ( player == NULL )
+					continue;
+
+				if ( player.HasLastPosition() )
+				{
+					vector newPosition = player.GetLastPosition();
+
+					player.SetLastPosition( player.GetPosition() );
+
+					player.SetPosition( newPosition );
+
+					COTLog( sender, "Teleported " + players[i].Data.SGUID + " to last position" );
+
+					SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to your last position." );
+
+				} else
+				{
+					SendAdminNotification( sender, NULL, players[i].Data.SName + " doesn't have a last position." );
+				}
+			}
+		}
+	}
+
 	void StripPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Server )
@@ -784,7 +829,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", sender ) )
 				return;
 
 			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
@@ -816,7 +861,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Bleeding", sender ) )
 				return;
 
 			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
