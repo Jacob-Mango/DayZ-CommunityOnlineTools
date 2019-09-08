@@ -13,8 +13,6 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
 		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
-		
-		NewModuleManager();
 	}
 
 	void ~CommunityOnlineTools()

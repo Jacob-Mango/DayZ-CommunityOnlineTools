@@ -2,13 +2,13 @@ class JMModuleBase
 {
 	protected bool m_Enabled;
 	protected bool m_PreventInput;
-	protected ref set< ref JMModuleBinding > m_KeyBindings;
+	protected ref set< ref JMModuleBinding > m_Bindings;
 	
 	void JMModuleBase()
 	{
 		m_Enabled = true;
 		m_PreventInput = false;
-		m_KeyBindings = new set< ref JMModuleBinding >;
+		m_Bindings = new set< ref JMModuleBinding >;
 	}
 	
 	void ~JMModuleBase()
@@ -54,14 +54,23 @@ class JMModuleBase
 	{
 	}
 	
+	/**
+	 * Deprecated, use RegisterBinding instead.
+	 */
 	void RegisterKeyMouseBinding( JMModuleBinding binding ) 
 	{
-		m_KeyBindings.Insert( binding );
+		RegisterBinding( binding );
+		Error( GetModuleName() + "::RegisterKeyMouseBinding has been deprecated, use " + GetModuleName() + "::RegisterBinding instead." );
+	}
+
+	void RegisterBinding( JMModuleBinding binding ) 
+	{
+		m_Bindings.Insert( binding );
 	}
 	
 	set< ref JMModuleBinding > GetBindings()
 	{
-		return m_KeyBindings;
+		return m_Bindings;
 	}
 
 	// Override functions 
@@ -90,5 +99,40 @@ class JMModuleBase
 	
 	void OnMissionLoaded()
 	{
+	}
+
+	bool OnClientLogoutCancelled( PlayerBase player, PlayerIdentity identity )
+	{
+		return false;
+	}
+
+	bool OnClientNew( out PlayerBase player, PlayerIdentity identity, vector pos, ParamsReadContext ctx )
+	{
+		return false;
+	}
+
+	bool OnClientRespawn( PlayerBase player, PlayerIdentity identity )
+	{
+		return false;
+	}
+
+	bool OnClientReady( PlayerBase player, PlayerIdentity identity )
+	{
+		return false;
+	}
+
+	bool OnClientPrepare( PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout )
+	{
+		return false;
+	}
+
+	bool OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	{
+		return false;
+	}
+
+	bool OnClientDisconnected( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	{
+		return false;
 	}
 }

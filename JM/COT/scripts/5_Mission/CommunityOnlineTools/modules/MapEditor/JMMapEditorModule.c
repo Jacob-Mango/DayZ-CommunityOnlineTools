@@ -144,7 +144,7 @@ class JMMapEditorModule: JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleEditor",		"UAMapEditorModuleToggleEditor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "ToggleEditor",		"UAMapEditorModuleToggleEditor",	true 	) );
 	}
 	
 	override void OnMissionLoaded()

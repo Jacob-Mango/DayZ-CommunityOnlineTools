@@ -19,10 +19,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "DeleteOnCursor",				"UAObjectModuleDeleteOnCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
+		RegisterBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
+		RegisterBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
+		RegisterBinding( new JMModuleBinding( "DeleteOnCursor",				"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()

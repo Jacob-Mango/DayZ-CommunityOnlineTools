@@ -44,7 +44,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new JMModuleBinding( "TeleportCursor",		"UATeleportModuleTeleportCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "TeleportCursor",		"UATeleportModuleTeleportCursor",	true 	) );
 	}
 
 	override string GetLayoutRoot()

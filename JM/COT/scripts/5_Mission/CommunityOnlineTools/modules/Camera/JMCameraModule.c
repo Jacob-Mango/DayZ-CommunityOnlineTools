@@ -78,9 +78,9 @@ class JMCameraModule: JMRenderableModuleBase
 	
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
+		RegisterBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
+		RegisterBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
+		RegisterBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
 	}
 
 	Camera GetCamera()
