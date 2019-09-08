@@ -22,10 +22,10 @@ class JMModuleManager
 		if ( module.IsInherited( JMRenderableModuleBase ) )
 		{
 			m_EditorModules.Insert( JMRenderableModuleBase.Cast( module ) );
-			message = " as a JMRenderableModuleBase.";
+			message = " (type=JMRenderableModuleBase)";
 		} else
 		{
-			message = " as a JMModuleBase.";
+			message = " (type=JMModuleBase)";
 		}
 
 		GetLogger().Log( "Registered module " + module + message, "JM_COT_ModuleFramework" );
@@ -96,6 +96,100 @@ class JMModuleManager
 		for ( int i = 0; i < m_Modules.Count(); ++i)
 		{
 			m_Modules.Get(i).OnMissionLoaded();
+		}
+	}
+
+	
+	void OnClientLogoutCancelled( PlayerBase player, PlayerIdentity identity )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientLogoutCancelled()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientLogoutCancelled( player, identity ) )
+			{
+				break;
+			}
+		}
+	}
+
+	bool OnClientNew( out PlayerBase player, PlayerIdentity identity, vector pos, ParamsReadContext ctx )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientNew()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientNew( player, identity, pos, ctx ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void OnClientReady( PlayerBase player, PlayerIdentity identity )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientReady()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientReady( player, identity ) )
+			{
+				break;
+			}
+		}
+	}
+
+	void OnClientPrepare( PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientPrepare()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientPrepare( identity, useDB, pos, yaw, preloadTimeout ) )
+			{
+				break;
+			}
+		}
+	}
+
+	void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientReconnect()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientReconnect( player, identity ) )
+			{
+				break;
+			}
+		}
+	}
+
+	void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientRespawn()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientRespawn( player, identity ) )
+			{
+				break;
+			}
+		}
+	}
+
+	void OnClientDisconnected( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	{
+		GetLogger().Log( "JMModuleManager::OnClientDisconnected()", "JM_COT_ModuleFramework" );
+
+		for ( int i = 0; i < m_Modules.Count(); ++i)
+		{
+			if ( m_Modules.Get(i).OnClientDisconnected( player, identity, logoutTime, authFailed ) )
+			{
+				break;
+			}
 		}
 	}
 
@@ -229,24 +323,17 @@ class JMModuleManager
 
 ref JMModuleManager g_cot_ModuleManager;
 
-ref JMModuleManager GetModuleManager()
+static ref JMModuleManager GetModuleManager()
 {
-	if( !g_cot_ModuleManager )
-	{
-		g_cot_ModuleManager = new JMModuleManager();
-	}
-
 	return g_cot_ModuleManager;
 }
 
-ref JMModuleManager NewModuleManager()
+static void CreateModuleManager()
 {
-	if ( g_cot_ModuleManager )
-	{
-		delete g_cot_ModuleManager;
-	}
+	g_cot_ModuleManager = new JMModuleManager;
+}
 
-	g_cot_ModuleManager = new JMModuleManager();
-
-	return g_cot_ModuleManager;
+static void DestroyModuleManager()
+{
+	delete g_cot_ModuleManager;
 }

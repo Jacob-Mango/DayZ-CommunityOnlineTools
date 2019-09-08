@@ -10,11 +10,13 @@ class CommunityOnlineToolsBase
     void CommunityOnlineToolsBase()
     {
 		m_Loaded = false;
+
+		CreateModuleManager();
     }
 
     void ~CommunityOnlineToolsBase()
     {
-        
+        DestroyModuleManager();
     }
 
 	void RegisterModules()
@@ -42,8 +44,6 @@ class CommunityOnlineToolsBase
 	void OnFinish()
 	{
 		GetModuleManager().OnMissionFinish();
-
-		NewModuleManager();
 	}
 
 	void OnLoaded()
@@ -84,16 +84,19 @@ class CommunityOnlineToolsBase
 
     void SetOpen( bool open )
     {
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+        if ( open )
         {
-			return;
-        }
+            if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+            {
+                return;
+            }
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
+            if ( !GetCommunityOnlineToolsBase().IsActive() )
+            {
+                CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+                return;
+            }
+        }
 
         m_IsOpen = open;
 
@@ -102,16 +105,19 @@ class CommunityOnlineToolsBase
 
     void ToggleOpen()
     {
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+        if ( !m_IsOpen )
         {
-			return;
-        }
+            if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+            {
+                return;
+            }
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
+            if ( !GetCommunityOnlineToolsBase().IsActive() )
+            {
+                CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+                return;
+            }
+        }
 
         m_IsOpen = !m_IsOpen;
 

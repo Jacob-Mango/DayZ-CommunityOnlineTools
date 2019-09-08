@@ -136,8 +136,8 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 static Car SpawnVehicleAtPosition( string type, vector position, PlayerIdentity sender = NULL )
 {
-	JMVehicleSpawnerModule module = JMVehicleSpawnerModule.Cast( GetModuleManager().GetModule( JMVehicleSpawnerModule ) );
-	if ( module )
+	JMVehicleSpawnerModule module;
+	if ( Class.CastTo( module, GetModuleManager().GetModule( JMVehicleSpawnerModule ) ) )
 	{
 		return module.SpawnVehicle( type, position, sender );
 	}

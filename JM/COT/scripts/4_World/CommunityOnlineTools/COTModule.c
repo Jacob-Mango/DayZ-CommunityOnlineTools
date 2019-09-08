@@ -40,11 +40,11 @@ class COTModule : JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleMenu",		"UACOTModuleToggleMenu",	true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
-		RegisterKeyMouseBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
+		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTModuleToggleMenu",	true 	) );
+		RegisterBinding( new JMModuleBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
+		RegisterBinding( new JMModuleBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
+		RegisterBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
+		RegisterBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
 
 	override void OnUpdate( float timeslice )
