@@ -1,6 +1,6 @@
 modded class JMModuleConstructor
 {
-    override void RegisterModules( TTypenameArray modules )
+    override void RegisterModules( out TTypenameArray modules )
 	{
         super.RegisterModules( modules );
 
