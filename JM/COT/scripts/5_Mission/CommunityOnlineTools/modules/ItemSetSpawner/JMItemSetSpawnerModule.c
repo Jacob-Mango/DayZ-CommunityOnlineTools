@@ -26,9 +26,9 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		meta = JMItemSetMeta.DeriveFromSettings( settings );
 	}
 
-	override void ReloadSettings()
+	override void OnSettingsUpdated()
 	{
-		super.ReloadSettings();
+		super.OnSettingsUpdated();
 
 		settings = JMItemSetSettings.Load();
 

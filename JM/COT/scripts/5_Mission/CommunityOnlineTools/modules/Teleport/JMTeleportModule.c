@@ -19,9 +19,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Teleport.View" );
 	}
 	
-	override void ReloadSettings()
+	override void OnSettingsUpdated()
 	{
-		super.ReloadSettings();
+		super.OnSettingsUpdated();
 
 		settings = JMTeleportSerialize.Load();
 	}

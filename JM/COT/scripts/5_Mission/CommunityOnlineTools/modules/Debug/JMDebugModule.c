@@ -6,12 +6,12 @@ class JMDebugModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "COT.Apply" );
 
-		CFLogger.OnUpdate.Insert( this.ReloadSettings );
+		CFLogger.OnUpdate.Insert( this.OnSettingsUpdated );
 	}
 
 	void ~JMDebugModule()
 	{
-		CFLogger.OnUpdate.Remove( this.ReloadSettings );
+		CFLogger.OnUpdate.Remove( this.OnSettingsUpdated );
 	}
 
 	override bool HasAccess()
@@ -24,7 +24,7 @@ class JMDebugModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 	}
 
-	override void ReloadSettings()
+	override void OnSettingsUpdated()
 	{
 		if ( !GetGame().IsClient() || ( GetGame().IsServer() && GetGame().IsMultiplayer() ) )
 			return;

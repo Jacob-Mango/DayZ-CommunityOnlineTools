@@ -19,26 +19,6 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		Print("CommunityOnlineTools::~CommunityOnlineTools");
 	}
-
-	override void RegisterModules()
-	{
-		super.RegisterModules();
-
-		GetModuleManager().RegisterModule( new CommunityOnlineToolsModule );
-		GetModuleManager().RegisterModule( new JMDebugModule );
-		// GetModuleManager().RegisterModule( new JMServerInfoModule );
-		GetModuleManager().RegisterModule( new JMSelectedModule );
-		GetModuleManager().RegisterModule( new JMPlayerModule );
-		GetModuleManager().RegisterModule( new JMObjectSpawnerModule );
-		GetModuleManager().RegisterModule( new JMESPModule );
-		GetModuleManager().RegisterModule( new JMMapEditorModule );
-		GetModuleManager().RegisterModule( new JMTeleportModule );
-		GetModuleManager().RegisterModule( new JMCameraModule );
-		GetModuleManager().RegisterModule( new JMItemSetSpawnerModule );
-		GetModuleManager().RegisterModule( new JMVehicleSpawnerModule );
-		GetModuleManager().RegisterModule( new JMWeatherModule );
-		GetModuleManager().RegisterModule( new JMMapModule );
-	}
 	
 	override void OnStart()
 	{
