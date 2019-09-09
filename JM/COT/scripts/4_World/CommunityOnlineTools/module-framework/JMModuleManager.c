@@ -16,6 +16,8 @@ modded class JMModuleManager
     
 	protected override void RegisterModule( ref JMModuleBase module )
 	{
+        super.RegisterModule( module );
+        
         if ( module.IsInherited( JMRenderableModuleBase ) )
         {
             m_COTModules.Insert( JMRenderableModuleBase.Cast( module ) );
