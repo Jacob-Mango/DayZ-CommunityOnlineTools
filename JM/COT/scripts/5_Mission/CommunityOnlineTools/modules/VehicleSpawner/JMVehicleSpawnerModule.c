@@ -26,9 +26,9 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
 	}
 
-	override void ReloadSettings()
+	override void OnSettingsUpdated()
 	{
-		super.ReloadSettings();
+		super.OnSettingsUpdated();
 
 		settings = JMVehicleSpawnerSettings.Load();
 

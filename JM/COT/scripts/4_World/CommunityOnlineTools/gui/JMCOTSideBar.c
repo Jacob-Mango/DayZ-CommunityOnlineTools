@@ -67,7 +67,7 @@ class JMCOTSideBar
 		m_ButtonsContainer = layoutRoot.FindAnyWidget( "Buttons" );
 		m_Windows = layoutRoot.FindAnyWidget( "Windows" );
 
-		m_Modules = GetModuleManager().GetEditorModules();
+		m_Modules = GetModuleManager().GetCOTModules();
 
 		for ( int i = 0; i < m_Modules.Count(); i++ )
 		{

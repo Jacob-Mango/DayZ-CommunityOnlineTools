@@ -10,17 +10,10 @@ class CommunityOnlineToolsBase
     void CommunityOnlineToolsBase()
     {
 		m_Loaded = false;
-
-		CreateModuleManager();
     }
 
     void ~CommunityOnlineToolsBase()
     {
-        DestroyModuleManager();
-    }
-
-	void RegisterModules()
-	{
     }
 
     void OnStart()
@@ -29,37 +22,24 @@ class CommunityOnlineToolsBase
 		{
 			GetPermissionsManager().LoadRoles();
 		}
-
-		GetModuleManager().RegisterModules();
-
-		RegisterModules();
-
-		GetModuleManager().OnInit();
-		
-		GetModuleManager().ReloadSettings();
-
-		GetModuleManager().OnMissionStart();
 	}
 
 	void OnFinish()
 	{
-		GetModuleManager().OnMissionFinish();
 	}
 
 	void OnLoaded()
 	{
-		GetModuleManager().OnMissionLoaded();
 	}
 
 	void OnUpdate( float timeslice )
 	{
-		if( !m_Loaded && !GetDayZGame().IsLoading() )
+		if ( !m_Loaded && !GetDayZGame().IsLoading() )
 		{
 			m_Loaded = true;
 			OnLoaded();
-		} else {
-			GetModuleManager().OnUpdate( timeslice );
 		}
+
 	}
 
     bool IsActive()
