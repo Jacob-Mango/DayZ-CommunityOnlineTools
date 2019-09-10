@@ -243,7 +243,7 @@ class JMPlayerInstance: Managed
 			Serialize();
 
 			GetLogger().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
-			FileHandle file = OpenFile( JMConstants.DIR_PLAYERS + filename + JMConstants.EXT_PLAYER, FileMode.WRITE );
+			FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + filename + JMConstants.EXT_PLAYER, FileMode.WRITE );
 
 			if ( file != 0 )
 			{
