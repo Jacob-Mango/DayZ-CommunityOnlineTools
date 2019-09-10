@@ -12,7 +12,7 @@ class COTModule : JMModuleBase
 
 		MakeDirectory( JMConstants.DIR_COT );
 
-		CommunityOnlineToolsBase.SI_OPEN.Insert( SetMenuState );
+		JMScriptInvokers.COT_ON_OPEN.Insert( SetMenuState );
 
 		GetPermissionsManager().RegisterPermission( "COT.View" );
 	}
@@ -21,7 +21,7 @@ class COTModule : JMModuleBase
 	{
 		m_COTMenu.Hide();
 
-		CommunityOnlineToolsBase.SI_OPEN.Remove( SetMenuState );
+		JMScriptInvokers.COT_ON_OPEN.Remove( SetMenuState );
 
 		delete m_COTMenu;
 	}

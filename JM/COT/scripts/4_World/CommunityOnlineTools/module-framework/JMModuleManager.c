@@ -6,12 +6,12 @@ modded class JMModuleManager
     {
 		m_COTModules = new array< ref JMRenderableModuleBase >;
 
-        CommunityOnlineToolsBase.SI_OPEN.Insert( SetPreventModuleBindings );
+        JMScriptInvokers.COT_ON_OPEN.Insert( SetPreventModuleBindings );
     }
 
     void ~JMModuleManager()
     {
-        CommunityOnlineToolsBase.SI_OPEN.Remove( SetPreventModuleBindings );
+        JMScriptInvokers.COT_ON_OPEN.Remove( SetPreventModuleBindings );
     }
     
 	protected override void RegisterModule( ref JMModuleBase module )
