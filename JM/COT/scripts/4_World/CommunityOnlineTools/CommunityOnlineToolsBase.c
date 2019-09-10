@@ -1,7 +1,5 @@
 class CommunityOnlineToolsBase
 {
-	static ref ScriptInvoker SI_OPEN = new ScriptInvoker;
-
     private bool m_Loaded;
 
     private bool m_IsActive;
@@ -80,7 +78,7 @@ class CommunityOnlineToolsBase
 
         m_IsOpen = open;
 
-        SI_OPEN.Invoke( m_IsOpen );
+        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
     }
 
     void ToggleOpen()
@@ -101,7 +99,7 @@ class CommunityOnlineToolsBase
 
         m_IsOpen = !m_IsOpen;
 
-        SI_OPEN.Invoke( m_IsOpen );
+        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
     }
 
     void Log( JMPlayerInstance player, string text )
