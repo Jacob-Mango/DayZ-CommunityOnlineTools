@@ -906,6 +906,13 @@ class JMPlayerModule: JMRenderableModuleBase
 				player.SetInvisibility( data.param1 );
 
 				GetCommunityOnlineToolsBase().Log(sender, "Set invisibility to " + data.param1 + " for " + players[i].Data.SGUID);
+
+				if ( data.param1 )
+				{
+					SendAdminNotification( sender, player.GetIdentity(), "You are now invisible." );
+				} else {
+					SendAdminNotification( sender, player.GetIdentity(), "You are no longer invisible." );
+				}
 			}
 		}
 	}
