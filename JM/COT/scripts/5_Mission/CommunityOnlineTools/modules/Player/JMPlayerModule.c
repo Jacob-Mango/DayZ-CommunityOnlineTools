@@ -893,7 +893,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy(data.param2);
 
-			if (!GetPermissionsManager().HasPermission( "Admin.Player.Invisible", sender))
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisible", sender ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
