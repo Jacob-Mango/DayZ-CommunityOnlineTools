@@ -2,7 +2,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 {
 	void CommunityOnlineTools()
 	{
-		Print("CommunityOnlineTools::CommunityOnlineTools");
+		//Print("CommunityOnlineTools::CommunityOnlineTools");
 
 		GetRPCManager().AddRPC( "COT", "RefreshPlayers", this, SingeplayerExecutionType.Server );
 
@@ -18,7 +18,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	void ~CommunityOnlineTools()
 	{
-		Print("CommunityOnlineTools::~CommunityOnlineTools");
+		//Print("CommunityOnlineTools::~CommunityOnlineTools");
 	}
 	
 	override void OnStart()
@@ -56,7 +56,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			{
 				players[i].UpdatePlayerData();
 				players[i].Serialize();
-				
+
 				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[i].Data, players[i].IdentityPlayer ), false, sender );
 			}
 		}

@@ -18,7 +18,7 @@ class JMVehicleSpawnerSettings
 
 		if ( FileExist( VEHICLE_SPAWNER_FOLDER + COT_FILE_EXIST ) ) 
 		{
-			GetLogger().Log( "Found existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
+			//GetLogger().Log( "Found existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
 			for ( int i = 0; i < files.Count(); i++ )
 			{
 				if ( files[i].Contains( COT_FILE_EXIST ) )
@@ -31,11 +31,11 @@ class JMVehicleSpawnerSettings
 					name = files[i].Substring( 0, pos );
 
 				settings.Vehicles.Insert( name, JMVehicleSpawnerSerialize.Load( name ) );
-				GetLogger().Log( "	Loading vehicle file ( " + name + " )", "JM_COT_VehicleSpawner" );
+				//GetLogger().Log( "	Loading vehicle file ( " + name + " )", "JM_COT_VehicleSpawner" );
 			}
 		} else 
 		{
-			GetLogger().Log( "Didn't find existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
+			//GetLogger().Log( "Didn't find existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
 			DeleteFiles( VEHICLE_SPAWNER_FOLDER, files );
 
 			settings.Defaults();

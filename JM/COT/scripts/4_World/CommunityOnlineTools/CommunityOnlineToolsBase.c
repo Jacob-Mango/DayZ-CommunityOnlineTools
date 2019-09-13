@@ -111,7 +111,7 @@ class CommunityOnlineToolsBase
             GetGame().AdminLog( text );
         }
 
-        GetLogger().Log( text, "JM_COT_StaticFunctions" );
+        //GetLogger().Log( text, "JM_COT_StaticFunctions" );
     }
 
     void Log( PlayerIdentity player, string text )
@@ -132,7 +132,7 @@ class CommunityOnlineToolsBase
             GetGame().AdminLog( text );
         }
         
-        GetLogger().Log( text, "JM_COT_StaticFunctions" );
+        //GetLogger().Log( text, "JM_COT_StaticFunctions" );
     }
 }
 

@@ -4,14 +4,14 @@ modded class JMModuleConstructor
 	{
         super.RegisterModules( modules );
 
-        modules.Insert( CommunityOnlineToolsModule );
+        // modules.Insert( CommunityOnlineToolsModule );
 		modules.Insert( JMDebugModule );
 		// modules.Insert( JMServerInfoModule );
-		modules.Insert( JMSelectedModule );
+		// modules.Insert( JMSelectedModule );
 		modules.Insert( JMPlayerModule );
 		modules.Insert( JMObjectSpawnerModule );
 		modules.Insert( JMESPModule );
-		modules.Insert( JMMapEditorModule );
+		// modules.Insert( JMMapEditorModule );
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
 		modules.Insert( JMItemSetSpawnerModule );

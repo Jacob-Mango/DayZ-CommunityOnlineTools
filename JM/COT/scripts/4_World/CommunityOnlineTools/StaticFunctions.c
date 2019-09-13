@@ -105,7 +105,7 @@ static vector GetCursorPos()
 
 static void Message( PlayerBase player, string txt ) 
 {
-	GetLogger().Log( txt, "JM_COT_StaticFunctions" );
+	//GetLogger().Log( txt, "JM_COT_StaticFunctions" );
 
 	if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 	{
