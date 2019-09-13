@@ -5,8 +5,6 @@ static bool COTPlayerIsRemoved = false;
 
 static bool COT_ESP_Toggled = false;
 
-static bool DISABLE_ALL_INPUT = false;
-
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 {
 	if ( !GetGame().IsMultiplayer() )
