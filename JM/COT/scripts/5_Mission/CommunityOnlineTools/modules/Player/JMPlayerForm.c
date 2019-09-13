@@ -170,7 +170,7 @@ class JMPlayerForm extends JMFormBase
 		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
 		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
 		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate", this, "Click_SpectatePlayer" );
-		m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
+		//m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
 		m_HealPlayer = UIActionManager.CreateButton( serverActions, "Heal", this, "Click_HealPlayer" );
 		m_StopBleeding = UIActionManager.CreateButton( serverActions, "Stop Bleeding", this, "Click_StopBleeding" );
 		m_StripPlayer = UIActionManager.CreateButton( serverActions, "Strip", this, "Click_StripPlayer" );
@@ -462,7 +462,7 @@ class JMPlayerForm extends JMFormBase
 			//m_LastShaved.SetSelection( data.ILifeSpanState );
 			m_BloodyHands.SetChecked( data.BBloodyHands );
 			m_GodMode.SetChecked( data.BGodMode );
-			m_Invisibility.SetChecked(data.BInvisibility);
+			//m_Invisibility.SetChecked(data.BInvisibility);
 			
 			m_PosX.SetText( "" + data.VPosition[0] );
 			m_PosY.SetText( "" + data.VPosition[1] );
@@ -503,7 +503,7 @@ class JMPlayerForm extends JMFormBase
 
 				m_BloodyHands.SetChecked( false );
 				m_GodMode.SetChecked( false );
-				m_Invisibility.SetChecked(false);
+				//m_Invisibility.SetChecked(false);
 			}
 		}
 	}
