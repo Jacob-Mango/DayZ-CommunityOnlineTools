@@ -203,7 +203,7 @@ class JMPermissionManager
 		}
 	}
 
-	JMPlayerInstance GetPlayerByGUID( string guid )
+	JMPlayerInstance GetPlayer( string guid )
 	{
 		if ( !GetGame().IsMultiplayer() )
 		{
@@ -244,12 +244,15 @@ class JMPermissionManager
 
 	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL )
 	{
-		JMPlayerInstance instance = GetPlayerByGUID( data.SGUID );
+		Print( "UpdatePlayer" );
+		JMPlayerInstance instance = GetPlayer( data.SGUID );
 
 		if ( !instance )
 		{
+			Print( " !instance" );
 			if ( !IsMissionClient() )
 			{
+				Print( " !IsMissionClient" );
 				return NULL;
 			}
 
@@ -262,6 +265,7 @@ class JMPermissionManager
 
 		if ( identity != NULL )
 		{
+			Print( " identity" );
 			instance.IdentityPlayer = identity;
 		}
 

@@ -1,12 +1,12 @@
 class JMPlayerRowWidget extends ScriptedWidgetEventHandler 
 {
-	protected Widget layoutRoot;
+	private Widget layoutRoot;
+
+	private string m_GUID;
 
 	TextWidget Name;
 	ButtonWidget Button;
 	CheckBoxWidget Checkbox;
-
-	JMPlayerInstance Player;
 
 	JMPlayerForm Menu;
 
@@ -60,53 +60,50 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetPlayer( JMPlayerInstance player )
+	void SetPlayer( string guid )
 	{
-		Player = player;
+		m_GUID = guid;
 		
-		if ( Player == NULL ) 
+		if ( m_GUID == "" ) 
 		{
 			Hide();
 		} else 
 		{
 			Show();
 
+			JMPlayerInstance player = GetPermissionsManager().GetPlayer( m_GUID );
+
 			if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
 			{
 				Name.SetText( "Offline Mode" );
 				Name.SetColor( 0xFF2ECC71 );
-			} else if ( GetPermissionsManager().GetClientGUID() == player.GetGUID() )
+			} else if ( GetPermissionsManager().GetClientGUID() == m_GUID )
 			{
-				Name.SetText( Player.Data.SName );
+				Name.SetText( player.Data.SName );
 				Name.SetColor( 0xFF2ECC71 );
 			} else 
 			{
-				Name.SetText( Player.Data.SName );
+				Name.SetText( player.Data.SName );
 				Name.SetColor( 0xFFFFFFFF );
 			}
 		}
 	}
 
-	string GetName()
+	string GetGUID()
 	{
-		return Player.Data.SName;
+		return m_GUID;
 	}
 
-	JMPlayerInstance GetPlayer()
-	{
-		return Player;
-	}
-
-	override bool OnClick(Widget w, int x, int y, int button)
+	override bool OnClick( Widget w, int x, int y, int button )
 	{		
 		if ( w == Checkbox )
 		{
-			Menu.OnPlayer_Checked( this );
+			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( m_GUID, Checkbox.IsChecked() );
 		}
 
 		if ( w == Button )
 		{
-			Menu.OnPlayer_Button( this );
+			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( m_GUID );
 		}
 
 		return true;

@@ -51,8 +51,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( type == CallType.Server )
 		{
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+
 			for ( int i = 0; i < players.Count(); i++ )
 			{
+				players[i].UpdatePlayerData();
 				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[i].Data, players[i].IdentityPlayer ), false, sender );
 			}
 		}
@@ -69,10 +71,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 					return;
 				
 				JMPlayerInstance instance;
-				if ( GetPermissionsManager().OnClientDisconnected( data.param1, instance ) )
-				{
-					RemoveSelectedPlayer( instance );
-				}
+				GetPermissionsManager().OnClientDisconnected( data.param1, instance );
+
+				RemoveSelectedPlayer( data.param1 );
 			}
 		}
 	}
@@ -88,10 +89,13 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !ctx.Read( data ) )
 				return;
 
-			JMPlayerInstance player = GetPermissionsManager().GetPlayerByGUID( data.param1 );
+			JMPlayerInstance player = GetPermissionsManager().GetPlayer( data.param1 );
 			if ( !player )
 				return;
 
+			player.UpdatePlayerData();
+			player.Serialize();
+			
 			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 		}
 

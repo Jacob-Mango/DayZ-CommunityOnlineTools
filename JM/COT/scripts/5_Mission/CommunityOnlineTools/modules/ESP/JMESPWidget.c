@@ -91,39 +91,45 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		return Math.Asin( a ) / Math.Acos( a );
 	}
 
+	private vector Player_GetPosition()
+	{
+		Human man;
+
+		if ( !Class.CastTo( man, Info.target ) )
+		{
+			return Info.target.GetPosition();
+		}
+
+		if ( man.IsInTransport() )
+		{
+			return man.GetPosition() + "0 1.1 0";
+		}
+
+		vector position = man.GetPosition() + "0 1.85 0";
+
+		int bone = man.GetBoneIndexByName( "Head" );
+
+		if ( bone != -1 )
+		{
+			position = man.GetBonePositionWS( bone ) + "0 0.2 0";
+		}
+
+		return position;
+	}
+
 	vector GetPosition()
 	{
 		if ( Info.target )
 		{
-			if ( Info.type == JMESPType.PLAYER )
+			switch ( Info.type )
 			{
-				Human man = Human.Cast( Info.target );
-
-				if ( !man )
-				{
-					return Info.target.GetPosition();
-				}
-
-				if ( man.IsInTransport() )
-				{
-					return man.GetPosition() + "0 1.1 0";
-				} else 
-				{
-					vector position = man.GetPosition() + "0 1.85 0";
-
-					int bone = man.GetBoneIndexByName( "Head" );
-
-					if ( bone != -1 )
-					{
-						position = man.GetBonePositionWS( bone ) + "0 0.2 0";
-					}
-
-					return position;
-				}
+			case JMESPType.PLAYER:
+				return Player_GetPosition();
+			default:
+				return Info.target.GetPosition();
 			}
-
-			return Info.target.GetPosition();
 		}
+
 		return "0 0 0";
 	}
 
@@ -243,24 +249,21 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			
 		ShowOnScreen = true;
 			
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
 	}
 
-	override bool OnClick(Widget w, int x, int y, int button)
+	override bool OnClick( Widget w, int x, int y, int button )
 	{		
 		if ( Info.type == JMESPType.PLAYER )
 		{
-			if ( Info.player && playerMenu ) 
+			if ( w == Checkbox && Checkbox != NULL )
 			{
-				if ( w == Checkbox && Checkbox != NULL )
-				{
-					playerMenu.OnPlayer_Checked_ESP( this );
-				}
+				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), Checkbox.IsChecked() );
+			}
 
-				if ( w == m_Button && Checkbox != NULL )
-				{
-					playerMenu.OnPlayer_Button_ESP( this );
-				}
+			if ( w == m_Button && Checkbox != NULL )
+			{
+				JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID() );
 			}
 		}
 		

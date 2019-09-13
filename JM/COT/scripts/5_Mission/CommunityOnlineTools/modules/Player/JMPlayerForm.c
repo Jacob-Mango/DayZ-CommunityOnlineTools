@@ -76,7 +76,7 @@ class JMPlayerForm extends JMFormBase
 	float awidth = -1;
 	float aheight = -1;
 
-	bool newPlayerSelected = false;
+	private string m_DataUpdateGUID;
 
 	void JMPlayerForm()
 	{
@@ -85,10 +85,15 @@ class JMPlayerForm extends JMFormBase
 		m_PlayerList = new array< ref JMPlayerRowWidget >;
 		m_PermissionList = new array< ref JMPermissionRowWidget >;
 		m_RolesList = new array< ref JMRoleRowWidget >;
+
+		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
+		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
 	}
 
 	void ~JMPlayerForm()
 	{
+		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Remove( OnPlayer_Checked );
+		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
 	override string GetTitle()
@@ -426,10 +431,19 @@ class JMPlayerForm extends JMFormBase
 		GetRPCManager().SendRPC( "COT_Admin", "Invisibility", new Param2< bool, ref array<string > >( action.IsChecked(), GetSelectedAsGUIDs() ) );
 	}
 
-	void UpdateActionsFields( ref JMPlayerInformation data )
+	void UpdateActionsFields()
 	{
-		if ( data )
+		m_DataUpdateGUID = GetSelectedPlayers()[0];
+
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( m_DataUpdateGUID );
+
+		if ( instance )
 		{
+			JMPlayerInformation data = instance.Data;
+			
+			LoadPermissions( data.APermissions );
+			LoadRoles( data.ARoles );
+
 			SetSize( awidth, plheight );
 
 			m_GUID.SetText( data.SGUID );
@@ -461,6 +475,9 @@ class JMPlayerForm extends JMFormBase
 			m_ActionsForm.FindAnyWidget( "disabled" ).Show( false );
 		} else 
 		{
+			LoadPermissions( NULL );
+			LoadRoles( NULL );
+
 			if ( m_ActionsForm.IsVisible() )
 			{
 				SetSize( plwidth, plheight );
@@ -497,13 +514,7 @@ class JMPlayerForm extends JMFormBase
 
 		ReloadPlayers();
 
-		if ( GetSelectedPlayers().Count() != 0 )
-		{
-			UpdateActionsFields( GetSelectedPlayers()[0].Data );
-		} else
-		{
-			UpdateActionsFields( NULL );
-		}
+		UpdateActionsFields();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
 
@@ -523,30 +534,8 @@ class JMPlayerForm extends JMFormBase
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
 	}
 
-	bool UpdateFirstUIData()
-	{
-		if ( GetSelectedPlayers().Count() > 0 )
-		{
-			JMPlayerInformation data = NULL;
-			data = GetSelectedPlayers()[0].Data;
-
-			UpdateActionsFields( data );
-			LoadPermissions( data.APermissions );
-			LoadRoles( data.ARoles );
-			return true;
-		} else 
-		{
-			UpdateActionsFields( NULL );
-			LoadPermissions( NULL );
-			LoadRoles( NULL );
-			return false;
-		}
-	}
-
 	void UpdateList()
 	{
-		UpdateFirstUIData();
-
 		if ( m_CanUpdateList )
 		{
 			m_CanUpdateList = false;
@@ -554,9 +543,9 @@ class JMPlayerForm extends JMFormBase
 			RefreshRolesUI();
 			m_CanUpdateList = true;
 
-			if ( GetSelectedPlayers().Count() > 0 && !IsMissionHost() )
+			if ( GetSelectedPlayers().Count() > 0 )
 			{
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ) );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param1< string >( GetSelectedPlayers()[0] ) );
 			}
 		}
 
@@ -592,94 +581,48 @@ class JMPlayerForm extends JMFormBase
 		return false;
 	}
 
-	void OnPlayer_Checked_ESP( ref JMESPWidget box )
+	void OnPlayer_Checked( string guid, bool checked )
 	{
-		OnPlayerSelected( box.Info.player, box.Checkbox.IsChecked() );
+		SelectPlayer( guid, checked );
 	}
 
-	void OnPlayer_Button_ESP( ref JMESPWidget box )
+	void OnPlayer_Button( string guid )
 	{
-		OnPlayerSelected( NULL );
+		SelectPlayer( guid, true, true );
+	}
 
-		if ( OnPlayerSelected( box.Info.player ) )
+	bool SelectPlayer( string guid, bool select, bool clearOthers = false )
+	{
+		int position = -1;
+
+		if ( clearOthers )
 		{
-			box.Checkbox.SetChecked( true );
-		}
-	}
-
-	void OnPlayer_Checked( ref JMPlayerRowWidget row )
-	{
-		OnPlayerSelected( row.GetPlayer(), row.Checkbox.IsChecked() );
-	}
-
-	void OnPlayer_Button( ref JMPlayerRowWidget row )
-	{
-		OnPlayerSelected( NULL );
-
-		if ( OnPlayerSelected( row.GetPlayer() ) )
-		{
-			row.Checkbox.SetChecked( true );
-		}
-	}
-
-	bool OnPlayerSelected( ref JMPlayerInstance player, bool select = true )
-	{
-		newPlayerSelected = true;
-		if ( player == NULL )
-		{
-			UpdateActionsFields( NULL );
-
-			GetSelectedPlayers().Clear();
-
 			for ( int i = 0; i < m_PlayerList.Count(); i++ )
 			{
-				m_PlayerList[i].Checkbox.SetChecked( false );
-			}
-
-			LoadPermissions( NULL );
-			
-			LoadRoles( NULL );
-
-			return false;
-		} else 
-		{
-			int position = -1;
-
-			if ( select )
-			{
-				position = AddSelectedPlayer( player );
-
-				if ( GetSelectedPlayers().Count() == 1 )
+				if ( m_PlayerList[i].GetGUID() == guid && select )
 				{
-					UpdateActionsFields( GetSelectedPlayers()[0].Data );
-
-					LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
-					LoadRoles( GetSelectedPlayers()[0].Data.ARoles );
-				}
-
-				return true;
-			} else
-			{
-				position = RemoveSelectedPlayer( player );
-
-				if ( position == 0 )
+					m_PlayerList[i].Checkbox.SetChecked( true );
+				} else
 				{
-					if (GetSelectedPlayers().Count() > 0 )
-					{
-						UpdateActionsFields( GetSelectedPlayers()[0].Data );
-						LoadPermissions( GetSelectedPlayers()[0].Data.APermissions );
-						LoadRoles( GetSelectedPlayers()[0].Data.ARoles );
-					} else 
-					{
-						UpdateActionsFields( NULL );
-						LoadPermissions( NULL );	
-						LoadRoles( NULL );
-					}
+					m_PlayerList[i].Checkbox.SetChecked( false );
 				}
-
-				return true;
 			}
 		}
+
+		if ( select )
+		{
+			position = AddSelectedPlayer( guid );
+		} else
+		{
+			position = RemoveSelectedPlayer( guid );
+		}
+
+		if ( position == 0 )
+		{
+			UpdateActionsFields();
+		}
+
+		return true;
 	}
 
 	void ReloadPlayers()
@@ -762,11 +705,6 @@ class JMPlayerForm extends JMFormBase
 			}
 		} else 
 		{
-			if ( !newPlayerSelected )
-			{
-				return;
-			}
-
 			for ( int j = 0; j < permissions.Count(); j++ )
 			{
 				m_PermissionUI.SetPermission( permissions[j] );
@@ -776,8 +714,6 @@ class JMPlayerForm extends JMFormBase
 			{
 				m_PermissionList[k].Enable();
 			}
-
-			newPlayerSelected = false;
 		}
 	}
 
@@ -895,7 +831,7 @@ class JMPlayerForm extends JMFormBase
 
 			if ( rowScript == NULL ) continue;
 
-			rowScript.SetPlayer( NULL );
+			rowScript.SetPlayer( "" );
 
 			rowScript.Menu = this;
 
@@ -915,7 +851,7 @@ class JMPlayerForm extends JMFormBase
 
 			if ( rowScript == NULL ) continue;
 
-			rowScript.SetPlayer( NULL );
+			rowScript.SetPlayer( "" );
 
 			rowScript.Menu = this;
 
@@ -932,37 +868,32 @@ class JMPlayerForm extends JMFormBase
 		
 		for ( int k = 0; k < m_PlayerList.Count(); k++ )
 		{
-			m_PlayerList[k].SetPlayer( NULL );
+			m_PlayerList[k].SetPlayer( "" );
 		}
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			m_PlayerList[i].SetPlayer( players[i] );
+			m_PlayerList[i].SetPlayer( players[i].GetGUID() );
 
-			if ( PlayerAlreadySelected( players[i] ) )
+			if ( PlayerAlreadySelected( players[i].GetGUID() ) )
 			{
 				// OnPlayerSelected( players[i], true );
 				m_PlayerList[i].Checkbox.SetChecked( true );
 			} else
 			{
-				OnPlayerSelected( players[i], false );
+				SelectPlayer( players[i].GetGUID(), false );
 				m_PlayerList[i].Checkbox.SetChecked( false );
 			}
-		}
-
-		if (GetSelectedPlayers().Count() > 0 )
-		{
-			UpdateActionsFields( GetSelectedPlayers()[0].Data );
 		}
 
 		int playerCount = players.Count();
 
 		if ( playerCount == 1 )
 		{
-			m_PlayerCount.SetText( "1 Online" );
+			m_PlayerCount.SetText( "1 Player" );
 		} else 
 		{
-			m_PlayerCount.SetText( "" + playerCount + " Online" );
+			m_PlayerCount.SetText( "" + playerCount + " Players" );
 		}
 	}
 }
