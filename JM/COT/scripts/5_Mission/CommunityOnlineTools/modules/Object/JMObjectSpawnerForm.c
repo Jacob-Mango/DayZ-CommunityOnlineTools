@@ -196,7 +196,7 @@ class JMObjectSpawnerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), GetSelectedAsGUIDs() ) );
 	}
 
 	void DeleteOnCursor( UIEvent eid, ref UIActionButton action )

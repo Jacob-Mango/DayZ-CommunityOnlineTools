@@ -220,7 +220,7 @@ class JMTeleportModule: JMRenderableModuleBase
 				return;
 			}
 
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 			
 			for ( int j = 0; j < players.Count(); j++ )
 			{

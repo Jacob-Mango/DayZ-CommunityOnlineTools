@@ -77,7 +77,7 @@ class JMTeleportForm extends JMFormBase
 
 	void Click_Teleport( UIEvent eid, ref UIActionButton action )
 	{
-		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), GetSelectedAsGUIDs() ) );
 	}
 
 	void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )

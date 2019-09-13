@@ -53,9 +53,10 @@ modded class MissionGameplay
 			item = player.GetInventory().CreateInInventory( "MilitaryBoots_Black" );
 			item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
 			item = player.GetInventory().CreateInInventory( "Shovel" );
-				
-			JMPlayerInstance auPlayer = GetPermissionsManager().PlayerJoined( NULL );
-			auPlayer.PlayerObject = player;
+			
+			JMPlayerInstance instance;
+			GetPermissionsManager().OnClientConnected( NULL, instance );
+			instance.PlayerObject = player;
 		}
 	}
 
