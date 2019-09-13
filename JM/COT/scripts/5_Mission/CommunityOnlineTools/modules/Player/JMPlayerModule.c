@@ -89,7 +89,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -120,7 +120,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -151,7 +151,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -182,7 +182,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -213,7 +213,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -244,7 +244,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -275,7 +275,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -306,7 +306,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -337,7 +337,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -368,7 +368,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -402,7 +402,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -439,7 +439,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -492,7 +492,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			array< Transport > completedTransports = new array< Transport >;
 
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -555,7 +555,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -605,7 +605,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			if ( players.Count() == 0 )
 				return;
@@ -666,7 +666,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				return;
 			}
 
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			if ( players.Count() != 1 ) return;
 
@@ -713,7 +713,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -750,7 +750,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -789,7 +789,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", sender ) )
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -832,7 +832,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", sender ) )
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -864,7 +864,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Bleeding", sender ) )
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -896,7 +896,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			if (!GetPermissionsManager().HasPermission( "Admin.Player.Invisible", sender))
 				return;
 
-			array<ref JMPlayerInstance> players = GetPermissionsManager().GetPlayersFromArray(guids);
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			
 			for (int i = 0; i < players.Count(); i++)
 			{
 				PlayerBase player = players[i].PlayerObject;
@@ -933,7 +934,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			ref array< string > guids = new array< string >;
 			guids.Copy( data.param2 );
 
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int k = 0; k < players.Count(); k++ )
 			{
@@ -946,7 +947,7 @@ class JMPlayerModule: JMRenderableModuleBase
 					player.AddPermission( perms[j] );
 				}
 
-				GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, player.IdentityPlayer );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, player.IdentityPlayer );
 
 				player.Save();
 
@@ -973,19 +974,19 @@ class JMPlayerModule: JMRenderableModuleBase
 			ref array< string > guids = new array< string >;
 			guids.Copy( data.param2 );
 
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( data.param2 );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int k = 0; k < players.Count(); k++ )
 			{
 				players[k].ClearRoles();
 				for ( int j = 0; j < roles.Count(); j++ )
 				{
-					players[k].AddStringRole( roles[j] );
+					players[k].AddRole( roles[j] );
 				}
 
 				players[k].Save();
 
-				GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
 
 				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].Data.SSteam64ID );
 
@@ -1008,14 +1009,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			array< string > guids = new array< string >;
 			guids.Copy( data.param1 );
 
-			array< ref JMPlayerInstance > auPlayers = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-			for ( int i = 0; i < auPlayers.Count(); i++ )
+			for ( int i = 0; i < players.Count(); i++ )
 			{
-				// SendAdminNotification( auPlayers[i].IdentityPlayer, NULL, "You have been kicked." );
+				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been kicked." );
 
-				GetGame().ChatPlayer( "#kick " + auPlayers[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Kicked " + auPlayers[i].Data.SGUID );
+				GetGame().ChatPlayer( "#kick " + players[i].IdentityPlayer.GetPlayerId() );
+				GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].Data.SGUID );
 			}
 		}
 	}
@@ -1034,14 +1035,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			array< string > guids = new array< string >;
 			guids.Copy( data.param1 );
 
-			array< ref JMPlayerInstance > auPlayers = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-			for ( int i = 0; i < auPlayers.Count(); i++ )
+			for ( int i = 0; i < players.Count(); i++ )
 			{
-				// SendAdminNotification( auPlayers[i].IdentityPlayer, NULL, "You have been banned." );
+				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been banned." );
 
-				GetGame().ChatPlayer( "#ban " + auPlayers[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Banned " + auPlayers[i].Data.SGUID );
+				GetGame().ChatPlayer( "#ban " + players[i].IdentityPlayer.GetPlayerId() );
+				GetCommunityOnlineToolsBase().Log( sender, "Banned " + players[i].Data.SGUID );
 			}
 		}
 	}

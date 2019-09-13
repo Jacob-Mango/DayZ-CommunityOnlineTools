@@ -177,7 +177,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		
 		if ( GetGame().IsMultiplayer() && type == CallType.Server )
 		{
-			array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{

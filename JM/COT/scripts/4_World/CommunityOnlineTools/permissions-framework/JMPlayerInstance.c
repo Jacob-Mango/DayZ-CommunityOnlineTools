@@ -1,7 +1,7 @@
 class JMPlayerInstance: Managed
 {
 	ref JMPermission RootPermission;
-	ref array< JMRole > Roles;
+	ref array< string > Roles;
 
 	PlayerBase PlayerObject;
 	PlayerIdentity IdentityPlayer;
@@ -29,7 +29,7 @@ class JMPlayerInstance: Managed
 		}
 
 		RootPermission = new JMPermission( Data.SSteam64ID );
-		Roles = new array< JMRole >;
+		Roles = new array< string >;
 	}
 
 	void ~JMPlayerInstance()
@@ -134,9 +134,9 @@ class JMPlayerInstance: Managed
 
 		for ( int j = 0; j < Roles.Count(); j++ )
 		{
-			hasPermission = Roles[j].HasPermission( permission, permType );
+			hasPermission = GetPermissionsManager().HasRolePermission( Roles[j], permission, permType );
 
-			GetLogger().Log( "    " +  Roles[j].Name + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
+			GetLogger().Log( "    " +  Roles[j] + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
 
 			if ( hasPermission )
 			{
@@ -149,35 +149,26 @@ class JMPlayerInstance: Managed
 		return false;
 	}
 
-	void AddStringRole( string role, bool shouldSerialize = true )
+	void AddRole( string role, bool updateHasData = true )
 	{
-		ref JMRole r = GetPermissionsManager().RolesMap.Get( role );
-
-		if ( Roles.Find( r ) < 0 ) 
-		{
-			GetLogger().Log( "Adding role " + role + ": " + r, "JM_COT_PermissionFramework" );
-
-			Roles.Insert( r );
-
-			if ( shouldSerialize )
-				m_HasPlayerData = true;
-		}
-	}
-
-	void AddRole( JMRole role )
-	{
-		GetLogger().Log( "Adding role " + role.Name + ": " + role, "JM_COT_PermissionFramework" );
+		if ( !GetPermissionsManager().IsRole( role ) )
+			return;
 
 		m_HasPlayerData = true;
 
 		Roles.Insert( role );
+
+		if ( updateHasData )
+		{
+			m_HasPlayerData = true;
+		}
 	}
 
 	void ClearRoles()
 	{
 		Roles.Clear();
 
-		AddStringRole( "everyone" );
+		AddRole( "everyone" );
 	}
 
 	void Serialize()
@@ -186,11 +177,7 @@ class JMPlayerInstance: Managed
 		Data.ARoles.Clear();
 
 		RootPermission.Serialize( Data.APermissions );
-
-		for ( int j = 0; j < Roles.Count(); j++ )
-		{
-			Data.ARoles.Insert( Roles[j].Name );
-		}
+		Data.ARoles.Copy( Roles );
 	}
 
 	void Deserialize()
@@ -205,7 +192,7 @@ class JMPlayerInstance: Managed
 
 		for ( int j = 0; j < Data.ARoles.Count(); j++ )
 		{
-			AddStringRole( Data.ARoles[j] );
+			AddRole( Data.ARoles[j] );
 		}
 	}
 
@@ -224,14 +211,12 @@ class JMPlayerInstance: Managed
 		if ( !GetGame().IsServer() )
 			return;
 
+		Serialize();
+
 		if ( m_HasPlayerData )
 		{   
 			m_PlayerFile.Roles.Clear();
-
-			for ( int j = 0; j < Roles.Count(); j++ )
-			{
-				m_PlayerFile.Roles.Insert( Roles[j].Name );
-			}
+			m_PlayerFile.Roles.Copy( Data.ARoles );
 
 			m_PlayerFile.Save();
 		}
@@ -239,8 +224,6 @@ class JMPlayerInstance: Managed
 		if ( m_HasPermissions )
 		{
 			string filename = FileReadyStripName( Data.SSteam64ID );
-
-			Serialize();
 
 			GetLogger().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
 			FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + filename + JMConstants.EXT_PLAYER, FileMode.WRITE );
@@ -297,7 +280,7 @@ class JMPlayerInstance: Managed
 
 		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
 		{
-			AddStringRole( m_PlayerFile.Roles[j], false );
+			AddRole( m_PlayerFile.Roles[j], false );
 		}
 
 		GetLogger().Log( "Loading permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );

@@ -236,7 +236,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				SpawnItemOnPlayer( sender, GetGame().GetPlayer(), data.param1, data.param2 );
 			} else
 			{
-				array< ref JMPlayerInstance > players = GetPermissionsManager().GetPlayersFromArray( guids );
+				array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 	
 				for ( int i = 0; i < players.Count(); i++ )
 				{

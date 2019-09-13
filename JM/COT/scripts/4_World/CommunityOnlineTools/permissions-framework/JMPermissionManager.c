@@ -1,16 +1,16 @@
 class JMPermissionManager
 {
-	ref array< ref JMPlayerInstance > AuthPlayers;
-	ref array< ref JMRole > Roles;
-	ref map< string, ref JMRole > RolesMap;
+	autoptr map< string, ref JMPlayerInstance > Players;
+	autoptr map< string, ref JMRole > Roles;
 
 	ref JMPermission RootPermission;
 
+	private string m_ClientGUID;
+
 	void JMPermissionManager()
 	{
-		AuthPlayers = new array< ref JMPlayerInstance >;
-		Roles = new array< ref JMRole >;
-		RolesMap = new map< string, ref JMRole >;
+		Players = new map< string, ref JMPlayerInstance >;
+		Roles = new map< string, ref JMRole >;
 
 		RootPermission = new JMPermission( "ROOT" );
 		
@@ -24,43 +24,72 @@ class JMPermissionManager
 		}
 	}
 
-	array< ref JMPlayerInstance > GetPlayersFromArray( ref array< string > steamIds = NULL )
+	string GetClientGUID()
 	{
-		Print( steamIds );
+		return m_ClientGUID;
+	}
 
-		if ( steamIds == NULL || !GetGame().IsMultiplayer() )
+	void SetClientGUID( string guid )
+	{
+		m_ClientGUID = guid;
+	}
+
+	JMPlayerInstance GetClientPlayer()
+	{
+		return Players.Get( m_ClientGUID );
+	}
+
+	bool HasRolePermission( string name, string permission, out JMPermissionType permType = JMPermissionType.DISALLOW )
+	{
+		JMRole role;
+		if ( Roles.Find( name, role ) )
 		{
-			return AuthPlayers;
+			return role.HasPermission( permission, permType )
+		}
+		return false;
+	}
+
+	bool IsRole( string role )
+	{
+		return Roles.Contains( role );
+	}
+
+	/**
+	 * This uses GUIDs now.
+	 */
+	array< JMPlayerInstance > GetPlayers( ref array< string > guids = NULL )
+	{
+		if ( guids == NULL || !GetGame().IsMultiplayer() )
+		{
+			return Players.GetValueArray();
 		}
 
-		array< ref JMPlayerInstance > tempArray = new array< ref JMPlayerInstance >;
+		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
 
-		for ( int i = 0; i < steamIds.Count(); i++ )
+		for ( int i = 0; i < guids.Count(); i++ )
 		{
-			for ( int k = 0; k < AuthPlayers.Count(); k++ )
+			JMPlayerInstance instance;
+			if ( Players.Find( guids[i], instance ) )
 			{
-				if ( steamIds[i] == AuthPlayers[k].GetSteam64ID() )
-				{
-					tempArray.Insert( AuthPlayers[k] );
-				}
+				players.Insert( instance );
 			}
 		}
 
-		return tempArray;
+		return players;
 	}
 
 	void SortPlayersArray()
 	{
-		for ( int k = 0; k < AuthPlayers.Count(); k++ )
-		{
-			for ( int j = 0; j < AuthPlayers.Count(); j++ )
-			{
-				if ( AuthPlayers[k].Data.SName < AuthPlayers[j].Data.SName )
-					AuthPlayers.SwapItems( k, j );
-				else if ( AuthPlayers[k].Data.SName > AuthPlayers[j].Data.SName )
-					AuthPlayers.SwapItems( j, k );
-			}
-		}
+		// for ( int k = 0; k < Players.Count(); k++ )
+		// {
+		// 	for ( int j = 0; j < Players.Count(); j++ )
+		// 	{
+		// 		if ( Players[k].Data.SName < Players[j].Data.SName )
+		// 			Players.SwapItems( k, j );
+		// 		else if ( Players[k].Data.SName > Players[j].Data.SName )
+		// 			Players.SwapItems( j, k );
+		// 	}
+		// }
 	}
 
 	void RegisterPermission( string permission )
@@ -82,6 +111,8 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity identity = NULL )
 	{
+		PMPrint();
+
 		if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
 		{
 			return true;
@@ -89,13 +120,13 @@ class JMPermissionManager
 
 		if ( GetGame().IsClient() ) 
 		{
-			if ( ClientAuthPlayer == NULL )
+			if ( GetPermissionsManager().GetClientPlayer() == NULL )
 			{
-				GetLogger().Log( "ClientAuthPlayer: " + ClientAuthPlayer, "JM_COT_PermissionFramework" );
+				GetLogger().Log( "Client Player is NULL!", "JM_COT_PermissionFramework" );
 				return false;
 			}
 
-			return ClientAuthPlayer.HasPermission( permission );
+			return GetPermissionsManager().GetClientPlayer().HasPermission( permission );
 		}
 		
 		if ( identity == NULL )
@@ -103,105 +134,93 @@ class JMPermissionManager
 			return false;
 		}
 
-		PlayerBase player = GetPlayerObjectByIdentity( identity );
-
-		if ( player != NULL )
+		JMPlayerInstance instance;
+		if ( Players.Find( identity.GetId(), instance ) )
 		{
-			return player.GetAuthenticatedPlayer().HasPermission( permission );
-		}
-
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
-		{
-			if ( AuthPlayers[i].GetGUID() == identity.GetId() )
-			{
-				return AuthPlayers[i].HasPermission( permission );
-			}
+			return instance.HasPermission( permission );
 		}
 
 		return false;
 	}
 
-	ref JMPlayerInstance PlayerJoined( PlayerIdentity player )
+	bool OnClientConnected( PlayerIdentity identity, out JMPlayerInstance instance )
 	{
-		JMPlayerInstance auPlayer = new JMPlayerInstance( player );
-
-		auPlayer.CopyPermissions( RootPermission );
-		auPlayer.Load();
-
-		AuthPlayers.Insert( auPlayer );
-
-		return auPlayer;
-	}
-
-	void DebugPrint()
-	{
-		GetLogger().Log( "Printing all authenticated players!", "JM_COT_PermissionFramework" );
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
-		{
-			AuthPlayers[i].DebugPrint();
-		}
-	}
-
-	ref JMPlayerInstance GetPlayerByGUID( string guid )
-	{
-		ref JMPlayerInstance auPlayer = NULL;
-
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
-		{
-			if ( AuthPlayers[i].GetGUID() == guid )
-			{
-				auPlayer = AuthPlayers[i];
-				break;
-			}
-		}
-
-		if ( auPlayer == NULL )
-		{
-			auPlayer = new JMPlayerInstance( NULL );
-			auPlayer.Data.SGUID = guid;
-
-			AuthPlayers.Insert( auPlayer );
-		}
-
-		return auPlayer;
-	}
-
-	ref JMPlayerInstance GetPlayerBySteam64ID( string steam64 )
-	{
-		Error( "Deprecated method." );
-
-		if ( !GetGame().IsMultiplayer() )
-		{
-			return AuthPlayers[0];
-		}
+		string guid = "";
 		
-		ref JMPlayerInstance auPlayer = NULL;
-
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
+		if ( identity == NULL )
 		{
-			if ( AuthPlayers[i].GetSteam64ID() == steam64 )
+			if ( GetGame().IsMultiplayer() )
 			{
-				auPlayer = AuthPlayers[i];
-				break;
+				return false;
 			}
-		}
 
-		if ( auPlayer == NULL )
+			guid = JMConstants.OFFLINE_GUID;
+		} else
 		{
-			auPlayer = new JMPlayerInstance( NULL );
-			auPlayer.Data.SSteam64ID = steam64;
-
-			AuthPlayers.Insert( auPlayer );
+			guid = identity.GetId();
 		}
 
-		return auPlayer;
+		if ( Players.Find( guid, instance ) )
+		{
+			return false;
+		}
+
+		instance = new JMPlayerInstance( identity );
+
+		instance.CopyPermissions( RootPermission );
+		instance.Load();
+
+		instance.Serialize();
+
+		Players.Insert( guid, instance );
+
+		PMPrint();
+
+		return true;
 	}
 
-	ref JMPlayerInstance GetPlayerByIdentity( PlayerIdentity ident )
+	bool OnClientDisconnected( string guid, out JMPlayerInstance instance )
+	{
+		if ( Players.Find( guid, instance ) )
+		{
+			instance.Save();
+
+			Players.Remove( guid );
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	void PMPrint()
+	{
+		Print( "Printing all authenticated players!" );
+
+		for ( int i = 0; i < Players.Count(); i++ )
+		{
+			Players.GetElement( i ).DebugPrint();
+		}
+	}
+
+	JMPlayerInstance GetPlayerByGUID( string guid )
 	{
 		if ( !GetGame().IsMultiplayer() )
 		{
-			return AuthPlayers[0];
+			return Players.GetElement( 0 );
+		}
+
+		return Players.Get( guid );
+	}
+
+	/**
+	 * Sometimes PlayerIdentity::GetId doesn't work, for those situtations we use this
+	 */
+	JMPlayerInstance GetPlayerByIdentity( PlayerIdentity ident )
+	{
+		if ( !GetGame().IsMultiplayer() )
+		{
+			return Players.GetElement( 0 );
 		}
 		
 		if ( ident == NULL )
@@ -209,57 +228,44 @@ class JMPermissionManager
 			return NULL;
 		}
 
-		ref JMPlayerInstance auPlayer = NULL;
+		JMPlayerInstance auPlayer = NULL;
 
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
+		for ( int i = 0; i < Players.Count(); i++ )
 		{
-			if ( AuthPlayers[i].IdentityPlayer == ident )
+			if ( Players.GetElement( i ).IdentityPlayer == ident )
 			{
-				auPlayer = AuthPlayers[i];
+				auPlayer = Players.GetElement( i );
 				break;
 			}
-		}
-
-		if ( auPlayer == NULL )
-		{
-			auPlayer = PlayerJoined( ident );
 		}
 
 		return auPlayer;
 	}
 
-	ref JMPlayerInstance GetPlayer( ref JMPlayerInformation data )
+	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL )
 	{
-		if ( !GetGame().IsMultiplayer() )
-			return AuthPlayers[0];
-		
-		if ( data == NULL )
-			return NULL;
-		
-		ref JMPlayerInstance auPlayer = NULL;
+		JMPlayerInstance instance = GetPlayerByGUID( data.SGUID );
 
-		for ( int i = 0; i < AuthPlayers.Count(); i++ )
+		if ( !instance )
 		{
-			if ( AuthPlayers[i].GetGUID() == data.SGUID )
+			if ( !IsMissionClient() )
 			{
-				auPlayer = AuthPlayers[i];
-				break;
+				return NULL;
 			}
+
+			instance = new JMPlayerInstance( identity );
+			Players.Insert( data.SGUID, instance );
 		}
 
-		if ( auPlayer == NULL )
+		instance.SwapData( data );
+		instance.Deserialize();
+
+		if ( identity != NULL )
 		{
-			auPlayer = new JMPlayerInstance( NULL );
-			auPlayer.Data.Copy( data, GetGame().IsClient() );
-
-			AuthPlayers.Insert( auPlayer );
+			instance.IdentityPlayer = identity;
 		}
 
-		auPlayer.SwapData( data );
-
-		auPlayer.Deserialize();
-
-		return auPlayer;
+		return instance;
 	}
 
 	protected bool IsValidFolderForRoles( string name, FileAttr attributes )
@@ -288,8 +294,7 @@ class JMPermissionManager
 
 		role.Save();
 
-		Roles.Insert( role );
-		RolesMap.Insert( name, role );
+		Roles.Insert( name, role );
 
 		return role;
 	}
@@ -302,8 +307,7 @@ class JMPermissionManager
 		{
 			if ( role.Load() )
 			{
-				Roles.Insert( role );
-				RolesMap.Insert( name, role );
+				Roles.Insert( name, role );
 			}
 		} else
 		{
@@ -315,8 +319,7 @@ class JMPermissionManager
 				role.Save();
 			}
 
-			Roles.Insert( role );
-			RolesMap.Insert( name, role );
+			Roles.Insert( name, role );
 		}
 
 		return role;
@@ -347,7 +350,7 @@ class JMPermissionManager
 
 	bool RoleExists( string role )
 	{
-		return RolesMap.Contains( role );
+		return Roles.Contains( role );
 	}
 }
 

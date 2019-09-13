@@ -75,7 +75,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 			{
 				Name.SetText( "Offline Mode" );
 				Name.SetColor( 0xFF2ECC71 );
-			} else if ( ClientAuthPlayer == player )
+			} else if ( GetPermissionsManager().GetClientGUID() == player.GetGUID() )
 			{
 				Name.SetText( Player.Data.SName );
 				Name.SetColor( 0xFF2ECC71 );

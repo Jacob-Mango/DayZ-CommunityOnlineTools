@@ -4,13 +4,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		Print("CommunityOnlineTools::CommunityOnlineTools");
 
-		GetRPCManager().AddRPC( "COT", "UpdatePlayers", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT", "RemovePlayer", this, SingeplayerExecutionType.Client );
+		GetRPCManager().AddRPC( "COT", "RefreshPlayers", this, SingeplayerExecutionType.Server );
+
+		GetRPCManager().AddRPC( "COT", "RemoveClient", this, SingeplayerExecutionType.Client );
+		GetRPCManager().AddRPC( "COT", "SetClientInstance", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT", "UpdatePlayer", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT", "UpdatePlayerData", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT", "UpdateRole", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT", "SetClientPlayer", this, SingeplayerExecutionType.Client );
 		
+		GetRPCManager().AddRPC( "COT", "UpdateRole", this, SingeplayerExecutionType.Client );
+
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
 		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
 	}
@@ -32,14 +33,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		if ( GetGame().IsClient() && GetGame().IsMultiplayer() )
+		if ( IsMissionClient() )
 		{
-			GetRPCManager().SendRPC( "COT", "UpdatePlayers", new Param, true );
-		}
-
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.ReloadPlayerList, 1000, true );
+			GetRPCManager().SendRPC( "COT", "RefreshPlayers", new Param, true );
 		}
 
 		super.OnLoaded();
@@ -50,72 +46,38 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		super.OnUpdate( timeslice );
 	}
 
-	void ReloadPlayerList()
-	{
-		array< ref JMPlayerInstance > toRemove = new array< ref JMPlayerInstance >;
-
-		for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
-		{
-			JMPlayerInstance ap = GetPermissionsManager().AuthPlayers[i];
-			
-			if ( ap.IdentityPlayer == NULL )
-			{
-				toRemove.Insert( ap );
-				continue;
-			}
-
-			ap.UpdatePlayerData();
-		}
-
-		for ( int j = 0; j < toRemove.Count(); j++ )
-		{
-			toRemove[j].Save();
-
-			GetRPCManager().SendRPC( "COT", "RemovePlayer", new Param1< ref JMPlayerInformation >( SerializePlayer( toRemove[j] ) ), true );
-
-			GetPermissionsManager().AuthPlayers.RemoveItem( toRemove[j] );
-		}
-	}
-
 	void UpdatePlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( GetGame().IsMultiplayer() )
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+			for ( int i = 0; i < players.Count(); i++ )
 			{
-				for ( int i = 0; i < GetPermissionsManager().AuthPlayers.Count(); i++ )
-				{
-					if ( sender && GetPermissionsManager().AuthPlayers[i].IdentityPlayer == sender )
-					{
-						GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( GetPermissionsManager().AuthPlayers[i].Data, GetPermissionsManager().AuthPlayers[i].IdentityPlayer ), false, sender );
-					} else 
-					{
-						GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param2< ref JMPlayerInformation, PlayerIdentity >( GetPermissionsManager().AuthPlayers[i].Data, GetPermissionsManager().AuthPlayers[i].IdentityPlayer ), false, sender );
-					}
-				}
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[i].Data, players[i].IdentityPlayer ), false, sender );
 			}
 		}
 	}
 
-	void RemovePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RemoveClient( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Client )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
-				ref Param1< ref JMPlayerInformation > data;
+				ref Param1< string > data;
 				if ( !ctx.Read( data ) )
 					return;
 				
-				JMPlayerInstance player = GetPermissionsManager().GetPlayer( data.param1 );
-
-				RemoveSelectedPlayer( player );
-				GetPermissionsManager().AuthPlayers.RemoveItem( player );
+				JMPlayerInstance instance;
+				if ( GetPermissionsManager().OnClientDisconnected( data.param1, instance ) )
+				{
+					RemoveSelectedPlayer( instance );
+				}
 			}
 		}
 	}
 
-	void UpdatePlayerData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void UpdatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -126,53 +88,36 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !ctx.Read( data ) )
 				return;
 
-			if ( GetGame().IsMultiplayer() )
-			{
-				JMPlayerInstance player = GetPermissionsManager().GetPlayerByGUID( data.param1 );
-				if ( !player )
-					return;
+			JMPlayerInstance player = GetPermissionsManager().GetPlayerByGUID( data.param1 );
+			if ( !player )
+				return;
 
-				if ( player.IdentityPlayer == sender )
-				{
-					GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
-				} else 
-				{
-					GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
-				}
-			}
+			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 		}
 
 		if ( type == CallType.Client )
 		{
-			if ( GetGame().IsMultiplayer() )
-			{
-				ref Param2< ref JMPlayerInformation, PlayerIdentity > cdata;
-				if ( !ctx.Read( cdata ) )
-					return;
+			ref Param2< ref JMPlayerInformation, PlayerIdentity > cdata;
+			if ( !ctx.Read( cdata ) )
+				return;
 
-				GetPermissionsManager().GetPlayer( cdata.param1 ).IdentityPlayer = cdata.param2;
-			}
+			GetPermissionsManager().UpdatePlayer( cdata.param1, cdata.param2 );
 		}
 	}
 
-	void SetClientPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetClientInstance( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Client )
 		{
-			if ( GetGame().IsMultiplayer() )
-			{
-				ref Param2< ref JMPlayerInformation, PlayerIdentity > data;
-				if ( !ctx.Read( data ) )
-					return;
+			ref Param3< string, ref JMPlayerInformation, PlayerIdentity > data;
+			if ( !ctx.Read( data ) )
+				return;
 
-				ClientAuthPlayer = GetPermissionsManager().GetPlayer( data.param1 );
+			GetPermissionsManager().UpdatePlayer( data.param2, data.param3 );
 
-				ClientAuthPlayer.IdentityPlayer = data.param2;
+			GetPermissionsManager().SetClientGUID( data.param1 );
 
-				// ClientAuthPlayer.Data.DebugPrint();
-
-				GetModuleManager().OnClientPermissionsUpdated();
-			}
+			GetModuleManager().OnClientPermissionsUpdated();
 		}
 	}
 
@@ -192,7 +137,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Update", sender ) )
 				return;
 
-			GetPermissionsManager().RolesMap.Find( data.param1, role );
+			GetPermissionsManager().Roles.Find( data.param1, role );
 
 			if ( role )
 			{
@@ -213,7 +158,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( type == CallType.Client )
 		{
-			GetPermissionsManager().RolesMap.Find( data.param1, role );
+			GetPermissionsManager().Roles.Find( data.param1, role );
 
 			if ( role )
 			{

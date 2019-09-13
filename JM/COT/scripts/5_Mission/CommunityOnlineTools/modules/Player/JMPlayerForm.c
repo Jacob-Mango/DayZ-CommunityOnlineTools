@@ -219,7 +219,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "StripPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "StripPlayer", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_StopBleeding( UIEvent eid, ref UIActionButton action )
@@ -230,7 +230,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "StopBleeding", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "StopBleeding", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_HealPlayer( UIEvent eid, ref UIActionButton action )
@@ -241,7 +241,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "HealPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "HealPlayer", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SpectatePlayer( UIEvent eid, ref UIActionButton action )
@@ -264,35 +264,35 @@ class JMPlayerForm extends JMFormBase
 			}
 		}
 
-		GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_BanPlayer( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_KickPlayer( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_KickTransport( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_RepairTransport( UIEvent eid, ref UIActionButton action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( GetSelectedAsGUIDs() ) );
 	}
 	
 	void Click_TeleportToMe( UIEvent eid, ref UIActionButton action )
@@ -301,10 +301,10 @@ class JMPlayerForm extends JMFormBase
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
-			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ) );
+			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), GetSelectedAsGUIDs() ) );
 		} else 
 		{
-			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), SerializePlayersID( GetSelectedPlayers() ) ) );
+			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), GetSelectedAsGUIDs() ) );
 		}
 	}
 
@@ -314,7 +314,7 @@ class JMPlayerForm extends JMFormBase
 
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), false );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( GetSelectedAsGUIDs() ), false );
 	}
 
 	void Click_TeleportPrevious( UIEvent eid, ref UIActionButton action )
@@ -323,70 +323,70 @@ class JMPlayerForm extends JMFormBase
 
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "TPLastPosition", new Param1< ref array< string > >( SerializePlayersID( GetSelectedPlayers() ) ), false );
+		GetRPCManager().SendRPC( "COT_Admin", "TPLastPosition", new Param1< ref array< string > >( GetSelectedAsGUIDs() ), false );
 	}
 
 	void Click_SetHealth( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetShock( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetBlood( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetWater( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetHeatComfort( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetWet( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetTremor( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetStamina( UIEvent eid, ref UIActionEditableText action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetLifeSpanState( UIEvent eid, ref UIActionSelectBox action )
@@ -395,35 +395,35 @@ class JMPlayerForm extends JMFormBase
 
 		int state = action.GetSelection();
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_ToggleFreecam( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_GodMode( UIEvent eid, ref UIActionCheckbox action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedAsGUIDs() ) );
 	}
 
 	void Click_Invis(UIEvent eid, ref UIActionCheckbox action)
 	{
 		if (eid != UIEvent.CLICK) return;
 
-		GetRPCManager().SendRPC("COT_Admin", "Invisibility", new Param2<bool, ref array<string>>(action.IsChecked(), SerializePlayersID(GetSelectedPlayers())));
+		GetRPCManager().SendRPC( "COT_Admin", "Invisibility", new Param2< bool, ref array<string > >( action.IsChecked(), GetSelectedAsGUIDs() ) );
 	}
 
 	void UpdateActionsFields( ref JMPlayerInformation data )
@@ -554,9 +554,9 @@ class JMPlayerForm extends JMFormBase
 			RefreshRolesUI();
 			m_CanUpdateList = true;
 
-			if ( GetSelectedPlayers().Count() > 0 )
+			if ( GetSelectedPlayers().Count() > 0 && !IsMissionHost() )
 			{
-				GetRPCManager().SendRPC( "COT", "UpdatePlayerData", new Param1< string >( GetSelectedPlayers()[0].Data.SGUID ) );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param1< string >( GetSelectedPlayers()[0].GetGUID() ) );
 			}
 		}
 
@@ -684,7 +684,7 @@ class JMPlayerForm extends JMFormBase
 
 	void ReloadPlayers()
 	{
-		GetRPCManager().SendRPC( "COT", "UpdatePlayers", new Param );
+		GetRPCManager().SendRPC( "COT", "RefreshPlayers", new Param );
 	}
 
 	void CreatePermissionsUI()
@@ -783,7 +783,7 @@ class JMPlayerForm extends JMFormBase
 
 	void SetPermissions()
 	{
-		GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), GetSelectedAsGUIDs() ) );
 	}
 
 	void CreateRolesUI()
@@ -836,11 +836,12 @@ class JMPlayerForm extends JMFormBase
 
 		for ( int j = 0; j < GetPermissionsManager().Roles.Count(); j++ )
 		{
-			if ( GetPermissionsManager().Roles[j].Name == "everyone" )
+			string role = GetPermissionsManager().Roles.GetKey( j );
+			if ( role == "everyone" )
 				continue;
 
 			m_RolesList[j].Show();
-			m_RolesList[j].InitRole( GetPermissionsManager().Roles[j].Name );
+			m_RolesList[j].InitRole( role );
 		}
 	}
 
@@ -873,7 +874,7 @@ class JMPlayerForm extends JMFormBase
 
 	void SetRoles()
 	{
-		GetRPCManager().SendRPC( "COT_Admin", "SetRoles", new Param2< ref array< string >, ref array< string > >( SerializeRolesUI(), SerializePlayersID( GetSelectedPlayers() ) ) );
+		GetRPCManager().SendRPC( "COT_Admin", "SetRoles", new Param2< ref array< string >, ref array< string > >( SerializeRolesUI(), GetSelectedAsGUIDs() ) );
 	}
 
 	void CreatePlayerList()
@@ -924,10 +925,10 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerList()
 	{
-		if ( COT_IsUsingTestSort() )
-			GetPermissionsManager().SortPlayersArray();
+		//if ( COT_IsUsingTestSort() )
+		//	GetPermissionsManager().SortPlayersArray();
 
-		array< ref JMPlayerInstance > players = GetPermissionsManager().AuthPlayers;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 		
 		for ( int k = 0; k < m_PlayerList.Count(); k++ )
 		{

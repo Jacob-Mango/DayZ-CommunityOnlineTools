@@ -82,21 +82,33 @@ modded class MissionServer
 	{
 		super.InvokeOnConnect( player, identity );
 
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().OnClientConnected( identity, instance ) )
+		{
+			return;
+		}
+
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			JMRole role = GetPermissionsManager().Roles[i];
+			JMRole role = GetPermissionsManager().Roles.GetElement( i );
 			role.Serialize();
+
 			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
 		}
 
-		GetRPCManager().SendRPC( "COT", "SetClientPlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( SerializePlayer( GetPermissionsManager().PlayerJoined( identity ) ), identity ), true, identity );
+		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param3< string, ref JMPlayerInformation, PlayerIdentity >( instance.GetGUID(), instance.Data, identity ), true, identity );
 
 		GetGame().SelectPlayer( identity, player );
 	} 
 
-	override void InvokeOnDisconnect( PlayerBase player )
+	override void PlayerDisconnected( PlayerBase player, PlayerIdentity identity, string uid )
 	{
-		super.InvokeOnDisconnect( player );
-	} 
+		JMPlayerInstance instance;
+		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
+		{
+			GetRPCManager().SendRPC( "COT", "RemoveClient", new Param1< string >( uid ), true );
+		}
 
+		super.PlayerDisconnected( player, identity, uid );
+	}
 }
