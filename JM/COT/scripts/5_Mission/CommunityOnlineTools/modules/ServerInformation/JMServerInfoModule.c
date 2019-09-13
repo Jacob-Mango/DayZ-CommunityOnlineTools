@@ -58,7 +58,7 @@ class JMServerInfoModule: JMRenderableModuleBase
 			ChatMessageEventParams chat_params;
 			if ( Class.CastTo( chat_params, params ) )
 			{
-				Print( "int: " + chat_params.param1 + " string: " + chat_params.param2 + " string: " + chat_params.param3 + " string: " + chat_params.param4 );
+				//Print( "int: " + chat_params.param1 + " string: " + chat_params.param2 + " string: " + chat_params.param3 + " string: " + chat_params.param4 );
 			}
 			break;
 		}

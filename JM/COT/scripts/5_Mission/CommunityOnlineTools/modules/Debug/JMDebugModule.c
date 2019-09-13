@@ -38,7 +38,7 @@ class JMDebugModule: JMRenderableModuleBase
 		super.OnMissionFinish();
 
 		if ( GetGame().IsServer() )
-			GetLogger().Save();
+			//GetLogger().Save();
 	}
 
 	override string GetLayoutRoot()
@@ -56,7 +56,7 @@ class JMDebugModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "COT.Apply", sender ) )
 				return;
 
-			GetLogger().Copy( data.param1 );
+			//GetLogger().Copy( data.param1 );
 		}
 	}
 }

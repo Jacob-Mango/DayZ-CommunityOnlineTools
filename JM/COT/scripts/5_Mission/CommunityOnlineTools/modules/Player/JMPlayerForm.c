@@ -871,10 +871,10 @@ class JMPlayerForm extends JMFormBase
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
-		Print( "Player Count: " + players.Count() );
+		//Print( "Player Count: " + players.Count() );
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			Print( "" + i + ": " + players[i].GetGUID() );
+			//Print( "" + i + ": " + players[i].GetGUID() );
 			m_PlayerList[i].SetPlayer( players[i].GetGUID() );
 
 			if ( PlayerAlreadySelected( players[i].GetGUID() ) )

@@ -122,7 +122,7 @@ class JMPermissionManager
 		{
 			if ( GetPermissionsManager().GetClientPlayer() == NULL )
 			{
-				GetLogger().Log( "Client Player is NULL!", "JM_COT_PermissionFramework" );
+				//GetLogger().Log( "Client Player is NULL!", "JM_COT_PermissionFramework" );
 				return false;
 			}
 
@@ -195,7 +195,7 @@ class JMPermissionManager
 
 	void PMPrint()
 	{
-		Print( "Printing all authenticated players!" );
+		//Print( "Printing all authenticated players!" );
 
 		for ( int i = 0; i < Players.Count(); i++ )
 		{
@@ -244,15 +244,15 @@ class JMPermissionManager
 
 	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL )
 	{
-		Print( "UpdatePlayer (" + data.SGUID + ")" );
+		//Print( "UpdatePlayer (" + data.SGUID + ")" );
 		JMPlayerInstance instance = GetPlayer( data.SGUID );
 
 		if ( !instance )
 		{
-			Print( " !instance" );
+			//Print( " !instance" );
 			if ( !IsMissionClient() )
 			{
-				Print( " !IsMissionClient" );
+				//Print( " !IsMissionClient" );
 				return NULL;
 			}
 
@@ -265,7 +265,7 @@ class JMPermissionManager
 
 		if ( identity != NULL )
 		{
-			Print( " identity" );
+			//Print( " identity" );
 			instance.IdentityPlayer = identity;
 		}
 

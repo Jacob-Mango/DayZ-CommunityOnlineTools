@@ -38,7 +38,7 @@ class JMWidgetStore
 	{
 		SearchChildren( layoutRoot ); //recursion
 
-		Print("JMWidgetStore Init - Testing widget loading count: " + allWidgets.Count() );
+		//Print("JMWidgetStore Init - Testing widget loading count: " + allWidgets.Count() );
 	}
 
 	void SearchChildren( Widget widget ) 
@@ -46,7 +46,7 @@ class JMWidgetStore
 		Widget child = widget.GetChildren();
 		while ( child ) 
 		{
-			//Print( child.GetName() );
+			////Print( child.GetName() );
 			allWidgets.Insert( child );
 			AddWidget( child );
 			SearchSibling( child );
@@ -59,7 +59,7 @@ class JMWidgetStore
 		Widget sibling = widget.GetSibling();
 		while ( sibling ) 
 		{
-			//Print( sibling.GetName() );
+			////Print( sibling.GetName() );
 			allWidgets.Insert( sibling );
 			AddWidget( sibling );
 			SearchChildren( sibling );
@@ -83,13 +83,13 @@ class JMWidgetStore
 				}
 				if ( count > 1 ) 
 				{
-					GetLogger().Log( "Found duplicate: " + name, "JM_COT_WidgetStore" );
+					//GetLogger().Log( "Found duplicate: " + name, "JM_COT_WidgetStore" );
 					duplicates++;
 					break;
 				}
 			}
 		}
-		GetLogger().Log( "Duplicates: " + duplicates, "JM_COT_WidgetStore" );
+		//GetLogger().Log( "Duplicates: " + duplicates, "JM_COT_WidgetStore" );
 	}
 
 	void AddWidget( Widget widget ) 

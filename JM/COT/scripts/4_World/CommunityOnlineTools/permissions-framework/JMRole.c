@@ -79,7 +79,7 @@ class JMRole
 	{
 		string filename = FileReadyStripName( Name );
 
-		GetLogger().Log( "Saving role for " + filename, "JM_COT_PermissionFramework" );
+		//GetLogger().Log( "Saving role for " + filename, "JM_COT_PermissionFramework" );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );
 			
 		Serialize();
@@ -95,11 +95,11 @@ class JMRole
 			
 			CloseFile(file);
 			
-			GetLogger().Log( "Wrote to the roles", "JM_COT_PermissionFramework" );
+			//GetLogger().Log( "Wrote to the roles", "JM_COT_PermissionFramework" );
 			return true;
 		} else
 		{
-			GetLogger().Log( "Failed to open the file for the role for writing.", "JM_COT_PermissionFramework" );
+			//GetLogger().Log( "Failed to open the file for the role for writing.", "JM_COT_PermissionFramework" );
 			return false;
 		}
 	}
@@ -107,7 +107,7 @@ class JMRole
 	bool Load()
 	{
 		string filename = FileReadyStripName( Name );
-		GetLogger().Log( "Loading role " + filename, "JM_COT_PermissionFramework" );
+		//GetLogger().Log( "Loading role " + filename, "JM_COT_PermissionFramework" );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );
 			
 		ref array< string > data = new array< string >;
@@ -139,7 +139,7 @@ class JMRole
 
 	void DebugPrint()
 	{
-		GetLogger().Log( "Printing permissions for role " + Name, "JM_COT_PermissionFramework" );
+		//GetLogger().Log( "Printing permissions for role " + Name, "JM_COT_PermissionFramework" );
 
 		RootPermission.DebugPrint( 0 );
 	}

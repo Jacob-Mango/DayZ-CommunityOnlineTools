@@ -18,7 +18,7 @@ class JMItemSetSettings
 
 		if ( FileExist( ITEM_SETS_FOLDER + COT_FILE_EXIST ) ) 
 		{
-			GetLogger().Log( "Found existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
+			//GetLogger().Log( "Found existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
 			for ( int i = 0; i < files.Count(); i++ )
 			{
 				if ( files[i] == COT_FILE_EXIST )
@@ -33,11 +33,11 @@ class JMItemSetSettings
 				}
 
 				settings.ItemSets.Insert( name, JMItemSetSerialize.Load( name ) );
-				GetLogger().Log( "	Loading item set file ( " + name + " )", "JM_COT_ItemSetSpawner" );
+				//GetLogger().Log( "	Loading item set file ( " + name + " )", "JM_COT_ItemSetSpawner" );
 			}
 		} else 
 		{
-			GetLogger().Log( "Didn't find existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
+			//GetLogger().Log( "Didn't find existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
 			DeleteFiles( ITEM_SETS_FOLDER, files );
 
 			settings.Defaults();
