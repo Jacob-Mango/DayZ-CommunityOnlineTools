@@ -159,7 +159,7 @@ class COTModule : JMModuleBase
 
 		GetCommunityOnlineToolsBase().ToggleActive();
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
 			CreateLocalAdminNotification( "Community Online Tools has been toggled on." );
 		} else

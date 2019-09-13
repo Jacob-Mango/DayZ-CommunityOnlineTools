@@ -46,7 +46,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		super.OnUpdate( timeslice );
 	}
 
-	void UpdatePlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RefreshPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -55,6 +55,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			for ( int i = 0; i < players.Count(); i++ )
 			{
 				players[i].UpdatePlayerData();
+				players[i].Serialize();
+				
 				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[i].Data, players[i].IdentityPlayer ), false, sender );
 			}
 		}
@@ -95,7 +97,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 			player.UpdatePlayerData();
 			player.Serialize();
-			
+
 			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
 		}
 

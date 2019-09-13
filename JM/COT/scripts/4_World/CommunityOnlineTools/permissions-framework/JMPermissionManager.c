@@ -244,7 +244,7 @@ class JMPermissionManager
 
 	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL )
 	{
-		Print( "UpdatePlayer" );
+		Print( "UpdatePlayer (" + data.SGUID + ")" );
 		JMPlayerInstance instance = GetPlayer( data.SGUID );
 
 		if ( !instance )

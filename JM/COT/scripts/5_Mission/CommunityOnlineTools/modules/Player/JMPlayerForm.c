@@ -627,7 +627,7 @@ class JMPlayerForm extends JMFormBase
 
 	void ReloadPlayers()
 	{
-		GetRPCManager().SendRPC( "COT", "RefreshPlayers", new Param );
+		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
 	}
 
 	void CreatePermissionsUI()
@@ -864,15 +864,17 @@ class JMPlayerForm extends JMFormBase
 		//if ( COT_IsUsingTestSort() )
 		//	GetPermissionsManager().SortPlayersArray();
 
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
-		
 		for ( int k = 0; k < m_PlayerList.Count(); k++ )
 		{
 			m_PlayerList[k].SetPlayer( "" );
 		}
 
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+
+		Print( "Player Count: " + players.Count() );
 		for ( int i = 0; i < players.Count(); i++ )
 		{
+			Print( "" + i + ": " + players[i].GetGUID() );
 			m_PlayerList[i].SetPlayer( players[i].GetGUID() );
 
 			if ( PlayerAlreadySelected( players[i].GetGUID() ) )
