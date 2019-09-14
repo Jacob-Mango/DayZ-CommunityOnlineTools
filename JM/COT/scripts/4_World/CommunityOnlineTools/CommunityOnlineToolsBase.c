@@ -75,9 +75,6 @@ class CommunityOnlineToolsBase
 
 	void OnLoaded()
 	{
-        m_IsOpen = false;
-
-        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 	}
 
 	void OnUpdate( float timeslice )
@@ -129,6 +126,8 @@ class CommunityOnlineToolsBase
         m_IsOpen = open;
 
         JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+
+        LogServer( "m_IsOpen: " + m_IsOpen );
     }
 
     void ToggleOpen()
@@ -150,6 +149,8 @@ class CommunityOnlineToolsBase
         m_IsOpen = !m_IsOpen;
 
         JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+
+        LogServer( "m_IsOpen: " + m_IsOpen );
     }
 
     void LogServer( string text )

@@ -133,40 +133,15 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !ctx.Read( data ) )
 			return;
 
-		ref array< string > arr = new array< string >;
+		array< string > arr = new array< string >;
 		arr.Copy( data.param2 );
-
-		ref JMRole role = NULL;
-
-		if ( type == CallType.Server )
-		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Update", sender ) )
-				return;
-
-			GetPermissionsManager().Roles.Find( data.param1, role );
-
-			if ( role )
-			{
-				role.ClearPermissions();
-
-				role.SerializedData = arr;
-
-				role.Deserialize();
-			} else 
-			{
-				role = GetPermissionsManager().LoadRole( data.param1, arr );
-			}
-
-			role.Serialize();
-				
-			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), false );
-		}
 
 		if ( type == CallType.Client )
 		{
-			GetPermissionsManager().Roles.Find( data.param1, role );
-
-			if ( role )
+			Print( "Role: " + data.param1 );
+			
+			JMRole role;
+			if ( GetPermissionsManager().Roles.Find( data.param1, role ) >= 0 )
 			{
 				role.ClearPermissions();
 

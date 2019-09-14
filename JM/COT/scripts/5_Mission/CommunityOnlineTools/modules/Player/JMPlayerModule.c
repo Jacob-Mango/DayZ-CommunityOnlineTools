@@ -969,22 +969,20 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			for ( int k = 0; k < players.Count(); k++ )
 			{
-				JMPlayerInstance player = players[k];
-				
-				player.ClearPermissions();
+				players[k].ClearPermissions();
 
 				for ( int j = 0; j < perms.Count(); j++ )
 				{
-					player.AddPermission( perms[j] );
+					players[k].AddPermission( perms[j] );
 				}
 
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, player.IdentityPlayer );
+				players[k].Save();
 
-				player.Save();
+				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[j].GetGUID() );
+				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[k].GetGUID() );
 
-				SendAdminNotification( sender, player.IdentityPlayer, "Your permissions have been updated." );
+				SendAdminNotification( sender, players[k].IdentityPlayer, "Your permissions have been updated." );
 			}
 		}
 	}
@@ -1010,6 +1008,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			for ( int k = 0; k < players.Count(); k++ )
 			{
 				players[k].ClearRoles();
+				
 				for ( int j = 0; j < roles.Count(); j++ )
 				{
 					players[k].AddRole( roles[j] );
@@ -1017,7 +1016,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				players[k].Save();
 
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
+				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
 
 				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].GetGUID() );
 

@@ -33,12 +33,12 @@ class JMVehicleSpawnerSettings
 			if ( pos > -1 )
 			{
 				fileName = files[i].Substring( 0, pos );
-				fileType = files[i].Substring( pos, files[i].Length() - 1 );
-			}
+				// fileType = files[i].Substring( pos, files[i].Length() - 1 );
 
-			if ( fileType == JMConstants.EXT_VEHICLE )
-			{
-				settings.Vehicles.Insert( fileName, JMVehicleSpawnerSerialize.Load( fileName ) );
+				// if ( fileType == JMConstants.EXT_VEHICLE )
+				// {
+					settings.Vehicles.Insert( fileName, JMVehicleSpawnerSerialize.Load( fileName ) );
+				// }
 			}
 		}
 		

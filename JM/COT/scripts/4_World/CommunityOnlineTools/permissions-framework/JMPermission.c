@@ -289,7 +289,7 @@ class JMPermission
 			}
 		}
 
-		//Print( message + append );
+		Print( message + append );
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{

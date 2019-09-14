@@ -26,8 +26,6 @@ class JMPlayerForm extends JMFormBase
 	ref ButtonWidget m_SetRolesButton;
 	ref ButtonWidget m_RolesBackButton;
 
-	bool m_CanUpdateList;
-
 	ref JMPermission m_LoadedPermission;
 	ref JMPermissionRowWidget m_PermissionUI;
 
@@ -82,8 +80,6 @@ class JMPlayerForm extends JMFormBase
 
 	void JMPlayerForm()
 	{
-		m_CanUpdateList = true;
-
 		m_PlayerList = new array< ref JMPlayerRowWidget >;
 		m_PermissionList = new array< ref JMPermissionRowWidget >;
 		m_RolesList = new array< ref JMRoleRowWidget >;
@@ -507,10 +503,6 @@ class JMPlayerForm extends JMFormBase
 	{
 		super.OnShow();
 
-		ReloadPlayers();
-
-		UpdateActionsFields();
-
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
 
 		m_PermissionsWrapper.Show( false );
@@ -518,33 +510,23 @@ class JMPlayerForm extends JMFormBase
 		m_ActionsWrapper.Show( true );
 
 		UpdateList();
-
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( m_PermissionsWrapper.Show, 100, false, false );
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( m_RolesWrapper.Show, 100, false, false );
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( m_ActionsWrapper.Show, 100, false, true );
+		
+		UpdateActionsFields();
 	}
 
 	override void OnHide() 
 	{
+		super.OnHide();
+
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
 	}
 
 	void UpdateList()
 	{
-		if ( m_CanUpdateList )
-		{
-			m_CanUpdateList = false;
-			UpdatePlayerList();
-			RefreshRolesUI();
-			m_CanUpdateList = true;
+		UpdatePlayerList();
+		RefreshRolesUI();
 
-			if ( GetSelectedPlayers().Count() > 0 )
-			{
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param1< string >( GetSelectedPlayers()[0] ) );
-			}
-		}
-
-		ReloadPlayers();
+		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -638,11 +620,6 @@ class JMPlayerForm extends JMFormBase
 
 			HideSide();
 		}
-	}
-
-	void ReloadPlayers()
-	{
-		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
 	}
 
 	void CreatePermissionsUI()
@@ -879,26 +856,16 @@ class JMPlayerForm extends JMFormBase
 		//if ( COT_IsUsingTestSort() )
 		//	GetPermissionsManager().SortPlayersArray();
 
-		for ( int k = 0; k < m_PlayerList.Count(); k++ )
-		{
-			m_PlayerList[k].SetPlayer( "" );
-		}
-
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
-		//Print( "Player Count: " + players.Count() );
-		for ( int i = 0; i < players.Count(); i++ )
+		for ( int i = 0; i < m_PlayerList.Count(); i++ )
 		{
-			//Print( "" + i + ": " + players[i].GetGUID() );
-			m_PlayerList[i].SetPlayer( players[i].GetGUID() );
-
-			if ( PlayerAlreadySelected( players[i].GetGUID() ) )
+			if ( i < players.Count() )
 			{
-				// OnPlayerSelected( players[i], true );
-				m_PlayerList[i].Checkbox.SetChecked( true );
+				m_PlayerList[i].SetPlayer( players[i].GetGUID() );
 			} else
 			{
-				m_PlayerList[i].Checkbox.SetChecked( false );
+				m_PlayerList[i].SetPlayer( "" );
 			}
 		}
 

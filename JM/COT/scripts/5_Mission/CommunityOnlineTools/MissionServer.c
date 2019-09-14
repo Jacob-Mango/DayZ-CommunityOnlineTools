@@ -82,6 +82,14 @@ modded class MissionServer
 	{
 		super.InvokeOnConnect( player, identity );
 
+		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
+		{
+			JMRole role = GetPermissionsManager().Roles.GetElement( i );
+			role.Serialize();
+
+			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
+		}
+		
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().OnClientConnected( identity, instance ) )
 		{
@@ -90,14 +98,6 @@ modded class MissionServer
 				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
 			}
 			return;
-		}
-
-		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
-		{
-			JMRole role = GetPermissionsManager().Roles.GetElement( i );
-			role.Serialize();
-
-			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
 		}
 
 		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );

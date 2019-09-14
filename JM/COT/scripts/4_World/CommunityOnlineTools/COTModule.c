@@ -28,7 +28,7 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
-		if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
+		if ( IsMissionClient() )
 		{
 			if ( m_COTMenu == NULL )
 			{
@@ -72,9 +72,9 @@ class COTModule : JMModuleBase
 
 	void SetMenuState( bool show )
 	{
-		if ( !GetGame().IsClient() )
+		if ( !m_COTMenu )
 			return;
-			
+
 		if ( show )
 		{
 			if ( !m_COTMenu.IsVisible() )
@@ -103,6 +103,8 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
+		Print( "CloseCOT" );
+
 		GetCommunityOnlineToolsBase().SetOpen( false );
 	}
 
@@ -111,6 +113,8 @@ class COTModule : JMModuleBase
 		if ( input != NULL && !( input.LocalPress() ) )
 			return;
 
+		Print( "ToggleMenu" );
+
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
@@ -118,6 +122,8 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalRelease() ) )
 			return;
+
+		Print( "FocusUI" );
 
 		if ( m_COTMenu == NULL )
 			return;
@@ -133,6 +139,8 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 			
+		Print( "FocusGame" );
+
 		if ( m_COTMenu == NULL )
 			return;
 
@@ -153,6 +161,8 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalPress() ) )
 			return;
+
+		Print( "ToggleCOT" );
 
 		if ( m_COTMenu == NULL )
 			return;
