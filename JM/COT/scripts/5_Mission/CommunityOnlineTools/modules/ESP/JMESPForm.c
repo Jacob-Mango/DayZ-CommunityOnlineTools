@@ -82,7 +82,6 @@ class JMESPForm extends JMFormBase
 		m_ViewCreature = UIActionManager.CreateCheckbox( mainSpacer, "Include Animals", this, "Click_CreatureESP", JMESPModule.Cast( module ).ViewCreature );
 	}
 
-
 	override void OnInit( bool fromMenu )
 	{
 		JMESPWidget.espMenu = this;
@@ -194,7 +193,7 @@ class JMESPForm extends JMFormBase
 
 	void UpdateCheckboxStates()
 	{
-		if ( JMESPModule.Cast( module ).ViewEverything )
+		if ( JMESPModule.Cast( module ).CanViewEverything && JMESPModule.Cast( module ).ViewEverything )
 		{
 			m_ViewPlayers.Disable();
 			m_ViewBaseBuilding.Disable();
@@ -210,7 +209,8 @@ class JMESPForm extends JMFormBase
 
 	void Click_UpdateESP( UIEvent eid, ref UIActionButton action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		if ( JMESPModule.Cast( module ).IsShowing )
 		{
@@ -370,14 +370,14 @@ class JMESPForm extends JMFormBase
 
 		if ( JMESPModule.Cast( module ).ESPIsUpdating )
 		{
-			m_TextMode.Disable();
+			//m_TextMode.Disable();
 
-			JMESPWidget.ShowJustName = true;
+			//JMESPWidget.ShowJustName = true;
 		} else
 		{
-			m_TextMode.Enable();
+			//m_TextMode.Enable();
 
-			JMESPWidget.ShowJustName = m_TextMode.IsChecked();
+			//JMESPWidget.ShowJustName = m_TextMode.IsChecked();
 		}
 	}
 }

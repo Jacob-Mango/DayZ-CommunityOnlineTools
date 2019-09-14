@@ -20,9 +20,16 @@ class JMPlayerInstance: Managed
 
 		if ( IdentityPlayer && GetGame().IsServer() )
 		{
-			Data.SName = IdentityPlayer.GetName();
 			Data.SGUID = IdentityPlayer.GetId();
 			Data.SSteam64ID = IdentityPlayer.GetPlainId();
+			Data.SName = IdentityPlayer.GetName();
+		}
+
+		if ( !GetGame().IsMultiplayer() )
+		{
+			Data.SGUID = JMConstants.OFFLINE_GUID;
+			Data.SSteam64ID = JMConstants.OFFLINE_STEAM;
+			Data.SName = JMConstants.OFFLINE_NAME;
 		}
 
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
@@ -36,31 +43,7 @@ class JMPlayerInstance: Managed
 
 	void SwapData( JMPlayerInformation newData )
 	{
-		Data.ARoles.Clear();
-		Data.ARoles.Copy( newData.ARoles );
-		Data.APermissions.Clear();
-		Data.APermissions.Copy( newData.APermissions );
-
-		Data.VPosition = newData.VPosition;
-		Data.VDirection = newData.VDirection;
-		Data.VOrientation = newData.VOrientation;
-		
-		Data.FHealth = newData.FHealth;
-		Data.FBlood = newData.FBlood;
-		Data.FShock = newData.FShock;
-		Data.IBloodStatType = newData.IBloodStatType;
-		Data.FEnergy = newData.FEnergy;
-		Data.FWater = newData.FWater;
-		Data.FHeatComfort = newData.FHeatComfort;
-		Data.FWet = newData.FWet;
-		Data.FTremor = newData.FTremor;
-		Data.FStamina = newData.FStamina;
-		Data.Kills = newData.Kills;
-		Data.TotalKills = newData.TotalKills;
-		Data.ILifeSpanState = newData.ILifeSpanState;
-		Data.BBloodyHands = newData.BBloodyHands;
-		Data.BGodMode = newData.BGodMode;
-		Data.BInvisibility = newData.BInvisibility;
+		Data.Copy( newData );
 	}
 
 	string GetGUID()
@@ -95,6 +78,17 @@ class JMPlayerInstance: Managed
 
 			PlayerObject = GetPlayerObjectByIdentity( IdentityPlayer );
 
+			if ( PlayerObject )
+			{
+				PlayerObject.SetAuthenticatedPlayer( this );
+				Data.Load( PlayerObject );
+			}
+		}
+
+		if ( !GetGame().IsMultiplayer() )
+		{
+			PlayerObject = GetGame().GetPlayer();
+			
 			if ( PlayerObject )
 			{
 				PlayerObject.SetAuthenticatedPlayer( this );
@@ -217,7 +211,7 @@ class JMPlayerInstance: Managed
 		m_PlayerFile.Roles.Copy( Data.ARoles );
 		m_PlayerFile.Save();
 
-		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PLAYER, FileMode.WRITE );
+		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SGUID ) + JMConstants.EXT_PERMISSION, FileMode.WRITE );
 
 		if ( file != 0 )
 		{
@@ -229,6 +223,16 @@ class JMPlayerInstance: Managed
 			
 			CloseFile(file);
 		}
+	}
+
+	string FileReadyStripName( string name )
+	{
+		name.Replace( "\\", "" );
+		name.Replace( "/", "" );
+		name.Replace( "=", "" );
+		name.Replace( "+", "" );
+
+		return name;
 	}
 
 	protected bool ReadPermissions( string filename )
@@ -274,21 +278,17 @@ class JMPlayerInstance: Managed
 			AddRole( m_PlayerFile.Roles[j] );
 		}
 
-		if ( !ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION ) )
+		if ( !ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SGUID ) + JMConstants.EXT_PERMISSION ) )
 		{
-			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
+			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SGUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
-				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
-			}
-			
-			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION ) )
+				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SGUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+			} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SSteam64ID ) + JMConstants.EXT_PERMISSION ) )
 			{
-				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION );
-			}
-			
-			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
+				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SSteam64ID ) + JMConstants.EXT_PERMISSION );
+			} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SSteam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
-				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( Data.SSteam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
 			}
 		}
 
@@ -297,7 +297,7 @@ class JMPlayerInstance: Managed
 
 	void DebugPrint()
 	{
-		Print( "Printing permissions for " + Data.SSteam64ID );
+		Print( "Printing permissions for " + Data.SGUID );
 
 		RootPermission.DebugPrint( 0 );
 	}

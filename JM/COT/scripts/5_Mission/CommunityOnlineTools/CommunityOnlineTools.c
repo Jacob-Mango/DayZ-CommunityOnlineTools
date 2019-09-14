@@ -29,6 +29,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	override void OnFinish()
 	{
 		super.OnFinish();
+
+		SetOpen( false );
 	}
 
 	override void OnLoaded()
@@ -57,7 +59,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				players[i].UpdatePlayerData();
 				players[i].Serialize();
 
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[i].Data, players[i].IdentityPlayer ), false, sender );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject ), false, sender );
 			}
 		}
 	}
@@ -98,16 +100,16 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			player.UpdatePlayerData();
 			player.Serialize();
 
-			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( player.Data, player.IdentityPlayer ), false, sender );
+			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( player.Data, player.IdentityPlayer, player.PlayerObject ), false, sender );
 		}
 
 		if ( type == CallType.Client )
 		{
-			ref Param2< ref JMPlayerInformation, PlayerIdentity > cdata;
+			ref Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase > cdata;
 			if ( !ctx.Read( cdata ) )
 				return;
 
-			GetPermissionsManager().UpdatePlayer( cdata.param1, cdata.param2 );
+			GetPermissionsManager().UpdatePlayer( cdata.param1, cdata.param2, cdata.param3 );
 		}
 	}
 
@@ -115,11 +117,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( type == CallType.Client )
 		{
-			ref Param3< string, ref JMPlayerInformation, PlayerIdentity > data;
+			ref Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase > data;
 			if ( !ctx.Read( data ) )
 				return;
 
-			GetPermissionsManager().UpdatePlayer( data.param2, data.param3 );
+			GetPermissionsManager().UpdatePlayer( data.param2, data.param3, data.param4 );
 
 			GetPermissionsManager().SetClientGUID( data.param1 );
 
@@ -177,6 +179,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			{
 				GetPermissionsManager().LoadRole( data.param1, arr );
 			}
+
+			GetModuleManager().OnClientPermissionsUpdated();
 		}
 	}
 }

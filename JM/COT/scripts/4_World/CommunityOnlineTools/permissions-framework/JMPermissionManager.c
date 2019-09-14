@@ -242,7 +242,7 @@ class JMPermissionManager
 		return auPlayer;
 	}
 
-	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL )
+	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL, PlayerBase player = NULL )
 	{
 		//Print( "UpdatePlayer (" + data.SGUID + ")" );
 		JMPlayerInstance instance = GetPlayer( data.SGUID );
@@ -267,6 +267,16 @@ class JMPermissionManager
 		{
 			//Print( " identity" );
 			instance.IdentityPlayer = identity;
+		}
+
+		if ( IsMissionClient() )
+		{
+			if ( m_ClientGUID == data.SGUID )
+			{
+				GetModuleManager().OnClientPermissionsUpdated();
+			}
+
+			instance.PlayerObject = player;
 		}
 
 		return instance;

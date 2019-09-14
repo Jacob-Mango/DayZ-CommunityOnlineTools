@@ -5,6 +5,8 @@ class CommunityOnlineToolsBase
     private bool m_IsActive;
     private bool m_IsOpen;
 
+    private string m_FileLogName;
+
     void CommunityOnlineToolsBase()
     {
 		m_Loaded = false;
@@ -14,16 +16,53 @@ class CommunityOnlineToolsBase
     {
     }
 
+	private string GetDateTime()
+	{
+		int year, month, day;
+		int hour, minute, second;
+		GetYearMonthDay( year, month, day );
+
+		GetHourMinuteSecond( hour, minute, second );
+		string date = day.ToStringLen( 2 ) + "-" + month.ToStringLen( 2 ) + "-" + year.ToStringLen( 2 );
+		string time = hour.ToStringLen( 2 ) + "-" + minute.ToStringLen( 2 ) + "-" + second.ToStringLen( 2 );
+
+		return date + " " + time;
+	}
+
+    void CreateNewLog()
+    {
+		if ( !FileExist( JMConstants.DIR_LOGS ) )
+		{
+			MakeDirectory( JMConstants.DIR_LOGS );
+        }
+
+        m_FileLogName = JMConstants.DIR_LOGS + "cot-" + GetDateTime() + JMConstants.EXT_LOG;
+        int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
+
+        if ( fileLog != 0 )
+        {
+		    CloseFile( fileLog );
+        }
+    }
+
+    void CloseLog()
+    {
+        m_FileLogName = "";
+    }
+
     void OnStart()
 	{
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
 		}
+
+        CreateNewLog();
 	}
 
 	void OnFinish()
 	{
+        CloseLog();
 	}
 
 	void OnLoaded()
@@ -104,14 +143,28 @@ class CommunityOnlineToolsBase
 
     void Log( JMPlayerInstance player, string text )
     {
-        text = "[COT] " + player.GetSteam64ID() + ": " + text;
+        if ( player == NULL )
+        {
+            text = "[COT] Game: " + text;
+        } else if ( GetGame().IsMultiplayer() )
+        {
+            text = "[COT] " + player.GetSteam64ID() + ": " + text;
+        } else
+        {
+            text = "[COT] Offline: " + text;
+        }
 
         if ( GetGame().IsServer() )
         {
             GetGame().AdminLog( text );
         }
 
-        //GetLogger().Log( text, "JM_COT_StaticFunctions" );
+		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
+        if ( fileLog != 0 )
+        {
+		    FPrintln( fileLog, text );
+		    CloseFile( fileLog );
+        }
     }
 
     void Log( PlayerIdentity player, string text )
@@ -131,8 +184,13 @@ class CommunityOnlineToolsBase
         {
             GetGame().AdminLog( text );
         }
-        
-        //GetLogger().Log( text, "JM_COT_StaticFunctions" );
+
+		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
+        if ( fileLog != 0 )
+        {
+		    FPrintln( fileLog, text );
+		    CloseFile( fileLog );
+        }
     }
 }
 

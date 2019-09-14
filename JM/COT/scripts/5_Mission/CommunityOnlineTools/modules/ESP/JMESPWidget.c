@@ -13,8 +13,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	protected ref Widget			m_JustName;
 
 	protected ref TextWidget		m_Name1;
-
 	protected ref TextWidget		m_Name2;
+
 	protected ref ButtonWidget		m_Button;
 	ref CheckBoxWidget				Checkbox;
 
@@ -250,40 +250,51 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		ShowOnScreen = true;
 			
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
+
+		JMSelectedModule sm;
+		if ( Class.CastTo( sm, GetModuleManager().GetModule( JMSelectedModule ) ) )
+		{
+			if ( sm.GetObjects().Find( Info.target ) > -1 )
+			{
+				Checkbox.SetChecked( true );
+			} else
+			{
+				Checkbox.SetChecked( false );
+			}
+		}
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
-	{		
-		if ( Info.type == JMESPType.PLAYER )
+	{
+		if ( w == NULL )
 		{
-			if ( w == Checkbox && Checkbox != NULL )
+			return false;
+		}
+		
+		if ( w == Checkbox )
+		{
+			JMScriptInvokers.MENU_OBJECT_CHECKBOX.Invoke( Info.target, Checkbox.IsChecked() );
+
+			if ( Info.type == JMESPType.PLAYER && Info.player )
 			{
 				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), Checkbox.IsChecked() );
 			}
 
-			if ( w == m_Button && Checkbox != NULL )
-			{
-				JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID() );
-			}
-		}
-		
-		if ( w == Checkbox && Checkbox != NULL )
-		{
-			if ( Checkbox.IsChecked() )
-			{
-				GetObjectSelectedModule().AddObject( Info.target );
-			} else
-			{
-				GetObjectSelectedModule().RemoveObject( Info.target );
-			}
+			return true;
 		}
 
-		if ( w == m_Button && m_Button != NULL )
+		if ( w == m_Button )
 		{
-			GetObjectSelectedModule().ClearObjects();
-			GetObjectSelectedModule().AddObject( Info.target );
+			JMScriptInvokers.MENU_OBJECT_BUTTON.Invoke( Info.target, !Checkbox.IsChecked() );
+
+			if ( Info.type == JMESPType.PLAYER && Info.player )
+			{
+				JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID(), !Checkbox.IsChecked() );
+			}
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 }

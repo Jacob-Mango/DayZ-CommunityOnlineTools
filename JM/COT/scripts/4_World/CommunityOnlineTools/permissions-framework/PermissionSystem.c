@@ -1,6 +1,6 @@
-static ref set< string > JM_SELECTED_PLAYERS = new set< string >;
+static ref array< string > JM_SELECTED_PLAYERS = new array< string >;
 
-set< string > GetSelectedPlayers()
+array< string > GetSelectedPlayers()
 {
 	return JM_SELECTED_PLAYERS;
 }
@@ -8,6 +8,21 @@ set< string > GetSelectedPlayers()
 bool PlayerAlreadySelected( string guid )
 {
 	return JM_SELECTED_PLAYERS.Find( guid ) > -1;
+}
+
+int PlayerSelectedIndex( string guid )
+{
+	return JM_SELECTED_PLAYERS.Find( guid );
+}
+
+void ClearSelectedPlayers()
+{
+	JM_SELECTED_PLAYERS.Clear();
+}
+
+int CountPlayersSelected()
+{
+	return JM_SELECTED_PLAYERS.Count();
 }
 
 int RemoveSelectedPlayer( string guid )
@@ -28,20 +43,9 @@ int AddSelectedPlayer( string guid )
 	
 	if ( position > -1 )
 	{
+		Print( guid + " was already selected..." );
 		return position;
 	}
 
 	return JM_SELECTED_PLAYERS.Insert( guid );
-}
-
-array< string > GetSelectedAsGUIDs()
-{
-	ref array< string > output = new array< string >;
-
-	for ( int i = 0; i < JM_SELECTED_PLAYERS.Count(); i++)
-	{
-		output.Insert( JM_SELECTED_PLAYERS[i] );
-	}
-
-	return output;
 }

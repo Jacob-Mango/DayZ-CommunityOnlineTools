@@ -60,10 +60,36 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Previous" );
+
+		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
+		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
 	}
 
 	void ~JMPlayerModule()
 	{
+		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Remove( OnPlayer_Checked );
+		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
+	}
+
+	void OnPlayer_Checked( string guid, bool checked )
+	{
+		if ( checked )
+		{
+			AddSelectedPlayer( guid );
+		} else
+		{
+			RemoveSelectedPlayer( guid );
+		}
+	}
+
+	void OnPlayer_Button( string guid, bool check )
+	{
+		ClearSelectedPlayers();
+
+		if ( check )
+		{
+			AddSelectedPlayer( guid );
+		}
 	}
 
 	override string GetLayoutRoot()
@@ -956,7 +982,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.Save();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[j].GetSteam64ID() );
+				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[j].GetGUID() );
 
 				SendAdminNotification( sender, player.IdentityPlayer, "Your permissions have been updated." );
 			}
@@ -993,7 +1019,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].GetSteam64ID() );
+				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].GetGUID() );
 
 				SendAdminNotification( sender, players[k].IdentityPlayer, "Your roles have been updated." );
 			}

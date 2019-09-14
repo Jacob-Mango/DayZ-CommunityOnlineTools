@@ -7,7 +7,7 @@ modded class JMModuleConstructor
         // modules.Insert( CommunityOnlineToolsModule );
 		modules.Insert( JMDebugModule );
 		// modules.Insert( JMServerInfoModule );
-		// modules.Insert( JMSelectedModule );
+		modules.Insert( JMSelectedModule );
 		modules.Insert( JMPlayerModule );
 		modules.Insert( JMObjectSpawnerModule );
 		modules.Insert( JMESPModule );

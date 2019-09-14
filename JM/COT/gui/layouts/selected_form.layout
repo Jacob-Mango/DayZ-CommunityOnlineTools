@@ -2,46 +2,62 @@ GridSpacerWidgetClass JMSelectedForm {
  visible 0
  color 0 0 0 0
  position 0 0
- size 250 600
+ size 500 600
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
  scriptclass "JMSelectedForm"
  style EditorPanel
- Columns 1
+ Columns 2
  Rows 1
  {
-  PanelWidgetClass object_list_wrapper {
+  PanelWidgetClass object_selected_list_wrapper {
    color 0 0 0 0
    position 0 0
-   size 1 480
-   halign left_ref
+   size 1 0.5
    hexactpos 0
    vexactpos 0
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
+   halign left_ref
    style EditorPanel
    {
-    TextWidgetClass object_count {
-     position 0 10
+    TextWidgetClass object_selected_list_title {
+     position 5 5
      size 1 20
+     halign left_ref
      valign top_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 1
-     text "N/A Selected"
+     text "Selected List"
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
      "exact text size" 16
-     "text halign" center
+     "text halign" left
     }
-    ScrollWidgetClass object_list_scroller {
-     position 0 40
-     size 1 440
-     halign center_ref
+    TextWidgetClass object_selected_list_count {
+     position 5 5
+     size 1 20
+     halign right_ref
      valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "Selected: N/A"
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" right
+    }
+    ScrollWidgetClass object_selected_list_scroller {
+     position 0 0
+     size 1 570
+     halign center_ref
+     valign bottom_ref
      hexactpos 0
      vexactpos 1
      hexactsize 0
@@ -49,7 +65,7 @@ GridSpacerWidgetClass JMSelectedForm {
      style blank
      "Scrollbar V" 1
      {
-      GridSpacerWidgetClass object_list_grid_spacer {
+      GridSpacerWidgetClass object_selected_list_grid_spacer {
        position 0 0
        size 1 1
        hexactpos 1
@@ -60,7 +76,7 @@ GridSpacerWidgetClass JMSelectedForm {
        Columns 1
        Rows 10
        {
-        GridSpacerWidgetClass object_list_00 {
+        GridSpacerWidgetClass object_selected_list_00 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -71,7 +87,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_01 {
+        GridSpacerWidgetClass object_selected_list_01 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -82,7 +98,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_02 {
+        GridSpacerWidgetClass object_selected_list_02 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -93,7 +109,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_03 {
+        GridSpacerWidgetClass object_selected_list_03 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -104,7 +120,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_04 {
+        GridSpacerWidgetClass object_selected_list_04 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -115,7 +131,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_05 {
+        GridSpacerWidgetClass object_selected_list_05 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -126,7 +142,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_06 {
+        GridSpacerWidgetClass object_selected_list_06 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -137,7 +153,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_07 {
+        GridSpacerWidgetClass object_selected_list_07 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -148,7 +164,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_08 {
+        GridSpacerWidgetClass object_selected_list_08 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -159,7 +175,7 @@ GridSpacerWidgetClass JMSelectedForm {
          Columns 1
          Rows 100
         }
-        GridSpacerWidgetClass object_list_09 {
+        GridSpacerWidgetClass object_selected_list_09 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -178,11 +194,12 @@ GridSpacerWidgetClass JMSelectedForm {
   }
   ScrollWidgetClass actions_scroller {
    position 0 0
-   size 1 1
-   hexactpos 1
-   vexactpos 1
+   size 1 0.5
+   hexactpos 0
+   vexactpos 0
    hexactsize 0
    vexactsize 0
+   halign right_ref
    style blank
    "Scrollbar V" 1
    {
@@ -195,7 +212,7 @@ GridSpacerWidgetClass JMSelectedForm {
      vexactsize 0
      "Size To Content V" 1
      Columns 1
-     Rows 1000
+     Rows 100
     }
    }
   }

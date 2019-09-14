@@ -69,22 +69,37 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 			Hide();
 		} else 
 		{
-			Show();
-
 			JMPlayerInstance player = GetPermissionsManager().GetPlayer( m_GUID );
+			if ( player )
+			{
+				Show();
 
-			if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
-			{
-				Name.SetText( "Offline Mode" );
-				Name.SetColor( 0xFF2ECC71 );
-			} else if ( GetPermissionsManager().GetClientGUID() == m_GUID )
-			{
 				Name.SetText( player.GetName() );
-				Name.SetColor( 0xFF2ECC71 );
-			} else 
+
+				if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
+				{
+					Name.SetColor( 0xFF2ECC71 );
+				} else if ( GetPermissionsManager().GetClientGUID() == m_GUID )
+				{
+					Name.SetColor( 0xFF2ECC71 );
+				} else if ( player.HasPermission( "COT" ) )
+				{
+					Name.SetColor( 0xFFA85A32 );
+				} else 
+				{
+					Name.SetColor( 0xFFFFFFFF );
+				}
+
+				if ( PlayerAlreadySelected( m_GUID ) )
+				{
+					Checkbox.SetChecked( true );
+				} else
+				{
+					Checkbox.SetChecked( false );
+				}
+			} else
 			{
-				Name.SetText( player.GetName() );
-				Name.SetColor( 0xFFFFFFFF );
+				Hide();
 			}
 		}
 	}
@@ -95,17 +110,40 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
-	{		
+	{
+		if ( w == NULL )
+		{
+			return false;
+		}
+
 		if ( w == Checkbox )
 		{
 			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( m_GUID, Checkbox.IsChecked() );
+
+			JMPlayerInstance instanceCheck = GetPermissionsManager().GetPlayer( m_GUID );
+
+			if ( instanceCheck && instanceCheck.PlayerObject )
+			{
+				JMScriptInvokers.MENU_OBJECT_CHECKBOX.Invoke( instanceCheck.PlayerObject, Checkbox.IsChecked() );
+			}
+
+			return true;
 		}
 
 		if ( w == Button )
 		{
-			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( m_GUID );
+			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( m_GUID, !Checkbox.IsChecked() );
+
+			JMPlayerInstance instanceBut = GetPermissionsManager().GetPlayer( m_GUID );
+
+			if ( instanceBut && instanceBut.PlayerObject )
+			{
+				JMScriptInvokers.MENU_OBJECT_BUTTON.Invoke( instanceBut.PlayerObject, !Checkbox.IsChecked() );
+			}
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 }

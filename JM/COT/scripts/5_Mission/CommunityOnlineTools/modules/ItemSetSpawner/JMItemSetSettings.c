@@ -6,42 +6,40 @@ class JMItemSetSettings
 	{
 		ref JMItemSetSettings settings = new JMItemSetSettings();
 
-		if ( GetGame().IsClient() || ( !GetGame().IsMultiplayer() && GetGame().IsServer() ) )
+		if ( GetGame().IsClient() )
 		{
 			settings.Defaults();
 			return settings;
 		}
-		
-		MakeDirectory( ITEM_SETS_FOLDER );
 
-		array< string > files = FindFilesInLocation( ITEM_SETS_FOLDER );
-
-		if ( FileExist( ITEM_SETS_FOLDER + COT_FILE_EXIST ) ) 
+		if ( !FileExist( JMConstants.DIR_ITEMS ) )
 		{
-			//GetLogger().Log( "Found existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
-			for ( int i = 0; i < files.Count(); i++ )
-			{
-				if ( files[i] == COT_FILE_EXIST )
-					continue;
-
-				string name = files[i];
-				int pos = files[i].IndexOf(".");
-				
-				if ( pos > -1 )
-				{
-					name = files[i].Substring( 0, pos );
-				}
-
-				settings.ItemSets.Insert( name, JMItemSetSerialize.Load( name ) );
-				//GetLogger().Log( "	Loading item set file ( " + name + " )", "JM_COT_ItemSetSpawner" );
-			}
-		} else 
-		{
-			//GetLogger().Log( "Didn't find existence ( " + ITEM_SETS_FOLDER + " )", "JM_COT_ItemSetSpawner" );
-			DeleteFiles( ITEM_SETS_FOLDER, files );
+			MakeDirectory( JMConstants.DIR_ITEMS );
 
 			settings.Defaults();
 			settings.Save();
+
+			return settings;
+		}
+
+		array< string > files = FindFilesInLocation( JMConstants.DIR_ITEMS );
+
+		for ( int i = 0; i < files.Count(); i++ )
+		{
+			string fileName;
+			string fileType;
+			int pos = files[i].IndexOf(".");
+			
+			if ( pos > -1 )
+			{
+				fileName = files[i].Substring( 0, pos );
+				fileType = files[i].Substring( pos, files[i].Length() );
+			}
+
+			if ( fileType == JMConstants.EXT_ITEM )
+			{
+				settings.ItemSets.Insert( fileName, JMItemSetSerialize.Load( fileName ) );
+			}
 		}
 
 		return settings;
@@ -53,8 +51,6 @@ class JMItemSetSettings
 		{
 			ItemSets.GetElement( i ).Save();
 		}
-
-		CreateFilesExist( ITEM_SETS_FOLDER );
 	}
 
 	void Defaults()

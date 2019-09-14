@@ -37,24 +37,25 @@ class JMSelectedForm extends JMFormBase
 	}
 
 	override void OnInit( bool fromMenu )
-	{
-		m_ActionsWrapper    = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
-	
-		m_WObjectList		= layoutRoot.FindAnyWidget( "object_list_wrapper" );
-		m_WObjectCount		= TextWidget.Cast( layoutRoot.FindAnyWidget( "object_count" ) );
+	{	
+		m_WObjectList		= layoutRoot.FindAnyWidget( "object_selected_list_wrapper" );
+		m_WObjectCount		= TextWidget.Cast( layoutRoot.FindAnyWidget( "object_selected_list_count" ) );
 
 		ref Widget rwWidget = NULL;
 		ref JMSelectedWidget rwScript = NULL;
 
-		for ( int i = 0; i < 10; i++ )
+		int numSpacers = 10;
+		int numRows = 100;
+
+		for ( int i = 0; i < numSpacers; i++ )
 		{
-			GridSpacerWidget gsw = GridSpacerWidget.Cast( m_WObjectList.FindAnyWidget( "object_list_0" + i ) );
+			GridSpacerWidget gsw = GridSpacerWidget.Cast( m_WObjectList.FindAnyWidget( "object_selected_list_0" + i ) );
 			
 			if ( gsw )
 			{
 				m_ObjectListContainers.Insert( gsw );
 
-				for ( int j = 0; j < 100; j++ )
+				for ( int j = 0; j < numRows; j++ )
 				{
 					rwWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/selected_widget.layout", gsw );
 					
@@ -78,37 +79,58 @@ class JMSelectedForm extends JMFormBase
 				}
 			}
 		}
+
+		m_TotalNumObjects = numSpacers * numRows;
+
+		m_ActionsWrapper = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
+
+		UIActionManager.CreateButton( m_ActionsWrapper, "Delete All", this, "Click_Delete" )
 	}
 
-	void OnAddObject( Object obj )
+	override void OnShow()
 	{
-		for ( int i = 0; i < m_SelectedWidgets.Count(); i++ )
+		super.OnShow();
+
+		JMSelectedModule smod;
+		if ( Class.CastTo( smod, module ) )
 		{
-			if ( m_SelectedWidgets[i].GetObject() == NULL )
-			{
-				m_SelectedWidgets[i].SetObject( obj );
-				break;
-			}
+			RefreshSelectedList( smod.GetObjects() );
 		}
 	}
 
-	void OnRemoveObject( Object obj )
+	void RefreshSelectedList( set< Object > objects )
 	{
 		for ( int i = 0; i < m_SelectedWidgets.Count(); i++ )
 		{
-			if ( m_SelectedWidgets[i].GetObject() == obj )
+			if ( i < objects.Count() )
+			{
+				if ( objects[i] == NULL )
+				{
+					Print( "Removing selected because NULL" );
+					objects.Remove( i );
+					i--;
+					continue;
+				}
+
+				m_SelectedWidgets[i].SetObject( objects[i] );
+			} else
 			{
 				m_SelectedWidgets[i].SetObject( NULL );
-				break;
 			}
 		}
+
+		m_WObjectCount.SetText( "" + objects.Count() + " Selected" );
 	}
 
-	void OnClear()
+	void Click_Delete( UIEvent eid, ref UIActionButton action )
 	{
-		for ( int i = 0; i < m_SelectedWidgets.Count(); i++ )
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMSelectedModule smod;
+		if ( Class.CastTo( smod, module ) )
 		{
-			m_SelectedWidgets[i].SetObject( NULL );
+			smod.Delete();
 		}
 	}
 }
