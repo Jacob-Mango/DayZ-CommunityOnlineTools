@@ -33,7 +33,7 @@ class JMItemSetSettings
 			if ( pos > -1 )
 			{
 				fileName = files[i].Substring( 0, pos );
-				fileType = files[i].Substring( pos, files[i].Length() );
+				fileType = files[i].Substring( pos, files[i].Length() - 1 );
 			}
 
 			if ( fileType == JMConstants.EXT_ITEM )

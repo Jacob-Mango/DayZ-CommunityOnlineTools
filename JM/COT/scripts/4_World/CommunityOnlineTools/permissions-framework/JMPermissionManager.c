@@ -111,7 +111,7 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity identity = NULL )
 	{
-		PMPrint();
+		// PMPrint();
 
 		if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
 		{
@@ -174,7 +174,7 @@ class JMPermissionManager
 
 		Players.Insert( guid, instance );
 
-		PMPrint();
+		// PMPrint();
 
 		return true;
 	}

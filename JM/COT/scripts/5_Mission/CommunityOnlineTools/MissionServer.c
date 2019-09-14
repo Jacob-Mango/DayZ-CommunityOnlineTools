@@ -85,6 +85,10 @@ modded class MissionServer
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().OnClientConnected( identity, instance ) )
 		{
+			if ( instance )
+			{
+				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
+			}
 			return;
 		}
 
@@ -97,8 +101,6 @@ modded class MissionServer
 		}
 
 		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
-
-		GetGame().SelectPlayer( identity, player );
 	} 
 
 	override void PlayerDisconnected( PlayerBase player, PlayerIdentity identity, string uid )

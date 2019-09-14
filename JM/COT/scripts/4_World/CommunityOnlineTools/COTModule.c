@@ -72,6 +72,9 @@ class COTModule : JMModuleBase
 
 	void SetMenuState( bool show )
 	{
+		if ( !GetGame().IsClient() )
+			return;
+			
 		if ( show )
 		{
 			if ( !m_COTMenu.IsVisible() )

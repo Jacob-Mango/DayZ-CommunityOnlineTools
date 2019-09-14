@@ -1,4 +1,4 @@
-class JMServerInfoData: Managed
+class JMServerInfoData
 {
     float ServerFPS;
     int OnlinePlayers;
