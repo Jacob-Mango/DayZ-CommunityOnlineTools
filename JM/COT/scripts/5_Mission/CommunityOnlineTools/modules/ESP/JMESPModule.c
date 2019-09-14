@@ -2,8 +2,8 @@ class JMESPModule: JMRenderableModuleBase
 {
 	protected const int m_UserIDStart = 10000;
 
-	protected ref array< ref JMObjectMeta > m_ESPObjects;
-	protected ref array< ref JMESPWidget > m_ESPBoxes;
+	protected autoptr array< ref JMObjectMeta > m_ESPObjects;
+	protected autoptr array< ref JMESPWidget > m_ESPBoxes;
 
 	bool CanViewPlayers;
 	bool CanViewBaseBuilding;
@@ -58,14 +58,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
-		GetRPCManager().AddRPC( "COT_ESP", "RequestPlayerESPData", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_ESP", "ShowPlayerESPData", this, SingeplayerExecutionType.Client );
-
-		GetRPCManager().AddRPC( "COT_ESP", "ServerDeleteSelected", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "ServerSetSelected", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Set" );
-		GetPermissionsManager().RegisterPermission( "ESP.Manipulation.Delete" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
@@ -74,11 +67,19 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.View.Infected" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Creature" );
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
+
+		JMScriptInvokers.MENU_OBJECT_BUTTON.Insert( OnObjectButton );
+		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Insert( OnObjectCheckbox );
 	}
 
 	void ~JMESPModule()
 	{
+		HideESP();
+
 		Hide();
+
+		JMScriptInvokers.MENU_OBJECT_BUTTON.Remove( OnObjectButton );
+		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Remove( OnObjectCheckbox );
 	}
 
 	override bool HasAccess()
@@ -112,37 +113,31 @@ class JMESPModule: JMRenderableModuleBase
 		JMESPWidget.espModule = this;
 	}
 
-	int GetSelectedCount()
+	void OnObjectButton( Object obj, bool check )
 	{
-		return 0;
-	}
-
-	void ServerDeleteSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", sender ) )
-			return;
-
-		ref Param1< ref array< Object > > data;
-		if ( !ctx.Read( data ) ) return;
-
-		ref array< Object > copy = new array< Object >;
-		copy.Copy( data.param1 );
-		
-		if ( type == CallType.Server )
+		Print( "obj " + obj + " will be " + check );
+		for ( int i = 0; i < m_ESPBoxes.Count(); i++ )
 		{
-			for ( int i = 0; i < copy.Count(); i++ )
+			m_ESPBoxes[i].Checkbox.SetChecked( false );
+
+			if ( m_ESPBoxes[i].Info.target == obj )
 			{
-				if ( copy[i] == NULL ) continue;
-
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
-
-				GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
-				GetGame().ObjectDelete( copy[i] );
+				m_ESPBoxes[i].Checkbox.SetChecked( !check );
 			}
 		}
+	}
 
-		delete copy;
+	void OnObjectCheckbox( Object obj, bool checked )
+	{
+		Print( "obj " + obj + " is " + checked );
+		
+		for ( int i = 0; i < m_ESPBoxes.Count(); i++ )
+		{
+			if ( m_ESPBoxes[i].Info.target == obj )
+			{
+				m_ESPBoxes[i].Checkbox.SetChecked( checked );
+			}
+		}
 	}
 
 	void ServerSetSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
@@ -177,10 +172,11 @@ class JMESPModule: JMRenderableModuleBase
 		if ( type == CallType.Server )
 		{
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
-			if ( !player ) return;
-
-			GetCommunityOnlineToolsBase().Log( sender, "Entering Full Map ESP" );
-			GetGame().ObjectDelete( player );
+			if ( player )
+			{
+				GetCommunityOnlineToolsBase().Log( sender, "Entering Full Map ESP" );
+				GetGame().ObjectDelete( player );
+			}
 			
 			GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 		}
@@ -193,7 +189,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	void EnableFullMap()
 	{
-		if ( CurrentActiveCamera == NULL ) return;
+		if ( CurrentActiveCamera == NULL )
+			return;
 
 		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 	}
@@ -291,9 +288,8 @@ class JMESPModule: JMRenderableModuleBase
 					
 					if ( man && man.GetIdentity() )
 					{
-						PlayerIdentity identity = man.GetIdentity();
-						espInfo.player = GetPermissionsManager().GetPlayerByIdentity( identity );
-						espInfo.name = identity.GetName();
+						espInfo.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
+						espInfo.name = espInfo.player.GetName();
 					}
 
 					espInfo.target = obj;

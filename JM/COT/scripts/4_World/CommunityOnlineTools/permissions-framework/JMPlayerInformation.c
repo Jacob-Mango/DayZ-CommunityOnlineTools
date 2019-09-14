@@ -69,9 +69,9 @@ class JMPlayerInformation
 		BInvisibility = player.IsInvisible();
 	}
 
-	void Copy( JMPlayerInformation data, bool isClient )
+	void Copy( JMPlayerInformation data )
 	{
-		if ( isClient )
+		if ( IsMissionClient() )
 		{
 			SName	    	= "" + data.SName;
 			SGUID	    	= "" + data.SGUID;

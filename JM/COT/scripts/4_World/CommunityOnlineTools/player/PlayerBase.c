@@ -18,6 +18,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 
 		m_JMHasLastPosition = false;
+		m_JMLastPosition = "0 0 0";
 	}
 
 	override void OnVariablesSynchronized()
@@ -41,7 +42,7 @@ modded class PlayerBase
 
 	bool HasLastPosition()
 	{
-		return m_JMHasLastPosition != "0 0 0";
+		return m_JMHasLastPosition;
 	}
 
 	vector GetLastPosition()

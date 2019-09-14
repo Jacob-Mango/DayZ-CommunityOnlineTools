@@ -257,7 +257,7 @@ class JMTeleportModule: JMRenderableModuleBase
 					player.SetPosition( position );
 				}
 				
-				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].GetSteam64ID() + " to " + location.Name );
+				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].GetGUID() + " to " + location.Name );
 				
 				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
 			}

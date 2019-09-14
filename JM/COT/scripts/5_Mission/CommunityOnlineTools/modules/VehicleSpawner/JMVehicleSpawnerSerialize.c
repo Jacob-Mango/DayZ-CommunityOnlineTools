@@ -1,5 +1,3 @@
-const string VEHICLE_SPAWNER_FOLDER = JMConstants.DIR_COT + "Vehicles\\";
-
 class JMVehicleSpawnerSerialize
 {
 	[NonSerialized()]
@@ -15,14 +13,14 @@ class JMVehicleSpawnerSerialize
 		ref JMVehicleSpawnerSerialize settings = new JMVehicleSpawnerSerialize;
 		settings.m_FileName = file;
 
-		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( VEHICLE_SPAWNER_FOLDER + settings.m_FileName + ".json", settings );
+		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( JMConstants.DIR_VEHICLES + settings.m_FileName + JMConstants.EXT_VEHICLE, settings );
 
 		return settings;
 	}
 
 	void Save()
 	{
-		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonSaveFile( VEHICLE_SPAWNER_FOLDER + m_FileName + ".json", this );
+		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonSaveFile( JMConstants.DIR_VEHICLES + m_FileName + JMConstants.EXT_VEHICLE, this );
 	}
 
 	void Defaults()

@@ -6,17 +6,24 @@ class JMSelectedModule: JMRenderableModuleBase
 	{
 		m_SelectedObjects = new set< Object >;
 
+		GetRPCManager().AddRPC( "COT_Object", "RPC_Delete", this, SingeplayerExecutionType.Server );
+
 		GetPermissionsManager().RegisterPermission( "Object.View" );
         
 		GetPermissionsManager().RegisterPermission( "Object.Create" );
 		GetPermissionsManager().RegisterPermission( "Object.Delete" );
 		GetPermissionsManager().RegisterPermission( "Object.Select" );
-
-		g_jm_SelectedModule = this;
+		
+		JMScriptInvokers.MENU_OBJECT_BUTTON.Insert( OnObjectButton );
+		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Insert( OnObjectCheckbox );
 	}
 
 	void ~JMSelectedModule()
 	{
+		Hide();
+
+		JMScriptInvokers.MENU_OBJECT_BUTTON.Remove( OnObjectButton );
+		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Remove( OnObjectCheckbox );
     }
 
 	override void RegisterKeyMouseBindings() 
@@ -38,6 +45,71 @@ class JMSelectedModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
     }
 
+	void Delete()
+	{
+		if ( m_SelectedObjects.Count() > 0 )
+		{
+			GetRPCManager().SendRPC( "COT_Object", "RPC_Delete", new Param1< ref set< Object > >( m_SelectedObjects ) );
+		}
+	}
+
+	void RPC_Delete( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Object.Delete", sender ) )
+			return;
+
+		ref Param1< ref set< Object > > data;
+		if ( !ctx.Read( data ) )
+			return;
+
+		set< Object > copy = new set< Object >;
+		copy.Copy( data.param1 );
+		
+		if ( type == CallType.Server )
+		{
+			for ( int i = 0; i < copy.Count(); i++ )
+			{
+				if ( copy[i] == NULL )
+					continue;
+
+				string obtype;
+				GetGame().ObjectGetType( copy[i], obtype );
+
+				GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
+				GetGame().ObjectDelete( copy[i] );
+			}
+		}
+	}
+
+	void OnObjectButton( Object obj, bool check )
+	{
+		Print( "obj2 " + obj + " will be " + check );
+		m_SelectedObjects.Clear();
+
+		if ( !check )
+		{
+			m_SelectedObjects.Insert( obj );
+		}
+
+		JMSelectedForm frm;
+		if ( Class.CastTo( frm, GetForm() ) )
+		{
+			frm.RefreshSelectedList( m_SelectedObjects );
+		}
+	}
+
+	void OnObjectCheckbox( Object obj, bool checked )
+	{
+		Print( "obj2 " + obj + " is " + checked );
+		if ( checked )
+		{
+			AddObject( obj );
+		} else
+		{
+			RemoveObject( obj );
+		}
+	}
+
 	set< Object > GetObjects()
 	{
 		return m_SelectedObjects;
@@ -53,7 +125,7 @@ class JMSelectedModule: JMRenderableModuleBase
 			JMSelectedForm frm;
 			if ( Class.CastTo( frm, GetForm() ) )
 			{
-				frm.OnAddObject( obj );
+				frm.RefreshSelectedList( m_SelectedObjects );
 			}
 		}
 	}
@@ -68,7 +140,7 @@ class JMSelectedModule: JMRenderableModuleBase
 			JMSelectedForm frm;
 			if ( Class.CastTo( frm, GetForm() ) )
 			{
-				frm.OnRemoveObject( obj );
+				frm.RefreshSelectedList( m_SelectedObjects );
 			}
 		}
 	}
@@ -80,14 +152,7 @@ class JMSelectedModule: JMRenderableModuleBase
 		JMSelectedForm frm;
 		if ( Class.CastTo( frm, GetForm() ) )
 		{
-			frm.OnClear();
+			frm.RefreshSelectedList( m_SelectedObjects );
 		}
 	}
-}
-
-ref JMSelectedModule g_jm_SelectedModule;
-
-ref JMSelectedModule GetObjectSelectedModule()
-{
-	return g_jm_SelectedModule;
 }

@@ -6,42 +6,42 @@ class JMVehicleSpawnerSettings
 	{
 		ref JMVehicleSpawnerSettings settings = new JMVehicleSpawnerSettings();
 
-		if ( GetGame().IsClient() || ( !GetGame().IsMultiplayer() && GetGame().IsServer() ) )
+		if ( GetGame().IsClient() )
 		{
 			settings.Defaults();
 			return settings;
 		}
-		
-		MakeDirectory( VEHICLE_SPAWNER_FOLDER );
 
-		array< string > files = FindFilesInLocation( VEHICLE_SPAWNER_FOLDER );
-
-		if ( FileExist( VEHICLE_SPAWNER_FOLDER + COT_FILE_EXIST ) ) 
+		if ( !FileExist( JMConstants.DIR_VEHICLES ) )
 		{
-			//GetLogger().Log( "Found existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
-			for ( int i = 0; i < files.Count(); i++ )
-			{
-				if ( files[i].Contains( COT_FILE_EXIST ) )
-					continue;
-
-				string name = files[i];
-				int pos = files[i].IndexOf(".");
-				
-				if ( pos > -1 )
-					name = files[i].Substring( 0, pos );
-
-				settings.Vehicles.Insert( name, JMVehicleSpawnerSerialize.Load( name ) );
-				//GetLogger().Log( "	Loading vehicle file ( " + name + " )", "JM_COT_VehicleSpawner" );
-			}
-		} else 
-		{
-			//GetLogger().Log( "Didn't find existence ( " + VEHICLE_SPAWNER_FOLDER + " )", "JM_COT_VehicleSpawner" );
-			DeleteFiles( VEHICLE_SPAWNER_FOLDER, files );
+			MakeDirectory( JMConstants.DIR_VEHICLES );
 
 			settings.Defaults();
 			settings.Save();
+
+			return settings;
 		}
 
+		array< string > files = FindFilesInLocation( JMConstants.DIR_VEHICLES );
+
+		for ( int i = 0; i < files.Count(); i++ )
+		{
+			string fileName;
+			string fileType;
+			int pos = files[i].IndexOf(".");
+			
+			if ( pos > -1 )
+			{
+				fileName = files[i].Substring( 0, pos );
+				fileType = files[i].Substring( pos, files[i].Length() );
+			}
+
+			if ( fileType == JMConstants.EXT_VEHICLE )
+			{
+				settings.Vehicles.Insert( fileName, JMVehicleSpawnerSerialize.Load( fileName ) );
+			}
+		}
+		
 		return settings;
 	}
 
@@ -51,8 +51,6 @@ class JMVehicleSpawnerSettings
 		{
 			Vehicles.GetElement( i ).Save();
 		}
-
-		CreateFilesExist( VEHICLE_SPAWNER_FOLDER );
 	}
 
 	void Defaults()

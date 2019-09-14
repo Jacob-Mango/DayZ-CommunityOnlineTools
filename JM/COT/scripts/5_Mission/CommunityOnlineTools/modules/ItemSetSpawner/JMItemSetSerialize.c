@@ -15,14 +15,14 @@ class JMItemSetSerialize
 		ref JMItemSetSerialize settings = new JMItemSetSerialize;
 		settings.m_FileName = file;
 
-		JsonFileLoader< JMItemSetSerialize >.JsonLoadFile( ITEM_SETS_FOLDER + settings.m_FileName + ".json", settings );
+		JsonFileLoader< JMItemSetSerialize >.JsonLoadFile( JMConstants.DIR_ITEMS + settings.m_FileName + JMConstants.EXT_ITEM, settings );
 
 		return settings;
 	}
 
 	void Save()
 	{
-		JsonFileLoader< JMItemSetSerialize >.JsonSaveFile( ITEM_SETS_FOLDER + m_FileName + ".json", this );
+		JsonFileLoader< JMItemSetSerialize >.JsonSaveFile( JMConstants.DIR_ITEMS + m_FileName + JMConstants.EXT_ITEM, this );
 	}
 
 	void Defaults()

@@ -1,5 +1,3 @@
-const string TELEPORT_SETTINGS_FILE = JMConstants.DIR_COT + "TeleportModule.json";
-
 class JMTeleportSerialize
 {
 	ref array< ref JMTeleportLocation > Locations;
@@ -13,9 +11,9 @@ class JMTeleportSerialize
 	{
 		ref JMTeleportSerialize settings = new JMTeleportSerialize();
 
-		if ( FileExist( TELEPORT_SETTINGS_FILE ) )
+		if ( FileExist( JMConstants.FILE_TELEPORT ) )
 		{
-			JsonFileLoader<JMTeleportSerialize>.JsonLoadFile( TELEPORT_SETTINGS_FILE, settings );
+			JsonFileLoader<JMTeleportSerialize>.JsonLoadFile( JMConstants.FILE_TELEPORT, settings );
 		} else 
 		{
 			settings.Defaults();
@@ -27,7 +25,7 @@ class JMTeleportSerialize
 
 	void Save()
 	{
-		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( TELEPORT_SETTINGS_FILE, this );
+		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( JMConstants.FILE_TELEPORT, this );
 	}
 
 	void AddLocation( string name, vector position, float radius = 4.0 )

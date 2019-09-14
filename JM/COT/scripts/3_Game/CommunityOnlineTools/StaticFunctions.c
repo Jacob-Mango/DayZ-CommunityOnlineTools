@@ -205,8 +205,8 @@ static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL,
 	set< Object > geom = new set< Object >;
 	set< Object > view = new set< Object >;
 
-	DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, geom, with, ignore, false, false, ObjIntersectGeom, radius );
 	DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, view, with, ignore, false, false, ObjIntersectView, radius );
+	DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, geom, with, ignore, false, false, ObjIntersectGeom, radius );
 
 	for ( int i = 0; i < geom.Count(); i++ )
 	{
@@ -435,22 +435,6 @@ static void DeleteFiles( string folder, array< string > files )
 		DeleteFile( folder + files[i] );
 	}
 	//GetLogger().Log( "DeleteFiles( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
-}
-
-static string COT_FILE_EXIST = "do-not-delete";
-
-static void CreateFilesExist( string folder )
-{
-	FileHandle file = OpenFile( folder + COT_FILE_EXIST, FileMode.WRITE );
-
-	if ( file == 0 )
-	{
-		//GetLogger().Err( "[COT::StaticFunctions] Can't write to the default file in " + folder, "JM_COT_StaticFunctions" );
-		return;
-	}
-
-	FPrint( file, "Do not delete this file, this file allows the other files to be read. If it can't find this file the folder is cleared!" );
-	CloseFile( file );
 }
 
 static bool ArrayContains( array< string > arr, string match )

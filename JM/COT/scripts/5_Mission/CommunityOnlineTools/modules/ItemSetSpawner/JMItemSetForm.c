@@ -75,6 +75,6 @@ class JMItemSetForm extends JMFormBase
 		ref JMItemSpawnerButtonData data = JMItemSpawnerButtonData.Cast( action.GetData() );
 		if ( !data ) return;
 
-		GetRPCManager().SendRPC( "COT_ItemSetSpawner", "SpawnSelectedPlayers", new Param2< string, ref array< string > >( data.ClassName, GetSelectedAsGUIDs() ) );
+		GetRPCManager().SendRPC( "COT_ItemSetSpawner", "SpawnSelectedPlayers", new Param2< string, ref array< string > >( data.ClassName, GetSelectedPlayers() ) );
 	}
 }

@@ -96,7 +96,7 @@ modded class MissionServer
 			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
 		}
 
-		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param3< string, ref JMPlayerInformation, PlayerIdentity >( instance.GetGUID(), instance.Data, identity ), true, identity );
+		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
 
 		GetGame().SelectPlayer( identity, player );
 	} 

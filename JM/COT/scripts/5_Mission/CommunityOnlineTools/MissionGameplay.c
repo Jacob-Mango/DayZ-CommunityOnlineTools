@@ -57,6 +57,10 @@ modded class MissionGameplay
 			JMPlayerInstance instance;
 			GetPermissionsManager().OnClientConnected( NULL, instance );
 			instance.PlayerObject = player;
+
+			GetPermissionsManager().SetClientGUID( JMConstants.OFFLINE_GUID );
+
+			GetModuleManager().OnClientPermissionsUpdated();
 		}
 	}
 

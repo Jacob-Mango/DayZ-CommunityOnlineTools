@@ -148,7 +148,7 @@ PanelWidgetClass JMPlayerForm {
       }
       TextWidgetClass actions_title {
        position 5 10
-       size 1 20
+       size 0.3 20
        halign left_ref
        valign top_ref
        hexactpos 1
@@ -249,9 +249,9 @@ PanelWidgetClass JMPlayerForm {
       }
       ButtonWidgetClass permissions_back_button {
        position 5 10
-       size 60 24
-       halign right_ref
-       valign top_ref
+       size 200 24
+       halign left_ref
+       valign bottom_ref
        hexactpos 1
        vexactpos 1
        hexactsize 1
@@ -359,9 +359,9 @@ PanelWidgetClass JMPlayerForm {
       }
       ButtonWidgetClass roles_back_button {
        position 5 10
-       size 60 24
-       halign right_ref
-       valign top_ref
+       size 200 24
+       halign left_ref
+       valign bottom_ref
        hexactpos 1
        vexactpos 1
        hexactsize 1
@@ -414,6 +414,34 @@ PanelWidgetClass JMPlayerForm {
        hexactsize 0
        vexactsize 0
        style rover_sim_colorable
+      }
+     }
+    }
+    ButtonWidgetClass actions_refresh_button {
+     position 5 10
+     size 0.3 20
+     halign right_ref
+     valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     {
+      TextWidgetClass actions_refresh_text {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       style Light
+       text "Refresh Data"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 16
+       "text halign" center
+       "text valign" center
       }
      }
     }
