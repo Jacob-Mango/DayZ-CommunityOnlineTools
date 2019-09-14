@@ -10,7 +10,7 @@ class JMRole
 	{
 		Name = name;
 
-		RootPermission = new JMPermission( Name );
+		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		
 		SerializedData = new array< string >;
 	}
@@ -35,7 +35,7 @@ class JMRole
 	{
 		delete RootPermission;
 
-		RootPermission = new JMPermission( Name, NULL );
+		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )

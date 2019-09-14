@@ -28,6 +28,9 @@ class JMPlayerSerialize
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
+			DeleteFile( playerFile.m_FileName );
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
+
 			playerFile.Save();
 			return true;
 		}
@@ -50,7 +53,7 @@ class JMPlayerSerialize
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SGUID + JMConstants.EXT_PLAYER;
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;

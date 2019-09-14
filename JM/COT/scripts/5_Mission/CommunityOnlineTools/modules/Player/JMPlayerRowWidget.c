@@ -79,11 +79,11 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 				Name.SetColor( 0xFF2ECC71 );
 			} else if ( GetPermissionsManager().GetClientGUID() == m_GUID )
 			{
-				Name.SetText( player.Data.SName );
+				Name.SetText( player.GetName() );
 				Name.SetColor( 0xFF2ECC71 );
 			} else 
 			{
-				Name.SetText( player.Data.SName );
+				Name.SetText( player.GetName() );
 				Name.SetColor( 0xFFFFFFFF );
 			}
 		}

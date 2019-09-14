@@ -128,6 +128,8 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !player )
 				return;
 
+			player.SetLastPosition( player.GetPosition() );
+
 			if ( player.IsInTransport() )
 			{
 				// player.GetTransport().SetOrigin( data.param1 );
@@ -137,7 +139,8 @@ class JMTeleportModule: JMRenderableModuleBase
 				{
 					Transport transport = vehCommand.GetTransport();
 
-					if ( transport == NULL ) return;
+					if ( transport == NULL )
+						return;
 
 					transport.SetOrigin( data.param1 );
 					transport.SetPosition( data.param1 );
@@ -198,6 +201,8 @@ class JMTeleportModule: JMRenderableModuleBase
 				if ( player == NULL )
 					return;
 				
+				player.SetLastPosition( player.GetPosition() );
+
 				if ( player.IsInTransport() )
 				{
 					vehCommand = player.GetCommand_Vehicle();
@@ -206,7 +211,8 @@ class JMTeleportModule: JMRenderableModuleBase
 					{
 						transport = vehCommand.GetTransport();
 
-						if ( transport == NULL ) return;
+						if ( transport == NULL )
+							return;
 
 						transport.SetOrigin( position );
 						transport.SetPosition( position );
@@ -229,6 +235,8 @@ class JMTeleportModule: JMRenderableModuleBase
 				if ( player == NULL )
 					continue;
 
+				player.SetLastPosition( player.GetPosition() );
+
 				if ( player.IsInTransport() )
 				{
 					vehCommand = player.GetCommand_Vehicle();
@@ -249,7 +257,7 @@ class JMTeleportModule: JMRenderableModuleBase
 					player.SetPosition( position );
 				}
 				
-				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].Data.SSteam64ID + " to " + location.Name );
+				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].GetSteam64ID() + " to " + location.Name );
 				
 				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
 			}

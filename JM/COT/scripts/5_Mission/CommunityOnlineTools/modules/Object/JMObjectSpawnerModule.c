@@ -209,7 +209,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			oItem.SetQuantity(quantity);
 		}
 		
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().Data.SSteam64ID + " with amount " + quantity );
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().GetSteam64ID() + " with amount " + quantity );
 
 		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
 

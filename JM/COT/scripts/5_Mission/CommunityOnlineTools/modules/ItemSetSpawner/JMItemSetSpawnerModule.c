@@ -190,7 +190,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 				for (int j = 0; j < parts.Count(); j++)
 					chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].ItemName, parts[j].NumberOfStacks, parts[j].StackSize );
 	
-				GetCommunityOnlineToolsBase().Log( sender, "Item set " + data.param1 + " spawned on " + players[i].Data.SSteam64ID );
+				GetCommunityOnlineToolsBase().Log( sender, "Item set " + data.param1 + " spawned on " + players[i].GetSteam64ID() );
 			
 				SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
 			}

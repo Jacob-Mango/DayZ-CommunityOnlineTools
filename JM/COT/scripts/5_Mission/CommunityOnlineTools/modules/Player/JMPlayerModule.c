@@ -99,7 +99,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Health", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set health to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set health to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your health has been set to " + data.param1 );
 			}
@@ -130,7 +130,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Blood", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set blood to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set blood to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your blood has been set to " + data.param1 );
 			}
@@ -161,7 +161,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatEnergy().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set energy to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set energy to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your energy has been set to " + data.param1 );
 			}
@@ -192,7 +192,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatWater().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set water to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set water to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your water has been set to " + data.param1 );
 			}
@@ -223,7 +223,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Shock", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set shock to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set shock to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your shock has been set to " + data.param1 );
 			}
@@ -254,7 +254,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatHeatComfort().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set heat comfort to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set heat comfort to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your heat comfort has been set to " + data.param1 );
 			}
@@ -285,7 +285,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatWet().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set wetness to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set wetness to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your wetness has been set to " + data.param1 );
 			}
@@ -316,7 +316,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatTremor().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set tremor to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set tremor to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your tremor has been set to " + data.param1 );
 			}
@@ -347,7 +347,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatStamina().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set stamina to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set stamina to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your stamina has been set to " + data.param1 );
 			}
@@ -381,7 +381,7 @@ class JMPlayerModule: JMRenderableModuleBase
 					player.SetLifeSpanStateVisible( data.param1 );
 				}
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set beard state to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set beard state to " + data.param1 + " for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your beard state has been set to " + data.param1 );
 			}
@@ -412,7 +412,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetBloodyHands( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set bloody hands to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set bloody hands to " + data.param1 + " for " + players[i].GetGUID() );
 
 				if ( data.param1 )
 				{
@@ -467,7 +467,7 @@ class JMPlayerModule: JMRenderableModuleBase
 							vehCommand.JumpOutVehicle();
 						}
 
-						GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].Data.SGUID + " out of transport" );
+						GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].GetGUID() + " out of transport" );
 
 						SendAdminNotification( sender, player.GetIdentity(), "You have been kicked out of your vehicle." );
 					}
@@ -534,7 +534,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 					completedTransports.Insert( transport );
 
-					GetCommunityOnlineToolsBase().Log( sender, "Repaired transport for " + players[i].Data.SGUID );
+					GetCommunityOnlineToolsBase().Log( sender, "Repaired transport for " + players[i].GetGUID() );
 
 					SendAdminNotification( sender, player.GetIdentity(), "Your vehicle has been repaired." );
 				}
@@ -564,6 +564,8 @@ class JMPlayerModule: JMRenderableModuleBase
 				if ( player == NULL )
 					continue;
 
+				player.SetLastPosition( player.GetPosition() );
+
 				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 				
 				if ( vehCommand )
@@ -576,11 +578,12 @@ class JMPlayerModule: JMRenderableModuleBase
 						transport.SetPosition( data.param1 );
 						transport.Update();
 					}
+				} else
+				{
+					player.SetPosition( data.param1 );
 				}
 
-				player.SetPosition( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].Data.SGUID + " to self" );
+				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].GetGUID() + " to self" );
 
 				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + VectorToString( data.param1, 1 ) );
 			}
@@ -617,6 +620,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			
 			HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
 
+			player.SetLastPosition( player.GetPosition() );
+
 			if ( vehCommand )
 			{
 				Transport transport = vehCommand.GetTransport();
@@ -632,7 +637,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				senderPlayer.SetPosition( player.GetPosition() );
 			}
 
-			GetCommunityOnlineToolsBase().Log( sender, "Teleported self to " + players[0].Data.SGUID );
+			GetCommunityOnlineToolsBase().Log( sender, "Teleported self to " + players[0].GetGUID() );
 
 			SendAdminNotification( sender, player.GetIdentity(), "Teleported themself to you." );
 		}
@@ -680,7 +685,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param, true, sender, player );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Spectating " + players[0].Data.SGUID );
+			GetCommunityOnlineToolsBase().Log( sender, "Spectating " + players[0].GetGUID() );
 		}	
 
 		if ( type == CallType.Client )
@@ -723,7 +728,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetGodMode( data.param1 );
  
-				GetCommunityOnlineToolsBase().Log( sender, "Set god mode to " + data.param1 + " for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
 
 				if ( data.param1 )
 				{
@@ -768,7 +773,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 				player.GetStatWater().Set( player.GetStatWater().GetMax() );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Healing player for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Healing player for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "You have been fully healed." );
 			}
@@ -806,13 +811,13 @@ class JMPlayerModule: JMRenderableModuleBase
 
 					player.SetPosition( newPosition );
 
-					GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].Data.SGUID + " to last position" );
+					GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].GetGUID() + " to last position" );
 
 					SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to your last position." );
 
 				} else
 				{
-					SendAdminNotification( sender, NULL, players[i].Data.SName + " doesn't have a last position." );
+					SendAdminNotification( sender, NULL, players[i].GetName() + " doesn't have a last position." );
 				}
 			}
 		}
@@ -843,7 +848,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.RemoveAllItems();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Stripping items from " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Stripping items from " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "Your items have been stripped." );
 			}
@@ -875,7 +880,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetBleedingManagerServer().RemoveAllSources();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Bleeding stopped for " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Bleeding stopped for " + players[i].GetGUID() );
 
 				SendAdminNotification( sender, player.GetIdentity(), "You are no longer bleeding." );
 			}
@@ -906,7 +911,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetInvisibility( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log(sender, "Set invisibility to " + data.param1 + " for " + players[i].Data.SGUID);
+				GetCommunityOnlineToolsBase().Log(sender, "Set invisibility to " + data.param1 + " for " + players[i].GetGUID());
 
 				if ( data.param1 )
 				{
@@ -951,7 +956,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.Save();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[j].Data.SSteam64ID );
+				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[j].GetSteam64ID() );
 
 				SendAdminNotification( sender, player.IdentityPlayer, "Your permissions have been updated." );
 			}
@@ -988,7 +993,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param2< ref JMPlayerInformation, PlayerIdentity >( players[k].Data, players[k].IdentityPlayer ), false, players[k].IdentityPlayer );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].Data.SSteam64ID );
+				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].GetSteam64ID() );
 
 				SendAdminNotification( sender, players[k].IdentityPlayer, "Your roles have been updated." );
 			}
@@ -1016,7 +1021,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been kicked." );
 
 				GetGame().ChatPlayer( "#kick " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].GetGUID() );
 			}
 		}
 	}
@@ -1042,7 +1047,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been banned." );
 
 				GetGame().ChatPlayer( "#ban " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Banned " + players[i].Data.SGUID );
+				GetCommunityOnlineToolsBase().Log( sender, "Banned " + players[i].GetGUID() );
 			}
 		}
 	}

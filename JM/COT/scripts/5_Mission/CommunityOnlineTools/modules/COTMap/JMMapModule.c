@@ -81,7 +81,10 @@ class JMMapModule: JMRenderableModuleBase
 		{
 			PlayerBase player = GetPlayerObjectByIdentity( sender );
 
-			if ( !player ) return;
+			if ( !player )
+				return;
+
+			player.SetLastPosition( player.GetPosition() );
 
 			if ( player.IsInTransport() )
 			{

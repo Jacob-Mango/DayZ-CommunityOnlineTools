@@ -104,7 +104,7 @@ class CommunityOnlineToolsBase
 
     void Log( JMPlayerInstance player, string text )
     {
-        text = "[COT] " + player.Data.SSteam64ID + ": " + text;
+        text = "[COT] " + player.GetSteam64ID() + ": " + text;
 
         if ( GetGame().IsServer() )
         {
