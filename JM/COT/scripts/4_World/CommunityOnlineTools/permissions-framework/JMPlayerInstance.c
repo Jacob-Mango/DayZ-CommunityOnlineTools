@@ -124,22 +124,22 @@ class JMPlayerInstance
 	{
 		// RootPermission.DebugPrint( 0 );
 		
-		//GetLogger().Log( "Checking " + GetSteam64ID() + " for permission " + permission, "JM_COT_PermissionFramework" );
+		GetCommunityOnlineToolsBase().LogServer( "Checking " + GetSteam64ID() + " for permission " + permission );
 		
 		JMPermissionType permType;
 		bool hasPermission = RootPermission.HasPermission( permission, permType );
 		
-		//GetLogger().Log( "    " +  GetSteam64ID() + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
+		GetCommunityOnlineToolsBase().LogServer( "    " +  GetSteam64ID() + " -> " + hasPermission + " Type " + permType );
 
 		if ( hasPermission )
 		{
-			//GetLogger().Log( "Returned " + GetSteam64ID() + " true", "JM_COT_PermissionFramework" );
+			GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " true" );
 			return true;
 		}
 
 		if ( permType == JMPermissionType.DISALLOW )
 		{
-			//GetLogger().Log( "Returned " + GetSteam64ID() + " false", "JM_COT_PermissionFramework" );
+			GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " false" );
 			return false;
 		}
 
@@ -147,16 +147,16 @@ class JMPlayerInstance
 		{
 			hasPermission = GetPermissionsManager().HasRolePermission( Roles[j], permission, permType );
 
-			//GetLogger().Log( "    " +  Roles[j] + " -> " + hasPermission + " Type " + permType, "JM_COT_PermissionFramework" );
+			GetCommunityOnlineToolsBase().LogServer( "    " +  Roles[j] + " -> " + hasPermission + " Type " + permType );
 
 			if ( hasPermission )
 			{
-				//GetLogger().Log( "Returned " + GetSteam64ID() + " true", "JM_COT_PermissionFramework" );
+				GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " true" );
 				return true;
 			}
 		}
 
-		//GetLogger().Log( "Returned " + GetSteam64ID() + " false", "JM_COT_PermissionFramework" );
+		GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " false" );
 		return false;
 	}
 

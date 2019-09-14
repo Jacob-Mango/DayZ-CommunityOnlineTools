@@ -152,6 +152,23 @@ class CommunityOnlineToolsBase
         JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
     }
 
+    void LogServer( string text )
+    {
+        text = "[COT] Game: " + text;
+
+        if ( GetGame().IsServer() )
+        {
+            GetGame().AdminLog( text );
+        }
+
+		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
+        if ( fileLog != 0 )
+        {
+		    FPrintln( fileLog, text );
+		    CloseFile( fileLog );
+        }
+    }
+
     void Log( JMPlayerInstance player, string text )
     {
         if ( player == NULL )
