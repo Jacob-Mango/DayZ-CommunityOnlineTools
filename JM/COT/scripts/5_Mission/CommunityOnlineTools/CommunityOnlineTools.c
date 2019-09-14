@@ -139,18 +139,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( type == CallType.Client )
 		{
 			Print( "Role: " + data.param1 );
-			
+
 			JMRole role;
-			if ( GetPermissionsManager().Roles.Find( data.param1, role ) >= 0 )
+			GetPermissionsManager().LoadRole( data.param1, role );
+			if ( role )
 			{
-				role.ClearPermissions();
-
-				role.SerializedData = arr;
-
+				role.SerializedData.Clear();
+				role.SerializedData.Copy( arr );
 				role.Deserialize();
-			} else 
-			{
-				GetPermissionsManager().LoadRole( data.param1, arr );
 			}
 
 			GetModuleManager().OnClientPermissionsUpdated();

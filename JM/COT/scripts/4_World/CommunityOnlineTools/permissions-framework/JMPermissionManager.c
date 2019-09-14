@@ -316,30 +316,26 @@ class JMPermissionManager
 		return role;
 	}
 
-	ref JMRole LoadRole( string name, ref array< string > data = NULL )
+	bool LoadRole( string name, out JMRole role )
 	{
-		ref JMRole role = new JMRole( name );
-
-		if ( data == NULL )
+		if ( !Roles.Find( name, role ) )
 		{
-			if ( role.Load() )
-			{
-				Roles.Insert( name, role );
-			}
-		} else
-		{
-			role.SerializedData = data;
-			role.Deserialize();
-
-			if ( GetGame().IsMultiplayer() && GetGame().IsServer() )
-			{
-				role.Save();
-			}
-
+			role = new JMRole( name );
 			Roles.Insert( name, role );
+
+			return false;
 		}
 
-		return role;
+		return true;
+	}
+
+	void LoadRoleFromFile( string name )
+	{
+		JMRole role = new JMRole( name );
+		if ( role.Load() )
+		{
+			Roles.Insert( name, role );
+		}
 	}
 
 	void LoadRoles()
@@ -352,14 +348,14 @@ class JMPermissionManager
 		{
 			if ( IsValidFolderForRoles( sName, oFileAttr ) )
 			{
-				LoadRole( sName.Substring(0, sName.Length() - 4) );
+				LoadRoleFromFile( sName.Substring(0, sName.Length() - 4) );
 			}
 
 			while (FindNextFile(oFileHandle, sName, oFileAttr))
 			{
 				if ( IsValidFolderForRoles( sName, oFileAttr ))
 				{
-					LoadRole( sName.Substring(0, sName.Length() - 4) );
+					LoadRoleFromFile( sName.Substring(0, sName.Length() - 4) );
 				}
 			}
 		}
