@@ -1,4 +1,4 @@
-class JMPlayerInstance: Managed
+class JMPlayerInstance
 {
 	autoptr JMPermission RootPermission;
 	autoptr array< string > Roles;

@@ -1,4 +1,4 @@
-class CommunityOnlineToolsData: Managed
+class CommunityOnlineToolsData
 {
     bool TestSort;
 }

@@ -29,8 +29,6 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	override void OnFinish()
 	{
 		super.OnFinish();
-
-		SetOpen( false );
 	}
 
 	override void OnLoaded()

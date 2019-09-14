@@ -52,6 +52,10 @@ class CommunityOnlineToolsBase
 
     void OnStart()
 	{
+        m_IsOpen = false;
+
+        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+        
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
@@ -62,11 +66,18 @@ class CommunityOnlineToolsBase
 
 	void OnFinish()
 	{
+        m_IsOpen = false;
+
+        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+
         CloseLog();
 	}
 
 	void OnLoaded()
 	{
+        m_IsOpen = false;
+
+        JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 	}
 
 	void OnUpdate( float timeslice )
