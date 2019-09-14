@@ -165,7 +165,10 @@ class JMPlayerInstance
 		if ( !GetPermissionsManager().IsRole( role ) )
 			return;
 
-		Roles.Insert( role );
+		if ( Roles.Find( role ) < 0 )
+		{
+			Roles.Insert( role );
+		}
 	}
 
 	void ClearRoles()

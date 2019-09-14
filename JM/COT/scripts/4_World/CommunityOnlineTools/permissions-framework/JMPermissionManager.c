@@ -111,7 +111,7 @@ class JMPermissionManager
 
 	bool HasPermission( string permission, PlayerIdentity identity = NULL )
 	{
-		// PMPrint();
+		PMPrint();
 
 		if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
 		{
@@ -195,11 +195,14 @@ class JMPermissionManager
 
 	void PMPrint()
 	{
-		//Print( "Printing all authenticated players!" );
-
-		for ( int i = 0; i < Players.Count(); i++ )
+		if ( IsMissionClient() )
 		{
-			Players.GetElement( i ).DebugPrint();
+			Print( "Printing all authenticated players!" );
+
+			for ( int i = 0; i < Players.Count(); i++ )
+			{
+				Players.GetElement( i ).DebugPrint();
+			}
 		}
 	}
 
@@ -290,7 +293,7 @@ class JMPermissionManager
 		if ( name == extenstion )
 			return false;
 
-		if ( (attributes & FileAttr.DIRECTORY ) )
+		if ( attributes & FileAttr.DIRECTORY )
 			return false;
 
 		if ( name == "" )
