@@ -12,7 +12,7 @@ class JMPermissionManager
 		Players = new map< string, ref JMPlayerInstance >;
 		Roles = new map< string, ref JMRole >;
 
-		RootPermission = new JMPermission( "ROOT" );
+		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		
 		if ( GetGame().IsServer() )
 		{
@@ -84,9 +84,9 @@ class JMPermissionManager
 		// {
 		// 	for ( int j = 0; j < Players.Count(); j++ )
 		// 	{
-		// 		if ( Players[k].Data.SName < Players[j].Data.SName )
+		// 		if ( Players[k].GetName() < Players[j].GetName() )
 		// 			Players.SwapItems( k, j );
-		// 		else if ( Players[k].Data.SName > Players[j].Data.SName )
+		// 		else if ( Players[k].GetName() > Players[j].GetName() )
 		// 			Players.SwapItems( j, k );
 		// 	}
 		// }
@@ -122,7 +122,7 @@ class JMPermissionManager
 		{
 			if ( GetPermissionsManager().GetClientPlayer() == NULL )
 			{
-				//GetLogger().Log( "Client Player is NULL!", "JM_COT_PermissionFramework" );
+				Print( "Client Player is NULL!" );
 				return false;
 			}
 

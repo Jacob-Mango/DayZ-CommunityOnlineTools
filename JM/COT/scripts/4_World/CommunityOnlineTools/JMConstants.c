@@ -1,6 +1,8 @@
 class JMConstants
 {
-	static const string OFFLINE_GUID = "OFFLINE"
+	static const string OFFLINE_GUID = "OFFLINE";
+	
+	static const string PERM_ROOT = "ROOT";
 
 	static const string DIR_COT = "$profile:CommunityOnlineTools\\"
     static const string DIR_PF = "$profile:PermissionsFramework\\";

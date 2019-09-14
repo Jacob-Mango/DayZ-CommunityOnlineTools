@@ -3,31 +3,31 @@ modded class PlayerBase
 {
 	private JMPlayerInstance m_AuthenticatedPlayer;
 
-	private bool m_HasGodMode;
+	private bool m_JMHasGodMode;
 
-	private bool m_IsInvisible;
-	private bool m_IsInvisibleRemoteSynch;
+	private bool m_JMIsInvisible;
+	private bool m_JMIsInvisibleRemoteSynch;
 
-	private vector m_LastPosition;
-	private bool m_HasLastPosition;
+	private vector m_JMLastPosition;
+	private bool m_JMHasLastPosition;
 
 	override void Init()
 	{
 		super.Init();
 
-		RegisterNetSyncVariableBool( "m_IsInvisibleRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 
-		m_HasLastPosition = false;
+		m_JMHasLastPosition = false;
 	}
 
 	override void OnVariablesSynchronized()
 	{
 		super.OnVariablesSynchronized();
 
-		if ( m_IsInvisibleRemoteSynch != m_IsInvisible )
+		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
-			m_IsInvisibleRemoteSynch = m_IsInvisible;
-			if ( m_IsInvisible )
+			m_JMIsInvisibleRemoteSynch = m_JMIsInvisible;
+			if ( m_JMIsInvisible )
 			{
 				ClearFlags( EntityFlags.VISIBLE, true );
 			} else
@@ -35,27 +35,27 @@ modded class PlayerBase
 				SetFlags( EntityFlags.VISIBLE, true );
 			}
 
-			//SetInvisible( m_IsInvisible );
+			//SetInvisible( m_JMIsInvisible );
 		}
 	}
 
 	bool HasLastPosition()
 	{
-		return m_HasLastPosition;
+		return m_JMHasLastPosition != "0 0 0";
 	}
 
 	vector GetLastPosition()
 	{
-		return m_LastPosition;
+		return m_JMLastPosition;
 	}
 
 	void SetLastPosition( vector pos )
 	{
 		if ( GetGame().IsServer() )
 		{
-			m_LastPosition = pos;
+			m_JMLastPosition = pos;
 
-			m_HasLastPosition = true;
+			m_JMHasLastPosition = true;
 		}
 	}
 
@@ -71,21 +71,21 @@ modded class PlayerBase
 
 	bool HasGodMode()
 	{
-		return m_HasGodMode;
+		return m_JMHasGodMode;
 	}
 
 	bool IsInvisible()
 	{
-		return m_IsInvisible;
+		return m_JMIsInvisible;
 	}
 
 	void SetGodMode( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
-			m_HasGodMode = mode;
+			m_JMHasGodMode = mode;
 
-			SetAllowDamage( !m_HasGodMode );
+			SetAllowDamage( !m_JMHasGodMode );
 		}
 	}
 
@@ -93,8 +93,8 @@ modded class PlayerBase
 	{
 		if ( GetGame().IsServer() )
 		{
-			m_IsInvisible = mode;
-			m_IsInvisibleRemoteSynch = mode;
+			m_JMIsInvisible = mode;
+			m_JMIsInvisibleRemoteSynch = mode;
 
 			SetSynchDirty();
 		}

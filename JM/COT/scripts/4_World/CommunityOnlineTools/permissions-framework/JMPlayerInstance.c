@@ -1,17 +1,14 @@
 class JMPlayerInstance: Managed
 {
-	ref JMPermission RootPermission;
-	ref array< string > Roles;
+	autoptr JMPermission RootPermission;
+	autoptr array< string > Roles;
 
 	PlayerBase PlayerObject;
 	PlayerIdentity IdentityPlayer;
 
-	ref JMPlayerInformation Data;
+	autoptr JMPlayerInformation Data;
 
-	protected ref JMPlayerSerialize m_PlayerFile;
-
-	protected bool m_HasPermissions;
-	protected bool m_HasPlayerData;
+	private autoptr JMPlayerSerialize m_PlayerFile;
 
 	void JMPlayerInstance( PlayerIdentity identity )
 	{
@@ -28,7 +25,7 @@ class JMPlayerInstance: Managed
 			Data.SSteam64ID = IdentityPlayer.GetPlainId();
 		}
 
-		RootPermission = new JMPermission( Data.SSteam64ID );
+		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		Roles = new array< string >;
 	}
 
@@ -37,9 +34,33 @@ class JMPlayerInstance: Managed
 		delete RootPermission;
 	}
 
-	void SwapData( ref JMPlayerInformation newData )
+	void SwapData( JMPlayerInformation newData )
 	{
-		Data = newData;
+		Data.ARoles.Clear();
+		Data.ARoles.Copy( newData.ARoles );
+		Data.APermissions.Clear();
+		Data.APermissions.Copy( newData.APermissions );
+
+		Data.VPosition = newData.VPosition;
+		Data.VDirection = newData.VDirection;
+		Data.VOrientation = newData.VOrientation;
+		
+		Data.FHealth = newData.FHealth;
+		Data.FBlood = newData.FBlood;
+		Data.FShock = newData.FShock;
+		Data.IBloodStatType = newData.IBloodStatType;
+		Data.FEnergy = newData.FEnergy;
+		Data.FWater = newData.FWater;
+		Data.FHeatComfort = newData.FHeatComfort;
+		Data.FWet = newData.FWet;
+		Data.FTremor = newData.FTremor;
+		Data.FStamina = newData.FStamina;
+		Data.Kills = newData.Kills;
+		Data.TotalKills = newData.TotalKills;
+		Data.ILifeSpanState = newData.ILifeSpanState;
+		Data.BBloodyHands = newData.BBloodyHands;
+		Data.BGodMode = newData.BGodMode;
+		Data.BInvisibility = newData.BInvisibility;
 	}
 
 	string GetGUID()
@@ -97,16 +118,12 @@ class JMPlayerInstance: Managed
 	{
 		delete RootPermission;
 
-		RootPermission = new JMPermission( Data.SSteam64ID, NULL );
-
-		m_HasPermissions = false;
+		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
 		RootPermission.AddPermission( permission, type );
-
-		m_HasPermissions = true;
 	}
 
 	bool HasPermission( string permission )
@@ -149,19 +166,12 @@ class JMPlayerInstance: Managed
 		return false;
 	}
 
-	void AddRole( string role, bool updateHasData = true )
+	void AddRole( string role )
 	{
 		if ( !GetPermissionsManager().IsRole( role ) )
 			return;
 
-		m_HasPlayerData = true;
-
 		Roles.Insert( role );
-
-		if ( updateHasData )
-		{
-			m_HasPlayerData = true;
-		}
 	}
 
 	void ClearRoles()
@@ -196,16 +206,6 @@ class JMPlayerInstance: Managed
 		}
 	}
 
-	string FileReadyStripName( string name )
-	{
-		name.Replace( "\\", "" );
-		name.Replace( "/", "" );
-		name.Replace( "=", "" );
-		name.Replace( "+", "" );
-
-		return name;
-	}
-
 	void Save()
 	{
 		if ( !GetGame().IsServer() )
@@ -213,32 +213,21 @@ class JMPlayerInstance: Managed
 
 		Serialize();
 
-		if ( m_HasPlayerData )
-		{   
-			m_PlayerFile.Roles.Clear();
-			m_PlayerFile.Roles.Copy( Data.ARoles );
+		m_PlayerFile.Roles.Clear();
+		m_PlayerFile.Roles.Copy( Data.ARoles );
+		m_PlayerFile.Save();
 
-			m_PlayerFile.Save();
-		}
+		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PLAYER, FileMode.WRITE );
 
-		if ( m_HasPermissions )
+		if ( file != 0 )
 		{
-			string filename = FileReadyStripName( Data.SSteam64ID );
-
-			//GetLogger().Log( "Saving permissions and player data for " + filename, "JM_COT_PermissionFramework" );
-			FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + filename + JMConstants.EXT_PLAYER, FileMode.WRITE );
-
-			if ( file != 0 )
+			string line;
+			for ( int i = 0; i < Data.APermissions.Count(); i++ )
 			{
-				string line;
-
-				for ( int i = 0; i < Data.APermissions.Count(); i++ )
-				{
-					FPrintln( file, Data.APermissions[i] );
-				}
-				
-				CloseFile(file);
+				FPrintln( file, Data.APermissions[i] );
 			}
+			
+			CloseFile(file);
 		}
 	}
 
@@ -273,48 +262,42 @@ class JMPlayerInstance: Managed
 
 	void Load()
 	{
-		if ( !GetGame().IsServer() )
+		if ( !IsMissionHost() )
 			return;
 
-		m_HasPlayerData = JMPlayerSerialize.Load( Data, m_PlayerFile );
+		UpdatePlayerData();
+
+		JMPlayerSerialize.Load( Data, m_PlayerFile );
 
 		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
 		{
-			AddRole( m_PlayerFile.Roles[j], false );
+			AddRole( m_PlayerFile.Roles[j] );
 		}
 
-		//GetLogger().Log( "Loading permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );
-
-		m_HasPermissions = false;
-
-		if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION ) )
+		if ( !ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION ) )
 		{
-			m_HasPermissions = true;
-		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
-		{
-			m_HasPermissions = true;
-
-			DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
+			{
+				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SSteam64ID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+			}
 			
-			Save();
-		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION ) )
-		{
-			m_HasPermissions = true;
-		} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
-		{
-			m_HasPermissions = true;
-
-			DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION ) )
+			{
+				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION );
+			}
 			
-			Save();
+			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
+			{
+				DeleteFile( JMConstants.DIR_PERMISSIONS + Data.SGUID + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+			}
 		}
 
-		UpdatePlayerData();
+		Save();
 	}
 
 	void DebugPrint()
 	{
-		//GetLogger().Log( "Printing permissions for " + Data.SSteam64ID, "JM_COT_PermissionFramework" );
+		Print( "Printing permissions for " + Data.SSteam64ID );
 
 		RootPermission.DebugPrint( 0 );
 	}
