@@ -110,7 +110,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< string >( JsonFileLoader< JMItemSetMeta >.JsonMakeData( JMItemSetMeta.DeriveFromSettings( settings ) ) ) );
+		rpc.Write( JsonFileLoader< JMItemSetMeta >.JsonMakeData( JMItemSetMeta.DeriveFromSettings( settings ) ) );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );
 	}
 
@@ -123,14 +123,14 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			Param1< string > json;
+			string json;
 			if ( !ctx.Read( json ) )
 			{
 				Error("Failed");
 				return;
 			} 
 
-			Client_Load( json.param1 );
+			Client_Load( json );
 		}
 	}
 
@@ -148,8 +148,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	private void Client_SpawnPosition( string itemSet, vector position )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< string >( itemSet ) );
-		rpc.Write( new Param1< vector >( position ) );
+		rpc.Write( itemSet );
+		rpc.Write( position );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPosition, true, NULL );
 	}
 
@@ -180,21 +180,21 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Param1< string > itemSet;
+			string itemSet;
 			if ( !ctx.Read( itemSet ) )
 			{
 				Error("Failed");
 				return;
 			} 
 
-			Param1< vector > position;
+			vector position;
 			if ( !ctx.Read( position ) )
 			{
 				Error("Failed");
 				return;
 			} 
 
-			Server_SpawnPosition( itemSet.param1, position.param1, senderRPC );
+			Server_SpawnPosition( itemSet, position, senderRPC );
 		}
 	}
 	
@@ -212,8 +212,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	private void Client_SpawnPlayers( string itemSet, array< string > guids )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< string >( itemSet ) );
-		rpc.Write( new Param1< array< string > >( guids ) );
+		rpc.Write( itemSet );
+		rpc.Write( guids );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPlayers, true, NULL );
 	}
 
@@ -246,19 +246,19 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Param1< string > itemSet;
+			string itemSet;
 			if ( !ctx.Read( itemSet ) )
 			{
 				return;
 			} 
 
-			Param1< array< string > > guids;
+			array< string > guids;
 			if ( !ctx.Read( guids ) )
 			{
 				return;
 			} 
 
-			Server_SpawnPlayers( itemSet.param1, guids.param1, senderRPC );
+			Server_SpawnPlayers( itemSet, guids, senderRPC );
 		}
 	}
 

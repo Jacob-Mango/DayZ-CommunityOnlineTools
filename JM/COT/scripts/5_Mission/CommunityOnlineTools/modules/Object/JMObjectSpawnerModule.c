@@ -129,10 +129,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Client_SpawnEntity_Position( string ent, vector position, float quantity, float health )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< string >( ent ) );
-		rpc.Write( new Param1< vector >( position ) );
-		rpc.Write( new Param1< float >( quantity ) );
-		rpc.Write( new Param1< float >( health ) );
+		rpc.Write( ent );
+		rpc.Write( position );
+		rpc.Write( quantity );
+		rpc.Write( health );
 		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 	}
 
@@ -161,35 +161,35 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Param1< string > ent;
+			string ent;
 			if ( !ctx.Read( ent ) )
 			{
 				Error("Failed");
 				return;
 			}
 
-			Param1< vector > position;
+			vector position;
 			if ( !ctx.Read( position ) )
 			{
 				Error("Failed");
 				return;
 			}
 		
-			Param1< float > quantity;
+			float quantity;
 			if ( !ctx.Read( quantity ) )
 			{
 				Error("Failed");
 				return;
 			}
 
-			Param1< float > health;
+			float health;
 			if ( !ctx.Read( health ) )
 			{
 				Error("Failed");
 				return;
 			}
 
-			Server_SpawnEntity_Position( ent.param1, position.param1, quantity.param1, health.param1, senderRPC );
+			Server_SpawnEntity_Position( ent, position, quantity, health, senderRPC );
 		}
 	}
 
@@ -207,10 +207,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Client_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< string >( ent ) );
-		rpc.Write( new Param1< array< EntityAI > >( objects ) );
-		rpc.Write( new Param1< float >( quantity ) );
-		rpc.Write( new Param1< float >( health ) );
+		rpc.Write( ent );
+		rpc.Write( objects );
+		rpc.Write( quantity );
+		rpc.Write( health );
 		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 	}
 
@@ -255,31 +255,31 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Param1< string > ent;
+			string ent;
 			if ( !ctx.Read( ent ) )
 			{
 				return;
 			}
 
-			Param1< array< EntityAI > > objects;
+			array< EntityAI > objects;
 			if ( !ctx.Read( objects ) )
 			{
 				return;
 			}
 		
-			Param1< float > quantity;
+			float quantity;
 			if ( !ctx.Read( quantity ) )
 			{
 				return;
 			}
 
-			Param1< float > health;
+			float health;
 			if ( !ctx.Read( health ) )
 			{
 				return;
 			}
 
-			Server_SpawnEntity_Inventory( ent.param1, objects.param1, quantity.param1, health.param1, senderRPC );
+			Server_SpawnEntity_Inventory( ent, objects, quantity, health, senderRPC );
 		}
 	}
 
