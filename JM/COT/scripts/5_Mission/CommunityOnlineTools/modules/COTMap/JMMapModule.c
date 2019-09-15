@@ -62,7 +62,7 @@ class JMMapModule: JMRenderableModuleBase
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( new Param1< vector >( position ) );
+		rpc.Write( position );
 		rpc.Send( NULL, JMMapModuleRPC.Teleport, true, NULL );
 	}
 
@@ -98,7 +98,7 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Param1< vector > pos;
+			vector pos;
 			if ( !ctx.Read( pos ) )
 			{
 				return;
@@ -109,7 +109,7 @@ class JMMapModule: JMRenderableModuleBase
 			if ( !player )
 				return;
 
-			Server_Teleport( pos.param1, player );
+			Server_Teleport( pos, player );
 		}
 	}
 }
