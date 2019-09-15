@@ -5,17 +5,17 @@ static bool COTPlayerIsRemoved = false;
 
 static bool COT_ESP_Toggled = false;
 
-static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
+static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObjectByIdentity )
 {
 	if ( !GetGame().IsMultiplayer() )
 		return GetGame().GetPlayer();
 	
-	if ( identity == NULL )
+	if ( identityGetPlayerObjectByIdentity == NULL )
 		return NULL;
 
 	int networkIdLowBits;
 	int networkIdHighBits;
-	GetGame().GetPlayerNetworkIDByIdentityID( identity.GetPlayerId(), networkIdLowBits, networkIdHighBits );
+	GetGame().GetPlayerNetworkIDByIdentityID( identityGetPlayerObjectByIdentity.GetPlayerId(), networkIdLowBits, networkIdHighBits );
 
 	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
 }
@@ -23,27 +23,6 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identity )
 static void CreateLocalAdminNotification( string message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
 	NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
-}
-
-static void SendAdminNotification( PlayerIdentity from, PlayerIdentity to, string message, string icon = "set:ccgui_enforce image:HudBuild" )
-{
-	string title = "Community Online Tools";
-
-	if ( GetGame().IsClient() || !GetGame().IsMultiplayer() )
-	{
-		NotificationSystem.AddNotificationExtended( 1.5, title, message, icon );
-	} else 
-	{
-		if ( to != NULL )
-		{
-			title = "Community Online Tools - " + from.GetName();
-
-			NotificationSystem.SendNotificationToPlayerIdentityExtended( to, 1.5, title, message, icon );
-		} else 
-		{
-			NotificationSystem.SendNotificationToPlayerIdentityExtended( from, 1.5, title, message, icon );
-		}
-	}
 }
 
 static vector GetCurrentPosition()

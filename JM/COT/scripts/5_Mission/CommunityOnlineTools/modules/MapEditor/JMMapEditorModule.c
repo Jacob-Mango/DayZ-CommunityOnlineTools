@@ -16,9 +16,9 @@ class JMMapEditorModule: JMModuleBase
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
 	}
 	
-	void SetTransform( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetTransform( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "MapEditor.Transform.Position", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "MapEditor.Transform.Position", senderRPC ) )
 			return;
 
 		Param2< vector, vector > data;
@@ -33,14 +33,12 @@ class JMMapEditorModule: JMModuleBase
 			target.SetPosition( data.param1 );
 			target.SetOrientation( data.param2 );
 			//target.Update();
-
-			//SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been given the position " + VectorToString( data.param1, 1 ) );
 		}
 	}
 	
-	void EnterEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void EnterEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{			
-		if ( !GetPermissionsManager().HasPermission( "MapEditor.EnterEditor", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "MapEditor.EnterEditor", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -52,7 +50,7 @@ class JMMapEditorModule: JMModuleBase
 				position = target.GetPosition();
 			}
 
-			GetGame().SelectPlayer( sender, NULL );
+			GetGame().SelectPlayer( senderRPC, NULL );
 
 			PlayerBase human = PlayerBase.Cast( target );
 
@@ -64,11 +62,11 @@ class JMMapEditorModule: JMModuleBase
 				position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
 			}
 
-			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
+			GetGame().SelectSpectator( senderRPC, "JMCinematicCamera", position );
 
-			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, sender );
+			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, senderRPC );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Entered the Map Editor");
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Entered the Map Editor");
 		}
 
 		if ( type == CallType.Client )
@@ -97,33 +95,33 @@ class JMMapEditorModule: JMModuleBase
 		}
 	}
 	
-	void LeaveEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LeaveEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", senderRPC ) )
 			return;
 			
-		if ( !GetPermissionsManager().HasPermission( "MapEditor.LeaveEditor", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "MapEditor.LeaveEditor", senderRPC ) )
 			return;
 
 		bool cont = false;
 
 		if ( type == CallType.Server )
 		{
-			GetGame().SelectPlayer( sender, target );
+			GetGame().SelectPlayer( senderRPC, target );
 
 			if ( GetGame().IsMultiplayer() )
 			{
-				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, sender );
+				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, senderRPC );
 			} 
 
-			GetCommunityOnlineToolsBase().Log( sender, "Left the Map Editor");
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Left the Map Editor");
 		}
 
 		if ( type == CallType.Client )
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
-				GetGame().SelectPlayer( sender, target );
+				GetGame().SelectPlayer( senderRPC, target );
 			}
 
 			CurrentActiveCamera.SetActive( false );

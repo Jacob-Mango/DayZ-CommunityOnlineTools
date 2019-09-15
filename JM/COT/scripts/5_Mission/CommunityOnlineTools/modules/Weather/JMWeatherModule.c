@@ -29,7 +29,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/weather_form.layout";
 	}
 	
-	void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param5< int, int, int, int, int > data;
 		if ( !ctx.Read( data ) ) return;
@@ -40,7 +40,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetDate", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetDate", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -49,11 +49,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
 		}
 	}
 
-	void Weather_SetWindFunctionParams( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetWindFunctionParams( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -64,7 +64,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetWindFunctionParams", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetWindFunctionParams", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -73,11 +73,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
-	void Weather_SetOvercast( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetOvercast( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -88,7 +88,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetOvercast", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetOvercast", senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -97,11 +97,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
-	void Weather_SetFog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetFog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -112,7 +112,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetFog", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetFog", senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -121,11 +121,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
-	void Weather_SetRain( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetRain( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -136,7 +136,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetRain", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetRain", senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -145,11 +145,11 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
-	void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -160,7 +160,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.SetStorm", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Weather.SetStorm", senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -169,7 +169,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 

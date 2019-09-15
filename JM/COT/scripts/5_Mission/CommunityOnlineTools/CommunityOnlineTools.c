@@ -46,7 +46,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		super.OnUpdate( timeslice );
 	}
 
-	void RefreshPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RefreshPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -57,12 +57,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				players[i].UpdatePlayerData();
 				players[i].Serialize();
 
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject ), false, sender );
+				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject ), false, senderRPC );
 			}
 		}
 	}
 
-	void RemoveClient( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RemoveClient( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Client )
 		{
@@ -80,11 +80,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	void UpdatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void UpdatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 				return;
 
 			ref Param1< string > data;
@@ -98,7 +98,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			player.UpdatePlayerData();
 			player.Serialize();
 
-			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( player.Data, player.IdentityPlayer, player.PlayerObject ), false, sender );
+			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( player.Data, player.IdentityPlayer, player.PlayerObject ), false, senderRPC );
 		}
 
 		if ( type == CallType.Client )
@@ -111,7 +111,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	void SetClientInstance( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetClientInstance( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Client )
 		{
@@ -127,7 +127,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	void UpdateRole( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void UpdateRole( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		ref Param2< string, ref array< string > > data;
 		if ( !ctx.Read( data ) )

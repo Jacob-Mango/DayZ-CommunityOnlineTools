@@ -39,12 +39,12 @@ class JMPermissionManager
 		return Players.Get( m_ClientGUID );
 	}
 
-	bool HasRolePermission( string name, string permission, out JMPermissionType permType = JMPermissionType.DISALLOW )
+	bool HasRolePermission( string name, string permission, out JMPermissionType permTypeHasRolePermission = JMPermissionType.DISALLOW )
 	{
 		JMRole role;
 		if ( Roles.Find( name, role ) )
 		{
-			return role.HasPermission( permission, permType )
+			return role.HasPermission( permission, permTypeHasRolePermission )
 		}
 		return false;
 	}
@@ -57,19 +57,19 @@ class JMPermissionManager
 	/**
 	 * This uses GUIDs now.
 	 */
-	array< JMPlayerInstance > GetPlayers( ref array< string > guids = NULL )
+	array< JMPlayerInstance > GetPlayers( ref array< string > guidsGetPlayers = NULL )
 	{
-		if ( guids == NULL || !GetGame().IsMultiplayer() )
+		if ( guidsGetPlayers == NULL || !GetGame().IsMultiplayer() )
 		{
 			return Players.GetValueArray();
 		}
 
 		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
 
-		for ( int i = 0; i < guids.Count(); i++ )
+		for ( int i = 0; i < guidsGetPlayers.Count(); i++ )
 		{
 			JMPlayerInstance instance;
-			if ( Players.Find( guids[i], instance ) )
+			if ( Players.Find( guidsGetPlayers[i], instance ) )
 			{
 				players.Insert( instance );
 			}
@@ -104,22 +104,22 @@ class JMPermissionManager
 		return data;
 	}
 
-	ref JMPermission GetRootPermission()
+	JMPermission GetRootPermission()
 	{
 		return RootPermission;
 	}
 
-	bool HasPermission( string permission, PlayerIdentity identity = NULL )
+	bool HasPermission( string permission, PlayerIdentity identityHasPermission = NULL )
 	{
 		PMPrint();
 
-		if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
+		if ( IsMissionClient() ) 
 		{
-			return true;
-		}
-
-		if ( GetGame().IsClient() ) 
-		{
+			if ( IsMissionHost() )
+			{
+				return true;
+			}
+			
 			if ( GetPermissionsManager().GetClientPlayer() == NULL )
 			{
 				Print( "Client Player is NULL!" );
@@ -129,13 +129,13 @@ class JMPermissionManager
 			return GetPermissionsManager().GetClientPlayer().HasPermission( permission );
 		}
 		
-		if ( identity == NULL )
+		if ( identityHasPermission == NULL )
 		{
 			return false;
 		}
 
 		JMPlayerInstance instance;
-		if ( Players.Find( identity.GetId(), instance ) )
+		if ( Players.Find( identityHasPermission.GetId(), instance ) )
 		{
 			return instance.HasPermission( permission );
 		}
@@ -143,11 +143,11 @@ class JMPermissionManager
 		return false;
 	}
 
-	bool OnClientConnected( PlayerIdentity identity, out JMPlayerInstance instance )
+	bool OnClientConnected( PlayerIdentity identityOnClientConnected, out JMPlayerInstance instanceOnClientConnected )
 	{
 		string guid = "";
 		
-		if ( identity == NULL )
+		if ( identityOnClientConnected == NULL )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
@@ -157,33 +157,33 @@ class JMPermissionManager
 			guid = JMConstants.OFFLINE_GUID;
 		} else
 		{
-			guid = identity.GetId();
+			guid = identityOnClientConnected.GetId();
 		}
 
-		if ( Players.Find( guid, instance ) )
+		if ( Players.Find( guid, instanceOnClientConnected ) )
 		{
 			return false;
 		}
 
-		instance = new JMPlayerInstance( identity );
+		instanceOnClientConnected = new JMPlayerInstance( identityOnClientConnected );
 
-		instance.CopyPermissions( RootPermission );
-		instance.Load();
+		instanceOnClientConnected.CopyPermissions( RootPermission );
+		instanceOnClientConnected.Load();
 
-		instance.Serialize();
+		instanceOnClientConnected.Serialize();
 
-		Players.Insert( guid, instance );
+		Players.Insert( guid, instanceOnClientConnected );
 
 		// PMPrint();
 
 		return true;
 	}
 
-	bool OnClientDisconnected( string guid, out JMPlayerInstance instance )
+	bool OnClientDisconnected( string guid, out JMPlayerInstance instanceOnClientDisconnected )
 	{
-		if ( Players.Find( guid, instance ) )
+		if ( Players.Find( guid, instanceOnClientDisconnected ) )
 		{
-			instance.Save();
+			instanceOnClientDisconnected.Save();
 
 			Players.Remove( guid );
 			return true;
@@ -195,7 +195,7 @@ class JMPermissionManager
 
 	void PMPrint()
 	{
-		if ( IsMissionClient() )
+		if ( IsMissionClient() && false )
 		{
 			Print( "Printing all authenticated players!" );
 
@@ -216,70 +216,37 @@ class JMPermissionManager
 		return Players.Get( guid );
 	}
 
-	/**
-	 * Sometimes PlayerIdentity::GetId doesn't work, for those situtations we use this
-	 */
-	JMPlayerInstance GetPlayerByIdentity( PlayerIdentity ident )
+	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation dataUpdatePlayer, PlayerIdentity identityUpdatePlayer = NULL, PlayerBase playerUpdatePlayer = NULL )
 	{
-		if ( !GetGame().IsMultiplayer() )
-		{
-			return Players.GetElement( 0 );
-		}
-		
-		if ( ident == NULL )
-		{
-			return NULL;
-		}
-
-		JMPlayerInstance auPlayer = NULL;
-
-		for ( int i = 0; i < Players.Count(); i++ )
-		{
-			if ( Players.GetElement( i ).IdentityPlayer == ident )
-			{
-				auPlayer = Players.GetElement( i );
-				break;
-			}
-		}
-
-		return auPlayer;
-	}
-
-	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerIdentity identity = NULL, PlayerBase player = NULL )
-	{
-		//Print( "UpdatePlayer (" + data.SGUID + ")" );
-		JMPlayerInstance instance = GetPlayer( data.SGUID );
+		JMPlayerInstance instance = GetPlayer( dataUpdatePlayer.SGUID );
 
 		if ( !instance )
 		{
-			//Print( " !instance" );
 			if ( !IsMissionClient() )
 			{
-				//Print( " !IsMissionClient" );
 				return NULL;
 			}
 
-			instance = new JMPlayerInstance( identity );
-			Players.Insert( data.SGUID, instance );
+			instance = new JMPlayerInstance( identityUpdatePlayer );
+			Players.Insert( dataUpdatePlayer.SGUID, instance );
 		}
 
-		instance.SwapData( data );
+		instance.SwapData( dataUpdatePlayer );
 		instance.Deserialize();
 
-		if ( identity != NULL )
+		if ( identityUpdatePlayer != NULL )
 		{
-			//Print( " identity" );
-			instance.IdentityPlayer = identity;
+			instance.IdentityPlayer = identityUpdatePlayer;
 		}
 
 		if ( IsMissionClient() )
 		{
-			if ( m_ClientGUID == data.SGUID )
+			if ( m_ClientGUID == dataUpdatePlayer.SGUID )
 			{
 				GetModuleManager().OnClientPermissionsUpdated();
 			}
 
-			instance.PlayerObject = player;
+			instance.PlayerObject = playerUpdatePlayer;
 		}
 
 		return instance;

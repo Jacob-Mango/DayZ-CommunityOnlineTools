@@ -26,7 +26,7 @@ class CommunityOnlineToolsBase
 		string date = day.ToStringLen( 2 ) + "-" + month.ToStringLen( 2 ) + "-" + year.ToStringLen( 2 );
 		string time = hour.ToStringLen( 2 ) + "-" + minute.ToStringLen( 2 ) + "-" + second.ToStringLen( 2 );
 
-		return date + " " + time;
+		return date + "-" + time;
 	}
 
     void CreateNewLog()
@@ -155,69 +155,61 @@ class CommunityOnlineToolsBase
 
     void LogServer( string text )
     {
-        text = "[COT] Game: " + text;
-
         if ( GetGame().IsServer() )
         {
-            GetGame().AdminLog( text );
+            GetGame().AdminLog( "[COT] " + text );
         }
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
         if ( fileLog != 0 )
         {
-		    FPrintln( fileLog, text );
+		    FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
 		    CloseFile( fileLog );
         }
     }
 
-    void Log( JMPlayerInstance player, string text )
+    void Log( JMPlayerInstance logInstacPlyer, string text )
     {
-        if ( player == NULL )
+        if ( GetGame().IsMultiplayer() )
         {
-            text = "[COT] Game: " + text;
-        } else if ( GetGame().IsMultiplayer() )
-        {
-            text = "[COT] " + player.GetSteam64ID() + ": " + text;
+            text = "" + logInstacPlyer.GetSteam64ID() + ": " + text;
         } else
         {
-            text = "[COT] Offline: " + text;
+            text = "Offline: " + text;
         }
 
         if ( GetGame().IsServer() )
         {
-            GetGame().AdminLog( text );
+            GetGame().AdminLog( "[COT] " + text );
         }
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
         if ( fileLog != 0 )
         {
-		    FPrintln( fileLog, text );
+		    FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
 		    CloseFile( fileLog );
         }
     }
 
-    void Log( PlayerIdentity player, string text )
+    void Log( PlayerIdentity logIdentPlyer, string text )
     {
-        if ( player == NULL )
+        if ( GetGame().IsMultiplayer() )
         {
-            text = "[COT] Game: " + text;
-        } else if ( GetGame().IsMultiplayer() )
-        {
-            text = "[COT] " + player.GetPlainId() + ": " + text;
+            text = "" + logIdentPlyer.GetPlainId() + ": " + text;
         } else
         {
-            text = "[COT] Offline: " + text;
+            text = "Offline: " + text;
         }
 
         if ( GetGame().IsServer() )
         {
-            GetGame().AdminLog( text );
+            GetGame().AdminLog( "[COT] " + text );
         }
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
         if ( fileLog != 0 )
         {
-		    FPrintln( fileLog, text );
+		    FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
 		    CloseFile( fileLog );
         }
     }

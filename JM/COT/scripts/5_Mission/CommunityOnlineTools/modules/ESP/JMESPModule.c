@@ -140,9 +140,9 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void ServerSetSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void ServerSetSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Set", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Set", senderRPC ) )
 			return;
 
 		ref Param3< vector, vector, float > data;
@@ -156,7 +156,7 @@ class JMESPModule: JMRenderableModuleBase
 			string obtype;
 			GetGame().ObjectGetType( target, obtype );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
 
 			target.SetPosition( data.param1 );
 			target.SetYawPitchRoll( data.param2 );
@@ -164,17 +164,17 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void RequestFullMapESP( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RequestFullMapESP( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			PlayerBase player = GetPlayerObjectByIdentity( sender );
+			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 			if ( player )
 			{
-				GetCommunityOnlineToolsBase().Log( sender, "Entering Full Map ESP" );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Entering Full Map ESP" );
 				GetGame().ObjectDelete( player );
 			}
 			
@@ -428,14 +428,14 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void ESPLog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void ESPLog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		ref Param1< string > data;
 		if ( !ctx.Read( data ) ) return;
 		
 		if ( type == CallType.Server )
 		{
-			GetCommunityOnlineToolsBase().Log( sender, "ESP " + data.param1 );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "ESP " + data.param1 );
 		}
 	}
 

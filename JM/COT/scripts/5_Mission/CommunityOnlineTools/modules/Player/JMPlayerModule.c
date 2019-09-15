@@ -101,7 +101,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 	}
 
-	void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -110,7 +110,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -125,14 +125,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Health", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set health to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your health has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set health to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetBlood( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetBlood( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -141,7 +139,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -156,14 +154,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Blood", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set blood to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your blood has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set blood to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetEnergy( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetEnergy( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -172,7 +168,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -187,14 +183,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatEnergy().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set energy to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your energy has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set energy to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetWater( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetWater( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -203,7 +197,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -218,14 +212,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatWater().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set water to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your water has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set water to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetShock( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetShock( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -234,7 +226,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -249,14 +241,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetHealth( "GlobalHealth", "Shock", data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set shock to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your shock has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set shock to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetHeatComfort( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetHeatComfort( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -265,7 +255,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatComfort", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatComfort", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -280,14 +270,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatHeatComfort().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set heat comfort to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your heat comfort has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set heat comfort to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetWet( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetWet( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -296,7 +284,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Wet", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Wet", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -311,14 +299,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatWet().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set wetness to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your wetness has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set wetness to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetTremor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetTremor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -327,7 +313,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Tremor", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Tremor", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -342,14 +328,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatTremor().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set tremor to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your tremor has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set tremor to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetStamina( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetStamina( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< float, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -358,7 +342,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -373,14 +357,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetStatStamina().Set( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set stamina to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your stamina has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set stamina to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetLifeSpanState( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetLifeSpanState( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< int, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -389,7 +371,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -407,14 +389,12 @@ class JMPlayerModule: JMRenderableModuleBase
 					player.SetLifeSpanStateVisible( data.param1 );
 				}
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set beard state to " + data.param1 + " for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your beard state has been set to " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set beard state to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_SetBloodyHands( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_SetBloodyHands( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< bool, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -423,7 +403,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -438,20 +418,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetBloodyHands( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Set bloody hands to " + data.param1 + " for " + players[i].GetGUID() );
-
-				if ( data.param1 )
-				{
-					SendAdminNotification( sender, player.GetIdentity(), "You now have bloody hands." );
-				} else 
-				{
-					SendAdminNotification( sender, player.GetIdentity(), "You no longer have bloody hands." );
-				}
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set bloody hands to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Player_KickTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_KickTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param1< ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -460,7 +432,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param1 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Kick", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Kick", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -493,16 +465,14 @@ class JMPlayerModule: JMRenderableModuleBase
 							vehCommand.JumpOutVehicle();
 						}
 
-						GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].GetGUID() + " out of transport" );
-
-						SendAdminNotification( sender, player.GetIdentity(), "You have been kicked out of your vehicle." );
+						GetCommunityOnlineToolsBase().Log( senderRPC, "Kicked " + players[i].GetGUID() + " out of transport" );
 					}
 				}
 			}
 		}
 	}
 
-	void Player_RepairTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_RepairTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param1< ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -511,7 +481,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param1 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Repair", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Repair", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -560,15 +530,13 @@ class JMPlayerModule: JMRenderableModuleBase
 
 					completedTransports.Insert( transport );
 
-					GetCommunityOnlineToolsBase().Log( sender, "Repaired transport for " + players[i].GetGUID() );
-
-					SendAdminNotification( sender, player.GetIdentity(), "Your vehicle has been repaired." );
+					GetCommunityOnlineToolsBase().Log( senderRPC, "Repaired transport for " + players[i].GetGUID() );
 				}
 			}
 		}
 	}
 
-	void Player_TeleportToMe( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_TeleportToMe( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< vector, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -577,7 +545,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", sender ) ) return;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", senderRPC ) ) return;
 
 		if ( type == CallType.Server )
 		{
@@ -609,14 +577,12 @@ class JMPlayerModule: JMRenderableModuleBase
 					player.SetPosition( data.param1 );
 				}
 
-				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].GetGUID() + " to self" );
-
-				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + VectorToString( data.param1, 1 ) );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[i].GetGUID() + " to self" );
 			}
 		}
 	}
 
-	void Player_TeleportMeTo( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Player_TeleportMeTo( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param1< ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -625,12 +591,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param1 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", sender ) ) return;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", senderRPC ) ) return;
 
-		PlayerBase senderPlayer = GetPlayerObjectByIdentity( sender );
+		PlayerBase senderPlayer = GetPlayerObjectByIdentity( senderRPC );
 
-		if ( senderPlayer == NULL ) return;
-
+		if ( senderPlayer == NULL )
+			return;
 
 		if ( type == CallType.Server )
 		{
@@ -646,7 +612,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			
 			HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
 
-			player.SetLastPosition( player.GetPosition() );
+			senderPlayer.SetLastPosition( senderPlayer.GetPosition() );
 
 			if ( vehCommand )
 			{
@@ -663,15 +629,13 @@ class JMPlayerModule: JMRenderableModuleBase
 				senderPlayer.SetPosition( player.GetPosition() );
 			}
 
-			GetCommunityOnlineToolsBase().Log( sender, "Teleported self to " + players[0].GetGUID() );
-
-			SendAdminNotification( sender, player.GetIdentity(), "Teleported themself to you." );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported self to " + players[0].GetGUID() );
 		}
 	}
 
-	void SpectatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpectatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -687,13 +651,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			
 			if ( !data.param1 )
 			{
-				player = GetPlayerObjectByIdentity( sender );
-				if ( !player ) return;
+				player = GetPlayerObjectByIdentity( senderRPC );
+				if ( !player )
+					return;
 
-				GetGame().SelectPlayer( sender, player );
-				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
+				GetGame().SelectPlayer( senderRPC, player );
+				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, senderRPC );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Left spectating/free camera" );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Left spectating/free camera" );
 				return;
 			}
 
@@ -705,13 +670,13 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( player == NULL ) return;
 
-			GetGame().SelectSpectator( sender, "JMSpectatorCamera", player.GetPosition() );
+			GetGame().SelectSpectator( senderRPC, "JMSpectatorCamera", player.GetPosition() );
 
-			GetGame().SelectPlayer( sender, NULL );
+			GetGame().SelectPlayer( senderRPC, NULL );
 
-			GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param, true, sender, player );
+			GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param, true, senderRPC, player );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Spectating " + players[0].GetGUID() );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Spectating " + players[0].GetGUID() );
 		}	
 
 		if ( type == CallType.Client )
@@ -730,7 +695,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param2< bool, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -739,7 +704,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		array< string > guids = new array< string >;
 		guids.Copy( data.param2 );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -754,20 +719,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetGodMode( data.param1 );
  
-				GetCommunityOnlineToolsBase().Log( sender, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
-
-				if ( data.param1 )
-				{
-					SendAdminNotification( sender, player.GetIdentity(), "You now have god mode." );
-				} else 
-				{
-					SendAdminNotification( sender, player.GetIdentity(), "You no longer have god mode." );
-				}
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void HealPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void HealPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -778,7 +735,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", senderRPC ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
@@ -799,14 +756,12 @@ class JMPlayerModule: JMRenderableModuleBase
 				player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 				player.GetStatWater().Set( player.GetStatWater().GetMax() );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Healing player for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "You have been fully healed." );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Healing player for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void TPLastPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void TPLastPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -817,7 +772,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", senderRPC ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
@@ -837,19 +792,13 @@ class JMPlayerModule: JMRenderableModuleBase
 
 					player.SetPosition( newPosition );
 
-					GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[i].GetGUID() + " to last position" );
-
-					SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to your last position." );
-
-				} else
-				{
-					SendAdminNotification( sender, NULL, players[i].GetName() + " doesn't have a last position." );
+					GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[i].GetGUID() + " to last position" );
 				}
 			}
 		}
 	}
 
-	void StripPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void StripPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -860,7 +809,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", senderRPC ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
@@ -874,14 +823,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.RemoveAllItems();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Stripping items from " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "Your items have been stripped." );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Stripping items from " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void StopBleeding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void StopBleeding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -892,7 +839,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy( data.param1 );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Bleeding", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Bleeding", senderRPC ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
@@ -906,14 +853,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.GetBleedingManagerServer().RemoveAllSources();
 
-				GetCommunityOnlineToolsBase().Log( sender, "Bleeding stopped for " + players[i].GetGUID() );
-
-				SendAdminNotification( sender, player.GetIdentity(), "You are no longer bleeding." );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Bleeding stopped for " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void Invisibility(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target)
+	void Invisibility(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target)
 	{
 		if (type == CallType.Server)
 		{
@@ -924,7 +869,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			array<string> guids = new array<string>;
 			guids.Copy(data.param2);
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisible", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisible", senderRPC ) )
 				return;
 
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
@@ -937,21 +882,14 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				player.SetInvisibility( data.param1 );
 
-				GetCommunityOnlineToolsBase().Log(sender, "Set invisibility to " + data.param1 + " for " + players[i].GetGUID());
-
-				if ( data.param1 )
-				{
-					SendAdminNotification( sender, player.GetIdentity(), "You are now invisible." );
-				} else {
-					SendAdminNotification( sender, player.GetIdentity(), "You are no longer invisible." );
-				}
+				GetCommunityOnlineToolsBase().Log(senderRPC, "Set invisibility to " + data.param1 + " for " + players[i].GetGUID());
 			}
 		}
 	}
 
-	void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Permissions", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Permissions", senderRPC ) )
 			return;
    
 		if ( type == CallType.Server )
@@ -980,16 +918,14 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated permissions for " + players[k].GetGUID() );
-
-				SendAdminNotification( sender, players[k].IdentityPlayer, "Your permissions have been updated." );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated permissions for " + players[k].GetGUID() );
 			}
 		}
 	}
 
-	void SetRoles( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SetRoles( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Roles", senderRPC ) )
 			return;
    
 		if ( type == CallType.Server )
@@ -1018,16 +954,14 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Updated roles for " + players[k].GetGUID() );
-
-				SendAdminNotification( sender, players[k].IdentityPlayer, "Your roles have been updated." );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated roles for " + players[k].GetGUID() );
 			}
 		}
 	}
 
-	void KickPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void KickPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -1043,17 +977,15 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
-				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been kicked." );
-
 				GetGame().ChatPlayer( "#kick " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Kicked " + players[i].GetGUID() );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Kicked " + players[i].GetGUID() );
 			}
 		}
 	}
 
-	void BanPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void BanPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -1069,10 +1001,8 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
-				// SendAdminNotification( players[i].IdentityPlayer, NULL, "You have been banned." );
-
 				GetGame().ChatPlayer( "#ban " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( sender, "Banned " + players[i].GetGUID() );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Banned " + players[i].GetGUID() );
 			}
 		}
 	}

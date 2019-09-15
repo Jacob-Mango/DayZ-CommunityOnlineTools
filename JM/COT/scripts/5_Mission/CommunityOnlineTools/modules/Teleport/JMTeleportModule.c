@@ -94,14 +94,14 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", senderRPC ) )
 				return;
 		
-			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref JMTeleportSerialize >( settings ), false, sender );
+			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref JMTeleportSerialize >( settings ), false, senderRPC );
 		}
 
 		if ( type == CallType.Client )
@@ -113,9 +113,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	void Cursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Cursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor", senderRPC ) )
 			return;
 
 		Param1< vector > data;
@@ -123,7 +123,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			PlayerBase player = GetPlayerObjectByIdentity( sender );
+			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 
 			if ( !player )
 				return;
@@ -151,14 +151,14 @@ class JMTeleportModule: JMRenderableModuleBase
 				player.SetPosition( data.param1 );
 			}
 
-			GetCommunityOnlineToolsBase().Log( sender, "Teleported to cursor " + data.param1 );
-			//SendAdminNotification( sender, NULL, "You have teleported to " + VectorToString( data.param1, 1 ) );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported to cursor " + data.param1 );
+
 		}
 	}
 	
-	void Predefined( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Predefined( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", senderRPC ) )
 			return;
 
 		Param2< string, ref array< string > > data;
@@ -257,9 +257,9 @@ class JMTeleportModule: JMRenderableModuleBase
 					player.SetPosition( position );
 				}
 				
-				GetCommunityOnlineToolsBase().Log( sender, "Teleported " + players[j].GetGUID() + " to " + location.Name );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[j].GetGUID() + " to " + location.Name );
 				
-				SendAdminNotification( sender, player.GetIdentity(), "You have been teleported to " + data.param1 );
+
 			}
 		}
 	}

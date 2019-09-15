@@ -211,6 +211,8 @@ class JMPlayerForm extends JMFormBase
 	
 	void Click_ModifyRoles()
 	{
+		RefreshRolesUI();
+
 		m_ActionsForm.Show( false );
 		m_RolesWrapper.Show( true );
 		m_PermissionsWrapper.Show( false );
@@ -441,11 +443,6 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowSide()
 	{
-		SetSize( awidth, plheight );
-	}
-
-	void UpdateActionsFields()
-	{
 		if ( CountPlayersSelected() == 0 )
 		{
 			m_DataUpdateGUID = "";
@@ -456,77 +453,73 @@ class JMPlayerForm extends JMFormBase
 		m_DataUpdateGUID = GetSelectedPlayers()[0];
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( m_DataUpdateGUID );
-
-		if ( instance )
+		
+		if ( !instance )
 		{
-			JMPlayerInformation data = instance.Data;
-			
-			LoadPermissions( data.APermissions );
-			LoadRoles( data.ARoles );
-
-			ShowSide();
-
-			m_GUID.SetText( data.SGUID );
-			m_Name.SetText( data.SName );
-			m_Steam64ID.SetText( data.SSteam64ID );
-
-			m_Health.SetText( data.FHealth.ToString() );
-			m_Blood.SetText( data.FBlood.ToString() );
-			m_Energy.SetText( data.FEnergy.ToString() );
-			m_Water.SetText( data.FWater.ToString() );
-			m_Shock.SetText( data.FShock.ToString() );
-			//m_HeatComfort.SetText( data.FHeatComfort.ToString() );
-			//m_Wet.SetText( data.FWet.ToString() );
-			//m_Tremor.SetText( data.FTremor.ToString() );
-			m_Stamina.SetText( data.FStamina.ToString() );
-			//m_LastShaved.SetSelection( data.ILifeSpanState );
-			m_BloodyHands.SetChecked( data.BBloodyHands );
-			m_GodMode.SetChecked( data.BGodMode );
-			//m_Invisibility.SetChecked(data.BInvisibility);
-			
-			m_PosX.SetText( "" + data.VPosition[0] );
-			m_PosY.SetText( "" + data.VPosition[1] );
-			m_PosZ.SetText( "" + data.VPosition[2] );
-
-			m_PingMin.SetText( data.IPingMin.ToString() );
-			m_PingMax.SetText( data.IPingMax.ToString() );
-			m_PingAvg.SetText( data.IPingAvg.ToString() );
-
-			m_ActionsForm.FindAnyWidget( "disabled" ).Show( false );
-		} else 
-		{
+			m_DataUpdateGUID = "";
 			HideSide();
+			return;
 		}
+
+		SetSize( awidth, plheight );
+
+		UpdateActionsFields( instance );
+	}
+
+	void UpdateActionsFields( JMPlayerInstance instanceUpdateActionsFields )
+	{
+		JMPlayerInformation data = instanceUpdateActionsFields.Data;
+		
+		LoadPermissions( data.APermissions );
+		LoadRoles( data.ARoles );
+
+		m_GUID.SetText( data.SGUID );
+		m_Name.SetText( data.SName );
+		m_Steam64ID.SetText( data.SSteam64ID );
+
+		m_Health.SetText( data.FHealth.ToString() );
+		m_Blood.SetText( data.FBlood.ToString() );
+		m_Energy.SetText( data.FEnergy.ToString() );
+		m_Water.SetText( data.FWater.ToString() );
+		m_Shock.SetText( data.FShock.ToString() );
+		//m_HeatComfort.SetText( data.FHeatComfort.ToString() );
+		//m_Wet.SetText( data.FWet.ToString() );
+		//m_Tremor.SetText( data.FTremor.ToString() );
+		m_Stamina.SetText( data.FStamina.ToString() );
+		//m_LastShaved.SetSelection( data.ILifeSpanState );
+		m_BloodyHands.SetChecked( data.BBloodyHands );
+		m_GodMode.SetChecked( data.BGodMode );
+		//m_Invisibility.SetChecked(data.BInvisibility);
+		
+		m_PosX.SetText( "" + data.VPosition[0] );
+		m_PosY.SetText( "" + data.VPosition[1] );
+		m_PosZ.SetText( "" + data.VPosition[2] );
+
+		m_PingMin.SetText( data.IPingMin.ToString() );
+		m_PingMax.SetText( data.IPingMax.ToString() );
+		m_PingAvg.SetText( data.IPingAvg.ToString() );
+
+		m_ActionsForm.FindAnyWidget( "disabled" ).Show( false );
 	}
 
 	override void OnShow()
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateList, 1000, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
 
 		m_PermissionsWrapper.Show( false );
 		m_RolesWrapper.Show( false );
 		m_ActionsWrapper.Show( true );
-
-		UpdateList();
 		
-		UpdateActionsFields();
+		ShowSide();
 	}
 
 	override void OnHide() 
 	{
 		super.OnHide();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateList );
-	}
-
-	void UpdateList()
-	{
-		UpdatePlayerList();
-		RefreshRolesUI();
-
-		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -550,7 +543,7 @@ class JMPlayerForm extends JMFormBase
 
 		if ( w == m_ActionsRefresh )
 		{
-			UpdateActionsFields();
+			ShowSide();
 			return true;
 		}
 
@@ -585,7 +578,7 @@ class JMPlayerForm extends JMFormBase
 
 		if ( PlayerSelectedIndex( guid ) == 0 )
 		{
-			UpdateActionsFields();
+			ShowSide();
 		}
 
 		if ( CountPlayersSelected() == 0 )
@@ -611,7 +604,7 @@ class JMPlayerForm extends JMFormBase
 
 		if ( PlayerSelectedIndex( guid ) == 0 )
 		{
-			UpdateActionsFields();
+			ShowSide();
 		}
 
 		if ( CountPlayersSelected() == 0 )
@@ -624,7 +617,7 @@ class JMPlayerForm extends JMFormBase
 
 	void CreatePermissionsUI()
 	{
-		ref JMPermission rootPerm = GetPermissionsManager().GetRootPermission();
+		JMPermission rootPerm = GetPermissionsManager().GetRootPermission();
 
 		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", m_PermissionListFirst );
 
@@ -853,6 +846,8 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerList()
 	{
+		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
+
 		//if ( COT_IsUsingTestSort() )
 		//	GetPermissionsManager().SortPlayersArray();
 

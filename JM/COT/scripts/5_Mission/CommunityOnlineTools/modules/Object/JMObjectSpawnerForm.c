@@ -201,7 +201,8 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void DeleteOnCursor( UIEvent eid, ref UIActionButton action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
 	}
