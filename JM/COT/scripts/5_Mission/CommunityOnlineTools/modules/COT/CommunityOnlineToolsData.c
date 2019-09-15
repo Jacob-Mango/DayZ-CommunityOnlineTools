@@ -1,4 +1,0 @@
-class CommunityOnlineToolsData
-{
-    bool TestSort;
-}
