@@ -250,13 +250,16 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( guids.Count() == 0 )
 				return;
 
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + location ) )
+			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + location.Permission ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( location );
+			rpc.Write( location.Permission );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Location, true, NULL );
+		} else if ( IsMissionOffline() )
+		{
+			Server_Location( location.Permission, guids, NULL );
 		}
 	}
 
