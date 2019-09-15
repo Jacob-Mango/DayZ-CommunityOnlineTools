@@ -47,6 +47,9 @@ class JMMapForm extends JMFormBase
 	{
 		map_widget.ClearUserMarks();
 
+		if ( !GetPermissionsManager().HasPermission( "Map.Show.Players" ) )
+			return;
+
 		foreach( JMPlayerInstance player : GetPermissionsManager().GetPlayers() ) 
 		{
 			map_widget.AddUserMark( player.Data.VPosition, player.Data.SName, ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );

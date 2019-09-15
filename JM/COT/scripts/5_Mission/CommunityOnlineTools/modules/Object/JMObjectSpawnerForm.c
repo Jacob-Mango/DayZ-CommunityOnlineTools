@@ -180,31 +180,86 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void SpawnCursor( UIEvent eid, ref UIActionButton action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetText() ) );
+		JMObjectSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		int quantity = -1;
+
+		string quantText = m_QuantityItem.GetText();
+
+		quantText.ToUpper();
+
+		if ( quantText != "MAX")
+		{
+			quantity = quantText.ToInt();
+		}
+
+		mod.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
 	}
 
 	void SpawnPosition( UIEvent eid, ref UIActionButton action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectPosition", new Param3< string, vector, string >( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetText() ) );
+		JMObjectSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		int quantity = -1;
+
+		string quantText = m_QuantityItem.GetText();
+
+		quantText.ToUpper();
+
+		if ( quantText != "MAX")
+		{
+			quantity = quantText.ToInt();
+		}
+
+		mod.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
 	}
 
 	void SpawnInventory( UIEvent eid, ref UIActionButton action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Object", "SpawnObjectInventory", new Param3< string, string, ref array< string > >( GetCurrentSelection(), m_QuantityItem.GetText(), GetSelectedPlayers() ) );
-	}
-
-	void DeleteOnCursor( UIEvent eid, ref UIActionButton action )
-	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
+		JMObjectSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		array< EntityAI > entities = new array< EntityAI >;
+
+		JMSelectedModule sm;
+		if ( Class.CastTo( sm, GetModuleManager().GetModule( JMSelectedModule ) ) )
+		{
+			for ( int i = 0; i < sm.GetObjects().Count(); i++ )
+			{
+				EntityAI ent;
+				if ( Class.CastTo( ent, sm.GetObjects()[i] ) )
+				{
+					entities.Insert( ent );
+				}
+			}
+		}
+
+		int quantity = -1;
+
+		string quantText = m_QuantityItem.GetText();
+
+		quantText.ToUpper();
+
+		if ( quantText != "MAX")
+		{
+			quantity = quantText.ToInt();
+		}
+
+		mod.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )

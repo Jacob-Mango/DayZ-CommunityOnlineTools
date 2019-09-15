@@ -74,6 +74,6 @@ class JMVehicleSpawnerForm extends JMFormBase
 		if ( !Class.CastTo( mod, module ) )
 			return;
 
-		mod.SpawnCursor( data.ClassName, GetCursorPos() );
+		mod.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
 }
