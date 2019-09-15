@@ -64,9 +64,12 @@ class JMMapForm extends JMFormBase
 
 		if ( w == map_widget )
 		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
-			rpc.Send( NULL, JMMapModuleRPC.Teleport, true, NULL );
+			JMMapModule mod;
+			if ( Class.CastTo( mod, module ) )
+			{
+				mod.Teleport( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
+			}
+			
 			return true;
 		}
 
