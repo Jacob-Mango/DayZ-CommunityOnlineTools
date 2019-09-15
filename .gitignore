@@ -6,8 +6,6 @@ user.cfg
 .vs/
 
 ServerProfile/CommunityOnlineTools/Logs/
-ServerProfile/PermissionsFramework/Roles/
-ServerProfile/PermissionsFramework/Permissions/
 ServerProfile/BattlEye/
 ServerProfile/Users/
 ServerProfile/DataCache/
