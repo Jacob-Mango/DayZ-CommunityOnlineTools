@@ -27,24 +27,31 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		Load();
-		
-		meta = JMItemSetMeta.DeriveFromSettings( settings );
 	}
 
 	override void OnSettingsUpdated()
 	{
 		super.OnSettingsUpdated();
 
-		settings = JMItemSetSettings.Load();
-
-		for ( int j = 0; j < settings.ItemSets.Count(); j++ )
+		if ( settings )
 		{
-			string base = settings.ItemSets.GetKey( j );
-			base.Replace( " ", "." );
-			GetPermissionsManager().RegisterPermission( "Items." + base );
-		}
+			for ( int i = 0; i < settings.ItemSets.Count(); i++ )
+			{
+				string vehicle = settings.ItemSets.GetKey( i );
+				vehicle.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Items." + vehicle );
+			}
 
-		meta = JMItemSetMeta.DeriveFromSettings( settings );
+			meta = JMItemSetMeta.DeriveFromSettings( settings );
+		} else if ( meta )
+		{
+			for ( i = 0; i < meta.ItemSets.Count(); i++ )
+			{
+				vehicle = meta.ItemSets.Get( i );
+				vehicle.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Items." + vehicle );
+			}
+		}
 	}
 
 	override void OnMissionFinish()
@@ -93,24 +100,24 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	
 	void Load()
 	{
-		if ( IsMissionClient() && !IsMissionOffline() )
+		if ( GetGame().IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, NULL );
+		} else
+		{
+			settings = JMItemSetSettings.Load();
+
+			meta = JMItemSetMeta.DeriveFromSettings( settings );
+
+			OnSettingsUpdated();
 		}
-	}
-
-	private void Client_Load( string json )
-	{
-		JsonFileLoader< JMItemSetMeta >.JsonLoadData( json, meta );
-
-		OnSettingsUpdated();
 	}
 
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( JsonFileLoader< JMItemSetMeta >.JsonMakeData( JMItemSetMeta.DeriveFromSettings( settings ) ) );
+		rpc.Write( JMItemSetMeta.DeriveFromSettings( settings ) );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );
 	}
 
@@ -123,14 +130,10 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			string json;
-			if ( !ctx.Read( json ) )
+			if ( ctx.Read( meta ) )
 			{
-				Error("Failed");
-				return;
-			} 
-
-			Client_Load( json );
+				OnSettingsUpdated();
+			}
 		}
 	}
 
@@ -138,19 +141,14 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_SpawnPosition( itemSet, position );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( itemSet );
+			rpc.Write( position );
+			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPosition, true, NULL );
 		} else
 		{
 			Server_SpawnPosition( itemSet, position, NULL );
 		}
-	}
-
-	private void Client_SpawnPosition( string itemSet, vector position )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( itemSet );
-		rpc.Write( position );
-		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPosition, true, NULL );
 	}
 
 	private void Server_SpawnPosition( string itemSet, vector position, PlayerIdentity ident )
@@ -202,19 +200,14 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_SpawnPlayers( itemSet, guids );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( itemSet );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPlayers, true, NULL );
 		} else
 		{
 			Server_SpawnPlayers( itemSet, guids, NULL );
 		}
-	}
-
-	private void Client_SpawnPlayers( string itemSet, array< string > guids )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( itemSet );
-		rpc.Write( guids );
-		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPlayers, true, NULL );
 	}
 
 	private void Server_SpawnPlayers( string itemSet, array< string > guids, PlayerIdentity ident )

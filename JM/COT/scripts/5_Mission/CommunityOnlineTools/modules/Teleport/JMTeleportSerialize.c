@@ -7,9 +7,9 @@ class JMTeleportSerialize
 		Locations = new array< ref JMTeleportLocation >;
 	}
 
-	static ref JMTeleportSerialize Load()
+	static JMTeleportSerialize Load()
 	{
-		ref JMTeleportSerialize settings = new JMTeleportSerialize();
+		JMTeleportSerialize settings = new JMTeleportSerialize();
 
 		if ( FileExist( JMConstants.FILE_TELEPORT ) )
 		{
@@ -30,7 +30,11 @@ class JMTeleportSerialize
 
 	void AddLocation( string name, vector position, float radius = 4.0 )
 	{
-		Locations.Insert( new JMTeleportLocation( name, position, radius ) );
+		string permission = name + "";
+		permission.Replace( " ", "" );
+		permission.Replace( "'", "" );
+
+		Locations.Insert( new JMTeleportLocation( name, permission, position, radius ) );
 	}
 
 	void Defaults()

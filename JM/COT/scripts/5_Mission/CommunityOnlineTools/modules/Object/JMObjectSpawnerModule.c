@@ -119,21 +119,16 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_SpawnEntity_Position( ent, position, quantity, health );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( ent );
+			rpc.Write( position );
+			rpc.Write( quantity );
+			rpc.Write( health );
+			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		} else
 		{
 			Server_SpawnEntity_Position( ent, position, quantity, health, NULL );
 		}
-	}
-
-	private void Client_SpawnEntity_Position( string ent, vector position, float quantity, float health )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( ent );
-		rpc.Write( position );
-		rpc.Write( quantity );
-		rpc.Write( health );
-		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 	}
 
 	private void Server_SpawnEntity_Position( string ent, vector position, float quantity, float health, PlayerIdentity ident )
@@ -197,21 +192,16 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_SpawnEntity_Inventory( ent, objects, quantity, health );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( ent );
+			rpc.Write( objects );
+			rpc.Write( quantity );
+			rpc.Write( health );
+			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		} else
 		{
 			Server_SpawnEntity_Inventory( ent, objects, quantity, health, NULL );
 		}
-	}
-
-	private void Client_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( ent );
-		rpc.Write( objects );
-		rpc.Write( quantity );
-		rpc.Write( health );
-		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 	}
 
 	private void Server_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health, PlayerIdentity ident )

@@ -26,24 +26,31 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		Load();
-		
-		meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
 	}
 
 	override void OnSettingsUpdated()
 	{
 		super.OnSettingsUpdated();
 
-		settings = JMVehicleSpawnerSettings.Load();
-
-		for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+		if ( settings )
 		{
-			string vehicle = settings.Vehicles.GetKey( i );
-			vehicle.Replace( " ", "." );
-			GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
-		}
+			for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+			{
+				string vehicle = settings.Vehicles.GetKey( i );
+				vehicle.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
+			}
 
-		meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
+			meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
+		} else if ( meta )
+		{
+			for ( i = 0; i < meta.Vehicles.Count(); i++ )
+			{
+				vehicle = meta.Vehicles.Get( i );
+				vehicle.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
+			}
+		}
 	}
 
 	override void OnMissionFinish()
@@ -82,31 +89,31 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/vehiclespawner_form.layout";
 	}
 
-	ref array< string > GetVehicles()
+	array< string > GetVehicles()
 	{
 		return meta.Vehicles;
 	}
 	
 	void Load()
 	{
-		if ( IsMissionClient() && !IsMissionOffline() )
+		if ( GetGame().IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, NULL );
+		} else
+		{
+			settings = JMVehicleSpawnerSettings.Load();
+
+			meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
+
+			OnSettingsUpdated();
 		}
-	}
-
-	private void Client_Load( string json )
-	{
-		JsonFileLoader< JMVehicleSpawnerMeta >.JsonLoadData( json, meta );
-
-		OnSettingsUpdated();
 	}
 
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( JsonFileLoader< JMVehicleSpawnerMeta >.JsonMakeData( JMVehicleSpawnerMeta.DeriveFromSettings( settings ) ) );
+		rpc.Write( JMVehicleSpawnerMeta.DeriveFromSettings( settings ) );
 		rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, ident );
 	}
 
@@ -119,13 +126,10 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			string json;
-			if ( !ctx.Read( json ) )
+			if ( ctx.Read( meta ) )
 			{
-				return;
-			} 
-
-			Client_Load( json );
+				OnSettingsUpdated();
+			}
 		}
 	}
 
@@ -133,19 +137,14 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_SpawnPosition( vehicle, position );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( vehicle );
+			rpc.Write( position );
+			rpc.Send( NULL, JMVehicleSpawnerModuleRPC.SpawnPosition, true, NULL );
 		} else
 		{
 			Server_SpawnPosition( vehicle, position, NULL );
 		}
-	}
-
-	private void Client_SpawnPosition( string vehicle, vector position )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( vehicle );
-		rpc.Write( position );
-		rpc.Send( NULL, JMVehicleSpawnerModuleRPC.SpawnPosition, true, NULL );
 	}
 
 	private void Server_SpawnPosition( string vehicle, vector position, PlayerIdentity ident )

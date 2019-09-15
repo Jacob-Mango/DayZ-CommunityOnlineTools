@@ -47,7 +47,7 @@ class JMMapForm extends JMFormBase
 	{
 		map_widget.ClearUserMarks();
 
-		if ( !GetPermissionsManager().HasPermission( "Map.Show.Players" ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.Players" ) )
 			return;
 
 		foreach( JMPlayerInstance player : GetPermissionsManager().GetPlayers() ) 
@@ -67,10 +67,10 @@ class JMMapForm extends JMFormBase
 
 		if ( w == map_widget )
 		{
-			JMMapModule mod;
-			if ( Class.CastTo( mod, module ) )
+			JMTeleportModule mod;
+			if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
 			{
-				mod.Teleport( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
+				mod.Position( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
 			}
 			
 			return true;

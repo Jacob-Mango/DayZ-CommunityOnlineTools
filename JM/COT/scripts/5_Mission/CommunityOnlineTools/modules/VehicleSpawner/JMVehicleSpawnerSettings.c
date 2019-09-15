@@ -2,9 +2,9 @@ class JMVehicleSpawnerSettings
 {
 	autoptr map< string, ref JMVehicleSpawnerSerialize > Vehicles = new map< string, ref JMVehicleSpawnerSerialize >;
 	
-	static ref JMVehicleSpawnerSettings Load()
+	static JMVehicleSpawnerSettings Load()
 	{
-		ref JMVehicleSpawnerSettings settings = new JMVehicleSpawnerSettings();
+		JMVehicleSpawnerSettings settings = new JMVehicleSpawnerSettings();
 
 		if ( GetGame().IsClient() )
 		{

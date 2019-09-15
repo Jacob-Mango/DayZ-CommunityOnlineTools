@@ -1,15 +1,20 @@
+enum JMTeleportModuleRPC
+{
+    INVALID = 10260,
+    Load,
+	Position,
+	Location,
+    COUNT
+};
+
 class JMTeleportModule: JMRenderableModuleBase
 {
-	protected ref JMTeleportSerialize settings;
+	private ref JMTeleportSerialize settings;
 	
 	void JMTeleportModule()
 	{
-		GetRPCManager().AddRPC( "COT_Teleport", "Cursor", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Teleport", "Predefined", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Teleport", "LoadData", this, SingeplayerExecutionType.Client );
-
-		GetPermissionsManager().RegisterPermission( "Teleport.Cursor" );
-		GetPermissionsManager().RegisterPermission( "Teleport.Predefined" );
+		GetPermissionsManager().RegisterPermission( "Teleport.Position" );
+		GetPermissionsManager().RegisterPermission( "Teleport.Location" );
 	
 		GetPermissionsManager().RegisterPermission( "Teleport.View" );
 	}
@@ -18,20 +23,32 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		return GetPermissionsManager().HasPermission( "Teleport.View" );
 	}
-	
-	override void OnSettingsUpdated()
-	{
-		super.OnSettingsUpdated();
-
-		settings = JMTeleportSerialize.Load();
-	}
 
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
 
-		if ( GetGame().IsClient() )
-			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param, true );
+		Load();
+	}
+	
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( settings )
+		{
+			if ( !settings.Locations )
+				return;
+
+			for ( int i = 0; i < settings.Locations.Count(); i++ )
+			{
+				JMTeleportLocation location = settings.Locations[i];
+
+				string permission = location.Permission;
+				permission.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Teleport.Location." + permission );
+			}
+		}
 	}
 
 	override void OnMissionFinish()
@@ -44,7 +61,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterBinding( new JMModuleBinding( "TeleportCursor",		"UATeleportModuleTeleportCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "Input_Cursor",		"UATeleportModuleTeleportCursor",	true 	) );
 	}
 
 	override string GetLayoutRoot()
@@ -52,12 +69,12 @@ class JMTeleportModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/teleport_form.layout";
 	}
 
-	ref array< ref JMTeleportLocation > GetLocations()
+	array< ref JMTeleportLocation > GetLocations()
 	{
 		return settings.Locations;
 	}
 
-	void TeleportCursor( UAInput input )
+	void Input_Cursor( UAInput input )
 	{
 		if ( !(input.LocalPress() || input.LocalHold()) )
 			return;
@@ -84,183 +101,226 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		float distance = vector.Distance( currentPosition, hitPos );
 
-		if ( distance < 1000 )
+		if ( distance <= 1000 )
 		{
-			GetRPCManager().SendRPC( "COT_Teleport", "Cursor", new Param1< vector >( hitPos ) );
-		}
-		else
+			Position( hitPos );
+		} else
 		{
 			CreateLocalAdminNotification( "Distance for teleportation is too far!" );
 		}
 	}
 
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void SetPlayerPosition( PlayerBase player, vector position )
 	{
-		if ( type == CallType.Server )
-		{
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", senderRPC ) )
-				return;
-		
-			GetRPCManager().SendRPC( "COT_Teleport", "LoadData", new Param1< ref JMTeleportSerialize >( settings ), false, senderRPC );
-		}
+		player.SetLastPosition( player.GetPosition() );
 
-		if ( type == CallType.Client )
+		if ( player.IsInTransport() )
 		{
-			Param1< ref JMTeleportSerialize > data;
-			if ( !ctx.Read( data ) ) return;
+			HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
 
-			settings = data.param1;
+			if ( vehCommand )
+			{
+				Transport transport = vehCommand.GetTransport();
+
+				if ( transport == NULL )
+					return;
+
+				transport.SetOrigin( position );
+				transport.SetPosition( position );
+				transport.Update();
+			}
+		} else
+		{
+			player.SetPosition( position );
 		}
 	}
 
-	void Cursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	int GetRPCMin()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor", senderRPC ) )
+		return JMTeleportModuleRPC.INVALID;
+	}
+
+	int GetRPCMax()
+	{
+		return JMTeleportModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
+		{
+		case JMTeleportModuleRPC.Load:
+			RPC_Load( ctx, sender, target );
+			break;
+		case JMTeleportModuleRPC.Position:
+			RPC_Position( ctx, sender, target );
+			break;
+		case JMTeleportModuleRPC.Location:
+			RPC_Location( ctx, sender, target );
+			break;
+		}
+    }
+
+	void Load()
+	{
+		if ( IsMissionClient() && !IsMissionOffline() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
+		} else
+		{
+			settings = JMTeleportSerialize.Load();
+
+			OnSettingsUpdated();
+		}
+	}
+
+	private void Server_Load( PlayerIdentity ident )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( settings );
+		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
+	}
+
+	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_Load( senderRPC );
+		}
+
+		if ( IsMissionClient() )
+		{
+			if ( ctx.Read( settings ) )
+			{
+				OnSettingsUpdated();
+			}
+		}
+	}
+
+	void Position( vector position )
+	{
+		if ( IsMissionClient() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Teleport.Position" ) )
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( position );
+			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
+		}
+	}
+
+	private void Server_Position( vector position, PlayerBase player )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Teleport.Position", player.GetIdentity() ) )
 			return;
 
-		Param1< vector > data;
-		if ( !ctx.Read( data ) ) return;
+		SetPlayerPosition( player, position );
 
-		if ( type == CallType.Server )
+		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+	}
+
+	private void RPC_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
 		{
+			vector pos;
+			if ( !ctx.Read( pos ) )
+			{
+				return;
+			}
+
 			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 
 			if ( !player )
 				return;
 
-			player.SetLastPosition( player.GetPosition() );
-
-			if ( player.IsInTransport() )
-			{
-				// player.GetTransport().SetOrigin( data.param1 );
-			   HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
-				if ( vehCommand )
-				{
-					Transport transport = vehCommand.GetTransport();
-
-					if ( transport == NULL )
-						return;
-
-					transport.SetOrigin( data.param1 );
-					transport.SetPosition( data.param1 );
-					transport.Update();
-				}
-			} else
-			{
-				player.SetPosition( data.param1 );
-			}
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported to cursor " + data.param1 );
-
+			Server_Position( pos, player );
 		}
 	}
-	
-	void Predefined( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+
+	void Location( JMTeleportLocation location, array< string > guids )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Predefined", senderRPC ) )
+		if ( IsMissionClient() )
+		{
+			if ( location == NULL )
+				return;
+
+			if ( guids.Count() == 0 )
+				return;
+
+			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + location ) )
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( location );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMTeleportModuleRPC.Location, true, NULL );
+		}
+	}
+
+	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + locName, ident ) )
 			return;
 
-		Param2< string, ref array< string > > data;
-		if ( !ctx.Read( data ) ) return;
+		JMTeleportLocation location = NULL;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < GetLocations().Count(); i++ )
 		{
-			vector position = "0 0 0";
-
-			string name = data.param1;
-
-			ref JMTeleportLocation location = NULL;
-
-			for ( int i = 0; i < GetLocations().Count(); i++ )
+			if ( GetLocations()[i].Permission == locName )
 			{
-				if ( GetLocations()[i].Name == name )
-				{
-					location = GetLocations()[i];
-					break;
-				}
+				location = GetLocations()[i];
+				break;
 			}
+		}
 
-			if ( location == NULL )
+		if ( location == NULL )
+		{
+			return;
+		}
+
+		vector position = SnapToGround( location.Position );
+
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		
+		for ( int j = 0; j < players.Count(); j++ )
+		{
+			PlayerBase player = players[j].PlayerObject;
+
+			if ( player == NULL )
+				continue;
+
+			vector tempPos = "0 0 0";
+			tempPos[0] = position[0] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * location.Radius );
+			tempPos[2] = position[2] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * location.Radius );
+
+			tempPos[1] = GetGame().SurfaceY( tempPos[0], tempPos[2] );
+
+			SetPlayerPosition( player, tempPos );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
+		}
+	}
+
+	private void RPC_Location( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			string loc;
+			if ( !ctx.Read( loc ) )
 			{
 				return;
 			}
 
-			position = SnapToGround( location.Position );
-			PlayerBase player;
-			HumanCommandVehicle vehCommand;
-			Transport transport;
-			
-			if ( !GetGame().IsMultiplayer() )
+			array< string > guids;
+			if ( !ctx.Read( guids ) )
 			{
-				player = GetGame().GetPlayer();
-
-				if ( player == NULL )
-					return;
-				
-				player.SetLastPosition( player.GetPosition() );
-
-				if ( player.IsInTransport() )
-				{
-					vehCommand = player.GetCommand_Vehicle();
-
-					if ( vehCommand )
-					{
-						transport = vehCommand.GetTransport();
-
-						if ( transport == NULL )
-							return;
-
-						transport.SetOrigin( position );
-						transport.SetPosition( position );
-						transport.Update();
-					}
-				} else 
-				{
-					player.SetPosition( position );
-				}
-				
 				return;
 			}
 
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-			
-			for ( int j = 0; j < players.Count(); j++ )
-			{
-				player = players[j].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				player.SetLastPosition( player.GetPosition() );
-
-				if ( player.IsInTransport() )
-				{
-					vehCommand = player.GetCommand_Vehicle();
-
-					if ( vehCommand )
-					{
-						transport = vehCommand.GetTransport();
-
-						if ( transport == NULL )
-							return;
-
-						transport.SetOrigin( position );
-						transport.SetPosition( position );
-						transport.Update();
-					}
-				} else 
-				{
-					player.SetPosition( position );
-				}
-				
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[j].GetGUID() + " to " + location.Name );
-				
-
-			}
+			Server_Location( loc, guids, senderRPC );
 		}
 	}
 }
