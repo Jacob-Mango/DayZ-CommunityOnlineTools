@@ -1,3 +1,12 @@
+enum JMItemSetSpawnerModuleRPC
+{
+    INVALID = 10600,
+    Load,
+	SpawnCursor,
+	SpawnPlayers,
+    MAX
+};
+
 class JMItemSetSpawnerModule: JMRenderableModuleBase
 {
 	protected ref JMItemSetSettings settings;
@@ -5,23 +14,19 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	void JMItemSetSpawnerModule()
 	{
-		GetRPCManager().AddRPC( "COT_ItemSetSpawner", "LoadData", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT_ItemSetSpawner", "SpawnSelectedPlayers", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "ItemSets.View" );
+		GetPermissionsManager().RegisterPermission( "Items.View" );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "ItemSets.View" );
+		return GetPermissionsManager().HasPermission( "Items.View" );
 	}
 
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
 
-		if ( GetGame().IsClient() )
-			GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param, true );
+		Load();
 		
 		meta = JMItemSetMeta.DeriveFromSettings( settings );
 	}
@@ -36,8 +41,10 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		{
 			string base = settings.ItemSets.GetKey( j );
 			base.Replace( " ", "." );
-			GetPermissionsManager().RegisterPermission( "ItemSets." + base );
+			GetPermissionsManager().RegisterPermission( "Items." + base );
 		}
+
+		meta = JMItemSetMeta.DeriveFromSettings( settings );
 	}
 
 	override void OnMissionFinish()
@@ -47,6 +54,28 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		if ( GetGame().IsServer() )
 			settings.Save();
 	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+	{
+		super.OnRPC( sender, target, rpc_type, ctx );
+
+		if ( rpc_type > JMItemSetSpawnerModuleRPC.INVALID && rpc_type < JMItemSetSpawnerModuleRPC.MAX )
+		{
+			switch ( rpc_type )
+			{
+			case JMItemSetSpawnerModuleRPC.Load:
+				RPC_Load( ctx, sender, target );
+				break;
+			case JMItemSetSpawnerModuleRPC.SpawnCursor:
+				RPC_SpawnCursor( ctx, sender, target );
+				break;
+			case JMItemSetSpawnerModuleRPC.SpawnPlayers:
+				RPC_SpawnPlayers( ctx, sender, target );
+				break;
+			}
+			return;
+		}
+    }
 
 	override string GetLayoutRoot()
 	{
@@ -58,26 +87,168 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return meta.ItemSets;
 	}
 	
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void Load()
 	{
-		if ( type == CallType.Server )
+		if ( IsMissionClient() && !IsMissionOffline() )
 		{
-			GetRPCManager().SendRPC( "COT_ItemSetSpawner", "LoadData", new Param1< string >( JsonFileLoader< JMItemSetMeta >.JsonMakeData( JMItemSetMeta.DeriveFromSettings( settings ) ) ) );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, NULL );
+		}
+	}
+
+	private void Client_Load( string json )
+	{
+		JsonFileLoader< JMItemSetMeta >.JsonLoadData( json, meta );
+
+		OnSettingsUpdated();
+	}
+
+	private void Server_Load( PlayerIdentity ident )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( JsonFileLoader< JMItemSetMeta >.JsonMakeData( JMItemSetMeta.DeriveFromSettings( settings ) ) );
+		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );
+	}
+
+	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_Load( senderRPC );
 		}
 
-		if ( type == CallType.Client )
+		if ( IsMissionClient() )
 		{
-			Param1< string > data;
-			if ( !ctx.Read( data ) ) return;
-
-			JsonFileLoader< JMItemSetMeta >.JsonLoadData( data.param1, meta );
-
-			for ( int j = 0; j < meta.ItemSets.Count(); j++ )
+			string json;
+			if ( !ctx.Read( json ) )
 			{
-				string base = meta.ItemSets[j];
-				base.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "ItemSets." + base );
-			}
+				return;
+			} 
+
+			Client_Load( json );
+		}
+	}
+
+	void SpawnCursor( string itemSet, vector position )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_SpawnCursor( itemSet, position );
+		} else
+		{
+			Server_SpawnCursor( itemSet, position, NULL );
+		}
+	}
+
+	private void Client_SpawnCursor( string itemSet, vector position )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( itemSet );
+		rpc.Write( position );
+		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnCursor, true, NULL );
+	}
+
+	private void Server_SpawnCursor( string itemSet, vector position, PlayerIdentity ident )
+	{
+		JMItemSetSerialize file;
+		if ( !settings.ItemSets.Find( itemSet, file ) )
+		{
+			return;
+		}
+
+		string perm = file.Name;
+		perm.Replace( " ", "." );
+		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident ) )
+		{
+			return;
+		}
+
+		SpawnItemSet( file, position );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
+	}
+
+	private void RPC_SpawnCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			string itemSet;
+			if ( !ctx.Read( itemSet ) )
+			{
+				return;
+			} 
+
+			vector position;
+			if ( !ctx.Read( position ) )
+			{
+				return;
+			} 
+
+			Server_SpawnCursor( itemSet, position, senderRPC );
+		}
+	}
+	
+	void SpawnPlayers( string itemSet, array< string > guids )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_SpawnPlayers( itemSet, guids );
+		} else
+		{
+			Server_SpawnPlayers( itemSet, guids, NULL );
+		}
+	}
+
+	private void Client_SpawnPlayers( string itemSet, array< string > guids )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( itemSet );
+		rpc.Write( guids );
+		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.SpawnPlayers, true, NULL );
+	}
+
+	private void Server_SpawnPlayers( string itemSet, array< string > guids, PlayerIdentity ident )
+	{
+		JMItemSetSerialize file;
+		if ( !settings.ItemSets.Find( itemSet, file ) )
+		{
+			return;
+		}
+
+		string perm = file.Name;
+		perm.Replace( " ", "." );
+		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident ) )
+		{
+			return;
+		}
+
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			SpawnItemSet( file, players[i].Data.VPosition );
+			
+			GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
+		}
+	}
+
+	private void RPC_SpawnPlayers( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			string itemSet;
+			if ( !ctx.Read( itemSet ) )
+			{
+				return;
+			} 
+
+			array< string > guids;
+			if ( !ctx.Read( guids ) )
+			{
+				return;
+			} 
+
+			Server_SpawnPlayers( itemSet, guids, senderRPC );
 		}
 	}
 
@@ -105,18 +276,19 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return true;
 	}
 
-	private EntityAI SpawnItem( PlayerBase player, string ClassName )
+	private EntityAI SpawnItem( vector pos, string className )
 	{
-		vector position = player.GetPosition();
+		vector position = Vector( pos[0], pos[1], pos[2] );
 
-		position[0] = position[0] + ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0;
-		position[1] = position[1] + 0.1;
-		position[2] = position[2] + ( Math.RandomInt( 1, 50 ) - 25 ) / 10.0;
+		position[0] = position[0] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
+		position[2] = position[2] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
 
-		return EntityAI.Cast( GetGame().CreateObject( ClassName, position, false, true, true ) );
+		position[1] = GetGame().SurfaceY( position[0], position[2] );
+
+		return EntityAI.Cast( GetGame().CreateObject( className, position, false, true, true ) );
 	}
 
-	private EntityAI SpawnItemInContainer( string container, PlayerBase player, EntityAI chest, string ClassName, float numStacks, float stackSize )
+	private EntityAI SpawnItemInContainer( string container, vector position, EntityAI chest, string ClassName, float numStacks, float stackSize )
 	{
 		EntityAI item;
 
@@ -128,12 +300,12 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			{
 				if ( DetermineWillFit( chest, ClassName ) && container != "" && chest )
 				{
-					chest = SpawnItem( player, container );
+					chest = SpawnItem( position, container );
 
 					item = EntityAI.Cast( chest.GetInventory().CreateInInventory( ClassName ) );
 				} else
 				{
-					item = SpawnItem( player, ClassName );
+					item = SpawnItem( position, ClassName );
 				}
 			}
 			
@@ -148,59 +320,23 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return chest;
 	}
 
-	void SpawnSelectedPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void SpawnItemSet( JMItemSetSerialize file, vector position )
 	{
-		ref Param2< string, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-		
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		ref JMItemSetSerialize file = settings.ItemSets.Get( data.param1 );
-
-		if ( file == NULL )
-			return;
-
-		ref array< ref JMItemSetItemInfo > parts = file.Items;
-
-		if ( parts.Count() == 0 )
-			return;
-
-		string perm = file.Name;
-		perm.Replace( " ", "." );
-
-		if ( !GetPermissionsManager().HasPermission( "ItemSets.Spawn.ItemSets." + perm, senderRPC ) )
-			return;
-		
-		EntityAI chest;
-		
-		if ( GetGame().IsMultiplayer() && type == CallType.Server )
+		if ( file.Items.Count() == 0 )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			return;
+		}
 
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				if ( players[i].PlayerObject == NULL )
-					continue;
+		EntityAI chest;
 
-				if ( file.ContainerClassName != "" )
-					chest = SpawnItem( players[i].PlayerObject, file.ContainerClassName );
+		if ( file.ContainerClassName != "" )
+		{
+			chest = SpawnItem( position, file.ContainerClassName );
+		}
 	
-				for (int j = 0; j < parts.Count(); j++)
-					chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].ItemName, parts[j].NumberOfStacks, parts[j].StackSize );
-	
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Item set " + data.param1 + " spawned on " + players[i].GetGUID() );
-			}
-		} else
-		{	
-			if ( file.ContainerClassName != "" )
-				chest = SpawnItem( GetGame().GetPlayer(), file.ContainerClassName );
-	
-			for (int k = 0; k < parts.Count(); k++)
-				chest = SpawnItemInContainer( file.ContainerClassName, GetGame().GetPlayer(), chest, parts[k].ItemName, parts[k].NumberOfStacks, parts[k].StackSize );
-	
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Item set " + data.param1 + " spawned." );
+		for ( int j = 0; j < file.Items.Count(); j++ )
+		{
+			chest = SpawnItemInContainer( file.ContainerClassName, position, chest, file.Items[j].ItemName, file.Items[j].NumberOfStacks, file.Items[j].StackSize );
 		}
 	}
 }
