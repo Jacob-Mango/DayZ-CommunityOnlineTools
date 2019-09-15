@@ -46,15 +46,12 @@ class JMItemSetForm extends JMFormBase
 		{
 			name = iss.GetItemSets()[j];
 			
-			if ( GetGame().IsServer() )
-			{
-				button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " around self", this, "SpawnBaseBuilding" );
-			} else
-			{
-				button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnBaseBuilding" );
-			}
+			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnOnPlayers" );
 			button.SetData( new JMItemSpawnerButtonData( name ) );
+			m_ItemSetButtons.Insert( button );
 
+			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnOnCursor" );
+			button.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( button );
 		}
 	}
@@ -70,11 +67,29 @@ class JMItemSetForm extends JMFormBase
 		m_ItemSetButtons.Clear();
 	}
 
-	void SpawnBaseBuilding( UIEvent eid, ref UIActionButton action ) 
+	void SpawnOnPlayers( UIEvent eid, ref UIActionButton action ) 
 	{
-		ref JMItemSpawnerButtonData data = JMItemSpawnerButtonData.Cast( action.GetData() );
-		if ( !data ) return;
+		JMItemSpawnerButtonData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
 
-		GetRPCManager().SendRPC( "COT_ItemSetSpawner", "SpawnSelectedPlayers", new Param2< string, ref array< string > >( data.ClassName, GetSelectedPlayers() ) );
+		JMItemSetSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		mod.SpawnPlayers( data.ClassName, GetSelectedPlayers() );
+	}
+
+	void SpawnOnCursor( UIEvent eid, ref UIActionButton action ) 
+	{
+		JMItemSpawnerButtonData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
+
+		JMItemSetSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		mod.SpawnCursor( data.ClassName, GetCursorPos() );
 	}
 }
