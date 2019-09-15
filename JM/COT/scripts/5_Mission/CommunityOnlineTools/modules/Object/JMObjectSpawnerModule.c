@@ -10,8 +10,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	void JMObjectSpawnerModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Entity.Position" );
-		GetPermissionsManager().RegisterPermission( "Entity.Inventory" );
+		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Position" );
+		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Inventory" );
 		GetPermissionsManager().RegisterPermission( "Entity.View" );
 	}
 
@@ -37,7 +37,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -57,7 +57,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -77,7 +77,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -133,7 +133,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnEntity_Position( string ent, vector position, float quantity, float health, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Entity.Position", ident ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident ) )
 		{
 			return;
 		}
@@ -211,7 +211,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Inventory", ident ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident ) )
 		{
 			return;
 		}

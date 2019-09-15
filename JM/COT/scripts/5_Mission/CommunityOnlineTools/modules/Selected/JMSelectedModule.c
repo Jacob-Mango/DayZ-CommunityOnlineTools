@@ -1,3 +1,10 @@
+enum JMSelectedModuleRPC
+{
+    INVALID = 10180,
+    Delete,
+    COUNT
+};
+
 class JMSelectedModule: JMRenderableModuleBase
 {
 	private autoptr set< Object > m_SelectedObjects;
@@ -6,13 +13,8 @@ class JMSelectedModule: JMRenderableModuleBase
 	{
 		m_SelectedObjects = new set< Object >;
 
-		GetRPCManager().AddRPC( "COT_Object", "RPC_Delete", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "Object.View" );
-        
-		GetPermissionsManager().RegisterPermission( "Object.Create" );
-		GetPermissionsManager().RegisterPermission( "Object.Delete" );
-		GetPermissionsManager().RegisterPermission( "Object.Select" );
+		GetPermissionsManager().RegisterPermission( "Entity.View" );
+		GetPermissionsManager().RegisterPermission( "Entity.Delete" );
 		
 		JMScriptInvokers.MENU_OBJECT_BUTTON.Insert( OnObjectButton );
 		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Insert( OnObjectCheckbox );
@@ -32,7 +34,7 @@ class JMSelectedModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Object.View" );
+		return GetPermissionsManager().HasPermission( "Entity.View" );
 	}
 
 	override string GetLayoutRoot()
@@ -44,42 +46,6 @@ class JMSelectedModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
     }
-
-	void Delete()
-	{
-		if ( m_SelectedObjects.Count() > 0 )
-		{
-			GetRPCManager().SendRPC( "COT_Object", "RPC_Delete", new Param1< ref set< Object > >( m_SelectedObjects ) );
-		}
-	}
-
-	void RPC_Delete( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Delete", senderRPC ) )
-			return;
-
-		ref Param1< ref set< Object > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		set< Object > copy = new set< Object >;
-		copy.Copy( data.param1 );
-		
-		if ( type == CallType.Server )
-		{
-			for ( int i = 0; i < copy.Count(); i++ )
-			{
-				if ( copy[i] == NULL )
-					continue;
-
-				string obtype;
-				GetGame().ObjectGetType( copy[i], obtype );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
-				GetGame().ObjectDelete( copy[i] );
-			}
-		}
-	}
 
 	void OnObjectButton( Object obj, bool check )
 	{
@@ -153,6 +119,85 @@ class JMSelectedModule: JMRenderableModuleBase
 		if ( Class.CastTo( frm, GetForm() ) )
 		{
 			frm.RefreshSelectedList( m_SelectedObjects );
+		}
+	}
+
+	int GetRPCMin()
+	{
+		return JMSelectedModuleRPC.INVALID;
+	}
+
+	int GetRPCMax()
+	{
+		return JMSelectedModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
+		{
+		case JMSelectedModuleRPC.Delete:
+			RPC_Delete( ctx, sender, target );
+			break;
+		}
+    }
+
+	void Delete()
+	{
+		if ( m_SelectedObjects.Count() == 0 )
+		{
+			return;
+		}
+
+		if ( IsMissionClient() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
+			{
+				return;
+			}
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( m_SelectedObjects );
+			rpc.Send( NULL, JMSelectedModuleRPC.Delete, true, NULL );
+		} else
+		{
+			Server_Delete( m_SelectedObjects, NULL );
+		}
+	}
+
+	private void Server_Delete( set< Object > objects, PlayerIdentity ident )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident ) )
+		{
+			return;
+		}
+
+		for ( int i = 0; i < objects.Count(); i++ )
+		{
+			if ( objects[i] == NULL )
+				continue;
+
+			string obtype;
+			GetGame().ObjectGetType( objects[i], obtype );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Deleted object " + objects[i].GetDisplayName() + " (" + obtype + ") at " + objects[i].GetPosition() );
+			
+			GetGame().ObjectDelete( objects[i] );
+		}
+	}
+
+	private void RPC_Delete( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			set< Object > objects;
+			if ( !ctx.Read( objects ) )
+			{
+				Error("Failed");
+				return;
+			}
+
+			Server_Delete( objects, senderRPC );
 		}
 	}
 }
