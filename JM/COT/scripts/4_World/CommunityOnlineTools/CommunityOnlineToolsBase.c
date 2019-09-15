@@ -10,10 +10,13 @@ class CommunityOnlineToolsBase
     void CommunityOnlineToolsBase()
     {
 		m_Loaded = false;
+
+		GetDayZGame().Event_OnRPC.Insert( OnRPC );
     }
 
     void ~CommunityOnlineToolsBase()
     {
+		GetDayZGame().Event_OnRPC.Remove( OnRPC );
     }
 
 	private string GetDateTime()
@@ -212,6 +215,10 @@ class CommunityOnlineToolsBase
 		    FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
 		    CloseFile( fileLog );
         }
+    }
+
+	void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+	{
     }
 }
 

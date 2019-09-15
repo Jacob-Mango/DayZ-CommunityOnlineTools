@@ -78,29 +78,22 @@ modded class MissionServer
 		}
 	}
 
-	override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity)
+	override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		super.InvokeOnConnect( player, identity );
 
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			JMRole role = GetPermissionsManager().Roles.GetElement( i );
-			role.Serialize();
-
-			GetRPCManager().SendRPC( "COT", "UpdateRole", new Param2< string, ref array< string > >( role.Name, role.SerializedData ), true, identity );
+			GetCommunityOnlineTools().UpdateRole( GetPermissionsManager().Roles.GetElement( i ), identity );
 		}
 		
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().OnClientConnected( identity, instance ) )
-		{
-			if ( instance )
-			{
-				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
-			}
-			return;
-		}
+		GetPermissionsManager().OnClientConnected( identity, instance );
 
-		GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( instance.GetGUID(), instance.Data, identity, player ), true, identity );
+		if ( instance )
+		{
+			GetCommunityOnlineTools().SetClient( instance.GetGUID(), instance.Data, identity, player );
+		}
 	} 
 
 	override void PlayerDisconnected( PlayerBase player, PlayerIdentity identity, string uid )
@@ -108,7 +101,7 @@ modded class MissionServer
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
 		{
-			GetRPCManager().SendRPC( "COT", "RemoveClient", new Param1< string >( uid ), true );
+			GetCommunityOnlineTools().RemoveClient( uid );
 		}
 
 		super.PlayerDisconnected( player, identity, uid );
