@@ -399,14 +399,12 @@ string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, i
 
 static array< string > FindFilesInLocation( string folder )
 {
-	//GetLogger().Log( "FindFilesInLocation( " + folder + " ) Start", "JM_COT_StaticFunctions" );
 	array< string > files = new array< string >;
 	string fileName;
 	FileAttr fileAttr;
 	FindFileHandle findFileHandle = FindFile( folder + "*", fileName, fileAttr, 0 );
 	if ( findFileHandle )
 	{
-		//GetLogger().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
 		if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 		{
 			files.Insert( fileName );
@@ -414,7 +412,6 @@ static array< string > FindFilesInLocation( string folder )
 		
 		while ( FindNextFile( findFileHandle, fileName, fileAttr ) )
 		{
-			//GetLogger().Log( "  File: " + fileName, "JM_COT_StaticFunctions" );
 			if ( fileName.Length() > 0 && !( fileAttr & FileAttr.DIRECTORY) )
 			{
 				files.Insert( fileName );
@@ -422,19 +419,15 @@ static array< string > FindFilesInLocation( string folder )
 		}
 	}
 	CloseFindFile( findFileHandle );
-	//GetLogger().Log( "FindFilesInLocation( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
 	return files;
 }
 
 static void DeleteFiles( string folder, array< string > files )
 {
-	//GetLogger().Log( "DeleteFiles( " + folder + " ) Start", "JM_COT_StaticFunctions" );
 	for ( int i = 0; i < files.Count(); i++ )
 	{
-		//GetLogger().Log( "  File: " + folder + files[i], "JM_COT_StaticFunctions" );
 		DeleteFile( folder + files[i] );
 	}
-	//GetLogger().Log( "DeleteFiles( " + folder + " ) Finished", "JM_COT_StaticFunctions" );
 }
 
 static bool ArrayContains( array< string > arr, string match )
