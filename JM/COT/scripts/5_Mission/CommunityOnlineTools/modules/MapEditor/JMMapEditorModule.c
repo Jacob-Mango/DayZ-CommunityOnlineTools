@@ -96,10 +96,7 @@ class JMMapEditorModule: JMModuleBase
 	}
 	
 	void LeaveEditor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", senderRPC ) )
-			return;
-			
+	{			
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.LeaveEditor", senderRPC ) )
 			return;
 
