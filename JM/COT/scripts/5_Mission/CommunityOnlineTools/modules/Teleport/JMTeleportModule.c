@@ -1,6 +1,6 @@
 enum JMTeleportModuleRPC
 {
-    INVALID = 10260,
+    INVALID = 10240,
     Load,
 	Position,
 	Location,

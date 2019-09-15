@@ -58,8 +58,6 @@ class JMESPModule: JMRenderableModuleBase
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
-		GetRPCManager().AddRPC( "COT_ESP", "ServerSetSelected", this, SingeplayerExecutionType.Server );
-
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
 		GetPermissionsManager().RegisterPermission( "ESP.View.Vehicles" );
@@ -137,30 +135,6 @@ class JMESPModule: JMRenderableModuleBase
 			{
 				m_ESPBoxes[i].Checkbox.SetChecked( checked );
 			}
-		}
-	}
-
-	void ServerSetSelected( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Set", senderRPC ) )
-			return;
-
-		ref Param3< vector, vector, float > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Server )
-		{
-			if ( target == NULL )
-				return;
-
-			string obtype;
-			GetGame().ObjectGetType( target, obtype );
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Set object " + target.GetDisplayName() + " (" + obtype + ") Position [" + target.GetPosition() + "] -> [" + data.param1 + "] Rotation [" + target.GetYawPitchRoll() + "] -> [" + data.param2 +  "] Health [" + target.GetHealth( "", "" ) + "] -> [" + data.param3 +  "]" );
-
-			target.SetPosition( data.param1 );
-			target.SetYawPitchRoll( data.param2 );
-			target.SetHealth( "", "", data.param3 );
 		}
 	}
 

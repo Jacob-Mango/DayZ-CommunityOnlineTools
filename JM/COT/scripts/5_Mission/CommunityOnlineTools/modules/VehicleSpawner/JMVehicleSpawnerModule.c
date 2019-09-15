@@ -1,6 +1,6 @@
 enum JMVehicleSpawnerModuleRPC
 {
-    INVALID = 10240,
+    INVALID = 10260,
     Load,
 	SpawnPosition,
     COUNT
