@@ -7,8 +7,6 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void MissionGameplay()
 	{
-		//GetLogger().Log( "MissionGameplay::MissionGameplay()", "JGetCommunityOnlineTools()_Mission" );
-		
 		if ( !g_cotBase )
 		{
 			g_cotBase = new CommunityOnlineTools;
@@ -20,7 +18,6 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void ~MissionGameplay()
 	{
-		//GetLogger().Log( "MissionGameplay::~MissionGameplay()", "JGetCommunityOnlineTools()_Mission" );
 	}
 
 	// ------------------------------------------------------------
@@ -36,8 +33,6 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void OfflineMissionStart()
 	{
-		//GetLogger().Log( "MissionGameplay::OfflineMissionStart()", "JGetCommunityOnlineTools()_Mission" );
-
 		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
 		GetGame().SelectPlayer( NULL, player );
 

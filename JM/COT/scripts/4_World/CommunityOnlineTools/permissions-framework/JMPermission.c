@@ -76,7 +76,7 @@ class JMPermission
 
 			inp.Split( ".", tokens );
 		} else {
-			//GetLogger().Log( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\".", "JM_COT_PermissionFramework" );
+			Error( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
 			return;
 		}
 		

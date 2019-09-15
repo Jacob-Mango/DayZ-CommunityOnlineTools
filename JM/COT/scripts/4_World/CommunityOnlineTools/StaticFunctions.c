@@ -82,12 +82,9 @@ static vector GetCursorPos()
 
 static void Message( PlayerBase player, string txt ) 
 {
-	//GetLogger().Log( txt, "JM_COT_StaticFunctions" );
-
 	if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 	{
 		player.MessageImportant( txt);
-		//GetGame().RPCSingleParam( man, ERPCs.RPC_USER_ACTION_MESSAGE, new Param1<string>(txt), false, man.GetIdentity() );
 	} else 
 	{
     	GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
