@@ -6,6 +6,8 @@ Entity.Delete 0
 Entity.Spawn 0
 Entity.Spawn.Position 0
 Entity.Spawn.Inventory 0
+Entity.Position 0
+Entity.Inventory 0
 Admin 0
 Admin.Permissions 0
 Admin.Roles 0
@@ -44,8 +46,8 @@ ESP.View.Vehicles 0
 ESP.View.Items 0
 ESP.View.Infected 0
 ESP.View.Creature 0
-Teleport 0
-Teleport.Position 0
+Teleport 2
+Teleport.Position 2
 Teleport.Location 0
 Teleport.Location.Altar 0
 Teleport.Location.Balota 0
@@ -189,7 +191,7 @@ Teleport.Location.Zelenogorsk 0
 Teleport.Location.ZelenogorskTrainyard 0
 Teleport.Location.ZubCastle 0
 Teleport.Location.Zvir 0
-Teleport.View 0
+Teleport.View 2
 Camera 0
 Camera.View 0
 Vehicles 0
@@ -221,6 +223,17 @@ Weather.Fog 0
 Weather.Rain 0
 Weather.Rain.Thresholds 0
 Weather.View 0
+Weather.SetDate 0
+Weather.SetWindFunctionParams 0
+Weather.SetOvercast 0
+Weather.SetFog 0
+Weather.SetRain 0
+Weather.SetStorm 0
 Map 0
 Map.View 0
 Map.Players 0
+Object 0
+Object.View 0
+Object.Create 0
+Object.Delete 0
+Object.Select 0
