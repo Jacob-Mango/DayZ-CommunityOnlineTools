@@ -2,23 +2,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 {
 	void CommunityOnlineTools()
 	{
-		//Print("CommunityOnlineTools::CommunityOnlineTools");
-
-		GetRPCManager().AddRPC( "COT", "RefreshPlayers", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT", "RemoveClient", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT", "SetClientInstance", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT", "UpdatePlayer", this, SingeplayerExecutionType.Client );
-		
-		GetRPCManager().AddRPC( "COT", "UpdateRole", this, SingeplayerExecutionType.Client );
-
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
 		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
 	}
 
 	void ~CommunityOnlineTools()
 	{
-		//Print("CommunityOnlineTools::~CommunityOnlineTools");
 	}
 	
 	override void OnStart()
@@ -35,7 +24,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionClient() )
 		{
-			GetRPCManager().SendRPC( "COT", "RefreshPlayers", new Param, true );
+			Client_RefreshClients();
 		}
 
 		super.OnLoaded();
@@ -46,9 +35,66 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		super.OnUpdate( timeslice );
 	}
 
-	void RefreshPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
-		if ( type == CallType.Server )
+		super.OnRPC( sender, target, rpc_type, ctx );
+
+		if ( rpc_type > JMClientRPC.INVALID && rpc_type < JMClientRPC.MAX )
+		{
+			switch ( rpc_type )
+			{
+			case JMClientRPC.RefreshClients:
+				RPC_RefreshClients( ctx, sender, target );
+				break;
+			case JMClientRPC.RemoveClient:
+				RPC_RemoveClient( ctx, sender, target );
+				break;
+			case JMClientRPC.UpdateClient:
+				RPC_UpdateClient( ctx, sender, target );
+				break;
+			case JMClientRPC.SetClient:
+				RPC_SetClient( ctx, sender, target );
+				break;
+			}
+			return;
+		}
+
+		if ( rpc_type > JMRoleRPC.INVALID && rpc_type < JMRoleRPC.MAX )
+		{
+			switch ( rpc_type )
+			{
+			case JMRoleRPC.UpdateRole:
+				RPC_UpdateRole( ctx, sender, target );
+				break;
+			}
+			return;
+		}
+    }
+
+	void RefreshClients()
+	{
+		if ( IsMissionClient() )
+		{
+			Client_RefreshClients();
+		}
+	}
+
+	private void Client_RefreshClients()
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
+	}
+
+	private void Server_RefreshClients()
+	{
+
+	}
+
+	private void RPC_RefreshClients( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+
+		if ( IsMissionHost() )
 		{
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
@@ -57,99 +103,251 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				players[i].UpdatePlayerData();
 				players[i].Serialize();
 
-				GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject ), false, senderRPC );
+				rpc.Write( players[i].Data );
+				rpc.Write( players[i].IdentityPlayer );
+				rpc.Write( players[i].PlayerObject );
+
+				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
+
+				rpc.Reset();
 			}
 		}
 	}
 
-	void RemoveClient( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void RemoveClient( string guid )
 	{
-		if ( type == CallType.Client )
+		if ( IsMissionHost() )
 		{
-			if ( GetGame().IsMultiplayer() )
-			{
-				ref Param1< string > data;
-				if ( !ctx.Read( data ) )
-					return;
-				
-				JMPlayerInstance instance;
-				GetPermissionsManager().OnClientDisconnected( data.param1, instance );
-
-				RemoveSelectedPlayer( data.param1 );
-			}
+			Server_RemoveClient( guid );
 		}
 	}
 
-	void UpdatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Client_RemoveClient( string guid )
 	{
-		if ( type == CallType.Server )
+		JMPlayerInstance instance;
+		GetPermissionsManager().OnClientDisconnected( guid, instance );
+
+		RemoveSelectedPlayer( guid );
+	}
+
+	private void Server_RemoveClient( string guid )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
+	}
+
+	private void RPC_RemoveClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionClient() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+			{
+				return;
+			} 
+
+			Client_RemoveClient( guid );
+		}
+	}
+
+	void UpdateClient( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_UpdateClient( guid, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Send( NULL, JMClientRPC.UpdateClient, true, NULL );
+		}
+	}
+
+	private void Client_UpdateClient( JMPlayerInformation playerInfo, PlayerIdentity playerIdent, PlayerBase playerObj )
+	{
+		GetPermissionsManager().UpdatePlayer( playerInfo, playerIdent, playerObj );
+	}
+
+	private void Server_UpdateClient( string guid, PlayerIdentity sendTo )
+	{
+		JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
+		if ( !player )
+			return;
+
+		player.UpdatePlayerData();
+		player.Serialize();
+
+		if ( IsMissionClient() )
+		{
+			Client_UpdateClient( player.Data, player.IdentityPlayer, player.PlayerObject );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( player.Data );
+			rpc.Write( player.IdentityPlayer );
+			rpc.Write( player.PlayerObject );
+			rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
+		}
+	}
+
+	private void RPC_UpdateClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( GetGame().IsServer() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 				return;
 
-			ref Param1< string > data;
-			if ( !ctx.Read( data ) )
-				return;
-
-			JMPlayerInstance player = GetPermissionsManager().GetPlayer( data.param1 );
-			if ( !player )
-				return;
-
-			player.UpdatePlayerData();
-			player.Serialize();
-
-			GetRPCManager().SendRPC( "COT", "UpdatePlayer", new Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase >( player.Data, player.IdentityPlayer, player.PlayerObject ), false, senderRPC );
-		}
-
-		if ( type == CallType.Client )
-		{
-			ref Param3< ref JMPlayerInformation, PlayerIdentity, PlayerBase > cdata;
-			if ( !ctx.Read( cdata ) )
-				return;
-
-			GetPermissionsManager().UpdatePlayer( cdata.param1, cdata.param2, cdata.param3 );
-		}
-	}
-
-	void SetClientInstance( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( type == CallType.Client )
-		{
-			ref Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase > data;
-			if ( !ctx.Read( data ) )
-				return;
-
-			GetPermissionsManager().UpdatePlayer( data.param2, data.param3, data.param4 );
-
-			GetPermissionsManager().SetClientGUID( data.param1 );
-
-			GetModuleManager().OnClientPermissionsUpdated();
-		}
-	}
-
-	void UpdateRole( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		ref Param2< string, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > arr = new array< string >;
-		arr.Copy( data.param2 );
-
-		if ( type == CallType.Client )
-		{
-			Print( "Role: " + data.param1 );
-
-			JMRole role;
-			GetPermissionsManager().LoadRole( data.param1, role );
-			if ( role )
+			string guid;
+			if ( !ctx.Read( guid ) )
 			{
-				role.SerializedData.Clear();
-				role.SerializedData.Copy( arr );
-				role.Deserialize();
+				return;
 			}
 
-			GetModuleManager().OnClientPermissionsUpdated();
+			Server_UpdateClient( guid, senderRPC );
+		}
+
+		if ( GetGame().IsClient() )
+		{
+			JMPlayerInformation cd;
+			if ( !ctx.Read( cd ) )
+			{
+				return;
+			}
+
+			PlayerIdentity pi;
+			if ( !ctx.Read( pi ) )
+			{
+				return;
+			}
+
+			PlayerBase po;
+			if ( !ctx.Read( po ) )
+			{
+				return;
+			}
+
+			Client_UpdateClient( cd, pi, po );
+		}
+	}
+
+	void SetClient( string guid, JMPlayerInformation cd, PlayerIdentity pi, PlayerBase po )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_SetClient( guid, cd, pi, po );
+		}
+	}
+
+	private void Client_SetClient( string guid, JMPlayerInformation playerInfo, PlayerIdentity playerIdent, PlayerBase playerObj )
+	{
+		GetPermissionsManager().UpdatePlayer( playerInfo, playerIdent, playerObj );
+
+		GetPermissionsManager().SetClientGUID( guid );
+
+		GetModuleManager().OnClientPermissionsUpdated();
+	}
+
+	private void Server_SetClient( string guid, JMPlayerInformation pInfo, PlayerIdentity pIdent, PlayerBase pObj )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_SetClient( guid, pInfo, pIdent, pObj );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Write( pInfo );
+			rpc.Write( pIdent );
+			rpc.Write( pObj );
+			rpc.Send( NULL, JMClientRPC.SetClient, true, pIdent );
+		}
+	}
+
+	private void RPC_SetClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionClient() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+			{
+				return;
+			}
+
+			JMPlayerInformation cd;
+			if ( !ctx.Read( cd ) )
+			{
+				return;
+			}
+
+			PlayerIdentity pi;
+			if ( !ctx.Read( pi ) )
+			{
+				return;
+			}
+
+			PlayerBase po;
+			if ( !ctx.Read( po ) )
+			{
+				return;
+			}
+
+			Client_SetClient( guid, cd, pi, po );
+		}
+	}
+
+	void UpdateRole( JMRole role, PlayerIdentity toSendTo = NULL )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_UpdateRole( role, toSendTo );
+		}
+	}
+
+	private void Client_UpdateRole( string roleName, array< string > perms )
+	{
+		JMRole role;
+		GetPermissionsManager().LoadRole( roleName, role );
+		if ( role )
+		{
+			role.SerializedData.Clear();
+			role.SerializedData.Copy( perms );
+			role.Deserialize();
+		}
+
+		GetModuleManager().OnClientPermissionsUpdated();
+	}
+
+	private void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )
+	{
+		if ( GetGame().IsServer() )
+		{
+			role.Serialize();
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( role.Name );
+			rpc.Write( role.SerializedData );
+			rpc.Send( NULL, JMRoleRPC.UpdateRole, true, toSendTo );
+		}
+	}
+
+	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionClient() )
+		{
+			string roleName;
+			if ( !ctx.Read( roleName ) )
+			{
+				return;
+			}
+
+			array< string > permissions;
+			if ( !ctx.Read( permissions ) )
+			{
+				return;
+			}
+
+			Client_UpdateRole( roleName, permissions );
 		}
 	}
 }

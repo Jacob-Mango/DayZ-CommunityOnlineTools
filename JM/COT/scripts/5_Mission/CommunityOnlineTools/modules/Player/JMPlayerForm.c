@@ -830,11 +830,13 @@ class JMPlayerForm extends JMFormBase
 
 			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", m_PlayerScriptListSecond );
 			
-			if ( playerRow == NULL ) continue;
+			if ( playerRow == NULL )
+				continue;
 
 			playerRow.GetScript( rowScript );
 
-			if ( rowScript == NULL ) continue;
+			if ( rowScript == NULL )
+				continue;
 
 			rowScript.SetPlayer( "" );
 
@@ -846,7 +848,7 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerList()
 	{
-		GetRPCManager().SendRPC( "COT", "RefreshPlayers" );
+		GetCommunityOnlineTools().RefreshClients();
 
 		//if ( COT_IsUsingTestSort() )
 		//	GetPermissionsManager().SortPlayersArray();

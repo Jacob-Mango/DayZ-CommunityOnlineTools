@@ -916,7 +916,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				players[k].Save();
 
-				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
+				GetCommunityOnlineTools().SetClient( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject  );
 
 				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated permissions for " + players[k].GetGUID() );
 			}
@@ -952,7 +952,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 				players[k].Save();
 
-				GetRPCManager().SendRPC( "COT", "SetClientInstance", new Param4< string, ref JMPlayerInformation, PlayerIdentity, PlayerBase >( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject ), false, players[k].IdentityPlayer );
+				GetCommunityOnlineTools().SetClient( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject  );
 
 				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated roles for " + players[k].GetGUID() );
 			}
