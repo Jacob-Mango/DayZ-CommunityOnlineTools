@@ -58,7 +58,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return meta.Vehicles;
 	}
 	
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -87,7 +87,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		car.Fill( fluid, cap );
 	}
 
-	Car SpawnVehicle( string type, vector position, PlayerIdentity sender = NULL )
+	Car SpawnVehicle( string type, vector position, PlayerIdentity senderRPC = NULL )
 	{
 		ref JMVehicleSpawnerSerialize file = settings.Vehicles.Get( type );
 
@@ -111,35 +111,35 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		FillCar( oCar, CarFluid.BRAKE );
 		FillCar( oCar, CarFluid.COOLANT );
 
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned vehicle " + oCar.GetDisplayName() + " (" + type + ") at " + position.ToString() );
 
-		// SendAdminNotification( sender, NULL, "You have spawned a " + oCar.GetDisplayName() + " at " + VectorToString( position, 1 ) );
+
 
 		return oCar;
 	}
 
-	void SpawnCursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpawnCursor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		ref Param2< string, vector > data;
 		if ( !ctx.Read( data ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "VehicleSpawner.Vehicle." + data.param1, sender ) )
+		if ( !GetPermissionsManager().HasPermission( "VehicleSpawner.Vehicle." + data.param1, senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server )
 		{
-			SpawnVehicle( data.param1, data.param2, sender );
+			SpawnVehicle( data.param1, data.param2, senderRPC );
 		}
 	}
 }
 
-static Car SpawnVehicleAtPosition( string type, vector position, PlayerIdentity sender = NULL )
+static Car SpawnVehicleAtPosition( string type, vector position, PlayerIdentity senderRPC = NULL )
 {
 	JMVehicleSpawnerModule module;
 	if ( Class.CastTo( module, GetModuleManager().GetModule( JMVehicleSpawnerModule ) ) )
 	{
-		return module.SpawnVehicle( type, position, sender );
+		return module.SpawnVehicle( type, position, senderRPC );
 	}
 	return NULL;
 }

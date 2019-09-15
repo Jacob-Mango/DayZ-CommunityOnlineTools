@@ -58,7 +58,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return meta.ItemSets;
 	}
 	
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
@@ -148,7 +148,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return chest;
 	}
 
-	void SpawnSelectedPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpawnSelectedPlayers( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		ref Param2< string, ref array< string > > data;
 		if ( !ctx.Read( data ) )
@@ -170,7 +170,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		string perm = file.Name;
 		perm.Replace( " ", "." );
 
-		if ( !GetPermissionsManager().HasPermission( "ItemSets.Spawn.ItemSets." + perm, sender ) )
+		if ( !GetPermissionsManager().HasPermission( "ItemSets.Spawn.ItemSets." + perm, senderRPC ) )
 			return;
 		
 		EntityAI chest;
@@ -190,9 +190,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 				for (int j = 0; j < parts.Count(); j++)
 					chest = SpawnItemInContainer( file.ContainerClassName, players[i].PlayerObject, chest, parts[j].ItemName, parts[j].NumberOfStacks, parts[j].StackSize );
 	
-				GetCommunityOnlineToolsBase().Log( sender, "Item set " + data.param1 + " spawned on " + players[i].GetGUID() );
-			
-				SendAdminNotification( sender, players[i].IdentityPlayer, "You have been given item set " + data.param1 );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Item set " + data.param1 + " spawned on " + players[i].GetGUID() );
 			}
 		} else
 		{	
@@ -202,7 +200,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			for (int k = 0; k < parts.Count(); k++)
 				chest = SpawnItemInContainer( file.ContainerClassName, GetGame().GetPlayer(), chest, parts[k].ItemName, parts[k].NumberOfStacks, parts[k].StackSize );
 	
-			GetCommunityOnlineToolsBase().Log( sender, "Item set " + data.param1 + " spawned." );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Item set " + data.param1 + " spawned." );
 		}
 	}
 }

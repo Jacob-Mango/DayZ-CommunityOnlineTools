@@ -46,14 +46,14 @@ class JMDebugModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/debug_form.layout";
 	}
 	
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		Param1< ref CFLogger > data;
 		if ( !ctx.Read( data ) ) return;
 
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "COT.Apply", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "COT.Apply", senderRPC ) )
 				return;
 
 			//GetLogger().Copy( data.param1 );

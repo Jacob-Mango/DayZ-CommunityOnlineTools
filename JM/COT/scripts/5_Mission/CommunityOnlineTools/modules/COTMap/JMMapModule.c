@@ -26,9 +26,9 @@ class JMMapModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Map.View" );
 	}
 	
-	void Request_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Request_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -51,11 +51,11 @@ class JMMapModule: JMRenderableModuleBase
 			
 	 	  	m_ServerPlayers.Clear();
 			
-			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref JMPlayerInformation >>( playerDataArray ), false, sender );
+			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref JMPlayerInformation >>( playerDataArray ), false, senderRPC );
 		}
 	}
 	
-	void Receive_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Receive_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server ) return;
 		
@@ -63,15 +63,15 @@ class JMMapModule: JMRenderableModuleBase
 		
 		if ( !ctx.Read( data ) ) return;
 		
-		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", senderRPC ) )
 			return;
 		
 		JMMapForm.Cast( form ).ShowPlayers( data.param1 );
 	}
 	
-	void MapTeleport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void MapTeleport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Map.Teleport", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.Teleport", senderRPC ) )
 			return;
 
 		Param1< vector > data;
@@ -79,7 +79,7 @@ class JMMapModule: JMRenderableModuleBase
 
 		if ( type == CallType.Server )
 		{
-			PlayerBase player = GetPlayerObjectByIdentity( sender );
+			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 
 			if ( !player )
 				return;
@@ -103,9 +103,7 @@ class JMMapModule: JMRenderableModuleBase
 				player.SetPosition( data.param1 );
 			}
 
-			GetCommunityOnlineToolsBase().Log( sender, "Teleported to position " + data.param1 + " from map." );
-
-			SendAdminNotification( sender, NULL, "Teleported to " + VectorToString( data.param1, 1 ) );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported to position " + data.param1 + " from map." );
 		}
 	}
 }

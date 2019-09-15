@@ -53,9 +53,9 @@ class JMSelectedModule: JMRenderableModuleBase
 		}
 	}
 
-	void RPC_Delete( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void RPC_Delete( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Delete", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Object.Delete", senderRPC ) )
 			return;
 
 		ref Param1< ref set< Object > > data;
@@ -75,7 +75,7 @@ class JMSelectedModule: JMRenderableModuleBase
 				string obtype;
 				GetGame().ObjectGetType( copy[i], obtype );
 
-				GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
+				GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted object " + copy[i].GetDisplayName() + " (" + obtype + ") at " + copy[i].GetPosition() );
 				GetGame().ObjectDelete( copy[i] );
 			}
 		}

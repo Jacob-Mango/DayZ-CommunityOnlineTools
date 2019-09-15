@@ -42,27 +42,19 @@ class CommunityOnlineToolsModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 	}
 
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "COT.UpdateData", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "COT.UpdateData", senderRPC ) )
 				return;
 				
 			Param1< ref CommunityOnlineToolsData > data;
 			if ( !ctx.Read( data ) ) return;
 
 			m_Data = data.param1;
-
-			if ( m_Data.TestSort )
-			{
-				SendAdminNotification( sender, NULL, "You have enabled Player Sorting." );
-			} else
-			{
-				SendAdminNotification( sender, NULL, "You have disabled Player Sorting." );
-			}
 		
-			GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", new Param1< ref CommunityOnlineToolsData >( m_Data ), false, sender );
+			GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", new Param1< ref CommunityOnlineToolsData >( m_Data ), false, senderRPC );
 		}
 
 		if ( type == CallType.Client )

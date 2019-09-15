@@ -103,9 +103,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
 	}
 
-	void SpawnEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpawnEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity", senderRPC ) )
 			return;
 
 		Param2< string, vector > data;
@@ -117,15 +117,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			if ( entity == NULL ) return;
 
-			GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
-
-			//SendAdminNotification( sender, NULL, "You have spawned a " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
 		}
 	}
 	
-	void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Position", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Position", senderRPC ) )
 			return;
 
 		Param3< string, vector, string > data;
@@ -153,7 +151,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				ItemBase oItem = ItemBase.Cast( entity );
 				SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
 
-
 				string text = data.param3;
 
 				text.ToUpper();
@@ -167,20 +164,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 
 				oItem.SetQuantity(quantity);
-
-				// oItem.CreateDynamicPhysics( PhxInteractionLayers.DYNAMICITEM );
-				// oItem.EnableDynamicCCD( true );
 			}
 
 			entity.PlaceOnSurface();
 
-			GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
-
-			//SendAdminNotification( sender, NULL, "You have spawned " + entity.GetDisplayName() + " at " + VectorToString( data.param2, 1 ) + ", quantity " + quantity );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
 		}
 	}
 	
-	protected void SpawnItemOnPlayer( ref PlayerIdentity sender, PlayerBase player, string item, string quantText )
+	protected void SpawnItemOnPlayer( ref PlayerIdentity senderRPC, PlayerBase player, string item, string quantText )
 	{
 		if ( !player )
 			return;
@@ -209,17 +201,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			oItem.SetQuantity(quantity);
 		}
 		
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().GetGUID() + " with amount " + quantity );
-
-		SendAdminNotification( sender, player.GetIdentity(), entity.GetDisplayName() + " has been added to your inventory, quantity " + quantity );
-
-		//if ( sender.GetPlainId() != player.GetIdentity().GetPlainId() )
-		//	SendAdminNotification( player.GetIdentity(), sender, entity.GetDisplayName() + " has been added to their inventory, quantity " + quantity );
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().GetGUID() + " with amount " + quantity );
 	}
 
-	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Inventory", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Inventory", senderRPC ) )
 			return;
 
 		ref Param3< string, string, ref array< string > > data;
@@ -233,22 +220,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
-				SpawnItemOnPlayer( sender, GetGame().GetPlayer(), data.param1, data.param2 );
+				SpawnItemOnPlayer( senderRPC, GetGame().GetPlayer(), data.param1, data.param2 );
 			} else
 			{
 				array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 	
 				for ( int i = 0; i < players.Count(); i++ )
 				{
-					SpawnItemOnPlayer( sender, players[i].PlayerObject, data.param1, data.param2 );
+					SpawnItemOnPlayer( senderRPC, players[i].PlayerObject, data.param1, data.param2 );
 				}
 			}
 		}
 	}
 
-	void DeleteObject( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void DeleteObject( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Delete", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "Object.Delete", senderRPC ) )
 			return;
 		
 		if ( type == CallType.Server )
@@ -258,8 +245,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			string obtype;
 			GetGame().ObjectGetType( target, obtype );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
-			SendAdminNotification( sender, NULL, target.GetDisplayName() + " has been deleted from the world." );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
 
 			GetGame().ObjectDelete( target );
 		}

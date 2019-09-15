@@ -96,14 +96,14 @@ class JMServerInfoModule: JMRenderableModuleBase
 		}
 	}
 
-	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LoadData( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.View", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.View", senderRPC ) )
 				return;
 		
-			GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", new Param1< ref JMServerInfoData >( m_Data ), false, sender );
+			GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", new Param1< ref JMServerInfoData >( m_Data ), false, senderRPC );
 		}
 
 		if ( type == CallType.Client )
@@ -117,11 +117,11 @@ class JMServerInfoModule: JMRenderableModuleBase
 		}
 	}
 
-	void Restart( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Restart( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( type == CallType.Server )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Restart", sender ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Restart", senderRPC ) )
 				return;
 		
 			GetGame().RestartMission();

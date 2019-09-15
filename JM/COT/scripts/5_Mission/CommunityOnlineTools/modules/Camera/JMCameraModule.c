@@ -88,9 +88,9 @@ class JMCameraModule: JMRenderableModuleBase
 		return CurrentActiveCamera;
 	}
 
-	void UpdateCameraNetworkBubble( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void UpdateCameraNetworkBubble( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.UpdateNetworkBubble", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.UpdateNetworkBubble", senderRPC ) )
 			return;
 
 		Param1< vector > data;
@@ -102,9 +102,9 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
@@ -116,7 +116,7 @@ class JMCameraModule: JMRenderableModuleBase
 				position = target.GetPosition();
 			}
 
-			GetGame().SelectPlayer( sender, NULL );
+			GetGame().SelectPlayer( senderRPC, NULL );
 
 			PlayerBase human = PlayerBase.Cast( target );
 
@@ -128,11 +128,11 @@ class JMCameraModule: JMRenderableModuleBase
 				position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
 			}
 
-			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
+			GetGame().SelectSpectator( senderRPC, "JMCinematicCamera", position );
 
-			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, sender );
+			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, senderRPC );
 
-			GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Entered the Free Camera");
 		}
 
 		if ( type == CallType.Client && !COTPlayerIsRemoved )
@@ -157,28 +157,28 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", sender ) )
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", senderRPC ) )
 			return;
 
 		if ( type == CallType.Server )
 		{
-			GetGame().SelectPlayer( sender, target );
+			GetGame().SelectPlayer( senderRPC, target );
 
 			if ( GetGame().IsMultiplayer() )
 			{
-				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, sender );
+				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, senderRPC );
 			} 
 
-			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Left the Free Camera");
 		}
 
 		if ( type == CallType.Client && !COTPlayerIsRemoved )
 		{
 			if ( !GetGame().IsMultiplayer() )
 			{
-				GetGame().SelectPlayer( sender, target );
+				GetGame().SelectPlayer( senderRPC, target );
 			}
 
 			CurrentActiveCamera.SetActive( false );
@@ -195,6 +195,17 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void EnableCamera()
 	{
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera" ) )
+		{
+			return;
+		}
+		
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			return;
+		}
+
 		if ( CurrentActiveCamera || COTPlayerIsRemoved )
 		{
 			return;
@@ -205,6 +216,17 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void DisableCamera()
 	{
+		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera" ) )
+		{
+			return;
+		}
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			return;
+		}
+
 		if ( CurrentActiveCamera && !COTPlayerIsRemoved )
 		{
 			SetFreezeMouse( false );
@@ -238,12 +260,6 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		if ( !( input.LocalPress() ) )
 			return;
-
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
 
 		if ( CurrentActiveCamera )
 		{
