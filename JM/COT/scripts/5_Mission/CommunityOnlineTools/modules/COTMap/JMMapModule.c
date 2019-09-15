@@ -1,3 +1,10 @@
+enum JMMapModuleRPC
+{
+    INVALID = 10500,
+    Teleport
+    MAX
+};
+
 class JMMapModule: JMRenderableModuleBase
 {
 	protected ref array< Man > m_ServerPlayers;
@@ -6,14 +13,8 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		m_ServerPlayers = new array< Man >;
 
-		GetPermissionsManager().RegisterPermission( "Map.ShowPlayers" );
-		GetPermissionsManager().RegisterPermission( "Map.Hidden" );
 		GetPermissionsManager().RegisterPermission( "Map.View" );
 		GetPermissionsManager().RegisterPermission( "Map.Teleport" );
-		
-		GetRPCManager().AddRPC( "COT_Map", "Request_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Map", "Receive_Map_PlayerPositions", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Map", "MapTeleport", this, SingeplayerExecutionType.Server );
 	}
 	
 	override string GetLayoutRoot()
@@ -25,85 +26,84 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		return GetPermissionsManager().HasPermission( "Map.View" );
 	}
-	
-	void Request_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", senderRPC ) )
-			return;
+		super.OnRPC( sender, target, rpc_type, ctx );
 
-		if ( type == CallType.Server )
+		if ( rpc_type > JMMapModuleRPC.INVALID && rpc_type < JMMapModuleRPC.MAX )
 		{
-			GetGame().GetPlayers( m_ServerPlayers );
-			
-			ref array<ref JMPlayerInformation> playerDataArray = new array<ref JMPlayerInformation>;
-			
-			for ( int j = 0; j < m_ServerPlayers.Count(); j++ )
-	   		{
-				Man man = m_ServerPlayers[j];
-
-				ref JMPlayerInformation data = new JMPlayerInformation();
-				data.SName = man.GetIdentity().GetName();
-				data.VPosition = man.GetPosition();
-				data.VDirection = man.GetDirection();
-				
-				playerDataArray.Insert(data);
+			switch ( rpc_type )
+			{
+			case JMMapModuleRPC.Teleport:
+				RPC_Teleport( ctx, sender, target );
+				break;
 			}
-			
-	 	  	m_ServerPlayers.Clear();
-			
-			GetRPCManager().SendRPC("COT_Map", "Receive_Map_PlayerPositions", new Param1< ref array<ref JMPlayerInformation >>( playerDataArray ), false, senderRPC );
+			return;
+		}
+    }
+
+	void Teleport( vector position )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_Teleport( position );
 		}
 	}
-	
-	void Receive_Map_PlayerPositions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+
+	private void Client_Teleport( vector position )
 	{
-		if ( type == CallType.Server ) return;
-		
-		ref Param1< ref array<ref JMPlayerInformation> > data;
-		
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( !GetPermissionsManager().HasPermission( "Map.ShowPlayers", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.Teleport" ) )
 			return;
-		
-		JMMapForm.Cast( form ).ShowPlayers( data.param1 );
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( position );
+		rpc.Send( NULL, JMMapModuleRPC.Teleport, true, NULL );
 	}
-	
-	void MapTeleport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+
+	private void Server_Teleport( vector position, PlayerBase player )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Map.Teleport", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.Teleport", player.GetIdentity() ) )
 			return;
 
-		Param1< vector > data;
-		if ( !ctx.Read( data ) ) return;
+		player.SetLastPosition( player.GetPosition() );
 
-		if ( type == CallType.Server )
+		if ( player.IsInTransport() )
 		{
+			HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
+
+			if ( vehCommand )
+			{
+				Transport transport = vehCommand.GetTransport();
+
+				if ( transport == NULL ) return;
+
+				transport.SetPosition( position );
+			}
+		} else
+		{
+			player.SetPosition( position );
+		}
+
+		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position + " from map." );
+	}
+
+	private void RPC_Teleport( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			vector pos;
+			if ( !ctx.Read( pos ) )
+			{
+				return;
+			}
+
 			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 
 			if ( !player )
 				return;
 
-			player.SetLastPosition( player.GetPosition() );
-
-			if ( player.IsInTransport() )
-			{
-				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
-				if ( vehCommand )
-				{
-					Transport transport = vehCommand.GetTransport();
-
-					if ( transport == NULL ) return;
-
-					transport.SetPosition( data.param1 );
-				}
-			} else
-			{
-				player.SetPosition( data.param1 );
-			}
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported to position " + data.param1 + " from map." );
+			Server_Teleport( pos, player );
 		}
 	}
 }

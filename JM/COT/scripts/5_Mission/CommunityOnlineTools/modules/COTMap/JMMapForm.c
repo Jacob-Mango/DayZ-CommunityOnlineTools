@@ -1,7 +1,7 @@
 class JMMapForm extends JMFormBase 
 {
-	protected ref MapWidget map_widget;
-	protected ref Widget basewindow_background;
+	private MapWidget map_widget;
+	private Widget basewindow_background;
 	
 	void JMMapForm()
 	{
@@ -29,8 +29,8 @@ class JMMapForm extends JMFormBase
 	override void OnInit( bool fromMenu )
 	{
 		map_widget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
-		basewindow_background = window.GetLayoutRoot().FindAnyWidget("background");
-		basewindow_background.Show(false);
+		basewindow_background = window.GetLayoutRoot().FindAnyWidget( "background" );
+		basewindow_background.Show( false );
 	}
 	
 	override void OnShow()
@@ -45,23 +45,31 @@ class JMMapForm extends JMFormBase
 
 	void UpdatePlayers() 
 	{
-		GetRPCManager().SendRPC( "COT_Map", "Request_Map_PlayerPositions", new Param );
-	}
-	
-	void ShowPlayers( ref array<ref JMPlayerInformation> data ) 
-	{
 		map_widget.ClearUserMarks();
-		
-		foreach( ref JMPlayerInformation playerData : data ) 
-		{
-			map_widget.AddUserMark(playerData.VPosition, playerData.SName, ARGB(255, 230, 20, 20), "\\JM\\COT\\GUI\\textures\\dot.paa");
-		}
-	}
-	
-	override bool OnDoubleClick(Widget w, int x, int y, int button)
-	{
-		GetRPCManager().SendRPC( "COT_Map", "MapTeleport", new Param1< vector >( SnapToGround(map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) ), true );
 
-		return true;
+		foreach( JMPlayerInstance player : GetPermissionsManager().GetPlayers() ) 
+		{
+			map_widget.AddUserMark( player.Data.VPosition, player.Data.SName, ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
+		}
+
+		GetCommunityOnlineTools().RefreshClients();
+	}
+
+	override bool OnDoubleClick( Widget w, int x, int y, int button )
+	{
+		if ( w == NULL )
+		{
+			return false;
+		}
+
+		if ( w == map_widget )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
+			rpc.Send( NULL, JMMapModuleRPC.Teleport, true, NULL );
+			return true;
+		}
+
+		return false;
 	}
 }
