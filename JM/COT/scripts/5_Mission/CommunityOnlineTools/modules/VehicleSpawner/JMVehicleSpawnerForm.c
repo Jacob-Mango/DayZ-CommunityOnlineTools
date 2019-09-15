@@ -66,9 +66,14 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	void SpawnVehicle( UIEvent eid, ref UIActionButton action ) 
 	{
-		ref JMVehicleSpawnerButtonData data = JMVehicleSpawnerButtonData.Cast( action.GetData() );
-		if ( !data ) return;
+		JMVehicleSpawnerButtonData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
 
-		GetRPCManager().SendRPC( "COT_VehicleSpawner", "SpawnCursor", new Param2< string, vector >( data.ClassName, GetCursorPos() ) );
+		JMVehicleSpawnerModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		mod.SpawnCursor( data.ClassName, GetCursorPos() );
 	}
 }
