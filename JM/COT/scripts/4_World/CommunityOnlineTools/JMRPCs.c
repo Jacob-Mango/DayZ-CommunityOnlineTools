@@ -6,7 +6,7 @@ enum JMClientRPC
     UpdateClient,
     SetClient,
     MAX
-}
+};
 
 enum JMRoleRPC
 {
@@ -15,10 +15,10 @@ enum JMRoleRPC
     UpdateRole,
     RemoveRole,
     MAX
-}
+};
 
 enum JMPermissionRPC
 {
     INVALID = 10300,
     MAX
-}
+};

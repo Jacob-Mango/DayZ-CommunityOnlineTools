@@ -1,3 +1,11 @@
+enum JMCameraModuleRPC
+{
+    INVALID = 10400,
+    Enter,
+    Leave,
+    MAX
+};
+
 class JMCameraModule: JMRenderableModuleBase
 {
 	protected float m_CurrentSmoothBlur;
@@ -6,15 +14,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void JMCameraModule()
 	{
-		GetRPCManager().AddRPC( "COT_Camera", "EnterCamera", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT_Camera", "LeaveCamera", this, SingeplayerExecutionType.Client );
-
-		GetRPCManager().AddRPC( "COT_Camera", "UpdateCameraNetworkBubble", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "CameraTools.View" );
-		GetPermissionsManager().RegisterPermission( "CameraTools.EnterCamera" );
-		GetPermissionsManager().RegisterPermission( "CameraTools.LeaveCamera" );
-		GetPermissionsManager().RegisterPermission( "CameraTools.UpdateNetworkBubble" );
+		GetPermissionsManager().RegisterPermission( "Camera.View" );
 
 		m_CurrentSmoothBlur = 0.0;
 		m_CurrentFOV = 1.0;
@@ -27,7 +27,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "CameraTools.View" );
+		return GetPermissionsManager().HasPermission( "Camera.View" );
 	}
 
 	override string GetLayoutRoot()
@@ -88,150 +88,177 @@ class JMCameraModule: JMRenderableModuleBase
 		return CurrentActiveCamera;
 	}
 
-	void UpdateCameraNetworkBubble( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.UpdateNetworkBubble", senderRPC ) )
-			return;
+		super.OnRPC( sender, target, rpc_type, ctx );
 
-		Param1< vector > data;
-		if ( !ctx.Read( data ) ) return;
-
-		if ( type == CallType.Server )
+		if ( rpc_type > JMCameraModuleRPC.INVALID && rpc_type < JMCameraModuleRPC.MAX )
 		{
-			GetGame().UpdateSpectatorPosition( data.param1 );
+			switch ( rpc_type )
+			{
+			case JMCameraModuleRPC.Enter:
+				RPC_Enter( ctx, sender, target );
+				break;
+			case JMCameraModuleRPC.Leave:
+				RPC_Leave( ctx, sender, target );
+				break;
+			}
+			return;
+		}
+    }
+
+	void Enter()
+	{
+		if ( IsMissionClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( GetGame().GetPlayer(), JMCameraModuleRPC.Enter, true, NULL );
 		}
 	}
 
-	void EnterCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+	private void Client_Enter()
+	{		
+		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
 		{
-			vector position = Vector( 0, 0, 0 );
-
-			if ( target )
-			{
-				position = target.GetPosition();
-			}
-
-			GetGame().SelectPlayer( senderRPC, NULL );
-
-			PlayerBase human = PlayerBase.Cast( target );
-
-			if ( human )
-			{
-				// human.Save();
-				// human.Delete();
-
-				position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
-			}
-
-			GetGame().SelectSpectator( senderRPC, "JMCinematicCamera", position );
-
-			GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, true, senderRPC );
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Entered the Free Camera");
-		}
-
-		if ( type == CallType.Client && !COTPlayerIsRemoved )
-		{
-			if ( GetGame().IsMultiplayer() )
-			{
-				CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
-			} else 
-			{
-				CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", target.GetPosition(), false ) );
-			}
+			CurrentActiveCamera.SetActive( true );
 			
-			if ( CurrentActiveCamera )
+			if ( GetGame().GetPlayer() )
 			{
-				CurrentActiveCamera.SetActive( true );
-				
-				if ( GetPlayer() )
-				{
-					GetPlayer().GetInputController().SetDisabled( true );
-				}
+				GetGame().GetPlayer().GetInputController().SetDisabled( true );
 			}
 		}
 	}
 
-	void LeaveCamera( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Server_Enter( PlayerIdentity sender, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera", senderRPC ) )
-			return;
+		vector position = Vector( 0, 0, 0 );
 
-		if ( type == CallType.Server )
+		if ( target )
 		{
-			GetGame().SelectPlayer( senderRPC, target );
-
-			if ( GetGame().IsMultiplayer() )
-			{
-				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, senderRPC );
-			} 
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Left the Free Camera");
+			position = target.GetPosition();
 		}
 
-		if ( type == CallType.Client && !COTPlayerIsRemoved )
+		GetGame().SelectPlayer( sender, NULL );
+
+		PlayerBase player;
+		if ( Class.CastTo( player, target ) )
 		{
-			if ( !GetGame().IsMultiplayer() )
-			{
-				GetGame().SelectPlayer( senderRPC, target );
-			}
+			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) );
+			//player.GetInputController().SetDisabled( true );
+		}
 
-			CurrentActiveCamera.SetActive( false );
-			CurrentActiveCamera = NULL;
-			
-			PPEffects.ResetDOFOverride();
+		if ( GetGame().IsMultiplayer() )
+		{
+			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
 
-			if ( GetPlayer() )
-			{
-				GetPlayer().GetInputController().SetDisabled( false );
-			}
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMCameraModuleRPC.Enter, true, sender );
+		} else
+		{
+			CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", position, false ) );
+
+			Client_Enter();
+		}
+
+		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
+	}
+
+	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			Server_Enter( senderRPC, target );
+		} else
+		{
+			Client_Enter();
 		}
 	}
 
-	void EnableCamera()
+	void Leave()
 	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.EnterCamera" ) )
-		{
-			return;
-		}
-		
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
-
-		if ( CurrentActiveCamera || COTPlayerIsRemoved )
-		{
-			return;
-		}
-
-		GetRPCManager().SendRPC( "COT_Camera", "EnterCamera", new Param, false, NULL, GetPlayer() );
-	}
-
-	void DisableCamera()
-	{
-		if ( !GetPermissionsManager().HasPermission( "CameraTools.LeaveCamera" ) )
-		{
-			return;
-		}
-
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
-
-		if ( CurrentActiveCamera && !COTPlayerIsRemoved )
+		if ( IsMissionClient() )
 		{
 			SetFreezeMouse( false );
 
-			GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, false, NULL, GetPlayer() );
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( GetGame().GetPlayer(), JMCameraModuleRPC.Leave, true, NULL );
+		}
+	}
+
+	private void Client_Leave()
+	{
+		CurrentActiveCamera.SetActive( false );
+		CurrentActiveCamera = NULL;
+		
+		PPEffects.ResetDOFOverride();
+
+		if ( GetGame().GetPlayer() )
+		{
+			GetGame().GetPlayer().GetInputController().SetDisabled( false );
+		}
+	}
+
+	private void Server_Leave( PlayerIdentity sender, Object target )
+	{
+		PlayerBase player;
+		if ( Class.CastTo( player, target ) )
+		{
+			GetGame().SelectPlayer( sender, player );
+
+			//player.GetInputController().SetDisabled( false );
+
+			if ( GetGame().IsMultiplayer() )
+			{
+				ScriptRPC rpc = new ScriptRPC();
+				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
+			} else
+			{
+				Client_Leave();
+			}
+
+			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
+		}
+	}
+
+	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			Server_Leave( senderRPC, target );
+		} else
+		{
+			Client_Leave();
+		}
+	}
+	
+	void ToggleCamera( UAInput input )
+	{
+		if ( !( input.LocalPress() ) )
+		{
+			return;
+		}
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			return;
+		}
+
+		if ( CurrentActiveCamera )
+		{
+			if ( !COTPlayerIsRemoved )
+			{
+				Leave();
+			}
+		} else
+		{
+			Enter();
 		}
 	}
 
@@ -253,21 +280,6 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				m_TargetFOV = 0.01;
 			}
-		}
-	}
-	
-	void ToggleCamera( UAInput input )
-	{
-		if ( !( input.LocalPress() ) )
-			return;
-
-		if ( CurrentActiveCamera )
-		{
-			DisableCamera();
-		}
-		else
-		{
-			EnableCamera();
 		}
 	}
 	
