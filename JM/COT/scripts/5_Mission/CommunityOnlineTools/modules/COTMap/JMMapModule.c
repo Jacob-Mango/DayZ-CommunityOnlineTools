@@ -1,8 +1,8 @@
 enum JMMapModuleRPC
 {
-    INVALID = 10500,
+    INVALID = 10180,
     Teleport
-    MAX
+    COUNT
 };
 
 class JMMapModule: JMRenderableModuleBase
@@ -15,6 +15,7 @@ class JMMapModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Map.View" );
 		GetPermissionsManager().RegisterPermission( "Map.Teleport" );
+		GetPermissionsManager().RegisterPermission( "Map.Show.Players" );
 	}
 	
 	override string GetLayoutRoot()
@@ -27,19 +28,23 @@ class JMMapModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Map.View" );
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+	int GetRPCMin()
 	{
-		super.OnRPC( sender, target, rpc_type, ctx );
+		return JMMapModuleRPC.INVALID;
+	}
 
-		if ( rpc_type > JMMapModuleRPC.INVALID && rpc_type < JMMapModuleRPC.MAX )
+	int GetRPCMax()
+	{
+		return JMMapModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
 		{
-			switch ( rpc_type )
-			{
-			case JMMapModuleRPC.Teleport:
-				RPC_Teleport( ctx, sender, target );
-				break;
-			}
-			return;
+		case JMMapModuleRPC.Teleport:
+			RPC_Teleport( ctx, sender, target );
+			break;
 		}
     }
 
@@ -57,7 +62,7 @@ class JMMapModule: JMRenderableModuleBase
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( position );
+		rpc.Write( new Param1< vector >( position ) );
 		rpc.Send( NULL, JMMapModuleRPC.Teleport, true, NULL );
 	}
 
@@ -76,7 +81,8 @@ class JMMapModule: JMRenderableModuleBase
 			{
 				Transport transport = vehCommand.GetTransport();
 
-				if ( transport == NULL ) return;
+				if ( transport == NULL )
+					return;
 
 				transport.SetPosition( position );
 			}
@@ -88,11 +94,11 @@ class JMMapModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position + " from map." );
 	}
 
-	private void RPC_Teleport( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Teleport( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
-			vector pos;
+			Param1< vector > pos;
 			if ( !ctx.Read( pos ) )
 			{
 				return;
@@ -103,7 +109,7 @@ class JMMapModule: JMRenderableModuleBase
 			if ( !player )
 				return;
 
-			Server_Teleport( pos, player );
+			Server_Teleport( pos.param1, player );
 		}
 	}
 }

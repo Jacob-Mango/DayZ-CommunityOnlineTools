@@ -39,7 +39,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		super.OnRPC( sender, target, rpc_type, ctx );
 
-		if ( rpc_type > JMClientRPC.INVALID && rpc_type < JMClientRPC.MAX )
+		if ( rpc_type > JMClientRPC.INVALID && rpc_type < JMClientRPC.COUNT )
 		{
 			switch ( rpc_type )
 			{
@@ -59,7 +59,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			return;
 		}
 
-		if ( rpc_type > JMRoleRPC.INVALID && rpc_type < JMRoleRPC.MAX )
+		if ( rpc_type > JMRoleRPC.INVALID && rpc_type < JMRoleRPC.COUNT )
 		{
 			switch ( rpc_type )
 			{
@@ -90,7 +90,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	}
 
-	private void RPC_RefreshClients( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RefreshClients( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		ScriptRPC rpc = new ScriptRPC();
 
@@ -137,7 +137,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
 	}
 
-	private void RPC_RemoveClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RemoveClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionClient() )
 		{
@@ -191,7 +191,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_UpdateClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -264,7 +264,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_SetClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionClient() )
 		{
@@ -331,7 +331,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_UpdateRole( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionClient() )
 		{

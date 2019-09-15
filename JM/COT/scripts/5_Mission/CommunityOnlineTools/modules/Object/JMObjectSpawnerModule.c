@@ -1,20 +1,18 @@
+enum JMObjectSpawnerModuleRPC
+{
+    INVALID = 10220,
+    Position,
+	Inventory,
+    COUNT
+};
+
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	void JMObjectSpawnerModule()
-	{   
-		GetRPCManager().AddRPC( "COT_Object", "SpawnObjectPosition", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Object", "SpawnObjectInventory", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT_Object", "SpawnEntity", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT_Object", "DeleteObject", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "Object.Spawn.Position" );
-		GetPermissionsManager().RegisterPermission( "Object.Spawn.Inventory" );
-		GetPermissionsManager().RegisterPermission( "Object.Spawn.Entity" );
-		GetPermissionsManager().RegisterPermission( "Object.View" );
-
-		GetPermissionsManager().RegisterPermission( "Object.Delete" );
+	{
+		GetPermissionsManager().RegisterPermission( "Entity.Position" );
+		GetPermissionsManager().RegisterPermission( "Entity.Inventory" );
+		GetPermissionsManager().RegisterPermission( "Entity.View" );
 	}
 
 	override void RegisterKeyMouseBindings() 
@@ -22,12 +20,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		RegisterBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		RegisterBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		RegisterBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
-		RegisterBinding( new JMModuleBinding( "DeleteOnCursor",				"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Object.View" );
+		return GetPermissionsManager().HasPermission( "Entity.View" );
 	}
 
 	override string GetLayoutRoot()
@@ -40,7 +37,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -49,7 +46,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( WorkingZombieClasses().GetRandomElement(), GetPointerPos() ) );
+		string className = WorkingZombieClasses().GetRandomElement();
+		vector position = GetPointerPos();
+
+		SpawnEntity_Position( className, position );
 	}
 
 	void SpawnRandomAnimal( UAInput input )
@@ -57,7 +57,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -66,7 +66,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( GetRandomChildFromBaseClass( "cfgVehicles", "AnimalBase", 2, "Animal_CanisLupus" ), GetPointerPos() ) );
+		string className = GetRandomChildFromBaseClass( "cfgVehicles", "AnimalBase", 2, "Animal_CanisLupus" );
+		vector position = GetPointerPos();
+
+		SpawnEntity_Position( className, position );
 	}
 
 	void SpawnRandomWolf( UAInput input )
@@ -74,7 +77,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity" ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -83,171 +86,235 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetRPCManager().SendRPC( "COT_Object", "SpawnEntity", new Param2< string, vector >( GetRandomChildFromBaseClass( "cfgVehicles", "Animal_CanisLupus" ), GetPointerPos() ) );
-	}
+		string className = GetRandomChildFromBaseClass( "cfgVehicles", "Animal_CanisLupus" );
+		vector position = GetPointerPos();
 
-	void DeleteOnCursor( UAInput input )
-	{
-		if ( !input.LocalPress() )
-			return;
-
-		if ( !GetPermissionsManager().HasPermission( "Object.Delete" ) )
-			return;
-
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
-			return;
-		}
-
-		GetRPCManager().SendRPC( "COT_Object", "DeleteObject", new Param, false, NULL, GetCursorObject( 10.0, GetGame().GetPlayer(), 0.01 ) );
-	}
-
-	void SpawnEntity( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Entity", senderRPC ) )
-			return;
-
-		Param2< string, vector > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Server )
-		{
-			EntityAI entity = EntityAI.Cast( GetGame().CreateObject( data.param1, data.param2, false, GetGame().IsKindOf( data.param1, "DZ_LightAI" ) ) );
-
-			if ( entity == NULL ) return;
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned Entity " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() );
-		}
+		SpawnEntity_Position( className, position );
 	}
 	
-	void SpawnObjectPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	int GetRPCMin()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Position", senderRPC ) )
-			return;
+		return JMObjectSpawnerModuleRPC.INVALID;
+	}
 
-		Param3< string, vector, string > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Server )
+	int GetRPCMax()
+	{
+		return JMObjectSpawnerModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
 		{
-			bool ai = false;
+		case JMObjectSpawnerModuleRPC.Position:
+			RPC_SpawnEntity_Position( ctx, sender, target );
+			break;
+		case JMObjectSpawnerModuleRPC.Inventory:
+			RPC_SpawnEntity_Inventory( ctx, sender, target );
+			break;
+		}
+    }
 
-			if ( GetGame().IsKindOf( data.param1, "DZ_LightAI" ) ) 
+	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1 )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_SpawnEntity_Position( ent, position, quantity, health );
+		} else
+		{
+			Server_SpawnEntity_Position( ent, position, quantity, health, NULL );
+		}
+	}
+
+	private void Client_SpawnEntity_Position( string ent, vector position, float quantity, float health )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( new Param1< string >( ent ) );
+		rpc.Write( new Param1< vector >( position ) );
+		rpc.Write( new Param1< float >( quantity ) );
+		rpc.Write( new Param1< float >( health ) );
+		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
+	}
+
+	private void Server_SpawnEntity_Position( string ent, vector position, float quantity, float health, PlayerIdentity ident )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Entity.Position", ident ) )
+		{
+			return;
+		}
+
+		Object obj = GetGame().CreateObject( ent, position, false, GetGame().IsKindOf( ent, "DZ_LightAI" ) );
+
+		if ( !obj )
+		{
+			return;
+		}
+
+		SetupEntity( obj, quantity, health );
+
+		obj.PlaceOnSurface();
+
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+	}
+
+	private void RPC_SpawnEntity_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			Param1< string > ent;
+			if ( !ctx.Read( ent ) )
 			{
-				ai = true;
+				Error("Failed");
+				return;
 			}
 
-			EntityAI entity = EntityAI.Cast( GetGame().CreateObject( data.param1, data.param2, false, ai ) );
-
-			if ( entity == NULL ) return;
-
-			entity.SetHealth( entity.GetMaxHealth() );
-
-			int quantity = 0;
-			
-			if ( entity.IsInherited( ItemBase ) )
+			Param1< vector > position;
+			if ( !ctx.Read( position ) )
 			{
-				ItemBase oItem = ItemBase.Cast( entity );
-				SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
+				Error("Failed");
+				return;
+			}
+		
+			Param1< float > quantity;
+			if ( !ctx.Read( quantity ) )
+			{
+				Error("Failed");
+				return;
+			}
 
-				string text = data.param3;
+			Param1< float > health;
+			if ( !ctx.Read( health ) )
+			{
+				Error("Failed");
+				return;
+			}
 
-				text.ToUpper();
+			Server_SpawnEntity_Position( ent.param1, position.param1, quantity.param1, health.param1, senderRPC );
+		}
+	}
 
-				if (text == "MAX")
+	void SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity = -1, float health = -1 )
+	{
+		if ( IsMissionClient() )
+		{
+			Client_SpawnEntity_Inventory( ent, objects, quantity, health );
+		} else
+		{
+			Server_SpawnEntity_Inventory( ent, objects, quantity, health, NULL );
+		}
+	}
+
+	private void Client_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( new Param1< string >( ent ) );
+		rpc.Write( new Param1< array< EntityAI > >( objects ) );
+		rpc.Write( new Param1< float >( quantity ) );
+		rpc.Write( new Param1< float >( health ) );
+		rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
+	}
+
+	private void Server_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health, PlayerIdentity ident )
+	{
+		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+		{
+			return;
+		}
+
+		if ( !GetPermissionsManager().HasPermission( "Entity.Inventory", ident ) )
+		{
+			return;
+		}
+
+		Object obj;
+
+		for ( int i = 0; i < objects.Count(); i++ )
+		{
+			obj = NULL;
+
+			obj = objects[i].GetInventory().CreateInInventory( ent );
+			if ( !obj )
+			{
+				obj = GetGame().CreateObject( ent, objects[i].GetPosition() );
+
+				if ( !obj )
 				{
-					quantity = oItem.GetQuantityMax();
-				} else
-				{
-					quantity = text.ToInt();
+					continue;
 				}
 
-				oItem.SetQuantity(quantity);
+				obj.PlaceOnSurface();
 			}
 
-			entity.PlaceOnSurface();
+			SetupEntity( obj, quantity, health );
 
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned object " + entity.GetDisplayName() + " (" + data.param1 + ") at " + data.param2.ToString() + " with amount " + quantity );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + objects[i] );
 		}
 	}
-	
-	protected void SpawnItemOnPlayer( ref PlayerIdentity senderRPC, PlayerBase player, string item, string quantText )
+
+	private void RPC_SpawnEntity_Inventory( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !player )
-			return;
-
-		EntityAI entity = player.GetInventory().CreateInInventory( item );
-
-		entity.SetHealth( entity.GetMaxHealth() );
-
-		int quantity = 0;
-				
-		if ( entity.IsInherited( ItemBase ) )
+		if ( IsMissionHost() )
 		{
-			ItemBase oItem = ItemBase.Cast( entity );
-			SetupSpawnedItem( oItem, oItem.GetMaxHealth(), 1 );
-
-			quantText.ToUpper();
-
-			if ( quantText == "MAX")
+			Param1< string > ent;
+			if ( !ctx.Read( ent ) )
 			{
-				quantity = oItem.GetQuantityMax();
-			} else
-			{
-				quantity = quantText.ToInt();
+				return;
 			}
 
-			oItem.SetQuantity(quantity);
-		}
+			Param1< array< EntityAI > > objects;
+			if ( !ctx.Read( objects ) )
+			{
+				return;
+			}
 		
-		GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned object " + entity.GetDisplayName() + " (" + item + ") on " + player.GetAuthenticatedPlayer().GetGUID() + " with amount " + quantity );
+			Param1< float > quantity;
+			if ( !ctx.Read( quantity ) )
+			{
+				return;
+			}
+
+			Param1< float > health;
+			if ( !ctx.Read( health ) )
+			{
+				return;
+			}
+
+			Server_SpawnEntity_Inventory( ent.param1, objects.param1, quantity.param1, health.param1, senderRPC );
+		}
 	}
 
-	void SpawnObjectInventory( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void SetupEntity( Object obj, out float quantity, out float health )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Spawn.Inventory", senderRPC ) )
-			return;
-
-		ref Param3< string, string, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-		
-		array< string > guids = new array< string >;
-		guids.Copy( data.param3 );
-
-		if ( type == CallType.Server )
+		ItemBase item;
+		if ( Class.CastTo( item, obj ) )
 		{
-			if ( !GetGame().IsMultiplayer() )
+			if ( quantity == -1 )
 			{
-				SpawnItemOnPlayer( senderRPC, GetGame().GetPlayer(), data.param1, data.param2 );
-			} else
-			{
-				array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-	
-				for ( int i = 0; i < players.Count(); i++ )
+				if ( item.HasQuantity() )
 				{
-					SpawnItemOnPlayer( senderRPC, players[i].PlayerObject, data.param1, data.param2 );
+					quantity = item.GetQuantityInit();
 				}
 			}
+
+			if ( quantity > 0 )
+			{
+				if ( quantity > item.GetQuantityMax() )
+				{
+					quantity = item.GetQuantityMax();
+				}
+
+				item.SetQuantity(quantity);
+			}
 		}
-	}
 
-	void DeleteObject( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "Object.Delete", senderRPC ) )
-			return;
-		
-		if ( type == CallType.Server )
+		if ( health == -1 )
 		{
-			if ( target == NULL ) return;
+			health = obj.GetMaxHealth();
+		}
 
-			string obtype;
-			GetGame().ObjectGetType( target, obtype );
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted object " + target.GetDisplayName() + " (" + obtype + ") at " + target.GetPosition() );
-
-			GetGame().ObjectDelete( target );
+		if ( health >= 0 )
+		{
+			obj.SetHealth( "", "", health );
 		}
 	}
 }

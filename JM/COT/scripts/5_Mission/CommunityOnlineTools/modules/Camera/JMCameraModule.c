@@ -1,9 +1,9 @@
 enum JMCameraModuleRPC
 {
-    INVALID = 10400,
+    INVALID = 10160,
     Enter,
     Leave,
-    MAX
+    COUNT
 };
 
 class JMCameraModule: JMRenderableModuleBase
@@ -88,22 +88,26 @@ class JMCameraModule: JMRenderableModuleBase
 		return CurrentActiveCamera;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+	int GetRPCMin()
 	{
-		super.OnRPC( sender, target, rpc_type, ctx );
+		return JMCameraModuleRPC.INVALID;
+	}
 
-		if ( rpc_type > JMCameraModuleRPC.INVALID && rpc_type < JMCameraModuleRPC.MAX )
+	int GetRPCMax()
+	{
+		return JMCameraModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
 		{
-			switch ( rpc_type )
-			{
-			case JMCameraModuleRPC.Enter:
-				RPC_Enter( ctx, sender, target );
-				break;
-			case JMCameraModuleRPC.Leave:
-				RPC_Leave( ctx, sender, target );
-				break;
-			}
-			return;
+		case JMCameraModuleRPC.Enter:
+			RPC_Enter( ctx, sender, target );
+			break;
+		case JMCameraModuleRPC.Leave:
+			RPC_Leave( ctx, sender, target );
+			break;
 		}
     }
 
@@ -163,7 +167,7 @@ class JMCameraModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
 	}
 
-	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Enter( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 			return;
@@ -223,7 +227,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Leave( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 			return;

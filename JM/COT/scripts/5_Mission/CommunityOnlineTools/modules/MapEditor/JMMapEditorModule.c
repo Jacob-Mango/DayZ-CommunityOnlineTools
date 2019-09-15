@@ -6,11 +6,6 @@ class JMMapEditorModule: JMModuleBase
 
 	void JMMapEditorModule()
 	{
-		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_MapEditor", "LeaveEditor", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT_MapEditor", "SetTransform", this, SingeplayerExecutionType.Server );
-
 		GetPermissionsManager().RegisterPermission( "MapEditor.EnterEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.LeaveEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );

@@ -5,20 +5,20 @@ enum JMClientRPC
     RemoveClient,
     UpdateClient,
     SetClient,
-    MAX
+    COUNT
 };
 
 enum JMRoleRPC
 {
-    INVALID = 10200,
+    INVALID = 10120,
     RefreshRoles,
     UpdateRole,
     RemoveRole,
-    MAX
+    COUNT
 };
 
 enum JMPermissionRPC
 {
-    INVALID = 10300,
-    MAX
+    INVALID = 10140,
+    COUNT
 };
