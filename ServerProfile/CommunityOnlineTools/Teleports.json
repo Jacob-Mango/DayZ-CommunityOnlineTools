@@ -2,6 +2,7 @@
     "Locations": [
         {
             "Name": "Altar",
+            "Permission": "Altar",
             "Position": [
                 8090.49,
                 0,
@@ -11,6 +12,7 @@
         },
         {
             "Name": "Balota",
+            "Permission": "Balota",
             "Position": [
                 4393.72,
                 0,
@@ -20,6 +22,7 @@
         },
         {
             "Name": "Balota Airstrip",
+            "Permission": "BalotaAirstrip",
             "Position": [
                 5025.65,
                 0,
@@ -29,6 +32,7 @@
         },
         {
             "Name": "Bashnya",
+            "Permission": "Bashnya",
             "Position": [
                 4156.51,
                 0,
@@ -38,6 +42,7 @@
         },
         {
             "Name": "Bay Mutnaya",
+            "Permission": "BayMutnaya",
             "Position": [
                 5634.24,
                 0,
@@ -47,6 +52,7 @@
         },
         {
             "Name": "Bay Tikhaya",
+            "Permission": "BayTikhaya",
             "Position": [
                 1190.83,
                 0,
@@ -56,6 +62,7 @@
         },
         {
             "Name": "Bay Zelenaya",
+            "Permission": "BayZelenaya",
             "Position": [
                 11140.8,
                 0,
@@ -65,6 +72,7 @@
         },
         {
             "Name": "Belaya Polana",
+            "Permission": "BelayaPolana",
             "Position": [
                 14148.2,
                 0,
@@ -74,6 +82,7 @@
         },
         {
             "Name": "Berezhki",
+            "Permission": "Berezhki",
             "Position": [
                 15152.5,
                 0,
@@ -83,6 +92,7 @@
         },
         {
             "Name": "Berezino",
+            "Permission": "Berezino",
             "Position": [
                 11856.3,
                 0,
@@ -92,6 +102,7 @@
         },
         {
             "Name": "Berezino Lumberyard",
+            "Permission": "BerezinoLumberyard",
             "Position": [
                 12661.3,
                 0,
@@ -101,6 +112,7 @@
         },
         {
             "Name": "Berezino Shipyard",
+            "Permission": "BerezinoShipyard",
             "Position": [
                 13179,
                 0,
@@ -110,6 +122,7 @@
         },
         {
             "Name": "Black Forest",
+            "Permission": "BlackForest",
             "Position": [
                 9083.59,
                 0,
@@ -119,6 +132,7 @@
         },
         {
             "Name": "Black Lake",
+            "Permission": "BlackLake",
             "Position": [
                 13360.8,
                 0,
@@ -128,6 +142,7 @@
         },
         {
             "Name": "Black Mtn",
+            "Permission": "BlackMtn",
             "Position": [
                 10246.3,
                 0,
@@ -137,6 +152,7 @@
         },
         {
             "Name": "Bogatyrka",
+            "Permission": "Bogatyrka",
             "Position": [
                 1504.85,
                 0,
@@ -146,6 +162,7 @@
         },
         {
             "Name": "Bor",
+            "Permission": "Bor",
             "Position": [
                 3317.02,
                 0,
@@ -155,6 +172,7 @@
         },
         {
             "Name": "Cap Golova",
+            "Permission": "CapGolova",
             "Position": [
                 8350.07,
                 0,
@@ -164,6 +182,7 @@
         },
         {
             "Name": "Cernaya Polana",
+            "Permission": "CernayaPolana",
             "Position": [
                 12200,
                 0,
@@ -173,6 +192,7 @@
         },
         {
             "Name": "Chernogorsk",
+            "Permission": "Chernogorsk",
             "Position": [
                 6572.9,
                 0,
@@ -182,6 +202,7 @@
         },
         {
             "Name": "Chernogorsk Factory",
+            "Permission": "ChernogorskFactory",
             "Position": [
                 6406.17,
                 0,
@@ -191,6 +212,7 @@
         },
         {
             "Name": "Chyornaya Bay",
+            "Permission": "ChyornayaBay",
             "Position": [
                 7706.96,
                 0,
@@ -200,6 +222,7 @@
         },
         {
             "Name": "Crown Castle",
+            "Permission": "CrownCastle",
             "Position": [
                 1430,
                 0,
@@ -209,6 +232,7 @@
         },
         {
             "Name": "Deep Lake",
+            "Permission": "DeepLake",
             "Position": [
                 1853.38,
                 0,
@@ -218,6 +242,7 @@
         },
         {
             "Name": "Devil's Castle",
+            "Permission": "DevilsCastle",
             "Position": [
                 6909.76,
                 0,
@@ -227,6 +252,7 @@
         },
         {
             "Name": "Dichina Military",
+            "Permission": "DichinaMilitary",
             "Position": [
                 4622.19,
                 0,
@@ -236,6 +262,7 @@
         },
         {
             "Name": "Dobroe",
+            "Permission": "Dobroe",
             "Position": [
                 13096.3,
                 0,
@@ -245,6 +272,7 @@
         },
         {
             "Name": "Dolina",
+            "Permission": "Dolina",
             "Position": [
                 11327.4,
                 0,
@@ -254,6 +282,7 @@
         },
         {
             "Name": "Drakon Island",
+            "Permission": "DrakonIsland",
             "Position": [
                 11186,
                 0,
@@ -263,6 +292,7 @@
         },
         {
             "Name": "Drozhino",
+            "Permission": "Drozhino",
             "Position": [
                 3446.32,
                 0,
@@ -272,6 +302,7 @@
         },
         {
             "Name": "Dubky",
+            "Permission": "Dubky",
             "Position": [
                 6653.59,
                 0,
@@ -281,6 +312,7 @@
         },
         {
             "Name": "Dubrovka",
+            "Permission": "Dubrovka",
             "Position": [
                 10397.6,
                 0,
@@ -290,6 +322,7 @@
         },
         {
             "Name": "Dubrovka Vyshnaya",
+            "Permission": "DubrovkaVyshnaya",
             "Position": [
                 9952.95,
                 0,
@@ -299,6 +332,7 @@
         },
         {
             "Name": "Electrozavodsk",
+            "Permission": "Electrozavodsk",
             "Position": [
                 10502.8,
                 0,
@@ -308,6 +342,7 @@
         },
         {
             "Name": "Electrozavodsk Power",
+            "Permission": "ElectrozavodskPower",
             "Position": [
                 10358.1,
                 0,
@@ -317,6 +352,7 @@
         },
         {
             "Name": "Electrozavodsk Shipyard",
+            "Permission": "ElectrozavodskShipyard",
             "Position": [
                 9961.48,
                 0,
@@ -326,6 +362,7 @@
         },
         {
             "Name": "Gnome Castle",
+            "Permission": "GnomeCastle",
             "Position": [
                 7410.93,
                 0,
@@ -335,6 +372,7 @@
         },
         {
             "Name": "Gorka",
+            "Permission": "Gorka",
             "Position": [
                 9646.16,
                 0,
@@ -344,6 +382,7 @@
         },
         {
             "Name": "Green Mtn",
+            "Permission": "GreenMtn",
             "Position": [
                 3744.3,
                 0,
@@ -353,6 +392,7 @@
         },
         {
             "Name": "Grishino",
+            "Permission": "Grishino",
             "Position": [
                 6018.26,
                 0,
@@ -362,6 +402,7 @@
         },
         {
             "Name": "Grozovoy Pass",
+            "Permission": "GrozovoyPass",
             "Position": [
                 3237.3,
                 0,
@@ -371,6 +412,7 @@
         },
         {
             "Name": "Guba",
+            "Permission": "Guba",
             "Position": [
                 14609.1,
                 0,
@@ -380,6 +422,7 @@
         },
         {
             "Name": "Guglovo",
+            "Permission": "Guglovo",
             "Position": [
                 8411.8,
                 0,
@@ -389,6 +432,7 @@
         },
         {
             "Name": "Gvozdno",
+            "Permission": "Gvozdno",
             "Position": [
                 8706.38,
                 0,
@@ -398,6 +442,7 @@
         },
         {
             "Name": "Kabanino",
+            "Permission": "Kabanino",
             "Position": [
                 5298.35,
                 0,
@@ -407,6 +452,7 @@
         },
         {
             "Name": "Kamenka",
+            "Permission": "Kamenka",
             "Position": [
                 1892.27,
                 0,
@@ -416,6 +462,7 @@
         },
         {
             "Name": "Kamensk",
+            "Permission": "Kamensk",
             "Position": [
                 6633.17,
                 0,
@@ -425,6 +472,7 @@
         },
         {
             "Name": "Kamyshovo",
+            "Permission": "Kamyshovo",
             "Position": [
                 12170.8,
                 0,
@@ -434,6 +482,7 @@
         },
         {
             "Name": "Karmanovka",
+            "Permission": "Karmanovka",
             "Position": [
                 12519.8,
                 0,
@@ -443,6 +492,7 @@
         },
         {
             "Name": "Khelm",
+            "Permission": "Khelm",
             "Position": [
                 12286.8,
                 0,
@@ -452,6 +502,7 @@
         },
         {
             "Name": "Klen Mtn",
+            "Permission": "KlenMtn",
             "Position": [
                 11491.7,
                 0,
@@ -461,6 +512,7 @@
         },
         {
             "Name": "Komarovo",
+            "Permission": "Komarovo",
             "Position": [
                 3619.86,
                 0,
@@ -470,6 +522,7 @@
         },
         {
             "Name": "Kozlova Mtn",
+            "Permission": "KozlovaMtn",
             "Position": [
                 8826.96,
                 0,
@@ -479,6 +532,7 @@
         },
         {
             "Name": "Kozlovka",
+            "Permission": "Kozlovka",
             "Position": [
                 4451.57,
                 0,
@@ -488,6 +542,7 @@
         },
         {
             "Name": "Krasnoe",
+            "Permission": "Krasnoe",
             "Position": [
                 6486.37,
                 0,
@@ -497,6 +552,7 @@
         },
         {
             "Name": "Krasnostav",
+            "Permission": "Krasnostav",
             "Position": [
                 11228.8,
                 0,
@@ -506,6 +562,7 @@
         },
         {
             "Name": "Krasnostav Airstrip",
+            "Permission": "KrasnostavAirstrip",
             "Position": [
                 12016.2,
                 0,
@@ -515,6 +572,7 @@
         },
         {
             "Name": "Krutoy Cap",
+            "Permission": "KrutoyCap",
             "Position": [
                 13624.7,
                 0,
@@ -524,6 +582,7 @@
         },
         {
             "Name": "Kumyrna",
+            "Permission": "Kumyrna",
             "Position": [
                 8403.05,
                 0,
@@ -533,6 +592,7 @@
         },
         {
             "Name": "Lopatino",
+            "Permission": "Lopatino",
             "Position": [
                 2749.87,
                 0,
@@ -542,6 +602,7 @@
         },
         {
             "Name": "Mamino",
+            "Permission": "Mamino",
             "Position": [
                 7981.69,
                 0,
@@ -551,6 +612,7 @@
         },
         {
             "Name": "Map Edge NE",
+            "Permission": "MapEdgeNE",
             "Position": [
                 15321.2,
                 0,
@@ -560,6 +622,7 @@
         },
         {
             "Name": "Map Edge NW",
+            "Permission": "MapEdgeNW",
             "Position": [
                 44.12,
                 0,
@@ -569,6 +632,7 @@
         },
         {
             "Name": "Map Edge SW",
+            "Permission": "MapEdgeSW",
             "Position": [
                 19.82,
                 0,
@@ -578,6 +642,7 @@
         },
         {
             "Name": "Mogilevka",
+            "Permission": "Mogilevka",
             "Position": [
                 7502.8,
                 0,
@@ -587,6 +652,7 @@
         },
         {
             "Name": "Msta",
+            "Permission": "Msta",
             "Position": [
                 11258.3,
                 0,
@@ -596,6 +662,7 @@
         },
         {
             "Name": "Myshkino",
+            "Permission": "Myshkino",
             "Position": [
                 2056.57,
                 0,
@@ -605,6 +672,7 @@
         },
         {
             "Name": "Myshkino Military",
+            "Permission": "MyshkinoMilitary",
             "Position": [
                 1266.66,
                 0,
@@ -614,6 +682,7 @@
         },
         {
             "Name": "Myshkino Trainyard",
+            "Permission": "MyshkinoTrainyard",
             "Position": [
                 885.72,
                 0,
@@ -623,6 +692,7 @@
         },
         {
             "Name": "Nadezhdino",
+            "Permission": "Nadezhdino",
             "Position": [
                 5821.39,
                 0,
@@ -632,6 +702,7 @@
         },
         {
             "Name": "Nagornoe",
+            "Permission": "Nagornoe",
             "Position": [
                 9333.93,
                 0,
@@ -641,6 +712,7 @@
         },
         {
             "Name": "Nizhnoye",
+            "Permission": "Nizhnoye",
             "Position": [
                 12895.4,
                 0,
@@ -650,6 +722,7 @@
         },
         {
             "Name": "Novaya Petrovka",
+            "Permission": "NovayaPetrovka",
             "Position": [
                 3471.91,
                 0,
@@ -659,6 +732,7 @@
         },
         {
             "Name": "Novaya Trainyard",
+            "Permission": "NovayaTrainyard",
             "Position": [
                 3526.6,
                 0,
@@ -668,6 +742,7 @@
         },
         {
             "Name": "Novodmitrovsk",
+            "Permission": "Novodmitrovsk",
             "Position": [
                 11595,
                 0,
@@ -677,6 +752,7 @@
         },
         {
             "Name": "Novoselky",
+            "Permission": "Novoselky",
             "Position": [
                 6052.29,
                 0,
@@ -686,6 +762,7 @@
         },
         {
             "Name": "Novy Sobor",
+            "Permission": "NovySobor",
             "Position": [
                 7159.26,
                 0,
@@ -695,6 +772,7 @@
         },
         {
             "Name": "NW Airfield ATC",
+            "Permission": "NWAirfieldATC",
             "Position": [
                 4618.3,
                 0,
@@ -704,6 +782,7 @@
         },
         {
             "Name": "NW Airfield Range",
+            "Permission": "NWAirfieldRange",
             "Position": [
                 5373.21,
                 0,
@@ -713,6 +792,7 @@
         },
         {
             "Name": "NW Airfield South",
+            "Permission": "NWAirfieldSouth",
             "Position": [
                 4520.11,
                 0,
@@ -722,6 +802,7 @@
         },
         {
             "Name": "NW Airfield Tents",
+            "Permission": "NWAirfieldTents",
             "Position": [
                 4163.31,
                 0,
@@ -731,6 +812,7 @@
         },
         {
             "Name": "Olha",
+            "Permission": "Olha",
             "Position": [
                 13320.9,
                 0,
@@ -740,6 +822,7 @@
         },
         {
             "Name": "Oreshka Pass",
+            "Permission": "OreshkaPass",
             "Position": [
                 9877.39,
                 0,
@@ -749,6 +832,7 @@
         },
         {
             "Name": "Orlovets",
+            "Permission": "Orlovets",
             "Position": [
                 12136.3,
                 0,
@@ -758,6 +842,7 @@
         },
         {
             "Name": "Orlovets Factory",
+            "Permission": "OrlovetsFactory",
             "Position": [
                 11489.7,
                 0,
@@ -767,6 +852,7 @@
         },
         {
             "Name": "Otmel Island",
+            "Permission": "OtmelIsland",
             "Position": [
                 11642.9,
                 0,
@@ -776,6 +862,7 @@
         },
         {
             "Name": "Pavlovo",
+            "Permission": "Pavlovo",
             "Position": [
                 1626.37,
                 0,
@@ -785,6 +872,7 @@
         },
         {
             "Name": "Pavlovo Military",
+            "Permission": "PavlovoMilitary",
             "Position": [
                 2101.77,
                 0,
@@ -794,6 +882,7 @@
         },
         {
             "Name": "Pogorevka",
+            "Permission": "Pogorevka",
             "Position": [
                 4376.71,
                 0,
@@ -803,6 +892,7 @@
         },
         {
             "Name": "Polana",
+            "Permission": "Polana",
             "Position": [
                 10678.7,
                 0,
@@ -812,6 +902,7 @@
         },
         {
             "Name": "Polesovo",
+            "Permission": "Polesovo",
             "Position": [
                 5817,
                 0,
@@ -821,6 +912,7 @@
         },
         {
             "Name": "Prigorodki",
+            "Permission": "Prigorodki",
             "Position": [
                 7984.89,
                 0,
@@ -830,6 +922,7 @@
         },
         {
             "Name": "Prud Lake",
+            "Permission": "PrudLake",
             "Position": [
                 6627.34,
                 0,
@@ -839,6 +932,7 @@
         },
         {
             "Name": "Pulkovo",
+            "Permission": "Pulkovo",
             "Position": [
                 4902.36,
                 0,
@@ -848,6 +942,7 @@
         },
         {
             "Name": "Pusta",
+            "Permission": "Pusta",
             "Position": [
                 9176.44,
                 0,
@@ -857,6 +952,7 @@
         },
         {
             "Name": "Pustoshka",
+            "Permission": "Pustoshka",
             "Position": [
                 2992.21,
                 0,
@@ -866,6 +962,7 @@
         },
         {
             "Name": "Ratnoe",
+            "Permission": "Ratnoe",
             "Position": [
                 6305.55,
                 0,
@@ -875,6 +972,7 @@
         },
         {
             "Name": "Rify",
+            "Permission": "Rify",
             "Position": [
                 13783.2,
                 0,
@@ -884,6 +982,7 @@
         },
         {
             "Name": "Rog Castle",
+            "Permission": "RogCastle",
             "Position": [
                 11255,
                 0,
@@ -893,6 +992,7 @@
         },
         {
             "Name": "Rogovo",
+            "Permission": "Rogovo",
             "Position": [
                 4731,
                 0,
@@ -902,6 +1002,7 @@
         },
         {
             "Name": "Romashka",
+            "Permission": "Romashka",
             "Position": [
                 8148.5,
                 0,
@@ -911,6 +1012,7 @@
         },
         {
             "Name": "Schadenfreude Island",
+            "Permission": "SchadenfreudeIsland",
             "Position": [
                 24000,
                 0,
@@ -920,6 +1022,7 @@
         },
         {
             "Name": "Severograd",
+            "Permission": "Severograd",
             "Position": [
                 7893.4,
                 0,
@@ -929,6 +1032,7 @@
         },
         {
             "Name": "Shakhovka",
+            "Permission": "Shakhovka",
             "Position": [
                 9670.8,
                 0,
@@ -938,6 +1042,7 @@
         },
         {
             "Name": "Silence Lake",
+            "Permission": "SilenceLake",
             "Position": [
                 1203.95,
                 0,
@@ -947,6 +1052,7 @@
         },
         {
             "Name": "Sinystok",
+            "Permission": "Sinystok",
             "Position": [
                 1447.49,
                 0,
@@ -956,6 +1062,7 @@
         },
         {
             "Name": "Skalisty Castle",
+            "Permission": "SkalistyCastle",
             "Position": [
                 13494,
                 0,
@@ -965,6 +1072,7 @@
         },
         {
             "Name": "Skalisty Island",
+            "Permission": "SkalistyIsland",
             "Position": [
                 13661.2,
                 0,
@@ -974,6 +1082,7 @@
         },
         {
             "Name": "Skvsch Biathlon Arena",
+            "Permission": "SkvschBiathlonArena",
             "Position": [
                 488.57,
                 0,
@@ -983,6 +1092,7 @@
         },
         {
             "Name": "Smirnovo",
+            "Permission": "Smirnovo",
             "Position": [
                 11629.3,
                 0,
@@ -992,6 +1102,7 @@
         },
         {
             "Name": "Solnichniy",
+            "Permission": "Solnichniy",
             "Position": [
                 13469.1,
                 0,
@@ -1001,6 +1112,7 @@
         },
         {
             "Name": "Solnichniy Factory",
+            "Permission": "SolnichniyFactory",
             "Position": [
                 13069.6,
                 0,
@@ -1010,6 +1122,7 @@
         },
         {
             "Name": "Sosnovka",
+            "Permission": "Sosnovka",
             "Position": [
                 2512.53,
                 0,
@@ -1019,6 +1132,7 @@
         },
         {
             "Name": "Sosnovy Pass",
+            "Permission": "SosnovyPass",
             "Position": [
                 2736.13,
                 0,
@@ -1028,6 +1142,7 @@
         },
         {
             "Name": "Staroye",
+            "Permission": "Staroye",
             "Position": [
                 10164.2,
                 0,
@@ -1037,6 +1152,7 @@
         },
         {
             "Name": "Stary Sobor",
+            "Permission": "StarySobor",
             "Position": [
                 6072.64,
                 0,
@@ -1046,6 +1162,7 @@
         },
         {
             "Name": "Stary Yar",
+            "Permission": "StaryYar",
             "Position": [
                 4935.61,
                 0,
@@ -1055,6 +1172,7 @@
         },
         {
             "Name": "Storozh Island (Prison)",
+            "Permission": "StorozhIsland(Prison)",
             "Position": [
                 2611.2,
                 0,
@@ -1064,6 +1182,7 @@
         },
         {
             "Name": "Svergino",
+            "Permission": "Svergino",
             "Position": [
                 9533.2,
                 0,
@@ -1073,6 +1192,7 @@
         },
         {
             "Name": "Svetlojarsk",
+            "Permission": "Svetlojarsk",
             "Position": [
                 13931.9,
                 0,
@@ -1082,6 +1202,7 @@
         },
         {
             "Name": "Three Crosses Gas",
+            "Permission": "ThreeCrossesGas",
             "Position": [
                 312.94,
                 0,
@@ -1091,6 +1212,7 @@
         },
         {
             "Name": "Three Valleys",
+            "Permission": "ThreeValleys",
             "Position": [
                 12842.1,
                 0,
@@ -1100,6 +1222,7 @@
         },
         {
             "Name": "Tisy",
+            "Permission": "Tisy",
             "Position": [
                 3413.75,
                 0,
@@ -1109,6 +1232,7 @@
         },
         {
             "Name": "Tisy Military",
+            "Permission": "TisyMilitary",
             "Position": [
                 1681.3,
                 0,
@@ -1118,6 +1242,7 @@
         },
         {
             "Name": "Topolka Dam",
+            "Permission": "TopolkaDam",
             "Position": [
                 10280.5,
                 0,
@@ -1127,6 +1252,7 @@
         },
         {
             "Name": "Topolniki",
+            "Permission": "Topolniki",
             "Position": [
                 2821.19,
                 0,
@@ -1136,6 +1262,7 @@
         },
         {
             "Name": "Troitskoe",
+            "Permission": "Troitskoe",
             "Position": [
                 7559.44,
                 0,
@@ -1145,6 +1272,7 @@
         },
         {
             "Name": "Troitskoe Military",
+            "Permission": "TroitskoeMilitary",
             "Position": [
                 7866.4,
                 0,
@@ -1154,6 +1282,7 @@
         },
         {
             "Name": "Tulga",
+            "Permission": "Tulga",
             "Position": [
                 12808.7,
                 0,
@@ -1163,6 +1292,7 @@
         },
         {
             "Name": "Turovo",
+            "Permission": "Turovo",
             "Position": [
                 13576.5,
                 0,
@@ -1172,6 +1302,7 @@
         },
         {
             "Name": "Vavilovo",
+            "Permission": "Vavilovo",
             "Position": [
                 2211.83,
                 0,
@@ -1181,6 +1312,7 @@
         },
         {
             "Name": "Veresnik Mtn",
+            "Permission": "VeresnikMtn",
             "Position": [
                 4439.42,
                 0,
@@ -1190,6 +1322,7 @@
         },
         {
             "Name": "Vybor",
+            "Permission": "Vybor",
             "Position": [
                 3800,
                 0,
@@ -1199,6 +1332,7 @@
         },
         {
             "Name": "Vyshnoye",
+            "Permission": "Vyshnoye",
             "Position": [
                 6532.61,
                 0,
@@ -1208,6 +1342,7 @@
         },
         {
             "Name": "Vysotovo",
+            "Permission": "Vysotovo",
             "Position": [
                 5616.26,
                 0,
@@ -1217,6 +1352,7 @@
         },
         {
             "Name": "Willow Lake",
+            "Permission": "WillowLake",
             "Position": [
                 13254.2,
                 0,
@@ -1226,6 +1362,7 @@
         },
         {
             "Name": "Zabolotye",
+            "Permission": "Zabolotye",
             "Position": [
                 1156.26,
                 0,
@@ -1235,6 +1372,7 @@
         },
         {
             "Name": "Zaprudnoe",
+            "Permission": "Zaprudnoe",
             "Position": [
                 4927.47,
                 0,
@@ -1244,6 +1382,7 @@
         },
         {
             "Name": "Zelenogorsk",
+            "Permission": "Zelenogorsk",
             "Position": [
                 2713.4,
                 0,
@@ -1253,6 +1392,7 @@
         },
         {
             "Name": "Zelenogorsk Trainyard",
+            "Permission": "ZelenogorskTrainyard",
             "Position": [
                 2490.65,
                 0,
@@ -1262,6 +1402,7 @@
         },
         {
             "Name": "Zub Castle",
+            "Permission": "ZubCastle",
             "Position": [
                 6541.79,
                 0,
@@ -1271,6 +1412,7 @@
         },
         {
             "Name": "Zvir",
+            "Permission": "Zvir",
             "Position": [
                 477.35,
                 0,

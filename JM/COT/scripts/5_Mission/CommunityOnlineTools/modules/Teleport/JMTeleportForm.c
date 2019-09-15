@@ -77,30 +77,41 @@ class JMTeleportForm extends JMFormBase
 
 	void Click_Teleport( UIEvent eid, ref UIActionButton action )
 	{
-		GetRPCManager().SendRPC( "COT_Teleport", "Predefined", new Param2< string, ref array< string > >( GetCurrentPositionName(), GetSelectedPlayers() ) );
+		JMTeleportModule mod;
+		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
+		{
+			mod.Location( GetCurrentLocation(), GetSelectedPlayers() );
+		}
 	}
 
 	void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )
 	{
-		if ( eid != UIEvent.CHANGE ) return;
+		if ( eid != UIEvent.CHANGE )
+			return;
 
 		UpdateList();
 	}
 
 	void UpdateList()
 	{
-		JMTeleportModule tm = JMTeleportModule.Cast( module );
-
-		if ( tm == NULL ) return;
+		JMTeleportModule tm;
+		if ( !Class.CastTo( tm, GetModuleManager().GetModule( JMTeleportModule ) ) )
+		{
+			return;
+		}
 
 		m_LstPositionList.ClearItems();
 
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
 
-		for ( int nPosition = 0; nPosition < tm.GetLocations().Count(); nPosition++ )
+		array< ref JMTeleportLocation > locations = tm.GetLocations();
+		if ( !locations )
+			return;
+
+		for ( int i = 0; i < locations.Count(); i++ )
 		{
-			string name = "" + tm.GetLocations()[nPosition].Name;
+			string name = "" + locations[i].Name;
 			name.ToLower();
 
 			if ( (filter != "" && (!name.Contains( filter ))) ) 
@@ -108,26 +119,18 @@ class JMTeleportForm extends JMFormBase
 				continue;
 			}
 
-			m_LstPositionList.AddItem( tm.GetLocations()[nPosition].Name, NULL, 0 );
+			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + locations[i].Permission ) )
+			{
+				continue;
+			}
+
+			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );
 		}
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
 	{
-		JMTeleportModule tm = JMTeleportModule.Cast( module );
-
-		if ( tm == NULL ) return false;
-
-		ref JMTeleportLocation location = NULL;
-
-		for ( int i = 0; i < tm.GetLocations().Count(); i++ )
-		{
-			if ( tm.GetLocations()[i].Name == GetCurrentPositionName() )
-			{
-				location = tm.GetLocations()[i];
-				break;
-			}
-		}
+		JMTeleportLocation location = GetCurrentLocation();
 
 		if ( location == NULL )
 		{
@@ -139,8 +142,19 @@ class JMTeleportForm extends JMFormBase
 			m_PositionZ.SetText( location.Position[2].ToString() );
 		}
 
-
 		return true;
+	}
+
+	JMTeleportLocation GetCurrentLocation()
+	{
+		if ( m_LstPositionList.GetSelectedRow() != -1 )
+		{
+			JMTeleportLocation position_name;
+			m_LstPositionList.GetItemData( m_LstPositionList.GetSelectedRow(), 0, position_name );
+			return position_name;
+		}
+
+		return NULL;
 	}
 
 	string GetCurrentPositionName()
