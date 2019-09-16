@@ -169,7 +169,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		super.OnHide();
 	}
 
-	void SetListType( UIEvent eid, ref UIActionButton action )
+	void SetListType( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
@@ -178,7 +178,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		UpdateList();
 	}
 
-	void SpawnCursor( UIEvent eid, ref UIActionButton action )
+	void SpawnCursor( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -201,7 +201,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		mod.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
 	}
 
-	void SpawnPosition( UIEvent eid, ref UIActionButton action )
+	void SpawnPosition( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -224,7 +224,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		mod.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
 	}
 
-	void SpawnInventory( UIEvent eid, ref UIActionButton action )
+	void SpawnInventory( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -262,7 +262,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		mod.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
 	}
 
-	void SearchInput_OnChange( UIEvent eid, ref UIActionEditableText action )
+	void SearchInput_OnChange( UIEvent eid, ref UIActionBase action )
 	{
 		UpdateList();
 	}

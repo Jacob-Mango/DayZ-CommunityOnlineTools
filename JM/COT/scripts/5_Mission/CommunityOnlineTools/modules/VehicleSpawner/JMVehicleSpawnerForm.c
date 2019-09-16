@@ -64,7 +64,7 @@ class JMVehicleSpawnerForm extends JMFormBase
 		m_VehicleButtons.Clear();
 	}
 
-	void SpawnVehicle( UIEvent eid, ref UIActionButton action ) 
+	void SpawnVehicle( UIEvent eid, ref UIActionBase action ) 
 	{
 		JMVehicleSpawnerButtonData data;
 		if ( !Class.CastTo( data, action.GetData() ) )

@@ -23,7 +23,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
 
-		ref UIActionButton action;
+		UIActionButton action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -41,7 +41,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableText.layout", parent );
 
-		ref UIActionEditableText action;
+		UIActionEditableText action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -71,7 +71,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableVector.layout", parent );
 
-		ref UIActionEditableVector action;
+		UIActionEditableVector action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -100,7 +100,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
 
-		ref UIActionCheckbox action;
+		UIActionCheckbox action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -119,7 +119,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", parent );
 
-		ref UIActionText action;
+		UIActionText action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -144,7 +144,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
 
-		ref UIActionSelectBox action;
+		UIActionSelectBox action;
 		widget.GetScript( action );
 
 		if ( action )
@@ -163,7 +163,7 @@ class UIActionManager
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout", parent );
 
-		ref UIActionSlider action;
+		UIActionSlider action;
 		widget.GetScript( action );
 
 		if ( action )

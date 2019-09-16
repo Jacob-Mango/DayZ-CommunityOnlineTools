@@ -67,12 +67,12 @@ class UIActionSlider extends UIActionBase
         CalculateValue();
     }
 
-    float GetValue()
+    override float GetCurrent()
     {
         return m_Current;
     }
 
-    void SetValue( float value )
+    override void SetCurrent( float value )
     {
         float x = value;
         float a = m_Slider.GetMin();
@@ -121,7 +121,8 @@ class UIActionSlider extends UIActionBase
 	{
 		CalculateValue(); 
 
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+            return false;
 
 		if ( w == m_Slider )
 		{
@@ -134,7 +135,7 @@ class UIActionSlider extends UIActionBase
 
 	override bool CallEvent( UIEvent eid )
 	{
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionSlider >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
     }

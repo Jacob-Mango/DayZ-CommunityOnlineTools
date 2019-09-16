@@ -1,12 +1,20 @@
 class UIActionEditableText extends UIActionBase 
 {
+	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
 	protected ref TextWidget m_Label;
 	protected ref EditBoxWidget m_Text;
 	protected ref ButtonWidget m_Button;
 
+	protected bool m_OnlyNumbers;
+
+	protected string m_PreviousText;
+
 	override void OnInit() 
 	{
 		super.OnInit();
+
+		m_PreviousText = "";
 	}
 
 	override void OnShow()
@@ -39,31 +47,79 @@ class UIActionEditableText extends UIActionBase
 		m_Text = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action" ) );
 	}
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 	}
 
-	void SetText( string text )
+	override void SetText( string text )
 	{
-		if ( m_Text == GetFocus() ) return;
+		if ( m_Text == GetFocus() )
+			return;
 
 		m_Text.SetText( text );
+
+		UpdateText();
 	}
 
-	string GetText()
+	override string GetText()
 	{
 		return m_Text.GetText();
 	}
 
-	void SetButton( string text )
+	bool UpdateText()
 	{
-		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
+		if ( m_OnlyNumbers )
+		{
+			string newText = m_Text.GetText();
+
+			bool hasDecimal = false;
+			bool failed = false;
+
+			for ( int i = 0; i < newText.Length(); i++ )
+			{
+				if ( VALID_NUMBERS.Find( newText.Get( i ) ) == -1 )
+				{
+					if ( !hasDecimal )
+					{
+						if ( newText.Get( i ) == "." || newText.Get( i ) == "," )
+						{
+							hasDecimal = true;
+							continue;
+						}
+					}
+					failed = true;
+					break;
+				}
+			}
+
+			if ( failed )
+			{
+				m_Text.SetText( m_PreviousText );
+			} else
+			{
+				m_PreviousText = newText;
+			}
+
+			return !failed;
+		}
+
+		return true;
 	}
 
-	void RemoveDisableInput()
+	void SetOnlyNumbers( bool onlyNumbers )
 	{
-		DISABLE_ALL_INPUT = false;
+		m_OnlyNumbers = onlyNumbers;
+	}
+
+	bool IsOnlyNumbers()
+	{
+		return m_OnlyNumbers;
+	}
+
+	override void SetButton( string text )
+	{
+		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -90,12 +146,17 @@ class UIActionEditableText extends UIActionBase
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		if ( w == m_Text )
 		{
 			DISABLE_ALL_INPUT = true;
-			CallEvent( UIEvent.CHANGE );
+			if ( UpdateText() )
+			{
+				CallEvent( UIEvent.CHANGE );
+			}
+
 			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
 			return true;
 		}
@@ -121,7 +182,7 @@ class UIActionEditableText extends UIActionBase
 	{
 		if ( !m_HasCallback ) return false;
 
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionEditableText >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
 	}

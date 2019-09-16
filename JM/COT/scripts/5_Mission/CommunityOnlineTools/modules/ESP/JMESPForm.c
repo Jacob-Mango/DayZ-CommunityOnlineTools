@@ -54,7 +54,7 @@ class JMESPForm extends JMFormBase
 		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your character from the server, relog to fix." );
 
 		m_RangeSlider = UIActionManager.CreateSlider( mainSpacer, "Radius", 0, 1000, this, "Change_Range" );
-		m_RangeSlider.SetValue( JMESPModule.Cast( module ).ESPRadius );
+		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
 		m_RangeSlider.SetAppend(" metre(s)");
 		m_RangeSlider.SetStepValue( 10 );
 
@@ -63,7 +63,7 @@ class JMESPForm extends JMFormBase
 		m_ESPIsUpdating = UIActionManager.CreateCheckbox( duoSpacer, "Should Update Continuously", this, "Click_UpdateAtRate", JMESPModule.Cast( module ).ESPIsUpdating );
 
 		m_UpdateRate = UIActionManager.CreateSlider( duoSpacer, "At Rate", 0.5, 10, this, "Change_UpdateRate" );
-		m_UpdateRate.SetValue( JMESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
 		m_UpdateRate.SetAppend(" second(s)");
 		m_UpdateRate.SetStepValue( 0.5 );
 	}
@@ -99,8 +99,8 @@ class JMESPForm extends JMFormBase
 	{
 		super.OnShow();
 
-		m_RangeSlider.SetValue( JMESPModule.Cast( module ).ESPRadius );
-		m_UpdateRate.SetValue( JMESPModule.Cast( module ).ESPUpdateTime );
+		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
+		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
 		m_ESPIsUpdating.SetChecked( JMESPModule.Cast( module ).ESPIsUpdating );
 
 		if ( COTPlayerIsRemoved )
@@ -207,7 +207,7 @@ class JMESPForm extends JMFormBase
 		}
 	}
 
-	void Click_UpdateESP( UIEvent eid, ref UIActionButton action )
+	void Click_UpdateESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -234,28 +234,28 @@ class JMESPForm extends JMFormBase
 	}
 
 	// Removed.
-	void Click_HideESP( UIEvent eid, ref UIActionButton action )
+	void Click_HideESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
 		JMESPModule.Cast( module ).HideESP();
 	}
 
-	void Click_ChangeESPMode( UIEvent eid, ref UIActionCheckbox action )
+	void Click_ChangeESPMode( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
 		JMESPWidget.ShowJustName = action.IsChecked();
 	}
 	
-	void Change_Filter( UIEvent eid, ref UIActionEditableText action )
+	void Change_Filter( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 
 		JMESPModule.Cast( module ).Filter = action.GetText();
 	}
 
-	void Click_PlayerESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_PlayerESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -266,7 +266,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_BaseBuildingESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_BaseBuildingESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -277,7 +277,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_VehicleESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_VehicleESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -288,7 +288,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_ItemESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_ItemESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -299,7 +299,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_InfectedESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_InfectedESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -310,7 +310,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_CreatureESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_CreatureESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -321,7 +321,7 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Click_AllESP( UIEvent eid, ref UIActionCheckbox action )
+	void Click_AllESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -332,28 +332,28 @@ class JMESPForm extends JMFormBase
 		UpdateCheckboxStates();
 	}
 
-	void Change_UpdateRate( UIEvent eid, ref UIActionSlider action )
+	void Change_UpdateRate( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 		
-		JMESPModule.Cast( module ).ESPUpdateTime = action.GetValue();
+		JMESPModule.Cast( module ).ESPUpdateTime = action.GetCurrent();
 	}
 
-	void Change_Range( UIEvent eid, ref UIActionSlider action )
+	void Change_Range( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 		
-		JMESPModule.Cast( module ).ESPRadius = action.GetValue();
+		JMESPModule.Cast( module ).ESPRadius = action.GetCurrent();
 	}
 
-	void Click_UseClassName( UIEvent eid, ref UIActionCheckbox action )
+	void Click_UseClassName( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
 		JMESPWidget.UseClassName = action.IsChecked();
 	}
 
-	void Click_EnableFullMap( UIEvent eid, ref UIActionButton action )
+	void Click_EnableFullMap( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
@@ -362,7 +362,7 @@ class JMESPForm extends JMFormBase
 		m_FullMapESP.Disable();
 	}
 
-	void Click_UpdateAtRate( UIEvent eid, ref UIActionCheckbox action )
+	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		

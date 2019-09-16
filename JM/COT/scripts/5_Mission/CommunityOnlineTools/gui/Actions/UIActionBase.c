@@ -90,4 +90,68 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	{
 		return m_Data;
 	}
+
+	void SetButton( string text )
+	{
+	}
+
+	string GetButton()
+	{
+		return "";
+	}
+
+	void SetLabel( string text )
+	{
+	}
+
+	void SetChecked( bool checked )
+	{
+	}
+	
+	bool IsChecked()
+	{
+		return false;
+	}
+	
+	void SetText( string text )
+	{
+	}
+
+	string GetText()
+	{
+		return "";
+	}
+
+	float GetCurrent()
+	{
+		return 0.0;
+	}
+
+	void SetCurrent( float value )
+	{
+		
+	}
+
+	void SetValue( vector v )
+	{
+	}
+
+	vector GetValue()
+	{
+		return "0 0 0";
+	}
+
+	void RemoveDisableInput()
+	{
+		DISABLE_ALL_INPUT = false;
+	}
+
+	void SetSelection( int i, bool sendEvent = true )
+	{
+	}
+
+	int GetSelection()
+	{
+		return -1;
+	}
 }

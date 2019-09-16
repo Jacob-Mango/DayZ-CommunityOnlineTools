@@ -68,7 +68,7 @@ class JMServerInfoForm extends JMFormBase
 		m_UIMissionTickTime.SetText( "" + data.MissionTickTime );
 	}
 
-	void RefreshData( UIEvent eid, ref UIActionButton action )
+	void RefreshData( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -76,7 +76,7 @@ class JMServerInfoForm extends JMFormBase
 		GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", NULL, false, NULL );
 	}
 
-	void RestartMission( UIEvent eid, ref UIActionButton action )
+	void RestartMission( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

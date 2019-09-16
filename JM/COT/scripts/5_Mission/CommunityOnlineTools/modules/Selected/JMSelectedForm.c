@@ -122,7 +122,7 @@ class JMSelectedForm extends JMFormBase
 		m_WObjectCount.SetText( "" + objects.Count() + " Selected" );
 	}
 
-	void Click_Delete( UIEvent eid, ref UIActionButton action )
+	void Click_Delete( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

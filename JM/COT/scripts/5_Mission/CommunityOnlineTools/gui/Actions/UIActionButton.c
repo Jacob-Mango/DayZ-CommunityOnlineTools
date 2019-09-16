@@ -19,13 +19,13 @@ class UIActionButton extends UIActionBase
 	{
 	}
 
-	void SetButton( string text )
+	override void SetButton( string text )
 	{
 		m_Button.SetName( text );
 		m_Text.SetText( text );
 	}
 
-	string GetButton()
+	override string GetButton()
 	{
 		return m_Button.GetName();
 	}
@@ -46,7 +46,7 @@ class UIActionButton extends UIActionBase
 	{
 		if ( !m_HasCallback ) return false;
 
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionButton >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
 	}
