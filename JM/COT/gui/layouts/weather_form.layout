@@ -3,7 +3,7 @@ GridSpacerWidgetClass JMWeatherForm
  visible 0
  color 0 0 0 0
  position 0 0
- size 570 170
+ size 700 300
  hexactpos 0
  vexactpos 0
  hexactsize 1
