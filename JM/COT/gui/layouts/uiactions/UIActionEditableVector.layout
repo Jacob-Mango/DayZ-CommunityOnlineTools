@@ -47,7 +47,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{X}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
         EditBoxWidgetClass action_y {
          position 0 0
@@ -55,7 +56,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{Y}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
         EditBoxWidgetClass action_z {
          position 0 0
@@ -63,7 +65,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{Z}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
        }
       }
@@ -124,7 +127,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{X}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
         EditBoxWidgetClass action_y {
          position 0 0
@@ -132,7 +136,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{Y}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
         EditBoxWidgetClass action_z {
          position 0 0
@@ -140,7 +145,8 @@ PanelWidgetClass UIActionEditableVector {
          text "{Z}"
          "exact text" 1
          "no focus" 0
-         font "gui/fonts/sdf_MetronLight14"
+         font "gui/fonts/Metron"
+         style Editor
         }
        }
       }

@@ -513,6 +513,8 @@ class JMPlayerForm extends JMFormBase
 		m_ActionsWrapper.Show( true );
 		
 		ShowSide();
+
+		UpdatePlayerList();
 	}
 
 	override void OnHide() 

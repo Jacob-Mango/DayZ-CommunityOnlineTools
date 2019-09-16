@@ -8,22 +8,34 @@ enum JMWeatherModuleRPC
 	RainThresholds,
 	Overcast,
 	Wind,
-	WindSpeed,
 	WindFunctionParams,
 	Date,
-	MissionWeather,
-	RunPreset,
-	SavePreset,
+	UsePreset,
+	CreatePreset,
+	UpdatePreset,
+	RemovePreset,
     COUNT
+};
+
+enum JMWeatherTypes
+{
+	INVALID,
+	Phenomenon,
+	Mission,
+	Preset,
+	COUNT
 };
 
 class JMWeatherModule: JMRenderableModuleBase
 {
+	private ref JMWeatherSerialize settings;
+
 	void JMWeatherModule()
-	{	
+	{
 		GetPermissionsManager().RegisterPermission( "Weather.Date" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Wind" );
+		GetPermissionsManager().RegisterPermission( "Weather.Wind.Direction" );
 		GetPermissionsManager().RegisterPermission( "Weather.Wind.FunctionParams" );
 		GetPermissionsManager().RegisterPermission( "Weather.Wind.Speed" );
 
@@ -33,7 +45,12 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Weather.Rain" );
 		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
-	
+
+		GetPermissionsManager().RegisterPermission( "Weather.Preset" );
+		GetPermissionsManager().RegisterPermission( "Weather.Preset.Create" );
+		GetPermissionsManager().RegisterPermission( "Weather.Preset.Update" );
+		GetPermissionsManager().RegisterPermission( "Weather.Preset.Remove" );
+
 		GetPermissionsManager().RegisterPermission( "Weather.View" );
 	}
 
@@ -47,413 +64,577 @@ class JMWeatherModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/weather_form.layout";
 	}
 
-	void SetStorm( float density, float threshold, float timeOut )
+	override void OnMissionLoaded()
 	{
-		if ( IsMissionOffline() )
+		super.OnMissionLoaded();
+
+		Load();
+	}
+
+	bool HasSettings()
+	{
+		return settings != NULL;
+	}
+
+	array< ref JMWeatherPreset > GetPresets()
+	{
+		return settings.Presets;
+	}
+	
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( settings )
 		{
-			Exec_SetStorm( density, threshold, timeOut );
+			if ( !settings.Presets )
+				return;
+
+			for ( int i = 0; i < settings.Presets.Count(); i++ )
+			{
+				JMWeatherPreset location = settings.Presets[i];
+
+				string permission = location.Permission;
+				permission.Replace( " ", "." );
+				GetPermissionsManager().RegisterPermission( "Weather.Preset." + permission );
+			}
+		}
+	}
+
+	void Load()
+	{
+		if ( IsMissionClient() && !IsMissionOffline() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMWeatherModuleRPC.Load, true, NULL );
 		} else
 		{
-			Send_SetStorm( density, threshold, timeOut );
+			settings = JMWeatherSerialize.Load();
+
+			OnSettingsUpdated();
+		}
+	}
+
+	private void Server_Load( PlayerIdentity ident )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( settings );
+		rpc.Send( NULL, JMWeatherModuleRPC.Load, true, ident );
+	}
+
+	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			Server_Load( senderRPC );
+		}
+
+		if ( IsMissionClient() )
+		{
+			if ( ctx.Read( settings ) )
+			{
+				OnSettingsUpdated();
+			}
+		}
+	}
+
+	void SetStorm( float density, float threshold, float timeOut )
+	{
+		JMWeatherStorm wBase = new JMWeatherStorm;
+		wBase.Density = density;
+		wBase.Threshold = threshold;
+		wBase.TimeOut = timeOut;
+
+		if ( IsMissionOffline() )
+		{
+			Exec_SetStorm( wBase );
+		} else
+		{
+			Send_SetStorm( wBase );
 		} 
 	}
 
 	void SetFog( float forecast, float time = 0, float minDuration = 0 )
 	{
+		JMWeatherFog wBase = new JMWeatherFog;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
 		if ( IsMissionOffline() )
 		{
-			Exec_SetFog( forecast, time, minDuration );
+			Exec_SetFog( wBase );
 		} else
 		{
-			Send_SetFog( forecast, time, minDuration );
+			Send_SetFog( wBase );
 		} 
 	}
 
 	void SetRain( float forecast, float time = 0, float minDuration = 0 )
 	{
+		JMWeatherRain wBase = new JMWeatherRain;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
 		if ( IsMissionOffline() )
 		{
-			Exec_SetRain( forecast, time, minDuration );
+			Exec_SetRain( wBase );
 		} else
 		{
-			Send_SetRain( forecast, time, minDuration );
+			Send_SetRain( wBase );
 		} 
 	}
 
 	void SetRainThresholds( float tMin, float tMax, float tTime )
 	{
+		JMWeatherRainThreshold wBase = new JMWeatherRainThreshold;
+		wBase.OvercastMin = tMin;
+		wBase.OvercastMax = tMax;
+		wBase.Time = tTime;
+		
 		if ( IsMissionOffline() )
 		{
-			Exec_SetRainThresholds( tMin, tMax, tTime );
+			Exec_SetRainThresholds( wBase );
 		} else
 		{
-			Send_SetRainThresholds( tMin, tMax, tTime );
+			Send_SetRainThresholds( wBase );
 		} 
 	}
 
 	void SetOvercast( float forecast, float time = 0, float minDuration = 0 )
 	{
+		JMWeatherOvercast wBase = new JMWeatherOvercast;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
 		if ( IsMissionOffline() )
 		{
-			Exec_SetOvercast( forecast, time, minDuration );
+			Exec_SetOvercast( wBase );
 		} else
 		{
-			Send_SetOvercast( forecast, time, minDuration );
+			Send_SetOvercast( wBase );
 		} 
 	}
 
-	void SetWind( vector wind )
+	void SetWind( vector dir, float speed, float maxSpeed = -1 )
 	{
-		if ( IsMissionOffline() )
-		{
-			Exec_SetWind( wind );
-		} else
-		{
-			Send_SetWind( wind );
-		} 
-	}
+		JMWeatherWind wBase = new JMWeatherWind;
 
-	void SetWindSpeed( float speed )
-	{
-		if ( IsMissionOffline() )
+		wBase.Dir = dir;
+		wBase.Speed = speed;
+		if ( maxSpeed == -1 )
 		{
-			Exec_SetWindSpeed( speed );
+			wBase.MaxSpeed = GetGame().GetWeather().GetWindMaximumSpeed();
 		} else
 		{
-			Send_SetWindSpeed( speed );
+			wBase.MaxSpeed = maxSpeed
+		}
+
+		if ( IsMissionOffline() )
+		{
+			Exec_SetWind( wBase );
+		} else
+		{
+			Send_SetWind( wBase );
 		} 
 	}
 
 	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
 	{
+		JMWeatherWindFunction wBase = new JMWeatherWindFunction;
+		wBase.Min = fnMin;
+		wBase.Max = fnMax;
+		wBase.Speed = fnSpeed;
+
 		if ( IsMissionOffline() )
 		{
-			Exec_SetWindFunctionParams( fnMin, fnMax, fnSpeed );
+			Exec_SetWindFunctionParams( wBase );
 		} else
 		{
-			Send_SetWindFunctionParams( fnMin, fnMax, fnSpeed );
+			Send_SetWindFunctionParams( wBase );
 		} 
 	}
 
 	void SetDate( int year, int month, int day, int hour, int minute )
 	{
+		JMWeatherDate wBase = new JMWeatherDate;
+		wBase.Year = year;
+		wBase.Month = month;
+		wBase.Day = day;
+		wBase.Hour = hour;
+		wBase.Minute = minute;
+
 		if ( IsMissionOffline() )
 		{
-			Exec_SetDate( year, month, day, hour, minute );
+			Exec_SetDate( wBase );
 		} else
 		{
-			Send_SetDate( year, month, day, hour, minute );
+			Send_SetDate( wBase );
+		}
+	}
+
+	void UsePreset( string name )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_UsePreset( name );
+		} else
+		{
+			Send_UsePreset( name );
 		}
 	}
 	
-	private void Send_SetStorm( float density, float threshold, float timeOut )
+	private void Send_SetStorm( JMWeatherStorm wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( density );
-		rpc.Write( threshold );
-		rpc.Write( timeOut );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Storm, true, NULL );
 	}
 	
-	private void Send_SetFog( float forecast, float time = 0, float minDuration = 0 )
+	private void Send_SetFog( JMWeatherFog wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Fog, true, NULL );
 	}
 	
-	private void Send_SetRain( float forecast, float time = 0, float minDuration = 0 )
+	private void Send_SetRain( JMWeatherRain wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Rain, true, NULL );
 	}
 	
-	private void Send_SetRainThresholds( float tMin, float tMax, float tTime )
+	private void Send_SetRainThresholds( JMWeatherRainThreshold wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( tMin );
-		rpc.Write( tMax );
-		rpc.Write( tTime );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.RainThresholds, true, NULL );
 	}
 	
-	private void Send_SetOvercast( float forecast, float time = 0, float minDuration = 0 )
+	private void Send_SetOvercast( JMWeatherOvercast wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Overcast, true, NULL );
 	}
 	
-	private void Send_SetWind( vector wind )
+	private void Send_SetWind( JMWeatherWind wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( wind );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Wind, true, NULL );
 	}
-	
-	private void Send_SetWindSpeed( float speed )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( speed );
-		rpc.Send( NULL, JMWeatherModuleRPC.WindSpeed, true, NULL );
-	}
 
-	private void Send_SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
+	private void Send_SetWindFunctionParams( JMWeatherWindFunction wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( fnMin );
-		rpc.Write( fnMax );
-		rpc.Write( fnSpeed );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.WindFunctionParams, true, NULL );
 	}
 
-	private void Send_SetDate( int year, int month, int day, int hour, int minute )
+	private void Send_SetDate( JMWeatherDate wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( year );
-		rpc.Write( month );
-		rpc.Write( day );
-		rpc.Write( hour );
-		rpc.Write( minute );
+		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Date, true, NULL );
 	}
+
+	private void Send_UsePreset( string name )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+
+		rpc.Write( name );
+
+		rpc.Send( NULL, JMWeatherModuleRPC.UsePreset, true, NULL );
+	}
+
+	private void Send_UpdatePreset( JMWeatherPreset preset )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+
+		rpc.Write( preset );
+
+		rpc.Send( NULL, JMWeatherModuleRPC.UpdatePreset, true, NULL );
+	}
+
+	private void Send_RemovePreset( string name )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+
+		rpc.Write( name );
+
+		rpc.Send( NULL, JMWeatherModuleRPC.RemovePreset, true, NULL );
+	}
 	
-	private void Exec_SetStorm( float density, float threshold, float timeOut, PlayerIdentity ident = NULL )
+	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident = NULL )
 	{
-		Print( "density: " + density );
-		Print( "threshold: " + threshold );
-		Print( "timeOut: " + timeOut );
-		GetGame().GetWeather().SetStorm( density, threshold, timeOut );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set storm to " + density + " " + threshold + " " + timeOut );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetFog( float forecast, float time = 0, float minDuration = 0, PlayerIdentity ident = NULL )
+	private void Exec_SetFog( JMWeatherFog wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().GetFog().Set( forecast, time, minDuration );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set fog to " + forecast + " " + time + " " + minDuration );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetRain( float forecast, float time = 0, float minDuration = 0, PlayerIdentity ident = NULL )
+	private void Exec_SetRain( JMWeatherRain wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().GetRain().Set( forecast, time, minDuration );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set rain to " + forecast + " " + time + " " + minDuration );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetRainThresholds( float tMin, float tMax, float tTime, PlayerIdentity ident = NULL )
+	private void Exec_SetRainThresholds( JMWeatherRainThreshold wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().SetRainThresholds( tMin, tMax, tTime );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set wind function to " + tMin + " " + tMax + " " + tTime );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetOvercast( float forecast, float time = 0, float minDuration = 0, PlayerIdentity ident = NULL )
+	private void Exec_SetOvercast( JMWeatherOvercast wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().GetOvercast().Set( forecast, time, minDuration );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set overcast to " + forecast + " " + time + " " + minDuration );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetWind( vector wind, PlayerIdentity ident = NULL )
+	private void Exec_SetWind( JMWeatherWind wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().SetWind( wind );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set wind to " + wind );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetWindSpeed( float speed, PlayerIdentity ident = NULL )
+	private void Exec_SetWindFunctionParams( JMWeatherWindFunction wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().SetWindSpeed( speed );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set wind speed to " + speed );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed, PlayerIdentity ident = NULL )
+	private void Exec_SetDate( JMWeatherDate wBase, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWeather().SetWindFunctionParams( fnMin, fnMax, fnSpeed );
-
-		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set wind function to " + fnMin + " " + fnMax + " " + fnSpeed );
+		wBase.Apply();
+		wBase.Log( ident );
 	}
 
-	private void Exec_SetDate( int year, int month, int day, int hour, int minute, PlayerIdentity ident = NULL )
+	private void Exec_UsePreset( string preset, PlayerIdentity ident = NULL )
 	{
-		GetGame().GetWorld().SetDate( year, month, day, hour, minute );
+		// find and apply the preset
 
 		if ( IsMissionHost() )
-			GetCommunityOnlineToolsBase().Log( ident, "Set date to " + year + "/" + month + "/" + day + " " + hour + ":" + minute );
+		{
+			GetCommunityOnlineToolsBase().Log( ident, "Start Weather Preset " + preset );
+		}
 	}
 	
 	private void RPC_SetStorm( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherStorm p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetStorm( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Storm", senderRPC ) )
+				return;
 
-		Exec_SetStorm( p1, p2, p3, senderRPC );
+			Send_SetStorm( p1 );
+		}
+
+		Exec_SetStorm( p1, senderRPC );
     }
 
 	private void RPC_SetFog( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherFog p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetFog( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Fog", senderRPC ) )
+				return;
 
-		Exec_SetFog( p1, p2, p3, senderRPC );
+			Send_SetFog( p1 );
+		}
+
+		Exec_SetFog( p1, senderRPC );
     }
 
 	private void RPC_SetRain( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherRain p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetRain( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Rain", senderRPC ) )
+				return;
 
-		Exec_SetRain( p1, p2, p3, senderRPC );
+			Send_SetRain( p1 );
+		}
+
+		Exec_SetRain( p1, senderRPC );
     }
 
 	private void RPC_SetRainThresholds( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherRainThreshold p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetRainThresholds( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Rain.Thresholds", senderRPC ) )
+				return;
 
-		Exec_SetRainThresholds( p1, p2, p3, senderRPC );
+			Send_SetRainThresholds( p1 );
+		}
+
+		Exec_SetRainThresholds( p1, senderRPC );
     }
 
 	private void RPC_SetOvercast( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherOvercast p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetOvercast( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", senderRPC ) )
+				return;
 
-		Exec_SetOvercast( p1, p2, p3, senderRPC );
+			Send_SetOvercast( p1 );
+		}
+
+		Exec_SetOvercast( p1, senderRPC );
     }
 
 	private void RPC_SetWind( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		vector p1;
+		JMWeatherWind p1;
 		if ( !ctx.Read( p1 ) )
 			return;
 
 		if ( IsMissionHost() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Wind.Direction", senderRPC ) )
+				return;
+
 			Send_SetWind( p1 );
+		}
 
 		Exec_SetWind( p1 );
     }
 
-	private void RPC_SetWindSpeed( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
-		float p1;
-		if ( !ctx.Read( p1 ) )
-			return;
-
-		if ( IsMissionHost() )
-			Send_SetWindSpeed( p1 );
-
-		Exec_SetWindSpeed( p1, senderRPC );
-    }
-
 	private void RPC_SetWindFunctionParams( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		float p1;
+		JMWeatherWindFunction p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		float p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		float p3;
-		if ( !ctx.Read( p3 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetWindFunctionParams( p1, p2, p3 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", senderRPC ) )
+				return;
 
-		Exec_SetWindFunctionParams( p1, p2, p3, senderRPC );
+			Send_SetWindFunctionParams( p1 );
+		}
+
+		Exec_SetWindFunctionParams( p1, senderRPC );
     }
 
 	private void RPC_SetDate( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
     {
-		int p1;
+		JMWeatherDate p1;
 		if ( !ctx.Read( p1 ) )
-			return;
-		int p2;
-		if ( !ctx.Read( p2 ) )
-			return;
-		int p3;
-		if ( !ctx.Read( p3 ) )
-			return;
-		int p4;
-		if ( !ctx.Read( p4 ) )
-			return;
-		int p5;
-		if ( !ctx.Read( p5 ) )
 			return;
 
 		if ( IsMissionHost() )
-			Send_SetDate( p1, p2, p3, p4, p5 );
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Date", senderRPC ) )
+				return;
 
-		Exec_SetDate( p1, p2, p3, p4, p5, senderRPC );
+			Send_SetDate( p1 );
+		}
+
+		Exec_SetDate( p1, senderRPC );
+    }
+
+	private void RPC_UsePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+    {
+		string p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1, senderRPC ) )
+				return;
+
+			Send_UsePreset( p1 );
+		}
+
+		Exec_UsePreset( p1, senderRPC );
+    }
+
+	private void RPC_CreatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+    {
+		JMWeatherPreset p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Create", senderRPC ) )
+				return;
+
+			//Send_CreatePreset( p1 );
+		}
+
+		//Exec_CreatePreset( p1, senderRPC );
+    }
+
+	private void RPC_UpdatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+    {
+		JMWeatherPreset p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Update", senderRPC ) )
+				return;
+
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1.Permission, senderRPC ) )
+				return;
+
+			//Send_UpdatePreset( p1 );
+		}
+
+		//Exec_UpdatePreset( p1, senderRPC );
+    }
+
+	private void RPC_RemovePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+    {
+		string p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if ( IsMissionHost() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Remove", senderRPC ) )
+				return;
+
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1, senderRPC ) )
+				return;
+
+			//Send_RemovePreset( p1 );
+		}
+
+		//Exec_RemovePreset( p1, senderRPC );
     }
 
 	int GetRPCMin()
@@ -470,6 +651,9 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		switch ( rpc_type )
 		{
+		case JMWeatherModuleRPC.Load:
+			RPC_Load( ctx, sender, target );
+			break
 		case JMWeatherModuleRPC.Storm:
 			RPC_SetStorm( ctx, sender, target );
 			break;
@@ -488,15 +672,26 @@ class JMWeatherModule: JMRenderableModuleBase
 		case JMWeatherModuleRPC.Wind:
 			RPC_SetWind( ctx, sender, target );
 			break;
-		case JMWeatherModuleRPC.WindSpeed:
-			RPC_SetWindSpeed( ctx, sender, target );
-			break;
 		case JMWeatherModuleRPC.WindFunctionParams:
 			RPC_SetWindFunctionParams( ctx, sender, target );
 			break;
 		case JMWeatherModuleRPC.Date:
 			RPC_SetDate( ctx, sender, target );
 			break;
+		case JMWeatherModuleRPC.UsePreset:
+			RPC_UsePreset( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.CreatePreset:
+			RPC_CreatePreset( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.UpdatePreset:
+			RPC_UpdatePreset( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.RemovePreset:
+			RPC_RemovePreset( ctx, sender, target );
+			break;
 		}
+
+		GetGame().GetWeather().MissionWeather( true );
     }
 }
