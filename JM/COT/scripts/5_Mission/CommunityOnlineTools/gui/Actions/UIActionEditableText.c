@@ -42,24 +42,25 @@ class UIActionEditableText extends UIActionBase
 
 	void HasButton( bool enabled )
 	{
+		Widget root = NULL;
 		if ( enabled )
 		{
 			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
 
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			layoutRoot.Show( true );
+			root = layoutRoot.FindAnyWidget( "action_wrapper_check" );
+			root.Show( true );
 
-			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
+			m_Button = ButtonWidget.Cast( root.FindAnyWidget( "action_button" ) );
 		} else
 		{
 			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
 
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			layoutRoot.Show( true );
+			root = layoutRoot.FindAnyWidget( "action_wrapper_input" );
+			root.Show( true );
 		}
 
-		m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
-		m_Text = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action" ) );
+		m_Label = TextWidget.Cast( root.FindAnyWidget( "action_label" ) );
+		m_Text = EditBoxWidget.Cast( root.FindAnyWidget( "action" ) );
 	}
 
 	override void SetLabel( string text )

@@ -127,6 +127,7 @@ class JMWeatherForm extends JMFormBase
 		m_EditTextStormTimeout.SetText( "0" );
 		m_EditTextStormTimeout.SetWidgetWidth( m_EditTextStormTimeout.GetLabelWidget(), 0.6 );
 		m_EditTextStormTimeout.SetWidgetWidth( m_EditTextStormTimeout.GetEditBoxWidget(), 0.4 );
+		m_EditTextStormTimeout.SetWidgetPosition( m_EditTextStormTimeout.GetEditBoxWidget(), 0.6 );
 	}
 
 	void OnChange_Storm( UIEvent eid, ref UIActionBase action )
@@ -164,12 +165,14 @@ class JMWeatherForm extends JMFormBase
 		m_EditFogInterpTime.SetText( "0" );
 		m_EditFogInterpTime.SetWidgetWidth( m_EditFogInterpTime.GetLabelWidget(), 0.6 );
 		m_EditFogInterpTime.SetWidgetWidth( m_EditFogInterpTime.GetEditBoxWidget(), 0.4 );
+		m_EditFogInterpTime.SetWidgetPosition( m_EditFogInterpTime.GetEditBoxWidget(), 0.6 );
 
 		m_EditFogMinDuration = UIActionManager.CreateEditableText( actions, "Min Duration", this, "OnChange_Fog" );
 		m_EditFogMinDuration.SetOnlyNumbers( true );
 		m_EditFogMinDuration.SetText( "0" );
 		m_EditFogMinDuration.SetWidgetWidth( m_EditFogMinDuration.GetLabelWidget(), 0.6 );
 		m_EditFogMinDuration.SetWidgetWidth( m_EditFogMinDuration.GetEditBoxWidget(), 0.4 );
+		m_EditFogMinDuration.SetWidgetPosition( m_EditFogMinDuration.GetEditBoxWidget(), 0.6 );
 	}
 
 	void OnChange_Fog( UIEvent eid, ref UIActionBase action )
@@ -207,12 +210,14 @@ class JMWeatherForm extends JMFormBase
 		m_EditRainInterpTime.SetText( "0" );
 		m_EditRainInterpTime.SetWidgetWidth( m_EditRainInterpTime.GetLabelWidget(), 0.6 );
 		m_EditRainInterpTime.SetWidgetWidth( m_EditRainInterpTime.GetEditBoxWidget(), 0.4 );
+		m_EditRainInterpTime.SetWidgetPosition( m_EditRainInterpTime.GetEditBoxWidget(), 0.6 );
 
 		m_EditRainMinDuration = UIActionManager.CreateEditableText( actions, "Min Duration", this, "OnChange_Rain" );
 		m_EditRainMinDuration.SetOnlyNumbers( true );
 		m_EditRainMinDuration.SetText( "0" );
 		m_EditRainMinDuration.SetWidgetWidth( m_EditRainMinDuration.GetLabelWidget(), 0.6 );
 		m_EditRainMinDuration.SetWidgetWidth( m_EditRainMinDuration.GetEditBoxWidget(), 0.4 );
+		m_EditRainMinDuration.SetWidgetPosition( m_EditRainMinDuration.GetEditBoxWidget(), 0.6 );
 	}
 
 	void OnChange_Rain( UIEvent eid, ref UIActionBase action )
@@ -250,12 +255,14 @@ class JMWeatherForm extends JMFormBase
 		m_EditOvercastInterpTime.SetText( "0" );
 		m_EditOvercastInterpTime.SetWidgetWidth( m_EditOvercastInterpTime.GetLabelWidget(), 0.6 );
 		m_EditOvercastInterpTime.SetWidgetWidth( m_EditOvercastInterpTime.GetEditBoxWidget(), 0.4 );
+		m_EditOvercastInterpTime.SetWidgetPosition( m_EditOvercastInterpTime.GetEditBoxWidget(), 0.6 );
 
 		m_EditOvercastMinDuration = UIActionManager.CreateEditableText( actions, "Min Duration", this, "OnChange_Overcast" );
 		m_EditOvercastMinDuration.SetOnlyNumbers( true );
 		m_EditOvercastMinDuration.SetText( "0" );
 		m_EditOvercastMinDuration.SetWidgetWidth( m_EditOvercastMinDuration.GetLabelWidget(), 0.6 );
 		m_EditOvercastMinDuration.SetWidgetWidth( m_EditOvercastMinDuration.GetEditBoxWidget(), 0.4 );
+		m_EditOvercastMinDuration.SetWidgetPosition( m_EditOvercastMinDuration.GetEditBoxWidget(), 0.6 );
 	}
 
 	void OnChange_Overcast( UIEvent eid, ref UIActionBase action )

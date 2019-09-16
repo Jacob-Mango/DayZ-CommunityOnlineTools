@@ -80,6 +80,16 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		widget.Update();
 	}
 
+	void SetWidgetPosition( Widget widget, float xpos )
+	{
+		float x;
+		float y;
+		widget.GetPos( x, y );
+		widget.SetPos( xpos, y );
+		layoutRoot.Update();
+		widget.Update();
+	}
+
 	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
