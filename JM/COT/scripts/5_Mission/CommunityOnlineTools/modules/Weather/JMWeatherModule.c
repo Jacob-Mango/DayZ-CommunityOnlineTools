@@ -1,6 +1,7 @@
 enum JMWeatherModuleRPC
 {
     INVALID = 10280,
+	Load,
     Storm,
 	Fog,
 	Rain,
@@ -10,6 +11,9 @@ enum JMWeatherModuleRPC
 	WindSpeed,
 	WindFunctionParams,
 	Date,
+	MissionWeather,
+	RunPreset,
+	SavePreset,
     COUNT
 };
 
