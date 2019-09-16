@@ -1,6 +1,5 @@
 PanelWidgetClass action_wrapper {
  size 1 30
- halign center_ref
  valign center_ref
  hexactpos 0
  vexactpos 0
@@ -42,6 +41,7 @@ PanelWidgetClass action_wrapper {
        "exact text" 1
        "no focus" 0
        font "gui/fonts/sdf_MetronLight14"
+       style Editor
       }
       ButtonWidgetClass action_button {
        size 0.15 1
@@ -92,7 +92,8 @@ PanelWidgetClass action_wrapper {
        text "{TEXT}"
        "exact text" 1
        "no focus" 0
-       font "gui/fonts/sdf_MetronLight14"
+       font "gui/fonts/Metron"
+       style Editor
       }
      }
     }

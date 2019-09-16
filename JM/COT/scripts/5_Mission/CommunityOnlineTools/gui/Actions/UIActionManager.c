@@ -19,6 +19,24 @@ class UIActionManager
 		return widget;
 	}
 
+	static ref Widget CreatePanel( Widget parent, int color = 0x00000000, float height = -1 )
+	{
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", parent );
+
+		widget.SetColor( color );
+
+		if ( height != -1 )
+		{
+			float w;
+			float h;
+			widget.SetFlags( WidgetFlags.VEXACTSIZE );
+			widget.GetSize( w, h );
+			widget.SetSize( w, height );
+		}
+
+		return widget;
+	}
+
 	static ref UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname )
 	{
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );

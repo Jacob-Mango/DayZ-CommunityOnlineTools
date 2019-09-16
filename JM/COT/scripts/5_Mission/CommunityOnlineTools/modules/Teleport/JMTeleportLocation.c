@@ -12,4 +12,4 @@ class JMTeleportLocation
 		Position = position;
 		Radius = radius;
 	}
-}
+};
