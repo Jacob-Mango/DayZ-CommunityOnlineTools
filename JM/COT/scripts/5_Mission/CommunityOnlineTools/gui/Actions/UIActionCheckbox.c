@@ -19,17 +19,17 @@ class UIActionCheckbox extends UIActionBase
 	{
 	}
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 	}
 
-	void SetChecked( bool checked )
+	override void SetChecked( bool checked )
 	{
 		m_Checkbox.SetChecked( checked );
 	}
 
-	bool IsChecked()
+	override bool IsChecked()
 	{
 		return m_Checkbox.IsChecked();
 	}
@@ -50,7 +50,7 @@ class UIActionCheckbox extends UIActionBase
 	{
 		if ( !m_HasCallback ) return false;
 
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionCheckbox >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
 	}

@@ -75,7 +75,7 @@ class JMTeleportForm extends JMFormBase
 		super.OnHide();
 	}
 
-	void Click_Teleport( UIEvent eid, ref UIActionButton action )
+	void Click_Teleport( UIEvent eid, ref UIActionBase action )
 	{
 		JMTeleportModule mod;
 		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
@@ -84,7 +84,7 @@ class JMTeleportForm extends JMFormBase
 		}
 	}
 
-	void Type_UpdateList( UIEvent eid, ref UIActionEditableText action )
+	void Type_UpdateList( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;

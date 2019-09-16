@@ -53,15 +53,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetStorm( density, threshold, timeOut );
 		} 
 	}
-	
-	private void Send_SetStorm( float density, float threshold, float timeOut )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( density );
-		rpc.Write( threshold );
-		rpc.Write( timeOut );
-		rpc.Send( NULL, JMWeatherModuleRPC.Storm, true, NULL );
-	}
 
 	void SetFog( float forecast, float time = 0, float minDuration = 0 )
 	{
@@ -72,15 +63,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetFog( forecast, time, minDuration );
 		} 
-	}
-	
-	private void Send_SetFog( float forecast, float time = 0, float minDuration = 0 )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
-		rpc.Send( NULL, JMWeatherModuleRPC.Fog, true, NULL );
 	}
 
 	void SetRain( float forecast, float time = 0, float minDuration = 0 )
@@ -93,15 +75,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetRain( forecast, time, minDuration );
 		} 
 	}
-	
-	private void Send_SetRain( float forecast, float time = 0, float minDuration = 0 )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
-		rpc.Send( NULL, JMWeatherModuleRPC.Rain, true, NULL );
-	}
 
 	void SetRainThresholds( float tMin, float tMax, float tTime )
 	{
@@ -112,15 +85,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetRainThresholds( tMin, tMax, tTime );
 		} 
-	}
-	
-	private void Send_SetRainThresholds( float tMin, float tMax, float tTime )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( tMin );
-		rpc.Write( tMax );
-		rpc.Write( tTime );
-		rpc.Send( NULL, JMWeatherModuleRPC.RainThresholds, true, NULL );
 	}
 
 	void SetOvercast( float forecast, float time = 0, float minDuration = 0 )
@@ -133,15 +97,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetOvercast( forecast, time, minDuration );
 		} 
 	}
-	
-	private void Send_SetOvercast( float forecast, float time = 0, float minDuration = 0 )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( forecast );
-		rpc.Write( time );
-		rpc.Write( minDuration );
-		rpc.Send( NULL, JMWeatherModuleRPC.Overcast, true, NULL );
-	}
 
 	void SetWind( vector wind )
 	{
@@ -153,13 +108,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetWind( wind );
 		} 
 	}
-	
-	private void Send_SetWind( vector wind )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( wind );
-		rpc.Send( NULL, JMWeatherModuleRPC.Wind, true, NULL );
-	}
 
 	void SetWindSpeed( float speed )
 	{
@@ -170,13 +118,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetWindSpeed( speed );
 		} 
-	}
-	
-	private void Send_SetWindSpeed( float speed )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( speed );
-		rpc.Send( NULL, JMWeatherModuleRPC.WindSpeed, true, NULL );
 	}
 
 	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
@@ -190,15 +131,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		} 
 	}
 
-	private void Send_SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( fnMin );
-		rpc.Write( fnMax );
-		rpc.Write( fnSpeed );
-		rpc.Send( NULL, JMWeatherModuleRPC.WindFunctionParams, true, NULL );
-	}
-
 	void SetDate( int year, int month, int day, int hour, int minute )
 	{
 		if ( IsMissionOffline() )
@@ -208,6 +140,74 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetDate( year, month, day, hour, minute );
 		}
+	}
+	
+	private void Send_SetStorm( float density, float threshold, float timeOut )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( density );
+		rpc.Write( threshold );
+		rpc.Write( timeOut );
+		rpc.Send( NULL, JMWeatherModuleRPC.Storm, true, NULL );
+	}
+	
+	private void Send_SetFog( float forecast, float time = 0, float minDuration = 0 )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( forecast );
+		rpc.Write( time );
+		rpc.Write( minDuration );
+		rpc.Send( NULL, JMWeatherModuleRPC.Fog, true, NULL );
+	}
+	
+	private void Send_SetRain( float forecast, float time = 0, float minDuration = 0 )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( forecast );
+		rpc.Write( time );
+		rpc.Write( minDuration );
+		rpc.Send( NULL, JMWeatherModuleRPC.Rain, true, NULL );
+	}
+	
+	private void Send_SetRainThresholds( float tMin, float tMax, float tTime )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( tMin );
+		rpc.Write( tMax );
+		rpc.Write( tTime );
+		rpc.Send( NULL, JMWeatherModuleRPC.RainThresholds, true, NULL );
+	}
+	
+	private void Send_SetOvercast( float forecast, float time = 0, float minDuration = 0 )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( forecast );
+		rpc.Write( time );
+		rpc.Write( minDuration );
+		rpc.Send( NULL, JMWeatherModuleRPC.Overcast, true, NULL );
+	}
+	
+	private void Send_SetWind( vector wind )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wind );
+		rpc.Send( NULL, JMWeatherModuleRPC.Wind, true, NULL );
+	}
+	
+	private void Send_SetWindSpeed( float speed )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( speed );
+		rpc.Send( NULL, JMWeatherModuleRPC.WindSpeed, true, NULL );
+	}
+
+	private void Send_SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( fnMin );
+		rpc.Write( fnMax );
+		rpc.Write( fnSpeed );
+		rpc.Send( NULL, JMWeatherModuleRPC.WindFunctionParams, true, NULL );
 	}
 
 	private void Send_SetDate( int year, int month, int day, int hour, int minute )
@@ -223,6 +223,9 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	private void Exec_SetStorm( float density, float threshold, float timeOut, PlayerIdentity ident = NULL )
 	{
+		Print( "density: " + density );
+		Print( "threshold: " + threshold );
+		Print( "timeOut: " + timeOut );
 		GetGame().GetWeather().SetStorm( density, threshold, timeOut );
 
 		if ( IsMissionHost() )
@@ -308,7 +311,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetStorm( p1, p2, p3 );
 
-		Exec_SetStorm( p1, p2, p3 );
+		Exec_SetStorm( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetFog( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -326,7 +329,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetFog( p1, p2, p3 );
 
-		Exec_SetFog( p1, p2, p3 );
+		Exec_SetFog( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetRain( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -344,7 +347,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetRain( p1, p2, p3 );
 
-		Exec_SetRain( p1, p2, p3 );
+		Exec_SetRain( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetRainThresholds( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -362,7 +365,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetRainThresholds( p1, p2, p3 );
 
-		Exec_SetRainThresholds( p1, p2, p3 );
+		Exec_SetRainThresholds( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetOvercast( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -380,7 +383,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetOvercast( p1, p2, p3 );
 
-		Exec_SetOvercast( p1, p2, p3 );
+		Exec_SetOvercast( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetWind( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -404,7 +407,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetWindSpeed( p1 );
 
-		Exec_SetWindSpeed( p1 );
+		Exec_SetWindSpeed( p1, senderRPC );
     }
 
 	private void RPC_SetWindFunctionParams( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -422,7 +425,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetWindFunctionParams( p1, p2, p3 );
 
-		Exec_SetWindFunctionParams( p1, p2, p3 );
+		Exec_SetWindFunctionParams( p1, p2, p3, senderRPC );
     }
 
 	private void RPC_SetDate( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -446,7 +449,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 			Send_SetDate( p1, p2, p3, p4, p5 );
 
-		Exec_SetDate( p1, p2, p3, p4, p5 );
+		Exec_SetDate( p1, p2, p3, p4, p5, senderRPC );
     }
 
 	int GetRPCMin()

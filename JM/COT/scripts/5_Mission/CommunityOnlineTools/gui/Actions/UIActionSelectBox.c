@@ -34,31 +34,33 @@ class UIActionSelectBox extends UIActionBase
 		m_Selection.Enable();
 	}
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 	}
 
-	void SetSelection( int i, bool sendEvent = true )
+	override void SetSelection( int i, bool sendEvent = true )
 	{
 		m_Selection.SetValue( i, sendEvent );
 	}
 
-	int GetSelection()
+	override int GetSelection()
 	{
 		return m_Selection.GetValue();
 	}
 
 	bool OnSelectionChange()
 	{	
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		return CallEvent( UIEvent.CHANGE );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{	
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		bool ret = false;
 
@@ -74,7 +76,7 @@ class UIActionSelectBox extends UIActionBase
 	{
 		if ( !m_HasCallback ) return false;
 
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionSelectBox >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
 	}

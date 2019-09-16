@@ -46,31 +46,26 @@ class UIActionEditableVector extends UIActionBase
 		SetValue( vector.Zero );
 	}
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 	}
 
-	void SetValue( vector v )
+	override void SetValue( vector v )
 	{
 		m_TextX.SetText( v[0].ToString() );
 		m_TextY.SetText( v[1].ToString() );
 		m_TextZ.SetText( v[2].ToString() );
 	}
 
-	vector GetValue()
+	override vector GetValue()
 	{
 		return Vector( m_TextX.GetText().ToFloat(), m_TextY.GetText().ToFloat(), m_TextZ.GetText().ToFloat() );
 	}
 
-	void SetButton( string text )
+	override void SetButton( string text )
 	{
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
-	}
-
-	void RemoveDisableInput()
-	{
-		DISABLE_ALL_INPUT = false;
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -148,7 +143,7 @@ class UIActionEditableVector extends UIActionBase
 	{
 		if ( !m_HasCallback ) return false;
 
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionEditableVector >( eid, this ) );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
 	}
