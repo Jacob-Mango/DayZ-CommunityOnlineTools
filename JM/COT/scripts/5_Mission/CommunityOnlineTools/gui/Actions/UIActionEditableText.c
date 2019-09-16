@@ -25,6 +25,21 @@ class UIActionEditableText extends UIActionBase
 	{
 	}
 
+	TextWidget GetLabelWidget()
+	{
+		return m_Label;
+	}
+
+	EditBoxWidget GetEditBoxWidget()
+	{
+		return m_Text;
+	}
+
+	ButtonWidget GetButtonWidget()
+	{
+		return m_Button;
+	}
+
 	void HasButton( bool enabled )
 	{
 		if ( enabled )

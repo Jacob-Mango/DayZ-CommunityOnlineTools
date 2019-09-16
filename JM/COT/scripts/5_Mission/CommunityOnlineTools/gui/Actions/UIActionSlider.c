@@ -31,6 +31,21 @@ class UIActionSlider extends UIActionBase
 	{
 	}
 
+	TextWidget GetLabelWidget()
+	{
+		return m_Label;
+	}
+
+	SliderWidget GetSliderWidget()
+	{
+		return m_Slider;
+	}
+
+	TextWidget GetValueWidget()
+	{
+		return m_Value;
+	}
+
     void SetPrepend( string prepend )
     {
         m_Prepend = prepend;

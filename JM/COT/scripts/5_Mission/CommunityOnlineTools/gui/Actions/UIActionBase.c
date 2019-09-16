@@ -61,7 +61,26 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		m_Disable.Show( false );
 	}
 
-	ref Widget GetLayoutRoot() 
+	void SetWidth( float width )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetSize( width, h );
+		layoutRoot.Update();
+	}
+
+	void SetWidgetWidth( Widget widget, float width )
+	{
+		float w;
+		float h;
+		widget.GetSize( w, h );
+		widget.SetSize( width, h );
+		layoutRoot.Update();
+		widget.Update();
+	}
+
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}
