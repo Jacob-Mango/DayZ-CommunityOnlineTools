@@ -1,5 +1,4 @@
 PanelWidgetClass JMCOTSideBar {
- visible 0
  color 0.03 0.04 0.06 0.9
  position 0 0
  size 300 1
@@ -10,6 +9,7 @@ PanelWidgetClass JMCOTSideBar {
  hexactsize 1
  vexactsize 0
  style DayZDefaultPanelTop
+ scriptclass "JMCOTSideBar"
  {
   PanelWidgetClass TitleBar {
    visible 1

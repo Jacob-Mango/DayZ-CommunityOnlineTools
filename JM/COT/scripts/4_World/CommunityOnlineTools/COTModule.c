@@ -32,8 +32,7 @@ class COTModule : JMModuleBase
 		{
 			if ( m_COTMenu == NULL )
 			{
-				m_COTMenu = new JMCOTSideBar;
-				m_COTMenu.Init();
+				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
 			}
 		}
 	}
@@ -103,8 +102,6 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
-		Print( "CloseCOT" );
-
 		GetCommunityOnlineToolsBase().SetOpen( false );
 	}
 
@@ -113,8 +110,6 @@ class COTModule : JMModuleBase
 		if ( input != NULL && !( input.LocalPress() ) )
 			return;
 
-		Print( "ToggleMenu" );
-
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
@@ -122,8 +117,6 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalRelease() ) )
 			return;
-
-		Print( "FocusUI" );
 
 		if ( m_COTMenu == NULL )
 			return;
@@ -138,8 +131,6 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalPress() ) )
 			return;
-			
-		Print( "FocusGame" );
 
 		if ( m_COTMenu == NULL )
 			return;
@@ -161,8 +152,6 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalPress() ) )
 			return;
-
-		Print( "ToggleCOT" );
 
 		if ( m_COTMenu == NULL )
 			return;

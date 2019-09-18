@@ -1,4 +1,4 @@
-class JMCOTSideBar 
+class JMCOTSideBar extends ScriptedWidgetEventHandler
 {
 	protected Widget layoutRoot;
 
@@ -34,17 +34,17 @@ class JMCOTSideBar
 	{
 		return layoutRoot.IsVisible();
 	}
-	
-	Widget Init()
+
+	void OnWidgetScriptInit( Widget w )
 	{
-		if ( layoutRoot )
-		{
-			layoutRoot.Unlink();
-		}
+		layoutRoot = w;
+		layoutRoot.SetHandler( this );
 
-		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" );
-		layoutRoot.Show( false );
-
+		Init();
+	}
+	
+	void Init()
+	{
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "PayPal.Me/JacobMango" );
 
 		array< ref JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
@@ -58,8 +58,6 @@ class JMCOTSideBar
 				module.InitButton( GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", layoutRoot.FindAnyWidget( "Buttons" ) ) );
 			}
 		}
-
-		return layoutRoot;
 	}
 
 	void Show()
@@ -85,9 +83,12 @@ class JMCOTSideBar
 		SetFocus( NULL );
 
 		SetInputFocus( true );
+		
+		GetGame().GetInput().ResetGameFocus();
+		GetGame().GetUIManager().ShowUICursor( false );
 
 		GetGame().GetMission().GetHud().Show( true );
-		
+
 		m_StartX = m_ShowX;
 		m_EndX = m_HideX;
 	}

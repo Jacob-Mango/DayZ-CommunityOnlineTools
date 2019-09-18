@@ -16,12 +16,12 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void JMWindowBase() 
 	{
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( OnUpdate );
 	}
 
 	void ~JMWindowBase() 
 	{
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( OnUpdate );
+		Hide();
+
 		layoutRoot.Unlink();
 	}
 
@@ -100,6 +100,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		layoutRoot.Show( true );
 
 		m_Form.OnShow();
+
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 	}
 
 	void Hide()
@@ -110,9 +112,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		layoutRoot.Show( false );
 
 		m_Form.OnHide();
+
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 	}
 
-	void OnUpdate( float timeslice )
+	void Update( float timeSlice )
 	{
 		if ( !m_TitleWrapper )
 			return;
@@ -135,7 +139,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( super.OnClick( w, x, y, button ) )
 		{
-			return true;
+		//	return true;
 		}
 
 		if ( w == m_CloseButton )
@@ -151,7 +155,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		if ( super.OnDrag( w, x, y ) )
 		{
-			return true;
+		//	return true;
 		}
 
 		if ( w == m_TitleWrapper )
@@ -174,7 +178,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		if ( super.OnDragging( w, x, y, reciever ) )
 		{
-			return true;
+		//	return true;
 		}
 
 		if ( w == m_TitleWrapper )
@@ -191,7 +195,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		if ( super.OnDrop( w, x, y, reciever ) )
 		{
-			return true;
+		//	return true;
 		}
 
 		if ( w == m_TitleWrapper )

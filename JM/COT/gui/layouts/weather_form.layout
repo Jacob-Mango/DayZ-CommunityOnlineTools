@@ -1,6 +1,4 @@
-PanelWidgetClass JMWeatherForm
-{
- visible 0
+PanelWidgetClass JMWeatherForm {
  color 0 0 0 0
  position 0 0
  size 700 600
