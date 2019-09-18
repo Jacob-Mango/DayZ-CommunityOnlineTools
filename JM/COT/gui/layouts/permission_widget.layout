@@ -1,5 +1,4 @@
-PanelWidgetClass JMPermissionRowWidget
-{
+PanelWidgetClass JMPermissionRowWidget {
  position 0 0
  size 1 25
  hexactpos 0

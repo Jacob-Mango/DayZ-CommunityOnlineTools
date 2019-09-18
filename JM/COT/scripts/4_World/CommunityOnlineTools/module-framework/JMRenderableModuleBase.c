@@ -101,8 +101,13 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( HasAccess() )
 		{
-			m_Window = JMWindowBase.Create();
-			m_Window.SetModule( this );
+			if ( !m_Window )
+			{
+				m_Window = JMWindowBase.Create();
+				m_Window.SetModule( this );
+			}
+
+			m_Window.Show();
 		}
 	}
 
@@ -110,7 +115,6 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( IsVisible() )
 		{
-			m_Window.Hide();
 			delete m_Window;
 		}
 	}
@@ -122,6 +126,12 @@ class JMRenderableModuleBase extends JMModuleBase
 			Hide();
 		} else
 		{
+            if ( !GetCommunityOnlineToolsBase().IsActive() )
+            {
+                CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+                return;
+            }
+			
 			Show();
 		}
 	}

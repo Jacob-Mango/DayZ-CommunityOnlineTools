@@ -1,5 +1,4 @@
 GridSpacerWidgetClass JMServerInfoForm {
- visible 0
  color 0 0 0 0
  position 0 0
  size 400 450
