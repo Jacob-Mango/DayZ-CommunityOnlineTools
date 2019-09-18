@@ -166,19 +166,12 @@ class JMESPForm extends JMFormBase
 			m_ViewCreature.Disable();
 		}
 
-		if ( JMESPModule.Cast( module ).CanViewEverything )
-		{
-			m_ViewEverything.Enable();
-		} else
-		{
-			m_ViewEverything.Disable();
-		}
-		
+		m_ViewEverything.Enable();		
 	}
 
 	void UpdateCheckboxStates()
 	{
-		if ( JMESPModule.Cast( module ).CanViewEverything && JMESPModule.Cast( module ).ViewEverything )
+		if ( JMESPModule.Cast( module ).ViewEverything )
 		{
 			m_ViewPlayers.Disable();
 			m_ViewBaseBuilding.Disable();

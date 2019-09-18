@@ -128,6 +128,8 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	override void OnClientPermissionsUpdated()
 	{
+		super.OnClientPermissionsUpdated();
+		
 		if ( IsVisible() && !HasAccess() )
 		{
 			Hide();
