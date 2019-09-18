@@ -8,19 +8,21 @@ class JMCOTSideBar
 	protected bool m_GameFocus;
 
 	private const float m_HideX = -300.0;
-	private const float m_ShowX = 300.0;
+	private const float m_ShowX = 0.0;
+
+	private const float m_TotalAnimateTime = 1.0;
 
 	private float m_StartX;
 	private float m_EndX;
 	private float m_X;
 
 	private bool m_IsAnimating;
-
-	private float m_TotalAnimateTime;
 	private float m_AnimateTime;
 
 	void JMCOTSideBar()
 	{
+		m_StartX = m_ShowX;
+		m_EndX = m_HideX;
 	}
 	
 	void ~JMCOTSideBar()
@@ -72,9 +74,6 @@ class JMCOTSideBar
 
 		SetInputFocus( false );
 
-		GetGame().GetInput().ChangeGameFocus( 1 );
-		GetGame().GetUIManager().ShowUICursor( true );
-
 		GetGame().GetMission().GetHud().Show( false );
 		
 		m_StartX = m_HideX;
@@ -86,9 +85,6 @@ class JMCOTSideBar
 		SetFocus( NULL );
 
 		SetInputFocus( true );
-
-		GetGame().GetInput().ResetGameFocus();
-		GetGame().GetUIManager().ShowUICursor( false );
 
 		GetGame().GetMission().GetHud().Show( true );
 		
@@ -135,14 +131,21 @@ class JMCOTSideBar
 		if ( !IsVisible() )
 			return;
 
+		if ( m_IsAnimating )
+			return;
+
 		if ( m_GameFocus )
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );
+
+			GetGame().GetMission().GetHud().Show( true );
 		} else
 		{
 			GetGame().GetInput().ChangeGameFocus( 1 );
 			GetGame().GetUIManager().ShowUICursor( true );
+
+			GetGame().GetMission().GetHud().Show( false );
 		}
 	}
 

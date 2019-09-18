@@ -63,8 +63,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		float width = -1;
 		float height = -1;
 		menu.GetSize( width, height );
-		
-		content_ctr.SetSize( wdith, height );
+
+		content_ctr.SetSize( width, height );
 		SetSize( width, height );
 
 		menu.GetScript( m_Form );
