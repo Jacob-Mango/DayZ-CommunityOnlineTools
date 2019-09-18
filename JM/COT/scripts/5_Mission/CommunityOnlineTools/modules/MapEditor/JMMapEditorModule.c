@@ -11,10 +11,10 @@ class JMMapEditorModule: JMModuleBase
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
 	}
 
-	override string GetInputToggle()
-	{
-		return "UACOTToggleMapEditor";
-	}
+	// override string GetInputToggle()
+	// {
+	// 	return "UACOTToggleMapEditor";
+	// }
 	
 	void SetTransform( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{

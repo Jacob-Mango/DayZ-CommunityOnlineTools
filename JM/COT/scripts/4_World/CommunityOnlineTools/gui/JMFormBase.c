@@ -41,27 +41,9 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		return window.IsVisible();
 	}
 
-	void Show()
-	{
-		if ( layoutRoot )
-		{
-			window.Show();
-			layoutRoot.Show( true );
-
-			OnShow();
-		}
-	}
-
 	void SetSize( float w, float h )
 	{
 		window.SetSize( w, h );
-	}
-
-	void Hide()
-	{
-		OnHide();
-		layoutRoot.Show( false );
-		window.Hide();
 	}
 
 	void OnShow()

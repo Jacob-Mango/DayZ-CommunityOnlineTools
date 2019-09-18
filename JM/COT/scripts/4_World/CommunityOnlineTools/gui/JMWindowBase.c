@@ -25,6 +25,8 @@ class JMWindowBase extends UIScriptedMenu
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 
 		m_Title = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
+
+		return layoutRoot;
 	}
 
 	void SetModule( JMRenderableModuleBase module )
@@ -42,7 +44,7 @@ class JMWindowBase extends UIScriptedMenu
 		{
 			m_Form.Init( this, module );
 
-			m_Title.SetText( m_Form.GetTitle() );
+			m_Title.SetText( module.GetTitle() );
 		}
 	}
 
@@ -54,11 +56,15 @@ class JMWindowBase extends UIScriptedMenu
 	override void OnShow()
 	{
 		super.OnShow();
+
+		m_Form.OnShow();
 	}
 
 	override void OnHide() 
 	{
 		super.OnHide();
+
+		m_Form.OnHide();
 	}
 
 	override void Update( float timeslice )
@@ -75,7 +81,7 @@ class JMWindowBase extends UIScriptedMenu
 		{
 			if ( parentWidget == layoutRoot )
 			{
-				Print( m_Form + " is FOCUS!" );
+				Print( "" + m_Form + " is FOCUS!" );
 				break;
 			}
 			parentWidget = parentWidget.GetParent();
@@ -88,7 +94,7 @@ class JMWindowBase extends UIScriptedMenu
 
 		if ( w == m_CloseButton )
 		{
-			m_Form.Hide();
+			Close();
 			return true;
 		}
 
