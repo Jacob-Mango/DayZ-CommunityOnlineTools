@@ -1,5 +1,7 @@
 class JMWindowBase extends ScriptedWidgetEventHandler  
 {
+	private static ref Widget S_SCREEN;
+
 	private Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
@@ -40,11 +42,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	static JMWindowBase Create()
 	{
-		Widget root = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", NULL );
+		if ( S_SCREEN == NULL )
+		{
+			S_SCREEN = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen.layout", NULL );
+		}
 
 		JMWindowBase window;
-		root.GetScript( window );
-
+		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", S_SCREEN ).GetScript( window );
 		return window;
 	}
 
@@ -52,11 +56,15 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		m_Module = module;
 
-		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), layoutRoot.FindAnyWidget( "content" ) );
+		Widget content_ctr = layoutRoot.FindAnyWidget( "content" );
+
+		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), content_ctr );
 
 		float width = -1;
 		float height = -1;
 		menu.GetSize( width, height );
+		
+		content_ctr.SetSize( wdith, height );
 		SetSize( width, height );
 
 		menu.GetScript( m_Form );

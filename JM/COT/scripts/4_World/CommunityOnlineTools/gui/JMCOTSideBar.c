@@ -7,6 +7,18 @@ class JMCOTSideBar
 
 	protected bool m_GameFocus;
 
+	private const float m_HideX = -300.0;
+	private const float m_ShowX = 300.0;
+
+	private float m_StartX;
+	private float m_EndX;
+	private float m_X;
+
+	private bool m_IsAnimating;
+
+	private float m_TotalAnimateTime;
+	private float m_AnimateTime;
+
 	void JMCOTSideBar()
 	{
 	}
@@ -23,6 +35,11 @@ class JMCOTSideBar
 	
 	Widget Init()
 	{
+		if ( layoutRoot )
+		{
+			layoutRoot.Unlink();
+		}
+
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" );
 		layoutRoot.Show( false );
 
@@ -52,42 +69,31 @@ class JMCOTSideBar
 
 		if ( !layoutRoot )
 			return;
-		
-		layoutRoot.Show( true );
 
-		OnShow();
-	}
-
-	void Hide()
-	{
-		SetFocus( NULL );
-
-		OnHide();
-		
-		if ( !layoutRoot )
-			return;
-
-		layoutRoot.Show( false );
-	}
-
-	void OnShow()
-	{
 		SetInputFocus( false );
 
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 
 		GetGame().GetMission().GetHud().Show( false );
+		
+		m_StartX = m_HideX;
+		m_EndX = m_ShowX;
 	}
 
-	void OnHide()
+	void Hide()
 	{
+		SetFocus( NULL );
+
 		SetInputFocus( true );
 
 		GetGame().GetInput().ResetGameFocus();
 		GetGame().GetUIManager().ShowUICursor( false );
 
 		GetGame().GetMission().GetHud().Show( true );
+		
+		m_StartX = m_ShowX;
+		m_EndX = m_HideX;
 	}
 
 	void ToggleInputFocus()
@@ -102,6 +108,30 @@ class JMCOTSideBar
 
 	void OnUpdate( float timeslice )
 	{
+		if ( m_IsAnimating )
+		{
+			m_AnimateTime += timeslice;
+
+			m_X = m_StartX + ( Easing.EaseInCubic( m_AnimateTime ) * ( m_EndX - m_StartX ) );
+
+			if ( m_AnimateTime > m_TotalAnimateTime )
+			{
+				m_IsAnimating = false;
+			}
+		} else
+		{
+			m_X = m_EndX;
+		}
+
+		if ( m_X == m_HideX )
+		{
+			layoutRoot.Show( false );
+		} else
+		{
+			layoutRoot.Show( true );
+			layoutRoot.SetPos( m_X, 0 );
+		}
+
 		if ( !IsVisible() )
 			return;
 

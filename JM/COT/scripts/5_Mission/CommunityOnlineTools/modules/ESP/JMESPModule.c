@@ -11,7 +11,6 @@ class JMESPModule: JMRenderableModuleBase
 	bool CanViewItems;
 	bool CanViewInfected;
 	bool CanViewCreature;
-	bool CanViewEverything;
 
 	protected int m_UserID;
 
@@ -112,13 +111,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnClientPermissionsUpdated()
 	{
+		super.OnClientPermissionsUpdated();
+
 		CanViewPlayers = GetPermissionsManager().HasPermission( "ESP.View.Player" );
 		CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
 		CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
 		CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
 		CanViewInfected = GetPermissionsManager().HasPermission( "ESP.View.Infected" );
 		CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
-		CanViewEverything = GetPermissionsManager().HasPermission( "ESP.View" );
 
 		JMESPForm form;
 		if ( Class.CastTo( form, GetForm() ) )
@@ -271,7 +271,7 @@ class JMESPModule: JMRenderableModuleBase
 
 				Man man = Man.Cast( entity );
 			
-				if ( (ViewPlayers || ViewEverything) && (CanViewPlayers || CanViewEverything) && isPlayer )
+				if ( (ViewPlayers || ViewEverything) && CanViewPlayers && isPlayer )
 				{
 					espInfo = new JMObjectMeta;
 
@@ -294,7 +294,7 @@ class JMESPModule: JMRenderableModuleBase
 				}
 
 				bool isInfected = !isPlayer && ( entity.IsZombie() || entity.IsZombieMilitary() );
-				if ( (ViewInfected || ViewEverything) && (CanViewInfected || CanViewEverything) && isInfected )
+				if ( (ViewInfected || ViewEverything) && CanViewInfected && isInfected )
 				{
 					espInfo = new JMObjectMeta;
 
@@ -310,7 +310,7 @@ class JMESPModule: JMRenderableModuleBase
 				} 
 
 				bool isCreature = !isInfected && entity.IsAnimal();
-				if ( (ViewCreature || ViewEverything) && (CanViewCreature || CanViewEverything) && isCreature )
+				if ( (ViewCreature || ViewEverything) && CanViewCreature && isCreature )
 				{
 					espInfo = new JMObjectMeta;
 
@@ -327,7 +327,7 @@ class JMESPModule: JMRenderableModuleBase
 			}
 
 			bool isTransport = !isPlayer && obj.IsTransport();
-			if ( (ViewVehicles || ViewEverything) && (CanViewVehicles || CanViewEverything) && isTransport )
+			if ( (ViewVehicles || ViewEverything) && CanViewVehicles && isTransport )
 			{
 				espInfo = new JMObjectMeta;
 				
@@ -343,7 +343,7 @@ class JMESPModule: JMRenderableModuleBase
 			}
 
 			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase ) );
-			if ( (ViewBaseBuilding || ViewEverything) && (CanViewBaseBuilding || CanViewEverything) && isBaseBuilding )
+			if ( (ViewBaseBuilding || ViewEverything) && CanViewBaseBuilding && isBaseBuilding )
 			{
 				espInfo = new JMObjectMeta;
 				
@@ -359,7 +359,7 @@ class JMESPModule: JMRenderableModuleBase
 			}
 
 			bool isItem = !isBaseBuilding && ( obj.IsItemBase() || obj.IsInventoryItem() );
-			if ( (ViewItems || ViewEverything) && (CanViewItems || CanViewEverything) && isItem )
+			if ( (ViewItems || ViewEverything) && CanViewItems && isItem )
 			{
 				espInfo = new JMObjectMeta;
 				
@@ -373,23 +373,6 @@ class JMESPModule: JMRenderableModuleBase
 				CreateESPBox( espInfo );
 				continue;
 			}
-
-			/*
-			if ( ViewEverything && CanViewEverything )
-			{
-				espInfo = new JMObjectMeta;
-				
-				espInfo.name = obj.GetDisplayName();
-				if ( espInfo.name == "" )
-					espInfo.name = obj.GetType();
-
-				espInfo.target = obj;
-				espInfo.type = JMESPType.ALL;
-
-				CreateESPBox( espInfo );
-				continue;
-			} 
-			*/
 		}
 
 		objects.Clear();
