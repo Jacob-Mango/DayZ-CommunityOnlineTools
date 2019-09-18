@@ -29,21 +29,6 @@ class JMObjectSpawnerForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "Object Spawner";
-	}
-	
-	override string GetIconName()
-	{
-		return "OB";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
 	void AddObjectType( ref Widget parent, string name, string config )
 	{
 		UIActionManager.CreateButton( parent, name, this, "SetListType" );

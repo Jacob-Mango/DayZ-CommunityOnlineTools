@@ -29,9 +29,29 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Entity.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleEntity";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/objectspawner_form.layout";
+	}
+
+	override string GetTitle()
+	{
+		return "Object Spawner";
+	}
+	
+	override string GetIconName()
+	{
+		return "OB";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
 	}
 	
 	void SpawnRandomInfected( UAInput input )

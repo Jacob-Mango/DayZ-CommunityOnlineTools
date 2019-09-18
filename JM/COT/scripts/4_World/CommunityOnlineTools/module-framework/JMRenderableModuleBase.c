@@ -1,6 +1,6 @@
 class JMRenderableModuleBase extends JMModuleBase
 {
-	private JMWindowBase m_Window;
+	private ref JMWindowBase m_Window;
 
 	private ButtonWidget m_MenuButton;
 
@@ -11,23 +11,23 @@ class JMRenderableModuleBase extends JMModuleBase
 		if ( button_bkg && m_MenuButton )
 		{
 			TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
-			ttl.SetText( module.GetTitle() );
+			ttl.SetText( GetTitle() );
 
 			ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
 			TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
 
-			if ( module.ImageIsIcon() )
+			if ( ImageIsIcon() )
 			{
 				btn_txt.Show( false );
 				btn_img.Show( true );
 
-				btn_img.LoadImageFile( 0, "set:" + module.GetImageSet() + " image:" + module.GetIconName() );
+				btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
 			} else
 			{
 				btn_txt.Show( true );
 				btn_img.Show( false );
 
-				btn_txt.SetText( module.GetIconName() );
+				btn_txt.SetText( GetIconName() );
 			}
 
 			return true;
@@ -98,13 +98,8 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( HasAccess() )
 		{
-			if ( !m_Window )
-			{
-				m_Window = new JMWindowBase;
-				m_Window.SetModule( this );
-			}
-
-			m_Window.Show();
+			m_Window = new JMWindowBase;
+			m_Window.SetModule( this );
 		}
 	}
 
@@ -113,6 +108,8 @@ class JMRenderableModuleBase extends JMModuleBase
 		if ( IsVisible() )
 		{
 			m_Window.Close();
+
+			delete m_Window;
 		}
 	}
 
@@ -121,10 +118,10 @@ class JMRenderableModuleBase extends JMModuleBase
 		if ( IsVisible() ) 
 		{
 			m_Window.Close();
-			return;
+		} else
+		{
+			Show();
 		}
-
-		Show();
 	}
 
 	override void OnClientPermissionsUpdated()
