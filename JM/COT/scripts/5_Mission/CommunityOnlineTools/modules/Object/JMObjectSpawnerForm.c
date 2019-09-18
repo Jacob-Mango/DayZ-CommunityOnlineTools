@@ -50,7 +50,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_ObjectTypes.Insert( name, config );
 	}
 
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		m_ClassList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "object_spawn_list" ) );
 
@@ -58,7 +58,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
 
-		ref Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 7, 1 );
+		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 7, 1 );
 		AddObjectType( typesButtons, "ALL", "All" );
 		AddObjectType( typesButtons, "Food", "edible_base" );
 		AddObjectType( typesButtons, "Vehicles", "transport" );
@@ -67,20 +67,18 @@ class JMObjectSpawnerForm extends JMFormBase
 		AddObjectType( typesButtons, "Buildings", "house" );
 		AddObjectType( typesButtons, "AI", "dz_lightai" );
 
-		ref Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
+		Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
 		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 4, 1 );
 
-		ref Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+		Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
 		m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "Search: ", this, "SearchInput_OnChange" );
 		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "Quantity: " );
 		m_QuantityItem.SetText( "MAX" );
 
-		ref Widget spawnButtons = NULL;
+		Widget spawnButtons = NULL;
 
-		if ( fromMenu )
-		{
 			spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
 
 			UIActionManager.CreateText( spawnButtons, "Spawn on: " );
@@ -95,12 +93,6 @@ class JMObjectSpawnerForm extends JMFormBase
 			{
 				UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
 			}
-		} else 
-		{
-			spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 1 );
-
-			UIActionManager.CreateButton( spawnButtons, "Spawn On Cursor", this, "SpawnCursor" );
-		}
 
 		UIActionManager.CreateButton( m_SpawnerActionsWrapper, "Delete On Cursor", this, "DeleteOnCursor" );
 	}

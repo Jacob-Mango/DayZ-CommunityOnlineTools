@@ -49,26 +49,9 @@ class JMWeatherForm extends JMFormBase
 	void ~JMWeatherForm()
 	{
 	}
-	
-	override string GetTitle()
-	{
-		return "Weather";
-	}
-	
-	override string GetIconName()
-	{
-		return "W";
-	}
 
-	override bool ImageIsIcon()
+	override void OnInit()
 	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
-	{
-		super.OnInit( fromMenu );
-
 		m_PanelLeft = layoutRoot.FindAnyWidget( "panel_left" );
 		m_PanelRight = layoutRoot.FindAnyWidget( "panel_right" );
 

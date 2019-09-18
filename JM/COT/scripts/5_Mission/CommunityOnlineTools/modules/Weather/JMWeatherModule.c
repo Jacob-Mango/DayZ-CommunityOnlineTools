@@ -63,6 +63,21 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		return "JM/COT/GUI/layouts/weather_form.layout";
 	}
+	
+	override string GetTitle()
+	{
+		return "Weather";
+	}
+	
+	override string GetIconName()
+	{
+		return "W";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
 
 	override void OnMissionLoaded()
 	{

@@ -21,6 +21,26 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Vehicles.View" );
 	}
 
+	override string GetLayoutRoot()
+	{
+		return "JM/COT/GUI/layouts/vehiclespawner_form.layout";
+	}
+
+	override string GetTitle()
+	{
+		return "Vehicle Spawner";
+	}
+	
+	override string GetIconName()
+	{
+		return "VS";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -61,6 +81,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			settings.Save();
 	}
 
+	array< string > GetVehicles()
+	{
+		return meta.Vehicles;
+	}
+
 	int GetRPCMin()
 	{
 		return JMVehicleSpawnerModuleRPC.INVALID;
@@ -83,16 +108,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			break;
 		}
     }
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/vehiclespawner_form.layout";
-	}
-
-	array< string > GetVehicles()
-	{
-		return meta.Vehicles;
-	}
 	
 	void Load()
 	{

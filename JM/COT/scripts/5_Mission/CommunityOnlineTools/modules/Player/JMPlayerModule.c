@@ -97,6 +97,21 @@ class JMPlayerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/player_form.layout";
 	}
 
+	override string GetTitle()
+	{
+		return "Player Management";
+	}
+	
+	override string GetIconName()
+	{
+		return "P";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 	}

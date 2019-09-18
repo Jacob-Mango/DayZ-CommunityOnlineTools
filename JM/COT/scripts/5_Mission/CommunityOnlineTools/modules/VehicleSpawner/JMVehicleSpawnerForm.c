@@ -13,22 +13,7 @@ class JMVehicleSpawnerForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "Vehicle Spawner";
-	}
-	
-	override string GetIconName()
-	{
-		return "VS";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 	}

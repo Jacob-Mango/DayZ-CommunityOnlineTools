@@ -94,22 +94,7 @@ class JMPlayerForm extends JMFormBase
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
-	override string GetTitle()
-	{
-		return "Player Management";
-	}
-	
-	override string GetIconName()
-	{
-		return "P";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		JMESPWidget.playerMenu = this;
 
