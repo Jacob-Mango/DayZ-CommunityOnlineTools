@@ -24,12 +24,12 @@ class JMWindowBase extends UIScriptedMenu
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 
-		m_Title = TextWidget.Cast( GetLayoutRoot().FindAnyWidget( "title_text" ) );
+		m_Title = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
 	}
 
 	void SetModule( JMRenderableModuleBase module )
 	{
-		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), GetLayoutRoot().FindAnyWidget( "content" ) );
+		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), layoutRoot.FindAnyWidget( "content" ) );
 
 		float width = -1;
 		float height = -1;
@@ -70,6 +70,17 @@ class JMWindowBase extends UIScriptedMenu
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
+		Widget parentWidget = w;
+		while ( parentWidget != NULL )
+		{
+			if ( parentWidget == layoutRoot )
+			{
+				Print( m_Form + " is FOCUS!" );
+				break;
+			}
+			parentWidget = parentWidget.GetParent();
+		}
+
 		if ( super.OnClick( w, x, y, button ) )
 		{
 			return true;
