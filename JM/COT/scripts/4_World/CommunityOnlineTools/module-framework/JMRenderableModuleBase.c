@@ -129,7 +129,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();
-		
+
 		if ( IsVisible() && !HasAccess() )
 		{
 			Hide();
@@ -142,11 +142,11 @@ class JMRenderableModuleBase extends JMModuleBase
 
 		if ( GetInputToggle() != "" )
 		{
-			RegisterBinding( new JMModuleBinding( "Input_Toggle", GetInputToggle(), true ) );
+			RegisterBinding( new JMModuleBinding( "Input_ToggleShow", GetInputToggle(), true ) );
 		}
 	}
 
-	void Input_Toggle( UAInput input )
+	void Input_ToggleShow( UAInput input )
 	{
 		if ( !input.LocalPress() )
 			return;
