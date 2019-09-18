@@ -4,12 +4,21 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	private ButtonWidget m_MenuButton;
 
+	private int m_MenuButtonColour = 0;
+
+	void JMRenderableModuleBase()
+	{
+		SetMenuButtonColour( 1, 1, 0, 0 );
+	}
+
 	bool InitButton( Widget button_bkg )
 	{
 		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
 
 		if ( button_bkg && m_MenuButton )
 		{
+			m_MenuButton.SetColor( m_MenuButtonColour );
+
 			TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
 			ttl.SetText( GetTitle() );
 
@@ -34,6 +43,13 @@ class JMRenderableModuleBase extends JMModuleBase
 		}
 
 		return false;
+	}
+
+	void SetMenuButtonColour( float r, float g, float b, float alpha )
+	{
+		m_MenuButtonColour = ARGB( r * 255, g * 255, b * 255, alpha * 255 );
+		if ( m_MenuButton )
+			m_MenuButton.SetColor( m_MenuButtonColour );
 	}
 
 	ButtonWidget GetMenuButton()
@@ -103,7 +119,7 @@ class JMRenderableModuleBase extends JMModuleBase
 		{
 			if ( !m_Window )
 			{
-				m_Window = JMWindowBase.Create();
+				m_Window = GetCOTWindowManager().Create();
 				m_Window.SetModule( this );
 			}
 

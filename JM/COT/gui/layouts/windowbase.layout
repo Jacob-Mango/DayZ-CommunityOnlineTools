@@ -30,7 +30,7 @@ PanelWidgetClass base_window {
    hexactsize 0
    vexactsize 0
   }
-  PanelWidgetClass background {
+  PanelWidgetClass popup {
    visible 0
    color 0.06 0.08 0.11 0.8
    position 0 25

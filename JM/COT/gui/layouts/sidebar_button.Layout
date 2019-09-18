@@ -20,6 +20,7 @@ PanelWidgetClass btn_bkg {
    hexactsize 1
    vexactsize 0
    "no focus" 1
+   style rover_sim_colorable
    {
     PanelWidgetClass img_cnt {
      ignorepointer 1
