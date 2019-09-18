@@ -43,6 +43,9 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	JMFormBase GetForm()
 	{
+		if ( !m_Window )
+			return NULL;
+			
 		return m_Window.GetForm();
 	}
 
