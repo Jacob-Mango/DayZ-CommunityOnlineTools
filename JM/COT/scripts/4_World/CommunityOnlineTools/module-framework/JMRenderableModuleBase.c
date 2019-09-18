@@ -45,7 +45,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( !m_Window )
 			return NULL;
-			
+
 		return m_Window.GetForm();
 	}
 
@@ -102,6 +102,7 @@ class JMRenderableModuleBase extends JMModuleBase
 		if ( HasAccess() )
 		{
 			m_Window = new JMWindowBase;
+			m_Window.Init();
 			m_Window.SetModule( this );
 		}
 	}
