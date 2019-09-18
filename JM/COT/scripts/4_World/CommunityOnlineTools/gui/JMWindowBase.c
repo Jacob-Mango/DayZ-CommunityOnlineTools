@@ -17,8 +17,10 @@ class JMWindowBase extends UIScriptedMenu
 	{
 	}
 
-	Widget Init()
+	override Widget Init()
 	{
+		super.Init();
+		
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", NULL );
 
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
