@@ -101,8 +101,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( HasAccess() )
 		{
-			m_Window = new JMWindowBase;
-			m_Window.Init();
+			m_Window = JMWindowBase.Create();
 			m_Window.SetModule( this );
 		}
 	}
@@ -111,8 +110,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( IsVisible() )
 		{
-			m_Window.Close();
-
+			m_Window.Hide();
 			delete m_Window;
 		}
 	}
@@ -121,7 +119,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( IsVisible() ) 
 		{
-			m_Window.Close();
+			Hide();
 		} else
 		{
 			Show();
@@ -132,7 +130,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( IsVisible() && !HasAccess() )
 		{
-			m_Window.Close();
+			Hide();
 		}
 	}
 	

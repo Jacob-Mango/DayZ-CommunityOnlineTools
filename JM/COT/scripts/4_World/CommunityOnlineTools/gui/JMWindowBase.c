@@ -1,38 +1,57 @@
-class JMWindowBase extends UIScriptedMenu  
+class JMWindowBase extends ScriptedWidgetEventHandler  
 {
+	private Widget layoutRoot;
+
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
 	private TextWidget m_Title;
 
 	private JMFormBase m_Form;
+	private JMRenderableModuleBase m_Module;
 
 	private float offsetX;
 	private float offsetY;
 
 	void JMWindowBase() 
 	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( OnUpdate );
 	}
 
 	void ~JMWindowBase() 
 	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( OnUpdate );
+		layoutRoot.Unlink();
 	}
 
-	override Widget Init()
+	void OnWidgetScriptInit( Widget w )
 	{
-		super.Init();
-		
-		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", NULL );
+		layoutRoot = w;
+		layoutRoot.SetHandler( this );
 
+		Init();
+	}
+
+	void Init()
+	{
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
-
 		m_Title = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
+	}
 
-		return layoutRoot;
+	static JMWindowBase Create()
+	{
+		Widget root = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", NULL );
+
+		JMWindowBase window;
+		root.GetScript( window );
+
+		return window;
 	}
 
 	void SetModule( JMRenderableModuleBase module )
 	{
+		m_Module = module;
+
 		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), layoutRoot.FindAnyWidget( "content" ) );
 
 		float width = -1;
@@ -55,23 +74,40 @@ class JMWindowBase extends UIScriptedMenu
 		return m_Form;
 	}
 
-	override void OnShow()
+	Widget GetLayoutRoot()
 	{
-		super.OnShow();
+		return layoutRoot;
+	}
+
+	bool IsVisible()
+	{
+		return layoutRoot.IsVisible();
+	}
+
+	void Show()
+	{
+		if ( !layoutRoot )
+			return;
+
+		layoutRoot.Show( true );
 
 		m_Form.OnShow();
 	}
 
-	override void OnHide() 
+	void Hide()
 	{
-		super.OnHide();
+		if ( !layoutRoot )
+			return;
+
+		layoutRoot.Show( false );
 
 		m_Form.OnHide();
 	}
 
-	override void Update( float timeslice )
+	void OnUpdate( float timeslice )
 	{
-		super.Update( timeslice );
+		if ( !m_TitleWrapper )
+			return;
 
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
@@ -96,7 +132,7 @@ class JMWindowBase extends UIScriptedMenu
 
 		if ( w == m_CloseButton )
 		{
-			Close();
+			m_Module.Hide();
 			return true;
 		}
 

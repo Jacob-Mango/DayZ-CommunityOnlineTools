@@ -12,9 +12,6 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 	void ~JMFormBase() 
 	{
-		delete window;
-
-		delete layoutRoot;
 	}
 
 	void OnWidgetScriptInit( Widget w )
