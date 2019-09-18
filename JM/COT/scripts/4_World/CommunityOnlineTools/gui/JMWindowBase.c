@@ -1,12 +1,11 @@
 class JMWindowBase extends ScriptedWidgetEventHandler  
 {
-	private static ref Widget S_SCREEN;
-
 	private Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
 	private TextWidget m_Title;
+	private Widget m_Background;
 
 	private JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
@@ -16,10 +15,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void JMWindowBase() 
 	{
+        GetCOTWindowManager().AddWindow( this );
 	}
 
 	void ~JMWindowBase() 
 	{
+        GetCOTWindowManager().RemoveWindow( this );
+
 		Hide();
 
 		layoutRoot.Unlink();
@@ -38,18 +40,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 		m_Title = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
-	}
-
-	static JMWindowBase Create()
-	{
-		if ( S_SCREEN == NULL )
-		{
-			S_SCREEN = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen.layout", NULL );
-		}
-
-		JMWindowBase window;
-		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", S_SCREEN ).GetScript( window );
-		return window;
+		m_Background = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
 	}
 
 	void SetModule( JMRenderableModuleBase module )
@@ -74,7 +65,14 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			m_Form.Init( this, module );
 
 			m_Title.SetText( module.GetTitle() );
+			
+        	GetCOTWindowManager().BringFront( this );
 		}
+	}
+
+	JMRenderableModuleBase GetModule()
+	{
+		return m_Module;
 	}
 
 	JMFormBase GetForm()
@@ -85,6 +83,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	Widget GetLayoutRoot()
 	{
 		return layoutRoot;
+	}
+
+	void SetBackgroundColour( float r, float g, float b, float alpha )
+	{
+		m_Background.SetColor( ARGB( r * 255, g * 255, b * 255, alpha * 255 ) );
 	}
 
 	bool IsVisible()
@@ -124,18 +127,25 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 
-	override bool OnClick( Widget w, int x, int y, int button )
+
+	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		Widget parentWidget = w;
 		while ( parentWidget != NULL )
 		{
 			if ( parentWidget == layoutRoot )
 			{
-				Print( "" + m_Form + " is FOCUS!" );
+				GetCOTWindowManager().BringFront( this );
 				break;
 			}
 			parentWidget = parentWidget.GetParent();
 		}
+
+		return super.OnMouseButtonDown( w, x, y, button );
+	}
+
+	override bool OnClick( Widget w, int x, int y, int button )
+	{
 
 		if ( super.OnClick( w, x, y, button ) )
 		{

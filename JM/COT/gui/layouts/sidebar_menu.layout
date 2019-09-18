@@ -5,7 +5,7 @@ PanelWidgetClass JMCOTSideBar {
  halign right_ref
  valign top_ref
  hexactpos 1
- vexactpos 0
+ vexactpos 1
  hexactsize 1
  vexactsize 0
  style DayZDefaultPanelTop
