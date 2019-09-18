@@ -21,6 +21,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Vehicles.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleVehicle";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/vehiclespawner_form.layout";

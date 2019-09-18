@@ -12,22 +12,25 @@ class JMServerInfoModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Restart" );
 
 		m_Data = new JMServerInfoData;
-
-		//MissionServer.EVENT_INVOKER.Insert( OnEvent );
 	}
 
 	void ~JMServerInfoModule()
 	{
-		//MissionServer.EVENT_INVOKER.Remove( OnEvent );
 	}
 
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
 	}
 
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Admin.View" );
+	}
+
+	override string GetInputToggle()
+	{
+		return "UACOTToggleServerInfo";
 	}
 
 	override string GetLayoutRoot()

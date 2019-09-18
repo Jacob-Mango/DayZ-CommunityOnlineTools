@@ -24,6 +24,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Teleport.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleTeleport";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/teleport_form.layout";
@@ -81,6 +86,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
+		
 		RegisterBinding( new JMModuleBinding( "Input_Cursor",		"UATeleportModuleTeleportCursor",	true 	) );
 	}
 

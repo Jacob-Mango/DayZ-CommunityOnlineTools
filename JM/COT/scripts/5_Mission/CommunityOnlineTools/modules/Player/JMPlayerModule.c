@@ -92,6 +92,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTTogglePlayer";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/player_form.layout";

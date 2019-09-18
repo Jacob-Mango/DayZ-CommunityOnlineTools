@@ -17,6 +17,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
+		
 		RegisterBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		RegisterBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		RegisterBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );

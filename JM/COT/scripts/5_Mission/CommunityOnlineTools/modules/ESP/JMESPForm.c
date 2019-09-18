@@ -25,21 +25,6 @@ class JMESPForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "ESP Viewer";
-	}
-	
-	override string GetIconName()
-	{
-		return "X";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
 	void ESPControls( Widget mainSpacer )
 	{
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );

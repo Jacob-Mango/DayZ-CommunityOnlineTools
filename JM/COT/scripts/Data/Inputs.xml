@@ -2,10 +2,24 @@
 <modded_inputs>
     <inputs>
         <actions>
+            <input name="UACOTModuleToggleCOT" loc="Enable/Disable Keybinds" />
+            <input name="UACOTToggleButtons" loc="Open/Close Sidebar" />
+
+            <input name="UACOTTogglePlayer" loc="Open/Close Player Menu" />
+            <input name="UACOTToggleCamera" loc="Open/Close Camera Menu" />
+            <input name="UACOTToggleESP" loc="Open/Close ESP Menu" />
+            <input name="UACOTToggleMap" loc="Open/Close Map Menu" />
+            <input name="UACOTToggleMapEditor" loc="Open/Close Map Editor" />
+            <input name="UACOTToggleEntity" loc="Open/Close Entity Menu" />
+            <input name="UACOTToggleSelected" loc="Open/Close Selected Menu" />
+            <input name="UACOTToggleTeleport" loc="Open/Close Teleport Menu" />
+            <input name="UACOTToggleItem" loc="Open/Close Item Set Menu" />
+            <input name="UACOTToggleVehicle" loc="Open/Close Vehicle Menu" />
+            <input name="UACOTToggleWeather" loc="Open/Close Weather Menu" />
+            <input name="UACOTToggleServerInfo" loc="Open/Close Server Info Menu" />
+
             <input name="UACOTModuleFocusGame" loc="" visible="false" />
             <input name="UACOTModuleFocusUI" loc="" visible="false" />
-            <input name="UACOTModuleToggleCOT" loc="Toggle COT" />
-            <input name="UACOTModuleToggleMenu" loc="Show Side Menu" />
             
             <input name="UATeleportModuleTeleportCursor" loc="Teleport Self (Crosshair)" />
 
@@ -16,8 +30,6 @@
 
             <input name="UACameraToolSpeedIncrease" loc="Increase Freecam Speed" />
             <input name="UACameraToolSpeedDecrease" loc="Decrease Freecam Speed" />
-
-            <input name="UAMapEditorModuleToggleEditor" loc="Toggle Map Editor" />
 
             <input name="UAObjectModuleSpawnInfected" loc="Spawn Infected (Crosshair)" />
             <input name="UAObjectModuleSpawnAnimal" loc="Spawn Animal (Crosshair)" />
@@ -36,10 +48,6 @@
         </input>
         <input name="UACOTModuleToggleCOT">
             <btn name="kEnd">
-            </btn>
-        </input>
-        <input name="UACOTModuleToggleMenu">
-            <btn name="kY">
             </btn>
         </input>
 
@@ -85,7 +93,82 @@
         <input name="UAObjectModuleSpawnWolf">
         </input>
 
-        <input name="UAMapEditorModuleToggleEditor">
+        <input name="UACOTToggleButtons">
+            <btn name="kY">
+            </btn>
+        </input>
+        
+        <input name="UACOTTogglePlayer">
+            <btn name="kRMenu">
+                <btn name="kT">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleCamera">
+            <btn name="kRMenu">
+                <btn name="kY">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleESP">
+            <btn name="kRMenu">
+                <btn name="kU">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleMap">
+            <btn name="kRMenu">
+                <btn name="kI">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleMapEditor">
+            <btn name="kRMenu">
+                <btn name="kO">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleEntity">
+            <btn name="kRMenu">
+                <btn name="kP">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleSelected">
+            <btn name="kRMenu">
+                <btn name="kH">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleTeleport">
+            <btn name="kRMenu">
+                <btn name="kJ">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleItem">
+            <btn name="kRMenu">
+                <btn name="kK">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleVehicle">
+            <btn name="kRMenu">
+                <btn name="kL">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleWeather">
+            <btn name="kRMenu">
+                <btn name="kB">
+                </btn>
+            </btn>
+        </input>
+        <input name="UACOTToggleServerInfo">
+            <btn name="kRMenu">
+                <btn name="kN">
+                </btn>
+            </btn>
         </input>
     </preset>
 </modded_inputs>

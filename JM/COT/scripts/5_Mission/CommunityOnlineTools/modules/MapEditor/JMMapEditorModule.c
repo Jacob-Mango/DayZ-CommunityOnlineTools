@@ -10,6 +10,11 @@ class JMMapEditorModule: JMModuleBase
 		GetPermissionsManager().RegisterPermission( "MapEditor.LeaveEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
 	}
+
+	override string GetInputToggle()
+	{
+		return "UACOTToggleMapEditor";
+	}
 	
 	void SetTransform( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
 	{
@@ -134,6 +139,8 @@ class JMMapEditorModule: JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
+		
 		RegisterBinding( new JMModuleBinding( "ToggleEditor",		"UAMapEditorModuleToggleEditor",	true 	) );
 	}
 	

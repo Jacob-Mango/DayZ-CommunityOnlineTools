@@ -85,9 +85,29 @@ class JMESPModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "ESP.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleESP";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/esp_form.layout";
+	}
+
+	override string GetTitle()
+	{
+		return "ESP Viewer";
+	}
+	
+	override string GetIconName()
+	{
+		return "X";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
 	}
 
 	override void OnClientPermissionsUpdated()
