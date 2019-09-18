@@ -46,6 +46,11 @@ class JMRenderableModuleBase extends JMModuleBase
 		return m_Window.GetForm();
 	}
 
+	string GetInputToggle()
+	{
+		return "";
+	}
+
 	string GetLayoutRoot()
 	{
 		return "";
@@ -126,7 +131,25 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		if ( IsVisible() && !HasAccess() )
 		{
-			m_Window.Hide();
+			m_Window.Close();
 		}
+	}
+	
+	override void RegisterKeyMouseBindings() 
+	{
+		super.RegisterKeyMouseBindings();
+
+		if ( GetInputToggle() != "" )
+		{
+			RegisterBinding( new JMModuleBinding( "Input_Toggle", GetInputToggle(), true ) );
+		}
+	}
+
+	void Input_Toggle( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+		
+		ToggleShow();
 	}
 }

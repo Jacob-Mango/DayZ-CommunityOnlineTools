@@ -22,6 +22,11 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Items.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleItem";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/itemsetspawner_form.layout";

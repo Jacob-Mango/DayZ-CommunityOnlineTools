@@ -30,6 +30,11 @@ class JMCameraModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Camera.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleCamera";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/camera_form.layout";
@@ -98,6 +103,8 @@ class JMCameraModule: JMRenderableModuleBase
 	
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
+		
 		RegisterBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );

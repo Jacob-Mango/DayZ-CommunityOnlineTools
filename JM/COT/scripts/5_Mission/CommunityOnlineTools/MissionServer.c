@@ -1,7 +1,5 @@
 modded class MissionServer
 {
-	static ref ScriptInvoker EVENT_INVOKER = new ScriptInvoker();
-
 	void MissionServer()
 	{		
 		m_bLoaded = false;
@@ -59,13 +57,6 @@ modded class MissionServer
 
 			GetPermissionsManager().CreateRole( "admin", data );
 		}
-	}
-
-	override void OnEvent(EventType eventTypeId, Param params) 
-	{
-		EVENT_INVOKER.Invoke( eventTypeId, params );
-
-		super.OnEvent( eventTypeId, params );
 	}
 
 	override void OnUpdate( float timeslice )

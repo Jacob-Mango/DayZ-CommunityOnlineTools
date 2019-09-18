@@ -16,6 +16,11 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		return GetPermissionsManager().HasPermission( "Map.View" );
 	}
+
+	override string GetInputToggle()
+	{
+		return "UACOTToggleMap";
+	}
 	
 	override string GetLayoutRoot()
 	{

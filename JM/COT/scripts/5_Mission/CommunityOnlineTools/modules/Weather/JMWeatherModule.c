@@ -59,6 +59,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Weather.View" );
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleWeather";
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/weather_form.layout";

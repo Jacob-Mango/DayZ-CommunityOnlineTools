@@ -30,11 +30,17 @@ class JMSelectedModule: JMRenderableModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
+		super.RegisterKeyMouseBindings();
 	}
 
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Entity.View" );
+	}
+
+	override string GetInputToggle()
+	{
+		return "UACOTToggleSelected";
 	}
 
 	override string GetLayoutRoot()
