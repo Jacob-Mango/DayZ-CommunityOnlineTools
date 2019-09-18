@@ -10,23 +10,8 @@ class JMMapForm extends JMFormBase
 	void ~JMMapForm()
 	{
 	}
-
-	override string GetTitle()
-	{
-		return "Map";
-	}
 	
-	override string GetIconName()
-	{
-		return "M";
-	}
-	
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-	
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		map_widget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
 		basewindow_background = window.GetLayoutRoot().FindAnyWidget( "background" );

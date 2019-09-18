@@ -82,7 +82,7 @@ class JMESPForm extends JMFormBase
 		m_ViewCreature = UIActionManager.CreateCheckbox( mainSpacer, "Include Animals", this, "Click_CreatureESP", JMESPModule.Cast( module ).ViewCreature );
 	}
 
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		JMESPWidget.espMenu = this;
 

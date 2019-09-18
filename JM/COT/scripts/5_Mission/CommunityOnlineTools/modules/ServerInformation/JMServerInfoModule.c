@@ -35,6 +35,21 @@ class JMServerInfoModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/serverinfo_form.layout";
 	}
 
+	override string GetTitle()
+	{
+		return "Server Information";
+	}
+	
+	override string GetIconName()
+	{
+		return "S";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();

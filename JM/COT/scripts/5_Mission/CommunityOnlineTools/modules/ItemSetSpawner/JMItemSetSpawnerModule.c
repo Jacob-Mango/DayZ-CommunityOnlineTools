@@ -22,6 +22,26 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Items.View" );
 	}
 
+	override string GetLayoutRoot()
+	{
+		return "JM/COT/GUI/layouts/itemsetspawner_form.layout";
+	}
+
+	override string GetTitle()
+	{
+		return "ItemSet Spawner";
+	}
+	
+	override string GetIconName()
+	{
+		return "IS";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -87,11 +107,6 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			break;
 		}
     }
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/itemsetspawner_form.layout";
-	}
 
 	ref array< string > GetItemSets()
 	{

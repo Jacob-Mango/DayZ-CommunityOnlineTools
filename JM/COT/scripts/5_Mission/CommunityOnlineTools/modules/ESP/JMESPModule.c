@@ -100,9 +100,10 @@ class JMESPModule: JMRenderableModuleBase
 		CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
 		CanViewEverything = GetPermissionsManager().HasPermission( "ESP.View" );
 
-		if ( JMESPForm.Cast( form ) )
+		JMESPForm form;
+		if ( Class.CastTo( form, GetForm() ) )
 		{
-			JMESPForm.Cast( form ).DisableToggleableOptions();
+			form.DisableToggleableOptions();
 		}
 	}
 

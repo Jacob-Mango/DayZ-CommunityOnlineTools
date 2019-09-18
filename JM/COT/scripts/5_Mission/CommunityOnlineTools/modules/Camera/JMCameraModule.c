@@ -34,6 +34,26 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		return "JM/COT/GUI/layouts/camera_form.layout";
 	}
+
+	override string GetTitle()
+	{
+		return "Camera Tool";
+	}
+	
+	override string GetImageSet()
+	{
+		return "rover_imageset";
+	}
+
+	override string GetIconName()
+	{
+		return "camera";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return true;
+	}
 	
 	override void OnUpdate( float timeslice )
 	{

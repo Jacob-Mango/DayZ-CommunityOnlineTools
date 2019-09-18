@@ -1,16 +1,13 @@
 class JMFormBase extends ScriptedWidgetEventHandler 
 {
-	protected ref Widget layoutRoot;
+	protected Widget layoutRoot;
 	
-	ref JMWindowBase window;
+	protected JMWindowBase window;
 
-	ref JMRenderableModuleBase module;
-
-	bool HasBeenInitialized;
+	protected JMRenderableModuleBase module;
 
 	void JMFormBase() 
 	{
-		HasBeenInitialized = false;
 	}
 
 	void ~JMFormBase() 
@@ -26,13 +23,15 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		layoutRoot.SetHandler( this );
 	}
 
-	void Init( bool fromMenu )
+	void Init( JMWindowBase wdw, JMRenderableModuleBase mdl )
 	{
-		OnInit( fromMenu );
-		HasBeenInitialized = true;
+		window = wdw;
+		module = mdl;
+
+		OnInit();
 	}
 
-	void OnInit( bool fromMenu )
+	void OnInit()
 	{
 		
 	}
@@ -44,7 +43,7 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		if ( HasBeenInitialized )
+		if ( layoutRoot )
 		{
 			window.Show();
 			layoutRoot.Show( true );
@@ -87,28 +86,8 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
-	}
-
-	string GetTitle()
-	{
-		return "";
-	}
-
-	string GetImageSet()
-	{
-		return "";
-	}
-
-	string GetIconName()
-	{
-		return "";
-	}
-
-	bool ImageIsIcon()
-	{
-		return false;
 	}
 }

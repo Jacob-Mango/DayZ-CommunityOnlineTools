@@ -22,22 +22,7 @@ class JMServerInfoForm extends JMFormBase
 		JMServerInfoModule.DATA_UPDATED.Remove( UpdateData );
 	}
 
-	override string GetTitle()
-	{
-		return "Server Information";
-	}
-	
-	override string GetIconName()
-	{
-		return "S";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		m_ActionsWrapper	= UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 4, 1 );
 

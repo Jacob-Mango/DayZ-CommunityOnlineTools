@@ -19,22 +19,7 @@ class JMTeleportForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "Teleport";
-	}
-	
-	override string GetIconName()
-	{
-		return "T";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 

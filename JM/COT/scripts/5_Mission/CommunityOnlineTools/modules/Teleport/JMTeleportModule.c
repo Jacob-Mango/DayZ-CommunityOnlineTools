@@ -24,6 +24,26 @@ class JMTeleportModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Teleport.View" );
 	}
 
+	override string GetLayoutRoot()
+	{
+		return "JM/COT/GUI/layouts/teleport_form.layout";
+	}
+
+	override string GetTitle()
+	{
+		return "Teleport";
+	}
+	
+	override string GetIconName()
+	{
+		return "T";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -62,11 +82,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	override void RegisterKeyMouseBindings() 
 	{
 		RegisterBinding( new JMModuleBinding( "Input_Cursor",		"UATeleportModuleTeleportCursor",	true 	) );
-	}
-
-	override string GetLayoutRoot()
-	{
-		return "JM/COT/GUI/layouts/teleport_form.layout";
 	}
 
 	array< ref JMTeleportLocation > GetLocations()

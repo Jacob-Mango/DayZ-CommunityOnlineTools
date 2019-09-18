@@ -42,6 +42,21 @@ class JMSelectedModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/selected_form.layout";
 	}
 
+	override string GetTitle()
+	{
+		return "Selected Objects";
+	}
+	
+	override string GetIconName()
+	{
+		return "S";
+	}
+
+	override bool ImageIsIcon()
+	{
+		return false;
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();

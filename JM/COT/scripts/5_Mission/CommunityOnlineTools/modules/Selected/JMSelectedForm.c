@@ -21,22 +21,7 @@ class JMSelectedForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "Selected Objects";
-	}
-	
-	override string GetIconName()
-	{
-		return "S";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{	
 		m_WObjectList		= layoutRoot.FindAnyWidget( "object_selected_list_wrapper" );
 		m_WObjectCount		= TextWidget.Cast( layoutRoot.FindAnyWidget( "object_selected_list_count" ) );

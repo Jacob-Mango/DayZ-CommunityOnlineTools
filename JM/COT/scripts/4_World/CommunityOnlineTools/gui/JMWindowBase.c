@@ -1,14 +1,13 @@
-class JMWindowBase extends ScriptedWidgetEventHandler 
+class JMWindowBase extends UIScriptedMenu  
 {
-	protected ref Widget layoutRoot;
+	private ButtonWidget m_CloseButton;
+	private Widget m_TitleWrapper;
+	private TextWidget m_Title;
 
-	protected ref ButtonWidget m_CloseButton;
-	protected ref Widget m_TitleWrapper;
+	private JMFormBase m_Form;
 
-	ref JMFormBase form;
-
-	float offsetX;
-	float offsetY;
+	private float offsetX;
+	private float offsetY;
 
 	void JMWindowBase() 
 	{
@@ -16,72 +15,70 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
-		layoutRoot.Unlink();
-
-		delete m_CloseButton;
-		delete m_TitleWrapper;
-
-		delete layoutRoot;
 	}
 
-	void OnWidgetScriptInit( Widget w )
+	Widget Init()
 	{
-		layoutRoot = w;
-		layoutRoot.SetHandler( this );
+		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", NULL );
 
-		Init();
-	}
-
-	void Init() 
-	{
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
+
+		m_Title = TextWidget.Cast( GetLayoutRoot().FindAnyWidget( "title_text" ) );
 	}
 
-	void SetSize( float w, float h )
+	void SetModule( JMRenderableModuleBase module )
 	{
-		layoutRoot.SetSize( w, h + 25 );
-	}
+		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), GetLayoutRoot().FindAnyWidget( "content" ) );
 
-	bool IsVisible()
-	{
-		return layoutRoot.IsVisible();
-	}
-	
-	void Show()
-	{
-		layoutRoot.Show( true );
-		OnShow();
-	}
+		float width = -1;
+		float height = -1;
+		menu.GetSize( width, height );
+		SetSize( width, height );
 
-	void Hide()
-	{
-		OnHide();
-		layoutRoot.Show( false );
-	}
+		menu.GetScript( m_Form );
 
-	void OnShow()
-	{
-	}
-
-	void OnHide() 
-	{
-	}
-
-	override bool OnUpdate(Widget w)
-	{
-		if ( w == m_TitleWrapper )
+		if ( m_Form )
 		{
-			m_TitleWrapper.SetPos( 0, 0, true );
+			m_Form.Init( this, module );
+
+			m_Title.SetText( m_Form.GetTitle() );
 		}
-		return true;
+	}
+
+	JMFormBase GetForm()
+	{
+		return m_Form;
+	}
+
+	override void OnShow()
+	{
+		super.OnShow();
+	}
+
+	override void OnHide() 
+	{
+		super.OnHide();
+	}
+
+	override void Update( float timeslice )
+	{
+		super.Update( timeslice );
+
+		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
+		if ( super.OnClick( w, x, y, button ) )
+		{
+			return true;
+		}
+
 		if ( w == m_CloseButton )
 		{
-			form.Hide();
+			m_Form.Hide();
+			return true;
 		}
 
 		return false;
@@ -89,6 +86,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	override bool OnDrag( Widget w, int x, int y )
 	{
+		if ( super.OnDrag( w, x, y ) )
+		{
+			return true;
+		}
+
 		if ( w == m_TitleWrapper )
 		{
 			layoutRoot.GetPos( offsetX, offsetY );
@@ -99,34 +101,52 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			m_TitleWrapper.SetPos( 0, 0, true );
 			m_TitleWrapper.SetPos( 0, 0, false );
 			
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	override bool OnDragging( Widget w, int x, int y, Widget reciever )
 	{
+		if ( super.OnDragging( w, x, y, reciever ) )
+		{
+			return true;
+		}
+
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - offsetX, y - offsetY );
 
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	override bool OnDrop( Widget w, int x, int y, Widget reciever )
 	{
+		if ( super.OnDrop( w, x, y, reciever ) )
+		{
+			return true;
+		}
+
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - offsetX, y - offsetY );
 			
-			return false;
+			return true;
 		}
 
-		return true;
+		return false ;
+	}
+
+	void SetSize( float w, float h )
+	{
+		float tw, th;
+		m_TitleWrapper.GetSize( tw, th );
+
+		layoutRoot.SetSize( w, h + th );
 	}
 
 	void SetPosition( int x, int y )
@@ -134,10 +154,5 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		layoutRoot.SetPos( x, y, true );
 		
 		m_TitleWrapper.SetPos( 0, 0, true );
-	}
-
-	ref Widget GetLayoutRoot() 
-	{
-		return layoutRoot;
 	}
 }

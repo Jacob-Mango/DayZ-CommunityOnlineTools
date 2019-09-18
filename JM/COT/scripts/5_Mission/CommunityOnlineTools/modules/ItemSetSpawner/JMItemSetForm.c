@@ -13,22 +13,7 @@ class JMItemSetForm extends JMFormBase
 	{
 	}
 
-	override string GetTitle()
-	{
-		return "ItemSet Spawner";
-	}
-	
-	override string GetIconName()
-	{
-		return "IS";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return false;
-	}
-
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 	}

@@ -11,14 +11,29 @@ class JMMapModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Teleport.Position" );
 	}
+
+	override bool HasAccess()
+	{
+		return GetPermissionsManager().HasPermission( "Map.View" );
+	}
 	
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/mapview_form.layout";
 	}
 
-	override bool HasAccess()
+	override string GetTitle()
 	{
-		return GetPermissionsManager().HasPermission( "Map.View" );
+		return "Map";
+	}
+	
+	override string GetIconName()
+	{
+		return "M";
+	}
+	
+	override bool ImageIsIcon()
+	{
+		return false;
 	}
 }

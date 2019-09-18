@@ -36,28 +36,8 @@ class JMCameraForm extends JMFormBase
 	void ~JMCameraForm()
 	{
 	}
-
-	override string GetTitle()
-	{
-		return "Camera Tool";
-	}
 	
-	override string GetImageSet()
-	{
-		return "rover_imageset";
-	}
-
-	override string GetIconName()
-	{
-		return "camera";
-	}
-
-	override bool ImageIsIcon()
-	{
-		return true;
-	}
-	
-	override void OnInit( bool fromMenu )
+	override void OnInit()
 	{
 		widgetStore = new JMWidgetStore( layoutRoot );
 
@@ -98,10 +78,7 @@ class JMCameraForm extends JMFormBase
 	{
 		super.OnShow();
 
-		//if ( m_HasBeenInitialized )
-		//{
-			GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
-		//}
+		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
 
 		UpdateEditBox();
 	}
