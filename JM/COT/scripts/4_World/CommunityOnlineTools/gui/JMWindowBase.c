@@ -108,6 +108,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
+
+		GetDayZGame().COTPreventMenuOpen = true;
 	}
 
 	void Hide()
@@ -125,6 +127,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );
+			
+			GetDayZGame().COTPreventMenuOpen = false;
 		}
 	}
 
