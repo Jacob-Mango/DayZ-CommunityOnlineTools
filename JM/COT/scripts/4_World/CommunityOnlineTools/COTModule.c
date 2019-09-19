@@ -147,6 +147,9 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
+		if ( GetGame().GetUIManager().GetMenu() )
+			return;
+
 		if ( m_COTMenu == NULL )
 			return;
 

@@ -114,6 +114,11 @@ class CommunityOnlineToolsBase
     {
         if ( open )
         {
+			if ( GetGame().GetUIManager().GetMenu() )
+			{
+				return;
+			}
+
             if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
             {
                 return;
@@ -129,14 +134,17 @@ class CommunityOnlineToolsBase
         m_IsOpen = open;
 
         JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
-
-        LogServer( "m_IsOpen: " + m_IsOpen );
     }
 
     void ToggleOpen()
     {
         if ( !m_IsOpen )
         {
+			if ( GetGame().GetUIManager().GetMenu() )
+			{
+				return;
+			}
+
             if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
             {
                 return;
@@ -152,8 +160,6 @@ class CommunityOnlineToolsBase
         m_IsOpen = !m_IsOpen;
 
         JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
-
-        LogServer( "m_IsOpen: " + m_IsOpen );
     }
 
     void LogServer( string text )

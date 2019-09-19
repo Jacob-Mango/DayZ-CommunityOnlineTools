@@ -142,6 +142,11 @@ class JMRenderableModuleBase extends JMModuleBase
 			Hide();
 		} else
 		{
+			if ( GetGame().GetUIManager().GetMenu() )
+			{
+				return;
+			}
+
             if ( !GetCommunityOnlineToolsBase().IsActive() )
             {
                 CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
