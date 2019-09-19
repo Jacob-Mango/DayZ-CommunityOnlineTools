@@ -10,22 +10,76 @@ PanelWidgetClass JMWeatherPresetWidget {
  vexactsize 1
  scriptclass "JMWeatherPresetWidget"
  {
-  TextWidgetClass name {
-   ignorepointer 1
+  ButtonWidgetClass select_button {
+   ignorepointer 0
    position 0 0
-   size 1 0.55
+   size 1 30
+   halign left_ref
    valign center_ref
-   halign center_ref
-   hexactpos 0
-   vexactpos 0
+   hexactpos 1
+   vexactpos 1
    hexactsize 0
-   vexactsize 0
-   text "Sample Text"
-   font "gui/fonts/sdf_MetronLight24"
-   "exact text" 0
-   "exact text size" 18
-   "text halign" left
-   "text valign" center
+   vexactsize 1
+   {
+    TextWidgetClass preset_name_text {
+     ignorepointer 1
+     position 0 0
+     size 1 0.55
+     valign center_ref
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text ""
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 0
+     "exact text size" 18
+     "text halign" left
+     "text valign" center
+    }
+   }
+  }
+  PanelWidgetClass remove_wrapper {
+   ignorepointer 1
+   color 0 0 0 0
+   position 0 0
+   size 30 30
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   halign right_ref
+   valign center_ref
+   {
+    ButtonWidgetClass remove_button {
+     ignorepointer 0
+     color 0 0 0 0
+     position 0 0
+     size 24 24
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     {
+      ImageWidgetClass remove_image {
+       ignorepointer 1
+       color 1 1 1 1
+       size 1 1
+       halign center_ref
+       valign center_ref
+       fixaspect fixwidth
+       image0 "set:dayz_gui image:Close"
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       stretch 0
+      }
+     }
+    }
+   }
   }
  }
 }
