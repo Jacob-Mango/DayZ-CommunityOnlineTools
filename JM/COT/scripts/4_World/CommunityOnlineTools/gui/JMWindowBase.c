@@ -105,6 +105,9 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		m_Form.OnShow();
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+
+		GetGame().GetInput().ChangeGameFocus( 1 );
+		GetGame().GetUIManager().ShowUICursor( true );
 	}
 
 	void Hide()
@@ -117,6 +120,12 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		m_Form.OnHide();
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+
+		if ( !GetCommunityOnlineToolsBase().IsOpen() && GetCOTWindowManager().Count() == 0 )
+		{
+			GetGame().GetInput().ResetGameFocus();
+			GetGame().GetUIManager().ShowUICursor( false );
+		}
 	}
 
 	void Update( float timeSlice )
@@ -126,7 +135,6 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
-
 
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{

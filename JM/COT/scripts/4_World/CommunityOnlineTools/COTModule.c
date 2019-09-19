@@ -6,6 +6,8 @@ class COTModule : JMModuleBase
 
 	protected bool m_ForceHUD;
 
+	protected bool m_GameActive;
+
 	void COTModule()
 	{
 		COTInstance = this;
@@ -39,7 +41,7 @@ class COTModule : JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",	true 	) );
+		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
 		RegisterBinding( new JMModuleBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
 		RegisterBinding( new JMModuleBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
@@ -56,6 +58,25 @@ class COTModule : JMModuleBase
 		if ( m_ForceHUD )
 		{
 			GetGame().GetMission().GetHud().Show( false );
+		}
+	}
+
+	void UpdateMouseControls()
+	{
+		bool isMenuOpen = m_COTMenu && m_COTMenu.IsVisible();
+		bool windowsOpen = GetCOTWindowManager().Count() > 0;
+
+		if ( !isMenuOpen && !windowsOpen )
+			return;
+
+		if ( m_GameActive )
+		{
+			GetGame().GetInput().ResetGameFocus();
+			GetGame().GetUIManager().ShowUICursor( false );
+		} else
+		{
+			GetGame().GetInput().ChangeGameFocus( 1 );
+			GetGame().GetUIManager().ShowUICursor( true );
 		}
 	}
 
@@ -89,14 +110,6 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	void ShowMenu( bool force, bool checkForPerms = true )
-	{
-		if ( checkForPerms && !GetPermissionsManager().HasPermission( "COT.View" ) )
-			return;
-			
-		m_COTMenu.Show();
-	}
-
 	void CloseCOT( UAInput input )
 	{
 		if ( !( input.LocalPress() ) )
@@ -121,9 +134,11 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu == NULL )
 			return;
 		
-		if ( m_COTMenu.IsVisible() )
+		if ( m_GameActive )
 		{
-			m_COTMenu.SetInputFocus( false );
+			m_GameActive = false;
+
+			UpdateMouseControls();
 		}
 	}
 
@@ -135,16 +150,34 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu == NULL )
 			return;
 
-		if ( m_COTMenu.IsVisible() )
+		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().Count() > 0 )
 		{
-			Widget w = GetWidgetUnderCursor();
+			bool canContinue = false;
 
-			if ( w.GetName() != "Windows" && w.GetName() != "map_editor_menu" )
-			{
-				return;
+			Widget parentWidget = GetWidgetUnderCursor();
+			while ( parentWidget != NULL )
+			{   
+				if ( m_COTMenu && m_COTMenu.GetLayoutRoot() == parentWidget )
+				{
+					canContinue = true;
+					break;
+				}
+
+				if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
+				{
+					canContinue = true;
+					break;
+				}
+
+				parentWidget = parentWidget.GetParent();
 			}
 
-			m_COTMenu.SetInputFocus( true );
+			if ( !canContinue )
+			{
+				m_GameActive = true;
+
+				UpdateMouseControls();
+			}
 		}
 	}
 
