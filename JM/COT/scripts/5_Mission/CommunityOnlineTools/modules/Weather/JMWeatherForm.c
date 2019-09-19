@@ -11,7 +11,7 @@ class JMWeatherForm extends JMFormBase
 	private TextWidget m_TextList;
 	private ButtonWidget m_ButtonList;
 
-	private Widget m_WeatherActions;
+	private Widget m_PanelWeatherActions;
 
 	private UIActionSlider m_SliderStormDensity;
 	private UIActionSlider m_SliderStormThreshold;
@@ -40,6 +40,7 @@ class JMWeatherForm extends JMFormBase
 	private UIActionEditableText m_EditWindFuncSpeed;
 
 	private bool m_PresetsShown;
+	private string m_SelectedPreset;
 
 	void JMWeatherForm()
 	{
@@ -80,6 +81,25 @@ class JMWeatherForm extends JMFormBase
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePresetList );
 	}
 
+	void CreateNew()
+	{
+		m_TextList.SetText( "Creating New " );
+	}
+
+	void SetSelectedPreset( string preset )
+	{
+		m_SelectedPreset = preset;
+
+		m_TextList.SetText( "Selected: " + m_SelectedPreset );
+	}
+
+	void RemovePreset( string preset )
+	{
+		m_TextList.SetText( "Remove: " + preset );
+		
+		// todo: implement that popup feature for forms
+	}
+
 	void UpdatePresetList()
 	{
 		JMWeatherModule mod;
@@ -96,6 +116,9 @@ class JMWeatherForm extends JMFormBase
 			if ( i < presets.Count() )
 			{
 				m_WidgetsPreset[i].SetPreset( presets[i].Name, presets[i].Permission );
+			} else if ( i == presets.Count() )
+			{
+				m_WidgetsPreset[i].SetCreateNew();
 			} else
 			{
 				m_WidgetsPreset[i].SetPreset( "", "" );
@@ -196,7 +219,7 @@ class JMWeatherForm extends JMFormBase
 					continue;
 				}
 
-				rwScript.Init();
+				rwScript.Init( this );
 
 				rwScript.SetPreset( "", "" );
 
@@ -207,16 +230,13 @@ class JMWeatherForm extends JMFormBase
 
 	void InitRightPanel( Widget parent )
 	{
-		Widget actionsWrapper = UIActionManager.CreateGridSpacer( parent.FindAnyWidget( "actions_wrapper" ), 4, 1 );
-
-		m_WeatherActions = UIActionManager.CreateGridSpacer( actionsWrapper, 4, 1 );
-		InitStormWidgets( m_WeatherActions );
-		InitFogWidgets( m_WeatherActions );
-		InitRainWidgets( m_WeatherActions );
-		InitOvercastWidgets( m_WeatherActions );
-		InitWindWidgets( m_WeatherActions );
-
-		Widget presetManagementActions = UIActionManager.CreateGridSpacer( actionsWrapper, 1, 1 );
+		m_PanelWeatherActions = UIActionManager.CreateGridSpacer( parent.FindAnyWidget( "actions_wrapper" ), 4, 1 );
+		
+		InitStormWidgets( m_PanelWeatherActions );
+		InitFogWidgets( m_PanelWeatherActions );
+		InitRainWidgets( m_PanelWeatherActions );
+		InitOvercastWidgets( m_PanelWeatherActions );
+		InitWindWidgets( m_PanelWeatherActions );
 	}
 
 	private void InitStormWidgets( Widget actionsParent )
