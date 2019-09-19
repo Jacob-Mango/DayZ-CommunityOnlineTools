@@ -237,7 +237,7 @@ class JMWeatherForm extends JMFormBase
 		m_SliderStormDensity.SetWidth( 0.3 );
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetLabelWidget(), 0.57 );
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetSliderWidget(), 0.43 );
-		m_SliderStormDensity.SetWidgetPosition( m_EditTextStormTimeout.GetEditBoxWidget(), 0.6 );
+		m_SliderStormDensity.SetWidgetPosition( m_SliderStormDensity.GetEditBoxWidget(), 0.6 );
 
 		m_SliderStormThreshold = UIActionManager.CreateSlider( actions, "Min Overcast", 0, 1, this, "OnChange_Storm" );
 		m_SliderStormThreshold.SetCurrent( 0 );
@@ -249,7 +249,7 @@ class JMWeatherForm extends JMFormBase
 		m_SliderStormThreshold.SetWidth( 0.4 );
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetLabelWidget(), 0.6 );
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetSliderWidget(), 0.4 );
-		m_SliderStormThreshold.SetWidgetPosition( m_EditTextStormTimeout.GetEditBoxWidget(), 0.6 );
+		m_SliderStormThreshold.SetWidgetPosition( m_SliderStormThreshold.GetEditBoxWidget(), 0.6 );
 
 		m_EditTextStormTimeout = UIActionManager.CreateEditableText( actions, "Timeout", this, "OnChange_Storm" );
 		m_EditTextStormTimeout.SetOnlyNumbers( true );

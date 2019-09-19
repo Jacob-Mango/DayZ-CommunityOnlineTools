@@ -121,8 +121,10 @@ class JMVehicleSpawnerSettings
 
 		attArr.Insert("Hatchback_02_Hood");
 		attArr.Insert("Hatchback_02_Trunk");
-		attArr.Insert("Hatchback_02_Doors_Driver");
-		attArr.Insert("Hatchback_02_Doors_CoDriver");
+		attArr.Insert("Hatchback_02_Door_1_1");
+		attArr.Insert("Hatchback_02_Door_1_2");
+		attArr.Insert("Hatchback_02_Door_2_1");
+		attArr.Insert("Hatchback_02_Door_2_2");
 		attArr.Insert("Hatchback_02_Wheel");
 		attArr.Insert("Hatchback_02_Wheel");
 		attArr.Insert("Hatchback_02_Wheel");
@@ -147,8 +149,10 @@ class JMVehicleSpawnerSettings
 
 		attArr.Insert("Sedan_02_Hood");
 		attArr.Insert("Sedan_02_Trunk");
-		attArr.Insert("Sedan_02_Doors_Driver");
-		attArr.Insert("Sedan_02_Doors_CoDriver");
+		attArr.Insert("Sedan_02_Door_1_1");
+		attArr.Insert("Sedan_02_Door_1_2");
+		attArr.Insert("Sedan_02_Door_2_1");
+		attArr.Insert("Sedan_02_Door_2_2");
 		attArr.Insert("Sedan_02_Wheel");
 		attArr.Insert("Sedan_02_Wheel");
 		attArr.Insert("Sedan_02_Wheel");
