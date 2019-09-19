@@ -25,6 +25,11 @@ class JMWindowManager
 		return window;
 	}
 
+    int Count()
+    {
+        return m_Windows.Count();
+    }
+
     void RemoveWindow( JMWindowBase window )
     {
         if ( window.GetModule() )
@@ -67,22 +72,30 @@ class JMWindowManager
             }
         } else
         {
-		    //Print( "" + window.GetForm() + " FAILED TO FOCUS!" );
             return;
         }
 
-		//Print( "" + window.GetForm() + " is FOCUS!" );
-
         for ( int i = 0; i < m_Windows.Count(); i++ )
         {
-		    //Print( "" + m_Windows[i].GetForm() + " current sort is " + m_Windows[i].GetLayoutRoot().GetSort() + "" );
-
             m_Windows[i].GetLayoutRoot().SetSort( m_Windows.Count() - i );
 
-            m_Windows[i].SetBackgroundColour( 0.8, 0.06, 0.08, 0.11 );
+            m_Windows[i].SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
         }
 
-        window.SetBackgroundColour( 0.95, 0.06, 0.08, 0.11 );
+        window.SetBackgroundColour( 0.93, 0.06, 0.08, 0.11 );
+    }
+
+    JMWindowBase GetWindowFromWidget( notnull Widget w )
+    {  
+        for ( int i = 0; i < m_Windows.Count(); i++ )
+        {
+            if ( w == m_Windows[i].GetLayoutRoot() )
+            {
+                return m_Windows[i];
+            }
+        }
+
+        return NULL;
     }
 }
 
