@@ -221,6 +221,8 @@ class JMWeatherPreset
     {
         if ( IsMissionHost() )
 		{
+			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name + "(Permission: " + Permission + ")" );
+
             Date.Log( pidentLogPP );
             Storm.Log( pidentLogPP );
             PFog.Log( pidentLogPP );
