@@ -35,9 +35,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.Date" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Wind" );
-		GetPermissionsManager().RegisterPermission( "Weather.Wind.Direction" );
 		GetPermissionsManager().RegisterPermission( "Weather.Wind.FunctionParams" );
-		GetPermissionsManager().RegisterPermission( "Weather.Wind.Speed" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Storm" );
 		GetPermissionsManager().RegisterPermission( "Weather.Overcast" );
@@ -171,6 +169,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetStorm( wBase );
+			
+			if ( IsMissionHost() )
+			{
+				Exec_SetStorm( wBase );
+			}
 		} 
 	}
 
@@ -187,6 +190,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetFog( wBase );
+			
+			if ( IsMissionHost() )
+			{
+				Exec_SetFog( wBase );
+			}
 		} 
 	}
 
@@ -203,6 +211,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetRain( wBase );
+			
+			if ( IsMissionHost() )
+			{
+				Exec_SetRain( wBase );
+			}
 		} 
 	}
 
@@ -219,6 +232,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetRainThresholds( wBase );
+			
+			if ( IsMissionHost() )
+			{
+				Exec_SetRainThresholds( wBase );
+			}
 		} 
 	}
 
@@ -235,6 +253,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetOvercast( wBase );
+			
+			if ( IsMissionHost() )
+			{
+				Exec_SetOvercast( wBase );
+			}
 		} 
 	}
 
@@ -258,7 +281,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetWind( wBase );
-		} 
+
+			if ( IsMissionHost() )
+			{
+				Exec_SetWind( wBase );
+			}
+		}
 	}
 
 	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
@@ -274,6 +302,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetWindFunctionParams( wBase );
+
+			if ( IsMissionHost() )
+			{
+				Exec_SetWindFunctionParams( wBase );
+			}
 		} 
 	}
 
@@ -292,6 +325,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_SetDate( wBase );
+
+			if ( IsMissionHost() )
+			{
+				Exec_SetDate( wBase );
+			}
 		}
 	}
 
@@ -303,6 +341,44 @@ class JMWeatherModule: JMRenderableModuleBase
 		} else
 		{
 			Send_UsePreset( name );
+
+			if ( IsMissionHost() )
+			{
+				Exec_UsePreset( name );
+			}
+		}
+	}
+
+	void CreatePreset( JMWeatherPreset preset )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_CreatePreset( preset );
+		} else
+		{
+			Send_CreatePreset( preset );
+		}
+	}
+
+	void UpdatePreset( JMWeatherPreset preset )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_UpdatePreset( preset );
+		} else
+		{
+			Send_UpdatePreset( preset );
+		}
+	}
+
+	void RemovePreset( string name )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_RemovePreset( name );
+		} else
+		{
+			Send_RemovePreset( name );
 		}
 	}
 	
@@ -371,6 +447,15 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.UsePreset, true, NULL );
 	}
 
+	private void Send_CreatePreset( JMWeatherPreset preset )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+
+		rpc.Write( preset );
+
+		rpc.Send( NULL, JMWeatherModuleRPC.CreatePreset, true, NULL );
+	}
+
 	private void Send_UpdatePreset( JMWeatherPreset preset )
 	{
 		ScriptRPC rpc = new ScriptRPC();
@@ -437,14 +522,98 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Log( ident );
 	}
 
-	private void Exec_UsePreset( string preset, PlayerIdentity ident = NULL )
+	private void Exec_UsePreset( string name, PlayerIdentity ident = NULL )
 	{
-		// find and apply the preset
+		array< ref JMWeatherPreset > presets = GetPresets();
+		JMWeatherPreset preset;
 
-		if ( IsMissionHost() )
+		for ( int i = 0; i < presets.Count(); i++ )
 		{
-			GetCommunityOnlineToolsBase().Log( ident, "Start Weather Preset " + preset );
+			if ( presets[i].Permission == name )
+			{
+				preset = presets[i];
+				break;
+			}
 		}
+
+		if ( preset == NULL )
+			return;
+
+		preset.Apply();
+		preset.Log( ident );
+	}
+
+	private void Exec_CreatePreset( JMWeatherPreset preset, PlayerIdentity ident = NULL )
+	{
+		if ( preset == NULL )
+			return;
+
+		array< ref JMWeatherPreset > presets = GetPresets();
+		for ( int i = 0; i < presets.Count(); i++ )
+		{
+			if ( presets[i].Permission == preset.Permission )
+			{
+				return;
+			}
+		}
+
+		GetPresets().Insert( preset );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name + " (Permission: " + preset.Permission + ")" );
+
+		settings.Save();
+	}
+
+	private void Exec_UpdatePreset( JMWeatherPreset preset, PlayerIdentity ident = NULL )
+	{
+		if ( preset == NULL )
+			return;
+
+		array< ref JMWeatherPreset > presets = GetPresets();
+		int index = -1;
+
+		for ( int i = 0; i < presets.Count(); i++ )
+		{
+			if ( presets[i].Permission == preset.Permission )
+			{
+				index = i;
+				break;
+			}
+		}
+
+		if ( index == -1 )
+			return;
+		
+		GetPresets().Remove( index );
+		GetPresets().InsertAt( preset, index );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name + " (Permission: " + preset.Permission + ")" );
+
+		settings.Save();
+	}
+
+	private void Exec_RemovePreset( string name, PlayerIdentity ident = NULL )
+	{
+		array< ref JMWeatherPreset > presets = GetPresets();
+		int index = -1;
+
+		for ( int i = 0; i < presets.Count(); i++ )
+		{
+			if ( presets[i].Permission == name )
+			{
+				index = i;
+				break;
+			}
+		}
+
+		if ( index == -1 )
+			return;
+		
+		GetPresets().Remove( index );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Permission: " + name + ")" );
+
+		settings.Save();
 	}
 	
 	private void RPC_SetStorm( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -540,7 +709,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Weather.Wind.Direction", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
 				return;
 
 			Send_SetWind( p1 );
@@ -611,10 +780,10 @@ class JMWeatherModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Create", senderRPC ) )
 				return;
 
-			//Send_CreatePreset( p1 );
+			Send_CreatePreset( p1 );
 		}
 
-		//Exec_CreatePreset( p1, senderRPC );
+		Exec_CreatePreset( p1, senderRPC );
     }
 
 	private void RPC_UpdatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -631,10 +800,10 @@ class JMWeatherModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1.Permission, senderRPC ) )
 				return;
 
-			//Send_UpdatePreset( p1 );
+			Send_UpdatePreset( p1 );
 		}
 
-		//Exec_UpdatePreset( p1, senderRPC );
+		Exec_UpdatePreset( p1, senderRPC );
     }
 
 	private void RPC_RemovePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -651,10 +820,10 @@ class JMWeatherModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1, senderRPC ) )
 				return;
 
-			//Send_RemovePreset( p1 );
+			Send_RemovePreset( p1 );
 		}
 
-		//Exec_RemovePreset( p1, senderRPC );
+		Exec_RemovePreset( p1, senderRPC );
     }
 
 	int GetRPCMin()

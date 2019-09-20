@@ -68,6 +68,11 @@ class UIActionEditableText extends UIActionBase
 		m_Label.SetText( text );
 	}
 
+	void SetText( float num )
+	{
+		SetText( "" + num );
+	}
+
 	override void SetText( string text )
 	{
 		if ( m_Text == GetFocus() )
