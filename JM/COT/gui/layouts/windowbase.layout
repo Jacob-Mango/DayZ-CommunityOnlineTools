@@ -30,16 +30,17 @@ PanelWidgetClass base_window {
    hexactsize 0
    vexactsize 0
   }
-  PanelWidgetClass popup {
+  PanelWidgetClass confirmation_panel {
    visible 0
-   color 0.06 0.08 0.11 0.8
+   color 0.06 0.08 0.11 0.9
    position 0 25
    size 1 1
    hexactpos 1
    vexactpos 1
-   hexactsize 1
-   vexactsize 1
+   hexactsize 0
+   vexactsize 0
    style rover_sim_colorable
+   scriptclass "JMConfirmation"
   }
   PanelWidgetClass title_bar_drag {
    ignorepointer 0
