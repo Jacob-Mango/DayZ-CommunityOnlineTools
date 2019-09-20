@@ -4,11 +4,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
-	private TextWidget m_Title;
+	private TextWidget m_TitleText;
+	private Widget m_TitlePanel;
 	private Widget m_Background;
 
 	private JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
+	private JMConfirmation m_Confirmation;
 
 	private float offsetX;
 	private float offsetY;
@@ -39,7 +41,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
-		m_Title = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
+		m_TitlePanel = layoutRoot.FindAnyWidget( "title_wrapper" );
+		m_TitleText = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
 		m_Background = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
 	}
 
@@ -64,9 +67,16 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		{
 			m_Form.Init( this, module );
 
-			m_Title.SetText( module.GetTitle() );
+			m_TitleText.SetText( module.GetTitle() );
 			
         	GetCOTWindowManager().BringFront( this );
+		}
+
+		layoutRoot.FindAnyWidget( "confirmation_panel" ).GetScript( m_Confirmation );
+
+		if ( m_Confirmation )
+		{
+			m_Confirmation.Init( this );
 		}
 	}
 
@@ -85,9 +95,38 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetBackgroundColour( float r, float g, float b, float alpha )
+	void CreateConfirmation_One( string title, string message, string callBackOneName, string callBackOne )
 	{
-		m_Background.SetColor( ARGB( r * 255, g * 255, b * 255, alpha * 255 ) );
+		if ( !m_Confirmation )
+			return;
+
+		m_Confirmation.CreateConfirmation_One( title, message, callBackOneName, callBackOne );
+	}
+
+	void CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	{
+		if ( !m_Confirmation )
+			return;
+
+		m_Confirmation.CreateConfirmation_Two( title, message, callBackOneName, callBackTwoName, callBackOne, callBackTwo );
+	}
+
+	void CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	{
+		if ( !m_Confirmation )
+			return;
+
+		m_Confirmation.CreateConfirmation_Three( title, message, callBackOneName, callBackTwoName, callBackThreeName, callBackOne, callBackTwo, callBackThree );
+	}
+
+	void SetTitleColour( float alpha, float r, float g, float b )
+	{
+		m_TitlePanel.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
+	}
+
+	void SetBackgroundColour( float alpha, float r, float g, float b )
+	{
+		m_Background.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
 	}
 
 	bool IsVisible()

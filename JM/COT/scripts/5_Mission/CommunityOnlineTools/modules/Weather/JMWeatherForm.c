@@ -41,6 +41,7 @@ class JMWeatherForm extends JMFormBase
 
 	private bool m_PresetsShown;
 	private string m_SelectedPreset;
+	private string m_RemovePreset;
 
 	void JMWeatherForm()
 	{
@@ -95,9 +96,19 @@ class JMWeatherForm extends JMFormBase
 
 	void RemovePreset( string preset )
 	{
-		m_TextList.SetText( "Remove: " + preset );
-		
-		// todo: implement that popup feature for forms
+		m_RemovePreset = preset;
+
+		CreateConfirmation_Two( "Confirm", "Do you wish to remove the preset " + preset, "No", "RemovePreset_No", "Yes", "RemovePreset_Yes" );
+	}
+
+	void RemovePreset_No()
+	{
+		// do nothing
+	}
+
+	void RemovePreset_Yes()
+	{
+		// m_RemovePreset
 	}
 
 	void UpdatePresetList()
