@@ -72,7 +72,10 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
             Close();
 
-            GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback1 );
+            if ( m_Callback1 != "" )
+            {
+                GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback1 );
+            }
 			return true;
 		}
 
@@ -80,7 +83,10 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
             Close();
 
-            GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback2 );
+            if ( m_Callback2 != "" )
+            {
+                GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback2 );
+            }
 			return true;
 		}
 
@@ -88,7 +94,10 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
             Close();
 
-            GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback3 );
+            if ( m_Callback3 != "" )
+            {
+                GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback3 );
+            }
 			return true;
 		}
 

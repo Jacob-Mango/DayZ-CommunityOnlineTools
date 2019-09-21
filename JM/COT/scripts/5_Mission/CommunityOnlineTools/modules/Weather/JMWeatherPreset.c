@@ -3,6 +3,11 @@ class JMWeatherBase
     void Apply()
     {
     }
+
+    void SetFromWorld()
+    {
+
+    }
     
     void Log( PlayerIdentity pidentLog = NULL )
     {
@@ -18,6 +23,13 @@ class JMWeatherStorm: JMWeatherBase
     override void Apply()
     {
 		GetGame().GetWeather().SetStorm( Density, Threshold, TimeOut );
+    }
+
+    override void SetFromWorld()
+    {
+        Density = 0.0;
+        Threshold = 0.5;
+        TimeOut = 60.0;
     }
 
     override void Log( PlayerIdentity pidentLog = NULL )
@@ -40,6 +52,13 @@ class JMWeatherFog: JMWeatherBase
 		GetGame().GetWeather().GetFog().Set( Forecast, Time, MinDuration );
     }
 
+    override void SetFromWorld()
+    {
+        Forecast = GetGame().GetWeather().GetFog().GetForecast();
+        Time = GetGame().GetWeather().GetFog().GetNextChange();
+        MinDuration = 4000.0;
+    }
+
     override void Log( PlayerIdentity pidentLog = NULL )
     {
         if ( IsMissionHost() )
@@ -60,6 +79,13 @@ class JMWeatherRain: JMWeatherBase
 		GetGame().GetWeather().GetRain().Set( Forecast, Time, MinDuration );
     }
 
+    override void SetFromWorld()
+    {
+        Forecast = GetGame().GetWeather().GetRain().GetForecast();
+        Time = GetGame().GetWeather().GetRain().GetNextChange();
+        MinDuration = 4000.0;
+    }
+
     override void Log( PlayerIdentity pidentLog = NULL )
     {
         if ( IsMissionHost() )
@@ -78,6 +104,13 @@ class JMWeatherOvercast: JMWeatherBase
     override void Apply()
     {
 		GetGame().GetWeather().GetOvercast().Set( Forecast, Time, MinDuration );
+    }
+
+    override void SetFromWorld()
+    {
+        Forecast = GetGame().GetWeather().GetOvercast().GetForecast();
+        Time = GetGame().GetWeather().GetOvercast().GetNextChange();
+        MinDuration = 4000.0;
     }
 
     override void Log( PlayerIdentity pidentLog = NULL )
@@ -102,6 +135,13 @@ class JMWeatherWind: JMWeatherBase
 		GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
     }
 
+    override void SetFromWorld()
+    {
+        Dir = GetGame().GetWeather().GetWind();
+        Speed = Dir.Normalize();
+        MaxSpeed = GetGame().GetWeather().GetWindMaximumSpeed();
+    }
+
     override void Log( PlayerIdentity pidentLog = NULL )
     {
         if ( IsMissionHost() )
@@ -120,6 +160,11 @@ class JMWeatherWindFunction: JMWeatherBase
     override void Apply()
     {
 		GetGame().GetWeather().SetWindFunctionParams( Min, Max, Speed );
+    }
+
+    override void SetFromWorld()
+    {
+        GetGame().GetWeather().GetWindFunctionParams( Min, Max, Speed );
     }
 
     override void Log( PlayerIdentity pidentLog = NULL )
@@ -144,6 +189,11 @@ class JMWeatherDate: JMWeatherBase
         GetGame().GetWorld().SetDate( Year, Month, Day, Hour, Minute );
     }
 
+    override void SetFromWorld()
+    {
+        GetGame().GetWorld().GetDate( Year, Month, Day, Hour, Minute );
+    }
+
     override void Log( PlayerIdentity pidentLog = NULL )
     {
         if ( IsMissionHost() )
@@ -162,6 +212,13 @@ class JMWeatherRainThreshold: JMWeatherBase
     override void Apply()
     {
 		GetGame().GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
+    }
+
+    override void SetFromWorld()
+    {
+        OvercastMin = 0.75;
+        OvercastMax = 1.0;
+        Time = 30.0;
     }
 
     override void Log( PlayerIdentity pidentLog = NULL )
@@ -215,6 +272,18 @@ class JMWeatherPreset
         RainThreshold.Apply();
         Wind.Apply();
         WindFunc.Apply();
+    }
+
+    void SetFromWorld()
+    {
+        Date.SetFromWorld();
+        Storm.SetFromWorld();
+        PFog.SetFromWorld();
+        POvercast.SetFromWorld();
+        PRain.SetFromWorld();
+        RainThreshold.SetFromWorld();
+        Wind.SetFromWorld();
+        WindFunc.SetFromWorld();
     }
 
     void Log( PlayerIdentity pidentLogPP = NULL )
