@@ -7,6 +7,7 @@ class UIActionEditableText extends UIActionBase
 	protected ref ButtonWidget m_Button;
 
 	protected bool m_OnlyNumbers;
+	protected bool m_OnlyIntegers;
 
 	protected string m_PreviousText;
 
@@ -101,7 +102,7 @@ class UIActionEditableText extends UIActionBase
 			{
 				if ( VALID_NUMBERS.Find( newText.Get( i ) ) == -1 )
 				{
-					if ( !hasDecimal )
+					if ( !hasDecimal && !m_OnlyIntegers )
 					{
 						if ( newText.Get( i ) == "." || newText.Get( i ) == "," )
 						{
@@ -128,9 +129,17 @@ class UIActionEditableText extends UIActionBase
 		return true;
 	}
 
-	void SetOnlyNumbers( bool onlyNumbers )
+	void SetOnlyNumbers( bool onlyNumbers, bool onlyInts = false )
 	{
 		m_OnlyNumbers = onlyNumbers;
+
+		if ( m_OnlyNumbers )
+		{
+			m_OnlyIntegers = onlyInts;
+		} else
+		{
+			m_OnlyIntegers = false;
+		}
 	}
 
 	bool IsOnlyNumbers()

@@ -39,50 +39,48 @@
 
     <preset>
         <input name="UACOTModuleFocusGame">
-            <btn name="mBLeft">
-            </btn>
+            <btn name="mBLeft" />
         </input>
         <input name="UACOTModuleFocusUI">
-            <btn name="mBLeft">
-            </btn>
+            <btn name="mBLeft" />
         </input>
         <input name="UACOTModuleToggleCOT">
             <btn name="kEnd">
+			    <event name="click" />
             </btn>
         </input>
 
         <input name="UATeleportModuleTeleportCursor">
             <btn name="kH">
+			    <event name="click" />
             </btn>
         </input>
 
         <input name="UACameraToolToggleCamera">
             <btn name="kInsert">
+			    <event name="click" />
             </btn>
         </input>
         <input name="UACameraToolZoomForwards">
             <btn name="kLControl">
-                <btn name="mWheelUp">
-                </btn>
+                <btn name="mWheelUp" />
             </btn>
         </input>
         <input name="UACameraToolZoomBackwards">
             <btn name="kLControl">
-                <btn name="mWheelDown">
-                </btn>
+                <btn name="mWheelDown" />
             </btn>
         </input>
         <input name="UACameraToolSpeedIncrease">
-            <btn name="mWheelUp">
-            </btn>
+            <btn name="mWheelUp" />
         </input>
         <input name="UACameraToolSpeedDecrease">
-            <btn name="mWheelDown">
-            </btn>
+            <btn name="mWheelDown" />
         </input>
 
         <input name="UAObjectModuleDeleteOnCursor">
             <btn name="kDelete">
+			    <event name="click" />
             </btn>
         </input>
         
@@ -95,79 +93,68 @@
 
         <input name="UACOTToggleButtons">
             <btn name="kY">
+			    <event name="click" />
             </btn>
         </input>
         
         <input name="UACOTTogglePlayer">
             <btn name="kRMenu">
-                <btn name="kT">
-                </btn>
+                <btn name="kT" />
             </btn>
         </input>
         <input name="UACOTToggleCamera">
             <btn name="kRMenu">
-                <btn name="kY">
-                </btn>
+                <btn name="kY" />
             </btn>
         </input>
         <input name="UACOTToggleESP">
             <btn name="kRMenu">
-                <btn name="kU">
-                </btn>
+                <btn name="kU" />
             </btn>
         </input>
         <input name="UACOTToggleMap">
             <btn name="kRMenu">
-                <btn name="kI">
-                </btn>
+                <btn name="kI" />
             </btn>
         </input>
         <input name="UACOTToggleMapEditor">
             <btn name="kRMenu">
-                <btn name="kO">
-                </btn>
+                <btn name="kB" />
             </btn>
         </input>
         <input name="UACOTToggleEntity">
             <btn name="kRMenu">
-                <btn name="kP">
-                </btn>
+                <btn name="kP" />
             </btn>
         </input>
         <input name="UACOTToggleSelected">
             <btn name="kRMenu">
-                <btn name="kH">
-                </btn>
+                <btn name="kM" />
             </btn>
         </input>
         <input name="UACOTToggleTeleport">
             <btn name="kRMenu">
-                <btn name="kJ">
-                </btn>
+                <btn name="kJ" />
             </btn>
         </input>
         <input name="UACOTToggleItem">
             <btn name="kRMenu">
-                <btn name="kK">
-                </btn>
+                <btn name="kK" />
             </btn>
         </input>
         <input name="UACOTToggleVehicle">
             <btn name="kRMenu">
-                <btn name="kL">
-                </btn>
+                <btn name="kL" />
             </btn>
         </input>
         <input name="UACOTToggleWeather">
             <btn name="kRMenu">
-                <btn name="kB">
-                </btn>
+                <btn name="kO" />
             </btn>
         </input>
         <input name="UACOTToggleServerInfo">
             <btn name="kRMenu">
-                <btn name="kN">
-                </btn>
+                <btn name="kN" />
             </btn>
         </input>
     </preset>

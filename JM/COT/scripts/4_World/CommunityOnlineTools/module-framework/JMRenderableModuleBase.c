@@ -179,7 +179,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	void Input_ToggleShow( UAInput input )
 	{
-		if ( !input.LocalPress() )
+		if ( !input.LocalClick() )
 			return;
 		
 		ToggleShow();

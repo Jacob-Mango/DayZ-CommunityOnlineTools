@@ -98,8 +98,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor( UAInput input )
 	{
-		if ( !(input.LocalPress() || input.LocalHold()) )
-			return;
+		//if ( !(input.LocalPress() || input.LocalHold()) )
+		//	return;
 
 		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
 			return;
