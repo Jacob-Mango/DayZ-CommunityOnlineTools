@@ -107,8 +107,6 @@ class JMMapEditorForm
 		
 		if ( input.LocalRelease( "UADefaultAction", false ) && m_SelectedObject )
 		{
-			GetRPCManager().SendRPC( "COT_MapEditor", "SetTransform", new Param2<vector, vector>( m_SelectedObject.GetPosition(), m_SelectedObject.GetOrientation() ), false, NULL, m_SelectedObject );
-
 			m_SelectedObject = NULL;
 		}
 
@@ -185,9 +183,7 @@ class JMMapEditorForm
 			if ( !GetGame().GetPlayer() || vector.Distance( position, GetGame().GetPlayer().GetPosition() ) < 900.0 )
 			{
 				m_SelectedObject.SetPosition( position );
-				m_SelectedObject.SetOrientation( orientation );
-				
-				GetRPCManager().SendRPC( "COT_MapEditor", "SetTransform", new Param2<vector, vector>( position, orientation ), false, NULL, m_SelectedObject );
+				m_SelectedObject.SetOrientation( orientation );	
 			}
 		} else 
 		{

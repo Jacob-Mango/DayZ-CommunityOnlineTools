@@ -41,9 +41,9 @@ PanelWidgetClass JMPlayerForm {
        vexactsize 0
        "Size To Content V" 1
        Columns 1
-       Rows 2
+       Rows 10
        {
-        GridSpacerWidgetClass player_list_first {
+        GridSpacerWidgetClass list_00 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -52,9 +52,9 @@ PanelWidgetClass JMPlayerForm {
          vexactsize 0
          "Size To Content V" 1
          Columns 1
-         Rows 1000
+         Rows 100
         }
-        GridSpacerWidgetClass player_list_second {
+        GridSpacerWidgetClass list_01 {
          position 0 0
          size 1 1
          hexactpos 1
@@ -63,7 +63,95 @@ PanelWidgetClass JMPlayerForm {
          vexactsize 0
          "Size To Content V" 1
          Columns 1
-         Rows 1000
+         Rows 100
+        }
+        GridSpacerWidgetClass list_02 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_03 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_04 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_05 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_06 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_07 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_08 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
+        }
+        GridSpacerWidgetClass list_09 {
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         "Size To Content V" 1
+         Columns 1
+         Rows 100
         }
        }
       }
@@ -204,9 +292,9 @@ PanelWidgetClass JMPlayerForm {
          vexactsize 0
          "Size To Content V" 1
          Columns 1
-         Rows 2
+         Rows 10
          {
-          GridSpacerWidgetClass permissions_container_first {
+          GridSpacerWidgetClass list_00 {
            position 0 0
            size 1 1
            hexactpos 1
@@ -215,9 +303,9 @@ PanelWidgetClass JMPlayerForm {
            vexactsize 0
            "Size To Content V" 1
            Columns 1
-           Rows 1000
+           Rows 100
           }
-          GridSpacerWidgetClass permissions_container_second {
+          GridSpacerWidgetClass list_01 {
            position 0 0
            size 1 1
            hexactpos 1
@@ -226,7 +314,95 @@ PanelWidgetClass JMPlayerForm {
            vexactsize 0
            "Size To Content V" 1
            Columns 1
-           Rows 1000
+           Rows 100
+          }
+          GridSpacerWidgetClass list_02 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_03 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_04 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_05 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_06 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_07 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_08 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
+          }
+          GridSpacerWidgetClass list_09 {
+           position 0 0
+           size 1 1
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           "Size To Content V" 1
+           Columns 1
+           Rows 100
           }
          }
         }

@@ -115,9 +115,51 @@ class JMPlayerInstance
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 	}
 
+	void LoadPermissions( array< string > permissions )
+	{
+		ClearPermissions();
+
+		for ( int i = 0; i < permissions.Count(); i++ )
+		{
+			AddPermission( permissions[i] );
+		}
+
+		Save();
+	}
+
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
 		RootPermission.AddPermission( permission, type );
+	}
+
+	void LoadRoles( array< string > roles )
+	{
+		ClearRoles();
+
+		for ( int i = 0; i < roles.Count(); i++ )
+		{
+			AddRole( roles[i] );
+		}
+
+		Save();
+	}
+
+	void AddRole( string role )
+	{
+		if ( !GetPermissionsManager().IsRole( role ) )
+			return;
+
+		if ( Roles.Find( role ) < 0 )
+		{
+			Roles.Insert( role );
+		}
+	}
+
+	void ClearRoles()
+	{
+		Roles.Clear();
+
+		AddRole( "everyone" );
 	}
 
 	bool HasPermission( string permission )
@@ -158,24 +200,6 @@ class JMPlayerInstance
 
 		//GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " false" );
 		return false;
-	}
-
-	void AddRole( string role )
-	{
-		if ( !GetPermissionsManager().IsRole( role ) )
-			return;
-
-		if ( Roles.Find( role ) < 0 )
-		{
-			Roles.Insert( role );
-		}
-	}
-
-	void ClearRoles()
-	{
-		Roles.Clear();
-
-		AddRole( "everyone" );
 	}
 
 	void Serialize()
