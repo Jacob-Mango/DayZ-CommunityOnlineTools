@@ -1,65 +1,52 @@
+enum JMPlayerModuleRPC
+{
+    INVALID = 10320,
+    SetHealth,
+	SetBlood,
+	SetShock,
+	SetEnergy,
+	SetWater,
+	SetStamina,
+	SetBloodyHands,
+	RepairTransport,
+	TeleportTo,
+	TeleportSenderTo,
+	TeleportToPrevious,
+	StartSpectating,
+	EndSpectating,
+	SetGodMode,
+	Heal,
+	Strip,
+	StopBleeding,
+	SetPermissions,
+	SetRoles,
+    COUNT
+};
+
 class JMPlayerModule: JMRenderableModuleBase
 {
 	void JMPlayerModule()
 	{
-		GetRPCManager().AddRPC( "COT_Admin", "SetPermissions", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "SetRoles", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT_Admin", "KickPlayer", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "BanPlayer", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "GodMode", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "SpectatePlayer", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "ToggleFreecam", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Invisibility", this, SingeplayerExecutionType.Server);
-		GetRPCManager().AddRPC( "COT_Admin", "HealPlayer", this, SingeplayerExecutionType.Server);
-		GetRPCManager().AddRPC( "COT_Admin", "StripPlayer", this, SingeplayerExecutionType.Server);
-		GetRPCManager().AddRPC( "COT_Admin", "StopBleeding", this, SingeplayerExecutionType.Server);
-		GetRPCManager().AddRPC( "COT_Admin", "TPLastPosition", this, SingeplayerExecutionType.Server);
-
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetHealth", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetBlood", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetEnergy", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetWater", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetShock", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetHeatComfort", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetWet", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetTremor", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetStamina", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetLifeSpanState", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_SetBloodyHands", this, SingeplayerExecutionType.Server );
-
-		GetRPCManager().AddRPC( "COT_Admin", "Player_KickTransport", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_RepairTransport", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportToMe", this, SingeplayerExecutionType.Server );
-		GetRPCManager().AddRPC( "COT_Admin", "Player_TeleportMeTo", this, SingeplayerExecutionType.Server );
-
-		GetPermissionsManager().RegisterPermission( "Admin.Permissions" );
-		GetPermissionsManager().RegisterPermission( "Admin.Roles" );
-		
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.StartSpectating" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
+
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Previous" );
+
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Permissions" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Roles" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Health" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Shock" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Blood" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Energy" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Water" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.HeatComfort" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Wet" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Tremor" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Stamina" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.LastShaved" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
 
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Transport.Kick" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Transport.Repair" );
-
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.ToMe" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.MeTo" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Previous" );
+		GetPermissionsManager().RegisterPermission( "Admin.Transport.Repair" );
 
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
@@ -121,909 +108,1043 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 	}
 
-	void Player_SetHealth( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	int GetRPCMin()
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		return JMPlayerModuleRPC.INVALID;
+	}
+
+	int GetRPCMax()
+	{
+		return JMPlayerModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
+		{
+		case JMPlayerModuleRPC.SetHealth:
+			RPC_SetHealth( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetBlood:
+			RPC_SetBlood( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetShock:
+			RPC_SetShock( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetEnergy:
+			RPC_SetEnergy( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetWater:
+			RPC_SetWater( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetStamina:
+			RPC_SetStamina( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetBloodyHands:
+			RPC_SetBloodyHands( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.RepairTransport:
+			RPC_RepairTransport( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.TeleportTo:
+			RPC_TeleportTo( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.TeleportSenderTo:
+			RPC_TeleportSenderTo( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.TeleportToPrevious:
+			RPC_TeleportToPrevious( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.StartSpectating:
+			RPC_StartSpectating( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.EndSpectating:
+			RPC_EndSpectating( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetGodMode:
+			RPC_SetGodMode( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Heal:
+			RPC_Heal( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Strip:
+			RPC_Strip( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.StopBleeding:
+			RPC_StopBleeding( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetPermissions:
+			RPC_SetPermissions( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetRoles:
+			RPC_SetRoles( ctx, sender, target );
+			break;
+		}
+    }
+
+	void SetHealth( float health, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetHealth( health, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( health );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetHealth, true, NULL );
+		}
+	}
+
+	private void Exec_SetHealth( float health, array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetHealth( "GlobalHealth", "Health", health );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Health To " + health + " [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float health;
+		if ( !ctx.Read( health ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", senderRPC ) )
 			return;
 
-		if ( type == CallType.Server )
+		Exec_SetHealth( health, guids, senderRPC );
+	}
+
+	void SetBlood( float blood, array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.SetHealth( "GlobalHealth", "Health", data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set health to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_SetBlood( blood, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( blood );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetBlood, true, NULL );
 		}
 	}
 
-	void Player_SetBlood( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetBlood( float blood, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetHealth( "GlobalHealth", "Blood", blood );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Blood To " + blood + " [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_SetBlood( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float blood;
+		if ( !ctx.Read( blood ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", senderRPC ) )
 			return;
 
-		if ( type == CallType.Server )
+		Exec_SetBlood( blood, guids, senderRPC );
+	}
+
+	void SetShock( float shock, array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.SetHealth( "GlobalHealth", "Blood", data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set blood to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_SetShock( shock, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( shock );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetShock, true, NULL );
 		}
 	}
 
-	void Player_SetEnergy( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetShock( float shock, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
 
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
+			player.SetHealth( "GlobalHealth", "Shock", shock );
 
-				if ( player == NULL ) continue;
-
-				player.GetStatEnergy().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set energy to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Set Shock To " + shock + " [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
-	void Player_SetWater( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_SetShock( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		float shock;
+		if ( !ctx.Read( shock ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", senderRPC ) )
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
 			return;
-
-		if ( type == CallType.Server )
-		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.GetStatWater().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set water to " + data.param1 + " for " + players[i].GetGUID() );
-			}
-		}
-	}
-
-	void Player_SetShock( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", senderRPC ) )
 			return;
 
-		if ( type == CallType.Server )
+		Exec_SetShock( shock, guids, senderRPC );
+	}
+
+	void SetEnergy( float energy, array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.SetHealth( "GlobalHealth", "Shock", data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set shock to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_SetEnergy( energy, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( energy );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetEnergy, true, NULL );
 		}
 	}
 
-	void Player_SetHeatComfort( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetEnergy( float energy, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatComfort", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
 
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
+			player.GetStatEnergy().Set( energy );
 
-				if ( player == NULL ) continue;
-
-				player.GetStatHeatComfort().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set heat comfort to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Set Energy To " + energy + " [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
-	void Player_SetWet( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_SetEnergy( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		float energy;
+		if ( !ctx.Read( energy ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Wet", senderRPC ) )
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
 			return;
 
-		if ( type == CallType.Server )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", senderRPC ) )
+			return;
+
+		Exec_SetEnergy( energy, guids, senderRPC );
+	}
+
+	void SetWater( float water, array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.GetStatWet().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set wetness to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_SetWater( water, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( water );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetWater, true, NULL );
 		}
 	}
 
-	void Player_SetTremor( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetWater( float water, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Tremor", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
 
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
+			player.GetStatWater().Set( water );
 
-				if ( player == NULL ) continue;
-
-				player.GetStatTremor().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set tremor to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Set Water To " + water + " [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
-	void Player_SetStamina( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_SetWater( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Param2< float, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		float water;
+		if ( !ctx.Read( water ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", senderRPC ) )
+			return;
+
+		Exec_SetWater( water, guids, senderRPC );
+	}
+
+	void SetStamina( float stamina, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetStamina( stamina, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( stamina );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetStamina, true, NULL );
+		}
+	}
+
+	private void Exec_SetStamina( float stamina, array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.GetStatStamina().Set( stamina );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Stamina To " + stamina + " [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_SetStamina( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float stamina;
+		if ( !ctx.Read( stamina ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", senderRPC ) )
 			return;
 
-		if ( type == CallType.Server )
+		Exec_SetStamina( stamina, guids, senderRPC );
+	}
+
+	void SetBloodyHands( bool bloodyhands, array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.GetStatStamina().Set( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set stamina to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_SetBloodyHands( bloodyhands, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( bloodyhands );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetBloodyHands, true, NULL );
 		}
 	}
 
-	void Player_SetLifeSpanState( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetBloodyHands( bool bloodyhands, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param2< int, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.LastShaved", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
 
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
+			player.SetBloodyHands( bloodyhands );
 
-				if ( player == NULL ) continue;
-
-				if ( data.param1 >= LifeSpanState.BEARD_NONE && data.param1 < LifeSpanState.COUNT )
-				{
-					player.SetLifeSpanStateVisible( data.param1 );
-				}
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set beard state to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Set BloodyHands To " + bloodyhands + " [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
-	void Player_SetBloodyHands( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_SetBloodyHands( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Param2< bool, ref array< string > > data;
-		if ( !ctx.Read( data ) )
+		bool bloodyhands;
+		if ( !ctx.Read( bloodyhands ) )
 			return;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", senderRPC ) )
 			return;
 
-		if ( type == CallType.Server )
+		Exec_SetBloodyHands( bloodyhands, guids, senderRPC );
+	}
+
+	void RepairTransport( array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.SetBloodyHands( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set bloody hands to " + data.param1 + " for " + players[i].GetGUID() );
-			}
+			Exec_RepairTransport( guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.RepairTransport, true, NULL );
 		}
 	}
 
-	void Player_KickTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_RepairTransport( array< string > guids, PlayerIdentity ident = NULL )
 	{
-		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
+		array< Transport > transports = new array< Transport >;
 
-		array< string > guids = new array< string >;
-		guids.Copy( data.param1 );
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Kick", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
-				if ( vehCommand == NULL ) continue;
-
-				Transport trans = vehCommand.GetTransport();
-				
-				if ( trans )
-				{
-					Car car;
-					if ( Class.CastTo(car, trans) )
-					{
-						float speed = car.GetSpeedometer();
-						if ( speed <= 8 )
-						{
-							vehCommand.GetOutVehicle();
-						} else
-						{
-							vehCommand.JumpOutVehicle();
-						}
-
-						GetCommunityOnlineToolsBase().Log( senderRPC, "Kicked " + players[i].GetGUID() + " out of transport" );
-					}
-				}
-			}
-		}
-	}
-
-	void Player_RepairTransport( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > guids = new array< string >;
-		guids.Copy( data.param1 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Transport.Repair", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
-		{
-			array< Transport > completedTransports = new array< Transport >;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL) continue;
-
-				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
-				if ( vehCommand == NULL ) continue;
-
-				Transport transport = vehCommand.GetTransport();
-
-				if ( transport == NULL ) continue;
-
-				if ( completedTransports.Find( transport ) > -1 )
-				{
-					ItemBase radiator;
-
-					Class.CastTo( radiator, transport.FindAttachmentBySlotName("CarRadiator") );
-
-					if ( radiator )
-					{
-						radiator.SetHealth( "", "", 100 );
-					}
-
-					transport.SetHealth( "Engine", "", 100 );
-					transport.SetHealth( "FuelTank", "", 100 );
-
-					CarScript car = CarScript.Cast( transport );
-
-					if ( car )
-					{
-						car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
-						car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
-						car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
-						car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
-					}
-
-					completedTransports.Insert( transport );
-
-					GetCommunityOnlineToolsBase().Log( senderRPC, "Repaired transport for " + players[i].GetGUID() );
-				}
-			}
-		}
-	}
-
-	void Player_TeleportToMe( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		Param2< vector, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.ToMe", senderRPC ) ) return;
-
-		if ( type == CallType.Server )
-		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				player.SetLastPosition( player.GetPosition() );
-
-				HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-				
-				if ( vehCommand )
-				{
-					Transport transport = vehCommand.GetTransport();
-
-					if ( transport )
-					{
-						transport.SetOrigin( data.param1 );
-						transport.SetPosition( data.param1 );
-						transport.Update();
-					}
-				} else
-				{
-					player.SetPosition( data.param1 );
-				}
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[i].GetGUID() + " to self" );
-			}
-		}
-	}
-
-	void Player_TeleportMeTo( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		Param1< ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > guids = new array< string >;
-		guids.Copy( data.param1 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.MeTo", senderRPC ) ) return;
-
-		PlayerBase senderPlayer = GetPlayerObjectByIdentity( senderRPC );
-
-		if ( senderPlayer == NULL )
-			return;
-
-		if ( type == CallType.Server )
-		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			if ( players.Count() == 0 )
-				return;
-
-			PlayerBase player = players[0].PlayerObject;
-
+			PlayerBase player = players[i].PlayerObject;
 			if ( player == NULL )
-				return;
-			
-			HumanCommandVehicle vehCommand = senderPlayer.GetCommand_Vehicle();
+				continue;
 
-			senderPlayer.SetLastPosition( senderPlayer.GetPosition() );
+			Transport transport;
+			if ( !Class.CastTo( transport, player.GetParent() ) )
+				continue;
 
-			if ( vehCommand )
+			if ( transports.Find( transport ) > -1 )
+				continue;
+
+			transports.Insert( transport );
+
+			ItemBase radiator;
+			if ( Class.CastTo( radiator, transport.FindAttachmentBySlotName( "CarRadiator" ) ) )
 			{
-				Transport transport = vehCommand.GetTransport();
+				radiator.SetHealth( "", "", 100 );
+			}
 
-				if ( transport == NULL )
-					return;
+			transport.SetHealth( "Engine", "", 100 );
+			transport.SetHealth( "FuelTank", "", 100 );
 
-				transport.SetOrigin( player.GetPosition() );
-				transport.SetPosition( player.GetPosition() );
+			CarScript car;
+			if ( Class.CastTo( car, transport ) )
+			{
+				car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
+				car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
+				car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
+				car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
+			}
+
+			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_RepairTransport( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Transport.Repair", senderRPC ) )
+			return;
+
+		Exec_RepairTransport( guids, senderRPC );
+	}
+
+	void TeleportTo( vector position, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_TeleportTo( position, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( position );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.TeleportTo, true, NULL );
+		}
+	}
+
+	private void Exec_TeleportTo( vector position, array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetLastPosition( player.GetPosition() );
+
+			Transport transport;
+			if ( Class.CastTo( transport, player.GetParent() ) )
+			{
+				transport.SetOrigin( position );
+				transport.SetPosition( position );
 				transport.Update();
 			} else
 			{
-				senderPlayer.SetPosition( player.GetPosition() );
+				player.SetPosition( position );
 			}
 
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported self to " + players[0].GetGUID() );
+			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
 		}
 	}
 
-	void SpectatePlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_TeleportTo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
+		vector position;
+		if ( !ctx.Read( position ) )
 			return;
 
-		if ( type == CallType.Server )
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
+			return;
+
+		Exec_TeleportTo( position, guids, senderRPC );
+	}
+
+	void TeleportSenderTo( string guid )
+	{
+		if ( IsMissionHost() )
 		{
-			Param2< bool, ref array< string > > data;
-			if ( !ctx.Read( data ) )
-				return;
+			Exec_TeleportSenderTo( guid );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Send( NULL, JMPlayerModuleRPC.TeleportSenderTo, true, NULL );
+		}
+	}
 
-			array< string > guids = new array< string >;
-			guids.Copy( data.param2 );
+	private void Exec_TeleportSenderTo( string guid, PlayerIdentity ident = NULL )
+	{
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
 
-			PlayerBase player;
-			
-			if ( !data.param1 )
+		PlayerBase player = instance.PlayerObject;
+		if ( player == NULL )
+			return;
+
+		vector position = player.GetPosition();
+
+		if ( Class.CastTo( player, GetPlayerObjectByIdentity( ident ) )
+		{
+			player.SetLastPosition( player.GetPosition() );
+
+			Transport transport;
+			if ( Class.CastTo( transport, player.GetParent() ) )
 			{
-				player = GetPlayerObjectByIdentity( senderRPC );
-				if ( !player )
-					return;
-
-				GetGame().SelectPlayer( senderRPC, player );
-				GetRPCManager().SendRPC( "COT_Camera", "LeaveCamera", new Param, true, senderRPC );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Left spectating/free camera" );
-				return;
+				transport.SetOrigin( position );
+				transport.SetPosition( position );
+				transport.Update();
+			} else
+			{
+				player.SetPosition( position );
 			}
 
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + instance.GetGUID() + "]" );
+		}
+	}
 
-			if ( players.Count() != 1 ) return;
+	private void RPC_TeleportSenderTo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		string guid;
+		if ( !ctx.Read( guid ) )
+			return;
 
-			player = players[0].PlayerObject;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.SenderTo", senderRPC ) )
+			return;
 
-			if ( player == NULL ) return;
+		Exec_TeleportSenderTo( guid, senderRPC );
+	}
 
-			GetGame().SelectSpectator( senderRPC, "JMSpectatorCamera", player.GetPosition() );
-
-			GetGame().SelectPlayer( senderRPC, NULL );
-
-			GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param, true, senderRPC, player );
-
-			GetCommunityOnlineToolsBase().Log( senderRPC, "Spectating " + players[0].GetGUID() );
-		}	
-
-		if ( type == CallType.Client )
+	void TeleportToPrevious( array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			if ( GetGame().IsMultiplayer() )
+			Exec_TeleportToPrevious( guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.TeleportToPrevious, true, NULL );
+		}
+	}
+
+	private void Exec_TeleportToPrevious( array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			if ( !player.HasLastPosition() )
+                continue;
+
+            vector position = player.GetLastPosition();
+
+			player.SetLastPosition( player.GetPosition() );
+
+			Transport transport;
+			if ( Class.CastTo( transport, player.GetParent() ) )
 			{
-				CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
+				transport.SetOrigin( position );
+				transport.SetPosition( position );
+				transport.Update();
+			} else
+			{
+				player.SetPosition( position );
 			}
-			
-			if ( CurrentActiveCamera )
+
+			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position + " [previous]" );
+		}
+	}
+
+	private void RPC_TeleportToPrevious( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", senderRPC ) )
+			return;
+
+		Exec_TeleportToPrevious( guids, senderRPC );
+	}
+
+	void StartSpectating( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			if ( IsMissionOffline() )
 			{
-				CurrentActiveCamera.SelectedTarget( target );
-				CurrentActiveCamera.SetActive( true );
+				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
+			}
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Send( NULL, JMPlayerModuleRPC.StartSpectating, true, NULL );
+		}
+	}
+
+	private void Server_StartSpectating( string guid, PlayerIdentity ident = NULL )
+	{
+		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer( guid );
+		if ( !spectateInstance )
+			return;
+
+		PlayerBase spectatePlayer = spectateInstance.PlayerObject;
+		if ( !spectatePlayer )
+			return;
+
+		bool spectatorObjectExists = false;
+		PlayerBase spectatorPlayer = GetPlayerObjectByIdentity( ident );
+		if ( spectatorPlayer )
+		{
+			spectatorObjectExists = true;
+		}
+
+		if ( spectatorObjectExists )
+		{
+			float distance = vector.Distance( spectatorPlayer.GetPosition(), spectatePlayer.GetPosition() );
+			if ( distance >= 1000 )
+			{
+				// notify error using notifications
+				return;
+			}
+		}
+
+		GetGame().SelectSpectator( ident, "JMSpectatorCamera", spectatePlayer.GetPosition() );
+		GetGame().SelectPlayer( ident, NULL );
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( spectatePlayer, JMPlayerModuleRPC.StartSpectating, true, ident );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Spectating [guid=" + guid + "]" );
+	}
+
+	private void Client_StartSpectating( PlayerBase player, PlayerIdentity ident = NULL )
+	{
+		CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
+		
+		if ( CurrentActiveCamera )
+		{
+			CurrentActiveCamera.SelectedTarget( player );
+			CurrentActiveCamera.SetActive( true );
+			
+			if ( GetPlayer() )
+			{
 				GetPlayer().GetInputController().SetDisabled( true );
 			}
 		}
 	}
 
-	void GodMode( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_StartSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Param2< bool, ref array< string > > data;
-		if ( !ctx.Read( data ) )
-			return;
-
-		array< string > guids = new array< string >;
-		guids.Copy( data.param2 );
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
+		if ( IsMissionHost() )
 		{
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
 
-			for ( int i = 0; i < players.Count(); i++ )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
+				return;
+
+			Server_StartSpectating( guid, senderRPC );
+		} else
+		{
+			PlayerBase player;
+			if ( Class.CastTo( player, target ) )
 			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL ) continue;
-
-				player.SetGodMode( data.param1 );
- 
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Set god mode to " + data.param1 + " for " + players[i].GetGUID() );
+				Client_StartSpectating( player, senderRPC );
 			}
 		}
 	}
 
-	void HealPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void EndSpectating()
 	{
-		if ( type == CallType.Server )
+		if ( IsMissionHost() )
 		{
-			Param1<ref array<string>> data;
-			if ( !ctx.Read( data ) )
-				return;
-	
-			array<string> guids = new array<string>;
-			guids.Copy( data.param1 );
-
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", senderRPC ) )
-				return;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
+			if ( IsMissionOffline() )
 			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				player.GetBleedingManagerServer().RemoveAllSources();
-
-				player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
-				player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
-				player.SetHealth( "GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
-
-				player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
-				player.GetStatWater().Set( player.GetStatWater().GetMax() );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Healing player for " + players[i].GetGUID() );
+				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
 			}
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( GetGame().GetPlayer(), JMPlayerModuleRPC.EndSpectating, true, NULL );
 		}
 	}
 
-	void TPLastPosition( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident = NULL )
 	{
-		if ( type == CallType.Server )
-		{
-			Param1<ref array<string>> data;
-			if (!ctx.Read(data))
-				return;
-	
-			array<string> guids = new array<string>;
-			guids.Copy( data.param1 );
+		GetGame().SelectPlayer( ident, player );
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", senderRPC ) )
-				return;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				if ( player.HasLastPosition() )
-				{
-					vector newPosition = player.GetLastPosition();
-
-					player.SetLastPosition( player.GetPosition() );
-
-					player.SetPosition( newPosition );
-
-					GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported " + players[i].GetGUID() + " to last position" );
-				}
-			}
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 	}
 
-	void StripPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Client_EndSpectating( PlayerIdentity ident = NULL )
 	{
-		if ( type == CallType.Server )
+		if ( CurrentActiveCamera )
 		{
-			Param1<ref array<string>> data;
-			if (!ctx.Read(data))
-				return;
-	
-			array<string> guids = new array<string>;
-			guids.Copy( data.param1 );
-
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", senderRPC ) )
-				return;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				player.RemoveAllItems();
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Stripping items from " + players[i].GetGUID() );
-			}
-		}
-	}
-
-	void StopBleeding( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( type == CallType.Server )
-		{
-			Param1<ref array<string>> data;
-			if (!ctx.Read(data))
-				return;
-	
-			array<string> guids = new array<string>;
-			guids.Copy( data.param1 );
-
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Bleeding", senderRPC ) )
-				return;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				PlayerBase player = players[i].PlayerObject;
-
-				if ( player == NULL )
-					continue;
-
-				player.GetBleedingManagerServer().RemoveAllSources();
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Bleeding stopped for " + players[i].GetGUID() );
-			}
-		}
-	}
-
-	void Invisibility(CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target)
-	{
-		if (type == CallType.Server)
-		{
-			Param2<bool, ref array<string>> data;
-			if (!ctx.Read(data))
-				return;
-	
-			array<string> guids = new array<string>;
-			guids.Copy(data.param2);
-
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisible", senderRPC ) )
-				return;
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+			CurrentActiveCamera.SetActive( false );
+			CurrentActiveCamera = NULL;
 			
-			for (int i = 0; i < players.Count(); i++)
-			{
-				PlayerBase player = players[i].PlayerObject;
+			PPEffects.ResetDOFOverride();
+		}
 
-				if (player == NULL) continue;
-
-				player.SetInvisibility( data.param1 );
-
-				GetCommunityOnlineToolsBase().Log(senderRPC, "Set invisibility to " + data.param1 + " for " + players[i].GetGUID());
-			}
+		if ( GetGame().GetPlayer() )
+		{
+			GetGame().GetPlayer().GetInputController().SetDisabled( false );
 		}
 	}
 
-	void SetPermissions( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_EndSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Permissions", senderRPC ) )
-			return;
-   
-		if ( type == CallType.Server )
+		if ( IsMissionHost() )
 		{
-			Param2< ref array< string >, ref array< string > > data;
-			if ( !ctx.Read( data ) ) return;
-
-			ref array< string > perms = new array< string >;
-			perms.Copy( data.param1 );
-
-			ref array< string > guids = new array< string >;
-			guids.Copy( data.param2 );
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int k = 0; k < players.Count(); k++ )
+			PlayerBase player;
+			if ( Class.CastTo( player, target ) )
 			{
-				players[k].ClearPermissions();
-
-				for ( int j = 0; j < perms.Count(); j++ )
-				{
-					players[k].AddPermission( perms[j] );
-				}
-
-				players[k].Save();
-
-				GetCommunityOnlineTools().SetClient( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject  );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated permissions for " + players[k].GetGUID() );
+				Server_EndSpectating( player, senderRPC );
 			}
+		} else
+		{
+			Client_EndSpectating( senderRPC );
 		}
 	}
 
-	void SetRoles( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void SetGodMode( bool godmode, array< string > guids )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles", senderRPC ) )
-			return;
-   
-		if ( type == CallType.Server )
+		if ( IsMissionHost() )
 		{
-			Param2< ref array< string >, ref array< string > > data;
-			if ( !ctx.Read( data ) ) return;
-
-			ref array< string > roles = new array< string >;
-			roles.Copy( data.param1 );
-
-			ref array< string > guids = new array< string >;
-			guids.Copy( data.param2 );
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int k = 0; k < players.Count(); k++ )
-			{
-				players[k].ClearRoles();
-				
-				for ( int j = 0; j < roles.Count(); j++ )
-				{
-					players[k].AddRole( roles[j] );
-				}
-
-				players[k].Save();
-
-				GetCommunityOnlineTools().SetClient( players[k].GetGUID(), players[k].Data, players[k].IdentityPlayer, players[k].PlayerObject  );
-
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Updated roles for " + players[k].GetGUID() );
-			}
+			Exec_SetGodMode( godmode, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( godmode );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetGodMode, true, NULL );
 		}
 	}
 
-	void KickPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void Exec_SetGodMode( bool godmode, array< string > guids, PlayerIdentity ident = NULL )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC ) )
-			return;
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		if ( type == CallType.Server )
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			ref Param1< ref array< string > > data;
-			if ( !ctx.Read( data ) )
-				return;
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
 
-			array< string > guids = new array< string >;
-			guids.Copy( data.param1 );
+			player.SetGodMode( godmode );
 
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				GetGame().ChatPlayer( "#kick " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Kicked " + players[i].GetGUID() );
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + godmode + " [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
-	void BanPlayer( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	private void RPC_SetGodMode( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC ) )
+		bool godmode;
+		if ( !ctx.Read( godmode ) )
 			return;
 
-		if ( type == CallType.Server )
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.GodMode", senderRPC ) )
+			return;
+
+		Exec_SetGodMode( godmode, guids, senderRPC );
+	}
+
+	void Heal( array< string > guids )
+	{
+		if ( IsMissionHost() )
 		{
-			ref Param1< ref array< string > > data;
-			if ( !ctx.Read( data ) )
-				return;
-
-			array< string > guids = new array< string >;
-			guids.Copy( data.param1 );
-
-			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-			for ( int i = 0; i < players.Count(); i++ )
-			{
-				GetGame().ChatPlayer( "#ban " + players[i].IdentityPlayer.GetPlayerId() );
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Banned " + players[i].GetGUID() );
-			}
+			Exec_Heal( guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Heal, true, NULL );
 		}
+	}
+
+	private void Exec_Heal( array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.GetBleedingManagerServer().RemoveAllSources();
+
+			player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
+			player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
+			player.SetHealth( "GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
+
+			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
+			player.GetStatWater().Set( player.GetStatWater().GetMax() );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_Heal( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", senderRPC ) )
+			return;
+
+		Exec_Heal( guids, senderRPC );
+	}
+	
+	void Strip( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Strip( guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Strip, true, NULL );
+		}
+	}
+
+	private void Exec_Strip( array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.RemoveAllItems();
+
+			GetCommunityOnlineToolsBase().Log( ident, "Striped [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_Strip( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", senderRPC ) )
+			return;
+
+		Exec_Strip( guids, senderRPC );
+	}
+	
+	void StopBleeding( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_StopBleeding( guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.StopBleeding, true, NULL );
+		}
+	}
+
+	private void Exec_StopBleeding( array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.GetBleedingManagerServer().RemoveAllSources();
+
+			GetCommunityOnlineToolsBase().Log( ident, "Bleeding stopped [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_StopBleeding( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.StopBleeding", senderRPC ) )
+			return;
+
+		Exec_StopBleeding( guids, senderRPC );
+	}
+
+	void SetPermissions( array< string > permissions, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetPermissions( permissions, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( permissions );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetPermissions, true, NULL );
+		}
+	}
+
+	private void Exec_SetPermissions( array< string > permissions, array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{		
+            players[i].LoadPermissions( permissions );
+
+			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject  );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_SetPermissions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > permissions;
+		if ( !ctx.Read( permissions ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", senderRPC ) )
+			return;
+
+		Exec_SetPermissions( permissions, guids, senderRPC );
+	}
+
+	void SetRoles( array< string > roles, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetRoles( roles, guids );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( roles );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetRoles, true, NULL );
+		}
+	}
+
+	private void Exec_SetRoles( array< string > roles, array< string > guids, PlayerIdentity ident = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{		
+            players[i].LoadRoles( roles );
+
+			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject  );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
+		}
+	}
+
+	private void RPC_SetRoles( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > roles;
+		if ( !ctx.Read( roles ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Roles", senderRPC ) )
+			return;
+
+		Exec_SetRoles( roles, guids, senderRPC );
 	}
 }

@@ -33,6 +33,14 @@ class JMTeleportSerialize
 		string permission = name + "";
 		permission.Replace( " ", "" );
 		permission.Replace( "'", "" );
+		permission.Replace( "(", "" );
+		permission.Replace( ")", "" );
+		permission.Replace( "[", "" );
+		permission.Replace( "]", "" );
+		permission.Replace( "{", "" );
+		permission.Replace( "}", "" );
+		permission.Replace( "\\", "" );
+		permission.Replace( "/", "" );
 
 		Locations.Insert( new JMTeleportLocation( name, permission, position, radius ) );
 	}

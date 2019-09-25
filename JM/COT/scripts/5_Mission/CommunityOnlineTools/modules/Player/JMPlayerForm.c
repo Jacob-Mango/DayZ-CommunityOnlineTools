@@ -6,15 +6,11 @@ class JMPlayerForm extends JMFormBase
 
 	ref Widget m_PlayerListWrapper;
 	ref TextWidget m_PlayerCount;
-	ref GridSpacerWidget m_PlayerScriptListFirst;
-	ref GridSpacerWidget m_PlayerScriptListSecond;
 
 	ref Widget m_ActionsWrapper;
 	ref Widget m_ActionsForm;
 
 	ref Widget m_PermissionsWrapper;
-	ref GridSpacerWidget m_PermissionListFirst;
-	ref GridSpacerWidget m_PermissionListSecond;
 
 	ref ButtonWidget m_SetPermissionsButton;
 	ref ButtonWidget m_PermissionsBackButton;
@@ -99,8 +95,6 @@ class JMPlayerForm extends JMFormBase
 		JMESPWidget.playerMenu = this;
 
 		m_PlayerListWrapper = layoutRoot.FindAnyWidget("players_list_wrapper");
-		m_PlayerScriptListFirst = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_first"));
-		m_PlayerScriptListSecond = GridSpacerWidget.Cast(m_PlayerListWrapper.FindAnyWidget("player_list_second"));
 
 		m_PlayerCount = TextWidget.Cast(layoutRoot.FindAnyWidget("player_count"));
 
@@ -120,28 +114,22 @@ class JMPlayerForm extends JMFormBase
 		m_PingMin = UIActionManager.CreateText( pings, "Ping Min: ", "" );
 		m_PingMax = UIActionManager.CreateText( pings, "Ping Max: ", "" );
 		m_PingAvg = UIActionManager.CreateText( pings, "Ping Avg: ", "" );
-		pings.Show( false ); // because this doesn't work
+		pings.Show( false );
 
 		ref Widget playerActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 6, 2 );
 		m_Health = UIActionManager.CreateEditableText( playerActions, "Health: ", this, "Click_SetHealth", "", "Set" );
+		m_Health.SetOnlyNumbers( true );
 		m_Shock = UIActionManager.CreateEditableText( playerActions, "Shock: ", this, "Click_SetShock", "", "Set" );
+		m_Shock.SetOnlyNumbers( true );
 		m_Blood = UIActionManager.CreateEditableText( playerActions, "Blood: ", this, "Click_SetBlood", "", "Set" );
+		m_Blood.SetOnlyNumbers( true );
 		m_Energy = UIActionManager.CreateEditableText( playerActions, "Energy: ", this, "Click_SetEnergy", "", "Set" );
+		m_Energy.SetOnlyNumbers( true );
 		m_Water = UIActionManager.CreateEditableText( playerActions, "Water: ", this, "Click_SetWater", "", "Set" );
-		//m_HeatComfort = UIActionManager.CreateEditableText( playerActions, "Temp Change: ", this, "Click_SetHeatComfort", "", "Set" );
-		//m_Wet = UIActionManager.CreateEditableText( playerActions, "Wet: ", this, "Click_SetWet", "", "Set" );
-		//m_Tremor = UIActionManager.CreateEditableText( playerActions, "Tremor: ", this, "Click_SetTremor", "", "Set" );
+		m_Water.SetOnlyNumbers( true );
 		m_Stamina = UIActionManager.CreateEditableText( playerActions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
-
-		ref array< string > lifeSpanOptions = new array< string >;
-		lifeSpanOptions.Insert( "No" );
-		lifeSpanOptions.Insert( "Medium " );
-		lifeSpanOptions.Insert( "Large" );
-		lifeSpanOptions.Insert( "Extra" );
-
-		// m_LastShaved = UIActionManager.CreateSelectionBox( playerActions, "Beard: ", lifeSpanOptions, this, "Click_SetLifeSpanState" );
+		m_Stamina.SetOnlyNumbers( true );
 		m_BloodyHands = UIActionManager.CreateCheckbox( playerActions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
-		// m_KickTransport = UIActionManager.CreateButton( playerActions, "Kick Transport", this, "Click_KickTransport" );
 		m_RepairTransport = UIActionManager.CreateButton( playerActions, "Repair Transport", this, "Click_RepairTransport" );
 		m_TeleportToMe = UIActionManager.CreateButton( playerActions, "Teleport To Me", this, "Click_TeleportToMe" );
 		m_TeleportMeTo = UIActionManager.CreateButton( playerActions, "Teleport Me To", this, "Click_TeleportMeTo" );
@@ -150,20 +138,13 @@ class JMPlayerForm extends JMFormBase
 		ref Widget serverActions = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 4, 2 );
 		m_ModifyPermissions = UIActionManager.CreateButton( serverActions, "Modify Permissions", this, "Click_ModifyPermissions" );
 		m_ModifyRoles = UIActionManager.CreateButton( serverActions, "Modify Roles", this, "Click_ModifyRoles" );
-		//m_Freecam = UIActionManager.CreateCheckbox( serverActions, "Freecam", this, "Click_ToggleFreecam", false );
-		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_GodMode", false );
+		m_GodMode = UIActionManager.CreateCheckbox( serverActions, "Godmode", this, "Click_SetGodMode", false );
 		m_SpectatePlayer = UIActionManager.CreateButton( serverActions, "Spectate", this, "Click_SpectatePlayer" );
-		//m_Invisibility = UIActionManager.CreateCheckbox(serverActions, "Invisibility", this, "Click_Invis", false);
 		m_HealPlayer = UIActionManager.CreateButton( serverActions, "Heal", this, "Click_HealPlayer" );
 		m_StopBleeding = UIActionManager.CreateButton( serverActions, "Stop Bleeding", this, "Click_StopBleeding" );
 		m_StripPlayer = UIActionManager.CreateButton( serverActions, "Strip", this, "Click_StripPlayer" );
 
-		//m_BanPlayer = UIActionManager.CreateButton( serverActions, "Ban Player", this, "Click_BanPlayer" );
-		//m_KickPlayer = UIActionManager.CreateButton( serverActions, "Kick Player", this, "Click_KickPlayer" );
-
 		m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
-		m_PermissionListFirst = GridSpacerWidget.Cast(m_PermissionsWrapper.FindAnyWidget("permissions_container_first"));
-		m_PermissionListSecond = GridSpacerWidget.Cast(m_PermissionsWrapper.FindAnyWidget("permissions_container_second"));
 
 		m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
 		m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
@@ -211,7 +192,11 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "StripPlayer", new Param1< ref array< string > >( GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.Strip( GetSelectedPlayers() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, ref UIActionBase action )
@@ -222,7 +207,11 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "StopBleeding", new Param1< ref array< string > >( GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.StopBleeding( GetSelectedPlayers() );
 	}
 
 	void Click_HealPlayer( UIEvent eid, ref UIActionBase action )
@@ -233,15 +222,20 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "HealPlayer", new Param1< ref array< string > >( GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.Heal( GetSelectedPlayers() );
 	}
 
 	void Click_SpectatePlayer( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 )
+		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( eid != UIEvent.CLICK )
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
 			return;
 
 		bool shouldSpectate = true;
@@ -256,166 +250,176 @@ class JMPlayerForm extends JMFormBase
 			}
 		}
 
-		GetRPCManager().SendRPC( "COT_Admin", "SpectatePlayer", new Param2< bool, ref array< string > >( shouldSpectate, GetSelectedPlayers() ) );
-	}
+		if ( shouldSpectate )
+		{
+			if ( GetSelectedPlayers().Count() != 1 )
+				return;
 
-	void Click_BanPlayer( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "BanPlayer", new Param1< ref array< string > >( GetSelectedPlayers() ) );
-	}
-
-	void Click_KickPlayer( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "KickPlayer", new Param1< ref array< string > >( GetSelectedPlayers() ) );
-	}
-
-	void Click_KickTransport( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "Player_KickTransport", new Param1< ref array< string > >( GetSelectedPlayers() ) );
+			module.StartSpectating( GetSelectedPlayers()[0] );
+		} else
+		{
+			module.EndSpectating();
+		}
 	}
 
 	void Click_RepairTransport( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_RepairTransport", new Param1< ref array< string > >( GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.RepairTransport( GetSelectedPlayers() );
 	}
 	
 	void Click_TeleportToMe( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		vector position = "0 0 0";
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
-			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( CurrentActiveCamera.GetPosition(), GetSelectedPlayers() ) );
-		} else 
+			position = CurrentActiveCamera.GetPosition();
+		} else if ( GetPlayer() )
 		{
-			GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportToMe", new Param2< vector, ref array< string > >( GetPlayer().GetPosition(), GetSelectedPlayers() ) );
+			position = GetPlayer().GetPosition();
+		} else
+		{
+			return;
 		}
+
+		module.TeleportTo( position, GetSelectedPlayers() );
 	}
 
 	void Click_TeleportMeTo( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 ) return;
+		if ( GetSelectedPlayers().Count() != 1 )
+			return;
 
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_TeleportMeTo", new Param1< ref array< string > >( GetSelectedPlayers() ), false );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.TeleportSenderTo( GetSelectedPlayers()[0] );
 	}
 
 	void Click_TeleportPrevious( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		if ( eid != UIEvent.CLICK ) return;
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "TPLastPosition", new Param1< ref array< string > >( GetSelectedPlayers() ), false );
+		module.TeleportToPrevious( GetSelectedPlayers() );
 	}
 
 	void Click_SetHealth( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHealth", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetHealth( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetShock( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetShock", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetShock( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetBlood( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBlood", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetBlood( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetEnergy", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetEnergy( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetWater( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWater", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
-	}
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
 
-	void Click_SetHeatComfort( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetHeatComfort", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
-	}
-
-	void Click_SetWet( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetWet", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
-	}
-
-	void Click_SetTremor( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetTremor", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
+		module.SetWater( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetStamina( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetStamina", new Param2< float, ref array< string > >( ToFloat( action.GetText() ), GetSelectedPlayers() ) );
-	}
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
 
-	void Click_SetLifeSpanState( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE ) return;
-
-		int state = action.GetSelection();
-
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetLifeSpanState", new Param2< int, ref array< string > >( state, GetSelectedPlayers() ) );
+		module.SetStamina( ToFloat( action.GetText() ), GetSelectedPlayers() );
 	}
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "Player_SetBloodyHands", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetBloodyHands( action.IsChecked(), GetSelectedPlayers() );
 	}
 
-	void Click_ToggleFreecam( UIEvent eid, ref UIActionBase action )
+	void Click_SetGodMode( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
-		GetRPCManager().SendRPC( "COT_Admin", "ToggleFreecam", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedPlayers() ) );
-	}
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
 
-	void Click_GodMode( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "GodMode", new Param2< bool, ref array< string > >( action.IsChecked(), GetSelectedPlayers() ) );
-	}
-
-	void Click_Invis(UIEvent eid, ref UIActionBase action)
-	{
-		if (eid != UIEvent.CLICK) return;
-
-		GetRPCManager().SendRPC( "COT_Admin", "Invisibility", new Param2< bool, ref array<string > >( action.IsChecked(), GetSelectedPlayers() ) );
+		module.SetGodMode( action.IsChecked(), GetSelectedPlayers() );
 	}
 
 	void HideSide()
@@ -606,7 +610,7 @@ class JMPlayerForm extends JMFormBase
 	{
 		JMPermission rootPerm = GetPermissionsManager().GetRootPermission();
 
-		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", m_PermissionListFirst );
+		Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", m_PermissionsWrapper.FindAnyWidget( "list_00" ) );
 
 		permRow.GetScript( m_PermissionUI );
 
@@ -639,30 +643,22 @@ class JMPlayerForm extends JMFormBase
 	{
 		for ( int i = 0; i < perm.Children.Count(); i++ )
 		{
-			ref JMPermission cPerm = perm.Children[i];
+			Widget parentWidget = m_PermissionsWrapper.FindAnyWidget( "list_0" + Math.Floor( m_PermissionList.Count() / 100 ) );
 
-			Widget permRow = NULL;
-			
-			if ( m_PermissionList.Count() >= 100 )
-			{
-				permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", m_PermissionListFirst );
-			} else
-			{
-				permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", m_PermissionListSecond );
-			}
+			Widget permRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", parentWidget );
 
-			ref JMPermissionRowWidget rowScript;
+			JMPermissionRowWidget rowScript;
 			permRow.GetScript( rowScript );
 
 			if ( rowScript )
 			{
 				m_PermissionList.Insert( rowScript );
-				rowScript.InitPermission( cPerm, depth );
+				rowScript.InitPermission( perm.Children[i], depth );
 
 				parentRow.Children.Insert( rowScript );
 				rowScript.Parent = parentRow;
 
-				CreatePermissionUIRow( cPerm, depth + 1, rowScript );
+				CreatePermissionUIRow( perm.Children[i], depth + 1, rowScript );
 			}
 		}
 	}
@@ -691,7 +687,11 @@ class JMPlayerForm extends JMFormBase
 
 	void SetPermissions()
 	{
-		GetRPCManager().SendRPC( "COT_Admin", "SetPermissions", new Param2< ref array< string >, ref array< string > >( SerializePermissionUI(), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetPermissions( SerializePermissionUI(), GetSelectedPlayers() );
 	}
 
 	void CreateRolesUI()
@@ -782,55 +782,48 @@ class JMPlayerForm extends JMFormBase
 
 	void SetRoles()
 	{
-		GetRPCManager().SendRPC( "COT_Admin", "SetRoles", new Param2< ref array< string >, ref array< string > >( SerializeRolesUI(), GetSelectedPlayers() ) );
+		JMPlayerModule module;
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+			return;
+
+		module.SetRoles( SerializeRolesUI(), GetSelectedPlayers() );
 	}
 
 	void CreatePlayerList()
 	{
-		ref Widget playerRow = NULL;
-		ref JMPlayerRowWidget rowScript = NULL;
+		ref Widget rwWidget = NULL;
+		ref JMPlayerRowWidget rwScript = NULL;
 
-		for ( int i = 0; i < 100; i++ )
+		for ( int i = 0; i < 10; i++ )
 		{
-			rowScript = NULL;
-			playerRow = NULL;
-
-			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", m_PlayerScriptListFirst );
+			GridSpacerWidget gsw = GridSpacerWidget.Cast( m_PlayerListWrapper.FindAnyWidget( "list_0" + i ) );
 			
-			if ( playerRow == NULL ) continue;
-
-			playerRow.GetScript( rowScript );
-
-			if ( rowScript == NULL ) continue;
-
-			rowScript.SetPlayer( "" );
-
-			rowScript.Menu = this;
-
-			m_PlayerList.Insert( rowScript );
-		}
-
-		for ( i = 0; i < 100; i++ )
-		{
-			rowScript = NULL;
-			playerRow = NULL;
-
-			playerRow = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", m_PlayerScriptListSecond );
-			
-			if ( playerRow == NULL )
+			if ( !gsw )
 				continue;
 
-			playerRow.GetScript( rowScript );
+			for ( int j = 0; j < 100; j++ )
+			{
+				rwWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
+				
+				if ( rwWidget == NULL )
+				{
+					continue;
+				}
 
-			if ( rowScript == NULL )
-				continue;
+				rwWidget.GetScript( rwScript );
 
-			rowScript.SetPlayer( "" );
+				if ( rwScript == NULL )
+				{
+					continue;
+				}
 
-			rowScript.Menu = this;
+				rwScript.SetPlayer( "" );
 
-			m_PlayerList.Insert( rowScript );
-		}				
+				rwScript.Menu = this;
+
+				m_PlayerList.Insert( rwScript );
+			}
+		}		
 	}
 
 	void UpdatePlayerList()

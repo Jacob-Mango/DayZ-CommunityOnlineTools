@@ -35,9 +35,6 @@ class JMServerInfoForm extends JMFormBase
 		m_UIActiveAI 		= UIActionManager.CreateText( m_ActionsWrapper, "Active AI: ", "" );
 		m_UIGameTickTime	= UIActionManager.CreateText( m_ActionsWrapper, "Game Tick Time: ", "" );
 		m_UIMissionTickTime = UIActionManager.CreateText( m_ActionsWrapper, "Mission Tick Time: ", "" );
-
-		UIActionManager.CreateButton( m_ActionsWrapper, "Refresh Data", this, "RefreshData" );
-		//UIActionManager.CreateButton( m_ActionsWrapper, "Restart Mission", this, "RestartMission" );
 	}
 
 	void UpdateData( ref JMServerInfoData data )
@@ -51,21 +48,5 @@ class JMServerInfoForm extends JMFormBase
 		m_UIActiveAI.SetText( "" + data.ActiveAI );
 		m_UIGameTickTime.SetText( "" + data.GameTickTime );
 		m_UIMissionTickTime.SetText( "" + data.MissionTickTime );
-	}
-
-	void RefreshData( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-		
-		GetRPCManager().SendRPC( "COT_ServerInformation", "LoadData", NULL, false, NULL );
-	}
-
-	void RestartMission( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-		
-		GetRPCManager().SendRPC( "COT_ServerInformation", "Restart", NULL, false, NULL );
 	}
 }

@@ -1,3 +1,11 @@
+enum JMESPModuleRPC
+{
+    INVALID = 10300,
+	Log,
+    FullMap,
+    COUNT
+};
+
 class JMESPModule: JMRenderableModuleBase
 {
 	protected const int m_UserIDStart = 10000;
