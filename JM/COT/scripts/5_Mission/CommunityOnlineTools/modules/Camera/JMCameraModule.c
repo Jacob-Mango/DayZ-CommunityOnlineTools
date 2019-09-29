@@ -172,8 +172,6 @@ class JMCameraModule: JMRenderableModuleBase
 			position = target.GetPosition();
 		}
 
-		GetGame().SelectPlayer( sender, NULL );
-
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
@@ -181,17 +179,19 @@ class JMCameraModule: JMRenderableModuleBase
 			//player.GetInputController().SetDisabled( true );
 		}
 
-		if ( GetGame().IsMultiplayer() )
+		GetGame().SelectPlayer( sender, NULL );
+
+		if ( IsMissionOffline() )
+		{
+			CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", position, false ) );
+
+			Client_Enter();
+		} else 
 		{
 			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMCameraModuleRPC.Enter, true, sender );
-		} else
-		{
-			CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", position, false ) );
-
-			Client_Enter();
 		}
 
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
