@@ -46,13 +46,11 @@
         </input>
         <input name="UACOTModuleToggleCOT">
             <btn name="kEnd">
-			    <event name="click" />
             </btn>
         </input>
 
         <input name="UATeleportModuleTeleportCursor">
             <btn name="kH">
-			    <event name="click" />
             </btn>
         </input>
 
@@ -80,7 +78,6 @@
 
         <input name="UAObjectModuleDeleteOnCursor">
             <btn name="kDelete">
-			    <event name="click" />
             </btn>
         </input>
         
@@ -93,7 +90,6 @@
 
         <input name="UACOTToggleButtons">
             <btn name="kY">
-			    <event name="click" />
             </btn>
         </input>
         
