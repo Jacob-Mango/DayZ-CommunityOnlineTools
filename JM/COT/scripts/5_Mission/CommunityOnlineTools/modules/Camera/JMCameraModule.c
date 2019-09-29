@@ -140,7 +140,8 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
-		if ( IsMissionClient() )
+
+		if ( !IsMissionOffline() && IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( GetGame().GetPlayer(), JMCameraModuleRPC.Enter, true, NULL );
@@ -199,7 +200,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 			return;
 
-		if ( IsMissionHost() )
+		if ( !IsMissionOffline() && IsMissionHost() )
 		{
 			Server_Enter( senderRPC, target );
 		} else
@@ -210,7 +211,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Leave()
 	{
-		if ( IsMissionClient() )
+		if ( !IsMissionOffline() && IsMissionClient() )
 		{
 			SetFreezeMouse( false );
 
