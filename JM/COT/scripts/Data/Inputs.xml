@@ -50,14 +50,11 @@
         </input>
 
         <input name="UATeleportModuleTeleportCursor">
-            <btn name="kH">
-            </btn>
+            <btn name="kH" />
         </input>
 
         <input name="UACameraToolToggleCamera">
-            <btn name="kInsert">
-			    <event name="click" />
-            </btn>
+            <btn name="kInsert" />
         </input>
         <input name="UACameraToolZoomForwards">
             <btn name="kLControl">
