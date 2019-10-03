@@ -283,7 +283,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
 			return;
 		}
 

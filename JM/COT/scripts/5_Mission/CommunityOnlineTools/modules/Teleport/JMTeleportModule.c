@@ -106,7 +106,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			CreateLocalAdminNotification( "Community Online Tools is currently toggled off." );
+			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -128,7 +128,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			Position( hitPos );
 		} else
 		{
-			CreateLocalAdminNotification( "Distance for teleportation is too far!" );
+			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
 		}
 	}
 
