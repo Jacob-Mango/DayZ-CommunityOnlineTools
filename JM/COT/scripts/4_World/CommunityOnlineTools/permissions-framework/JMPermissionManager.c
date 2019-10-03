@@ -14,13 +14,18 @@ class JMPermissionManager
 
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		
-		if ( GetGame().IsServer() )
+		if ( IsMissionHost() )
 		{
 			MakeDirectory( JMConstants.DIR_PF );
 
 			MakeDirectory( JMConstants.DIR_PERMISSIONS );
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
+		}
+
+		if ( IsMissionOffline() )
+		{
+			CreateFakePlayers();
 		}
 	}
 
@@ -52,6 +57,21 @@ class JMPermissionManager
 	bool IsRole( string role )
 	{
 		return Roles.Contains( role );
+	}
+
+	void CreateFakePlayers()
+	{
+		for ( int i = 0; i < 200; i++ )
+		{
+			CreateFakePlayer( i );
+		}
+	}
+
+	private void CreateFakePlayer( int i )
+	{
+		JMPlayerInstance instance = new JMPlayerInstance( NULL );
+		instance.MakeFake( "GFake" + i, "SFake" + i, "NFake" + i )
+		Players.Insert( instance.GetGUID(), instance );
 	}
 
 	/**

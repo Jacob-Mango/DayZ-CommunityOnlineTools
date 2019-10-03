@@ -9,7 +9,7 @@ PanelWidgetClass JMPlayerForm {
  scriptclass "JMPlayerForm"
  style EditorPanel
  {
-  PanelWidgetClass players_list_wrapper {
+  PanelWidgetClass panel_left {
    color 0 0 0 0
    position 0 0
    size 0.30 1
@@ -20,171 +20,17 @@ PanelWidgetClass JMPlayerForm {
    vexactsize 0
    style EditorPanel
    {
-    ScrollWidgetClass players_list_scroller {
-     position 0 5
-     size 1 560
-     halign center_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
+    PanelWidgetClass actions_form {
+     color 0 0 0 0
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     style blank
-     "Scrollbar V" 1
+     vexactsize 0
+     style EditorPanel
      {
-      GridSpacerWidgetClass player_list_scroller_container {
-       position 0 0
-       size 1 1
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 10
-       {
-        GridSpacerWidgetClass list_00 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_01 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_02 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_03 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_04 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_05 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_06 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_07 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_08 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-        GridSpacerWidgetClass list_09 {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-         Columns 1
-         Rows 100
-        }
-       }
-      }
      }
-    }
-    TextWidgetClass text {
-     position 5 10
-     size 1 20
-     halign left_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     text "Player List"
-     font "gui/fonts/sdf_MetronLight24"
-     "exact text" 1
-     "exact text size" 16
-    }
-    TextWidgetClass player_count {
-     position 5 10
-     size 1 20
-     halign right_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     text "N/A Online"
-     font "gui/fonts/sdf_MetronLight24"
-     "exact text" 1
-     "exact text size" 16
-     "text halign" right
     }
    }
   }
@@ -197,6 +43,7 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
+   style EditorPanel
    {
     PanelWidgetClass actions_form {
      color 0 0 0 0

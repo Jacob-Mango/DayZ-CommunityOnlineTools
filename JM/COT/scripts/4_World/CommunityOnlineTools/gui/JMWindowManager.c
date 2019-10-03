@@ -79,12 +79,10 @@ class JMWindowManager
         {
             m_Windows[i].GetLayoutRoot().SetSort( m_Windows.Count() - i );
 
-            m_Windows[i].SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
-            m_Windows[i].SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
+            m_Windows[i].Unfocus();
         }
 
-        window.SetBackgroundColour( 0.93, 0.06, 0.08, 0.11 );
-        window.SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
+        window.Focus();
     }
 
     JMWindowBase GetWindowFromWidget( notnull Widget w )

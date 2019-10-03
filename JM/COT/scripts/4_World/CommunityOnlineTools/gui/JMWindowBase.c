@@ -12,12 +12,16 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	private JMRenderableModuleBase m_Module;
 	private JMConfirmation m_Confirmation;
 
-	private float offsetX;
-	private float offsetY;
+	private autoptr array< Widget > m_BrokenWidgets;
+
+	private float m_OffsetX;
+	private float m_OffsetY;
 
 	void JMWindowBase() 
 	{
         GetCOTWindowManager().AddWindow( this );
+
+		m_BrokenWidgets = new array< Widget >;
 	}
 
 	void ~JMWindowBase() 
@@ -171,6 +175,74 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		}
 	}
 
+	void Focus()
+	{
+        SetBackgroundColour( 0.99, 0.06, 0.08, 0.11 );
+        SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
+
+		foreach ( Widget widget : m_BrokenWidgets )
+		{
+			widget.Show( true );
+		}
+
+		m_Form.OnFocus();
+	}
+
+	void Unfocus()
+	{
+        SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
+        SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
+
+		foreach ( Widget widget : m_BrokenWidgets )
+		{
+			widget.Show( false );
+
+			if ( widget.GetChildren() )
+			{
+				widget.GetChildren().Show( true );
+			}
+		}
+
+		m_Form.OnUnfocus();
+	}
+
+	void OnFormLoaded()
+	{
+		if ( !m_Form || !m_Form.GetLayoutRoot() )
+			return;
+
+		// RecursiveCheckWidget( m_Form.GetLayoutRoot() );
+	}
+
+	private void RecursiveCheckWidget( Widget w )
+	{
+		if ( w == NULL )
+			return;
+
+		if ( w.GetTypeName() == "ScrollWidget" )
+		{
+		// lets live with the fact that scroll bar widgets are brokken
+		//	m_BrokenWidgets.Insert( w ); 
+		} else if ( w.GetTypeName() == "ItemPreviewWidget" )
+		{
+			m_BrokenWidgets.Insert( w );
+		} else if ( w.GetTypeName() == "PlayerPreviewWidget" )
+		{
+			m_BrokenWidgets.Insert( w );
+		} else if ( w.GetTypeName() == "HtmlWidget" )
+		{
+			m_BrokenWidgets.Insert( w );
+		} else if ( w.GetTypeName() == "MapWidget" )
+		{
+			m_BrokenWidgets.Insert( w );
+		} else
+		{
+			RecursiveCheckWidget( w.GetChildren() );
+		}
+
+		RecursiveCheckWidget( w.GetSibling() );
+	}
+
 	void Update( float timeSlice )
 	{
 		if ( !m_TitleWrapper )
@@ -221,10 +293,10 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( w == m_TitleWrapper )
 		{
-			layoutRoot.GetPos( offsetX, offsetY );
+			layoutRoot.GetPos( m_OffsetX, m_OffsetY );
 
-			offsetX = x - offsetX;
-			offsetY = y - offsetY;
+			m_OffsetX = x - m_OffsetX;
+			m_OffsetY = y - m_OffsetY;
 
 			m_TitleWrapper.SetPos( 0, 0, true );
 			m_TitleWrapper.SetPos( 0, 0, false );
@@ -244,7 +316,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( w == m_TitleWrapper )
 		{
-			SetPosition( x - offsetX, y - offsetY );
+			SetPosition( x - m_OffsetX, y - m_OffsetY );
 
 			return true;
 		}
@@ -261,7 +333,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( w == m_TitleWrapper )
 		{
-			SetPosition( x - offsetX, y - offsetY );
+			SetPosition( x - m_OffsetX, y - m_OffsetY );
 			
 			return true;
 		}
