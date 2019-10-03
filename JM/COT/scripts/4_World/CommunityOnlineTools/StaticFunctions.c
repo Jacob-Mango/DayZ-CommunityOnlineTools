@@ -20,9 +20,9 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObj
 	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
 }
 
-static void CreateLocalAdminNotification( string message, string icon = "set:ccgui_enforce image:HudBuild" )
+static void CreateLocalAdminNotification( ref StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
-	NotificationSystem.AddNotificationExtended( 1.5, "Admin", message, icon );
+	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIF_ADMIN_TITLE" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, NULL );
 }
 
 static vector GetCurrentPosition()

@@ -199,10 +199,10 @@ class COTModule : JMModuleBase
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
-			CreateLocalAdminNotification( "Community Online Tools has been toggled on." );
+			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_on" ) );
 		} else
 		{
-			CreateLocalAdminNotification( "Community Online Tools has been toggled off." );
+			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_off" ) );
 		}
 	}
 }
