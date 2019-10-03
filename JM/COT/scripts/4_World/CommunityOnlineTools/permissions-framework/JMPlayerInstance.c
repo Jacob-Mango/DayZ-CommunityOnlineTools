@@ -41,6 +41,13 @@ class JMPlayerInstance
 		delete RootPermission;
 	}
 
+	void MakeFake( string gid, string sid, string nid )
+	{
+		Data.SGUID = gid;
+		Data.SSteam64ID = sid;
+		Data.SName = nid;
+	}
+
 	void SwapData( JMPlayerInformation newData )
 	{
 		Data.Copy( newData );

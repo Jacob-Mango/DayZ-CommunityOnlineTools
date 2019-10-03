@@ -11,6 +11,13 @@ class UIActionManager
 
 		return NULL;
 	}
+
+	static ref Widget CreateActionRows( Widget parent )
+	{
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
+
+		return widget;
+	}
 	
 	static ref Widget CreateSpacer( Widget parent )
 	{
@@ -192,6 +199,21 @@ class UIActionManager
 			action.SetMax( max );
 			action.SetStepValue( 0 );
 
+			return action;
+		}
+
+		return NULL;
+	}
+
+	static ref UIActionScroller CreateScroller( Widget parent )
+	{
+		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout", parent );
+
+		UIActionScroller action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
 			return action;
 		}
 

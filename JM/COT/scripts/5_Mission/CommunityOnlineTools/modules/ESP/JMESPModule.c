@@ -62,7 +62,6 @@ class JMESPModule: JMRenderableModuleBase
 		IsShowing = false;
 
 		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
-
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );

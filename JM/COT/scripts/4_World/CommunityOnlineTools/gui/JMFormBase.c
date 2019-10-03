@@ -26,6 +26,8 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		module = mdl;
 
 		OnInit();
+		
+		window.OnFormLoaded();
 	}
 
 	void OnInit()
@@ -48,6 +50,14 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	}
 
 	void OnHide() 
+	{
+	}
+
+	void OnFocus()
+	{
+	}
+
+	void OnUnfocus()
 	{
 	}
 

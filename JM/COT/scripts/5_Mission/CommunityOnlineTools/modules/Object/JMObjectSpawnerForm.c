@@ -64,25 +64,25 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		Widget spawnButtons = NULL;
 
-			spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
+		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
 
-			UIActionManager.CreateText( spawnButtons, "Spawn on: " );
+		UIActionManager.CreateText( spawnButtons, "Spawn on: " );
 
-			UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
-			UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
-			
-			if ( GetGame().IsServer() )
-			{
-				UIActionManager.CreateButton( spawnButtons, "Inventory", this, "SpawnInventory" );
-			} else
-			{
-				UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
-			}
+		UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
+		UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
+		
+		if ( GetGame().IsServer() )
+		{
+			UIActionManager.CreateButton( spawnButtons, "Inventory", this, "SpawnInventory" );
+		} else
+		{
+			UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+		}
 
-		UIActionManager.CreateButton( m_SpawnerActionsWrapper, "Delete On Cursor", this, "DeleteOnCursor" );
+		UpdateItemPreview();
 	}
 
-	void UpdateRotation(int mouse_x, int mouse_y, bool is_dragging)
+	void UpdateRotation( int mouse_x, int mouse_y, bool is_dragging )
 	{		
 		m_Orientation[0] = m_Orientation[0] + ( m_MouseY - mouse_y );
 		m_Orientation[1] = m_Orientation[1] - ( m_MouseX - mouse_x );
@@ -90,43 +90,60 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_ItemPreview.SetModelOrientation( m_Orientation );
 	}
 
+	void UpdateItemPreview()
+	{
+		string strSelection = GetCurrentSelection();
+
+		if ( m_PreviewItem ) 
+		{
+			GetGame().ObjectDelete( m_PreviewItem );
+		}
+
+		if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
+		{
+			m_ItemPreview.Show( false );
+			return;
+		}
+
+		m_Orientation = vector.Zero;
+
+		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
+
+		if ( m_PreviewItem )
+		{
+			m_ItemPreview.SetItem( m_PreviewItem );
+			m_ItemPreview.SetModelPosition( Vector( 0, 0, 0.5 ) );
+			m_ItemPreview.SetModelOrientation( vector.Zero );
+			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
+			m_ItemPreview.Show( true );
+		} else
+		{
+			m_ItemPreview.Show( false );
+		}
+	}
+
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
 	{
 		if ( w == m_ClassList ) 
 		{
-			string strSelection = GetCurrentSelection();
+			UpdateItemPreview();
 
-			if ( m_PreviewItem ) 
-			{
-				GetGame().ObjectDelete( m_PreviewItem );
-			}
-
-			if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
-			{
-				return true;
-			}
-
-			m_Orientation = vector.Zero;
-
-			m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
-
-			m_ItemPreview.SetModelPosition( Vector( 0, 0, 0.5 ) );
-			m_ItemPreview.SetModelOrientation( vector.Zero );
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
 		super.OnMouseButtonDown( w, x, y, button );
 
-		if ( w == m_PreviewItem )
+		if ( w == m_PreviewItem && button == MouseState.LEFT )
 		{
-			GetGame().GetDragQueue().Call(this, "UpdateRotation");
+			GetGame().GetDragQueue().Call( this, "UpdateRotation" );
 			GetGame().GetMousePos( m_MouseX, m_MouseY );
 
-			return false;
+			return true;
 		} 
 
 		return false;

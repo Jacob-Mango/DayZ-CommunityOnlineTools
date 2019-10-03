@@ -4,7 +4,12 @@ class JMPlayerForm extends JMFormBase
 	ref array< ref JMPermissionRowWidget >	m_PermissionList;
 	ref array< ref JMRoleRowWidget >		m_RolesList;
 
-	ref Widget m_PlayerListWrapper;
+	ref UIActionScroller m_PlayerListScroller;
+	ref Widget m_PlayerListRows;
+
+	ref Widget m_LeftPanel;
+	ref Widget m_RightPanel;
+
 	ref TextWidget m_PlayerCount;
 
 	ref Widget m_ActionsWrapper;
@@ -94,12 +99,17 @@ class JMPlayerForm extends JMFormBase
 	{
 		JMESPWidget.playerMenu = this;
 
-		m_PlayerListWrapper = layoutRoot.FindAnyWidget("players_list_wrapper");
+		m_RightPanel = layoutRoot.FindAnyWidget( "panel_right" );
+		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
 
-		m_PlayerCount = TextWidget.Cast(layoutRoot.FindAnyWidget("player_count"));
+		m_PlayerListScroller = UIActionManager.CreateScroller( m_LeftPanel.FindAnyWidget( "actions_form" ) );
 
-		m_ActionsForm = layoutRoot.FindAnyWidget("actions_form");
-		m_ActionsWrapper = layoutRoot.FindAnyWidget("actions_wrapper");
+		m_PlayerListRows = m_PlayerListScroller.GetContentWidget();
+
+		m_PlayerCount = TextWidget.Cast( m_LeftPanel.FindAnyWidget("player_count"));
+
+		m_ActionsForm = m_RightPanel.FindAnyWidget("actions_form");
+		m_ActionsWrapper = m_ActionsForm.FindAnyWidget("actions_wrapper");
 		
 		m_GUID = UIActionManager.CreateText( m_ActionsWrapper, "GUID: ", "" );
 		m_Name = UIActionManager.CreateText( m_ActionsWrapper, "Name: ", "" );
@@ -144,21 +154,21 @@ class JMPlayerForm extends JMFormBase
 		m_StopBleeding = UIActionManager.CreateButton( serverActions, "Stop Bleeding", this, "Click_StopBleeding" );
 		m_StripPlayer = UIActionManager.CreateButton( serverActions, "Strip", this, "Click_StripPlayer" );
 
-		m_PermissionsWrapper = layoutRoot.FindAnyWidget("permissions_wrapper");
+		m_PermissionsWrapper = m_RightPanel.FindAnyWidget("permissions_wrapper");
 
-		m_SetPermissionsButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_set_button"));
-		m_PermissionsBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("permissions_back_button"));
+		m_SetPermissionsButton = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("permissions_set_button"));
+		m_PermissionsBackButton = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("permissions_back_button"));
 		
-		m_RolesWrapper = layoutRoot.FindAnyWidget("roles_wrapper");
-		m_RolesContainer = layoutRoot.FindAnyWidget("roles_container");
-		m_SetRolesButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("roles_set_button"));
-		m_RolesBackButton = ButtonWidget.Cast(layoutRoot.FindAnyWidget("roles_back_button"));
+		m_RolesWrapper = m_RightPanel.FindAnyWidget("roles_wrapper");
+		m_RolesContainer = m_RightPanel.FindAnyWidget("roles_container");
+		m_SetRolesButton = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("roles_set_button"));
+		m_RolesBackButton = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("roles_back_button"));
 
-		m_ActionsRefresh = ButtonWidget.Cast(layoutRoot.FindAnyWidget("actions_refresh_button"));
+		m_ActionsRefresh = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("actions_refresh_button"));
 
 		layoutRoot.GetSize( awidth, aheight );
 
-		m_PlayerListWrapper.GetSize( plwidth, plheight );
+		m_LeftPanel.GetSize( plwidth, plheight );
 
 		plwidth = plwidth * awidth;
 		plheight = plheight * aheight;
@@ -796,7 +806,7 @@ class JMPlayerForm extends JMFormBase
 
 		for ( int i = 0; i < 10; i++ )
 		{
-			GridSpacerWidget gsw = GridSpacerWidget.Cast( m_PlayerListWrapper.FindAnyWidget( "list_0" + i ) );
+			GridSpacerWidget gsw = GridSpacerWidget.Cast( m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) );
 			
 			if ( !gsw )
 				continue;
@@ -850,10 +860,20 @@ class JMPlayerForm extends JMFormBase
 
 		if ( playerCount == 1 )
 		{
-			m_PlayerCount.SetText( "1 Player" );
+		//	m_PlayerCount.SetText( "1 Player" );
 		} else 
 		{
-			m_PlayerCount.SetText( "" + playerCount + " Players" );
+		//	m_PlayerCount.SetText( "" + playerCount + " Players" );
 		}
+	}
+
+	override void OnFocus()
+	{
+		//CF_DumpWidgets( m_LeftPanel );
+	}
+
+	override void OnUnfocus()
+	{
+
 	}
 }
