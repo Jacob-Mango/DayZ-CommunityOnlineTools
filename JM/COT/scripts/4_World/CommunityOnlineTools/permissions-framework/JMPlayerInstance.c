@@ -23,9 +23,7 @@ class JMPlayerInstance
 			Data.SGUID = IdentityPlayer.GetId();
 			Data.SSteam64ID = IdentityPlayer.GetPlainId();
 			Data.SName = IdentityPlayer.GetName();
-		}
-
-		if ( !GetGame().IsMultiplayer() )
+		} else if ( IsMissionOffline() )
 		{
 			Data.SGUID = JMConstants.OFFLINE_GUID;
 			Data.SSteam64ID = JMConstants.OFFLINE_STEAM;
@@ -331,8 +329,11 @@ class JMPlayerInstance
 
 	void DebugPrint()
 	{
-		Print( "Printing permissions for " + Data.SGUID );
+		Print( "IdentityPlayer: " + IdentityPlayer );
+		Print( "  SGUID: " + Data.SGUID );
+		Print( "  SSteam64ID: " + Data.SSteam64ID );
+		Print( "  SName: " + Data.SName );
 
-		RootPermission.DebugPrint( 0 );
+		RootPermission.DebugPrint( 2 );
 	}
 }

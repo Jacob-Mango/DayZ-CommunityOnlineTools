@@ -43,7 +43,9 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		OnHide();
-		layoutRoot.Show( false );
+		
+		if ( layoutRoot )
+			layoutRoot.Show( false );
 	}
 
 	void OnShow()
