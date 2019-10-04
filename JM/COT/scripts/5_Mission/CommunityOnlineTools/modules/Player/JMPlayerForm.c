@@ -1,81 +1,81 @@
 class JMPlayerForm extends JMFormBase
 {
-	ref array< ref JMPlayerRowWidget >		m_PlayerList;
-	ref array< ref JMPermissionRowWidget >	m_PermissionList;
-	ref array< ref JMRoleRowWidget >		m_RolesList;
+	private autoptr array< ref JMPlayerRowWidget >		m_PlayerList;
+	private autoptr array< ref JMPermissionRowWidget >	m_PermissionList;
+	private autoptr array< ref JMRoleRowWidget >		m_RolesList;
 
-	ref UIActionScroller m_PlayerListScroller;
-	ref Widget m_PlayerListRows;
+	private Widget m_LeftPanel;
+	private Widget m_RightPanel;
 
-	ref Widget m_LeftPanel;
-	ref Widget m_RightPanel;
+	private UIActionText m_PlayerCount;
+	private UIActionScroller m_PlayerListScroller;
 
-	ref TextWidget m_PlayerCount;
+	private Widget m_PlayerListRows;
 
-	ref Widget m_ActionsWrapper;
-	ref Widget m_ActionsForm;
+	private Widget m_ActionsWrapper;
+	private Widget m_ActionsForm;
 
-	ref Widget m_PermissionsWrapper;
+	private Widget m_PermissionsWrapper;
 
-	ref ButtonWidget m_SetPermissionsButton;
-	ref ButtonWidget m_PermissionsBackButton;
+	private ButtonWidget m_SetPermissionsButton;
+	private ButtonWidget m_PermissionsBackButton;
 
-	ref ButtonWidget m_ActionsRefresh;
+	private ButtonWidget m_ActionsRefresh;
 
-	ref Widget m_RolesWrapper;
-	ref Widget m_RolesContainer;
-	ref ButtonWidget m_SetRolesButton;
-	ref ButtonWidget m_RolesBackButton;
+	private Widget m_RolesWrapper;
+	private Widget m_RolesContainer;
+	private ButtonWidget m_SetRolesButton;
+	private ButtonWidget m_RolesBackButton;
 
-	ref JMPermission m_LoadedPermission;
-	ref JMPermissionRowWidget m_PermissionUI;
+	private JMPermission m_LoadedPermission;
+	private JMPermissionRowWidget m_PermissionUI;
 
-	ref UIActionText m_GUID;
-	ref UIActionText m_Name;
-	ref UIActionText m_Steam64ID;
+	private UIActionText m_GUID;
+	private UIActionText m_Name;
+	private UIActionText m_Steam64ID;
 
-	ref UIActionText m_PosX;
-	ref UIActionText m_PosY;
-	ref UIActionText m_PosZ;
+	private UIActionText m_PosX;
+	private UIActionText m_PosY;
+	private UIActionText m_PosZ;
 
-	ref UIActionText m_PingMin;
-	ref UIActionText m_PingMax;
-	ref UIActionText m_PingAvg;
+	private UIActionText m_PingMin;
+	private UIActionText m_PingMax;
+	private UIActionText m_PingAvg;
 
-	ref UIActionEditableText m_Health;
-	ref UIActionEditableText m_Blood;
-	ref UIActionEditableText m_Energy;
-	ref UIActionEditableText m_Water;
-	ref UIActionEditableText m_Shock;
-	ref UIActionEditableText m_HeatComfort;
-	ref UIActionEditableText m_Wet;
-	ref UIActionEditableText m_Tremor;
-	ref UIActionEditableText m_Stamina;
-	ref UIActionSelectBox m_LastShaved;
-	ref UIActionCheckbox m_BloodyHands;
+	private UIActionEditableText m_Health;
+	private UIActionEditableText m_Blood;
+	private UIActionEditableText m_Energy;
+	private UIActionEditableText m_Water;
+	private UIActionEditableText m_Shock;
+	private UIActionEditableText m_HeatComfort;
+	private UIActionEditableText m_Wet;
+	private UIActionEditableText m_Tremor;
+	private UIActionEditableText m_Stamina;
+	private UIActionSelectBox m_LastShaved;
+	private UIActionCheckbox m_BloodyHands;
 
-	ref UIActionButton m_KickTransport;
-	ref UIActionButton m_RepairTransport;
-	ref UIActionButton m_TeleportToMe;
-	ref UIActionButton m_TeleportMeTo;
-	ref UIActionButton m_TeleportPrevious;
+	private UIActionButton m_KickTransport;
+	private UIActionButton m_RepairTransport;
+	private UIActionButton m_TeleportToMe;
+	private UIActionButton m_TeleportMeTo;
+	private UIActionButton m_TeleportPrevious;
 
-	ref UIActionButton m_ModifyPermissions;
-	ref UIActionButton m_ModifyRoles;
-	ref UIActionButton m_BanPlayer;
-	ref UIActionButton m_KickPlayer;
-	ref UIActionCheckbox m_Freecam;
-	ref UIActionCheckbox m_GodMode;
-	ref UIActionCheckbox m_Invisibility;
-	ref UIActionButton m_SpectatePlayer;
-	ref UIActionButton m_HealPlayer;
-	ref UIActionButton m_StopBleeding;
-	ref UIActionButton m_StripPlayer;
+	private UIActionButton m_ModifyPermissions;
+	private UIActionButton m_ModifyRoles;
+	private UIActionButton m_BanPlayer;
+	private UIActionButton m_KickPlayer;
+	private UIActionCheckbox m_Freecam;
+	private UIActionCheckbox m_GodMode;
+	private UIActionCheckbox m_Invisibility;
+	private UIActionButton m_SpectatePlayer;
+	private UIActionButton m_HealPlayer;
+	private UIActionButton m_StopBleeding;
+	private UIActionButton m_StripPlayer;
 
-	float plwidth = -1;
-	float plheight = -1;
-	float awidth = -1;
-	float aheight = -1;
+	private float plwidth = -1;
+	private float plheight = -1;
+	private float awidth = -1;
+	private float aheight = -1;
 
 	private string m_DataUpdateGUID;
 
@@ -99,14 +99,22 @@ class JMPlayerForm extends JMFormBase
 	{
 		JMESPWidget.playerMenu = this;
 
-		m_RightPanel = layoutRoot.FindAnyWidget( "panel_right" );
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
+		m_RightPanel = layoutRoot.FindAnyWidget( "panel_right" );
 
-		m_PlayerListScroller = UIActionManager.CreateScroller( m_LeftPanel.FindAnyWidget( "actions_form" ) );
+		float width;
+		float leftHeight;
+		m_LeftPanel.GetScreenSize( width, leftHeight );
+
+		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 2, 1 );
+		m_PlayerCount = UIActionManager.CreateText( leftPanelGrid, "Player Count: ", "" );
+		//m_PlayerCount.SetYPosition( 0 );
+
+		m_PlayerListScroller = UIActionManager.CreateScroller( leftPanelGrid );
+		//m_PlayerListScroller.SetYPosition( m_PlayerCount.GetHeight());
+		//m_PlayerListScroller.SetHeight( leftHeight - m_PlayerCount.GetHeight() );
 
 		m_PlayerListRows = m_PlayerListScroller.GetContentWidget();
-
-		m_PlayerCount = TextWidget.Cast( m_LeftPanel.FindAnyWidget("player_count"));
 
 		m_ActionsForm = m_RightPanel.FindAnyWidget("actions_form");
 		m_ActionsWrapper = m_ActionsForm.FindAnyWidget("actions_wrapper");
@@ -833,12 +841,17 @@ class JMPlayerForm extends JMFormBase
 
 				m_PlayerList.Insert( rwScript );
 			}
-		}		
+		}
+
+		m_PlayerListScroller.UpdateScroller();		
 	}
 
 	void UpdatePlayerList()
 	{
-		GetCommunityOnlineTools().RefreshClients();
+		if ( !IsMissionOffline() )
+		{
+			GetCommunityOnlineTools().RefreshClients();
+		}
 
 		//if ( COT_IsUsingTestSort() )
 		//	GetPermissionsManager().SortPlayersArray();
@@ -856,15 +869,9 @@ class JMPlayerForm extends JMFormBase
 			}
 		}
 
-		int playerCount = players.Count();
+		m_PlayerCount.SetText( "" + players.Count() );
 
-		if ( playerCount == 1 )
-		{
-		//	m_PlayerCount.SetText( "1 Player" );
-		} else 
-		{
-		//	m_PlayerCount.SetText( "" + playerCount + " Players" );
-		}
+		m_PlayerListScroller.UpdateScroller();	
 	}
 
 	override void OnFocus()

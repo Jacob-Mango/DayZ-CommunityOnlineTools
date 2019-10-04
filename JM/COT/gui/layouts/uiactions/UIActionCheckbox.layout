@@ -55,7 +55,7 @@ PanelWidgetClass UIActionCheckbox {
   PanelWidgetClass action_wrapper_disable {
    visible 0
    clipchildren 0
-   ignorepointer 1
+   ignorepointer 0
    color 0.1569 0.1569 0.1569 0.902
    position 0 0
    size 1 1

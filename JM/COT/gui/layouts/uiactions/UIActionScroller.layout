@@ -1,5 +1,6 @@
 FrameWidgetClass UIActionScroller {
  size 1 1
+ position 0 0
  hexactpos 0
  vexactpos 0
  hexactsize 0
@@ -20,7 +21,7 @@ FrameWidgetClass UIActionScroller {
      size 1 1
      hexactpos 1
      vexactpos 1
-     hexactsize 0
+     hexactsize 1
      vexactsize 1
      "Size To Content V" 1
      Columns 1
@@ -32,7 +33,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -43,7 +44,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -54,7 +55,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -65,7 +66,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -76,7 +77,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -87,7 +88,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -98,7 +99,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -109,7 +110,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -120,7 +121,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -131,7 +132,7 @@ FrameWidgetClass UIActionScroller {
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
        "Size To Content V" 1
        Columns 1
        Rows 100
@@ -139,13 +140,15 @@ FrameWidgetClass UIActionScroller {
      }
     }
     PanelWidgetClass ScrollerContainer {
-     halign right_ref
-     valign center_ref
+     ignorepointer 0
+     halign left_ref
+     valign top_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 0
-     size 15 1
+     position 0 0
+     size 12 1
      color 0.25 0.25 0.25 1.0 
      style rover_sim_colorable
      {
@@ -157,7 +160,7 @@ FrameWidgetClass UIActionScroller {
        hexactsize 0
        vexactsize 1
        size 1 100
-       color 0.5 0.5 0.5 1.0 
+       color 0.75 0.75 0.75 1.0 
        style rover_sim_colorable
        {
        }
@@ -169,7 +172,7 @@ FrameWidgetClass UIActionScroller {
   PanelWidgetClass action_wrapper_disable {
    visible 0
    clipchildren 0
-   ignorepointer 1
+   ignorepointer 0
    color 0.1569 0.1569 0.1569 0.902
    position 0 0
    size 1 1

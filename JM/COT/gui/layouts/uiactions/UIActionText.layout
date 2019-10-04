@@ -1,7 +1,7 @@
 PanelWidgetClass UIActionText {
  size 1 30
  halign center_ref
- valign center_ref
+ valign top_ref
  hexactpos 0
  vexactpos 0
  hexactsize 0
@@ -47,7 +47,7 @@ PanelWidgetClass UIActionText {
   PanelWidgetClass action_wrapper_disable {
    visible 0
    clipchildren 0
-   ignorepointer 1
+   ignorepointer 0
    color 0.1569 0.1569 0.1569 0.902
    position 0 0
    size 1 1
