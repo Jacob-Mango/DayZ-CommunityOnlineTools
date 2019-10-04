@@ -1,15 +1,20 @@
 class UIActionBase extends ScriptedWidgetEventHandler 
 {
-	protected ref Widget layoutRoot;
+	protected Widget layoutRoot;
 
-	protected ref Widget m_Disable;
+	protected Widget m_Disable;
 
 	protected Class m_Instance;
 	protected string m_FuncName;
 
 	protected bool m_HasCallback;
 
-	protected ref UIActionData m_Data;
+	protected UIActionData m_Data;
+
+	void ~UIActionBase()
+	{
+		Hide();
+	}
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -19,6 +24,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		OnInit();
 
 		m_Disable = layoutRoot.FindAnyWidget( "action_wrapper_disable" );
+
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 	}
 
 	void OnInit() 
@@ -33,6 +40,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Hide()
 	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+
 		OnHide();
 		layoutRoot.Show( false );
 	}
@@ -42,6 +51,10 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	}
 
 	void OnHide() 
+	{
+	}
+
+	void Update( float timeSlice )
 	{
 	}
 
@@ -70,6 +83,33 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		layoutRoot.Update();
 	}
 
+/*
+	void SetHeight( float height )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetSize( w, height );
+		layoutRoot.Update();
+	}
+
+	float GetHeight()
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		return h;
+	}
+
+	void SetYPosition( float ypos )
+	{
+		float w;
+		float h;
+		layoutRoot.GetPos( w, h );
+		layoutRoot.SetPos( w, ypos );
+		layoutRoot.Update();
+	}
+*/
 	void SetPosition( float xpos )
 	{
 		float w;

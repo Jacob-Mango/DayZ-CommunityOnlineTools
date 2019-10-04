@@ -228,10 +228,10 @@ class JMPermissionManager
 
 	JMPlayerInstance GetPlayer( string guid )
 	{
-		if ( !GetGame().IsMultiplayer() )
-		{
-			return Players.GetElement( 0 );
-		}
+		// if ( !GetGame().IsMultiplayer() )
+		// {
+		// 	return Players.GetElement( 0 );
+		// }
 
 		return Players.Get( guid );
 	}

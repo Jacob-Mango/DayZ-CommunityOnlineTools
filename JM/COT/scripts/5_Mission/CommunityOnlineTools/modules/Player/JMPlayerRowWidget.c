@@ -76,10 +76,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 
 				Name.SetText( player.GetName() );
 
-				if ( GetGame().IsServer() && !GetGame().IsMultiplayer() )
-				{
-					Name.SetColor( 0xFF2ECC71 );
-				} else if ( GetPermissionsManager().GetClientGUID() == m_GUID )
+				if ( GetPermissionsManager().GetClientGUID() == m_GUID )
 				{
 					Name.SetColor( 0xFF2ECC71 );
 				} else if ( player.HasPermission( "COT" ) )
