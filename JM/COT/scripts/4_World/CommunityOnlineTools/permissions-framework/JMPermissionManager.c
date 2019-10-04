@@ -25,7 +25,7 @@ class JMPermissionManager
 
 		if ( IsMissionOffline() )
 		{
-			CreateFakePlayers();
+		//	CreateFakePlayers();
 		}
 	}
 
@@ -201,15 +201,15 @@ class JMPermissionManager
 
 	void PMPrint()
 	{
-		if ( IsMissionClient() && false )
-		{
+		//if ( IsMissionClient() && false )
+		//{
 			Print( "Printing all authenticated players!" );
 
 			for ( int i = 0; i < Players.Count(); i++ )
 			{
 				Players.GetElement( i ).DebugPrint();
 			}
-		}
+		//}
 	}
 
 	JMPlayerInstance GetPlayer( string guid )
