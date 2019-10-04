@@ -98,20 +98,6 @@ class JMPermissionManager
 		return players;
 	}
 
-	void SortPlayersArray()
-	{
-		// for ( int k = 0; k < Players.Count(); k++ )
-		// {
-		// 	for ( int j = 0; j < Players.Count(); j++ )
-		// 	{
-		// 		if ( Players[k].GetName() < Players[j].GetName() )
-		// 			Players.SwapItems( k, j );
-		// 		else if ( Players[k].GetName() > Players[j].GetName() )
-		// 			Players.SwapItems( j, k );
-		// 	}
-		// }
-	}
-
 	void RegisterPermission( string permission )
 	{
 		RootPermission.AddPermission( permission, JMPermissionType.INHERIT );

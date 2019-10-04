@@ -221,7 +221,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( w.GetTypeName() == "ScrollWidget" )
 		{
-		// lets live with the fact that scroll bar widgets are brokken
+		// lets live with the fact that scroll bar widgets are broken
 		//	m_BrokenWidgets.Insert( w ); 
 		} else if ( w.GetTypeName() == "ItemPreviewWidget" )
 		{
@@ -272,12 +272,6 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
-
-		if ( super.OnClick( w, x, y, button ) )
-		{
-		//	return true;
-		}
-
 		if ( w == m_CloseButton )
 		{
 			m_Module.Hide();
@@ -289,11 +283,6 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	override bool OnDrag( Widget w, int x, int y )
 	{
-		if ( super.OnDrag( w, x, y ) )
-		{
-		//	return true;
-		}
-
 		if ( w == m_TitleWrapper )
 		{
 			layoutRoot.GetPos( m_OffsetX, m_OffsetY );
@@ -312,11 +301,6 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	override bool OnDragging( Widget w, int x, int y, Widget reciever )
 	{
-		if ( super.OnDragging( w, x, y, reciever ) )
-		{
-		//	return true;
-		}
-
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - m_OffsetX, y - m_OffsetY );
@@ -329,11 +313,6 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	override bool OnDrop( Widget w, int x, int y, Widget reciever )
 	{
-		if ( super.OnDrop( w, x, y, reciever ) )
-		{
-		//	return true;
-		}
-
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - m_OffsetX, y - m_OffsetY );
@@ -341,7 +320,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			return true;
 		}
 
-		return false ;
+		return false;
 	}
 
 	void SetSize( float w, float h )
