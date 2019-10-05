@@ -30,6 +30,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StartSpectating" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );

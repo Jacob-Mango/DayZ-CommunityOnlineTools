@@ -11,6 +11,8 @@ Admin.Player 0
 Admin.Player.Godmode 0
 Admin.Player.StartSpectating 0
 Admin.Player.Invisible 0
+Admin.Player.Strip 0
+Admin.Player.StopBleeding 0
 Admin.Player.Teleport 0
 Admin.Player.Teleport.Position 0
 Admin.Player.Teleport.SenderTo 0

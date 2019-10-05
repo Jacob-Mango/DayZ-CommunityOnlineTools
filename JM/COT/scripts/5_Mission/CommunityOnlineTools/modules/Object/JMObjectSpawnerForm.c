@@ -43,12 +43,13 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
 
-		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 7, 1 );
-		AddObjectType( typesButtons, "ALL", "All" );
+		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 8, 1 );
+		AddObjectType( typesButtons, "ALL", "" );
 		AddObjectType( typesButtons, "Food", "edible_base" );
 		AddObjectType( typesButtons, "Vehicles", "transport" );
 		AddObjectType( typesButtons, "Firearms", "weapon_base" );
 		AddObjectType( typesButtons, "Clothing", "clothing_base" );
+		AddObjectType( typesButtons, "Items", "inventory_base" );
 		AddObjectType( typesButtons, "Buildings", "house" );
 		AddObjectType( typesButtons, "AI", "dz_lightai" );
 
@@ -298,34 +299,33 @@ class JMObjectSpawnerForm extends JMFormBase
 
 				strNameLower.ToLower();
 
-				if ( m_CurrentType == "All" || GetGame().IsKindOf( strNameLower, m_CurrentType ) ) // Fix for weapon_base not being child of "All"
+				if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
 				{
-					if ( (strSearch != "" && (!strNameLower.Contains( strSearch ))) ) 
+					if ( CheckItemCrash( strName ) ) 
+					{
+						continue; 
+					}
+
+					if ( ( strSearch != "" && ( !strNameLower.Contains( strSearch ) ) ) ) 
 					{
 						continue;
-					}
-
-					bool shouldCont = false;
-
-					switch ( strName )
-					{
-						case "ItemOptics":
-							shouldCont = true;
-							break;
-						default:
-							shouldCont = false;
-							break;
-					}
-
-					if ( shouldCont ) 
-					{
-						continue; // Fix crash
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
 				}
 			}
 		}
+	}
+
+	private bool CheckItemCrash( string name )
+	{
+		switch ( name )
+		{
+			case "ItemOptics":
+				return true;
+		}
+
+		return false;
 	}
 
 	string GetCurrentSelection()
