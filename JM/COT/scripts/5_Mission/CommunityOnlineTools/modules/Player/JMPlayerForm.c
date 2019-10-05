@@ -74,10 +74,12 @@ class JMPlayerForm extends JMFormBase
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
 
-	private float plwidth = -1;
-	private float plheight = -1;
-	private float awidth = -1;
-	private float aheight = -1;
+	private float m_PlayerListWidth = -1;
+	private float m_PlayerListHeight = -1;
+	private float m_FormWidth = -1;
+	private float m_FormHeight = -1;
+
+	private int m_NumPlayerCount;
 
 	private string m_DataUpdateGUID;
 
@@ -110,10 +112,10 @@ class JMPlayerForm extends JMFormBase
 
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
 		m_PlayerListCount = UIActionManager.CreateText( leftPanelGrid, "Player Count: ", "" );
-		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "Filter: " );
-		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "Sort: " );
+		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "Filter: ", this, "Event_UpdatePlayerList" );
+		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "Sort: ", this, "Event_UpdatePlayerList" );
 		m_PlayerListScroller = UIActionManager.CreateScroller( leftPanelGrid );
-		m_PlayerListRows = m_PlayerListScroller.GetContentWidget();
+		m_PlayerListRows = UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 
 		m_ActionsForm = m_RightPanel.FindAnyWidget("actions_form");
 		m_ActionsWrapper = m_ActionsForm.FindAnyWidget("actions_wrapper");
@@ -173,16 +175,21 @@ class JMPlayerForm extends JMFormBase
 
 		m_ActionsRefresh = ButtonWidget.Cast( m_RightPanel.FindAnyWidget("actions_refresh_button"));
 
-		layoutRoot.GetSize( awidth, aheight );
+		layoutRoot.GetSize( m_FormWidth, m_FormHeight );
 
-		m_LeftPanel.GetSize( plwidth, plheight );
+		m_LeftPanel.GetSize( m_PlayerListWidth, m_PlayerListHeight );
 
-		plwidth = plwidth * awidth;
-		plheight = plheight * aheight;
+		m_PlayerListWidth = m_PlayerListWidth * m_FormWidth;
+		m_PlayerListHeight = m_PlayerListHeight * m_FormHeight;
 
 		CreatePermissionsUI();
 		CreateRolesUI();
 		CreatePlayerList();
+	}
+
+	void Event_UpdatePlayerList( UIEvent eid, ref UIActionBase action )
+	{
+		UpdatePlayerList();
 	}
 
 	void Click_ModifyPermissions()
@@ -444,7 +451,7 @@ class JMPlayerForm extends JMFormBase
 		LoadPermissions( NULL );
 		LoadRoles( NULL );
 
-		SetSize( plwidth, plheight );
+		SetSize( m_PlayerListWidth, m_PlayerListHeight );
 	}
 
 	void ShowSide()
@@ -467,7 +474,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 		}
 
-		SetSize( awidth, plheight );
+		SetSize( m_FormWidth, m_PlayerListHeight );
 
 		UpdateActionsFields( instance );
 	}
@@ -595,6 +602,8 @@ class JMPlayerForm extends JMFormBase
 
 			HideSide();
 		}
+
+		UpdatePlayerCount();
 	}
 
 	void OnPlayer_Button( string guid, bool check )
@@ -621,6 +630,8 @@ class JMPlayerForm extends JMFormBase
 
 			HideSide();
 		}
+
+		UpdatePlayerCount();
 	}
 
 	void CreatePermissionsUI()
@@ -845,41 +856,48 @@ class JMPlayerForm extends JMFormBase
 		m_PlayerListScroller.UpdateScroller();		
 	}
 
-	int	compareString( string p1, string p2)
-	{
-		int idx = 0;
-
-		int c1;
-		int c2;
-
-		while ( c1 == c2 )
-		{
-			if ( idx >= p1.Length() || idx >= p2.Length() )
-			{
-				return p1.Length() - p2.Length();
-			}
-
-			c1 = p1.Get( idx ).ToAscii( "" );
-			c2 = p2.Get( idx ).ToAscii( "" );
-
-			idx++;
-		}
-
-		return c1 - c2;
-	}
-
 	private void SortPlayersArray( out array< JMPlayerInstance > players )
 	{
-		for ( int k = 0; k < players.Count() - 1; k++ )
+		string pNames[ 1000 ];
+		int pIndices[ 1000 ];
+
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			for ( int j = k + 1; j < players.Count(); j++ )
+			pNames[ i ] = players[ i ].GetName();
+		}
+
+		Sort( pNames, players.Count() );
+
+		for ( i = 0; i < players.Count(); i++ )
+		{
+			for ( int j = 0; j < players.Count(); j++ )
 			{
-                if ( compareString( players[k].GetName(), players[j].GetName() ) > 0 ) 
-                {
-					players.SwapItems( k, j );
-                }
+				if ( pNames[ j ] == players[ i ].GetName() )
+				{
+					pIndices[ i ] = j;
+				}
 			}
 		}
+
+		array< JMPlayerInstance > playersTemp = new array< JMPlayerInstance >;
+
+		for ( i = 0; i < players.Count(); i++ )
+		{
+			playersTemp.Insert( NULL );
+		}
+
+		for ( i = 0; i < players.Count(); i++ )
+		{
+			playersTemp.Set( pIndices[ i ], players[ i ] );
+		}
+
+		players.Clear();
+		players.Copy( playersTemp );
+	}
+
+	void UpdatePlayerCount()
+	{
+		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + GetSelectedPlayers().Count() + ")" );
 	}
 
 	void UpdatePlayerList()
@@ -896,7 +914,8 @@ class JMPlayerForm extends JMFormBase
 
 		int idx = 0;
 		int pIdx = 0;
-		int pCount = 0;
+
+		m_NumPlayerCount = 0;
 
 		string filter = m_PlayerListFilter.GetText();
 		bool isFiltering = filter.Length() > 0;
@@ -922,7 +941,7 @@ class JMPlayerForm extends JMFormBase
 
 				m_PlayerList[idx].SetPlayer( cPlayer.GetGUID() );
 
-				pCount++;
+				m_NumPlayerCount++;
 			} else
 			{
 				m_PlayerList[idx].SetPlayer( "" );
@@ -931,7 +950,7 @@ class JMPlayerForm extends JMFormBase
 			idx++;
 		}
 
-		m_PlayerListCount.SetText( "" + pCount + " (" + GetSelectedPlayers().Count() + ")" );
+		UpdatePlayerCount();
 
 		m_PlayerListScroller.UpdateScroller();	
 	}

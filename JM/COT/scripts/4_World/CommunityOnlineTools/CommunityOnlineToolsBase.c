@@ -226,6 +226,10 @@ class CommunityOnlineToolsBase
 	void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
     }
+
+    void SetClient( string guid, JMPlayerInformation cd, PlayerIdentity pi )
+	{
+    }
 }
 
 static ref CommunityOnlineToolsBase g_cotBase;

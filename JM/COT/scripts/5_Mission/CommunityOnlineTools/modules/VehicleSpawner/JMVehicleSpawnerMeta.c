@@ -1,6 +1,6 @@
 class JMVehicleSpawnerMeta
 {
-	autoptr ref array< string > Vehicles = new array< string >;
+	autoptr autoptr array< string > Vehicles = new array< string >;
 
 	static ref JMVehicleSpawnerMeta DeriveFromSettings( ref JMVehicleSpawnerSettings settings )
 	{

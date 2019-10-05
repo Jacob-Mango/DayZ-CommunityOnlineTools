@@ -80,11 +80,6 @@ modded class MissionServer
 		
 		JMPlayerInstance instance;
 		GetPermissionsManager().OnClientConnected( identity, instance );
-
-		if ( instance )
-		{
-			GetCommunityOnlineTools().SetClient( instance.GetGUID(), instance.Data, identity, player );
-		}
 	} 
 
 	override void PlayerDisconnected( PlayerBase player, PlayerIdentity identity, string uid )

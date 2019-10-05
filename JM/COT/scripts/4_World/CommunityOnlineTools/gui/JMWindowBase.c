@@ -1,6 +1,6 @@
 class JMWindowBase extends ScriptedWidgetEventHandler  
 {
-	private Widget layoutRoot;
+	private ref Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
