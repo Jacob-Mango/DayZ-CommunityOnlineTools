@@ -95,6 +95,8 @@ class JMPlayerForm extends JMFormBase
 		m_TeleportPrevious.UpdatePermission( "Admin.Player.Teleport.Previous" );
 
 		m_RepairTransport.UpdatePermission( "Admin.Transport.Repair" );
+
+		UpdateUI();
 	}
 
 	override void OnInit()
@@ -620,9 +622,17 @@ class JMPlayerForm extends JMFormBase
 			m_TeleportMeTo.Disable();
 		}
 
+		if ( IsMissionOffline() )
+		{
+			m_TeleportToMe.Disable();
+			m_TeleportMeTo.Disable();
+			m_TeleportPrevious.Disable();
+			m_SpectatePlayer.Disable();
+		}
+
 		m_PositionX.SetText( data.VPosition[0].ToString() );
-		m_PositionY.SetText( data.VPosition[0].ToString() );
-		m_PositionZ.SetText( data.VPosition[0].ToString() );
+		m_PositionY.SetText( data.VPosition[1].ToString() );
+		m_PositionZ.SetText( data.VPosition[2].ToString() );
 
 		m_Health.SetText( data.FHealth.ToString() );
 		m_Blood.SetText( data.FBlood.ToString() );
