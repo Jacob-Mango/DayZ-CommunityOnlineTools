@@ -57,23 +57,29 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnSettingsUpdated();
 
-		if ( settings )
+		if ( IsMissionHost() )
 		{
-			for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+			if ( settings )
 			{
-				string vehicle = settings.Vehicles.GetKey( i );
-				vehicle.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
-			}
+				for ( int i = 0; i < settings.Vehicles.Count(); i++ )
+				{
+					string vehicle = settings.Vehicles.GetKey( i );
+					vehicle.Replace( " ", "." );
+					GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
+				}
 
-			meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
-		} else if ( meta )
+				meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
+			}
+		} else if ( IsMissionClient() )
 		{
-			for ( i = 0; i < meta.Vehicles.Count(); i++ )
+			if ( meta )
 			{
-				vehicle = meta.Vehicles.Get( i );
-				vehicle.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
+				for ( i = 0; i < meta.Vehicles.Count(); i++ )
+				{
+					vehicle = meta.Vehicles.Get( i );
+					vehicle.Replace( " ", "." );
+					GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
+				}
 			}
 		}
 	}
@@ -124,8 +130,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		{
 			settings = JMVehicleSpawnerSettings.Load();
 
-			meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
-
 			OnSettingsUpdated();
 		}
 	}
@@ -133,7 +137,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( JMVehicleSpawnerMeta.DeriveFromSettings( settings ) );
+		rpc.Write( meta );
 		rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, ident );
 	}
 
@@ -199,13 +203,13 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( vehicle ) )
 			{
 				return;
-			} 
+			}
 
 			vector position;
 			if ( !ctx.Read( position ) )
 			{
 				return;
-			} 
+			}
 
 			Server_SpawnPosition( vehicle, position, senderRPC );
 		}
@@ -219,14 +223,14 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	private Car SpawnVehicle( JMVehicleSpawnerSerialize file, vector position )
 	{
-		array< string > attachments = file.Parts;
-
-		if ( attachments.Count() == 0 )
+		if ( file == NULL )
 			return NULL;
+
+		array< string > attachments = file.Parts;
 
 		Car oCar = Car.Cast( GetGame().CreateObject( file.VehicleName, position ) );
 
-		for (int j = 0; j < attachments.Count(); j++)
+		for ( int j = 0; j < attachments.Count(); j++ )
 		{
 			oCar.GetInventory().CreateInInventory( attachments[j] );
 		}

@@ -9,10 +9,12 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	protected bool m_HasCallback;
 
-	protected UIActionData m_Data;
+	protected ref UIActionData m_Data;
 
 	void ~UIActionBase()
 	{
+		delete m_Data;
+		
 		Hide();
 	}
 
@@ -161,7 +163,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		return false;
 	}
 
-	void SetData( ref UIActionData data )
+	void SetData( UIActionData data )
 	{
 		m_Data = data;
 	}

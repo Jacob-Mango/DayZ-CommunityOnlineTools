@@ -22,11 +22,6 @@ class JMPermissionManager
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
 		}
-
-		if ( IsMissionOffline() )
-		{
-		//	CreateFakePlayers();
-		}
 	}
 
 	string GetClientGUID()
@@ -57,6 +52,15 @@ class JMPermissionManager
 	bool IsRole( string role )
 	{
 		return Roles.Contains( role );
+	}
+
+	void ResetMission()
+	{
+		if ( !IsMissionClient() )
+			return;
+
+		Players.Clear();
+		Roles.Clear();
 	}
 
 	void CreateFakePlayers()
@@ -178,6 +182,8 @@ class JMPermissionManager
 
 		instanceOnClientConnected.Serialize();
 
+		GetCommunityOnlineToolsBase().SetClient( guid, instanceOnClientConnected.Data, identityOnClientConnected );
+
 		Players.Insert( guid, instanceOnClientConnected );
 
 		// PMPrint();
@@ -201,24 +207,19 @@ class JMPermissionManager
 
 	void PMPrint()
 	{
-		//if ( IsMissionClient() && false )
-		//{
+		if ( IsMissionClient() && false )
+		{
 			Print( "Printing all authenticated players!" );
 
 			for ( int i = 0; i < Players.Count(); i++ )
 			{
 				Players.GetElement( i ).DebugPrint();
 			}
-		//}
+		}
 	}
 
 	JMPlayerInstance GetPlayer( string guid )
 	{
-		// if ( !GetGame().IsMultiplayer() )
-		// {
-		// 	return Players.GetElement( 0 );
-		// }
-
 		return Players.Get( guid );
 	}
 

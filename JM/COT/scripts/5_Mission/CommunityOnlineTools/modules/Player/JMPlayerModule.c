@@ -1082,7 +1082,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{		
             players[i].LoadPermissions( permissions );
 
-			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject  );
+			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
 		}
@@ -1126,7 +1126,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{		
             players[i].LoadRoles( roles );
 
-			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer, players[i].PlayerObject  );
+			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
 		}

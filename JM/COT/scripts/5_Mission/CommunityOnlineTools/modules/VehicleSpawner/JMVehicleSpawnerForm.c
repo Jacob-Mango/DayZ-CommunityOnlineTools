@@ -22,16 +22,14 @@ class JMVehicleSpawnerForm extends JMFormBase
 	{
 		JMVehicleSpawnerModule gm = JMVehicleSpawnerModule.Cast( module );
 
-		if ( gm == NULL ) return;
-
-		string name;
-		ref UIActionButton button;
+		if ( gm == NULL )
+			return;
 
 		for ( int i = 0; i < gm.GetVehicles().Count(); i++ )
 		{
-			name = gm.GetVehicles()[i];
+			string name = gm.GetVehicles()[i];
 
-			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnVehicle" );
+			UIActionButton button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnVehicle" );
 			button.SetData( new JMVehicleSpawnerButtonData( name ) );
 
 			m_VehicleButtons.Insert( button );
@@ -42,8 +40,11 @@ class JMVehicleSpawnerForm extends JMFormBase
 	{
 		for ( int j = 0; j < m_VehicleButtons.Count(); j++ )
 		{
-			m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
-			m_VehicleButtons[j].GetLayoutRoot().Unlink();
+			if ( m_VehicleButtons[j].GetLayoutRoot() )
+			{
+				m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
+				m_VehicleButtons[j].GetLayoutRoot().Unlink();
+			}
 		}
 
 		m_VehicleButtons.Clear();
