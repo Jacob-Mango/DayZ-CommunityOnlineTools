@@ -161,7 +161,14 @@ class JMRenderableModuleBase extends JMModuleBase
 	{
 		super.OnClientPermissionsUpdated();
 
-		if ( IsVisible() && !HasAccess() )
+		bool hasAccess = HasAccess();
+
+		if ( GetForm() && hasAccess )
+		{
+			GetForm().OnClientPermissionsUpdated();
+		}
+
+		if ( IsVisible() && !hasAccess )
 		{
 			Hide();
 		}

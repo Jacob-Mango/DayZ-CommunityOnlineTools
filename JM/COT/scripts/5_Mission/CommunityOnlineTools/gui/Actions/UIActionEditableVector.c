@@ -75,11 +75,13 @@ class UIActionEditableVector extends UIActionBase
 			SetFocus( m_TextX );
 			return true;
 		}
+
 		if ( w == m_TextY )
 		{
 			SetFocus( m_TextY );
 			return true;
 		}
+		
 		if ( w == m_TextZ )
 		{
 			SetFocus( m_TextZ );
@@ -96,11 +98,13 @@ class UIActionEditableVector extends UIActionBase
 			SetFocus( NULL );
 			return true;
 		}
+
 		if ( w == m_TextY )
 		{
 			SetFocus( NULL );
 			return true;
 		}
+
 		if ( w == m_TextZ )
 		{
 			SetFocus( NULL );
@@ -112,7 +116,8 @@ class UIActionEditableVector extends UIActionBase
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		if ( w == m_TextX || w == m_TextY || w == m_TextZ )
 		{
@@ -127,7 +132,8 @@ class UIActionEditableVector extends UIActionBase
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{	
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		bool ret = false;
 
@@ -141,7 +147,8 @@ class UIActionEditableVector extends UIActionBase
 
 	override bool CallEvent( UIEvent eid )
 	{
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
