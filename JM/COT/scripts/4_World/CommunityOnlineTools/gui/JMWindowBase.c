@@ -177,7 +177,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Focus()
 	{
-        SetBackgroundColour( 0.996, 0.06, 0.08, 0.11 );
+        SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
         SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
 
 		foreach ( Widget widget : m_BrokenWidgets )
