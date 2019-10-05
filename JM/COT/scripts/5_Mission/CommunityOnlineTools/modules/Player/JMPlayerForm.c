@@ -1,8 +1,6 @@
 class JMPlayerForm extends JMFormBase
 {
-	private autoptr array< ref JMPlayerRowWidget >		m_PlayerList;
-	private autoptr array< ref JMPermissionRowWidget >	m_PermissionList;
-	private autoptr array< ref JMRoleRowWidget >		m_RolesList;
+	private autoptr array< ref JMPlayerRowWidget > m_PlayerList;
 
 	private Widget m_LeftPanel;
 	private Widget m_RightPanel;
@@ -28,52 +26,33 @@ class JMPlayerForm extends JMFormBase
 	private UIActionEditableText m_PositionZ;
 	private UIActionButton m_Position;
 
-	private UIActionText m_PingMin;
-	private UIActionText m_PingMax;
-	private UIActionText m_PingAvg;
-
 	private UIActionEditableText m_Health;
 	private UIActionEditableText m_Blood;
 	private UIActionEditableText m_Energy;
 	private UIActionEditableText m_Water;
 	private UIActionEditableText m_Shock;
-	private UIActionEditableText m_HeatComfort;
-	private UIActionEditableText m_Wet;
-	private UIActionEditableText m_Tremor;
 	private UIActionEditableText m_Stamina;
-	private UIActionSelectBox m_LastShaved;
 	private UIActionCheckbox m_BloodyHands;
+	private UIActionCheckbox m_GodMode;
 
-	private UIActionButton m_KickTransport;
-	private UIActionButton m_RepairTransport;
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
 	private UIActionButton m_TeleportPrevious;
 
 	private UIActionButton m_ModifyPermissions;
 	private UIActionButton m_ModifyRoles;
-	private UIActionButton m_BanPlayer;
-	private UIActionButton m_KickPlayer;
-	private UIActionCheckbox m_Freecam;
-	private UIActionCheckbox m_GodMode;
-	private UIActionCheckbox m_Invisibility;
+
+	private UIActionButton m_RepairTransport;
 	private UIActionButton m_SpectatePlayer;
 	private UIActionButton m_HealPlayer;
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
-
-	private float m_PlayerListWidth = -1;
-	private float m_PlayerListHeight = -1;
-	private float m_FormWidth = -1;
-	private float m_FormHeight = -1;
 
 	private int m_NumPlayerCount;
 
 	void JMPlayerForm()
 	{
 		m_PlayerList = new array< ref JMPlayerRowWidget >;
-		m_PermissionList = new array< ref JMPermissionRowWidget >;
-		m_RolesList = new array< ref JMRoleRowWidget >;
 
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
@@ -122,31 +101,22 @@ class JMPlayerForm extends JMFormBase
 	{
 		JMESPWidget.playerMenu = this;
 
+		InitWidgetsLeft();
+		InitWidgetsRight();
+	}
+
+	private void InitWidgetsLeft()
+	{
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
-		m_RightPanel = layoutRoot.FindAnyWidget( "panel_right" );
-		m_RightPanelDisable = layoutRoot.FindAnyWidget( "panel_right_disable" );
 
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
+
 		m_PlayerListCount = UIActionManager.CreateText( leftPanelGrid, "Player Count: ", "" );
 		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "Filter: ", this, "Event_UpdatePlayerList" );
 		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "Sort: ", this, "Event_UpdatePlayerList" );
 		m_PlayerListScroller = UIActionManager.CreateScroller( leftPanelGrid );
 		m_PlayerListRows = UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
-
-		m_ActionListScroller = UIActionManager.CreateScroller( m_RightPanel );
-		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ActionListScroller.GetContentWidget(), 9, 1 );
 		
-		InitActionWidgetsIdentity( m_ActionsWrapper );
-		InitActionWidgetsPosition( m_ActionsWrapper );
-		InitActionWidgetsStats( m_ActionsWrapper );
-		InitActionWidgetsPermissions( m_ActionsWrapper );
-		InitActionWidgetsQuick( m_ActionsWrapper );
-		
-		layoutRoot.GetSize( m_FormWidth, m_FormHeight );
-		m_LeftPanel.GetSize( m_PlayerListWidth, m_PlayerListHeight );
-		m_PlayerListWidth = m_PlayerListWidth * m_FormWidth;
-		m_PlayerListHeight = m_PlayerListHeight * m_FormHeight;
-
 		for ( int i = 0; i < 10; i++ )
 		{
 			GridSpacerWidget gsw;
@@ -174,6 +144,22 @@ class JMPlayerForm extends JMFormBase
 		}
 
 		m_PlayerListScroller.UpdateScroller();
+	}
+
+	private void InitWidgetsRight()
+	{
+		m_RightPanel = layoutRoot.FindAnyWidget( "panel_right" );
+		m_RightPanelDisable = layoutRoot.FindAnyWidget( "panel_right_disable" );
+
+		m_ActionListScroller = UIActionManager.CreateScroller( m_RightPanel );
+		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ActionListScroller.GetContentWidget(), 9, 1 );
+		
+		InitActionWidgetsIdentity( m_ActionsWrapper );
+		InitActionWidgetsPosition( m_ActionsWrapper );
+		InitActionWidgetsStats( m_ActionsWrapper );
+		InitActionWidgetsPermissions( m_ActionsWrapper );
+		InitActionWidgetsQuick( m_ActionsWrapper );
+
 		m_ActionListScroller.UpdateScroller();
 	}
 
@@ -582,8 +568,6 @@ class JMPlayerForm extends JMFormBase
 
 	void HideUI()
 	{
-		// SetSize( m_PlayerListWidth, m_PlayerListHeight );
-
 		ShowIdentityWidgets();
 
 		m_RightPanelDisable.Show( true );
@@ -591,8 +575,6 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowUI()
 	{
-		// SetSize( m_FormWidth, m_PlayerListHeight );
-
 		m_RightPanelDisable.Show( false );
 	}
 
