@@ -261,8 +261,10 @@ class JMPlayerForm extends JMFormBase
 		m_Energy = UIActionManager.CreateEditableText( actions, "Food: ", this, "Click_SetEnergy", "", "Set" );
 		m_Water = UIActionManager.CreateEditableText( actions, "Water: ", this, "Click_SetWater", "", "Set" );
 		m_Stamina = UIActionManager.CreateEditableText( actions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
+
 		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
-		
+		m_GodMode = UIActionManager.CreateCheckbox( actions, "Godmode: ", this, "Click_SetGodMode", false );
+
 		m_Health.SetOnlyNumbers( true );
 		m_Shock.SetOnlyNumbers( true );
 		m_Blood.SetOnlyNumbers( true );
@@ -299,12 +301,11 @@ class JMPlayerForm extends JMFormBase
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 2 );
 
-		m_GodMode = UIActionManager.CreateCheckbox( actions, "Godmode", this, "Click_SetGodMode", false );
 		m_RepairTransport = UIActionManager.CreateButton( actions, "Repair Transport", this, "Click_RepairTransport" );
 		m_SpectatePlayer = UIActionManager.CreateButton( actions, "Spectate", this, "Click_SpectatePlayer" );
 		m_HealPlayer = UIActionManager.CreateButton( actions, "Heal", this, "Click_HealPlayer" );
 		m_StopBleeding = UIActionManager.CreateButton( actions, "Stop Bleeding", this, "Click_StopBleeding" );
-		m_StripPlayer = UIActionManager.CreateButton( actions, "Strip", this, "Click_StripPlayer" );
+		m_StripPlayer = UIActionManager.CreateButton( actions, "Clear Inventory", this, "Click_StripPlayer" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
