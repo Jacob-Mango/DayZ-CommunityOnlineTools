@@ -33,7 +33,9 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	void OfflineMissionStart()
 	{
-		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE" ) );
+		vector position = GetSpawnPoints().GetRandomElement();
+		// position = "13931.9 0 13231.4";
+		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), position, 0, "NONE" ) );
 		GetGame().SelectPlayer( NULL, player );
 
 		if ( player )
@@ -61,7 +63,7 @@ modded class MissionGameplay
 		GetCommunityOnlineTools().OnStart();
 		
 		// If game is not multiplayer, add a default offline player
-		if ( !GetGame().IsMultiplayer() )
+		if ( IsMissionOffline() )
 		{
 			OfflineMissionStart();
 		}

@@ -1,7 +1,7 @@
 PanelWidgetClass UIActionCheckbox {
  size 1 30
- halign center_ref
- valign center_ref
+ halign left_ref
+ valign top_ref
  hexactpos 0
  vexactpos 0
  hexactsize 0

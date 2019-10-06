@@ -3,7 +3,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
 
-	static bool ShowJustName = false;
+	static bool Simplified = false;
 	static bool UseClassName = false;
 
 	protected Widget 			layoutRoot;
@@ -133,8 +133,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	void Update() 
 	{
-		m_CheckboxStyle.Show( !ShowJustName );
-		m_JustName.Show( ShowJustName );
+		m_CheckboxStyle.Show( !Simplified );
+		m_JustName.Show( Simplified );
 			
 		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 

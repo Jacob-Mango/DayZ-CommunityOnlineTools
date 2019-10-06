@@ -4,6 +4,8 @@ PanelWidgetClass UIPanel {
  vexactpos 0
  hexactsize 0
  vexactsize 0
+ halign left_ref
+ valign top_ref
  color 0 0 0 0
  style rover_sim_colorable
  "Size To Content V" 1

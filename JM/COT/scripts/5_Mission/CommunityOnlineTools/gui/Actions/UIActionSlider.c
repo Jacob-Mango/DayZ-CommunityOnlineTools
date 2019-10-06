@@ -59,6 +59,14 @@ class UIActionSlider extends UIActionBase
 	void SetLabel( string text )
 	{
 		m_Label.SetText( text );
+
+        if ( text.Length() > 0 )
+        {
+            SetWidgetWidth( m_Slider, 0.7 );
+        } else
+        {
+            SetWidgetWidth( m_Slider, 1.0 );
+        }
 	}
 
     void SetStepValue( float step )
