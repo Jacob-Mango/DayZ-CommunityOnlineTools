@@ -1,22 +1,21 @@
 class JMESPWidget extends ScriptedWidgetEventHandler 
 {
-	static ref JMESPModule espModule;
-	static ref JMESPForm espMenu;
-	static ref JMPlayerForm playerMenu;
+	static JMESPForm espMenu;
+	static JMESPModule espModule;
 
 	static bool ShowJustName = false;
 	static bool UseClassName = false;
 
-	protected ref Widget 			layoutRoot;
+	protected Widget 			layoutRoot;
 
-	protected ref Widget			m_CheckboxStyle;
-	protected ref Widget			m_JustName;
+	protected Widget			m_CheckboxStyle;
+	protected Widget			m_JustName;
 
-	protected ref TextWidget		m_Name1;
-	protected ref TextWidget		m_Name2;
+	protected TextWidget		m_Name1;
+	protected TextWidget		m_Name2;
 
-	protected ref ButtonWidget		m_Button;
-	ref CheckBoxWidget				Checkbox;
+	protected ButtonWidget		m_Button;
+	CheckBoxWidget				Checkbox;
 
 	bool ShowOnScreen;
 
@@ -25,7 +24,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	float FOV;
 	vector ScreenPos;
 
-	ref JMObjectMeta Info;
+	ref JMESPMeta Info;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -94,7 +93,6 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	private vector Player_GetPosition()
 	{
 		Human man;
-
 		if ( !Class.CastTo( man, Info.target ) )
 		{
 			return Info.target.GetPosition();
@@ -121,11 +119,11 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	{
 		if ( Info.target )
 		{
-			switch ( Info.type )
+			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 			{
-			case JMESPType.PLAYER:
 				return Player_GetPosition();
-			default:
+			} else
+			{
 				return Info.target.GetPosition();
 			}
 		}
@@ -168,12 +166,18 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 			string text = "";
 
-			if ( Info.type != JMESPType.PLAYER && UseClassName )
-			{
-				text = Info.target.GetType() + " (" + distance + "m)";
-			} else 
+			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 			{
 				text = Info.name + " (" + distance + "m)";
+			} else
+			{
+				if ( UseClassName )
+				{
+					text = Info.target.GetType() + " (" + distance + "m)";
+				} else
+				{
+					text = Info.name + " (" + distance + "m)";
+				}
 			}
 
 			m_Name1.SetText( text );
@@ -191,7 +195,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetInfo( ref JMObjectMeta info )
+	void SetInfo( ref JMESPMeta info )
 	{
 		Info = info;
 		
@@ -203,65 +207,15 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			return;
 		}
 
-		int colour = 0xFFFFFFFF;
+		m_Name1.SetColor( Info.colour );
+		m_Name2.SetColor( Info.colour );
 
-		switch ( Info.type )
-		{
-			case JMESPType.PLAYER:
-			{
-				colour = 0xFF00FFFF;
-				break;
-			}
-			case JMESPType.VEHICLE:
-			{
-				colour = 0xFF00FFDD;
-				break;
-			}
-			case JMESPType.BASEBUILDING:
-			{
-				colour = 0xFFF75B18;
-				break;
-			}
-			case JMESPType.ITEM:
-			{
-				colour = 0xFFF7F71D;
-				break;
-			}
-			case JMESPType.INFECTED:
-			{
-				colour = 0xFF23FF44;
-				break;
-			}
-			case JMESPType.CREATURE:
-			{
-				colour = 0xFF54F7BB;
-				break;
-			}
-			case JMESPType.ALL:
-			{
-				colour = 0xFFFFFFFF;
-				break;
-			}
-		}
-
-		m_Name1.SetColor( colour );
-		m_Name2.SetColor( colour );
+		Checkbox.Show( Info.type.IsInherited( JMESPViewTypePlayer ) );
+		m_Button.Enable( Info.type.IsInherited( JMESPViewTypePlayer ) );
 			
 		ShowOnScreen = true;
 			
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
-
-		JMSelectedModule sm;
-		if ( Class.CastTo( sm, GetModuleManager().GetModule( JMSelectedModule ) ) )
-		{
-			if ( sm.GetObjects().Find( Info.target ) > -1 )
-			{
-				Checkbox.SetChecked( true );
-			} else
-			{
-				Checkbox.SetChecked( false );
-			}
-		}
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -270,27 +224,22 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		{
 			return false;
 		}
+
+		if ( !Info.player )
+		{
+			return false;
+		}
 		
 		if ( w == Checkbox )
 		{
-			JMScriptInvokers.MENU_OBJECT_CHECKBOX.Invoke( Info.target, Checkbox.IsChecked() );
-
-			if ( Info.type == JMESPType.PLAYER && Info.player )
-			{
-				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), Checkbox.IsChecked() );
-			}
+			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), Checkbox.IsChecked() );
 
 			return true;
 		}
 
 		if ( w == m_Button )
 		{
-			JMScriptInvokers.MENU_OBJECT_BUTTON.Invoke( Info.target, !Checkbox.IsChecked() );
-
-			if ( Info.type == JMESPType.PLAYER && Info.player )
-			{
-				JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID(), !Checkbox.IsChecked() );
-			}
+			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID(), !Checkbox.IsChecked() );
 
 			return true;
 		}

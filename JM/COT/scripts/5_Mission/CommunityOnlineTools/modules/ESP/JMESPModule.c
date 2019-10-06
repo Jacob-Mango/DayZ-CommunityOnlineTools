@@ -10,38 +10,16 @@ class JMESPModule: JMRenderableModuleBase
 {
 	protected const int m_UserIDStart = 10000;
 
-	protected autoptr array< ref JMObjectMeta > m_ESPObjects;
+	protected autoptr array< ref JMESPMeta > m_ESPObjects;
 	protected autoptr array< ref JMESPWidget > m_ESPBoxes;
 
-	bool CanViewPlayers;
-	bool CanViewBaseBuilding;
-	bool CanViewVehicles;
-	bool CanViewItems;
-	bool CanViewInfected;
-	bool CanViewCreature;
+	protected autoptr array< ref JMESPViewType > m_ViewTypes;
 
 	protected int m_UserID;
 
 	string Filter;
 
-	bool ViewPlayers;
-	bool ViewBaseBuilding;
-	bool ViewVehicles;
-	bool ViewItems;
-	bool ViewInfected;
-	bool ViewCreature;
-	bool ViewEverything;
-
 	float ESPRadius;
-
-	string Name;
-
-	vector Position;
-	vector Rotation;
-
-	float MaxHealth;
-	float Health;
-
 	float ESPUpdateTime;
 	bool ESPIsUpdating;
 
@@ -49,14 +27,13 @@ class JMESPModule: JMRenderableModuleBase
 
 	void JMESPModule()
 	{
-		m_ESPObjects = new array< ref JMObjectMeta >;
+		m_ESPObjects = new array< ref JMESPMeta >;
 		m_ESPBoxes = new array< ref JMESPWidget >;
 		m_UserID = m_UserIDStart;
 
-		ESPRadius = 200;
+		m_ViewTypes = new array< ref JMESPViewType >;
 
-		Position = "0 0 0";
-		Rotation = "0 0 0";
+		ESPRadius = 200;
 
 		ESPUpdateTime = 0.5;
 		IsShowing = false;
@@ -64,16 +41,7 @@ class JMESPModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
-		GetPermissionsManager().RegisterPermission( "ESP.View.Player" );
-		GetPermissionsManager().RegisterPermission( "ESP.View.BaseBuilding" );
-		GetPermissionsManager().RegisterPermission( "ESP.View.Vehicles" );
-		GetPermissionsManager().RegisterPermission( "ESP.View.Items" );
-		GetPermissionsManager().RegisterPermission( "ESP.View.Infected" );
-		GetPermissionsManager().RegisterPermission( "ESP.View.Creature" );
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
-
-		JMScriptInvokers.MENU_OBJECT_BUTTON.Insert( OnObjectButton );
-		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Insert( OnObjectCheckbox );
 	}
 
 	void ~JMESPModule()
@@ -81,9 +49,6 @@ class JMESPModule: JMRenderableModuleBase
 		HideESP();
 
 		Hide();
-
-		JMScriptInvokers.MENU_OBJECT_BUTTON.Remove( OnObjectButton );
-		JMScriptInvokers.MENU_OBJECT_CHECKBOX.Remove( OnObjectCheckbox );
 	}
 
 	override bool HasAccess()
@@ -120,18 +85,51 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		super.OnClientPermissionsUpdated();
 
-		CanViewPlayers = GetPermissionsManager().HasPermission( "ESP.View.Player" );
-		CanViewBaseBuilding = GetPermissionsManager().HasPermission( "ESP.View.BaseBuilding" );
-		CanViewVehicles = GetPermissionsManager().HasPermission( "ESP.View.Vehicles" );
-		CanViewItems = GetPermissionsManager().HasPermission( "ESP.View.Items" );
-		CanViewInfected = GetPermissionsManager().HasPermission( "ESP.View.Infected" );
-		CanViewCreature = GetPermissionsManager().HasPermission( "ESP.View.Creature" );
+		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
+		{
+			m_ViewTypes[i].HasPermission = GetPermissionsManager().HasPermission( "ESP.View." + m_ViewTypes[i].Permission );
+		}
 
 		JMESPForm form;
 		if ( Class.CastTo( form, GetForm() ) )
 		{
 			form.DisableToggleableOptions();
 		}
+	}
+
+	override void OnInit()
+	{
+		RegisterTypes();
+
+		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
+		{
+			GetPermissionsManager().RegisterPermission( "ESP.View." + m_ViewTypes[i].Permission );
+		}
+	}
+
+	void RegisterTypes()
+	{
+		m_ViewTypes.Insert( new JMESPViewTypePlayer );
+		m_ViewTypes.Insert( new JMESPViewTypeInfected );
+		m_ViewTypes.Insert( new JMESPViewTypeAnimal );
+		m_ViewTypes.Insert( new JMESPViewTypeCar );
+		m_ViewTypes.Insert( new JMESPViewTypeBaseBuilding );
+		m_ViewTypes.Insert( new JMESPViewTypeBoltActionRifle );
+		m_ViewTypes.Insert( new JMESPViewTypeRifle );
+		m_ViewTypes.Insert( new JMESPViewTypePistol );
+		m_ViewTypes.Insert( new JMESPViewTypeWeapon );
+		m_ViewTypes.Insert( new JMESPViewTypeItemTool );
+		m_ViewTypes.Insert( new JMESPViewTypeItemCrafted );
+		m_ViewTypes.Insert( new JMESPViewTypeItemTent );
+		m_ViewTypes.Insert( new JMESPViewTypeItemMaterial );
+		m_ViewTypes.Insert( new JMESPViewTypeItemAttachment );
+		m_ViewTypes.Insert( new JMESPViewTypeItemFood );
+		m_ViewTypes.Insert( new JMESPViewTypeItemExplosive );
+		m_ViewTypes.Insert( new JMESPViewTypeItemBook );
+		m_ViewTypes.Insert( new JMESPViewTypeItemContainer );
+		m_ViewTypes.Insert( new JMESPViewTypeItemEyewear );
+		m_ViewTypes.Insert( new JMESPViewTypeItemAmmo );
+		m_ViewTypes.Insert( new JMESPViewTypeItem );
 	}
 
 	override void OnMissionStart()
@@ -227,158 +225,49 @@ class JMESPModule: JMRenderableModuleBase
 		array<Object> objects = new array<Object>;
 		GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
 
-		Object obj;
-		EntityAI entity;
-		JMObjectMeta espInfo;
-
-		bool isUsingFilter = false;
-
-		if ( Filter != "" ) 
-		{
-			isUsingFilter = true;
-		}
+		bool isUsingFilter = Filter.Length() > 0;
 
 		string filter = Filter + "";
 		filter.ToLower();
 
 		for (int i = 0; i < objects.Count(); ++i)
 		{
-			obj = Object.Cast( objects.Get(i) );
-			entity = EntityAI.Cast( obj );
-			
+			Object obj = objects[i];
+
 			if ( obj == NULL )
 				continue;
 
 			string type = obj.GetType();
 			type.ToLower();
 
-			if ( isUsingFilter && !type.Contains( filter ) )
+			if ( !IsMissionOffline() && !obj.HasNetworkID() )
 				continue;
-				
-			if ( !obj.HasNetworkID() )
-				continue;
+
 			if ( obj.IsRock() )
 				continue;
+
 			if ( obj.IsWoodBase() )
 				continue;
+
 			if ( obj.IsBush() )
 				continue;
+
 			if ( obj.IsTree() )
 				continue;
+
 			if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
 				continue;
 
-			entity = EntityAI.Cast( obj );
+			if ( isUsingFilter && !type.Contains( filter ) )
+				continue;
 
-			bool isPlayer = false;
-			
-			if ( entity != NULL )
+			for ( int j = 0; j < m_ViewTypes.Count(); j++ )
 			{
-				isPlayer = entity.IsPlayer();
-
-				Man man = Man.Cast( entity );
-			
-				if ( (ViewPlayers || ViewEverything) && CanViewPlayers && isPlayer )
+				JMESPMeta espInfo;
+				if ( m_ViewTypes[j].IsValid( obj, espInfo ) )
 				{
-					espInfo = new JMObjectMeta;
-
-					espInfo.name = obj.GetDisplayName();
-					if ( espInfo.name == "" )
-						espInfo.name = obj.GetType();
-
-					espInfo.type = JMESPType.PLAYER;
-					
-					if ( man && man.GetIdentity() )
-					{
-						espInfo.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
-						espInfo.name = espInfo.player.GetName();
-					}
-
-					espInfo.target = obj;
-
 					CreateESPBox( espInfo );
-					continue;
 				}
-
-				bool isInfected = !isPlayer && ( entity.IsZombie() || entity.IsZombieMilitary() );
-				if ( (ViewInfected || ViewEverything) && CanViewInfected && isInfected )
-				{
-					espInfo = new JMObjectMeta;
-
-					espInfo.name = obj.GetDisplayName();
-					if ( espInfo.name == "" )
-						espInfo.name = obj.GetType();
-
-					espInfo.target = obj;
-					espInfo.type = JMESPType.INFECTED;
-
-					CreateESPBox( espInfo );
-					continue;
-				} 
-
-				bool isCreature = !isInfected && entity.IsAnimal();
-				if ( (ViewCreature || ViewEverything) && CanViewCreature && isCreature )
-				{
-					espInfo = new JMObjectMeta;
-
-					espInfo.name = obj.GetDisplayName();
-					if ( espInfo.name == "" )
-						espInfo.name = obj.GetType();
-
-					espInfo.target = obj;
-					espInfo.type = JMESPType.CREATURE;
-
-					CreateESPBox( espInfo );
-					continue;
-				}
-			}
-
-			bool isTransport = !isPlayer && obj.IsTransport();
-			if ( (ViewVehicles || ViewEverything) && CanViewVehicles && isTransport )
-			{
-				espInfo = new JMObjectMeta;
-				
-				espInfo.name = obj.GetDisplayName();
-				if ( espInfo.name == "" )
-					espInfo.name = obj.GetType();
-
-				espInfo.target = obj;
-				espInfo.type = JMESPType.VEHICLE;
-
-				CreateESPBox( espInfo );
-				continue;
-			}
-
-			bool isBaseBuilding = !isTransport && ( obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase ) );
-			if ( (ViewBaseBuilding || ViewEverything) && CanViewBaseBuilding && isBaseBuilding )
-			{
-				espInfo = new JMObjectMeta;
-				
-				espInfo.name = obj.GetDisplayName();
-				if ( espInfo.name == "" )
-					espInfo.name = obj.GetType();
-
-				espInfo.target = obj;
-				espInfo.type = JMESPType.BASEBUILDING;
-
-				CreateESPBox( espInfo );
-				continue;
-			}
-
-			bool isItem = !isBaseBuilding && ( obj.IsItemBase() || obj.IsInventoryItem() );
-			if ( (ViewItems || ViewEverything) && CanViewItems && isItem )
-			{
-				espInfo = new JMObjectMeta;
-				
-				espInfo.name = obj.GetDisplayName();
-				if ( espInfo.name == "" )
-					espInfo.name = obj.GetType();
-
-				espInfo.target = obj;
-				espInfo.type = JMESPType.ITEM;
-
-				CreateESPBox( espInfo );
-				continue;
 			}
 		}
 
@@ -424,7 +313,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void CreateESPBox( ref JMObjectMeta info )
+	void CreateESPBox( ref JMESPMeta info )
 	{
 		ref JMESPWidget boxScript = NULL;
 		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout" );

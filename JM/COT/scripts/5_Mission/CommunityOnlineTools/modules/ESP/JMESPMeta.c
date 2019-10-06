@@ -1,7 +1,8 @@
-class JMObjectMeta
+class JMESPMeta
 {
 	string name;
-	JMESPType type;
+	JMESPViewType type;
+	int colour;
 	ref JMPlayerInstance player;
 	Object target;
 }
