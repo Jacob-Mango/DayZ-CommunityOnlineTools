@@ -200,7 +200,7 @@ class JMESPViewTypeBaseBuilding: JMESPViewType
 
 class JMESPViewTypeWeapon: JMESPViewType
 {
-    void JMESPViewTypeRifle()
+    void JMESPViewTypeWeapon()
     {
         Permission = "Weapon";
         Localisation = "Weapons";
@@ -234,7 +234,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 {
-    void JMESPViewTypeRifle()
+    void JMESPViewTypeBoltActionRifle()
     {
         Permission = "Weapon.BoltActionRifle";
         Localisation = "Bolt Action Rifles";
@@ -463,7 +463,7 @@ class JMESPViewTypeItemMaterial: JMESPViewTypeItem
 
 class JMESPViewTypeItemAttachment: JMESPViewTypeItem
 {
-    void JMESPViewTypeItemMaterial()
+    void JMESPViewTypeItemAttachment()
     {
         Permission = "Item.Attachment";
         Localisation = "Attachments";

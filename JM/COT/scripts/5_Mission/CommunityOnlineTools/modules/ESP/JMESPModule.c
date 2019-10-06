@@ -132,6 +132,11 @@ class JMESPModule: JMRenderableModuleBase
 		m_ViewTypes.Insert( new JMESPViewTypeItem );
 	}
 
+	array< ref JMESPViewType > GetViewTypes()
+	{
+		return m_ViewTypes;
+	}
+
 	override void OnMissionStart()
 	{
 		if ( IsMissionClient() )

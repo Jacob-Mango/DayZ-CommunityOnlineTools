@@ -96,7 +96,7 @@ class UIActionScroller extends UIActionBase
 		float scrollerPos = m_RootHeight - scroller_height;
 		scrollerPos = scrollerPos * m_Position;
 
-		float contentPos = -(m_ContentHeight - layoutRootHeight);
+		float contentPos = -( m_ContentHeight - m_RootHeight );
 		contentPos = contentPos * m_Position;
 
 		m_Scroller.SetPos( 0, scrollerPos );

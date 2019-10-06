@@ -1,7 +1,7 @@
 PanelWidgetClass JMESPForm {
  color 0 0 0 0
  position 0 0
- size 700 520
+ size 700 500
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -9,16 +9,23 @@ PanelWidgetClass JMESPForm {
  scriptclass "JMESPForm"
  style EditorPanel
  {
-  GridSpacerWidgetClass actions_wrapper {
-   position 5 5
-   size 690 510
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
+  FrameWidgetClass panel_top {
+   position 0 0
+   size 1 170
+   halign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
    vexactsize 1
-   "Size To Content V" 1
-   Columns 1
-   Rows 1
+  }
+  FrameWidgetClass panel_bottom {
+   position 0 0
+   size 1 330
+   valign bottom_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
   }
  }
 }
