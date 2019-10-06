@@ -101,8 +101,6 @@ class JMPlayerForm extends JMFormBase
 
 	override void OnInit()
 	{
-		JMESPWidget.playerMenu = this;
-
 		InitWidgetsLeft();
 		InitWidgetsRight();
 	}

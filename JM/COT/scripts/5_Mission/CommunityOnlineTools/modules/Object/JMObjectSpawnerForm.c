@@ -228,20 +228,8 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( !Class.CastTo( mod, module ) )
 			return;
 
+		// TODO: FIX TO BE PLAYERS INSTEAD!
 		array< EntityAI > entities = new array< EntityAI >;
-
-		JMSelectedModule sm;
-		if ( Class.CastTo( sm, GetModuleManager().GetModule( JMSelectedModule ) ) )
-		{
-			for ( int i = 0; i < sm.GetObjects().Count(); i++ )
-			{
-				EntityAI ent;
-				if ( Class.CastTo( ent, sm.GetObjects()[i] ) )
-				{
-					entities.Insert( ent );
-				}
-			}
-		}
 
 		int quantity = -1;
 

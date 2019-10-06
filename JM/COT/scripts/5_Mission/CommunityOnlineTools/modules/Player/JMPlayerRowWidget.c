@@ -117,26 +117,12 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		{
 			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( m_GUID, Checkbox.IsChecked() );
 
-			JMPlayerInstance instanceCheck = GetPermissionsManager().GetPlayer( m_GUID );
-
-			if ( instanceCheck && instanceCheck.PlayerObject )
-			{
-				JMScriptInvokers.MENU_OBJECT_CHECKBOX.Invoke( instanceCheck.PlayerObject, Checkbox.IsChecked() );
-			}
-
 			return true;
 		}
 
 		if ( w == Button )
 		{
 			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( m_GUID, !Checkbox.IsChecked() );
-
-			JMPlayerInstance instanceBut = GetPermissionsManager().GetPlayer( m_GUID );
-
-			if ( instanceBut && instanceBut.PlayerObject )
-			{
-				JMScriptInvokers.MENU_OBJECT_BUTTON.Invoke( instanceBut.PlayerObject, !Checkbox.IsChecked() );
-			}
 
 			return true;
 		}
