@@ -1,13 +1,17 @@
 class JMESPForm extends JMFormBase
 {
+	private autoptr array< ref JMESPViewTypeWidget > m_ESPTypeList;
+
+	private UIActionScroller m_ESPListScroller;
+	private Widget m_ESPListRows;
+
 	protected UIActionSlider m_RangeSlider;
-
 	protected UIActionSlider m_UpdateRate;
-
 	protected UIActionButton m_FullMapESP;
 
 	void JMESPForm()
 	{
+		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
 	}
 
 	void ~JMESPForm()
@@ -16,7 +20,7 @@ class JMESPForm extends JMFormBase
 
 	void ESPControls( Widget parent )
 	{
-		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 3, 1 );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 5, 1 );
 
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
@@ -33,16 +37,16 @@ class JMESPForm extends JMFormBase
 		m_UpdateRate.SetAppend(" second(s)");
 		m_UpdateRate.SetStepValue( 0.5 );
 
-		Widget fullMapSpacer = UIActionManager.CreatePanel( parent, 0x00000000, 30 );
+		Widget fullMapSpacer = UIActionManager.CreatePanel( mainSpacer, 0x00000000, 30 );
 		m_FullMapESP = UIActionManager.CreateButton( fullMapSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
 		m_FullMapESP.SetPosition( 0 );
-		m_FullMapESP.SetWidth( 0.2 );
+		m_FullMapESP.SetWidth( 0.3 );
 		UIActionText fmHeading = UIActionManager.CreateText( fullMapSpacer, "Warning: ", "" );
-		fmHeading.SetPosition( 0.2 );
+		fmHeading.SetPosition( 0.3 );
 		fmHeading.SetWidth( 0.15 );
-		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "Entering deletes your character and exiting fullmap ESP requires a relog" );
-		fmText.SetPosition( 0.35 );
-		fmText.SetWidth( 0.65 );
+		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "Exiting fullmap ESP requires a relog" );
+		fmText.SetPosition( 0.45 );
+		fmText.SetWidth( 0.55 );
 
 		Widget otherStuffSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
@@ -52,24 +56,61 @@ class JMESPForm extends JMFormBase
 		m_RangeSlider.SetStepValue( 10 );
 
 		UIActionManager.CreateEditableText( otherStuffSpacer, "Class Filter: ", this, "Change_Filter", JMESPModule.Cast( module ).Filter );
+	
+		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
+		
+		UIActionManager.CreateText( mainSpacer, "Filters: ", "" );
 	}
 
 	void ESPFilters( Widget parent )
 	{
-		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 8, 1 );
+		m_ESPListScroller = UIActionManager.CreateScroller( parent );
+		m_ESPListRows = UIActionManager.CreateActionRows( m_ESPListScroller.GetContentWidget() );
+
+		JMESPModule mod;
+		if ( !Class.CastTo( mod, module ) )
+			return;
+
+		int totalInContentRow = 100;
+		int currentContentRow = 0;
+
+		GridSpacerWidget gsw;
+
+		for ( int i = 0; i < mod.GetViewTypes().Count(); i++ )
+		{
+			if ( totalInContentRow >= 100 )
+			{
+				Class.CastTo( gsw, m_ESPListRows.FindAnyWidget( "Content_Row_0" + currentContentRow ) );
+				currentContentRow++;
+				totalInContentRow = 0;
+			}
+
+			Widget rWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_type_widget.layout", gsw );
+			
+			if ( !rWidget )
+				continue;
+
+			JMESPViewTypeWidget rScript;
+			rWidget.GetScript( rScript );
+
+			if ( !rScript )
+				continue;
+
+			rScript.Set( mod.GetViewTypes()[i] );
+
+			m_ESPTypeList.Insert( rScript );
+		}
+
+		m_ESPListScroller.UpdateScroller();
 	}
 
 	override void OnInit()
 	{
 		JMESPWidget.espMenu = this;
 
-		Widget mainSpacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 3, 1 );
+		ESPControls( layoutRoot.FindAnyWidget( "panel_top" ) );
 
-		ESPControls( mainSpacer );
-
-		UIActionManager.CreateSpacer( mainSpacer );
-
-		ESPFilters( mainSpacer );
+		ESPFilters( layoutRoot.FindAnyWidget( "panel_bottom" ) );
 	}
 
 	override void OnShow()
