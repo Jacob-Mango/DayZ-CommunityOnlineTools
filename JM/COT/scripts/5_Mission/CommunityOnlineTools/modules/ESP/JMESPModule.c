@@ -68,7 +68,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "ESP Viewer";
+		return "ESP Tools";
 	}
 	
 	override string GetIconName()
@@ -134,33 +134,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMissionStart()
 	{
-		JMESPWidget.espModule = this;
-	}
-
-	void OnObjectButton( Object obj, bool check )
-	{
-		Print( "obj " + obj + " will be " + check );
-		for ( int i = 0; i < m_ESPBoxes.Count(); i++ )
+		if ( IsMissionClient() )
 		{
-			m_ESPBoxes[i].Checkbox.SetChecked( false );
-
-			if ( m_ESPBoxes[i].Info.target == obj )
-			{
-				m_ESPBoxes[i].Checkbox.SetChecked( !check );
-			}
-		}
-	}
-
-	void OnObjectCheckbox( Object obj, bool checked )
-	{
-		Print( "obj " + obj + " is " + checked );
-		
-		for ( int i = 0; i < m_ESPBoxes.Count(); i++ )
-		{
-			if ( m_ESPBoxes[i].Info.target == obj )
-			{
-				m_ESPBoxes[i].Checkbox.SetChecked( checked );
-			}
+			JMESPWidget.espModule = this;
 		}
 	}
 

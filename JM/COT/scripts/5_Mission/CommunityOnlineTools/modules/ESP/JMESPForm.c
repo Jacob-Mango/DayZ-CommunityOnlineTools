@@ -1,13 +1,10 @@
 class JMESPForm extends JMFormBase
 {
-	protected ref UIActionSlider m_RangeSlider;
+	protected UIActionSlider m_RangeSlider;
 
-	protected ref UIActionButton m_UpdateShow;
-	protected ref UIActionCheckbox m_TextMode;
-	protected ref UIActionSlider m_UpdateRate;
-	protected ref UIActionCheckbox m_ESPIsUpdating;
+	protected UIActionSlider m_UpdateRate;
 
-	protected ref UIActionButton m_FullMapESP;
+	protected UIActionButton m_FullMapESP;
 
 	void JMESPForm()
 	{
@@ -17,37 +14,49 @@ class JMESPForm extends JMFormBase
 	{
 	}
 
-	void ESPControls( Widget mainSpacer )
+	void ESPControls( Widget parent )
 	{
-		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 3, 1 );
+
+		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
-		m_UpdateShow = UIActionManager.CreateButton( quadSpacer, "Show ESP", this, "Click_UpdateESP" );
-		m_TextMode = UIActionManager.CreateCheckbox( quadSpacer, "Text Mode", this, "Click_ChangeESPMode", JMESPWidget.ShowJustName );
+		UIActionManager.CreateButton( quadSpacer, "Toggle", this, "Click_UpdateESP" );
 
-		m_FullMapESP = UIActionManager.CreateButton( quadSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
-		UIActionManager.CreateCheckbox( quadSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidget.UseClassName );
+		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateText( mainSpacer, "Information: ", "Enabling full map ESP requires you to be in Free Cam." );
-		UIActionManager.CreateText( mainSpacer, "Warning: ", "Enabling full map ESP removes your character from the server, relog to fix." );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "Simplified", this, "Click_ChangeESPMode", JMESPWidget.Simplified );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidget.UseClassName );
 
-		m_RangeSlider = UIActionManager.CreateSlider( mainSpacer, "Radius", 0, 1000, this, "Change_Range" );
+		UIActionManager.CreateButton( quadSpacer, "Update Interval", this, "Click_UpdateAtRate" );
+		m_UpdateRate = UIActionManager.CreateSlider( quadSpacer, "", 0.5, 10, this, "Change_UpdateRate" );
+		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetAppend(" second(s)");
+		m_UpdateRate.SetStepValue( 0.5 );
+
+		Widget fullMapSpacer = UIActionManager.CreatePanel( parent, 0x00000000, 30 );
+		m_FullMapESP = UIActionManager.CreateButton( fullMapSpacer, "Enable Fullmap ESP", this, "Click_EnableFullMap" );
+		m_FullMapESP.SetPosition( 0 );
+		m_FullMapESP.SetWidth( 0.2 );
+		UIActionText fmHeading = UIActionManager.CreateText( fullMapSpacer, "Warning: ", "" );
+		fmHeading.SetPosition( 0.2 );
+		fmHeading.SetWidth( 0.15 );
+		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "Entering deletes your character and exiting fullmap ESP requires a relog" );
+		fmText.SetPosition( 0.35 );
+		fmText.SetWidth( 0.65 );
+
+		Widget otherStuffSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
+
+		m_RangeSlider = UIActionManager.CreateSlider( otherStuffSpacer, "Radius", 0, 1000, this, "Change_Range" );
 		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
 		m_RangeSlider.SetAppend(" metre(s)");
 		m_RangeSlider.SetStepValue( 10 );
 
-		Widget duoSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
-
-		m_ESPIsUpdating = UIActionManager.CreateCheckbox( duoSpacer, "Should Update Continuously", this, "Click_UpdateAtRate", JMESPModule.Cast( module ).ESPIsUpdating );
-
-		m_UpdateRate = UIActionManager.CreateSlider( duoSpacer, "At Rate", 0.5, 10, this, "Change_UpdateRate" );
-		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
-		m_UpdateRate.SetAppend(" second(s)");
-		m_UpdateRate.SetStepValue( 0.5 );
+		UIActionManager.CreateEditableText( otherStuffSpacer, "Class Filter: ", this, "Change_Filter", JMESPModule.Cast( module ).Filter );
 	}
 
-	void ESPFilters( Widget mainSpacer )
+	void ESPFilters( Widget parent )
 	{
-		UIActionManager.CreateEditableText( mainSpacer, "Class Filter: ", this, "Change_Filter", JMESPModule.Cast( module ).Filter );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 8, 1 );
 	}
 
 	override void OnInit()
@@ -56,11 +65,11 @@ class JMESPForm extends JMFormBase
 
 		Widget mainSpacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "actions_wrapper" ), 3, 1 );
 
-		ESPControls( UIActionManager.CreateGridSpacer( mainSpacer, 3, 1 ) );
+		ESPControls( mainSpacer );
 
 		UIActionManager.CreateSpacer( mainSpacer );
 
-		ESPFilters( UIActionManager.CreateGridSpacer( mainSpacer, 8, 1 ) );
+		ESPFilters( mainSpacer );
 	}
 
 	override void OnShow()
@@ -68,8 +77,8 @@ class JMESPForm extends JMFormBase
 		super.OnShow();
 
 		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
-		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
-		m_ESPIsUpdating.SetChecked( JMESPModule.Cast( module ).ESPIsUpdating );
+
+		UpdateRefreshRateSlider();
 
 		if ( COTPlayerIsRemoved )
 		{
@@ -86,17 +95,21 @@ class JMESPForm extends JMFormBase
 		super.OnHide();
 	}
 
-	void UpdateESPButtonName()
+	void UpdateRefreshRateSlider()
 	{
-		bool isShowing = JMESPModule.Cast( module ).IsShowing;
+		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
 
-		if ( isShowing )
+		if ( JMESPModule.Cast( module ).ESPIsUpdating  )
 		{
-			m_UpdateShow.SetButton( "Clear ESP" );
+			m_UpdateRate.Enable();
 		} else
 		{
-			m_UpdateShow.SetButton( "Enable ESP" );
+			m_UpdateRate.Disable();
 		}
+	}
+
+	void UpdateESPButtonName()
+	{
 	}
 
 	void DisableToggleableOptions()
@@ -113,20 +126,16 @@ class JMESPForm extends JMFormBase
 			return;
 
 		if ( JMESPModule.Cast( module ).IsShowing )
-		{
-			JMESPModule.Cast( module ).ESPIsUpdating = false;
-			
+		{			
 			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( JMESPModule.Cast( module ).UpdateESP );
 
 			JMESPModule.Cast( module ).HideESP();
 		} else
 		{
-			JMESPModule.Cast( module ).ESPIsUpdating = m_ESPIsUpdating.IsChecked();
-
 			JMESPModule.Cast( module ).UpdateESP();
 		}
 
-		GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + JMESPModule.Cast( module ).IsShowing ) );
+		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + JMESPModule.Cast( module ).IsShowing ) );
 
 		UpdateESPButtonName();
 
@@ -145,7 +154,7 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		JMESPWidget.ShowJustName = action.IsChecked();
+		JMESPWidget.Simplified = action.IsChecked();
 	}
 	
 	void Change_Filter( UIEvent eid, ref UIActionBase action )
@@ -182,13 +191,17 @@ class JMESPForm extends JMFormBase
 		
 		JMESPModule.Cast( module ).EnableFullMap();
 		
-		m_FullMapESP.Disable();
+		// TODO: Send RPC back to disable this
+		// m_FullMapESP.Disable();
 	}
 
 	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 		
-		JMESPModule.Cast( module ).ESPUpdateLoop( action.IsChecked() );
+		JMESPModule.Cast( module ).ESPUpdateLoop( !JMESPModule.Cast( module ).ESPIsUpdating );
+
+		UpdateRefreshRateSlider();
 	}
 }
