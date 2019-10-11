@@ -88,13 +88,45 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		RegisterBinding( new JMModuleBinding( "Input_Cursor",		"UATeleportModuleTeleportCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "Input_WorldToModelLookAt",	"UATeleportModuleWorldToModelLookAt",	true 	) );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()
 	{
 		return settings.Locations;
 	}
+
+    void Input_WorldToModelLookAt( UAInput input )
+    {
+		if ( !(input.LocalPress()) )
+			return;
+
+        vector dir = GetGame().GetPointerDirection();
+
+        vector from = GetGame().GetCurrentCameraPosition();
+
+        vector to = from + ( dir * 10000 );
+
+        vector rayStart = from;
+        vector rayEnd = to;
+        vector hitPos;
+        vector hitNormal;
+        int hitComponentIndex;
+
+        set< Object > objs = new set< Object >;
+        if ( DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, objs, NULL, GetPlayer()) )
+        {
+            if ( objs.Count() > 0 ) 
+            {
+                vector position = objs[0].WorldToModel( hitPos );
+
+                Print( "Model: " + objs[0].GetType() + ", Position: " + position );
+
+                Message( "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
+            }
+        }
+    }
 
 	void Input_Cursor( UAInput input )
 	{

@@ -22,6 +22,7 @@
             <input name="UACOTModuleFocusUI" loc="" visible="false" />
             
             <input name="UATeleportModuleTeleportCursor" loc="Teleport Self (Crosshair)" />
+            <input name="UATeleportModuleWorldToModelLookAt" loc="WorldToModelLookAt" />
 
             <input name="UACameraToolToggleCamera" loc="Toggles Freecam" />
 
@@ -51,6 +52,10 @@
 
         <input name="UATeleportModuleTeleportCursor">
             <btn name="kH" />
+        </input>
+
+        <input name="UATeleportModuleWorldToModelLookAt">
+            <btn name="kL" />
         </input>
 
         <input name="UACameraToolToggleCamera">
