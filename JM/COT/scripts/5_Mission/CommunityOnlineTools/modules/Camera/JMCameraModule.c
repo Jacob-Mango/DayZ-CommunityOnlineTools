@@ -62,7 +62,7 @@ class JMCameraModule: JMRenderableModuleBase
 	
 	override void OnUpdate( float timeslice )
 	{
-		if ( !GetGame().IsMultiplayer() && CurrentActiveCamera )
+		if ( IsMissionClient() && CurrentActiveCamera )
 		{
 			float speed = 0.2;
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
@@ -152,8 +152,11 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void Client_Enter()
 	{		
+		Message(NULL, "Client_Enter");
+		
 		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
 		{
+		Message(NULL, "Client_Enter::CastTo");
 			CurrentActiveCamera.SetActive( true );
 			
 			if ( GetGame().GetPlayer() )
@@ -165,6 +168,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void Server_Enter( PlayerIdentity sender, Object target )
 	{
+		Message(NULL, "Server_Enter");
 		vector position = Vector( 0, 0, 0 );
 
 		if ( target )
@@ -179,21 +183,30 @@ class JMCameraModule: JMRenderableModuleBase
 			//player.GetInputController().SetDisabled( true );
 		}
 
-		GetGame().SelectPlayer( sender, NULL );
-
 		if ( IsMissionOffline() )
 		{
+			Message(NULL, "Server_Enter::IsMissionOffline");
 			CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", position, false ) );
 
-			Client_Enter();
+			Message(NULL, "Server_Enter::  " + CurrentActiveCamera );
+			CurrentActiveCamera.SetActive( true );
+			
+			if ( GetGame().GetPlayer() )
+			{
+				GetGame().GetPlayer().GetInputController().SetDisabled( true );
+			}
 		} else 
 		{
+		Message(NULL, "Server_Enter::!!IsMissionOffline");
+			GetGame().SelectPlayer( sender, NULL );
+
 			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMCameraModuleRPC.Enter, true, sender );
 		}
 
+		Message(NULL, "Server_Enter::Logged");
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
 	}
 
