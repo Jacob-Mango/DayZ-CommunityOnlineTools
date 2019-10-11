@@ -123,7 +123,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
                 Print( "Model: " + objs[0].GetType() + ", Position: " + position );
 
-                Message( "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
+                Message( NULL, "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
             }
         }
     }
