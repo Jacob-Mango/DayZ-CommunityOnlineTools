@@ -9,9 +9,15 @@ class JMPlayerForm extends JMFormBase
 	private UIActionText m_PlayerListCount;
 	private UIActionEditableText m_PlayerListFilter;
 	private UIActionCheckbox m_PlayerListSort; //TODO: make a new ui action type thing
+	
 	private UIActionScroller m_PlayerListScroller;
-
 	private Widget m_PlayerListRows;
+
+	private UIActionScroller m_PermissionsListScroller;
+	private Widget m_PermissionsRows;
+
+	private UIActionScroller m_RolesListScroller;
+	private Widget m_RolesRows;
 
 	private UIActionScroller m_ActionListScroller;
 	private Widget m_ActionsWrapper;
@@ -269,12 +275,20 @@ class JMPlayerForm extends JMFormBase
 
 		UIActionManager.CreateText( parent, "Permissions:", "Modify the permissions and roles" );
 
-		Widget actions = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 1 );
 
 		m_ModifyPermissions = UIActionManager.CreateButton( actions, "Permissions", this, "Click_ModifyPermissions" );
+		m_PermissionsListScroller = UIActionManager.CreateScroller( actions );
+		m_PermissionsRows = UIActionManager.CreateGridSpacer( m_PermissionsListScroller.GetContentWidget(), 9, 1 );
+
 		m_ModifyRoles = UIActionManager.CreateButton( actions, "Roles", this, "Click_ModifyRoles" );
+		m_RolesListScroller = UIActionManager.CreateScroller( actions );
+		m_RolesRows = UIActionManager.CreateGridSpacer( m_RolesListScroller.GetContentWidget(), 9, 1 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
+
+		HidePermissions();
+		HideRoles();
 
 		return parent;
 	}
@@ -303,12 +317,52 @@ class JMPlayerForm extends JMFormBase
 		UpdatePlayerList();
 	}
 
+	void HidePermissions()
+	{
+		m_ModifyPermissions.SetButton( "Permissions" );
+		m_PermissionsListScroller.Hide();
+	}
+
+	void ShowPermissions()
+	{
+		m_ModifyPermissions.SetButton( "Permissions" );
+		m_PermissionsListScroller.Show();
+	}
+
+	void HideRoles()
+	{
+		m_ModifyRoles.SetButton( "Roles" );
+		m_RolesListScroller.Hide();
+	}
+
+	void ShowRoles()
+	{
+		m_ModifyRoles.SetButton( "Roles" );
+		m_RolesListScroller.Show();
+
+		// update role list here
+	}
+
 	void Click_ModifyPermissions()
 	{
+		if ( m_PermissionsListScroller.IsVisible() )
+		{
+			HidePermissions();
+		} else
+		{
+			ShowPermissions();
+		}
 	}
 	
 	void Click_ModifyRoles()
 	{
+		if ( m_RolesListScroller.IsVisible() )
+		{
+			HideRoles();
+		} else
+		{
+			ShowRoles();
+		}
 	}
 
 	void Click_SetPosition( UIEvent eid, ref UIActionBase action )

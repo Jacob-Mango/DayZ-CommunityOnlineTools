@@ -164,6 +164,14 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
+	bool IsVisible()
+	{
+		if ( !layoutRoot )
+			return false;
+			
+		return layoutRoot.IsVisible();
+	}
+
 	void SetCallback( Class instance, string funcname )
 	{
 		if ( instance == NULL || funcname == "" ) return;
