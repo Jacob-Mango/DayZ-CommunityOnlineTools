@@ -43,7 +43,6 @@ class JMVehicleSpawnerForm extends JMFormBase
 			if ( m_VehicleButtons[j].GetLayoutRoot() )
 			{
 				m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
-				m_VehicleButtons[j].GetLayoutRoot().Unlink();
 			}
 		}
 

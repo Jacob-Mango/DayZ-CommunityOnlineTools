@@ -119,7 +119,7 @@ class JMTeleportModule: JMRenderableModuleBase
         {
             if ( objs.Count() > 0 ) 
             {
-                vector position = objs[0].WorldToModel( hitPos );
+                vector position = objs[0].CoordToLocal( hitPos );
 
                 Print( "Model: " + objs[0].GetType() + ", Position: " + position );
 

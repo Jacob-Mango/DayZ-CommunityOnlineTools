@@ -12,6 +12,7 @@ modded class MissionServer
 
 	void ~MissionServer()
 	{
+		delete g_cotBase;
 	}
 
 	override void OnInit()
