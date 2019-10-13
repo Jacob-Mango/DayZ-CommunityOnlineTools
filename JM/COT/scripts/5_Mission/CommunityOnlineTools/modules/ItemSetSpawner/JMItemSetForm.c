@@ -45,8 +45,10 @@ class JMItemSetForm extends JMFormBase
 	{
 		for ( int k = 0; k < m_ItemSetButtons.Count(); k++ )
 		{
-			m_ActionsWrapper.RemoveChild( m_ItemSetButtons[k].GetLayoutRoot() );
-			m_ItemSetButtons[k].GetLayoutRoot().Unlink();
+			if ( m_ItemSetButtons[k].GetLayoutRoot() )
+			{
+				m_ActionsWrapper.RemoveChild( m_ItemSetButtons[k].GetLayoutRoot() );
+			}
 		}
 
 		m_ItemSetButtons.Clear();

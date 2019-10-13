@@ -88,7 +88,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() )
+		if ( IsMissionHost() && settings )
 			settings.Save();
 	}
 
