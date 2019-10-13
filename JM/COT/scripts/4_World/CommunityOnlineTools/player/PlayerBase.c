@@ -22,7 +22,7 @@ modded class PlayerBase
 
 		if ( GetGame() && IsMissionOffline() )
 		{
-			if ( GetGame().GetPlayer() == NULL && GetGame().GetGameState() != DayZGameState.MAIN_MENU )
+			if ( GetGame().GetPlayer() == NULL && g_Game.GetGameState() != DayZGameState.MAIN_MENU )
 			{
 				JMPlayerInstance instance;
 				GetPermissionsManager().OnClientConnected( NULL, instance );
