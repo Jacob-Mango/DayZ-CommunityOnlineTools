@@ -254,7 +254,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Position( vector position )
 	{
-		if ( IsMissionClient() )
+		if ( IsMissionOffline() )
+		{
+			Server_Position( position, GetGame().GetPlayer() );
+		} else if ( IsMissionClient() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Teleport.Position" ) )
 				return;
@@ -296,7 +299,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Location( JMTeleportLocation location, array< string > guids )
 	{
-		if ( IsMissionClient() )
+		if ( IsMissionOffline() )
+		{
+			Server_Location( location.Permission, guids, NULL );
+		} else if ( IsMissionClient() )
 		{
 			if ( location == NULL )
 				return;
@@ -311,9 +317,6 @@ class JMTeleportModule: JMRenderableModuleBase
 			rpc.Write( location.Permission );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Location, true, NULL );
-		} else if ( IsMissionOffline() )
-		{
-			Server_Location( location.Permission, guids, NULL );
 		}
 	}
 
