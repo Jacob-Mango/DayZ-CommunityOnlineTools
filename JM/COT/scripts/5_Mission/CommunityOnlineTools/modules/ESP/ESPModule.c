@@ -260,7 +260,7 @@ class ESPModule: EditorModule
 			Position = m_SelectedBoxes[0].Info.target.GetPosition();
 			Rotation = m_SelectedBoxes[0].Info.target.GetYawPitchRoll();
 			MaxHealth = m_SelectedBoxes[0].Info.target.GetMaxHealth( "", "" );
-			Health = m_SelectedBoxes[0].Info.target.GetHealth( "", "" );
+			Health = m_SelectedBoxes[0].Info.target.GetMaxHealth( "", "" );
 		}
 	}
 
