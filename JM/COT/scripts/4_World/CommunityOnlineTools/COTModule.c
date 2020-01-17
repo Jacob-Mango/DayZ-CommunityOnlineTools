@@ -39,6 +39,14 @@ class COTModule : JMModuleBase
 		}
 	}
 
+	override void OnMissionFinish()
+	{
+		if ( IsMissionClient() )
+		{
+			delete m_COTMenu;
+		}
+	}
+
 	override void RegisterKeyMouseBindings() 
 	{
 		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
