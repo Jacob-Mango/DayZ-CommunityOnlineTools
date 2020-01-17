@@ -172,7 +172,7 @@ for /f "tokens=*" %%D in ('dir /b /s "%workDrive%%prefixLinkRoot%\*"') do (
 								set pboName=!pboName:\%prefixLinkRoot%\=!
 								set pboName=!pboName:\=_!
 
-								%makePBO% -U -P -D -N "%%~dpnxD" "%modBuildDirectory%%modName%\Addons\!pboName!.pbo"
+								%makePBO% -U -P -D "%%~dpnxD" "%modBuildDirectory%%modName%\Addons\!pboName!.pbo"
 								%signFile% "%keyDirectory%%keyName%.biprivatekey" "%modBuildDirectory%%modName%\Addons\!pboName!.pbo"
 							)
 						)

@@ -129,7 +129,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	void Hide()
 	{
-		if ( IsVisible() )
+		if ( m_Window )
 		{
 			delete m_Window;
 		}
