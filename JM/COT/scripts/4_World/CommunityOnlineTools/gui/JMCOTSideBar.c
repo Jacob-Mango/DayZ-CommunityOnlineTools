@@ -18,10 +18,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 	
 	void ~JMCOTSideBar()
 	{
-		if ( IsVisible() )
-		{
-			Hide();
-		}
+		Hide();
 	}
 
 	Widget GetLayoutRoot()
