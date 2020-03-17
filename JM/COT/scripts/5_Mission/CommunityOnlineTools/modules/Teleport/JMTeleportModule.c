@@ -189,12 +189,12 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMTeleportModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMTeleportModuleRPC.COUNT;
 	}
@@ -256,7 +256,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_Position( position, GetGame().GetPlayer() );
+			Server_Position( position, PlayerBase.Cast( GetGame().GetPlayer() ) );
 		} else if ( IsMissionClient() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Teleport.Position" ) )

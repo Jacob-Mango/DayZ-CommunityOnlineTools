@@ -44,7 +44,7 @@ class JMPermissionManager
 		JMRole role;
 		if ( Roles.Find( name, role ) )
 		{
-			return role.HasPermission( permission, permTypeHasRolePermission )
+			return role.HasPermission( permission, permTypeHasRolePermission );
 		}
 		return false;
 	}
@@ -74,7 +74,7 @@ class JMPermissionManager
 	private void CreateFakePlayer( int i )
 	{
 		JMPlayerInstance instance = new JMPlayerInstance( NULL );
-		instance.MakeFake( "GFake" + i, "SFake" + i, "NFake" + i )
+		instance.MakeFake( "GFake" + i, "SFake" + i, "NFake" + i );
 		Players.Insert( instance.GetGUID(), instance );
 	}
 

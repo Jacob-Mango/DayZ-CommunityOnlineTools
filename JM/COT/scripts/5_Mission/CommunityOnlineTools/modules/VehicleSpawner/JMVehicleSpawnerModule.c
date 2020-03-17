@@ -97,12 +97,12 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return meta.Vehicles;
 	}
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMVehicleSpawnerModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMVehicleSpawnerModuleRPC.COUNT;
 	}
