@@ -92,7 +92,7 @@ class JMPlayerInstance
 
 		if ( !GetGame().IsMultiplayer() )
 		{
-			PlayerObject = GetGame().GetPlayer();
+			PlayerObject = PlayerBase.Cast( GetGame().GetPlayer() );
 			
 			if ( PlayerObject )
 			{
