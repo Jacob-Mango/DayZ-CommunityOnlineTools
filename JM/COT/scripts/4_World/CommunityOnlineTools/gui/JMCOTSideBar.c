@@ -142,7 +142,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		}
 	}
 
-	bool OnClick( Widget w, int x, int y, int button )
+	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( !IsMissionClient() ) 
 			return false;

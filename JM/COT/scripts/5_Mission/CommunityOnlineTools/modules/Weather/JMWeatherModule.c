@@ -272,7 +272,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			wBase.MaxSpeed = GetGame().GetWeather().GetWindMaximumSpeed();
 		} else
 		{
-			wBase.MaxSpeed = maxSpeed
+			wBase.MaxSpeed = maxSpeed;
 		}
 
 		if ( IsMissionOffline() )
@@ -826,12 +826,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		Exec_RemovePreset( p1, senderRPC );
     }
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMWeatherModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMWeatherModuleRPC.COUNT;
 	}

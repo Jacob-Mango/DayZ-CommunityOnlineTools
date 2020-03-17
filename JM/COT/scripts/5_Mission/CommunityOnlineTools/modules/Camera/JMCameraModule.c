@@ -115,12 +115,12 @@ class JMCameraModule: JMRenderableModuleBase
 		return CurrentActiveCamera;
 	}
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMCameraModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMCameraModuleRPC.COUNT;
 	}

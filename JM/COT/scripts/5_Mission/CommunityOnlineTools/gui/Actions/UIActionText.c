@@ -21,12 +21,12 @@ class UIActionText extends UIActionBase
 	{
 	}
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 	}
 
-	void SetText( string text )
+	override void SetText( string text )
 	{
 		m_ActualText = text;
 		m_Text.SetText( text );

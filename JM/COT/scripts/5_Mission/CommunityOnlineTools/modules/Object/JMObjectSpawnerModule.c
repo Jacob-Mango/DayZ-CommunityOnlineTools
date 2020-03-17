@@ -114,12 +114,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SpawnEntity_Position( className, position );
 	}
 	
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMObjectSpawnerModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMObjectSpawnerModuleRPC.COUNT;
 	}
