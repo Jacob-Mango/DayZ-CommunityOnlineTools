@@ -145,7 +145,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void RequestFullMapESP( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void RequestFullMapESP( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
 	{
 		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", senderRPC ) )
 			return;
@@ -283,7 +283,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void ESPLog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity senderRPC, ref Object target )
+	void ESPLog( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
 	{
 		ref Param1< string > data;
 		if ( !ctx.Read( data ) ) return;
