@@ -247,7 +247,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_SetClient( string guid, JMPlayerInformation playerInfo, PlayerIdentity playerIdent )
 	{
-		GetPermissionsManager().UpdatePlayer( playerInfo, playerIdent, GetGame().GetPlayer() );
+		GetPermissionsManager().UpdatePlayer( playerInfo, playerIdent, PlayerBase.Cast( GetGame().GetPlayer() ) );
 
 		GetPermissionsManager().SetClientGUID( guid );
 

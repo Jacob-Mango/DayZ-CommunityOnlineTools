@@ -371,7 +371,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		vector pos = "0 0 0";
@@ -391,7 +391,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.Strip( GetSelectedPlayers() );
@@ -406,7 +406,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.StopBleeding( GetSelectedPlayers() );
@@ -421,7 +421,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.Heal( GetSelectedPlayers() );
@@ -433,7 +433,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		bool shouldSpectate = true;
@@ -466,7 +466,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.RepairTransport( GetSelectedPlayers() );
@@ -478,7 +478,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		vector position = "0 0 0";
@@ -506,7 +506,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.TeleportSenderTo( GetSelectedPlayers()[0] );
@@ -518,7 +518,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.TeleportToPrevious( GetSelectedPlayers() );
@@ -530,7 +530,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetHealth( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -542,7 +542,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetShock( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -554,7 +554,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetBlood( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -566,7 +566,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetEnergy( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -578,7 +578,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetWater( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -590,7 +590,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetStamina( ToFloat( action.GetText() ), GetSelectedPlayers() );
@@ -602,7 +602,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetBloodyHands( action.IsChecked(), GetSelectedPlayers() );
@@ -614,7 +614,7 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		JMPlayerModule module;
-		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) )
+		if ( !Class.CastTo( module, GetModuleManager().GetModule( JMPlayerModule ) ) )
 			return;
 
 		module.SetGodMode( action.IsChecked(), GetSelectedPlayers() );

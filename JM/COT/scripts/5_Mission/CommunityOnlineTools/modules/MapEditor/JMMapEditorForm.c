@@ -112,7 +112,7 @@ class JMMapEditorForm
 
 		if ( input.LocalPress( "UADefaultAction", false ) )
 		{
-			m_SelectedObject = GetPointerObject( m_Distance );
+			m_SelectedObject = EntityAI.Cast( GetPointerObject( m_Distance ) );
 
 			if ( GetGame().GetPlayer() && vector.Distance( m_SelectedObject.GetPosition(), GetGame().GetPlayer().GetPosition() ) > 900.0 )
 				m_SelectedObject = NULL;
@@ -122,7 +122,7 @@ class JMMapEditorForm
 
 			if ( m_SelectedObject )
 			{
-				m_DistanceFromObject = vector.Distance( CurrentActiveCamera.GetPosition(), m_SelectedObject.GetPosition() )
+				m_DistanceFromObject = vector.Distance( CurrentActiveCamera.GetPosition(), m_SelectedObject.GetPosition() );
 			}
 		}
 

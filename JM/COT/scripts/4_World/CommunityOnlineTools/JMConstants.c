@@ -6,7 +6,7 @@ class JMConstants
 	
 	static const string PERM_ROOT = "ROOT";
 
-	static const string DIR_COT = "$profile:CommunityOnlineTools\\"
+	static const string DIR_COT = "$profile:CommunityOnlineTools\\";
     static const string DIR_PF = "$profile:PermissionsFramework\\";
 
     static const string DIR_LOGS = DIR_COT + "Logs\\";

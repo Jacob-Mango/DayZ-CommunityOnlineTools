@@ -87,12 +87,12 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			settings.Save();
 	}
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMItemSetSpawnerModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMItemSetSpawnerModuleRPC.COUNT;
 	}

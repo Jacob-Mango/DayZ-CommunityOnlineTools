@@ -56,7 +56,7 @@ class UIActionSlider extends UIActionBase
         m_Append = append;
     }
 
-	void SetLabel( string text )
+	override void SetLabel( string text )
 	{
 		m_Label.SetText( text );
 
