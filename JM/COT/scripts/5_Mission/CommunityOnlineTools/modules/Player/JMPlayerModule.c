@@ -110,12 +110,12 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 	}
 
-	int GetRPCMin()
+	override int GetRPCMin()
 	{
 		return JMPlayerModuleRPC.INVALID;
 	}
 
-	int GetRPCMax()
+	override int GetRPCMax()
 	{
 		return JMPlayerModuleRPC.COUNT;
 	}
@@ -654,7 +654,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		vector position = player.GetPosition();
 
-		if ( Class.CastTo( player, GetPlayerObjectByIdentity( ident ) )
+		if ( Class.CastTo( player, GetPlayerObjectByIdentity( ident ) ) )
 		{
 			player.SetLastPosition( player.GetPosition() );
 

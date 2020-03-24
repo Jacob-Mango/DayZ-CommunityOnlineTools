@@ -8,7 +8,7 @@ static bool COT_ESP_Toggled = false;
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObjectByIdentity )
 {
 	if ( !GetGame().IsMultiplayer() )
-		return GetGame().GetPlayer();
+		return PlayerBase.Cast( GetGame().GetPlayer() );
 	
 	if ( identityGetPlayerObjectByIdentity == NULL )
 		return NULL;
