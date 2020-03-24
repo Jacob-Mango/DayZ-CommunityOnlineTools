@@ -39,8 +39,8 @@ ESP.View.Infected 0
 ESP.View.Animal 0
 ESP.View.Car 0
 ESP.View.BaseBuilding 0
-ESP.View.INVALID 0
 ESP.View.Weapon 0
+ESP.View.Weapon.BoltActionRifle 0
 ESP.View.Weapon.Rifle 0
 ESP.View.Weapon.Pistol 0
 ESP.View.Item 0
@@ -48,12 +48,14 @@ ESP.View.Item.Tool 0
 ESP.View.Item.Crafted 0
 ESP.View.Item.Tent 0
 ESP.View.Item.Material 0
+ESP.View.Item.Attachment 0
 ESP.View.Item.Food 0
 ESP.View.Item.Explosive 0
 ESP.View.Item.Book 0
 ESP.View.Item.Container 0
 ESP.View.Item.Eyewear 0
 ESP.View.Item.Ammo 0
+ESP.View.INVALID 0
 ESP.View.Vehicles 0
 ESP.View.Items 0
 ESP.View.Creature 0
