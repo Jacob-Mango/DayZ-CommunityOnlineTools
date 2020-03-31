@@ -279,7 +279,7 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
 
-		UIActionManager.CreateText( parent, "Permission Management:", "Modify the permissions and roles" );
+		UIActionManager.CreateText( parent, "Permission Management:", "" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 1 );
 
@@ -427,7 +427,7 @@ class JMPlayerForm extends JMFormBase
 
 		for ( int j = 0; j < roles.Count(); j++ )
 		{
-			if ( j % 100 == 0 )
+			if ( m_RoleList.Count() % 100 == 0 )
 			{
 				if ( !Class.CastTo( parentSpacer, m_RolesRows.FindAnyWidget( "Content_Row_0" + spacerIndex ) ) )
 					return;
@@ -449,6 +449,11 @@ class JMPlayerForm extends JMFormBase
 			prScript.Show();
 			prScript.InitRole( roles[j].Name );
 			prScript.SetChecked( pi.HasRole( roles[j].Name ) );
+
+			if ( roles[j].Name == "everyone" )
+			{
+				prScript.Disable();
+			}
 
 			m_RoleList.Insert( prScript );
 		}

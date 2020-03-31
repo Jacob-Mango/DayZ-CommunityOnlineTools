@@ -3,10 +3,10 @@ class JMRoleRowWidget extends ScriptedWidgetEventHandler
 	string Name;
 	int Type;
 
-	protected ref TextWidget Text;
-	protected ref CheckBoxWidget  Checkbox;
+	protected TextWidget Text;
+	protected CheckBoxWidget  Checkbox;
 
-	protected ref Widget layoutRoot;
+	protected Widget layoutRoot;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -77,10 +77,13 @@ class JMRoleRowWidget extends ScriptedWidgetEventHandler
 
 	void OnEnable()
 	{
+		Checkbox.Enable( true );
+		Checkbox.Show( true );
 	}
 
 	void OnDisable()
 	{
+		Checkbox.Enable( false );
+		Checkbox.Show( false );
 	}
-
 }
