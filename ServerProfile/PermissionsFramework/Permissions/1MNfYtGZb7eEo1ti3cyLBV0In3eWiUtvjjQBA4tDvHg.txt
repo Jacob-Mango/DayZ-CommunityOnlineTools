@@ -1,6 +1,6 @@
-COT 0
-COT.View 0
-Admin 0
+COT 2
+COT.View 2
+Admin 2
 Admin.Player 0
 Admin.Player.Godmode 0
 Admin.Player.StartSpectating 0
@@ -31,7 +31,6 @@ Entity.Spawn 0
 Entity.Spawn.Position 0
 Entity.Spawn.Inventory 0
 Entity.View 0
-Entity.Delete 0
 ESP 0
 ESP.View 0
 ESP.View.Player 0
@@ -55,10 +54,6 @@ ESP.View.Item.Book 0
 ESP.View.Item.Container 0
 ESP.View.Item.Eyewear 0
 ESP.View.Item.Ammo 0
-ESP.View.INVALID 0
-ESP.View.Vehicles 0
-ESP.View.Items 0
-ESP.View.Creature 0
 Teleport 0
 Teleport.Position 0
 Teleport.Location 0

@@ -31,7 +31,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( IsMissionOffline() )
 		{
-			GetPermissionsManager().CreateFakePlayers();
+			// GetPermissionsManager().CreateFakePlayers();
 		}
 
 		super.OnLoaded();

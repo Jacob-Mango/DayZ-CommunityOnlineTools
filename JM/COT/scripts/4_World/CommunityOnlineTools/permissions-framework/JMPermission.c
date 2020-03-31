@@ -1,12 +1,18 @@
 class JMPermission
 {
-	ref JMPermission Parent;
+	JMPermission Parent;
 
-	ref array< ref JMPermission > Children;
+	autoptr array< ref JMPermission > Children;
 
 	string Name;
 
+	private string m_SerializedFullName;
+
 	JMPermissionType Type;
+
+	Widget View;
+
+	int Depth;
 
 	void JMPermission( string name, ref JMPermission parent = NULL )
 	{
@@ -21,6 +27,8 @@ class JMPermission
 		}
 
 		Children = new array< ref JMPermission >;
+
+		UpdateFullName();
 	}
 
 	void ~JMPermission()
@@ -28,23 +36,26 @@ class JMPermission
 		delete Children;
 	}
 
-	string GetFullName()
+	void UpdateFullName()
 	{
-		string permission = Name;
+		m_SerializedFullName = Name;
 		ref JMPermission parent = Parent;
 
 		while ( parent != NULL )
 		{
 			if ( parent.Parent == NULL ) 
 			{
-				return permission;
+				return;
 			}
 			
-			permission = parent.Name + "." +  permission;
+			m_SerializedFullName = parent.Name + "." +  m_SerializedFullName;
 			parent = parent.Parent;
 		}
+	}
 
-		return permission;
+	string GetFullName()
+	{
+		return m_SerializedFullName;
 	}
 
 	void AddPermission( string inp, JMPermissionType permType = JMPermissionType.INHERIT )

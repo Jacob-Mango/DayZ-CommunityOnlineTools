@@ -1064,11 +1064,16 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void SetPermissions( array< string > permissions, array< string > guids )
 	{
+		Print( "SetPermissions" );
+		Print( permissions );
+		Print( guids );
 		if ( IsMissionHost() )
 		{
+			Print( "IsMissionHost() true" );
 			Exec_SetPermissions( permissions, guids );
 		} else
 		{
+			Print( "IsMissionHost() false" );
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( permissions );
 			rpc.Write( guids );
@@ -1078,7 +1083,14 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Exec_SetPermissions( array< string > permissions, array< string > guids, PlayerIdentity ident = NULL )
 	{
+		Print( "Exec_SetPermissions" );
+		Print( permissions );
+		Print( guids );
+		Print( ident );
+
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		Print( players );
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{		
@@ -1092,17 +1104,22 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_SetPermissions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		Print( "RPC_SetPermissions" );
+
 		array< string > permissions;
 		if ( !ctx.Read( permissions ) )
 			return;
 
+		Print( permissions );
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
+		Print( guids );
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", senderRPC ) )
 			return;
 
+		Print( "has permission" );
 		Exec_SetPermissions( permissions, guids, senderRPC );
 	}
 

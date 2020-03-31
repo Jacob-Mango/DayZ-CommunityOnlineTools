@@ -2,16 +2,17 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 {
 	private string indent = "";
 
-	ref JMPermissionRowWidget Parent;
-	ref array< ref JMPermissionRowWidget > Children;
+	JMPermissionRowWidget Parent;
+	ref array< JMPermissionRowWidget > Children;
 
 	string Name;
+	string FullName;
 	int Type;
 
-	protected ref Widget layoutRoot;
-	protected ref TStringArray stateOptions;
+	protected Widget layoutRoot;
+	protected autoptr TStringArray stateOptions;
 
-	ref TextWidget perm_name;
+	TextWidget perm_name;
 	ref OptionSelectorMultistate perm_state;
 
 	protected bool m_IsEnabled = false;
@@ -31,7 +32,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
-		Children = new array< ref JMPermissionRowWidget >;
+		Children = new array< JMPermissionRowWidget >;
 
 		perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
 
@@ -84,11 +85,14 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Type = perm_state.GetValue();
 	}
 
-	void InitPermission( ref JMPermission permission, int depth )
+	void InitPermission( ref JMPermission permission )
 	{
-		Indent( depth );
+		Indent( permission.Depth );
 
 		Name = permission.Name;
+		FullName = permission.GetFullName();
+
+		permission.View = layoutRoot;
 
 		perm_name.SetText( indent + Name );
 		perm_state.SetValue( 0, true );
@@ -141,7 +145,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		return true;
 	}
 
-	void Serialize( ref array< string > output, string prepend = "" )
+	void Serialize( out array< string > output, string prepend = "" )
 	{
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -220,5 +224,10 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Enable();
 		perm_state.SetValue( type, true );
 		return this;
+	}
+
+	void SetType( JMPermissionType type )
+	{
+		perm_state.SetValue( type, true );
 	}
 }
