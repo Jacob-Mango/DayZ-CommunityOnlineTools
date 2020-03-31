@@ -24,6 +24,40 @@ class JMPermissionManager
 		}
 	}
 
+	void GetRolesAsList( out array< JMRole > roles )
+	{
+		if ( roles == NULL )
+			roles = new array< JMRole >();
+
+		Roles.GetValueArray().Debug();
+
+		Print("copying");
+
+		roles.Copy( Roles.GetValueArray() );
+
+		roles.Debug();
+	}
+
+	void GetPermissionsAsList( out array< JMPermission > permissions )
+	{
+		if ( permissions == NULL )
+			permissions = new array< JMPermission >();
+
+		GetPermissionsAsList( RootPermission, -1, permissions );
+	}
+
+	private void GetPermissionsAsList( ref JMPermission permission, int depth, out array< JMPermission > permissions )
+	{
+		permission.Depth = depth;
+
+		for ( int i = 0; i < permission.Children.Count(); ++i )
+		{
+			permissions.Insert( permission.Children[i] );
+
+			GetPermissionsAsList( permission.Children[i], depth + 1, permissions );
+		}
+	}
+
 	string GetClientGUID()
 	{
 		return m_ClientGUID;
@@ -81,7 +115,7 @@ class JMPermissionManager
 	/**
 	 * This uses GUIDs now.
 	 */
-	array< JMPlayerInstance > GetPlayers( ref array< string > guidsGetPlayers = NULL )
+	ref array< JMPlayerInstance > GetPlayers( ref array< string > guidsGetPlayers = NULL )
 	{
 		if ( guidsGetPlayers == NULL || !GetGame().IsMultiplayer() )
 		{
@@ -114,7 +148,7 @@ class JMPermissionManager
 		return data;
 	}
 
-	JMPermission GetRootPermission()
+	ref JMPermission GetRootPermission()
 	{
 		return RootPermission;
 	}
@@ -218,12 +252,12 @@ class JMPermissionManager
 		}
 	}
 
-	JMPlayerInstance GetPlayer( string guid )
+	ref JMPlayerInstance GetPlayer( string guid )
 	{
 		return Players.Get( guid );
 	}
 
-	JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation dataUpdatePlayer, PlayerIdentity identityUpdatePlayer = NULL, PlayerBase playerUpdatePlayer = NULL )
+	ref JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation dataUpdatePlayer, PlayerIdentity identityUpdatePlayer = NULL, PlayerBase playerUpdatePlayer = NULL )
 	{
 		JMPlayerInstance instance = GetPlayer( dataUpdatePlayer.SGUID );
 
@@ -305,9 +339,14 @@ class JMPermissionManager
 
 	void LoadRoleFromFile( string name )
 	{
-		JMRole role = new JMRole( name );
+		Print( "Loading role " + name );
+
+		ref JMRole role = new JMRole( name );
+		Print( "Role " + role );
 		if ( role.Load() )
 		{
+			Print( "Loaded role " + role );
+
 			Roles.Insert( name, role );
 		}
 	}
@@ -332,6 +371,12 @@ class JMPermissionManager
 					LoadRoleFromFile( sName.Substring(0, sName.Length() - 4) );
 				}
 			}
+		}
+
+		PrintString( "Roles count: " + Roles.Count().ToString() );
+		for ( int i = 0; i < Roles.Count(); i++ )
+		{
+			PrintString( "["+Roles.GetKey( i )+"] => " + Roles.GetElement( i ) );
 		}
 	}
 

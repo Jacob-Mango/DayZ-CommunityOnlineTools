@@ -130,6 +130,24 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		layoutRoot.Update();
 	}
 */
+	void SetFixedSize( float width, float height )
+	{
+		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
+		layoutRoot.SetFlags( WidgetFlags.HEXACTSIZE, true );
+		layoutRoot.SetSize( width, height );
+		layoutRoot.Update();
+	}
+
+	void SetFixedHeight( float height )
+	{
+		float w;
+		float h;
+		layoutRoot.GetSize( w, h );
+		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
+		layoutRoot.SetSize( w, height );
+		layoutRoot.Update();
+	}
+
 	void SetPosition( float xpos )
 	{
 		float w;

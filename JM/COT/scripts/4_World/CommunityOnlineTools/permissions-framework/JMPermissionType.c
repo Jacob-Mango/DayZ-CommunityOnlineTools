@@ -1,4 +1,6 @@
 enum JMPermissionType 
 {
-	INHERIT, DISALLOW, ALLOW
+	INHERIT = 0,
+	DISALLOW = 1,
+	ALLOW = 2
 }

@@ -122,6 +122,8 @@ class JMPlayerInstance
 
 	void LoadPermissions( array< string > permissions )
 	{
+		Print( "LoadPermissions" );
+		Print( permissions );
 		ClearPermissions();
 
 		for ( int i = 0; i < permissions.Count(); i++ )
@@ -134,6 +136,9 @@ class JMPlayerInstance
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
+		Print( "AddPermission" );
+		Print( permission );
+		Print( type );
 		RootPermission.AddPermission( permission, type );
 	}
 
@@ -158,6 +163,19 @@ class JMPlayerInstance
 		{
 			Roles.Insert( role );
 		}
+	}
+
+	bool HasRole( string role )
+	{
+		return Roles.Find( role ) >= 0;
+	}
+
+	// doesn't check through roles.
+	JMPermissionType GetRawPermissionType( string permission )
+	{
+		JMPermissionType permType;
+		RootPermission.HasPermission( permission, permType );
+		return permType;
 	}
 
 	void ClearRoles()
