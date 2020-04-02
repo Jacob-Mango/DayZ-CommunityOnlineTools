@@ -53,7 +53,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "ESP.View" );
+		return GetPermissionsManager().HasPermission( "ESP.View", NULL );
 	}
 
 	override string GetInputToggle()
@@ -87,7 +87,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
 		{
-			m_ViewTypes[i].HasPermission = GetPermissionsManager().HasPermission( "ESP.View." + m_ViewTypes[i].Permission );
+			m_ViewTypes[i].HasPermission = GetPermissionsManager().HasPermission( "ESP.View." + m_ViewTypes[i].Permission, NULL );
 		}
 
 		JMESPForm form;

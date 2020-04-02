@@ -25,7 +25,7 @@ class JMServerInfoModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.View" );
+		return GetPermissionsManager().HasPermission( "Admin.View", NULL );
 	}
 
 	override string GetInputToggle()

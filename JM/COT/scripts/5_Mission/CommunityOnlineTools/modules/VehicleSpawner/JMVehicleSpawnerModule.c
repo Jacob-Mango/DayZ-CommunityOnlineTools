@@ -18,7 +18,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Vehicles.View" );
+		return GetPermissionsManager().HasPermission( "Vehicles.View", NULL );
 	}
 
 	override string GetInputToggle()

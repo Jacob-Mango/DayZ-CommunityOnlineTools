@@ -190,11 +190,11 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 			inp.Split( ".", tokens );
 		} else 
 		{
-			//Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+			// Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
 			return;
 		}
 
-		////Print( inp + " with type " + type );
+		// Print( inp + " with type " + type );
 		
 		int depth = tokens.Find( Name );
 

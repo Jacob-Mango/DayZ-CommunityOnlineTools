@@ -1,7 +1,7 @@
 modded class MissionServer
 {
 	void MissionServer()
-	{		
+	{
 		m_bLoaded = false;
 		
 		if ( !g_cotBase )
@@ -24,12 +24,12 @@ modded class MissionServer
 	{
 		super.OnMissionStart();
 
-		GetCommunityOnlineTools().OnStart();
+		g_cotBase.OnStart();
 	}
 
 	override void OnMissionFinish()
 	{
-		GetCommunityOnlineTools().OnFinish();
+		g_cotBase.OnFinish();
 
 		super.OnMissionFinish();
 	}
@@ -64,33 +64,6 @@ modded class MissionServer
 	{
 		super.OnUpdate( timeslice );
 
-		if ( m_bLoaded )
-		{
-			GetCommunityOnlineTools().OnUpdate( timeslice );
-		}
-	}
-
-	override void InvokeOnConnect( PlayerBase player, PlayerIdentity identity )
-	{
-		super.InvokeOnConnect( player, identity );
-
-		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
-		{
-			GetCommunityOnlineTools().UpdateRole( GetPermissionsManager().Roles.GetElement( i ), identity );
-		}
-		
-		JMPlayerInstance instance;
-		GetPermissionsManager().OnClientConnected( identity, instance );
-	} 
-
-	override void PlayerDisconnected( PlayerBase player, PlayerIdentity identity, string uid )
-	{
-		JMPlayerInstance instance;
-		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
-		{
-			GetCommunityOnlineTools().RemoveClient( uid );
-		}
-
-		super.PlayerDisconnected( player, identity, uid );
+		g_cotBase.OnUpdate( timeslice );
 	}
 }

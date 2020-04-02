@@ -4,7 +4,6 @@ class JMPlayerInstance
 	autoptr array< string > Roles;
 
 	PlayerBase PlayerObject;
-	PlayerIdentity IdentityPlayer;
 
 	autoptr JMPlayerInformation Data;
 
@@ -16,13 +15,11 @@ class JMPlayerInstance
 
 		Data = new JMPlayerInformation;
 
-		IdentityPlayer = identity;
-
-		if ( IdentityPlayer && GetGame().IsServer() )
+		if ( identity && GetGame().IsServer() )
 		{
-			Data.SGUID = IdentityPlayer.GetId();
-			Data.SSteam64ID = IdentityPlayer.GetPlainId();
-			Data.SName = IdentityPlayer.GetName();
+			Data.SGUID = identity.GetId();
+			Data.SSteam64ID = identity.GetPlainId();
+			Data.SName = identity.GetName();
 		} else if ( IsMissionOffline() )
 		{
 			Data.SGUID = JMConstants.OFFLINE_GUID;
@@ -51,6 +48,19 @@ class JMPlayerInstance
 		Data.Copy( newData );
 	}
 
+	bool CanSendData()
+	{
+		return PlayerObject != NULL; 
+	}
+
+	PlayerIdentity GetPlayerIdentity()
+	{
+		if ( PlayerObject != NULL )
+			return PlayerObject.GetIdentity();
+
+		return NULL;
+	}
+
 	string GetGUID()
 	{
 		return Data.SGUID;
@@ -71,26 +81,13 @@ class JMPlayerInstance
 		if ( !GetGame().IsServer() )
 			return;
 
-		if ( IdentityPlayer )
+		if ( PlayerObject )
 		{
-			Data.IPingMin = IdentityPlayer.GetPingMin();
-			Data.IPingMax = IdentityPlayer.GetPingMax();
-			Data.IPingAvg = IdentityPlayer.GetPingAvg();
-			
-			Data.SSteam64ID = IdentityPlayer.GetPlainId();
-			Data.SGUID = IdentityPlayer.GetId();
-			Data.SName = IdentityPlayer.GetName();
-
-			PlayerObject = GetPlayerObjectByIdentity( IdentityPlayer );
-
-			if ( PlayerObject )
-			{
-				PlayerObject.SetAuthenticatedPlayer( this );
-				Data.Load( PlayerObject );
-			}
+			PlayerObject.SetAuthenticatedPlayer( this );
+			Data.Load( PlayerObject );
 		}
 
-		if ( !GetGame().IsMultiplayer() )
+		if ( IsMissionOffline() )
 		{
 			PlayerObject = PlayerBase.Cast( GetGame().GetPlayer() );
 			
@@ -122,8 +119,8 @@ class JMPlayerInstance
 
 	void LoadPermissions( array< string > permissions )
 	{
-		Print( "LoadPermissions" );
-		Print( permissions );
+		// Print( "LoadPermissions" );
+		// Print( permissions );
 		ClearPermissions();
 
 		for ( int i = 0; i < permissions.Count(); i++ )
@@ -136,9 +133,9 @@ class JMPlayerInstance
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
-		Print( "AddPermission" );
-		Print( permission );
-		Print( type );
+		// Print( "AddPermission" );
+		// Print( permission );
+		// Print( type );
 		RootPermission.AddPermission( permission, type );
 	}
 
@@ -189,22 +186,18 @@ class JMPlayerInstance
 	{
 		// RootPermission.DebugPrint( 0 );
 		
-		//GetCommunityOnlineToolsBase().LogServer( "Checking " + GetSteam64ID() + " for permission " + permission );
-		
 		JMPermissionType permType;
 		bool hasPermission = RootPermission.HasPermission( permission, permType );
 		
-		//GetCommunityOnlineToolsBase().LogServer( "    " +  GetSteam64ID() + " -> " + hasPermission + " Type " + permType );
-
+		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
 		if ( hasPermission )
 		{
-			//GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " true" );
 			return true;
 		}
 
+		// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
 		if ( permType == JMPermissionType.DISALLOW )
 		{
-			//GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " false" );
 			return false;
 		}
 
@@ -212,16 +205,16 @@ class JMPlayerInstance
 		{
 			hasPermission = GetPermissionsManager().HasRolePermission( Roles[j], permission, permType );
 
-			//GetCommunityOnlineToolsBase().LogServer( "    " +  Roles[j] + " -> " + hasPermission + " Type " + permType );
+			// Print( "JMPlayerInstance::HasPermission - role[" + j + "]=" + Roles[j] );
+			// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
+			// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
 
 			if ( hasPermission )
 			{
-				//GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " true" );
 				return true;
 			}
 		}
 
-		//GetCommunityOnlineToolsBase().LogServer( "Returned " + GetSteam64ID() + " false" );
 		return false;
 	}
 
@@ -347,10 +340,9 @@ class JMPlayerInstance
 
 	void DebugPrint()
 	{
-		Print( "IdentityPlayer: " + IdentityPlayer );
-		Print( "  SGUID: " + Data.SGUID );
-		Print( "  SSteam64ID: " + Data.SSteam64ID );
-		Print( "  SName: " + Data.SName );
+		// Print( "  SGUID: " + Data.SGUID );
+		// Print( "  SSteam64ID: " + Data.SSteam64ID );
+		// Print( "  SName: " + Data.SName );
 
 		RootPermission.DebugPrint( 2 );
 	}

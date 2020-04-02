@@ -19,7 +19,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Items.View" );
+		return GetPermissionsManager().HasPermission( "Items.View", NULL );
 	}
 
 	override string GetInputToggle()
@@ -173,21 +173,21 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnPosition( string itemSet, vector position, PlayerIdentity ident )
 	{
-		Print("Test 1 " + itemSet);
+		// Print("Test 1 " + itemSet);
 		JMItemSetSerialize file;
 		if ( !settings.ItemSets.Find( itemSet, file ) )
 		{
 			return;
 		}
 
-		Print("Test 2 " + file);
+		// Print("Test 2 " + file);
 		string perm = file.Name;
 		perm.Replace( " ", "." );
 		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident ) )
 		{
 			return;
 		}
-		Print("Test 3 " + perm);
+		// Print("Test 3 " + perm);
 
 		SpawnItemSet( file, position );
 

@@ -2,6 +2,8 @@ modded class MissionGameplay
 {
 	protected ref JMDebugMonitor m_CDebugMonitor;
 
+	protected JMPlayerInstance m_OfflineInstance;
+
 	// ------------------------------------------------------------
 	// Constructor
 	// ------------------------------------------------------------
@@ -11,6 +13,17 @@ modded class MissionGameplay
 		{
 			g_cotBase = new CommunityOnlineTools;
 		}
+
+		if ( IsMissionOffline() )
+		{
+			if ( g_Game.GetGameState() != DayZGameState.MAIN_MENU )
+			{
+				if ( GetPermissionsManager().OnClientConnected( NULL, m_OfflineInstance ) )
+				{
+					GetCommunityOnlineToolsBase().SetClient( m_OfflineInstance );
+				}
+			}
+		}
 	}
 
 	// ------------------------------------------------------------
@@ -19,6 +32,8 @@ modded class MissionGameplay
 	void ~MissionGameplay()
 	{
 		delete g_cotBase;
+		
+		GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance )
 	}
 
 	// ------------------------------------------------------------

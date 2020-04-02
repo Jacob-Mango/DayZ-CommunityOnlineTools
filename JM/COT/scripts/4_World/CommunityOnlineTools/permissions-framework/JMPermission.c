@@ -181,12 +181,17 @@ class JMPermission
 
 	bool HasPermission( string inp, out JMPermissionType permType )
 	{
+		// Print( "JMPermission::HasPermission - inp=" + inp );
+
 		array<string> tokens = new array<string>;
 		inp.Split( ".", tokens );
 
-		if ( tokens.Count() == 0 ) return false;
+		// Print( "JMPermission::HasPermission - tokens=" + tokens );
+		if ( tokens.Count() == 0 )
+			return false;
 		
-		int depth = tokens.Find(Name);
+		int depth = tokens.Find( Name );
+		// Print( "JMPermission::HasPermission - depth=" + depth );
 
 		bool parentDisallowed = false;
 
@@ -197,6 +202,8 @@ class JMPermission
 		{
 			// magic fuckery to figure this out...
 		}
+
+		// Print( "JMPermission::HasPermission - parentDisallowed=" + parentDisallowed );
 		
 		if ( depth > -1 )
 		{
@@ -230,6 +237,11 @@ class JMPermission
 		{
 			parentDisallowed = false;
 		}
+
+		// Print( "JMPermission::HasPermission - Name=" + Name );
+		// Print( "JMPermission::HasPermission - Type=" + Type );
+		// Print( "JMPermission::HasPermission - ifReturnAs=" + ifReturnAs );
+		// Print( "JMPermission::HasPermission - parentDisallowed=" + parentDisallowed );
 
 		if ( depth < tokens.Count() )
 		{
@@ -300,7 +312,7 @@ class JMPermission
 			}
 		}
 
-		Print( message + append );
+		// Print( message + append );
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{

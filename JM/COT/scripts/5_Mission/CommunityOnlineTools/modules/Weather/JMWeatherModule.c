@@ -54,7 +54,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Weather.View" );
+		return GetPermissionsManager().HasPermission( "Weather.View", NULL );
 	}
 
 	override string GetInputToggle()
@@ -165,14 +165,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetStorm( wBase );
+			Exec_SetStorm( wBase, NULL );
 		} else
 		{
 			Send_SetStorm( wBase );
 			
 			if ( IsMissionHost() )
 			{
-				Exec_SetStorm( wBase );
+				Exec_SetStorm( wBase, NULL );
 			}
 		} 
 	}
@@ -186,14 +186,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetFog( wBase );
+			Exec_SetFog( wBase, NULL );
 		} else
 		{
 			Send_SetFog( wBase );
 			
 			if ( IsMissionHost() )
 			{
-				Exec_SetFog( wBase );
+				Exec_SetFog( wBase, NULL );
 			}
 		} 
 	}
@@ -207,14 +207,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetRain( wBase );
+			Exec_SetRain( wBase, NULL );
 		} else
 		{
 			Send_SetRain( wBase );
 			
 			if ( IsMissionHost() )
 			{
-				Exec_SetRain( wBase );
+				Exec_SetRain( wBase, NULL );
 			}
 		} 
 	}
@@ -228,14 +228,14 @@ class JMWeatherModule: JMRenderableModuleBase
 		
 		if ( IsMissionOffline() )
 		{
-			Exec_SetRainThresholds( wBase );
+			Exec_SetRainThresholds( wBase, NULL );
 		} else
 		{
 			Send_SetRainThresholds( wBase );
 			
 			if ( IsMissionHost() )
 			{
-				Exec_SetRainThresholds( wBase );
+				Exec_SetRainThresholds( wBase, NULL );
 			}
 		} 
 	}
@@ -249,14 +249,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetOvercast( wBase );
+			Exec_SetOvercast( wBase, NULL );
 		} else
 		{
 			Send_SetOvercast( wBase );
 			
 			if ( IsMissionHost() )
 			{
-				Exec_SetOvercast( wBase );
+				Exec_SetOvercast( wBase, NULL );
 			}
 		} 
 	}
@@ -277,14 +277,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetWind( wBase );
+			Exec_SetWind( wBase, NULL );
 		} else
 		{
 			Send_SetWind( wBase );
 
 			if ( IsMissionHost() )
 			{
-				Exec_SetWind( wBase );
+				Exec_SetWind( wBase, NULL );
 			}
 		}
 	}
@@ -298,14 +298,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetWindFunctionParams( wBase );
+			Exec_SetWindFunctionParams( wBase, NULL );
 		} else
 		{
 			Send_SetWindFunctionParams( wBase );
 
 			if ( IsMissionHost() )
 			{
-				Exec_SetWindFunctionParams( wBase );
+				Exec_SetWindFunctionParams( wBase, NULL );
 			}
 		} 
 	}
@@ -321,14 +321,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Exec_SetDate( wBase );
+			Exec_SetDate( wBase, NULL );
 		} else
 		{
 			Send_SetDate( wBase );
 
 			if ( IsMissionHost() )
 			{
-				Exec_SetDate( wBase );
+				Exec_SetDate( wBase, NULL );
 			}
 		}
 	}
@@ -337,14 +337,14 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_UsePreset( name );
+			Exec_UsePreset( name, NULL );
 		} else
 		{
 			Send_UsePreset( name );
 
 			if ( IsMissionHost() )
 			{
-				Exec_UsePreset( name );
+				Exec_UsePreset( name, NULL );
 			}
 		}
 	}
@@ -353,7 +353,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_CreatePreset( preset );
+			Exec_CreatePreset( preset, NULL );
 		} else
 		{
 			Send_CreatePreset( preset );
@@ -364,7 +364,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_UpdatePreset( preset );
+			Exec_UpdatePreset( preset, NULL );
 		} else
 		{
 			Send_UpdatePreset( preset );
@@ -375,7 +375,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_RemovePreset( name );
+			Exec_RemovePreset( name, NULL );
 		} else
 		{
 			Send_RemovePreset( name );
@@ -474,55 +474,55 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.RemovePreset, true, NULL );
 	}
 	
-	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetFog( JMWeatherFog wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetFog( JMWeatherFog wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetRain( JMWeatherRain wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetRain( JMWeatherRain wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetRainThresholds( JMWeatherRainThreshold wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetRainThresholds( JMWeatherRainThreshold wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetOvercast( JMWeatherOvercast wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetOvercast( JMWeatherOvercast wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetWind( JMWeatherWind wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetWind( JMWeatherWind wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetWindFunctionParams( JMWeatherWindFunction wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetWindFunctionParams( JMWeatherWindFunction wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_SetDate( JMWeatherDate wBase, PlayerIdentity ident = NULL )
+	private void Exec_SetDate( JMWeatherDate wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
 
-	private void Exec_UsePreset( string name, PlayerIdentity ident = NULL )
+	private void Exec_UsePreset( string name, PlayerIdentity ident )
 	{
 		array< ref JMWeatherPreset > presets = GetPresets();
 		JMWeatherPreset preset;
@@ -543,7 +543,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		preset.Log( ident );
 	}
 
-	private void Exec_CreatePreset( JMWeatherPreset preset, PlayerIdentity ident = NULL )
+	private void Exec_CreatePreset( JMWeatherPreset preset, PlayerIdentity ident )
 	{
 		if ( preset == NULL )
 			return;
@@ -564,7 +564,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		settings.Save();
 	}
 
-	private void Exec_UpdatePreset( JMWeatherPreset preset, PlayerIdentity ident = NULL )
+	private void Exec_UpdatePreset( JMWeatherPreset preset, PlayerIdentity ident )
 	{
 		if ( preset == NULL )
 			return;
@@ -592,7 +592,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		settings.Save();
 	}
 
-	private void Exec_RemovePreset( string name, PlayerIdentity ident = NULL )
+	private void Exec_RemovePreset( string name, PlayerIdentity ident )
 	{
 		array< ref JMWeatherPreset > presets = GetPresets();
 		int index = -1;
@@ -715,7 +715,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetWind( p1 );
 		}
 
-		Exec_SetWind( p1 );
+		Exec_SetWind( p1, senderRPC );
     }
 
 	private void RPC_SetWindFunctionParams( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
