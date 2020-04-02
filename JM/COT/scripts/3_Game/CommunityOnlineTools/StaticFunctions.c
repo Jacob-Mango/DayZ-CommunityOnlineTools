@@ -251,22 +251,22 @@ static Object GetCursorObject( float distance = 100.0, Object ignore = NULL, flo
 
 static bool SHIFT()
 {
-    return( ( KeyState( KeyCode.KC_LSHIFT ) > 0 ) || ( KeyState( KeyCode.KC_RSHIFT ) > 0 ) );
+	return( ( KeyState( KeyCode.KC_LSHIFT ) > 0 ) || ( KeyState( KeyCode.KC_RSHIFT ) > 0 ) );
 }
 
 static bool CTRL()
 {
-    return( ( KeyState( KeyCode.KC_LCONTROL ) > 0 ) || ( KeyState( KeyCode.KC_RCONTROL ) > 0 ) );
+	return( ( KeyState( KeyCode.KC_LCONTROL ) > 0 ) || ( KeyState( KeyCode.KC_RCONTROL ) > 0 ) );
 }
 
 static bool ALT()
 {
-    return( ( KeyState( KeyCode.KC_LMENU ) > 0 ) || ( KeyState( KeyCode.KC_RMENU ) > 0 ) );
+	return( ( KeyState( KeyCode.KC_LMENU ) > 0 ) || ( KeyState( KeyCode.KC_RMENU ) > 0 ) );
 }
 
 static bool WINKEY()
 {
-    return( ( KeyState( KeyCode.KC_LWIN ) > 0 ) || ( KeyState( KeyCode.KC_RWIN ) > 0 ) );
+	return( ( KeyState( KeyCode.KC_LWIN ) > 0 ) || ( KeyState( KeyCode.KC_RWIN ) > 0 ) );
 }
 
 static string FileAttributeToString( FileAttr attr )
@@ -370,31 +370,31 @@ static bool CheckStringType( string str, int type )
 
 string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, int minScope = -1, string strIgnoreClass = "" )
 {
-    string child_name = "";
-    int count = GetGame().ConfigGetChildrenCount ( strConfigName );
+	string child_name = "";
+	int count = GetGame().ConfigGetChildrenCount ( strConfigName );
 
 	if ( count == 0 )
 		return strBaseClass;
 
-    array< string > class_names = new array<string>;
+	array< string > class_names = new array<string>;
 
-    for ( int p = 0; p < count; p++ )
-    {
-        GetGame().ConfigGetChildName ( strConfigName, p, child_name );
+	for ( int p = 0; p < count; p++ )
+	{
+		GetGame().ConfigGetChildName ( strConfigName, p, child_name );
 
 		if ( child_name.Contains( strIgnoreClass ) )
 			continue;
 
-        if ( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
+		if ( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
 			continue;
 
-        if ( GetGame().IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )
-        {
-            class_names.Insert( child_name );
-        }
-    }
+		if ( GetGame().IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )
+		{
+			class_names.Insert( child_name );
+		}
+	}
 
-    return class_names.GetRandomElement(); // GetRandomChildFromBaseClass( strConfigName, class_names.GetRandomElement(), minScope, strIgnoreClass );
+	return class_names.GetRandomElement(); // GetRandomChildFromBaseClass( strConfigName, class_names.GetRandomElement(), minScope, strIgnoreClass );
 }
 
 static array< string > FindFilesInLocation( string folder )

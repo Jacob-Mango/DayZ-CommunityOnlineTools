@@ -1,9 +1,9 @@
 enum JMVehicleSpawnerModuleRPC
 {
-    INVALID = 10260,
-    Load,
+	INVALID = 10260,
+	Load,
 	SpawnPosition,
-    COUNT
+	COUNT
 };
 
 class JMVehicleSpawnerModule: JMRenderableModuleBase
@@ -118,7 +118,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			RPC_SpawnPosition( ctx, sender, target );
 			break;
 		}
-    }
+	}
 	
 	void Load()
 	{

@@ -147,11 +147,11 @@ class JMRenderableModuleBase extends JMModuleBase
 				return;
 			}
 
-            if ( !GetCommunityOnlineToolsBase().IsActive() )
-            {
-                CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
-                return;
-            }
+			if ( !GetCommunityOnlineToolsBase().IsActive() )
+			{
+				CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+				return;
+			}
 			
 			Show();
 		}

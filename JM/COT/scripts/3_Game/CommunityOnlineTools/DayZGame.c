@@ -1,12 +1,12 @@
 modded class DayZGame
 {
-    bool COTPreventMenuOpen;
+	bool COTPreventMenuOpen;
 
-    //override UIScriptedMenu CreateScriptedMenu( int id )
+	//override UIScriptedMenu CreateScriptedMenu( int id )
 	//{
-    //    if ( COTPreventMenuOpen )
-    //        return NULL;
-    //
+	//	if ( COTPreventMenuOpen )
+	//		return NULL;
+	//
 	//	return super.CreateScriptedMenu( id );
 	//}
 }

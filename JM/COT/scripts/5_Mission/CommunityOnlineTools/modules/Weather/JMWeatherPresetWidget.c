@@ -3,12 +3,12 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 	private Widget layoutRoot;
 
 	private TextWidget m_WName;
-    private string m_Name;
+	private string m_Name;
 
 	private ButtonWidget m_WRemoveButton;
 	private ButtonWidget m_WSelectButton;
 
-    private string m_Permission;
+	private string m_Permission;
 
 	private JMWeatherForm m_Form;
 
@@ -64,20 +64,20 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-    void SetCreateNew()
-    {
+	void SetCreateNew()
+	{
 		Show();
 		m_WName.SetText( "Add New" );
 		m_WName.SetColor( 0xFFFFFFFF );
 		m_WRemoveButton.Show( false );
 
 		m_IsCreatingNew = true;
-    }
+	}
 
 	void SetPreset( string name, string permission )
 	{
 		m_Name = name;
-        m_Permission = permission;
+		m_Permission = permission;
 
 		m_IsCreatingNew = false;
 		

@@ -1,9 +1,9 @@
 enum JMCameraModuleRPC
 {
-    INVALID = 10160,
-    Enter,
-    Leave,
-    COUNT
+	INVALID = 10160,
+	Enter,
+	Leave,
+	COUNT
 };
 
 class JMCameraModule: JMRenderableModuleBase
@@ -136,7 +136,7 @@ class JMCameraModule: JMRenderableModuleBase
 			RPC_Leave( ctx, sender, target );
 			break;
 		}
-    }
+	}
 
 	void Enter()
 	{

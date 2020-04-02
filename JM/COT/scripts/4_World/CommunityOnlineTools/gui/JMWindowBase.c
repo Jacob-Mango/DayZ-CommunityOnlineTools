@@ -19,14 +19,14 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void JMWindowBase() 
 	{
-        GetCOTWindowManager().AddWindow( this );
+		GetCOTWindowManager().AddWindow( this );
 
 		m_BrokenWidgets = new array< Widget >;
 	}
 
 	void ~JMWindowBase() 
 	{
-        GetCOTWindowManager().RemoveWindow( this );
+		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
 
@@ -73,7 +73,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 			m_TitleText.SetText( module.GetTitle() );
 			
-        	GetCOTWindowManager().BringFront( this );
+			GetCOTWindowManager().BringFront( this );
 		}
 
 		layoutRoot.FindAnyWidget( "confirmation_panel" ).GetScript( m_Confirmation );
@@ -177,8 +177,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Focus()
 	{
-        SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
-        SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
+		SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
+		SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
 
 		foreach ( Widget widget : m_BrokenWidgets )
 		{
@@ -190,8 +190,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Unfocus()
 	{
-        SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
-        SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
+		SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
+		SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
 
 		foreach ( Widget widget : m_BrokenWidgets )
 		{

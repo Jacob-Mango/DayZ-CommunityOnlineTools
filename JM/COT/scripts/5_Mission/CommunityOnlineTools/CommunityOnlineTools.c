@@ -72,7 +72,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				break;
 			}
 		}
-    }
+	}
 
 	override void RefreshClients()
 	{
@@ -344,5 +344,5 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 CommunityOnlineTools GetCommunityOnlineTools()
 {
-    return CommunityOnlineTools.Cast( g_cotBase );
+	return CommunityOnlineTools.Cast( g_cotBase );
 }

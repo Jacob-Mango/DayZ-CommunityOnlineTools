@@ -1,9 +1,9 @@
 enum JMESPModuleRPC
 {
-    INVALID = 10300,
+	INVALID = 10300,
 	Log,
-    FullMap,
-    COUNT
+	FullMap,
+	COUNT
 };
 
 class JMESPModule: JMRenderableModuleBase

@@ -1,10 +1,10 @@
 enum JMItemSetSpawnerModuleRPC
 {
-    INVALID = 10200,
-    Load,
+	INVALID = 10200,
+	Load,
 	SpawnPosition,
 	SpawnPlayers,
-    COUNT
+	COUNT
 };
 
 class JMItemSetSpawnerModule: JMRenderableModuleBase
@@ -111,7 +111,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			RPC_SpawnPlayers( ctx, sender, target );
 			break;
 		}
-    }
+	}
 
 	ref array< string > GetItemSets()
 	{
