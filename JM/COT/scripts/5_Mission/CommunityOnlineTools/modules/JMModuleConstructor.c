@@ -1,8 +1,8 @@
 modded class JMModuleConstructor
 {
-    override void RegisterModules( out TTypenameArray modules )
+	override void RegisterModules( out TTypenameArray modules )
 	{
-        super.RegisterModules( modules );
+		super.RegisterModules( modules );
 
 		// modules.Insert( JMServerInfoModule );
 		modules.Insert( JMPlayerModule );
@@ -15,5 +15,5 @@ modded class JMModuleConstructor
 		modules.Insert( JMItemSetSpawnerModule );
 		modules.Insert( JMWeatherModule );
 		modules.Insert( JMMapModule );
-    }
+	}
 }

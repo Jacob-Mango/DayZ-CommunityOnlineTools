@@ -1,9 +1,9 @@
 enum JMObjectSpawnerModuleRPC
 {
-    INVALID = 10220,
-    Position,
+	INVALID = 10220,
+	Position,
 	Inventory,
-    COUNT
+	COUNT
 };
 
 class JMObjectSpawnerModule: JMRenderableModuleBase
@@ -135,7 +135,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			RPC_SpawnEntity_Inventory( ctx, sender, target );
 			break;
 		}
-    }
+	}
 
 	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1 )
 	{

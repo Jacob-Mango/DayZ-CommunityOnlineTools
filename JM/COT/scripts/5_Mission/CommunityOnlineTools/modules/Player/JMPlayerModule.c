@@ -1,7 +1,7 @@
 enum JMPlayerModuleRPC
 {
-    INVALID = 10320,
-    SetHealth,
+	INVALID = 10320,
+	SetHealth,
 	SetBlood,
 	SetShock,
 	SetEnergy,
@@ -20,7 +20,7 @@ enum JMPlayerModuleRPC
 	StopBleeding,
 	SetPermissions,
 	SetRoles,
-    COUNT
+	COUNT
 };
 
 class JMPlayerModule: JMRenderableModuleBase
@@ -182,7 +182,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			RPC_SetRoles( ctx, sender, target );
 			break;
 		}
-    }
+	}
 
 	void SetHealth( float health, array< string > guids )
 	{
@@ -717,9 +717,9 @@ class JMPlayerModule: JMRenderableModuleBase
 				continue;
 
 			if ( !player.HasLastPosition() )
-                continue;
+				continue;
 
-            vector position = player.GetLastPosition();
+			vector position = player.GetLastPosition();
 
 			player.SetLastPosition( player.GetPosition() );
 
@@ -1102,7 +1102,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{		
-            players[i].LoadPermissions( permissions );
+			players[i].LoadPermissions( permissions );
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 
@@ -1151,7 +1151,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{		
-            players[i].LoadRoles( roles );
+			players[i].LoadRoles( roles );
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 

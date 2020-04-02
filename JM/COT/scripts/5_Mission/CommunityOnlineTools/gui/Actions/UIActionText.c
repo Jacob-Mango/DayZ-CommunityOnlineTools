@@ -34,7 +34,7 @@ class UIActionText extends UIActionBase
 
 
 	void SetLabelHAlign( UIActionHAlign type )
-    {
+	{
 		switch ( type )
 		{
 		case UIActionHAlign.CENTER:
@@ -47,10 +47,10 @@ class UIActionText extends UIActionBase
 			m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.RALIGN );
 			break;
 		}
-    }
-    
-    void SetLabelVAlign( UIActionVAlign type )
-    {
+	}
+	
+	void SetLabelVAlign( UIActionVAlign type )
+	{
 		switch ( type )
 		{
 		case UIActionVAlign.CENTER:
@@ -63,10 +63,10 @@ class UIActionText extends UIActionBase
 			// m_Label.SetFlags( m_Label.GetFlags() | WidgetFlags.RALIGN );
 			break;
 		}
-    }
-    
-    void SetTextHAlign( UIActionHAlign type )
-    {
+	}
+	
+	void SetTextHAlign( UIActionHAlign type )
+	{
 		switch ( type )
 		{
 		case UIActionHAlign.CENTER:
@@ -79,10 +79,10 @@ class UIActionText extends UIActionBase
 			m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.RALIGN );
 			break;
 		}
-    }
-    
-    void SetTextVAlign( UIActionVAlign type )
-    {
+	}
+	
+	void SetTextVAlign( UIActionVAlign type )
+	{
 		switch ( type )
 		{
 		case UIActionVAlign.CENTER:
@@ -95,7 +95,7 @@ class UIActionText extends UIActionBase
 			// m_Text.SetFlags( m_Text.GetFlags() | WidgetFlags.RALIGN );
 			break;
 		}
-    }
+	}
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{	

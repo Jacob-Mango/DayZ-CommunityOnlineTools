@@ -154,10 +154,10 @@ class UIActionManager
 			action.SetText( text );
 
 			action.SetLabelHAlign( lha );
-            action.SetLabelVAlign( lva );
+			action.SetLabelVAlign( lva );
 
-            action.SetTextHAlign( tha );
-            action.SetTextVAlign( tva );
+			action.SetTextHAlign( tha );
+			action.SetTextVAlign( tva );
 
 			return action;
 		}

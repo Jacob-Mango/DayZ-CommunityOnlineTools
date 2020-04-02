@@ -1,8 +1,8 @@
 enum JMWeatherModuleRPC
 {
-    INVALID = 10280,
+	INVALID = 10280,
 	Load,
-    Storm,
+	Storm,
 	Fog,
 	Rain,
 	RainThresholds,
@@ -14,7 +14,7 @@ enum JMWeatherModuleRPC
 	CreatePreset,
 	UpdatePreset,
 	RemovePreset,
-    COUNT
+	COUNT
 };
 
 enum JMWeatherTypes
@@ -617,7 +617,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	}
 	
 	private void RPC_SetStorm( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherStorm p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -631,10 +631,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetStorm( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetFog( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherFog p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -648,10 +648,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetFog( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetRain( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherRain p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -665,10 +665,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetRain( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetRainThresholds( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherRainThreshold p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -682,10 +682,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetRainThresholds( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetOvercast( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherOvercast p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -699,10 +699,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetOvercast( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetWind( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherWind p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -716,10 +716,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetWind( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetWindFunctionParams( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherWindFunction p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -733,10 +733,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetWindFunctionParams( p1, senderRPC );
-    }
+	}
 
 	private void RPC_SetDate( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherDate p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -750,10 +750,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_SetDate( p1, senderRPC );
-    }
+	}
 
 	private void RPC_UsePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		string p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -767,10 +767,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_UsePreset( p1, senderRPC );
-    }
+	}
 
 	private void RPC_CreatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherPreset p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -784,10 +784,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_CreatePreset( p1, senderRPC );
-    }
+	}
 
 	private void RPC_UpdatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		JMWeatherPreset p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -804,10 +804,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_UpdatePreset( p1, senderRPC );
-    }
+	}
 
 	private void RPC_RemovePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-    {
+	{
 		string p1;
 		if ( !ctx.Read( p1 ) )
 			return;
@@ -824,7 +824,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		Exec_RemovePreset( p1, senderRPC );
-    }
+	}
 
 	override int GetRPCMin()
 	{
@@ -882,5 +882,5 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 
 		GetGame().GetWeather().MissionWeather( true );
-    }
+	}
 }

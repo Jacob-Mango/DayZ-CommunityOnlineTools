@@ -1,10 +1,10 @@
 enum JMTeleportModuleRPC
 {
-    INVALID = 10240,
-    Load,
+	INVALID = 10240,
+	Load,
 	Position,
 	Location,
-    COUNT
+	COUNT
 };
 
 class JMTeleportModule: JMRenderableModuleBase
@@ -97,36 +97,36 @@ class JMTeleportModule: JMRenderableModuleBase
 		return settings.Locations;
 	}
 
-    void Input_WorldToModelLookAt( UAInput input )
-    {
+	void Input_WorldToModelLookAt( UAInput input )
+	{
 		if ( !(input.LocalPress()) )
 			return;
 
-        vector dir = GetGame().GetPointerDirection();
+		vector dir = GetGame().GetPointerDirection();
 
-        vector from = GetGame().GetCurrentCameraPosition();
+		vector from = GetGame().GetCurrentCameraPosition();
 
-        vector to = from + ( dir * 10000 );
+		vector to = from + ( dir * 10000 );
 
-        vector rayStart = from;
-        vector rayEnd = to;
-        vector hitPos;
-        vector hitNormal;
-        int hitComponentIndex;
+		vector rayStart = from;
+		vector rayEnd = to;
+		vector hitPos;
+		vector hitNormal;
+		int hitComponentIndex;
 
-        set< Object > objs = new set< Object >;
-        if ( DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, objs, NULL, GetPlayer()) )
-        {
-            if ( objs.Count() > 0 ) 
-            {
-                vector position = objs[0].CoordToLocal( hitPos );
+		set< Object > objs = new set< Object >;
+		if ( DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, objs, NULL, GetPlayer()) )
+		{
+			if ( objs.Count() > 0 ) 
+			{
+				vector position = objs[0].CoordToLocal( hitPos );
 
-                // Print( "Model: " + objs[0].GetType() + ", Position: " + position );
+				// Print( "Model: " + objs[0].GetType() + ", Position: " + position );
 
-                Message( NULL, "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
-            }
-        }
-    }
+				Message( NULL, "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
+			}
+		}
+	}
 
 	void Input_Cursor( UAInput input )
 	{
@@ -213,7 +213,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			RPC_Location( ctx, sender, target );
 			break;
 		}
-    }
+	}
 
 	void Load()
 	{

@@ -73,8 +73,8 @@ class JMPlayerInformation
 	{
 		if ( IsMissionClient() )
 		{
-			SName	    	= "" + data.SName;
-			SGUID	    	= "" + data.SGUID;
+			SName			= "" + data.SName;
+			SGUID			= "" + data.SGUID;
 			SSteam64ID		= "" + data.SSteam64ID;
 
 			IPingMax		= data.IPingMax;
@@ -89,22 +89,22 @@ class JMPlayerInformation
 		VDirection		= data.VDirection;
 		VOrientation	= data.VOrientation;
 
-		FHealth	    	= data.FHealth;
-		FBlood	    	= data.FBlood;
-		FShock	    	= data.FShock;
+		FHealth			= data.FHealth;
+		FBlood			= data.FBlood;
+		FShock			= data.FShock;
 
 		IBloodStatType  = data.IBloodStatType;
 
-		FEnergy	    	= data.FEnergy;
-		FWater		    = data.FWater;
+		FEnergy			= data.FEnergy;
+		FWater			= data.FWater;
 
-		FHeatComfort    = data.FHeatComfort;
+		FHeatComfort	= data.FHeatComfort;
 
-		FWet	       	= data.FWater;
-		FTremor         = data.FTremor;
+		FWet		   	= data.FWater;
+		FTremor		 = data.FTremor;
 		FStamina		= data.FStamina;
 
-		Kills		    = data.Kills;
+		Kills			= data.Kills;
 		TotalKills		= data.TotalKills;
 
 		ILifeSpanState	= data.ILifeSpanState;

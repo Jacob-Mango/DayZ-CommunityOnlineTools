@@ -87,7 +87,7 @@ static void Message( PlayerBase player, string txt )
 		player.MessageImportant( txt);
 	} else 
 	{
-    	GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
+		GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
 	}
 }
 

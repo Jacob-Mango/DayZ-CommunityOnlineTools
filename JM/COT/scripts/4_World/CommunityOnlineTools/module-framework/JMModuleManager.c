@@ -1,28 +1,28 @@
 modded class JMModuleManager
 {
-    protected autoptr array< ref JMRenderableModuleBase > m_COTModules;
+	protected autoptr array< ref JMRenderableModuleBase > m_COTModules;
 
-    void JMModuleManager()
-    {
+	void JMModuleManager()
+	{
 		m_COTModules = new array< ref JMRenderableModuleBase >;
 
-        JMScriptInvokers.COT_ON_OPEN.Insert( SetPreventModuleBindings );
-    }
+		JMScriptInvokers.COT_ON_OPEN.Insert( SetPreventModuleBindings );
+	}
 
-    void ~JMModuleManager()
-    {
-        JMScriptInvokers.COT_ON_OPEN.Remove( SetPreventModuleBindings );
-    }
-    
+	void ~JMModuleManager()
+	{
+		JMScriptInvokers.COT_ON_OPEN.Remove( SetPreventModuleBindings );
+	}
+	
 	protected override void RegisterModule( ref JMModuleBase module )
 	{
-        super.RegisterModule( module );
-        
-        if ( module.IsInherited( JMRenderableModuleBase ) )
-        {
-            m_COTModules.Insert( JMRenderableModuleBase.Cast( module ) );
-        }
-    }
+		super.RegisterModule( module );
+		
+		if ( module.IsInherited( JMRenderableModuleBase ) )
+		{
+			m_COTModules.Insert( JMRenderableModuleBase.Cast( module ) );
+		}
+	}
 
 	array< ref JMRenderableModuleBase > GetCOTModules()
 	{

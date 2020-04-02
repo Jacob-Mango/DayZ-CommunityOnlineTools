@@ -1,10 +1,10 @@
 class JMESPViewTypeWidget extends ScriptedWidgetEventHandler 
 {
 	private Widget m_LayoutRoot;
-    private CheckBoxWidget m_Checkbox;
+	private CheckBoxWidget m_Checkbox;
 	private TextWidget m_Name;
 
-    private JMESPViewType m_Type;
+	private JMESPViewType m_Type;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -15,8 +15,8 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
-        Class.CastTo( m_Checkbox, m_LayoutRoot.FindAnyWidget( "checkbox" ) );
-        Class.CastTo( m_Name, m_LayoutRoot.FindAnyWidget( "text_name" ) );
+		Class.CastTo( m_Checkbox, m_LayoutRoot.FindAnyWidget( "checkbox" ) );
+		Class.CastTo( m_Name, m_LayoutRoot.FindAnyWidget( "text_name" ) );
 	}
 
 	void Show()
@@ -54,13 +54,13 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 		
 		if ( m_Type ) 
 		{
-            m_Name.SetText( type.Localisation );
-            m_Checkbox.SetChecked( type.View );
+			m_Name.SetText( type.Localisation );
+			m_Checkbox.SetChecked( type.View );
 
 			Show();
 		} else 
 		{
-            Hide();
+			Hide();
 		}
 	}
 
@@ -73,7 +73,7 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 
 		if ( w == m_Checkbox )
 		{
-            m_Type.View = m_Checkbox.IsChecked();
+			m_Type.View = m_Checkbox.IsChecked();
 
 			return true;
 		}

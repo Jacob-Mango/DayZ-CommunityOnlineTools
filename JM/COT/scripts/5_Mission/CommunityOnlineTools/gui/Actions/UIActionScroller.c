@@ -26,13 +26,13 @@ class UIActionScroller extends UIActionBase
 
 		m_Position = 0;
 
-        UpdateScroller();
+		UpdateScroller();
 	}
 
-    Widget GetContentWidget()
-    {
-        return m_Content;
-    }
+	Widget GetContentWidget()
+	{
+		return m_Content;
+	}
 
 	override void OnShow()
 	{
@@ -42,12 +42,12 @@ class UIActionScroller extends UIActionBase
 	{
 	}
 
-    void UpdateScroller()
-    {
+	void UpdateScroller()
+	{
 		m_Content.Update();
 		m_ScrollerContainer.Update();
 		m_Scroller.Update();
-        layoutRoot.Update();
+		layoutRoot.Update();
 
 		float width;
 		float height;
@@ -63,7 +63,7 @@ class UIActionScroller extends UIActionBase
 		layoutRoot.GetScreenSize( layoutRootWidth, layoutRootHeight );
 
 		diff = m_ContentHeight - m_RootHeight;
-        
+		
 		if ( diff < 0 )
 		{
 			m_Content.SetPos( 0, 0 );
@@ -88,10 +88,10 @@ class UIActionScroller extends UIActionBase
 		m_Scroller.SetSize( width, scroller_height );
 
 		if ( m_Position < 0 )
-            m_Position = 0;
+			m_Position = 0;
 
 		if ( m_Position > 1 )
-            m_Position = 1;
+			m_Position = 1;
 
 		float scrollerPos = m_RootHeight - scroller_height;
 		scrollerPos = scrollerPos * m_Position;
@@ -101,7 +101,7 @@ class UIActionScroller extends UIActionBase
 
 		m_Scroller.SetPos( 0, scrollerPos );
 		m_Content.SetPos( 0, contentPos );
-    }
+	}
 
 	protected void UpdateDragScroll( int mouse_x, int mouse_y, bool is_dragging )
 	{
@@ -217,7 +217,7 @@ class UIActionScroller extends UIActionBase
 	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
 	{
 		if ( m_IsDragScrolling || m_ContentHeight <= m_RootHeight )
-            return false;
+			return false;
 	
 		float step = ( 1.0 / ( m_ContentHeight - m_RootHeight ) ) * WHEEL_STEP;
 		m_Position -= wheel * step;
@@ -228,7 +228,7 @@ class UIActionScroller extends UIActionBase
 	}
 	
 	override bool OnResize( Widget w, int x, int y )
-    {
+	{
 		if ( w == layoutRoot || w == m_Content ) 
 		{
 			// UpdateScroller();
