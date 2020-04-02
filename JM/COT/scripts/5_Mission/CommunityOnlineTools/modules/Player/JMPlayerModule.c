@@ -188,7 +188,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetHealth( health, guids );
+			Exec_SetHealth( health, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -198,13 +198,17 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetHealth( float health, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetHealth( float health, array< string > guids, PlayerIdentity ident )
 	{
+		// Print( "JMPlayerModule::Exec_SetHealth" );
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		// Print( "JMPlayerModule::Exec_SetHealth - players=" + players );
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = players[i].PlayerObject;
+			// Print( "JMPlayerModule::Exec_SetHealth - player=" + players[i] );
+			// Print( "JMPlayerModule::Exec_SetHealth - playerEnt=" + player );
 			if ( player == NULL )
 				continue;
 
@@ -216,14 +220,18 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		// Print( "JMPlayerModule::RPC_SetHealth" );
+
 		float health;
 		if ( !ctx.Read( health ) )
 			return;
 
+		// Print( "JMPlayerModule::RPC_SetHealth - health=" + health );
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
+		// Print( "JMPlayerModule::RPC_SetHealth - guids=" + guids );
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", senderRPC ) )
 			return;
 
@@ -234,7 +242,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetBlood( blood, guids );
+			Exec_SetBlood( blood, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -244,7 +252,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetBlood( float blood, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetBlood( float blood, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -280,7 +288,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetShock( shock, guids );
+			Exec_SetShock( shock, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -290,7 +298,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetShock( float shock, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetShock( float shock, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -326,7 +334,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetEnergy( energy, guids );
+			Exec_SetEnergy( energy, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -336,7 +344,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetEnergy( float energy, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetEnergy( float energy, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -372,7 +380,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetWater( water, guids );
+			Exec_SetWater( water, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -382,7 +390,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetWater( float water, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetWater( float water, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -418,7 +426,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetStamina( stamina, guids );
+			Exec_SetStamina( stamina, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -428,7 +436,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetStamina( float stamina, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetStamina( float stamina, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -464,7 +472,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetBloodyHands( bloodyhands, guids );
+			Exec_SetBloodyHands( bloodyhands, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -474,7 +482,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetBloodyHands( bool bloodyhands, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetBloodyHands( bool bloodyhands, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -510,7 +518,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_RepairTransport( guids );
+			Exec_RepairTransport( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -519,7 +527,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_RepairTransport( array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_RepairTransport( array< string > guids, PlayerIdentity ident )
 	{
 		array< Transport > transports = new array< Transport >;
 
@@ -578,7 +586,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_TeleportTo( position, guids );
+			Exec_TeleportTo( position, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -588,7 +596,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_TeleportTo( vector position, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_TeleportTo( vector position, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -635,7 +643,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_TeleportSenderTo( guid );
+			Exec_TeleportSenderTo( guid, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -644,7 +652,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_TeleportSenderTo( string guid, PlayerIdentity ident = NULL )
+	private void Exec_TeleportSenderTo( string guid, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
 
@@ -689,7 +697,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_TeleportToPrevious( guids );
+			Exec_TeleportToPrevious( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -698,7 +706,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_TeleportToPrevious( array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_TeleportToPrevious( array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -758,7 +766,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_StartSpectating( string guid, PlayerIdentity ident = NULL )
+	private void Server_StartSpectating( string guid, PlayerIdentity ident )
 	{
 		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer( guid );
 		if ( !spectateInstance )
@@ -794,7 +802,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "Spectating [guid=" + guid + "]" );
 	}
 
-	private void Client_StartSpectating( PlayerBase player, PlayerIdentity ident = NULL )
+	private void Client_StartSpectating( PlayerBase player, PlayerIdentity ident )
 	{
 		CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
 		
@@ -847,7 +855,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident = NULL )
+	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident )
 	{
 		GetGame().SelectPlayer( ident, player );
 
@@ -855,7 +863,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 	}
 
-	private void Client_EndSpectating( PlayerIdentity ident = NULL )
+	private void Client_EndSpectating( PlayerIdentity ident )
 	{
 		if ( CurrentActiveCamera )
 		{
@@ -890,7 +898,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetGodMode( godmode, guids );
+			Exec_SetGodMode( godmode, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -900,7 +908,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetGodMode( bool godmode, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetGodMode( bool godmode, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -936,7 +944,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Heal( guids );
+			Exec_Heal( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -945,7 +953,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Heal( array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_Heal( array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -984,7 +992,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Strip( guids );
+			Exec_Strip( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -993,7 +1001,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Strip( array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_Strip( array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1025,7 +1033,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_StopBleeding( guids );
+			Exec_StopBleeding( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -1034,7 +1042,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_StopBleeding( array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_StopBleeding( array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1064,16 +1072,16 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void SetPermissions( array< string > permissions, array< string > guids )
 	{
-		Print( "SetPermissions" );
-		Print( permissions );
-		Print( guids );
+		// Print( "SetPermissions" );
+		// Print( permissions );
+		// Print( guids );
 		if ( IsMissionHost() )
 		{
-			Print( "IsMissionHost() true" );
-			Exec_SetPermissions( permissions, guids );
+			// Print( "IsMissionHost() true" );
+			Exec_SetPermissions( permissions, guids, NULL );
 		} else
 		{
-			Print( "IsMissionHost() false" );
+			// Print( "IsMissionHost() false" );
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( permissions );
 			rpc.Write( guids );
@@ -1081,22 +1089,22 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetPermissions( array< string > permissions, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetPermissions( array< string > permissions, array< string > guids, PlayerIdentity ident )
 	{
-		Print( "Exec_SetPermissions" );
-		Print( permissions );
-		Print( guids );
-		Print( ident );
+		// Print( "Exec_SetPermissions" );
+		// Print( permissions );
+		// Print( guids );
+		// Print( ident );
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		Print( players );
+		// Print( players );
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{		
             players[i].LoadPermissions( permissions );
 
-			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer );
+			GetCommunityOnlineTools().SetClient( players[i] );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
 		}
@@ -1104,22 +1112,22 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_SetPermissions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		Print( "RPC_SetPermissions" );
+		// Print( "RPC_SetPermissions" );
 
 		array< string > permissions;
 		if ( !ctx.Read( permissions ) )
 			return;
 
-		Print( permissions );
+		// Print( permissions );
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
-		Print( guids );
+		// Print( guids );
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", senderRPC ) )
 			return;
 
-		Print( "has permission" );
+		// Print( "has permission" );
 		Exec_SetPermissions( permissions, guids, senderRPC );
 	}
 
@@ -1127,7 +1135,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetRoles( roles, guids );
+			Exec_SetRoles( roles, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -1137,7 +1145,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetRoles( array< string > roles, array< string > guids, PlayerIdentity ident = NULL )
+	private void Exec_SetRoles( array< string > roles, array< string > guids, PlayerIdentity ident )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1145,7 +1153,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{		
             players[i].LoadRoles( roles );
 
-			GetCommunityOnlineTools().SetClient( players[i].GetGUID(), players[i].Data, players[i].IdentityPlayer );
+			GetCommunityOnlineTools().SetClient( players[i] );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
 		}

@@ -91,7 +91,7 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 			m_WName.SetText( m_Name );
 			m_WName.SetColor( 0xFFFFFFFF );
 
-			if ( GetPermissionsManager().HasPermission( "Weather.Preset.Remove" ) )
+			if ( GetPermissionsManager().HasPermission( "Weather.Preset.Remove", NULL ) )
 			{
 				m_WRemoveButton.Show( true );
 			} else

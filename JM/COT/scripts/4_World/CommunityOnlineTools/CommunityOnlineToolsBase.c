@@ -127,7 +127,7 @@ class CommunityOnlineToolsBase
 				return;
 			}
 
-            if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+            if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
             {
                 return;
             }
@@ -153,7 +153,7 @@ class CommunityOnlineToolsBase
 				return;
 			}
 
-            if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+            if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
             {
                 return;
             }
@@ -235,7 +235,27 @@ class CommunityOnlineToolsBase
 	{
     }
 
-    void SetClient( string guid, JMPlayerInformation cd, PlayerIdentity pi )
+	void UpdateRole( JMRole role, PlayerIdentity toSendTo )
+    {
+    }
+
+	void UpdateClient( string guid, PlayerIdentity sendTo )
+    {
+    }
+
+	void RemoveClient( string guid )
+    {
+    }
+
+	void RefreshClients()
+    {
+    }
+
+    void SetClient( JMPlayerInstance player )
+	{
+    }
+
+    void SetClient( JMPlayerInstance player, PlayerIdentity identity )
 	{
     }
 }

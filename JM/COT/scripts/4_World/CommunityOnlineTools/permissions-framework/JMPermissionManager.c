@@ -31,7 +31,7 @@ class JMPermissionManager
 
 		Roles.GetValueArray().Debug();
 
-		Print("copying");
+		// Print("copying");
 
 		roles.Copy( Roles.GetValueArray() );
 
@@ -153,45 +153,61 @@ class JMPermissionManager
 		return RootPermission;
 	}
 
-	bool HasPermission( string permission, PlayerIdentity identityHasPermission = NULL )
+	bool HasPermission( string permission, PlayerIdentity identityHasPermissions )
 	{
+		JMPlayerInstance instance;
+		return HasPermission( permission, identityHasPermissions, instance );
+	}
+
+	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
+	{
+		// Print( "JMPermissionManager::HasPermission - Start" );
+		
 		PMPrint();
 
 		if ( IsMissionClient() ) 
 		{
+			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );
+
+			instance = GetClientPlayer();
+
 			if ( IsMissionHost() )
 			{
+				// Print( "JMPermissionManager::HasPermission - IsMissionHost" );
 				return true;
 			}
 			
-			if ( GetPermissionsManager().GetClientPlayer() == NULL )
+			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
+			if ( instance == NULL )
 			{
-				Print( "Client Player is NULL!" );
+				// Print( "Client Player is NULL!" );
 				return false;
 			}
 
-			return GetPermissionsManager().GetClientPlayer().HasPermission( permission );
+			return instance.HasPermission( permission );
 		}
 		
-		if ( identityHasPermission == NULL )
+		// Print( "JMPermissionManager::HasPermission - identity=" + identity );
+		if ( identity == NULL )
 		{
 			return false;
 		}
 
-		JMPlayerInstance instance;
-		if ( Players.Find( identityHasPermission.GetId(), instance ) )
+		// Print( "JMPermissionManager::HasPermission - identity::GetId=" + identity.GetId() );
+		if ( Players.Find( identity.GetId(), instance ) )
 		{
+			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			return instance.HasPermission( permission );
 		}
 
 		return false;
 	}
 
-	bool OnClientConnected( PlayerIdentity identityOnClientConnected, out JMPlayerInstance instanceOnClientConnected )
+	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
 		string guid = "";
 		
-		if ( identityOnClientConnected == NULL )
+		if ( ident == NULL )
 		{
 			if ( GetGame().IsMultiplayer() )
 			{
@@ -201,35 +217,33 @@ class JMPermissionManager
 			guid = JMConstants.OFFLINE_GUID;
 		} else
 		{
-			guid = identityOnClientConnected.GetId();
+			guid = ident.GetId();
 		}
 
-		if ( Players.Find( guid, instanceOnClientConnected ) )
+		if ( Players.Find( guid, inst ) )
 		{
 			return false;
 		}
 
-		instanceOnClientConnected = new JMPlayerInstance( identityOnClientConnected );
+		inst = new JMPlayerInstance( ident );
 
-		instanceOnClientConnected.CopyPermissions( RootPermission );
-		instanceOnClientConnected.Load();
+		inst.CopyPermissions( RootPermission );
+		inst.Load();
 
-		instanceOnClientConnected.Serialize();
+		inst.Serialize();
 
-		GetCommunityOnlineToolsBase().SetClient( guid, instanceOnClientConnected.Data, identityOnClientConnected );
-
-		Players.Insert( guid, instanceOnClientConnected );
+		Players.Insert( guid, inst );
 
 		// PMPrint();
 
 		return true;
 	}
 
-	bool OnClientDisconnected( string guid, out JMPlayerInstance instanceOnClientDisconnected )
+	bool OnClientDisconnected( string guid, out JMPlayerInstance inst )
 	{
-		if ( Players.Find( guid, instanceOnClientDisconnected ) )
+		if ( Players.Find( guid, inst ) )
 		{
-			instanceOnClientDisconnected.Save();
+			inst.Save();
 
 			Players.Remove( guid );
 			return true;
@@ -243,7 +257,7 @@ class JMPermissionManager
 	{
 		if ( IsMissionClient() && false )
 		{
-			Print( "Printing all authenticated players!" );
+			// Print( "Printing all authenticated players!" );
 
 			for ( int i = 0; i < Players.Count(); i++ )
 			{
@@ -257,9 +271,9 @@ class JMPermissionManager
 		return Players.Get( guid );
 	}
 
-	ref JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation dataUpdatePlayer, PlayerIdentity identityUpdatePlayer = NULL, PlayerBase playerUpdatePlayer = NULL )
+	ref JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerBase playerUpdatePlayer = NULL )
 	{
-		JMPlayerInstance instance = GetPlayer( dataUpdatePlayer.SGUID );
+		JMPlayerInstance instance = GetPlayer( data.SGUID );
 
 		if ( !instance )
 		{
@@ -268,21 +282,16 @@ class JMPermissionManager
 				return NULL;
 			}
 
-			instance = new JMPlayerInstance( identityUpdatePlayer );
-			Players.Insert( dataUpdatePlayer.SGUID, instance );
+			instance = new JMPlayerInstance( NULL );
+			Players.Insert( data.SGUID, instance );
 		}
 
-		instance.SwapData( dataUpdatePlayer );
+		instance.SwapData( data );
 		instance.Deserialize();
-
-		if ( identityUpdatePlayer != NULL )
-		{
-			instance.IdentityPlayer = identityUpdatePlayer;
-		}
 
 		if ( IsMissionClient() )
 		{
-			if ( m_ClientGUID == dataUpdatePlayer.SGUID )
+			if ( m_ClientGUID == data.SGUID )
 			{
 				GetModuleManager().OnClientPermissionsUpdated();
 			}
@@ -339,13 +348,13 @@ class JMPermissionManager
 
 	void LoadRoleFromFile( string name )
 	{
-		Print( "Loading role " + name );
+		// Print( "Loading role " + name );
 
 		ref JMRole role = new JMRole( name );
-		Print( "Role " + role );
+		// Print( "Role " + role );
 		if ( role.Load() )
 		{
-			Print( "Loaded role " + role );
+			// Print( "Loaded role " + role );
 
 			Roles.Insert( name, role );
 		}
@@ -373,10 +382,10 @@ class JMPermissionManager
 			}
 		}
 
-		PrintString( "Roles count: " + Roles.Count().ToString() );
+		// Print( "Roles count: " + Roles.Count().ToString() );
 		for ( int i = 0; i < Roles.Count(); i++ )
 		{
-			PrintString( "["+Roles.GetKey( i )+"] => " + Roles.GetElement( i ) );
+			// Print( "["+Roles.GetKey( i )+"] => " + Roles.GetElement( i ) );
 		}
 	}
 

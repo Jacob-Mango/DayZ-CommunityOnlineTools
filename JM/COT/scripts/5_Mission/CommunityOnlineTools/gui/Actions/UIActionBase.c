@@ -64,7 +64,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void UpdatePermission( string permission )
 	{
-		SetEnabled( GetPermissionsManager().HasPermission( permission ) );
+		SetEnabled( GetPermissionsManager().HasPermission( permission, NULL ) );
 	}
 
 	void SetEnabled( bool enable )

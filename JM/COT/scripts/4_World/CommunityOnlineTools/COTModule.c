@@ -200,7 +200,7 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu == NULL )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
+		if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleActive();
@@ -212,5 +212,126 @@ class COTModule : JMModuleBase
 		{
 			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_off" ) );
 		}
+	}
+
+	private void InvokeOnConnect( PlayerBase player, PlayerIdentity identity )
+	{
+		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
+		{
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement( i ), identity );
+		}
+		
+		JMPlayerInstance instance;
+		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
+		{
+			instance.PlayerObject = player;
+			GetCommunityOnlineToolsBase().SetClient( instance, identity );
+		}
+	}
+	
+	/**
+	 * See: LogoutCancelEventTypeID
+	 */
+	bool OnClientLogoutCancelled( PlayerBase player, PlayerIdentity identity )
+	{
+		return false;
+	}
+
+	/**
+	 * See: ClientNewEventTypeID
+	 */
+	bool OnClientNew( out PlayerBase player, PlayerIdentity identity, vector pos, ParamsReadContext ctx )
+	{
+		InvokeOnConnect( player, identity );
+
+		return false;
+	}
+
+	/**
+	 * See: ClientRespawnEventTypeID
+	 */
+	bool OnClientRespawn( PlayerBase player, PlayerIdentity identity )
+	{
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		if ( instance )
+		{
+			instance.PlayerObject = player;
+		}
+
+		return false;
+	}
+
+	/**
+	 * See: ClientReadyEventTypeID
+	 */
+	bool OnClientReady( PlayerBase player, PlayerIdentity identity )
+	{
+		InvokeOnConnect( player, identity );
+
+		return false;
+	}
+
+	/**
+	 * See: ClientPrepareEventTypeID
+	 */
+	bool OnClientPrepare( PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout )
+	{
+		return false;
+	}
+
+	/**
+	 * See: ClientReconnectEventTypeID
+	 */
+	bool OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	{
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		if ( instance )
+		{
+			instance.PlayerObject = player;
+		}
+
+		return false;
+	}
+
+	/**
+	 * See: ClientDisconnectedEventTypeID
+	 */
+	bool OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	{
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		if ( instance )
+		{
+			instance.PlayerObject = player;
+		}
+
+		return false;
+	}
+
+	/**
+	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
+	 */
+	bool OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
+	{
+		JMPlayerInstance instance;
+		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
+		{
+			GetCommunityOnlineToolsBase().RemoveClient( uid );
+		}
+
+		return false;
+	}
+
+	/**
+	 * See: LogoutCancelEventTypeID
+	 */
+	bool OnClientLogoutCancelled( PlayerBase player )
+	{
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
+		if ( instance )
+		{
+			instance.PlayerObject = player;
+		}
+
+		return false;
 	}
 }

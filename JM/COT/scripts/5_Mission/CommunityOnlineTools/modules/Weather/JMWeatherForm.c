@@ -220,7 +220,7 @@ class JMWeatherForm extends JMFormBase
 		bool disable = false;
 		if ( permission != "" )
 		{
-			disable = !GetPermissionsManager().HasPermission( permission );
+			disable = !GetPermissionsManager().HasPermission( permission, NULL );
 		}
 		
 		if ( disable || shouldDisable )

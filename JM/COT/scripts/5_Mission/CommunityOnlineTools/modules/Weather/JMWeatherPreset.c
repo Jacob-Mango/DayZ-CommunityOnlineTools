@@ -9,7 +9,7 @@ class JMWeatherBase
 
     }
     
-    void Log( PlayerIdentity pidentLog = NULL )
+    void Log( PlayerIdentity pidentLog )
     {
     }
 };
@@ -32,7 +32,7 @@ class JMWeatherStorm: JMWeatherBase
         TimeOut = 60.0;
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -59,7 +59,7 @@ class JMWeatherFog: JMWeatherBase
         MinDuration = 4000.0;
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -86,7 +86,7 @@ class JMWeatherRain: JMWeatherBase
         MinDuration = 4000.0;
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -113,7 +113,7 @@ class JMWeatherOvercast: JMWeatherBase
         MinDuration = 4000.0;
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -142,7 +142,7 @@ class JMWeatherWind: JMWeatherBase
         MaxSpeed = GetGame().GetWeather().GetWindMaximumSpeed();
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -167,7 +167,7 @@ class JMWeatherWindFunction: JMWeatherBase
         GetGame().GetWeather().GetWindFunctionParams( Min, Max, Speed );
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -194,7 +194,7 @@ class JMWeatherDate: JMWeatherBase
         GetGame().GetWorld().GetDate( Year, Month, Day, Hour, Minute );
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -221,7 +221,7 @@ class JMWeatherRainThreshold: JMWeatherBase
         Time = 30.0;
     }
 
-    override void Log( PlayerIdentity pidentLog = NULL )
+    override void Log( PlayerIdentity pidentLog )
     {
         if ( IsMissionHost() )
 		{
@@ -286,7 +286,7 @@ class JMWeatherPreset
         WindFunc.SetFromWorld();
     }
 
-    void Log( PlayerIdentity pidentLogPP = NULL )
+    void Log( PlayerIdentity pidentLogPP )
     {
         if ( IsMissionHost() )
 		{

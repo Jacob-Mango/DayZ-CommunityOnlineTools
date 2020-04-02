@@ -43,7 +43,7 @@ int AddSelectedPlayer( string guid )
 	
 	if ( position > -1 )
 	{
-		Print( guid + " was already selected..." );
+		// Print( guid + " was already selected..." );
 		return position;
 	}
 

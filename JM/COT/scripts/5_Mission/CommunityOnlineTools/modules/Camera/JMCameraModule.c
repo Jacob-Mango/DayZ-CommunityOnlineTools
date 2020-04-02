@@ -27,7 +27,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Camera.View" );
+		return GetPermissionsManager().HasPermission( "Camera.View", NULL );
 	}
 
 	override string GetInputToggle()

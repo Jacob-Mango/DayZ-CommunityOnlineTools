@@ -19,15 +19,6 @@ modded class PlayerBase
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
-
-		if ( GetGame() && IsMissionOffline() )
-		{
-			if ( GetGame().GetPlayer() == NULL && g_Game.GetGameState() != DayZGameState.MAIN_MENU )
-			{
-				JMPlayerInstance instance;
-				GetPermissionsManager().OnClientConnected( NULL, instance );
-			}
-		}
 	}
 
 	override void OnVariablesSynchronized()
