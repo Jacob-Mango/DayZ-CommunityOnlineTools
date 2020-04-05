@@ -20,24 +20,24 @@ class JMItemSetForm extends JMFormBase
 
 	override void OnShow()
 	{
-		JMItemSetSpawnerModule iss = JMItemSetSpawnerModule.Cast( module );
-
-		if ( iss == NULL ) return;
-
-		string name;
-		ref UIActionButton button;
+		JMItemSetSpawnerModule iss;
+		if ( !Class.CastTo( iss, module ) )
+			return;
 
 		for ( int j = 0; j < iss.GetItemSets().Count(); j++ )
 		{
-			name = iss.GetItemSets()[j];
-			
-			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " on Selected Player(s)", this, "SpawnOnPlayers" );
-			button.SetData( new JMItemSpawnerButtonData( name ) );
-			m_ItemSetButtons.Insert( button );
+			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+			string name = iss.GetItemSets()[j];
 
-			button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnOnCursor" );
-			button.SetData( new JMItemSpawnerButtonData( name ) );
-			m_ItemSetButtons.Insert( button );
+			UIActionManager.CreateText( wrapper, name );
+			
+			UIActionButton selButton = UIActionManager.CreateButton( wrapper, "Selected Player(s)", this, "SpawnOnPlayers" );
+			selButton.SetData( new JMItemSpawnerButtonData( name ) );
+			m_ItemSetButtons.Insert( selButton );
+
+			UIActionButton curButton = UIActionManager.CreateButton( wrapper, "Cursor", this, "SpawnOnCursor" );
+			curButton.SetData( new JMItemSpawnerButtonData( name ) );
+			m_ItemSetButtons.Insert( curButton );
 		}
 	}
 
