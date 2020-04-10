@@ -75,7 +75,7 @@ static vector GetCursorPos()
 	vector hitPos;
 	vector hitNormal;
 	int hitComponentIndex;
-	DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, GetPlayer());
+	DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, GetPlayer(), false, false, ObjIntersectGeom);
 
 	return hitPos;
 }

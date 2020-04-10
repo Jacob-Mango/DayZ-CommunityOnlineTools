@@ -115,13 +115,13 @@ class JMTeleportModule: JMRenderableModuleBase
 		int hitComponentIndex;
 
 		set< Object > objs = new set< Object >;
-		if ( DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, objs, NULL, GetPlayer()) )
+		if ( DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, objs, NULL, GetPlayer(), false, false, ObjIntersectGeom) )
 		{
 			if ( objs.Count() > 0 ) 
 			{
 				vector position = objs[0].CoordToLocal( hitPos );
 
-				// Print( "Model: " + objs[0].GetType() + ", Position: " + position );
+				Print( "Model: " + objs[0].GetType() + ", Position: " + position );
 
 				Message( NULL, "(Logged) Model: " + objs[0].GetType() + ", Position: " + position );
 			}
@@ -166,27 +166,18 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void SetPlayerPosition( PlayerBase player, vector position )
 	{
+		if ( player.IsInTransport() )
+			return;
+
 		player.SetLastPosition( player.GetPosition() );
 
-		if ( player.IsInTransport() )
+		Object parent;
+		if ( Class.CastTo( parent, player.GetParent() ) )
 		{
-			HumanCommandVehicle vehCommand = player.GetCommand_Vehicle();
-
-			if ( vehCommand )
-			{
-				Transport transport = vehCommand.GetTransport();
-
-				if ( transport == NULL )
-					return;
-
-				transport.SetOrigin( position );
-				transport.SetPosition( position );
-				transport.Update();
-			}
-		} else
-		{
-			player.SetPosition( position );
+			position = parent.WorldToModel( position );
 		}
+
+		player.SetPosition( position );
 	}
 
 	override int GetRPCMin()
