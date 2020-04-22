@@ -1,0 +1,13 @@
+ImageWidgetClass rootFrame {
+ inheritalpha 1
+ ignorepointer 1
+ position 0 0
+ size 32 32
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ imageTexture "{29A0E29F06B3139E}JM/COT/gui/textures/new_cursor.edds"
+ mode blend
+ "src alpha" 1
+}

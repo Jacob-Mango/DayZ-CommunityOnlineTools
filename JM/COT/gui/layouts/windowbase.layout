@@ -71,7 +71,7 @@ PanelWidgetClass base_window {
     TextWidgetClass title_text {
      ignorepointer 1
      color 1 1 1 1
-     position 5 0
+     position 6 0
      size 1 1
      halign left_ref
      valign center_ref
@@ -91,7 +91,7 @@ PanelWidgetClass base_window {
      ignorepointer 0
      visible 1
      color 1 0 0 1
-     position 5 0
+     position 6 0
      size 25 25
      halign right_ref
      valign center_ref
@@ -115,6 +115,50 @@ PanelWidgetClass base_window {
       }
      }
     }
+   }
+  }
+  FrameWidgetClass resize_drag_up {
+   ignorepointer 0
+   hexactpos 0
+   vexactpos 1
+   hexactsize 1
+   vexactsize 0
+   size 1.0 1.0
+   position 0.0 0.0
+   {
+   }
+  }
+  FrameWidgetClass resize_drag_down {
+   ignorepointer 0
+   hexactpos 0
+   vexactpos 1
+   hexactsize 1
+   vexactsize 0
+   size 1.0 1.0
+   position 0.0 1.0
+   {
+   }
+  }
+  FrameWidgetClass resize_drag_left {
+   ignorepointer 0
+   hexactpos 0
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   size 1.0 1.0
+   position 0.0 0.0
+   {
+   }
+  }
+  FrameWidgetClass resize_drag_right {
+   ignorepointer 0
+   hexactpos 0
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   size 1.0 1.0
+   position 1.0 0.0
+   {
    }
   }
  }

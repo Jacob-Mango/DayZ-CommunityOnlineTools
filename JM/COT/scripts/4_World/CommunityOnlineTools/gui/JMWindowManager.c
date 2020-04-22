@@ -2,7 +2,9 @@ class JMWindowManager
 {
 	private autoptr array< JMWindowBase > m_Windows;
 
-	private ref Widget m_WindowContainer;
+	private Widget m_WindowContainer;
+
+	private ImageWidget m_MainCursorWidget;
 
 	void JMWindowManager()
 	{
@@ -16,6 +18,10 @@ class JMWindowManager
 	void Init()
 	{
 		m_WindowContainer = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen.layout", NULL );
+
+		//Class.CastTo( m_MainCursorWidget, GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/cursors/main.layout" ) );
+		//m_MainCursorWidget.SetSort( 1024 );
+		//SetCursorWidget( m_MainCursorWidget );
 	}
 
 	JMWindowBase Create()
@@ -23,6 +29,15 @@ class JMWindowManager
 		JMWindowBase window;
 		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", m_WindowContainer ).GetScript( window );
 		return window;
+	}
+
+	void Update( float pDt )
+	{
+		Widget widget_under_mouse = GetWidgetUnderCursor();
+		if ( widget_under_mouse.GetName().IndexOf( "resize_drag" ) )
+		{
+			
+		}
 	}
 
 	int Count()
