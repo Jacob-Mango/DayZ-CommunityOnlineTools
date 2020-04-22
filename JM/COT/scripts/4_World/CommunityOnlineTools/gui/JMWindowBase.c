@@ -1,5 +1,10 @@
 class JMWindowBase extends ScriptedWidgetEventHandler  
 {
+	reference float m_DragXN;
+	reference float m_DragYN;
+	reference float m_DragXP;
+	reference float m_DragYP;
+
 	private ref Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
@@ -7,6 +12,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
 	private Widget m_Background;
+
+	private Widget m_ResizeDragUp;
+	private Widget m_ResizeDragDown;
+	private Widget m_ResizeDragLeft;
+	private Widget m_ResizeDragRight;
 
 	private JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
@@ -16,6 +26,12 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	private float m_OffsetX;
 	private float m_OffsetY;
+
+	private int m_ResizeDirection;
+	private float m_StartResizeSizeW;
+	private float m_StartResizeSizeH;
+	private int m_StartResizePositionX;
+	private int m_StartResizePositionY;
 
 	void JMWindowBase() 
 	{
@@ -48,6 +64,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		m_TitlePanel = layoutRoot.FindAnyWidget( "title_wrapper" );
 		m_TitleText = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
 		m_Background = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
+
+		m_ResizeDragUp = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
+		m_ResizeDragDown = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_down" ) );
+		m_ResizeDragLeft = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_left" ) );
+		m_ResizeDragRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_right" ) );
 	}
 
 	void SetModule( JMRenderableModuleBase module )
@@ -296,6 +317,33 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			return true;
 		}
 
+		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		{
+			w.SetPos( 0, 0, true );
+			w.SetPos( 0, 0, false );
+
+			if ( w == m_ResizeDragUp ) 
+			{
+				m_ResizeDirection = 0;
+			} else if ( w == m_ResizeDragDown ) 
+			{
+				m_ResizeDirection = 1;
+			} else if ( w == m_ResizeDragLeft ) 
+			{
+				m_ResizeDirection = 2;
+			} else if ( w == m_ResizeDragRight )
+			{
+				m_ResizeDirection = 3;
+			}
+
+			m_StartResizePositionX = x;
+			m_StartResizePositionY = y;
+
+			layoutRoot.GetSize( m_StartResizeSizeW, m_StartResizeSizeH );
+
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -308,6 +356,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			return true;
 		}
 
+		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		{
+			Resize( w, x, y );
+
+			return true;
+		}
+
 		return false;
 	}
 
@@ -316,6 +371,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - m_OffsetX, y - m_OffsetY );
+			
+			return true;
+		}
+
+		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		{
+			Resize( w, x, y );
 			
 			return true;
 		}
@@ -336,5 +398,31 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		layoutRoot.SetPos( x, y, true );
 		
 		m_TitleWrapper.SetPos( 0, 0, true );
+	}
+
+	private void Resize( Widget w, int x, int y )
+	{
+		w.SetPos( 0, 0, true );
+
+		float newWidth = m_StartResizeSizeW;
+		float newHeight = m_StartResizeSizeH;
+
+		switch ( m_ResizeDirection )
+		{
+			case 0:
+				newHeight += m_StartResizePositionX - x;
+				break;
+			case 1:
+				newHeight += m_StartResizePositionX - x;
+				break;
+			case 2:
+				newWidth += m_StartResizePositionY - y;
+				break;
+			case 3:
+				newWidth += m_StartResizePositionY - y;
+				break;
+		}
+
+		// layoutRoot.SetSize( newWidth, newHeight );
 	}
 }

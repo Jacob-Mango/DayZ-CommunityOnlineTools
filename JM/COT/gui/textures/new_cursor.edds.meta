@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{29A0E29F06B3139E}JM/COT/gui/textures/new_cursor.edds"
+ Author "desktop-e9gi1uo"
+ ChangeDate 1417963666
+ Configurations {
+  PNGResourceClass PC {
+   SourceFile "new_cursor.png"
+  }
+  PNGResourceClass XBOX_ONE : PC {
+  }
+  PNGResourceClass PS4 : PC {
+  }
+  PNGResourceClass LINUX : PC {
+  }
+ }
+}
