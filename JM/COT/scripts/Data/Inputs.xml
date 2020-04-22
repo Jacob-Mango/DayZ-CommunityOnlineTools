@@ -2,39 +2,39 @@
 <modded_inputs>
     <inputs>
         <actions>
-            <input name="UACOTModuleToggleCOT" loc="Enable/Disable Keybinds" />
-            <input name="UACOTToggleButtons" loc="Open/Close Sidebar" />
+            <input name="UACOTModuleToggleCOT" loc="STR_COT_INPUT_TOGGLE" />
+            <input name="UACOTToggleButtons" loc="STR_COT_INPUT_TOGGLE_SIDEBAR" />
 
-            <input name="UACOTTogglePlayer" loc="Open/Close Player Menu" />
-            <input name="UACOTToggleCamera" loc="Open/Close Camera Menu" />
-            <input name="UACOTToggleESP" loc="Open/Close ESP Menu" />
-            <input name="UACOTToggleMap" loc="Open/Close Map Menu" />
-            <input name="UACOTToggleMapEditor" loc="Open/Close Map Editor" />
-            <input name="UACOTToggleEntity" loc="Open/Close Entity Menu" />
-            <input name="UACOTToggleSelected" loc="Open/Close Selected Menu" />
-            <input name="UACOTToggleTeleport" loc="Open/Close Teleport Menu" />
-            <input name="UACOTToggleItem" loc="Open/Close Item Set Menu" />
-            <input name="UACOTToggleVehicle" loc="Open/Close Vehicle Menu" />
-            <input name="UACOTToggleWeather" loc="Open/Close Weather Menu" />
-            <input name="UACOTToggleServerInfo" loc="Open/Close Server Info Menu" />
+            <input name="UACOTTogglePlayer" loc="STR_COT_INPUT_TOGGLE_MENU_PLAYER" />
+            <input name="UACOTToggleCamera" loc="STR_COT_INPUT_TOGGLE_MENU_CAMERA" />
+            <input name="UACOTToggleESP" loc="STR_COT_INPUT_TOGGLE_MENU_ESP" />
+            <input name="UACOTToggleMap" loc="STR_COT_INPUT_TOGGLE_MENU_MAP" />
+            <input name="UACOTToggleMapEditor" loc="STR_COT_INPUT_TOGGLE_MENU_MAP_EDITOR" />
+            <input name="UACOTToggleEntity" loc="STR_COT_INPUT_TOGGLE_MENU_ENTITY" />
+            <input name="UACOTToggleSelected" loc="STR_COT_INPUT_TOGGLE_MENU_SELECTED" />
+            <input name="UACOTToggleTeleport" loc="STR_COT_INPUT_TOGGLE_MENU_TELEPORT" />
+            <input name="UACOTToggleItem" loc="STR_COT_INPUT_TOGGLE_MENU_ITEMSET" />
+            <input name="UACOTToggleVehicle" loc="STR_COT_INPUT_TOGGLE_MENU_VEHICLE" />
+            <input name="UACOTToggleWeather" loc="STR_COT_INPUT_TOGGLE_MENU_WEATHER" />
+            <input name="UACOTToggleServerInfo" loc="STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO" />
 
             <input name="UACOTModuleFocusGame" loc="" visible="false" />
             <input name="UACOTModuleFocusUI" loc="" visible="false" />
             
-            <input name="UATeleportModuleTeleportCursor" loc="Teleport Self (Crosshair)" />
-            <input name="UATeleportModuleWorldToModelLookAt" loc="WorldToModelLookAt" />
+            <input name="UATeleportModuleTeleportCursor" loc="STR_COT_INPUT_TELEPORT_CROSSHAIR" />
+            <input name="UATeleportModuleWorldToModelLookAt" loc="STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT" />
 
-            <input name="UACameraToolToggleCamera" loc="Toggles Freecam" />
+            <input name="UACameraToolToggleCamera" loc="STR_COT_INPUT_TOGGLE_FREECAM" />
 
-            <input name="UACameraToolZoomForwards" loc="Zoom Freecam Forwards" />
-            <input name="UACameraToolZoomBackwards" loc="Zoom Freecam Backwards" />
+            <input name="UACameraToolZoomForwards" loc="STR_COT_INPUT_FREECAM_ZOOM_FORWARD" />
+            <input name="UACameraToolZoomBackwards" loc="STR_COT_INPUT_FREECAM_ZOOM_BACKWARD" />
 
-            <input name="UACameraToolSpeedIncrease" loc="Increase Freecam Speed" />
-            <input name="UACameraToolSpeedDecrease" loc="Decrease Freecam Speed" />
+            <input name="UACameraToolSpeedIncrease" loc="STR_COT_INPUT_FREECAM_SPEED_INCREASE" />
+            <input name="UACameraToolSpeedDecrease" loc="STR_COT_INPUT_FREECAM_SPEED_DECREASE" />
 
-            <input name="UAObjectModuleSpawnInfected" loc="Spawn Infected (Crosshair)" />
-            <input name="UAObjectModuleSpawnAnimal" loc="Spawn Animal (Crosshair)" />
-            <input name="UAObjectModuleSpawnWolf" loc="Spawn Wolf (Crosshair)" />
+            <input name="UAObjectModuleSpawnInfected" loc="STR_COT_INPUT_SPAWN_INFECTED" />
+            <input name="UAObjectModuleSpawnAnimal" loc="STR_COT_INPUT_SPAWN_ANIMAL" />
+            <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
         </actions>
     </inputs>
 
