@@ -81,21 +81,14 @@ class JMPlayerInstance
 		if ( !GetGame().IsServer() )
 			return;
 
-		if ( PlayerObject )
-		{
-			PlayerObject.SetAuthenticatedPlayer( this );
-			Data.Load( PlayerObject );
-		}
-
 		if ( IsMissionOffline() )
 		{
 			PlayerObject = PlayerBase.Cast( GetGame().GetPlayer() );
-			
-			if ( PlayerObject )
-			{
-				PlayerObject.SetAuthenticatedPlayer( this );
-				Data.Load( PlayerObject );
-			}
+		}
+
+		if ( PlayerObject )
+		{
+			Data.Load( PlayerObject );
 		}
 	}
 
