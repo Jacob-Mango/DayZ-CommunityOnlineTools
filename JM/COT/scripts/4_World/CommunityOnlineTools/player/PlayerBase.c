@@ -19,6 +19,8 @@ modded class PlayerBase
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DeferredInit );
 	}
 
 	override void OnVariablesSynchronized()
@@ -37,6 +39,18 @@ modded class PlayerBase
 			}
 
 			//SetInvisible( m_JMIsInvisible );
+		}
+	}
+
+	void DeferredInit()
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
+		if ( m_AuthenticatedPlayer )
+		{
+			m_AuthenticatedPlayer.PlayerObject = this;
 		}
 	}
 
@@ -60,12 +74,7 @@ modded class PlayerBase
 		}
 	}
 
-	void SetAuthenticatedPlayer( ref JMPlayerInstance player )
-	{
-		m_AuthenticatedPlayer = player;
-	}
-
-	JMPlayerInstance GetAuthenticatedPlayer()
+	ref JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		return m_AuthenticatedPlayer;
 	}
