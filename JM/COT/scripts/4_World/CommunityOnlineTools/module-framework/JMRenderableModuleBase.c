@@ -20,7 +20,7 @@ class JMRenderableModuleBase extends JMModuleBase
 			m_MenuButton.SetColor( m_MenuButtonColour );
 
 			TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
-			ttl.SetText( GetTitle() );
+			ttl.SetText( GetLocalisedTitle() );
 
 			ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
 			TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
@@ -78,6 +78,18 @@ class JMRenderableModuleBase extends JMModuleBase
 	string GetTitle()
 	{
 		return "";
+	}
+
+	string GetLocalisedTitle()
+	{
+		string text = Widget.TranslateString( "#" + GetTitle() );
+
+		if ( text == "" || text.Get( 0 ) == " " )
+		{
+			return GetTitle();
+		}
+		
+		return text;
 	}
 
 	string GetImageSet()

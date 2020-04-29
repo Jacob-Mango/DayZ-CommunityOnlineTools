@@ -26,22 +26,35 @@ class JMVehicleSpawnerForm extends JMFormBase
 	}
 
 	override void OnShow()
-	{
-		array< string > vehicles = new array< string >;
+	{		array< string > vehicles = new array< string >;
+		array< string > vehiclesDisplay = new array< string >;
 		vehicles.Copy( m_Module.GetVehicles() );
-
-		JMStatics.SortStringArray( vehicles );
 
 		for ( int i = 0; i < vehicles.Count(); i++ )
 		{
+			string displayName;
+			GetGame().ConfigGetText( "cfgVehicles " + vehicles[i] + " displayName", displayName );
+			string text = Widget.TranslateString( "#" + displayName );
+
+			if ( text == "" || text.Get( 0 ) == " " )
+			{
+				vehiclesDisplay.Insert( displayName );
+			} else
+			{
+				vehiclesDisplay.Insert( text );
+			}
+		}
+
+		JMStatics.SortStringArrayKVPair( vehiclesDisplay, vehicles );
+
+		for ( i = 0; i < vehicles.Count(); i++ )
+		{
 			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
 			
-			string name = vehicles[i];
-
-			UIActionManager.CreateText( wrapper, name );
+			UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
 
 			UIActionButton button = UIActionManager.CreateButton( wrapper, "Cursor", this, "SpawnVehicle" );
-			button.SetData( new JMVehicleSpawnerButtonData( name ) );
+			button.SetData( new JMVehicleSpawnerButtonData( vehicles[i] ) );
 
 			m_VehicleButtons.Insert( button );
 		}
