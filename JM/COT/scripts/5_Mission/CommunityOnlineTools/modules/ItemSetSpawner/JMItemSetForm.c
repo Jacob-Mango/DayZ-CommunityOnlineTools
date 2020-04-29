@@ -1,8 +1,10 @@
 class JMItemSetForm extends JMFormBase
 {
-	protected Widget m_ActionsWrapper;
+	private Widget m_ActionsWrapper;
 
-	protected ref array< ref UIActionButton > m_ItemSetButtons;
+	private autoptr array< ref UIActionButton > m_ItemSetButtons;
+
+	private JMItemSetSpawnerModule m_Module;
 
 	void JMItemSetForm()
 	{
@@ -13,6 +15,11 @@ class JMItemSetForm extends JMFormBase
 	{
 	}
 
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
+	}
+
 	override void OnInit()
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
@@ -20,14 +27,16 @@ class JMItemSetForm extends JMFormBase
 
 	override void OnShow()
 	{
-		JMItemSetSpawnerModule iss;
-		if ( !Class.CastTo( iss, module ) )
-			return;
+		array< string > items = new array< string >;
+		items.Copy( m_Module.GetItemSets() );
+		
+		JMStatics.SortStringArray( items );
 
-		for ( int j = 0; j < iss.GetItemSets().Count(); j++ )
+		for ( int j = 0; j < items.Count(); j++ )
 		{
 			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
-			string name = iss.GetItemSets()[j];
+
+			string name = items[j];
 
 			UIActionManager.CreateText( wrapper, name );
 			
@@ -43,12 +52,12 @@ class JMItemSetForm extends JMFormBase
 
 	override void OnHide() 
 	{
-		for ( int k = 0; k < m_ItemSetButtons.Count(); k++ )
+		Widget child = m_ActionsWrapper.GetChildren();
+		while ( child != NULL )
 		{
-			if ( m_ItemSetButtons[k].GetLayoutRoot() )
-			{
-				m_ActionsWrapper.RemoveChild( m_ItemSetButtons[k].GetLayoutRoot() );
-			}
+			child.Unlink();
+			
+			child = child.GetSibling();
 		}
 
 		m_ItemSetButtons.Clear();
@@ -60,11 +69,7 @@ class JMItemSetForm extends JMFormBase
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		JMItemSetSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
-		mod.SpawnPlayers( data.ClassName, GetSelectedPlayers() );
+		m_Module.SpawnPlayers( data.ClassName, GetSelectedPlayers() );
 	}
 
 	void SpawnOnCursor( UIEvent eid, ref UIActionBase action ) 
@@ -73,10 +78,6 @@ class JMItemSetForm extends JMFormBase
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		JMItemSetSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
-		mod.SpawnPosition( data.ClassName, GetCursorPos() );
+		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
 }

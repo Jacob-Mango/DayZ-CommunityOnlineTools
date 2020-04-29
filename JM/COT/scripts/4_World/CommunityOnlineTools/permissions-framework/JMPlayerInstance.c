@@ -53,14 +53,6 @@ class JMPlayerInstance
 		return PlayerObject != NULL; 
 	}
 
-	PlayerIdentity GetPlayerIdentity()
-	{
-		if ( PlayerObject != NULL )
-			return PlayerObject.GetIdentity();
-
-		return NULL;
-	}
-
 	string GetGUID()
 	{
 		return Data.SGUID;

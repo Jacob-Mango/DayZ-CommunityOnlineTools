@@ -4,8 +4,6 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	
 	protected JMWindowBase window;
 
-	protected JMRenderableModuleBase module;
-
 	void JMFormBase() 
 	{
 	}
@@ -20,14 +18,21 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		layoutRoot.SetHandler( this );
 	}
 
-	void Init( JMWindowBase wdw, JMRenderableModuleBase mdl )
+	void Init( ref JMWindowBase wdw, ref JMRenderableModuleBase mdl )
 	{
 		window = wdw;
-		module = mdl;
 
-		OnInit();
-		
-		window.OnFormLoaded();
+		if ( SetModule( mdl ) )
+		{
+			OnInit();
+			
+			window.OnFormLoaded();
+		}
+	}
+
+	protected bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return false;
 	}
 
 	void OnInit()

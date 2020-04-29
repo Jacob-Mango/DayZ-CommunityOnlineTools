@@ -212,7 +212,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity = -1, float health = -1 )
 	{
-		if ( IsMissionClient() )
+		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( ent );

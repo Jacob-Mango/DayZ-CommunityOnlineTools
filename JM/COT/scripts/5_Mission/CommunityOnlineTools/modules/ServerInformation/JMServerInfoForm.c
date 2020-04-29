@@ -1,16 +1,18 @@
 class JMServerInfoForm extends JMFormBase
 {
-	protected Widget m_ActionsWrapper;
+	private Widget m_ActionsWrapper;
 
-	protected ref UIActionText m_UIServerFPS;
-	protected ref UIActionText m_UIOnlinePlayers;
-	protected ref UIActionText m_UIServerUpTime;
-	protected ref UIActionText m_UIMemoryUsed;
-	protected ref UIActionText m_UINetworkOut;
-	protected ref UIActionText m_UINetworkIn;
-	protected ref UIActionText m_UIActiveAI;
-	protected ref UIActionText m_UIGameTickTime;
-	protected ref UIActionText m_UIMissionTickTime;
+	private ref UIActionText m_UIServerFPS;
+	private ref UIActionText m_UIOnlinePlayers;
+	private ref UIActionText m_UIServerUpTime;
+	private ref UIActionText m_UIMemoryUsed;
+	private ref UIActionText m_UINetworkOut;
+	private ref UIActionText m_UINetworkIn;
+	private ref UIActionText m_UIActiveAI;
+	private ref UIActionText m_UIGameTickTime;
+	private ref UIActionText m_UIMissionTickTime;
+
+	private JMServerInfoModule m_Module;
 
 	void JMServerInfoForm()
 	{
@@ -20,6 +22,11 @@ class JMServerInfoForm extends JMFormBase
 	void ~JMServerInfoForm()
 	{
 		JMServerInfoModule.DATA_UPDATED.Remove( UpdateData );
+	}
+
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
 	}
 
 	override void OnInit()

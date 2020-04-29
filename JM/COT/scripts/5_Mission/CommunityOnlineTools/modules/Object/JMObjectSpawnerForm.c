@@ -1,24 +1,26 @@
 class JMObjectSpawnerForm extends JMFormBase
 {
-	protected ref map< string, string > m_ObjectTypes;
-	protected string m_CurrentType;
+	private autoptr map< string, string > m_ObjectTypes;
+	private string m_CurrentType;
 
-	protected Widget m_TypesActionsWrapper;
-	protected Widget m_SpawnerActionsWrapper;
+	private Widget m_TypesActionsWrapper;
+	private Widget m_SpawnerActionsWrapper;
 
-	protected UIActionEditableText m_QuantityItem;
-	protected UIActionEditableText m_SearchBox;
+	private UIActionEditableText m_QuantityItem;
+	private UIActionEditableText m_SearchBox;
 
-	protected TextListboxWidget m_ClassList;
+	private TextListboxWidget m_ClassList;
 
-	protected ItemPreviewWidget m_ItemPreview;
-	protected EntityAI m_PreviewItem;
-	protected vector m_Orientation;
+	private ItemPreviewWidget m_ItemPreview;
+	private EntityAI m_PreviewItem;
+	private vector m_Orientation;
 
-	protected int m_MouseX;
-	protected int m_MouseY;
+	private int m_MouseX;
+	private int m_MouseY;
 
-	protected string m_ItemsList;
+	private string m_ItemsList;
+
+	private JMObjectSpawnerModule m_Module;
 
 	void JMObjectSpawnerForm()
 	{
@@ -27,12 +29,12 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void ~JMObjectSpawnerForm()
 	{
+		delete m_ObjectTypes;
 	}
 
-	void AddObjectType( ref Widget parent, string name, string config )
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
 	{
-		UIActionManager.CreateButton( parent, name, this, "SetListType" );
-		m_ObjectTypes.Insert( name, config );
+		return Class.CastTo( m_Module, mdl );
 	}
 
 	override void OnInit()
@@ -81,6 +83,12 @@ class JMObjectSpawnerForm extends JMFormBase
 		}
 
 		UpdateItemPreview();
+	}
+
+	void AddObjectType( ref Widget parent, string name, string config )
+	{
+		UIActionManager.CreateButton( parent, name, this, "SetListType" );
+		m_ObjectTypes.Insert( name, config );
 	}
 
 	void UpdateRotation( int mouse_x, int mouse_y, bool is_dragging )
@@ -178,10 +186,6 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		JMObjectSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
 		int quantity = -1;
 
 		string quantText = m_QuantityItem.GetText();
@@ -193,7 +197,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			quantity = quantText.ToInt();
 		}
 
-		mod.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
+		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
 	}
 
 	void SpawnPosition( UIEvent eid, ref UIActionBase action )
@@ -201,10 +205,6 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		JMObjectSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
 		int quantity = -1;
 
 		string quantText = m_QuantityItem.GetText();
@@ -216,7 +216,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			quantity = quantText.ToInt();
 		}
 
-		mod.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
+		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
 	}
 
 	void SpawnInventory( UIEvent eid, ref UIActionBase action )
@@ -224,12 +224,9 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		JMObjectSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
 		// TODO: FIX TO BE PLAYERS INSTEAD!
 		array< EntityAI > entities = new array< EntityAI >;
+        entities.Insert( GetGame().GetPlayer() );
 
 		int quantity = -1;
 
@@ -242,7 +239,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			quantity = quantText.ToInt();
 		}
 
-		mod.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
+		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionBase action )

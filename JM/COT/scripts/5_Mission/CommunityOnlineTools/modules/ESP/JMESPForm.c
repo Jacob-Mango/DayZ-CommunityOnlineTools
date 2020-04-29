@@ -5,9 +5,11 @@ class JMESPForm extends JMFormBase
 	private UIActionScroller m_ESPListScroller;
 	private Widget m_ESPListRows;
 
-	protected UIActionSlider m_RangeSlider;
-	protected UIActionSlider m_UpdateRate;
-	protected UIActionButton m_FullMapESP;
+	private UIActionSlider m_RangeSlider;
+	private UIActionSlider m_UpdateRate;
+	private UIActionButton m_FullMapESP;
+
+	private JMESPModule m_Module;
 
 	void JMESPForm()
 	{
@@ -16,6 +18,11 @@ class JMESPForm extends JMFormBase
 
 	void ~JMESPForm()
 	{
+	}
+
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
 	}
 
 	void ESPControls( Widget parent )
@@ -33,7 +40,7 @@ class JMESPForm extends JMFormBase
 
 		UIActionManager.CreateButton( quadSpacer, "Update Interval", this, "Click_UpdateAtRate" );
 		m_UpdateRate = UIActionManager.CreateSlider( quadSpacer, "", 0.5, 10, this, "Change_UpdateRate" );
-		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetCurrent( m_Module.ESPUpdateTime );
 		m_UpdateRate.SetAppend(" second(s)");
 		m_UpdateRate.SetStepValue( 0.5 );
 
@@ -51,11 +58,11 @@ class JMESPForm extends JMFormBase
 		Widget otherStuffSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
 		m_RangeSlider = UIActionManager.CreateSlider( otherStuffSpacer, "Radius", 0, 1000, this, "Change_Range" );
-		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
+		m_RangeSlider.SetCurrent( m_Module.ESPRadius );
 		m_RangeSlider.SetAppend(" metre(s)");
 		m_RangeSlider.SetStepValue( 10 );
 
-		UIActionManager.CreateEditableText( otherStuffSpacer, "Class Filter: ", this, "Change_Filter", JMESPModule.Cast( module ).Filter );
+		UIActionManager.CreateEditableText( otherStuffSpacer, "Class Filter: ", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 		
@@ -67,16 +74,12 @@ class JMESPForm extends JMFormBase
 		m_ESPListScroller = UIActionManager.CreateScroller( parent );
 		m_ESPListRows = UIActionManager.CreateActionRows( m_ESPListScroller.GetContentWidget() );
 
-		JMESPModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
 		int totalInContentRow = 100;
 		int currentContentRow = 0;
 
 		GridSpacerWidget gsw;
 
-		for ( int i = 0; i < mod.GetViewTypes().Count(); i++ )
+		for ( int i = 0; i < m_Module.GetViewTypes().Count(); i++ )
 		{
 			if ( totalInContentRow >= 100 )
 			{
@@ -96,7 +99,7 @@ class JMESPForm extends JMFormBase
 			if ( !rScript )
 				continue;
 
-			rScript.Set( mod.GetViewTypes()[i] );
+			rScript.Set( m_Module.GetViewTypes()[i] );
 
 			m_ESPTypeList.Insert( rScript );
 		}
@@ -117,7 +120,7 @@ class JMESPForm extends JMFormBase
 	{
 		super.OnShow();
 
-		m_RangeSlider.SetCurrent( JMESPModule.Cast( module ).ESPRadius );
+		m_RangeSlider.SetCurrent( m_Module.ESPRadius );
 
 		UpdateRefreshRateSlider();
 
@@ -138,9 +141,9 @@ class JMESPForm extends JMFormBase
 
 	void UpdateRefreshRateSlider()
 	{
-		m_UpdateRate.SetCurrent( JMESPModule.Cast( module ).ESPUpdateTime );
+		m_UpdateRate.SetCurrent( m_Module.ESPUpdateTime );
 
-		if ( JMESPModule.Cast( module ).ESPIsUpdating  )
+		if ( m_Module.ESPIsUpdating  )
 		{
 			m_UpdateRate.Enable();
 		} else
@@ -166,17 +169,17 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( JMESPModule.Cast( module ).IsShowing )
+		if ( m_Module.IsShowing )
 		{			
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( JMESPModule.Cast( module ).UpdateESP );
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( m_Module.UpdateESP );
 
-			JMESPModule.Cast( module ).HideESP();
+			m_Module.HideESP();
 		} else
 		{
-			JMESPModule.Cast( module ).UpdateESP();
+			m_Module.UpdateESP();
 		}
 
-		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + JMESPModule.Cast( module ).IsShowing ) );
+		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + m_Module.IsShowing ) );
 
 		UpdateESPButtonName();
 
@@ -188,7 +191,7 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		JMESPModule.Cast( module ).HideESP();
+		m_Module.HideESP();
 	}
 
 	void Click_ChangeESPMode( UIEvent eid, ref UIActionBase action )
@@ -202,21 +205,21 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 
-		JMESPModule.Cast( module ).Filter = action.GetText();
+		m_Module.Filter = action.GetText();
 	}
 
 	void Change_UpdateRate( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 		
-		JMESPModule.Cast( module ).ESPUpdateTime = action.GetCurrent();
+		m_Module.ESPUpdateTime = action.GetCurrent();
 	}
 
 	void Change_Range( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE ) return;
 		
-		JMESPModule.Cast( module ).ESPRadius = action.GetCurrent();
+		m_Module.ESPRadius = action.GetCurrent();
 	}
 
 	void Click_UseClassName( UIEvent eid, ref UIActionBase action )
@@ -230,7 +233,7 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		JMESPModule.Cast( module ).EnableFullMap();
+		m_Module.EnableFullMap();
 		
 		// TODO: Send RPC back to disable this
 		// m_FullMapESP.Disable();
@@ -241,7 +244,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		JMESPModule.Cast( module ).ESPUpdateLoop( !JMESPModule.Cast( module ).ESPIsUpdating );
+		m_Module.ESPUpdateLoop( !m_Module.ESPIsUpdating );
 
 		UpdateRefreshRateSlider();
 	}
