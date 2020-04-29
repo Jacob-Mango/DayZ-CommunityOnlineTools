@@ -186,13 +186,13 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		Car car = SpawnVehicle( file, position );
-		if ( !car )
+		EntityAI ent = SpawnVehicle( file, position );
+		if ( !ent )
 		{
 			return;
 		}
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned vehicle " + car.GetDisplayName() + " (" + vehicle + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned vehicle " + ent.GetDisplayName() + " (" + vehicle + ") at " + position.ToString() );
 	}
 
 	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -221,25 +221,31 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		car.Fill( fluid, cap );
 	}
 
-	private Car SpawnVehicle( JMVehicleSpawnerSerialize file, vector position )
+	private EntityAI SpawnVehicle( JMVehicleSpawnerSerialize file, vector position )
 	{
 		if ( file == NULL )
 			return NULL;
 
 		array< string > attachments = file.Parts;
 
-		Car oCar = Car.Cast( GetGame().CreateObject( file.VehicleName, position ) );
+		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position + "0 0.5 0" ) );
+        if ( vehicle )
+        {
+            for ( int j = 0; j < attachments.Count(); j++ )
+            {
+                vehicle.GetInventory().CreateInInventory( attachments[j] );
+            }
 
-		for ( int j = 0; j < attachments.Count(); j++ )
-		{
-			oCar.GetInventory().CreateInInventory( attachments[j] );
-		}
-
-		FillCar( oCar, CarFluid.FUEL );
-		FillCar( oCar, CarFluid.OIL );
-		FillCar( oCar, CarFluid.BRAKE );
-		FillCar( oCar, CarFluid.COOLANT );
+            Car car;
+            if ( Class.CastTo( car, vehicle ) )
+            {
+                FillCar( car, CarFluid.FUEL );
+                FillCar( car, CarFluid.OIL );
+                FillCar( car, CarFluid.BRAKE );
+                FillCar( car, CarFluid.COOLANT );
+            }
+        }
 		
-		return oCar;
+		return vehicle;
 	}
 }
