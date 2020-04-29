@@ -11,12 +11,19 @@ class JMTeleportForm extends JMFormBase
 	protected UIActionText m_PositionZ;
 	protected UIActionButton m_Teleport;
 
+	private JMTeleportModule m_Module;
+
 	void JMTeleportForm()
 	{
 	}
 
 	void ~JMTeleportForm()
 	{
+	}
+
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
 	}
 
 	override void OnInit()
@@ -62,11 +69,7 @@ class JMTeleportForm extends JMFormBase
 
 	void Click_Teleport( UIEvent eid, ref UIActionBase action )
 	{
-		JMTeleportModule mod;
-		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-		{
-			mod.Location( GetCurrentLocation(), GetSelectedPlayers() );
-		}
+		m_Module.Location( GetCurrentLocation(), GetSelectedPlayers() );
 	}
 
 	void Type_UpdateList( UIEvent eid, ref UIActionBase action )
@@ -79,18 +82,12 @@ class JMTeleportForm extends JMFormBase
 
 	void UpdateList()
 	{
-		JMTeleportModule tm;
-		if ( !Class.CastTo( tm, GetModuleManager().GetModule( JMTeleportModule ) ) )
-		{
-			return;
-		}
-
 		m_LstPositionList.ClearItems();
 
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
 
-		array< ref JMTeleportLocation > locations = tm.GetLocations();
+		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
 			return;
 

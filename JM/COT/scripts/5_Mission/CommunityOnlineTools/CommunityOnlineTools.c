@@ -255,7 +255,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 		rpc.Write( player.Data );
-		rpc.Send( NULL, JMClientRPC.SetClient, true, player.GetPlayerIdentity() );
+		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
 
 	private void Server_SetClient( JMPlayerInstance player, PlayerIdentity identity )

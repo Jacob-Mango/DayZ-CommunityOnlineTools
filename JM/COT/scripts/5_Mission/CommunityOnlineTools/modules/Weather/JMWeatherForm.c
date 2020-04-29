@@ -64,6 +64,8 @@ class JMWeatherForm extends JMFormBase
 	private string m_SelectedPreset;
 	private string m_RemovePreset;
 
+	private JMWeatherModule m_Module;
+
 	void JMWeatherForm()
 	{
 		m_WidgetsPreset = new array< JMWeatherPresetWidget >;
@@ -71,6 +73,11 @@ class JMWeatherForm extends JMFormBase
 
 	void ~JMWeatherForm()
 	{
+	}
+
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
 	}
 
 	override void OnInit()
@@ -139,21 +146,17 @@ class JMWeatherForm extends JMFormBase
 			m_SelectedPreset = "";
 		}
 
-		JMWeatherModule.Cast( module ).RemovePreset( m_RemovePreset );
+		m_Module.RemovePreset( m_RemovePreset );
 
 		UpdateStates();
 	}
 
 	void UpdatePresetList()
 	{
-		JMWeatherModule mod;
-		if ( !Class.CastTo( mod, module ) )
+		if ( !m_Module.HasSettings() )
 			return;
 
-		if ( !mod.HasSettings() )
-			return;
-
-		array< ref JMWeatherPreset > presets = mod.GetPresets();
+		array< ref JMWeatherPreset > presets = m_Module.GetPresets();
 
 		for ( int i = 0; i < m_WidgetsPreset.Count(); i++ )
 		{
@@ -329,7 +332,7 @@ class JMWeatherForm extends JMFormBase
 			{
 				m_ButtonPresetUpdate.SetButton( "Update Preset" );
 
-				array< ref JMWeatherPreset > presets = JMWeatherModule.Cast( module ).GetPresets();
+				array< ref JMWeatherPreset > presets = m_Module.GetPresets();
 
 				for ( int i = 0; i < presets.Count(); i++ )
 				{
@@ -597,7 +600,7 @@ class JMWeatherForm extends JMFormBase
 			}
 		} else
 		{
-			array< ref JMWeatherPreset > presets = JMWeatherModule.Cast( module ).GetPresets();
+			array< ref JMWeatherPreset > presets = m_Module.GetPresets();
 
 			for ( int i = 0; i < presets.Count(); i++ )
 			{
@@ -616,14 +619,14 @@ class JMWeatherForm extends JMFormBase
 
 		if ( m_IsCreatingPreset )
 		{
-			JMWeatherModule.Cast( module ).CreatePreset( preset );
+			m_Module.CreatePreset( preset );
 
 			m_IsCreatingPreset = false;
 
 			m_SelectedPreset = preset.Permission;
 		} else
 		{
-			JMWeatherModule.Cast( module ).UpdatePreset( preset );
+			m_Module.UpdatePreset( preset );
 		}
 
 		UpdateStates();
@@ -637,7 +640,7 @@ class JMWeatherForm extends JMFormBase
 		if ( !m_PresetsShown )
 			return;
 
-		JMWeatherModule.Cast( module ).UsePreset( m_SelectedPreset );
+		m_Module.UsePreset( m_SelectedPreset );
 	}
 
 	void OnClick_PresetRemove( UIEvent eid, ref UIActionBase action )
@@ -711,7 +714,7 @@ class JMWeatherForm extends JMFormBase
 		int hour = m_EditTextDateHour.GetText().ToInt();
 		int minute = m_EditTextDateMinute.GetText().ToInt();
 
-		JMWeatherModule.Cast( module ).SetDate( year, month, day, hour, minute );
+		m_Module.SetDate( year, month, day, hour, minute );
 	}
 
 	private void InitStormWidgets( Widget actionsParent )
@@ -770,7 +773,7 @@ class JMWeatherForm extends JMFormBase
 		float threshold = m_SliderStormThreshold.GetCurrent() * 0.01;
 		float timeout = m_EditTextStormTimeout.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetStorm( density, threshold, timeout );
+		m_Module.SetStorm( density, threshold, timeout );
 	}
 
 	private void InitFogWidgets( Widget actionsParent )
@@ -825,7 +828,7 @@ class JMWeatherForm extends JMFormBase
 		float time = m_EditFogInterpTime.GetText().ToFloat();
 		float minDuration = m_EditFogMinDuration.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetFog( forecast, time, minDuration );
+		m_Module.SetFog( forecast, time, minDuration );
 	}
 
 	private void InitRainWidgets( Widget actionsParent )
@@ -880,7 +883,7 @@ class JMWeatherForm extends JMFormBase
 		float time = m_EditRainInterpTime.GetText().ToFloat();
 		float minDuration = m_EditRainMinDuration.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetRain( forecast, time, minDuration );
+		m_Module.SetRain( forecast, time, minDuration );
 	}
 
 	private void InitRainThresholdWidgets( Widget actionsParent )
@@ -939,7 +942,7 @@ class JMWeatherForm extends JMFormBase
 		float max = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		float transition = m_EditRainMinDuration.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetRainThresholds( min, max, transition );
+		m_Module.SetRainThresholds( min, max, transition );
 	}
 
 	private void InitOvercastWidgets( Widget actionsParent )
@@ -994,7 +997,7 @@ class JMWeatherForm extends JMFormBase
 		float time = m_EditOvercastInterpTime.GetText().ToFloat();
 		float minDuration = m_EditOvercastMinDuration.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetOvercast( forecast, time, minDuration );
+		m_Module.SetOvercast( forecast, time, minDuration );
 	}
 
 	private void InitWindDirectionSlider( Widget parent, out UIActionSlider action, string label )
@@ -1067,7 +1070,7 @@ class JMWeatherForm extends JMFormBase
 		float speed = m_EditWindSpeed.GetText().ToFloat();
 		float maxSpeed = m_EditWindMaxSpeed.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetWind( dir, speed, maxSpeed );
+		m_Module.SetWind( dir, speed, maxSpeed );
 	}
 	
 	private void InitWindFuncWidgets( Widget actionsParent )
@@ -1120,6 +1123,6 @@ class JMWeatherForm extends JMFormBase
 		float max = m_EditWindFuncMax.GetText().ToFloat();
 		float speed = m_EditWindFuncSpeed.GetText().ToFloat();
 
-		JMWeatherModule.Cast( module ).SetWindFunctionParams( min, max, speed );
+		m_Module.SetWindFunctionParams( min, max, speed );
 	}
 }

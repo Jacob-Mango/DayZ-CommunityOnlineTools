@@ -1,8 +1,10 @@
 class JMVehicleSpawnerForm extends JMFormBase
 {
-	protected Widget m_ActionsWrapper;
+	private Widget m_ActionsWrapper;
 
-	protected ref array< ref UIActionButton > m_VehicleButtons;
+	private ref array< ref UIActionButton > m_VehicleButtons;
+
+	private JMVehicleSpawnerModule m_Module;
 
 	void JMVehicleSpawnerForm()
 	{
@@ -13,6 +15,11 @@ class JMVehicleSpawnerForm extends JMFormBase
 	{
 	}
 
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
+	}
+
 	override void OnInit()
 	{
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
@@ -20,16 +27,20 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	override void OnShow()
 	{
-		JMVehicleSpawnerModule gm = JMVehicleSpawnerModule.Cast( module );
+		array< string > vehicles = new array< string >;
+		vehicles.Copy( m_Module.GetVehicles() );
 
-		if ( gm == NULL )
-			return;
+		JMStatics.SortStringArray( vehicles );
 
-		for ( int i = 0; i < gm.GetVehicles().Count(); i++ )
+		for ( int i = 0; i < vehicles.Count(); i++ )
 		{
-			string name = gm.GetVehicles()[i];
+			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+			
+			string name = vehicles[i];
 
-			UIActionButton button = UIActionManager.CreateButton( m_ActionsWrapper, "Spawn " + name + " at Cursor", this, "SpawnVehicle" );
+			UIActionManager.CreateText( wrapper, name );
+
+			UIActionButton button = UIActionManager.CreateButton( wrapper, "Cursor", this, "SpawnVehicle" );
 			button.SetData( new JMVehicleSpawnerButtonData( name ) );
 
 			m_VehicleButtons.Insert( button );
@@ -38,12 +49,12 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	override void OnHide() 
 	{
-		for ( int j = 0; j < m_VehicleButtons.Count(); j++ )
+		Widget child = m_ActionsWrapper.GetChildren();
+		while ( child != NULL )
 		{
-			if ( m_VehicleButtons[j].GetLayoutRoot() )
-			{
-				m_ActionsWrapper.RemoveChild( m_VehicleButtons[j].GetLayoutRoot() );
-			}
+			child.Unlink();
+
+			child = child.GetSibling();
 		}
 
 		m_VehicleButtons.Clear();
@@ -55,10 +66,6 @@ class JMVehicleSpawnerForm extends JMFormBase
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		JMVehicleSpawnerModule mod;
-		if ( !Class.CastTo( mod, module ) )
-			return;
-
-		mod.SpawnPosition( data.ClassName, GetCursorPos() );
+		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
 }
