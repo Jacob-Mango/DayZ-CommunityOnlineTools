@@ -29,23 +29,34 @@ class JMPlayerForm extends JMFormBase
 	private UIActionText m_Name;
 	private UIActionText m_Steam64ID;
 
-	private UIActionEditableText m_PositionX;
-	private UIActionEditableText m_PositionY;
-	private UIActionEditableText m_PositionZ;
-	private UIActionButton m_Position;
-
+	private UIActionButton m_RefreshStats;
+	private UIActionButton m_ApplyStats;
 	private UIActionEditableText m_Health;
+	private bool m_HealthUpdated;
 	private UIActionEditableText m_Blood;
+	private bool m_BloodUpdated;
 	private UIActionEditableText m_Energy;
+	private bool m_EnergyUpdated;
 	private UIActionEditableText m_Water;
+	private bool m_WaterUpdated;
 	private UIActionEditableText m_Shock;
+	private bool m_ShockUpdated;
 	private UIActionEditableText m_Stamina;
+	private bool m_StaminaUpdated;
 	private UIActionCheckbox m_BloodyHands;
+	private bool m_BloodyHandsUpdated;
 	private UIActionCheckbox m_GodMode;
+	private bool m_GodModeUpdated;
 
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
 	private UIActionButton m_TeleportPrevious;
+
+	private UIActionEditableText m_PositionX;
+	private UIActionEditableText m_PositionY;
+	private UIActionEditableText m_PositionZ;
+	private UIActionButton m_PositionRefresh;
+	private UIActionButton m_Position;
 
 	private UIActionButton m_ModifyPermissions;
 	private UIActionButton m_SavePermissions;
@@ -59,6 +70,8 @@ class JMPlayerForm extends JMFormBase
 	private UIActionButton m_StripPlayer;
 
 	private int m_NumPlayerCount;
+
+	private JMPlayerInstance m_SelectedInstance;
 
 	private JMPlayerModule m_Module;
 
@@ -221,9 +234,9 @@ class JMPlayerForm extends JMFormBase
 
 	private Widget InitActionWidgetsPosition( Widget actionsParent )
 	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 5, 1 );
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
 
-		UIActionManager.CreateText( parent, "Position: ", "The world position of the player" );
+		UIActionManager.CreateText( parent, "Teleporting: ", "" );
 
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
@@ -236,11 +249,9 @@ class JMPlayerForm extends JMFormBase
 		m_PositionY.SetOnlyNumbers( true );
 		m_PositionZ.SetOnlyNumbers( true );
 		
-		m_Position = UIActionManager.CreateButton( positionActions, "Set Position", this, "Click_SetPosition" );
-
-		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
-
-		UIActionManager.CreateText( parent, "Teleporting: ", "" );
+		Widget positionActionsBut = UIActionManager.CreateGridSpacer( positionActions, 1, 2 );
+		m_PositionRefresh = UIActionManager.CreateButton( positionActionsBut, "Refresh Coordinates", this, "Click_RefreshTeleports" );
+		m_Position = UIActionManager.CreateButton( positionActionsBut, "Telport to Coordinates", this, "Click_SetPosition" );
 
 		Widget teleportActions = UIActionManager.CreateGridSpacer( parent, 1, 3 );
 		m_TeleportToMe = UIActionManager.CreateButton( teleportActions, "Teleport To Me", this, "Click_TeleportToMe" );
@@ -254,21 +265,25 @@ class JMPlayerForm extends JMFormBase
 
 	private Widget InitActionWidgetsStats( Widget actionsParent )
 	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
 
-		UIActionManager.CreateText( parent, "Player Variables: ", "" );
+		Widget header = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+		UIActionManager.CreateText( header, "Player Variables: ", "" );
+		m_RefreshStats = UIActionManager.CreateButton( header, "Refresh", this, "Click_RefreshStats" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 2 );
 
-		m_Health = UIActionManager.CreateEditableText( actions, "Health: ", this, "Click_SetHealth", "", "Set" );
-		m_Shock = UIActionManager.CreateEditableText( actions, "Shock: ", this, "Click_SetShock", "", "Set" );
-		m_Blood = UIActionManager.CreateEditableText( actions, "Blood: ", this, "Click_SetBlood", "", "Set" );
-		m_Energy = UIActionManager.CreateEditableText( actions, "Food: ", this, "Click_SetEnergy", "", "Set" );
-		m_Water = UIActionManager.CreateEditableText( actions, "Water: ", this, "Click_SetWater", "", "Set" );
-		m_Stamina = UIActionManager.CreateEditableText( actions, "Stamina: ", this, "Click_SetStamina", "", "Set" );
+		m_Health = UIActionManager.CreateEditableText( actions, "Health: ", this, "Click_SetHealth", "", "" );
+		m_Shock = UIActionManager.CreateEditableText( actions, "Shock: ", this, "Click_SetShock", "", "" );
+		m_Blood = UIActionManager.CreateEditableText( actions, "Blood: ", this, "Click_SetBlood", "", "" );
+		m_Energy = UIActionManager.CreateEditableText( actions, "Food: ", this, "Click_SetEnergy", "", "" );
+		m_Water = UIActionManager.CreateEditableText( actions, "Water: ", this, "Click_SetWater", "", "" );
+		m_Stamina = UIActionManager.CreateEditableText( actions, "Stamina: ", this, "Click_SetStamina", "", "" );
 
 		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
 		m_GodMode = UIActionManager.CreateCheckbox( actions, "Godmode: ", this, "Click_SetGodMode", false );
+
+		m_ApplyStats = UIActionManager.CreateButton( parent, "Apply", this, "Click_ApplyStats" );
 
 		m_Health.SetOnlyNumbers( true );
 		m_Shock.SetOnlyNumbers( true );
@@ -520,19 +535,6 @@ class JMPlayerForm extends JMFormBase
 		m_Module.SetRoles( roles, GetSelectedPlayers() );
 	}
 
-	void Click_SetPosition( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		vector pos = "0 0 0";
-		pos[0] = m_PositionX.GetText().ToFloat();
-		pos[1] = m_PositionY.GetText().ToFloat();
-		pos[2] = m_PositionZ.GetText().ToFloat();
-
-		m_Module.TeleportTo( pos, GetSelectedPlayers() );
-	}
-
 	void Click_StripPlayer( UIEvent eid, ref UIActionBase action )
 	{
 		if ( GetSelectedPlayers().Count() != 1 )
@@ -602,7 +604,20 @@ class JMPlayerForm extends JMFormBase
 
 		m_Module.RepairTransport( GetSelectedPlayers() );
 	}
-	
+
+	void Click_SetPosition( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		vector pos = "0 0 0";
+		pos[0] = m_PositionX.GetText().ToFloat();
+		pos[1] = m_PositionY.GetText().ToFloat();
+		pos[2] = m_PositionZ.GetText().ToFloat();
+
+		m_Module.TeleportTo( pos, GetSelectedPlayers() );
+	}
+
 	void Click_TeleportToMe( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -643,20 +658,133 @@ class JMPlayerForm extends JMFormBase
 		m_Module.TeleportToPrevious( GetSelectedPlayers() );
 	}
 
-	void Click_SetHealth( UIEvent eid, ref UIActionBase action )
+	void Click_RefreshStats( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetHealth( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		RefreshStats();
+	}
+	
+	void Click_RefreshTeleports( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+			
+		RefreshTeleports();
 	}
 
-	void Click_SetShock( UIEvent eid, ref UIActionBase action )
+	void RefreshStats()
+	{
+		if ( !m_SelectedInstance )
+			return;
+
+		JMPlayerInformation data = m_SelectedInstance.Data;
+		if ( !data )
+			return;
+
+		m_HealthUpdated = false;
+		m_BloodUpdated = false;
+		m_EnergyUpdated = false;
+		m_WaterUpdated = false;
+		m_ShockUpdated = false;
+		m_StaminaUpdated = false;
+		m_BloodyHandsUpdated = false;
+		m_GodModeUpdated = false;
+		
+		m_Health.SetText( data.FHealth.ToString() );
+		m_Blood.SetText( data.FBlood.ToString() );
+		m_Energy.SetText( data.FEnergy.ToString() );
+		m_Water.SetText( data.FWater.ToString() );
+		m_Shock.SetText( data.FShock.ToString() );
+		m_Stamina.SetText( data.FStamina.ToString() );
+
+		m_BloodyHands.SetChecked( data.BBloodyHands );
+		m_GodMode.SetChecked( data.BGodMode );
+	}
+
+	void RefreshTeleports()
+	{
+		if ( !m_SelectedInstance )
+			return;
+
+		JMPlayerInformation data = m_SelectedInstance.Data;
+		if ( !data )
+			return;
+
+		m_PositionX.SetText( data.VPosition[0].ToString() );
+		m_PositionY.SetText( data.VPosition[1].ToString() );
+		m_PositionZ.SetText( data.VPosition[2].ToString() );
+	}
+
+	void Click_ApplyStats( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetShock( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		if ( m_HealthUpdated )
+		{
+			m_HealthUpdated = false;
+
+			m_Module.SetHealth( ToFloat( m_Health.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_BloodUpdated )
+		{
+			m_BloodUpdated = false;
+
+			m_Module.SetBlood( ToFloat( m_Blood.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_EnergyUpdated )
+		{
+			m_EnergyUpdated = false;
+
+			m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_WaterUpdated )
+		{
+			m_WaterUpdated = false;
+
+			m_Module.SetWater( ToFloat( m_Water.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_ShockUpdated )
+		{
+			m_ShockUpdated = false;
+
+			m_Module.SetShock( ToFloat( m_Shock.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_StaminaUpdated )
+		{
+			m_StaminaUpdated = false;
+
+			m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), GetSelectedPlayers() );
+		}
+
+		if ( m_BloodyHandsUpdated )
+		{
+			m_BloodyHandsUpdated = false;
+
+			m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), GetSelectedPlayers() );
+		}
+
+		if ( m_GodModeUpdated )
+		{
+			m_GodModeUpdated = false;
+
+			m_Module.SetGodMode( m_GodMode.IsChecked(), GetSelectedPlayers() );
+		}
+	}
+
+	void Click_SetHealth( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_HealthUpdated = true;
 	}
 
 	void Click_SetBlood( UIEvent eid, ref UIActionBase action )
@@ -664,7 +792,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetBlood( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		m_BloodUpdated = false;
 	}
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionBase action )
@@ -672,7 +800,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetEnergy( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		m_EnergyUpdated = false;
 	}
 
 	void Click_SetWater( UIEvent eid, ref UIActionBase action )
@@ -680,7 +808,15 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetWater( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		m_WaterUpdated = false;
+	}
+
+	void Click_SetShock( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_ShockUpdated = false;
 	}
 
 	void Click_SetStamina( UIEvent eid, ref UIActionBase action )
@@ -688,7 +824,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetStamina( ToFloat( action.GetText() ), GetSelectedPlayers() );
+		m_StaminaUpdated = false;
 	}
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
@@ -696,7 +832,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetBloodyHands( action.IsChecked(), GetSelectedPlayers() );
+		m_BloodyHandsUpdated = true;
 	}
 
 	void Click_SetGodMode( UIEvent eid, ref UIActionBase action )
@@ -704,7 +840,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.SetGodMode( action.IsChecked(), GetSelectedPlayers() );
+		m_GodModeUpdated = true;
 	}
 
 	void HideUI()
@@ -712,6 +848,8 @@ class JMPlayerForm extends JMFormBase
 		ShowIdentityWidgets();
 
 		m_RightPanelDisable.Show( true );
+
+		m_SelectedInstance = NULL;
 	}
 
 	void ShowUI()
@@ -733,6 +871,12 @@ class JMPlayerForm extends JMFormBase
 		{
 			HideUI();
 			return;
+		}
+
+		if ( IsMissionOffline() )
+		{
+			instance.UpdatePlayerData();
+			instance.Serialize();
 		}
 
 		JMPlayerInformation data = instance.Data;
@@ -769,19 +913,14 @@ class JMPlayerForm extends JMFormBase
 			m_SpectatePlayer.Disable();
 		}
 
-		m_PositionX.SetText( data.VPosition[0].ToString() );
-		m_PositionY.SetText( data.VPosition[1].ToString() );
-		m_PositionZ.SetText( data.VPosition[2].ToString() );
+		if ( m_SelectedInstance != instance )
+		{
+			m_SelectedInstance = instance;
 
-		m_Health.SetText( data.FHealth.ToString() );
-		m_Blood.SetText( data.FBlood.ToString() );
-		m_Energy.SetText( data.FEnergy.ToString() );
-		m_Water.SetText( data.FWater.ToString() );
-		m_Shock.SetText( data.FShock.ToString() );
-		m_Stamina.SetText( data.FStamina.ToString() );
+			RefreshStats();
 
-		m_BloodyHands.SetChecked( data.BBloodyHands );
-		m_GodMode.SetChecked( data.BGodMode );
+			RefreshTeleports();
+		}
 	}
 
 	override void OnShow()
