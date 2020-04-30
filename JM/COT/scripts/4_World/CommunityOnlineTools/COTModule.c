@@ -214,7 +214,7 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	private void InvokeOnConnect( PlayerBase player, PlayerIdentity identity )
+	override bool OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
@@ -227,22 +227,6 @@ class COTModule : JMModuleBase
 			instance.PlayerObject = player;
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
 		}
-	}
-	
-	/**
-	 * See: LogoutCancelEventTypeID
-	 */
-	bool OnClientLogoutCancelled( PlayerBase player, PlayerIdentity identity )
-	{
-		return false;
-	}
-
-	/**
-	 * See: ClientNewEventTypeID
-	 */
-	bool OnClientNew( out PlayerBase player, PlayerIdentity identity, vector pos, ParamsReadContext ctx )
-	{
-		InvokeOnConnect( player, identity );
 
 		return false;
 	}
@@ -258,24 +242,6 @@ class COTModule : JMModuleBase
 			instance.PlayerObject = player;
 		}
 
-		return false;
-	}
-
-	/**
-	 * See: ClientReadyEventTypeID
-	 */
-	bool OnClientReady( PlayerBase player, PlayerIdentity identity )
-	{
-		InvokeOnConnect( player, identity );
-
-		return false;
-	}
-
-	/**
-	 * See: ClientPrepareEventTypeID
-	 */
-	bool OnClientPrepare( PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout )
-	{
 		return false;
 	}
 
