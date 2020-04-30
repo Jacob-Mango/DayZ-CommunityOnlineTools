@@ -173,8 +173,8 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnPosition( string vehicle, vector position, PlayerIdentity ident )
 	{
-		JMVehicleSpawnerSerialize file;
-		if ( !settings.Vehicles.Find( vehicle, file ) )
+		JMVehicleSpawnerSerialize file = settings.Vehicles.Get( vehicle );
+		if ( !file )
 		{
 			return;
 		}

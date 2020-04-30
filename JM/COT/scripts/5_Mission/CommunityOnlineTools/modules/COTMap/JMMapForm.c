@@ -35,9 +35,15 @@ class JMMapForm extends JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Map.Players", NULL ) )
 			return;
 
-		foreach( JMPlayerInstance player : GetPermissionsManager().GetPlayers() ) 
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+
+		for ( int i = 0; i < players.Count(); ++i )
 		{
-			map_widget.AddUserMark( player.Data.VPosition, player.Data.SName, ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
+			JMPlayerInformation data = players[i].Data;
+			if ( !data )
+				continue;
+
+			map_widget.AddUserMark( data.VPosition, data.SName, ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
 		}
 
 		GetCommunityOnlineTools().RefreshClients();

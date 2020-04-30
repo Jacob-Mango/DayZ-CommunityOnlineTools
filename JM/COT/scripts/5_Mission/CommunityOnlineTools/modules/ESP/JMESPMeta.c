@@ -3,6 +3,6 @@ class JMESPMeta
 	string name;
 	JMESPViewType type;
 	int colour;
-	ref JMPlayerInstance player;
+	JMPlayerInstance player;
 	Object target;
 }
