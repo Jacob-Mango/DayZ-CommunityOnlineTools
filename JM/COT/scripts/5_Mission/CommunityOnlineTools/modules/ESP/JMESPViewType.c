@@ -51,6 +51,10 @@ class JMESPViewTypePlayer: JMESPViewType
 		if ( man.GetIdentity() )
 		{
 			meta.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
+		} 
+
+		if ( meta.player )
+		{
 			meta.name = meta.player.GetName();
 		} else
 		{

@@ -174,8 +174,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnPosition( string itemSet, vector position, PlayerIdentity ident )
 	{
 		// Print("Test 1 " + itemSet);
-		JMItemSetSerialize file;
-		if ( !settings.ItemSets.Find( itemSet, file ) )
+		JMItemSetSerialize file = settings.ItemSets.Get( itemSet );
+		if ( !file )
 		{
 			return;
 		}
@@ -232,8 +232,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnPlayers( string itemSet, array< string > guids, PlayerIdentity ident )
 	{
-		JMItemSetSerialize file;
-		if ( !settings.ItemSets.Find( itemSet, file ) )
+		JMItemSetSerialize file = settings.ItemSets.Get( itemSet );
+		if ( !file )
 		{
 			return;
 		}

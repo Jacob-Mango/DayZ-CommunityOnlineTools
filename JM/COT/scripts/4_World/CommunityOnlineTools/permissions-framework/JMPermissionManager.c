@@ -75,11 +75,10 @@ class JMPermissionManager
 
 	bool HasRolePermission( string name, string permission, out JMPermissionType permTypeHasRolePermission = JMPermissionType.DISALLOW )
 	{
-		JMRole role;
-		if ( Roles.Find( name, role ) )
-		{
+		JMRole role = Roles.Get( name );
+		if ( role )
 			return role.HasPermission( permission, permTypeHasRolePermission );
-		}
+
 		return false;
 	}
 
@@ -126,11 +125,9 @@ class JMPermissionManager
 
 		for ( int i = 0; i < guidsGetPlayers.Count(); i++ )
 		{
-			JMPlayerInstance instance;
-			if ( Players.Find( guidsGetPlayers[i], instance ) )
-			{
+			JMPlayerInstance instance = Players.Get( guidsGetPlayers[i] );
+			if ( instance )
 				players.Insert( instance );
-			}
 		}
 
 		return players;
@@ -194,7 +191,9 @@ class JMPermissionManager
 		}
 
 		// Print( "JMPermissionManager::HasPermission - identity::GetId=" + identity.GetId() );
-		if ( Players.Find( identity.GetId(), instance ) )
+
+		instance = Players.Get( identity.GetId() );
+		if ( instance )
 		{
 			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			return instance.HasPermission( permission );
@@ -220,7 +219,8 @@ class JMPermissionManager
 			guid = ident.GetId();
 		}
 
-		if ( Players.Find( guid, inst ) )
+		inst = Players.Get( guid );
+		if ( inst )
 		{
 			return false;
 		}
@@ -241,7 +241,8 @@ class JMPermissionManager
 
 	bool OnClientDisconnected( string guid, out JMPlayerInstance inst )
 	{
-		if ( Players.Find( guid, inst ) )
+		inst = Players.Get( guid );
+		if ( inst )
 		{
 			inst.Save();
 
@@ -335,7 +336,9 @@ class JMPermissionManager
 
 	bool LoadRole( string name, out JMRole role )
 	{
-		if ( !Roles.Find( name, role ) )
+		role = Roles.Get( name );
+
+		if ( !role )
 		{
 			role = new JMRole( name );
 			Roles.Insert( name, role );
