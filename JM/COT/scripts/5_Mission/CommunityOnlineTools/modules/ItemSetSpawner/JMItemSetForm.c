@@ -34,9 +34,12 @@ class JMItemSetForm extends JMFormBase
 
 		for ( int j = 0; j < items.Count(); j++ )
 		{
-			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
-
 			string name = items[j];
+			
+			if ( name == "" )
+				continue;
+
+			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
 
 			UIActionManager.CreateText( wrapper, name );
 			

@@ -26,7 +26,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Entity.View", NULL );
+		return GetPermissionsManager().HasPermission( "Entity.View" );
 	}
 
 	override string GetInputToggle()
@@ -59,7 +59,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", NULL ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -79,7 +79,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", NULL ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -99,7 +99,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", NULL ) )
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )

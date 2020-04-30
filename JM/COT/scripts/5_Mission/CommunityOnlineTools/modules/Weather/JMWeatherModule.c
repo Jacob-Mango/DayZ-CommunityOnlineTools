@@ -54,7 +54,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Weather.View", NULL );
+		return GetPermissionsManager().HasPermission( "Weather.View" );
 	}
 
 	override string GetInputToggle()

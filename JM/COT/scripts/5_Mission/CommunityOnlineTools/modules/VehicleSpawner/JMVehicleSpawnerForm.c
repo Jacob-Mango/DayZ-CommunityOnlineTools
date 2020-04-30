@@ -26,7 +26,8 @@ class JMVehicleSpawnerForm extends JMFormBase
 	}
 
 	override void OnShow()
-	{		array< string > vehicles = new array< string >;
+	{
+		array< string > vehicles = new array< string >;
 		array< string > vehiclesDisplay = new array< string >;
 		vehicles.Copy( m_Module.GetVehicles() );
 
@@ -49,6 +50,9 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 		for ( i = 0; i < vehicles.Count(); i++ )
 		{
+			if ( vehicles[i] == "" )
+				continue;
+				
 			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
 			
 			UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
