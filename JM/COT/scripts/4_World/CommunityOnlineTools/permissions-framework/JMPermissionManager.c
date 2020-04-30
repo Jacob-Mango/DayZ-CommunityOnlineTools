@@ -156,14 +156,14 @@ class JMPermissionManager
 		{
 			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );
 
-			JMPlayerInstance instance = GetClientPlayer();
-
 			if ( IsMissionHost() )
 			{
 				// Print( "JMPermissionManager::HasPermission - IsMissionHost" );
 				return true;
 			}
 			
+			JMPlayerInstance instance = GetClientPlayer();
+
 			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			if ( instance == NULL )
 			{
@@ -177,8 +177,13 @@ class JMPermissionManager
 		return false;
 	}
 
-	bool HasPermission( string permission, notnull PlayerIdentity ihp )
+	bool HasPermission( string permission, PlayerIdentity ihp )
 	{
+		if ( IsMissionOffline() )
+		{
+			return true;
+		}
+
 		JMPlayerInstance instance;
 		return HasPermission( permission, ihp, instance );
 	}

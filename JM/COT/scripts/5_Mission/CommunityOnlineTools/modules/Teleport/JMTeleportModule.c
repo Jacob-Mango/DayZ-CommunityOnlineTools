@@ -275,9 +275,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			vector pos;
 			if ( !ctx.Read( pos ) )
-			{
 				return;
-			}
 
 			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 
