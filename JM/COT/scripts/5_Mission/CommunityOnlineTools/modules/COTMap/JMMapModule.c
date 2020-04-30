@@ -14,7 +14,7 @@ class JMMapModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Map.View", NULL );
+		return GetPermissionsManager().HasPermission( "Map.View" );
 	}
 
 	override string GetInputToggle()

@@ -127,7 +127,7 @@ class CommunityOnlineToolsBase
 				return;
 			}
 
-			if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
+			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
 			{
 				return;
 			}
@@ -153,7 +153,7 @@ class CommunityOnlineToolsBase
 				return;
 			}
 
-			if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
+			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
 			{
 				return;
 			}

@@ -150,18 +150,43 @@ class JMPermissionManager
 		return RootPermission;
 	}
 
-	bool HasPermission( string permission, PlayerIdentity identityHasPermissions )
+	bool HasPermission( string permission )
 	{
-		JMPlayerInstance instance;
-		return HasPermission( permission, identityHasPermissions, instance );
+		if ( IsMissionClient() ) 
+		{
+			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );
+
+			JMPlayerInstance instance = GetClientPlayer();
+
+			if ( IsMissionHost() )
+			{
+				// Print( "JMPermissionManager::HasPermission - IsMissionHost" );
+				return true;
+			}
+			
+			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
+			if ( instance == NULL )
+			{
+				// Print( "Client Player is NULL!" );
+				return false;
+			}
+
+			return instance.HasPermission( permission );
+		}
+
+		return false;
 	}
 
-	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
+	bool HasPermission( string permission, notnull PlayerIdentity ihp )
+	{
+		JMPlayerInstance instance;
+		return HasPermission( permission, ihp, instance );
+	}
+
+	bool HasPermission( string permission, notnull PlayerIdentity identity, out JMPlayerInstance instance )
 	{
 		// Print( "JMPermissionManager::HasPermission - Start" );
 		
-		PMPrint();
-
 		if ( IsMissionClient() ) 
 		{
 			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );

@@ -50,7 +50,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		{
 			JMRenderableModuleBase module = modules.Get( i );
 
-			if ( modules[i].HasButton() )
+			if ( modules[i] && modules[i].HasButton() )
 			{
 				modules[i].InitButton( GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget( "Buttons" ) ) );
 			}

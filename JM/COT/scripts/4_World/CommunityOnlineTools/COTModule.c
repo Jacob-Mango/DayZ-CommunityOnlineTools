@@ -200,7 +200,7 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu == NULL )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "COT.View", NULL ) )
+		if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleActive();

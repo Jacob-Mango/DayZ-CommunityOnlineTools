@@ -19,7 +19,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Items.View", NULL );
+		return GetPermissionsManager().HasPermission( "Items.View" );
 	}
 
 	override string GetInputToggle()

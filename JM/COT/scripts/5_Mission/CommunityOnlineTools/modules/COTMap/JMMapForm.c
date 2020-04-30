@@ -32,7 +32,7 @@ class JMMapForm extends JMFormBase
 	{
 		map_widget.ClearUserMarks();
 
-		if ( !GetPermissionsManager().HasPermission( "Map.Players", NULL ) )
+		if ( !GetPermissionsManager().HasPermission( "Map.Players" ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
