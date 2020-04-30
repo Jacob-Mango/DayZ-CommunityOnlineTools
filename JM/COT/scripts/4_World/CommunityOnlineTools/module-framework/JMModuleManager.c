@@ -14,9 +14,9 @@ modded class JMModuleManager
 		JMScriptInvokers.COT_ON_OPEN.Remove( SetPreventModuleBindings );
 	}
 	
-	protected override void RegisterModule( ref JMModuleBase module )
+	protected override void InitModule( ref JMModuleBase module )
 	{
-		super.RegisterModule( module );
+		super.InitModule( module );
 		
 		if ( module.IsInherited( JMRenderableModuleBase ) )
 		{
