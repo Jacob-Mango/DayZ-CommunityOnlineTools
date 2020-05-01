@@ -214,7 +214,7 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	override bool OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
+	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
@@ -227,77 +227,65 @@ class COTModule : JMModuleBase
 			instance.PlayerObject = player;
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
 		}
-
-		return false;
 	}
 
 	/**
 	 * See: ClientRespawnEventTypeID
 	 */
-	bool OnClientRespawn( PlayerBase player, PlayerIdentity identity )
+	void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
-
-		return false;
 	}
 
 	/**
 	 * See: ClientReconnectEventTypeID
 	 */
-	bool OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
-
-		return false;
 	}
 
 	/**
 	 * See: ClientDisconnectedEventTypeID
 	 */
-	bool OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
-
-		return false;
 	}
 
 	/**
 	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
 	 */
-	bool OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
+	void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
 	{
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
 		{
 			GetCommunityOnlineToolsBase().RemoveClient( uid );
 		}
-
-		return false;
 	}
 
 	/**
 	 * See: LogoutCancelEventTypeID
 	 */
-	bool OnClientLogoutCancelled( PlayerBase player )
+	void OnClientLogoutCancelled( PlayerBase player )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
-
-		return false;
 	}
 }
