@@ -88,7 +88,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",	true 	) );
+		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
 		RegisterBinding( new JMModuleBinding( "Input_WorldToModelLookAt",	"UATeleportModuleWorldToModelLookAt",	true 	) );
 	}
 

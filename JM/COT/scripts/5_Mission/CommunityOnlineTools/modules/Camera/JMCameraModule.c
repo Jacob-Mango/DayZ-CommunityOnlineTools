@@ -204,14 +204,16 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Enter( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
-			return;
-
 		if ( IsMissionHost() )
 		{
+			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+				return;
+
 			Server_Enter( senderRPC, target );
 		} else
 		{
+			// RPC was sent from the server, permission would've been verified there.
+
 			Client_Enter();
 		}
 	}
@@ -267,14 +269,16 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Leave( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
-			return;
-
 		if ( IsMissionHost() )
 		{
+			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+				return;
+
 			Server_Leave( senderRPC, target );
 		} else
 		{
+			// RPC was sent from the server, permission would've been verified there.
+
 			Client_Leave();
 		}
 	}

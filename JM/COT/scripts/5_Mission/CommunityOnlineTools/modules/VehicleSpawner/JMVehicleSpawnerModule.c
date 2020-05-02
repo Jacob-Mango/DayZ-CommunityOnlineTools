@@ -157,21 +157,24 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnPosition( string vehicle, vector position )
+	void SpawnPosition( string vehicle, vector position, vector direction = "0 0 1" )
 	{
+		position = position + "0 2 0";
+		
 		if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( vehicle );
 			rpc.Write( position );
+			rpc.Write( direction );
 			rpc.Send( NULL, JMVehicleSpawnerModuleRPC.SpawnPosition, true, NULL );
 		} else
 		{
-			Server_SpawnPosition( vehicle, position, NULL );
+			Server_SpawnPosition( vehicle, position, direction, NULL );
 		}
 	}
 
-	private void Server_SpawnPosition( string vehicle, vector position, PlayerIdentity ident )
+	private void Server_SpawnPosition( string vehicle, vector position, vector direction, PlayerIdentity ident )
 	{
 		JMVehicleSpawnerSerialize file = settings.Vehicles.Get( vehicle );
 		if ( !file )
@@ -186,7 +189,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		EntityAI ent = SpawnVehicle( file, position );
+		EntityAI ent = SpawnVehicle( file, position, direction );
 		if ( !ent )
 		{
 			return;
@@ -201,17 +204,17 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		{
 			string vehicle;
 			if ( !ctx.Read( vehicle ) )
-			{
 				return;
-			}
 
 			vector position;
 			if ( !ctx.Read( position ) )
-			{
 				return;
-			}
 
-			Server_SpawnPosition( vehicle, position, senderRPC );
+			vector direction;
+			if ( !ctx.Read( direction ) )
+				return;
+
+			Server_SpawnPosition( vehicle, position, direction, senderRPC );
 		}
 	}
 
@@ -221,14 +224,14 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		car.Fill( fluid, cap );
 	}
 
-	private EntityAI SpawnVehicle( JMVehicleSpawnerSerialize file, vector position )
+	private EntityAI SpawnVehicle( ref JMVehicleSpawnerSerialize file, vector position, vector direction )
 	{
 		if ( file == NULL )
 			return NULL;
 
 		array< string > attachments = file.Parts;
 
-		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position + "0 0.5 0" ) );
+		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
         if ( vehicle )
         {
             for ( int j = 0; j < attachments.Count(); j++ )
@@ -244,6 +247,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
                 FillCar( car, CarFluid.BRAKE );
                 FillCar( car, CarFluid.COOLANT );
             }
+
+			vehicle.SetPosition( position );
+			vehicle.SetDirection( direction );
+			vehicle.SetOrientation( vehicle.GetOrientation() );
+			vehicle.SetPosition( position );
         }
 		
 		return vehicle;

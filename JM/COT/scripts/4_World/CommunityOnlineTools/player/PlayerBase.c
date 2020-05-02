@@ -47,10 +47,13 @@ modded class PlayerBase
 		if ( !IsMissionHost() )
 			return;
 
-		m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-		if ( m_AuthenticatedPlayer )
+		if ( GetIdentity() )
 		{
-			m_AuthenticatedPlayer.PlayerObject = this;
+			m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
+			if ( m_AuthenticatedPlayer )
+			{
+				m_AuthenticatedPlayer.PlayerObject = this;
+			}
 		}
 	}
 
