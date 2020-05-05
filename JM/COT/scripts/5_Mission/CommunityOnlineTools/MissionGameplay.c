@@ -33,7 +33,7 @@ modded class MissionGameplay
 	{
 		delete g_cotBase;
 		
-		GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance )
+		GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
 	}
 
 	// ------------------------------------------------------------
