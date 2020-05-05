@@ -159,7 +159,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	void SpawnPosition( string vehicle, vector position, vector direction = "0 0 1" )
 	{
-		position = position + "0 2 0";
+		// position = position + "0 5 0";
 		
 		if ( IsMissionClient() )
 		{
@@ -248,10 +248,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
                 FillCar( car, CarFluid.COOLANT );
             }
 
-			vehicle.SetPosition( position );
-			vehicle.SetDirection( direction );
-			vehicle.SetOrientation( vehicle.GetOrientation() );
-			vehicle.SetPosition( position );
+			vehicle.PlaceOnSurface();
+			//vehicle.SetDirection( direction );
+			//vehicle.SetPosition( position );
+			//vehicle.SetOrientation( vehicle.GetOrientation() );
+			//vehicle.SetPosition( position );
         }
 		
 		return vehicle;

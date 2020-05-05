@@ -31,12 +31,13 @@ PanelWidgetClass UIActionSelectBox {
      "exact text size" 16
     }
     FrameWidgetClass action {
+     ignorepointer 1
      position 0.3 0
-     size 0.7 20
+     size 0.7 1
      hexactpos 0
      vexactpos 0
      hexactsize 0
-     vexactsize 1
+     vexactsize 0
     }
    }
   }
