@@ -232,7 +232,7 @@ class COTModule : JMModuleBase
 	/**
 	 * See: ClientRespawnEventTypeID
 	 */
-	void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
+	override void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
@@ -244,7 +244,7 @@ class COTModule : JMModuleBase
 	/**
 	 * See: ClientReconnectEventTypeID
 	 */
-	void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	override void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
@@ -256,7 +256,7 @@ class COTModule : JMModuleBase
 	/**
 	 * See: ClientDisconnectedEventTypeID
 	 */
-	void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	override void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 		if ( instance )
@@ -268,7 +268,7 @@ class COTModule : JMModuleBase
 	/**
 	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
 	 */
-	void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
+	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
 	{
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
@@ -280,7 +280,7 @@ class COTModule : JMModuleBase
 	/**
 	 * See: LogoutCancelEventTypeID
 	 */
-	void OnClientLogoutCancelled( PlayerBase player )
+	override void OnClientLogoutCancelled( PlayerBase player )
 	{
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
 		if ( instance )
