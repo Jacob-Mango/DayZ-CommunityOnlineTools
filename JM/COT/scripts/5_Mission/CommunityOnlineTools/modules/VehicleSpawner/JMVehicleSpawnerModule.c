@@ -248,8 +248,14 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
                 FillCar( car, CarFluid.COOLANT );
             }
 
-			vehicle.PlaceOnSurface();
-			//vehicle.SetDirection( direction );
+			vector boundingBox[2];
+			float radius = vehicle.ClippingInfo( boundingBox );
+
+			position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1] + 0.5;
+
+			vehicle.SetPosition( position );
+			vehicle.SetDirection( direction );
+			
 			//vehicle.SetPosition( position );
 			//vehicle.SetOrientation( vehicle.GetOrientation() );
 			//vehicle.SetPosition( position );

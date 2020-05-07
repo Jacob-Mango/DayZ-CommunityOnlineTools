@@ -301,14 +301,25 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private EntityAI SpawnItem( vector pos, string className )
 	{
+		/*
 		vector position = Vector( pos[0], pos[1], pos[2] );
 
 		position[0] = position[0] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
 		position[2] = position[2] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
 
 		position[1] = GetGame().SurfaceY( position[0], position[2] );
+		*/
 
-		return EntityAI.Cast( GetGame().CreateObject( className, position, false, true, true ) );
+		EntityAI ent = EntityAI.Cast( GetGame().CreateObject( className, pos, false, true, true ) );
+		
+		vector boundingBox[2];
+		float radius = ent.ClippingInfo( boundingBox );
+
+		pos[1] = pos[1] - boundingBox[0][1] + boundingBox[1][1];
+
+		ent.SetPosition( pos );
+
+		return ent;
 	}
 
 	private EntityAI SpawnItemInContainer( string container, vector position, EntityAI chest, string ClassName, float numStacks, float stackSize )
