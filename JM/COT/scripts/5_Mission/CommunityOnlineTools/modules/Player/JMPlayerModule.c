@@ -608,13 +608,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.SetLastPosition();
 
-			Object parent;
-			if ( Class.CastTo( parent, player.GetParent() ) )
-			{
-				position = parent.WorldToModel( position );
-			}
-
-			player.SetPosition( position );
+			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
 		}
@@ -663,13 +657,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			player.SetLastPosition();
 
-			Object parent;
-			if ( Class.CastTo( parent, player.GetParent() ) )
-			{
-				position = parent.WorldToModel( position );
-			}
-
-			player.SetPosition( position );
+			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + instance.GetGUID() + "]" );
 		}
@@ -714,13 +702,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.SetLastPosition();
 
-			Object parent;
-			if ( Class.CastTo( parent, player.GetParent() ) )
-			{
-				position = parent.WorldToModel( position );
-			}
-
-			player.SetPosition( position );
+			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position + " [previous]" );
 		}
