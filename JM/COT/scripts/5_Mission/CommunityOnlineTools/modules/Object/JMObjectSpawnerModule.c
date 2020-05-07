@@ -3,6 +3,7 @@ enum JMObjectSpawnerModuleRPC
 	INVALID = 10220,
 	Position,
 	Inventory,
+	Delete,
 	COUNT
 };
 
@@ -12,6 +13,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Position" );
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Inventory" );
+		GetPermissionsManager().RegisterPermission( "Entity.Delete" );
 		GetPermissionsManager().RegisterPermission( "Entity.View" );
 	}
 
@@ -134,6 +136,53 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		case JMObjectSpawnerModuleRPC.Inventory:
 			RPC_SpawnEntity_Inventory( ctx, sender, target );
 			break;
+		case JMObjectSpawnerModuleRPC.Delete:
+			RPC_DeleteEntity( ctx, sender, target );
+			break;
+		}
+	}
+
+	void DeleteEntity( Object obj )
+	{
+		if ( IsMissionClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( obj, JMObjectSpawnerModuleRPC.Delete, true, NULL );
+		} else
+		{
+			Server_DeleteEntity( obj, NULL );
+		}
+	}
+
+	private void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident ) )
+		{
+			return;
+		}
+
+		if ( PlayerBase.Cast( obj ) )
+			return;
+
+		string obtype;
+		GetGame().ObjectGetType( obj, obtype );
+
+		vector transform[4];
+		obj.GetTransform( transform );
+
+		GetGame().ObjectDelete( obj );
+		
+		GetCommunityOnlineToolsBase().Log( ident, "Deleted Entity " + obtype + " at " + transform[3].ToString() );
+	}
+
+	private void RPC_DeleteEntity( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			if ( target == NULL )
+				return;
+
+			Server_DeleteEntity( target, senderRPC );
 		}
 	}
 

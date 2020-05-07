@@ -67,11 +67,13 @@ modded class PlayerBase
 		return m_JMLastPosition;
 	}
 
-	void SetLastPosition( vector pos )
+	void SetLastPosition()
 	{
 		if ( GetGame().IsServer() )
 		{
-			m_JMLastPosition = pos;
+			vector trans[4];
+			GetTransform( trans );
+			m_JMLastPosition = trans[3];
 
 			m_JMHasLastPosition = true;
 		}
