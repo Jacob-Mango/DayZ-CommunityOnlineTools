@@ -169,7 +169,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( player.IsInTransport() )
 			return;
 
-		player.SetLastPosition( player.GetPosition() );
+		player.SetLastPosition();
 
 		Object parent;
 		if ( Class.CastTo( parent, player.GetParent() ) )

@@ -603,21 +603,18 @@ class JMPlayerModule: JMRenderableModuleBase
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = players[i].PlayerObject;
-			if ( player == NULL )
+			if ( player == NULL || player.IsInTransport() )
 				continue;
 
-			player.SetLastPosition( player.GetPosition() );
+			player.SetLastPosition();
 
-			Transport transport;
-			if ( Class.CastTo( transport, player.GetParent() ) )
+			Object parent;
+			if ( Class.CastTo( parent, player.GetParent() ) )
 			{
-				transport.SetOrigin( position );
-				transport.SetPosition( position );
-				transport.Update();
-			} else
-			{
-				player.SetPosition( position );
+				position = parent.WorldToModel( position );
 			}
+
+			player.SetPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
 		}
@@ -657,25 +654,22 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
 
 		PlayerBase player = instance.PlayerObject;
-		if ( player == NULL )
+		if ( player == NULL || player.IsInTransport() )
 			return;
 
 		vector position = player.GetPosition();
 
 		if ( Class.CastTo( player, GetPlayerObjectByIdentity( ident ) ) )
 		{
-			player.SetLastPosition( player.GetPosition() );
+			player.SetLastPosition();
 
-			Transport transport;
-			if ( Class.CastTo( transport, player.GetParent() ) )
+			Object parent;
+			if ( Class.CastTo( parent, player.GetParent() ) )
 			{
-				transport.SetOrigin( position );
-				transport.SetPosition( position );
-				transport.Update();
-			} else
-			{
-				player.SetPosition( position );
+				position = parent.WorldToModel( position );
 			}
+
+			player.SetPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + instance.GetGUID() + "]" );
 		}
@@ -713,26 +707,20 @@ class JMPlayerModule: JMRenderableModuleBase
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = players[i].PlayerObject;
-			if ( player == NULL )
-				continue;
-
-			if ( !player.HasLastPosition() )
+			if ( player == NULL || !player.HasLastPosition() || player.IsInTransport() )
 				continue;
 
 			vector position = player.GetLastPosition();
 
-			player.SetLastPosition( player.GetPosition() );
+			player.SetLastPosition();
 
-			Transport transport;
-			if ( Class.CastTo( transport, player.GetParent() ) )
+			Object parent;
+			if ( Class.CastTo( parent, player.GetParent() ) )
 			{
-				transport.SetOrigin( position );
-				transport.SetPosition( position );
-				transport.Update();
-			} else
-			{
-				player.SetPosition( position );
+				position = parent.WorldToModel( position );
 			}
+
+			player.SetPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position + " [previous]" );
 		}

@@ -82,6 +82,8 @@ class JMObjectSpawnerForm extends JMFormBase
 			UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
 		}
 
+		UIActionManager.CreateButton( spawnButtons, "Delete", this, "DeleteCursor" );
+
 		UpdateItemPreview();
 	}
 
@@ -240,6 +242,18 @@ class JMObjectSpawnerForm extends JMFormBase
 		}
 
 		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
+	}
+
+	void DeleteCursor( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		Object obj = GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 );
+		if ( PlayerBase.Cast( obj ) )
+			return;
+
+		m_Module.DeleteEntity( obj );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionBase action )
