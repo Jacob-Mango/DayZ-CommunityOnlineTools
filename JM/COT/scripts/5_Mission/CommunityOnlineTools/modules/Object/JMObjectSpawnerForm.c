@@ -67,7 +67,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		Widget spawnButtons = NULL;
 
-		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 4 );
+		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
 
 		UIActionManager.CreateText( spawnButtons, "Spawn on: " );
 
