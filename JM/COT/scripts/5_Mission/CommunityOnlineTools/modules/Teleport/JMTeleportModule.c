@@ -171,13 +171,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		player.SetLastPosition();
 
-		Object parent;
-		if ( Class.CastTo( parent, player.GetParent() ) )
-		{
-			position = parent.WorldToModel( position );
-		}
-
-		player.SetPosition( position );
+		player.SetWorldPosition( position );
 	}
 
 	override int GetRPCMin()

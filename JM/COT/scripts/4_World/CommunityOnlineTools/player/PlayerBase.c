@@ -79,6 +79,33 @@ modded class PlayerBase
 		}
 	}
 
+	void SetWorldPosition( vector position )
+	{
+		Object parent;
+		if ( Class.CastTo( parent, GetParent() ) )
+		{
+			/*
+			vector tmPlayer[4];
+			vector tmTarget[4];
+			vector tmLocal[4];
+
+			GetTransformWS( tmPlayer );
+			tmPlayer[3] = position;
+
+			parent.GetTransform( tmTarget );
+			Math3D.MatrixInvMultiply4( tmTarget, tmPlayer, tmLocal );
+
+			SetPosition( tmLocal[3] );
+			SetDirection( tmLocal[2] );
+			*/
+
+			SetPosition( parent.WorldToModel( position ) );
+		} else
+		{
+			SetPosition( position );
+		}
+	}
+
 	ref JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		return m_AuthenticatedPlayer;
