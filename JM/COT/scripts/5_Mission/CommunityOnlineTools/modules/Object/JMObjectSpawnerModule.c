@@ -218,7 +218,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		SetupEntity( obj, quantity, health );
 
-		obj.PlaceOnSurface();
+		vector boundingBox[2];
+		float radius = obj.ClippingInfo( boundingBox );
+
+		position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1];
+
+		obj.SetPosition( position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
 	}
@@ -296,14 +301,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			obj = objects[i].GetInventory().CreateInInventory( ent );
 			if ( !obj )
 			{
-				obj = GetGame().CreateObject( ent, objects[i].GetPosition() );
+				vector position = objects[i].GetPosition();
+				obj = GetGame().CreateObject( ent, position );
 
 				if ( !obj )
 				{
 					continue;
 				}
+				
+				vector boundingBox[2];
+				float radius = obj.ClippingInfo( boundingBox );
 
-				obj.PlaceOnSurface();
+				position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1];
+
+				obj.SetPosition( position );
 			}
 
 			SetupEntity( obj, quantity, health );
