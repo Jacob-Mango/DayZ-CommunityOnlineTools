@@ -219,9 +219,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntity( obj, quantity, health );
 
 		vector boundingBox[2];
-		float radius = obj.ClippingInfo( boundingBox );
+		float radius = obj.GetCollisionBox( boundingBox );
 
-		position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1];
+		position[1] = position[1] - boundingBox[0][1];
 
 		obj.SetPosition( position );
 
@@ -310,7 +310,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				
 				vector boundingBox[2];
-				float radius = obj.ClippingInfo( boundingBox );
+				obj.GetCollisionBox( boundingBox );
 
 				position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1];
 
