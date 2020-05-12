@@ -249,9 +249,9 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
             }
 
 			vector boundingBox[2];
-			float radius = vehicle.ClippingInfo( boundingBox );
+			float radius = vehicle.GetCollisionBox( boundingBox );
 
-			position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1] + 0.5;
+			position[1] = position[1] - boundingBox[0][1] + 0.5;
 
 			vehicle.SetPosition( position );
 			vehicle.SetDirection( direction );

@@ -313,9 +313,9 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		EntityAI ent = EntityAI.Cast( GetGame().CreateObject( className, pos, false, true, true ) );
 		
 		vector boundingBox[2];
-		float radius = ent.ClippingInfo( boundingBox );
+		float radius = ent.GetCollisionBox( boundingBox );
 
-		pos[1] = pos[1] - boundingBox[0][1] + boundingBox[1][1];
+		pos[1] = pos[1] - boundingBox[0][1];
 
 		ent.SetPosition( pos );
 
