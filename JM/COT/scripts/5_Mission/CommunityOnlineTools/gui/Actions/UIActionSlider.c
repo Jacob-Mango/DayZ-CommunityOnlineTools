@@ -110,10 +110,11 @@ class UIActionSlider extends UIActionBase
 		{
 			m_Slider.SetCurrent( ( top / bottom ) + a );
 			CalculateValue();
-			return;
+		} else
+		{
+			m_Slider.SetCurrent( 0 );
+			m_Current = 0;
 		}
-
-		m_Slider.SetCurrent( 0 );
 	}
 
 	void CalculateValue()

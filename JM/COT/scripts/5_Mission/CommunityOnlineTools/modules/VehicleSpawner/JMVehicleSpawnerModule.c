@@ -231,7 +231,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
+		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject_WIP( file.VehicleName, position, ECE_CREATEPHYSICS ) );
         if ( vehicle )
         {
             for ( int j = 0; j < attachments.Count(); j++ )
@@ -251,7 +251,9 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			vector boundingBox[2];
 			float radius = vehicle.GetCollisionBox( boundingBox );
 
-			position[1] = position[1] - boundingBox[0][1] + 0.5;
+			float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
+
+			position[1] = position[1] + height + 0.5;
 
 			vehicle.SetPosition( position );
 			vehicle.SetDirection( direction );
