@@ -1,9 +1,9 @@
 class JMCinematicCamera extends JMCameraBase
 {
-	vector velocity;
+	vector linearVelocity;
+	vector angularVelocity;
 
-	float yawVelocity;
-	float pitchVelocity;
+	vector orientation;
 	
 	void JMCinematicCamera()
 	{
@@ -14,9 +14,8 @@ class JMCinematicCamera extends JMCameraBase
 	{
 		super.OnUpdate( timeslice );
 		
-		vector oldOrient = GetOrientation();
-		vector oldPos = GetPosition();
-		vector oldDir = GetDirection();
+		vector transform[4];
+		GetTransform( transform );
 
 		Input input = GetGame().GetInput();
 
@@ -29,6 +28,10 @@ class JMCinematicCamera extends JMCameraBase
 
 		float speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
 
+		float zoomAmt = input.LocalValue( "UACameraToolZoomForwards" ) - input.LocalValue( "UACameraToolZoomBackwards" );
+		if ( zoomAmt != 0 )
+			speedInc = 0;
+
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
 
@@ -38,7 +41,7 @@ class JMCinematicCamera extends JMCameraBase
 
 			if ( !shouldRoll && CAMERA_BOOST_MULT > 0 )
 			{
-				CAMERA_SPEED = CAMERA_SPEED + ( CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT );
+				CAMERA_SPEED += timeslice * 40.0 * CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT;
 				
 				if ( CAMERA_SPEED < 0.001 ) 
 				{
@@ -52,63 +55,84 @@ class JMCinematicCamera extends JMCameraBase
 					cam_speed = cam_speed * CAMERA_BOOST_MULT;
 				}
 			}
-
-			vector up = vector.Up;
-			vector direction = GetDirection();
-			vector directionAside = vector.Up * direction;
 			
-			up = up * altitude * cam_speed;
+			linearVelocity = linearVelocity * CAMERA_VELDRAG;
 
-			direction = direction * forward * cam_speed;
-			directionAside = directionAside * strafe * cam_speed;
+			linearVelocity = linearVelocity + ( transform[0] * strafe * cam_speed );
+			linearVelocity = linearVelocity + ( transform[1] * altitude * cam_speed );
+			linearVelocity = linearVelocity + ( transform[2] * forward * cam_speed );
 
-			velocity = velocity * CAMERA_VELDRAG;
-			velocity = velocity + (direction + directionAside + up) * timeslice;
+			transform[3] = transform[3] + ( linearVelocity * timeslice );
 
-			vector newPos = oldPos + velocity;
-
-			float surfaceY = GetGame().SurfaceY( newPos[0], newPos[2] ) + 0.25;
-
-			if ( newPos[1] < surfaceY ) 
-			{
-				newPos[1] = surfaceY;
-			}
-
-			SetPosition(newPos);
+			//float surfaceY = GetGame().SurfaceY( newPos[0], newPos[2] ) + 0.25;
+			//if ( newPos[1] < surfaceY ) 
+			//{
+			//	newPos[1] = surfaceY;
+			//}
 		}
 
+		/*
 		if ( !LookFreeze )
 		{
-			yawVelocity = yawVelocity + yawDiff * CAMERA_MSENS;
-			pitchVelocity = pitchVelocity + pitchDiff * CAMERA_MSENS;
+			float yawQuat[4];
+			float pitchQuat[4];
+			vector yawMat[3];
+			vector pitchMat[3];
 
-			vector newOrient = oldOrient;
+			AngleToQuat( pitchDiff * 360.0 * timeslice, "0 1 0", pitchQuat );
+			AngleToQuat( -yawDiff * 360.0 * timeslice, "1 0 0", yawQuat );
 
-			newOrient[0] = oldOrient[0] - Math.RAD2DEG * yawVelocity * timeslice;
-			newOrient[1] = oldOrient[1] - Math.RAD2DEG * pitchVelocity * timeslice;
+			Math3D.QuatToMatrix( pitchQuat, pitchMat );
+			Math3D.QuatToMatrix( yawQuat, yawMat );
 
-			yawVelocity *= CAMERA_SMOOTH;
-			pitchVelocity *= CAMERA_SMOOTH;
+			Math3D.MatrixMultiply3( pitchMat, transform, transform );
+			Math3D.MatrixMultiply3( yawMat, transform, transform );
+		}
+		*/
 
-			if ( newOrient[1] < -89 )
-				newOrient[1] = -89;
-			if ( newOrient[1] > 89 )
-				newOrient[1] = 89;
+		SetTransform( transform );
+			
+		if ( !LookFreeze )
+		{
+			angularVelocity = angularVelocity * CAMERA_SMOOTH;
 
+			angularVelocity[0] = angularVelocity[0] + ( yawDiff * CAMERA_MSENS );
+			angularVelocity[1] = angularVelocity[1] + ( pitchDiff * CAMERA_MSENS );
+			
 			if ( shouldRoll ) 
 			{
-				if ( increaseSpeeds && CAMERA_BOOST_MULT > 0 )
-				{
-					speedInc = speedInc * CAMERA_BOOST_MULT;
-				}
-
-				newOrient[2] = newOrient[2] - ( speedInc );
+				angularVelocity[2] = angularVelocity[2] + ( speedInc * CAMERA_MSENS );
 			}
 
-			SetOrientation( newOrient );
-		}
+			orientation[0] = orientation[0] - ( angularVelocity[0] * timeslice );
+			orientation[1] = orientation[1] - ( angularVelocity[1] * timeslice );
+			orientation[2] = orientation[2] - ( angularVelocity[2] * timeslice );
 
-		//LookFreeze = false;
-		//MoveFreeze = false;
+			if ( orientation[1] <= -90 )
+			{
+				angularVelocity[1] = Math.Min( angularVelocity[1], 0 );
+				orientation[1] = -90;
+			} else if ( orientation[1] >= 90 )
+			{
+				orientation[1] = 90;
+				angularVelocity[1] = Math.Max( angularVelocity[1], 0 );
+			}
+
+			orientation[0] = Math.NormalizeAngle( orientation[0] );
+			orientation[2] = Math.NormalizeAngle( orientation[2] );
+
+			SetOrientation( orientation );
+		}
+	}
+
+	void AngleToQuat( float angle, vector dir, out float d[4] )
+	{
+		float sin = Math.Sin( angle * 0.5 * Math.DEG2RAD );
+		float cos = Math.Cos( angle * 0.5 * Math.DEG2RAD );
+
+		d[3] = cos;
+		d[2] = dir[2] * sin;
+		d[1] = dir[1] * sin;
+		d[0] = dir[0] * sin;
 	}
 }
