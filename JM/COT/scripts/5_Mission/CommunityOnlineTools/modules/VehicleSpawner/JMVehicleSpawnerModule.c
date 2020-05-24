@@ -231,7 +231,8 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject_WIP( file.VehicleName, position, ECE_CREATEPHYSICS ) );
+		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
+		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject_WIP( file.VehicleName, position, ECE_CREATEPHYSICS ) );
         if ( vehicle )
         {
             for ( int j = 0; j < attachments.Count(); j++ )
@@ -253,7 +254,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 			float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
 
-			position[1] = position[1] + height + 0.5;
+			position[1] = position[1] + ( height * 2.0 );
 
 			vehicle.SetPosition( position );
 			vehicle.SetDirection( direction );

@@ -9,7 +9,7 @@ FrameWidgetClass COTMap {
  scriptclass "JMMapForm"
  style EditorPanel
  {
-  MapWidgetClass map_widget {
+  MapWidgetClass JM_COT_GUI_Map {
    visible 1
    position 0 0
    size 1 1
@@ -17,7 +17,7 @@ FrameWidgetClass COTMap {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   scriptclass "JM_COT_MapMenu"
+   scriptclass "JM_COT_GUI_Map"
   }
  }
 }

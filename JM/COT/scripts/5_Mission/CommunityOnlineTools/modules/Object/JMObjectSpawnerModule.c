@@ -209,10 +209,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
-			flags |= 0x800;
-		Object obj = GetGame().CreateObject_WIP( ent, position, flags );
+		//int flags = ECE_CREATEPHYSICS;
+		//if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+		//	flags |= 0x800;
+		//Object obj = GetGame().CreateObject_WIP( ent, position, flags );
+
+		Object obj = GetGame().CreateObject( ent, position, false, GetGame().IsKindOf( ent, "DZ_LightAI" ) );
 		if ( !obj )
 		{
 			return;
@@ -223,7 +225,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		vector boundingBox[2];
 		float radius = obj.GetCollisionBox( boundingBox );
 
-		position[1] = position[1] - boundingBox[0][1];
+		float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
+
+		position[1] = position[1] + ( height * 2.0 );
 
 		obj.SetPosition( position );
 
@@ -314,7 +318,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				vector boundingBox[2];
 				obj.GetCollisionBox( boundingBox );
 
-				position[1] = position[1] - boundingBox[0][1] + boundingBox[1][1];
+				float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
+
+				position[1] = position[1] + ( height * 2.0 );
 
 				obj.SetPosition( position );
 			}
