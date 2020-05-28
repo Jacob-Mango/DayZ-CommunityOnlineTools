@@ -679,10 +679,6 @@ class JMPlayerForm extends JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 
-		JMPlayerInformation data = m_SelectedInstance.Data;
-		if ( !data )
-			return;
-
 		m_HealthUpdated = false;
 		m_BloodUpdated = false;
 		m_EnergyUpdated = false;
@@ -692,15 +688,15 @@ class JMPlayerForm extends JMFormBase
 		m_BloodyHandsUpdated = false;
 		m_GodModeUpdated = false;
 		
-		m_Health.SetText( data.FHealth.ToString() );
-		m_Blood.SetText( data.FBlood.ToString() );
-		m_Energy.SetText( data.FEnergy.ToString() );
-		m_Water.SetText( data.FWater.ToString() );
-		m_Shock.SetText( data.FShock.ToString() );
-		m_Stamina.SetText( data.FStamina.ToString() );
+		m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
+		m_Blood.SetText( m_SelectedInstance.GetBlood().ToString() );
+		m_Energy.SetText( m_SelectedInstance.GetEnergy().ToString() );
+		m_Water.SetText( m_SelectedInstance.GetWater().ToString() );
+		m_Shock.SetText( m_SelectedInstance.GetShock().ToString() );
+		m_Stamina.SetText( m_SelectedInstance.GetStamina().ToString() );
 
-		m_BloodyHands.SetChecked( data.BBloodyHands );
-		m_GodMode.SetChecked( data.BGodMode );
+		m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
+		m_GodMode.SetChecked( m_SelectedInstance.HasGodMode() );
 	}
 
 	void RefreshTeleports()
@@ -708,13 +704,11 @@ class JMPlayerForm extends JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 
-		JMPlayerInformation data = m_SelectedInstance.Data;
-		if ( !data )
-			return;
+		vector position = m_SelectedInstance.GetPosition();
 
-		m_PositionX.SetText( data.VPosition[0].ToString() );
-		m_PositionY.SetText( data.VPosition[1].ToString() );
-		m_PositionZ.SetText( data.VPosition[2].ToString() );
+		m_PositionX.SetText( position[0].ToString() );
+		m_PositionY.SetText( position[1].ToString() );
+		m_PositionZ.SetText( position[2].ToString() );
 	}
 
 	void Click_ApplyStats( UIEvent eid, ref UIActionBase action )
@@ -875,16 +869,7 @@ class JMPlayerForm extends JMFormBase
 
 		if ( IsMissionOffline() )
 		{
-			instance.UpdatePlayerData();
-			instance.Serialize();
-		}
-
-		JMPlayerInformation data = instance.Data;
-
-		if ( !data )
-		{
-			HideUI();
-			return;
+			instance.Update();
 		}
 
 		ShowUI();
@@ -893,9 +878,9 @@ class JMPlayerForm extends JMFormBase
 		{
 			ShowIdentityWidgets();
 
-			m_GUID.SetText( data.SGUID );
-			m_Name.SetText( data.SName );
-			m_Steam64ID.SetText( data.SSteam64ID );
+			m_GUID.SetText( instance.GetGUID() );
+			m_Name.SetText( instance.GetName() );
+			m_Steam64ID.SetText( instance.GetSteam64ID() );
 
 			m_TeleportMeTo.Enable();
 		} else

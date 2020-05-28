@@ -2,8 +2,10 @@ enum JMClientRPC
 {
 	INVALID = 10100,
 	RefreshClients,
+	RefreshClientPositions,
 	RemoveClient,
 	UpdateClient,
+	UpdateClientPosition,
 	SetClient,
 	COUNT
 };

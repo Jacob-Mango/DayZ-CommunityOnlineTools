@@ -249,7 +249,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			SpawnItemSet( file, players[i].Data.VPosition );
+			SpawnItemSet( file, players[i].GetPosition() );
 			
 			GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
 		}

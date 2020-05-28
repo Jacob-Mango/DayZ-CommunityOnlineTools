@@ -251,6 +251,10 @@ class CommunityOnlineToolsBase
 	{
 	}
 
+	void RefreshClientPositions()
+	{
+	}
+
 	void SetClient( JMPlayerInstance player )
 	{
 	}

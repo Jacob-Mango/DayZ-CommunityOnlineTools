@@ -101,7 +101,7 @@ class JMTeleportForm extends JMFormBase
 				continue;
 			}
 
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + locations[i].Permission ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locations[i].Permission ) )
 			{
 				continue;
 			}
