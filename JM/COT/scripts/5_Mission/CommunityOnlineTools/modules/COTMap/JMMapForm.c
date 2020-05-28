@@ -1,21 +1,14 @@
 class JMMapForm extends JMFormBase 
 {
-	private MapWidget map_widget;
-	private Widget basewindow_background;
-	
-	void JMMapForm()
-	{
-	}
-
-	void ~JMMapForm()
-	{
-	}
+	private MapWidget m_MapWidget;
+	private Widget m_BackgroundWidget;
 	
 	override void OnInit()
 	{
-		map_widget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
-		basewindow_background = window.GetLayoutRoot().FindAnyWidget( "background" );
-		basewindow_background.Show( false );
+		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "JM_COT_GUI_Map" ) );
+
+		m_BackgroundWidget = window.GetLayoutRoot().FindAnyWidget( "background" );
+		m_BackgroundWidget.Show( false );
 	}
 	
 	override void OnShow()
@@ -30,23 +23,19 @@ class JMMapForm extends JMFormBase
 
 	void UpdatePlayers() 
 	{
-		map_widget.ClearUserMarks();
+		m_MapWidget.ClearUserMarks();
 
-		if ( !GetPermissionsManager().HasPermission( "Map.Players" ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Players.Map" ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
 		for ( int i = 0; i < players.Count(); ++i )
 		{
-			JMPlayerInformation data = players[i].Data;
-			if ( !data )
-				continue;
-
-			map_widget.AddUserMark( data.VPosition, data.SName, ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
+			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
 		}
 
-		GetCommunityOnlineTools().RefreshClients();
+		GetCommunityOnlineTools().RefreshClientPositions();
 	}
 
 	override bool OnDoubleClick( Widget w, int x, int y, int button )
@@ -56,12 +45,12 @@ class JMMapForm extends JMFormBase
 			return false;
 		}
 
-		if ( w == map_widget )
+		if ( w == m_MapWidget )
 		{
 			JMTeleportModule mod;
 			if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
 			{
-				mod.Position( SnapToGround( map_widget.ScreenToMap( Vector( x, y, 0 ) ) ) );
+				mod.Position( SnapToGround( m_MapWidget.ScreenToMap( Vector( x, y, 0 ) ) ) );
 			}
 			
 			return true;

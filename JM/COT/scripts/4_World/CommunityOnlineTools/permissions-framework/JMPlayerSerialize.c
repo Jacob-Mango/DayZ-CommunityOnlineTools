@@ -20,11 +20,11 @@ class JMPlayerSerialize
 		return name;
 	}
 
-	static bool Load( JMPlayerInformation data, out JMPlayerSerialize playerFile )
+	static bool Load( JMPlayerInstance inst, out JMPlayerSerialize playerFile )
 	{
 		playerFile = new JMPlayerSerialize;
 
-		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER;
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
@@ -33,43 +33,43 @@ class JMPlayerSerialize
 			return true;
 		}
 		
-		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER;
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + inst.GetSteam64ID() + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER;
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;
 		}
 		
-		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER;
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;
 		}
 
-		playerFile.m_FileName = JMConstants.DIR_PLAYERS + data.SSteam64ID + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + inst.GetSteam64ID() + JMConstants.EXT_PLAYER + JMConstants.EXT_WINDOWS_DEFAULT;
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
 
 			DeleteFile( playerFile.m_FileName );
-			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER;
+			playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 
 			playerFile.Save();
 			return true;
 		}
 
-		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( data.SGUID ) + JMConstants.EXT_PLAYER;
+		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 		playerFile.Roles.Insert( "everyone" );
 		return false;
 	}

@@ -260,8 +260,6 @@ class JMPermissionManager
 		inst.CopyPermissions( RootPermission );
 		inst.Load();
 
-		inst.Serialize();
-
 		Players.Insert( guid, inst );
 
 		// PMPrint();
@@ -302,9 +300,9 @@ class JMPermissionManager
 		return Players.Get( guid );
 	}
 
-	ref JMPlayerInstance UpdatePlayer( notnull JMPlayerInformation data, PlayerBase playerUpdatePlayer = NULL )
+	ref JMPlayerInstance UpdatePlayer( string guid, ref ParamsReadContext ctx, PlayerBase playerUpdatePlayer = NULL )
 	{
-		JMPlayerInstance instance = GetPlayer( data.SGUID );
+		JMPlayerInstance instance = GetPlayer( guid );
 
 		if ( !instance )
 		{
@@ -314,15 +312,14 @@ class JMPermissionManager
 			}
 
 			instance = new JMPlayerInstance( NULL );
-			Players.Insert( data.SGUID, instance );
+			Players.Insert( guid, instance );
 		}
 
-		instance.SwapData( data );
-		instance.Deserialize();
+		instance.OnRecieve( ctx );
 
 		if ( IsMissionClient() )
 		{
-			if ( m_ClientGUID == data.SGUID )
+			if ( m_ClientGUID == guid )
 			{
 				GetModuleManager().OnClientPermissionsUpdated();
 			}

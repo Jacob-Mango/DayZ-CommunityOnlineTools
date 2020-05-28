@@ -24,10 +24,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		if ( IsMissionClient() )
-		{
-			Client_RefreshClients();
-		}
+		RefreshClients();
 
 		if ( IsMissionOffline() )
 		{
@@ -59,6 +56,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			case JMClientRPC.UpdateClient:
 				RPC_UpdateClient( ctx, sender, target );
 				break;
+			case JMClientRPC.UpdateClientPosition:
+				RPC_UpdateClientPosition( ctx, sender, target );
+				break;
 			case JMClientRPC.SetClient:
 				RPC_SetClient( ctx, sender, target );
 				break;
@@ -78,23 +78,16 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionClient() )
 		{
-			Client_RefreshClients();
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
 		}
-	}
-
-	private void Client_RefreshClients()
-	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send( NULL, JMClientRPC.RefreshClients, true, NULL );
-	}
-
-	private void Server_RefreshClients()
-	{
-
 	}
 
 	private void RPC_RefreshClients( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 
 		if ( IsMissionHost() )
@@ -103,13 +96,45 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
-				players[i].UpdatePlayerData();
-				players[i].Serialize();
-
-				rpc.Write( players[i].Data );
+				players[i].Update();
+				players[i].OnSend( rpc );
 				rpc.Write( players[i].PlayerObject );
 
 				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
+
+				rpc.Reset();
+			}
+		}
+	}
+
+	override void RefreshClientPositions()
+	{
+		if ( IsMissionClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMClientRPC.RefreshClientPositions, true, NULL );
+		}
+	}
+
+	private void RPC_RefreshClientPositions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
+			return;
+
+		ScriptRPC rpc = new ScriptRPC();
+
+		if ( IsMissionHost() )
+		{
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+
+			for ( int i = 0; i < players.Count(); i++ )
+			{
+				players[i].Update();
+
+				rpc.Write( players[i].GetGUID() );
+				players[i].OnSendPosition( rpc );
+
+				rpc.Send( NULL, JMClientRPC.UpdateClientPosition, true, senderRPC );
 
 				rpc.Reset();
 			}
@@ -134,19 +159,13 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		RemoveSelectedPlayer( guid );
 	}
 
-	private void Server_RemoveClient( string guid )
-	{
-	}
-
 	private void RPC_RemoveClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionClient() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
-			{
 				return;
-			} 
 
 			Client_RemoveClient( guid );
 		}
@@ -165,9 +184,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_UpdateClient( JMPlayerInformation playerInfo, PlayerBase playerObj )
+	private void Client_UpdateClient( string guid, ref ParamsReadContext ctx, PlayerBase playerObj )
 	{
-		GetPermissionsManager().UpdatePlayer( playerInfo, playerObj );
+		GetPermissionsManager().UpdatePlayer( guid, ctx, playerObj );
 	}
 
 	private void Server_UpdateClient( string guid, PlayerIdentity sendTo )
@@ -176,12 +195,13 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !player )
 			return;
 
-		player.UpdatePlayerData();
-		player.Serialize();
+		player.Update();
 
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( player.Data );
 		rpc.Write( player.PlayerObject );
+		rpc.Write( player.GetGUID() );
+		player.OnSend( rpc );
+
 		rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
 	}
 
@@ -194,28 +214,36 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 			string guid;
 			if ( !ctx.Read( guid ) )
-			{
 				return;
-			}
 
 			Server_UpdateClient( guid, senderRPC );
 		}
 
 		if ( GetGame().IsClient() )
 		{
-			JMPlayerInformation cd;
-			if ( !ctx.Read( cd ) )
-			{
-				return;
-			}
-
 			PlayerBase po;
 			if ( !ctx.Read( po ) )
-			{
 				return;
-			}
 
-			Client_UpdateClient( cd, po );
+			string pg;
+			if ( !ctx.Read( pg ) )
+				return;
+
+			Client_UpdateClient( pg, ctx, po );
+		}
+	}
+
+	private void RPC_UpdateClientPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( GetGame().IsClient() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+			
+			JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
+
+			player.OnRecievePosition( ctx );
 		}
 	}
 
@@ -223,7 +251,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Client_SetClient( player.GetGUID(), player.Data );
+			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
+			player.OnSend( rwctx.GetWriteContext() );
+
+			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
 			Server_SetClient( player );
@@ -234,16 +265,19 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Client_SetClient( player.GetGUID(), player.Data );
+			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
+			player.OnSend( rwctx.GetWriteContext() );
+
+			Client_SetClient( player.GetGUID(), rwctx.GetReadContext() );
 		} else if ( IsMissionHost() )
 		{
 			Server_SetClient( player, identity );
 		}
 	}
 
-	private void Client_SetClient( string guid, JMPlayerInformation playerInfo )
+	private void Client_SetClient( string guid, ref ParamsReadContext ctx )
 	{
-		GetPermissionsManager().UpdatePlayer( playerInfo, PlayerBase.Cast( GetGame().GetPlayer() ) );
+		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
 
 		GetPermissionsManager().SetClientGUID( guid );
 
@@ -254,7 +288,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
-		rpc.Write( player.Data );
+
+		player.OnSend( rpc );
+
 		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
 
@@ -262,7 +298,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
-		rpc.Write( player.Data );
+
+		player.OnSend( rpc );
+
 		rpc.Send( NULL, JMClientRPC.SetClient, true, identity );
 	}
 
@@ -272,17 +310,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
-			{
 				return;
-			}
 
-			JMPlayerInformation cd;
-			if ( !ctx.Read( cd ) )
-			{
-				return;
-			}
-
-			Client_SetClient( guid, cd );
+			Client_SetClient( guid, ctx );
 		}
 	}
 
@@ -327,15 +357,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		{
 			string roleName;
 			if ( !ctx.Read( roleName ) )
-			{
 				return;
-			}
 
 			array< string > permissions;
 			if ( !ctx.Read( permissions ) )
-			{
 				return;
-			}
 
 			Client_UpdateRole( roleName, permissions );
 		}

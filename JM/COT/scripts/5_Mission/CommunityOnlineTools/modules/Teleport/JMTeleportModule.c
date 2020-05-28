@@ -13,15 +13,15 @@ class JMTeleportModule: JMRenderableModuleBase
 	
 	void JMTeleportModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Teleport.Position" );
-		GetPermissionsManager().RegisterPermission( "Teleport.Location" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location" );
 	
-		GetPermissionsManager().RegisterPermission( "Teleport.View" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Teleport.View" );
+		return GetPermissionsManager().HasPermission( "Admin.Player.Teleport.View" );
 	}
 
 	override string GetInputToggle()
@@ -71,7 +71,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 				string permission = location.Permission;
 				permission.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Teleport.Location." + permission );
+				GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location." + permission );
 			}
 		}
 	}
@@ -133,7 +133,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !(input.LocalPress() || input.LocalHold()) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Cursor" ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
 			return;
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
@@ -244,7 +244,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			Server_Position( position, PlayerBase.Cast( GetGame().GetPlayer() ) );
 		} else if ( IsMissionClient() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Position" ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
@@ -255,7 +255,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_Position( vector position, PlayerBase player )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Position", player.GetIdentity() ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity() ) )
 			return;
 
 		SetPlayerPosition( player, position );
@@ -293,7 +293,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( guids.Count() == 0 )
 				return;
 
-			if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + location.Permission ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + location.Permission ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
@@ -305,7 +305,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Teleport.Location." + locName, ident ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident ) )
 			return;
 
 		JMTeleportLocation location = NULL;
