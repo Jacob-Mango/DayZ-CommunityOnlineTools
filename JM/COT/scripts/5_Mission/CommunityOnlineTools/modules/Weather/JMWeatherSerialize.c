@@ -41,11 +41,11 @@ class JMWeatherSerialize
 		preset.Name = "Default";
 		preset.Permission = "Default";
 
-		preset.Date.Year = 2019;
-		preset.Date.Month = 5;
-		preset.Date.Day = 23;
-		preset.Date.Hour = 12;
-		preset.Date.Minute = 25;
+		preset.PDate.Year = 2019;
+		preset.PDate.Month = 5;
+		preset.PDate.Day = 23;
+		preset.PDate.Hour = 12;
+		preset.PDate.Minute = 25;
 
 		preset.PFog.Forecast = 0.1;
 		preset.PFog.Time = 100;
@@ -69,11 +69,11 @@ class JMWeatherSerialize
 		preset.Name = "Test";
 		preset.Permission = "Test";
 
-		preset.Date.Year = 2019;
-		preset.Date.Month = 2;
-		preset.Date.Day = 18;
-		preset.Date.Hour = 9;
-		preset.Date.Minute = 5;
+		preset.PDate.Year = 2019;
+		preset.PDate.Month = 2;
+		preset.PDate.Day = 18;
+		preset.PDate.Hour = 9;
+		preset.PDate.Minute = 5;
 
 		preset.PFog.Forecast = 0.1;
 		preset.PFog.Time = 100;

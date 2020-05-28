@@ -27,19 +27,6 @@ class CommunityOnlineToolsBase
 		GetDayZGame().Event_OnRPC.Remove( OnRPC );
 	}
 
-	private string GetDateTime()
-	{
-		int year, month, day;
-		int hour, minute, second;
-		GetYearMonthDay( year, month, day );
-
-		GetHourMinuteSecond( hour, minute, second );
-		string date = day.ToStringLen( 2 ) + "-" + month.ToStringLen( 2 ) + "-" + year.ToStringLen( 2 );
-		string time = hour.ToStringLen( 2 ) + "-" + minute.ToStringLen( 2 ) + "-" + second.ToStringLen( 2 );
-
-		return date + "-" + time;
-	}
-
 	void CreateNewLog()
 	{
 		if ( !FileExist( JMConstants.DIR_LOGS ) )
@@ -47,7 +34,7 @@ class CommunityOnlineToolsBase
 			MakeDirectory( JMConstants.DIR_LOGS );
 		}
 
-		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + GetDateTime() + JMConstants.EXT_LOG;
+		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + Date.Now( true ).ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
 		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
 
 		if ( fileLog != 0 )
@@ -95,7 +82,6 @@ class CommunityOnlineToolsBase
 			m_Loaded = true;
 			OnLoaded();
 		}
-
 	}
 
 	bool IsActive()
@@ -180,7 +166,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
+			FPrintln( fileLog, "[COT " + Date.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
@@ -203,7 +189,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
+			FPrintln( fileLog, "[COT " + Date.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
@@ -226,7 +212,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + GetDateTime() + "] " + text );
+			FPrintln( fileLog, "[COT " + Date.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
