@@ -237,7 +237,7 @@ class JMWeatherPreset
 
 	float Time;
 
-	autoptr JMWeatherDate Date;
+	autoptr JMWeatherDate PDate;
 
 	autoptr JMWeatherStorm Storm;
 
@@ -252,7 +252,7 @@ class JMWeatherPreset
 
 	void JMWeatherPreset()
 	{
-		Date = new JMWeatherDate;
+		PDate = new JMWeatherDate;
 		Storm = new JMWeatherStorm;
 		PFog = new JMWeatherFog;
 		POvercast = new JMWeatherOvercast;
@@ -264,7 +264,7 @@ class JMWeatherPreset
 
 	void Apply()
 	{
-		Date.Apply();
+		PDate.Apply();
 		Storm.Apply();
 		PFog.Apply();
 		POvercast.Apply();
@@ -276,7 +276,7 @@ class JMWeatherPreset
 
 	void SetFromWorld()
 	{
-		Date.SetFromWorld();
+		PDate.SetFromWorld();
 		Storm.SetFromWorld();
 		PFog.SetFromWorld();
 		POvercast.SetFromWorld();
@@ -292,7 +292,7 @@ class JMWeatherPreset
 		{
 			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name + "(Permission: " + Permission + ")" );
 
-			Date.Log( pidentLogPP );
+			PDate.Log( pidentLogPP );
 			Storm.Log( pidentLogPP );
 			PFog.Log( pidentLogPP );
 			POvercast.Log( pidentLogPP );

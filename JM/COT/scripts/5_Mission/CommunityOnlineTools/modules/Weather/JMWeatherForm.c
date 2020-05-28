@@ -365,11 +365,11 @@ class JMWeatherForm extends JMFormBase
 		m_EditTextPresetName.SetText( preset.Name );
 		m_EditTextPresetPermission.SetText( preset.Permission );
 
-		m_EditTextDateYear.SetText( preset.Date.Year );
-		m_EditTextDateMonth.SetText( preset.Date.Month );
-		m_EditTextDateDay.SetText( preset.Date.Day );
-		m_EditTextDateHour.SetText( preset.Date.Hour );
-		m_EditTextDateMinute.SetText( preset.Date.Minute );
+		m_EditTextDateYear.SetText( preset.PDate.Year );
+		m_EditTextDateMonth.SetText( preset.PDate.Month );
+		m_EditTextDateDay.SetText( preset.PDate.Day );
+		m_EditTextDateHour.SetText( preset.PDate.Hour );
+		m_EditTextDateMinute.SetText( preset.PDate.Minute );
 
 		m_SliderStormDensity.SetCurrent( preset.Storm.Density * 100.0 );
 		m_SliderStormThreshold.SetCurrent( preset.Storm.Threshold * 100.0 );
@@ -407,11 +407,11 @@ class JMWeatherForm extends JMFormBase
 		preset.Name = m_EditTextPresetName.GetText();
 		preset.Permission = m_EditTextPresetPermission.GetText();
 
-		preset.Date.Year = ToFloat( m_EditTextDateYear.GetText() );
-		preset.Date.Month = ToFloat( m_EditTextDateMonth.GetText() );
-		preset.Date.Day = ToFloat( m_EditTextDateDay.GetText() );
-		preset.Date.Hour = ToFloat( m_EditTextDateHour.GetText() );
-		preset.Date.Minute = ToFloat( m_EditTextDateMinute.GetText() );
+		preset.PDate.Year = ToFloat( m_EditTextDateYear.GetText() );
+		preset.PDate.Month = ToFloat( m_EditTextDateMonth.GetText() );
+		preset.PDate.Day = ToFloat( m_EditTextDateDay.GetText() );
+		preset.PDate.Hour = ToFloat( m_EditTextDateHour.GetText() );
+		preset.PDate.Minute = ToFloat( m_EditTextDateMinute.GetText() );
 
 		preset.Storm.Density = m_SliderStormDensity.GetCurrent() * 0.01;
 		preset.Storm.Threshold = m_SliderStormThreshold.GetCurrent() * 0.01;
