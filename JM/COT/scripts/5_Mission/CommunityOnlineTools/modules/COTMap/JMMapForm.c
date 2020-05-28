@@ -2,13 +2,20 @@ class JMMapForm extends JMFormBase
 {
 	private MapWidget m_MapWidget;
 	private Widget m_BackgroundWidget;
+
+	private JMMapModule m_Module;
 	
 	override void OnInit()
 	{
-		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "JM_COT_GUI_Map" ) );
+		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
 
 		m_BackgroundWidget = window.GetLayoutRoot().FindAnyWidget( "background" );
 		m_BackgroundWidget.Show( false );
+	}
+
+	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	{
+		return Class.CastTo( m_Module, mdl );
 	}
 	
 	override void OnShow()
@@ -25,7 +32,7 @@ class JMMapForm extends JMFormBase
 	{
 		m_MapWidget.ClearUserMarks();
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Players.Map" ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Map" ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
