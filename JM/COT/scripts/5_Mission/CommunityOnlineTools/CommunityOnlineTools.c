@@ -50,6 +50,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			case JMClientRPC.RefreshClients:
 				RPC_RefreshClients( ctx, sender, target );
 				break;
+			case JMClientRPC.RefreshClientPositions:
+				RPC_RefreshClientPositions( ctx, sender, target );
+				break;
 			case JMClientRPC.RemoveClient:
 				RPC_RemoveClient( ctx, sender, target );
 				break;
@@ -97,8 +100,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			for ( int i = 0; i < players.Count(); i++ )
 			{
 				players[i].Update();
-				players[i].OnSend( rpc );
+				
 				rpc.Write( players[i].PlayerObject );
+				rpc.Write( players[i].GetGUID() );
+				players[i].OnSend( rpc );
 
 				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
 
@@ -175,7 +180,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionHost() )
 		{
-			Server_UpdateClient( guid, NULL );
+			Server_UpdateClient( guid, sendTo );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -217,9 +222,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				return;
 
 			Server_UpdateClient( guid, senderRPC );
-		}
-
-		if ( GetGame().IsClient() )
+		} else if ( GetGame().IsClient() )
 		{
 			PlayerBase po;
 			if ( !ctx.Read( po ) )
