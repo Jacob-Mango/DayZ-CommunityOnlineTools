@@ -83,7 +83,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() )
+		if ( !GetGame().IsClient() && settings )
 			settings.Save();
 	}
 

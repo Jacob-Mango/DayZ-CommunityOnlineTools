@@ -71,25 +71,6 @@ class JMCinematicCamera extends JMCameraBase
 			//}
 		}
 
-		/*
-		if ( !LookFreeze )
-		{
-			float yawQuat[4];
-			float pitchQuat[4];
-			vector yawMat[3];
-			vector pitchMat[3];
-
-			AngleToQuat( pitchDiff * 360.0 * timeslice, "0 1 0", pitchQuat );
-			AngleToQuat( -yawDiff * 360.0 * timeslice, "1 0 0", yawQuat );
-
-			Math3D.QuatToMatrix( pitchQuat, pitchMat );
-			Math3D.QuatToMatrix( yawQuat, yawMat );
-
-			Math3D.MatrixMultiply3( pitchMat, transform, transform );
-			Math3D.MatrixMultiply3( yawMat, transform, transform );
-		}
-		*/
-
 		SetTransform( transform );
 			
 		if ( !LookFreeze )
