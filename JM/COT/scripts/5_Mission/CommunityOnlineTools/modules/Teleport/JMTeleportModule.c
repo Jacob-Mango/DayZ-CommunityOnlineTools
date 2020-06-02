@@ -89,7 +89,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		super.RegisterKeyMouseBindings();
 		
 		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
-		RegisterBinding( new JMModuleBinding( "Input_WorldToModelLookAt",	"UATeleportModuleWorldToModelLookAt",	true 	) );
+		//RegisterBinding( new JMModuleBinding( "Input_WorldToModelLookAt",	"UATeleportModuleWorldToModelLookAt",	true 	) );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()
@@ -138,7 +138,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -160,7 +160,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			Position( hitPos );
 		} else
 		{
-			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
 		}
 	}
 
@@ -259,6 +259,8 @@ class JMTeleportModule: JMRenderableModuleBase
 			return;
 
 		SetPlayerPosition( player, position );
+
+		// COTCreateNotification( player.GetIdentity(), new StringLocaliser( "Teleported to position " + position.ToString() ) );
 
 		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
 	}
