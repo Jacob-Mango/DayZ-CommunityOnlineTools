@@ -207,10 +207,10 @@ class COTModule : JMModuleBase
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
-			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_on" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_on" ) );
 		} else
 		{
-			CreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_off" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_off" ) );
 		}
 	}
 
