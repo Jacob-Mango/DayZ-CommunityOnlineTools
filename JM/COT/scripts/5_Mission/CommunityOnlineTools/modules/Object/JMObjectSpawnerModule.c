@@ -212,7 +212,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		//int flags = ECE_CREATEPHYSICS;
 		//if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
 		//	flags |= 0x800;
-		//Object obj = GetGame().CreateObject_WIP( ent, position, flags );
+		//Object obj = GetGame().CreateObjectEx( ent, position, flags );
 
 		Object obj = GetGame().CreateObject( ent, position, false, GetGame().IsKindOf( ent, "DZ_LightAI" ) );
 		if ( !obj )
