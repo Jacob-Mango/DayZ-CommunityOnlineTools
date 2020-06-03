@@ -232,7 +232,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		array< string > attachments = file.Parts;
 
 		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
-		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject_WIP( file.VehicleName, position, ECE_CREATEPHYSICS ) );
+		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) );
         if ( vehicle )
         {
             for ( int j = 0; j < attachments.Count(); j++ )
