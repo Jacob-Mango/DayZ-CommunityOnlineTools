@@ -132,7 +132,8 @@ class ESPRenderBox extends ScriptedWidgetEventHandler
 		m_CheckboxStyle.Show( !ShowJustName );
 		m_JustName.Show( ShowJustName );
 			
-		ScreenPos = GetGame().GetScreenPos( GetPosition() );
+		vector position = GetPosition();
+		ScreenPos = GetGame().GetScreenPos( position );
 
 		GetScreenSize( Width, Height );
 
@@ -157,7 +158,7 @@ class ESPRenderBox extends ScriptedWidgetEventHandler
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1] - ( Height / 2 ), true );
 
-			float distance = Math.Round( ScreenPos[2] * 10.0 ) / 10.0;
+			float distance = Math.Round( vector.Distance( position, GetGame().GetPlayer().GetPosition() ) * 10.0 ) / 10.0;
 
 			string text = "";
 
