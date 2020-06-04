@@ -164,7 +164,7 @@ class JMObjectSpawnerForm extends JMFormBase
 	{
 		super.OnShow();
 
-		m_CurrentType = "All";
+		m_CurrentType = "";
 		
 		UpdateList();
 	}
