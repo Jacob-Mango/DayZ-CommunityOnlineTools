@@ -322,6 +322,10 @@ class JMObjectSpawnerForm extends JMFormBase
 		{
 			case "ItemOptics":
 				return true;
+			case "QuickieBow":
+				return true;
+			case "M203":
+				return true;
 		}
 
 		return false;
