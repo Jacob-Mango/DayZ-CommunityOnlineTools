@@ -349,8 +349,8 @@ class JMESPModule: JMRenderableModuleBase
 					IsShowing = false;
 			} else
 			{
-				if ( m_IsDestroyingWidgets || m_IsCreatingWidgets )
-					Sleep( 100 );
+				if ( ( m_IsDestroyingWidgets || m_IsCreatingWidgets ) && ( IsShowing || ToDestroy ) )
+					Sleep( 50 );
 				else 
 					Sleep( 500 );
 			}

@@ -35,7 +35,6 @@ class JMESPForm extends JMFormBase
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "Simplified", this, "Click_ChangeESPMode", JMESPWidget.Simplified );
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidget.UseClassName );
 
 		UIActionManager.CreateButton( quadSpacer, "Update Interval", this, "Click_UpdateAtRate" );
@@ -184,13 +183,6 @@ class JMESPForm extends JMFormBase
 		UpdateESPButtonName();
 
 		UpdateCheckboxStates();
-	}
-
-	void Click_ChangeESPMode( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		JMESPWidget.Simplified = action.IsChecked();
 	}
 	
 	void Change_Filter( UIEvent eid, ref UIActionBase action )

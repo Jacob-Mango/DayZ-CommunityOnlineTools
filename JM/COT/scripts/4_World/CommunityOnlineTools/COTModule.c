@@ -32,6 +32,12 @@ class COTModule : JMModuleBase
 	{
 		if ( IsMissionClient() )
 		{
+			if ( !JMStatics.ESP_CONTAINER )
+				JMStatics.ESP_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
+			
+			if ( !JMStatics.WINDOWS_CONTAINER )
+				JMStatics.WINDOWS_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
+			
 			if ( m_COTMenu == NULL )
 			{
 				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
@@ -175,6 +181,12 @@ class COTModule : JMModuleBase
 				}
 
 				if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
+				{
+					canContinue = true;
+					break;
+				}
+
+				if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
 				{
 					canContinue = true;
 					break;

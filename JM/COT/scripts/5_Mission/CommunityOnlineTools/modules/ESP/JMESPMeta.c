@@ -12,7 +12,7 @@ class JMESPMeta : Managed
 	{
 		Print( "JMESPMeta::Create - " + target );
 
-		Widget w = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout" );
+		Widget w = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER );
 
 		if ( w == NULL )
 			return;
