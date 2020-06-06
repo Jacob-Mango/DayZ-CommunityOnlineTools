@@ -35,7 +35,6 @@ class JMESPForm extends JMFormBase
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "Simplified", this, "Click_ChangeESPMode", JMESPWidget.Simplified );
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidget.UseClassName );
 
 		UIActionManager.CreateButton( quadSpacer, "Update Interval", this, "Click_UpdateAtRate" );
@@ -170,35 +169,21 @@ class JMESPForm extends JMFormBase
 			return;
 
 		if ( m_Module.IsShowing )
-		{			
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( m_Module.UpdateESP );
-
-			m_Module.HideESP();
+		{
+			m_Module.ToDestroy = true;
+			m_Module.IsShowing = false;
+			m_Module.ESPIsUpdating = false;
 		} else
 		{
-			m_Module.UpdateESP();
+			m_Module.ToDestroy = false;
+			m_Module.IsShowing = true;
 		}
 
-		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + m_Module.IsShowing ) );
+		m_Module.Log( "ESP Showing " + m_Module.IsShowing );
 
 		UpdateESPButtonName();
 
 		UpdateCheckboxStates();
-	}
-
-	// Removed.
-	void Click_HideESP( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		m_Module.HideESP();
-	}
-
-	void Click_ChangeESPMode( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		JMESPWidget.Simplified = action.IsChecked();
 	}
 	
 	void Change_Filter( UIEvent eid, ref UIActionBase action )
@@ -244,8 +229,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		m_Module.ESPUpdateLoop( !m_Module.ESPIsUpdating );
-
+		m_Module.ESPIsUpdating = !m_Module.ESPIsUpdating;
 		UpdateRefreshRateSlider();
 	}
 }

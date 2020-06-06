@@ -3,19 +3,25 @@ enum JMESPModuleRPC
 	INVALID = 10300,
 	Log,
 	FullMap,
+	SetPosition,
+	SetOrientation,
+	SetHealth,
 	COUNT
 };
 
 class JMESPModule: JMRenderableModuleBase
 {
-	protected const int m_UserIDStart = 10000;
+	private autoptr array< ref JMESPMeta > m_ActiveESPObjects;
 
-	protected autoptr array< ref JMESPMeta > m_ESPObjects;
-	protected autoptr array< ref JMESPWidget > m_ESPBoxes;
+	private autoptr array< ref JMESPMeta > m_ESPToCreate;
+	private autoptr array< JMESPMeta > m_ESPToDestroy;
 
-	protected autoptr array< ref JMESPViewType > m_ViewTypes;
+	private autoptr map< Object, JMESPMeta > m_MappedESPObjects;
 
-	protected int m_UserID;
+	private autoptr array< ref JMESPViewType > m_ViewTypes;
+
+	private bool m_IsCreatingWidgets;
+	private bool m_IsDestroyingWidgets;
 
 	string Filter;
 
@@ -24,12 +30,16 @@ class JMESPModule: JMRenderableModuleBase
 	bool ESPIsUpdating;
 
 	bool IsShowing;
+	bool ToDestroy;
 
 	void JMESPModule()
 	{
-		m_ESPObjects = new array< ref JMESPMeta >;
-		m_ESPBoxes = new array< ref JMESPWidget >;
-		m_UserID = m_UserIDStart;
+		m_ActiveESPObjects = new array< ref JMESPMeta >;
+
+		m_ESPToCreate = new array< ref JMESPMeta >;
+		m_ESPToDestroy = new array< JMESPMeta >;
+
+		m_MappedESPObjects = new map< Object, JMESPMeta >;
 
 		m_ViewTypes = new array< ref JMESPViewType >;
 
@@ -38,7 +48,6 @@ class JMESPModule: JMRenderableModuleBase
 		ESPUpdateTime = 0.5;
 		IsShowing = false;
 
-		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
@@ -46,8 +55,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	void ~JMESPModule()
 	{
-		HideESP();
-
 		Hide();
 	}
 
@@ -99,37 +106,46 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnInit()
 	{
-		RegisterTypes();
-
-		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
+		TTypenameArray espTypes = new TTypenameArray;
+		RegisterTypes( espTypes );
+		
+		for(int i = 0; i < espTypes.Count(); i++)
 		{
-			GetPermissionsManager().RegisterPermission( "ESP.View." + m_ViewTypes[i].Permission );
+			if ( espTypes[i].IsInherited( JMESPViewType ) )
+			{
+				ref JMESPViewType viewType = espTypes[i].Spawn();
+				if ( viewType )
+				{
+					m_ViewTypes.Insert( viewType );
+					GetPermissionsManager().RegisterPermission( "ESP.View." + viewType.Permission );
+				}
+			}
 		}
 	}
 
-	void RegisterTypes()
+	void RegisterTypes( out TTypenameArray types )
 	{
-		m_ViewTypes.Insert( new JMESPViewTypePlayer );
-		m_ViewTypes.Insert( new JMESPViewTypeInfected );
-		m_ViewTypes.Insert( new JMESPViewTypeAnimal );
-		m_ViewTypes.Insert( new JMESPViewTypeCar );
-		m_ViewTypes.Insert( new JMESPViewTypeBaseBuilding );
-		m_ViewTypes.Insert( new JMESPViewTypeBoltActionRifle );
-		m_ViewTypes.Insert( new JMESPViewTypeRifle );
-		m_ViewTypes.Insert( new JMESPViewTypePistol );
-		m_ViewTypes.Insert( new JMESPViewTypeWeapon );
-		m_ViewTypes.Insert( new JMESPViewTypeItemTool );
-		m_ViewTypes.Insert( new JMESPViewTypeItemCrafted );
-		m_ViewTypes.Insert( new JMESPViewTypeItemTent );
-		m_ViewTypes.Insert( new JMESPViewTypeItemMaterial );
-		m_ViewTypes.Insert( new JMESPViewTypeItemAttachment );
-		m_ViewTypes.Insert( new JMESPViewTypeItemFood );
-		m_ViewTypes.Insert( new JMESPViewTypeItemExplosive );
-		m_ViewTypes.Insert( new JMESPViewTypeItemBook );
-		m_ViewTypes.Insert( new JMESPViewTypeItemContainer );
-		m_ViewTypes.Insert( new JMESPViewTypeItemEyewear );
-		m_ViewTypes.Insert( new JMESPViewTypeItemAmmo );
-		m_ViewTypes.Insert( new JMESPViewTypeItem );
+		types.Insert( JMESPViewTypePlayer );
+		types.Insert( JMESPViewTypeInfected );
+		types.Insert( JMESPViewTypeAnimal );
+		types.Insert( JMESPViewTypeCar );
+		types.Insert( JMESPViewTypeBaseBuilding );
+		types.Insert( JMESPViewTypeBoltActionRifle );
+		types.Insert( JMESPViewTypeRifle );
+		types.Insert( JMESPViewTypePistol );
+		types.Insert( JMESPViewTypeWeapon );
+		types.Insert( JMESPViewTypeItemTool );
+		types.Insert( JMESPViewTypeItemCrafted );
+		types.Insert( JMESPViewTypeItemTent );
+		types.Insert( JMESPViewTypeItemMaterial );
+		types.Insert( JMESPViewTypeItemAttachment );
+		types.Insert( JMESPViewTypeItemFood );
+		types.Insert( JMESPViewTypeItemExplosive );
+		types.Insert( JMESPViewTypeItemBook );
+		types.Insert( JMESPViewTypeItemContainer );
+		types.Insert( JMESPViewTypeItemEyewear );
+		types.Insert( JMESPViewTypeItemAmmo );
+		types.Insert( JMESPViewTypeItem );
 	}
 
 	array< ref JMESPViewType > GetViewTypes()
@@ -142,6 +158,8 @@ class JMESPModule: JMRenderableModuleBase
 		if ( IsMissionClient() )
 		{
 			JMESPWidget.espModule = this;
+
+			GetGame().GameScript.Call( this, "ThreadESP", NULL );
 		}
 	}
 
@@ -178,139 +196,314 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMissionFinish()
 	{
-		HideESP();
-	}
-
-	void HideESP()
-	{
-		IsShowing = false;
-
-		for (int j = 0; j < m_ESPBoxes.Count(); j++ )
+		for (int j = 0; j < m_ActiveESPObjects.Count(); j++ )
 		{
-			m_ESPBoxes[j].Unlink();
+			m_ActiveESPObjects[j].Destroy();
 		}
 
-		m_ESPBoxes.Clear();
-
-		m_ESPObjects.Clear();
-
-		m_UserID = m_UserIDStart;
+		m_ActiveESPObjects.Clear();
 	}
 
-	void UpdateESP()
+	void CreateNewWidgets()
 	{
-		HideESP();
+		m_IsCreatingWidgets = true;
 
-		IsShowing = true;
-
-		array<Object> objects = new array<Object>;
-		GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
-
-		bool isUsingFilter = Filter.Length() > 0;
-
-		string filter = Filter + "";
-		filter.ToLower();
-
-		for (int i = 0; i < objects.Count(); ++i)
+		for ( int i = 0; i < m_ESPToCreate.Count(); ++i )
 		{
-			Object obj = objects[i];
+			m_ESPToCreate[i].Create( this );
 
-			if ( obj == NULL )
-				continue;
+			m_ActiveESPObjects.Insert( m_ESPToCreate[i] );
+		}
 
-			string type = obj.GetType();
-			type.ToLower();
+		m_ESPToCreate.Clear();
 
-			if ( !IsMissionOffline() && !obj.HasNetworkID() )
-				continue;
+		m_IsCreatingWidgets = false;
+	}
 
-			if ( obj.IsRock() )
-				continue;
+	void DestroyOldWidgets()
+	{
+		m_IsDestroyingWidgets = true;
 
-			if ( obj.IsWoodBase() )
-				continue;
+		for ( int i = 0; i < m_ESPToDestroy.Count(); ++i )
+		{
+			m_ESPToDestroy[i].Destroy();
 
-			if ( obj.IsBush() )
-				continue;
+			int remove_index = m_ActiveESPObjects.Find( m_ESPToDestroy[i] );
+			if ( remove_index >= 0 )
+				m_ActiveESPObjects.Remove( remove_index );
+		}
 
-			if ( obj.IsTree() )
-				continue;
+		m_ESPToDestroy.Clear();
 
-			if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
-				continue;
+		m_IsDestroyingWidgets = false;
+	}
 
-			if ( isUsingFilter && !type.Contains( filter ) )
-				continue;
-
-			for ( int j = 0; j < m_ViewTypes.Count(); j++ )
+	void ThreadESP()
+	{
+		while ( true )
+		{
+			if ( ( IsShowing || ToDestroy ) && !m_IsDestroyingWidgets && !m_IsCreatingWidgets )
 			{
-				JMESPMeta espInfo;
-				if ( m_ViewTypes[j].IsValid( obj, espInfo ) )
+				array<Object> objects = new array<Object>;
+				array<Object> addedObjects = new array<Object>;
+
+				GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
+
+				bool isUsingFilter = Filter.Length() > 0;
+
+				string filter = Filter + "";
+				filter.ToLower();
+
+				int k;
+
+				if ( ToDestroy )
 				{
-					CreateESPBox( espInfo );
+					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
+					{
+						m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+					}
+				} else if ( IsShowing )
+				{
+					for ( int i = 0; i < objects.Count(); ++i )
+					{
+						Object obj = objects[i];
+
+						if ( obj == NULL )
+							continue;
+
+						string type = obj.GetType();
+						type.ToLower();
+
+						if ( !IsMissionOffline() && !obj.HasNetworkID() )
+							continue;
+
+						if ( obj.IsRock() )
+							continue;
+
+						if ( obj.IsWoodBase() )
+							continue;
+
+						if ( obj.IsBush() )
+							continue;
+
+						if ( obj.IsTree() )
+							continue;
+
+						if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
+							continue;
+
+						if ( isUsingFilter && !type.Contains( filter ) )
+							continue;
+
+						JMESPMeta meta = m_MappedESPObjects.Get( obj );
+						if ( meta != NULL )
+						{
+							if ( meta.IsValid() )
+							{
+								addedObjects.Insert( obj );
+							}
+						} else
+						{
+							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
+							{
+								if ( m_ViewTypes[j].IsValid( obj, meta ) )
+								{
+									m_MappedESPObjects.Insert( obj, meta );
+
+									m_ESPToCreate.Insert( meta );
+
+									j = m_ViewTypes.Count();
+								}
+							}
+						}
+					}
+
+					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
+					{
+						if ( m_ActiveESPObjects[k].target == NULL )
+						{
+							m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+						} else if ( addedObjects.Find( m_ActiveESPObjects[k].target ) == -1 )
+						{
+							m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+						}
+					}
+
+					GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );
 				}
-			}
-		}
+			
+				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
+				
+				if ( ToDestroy )
+				{
+					ESPIsUpdating = false;
+					IsShowing = false;
+					ToDestroy = false;
+				}
 
-		objects.Clear();
-		delete objects;
+				Sleep( ESPUpdateTime * 1000 );
 
-		if ( ESPIsUpdating )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateESP, ESPUpdateTime * 1000.0 );
-		} else
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
-		}
-	}
-
-	void ESPUpdateLoop( bool isDoing )
-	{
-		ESPIsUpdating = isDoing;
-
-		if ( ESPIsUpdating )
-		{
-			if ( IsShowing )
-			{
-				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.UpdateESP, ESPUpdateTime * 1000.0 );
+				if ( !ESPIsUpdating )
+					IsShowing = false;
 			} else
 			{
-				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
+				if ( ( m_IsDestroyingWidgets || m_IsCreatingWidgets ) && ( IsShowing || ToDestroy ) )
+					Sleep( 50 );
+				else 
+					Sleep( 500 );
 			}
-		} else 
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( this.UpdateESP );
 		}
 	}
 
-	void ESPLog( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
+	override int GetRPCMin()
 	{
-		ref Param1< string > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Server )
+		return JMESPModuleRPC.INVALID;
+	}
+
+	override int GetRPCMax()
+	{
+		return JMESPModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
 		{
-			GetCommunityOnlineToolsBase().Log( senderRPC, "ESP " + data.param1 );
+		case JMESPModuleRPC.Log:
+			RPC_Log( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetPosition:
+			RPC_SetPosition( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetOrientation:
+			RPC_SetOrientation( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetHealth:
+			RPC_SetHealth( ctx, sender, target );
+			break;
 		}
 	}
 
-	void CreateESPBox( ref JMESPMeta info )
+	void Log( string log )
 	{
-		ref JMESPWidget boxScript = NULL;
-		ref Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout" );
+		if ( IsMissionOffline() )
+		{
+			Exec_Log( log, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( log );
+			rpc.Send( NULL, JMESPModuleRPC.Log, false, NULL );
+		}
+	}
 
-		if ( widget == NULL ) return;
+	private void Exec_Log( string log, PlayerIdentity ident )
+	{
+		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
+	}
 
-		m_UserID++;
+	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		string log;
+		if ( !ctx.Read( log ) )
+			return;
 
-		widget.SetUserID( m_UserID );
-		widget.GetScript( boxScript );
+		Exec_Log( log, senderRPC );
+	}
 
-		if ( boxScript == NULL ) return;
+	void SetPosition( vector position, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetPosition( position, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( position );
+			rpc.Send( target, JMESPModuleRPC.SetPosition, false, NULL );
+		}
+	}
 
-		boxScript.SetInfo( info );
+	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident )
+	{
+		target.SetPosition( position );
 
-		m_ESPBoxes.Insert( boxScript );
-		m_ESPObjects.Insert( info );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " position=" + position );
+	}
+
+	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		vector position;
+		if ( !ctx.Read( position ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Position", senderRPC ) )
+			return;
+
+		Exec_SetPosition( position, target, senderRPC );
+	}
+
+	void SetOrientation( vector orientation, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetOrientation( orientation, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( orientation );
+			rpc.Send( target, JMESPModuleRPC.SetOrientation, false, NULL );
+		}
+	}
+
+	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident )
+	{
+		target.SetOrientation( orientation );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " orientation=" + orientation );
+	}
+
+	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		vector orientation;
+		if ( !ctx.Read( orientation ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Orientation", senderRPC ) )
+			return;
+
+		Exec_SetOrientation( orientation, target, senderRPC );
+	}
+
+	void SetHealth( float health, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetHealth( health, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( health );
+			rpc.Send( target, JMESPModuleRPC.SetHealth, false, NULL );
+		}
+	}
+
+	private void Exec_SetHealth( float health, Object target, PlayerIdentity ident )
+	{
+		target.SetHealth( health );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " health=" + health );
+	}
+
+	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float health;
+		if ( !ctx.Read( health ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Health", senderRPC ) )
+			return;
+
+		Exec_SetHealth( health, target, senderRPC );
 	}
 }

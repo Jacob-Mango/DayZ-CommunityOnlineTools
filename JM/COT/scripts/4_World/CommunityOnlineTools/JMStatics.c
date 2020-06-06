@@ -1,5 +1,8 @@
 class JMStatics
 {
+	static Widget ESP_CONTAINER;
+	static Widget WINDOWS_CONTAINER;
+
     static void SortStringArray( out array< string > arr )
 	{
         int count = arr.Count();

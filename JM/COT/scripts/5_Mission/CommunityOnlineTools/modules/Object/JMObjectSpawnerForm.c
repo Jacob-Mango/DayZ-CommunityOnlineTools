@@ -164,7 +164,7 @@ class JMObjectSpawnerForm extends JMFormBase
 	{
 		super.OnShow();
 
-		m_CurrentType = "All";
+		m_CurrentType = "";
 		
 		UpdateList();
 	}
@@ -321,6 +321,10 @@ class JMObjectSpawnerForm extends JMFormBase
 		switch ( name )
 		{
 			case "ItemOptics":
+				return true;
+			case "QuickieBow":
+				return true;
+			case "M203":
 				return true;
 		}
 

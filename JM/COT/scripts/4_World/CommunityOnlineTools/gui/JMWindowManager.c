@@ -2,8 +2,6 @@ class JMWindowManager
 {
 	private autoptr array< JMWindowBase > m_Windows;
 
-	private Widget m_WindowContainer;
-
 	private ImageWidget m_MainCursorWidget;
 
 	void JMWindowManager()
@@ -15,19 +13,10 @@ class JMWindowManager
 	{
 	}
 
-	void Init()
-	{
-		m_WindowContainer = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen.layout", NULL );
-
-		//Class.CastTo( m_MainCursorWidget, GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/cursors/main.layout" ) );
-		//m_MainCursorWidget.SetSort( 1024 );
-		//SetCursorWidget( m_MainCursorWidget );
-	}
-
 	JMWindowBase Create()
 	{
 		JMWindowBase window;
-		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", m_WindowContainer ).GetScript( window );
+		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", JMStatics.WINDOWS_CONTAINER ).GetScript( window );
 		return window;
 	}
 
@@ -118,10 +107,9 @@ ref JMWindowManager g_cot_WindowManager;
 
 ref JMWindowManager GetCOTWindowManager()
 {
-	if( !g_cot_WindowManager )
+	if ( !g_cot_WindowManager )
 	{
 		g_cot_WindowManager = new JMWindowManager();
-		g_cot_WindowManager.Init();
 	}
 
 	return g_cot_WindowManager;
