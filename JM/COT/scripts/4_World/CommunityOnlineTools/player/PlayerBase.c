@@ -20,7 +20,7 @@ modded class PlayerBase
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
 
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DeferredInit );
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( DeferredInit, 1000, false );
 	}
 
 	override void OnVariablesSynchronized()
@@ -44,16 +44,20 @@ modded class PlayerBase
 
 	void DeferredInit()
 	{
-		if ( !IsMissionHost() )
-			return;
-
-		if ( GetIdentity() )
+		if ( IsMissionOffline() )
 		{
-			m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-			if ( m_AuthenticatedPlayer )
+			m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+		} else if ( IsMissionClient() )
+		{
+			if ( GetIdentity() )
 			{
-				m_AuthenticatedPlayer.PlayerObject = this;
+				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
 			}
+		}
+
+		if ( m_AuthenticatedPlayer )
+		{
+			m_AuthenticatedPlayer.PlayerObject = this;
 		}
 	}
 
@@ -106,7 +110,7 @@ modded class PlayerBase
 		}
 	}
 
-	ref JMPlayerInstance GetAuthenticatedPlayer()
+	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		return m_AuthenticatedPlayer;
 	}

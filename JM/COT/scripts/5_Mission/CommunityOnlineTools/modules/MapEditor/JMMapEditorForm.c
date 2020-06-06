@@ -102,7 +102,7 @@ class JMMapEditorForm
 
 		Input input = GetGame().GetInput();
 
-		if ( GetWidgetUnderCursor() == NULL || GetWidgetUnderCursor().GetName() != "Windows" && GetWidgetUnderCursor().GetName() != "map_editor_menu" )
+		if ( GetWidgetUnderCursor() == NULL || GetWidgetUnderCursor().GetName() != "Windows_Container" && GetWidgetUnderCursor().GetName() != "map_editor_menu" )
 			return;
 		
 		if ( input.LocalRelease( "UADefaultAction", false ) && m_SelectedObject )

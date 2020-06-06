@@ -9,6 +9,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	protected bool m_HasCallback;
 
+	protected bool m_WasFocused;
+
 	protected ref UIActionData m_Data;
 
 	void ~UIActionBase()
@@ -16,6 +18,16 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		delete m_Data;
 		
 		Hide();
+	}
+
+	void GetUserData( out Class data )
+	{
+		layoutRoot.GetUserData( data );
+	}
+
+	void SetUserData( Class data )
+	{
+		layoutRoot.SetUserData( data );
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -60,6 +72,48 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Update( float timeSlice )
 	{
+	}
+
+	bool IsFocused()
+	{
+		return m_WasFocused;
+	}
+
+	override bool OnFocus( Widget w, int x, int y )
+	{
+		if ( IsFocusWidget( w ) )
+		{
+			m_WasFocused = true;
+
+			return true;
+		}
+
+		return super.OnFocus( w, x, y );
+	}
+
+	override bool OnFocusLost( Widget w, int x, int y )
+	{
+		if ( IsFocusWidget( w ) )
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateFocusState, 50, true );
+
+			return true;
+		}
+
+		return super.OnFocusLost( w, x, y );
+	}
+
+	bool IsFocusWidget( Widget widget )
+	{
+		return false;
+	}
+
+	void UpdateFocusState()
+	{
+		if ( IsFocusWidget( GetFocus() ) )
+			return;
+
+		m_WasFocused = false;
 	}
 
 	void UpdatePermission( string permission )
@@ -263,11 +317,6 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	vector GetValue()
 	{
 		return "0 0 0";
-	}
-
-	void RemoveDisableInput()
-	{
-		DISABLE_ALL_INPUT = false;
 	}
 
 	void SetSelection( int i, bool sendEvent = true )

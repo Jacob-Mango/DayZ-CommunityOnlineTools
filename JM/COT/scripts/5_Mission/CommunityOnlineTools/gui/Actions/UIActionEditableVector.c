@@ -51,8 +51,23 @@ class UIActionEditableVector extends UIActionBase
 		m_Label.SetText( text );
 	}
 
+	bool IsFocusWidget( Widget widget )
+	{
+		if ( widget == m_TextX )
+			return true;
+		if ( widget == m_TextY )
+			return true;
+		if ( widget == m_TextZ )
+			return true;
+
+		return false;
+	}
+
 	override void SetValue( vector v )
 	{
+		if ( IsFocused() )
+			return;
+
 		m_TextX.SetText( v[0].ToString() );
 		m_TextY.SetText( v[1].ToString() );
 		m_TextZ.SetText( v[2].ToString() );
@@ -68,52 +83,6 @@ class UIActionEditableVector extends UIActionBase
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 
-	override bool OnMouseEnter( Widget w, int x, int y )
-	{
-		if ( w == m_TextX )
-		{
-			SetFocus( m_TextX );
-			return true;
-		}
-
-		if ( w == m_TextY )
-		{
-			SetFocus( m_TextY );
-			return true;
-		}
-		
-		if ( w == m_TextZ )
-		{
-			SetFocus( m_TextZ );
-			return true;
-		}
-
-		return false;
-	}
-
-	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
-	{
-		if ( w == m_TextX )
-		{
-			SetFocus( NULL );
-			return true;
-		}
-
-		if ( w == m_TextY )
-		{
-			SetFocus( NULL );
-			return true;
-		}
-
-		if ( w == m_TextZ )
-		{
-			SetFocus( NULL );
-			return true;
-		}
-
-		return false;
-	}
-
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( !m_HasCallback )
@@ -121,9 +90,8 @@ class UIActionEditableVector extends UIActionBase
 
 		if ( w == m_TextX || w == m_TextY || w == m_TextZ )
 		{
-			DISABLE_ALL_INPUT = true;
 			CallEvent( UIEvent.CHANGE );
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
+			
 			return true;
 		}
 		
