@@ -199,6 +199,8 @@ class COTModule : JMModuleBase
 			{
 				m_GameActive = true;
 
+				SetFocus( NULL );
+
 				UpdateMouseControls();
 			}
 		}
