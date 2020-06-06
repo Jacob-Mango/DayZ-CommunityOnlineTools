@@ -114,7 +114,7 @@ GridSpacerWidgetClass JMESPWidget {
   }
   PanelWidgetClass esp_actions_container {
    visible 1
-   ignorepointer 1
+   ignorepointer 0
    position 0 22
    size 1 200
    hexactpos 1

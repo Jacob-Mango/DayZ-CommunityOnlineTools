@@ -18,6 +18,16 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		Hide();
 	}
 
+	void GetUserData( out Class data )
+	{
+		layoutRoot.GetUserData( data );
+	}
+
+	void SetUserData( Class data )
+	{
+		layoutRoot.SetUserData( data );
+	}
+
 	void OnWidgetScriptInit( Widget w )
 	{
 		layoutRoot = w;

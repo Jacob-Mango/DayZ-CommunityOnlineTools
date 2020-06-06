@@ -172,13 +172,14 @@ class JMESPForm extends JMFormBase
 		{
 			m_Module.ToDestroy = true;
 			m_Module.IsShowing = false;
+			m_Module.ESPIsUpdating = false;
 		} else
 		{
 			m_Module.ToDestroy = false;
 			m_Module.IsShowing = true;
 		}
 
-		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + m_Module.IsShowing ) );
+		m_Module.Log( "ESP Showing " + m_Module.IsShowing );
 
 		UpdateESPButtonName();
 

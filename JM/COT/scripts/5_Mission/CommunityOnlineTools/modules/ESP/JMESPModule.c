@@ -3,6 +3,9 @@ enum JMESPModuleRPC
 	INVALID = 10300,
 	Log,
 	FullMap,
+	SetPosition,
+	SetOrientation,
+	SetHealth,
 	COUNT
 };
 
@@ -45,7 +48,6 @@ class JMESPModule: JMRenderableModuleBase
 		ESPUpdateTime = 0.5;
 		IsShowing = false;
 
-		GetRPCManager().AddRPC( "COT_ESP", "ESPLog", this, SingeplayerExecutionType.Server );
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
@@ -208,7 +210,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < m_ESPToCreate.Count(); ++i )
 		{
-			m_ESPToCreate[i].Create();
+			m_ESPToCreate[i].Create( this );
 
 			m_ActiveESPObjects.Insert( m_ESPToCreate[i] );
 		}
@@ -304,7 +306,6 @@ class JMESPModule: JMRenderableModuleBase
 						{
 							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
 							{
-								meta = new JMESPMeta;
 								if ( m_ViewTypes[j].IsValid( obj, meta ) )
 								{
 									m_MappedESPObjects.Insert( obj, meta );
@@ -312,9 +313,6 @@ class JMESPModule: JMRenderableModuleBase
 									m_ESPToCreate.Insert( meta );
 
 									j = m_ViewTypes.Count();
-								} else
-								{
-									delete meta;
 								}
 							}
 						}
@@ -357,14 +355,155 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void ESPLog( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
+	override int GetRPCMin()
 	{
-		ref Param1< string > data;
-		if ( !ctx.Read( data ) ) return;
-		
-		if ( type == CallType.Server )
+		return JMESPModuleRPC.INVALID;
+	}
+
+	override int GetRPCMax()
+	{
+		return JMESPModuleRPC.COUNT;
+	}
+
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	{
+		switch ( rpc_type )
 		{
-			GetCommunityOnlineToolsBase().Log( senderRPC, "ESP " + data.param1 );
+		case JMESPModuleRPC.Log:
+			RPC_Log( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetPosition:
+			RPC_SetPosition( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetOrientation:
+			RPC_SetOrientation( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetHealth:
+			RPC_SetHealth( ctx, sender, target );
+			break;
 		}
+	}
+
+	void Log( string log )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_Log( log, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( log );
+			rpc.Send( NULL, JMESPModuleRPC.Log, false, NULL );
+		}
+	}
+
+	private void Exec_Log( string log, PlayerIdentity ident )
+	{
+		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
+	}
+
+	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		string log;
+		if ( !ctx.Read( log ) )
+			return;
+
+		Exec_Log( log, senderRPC );
+	}
+
+	void SetPosition( vector position, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetPosition( position, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( position );
+			rpc.Send( target, JMESPModuleRPC.SetPosition, false, NULL );
+		}
+	}
+
+	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident )
+	{
+		target.SetPosition( position );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " position=" + position );
+	}
+
+	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		vector position;
+		if ( !ctx.Read( position ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Position", senderRPC ) )
+			return;
+
+		Exec_SetPosition( position, target, senderRPC );
+	}
+
+	void SetOrientation( vector orientation, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetOrientation( orientation, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( orientation );
+			rpc.Send( target, JMESPModuleRPC.SetOrientation, false, NULL );
+		}
+	}
+
+	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident )
+	{
+		target.SetOrientation( orientation );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " orientation=" + orientation );
+	}
+
+	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		vector orientation;
+		if ( !ctx.Read( orientation ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Orientation", senderRPC ) )
+			return;
+
+		Exec_SetOrientation( orientation, target, senderRPC );
+	}
+
+	void SetHealth( float health, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetHealth( health, target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( health );
+			rpc.Send( target, JMESPModuleRPC.SetHealth, false, NULL );
+		}
+	}
+
+	private void Exec_SetHealth( float health, Object target, PlayerIdentity ident )
+	{
+		target.SetHealth( health );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " health=" + health );
+	}
+
+	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float health;
+		if ( !ctx.Read( health ) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Health", senderRPC ) )
+			return;
+
+		Exec_SetHealth( health, target, senderRPC );
 	}
 }

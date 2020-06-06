@@ -14,6 +14,9 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	private Widget m_pnl_Actions;
 
+	private UIActionScroller m_scrler_Actions;
+	private Widget m_rows_Actions;
+
 	bool ShowOnScreen;
 
 	int Width;
@@ -52,6 +55,9 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		}
 
 		Class.CastTo( m_pnl_Actions, layoutRoot.FindAnyWidget( "esp_actions_container" ) );
+
+		m_scrler_Actions = UIActionManager.CreateScroller( m_pnl_Actions );
+		m_rows_Actions = UIActionManager.CreateActionRows( m_scrler_Actions.GetContentWidget() );
 
 		HideActions();
 	}
@@ -202,6 +208,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			}
 
 			m_txt_ObjectName.SetText( text );
+
+			m_scrler_Actions.UpdateScroller();
 			
 			Show();
 		} else 
@@ -215,8 +223,10 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void SetInfo( ref JMESPMeta info )
+	void SetInfo( ref JMESPMeta info, out Widget action_rows )
 	{
+		action_rows = m_rows_Actions;
+
 		Info = info;
 		
 		if ( Info == NULL || Info.target == NULL ) 
