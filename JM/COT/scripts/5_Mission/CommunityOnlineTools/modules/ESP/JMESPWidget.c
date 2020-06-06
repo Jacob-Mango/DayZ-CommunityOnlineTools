@@ -3,19 +3,16 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
 
-	static bool Simplified = false;
 	static bool UseClassName = false;
 
-	protected Widget 			layoutRoot;
+	private Widget layoutRoot;
 
-	protected Widget			m_CheckboxStyle;
-	protected Widget			m_JustName;
+	private CheckBoxWidget m_chbx_SelectedObject;
+	private TextWidget m_txt_ObjectName;
+	private ButtonWidget m_btn_ToggleActions;
+	private ImageWidget m_img_ToggleActions;
 
-	protected TextWidget		m_Name1;
-	protected TextWidget		m_Name2;
-
-	protected ButtonWidget		m_Button;
-	CheckBoxWidget				Checkbox;
+	private Widget m_pnl_Actions;
 
 	bool ShowOnScreen;
 
@@ -41,15 +38,22 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
-		m_CheckboxStyle = layoutRoot.FindAnyWidget("CheckboxStyle");
-		m_JustName = layoutRoot.FindAnyWidget("JustName");
-		
-		m_Name1 = TextWidget.Cast( m_JustName.FindAnyWidget("text_name") );
+		Widget header;
+		Class.CastTo( header, layoutRoot.FindAnyWidget( "esp_object_header" ) );
 
-		m_Name2 = TextWidget.Cast( m_CheckboxStyle.FindAnyWidget("text_name") );
+		Class.CastTo( m_chbx_SelectedObject, header.FindAnyWidget( "esp_select_checkbox" ) );
+		Class.CastTo( m_txt_ObjectName, header.FindAnyWidget( "esp_object_name" ) );
+		Class.CastTo( m_btn_ToggleActions, header.FindAnyWidget( "esp_toggle_button" ) );
 
-		m_Button = ButtonWidget.Cast( m_CheckboxStyle.FindAnyWidget("button") );
-		Checkbox = CheckBoxWidget.Cast( m_CheckboxStyle.FindAnyWidget("checkbox") );
+		if ( Class.CastTo( m_img_ToggleActions, header.FindAnyWidget( "esp_toggle_button_image" ) ) )
+		{
+			m_img_ToggleActions.LoadImageFile( 0, "set:dayz_gui image:icon_expand" );
+			m_img_ToggleActions.LoadImageFile( 1, "set:dayz_gui image:icon_collapse" );
+		}
+
+		Class.CastTo( m_pnl_Actions, layoutRoot.FindAnyWidget( "esp_actions_container" ) );
+
+		HideActions();
 	}
 
 	void Show()
@@ -70,12 +74,31 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 		if ( layoutRoot )
 			layoutRoot.Unlink();
+	}
 
-		delete m_Name1;
-		delete m_Name2;
-		delete m_Button;
-		delete Checkbox;
-		delete layoutRoot;
+	void ToggleESPActions()
+	{
+		if ( m_pnl_Actions.IsVisible() )
+		{
+			HideActions();
+		} else
+		{
+			ShowActions();
+		}
+	}
+
+	void ShowActions()
+	{
+		m_pnl_Actions.Show( true );
+
+		m_img_ToggleActions.SetImage( 0 );
+	}
+
+	void HideActions()
+	{		
+		m_pnl_Actions.Show( false );
+
+		m_img_ToggleActions.SetImage( 1 );
 	}
 
 	void OnShow()
@@ -133,10 +156,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	}
 
 	void Update() 
-	{
-		m_CheckboxStyle.Show( !Simplified );
-		m_JustName.Show( Simplified );
-			
+	{			
 		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 
 		GetScreenSize( Width, Height );
@@ -161,7 +181,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 		if ( ShowOnScreen && Info )
 		{
-			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1] - ( Height / 2 ), true );
+			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
 			float distance = Math.Round( ScreenPos[2] * 10.0 ) / 10.0;
 
@@ -181,8 +201,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 				}
 			}
 
-			m_Name1.SetText( text );
-			m_Name2.SetText( text );
+			m_txt_ObjectName.SetText( text );
 			
 			Show();
 		} else 
@@ -208,11 +227,9 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			return;
 		}
 
-		m_Name1.SetColor( Info.colour );
-		m_Name2.SetColor( Info.colour );
+		m_txt_ObjectName.SetColor( Info.colour );
 
-		Checkbox.Show( Info.type.IsInherited( JMESPViewTypePlayer ) );
-		m_Button.Enable( Info.type.IsInherited( JMESPViewTypePlayer ) );
+		m_chbx_SelectedObject.Show( true );
 			
 		ShowOnScreen = true;
 			
@@ -225,22 +242,20 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		{
 			return false;
 		}
-
-		if ( !Info.player )
-		{
-			return false;
-		}
 		
-		if ( w == Checkbox )
+		if ( w == m_chbx_SelectedObject )
 		{
-			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), Checkbox.IsChecked() );
+			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
+			{
+				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), m_chbx_SelectedObject.IsChecked() );
+			}
 
 			return true;
 		}
 
-		if ( w == m_Button )
+		if ( w == m_btn_ToggleActions )
 		{
-			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( Info.player.GetGUID(), !Checkbox.IsChecked() );
+			ToggleESPActions();
 
 			return true;
 		}

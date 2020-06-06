@@ -1,4 +1,4 @@
-PanelWidgetClass Windows {
+PanelWidgetClass ESP_Container {
  ignorepointer 1
  visible 1
  color 0 0 0 0
