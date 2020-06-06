@@ -44,7 +44,11 @@ class JMESPMeta : Managed
 	}
 
 	void Destroy()
-	{		
+	{
+		m_Action_Position = NULL;
+		m_Action_Orientation = NULL;
+		m_Action_Health = NULL;
+
 		if ( widget )
 			widget.Unlink();
 	}

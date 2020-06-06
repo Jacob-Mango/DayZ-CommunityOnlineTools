@@ -112,18 +112,6 @@ modded class MissionGameplay
 
 			GetCommunityOnlineTools().OnUpdate( timeslice );
 
-			// Disable openning radial menu
-			if ( DISABLE_ALL_INPUT )
-			{
-				if( input.LocalPress("UAUIQuickbarRadialOpen", false) )
-				{
-					if ( GetUIManager().IsMenuOpen( MENU_RADIAL_QUICKBAR ) )
-					{
-						RadialQuickbarMenu.CloseMenu();
-					}
-				}
-			}
-
 			// Force the custom debug monitor to show instead
 			if ( m_CDebugMonitor )
 			{
@@ -185,7 +173,8 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	override void ShowInventory()
 	{
-		if ( DISABLE_ALL_INPUT ) return;
+		if ( GetCommunityOnlineToolsBase().IsOpen() )
+			return;
 
 		super.ShowInventory();
 	}
@@ -195,8 +184,6 @@ modded class MissionGameplay
 	// ------------------------------------------------------------
 	override void ShowChat()
 	{
-		if ( DISABLE_ALL_INPUT ) return;
-
 		super.ShowChat();
 	}
 }

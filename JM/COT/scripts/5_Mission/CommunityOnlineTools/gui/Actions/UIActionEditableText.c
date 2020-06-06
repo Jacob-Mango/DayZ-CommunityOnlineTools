@@ -74,9 +74,17 @@ class UIActionEditableText extends UIActionBase
 		SetText( "" + num );
 	}
 
+	bool IsFocusWidget( Widget widget )
+	{
+		if ( widget == m_Text )
+			return true;
+
+		return false;
+	}
+
 	override void SetText( string text )
 	{
-		if ( m_Text == GetFocus() )
+		if ( IsFocused() )
 			return;
 
 		m_Text.SetText( text );
@@ -152,28 +160,6 @@ class UIActionEditableText extends UIActionBase
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 
-	override bool OnMouseEnter( Widget w, int x, int y )
-	{
-		if ( w == m_Text )
-		{
-			SetFocus( m_Text );
-			return true;
-		}
-
-		return false;
-	}
-
-	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
-	{
-		if ( w == m_Text )
-		{
-			SetFocus( NULL );
-			return true;
-		}
-
-		return false;
-	}
-
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( !m_HasCallback )
@@ -181,13 +167,11 @@ class UIActionEditableText extends UIActionBase
 
 		if ( w == m_Text )
 		{
-			DISABLE_ALL_INPUT = true;
 			if ( UpdateText() )
 			{
 				CallEvent( UIEvent.CHANGE );
 			}
 
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( this.RemoveDisableInput, 100, false );
 			return true;
 		}
 		
@@ -196,7 +180,8 @@ class UIActionEditableText extends UIActionBase
 
 	override bool OnClick(Widget w, int x, int y, int button)
 	{	
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		bool ret = false;
 
@@ -210,7 +195,8 @@ class UIActionEditableText extends UIActionBase
 
 	override bool CallEvent( UIEvent eid )
 	{
-		if ( !m_HasCallback ) return false;
+		if ( !m_HasCallback )
+			return false;
 
 		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
