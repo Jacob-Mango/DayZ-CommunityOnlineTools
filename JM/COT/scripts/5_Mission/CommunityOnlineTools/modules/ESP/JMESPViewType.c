@@ -1,5 +1,7 @@
 class JMESPViewType
 {
+	typename MetaType = JMESPMeta;
+
 	string Localisation;
 	string Permission;
 
@@ -16,6 +18,12 @@ class JMESPViewType
 		Colour = ARGB( 255, 255, 255, 255 );
 
 		View = true;
+	}
+
+	void CreateMeta( out JMESPMeta meta )
+	{
+		if ( meta == NULL )
+			Class.CastTo( meta, MetaType.Spawn() );
 	}
 
 	bool IsValid( Object obj, out JMESPMeta meta )
@@ -43,6 +51,8 @@ class JMESPViewTypePlayer: JMESPViewType
 		if ( !Class.CastTo( man, obj ) || !man.IsPlayer() )
 			return false;
 		
+		CreateMeta( meta );
+
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -83,6 +93,8 @@ class JMESPViewTypeInfected: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !( entity.IsZombie() || entity.IsZombieMilitary() ) )
 			return false;
 		
+		CreateMeta( meta );
+		
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -116,6 +128,8 @@ class JMESPViewTypeAnimal: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !entity.IsAnimal() )
 			return false;
 		
+		CreateMeta( meta );
+		
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -148,6 +162,8 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 		CarScript car;
 		if ( !Class.CastTo( car, obj ) )
 			return false;
+		
+		CreateMeta( meta );
 		
 		meta.target = obj;
 		meta.colour = Colour;
@@ -183,6 +199,8 @@ class JMESPViewTypeBaseBuilding: JMESPViewType
 		if ( !isValid )
 			return false;
 		
+		CreateMeta( meta );
+		
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -215,6 +233,8 @@ class JMESPViewTypeWeapon: JMESPViewType
 		Weapon_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
+		
+		CreateMeta( meta );
 		
 		meta.target = obj;
 		meta.colour = Colour;
@@ -249,6 +269,8 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
+		CreateMeta( meta );
+		
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -282,6 +304,8 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
+		CreateMeta( meta );
+		
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -314,6 +338,8 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		Pistol_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
+		
+		CreateMeta( meta );
 		
 		meta.target = obj;
 		meta.colour = Colour;
@@ -351,6 +377,8 @@ class JMESPViewTypeItem: JMESPViewType
 
 		if ( !CheckLootCategory( obj ) )
 			return false;
+		
+		CreateMeta( meta );
 		
 		meta.target = obj;
 		meta.colour = Colour;
