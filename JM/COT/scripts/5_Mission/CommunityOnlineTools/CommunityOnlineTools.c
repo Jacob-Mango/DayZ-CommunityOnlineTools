@@ -280,9 +280,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_SetClient( string guid, ref ParamsReadContext ctx )
 	{
-		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
-
 		GetPermissionsManager().SetClientGUID( guid );
+
+		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
 
 		GetModuleManager().OnClientPermissionsUpdated();
 	}

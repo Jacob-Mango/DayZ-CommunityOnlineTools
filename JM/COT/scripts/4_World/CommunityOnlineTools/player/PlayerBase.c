@@ -106,7 +106,7 @@ modded class PlayerBase
 		}
 	}
 
-	ref JMPlayerInstance GetAuthenticatedPlayer()
+	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		return m_AuthenticatedPlayer;
 	}

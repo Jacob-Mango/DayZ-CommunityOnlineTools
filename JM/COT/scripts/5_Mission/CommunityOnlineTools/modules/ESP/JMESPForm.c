@@ -170,13 +170,13 @@ class JMESPForm extends JMFormBase
 			return;
 
 		if ( m_Module.IsShowing )
-		{			
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( m_Module.UpdateESP );
-
-			m_Module.HideESP();
+		{
+			m_Module.ToDestroy = true;
+			m_Module.IsShowing = false;
 		} else
 		{
-			m_Module.UpdateESP();
+			m_Module.ToDestroy = false;
+			m_Module.IsShowing = true;
 		}
 
 		// GetRPCManager().SendRPC( "COT_ESP", "ESPLog", new Param1< string >( "ESP Showing " + m_Module.IsShowing ) );
@@ -184,14 +184,6 @@ class JMESPForm extends JMFormBase
 		UpdateESPButtonName();
 
 		UpdateCheckboxStates();
-	}
-
-	// Removed.
-	void Click_HideESP( UIEvent eid, ref UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK ) return;
-		
-		m_Module.HideESP();
 	}
 
 	void Click_ChangeESPMode( UIEvent eid, ref UIActionBase action )
@@ -244,8 +236,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		m_Module.ESPUpdateLoop( !m_Module.ESPIsUpdating );
-
+		m_Module.ESPIsUpdating = !m_Module.ESPIsUpdating;
 		UpdateRefreshRateSlider();
 	}
 }

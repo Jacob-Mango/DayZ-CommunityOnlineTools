@@ -68,7 +68,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	{
 		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 
-		if ( layoutRoot ) layoutRoot.Unlink();
+		if ( layoutRoot )
+			layoutRoot.Unlink();
 
 		delete m_Name1;
 		delete m_Name2;
