@@ -43,7 +43,6 @@ class JMESPViewTypePlayer: JMESPViewType
 		if ( !Class.CastTo( man, obj ) || !man.IsPlayer() )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -84,7 +83,6 @@ class JMESPViewTypeInfected: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !( entity.IsZombie() || entity.IsZombieMilitary() ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -118,7 +116,6 @@ class JMESPViewTypeAnimal: JMESPViewType
 		if ( !Class.CastTo( entity, obj ) || !entity.IsAnimal() )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -152,7 +149,6 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 		if ( !Class.CastTo( car, obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -187,7 +183,6 @@ class JMESPViewTypeBaseBuilding: JMESPViewType
 		if ( !isValid )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -221,7 +216,6 @@ class JMESPViewTypeWeapon: JMESPViewType
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -255,7 +249,6 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -289,7 +282,6 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -323,7 +315,6 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
@@ -361,7 +352,6 @@ class JMESPViewTypeItem: JMESPViewType
 		if ( !CheckLootCategory( obj ) )
 			return false;
 		
-		meta = new JMESPMeta;
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
