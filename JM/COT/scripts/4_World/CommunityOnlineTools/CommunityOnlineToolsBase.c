@@ -175,7 +175,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( GetGame().IsMultiplayer() )
 		{
-			text = "" + logInstacPlyer.GetSteam64ID() + ": " + text;
+			text = "" + logInstacPlyer.GetName() + " (" + logInstacPlyer.GetGUID() + "): " + text;
 		} else
 		{
 			text = "Offline: " + text;
@@ -198,7 +198,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( GetGame().IsMultiplayer() )
 		{
-			text = "" + logIdentPlyer.GetPlainId() + ": " + text;
+			text = "" + logIdentPlyer.GetName() + " (" + logIdentPlyer.GetId() + "): " + text;
 		} else
 		{
 			text = "Offline: " + text;
