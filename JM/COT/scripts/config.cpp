@@ -2,12 +2,18 @@ class CfgPatches
 {
 	class JM_COT_Scripts
 	{
-		units[]={};
-		weapons[]={};
-		requiredVersion=0.1;
-		requiredAddons[]=
+		units[] =
 		{
-			"JM_CF_Scripts", "JM_COT_GUI", "DZ_Data"
+		};
+		weapons[] =
+		{
+		};
+		requiredVersion = 0.1;
+		requiredAddons[] =
+		{
+			"JM_CF_Scripts",
+			"JM_COT_GUI",
+			"DZ_Data"
 		};
 	};
 };
@@ -34,14 +40,21 @@ class CfgMods
 		extra = 0;
 		type = "mod";
 		
-		dependencies[] = {"Game", "World", "Mission"};
+		dependencies[] =
+		{
+			"Game",
+			"World",
+			"Mission"
+		};
 		
 		class defs
 		{
 			class gameScriptModule
 			{
 				value = "";
-				files[] = {
+				files[] =
+				{
+					"JM/COT/Scripts/Common",
 					"JM/COT/Scripts/3_Game"
 				};
 			};
@@ -49,7 +62,9 @@ class CfgMods
 			class worldScriptModule
 			{
 				value = "";
-				files[] = {
+				files[] =
+				{
+					"JM/COT/Scripts/Common",
 					"JM/COT/Scripts/4_World"
 				};
 			};
@@ -57,7 +72,9 @@ class CfgMods
 			class missionScriptModule
 			{
 				value = "";
-				files[] = {
+				files[] =
+				{
+					"JM/COT/Scripts/Common",
 					"JM/COT/Scripts/5_Mission"
 				};
 			};

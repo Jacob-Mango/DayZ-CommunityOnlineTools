@@ -1,5 +1,7 @@
 class JMESPMeta : Managed
 {
+	private bool m_IsDestroyed;
+
 	string name;
 	JMESPViewType type;
 	int colour;
@@ -7,28 +9,36 @@ class JMESPMeta : Managed
 	Object target;
 
 	JMESPModule module;
-	JMESPWidget widget;
+	JMESPWidgetHandler widgetHandler;
+	Widget widgetRoot;
+	Widget viewTypeActions;
 
 	UIActionEditableVector m_Action_Position;
 	UIActionEditableVector m_Action_Orientation;
 	UIActionEditableText m_Action_Health;
 
+	void ~JMESPMeta()
+	{
+		Destroy();
+	}
+
 	void Create( JMESPModule mod )
 	{
 		module = mod;
 
-		Widget w = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER );
+		widgetRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER );
 
-		if ( w == NULL )
+		if ( widgetRoot == NULL )
 			return;
 
-		w.GetScript( widget );
+		widgetRoot.GetScript( widgetHandler );
 
-		if ( widget == NULL )
+		if ( widgetHandler == NULL )
 			return;
 
-		Widget viewTypeActions;
-		widget.SetInfo( this, viewTypeActions );
+		m_IsDestroyed = false;
+
+		widgetHandler.SetInfo( this, viewTypeActions );
 
 		CreateActions( viewTypeActions );
 
@@ -37,7 +47,15 @@ class JMESPMeta : Managed
 
 	bool IsValid()
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPMeta::IsValid() bool;" );
+		Print( "  target = " + Object.GetDebugName( target ) );
+		#endif
+
 		if ( target == NULL )
+			return false;
+
+		if ( !(type.HasPermission && type.View) )
 			return false;
 
 		return type.IsValid( target, this );
@@ -45,12 +63,36 @@ class JMESPMeta : Managed
 
 	void Destroy()
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPMeta::Destroy() void;" );
+		Print( "  m_IsDestroyed = " + m_IsDestroyed );
+		Print( "  m_Action_Position = " + m_Action_Position );
+		Print( "  m_Action_Orientation = " + m_Action_Orientation );
+		Print( "  m_Action_Health = " + m_Action_Health );
+		Print( "  widgetHandler = " + widgetHandler );
+		#endif
+
+		if ( m_IsDestroyed )
+		{
+			#ifdef JM_COT_ESP_DEBUG
+			Print( "-JMESPMeta::Destroy() void;" );
+			#endif
+
+			return;
+		}
+
+		m_IsDestroyed = true;
+
+		if ( widgetRoot )
+			widgetRoot.Unlink();
+
 		m_Action_Position = NULL;
 		m_Action_Orientation = NULL;
 		m_Action_Health = NULL;
 
-		if ( widget )
-			widget.Unlink();
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "-JMESPMeta::Destroy() void;" );
+		#endif
 	}
 
 	void CreateActions( Widget parent )
@@ -64,6 +106,9 @@ class JMESPMeta : Managed
 
 	void UpdateActions()
 	{
+		if ( !viewTypeActions )
+			return;
+		
 		m_Action_Position.SetValue( target.GetPosition() );
 		m_Action_Orientation.SetValue( target.GetOrientation() );
 		m_Action_Health.SetText( "0" );

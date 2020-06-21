@@ -1,11 +1,11 @@
-class JMESPWidget extends ScriptedWidgetEventHandler 
+class JMESPWidgetHandler extends ScriptedWidgetEventHandler 
 {
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
 
 	static bool UseClassName = false;
 
-	private Widget layoutRoot;
+	private ref Widget layoutRoot;
 
 	private CheckBoxWidget m_chbx_SelectedObject;
 	private TextWidget m_txt_ObjectName;
@@ -16,6 +16,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	private UIActionScroller m_scrler_Actions;
 	private Widget m_rows_Actions;
+
+	private bool m_DidUnlink;
 
 	bool ShowOnScreen;
 
@@ -28,15 +30,25 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	void OnWidgetScriptInit( Widget w )
 	{
+		m_DidUnlink = false;
+
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
 
 		Init();
 	}
 
-	void ~JMESPWidget()
+	void ~JMESPWidgetHandler()
 	{
-		Unlink();
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		#endif
+
+		OnHide();
+
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		#endif
 	}
 
 	void Init() 
@@ -74,14 +86,6 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		layoutRoot.Show( false );
 	}
 
-	void Unlink()
-	{
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
-
-		if ( layoutRoot )
-			layoutRoot.Unlink();
-	}
-
 	void ToggleESPActions()
 	{
 		if ( m_pnl_Actions.IsVisible() )
@@ -109,10 +113,12 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 	void OnShow()
 	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
 	}
 
 	void OnHide() 
 	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
 	}
 
 	float ATan( float a )
@@ -165,6 +171,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 	{			
 		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 
+		float distance = vector.Distance( GetCurrentPosition(), GetPosition() );
+
 		GetScreenSize( Width, Height );
 
 		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
@@ -180,7 +188,7 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 			ShowOnScreen = false;
 		}
 
-		if ( ShowOnScreen && ( ScreenPos[2] > ( espModule.ESPRadius  * 2 ) || ScreenPos[2] < 0 ) )
+		if ( ShowOnScreen && ( distance > espModule.ESPRadius || ScreenPos[2] < 0 ) )
 		{
 			ShowOnScreen = false;
 		}
@@ -188,8 +196,6 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		if ( ShowOnScreen && Info )
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
-
-			float distance = Math.Round( ScreenPos[2] * 10.0 ) / 10.0;
 
 			string text = "";
 
@@ -213,10 +219,10 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 
 			m_scrler_Actions.UpdateScroller();
 			
-			Show();
+			layoutRoot.Show( true );
 		} else 
 		{
-			Hide();
+			layoutRoot.Show( false );
 		}
 	}
 
@@ -235,7 +241,6 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		{
 			ShowOnScreen = false;
 			Hide();
-			GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 			return;
 		}
 
@@ -244,8 +249,8 @@ class JMESPWidget extends ScriptedWidgetEventHandler
 		m_chbx_SelectedObject.Show( true );
 			
 		ShowOnScreen = true;
-			
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
+		
+		Show();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
