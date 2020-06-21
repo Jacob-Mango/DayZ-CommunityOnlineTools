@@ -231,12 +231,15 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
-		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) );
+		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
+		//Print( "Vehicle PreSpawn");
+		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) );
+		//Print( "Vehicle PostSpawn - " + vehicle );
         if ( vehicle )
         {
             for ( int j = 0; j < attachments.Count(); j++ )
             {
+				//Print( "Vehicle CreateInInventory - " + vehicle  + " - " + attachments[j] );
                 vehicle.GetInventory().CreateInInventory( attachments[j] );
             }
 
@@ -248,22 +251,22 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
                 FillCar( car, CarFluid.BRAKE );
                 FillCar( car, CarFluid.COOLANT );
             }
-
-			vector boundingBox[2];
-			float radius = vehicle.GetCollisionBox( boundingBox );
-
-			float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
-
-			position[1] = position[1] + ( height * 2.0 );
+			//Print( "Vehicle Car - " + car );
 
 			vehicle.SetPosition( position );
 			vehicle.SetDirection( direction );
 			
-			//vehicle.SetPosition( position );
-			//vehicle.SetOrientation( vehicle.GetOrientation() );
-			//vehicle.SetPosition( position );
+			//Print( "Vehicle SetPosition - " + vehicle  + " - " + position );
+			//Print( "Vehicle SetDirection - " + vehicle  + " - " + direction );
+
+			vector tmItem[4];
+			vehicle.GetTransform( tmItem );
+			vehicle.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
+			tmItem[3] = position + "0 5 0";
+			vehicle.SetTransform( tmItem );
         }
 		
+		//Print( "Vehicle Finish Setup - " + vehicle );
 		return vehicle;
 	}
 }

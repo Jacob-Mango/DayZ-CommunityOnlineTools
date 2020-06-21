@@ -313,14 +313,12 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+
 		EntityAI ent = EntityAI.Cast( GetGame().CreateObjectEx( className, pos, flags ) );
 		
-		vector boundingBox[2];
-		float radius = ent.GetCollisionBox( boundingBox );
-
-		pos[1] = pos[1] - boundingBox[0][1];
-
-		ent.SetPosition( pos );
+		vector tmItem[4];
+		ent.GetTransform( tmItem );
+		ent.PlaceOnSurfaceRotated( tmItem, pos, 0, 0, 0, true );
 
 		return ent;
 	}
