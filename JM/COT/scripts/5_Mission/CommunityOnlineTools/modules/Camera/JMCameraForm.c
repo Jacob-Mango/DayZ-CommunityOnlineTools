@@ -1,6 +1,6 @@
 class JMCameraForm extends JMFormBase 
 {
-	private Widget m_ActionsWrapper;
+	private UIActionScroller m_sclr_MainActions;
 
 	private UIActionSlider m_SliderBlurStrength;
 	private UIActionSlider m_SliderFocusDistance;
@@ -25,9 +25,8 @@ class JMCameraForm extends JMFormBase
 	
 	override void OnInit()
 	{
-		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
-
-		Widget actions = m_ActionsWrapper;// UIActionManager.CreateGridSpacer( m_ActionsWrapper, 5, 1 );
+		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
+		Widget actions = m_sclr_MainActions.GetContentWidget();
 
 		m_SliderBlurStrength = UIActionManager.CreateSlider( actions, "Blur: ", 0, 1, this, "OnChange_Blur" );
 		m_SliderBlurStrength.SetCurrent( 0 );
@@ -83,6 +82,8 @@ class JMCameraForm extends JMFormBase
 		m_SliderExposure.SetWidth( 1.0 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.7 );
+		
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	void OnSliderUpdate()
