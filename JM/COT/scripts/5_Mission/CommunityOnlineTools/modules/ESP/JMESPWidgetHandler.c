@@ -69,7 +69,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		Class.CastTo( m_pnl_Actions, layoutRoot.FindAnyWidget( "esp_actions_container" ) );
 
 		m_scrler_Actions = UIActionManager.CreateScroller( m_pnl_Actions );
-		m_rows_Actions = UIActionManager.CreateActionRows( m_scrler_Actions.GetContentWidget() ).FindAnyWidget( "Content_Row_00" );
+		Class.CastTo( m_rows_Actions, m_scrler_Actions.GetContentWidget() );
 
 		HideActions();
 	}

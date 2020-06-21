@@ -6,7 +6,6 @@ class JMESPForm extends JMFormBase
 	private Widget m_ESPListRows;
 
 	private UIActionScroller m_ESPSelectedObjects;
-	private Widget m_ESPSelectedObjectRows;
 
 	private UIActionButton m_btn_Toggle;
 	
@@ -44,17 +43,17 @@ class JMESPForm extends JMFormBase
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "Auto refresh", this, "Click_UpdateAtRate" );
-		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 0.5, 10, this, "Change_UpdateRate" );
+		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
 		m_sldr_Refresh.SetAppend(" second(s)");
-		m_sldr_Refresh.SetStepValue( 0.5 );
+		m_sldr_Refresh.SetStepValue( 1.0 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
 		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "Radius", 0, 1000, this, "Change_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
 		m_sldr_Radius.SetAppend(" metre(s)");
-		m_sldr_Radius.SetStepValue( 10 );
+		m_sldr_Radius.SetStepValue( 10.0 );
 
 		UIActionManager.CreateEditableText( filterSpacer, "Class Filter: ", this, "Change_Filter", m_Module.Filter );
 	
@@ -80,6 +79,7 @@ class JMESPForm extends JMFormBase
 			if ( totalInContentRow >= 100 )
 			{
 				Class.CastTo( gsw, m_ESPListRows.FindAnyWidget( "Content_Row_0" + currentContentRow ) );
+				gsw.Show( true );
 				currentContentRow++;
 				totalInContentRow = 0;
 			}
@@ -106,8 +106,6 @@ class JMESPForm extends JMFormBase
 	private void ESPSelectedObjects( Widget parent )
 	{
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
-		m_ESPSelectedObjectRows = UIActionManager.CreateActionRows( m_ESPSelectedObjects.GetContentWidget() );
-
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -118,9 +116,19 @@ class JMESPForm extends JMFormBase
 
 		ESPControls( layoutRoot.FindAnyWidget( "panel_top" ) );
 
-		Widget bottom = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "panel_bottom" ), 1, 2 );
+		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
+		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 
-		ESPFilters( bottom );
+		//left_bottom.SetFlags( WidgetFlags.EXACTPOS | WidgetFlags.EXACTSIZE );
+		//right_bottom.SetFlags( WidgetFlags.EXACTPOS | WidgetFlags.EXACTSIZE );
+
+		left_bottom.SetSize( 0.5, 1.0 );
+		right_bottom.SetSize( 0.5, 1.0 );
+		left_bottom.SetPos( 0.0, 0.0 );
+		right_bottom.SetPos( 0.5, 0.0 );
+
+		ESPFilters( left_bottom );
+		ESPSelectedObjects( right_bottom );
 	}
 
 	override void OnShow()

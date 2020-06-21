@@ -10,6 +10,7 @@ GridSpacerWidgetClass UIActionContentRows {
  Rows 10
  {
   GridSpacerWidgetClass Content_Row_00 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -21,6 +22,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_01 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -32,6 +34,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_02 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -43,6 +46,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_03 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -54,6 +58,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_04 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -65,6 +70,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_05 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -76,6 +82,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_06 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -87,6 +94,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_07 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -98,6 +106,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_08 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
@@ -109,6 +118,7 @@ GridSpacerWidgetClass UIActionContentRows {
    Rows 100
   }
   GridSpacerWidgetClass Content_Row_09 {
+   visible 0
    position 0 0
    size 1 1
    hexactpos 1
