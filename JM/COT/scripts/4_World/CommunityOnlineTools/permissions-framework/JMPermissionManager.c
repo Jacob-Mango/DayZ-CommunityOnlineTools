@@ -1,7 +1,7 @@
 class JMPermissionManager
 {
-	autoptr map< string, ref JMPlayerInstance > Players;
-	autoptr map< string, ref JMRole > Roles;
+	ref map< string, ref JMPlayerInstance > Players;
+	ref map< string, ref JMRole > Roles;
 
 	ref JMPermission RootPermission;
 
@@ -28,10 +28,6 @@ class JMPermissionManager
 	{
 		if ( roles == NULL )
 			roles = new array< JMRole >();
-
-		Roles.GetValueArray().Debug();
-
-		// Print("copying");
 
 		roles.Copy( Roles.GetValueArray() );
 
@@ -71,20 +67,6 @@ class JMPermissionManager
 	JMPlayerInstance GetClientPlayer()
 	{
 		return Players.Get( m_ClientGUID );
-	}
-
-	bool HasRolePermission( string name, string permission, out JMPermissionType permTypeHasRolePermission = JMPermissionType.DISALLOW )
-	{
-		JMRole role = Roles.Get( name );
-		if ( role )
-			return role.HasPermission( permission, permTypeHasRolePermission );
-
-		return false;
-	}
-
-	bool IsRole( string role )
-	{
-		return Roles.Contains( role );
 	}
 
 	void ResetMission()
@@ -154,25 +136,21 @@ class JMPermissionManager
 	{
 		if ( IsMissionClient() ) 
 		{
-			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );
-
 			if ( IsMissionHost() )
 			{
-				// Print( "JMPermissionManager::HasPermission - IsMissionHost" );
 				return true;
 			}
 			
 			JMPlayerInstance instance = GetClientPlayer();
-
-			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			if ( instance == NULL )
 			{
-				// Print( "Client Player is NULL!" );
 				return false;
 			}
 
 			return instance.HasPermission( permission );
 		}
+
+		Error( "JMPermissionManager::HasPermission( permission = " + permission + " ) bool; was called on server!" );
 
 		return false;
 	}
@@ -189,43 +167,27 @@ class JMPermissionManager
 	}
 
 	bool HasPermission( string permission, notnull PlayerIdentity identity, out JMPlayerInstance instance )
-	{
-		// Print( "JMPermissionManager::HasPermission - Start" );
-		
+	{		
 		if ( IsMissionClient() ) 
 		{
-			// Print( "JMPermissionManager::HasPermission - IsMissionClient" );
-
 			instance = GetClientPlayer();
 
 			if ( IsMissionHost() )
 			{
-				// Print( "JMPermissionManager::HasPermission - IsMissionHost" );
 				return true;
 			}
 			
-			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			if ( instance == NULL )
 			{
-				// Print( "Client Player is NULL!" );
 				return false;
 			}
 
 			return instance.HasPermission( permission );
 		}
-		
-		// Print( "JMPermissionManager::HasPermission - identity=" + identity );
-		if ( identity == NULL )
-		{
-			return false;
-		}
-
-		// Print( "JMPermissionManager::HasPermission - identity::GetId=" + identity.GetId() );
 
 		instance = Players.Get( identity.GetId() );
 		if ( instance )
 		{
-			// Print( "JMPermissionManager::HasPermission - instance=" + instance );
 			return instance.HasPermission( permission );
 		}
 
@@ -363,7 +325,7 @@ class JMPermissionManager
 
 	bool LoadRole( string name, out JMRole role )
 	{
-		role = Roles.Get( name );
+		role = GetRole( name );
 
 		if ( !role )
 		{
@@ -378,14 +340,10 @@ class JMPermissionManager
 
 	void LoadRoleFromFile( string name )
 	{
-		// Print( "Loading role " + name );
-
 		ref JMRole role = new JMRole( name );
-		// Print( "Role " + role );
+		
 		if ( role.Load() )
 		{
-			// Print( "Loaded role " + role );
-
 			Roles.Insert( name, role );
 		}
 	}
@@ -400,28 +358,32 @@ class JMPermissionManager
 		{
 			if ( IsValidFolderForRoles( sName, oFileAttr ) )
 			{
-				LoadRoleFromFile( sName.Substring(0, sName.Length() - 4) );
+				LoadRoleFromFile( sName.Substring( 0, sName.Length() - 4 ) );
 			}
 
-			while (FindNextFile(oFileHandle, sName, oFileAttr))
+			while ( FindNextFile( oFileHandle, sName, oFileAttr) )
 			{
-				if ( IsValidFolderForRoles( sName, oFileAttr ))
+				if ( IsValidFolderForRoles( sName, oFileAttr ) )
 				{
-					LoadRoleFromFile( sName.Substring(0, sName.Length() - 4) );
+					LoadRoleFromFile( sName.Substring( 0, sName.Length() - 4 ) );
 				}
 			}
-		}
-
-		// Print( "Roles count: " + Roles.Count().ToString() );
-		for ( int i = 0; i < Roles.Count(); i++ )
-		{
-			// Print( "["+Roles.GetKey( i )+"] => " + Roles.GetElement( i ) );
 		}
 	}
 
 	bool RoleExists( string role )
 	{
 		return Roles.Contains( role );
+	}
+
+	bool IsRole( string role )
+	{
+		return Roles.Contains( role );
+	}
+
+	ref JMRole GetRole( string name )
+	{
+		return Roles.Get( name );
 	}
 }
 
