@@ -238,7 +238,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		if ( !m_Form || !m_Form.GetLayoutRoot() )
 			return;
 
-		// RecursiveCheckWidget( m_Form.GetLayoutRoot() );
+		RecursiveCheckWidget( m_Form.GetLayoutRoot() );
 	}
 
 	private void RecursiveCheckWidget( Widget w )
@@ -248,8 +248,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		if ( w.GetTypeName() == "ScrollWidget" )
 		{
-		// lets live with the fact that scroll bar widgets are broken
-		//	m_BrokenWidgets.Insert( w ); 
+			m_BrokenWidgets.Insert( w ); 
 		} else if ( w.GetTypeName() == "ItemPreviewWidget" )
 		{
 			m_BrokenWidgets.Insert( w );

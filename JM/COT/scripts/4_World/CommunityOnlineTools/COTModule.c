@@ -130,6 +130,11 @@ class COTModule : JMModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().SetOpen( false );
+
+		while ( GetCOTWindowManager().Count() > 0 )
+		{
+			GetCOTWindowManager().Get( 0 ).GetModule().Hide();
+		}
 	}
 
 	void ToggleMenu( UAInput input = NULL )

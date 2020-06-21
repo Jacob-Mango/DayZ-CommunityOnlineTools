@@ -34,6 +34,11 @@ class JMWindowManager
 		return m_Windows.Count();
 	}
 
+	JMWindowBase Get( int index )
+	{
+		return m_Windows[index];
+	}
+
 	void RemoveWindow( JMWindowBase window )
 	{
 		if ( window.GetModule() )
