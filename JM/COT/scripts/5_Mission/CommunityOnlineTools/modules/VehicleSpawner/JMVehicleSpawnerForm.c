@@ -1,5 +1,6 @@
 class JMVehicleSpawnerForm extends JMFormBase
 {
+	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
 
 	private ref array< ref UIActionButton > m_VehicleButtons;
@@ -22,7 +23,10 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	override void OnInit()
 	{
-		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
+		m_ActionsWrapper = m_sclr_MainActions.GetContentWidget();
+
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	override void OnShow()
@@ -62,6 +66,8 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 			m_VehicleButtons.Insert( button );
 		}
+
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	override void OnHide() 
@@ -75,6 +81,8 @@ class JMVehicleSpawnerForm extends JMFormBase
 		}
 
 		m_VehicleButtons.Clear();
+		
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	void SpawnVehicle( UIEvent eid, ref UIActionBase action ) 

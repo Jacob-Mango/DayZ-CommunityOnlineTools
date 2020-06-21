@@ -1,5 +1,6 @@
 class JMItemSetForm extends JMFormBase
 {
+	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
 
 	private autoptr array< ref UIActionButton > m_ItemSetButtons;
@@ -22,7 +23,10 @@ class JMItemSetForm extends JMFormBase
 
 	override void OnInit()
 	{
-		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
+		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
+		m_ActionsWrapper = m_sclr_MainActions.GetContentWidget();
+
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	override void OnShow()
@@ -51,6 +55,8 @@ class JMItemSetForm extends JMFormBase
 			curButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( curButton );
 		}
+
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	override void OnHide() 
@@ -64,6 +70,8 @@ class JMItemSetForm extends JMFormBase
 		}
 
 		m_ItemSetButtons.Clear();
+		
+		m_sclr_MainActions.UpdateScroller();
 	}
 
 	void SpawnOnPlayers( UIEvent eid, ref UIActionBase action ) 
