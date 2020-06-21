@@ -158,7 +158,10 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	goto:eof
+	
+	if EXIST %~p2 (
+		exit 0
+	)
 )
 
 set pboProject="%_MIKEDLL%\bin\pboProject.exe"
@@ -214,19 +217,31 @@ if not errorlevel 1 (
 	rename "%modBuildDirectory%%modName%\Addons\!currentFolder!.pbo" "!pboName!.pbo"
 
 	%signFile% "%keyDirectory%%keyName%.biprivatekey" "%modBuildDirectory%%modName%\Addons\!pboName!.pbo"
-	goto end
+	
+	endlocal
+
+	if EXIST %~p2 (
+		exit 0
+	)
 ) else (
 	echo /////////////////////////////////////////////////////////////
 	echo Something went wrong with %%D for !pboName!.pbo - this tool will not work until you fix it. Please check %workDrive%Temp\ for the issue should be the most recent packing/bin log
 	echo /////////////////////////////////////////////////////////////
-	pause
-	goto end
+	
+	endlocal
+
+	if EXIST %~p3 (
+		exit 1
+	) else (
+		pause
+		if EXIST %~p2 (
+			exit 1
+		)
+	)
 )
 
 :end
-endlocal
 
-echo "ENDED"
 if EXIST %~p2 (
-	exit
+	exit 0
 )
