@@ -61,7 +61,7 @@ class JMESPForm extends JMFormBase
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 		UIActionManager.CreateText( headingSpacer, "Filters: ", "" );
-		UIActionManager.CreateText( headingSpacer, "Selected Objects: ", "" );
+		UIActionManager.CreateText( headingSpacer, "Actions: ", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -106,6 +106,13 @@ class JMESPForm extends JMFormBase
 	private void ESPSelectedObjects( Widget parent )
 	{
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
+		Widget container = m_ESPSelectedObjects.GetContentWidget();
+
+		UIActionManager.CreateButton( container, "Make Item Set", this, "Click_MakeItemSet" );
+		UIActionManager.CreateButton( container, "Duplicate All", this, "Click_DuplicateAll" );
+		UIActionManager.CreateButton( container, "Delete All", this, "Click_DeleteAll" );
+		UIActionManager.CreateButton( container, "Move To Cursor (Relative)", this, "Click_MoveToCursorRelative" );
+		UIActionManager.CreateButton( container, "Move To Cursor (Absolute)", this, "Click_MoveToCursorAbsolute" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -253,5 +260,56 @@ class JMESPForm extends JMFormBase
 		}
 		
 		UpdateUI();
+	}
+	
+	void Click_MakeItemSet( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		CreateConfirmation_Two( "Item Set", "What do you want to call this item set?", "Cancel", "MakeItemSet_Cancel", "Create", "MakeItemSet_Create" ).ShowEditBox();
+	
+	}
+
+	void MakeItemSet_Cancel( ref JMConfirmation confirmation )
+	{
+		// do nothing
+	}
+
+	void MakeItemSet_Create( ref JMConfirmation confirmation )
+	{
+		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
+	}
+	
+	void Click_DuplicateAll( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.DuplicateAll();
+	}
+	
+	void Click_DeleteAll( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.DeleteAll();
+	}
+	
+	void Click_MoveToCursorRelative( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.MoveToCursorRelative();
+	}
+	
+	void Click_MoveToCursorAbsolute( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.MoveToCursorAbsolute();
 	}
 }

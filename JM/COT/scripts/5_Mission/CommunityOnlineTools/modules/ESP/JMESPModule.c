@@ -19,6 +19,8 @@ enum JMESPState
 
 class JMESPModule: JMRenderableModuleBase
 {
+	private autoptr array< Object > m_SelectedObjects;
+	
 	private autoptr array< ref JMESPMeta > m_ActiveESPObjects;
 
 	private autoptr array< ref JMESPMeta > m_ESPToCreate;
@@ -41,6 +43,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	void JMESPModule()
 	{
+		m_SelectedObjects = new array< Object >;
+
 		m_ActiveESPObjects = new array< ref JMESPMeta >;
 
 		m_ESPToCreate = new array< ref JMESPMeta >;
@@ -693,5 +697,83 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		Exec_SetHealth( health, target, senderRPC );
+	}
+
+	private void OnAddObject( Object obj )
+	{
+		if ( m_SelectedObjects.Find( obj ) != -1 )
+			return;
+
+		m_SelectedObjects.Insert( obj );
+	}
+
+	private void OnRemoveObject( Object obj )
+	{
+		int index = m_SelectedObjects.Find( obj );
+		if ( index == -1 )
+			return;
+
+		m_SelectedObjects.Remove( index );
+	}
+	
+	void MakeItemSet( string name )
+	{
+		COTCreateLocalAdminNotification( new StringLocaliser( "Creating Item Set: %1", name ) );
+	}
+
+	private void RPC_MakeItemSet( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	}
+
+	private void Exec_MakeItemSet( array< Object > objects, string name, PlayerIdentity ident )
+	{
+	}
+
+	void DuplicateAll()
+	{
+	}
+
+	private void RPC_DuplicateAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	}
+
+	private void Exec_DuplicateAll( array< Object > objects, PlayerIdentity ident )
+	{
+	}
+
+	void DeleteAll()
+	{
+	}
+
+	private void RPC_DeleteAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	}
+
+	private void Exec_DeleteAll( array< Object > objects, PlayerIdentity ident )
+	{
+	}
+
+	void MoveToCursorRelative()
+	{
+	}
+
+	private void RPC_MoveToCursorRelative( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	}
+
+	private void Exec_MoveToCursorRelative( array< Object > objects, PlayerIdentity ident )
+	{
+	}
+
+	void MoveToCursorAbsolute()
+	{
+	}
+
+	private void RPC_MoveToCursorAbsolute( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	}
+
+	private void Exec_MoveToCursorAbsolute( array< Object > objects, PlayerIdentity ident )
+	{
 	}
 }

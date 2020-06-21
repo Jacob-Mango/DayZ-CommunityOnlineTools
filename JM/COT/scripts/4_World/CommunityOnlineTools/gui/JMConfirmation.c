@@ -6,6 +6,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	
 	private TextWidget m_TextTitle;
 	private TextWidget m_TextMessage;
+	private EditBoxWidget m_EditBox;
 
 	private Widget m_Buttons1Panel;
 	private Widget m_Buttons2Panel;
@@ -22,6 +23,8 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	private string m_Callback1;
 	private string m_Callback2;
 	private string m_Callback3;
+
+	private string m_EditBoxValue;
 
 	void JMConfirmation() 
 	{
@@ -50,6 +53,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 		Class.CastTo( m_TextTitle, layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
 		Class.CastTo( m_TextMessage, layoutRoot.FindAnyWidget( "confirmation_message_text" ) );
+		Class.CastTo( m_EditBox, layoutRoot.FindAnyWidget( "confirmation_message_input" ) );
 
 		Class.CastTo( m_Buttons1Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_1" ) );
 		Class.CastTo( m_Buttons2Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_2" ) );
@@ -70,33 +74,39 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 		if ( w == m_Button1 )
 		{
+			m_EditBoxValue = m_EditBox.GetText();
+
 			Close();
 
 			if ( m_Callback1 != "" )
 			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback1 );
+				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback1, new Param1<ref JMConfirmation>( this ) );
 			}
 			return true;
 		}
 
 		if ( w == m_Button2 )
 		{
+			m_EditBoxValue = m_EditBox.GetText();
+
 			Close();
 
 			if ( m_Callback2 != "" )
 			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback2 );
+				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback2, new Param1<ref JMConfirmation>( this ) );
 			}
 			return true;
 		}
 
 		if ( w == m_Button3 )
 		{
+			m_EditBoxValue = m_EditBox.GetText();
+
 			Close();
 
 			if ( m_Callback3 != "" )
 			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback3 );
+				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback3, new Param1<ref JMConfirmation>( this ) );
 			}
 			return true;
 		}
@@ -192,8 +202,15 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		}
 	}
 
+	void ShowEditBox()
+	{
+		m_EditBox.Show( true );
+	}
+
 	void Close()
 	{
+		m_EditBox.SetText( "" );
+		m_EditBox.Show( false );
 		layoutRoot.Show( false );
 	}
 
@@ -203,6 +220,11 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 	void OnHide() 
 	{
+	}
+
+	string GetEditBoxValue()
+	{
+		return m_EditBoxValue;
 	}
 
 	Widget GetLayoutRoot() 

@@ -134,12 +134,12 @@ class JMWeatherForm extends JMFormBase
 		CreateConfirmation_Two( "Confirm", "Do you wish to remove the preset " + preset, "No", "RemovePreset_No", "Yes", "RemovePreset_Yes" );
 	}
 
-	void RemovePreset_No()
+	void RemovePreset_No( ref JMConfirmation confirmation )
 	{
 		// do nothing
 	}
 
-	void RemovePreset_Yes()
+	void RemovePreset_Yes( ref JMConfirmation confirmation )
 	{
 		if ( m_SelectedPreset == m_RemovePreset )
 		{
@@ -590,12 +590,12 @@ class JMWeatherForm extends JMFormBase
 
 			if ( preset.Permission == "" )
 			{
-				CreateConfirmation_One( "Error", "Permission can't be empty", "Ok", "" );
+				CreateConfirmation_One( "Error", "Permission can't be empty", "Ok" );
 				return;
 			}
 			if ( preset.Name == "" )
 			{
-				CreateConfirmation_One( "Error", "Name can't be empty", "Ok", "" );
+				CreateConfirmation_One( "Error", "Name can't be empty", "Ok" );
 				return;
 			}
 		} else

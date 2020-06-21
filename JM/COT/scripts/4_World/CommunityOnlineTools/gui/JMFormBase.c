@@ -80,18 +80,33 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void CreateConfirmation_One( string title, string message, string callBackOneName, string callBackOne )
+	ref JMConfirmation CreateConfirmation_One( string title, string message, string callBackOneName, string callBackOne )
 	{
-		window.CreateConfirmation_One( title, message, callBackOneName, callBackOne );
+		return window.CreateConfirmation_One( title, message, callBackOneName, callBackOne );
 	}
 
-	void CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	ref JMConfirmation CreateConfirmation_One( string title, string message, string callBackOneName )
 	{
-		window.CreateConfirmation_Two( title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
+		return CreateConfirmation_One( title, message, callBackOneName, "" );
 	}
 
-	void CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	ref JMConfirmation CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
-		window.CreateConfirmation_Three( title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
+		return window.CreateConfirmation_Two( title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
+	}
+
+	ref JMConfirmation CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackTwoName )
+	{
+		return CreateConfirmation_Two( title, message, callBackOneName, "", callBackTwoName, "" );
+	}
+
+	ref JMConfirmation CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	{
+		return window.CreateConfirmation_Three( title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
+	}
+
+	ref JMConfirmation CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName )
+	{
+		return CreateConfirmation_Three( title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
 	}
 }
