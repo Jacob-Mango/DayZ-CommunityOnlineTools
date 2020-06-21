@@ -34,7 +34,7 @@ class JMESPModule: JMRenderableModuleBase
 	string Filter;
 
 	float ESPRadius;
-	float ESPUpdateTime;
+	int ESPUpdateTime;
 
 	private JMESPState m_CurrentState = JMESPState.Remove;
 	private bool m_StateChanged = false;
@@ -52,7 +52,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		ESPRadius = 200;
 
-		ESPUpdateTime = 0.5;
+		ESPUpdateTime = 1;
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
@@ -287,6 +287,16 @@ class JMESPModule: JMRenderableModuleBase
 		totalTimeTaken += time;
 	}
 
+	void _Sleep( int time, out int totalTimeTaken, inout int sleepIdx )
+	{
+		sleepIdx += 1;
+		if ( sleepIdx % 5 == 0 )
+		{
+			Sleep( time );
+			totalTimeTaken += time;
+		}
+	}
+
 	private void ChunkGetObjects( out array<Object> objects, out int totalTimeTaken )
 	{
 		vector centerPosition = GetCurrentPosition();
@@ -308,7 +318,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		subObjects.Clear();
 
-		_Sleep( 10, totalTimeTaken );
+		int sleepIdx = 0;
+
+		_Sleep( 1, totalTimeTaken, sleepIdx );
 
 		for ( int currIter = 2; currIter <= numIterations; ++currIter )
 		{
@@ -330,7 +342,7 @@ class JMESPModule: JMRenderableModuleBase
 				}
 				subObjects.Clear();
 
-				_Sleep( 10, totalTimeTaken );
+				_Sleep( 1, totalTimeTaken, sleepIdx );
 			}
 		}
 	}

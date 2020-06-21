@@ -3,10 +3,10 @@ STR_COT_NOTIF_ADMIN_TITLE,Community Online Tools,Community Online Tools,Communit
 STR_COT_NOTIF_TOGGLED_OFF,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.
 STR_COT_NOTIF_TELEPORT_TOO_FAR,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far
 STR_COT_NOTIF_TOGGLE,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1
-STR_COT_ON,ON,ON,ZAP,AN,ВКЛ,WŁ.,ON,SÌ,SÍ,OUI,開,オン,ON,开
-STR_COT_OFF,OFF,OFF,VYP,AUS,ВЫКЛ,WYŁ.,OFF,NO,NO,NON,關,オフ,OFF,关
-STR_COT_on,on,on,ZAP,AN,ВКЛ,WŁ.,on,SÌ,SÍ,OUI,開,オン,on,开
-STR_COT_off,off,off,VYP,AUS,ВЫКЛ,WYŁ.,off,NO,NO,NON,關,オフ,off,关
+STR_COT_ON_C,ON,ON,ZAP,AN,ВКЛ,WŁ.,ON,SÌ,SÍ,OUI,開,オン,ON,开
+STR_COT_OFF_C,OFF,OFF,VYP,AUS,ВЫКЛ,WYŁ.,OFF,NO,NO,NON,關,オフ,OFF,关
+STR_COT_ON,on,on,ZAP,AN,ВКЛ,WŁ.,on,SÌ,SÍ,OUI,開,オン,on,开
+STR_COT_OFF,off,off,VYP,AUS,ВЫКЛ,WYŁ.,off,NO,NO,NON,關,オフ,off,关
 STR_COT_INPUT_TOGGLE,Enable/Disable Keybinds,Enable/Disable Keybinds,,,,,,,,,,,,
 STR_COT_INPUT_TOGGLE_SIDEBAR,Open/Close Sidebar,Open/Close Sidebar,,,,,,,,,,,,
 STR_COT_INPUT_TOGGLE_MENU_PLAYER,Open/Close Player Menu,Open/Close Player Menu,,,,,,,,,,,,

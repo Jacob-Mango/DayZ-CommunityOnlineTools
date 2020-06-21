@@ -2,7 +2,7 @@ PanelWidgetClass JMESPViewTypeWidget {
  ignorepointer 1
  color 0 0 0 0
  position 0 0
- size 1 30
+ size 1 24
  valign center_ref
  hexactpos 0
  vexactpos 0

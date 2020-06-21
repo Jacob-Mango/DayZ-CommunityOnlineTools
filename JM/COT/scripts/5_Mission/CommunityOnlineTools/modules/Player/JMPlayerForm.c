@@ -155,6 +155,8 @@ class JMPlayerForm extends JMFormBase
 			if ( !Class.CastTo( gsw, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
 				continue;
 
+			gsw.Show( false );
+
 			for ( int j = 0; j < 100; j++ )
 			{
 				Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
@@ -382,6 +384,8 @@ class JMPlayerForm extends JMFormBase
 			if ( !Class.CastTo( gsw, m_PermissionsRows.FindAnyWidget( "Content_Row_0" + i ) ) )
 				continue;
 
+			gsw.Show( true );
+
 			for ( int j = 0; j < 100; j++ )
 			{
 				if ( permissionIdx >= permissions.Count() )
@@ -447,12 +451,22 @@ class JMPlayerForm extends JMFormBase
 
 		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( GetSelectedPlayers()[0] );
 
+		for ( int i = 0; i < 10; i++ )
+		{
+			if ( !Class.CastTo( parentSpacer, m_RolesRows.FindAnyWidget( "Content_Row_0" + i ) ) )
+				continue;
+
+			parentSpacer.Show( false );
+		}
+
 		for ( int j = 0; j < roles.Count(); j++ )
 		{
 			if ( m_RoleList.Count() % 100 == 0 )
 			{
 				if ( !Class.CastTo( parentSpacer, m_RolesRows.FindAnyWidget( "Content_Row_0" + spacerIndex ) ) )
 					return;
+
+				parentSpacer.Show( true );
 
 				spacerIndex++;
 			}
@@ -1020,6 +1034,16 @@ class JMPlayerForm extends JMFormBase
 			GetCommunityOnlineTools().RefreshClients();
 		}
 
+		GridSpacerWidget parentSpacer;
+		int spacerIndex = 0;
+		for ( int i = 0; i < 10; i++ )
+		{
+			if ( !Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
+				continue;
+
+			parentSpacer.Show( false );
+		}
+
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
 		if ( m_PlayerListSort.IsChecked() )
@@ -1040,6 +1064,16 @@ class JMPlayerForm extends JMFormBase
 		{
 			if ( pIdx < players.Count() )
 			{
+				if ( idx % 100 == 0 )
+				{
+					if ( !Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + spacerIndex ) ) )
+						return;
+
+					parentSpacer.Show( true );
+
+					spacerIndex++;
+				}
+
 				cPlayer = players[pIdx];
 
 				pIdx++;
