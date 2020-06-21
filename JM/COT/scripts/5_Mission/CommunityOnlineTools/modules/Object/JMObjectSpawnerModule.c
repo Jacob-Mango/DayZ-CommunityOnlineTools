@@ -205,31 +205,24 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnEntity_Position( string ent, vector position, float quantity, float health, PlayerIdentity ident )
 	{
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident ) )
-		{
 			return;
-		}
 
-		//int flags = ECE_CREATEPHYSICS;
-		//if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
-		//	flags |= 0x800;
-		//Object obj = GetGame().CreateObjectEx( ent, position, flags );
-
-		Object obj = GetGame().CreateObject( ent, position, false, GetGame().IsKindOf( ent, "DZ_LightAI" ) );
+		int flags = ECE_CREATEPHYSICS;
+		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+			flags |= 0x800;
+		Object obj = GetGame().CreateObjectEx( ent, position, flags );
 		if ( !obj )
-		{
 			return;
+
+		EntityAI e;
+		if ( Class.CastTo( e, obj ) )
+		{
+			vector tmItem[4];
+			e.GetTransform( tmItem );
+			e.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 		}
 
 		SetupEntity( obj, quantity, health );
-
-		vector boundingBox[2];
-		float radius = obj.GetCollisionBox( boundingBox );
-
-		float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
-
-		position[1] = position[1] + ( height * 2.0 );
-
-		obj.SetPosition( position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
 	}
