@@ -6,16 +6,17 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		m_ServerPlayers = new array< Man >;
 
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Map" );
+		GetPermissionsManager().RegisterPermission( "Admin.Map" );
 
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Map.SeePlayers" );
+		GetPermissionsManager().RegisterPermission( "Admin.Map.View" );
+		GetPermissionsManager().RegisterPermission( "Admin.Map.Players" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.Player.Map" );
+		return GetPermissionsManager().HasPermission( "Admin.Map.View" );
 	}
 
 	override string GetInputToggle()
