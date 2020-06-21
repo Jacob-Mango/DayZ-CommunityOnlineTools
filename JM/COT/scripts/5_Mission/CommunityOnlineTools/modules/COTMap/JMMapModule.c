@@ -8,6 +8,8 @@ class JMMapModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Map" );
 
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Map.SeePlayers" );
+
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 	}
 
