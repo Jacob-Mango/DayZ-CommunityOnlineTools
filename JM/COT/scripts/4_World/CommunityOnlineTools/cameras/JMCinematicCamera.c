@@ -41,7 +41,7 @@ class JMCinematicCamera extends JMCameraBase
 
 			if ( !shouldRoll && CAMERA_BOOST_MULT > 0 )
 			{
-				CAMERA_SPEED += timeslice * 40.0 * CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT;
+				CAMERA_SPEED += Math.Clamp( timeslice * 40.0 * CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT, -CAMERA_BOOST_MULT, CAMERA_BOOST_MULT );
 				
 				if ( CAMERA_SPEED < 0.001 ) 
 				{
