@@ -22,6 +22,8 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	private JMObjectSpawnerModule m_Module;
 
+	private Object m_DeletingObject;
+
 	void JMObjectSpawnerForm()
 	{
 		m_ObjectTypes = new map< string, string >;
@@ -249,11 +251,62 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		Object obj = GetCursorObject( 2.0, GetGame().GetPlayer(), 0.01 );
-		if ( PlayerBase.Cast( obj ) )
-			return;
+		m_DeletingObject = NULL;
 
-		m_Module.DeleteEntity( obj );
+		float distance = 2.0;
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.NEARESTCONTACT;
+		rayInput.radius = 1.0;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object obj;
+		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		{
+			for ( int i = 0; i < results.Count(); ++i )
+			{
+				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
+				{
+					continue;
+				}
+
+				if ( results[i].obj.GetType() == "" )
+				{
+					continue;
+				}
+
+				if ( results[i].obj.GetType() == "#particlesourceenf" )
+				{
+					continue;
+				}
+
+				obj = results[i].obj;
+				break;
+			}
+		}
+
+		if ( obj == NULL )
+		{
+			return;
+		}
+
+		m_DeletingObject = obj;
+		
+		CreateConfirmation_Two( "Confirm", "Do you wish to remove the object " + Object.GetDebugName( obj ), "No", "DeleteEntity_No", "Yes", "DeleteEntity_Yes" );
+	}
+
+	private void DeleteEntity_Yes()
+	{
+		m_Module.DeleteEntity( m_DeletingObject );
+
+		m_DeletingObject = NULL;
+	}
+
+	private void DeleteEntity_No()
+	{
+		
 	}
 
 	void SearchInput_OnChange( UIEvent eid, ref UIActionBase action )

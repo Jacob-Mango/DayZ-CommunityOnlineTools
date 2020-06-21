@@ -48,12 +48,12 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	{
 		GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/confirmation.layout", layoutRoot );
 
-		m_TextTitle = TextWidget.Cast( layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
-		m_TextMessage = TextWidget.Cast( layoutRoot.FindAnyWidget( "confirmation_message_text" ) );
+		Class.CastTo( m_TextTitle, layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
+		Class.CastTo( m_TextMessage, layoutRoot.FindAnyWidget( "confirmation_message_text" ) );
 
-		m_Buttons1Panel = layoutRoot.FindAnyWidget( "confirmation_buttons_1" );
-		m_Buttons2Panel = layoutRoot.FindAnyWidget( "confirmation_buttons_2" );
-		m_Buttons3Panel = layoutRoot.FindAnyWidget( "confirmation_buttons_3" );
+		Class.CastTo( m_Buttons1Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_1" ) );
+		Class.CastTo( m_Buttons2Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_2" ) );
+		Class.CastTo( m_Buttons3Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_3" ) );
 	}
 
 	bool IsVisible()
@@ -120,7 +120,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback1 = button1Callback;
 
-			m_ButtonText1 = TextWidget.Cast( m_Button1.FindAnyWidget( "confirmation_text" ) );
+			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
 	}
@@ -141,7 +141,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback1 = button1Callback;
 
-			m_ButtonText1 = TextWidget.Cast( m_Button1.FindAnyWidget( "confirmation_text" ) );
+			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
 
@@ -149,7 +149,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback2 = button2Callback;
 
-			m_ButtonText2 = TextWidget.Cast( m_Button2.FindAnyWidget( "confirmation_text" ) );
+			Class.CastTo( m_ButtonText2, m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2.SetText( button2Title );
 		}
 	}
@@ -170,7 +170,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback1 = button1Callback;
 
-			m_ButtonText1 = TextWidget.Cast( m_Button1.FindAnyWidget( "confirmation_text" ) );
+			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
 
@@ -178,6 +178,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback2 = button2Callback;
 
+			Class.CastTo( m_ButtonText2, m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2 = TextWidget.Cast( m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2.SetText( button2Title );
 		}
@@ -186,7 +187,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		{
 			m_Callback3 = button3Callback;
 
-			m_ButtonText3 = TextWidget.Cast( m_Button3.FindAnyWidget( "confirmation_text" ) );
+			Class.CastTo( m_ButtonText3, m_Button3.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText3.SetText( button2Title );
 		}
 	}
