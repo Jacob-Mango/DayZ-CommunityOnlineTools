@@ -174,7 +174,7 @@ static PlayerBase CreateCustomDefaultCharacter()
 static float CAMERA_FOV = 1.0;
 static float CAMERA_TARGETFOV = 1.0;
 static float CAMERA_FOV_SPEED_MODIFIER = 5.0;
-static float CAMERA_SPEED = 35.0;
+static float CAMERA_SPEED = 3.0;
 static float CAMERA_BOOST_MULT = 5.0;
 static float CAMERA_VELDRAG = 0.9;
 static float CAMERA_MSENS = 35.0;
