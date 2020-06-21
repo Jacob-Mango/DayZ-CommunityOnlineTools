@@ -67,6 +67,7 @@ PanelWidgetClass confirmation_panel_inner {
      ignorepointer 1
      position 0 0
      size 1 1
+     valign top_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
@@ -79,6 +80,21 @@ PanelWidgetClass confirmation_panel_inner {
      "text halign" center
      "text valign" center
      wrap 1
+    }
+    EditBoxWidgetClass confirmation_message_input {
+     visible 0
+     position 0 0
+     size 1 18
+     valign bottom_ref
+     vexactsize 1
+     style Light
+     text ""
+     font "gui/fonts/sdf_MetronLight16"
+     "exact text" 1
+     "exact text size" 16
+     "text halign" center
+     "text valign" center
+     style Editor
     }
    }
   }

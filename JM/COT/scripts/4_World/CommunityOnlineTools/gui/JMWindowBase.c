@@ -120,28 +120,34 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void CreateConfirmation_One( string title, string message, string callBackOneName, string callBackOne )
+	ref JMConfirmation CreateConfirmation_One( string title, string message, string callBackOneName, string callBackOne )
 	{
 		if ( !m_Confirmation )
-			return;
+			return NULL;
 
 		m_Confirmation.CreateConfirmation_One( title, message, callBackOneName, callBackOne );
+
+		return m_Confirmation;
 	}
 
-	void CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	ref JMConfirmation CreateConfirmation_Two( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
 		if ( !m_Confirmation )
-			return;
+			return NULL;
 
 		m_Confirmation.CreateConfirmation_Two( title, message, callBackOneName, callBackTwoName, callBackOne, callBackTwo );
+
+		return m_Confirmation;
 	}
 
-	void CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	ref JMConfirmation CreateConfirmation_Three( string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
 	{
 		if ( !m_Confirmation )
-			return;
+			return NULL;
 
 		m_Confirmation.CreateConfirmation_Three( title, message, callBackOneName, callBackTwoName, callBackThreeName, callBackOne, callBackTwo, callBackThree );
+
+		return m_Confirmation;
 	}
 
 	void SetTitleColour( float alpha, float r, float g, float b )

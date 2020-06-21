@@ -4,4 +4,7 @@ class JMScriptInvokers
 
 	static ref ScriptInvoker MENU_PLAYER_BUTTON = new ScriptInvoker;
 	static ref ScriptInvoker MENU_PLAYER_CHECKBOX = new ScriptInvoker;
+
+	static ref ScriptInvoker ADD_OBJECT = new ScriptInvoker;
+	static ref ScriptInvoker REMOVE_OBJECT = new ScriptInvoker;
 }

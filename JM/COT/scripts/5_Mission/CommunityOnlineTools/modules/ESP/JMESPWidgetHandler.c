@@ -265,6 +265,15 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 			{
 				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), m_chbx_SelectedObject.IsChecked() );
+			} else if ( Info.target )
+			{
+				if ( m_chbx_SelectedObject.IsChecked() )
+				{
+					JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
+				} else
+				{
+					JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target );
+				}
 			}
 
 			return true;
