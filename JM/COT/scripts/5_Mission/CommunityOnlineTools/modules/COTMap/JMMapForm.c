@@ -20,27 +20,27 @@ class JMMapForm extends JMFormBase
 	
 	override void OnShow()
 	{
-		if (!GetPermissionsManager().HasPermission( "Admin.Player.Map.SeePlayers" )) {
+		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
 			return;
-		}
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayers, 1000, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateMapMarkers, 1000, true );
 	}
 
 	override void OnHide() 
 	{
-		if (!GetPermissionsManager().HasPermission( "Admin.Player.Map.SeePlayers" )) {
-			return;
-		}
-
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayers );
+		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateMapMarkers );
 	}
 
-	void UpdatePlayers() 
+	void UpdateMapMarkers()
 	{
 		m_MapWidget.ClearUserMarks();
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Map.SeePlayers" ) )
+		UpdatePlayers();
+	}
+
+	private void UpdatePlayers() 
+	{
+		if ( !GetPermissionsManager().HasPermission( "Admin.Map.Players" ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
