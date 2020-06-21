@@ -9,6 +9,14 @@ enum JMESPModuleRPC
 	COUNT
 };
 
+enum JMESPState
+{
+	UNKNOWN = 0,
+	Update,
+	View,
+	Remove
+};
+
 class JMESPModule: JMRenderableModuleBase
 {
 	private autoptr array< ref JMESPMeta > m_ActiveESPObjects;
@@ -27,10 +35,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	float ESPRadius;
 	float ESPUpdateTime;
-	bool ESPIsUpdating;
 
-	bool IsShowing;
-	bool ToDestroy;
+	private JMESPState m_CurrentState = JMESPState.Remove;
+	private bool m_StateChanged = false;
 
 	void JMESPModule()
 	{
@@ -46,7 +53,6 @@ class JMESPModule: JMRenderableModuleBase
 		ESPRadius = 200;
 
 		ESPUpdateTime = 0.5;
-		IsShowing = false;
 
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
@@ -204,7 +210,7 @@ class JMESPModule: JMRenderableModuleBase
 		m_ActiveESPObjects.Clear();
 	}
 
-	void CreateNewWidgets()
+	private void CreateNewWidgets()
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPModule::CreateNewWidgets() void;" );
@@ -228,7 +234,7 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 	}
 
-	void DestroyOldWidgets()
+	private void DestroyOldWidgets()
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPModule::DestroyOldWidgets() void;" );
@@ -238,13 +244,15 @@ class JMESPModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < m_ESPToDestroy.Count(); ++i )
 		{
+			JMESPMeta meta = m_ESPToDestroy[i];
+
 			#ifdef JM_COT_ESP_DEBUG
-			Print( "  Removing: " + m_ESPToDestroy[i] );
+			Print( "  Removing: " + meta );
 			#endif
 
-			if ( m_ESPToDestroy[i] )
+			if ( meta )
 			{
-				int remove_index = m_ActiveESPObjects.Find( m_ESPToDestroy[i] );
+				int remove_index = m_ActiveESPObjects.Find( meta );
 				#ifdef JM_COT_ESP_DEBUG
 				Print( "  remove_index: " + remove_index );
 				#endif
@@ -256,13 +264,14 @@ class JMESPModule: JMRenderableModuleBase
 				Print( "  Removed." );
 				#endif
 
-				m_ESPToDestroy[i].Destroy();
+				delete meta;
 			}
 		}
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "  Clearing m_ESPToDestroy" );
 		#endif
+
 		m_ESPToDestroy.Clear();
 
 		m_IsDestroyingWidgets = false;
@@ -272,6 +281,12 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 	}
 
+	void _Sleep( int time, out int totalTimeTaken )
+	{
+		Sleep( time );
+		totalTimeTaken += time;
+	}
+
 	private void ChunkGetObjects( out array<Object> objects, out int totalTimeTaken )
 	{
 		vector centerPosition = GetCurrentPosition();
@@ -279,10 +294,6 @@ class JMESPModule: JMRenderableModuleBase
 		float maxRadiusChunk = 100;
 
 		int numIterations = Math.Ceil( ESPRadius / maxRadiusChunk );
-		Print( centerPosition );
-		Print( ESPRadius );
-		Print( maxRadiusChunk );
-		Print( numIterations );
 
 		array<Object> subObjects = new array<Object>;
 		GetGame().GetObjectsAtPosition( centerPosition, maxRadiusChunk, subObjects, NULL );
@@ -294,24 +305,20 @@ class JMESPModule: JMRenderableModuleBase
 				objects.Insert( subObjects[i] );
 			}
 		}
+
 		subObjects.Clear();
 
-		totalTimeTaken += 10;
-		Sleep( 10 );
+		_Sleep( 10, totalTimeTaken );
 
 		for ( int currIter = 2; currIter <= numIterations; ++currIter )
 		{
-			Print( currIter );
 			int numSubChunks = currIter * currIter;
-			Print( numSubChunks );
 			for ( int chunkIdx = 1; chunkIdx <= numSubChunks; ++chunkIdx )
 			{
-				Print( chunkIdx );
 				subObjects.Clear();
 
 				vector chunkPos = GetChunkCenterPosition( centerPosition, maxRadiusChunk, currIter, chunkIdx, numSubChunks );
 
-				Print( chunkPos );
 				GetGame().GetObjectsAtPosition( chunkPos, maxRadiusChunk, subObjects, NULL );
 
 				for ( i = 0; i < subObjects.Count(); i++ )
@@ -323,11 +330,9 @@ class JMESPModule: JMRenderableModuleBase
 				}
 				subObjects.Clear();
 
-				totalTimeTaken += 10;
-				Sleep( 10 );
+				_Sleep( 10, totalTimeTaken );
 			}
 		}
-
 	}
 
 	vector GetChunkCenterPosition( vector center, float radiusSize, int chnkIdx, int index, int count )
@@ -342,14 +347,35 @@ class JMESPModule: JMRenderableModuleBase
 		return center + Vector( x, 0, z );
 	}
 
+	JMESPState GetState()
+	{
+		return m_CurrentState;
+	}
+
+	bool IsStateChangeProcessing()
+	{
+		return m_StateChanged;
+	}
+
+	void UpdateState( JMESPState newState )
+	{
+		m_CurrentState = newState;
+		m_StateChanged = true;
+	}
+
 	void ThreadESP()
 	{
 		while ( true )
 		{
 			int totalTimeTaken = 0;
+			bool didRun = false;
 
-			if ( ( IsShowing || ToDestroy ) && !m_IsDestroyingWidgets && !m_IsCreatingWidgets )
+			if ( m_StateChanged && !m_IsDestroyingWidgets && !m_IsCreatingWidgets )
 			{
+				m_StateChanged = false;
+
+				didRun = true;
+
 				array<Object> objects = new array<Object>;
 				array<Object> addedObjects = new array<Object>;
 
@@ -360,13 +386,13 @@ class JMESPModule: JMRenderableModuleBase
 
 				int k;
 
-				if ( ToDestroy )
+				if ( m_CurrentState == JMESPState.Remove )
 				{
 					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
 					{
 						m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
 					}
-				} else if ( IsShowing )
+				} else if ( m_CurrentState == JMESPState.View || m_CurrentState == JMESPState.Update )
 				{
 					ChunkGetObjects( objects, totalTimeTaken );
 
@@ -457,19 +483,7 @@ class JMESPModule: JMRenderableModuleBase
 						}
 					}
 
-					totalTimeTaken += 1;
-					Sleep( 1 );
-
-					for ( k = m_MappedESPObjects.Count() - 1; k >= 0; --k )
-					{
-						if ( m_MappedESPObjects.GetKey( i ) == NULL )
-						{
-							m_MappedESPObjects.RemoveElement( i );
-						}
-					}
-
-					totalTimeTaken += 1;
-					Sleep( 1 );
+					_Sleep( 1, totalTimeTaken );
 
 					#ifdef JM_COT_ESP_DEBUG
 					Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
@@ -477,14 +491,20 @@ class JMESPModule: JMRenderableModuleBase
 
 					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
 					{
-						if ( m_ActiveESPObjects[k].target == NULL )
+						Object aTgt = m_ActiveESPObjects[k].target;
+
+						if ( aTgt == NULL )
 						{
 							m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
-						} else if ( addedObjects.Find( m_ActiveESPObjects[k].target ) == -1 )
+						} else if ( addedObjects.Find( aTgt ) == -1 )
 						{
 							m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+
+							m_MappedESPObjects.Remove( aTgt );
 						}
 					}
+
+					m_MappedESPObjects.Remove( NULL );
 
 					#ifdef JM_COT_ESP_DEBUG
 					Print( "-JMESPModule::ThreadESP() - Verifying ESP Objects" );
@@ -495,26 +515,18 @@ class JMESPModule: JMRenderableModuleBase
 			
 				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
 				
-				if ( ToDestroy )
+				if ( m_CurrentState == JMESPState.Update )
 				{
-					ESPIsUpdating = false;
-					IsShowing = false;
-					ToDestroy = false;
+					m_StateChanged = true;
 				}
+			}
 
-				int sleepTime = Math.Max( 0, ( ESPUpdateTime * 1000 ) - totalTimeTaken );
-				Sleep( sleepTime );
-
-				if ( !ESPIsUpdating )
-				{
-					IsShowing = false;
-				}
+			if ( didRun && m_StateChanged && m_CurrentState == JMESPState.Update )
+			{				
+				Sleep( Math.Max( 0, ( ESPUpdateTime * 1000 ) - totalTimeTaken ) );
 			} else
 			{
-				if ( ( m_IsDestroyingWidgets || m_IsCreatingWidgets ) && ( IsShowing || ToDestroy ) )
-					Sleep( 50 );
-				else 
-					Sleep( 500 );
+				Sleep( 50 );
 			}
 		}
 	}
