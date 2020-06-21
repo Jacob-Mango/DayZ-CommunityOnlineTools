@@ -33,6 +33,8 @@ class JMPermission
 
 	void ~JMPermission()
 	{
+		Clear();
+
 		delete Children;
 	}
 
@@ -181,17 +183,13 @@ class JMPermission
 
 	bool HasPermission( string inp, out JMPermissionType permType )
 	{
-		// Print( "JMPermission::HasPermission - inp=" + inp );
-
 		array<string> tokens = new array<string>;
 		inp.Split( ".", tokens );
 
-		// Print( "JMPermission::HasPermission - tokens=" + tokens );
 		if ( tokens.Count() == 0 )
 			return false;
 		
 		int depth = tokens.Find( Name );
-		// Print( "JMPermission::HasPermission - depth=" + depth );
 
 		bool parentDisallowed = false;
 
@@ -200,10 +198,22 @@ class JMPermission
 			parentDisallowed = true;
 		} else if ( Type == JMPermissionType.INHERIT )
 		{
-			// magic fuckery to figure this out...
-		}
+			JMPermission parent = Parent;
+			while ( parent != NULL )
+			{
+				if ( parent.Type != JMPermissionType.INHERIT )
+				{
+					if ( parent.Type == JMPermissionType.DISALLOW )
+					{
+						parentDisallowed = true;
+					}
 
-		// Print( "JMPermission::HasPermission - parentDisallowed=" + parentDisallowed );
+					break;
+				}
+				
+				parent = parent.Parent;
+			}
+		}
 		
 		if ( depth > -1 )
 		{
@@ -238,11 +248,6 @@ class JMPermission
 			parentDisallowed = false;
 		}
 
-		// Print( "JMPermission::HasPermission - Name=" + Name );
-		// Print( "JMPermission::HasPermission - Type=" + Type );
-		// Print( "JMPermission::HasPermission - ifReturnAs=" + ifReturnAs );
-		// Print( "JMPermission::HasPermission - parentDisallowed=" + parentDisallowed );
-
 		if ( depth < tokens.Count() )
 		{
 			ref JMPermission nChild = NULL;
@@ -266,6 +271,16 @@ class JMPermission
 		return ifReturnAs;
 	}
 
+	void Clear()
+	{
+		for ( int i = 0; i < Children.Count(); ++i )
+		{
+			delete Children[i];
+		}
+
+		Children.Clear();
+	}
+
 	void Serialize( ref array< string > output, string prepend = "" )
 	{
 		for ( int i = 0; i < Children.Count(); i++ )
@@ -279,6 +294,14 @@ class JMPermission
 				Children[i].Serialize( output, serialize + "." );
 			}
 		}
+	}
+
+	void Deserialize( ref array< string > input )
+	{
+		Clear();
+
+		for ( int i = 0; i < input.Count(); i++ )
+			AddPermission( input[i], JMPermissionType.INHERIT );
 	}
 
 	void DebugPrint( int depth = 0 )

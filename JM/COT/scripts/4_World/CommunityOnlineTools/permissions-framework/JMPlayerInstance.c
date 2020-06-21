@@ -1,7 +1,7 @@
 class JMPlayerInstance
 {
-	private autoptr JMPermission m_RootPermission;
-	private autoptr array< string > m_Roles;
+	private ref JMPermission m_RootPermission;
+	private ref array< string > m_Roles;
 
 	PlayerBase PlayerObject;
 
@@ -63,6 +63,7 @@ class JMPlayerInstance
 	void ~JMPlayerInstance()
 	{
 		delete m_RootPermission;
+		delete m_Roles;
 	}
 
 	void MakeFake( string gid, string sid, string nid )
@@ -115,41 +116,26 @@ class JMPlayerInstance
 
 	void CopyPermissions( ref JMPermission copy )
 	{
-		ref array< string > data = new array< string >;
+		array< string > data = new array< string >;
+
 		copy.Serialize( data );
 
-		for ( int i = 0; i < data.Count(); i++ )
-		{
-			m_RootPermission.AddPermission( data[i], JMPermissionType.INHERIT );
-		}
+		m_RootPermission.Deserialize( data );
 	}
 
 	void ClearPermissions()
 	{
-		delete m_RootPermission;
-
-		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
+		m_RootPermission.Clear();
 	}
 
 	void LoadPermissions( array< string > permissions )
 	{
-		// Print( "LoadPermissions" );
-		// Print( permissions );
-		ClearPermissions();
-
-		for ( int i = 0; i < permissions.Count(); i++ )
-		{
-			AddPermission( permissions[i] );
-		}
-
+		m_RootPermission.Deserialize( permissions );
 		Save();
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
-		// Print( "AddPermission" );
-		// Print( permission );
-		// Print( type );
 		m_RootPermission.AddPermission( permission, type );
 	}
 
@@ -217,16 +203,18 @@ class JMPlayerInstance
 
 		for ( int j = 0; j < m_Roles.Count(); j++ )
 		{
-			hasPermission = GetPermissionsManager().HasRolePermission( m_Roles[j], permission, permType );
+			JMRole role = GetPermissionsManager().GetRole( m_Roles[j] );
+			if ( !role )
+				continue;
+
+			hasPermission = role.HasPermission( permission, permType );
 
 			// Print( "JMPlayerInstance::HasPermission - role[" + j + "]=" + Roles[j] );
 			// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
 			// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
 
 			if ( hasPermission )
-			{
 				return true;
-			}
 		}
 
 		return false;
@@ -272,11 +260,9 @@ class JMPlayerInstance
 
 		ctx.Read( permissions );
 		ctx.Read( roles );
-		
-		ClearPermissions();
-		for ( int i = 0; i < permissions.Count(); i++ )
-			AddPermission( permissions[i] );
 
+		m_RootPermission.Deserialize( permissions );
+		
 		ClearRoles();
 		for ( int j = 0; j < roles.Count(); j++ )
 			AddRole( roles[j] );
