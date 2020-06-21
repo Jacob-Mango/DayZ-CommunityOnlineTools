@@ -1,4 +1,4 @@
-GridSpacerWidgetClass JMESPWidget {
+GridSpacerWidgetClass JMESPWidgetHandler {
  ignorepointer 1
  color 0.0784 0.098 0.1294 0.702
  size 300 20
@@ -6,7 +6,7 @@ GridSpacerWidgetClass JMESPWidget {
  vexactpos 1
  hexactsize 1
  vexactsize 1
- scriptclass "JMESPWidget"
+ scriptclass "JMESPWidgetHandler"
  style Colorable
  "Size To Content V" 1
  Columns 1

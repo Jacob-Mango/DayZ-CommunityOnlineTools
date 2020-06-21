@@ -165,10 +165,13 @@ Admin.Player.Set.Energy 0
 Admin.Player.Set.Water 0
 Admin.Player.Set.Stamina 0
 Admin.Player.Set.BloodyHands 0
-Admin.Player.Map 0
 Admin.Player.Read 0
+Admin.Player.Map 0
 Admin.Transport 0
 Admin.Transport.Repair 0
+Admin.Map 0
+Admin.Map.View 0
+Admin.Map.Players 0
 Admin.Roles 0
 Admin.Roles.Update 0
 Entity 0

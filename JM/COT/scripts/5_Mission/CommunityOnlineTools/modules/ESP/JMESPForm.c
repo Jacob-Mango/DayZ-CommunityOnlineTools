@@ -35,7 +35,7 @@ class JMESPForm extends JMFormBase
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidget.UseClassName );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 
 		UIActionManager.CreateButton( quadSpacer, "Update Interval", this, "Click_UpdateAtRate" );
 		m_UpdateRate = UIActionManager.CreateSlider( quadSpacer, "", 0.5, 10, this, "Change_UpdateRate" );
@@ -108,7 +108,7 @@ class JMESPForm extends JMFormBase
 
 	override void OnInit()
 	{
-		JMESPWidget.espMenu = this;
+		JMESPWidgetHandler.espMenu = this;
 
 		ESPControls( layoutRoot.FindAnyWidget( "panel_top" ) );
 
@@ -211,7 +211,7 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		
-		JMESPWidget.UseClassName = action.IsChecked();
+		JMESPWidgetHandler.UseClassName = action.IsChecked();
 	}
 
 	void Click_EnableFullMap( UIEvent eid, ref UIActionBase action )

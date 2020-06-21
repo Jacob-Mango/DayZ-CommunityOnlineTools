@@ -157,7 +157,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		if ( IsMissionClient() )
 		{
-			JMESPWidget.espModule = this;
+			JMESPWidgetHandler.espModule = this;
 
 			GetGame().GameScript.Call( this, "ThreadESP", NULL );
 		}
@@ -206,6 +206,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	void CreateNewWidgets()
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPModule::CreateNewWidgets() void;" );
+		#endif
+
 		m_IsCreatingWidgets = true;
 
 		for ( int i = 0; i < m_ESPToCreate.Count(); ++i )
@@ -218,36 +222,136 @@ class JMESPModule: JMRenderableModuleBase
 		m_ESPToCreate.Clear();
 
 		m_IsCreatingWidgets = false;
+
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "-JMESPModule::CreateNewWidgets() void;" );
+		#endif
 	}
 
 	void DestroyOldWidgets()
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPModule::DestroyOldWidgets() void;" );
+		#endif
+
 		m_IsDestroyingWidgets = true;
 
 		for ( int i = 0; i < m_ESPToDestroy.Count(); ++i )
 		{
-			m_ESPToDestroy[i].Destroy();
+			#ifdef JM_COT_ESP_DEBUG
+			Print( "  Removing: " + m_ESPToDestroy[i] );
+			#endif
 
-			int remove_index = m_ActiveESPObjects.Find( m_ESPToDestroy[i] );
-			if ( remove_index >= 0 )
-				m_ActiveESPObjects.Remove( remove_index );
+			if ( m_ESPToDestroy[i] )
+			{
+				int remove_index = m_ActiveESPObjects.Find( m_ESPToDestroy[i] );
+				#ifdef JM_COT_ESP_DEBUG
+				Print( "  remove_index: " + remove_index );
+				#endif
+				
+				if ( remove_index >= 0 )
+					m_ActiveESPObjects.Remove( remove_index );
+
+				#ifdef JM_COT_ESP_DEBUG
+				Print( "  Removed." );
+				#endif
+
+				m_ESPToDestroy[i].Destroy();
+			}
 		}
 
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "  Clearing m_ESPToDestroy" );
+		#endif
 		m_ESPToDestroy.Clear();
 
 		m_IsDestroyingWidgets = false;
+
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "-JMESPModule::DestroyOldWidgets() void;" );
+		#endif
+	}
+
+	private void ChunkGetObjects( out array<Object> objects, out int totalTimeTaken )
+	{
+		vector centerPosition = GetCurrentPosition();
+
+		float maxRadiusChunk = 100;
+
+		int numIterations = Math.Ceil( ESPRadius / maxRadiusChunk );
+		Print( centerPosition );
+		Print( ESPRadius );
+		Print( maxRadiusChunk );
+		Print( numIterations );
+
+		array<Object> subObjects = new array<Object>;
+		GetGame().GetObjectsAtPosition( centerPosition, maxRadiusChunk, subObjects, NULL );
+
+		for ( int i = 0; i < subObjects.Count(); i++ )
+		{
+			if ( objects.Find( subObjects[i] ) < 0 )
+			{
+				objects.Insert( subObjects[i] );
+			}
+		}
+		subObjects.Clear();
+
+		totalTimeTaken += 10;
+		Sleep( 10 );
+
+		for ( int currIter = 2; currIter <= numIterations; ++currIter )
+		{
+			Print( currIter );
+			int numSubChunks = currIter * currIter;
+			Print( numSubChunks );
+			for ( int chunkIdx = 1; chunkIdx <= numSubChunks; ++chunkIdx )
+			{
+				Print( chunkIdx );
+				subObjects.Clear();
+
+				vector chunkPos = GetChunkCenterPosition( centerPosition, maxRadiusChunk, currIter, chunkIdx, numSubChunks );
+
+				Print( chunkPos );
+				GetGame().GetObjectsAtPosition( chunkPos, maxRadiusChunk, subObjects, NULL );
+
+				for ( i = 0; i < subObjects.Count(); i++ )
+				{
+					if ( objects.Find( subObjects[i] ) < 0 )
+					{
+						objects.Insert( subObjects[i] );
+					}
+				}
+				subObjects.Clear();
+
+				totalTimeTaken += 10;
+				Sleep( 10 );
+			}
+		}
+
+	}
+
+	vector GetChunkCenterPosition( vector center, float radiusSize, int chnkIdx, int index, int count )
+	{
+		float angle = Math.PI - ( Math.PI2 * index / count );
+
+		float distance = chnkIdx * radiusSize;
+
+		float x = distance * Math.Cos( angle );
+		float z = distance * Math.Sin( angle );
+
+		return center + Vector( x, 0, z );
 	}
 
 	void ThreadESP()
 	{
 		while ( true )
 		{
+			int totalTimeTaken = 0;
+
 			if ( ( IsShowing || ToDestroy ) && !m_IsDestroyingWidgets && !m_IsCreatingWidgets )
 			{
 				array<Object> objects = new array<Object>;
 				array<Object> addedObjects = new array<Object>;
-
-				GetGame().GetObjectsAtPosition( GetCurrentPosition(), ESPRadius, objects, NULL );
 
 				bool isUsingFilter = Filter.Length() > 0;
 
@@ -264,6 +368,8 @@ class JMESPModule: JMRenderableModuleBase
 					}
 				} else if ( IsShowing )
 				{
+					ChunkGetObjects( objects, totalTimeTaken );
+
 					for ( int i = 0; i < objects.Count(); ++i )
 					{
 						Object obj = objects[i];
@@ -275,6 +381,18 @@ class JMESPModule: JMRenderableModuleBase
 						type.ToLower();
 
 						if ( !IsMissionOffline() && !obj.HasNetworkID() )
+							continue;
+
+						if ( obj.GetType() == "" )
+							continue;
+
+						if ( obj.GetType() == "#particlesourceenf" )
+							continue;
+
+						if ( obj.IsInherited( Particle ) )
+							continue;
+
+						if ( obj.IsInherited( Camera ) )
 							continue;
 
 						if ( obj.IsRock() )
@@ -298,25 +416,64 @@ class JMESPModule: JMRenderableModuleBase
 						JMESPMeta meta = m_MappedESPObjects.Get( obj );
 						if ( meta != NULL )
 						{
+							#ifdef JM_COT_ESP_DEBUG
+							bool metaIsValid = meta.IsValid();
+							Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid );
+							if ( metaIsValid )
+							#else
 							if ( meta.IsValid() )
+							#endif
 							{
 								addedObjects.Insert( obj );
 							}
 						} else
 						{
+							array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
 							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
 							{
-								if ( m_ViewTypes[j].IsValid( obj, meta ) )
+								if ( m_ViewTypes[j].HasPermission && m_ViewTypes[j].View )
 								{
-									m_MappedESPObjects.Insert( obj, meta );
+									validViewTypes.Insert( m_ViewTypes[j] );
+								}
+							}
+
+							for ( j = 0; j < validViewTypes.Count(); j++ )
+							{
+								#ifdef JM_COT_ESP_DEBUG
+								bool viewTypeIsValid = validViewTypes[j].IsValid( obj, meta );
+								Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid );
+								if ( viewTypeIsValid )
+								#else
+								if ( validViewTypes[j].IsValid( obj, meta ) )
+								#endif
+								{
+									m_MappedESPObjects.Set( obj, meta );
 
 									m_ESPToCreate.Insert( meta );
 
-									j = m_ViewTypes.Count();
+									j = validViewTypes.Count();
 								}
 							}
 						}
 					}
+
+					totalTimeTaken += 1;
+					Sleep( 1 );
+
+					for ( k = m_MappedESPObjects.Count() - 1; k >= 0; --k )
+					{
+						if ( m_MappedESPObjects.GetKey( i ) == NULL )
+						{
+							m_MappedESPObjects.RemoveElement( i );
+						}
+					}
+
+					totalTimeTaken += 1;
+					Sleep( 1 );
+
+					#ifdef JM_COT_ESP_DEBUG
+					Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					#endif
 
 					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
 					{
@@ -328,6 +485,10 @@ class JMESPModule: JMRenderableModuleBase
 							m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
 						}
 					}
+
+					#ifdef JM_COT_ESP_DEBUG
+					Print( "-JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					#endif
 
 					GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );
 				}
@@ -341,10 +502,13 @@ class JMESPModule: JMRenderableModuleBase
 					ToDestroy = false;
 				}
 
-				Sleep( ESPUpdateTime * 1000 );
+				int sleepTime = Math.Max( 0, ( ESPUpdateTime * 1000 ) - totalTimeTaken );
+				Sleep( sleepTime );
 
 				if ( !ESPIsUpdating )
+				{
 					IsShowing = false;
+				}
 			} else
 			{
 				if ( ( m_IsDestroyingWidgets || m_IsCreatingWidgets ) && ( IsShowing || ToDestroy ) )

@@ -22,13 +22,22 @@ class JMESPViewType
 
 	void CreateMeta( out JMESPMeta meta )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewType::CreateMeta( out = " + meta + " ) void;" );
+		#endif
+
 		if ( meta == NULL )
 			Class.CastTo( meta, MetaType.Spawn() );
+			
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "-JMESPViewType::CreateMeta( out = " + meta + " ) void;" );
+		#endif
 	}
 
 	bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		return HasPermission && View;
+		Error( "Not implemented!" );
+		return false;
 	}
 };
 
@@ -44,8 +53,9 @@ class JMESPViewTypePlayer: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !super.IsValid( obj, meta ) )
-			return false;
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypePlayer::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
 
 		Man man;
 		if ( !Class.CastTo( man, obj ) || !man.IsPlayer() )
@@ -86,8 +96,9 @@ class JMESPViewTypeInfected: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !super.IsValid( obj, meta ) )
-			return false;
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeInfected::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
 
 		EntityAI entity;
 		if ( !Class.CastTo( entity, obj ) || !( entity.IsZombie() || entity.IsZombieMilitary() ) )
@@ -121,9 +132,10 @@ class JMESPViewTypeAnimal: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !super.IsValid( obj, meta ) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeAnimal::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		EntityAI entity;
 		if ( !Class.CastTo( entity, obj ) || !entity.IsAnimal() )
 			return false;
@@ -156,9 +168,10 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !super.IsValid( obj, meta ) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeCar::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		CarScript car;
 		if ( !Class.CastTo( car, obj ) )
 			return false;
@@ -191,9 +204,10 @@ class JMESPViewTypeBaseBuilding: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !super.IsValid( obj, meta ) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeBaseBuilding::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		bool isValid = obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase );
 		
 		if ( !isValid )
@@ -227,9 +241,10 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !(HasPermission && View) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeWeapon::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		Weapon_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
@@ -262,9 +277,10 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !(HasPermission && View) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		BoltActionRifle_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
@@ -297,9 +313,10 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !(HasPermission && View) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		Rifle_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
@@ -332,9 +349,10 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !(HasPermission && View) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypePistol::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		Pistol_Base wpn;
 		if ( !Class.CastTo( wpn, obj ) )
 			return false;
@@ -367,9 +385,10 @@ class JMESPViewTypeItem: JMESPViewType
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
-		if ( !(HasPermission && View) )
-			return false;
-
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeItem::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
 		bool isValid = obj.IsItemBase() || obj.IsInventoryItem();
 		
 		if ( !isValid )
@@ -411,6 +430,10 @@ class JMESPViewTypeItemTool: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemTool::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Tools" )
@@ -432,6 +455,10 @@ class JMESPViewTypeItemCrafted: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemCrafted::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Crafted" )
@@ -453,6 +480,10 @@ class JMESPViewTypeItemTent: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemTent::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Tents" )
@@ -474,6 +505,10 @@ class JMESPViewTypeItemMaterial: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemMaterial::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Materials" )
@@ -495,6 +530,10 @@ class JMESPViewTypeItemAttachment: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemAttachment::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Attachments" )
@@ -516,6 +555,10 @@ class JMESPViewTypeItemFood: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemFood::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Food" )
@@ -537,6 +580,10 @@ class JMESPViewTypeItemExplosive: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemExplosive::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Explosives" )
@@ -558,6 +605,10 @@ class JMESPViewTypeItemBook: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemBook::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Books" )
@@ -579,6 +630,10 @@ class JMESPViewTypeItemContainer: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemContainer::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Containers" )
@@ -600,6 +655,10 @@ class JMESPViewTypeItemEyewear: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemEyewear::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Eyewear" )
@@ -621,6 +680,10 @@ class JMESPViewTypeItemAmmo: JMESPViewTypeItem
 
 	override bool CheckLootCategory( Object obj )
 	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeItemAmmo::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
 		string lootCategory;
 		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
 		if ( lootCategory != "Ammo" )
