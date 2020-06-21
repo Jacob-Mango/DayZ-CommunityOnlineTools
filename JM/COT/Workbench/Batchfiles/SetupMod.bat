@@ -31,6 +31,8 @@ set prefixLinkRoot=
 set workbenchDirectory=
 set gameDirectory=
 set serverDirectory=
+set modName=
+set modBuildDirectory=
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
     set workDrive=%%a
@@ -46,6 +48,14 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg GameDi
 
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerDirectory') do (
     set serverDirectory=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
+	set modName=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
+	set modBuildDirectory=%%a
 )
 
 setlocal enableextensions enabledelayedexpansion
@@ -74,6 +84,18 @@ if "%serverDirectory%"=="" (
     echo ServerDirectory parameter was not set in the project.cfg
 )
 
+echo ModName is: "%modName%"
+if "%modName%"=="" (
+	set /a failed=1
+	echo ModName parameter was not set in the project.cfg
+)
+
+echo ModBuildDirectory is: "%modBuildDirectory%"
+if "%modBuildDirectory%"=="" (
+	set /a failed=1
+	echo ModBuildDirectory parameter was not set in the project.cfg
+)
+
 if %failed%==1 (
     endlocal
 
@@ -89,8 +111,7 @@ IF exist "%workDrive%%prefixLinkRoot%\" (
 echo Creating link %workDrive%%prefixLinkRoot%\
 mklink /J "%workDrive%%prefixLinkRoot%\" "%rootDirectory%%prefixLinkRoot%\"
 
-set directory=%rootDirectory%\Missions\
-for /f "tokens=*" %%D in ('dir /b "%directory%"') do (
+for /f "tokens=*" %%D in ('dir /b "%rootDirectory%\Missions\"') do (
     set missionFolder=%%~D
 
     IF exist "%gameDirectory%\Missions\!missionFolder!\" (
@@ -98,7 +119,7 @@ for /f "tokens=*" %%D in ('dir /b "%directory%"') do (
         REM rmdir /s /q "%gameDirectory%\Missions\!missionFolder!\"
     ) else (
         echo.Creating link "%gameDirectory%\Missions\!missionFolder!\"
-        mklink /J "%gameDirectory%\Missions\!missionFolder!\" "%directory%\!missionFolder!\"
+        mklink /J "%gameDirectory%\Missions\!missionFolder!\" "%rootDirectory%\Missions\\!missionFolder!\"
     )
 
     IF exist "%serverDirectory%\MPMissions\!missionFolder!\" (
@@ -106,7 +127,7 @@ for /f "tokens=*" %%D in ('dir /b "%directory%"') do (
         REM rmdir /s /q "%serverDirectory%\MPMissions\!missionFolder!\"
     ) else (
         echo.Creating link "%serverDirectory%\MPMissions\!missionFolder!\"
-        mklink /J "%serverDirectory%\MPMissions\!missionFolder!\" "%directory%\!missionFolder!\"
+        mklink /J "%serverDirectory%\MPMissions\!missionFolder!\" "%rootDirectory%\Missions\\!missionFolder!\"
     )
 )
 

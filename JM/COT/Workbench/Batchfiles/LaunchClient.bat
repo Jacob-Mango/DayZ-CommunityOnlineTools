@@ -45,10 +45,6 @@ for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg Additi
     set mods=%%a
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerPassword') do (
-    set password=%%a
-)
-
 for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg GameDirectory') do (
     set gameDirectory=%%a
 )
@@ -89,7 +85,6 @@ setlocal enableextensions enabledelayedexpansion
 
 echo ClientLaunchParams is: "%clientLaunchParams%"
 if "%clientLaunchParams%"=="" (
-    set /a failed=1
     echo ClientLaunchParams parameter was not set in the project.cfg
 )
 
@@ -130,6 +125,12 @@ echo GameDirectory is: "%gameDirectory%"
 if "%gameDirectory%"=="" (
     set /a failed=1
     echo GameDirectory parameter was not set in the project.cfg
+)
+
+echo ServerDirectory is: "%serverDirectory%"
+if "%serverDirectory%"=="" (
+    set /a failed=1
+    echo ServerDirectory parameter was not set in the project.cfg
 )
 
 echo ServerProfileDirectory is: "%serverProfileDirectory%"

@@ -18,13 +18,6 @@ if exist ../user.cfg (
 	set /a failed=1
 )
 
-if %failed%==1 (
-    endlocal
-
-    echo Failed to package the mod.
-    goto:eof
-)
-
 set port=0
 set password=
 set gameDirectory=
@@ -184,13 +177,6 @@ echo ModBuildDirectory is: "%modBuildDirectory%"
 if "%modBuildDirectory%"=="" (
 	set /a failed=1
 	echo ModBuildDirectory parameter was not set in the project.cfg
-)
-
-if %failed%==1 (
-    endlocal
-
-    echo Failed to package the mod.   
-    goto:eof
 )
 
 for %%a in ("%mods:;=" "%") do (
