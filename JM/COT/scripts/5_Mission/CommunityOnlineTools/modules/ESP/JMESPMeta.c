@@ -86,10 +86,6 @@ class JMESPMeta : Managed
 		if ( widgetRoot )
 			widgetRoot.Unlink();
 
-		m_Action_Position = NULL;
-		m_Action_Orientation = NULL;
-		m_Action_Health = NULL;
-
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );
 		#endif
@@ -106,7 +102,7 @@ class JMESPMeta : Managed
 
 	void UpdateActions()
 	{
-		if ( !viewTypeActions )
+		if ( !viewTypeActions || m_IsDestroyed )
 			return;
 		
 		m_Action_Position.SetValue( target.GetPosition() );

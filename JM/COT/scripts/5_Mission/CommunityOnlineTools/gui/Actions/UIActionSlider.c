@@ -90,6 +90,14 @@ class UIActionSlider extends UIActionBase
 		CalculateValue();
 	}
 
+	bool IsFocusWidget( Widget widget )
+	{
+		if ( widget == m_Slider )
+			return true;
+
+		return false;
+	}
+
 	override float GetCurrent()
 	{
 		return m_Current;
@@ -97,6 +105,9 @@ class UIActionSlider extends UIActionBase
 
 	override void SetCurrent( float value )
 	{
+		if ( IsFocused() )
+			return;
+			
 		float x = value;
 		float a = m_Slider.GetMin();
 		float b = m_Slider.GetMax();

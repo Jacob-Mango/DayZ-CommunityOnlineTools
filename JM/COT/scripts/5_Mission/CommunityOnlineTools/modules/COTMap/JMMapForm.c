@@ -23,12 +23,12 @@ class JMMapForm extends JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
 			return;
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdateMapMarkers, 1000, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
 	}
 
 	override void OnHide() 
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdateMapMarkers );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateMapMarkers );
 	}
 
 	void UpdateMapMarkers()
