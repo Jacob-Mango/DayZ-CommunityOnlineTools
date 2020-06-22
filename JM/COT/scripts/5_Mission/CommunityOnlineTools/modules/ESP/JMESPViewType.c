@@ -17,7 +17,7 @@ class JMESPViewType
 
 		Colour = ARGB( 255, 255, 255, 255 );
 
-		View = true;
+		View = false;
 	}
 
 	void CreateMeta( out JMESPMeta meta )
