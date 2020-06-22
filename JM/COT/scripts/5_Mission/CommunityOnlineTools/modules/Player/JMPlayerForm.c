@@ -376,7 +376,7 @@ class JMPlayerForm extends JMFormBase
 
 		m_PermissionsRows = UIActionManager.CreateActionRows( m_PermissionsListScroller.GetContentWidget() );
 
-		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( GetSelectedPlayers()[0] );
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
 
 		for ( int i = 0; i < 10; i++ )
 		{
@@ -449,7 +449,7 @@ class JMPlayerForm extends JMFormBase
 
 		GetPermissionsManager().GetRolesAsList( roles );
 
-		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( GetSelectedPlayers()[0] );
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
 
 		for ( int i = 0; i < 10; i++ )
 		{
@@ -531,7 +531,7 @@ class JMPlayerForm extends JMFormBase
 			permissions.Insert( m_PermissionList[i].FullName + " " + m_PermissionList[i].Type );
 		}
 
-		m_Module.SetPermissions( permissions, GetSelectedPlayers() );
+		m_Module.SetPermissions( permissions, JM_GetSelected().GetPlayers() );
 	}
 	
 	void Click_SaveRoles( UIEvent eid, ref UIActionBase action )
@@ -546,40 +546,40 @@ class JMPlayerForm extends JMFormBase
 				roles.Insert( m_RoleList[i].Name );
 		}
 
-		m_Module.SetRoles( roles, GetSelectedPlayers() );
+		m_Module.SetRoles( roles, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_StripPlayer( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 )
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
 			return;
 
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.Strip( GetSelectedPlayers() );
+		m_Module.Strip( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 )
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
 			return;
 
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.StopBleeding( GetSelectedPlayers() );
+		m_Module.StopBleeding( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_HealPlayer( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 )
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
 			return;
 
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.Heal( GetSelectedPlayers() );
+		m_Module.Heal( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_SpectatePlayer( UIEvent eid, ref UIActionBase action )
@@ -601,10 +601,10 @@ class JMPlayerForm extends JMFormBase
 
 		if ( shouldSpectate )
 		{
-			if ( GetSelectedPlayers().Count() != 1 )
+			if ( JM_GetSelected().GetPlayers().Count() != 1 )
 				return;
 
-			m_Module.StartSpectating( GetSelectedPlayers()[0] );
+			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
 		} else
 		{
 			m_Module.EndSpectating();
@@ -616,7 +616,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.RepairTransport( GetSelectedPlayers() );
+		m_Module.RepairTransport( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_SetPosition( UIEvent eid, ref UIActionBase action )
@@ -629,7 +629,7 @@ class JMPlayerForm extends JMFormBase
 		pos[1] = m_PositionY.GetText().ToFloat();
 		pos[2] = m_PositionZ.GetText().ToFloat();
 
-		m_Module.TeleportTo( pos, GetSelectedPlayers() );
+		m_Module.TeleportTo( pos, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_TeleportToMe( UIEvent eid, ref UIActionBase action )
@@ -650,18 +650,18 @@ class JMPlayerForm extends JMFormBase
 			return;
 		}
 
-		m_Module.TeleportTo( position, GetSelectedPlayers() );
+		m_Module.TeleportTo( position, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_TeleportMeTo( UIEvent eid, ref UIActionBase action )
 	{
-		if ( GetSelectedPlayers().Count() != 1 )
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
 			return;
 
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.TeleportSenderTo( GetSelectedPlayers()[0] );
+		m_Module.TeleportSenderTo( JM_GetSelected().GetPlayers()[0] );
 	}
 
 	void Click_TeleportPrevious( UIEvent eid, ref UIActionBase action )
@@ -669,7 +669,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.TeleportToPrevious( GetSelectedPlayers() );
+		m_Module.TeleportToPrevious( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_RefreshStats( UIEvent eid, ref UIActionBase action )
@@ -734,56 +734,56 @@ class JMPlayerForm extends JMFormBase
 		{
 			m_HealthUpdated = false;
 
-			m_Module.SetHealth( ToFloat( m_Health.GetText() ), GetSelectedPlayers() );
+			m_Module.SetHealth( ToFloat( m_Health.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_BloodUpdated )
 		{
 			m_BloodUpdated = false;
 
-			m_Module.SetBlood( ToFloat( m_Blood.GetText() ), GetSelectedPlayers() );
+			m_Module.SetBlood( ToFloat( m_Blood.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_EnergyUpdated )
 		{
 			m_EnergyUpdated = false;
 
-			m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), GetSelectedPlayers() );
+			m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_WaterUpdated )
 		{
 			m_WaterUpdated = false;
 
-			m_Module.SetWater( ToFloat( m_Water.GetText() ), GetSelectedPlayers() );
+			m_Module.SetWater( ToFloat( m_Water.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_ShockUpdated )
 		{
 			m_ShockUpdated = false;
 
-			m_Module.SetShock( ToFloat( m_Shock.GetText() ), GetSelectedPlayers() );
+			m_Module.SetShock( ToFloat( m_Shock.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_StaminaUpdated )
 		{
 			m_StaminaUpdated = false;
 
-			m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), GetSelectedPlayers() );
+			m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_BloodyHandsUpdated )
 		{
 			m_BloodyHandsUpdated = false;
 
-			m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), GetSelectedPlayers() );
+			m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_GodModeUpdated )
 		{
 			m_GodModeUpdated = false;
 
-			m_Module.SetGodMode( m_GodMode.IsChecked(), GetSelectedPlayers() );
+			m_Module.SetGodMode( m_GodMode.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
 	}
 
@@ -867,13 +867,13 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdateUI()
 	{
-		if ( CountPlayersSelected() == 0 )
+		if ( JM_GetSelected().NumPlayers() == 0 )
 		{
 			HideUI();
 			return;
 		}
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( GetSelectedPlayers()[0] );
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
 		
 		if ( !instance )
 		{
@@ -888,7 +888,7 @@ class JMPlayerForm extends JMFormBase
 
 		ShowUI();
 		
-		if ( CountPlayersSelected() == 1 )
+		if ( JM_GetSelected().NumPlayers() == 1 )
 		{
 			ShowIdentityWidgets();
 
@@ -1024,7 +1024,7 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerCount()
 	{
-		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + GetSelectedPlayers().Count() + ")" );
+		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + JM_GetSelected().GetPlayers().Count() + ")" );
 	}
 
 	void UpdatePlayerList()

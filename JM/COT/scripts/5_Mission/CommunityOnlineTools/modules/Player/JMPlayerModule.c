@@ -64,20 +64,20 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( checked )
 		{
-			AddSelectedPlayer( guid );
+			JM_GetSelected().AddPlayer( guid );
 		} else
 		{
-			RemoveSelectedPlayer( guid );
+			JM_GetSelected().RemovePlayer( guid );
 		}
 	}
 
 	void OnPlayer_Button( string guid, bool check )
 	{
-		ClearSelectedPlayers();
+		JM_GetSelected().ClearPlayers();
 
 		if ( check )
 		{
-			AddSelectedPlayer( guid );
+			JM_GetSelected().AddPlayer( guid );
 		}
 	}
 

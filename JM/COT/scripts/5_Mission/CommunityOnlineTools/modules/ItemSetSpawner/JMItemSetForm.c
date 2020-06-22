@@ -80,7 +80,7 @@ class JMItemSetForm extends JMFormBase
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		m_Module.SpawnPlayers( data.ClassName, GetSelectedPlayers() );
+		m_Module.SpawnPlayers( data.ClassName, JM_GetSelected().GetPlayers() );
 	}
 
 	void SpawnOnCursor( UIEvent eid, ref UIActionBase action ) 

@@ -237,36 +237,49 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	{
 		if ( !m_Form || !m_Form.GetLayoutRoot() )
 			return;
+/*
+		Widget w = m_Form.GetLayoutRoot();
+		while ( w != NULL )
+		{
+			Widget c = NULL;
+			if ( w.GetTypeName() == "ScrollWidget" )
+			{
+				m_BrokenWidgets.Insert( w ); 
+			} else if ( w.GetTypeName() == "ItemPreviewWidget" )
+			{
+				m_BrokenWidgets.Insert( w );
+			} else if ( w.GetTypeName() == "PlayerPreviewWidget" )
+			{
+				m_BrokenWidgets.Insert( w );
+			} else if ( w.GetTypeName() == "HtmlWidget" )
+			{
+				m_BrokenWidgets.Insert( w );
+			} else if ( w.GetTypeName() == "MapWidget" )
+			{
+				m_BrokenWidgets.Insert( w );
+			} else
+			{
+				c = w.GetChildren();
+				if ( c != NULL )
+				{
+					w = c;
+					continue;
+				}
+			}
 
-		RecursiveCheckWidget( m_Form.GetLayoutRoot() );
-	}
+			c = w.GetSibling();
+			while ( c == NULL )
+			{
+				c = w.GetParent();
+				c = c.GetSibling();
+			}
+			
+			if ( w == m_Form.GetLayoutRoot() )
+				return;
 
-	private void RecursiveCheckWidget( Widget w )
-	{
-		if ( w == NULL )
-			return;
-
-		if ( w.GetTypeName() == "ScrollWidget" )
-		{
-			m_BrokenWidgets.Insert( w ); 
-		} else if ( w.GetTypeName() == "ItemPreviewWidget" )
-		{
-			m_BrokenWidgets.Insert( w );
-		} else if ( w.GetTypeName() == "PlayerPreviewWidget" )
-		{
-			m_BrokenWidgets.Insert( w );
-		} else if ( w.GetTypeName() == "HtmlWidget" )
-		{
-			m_BrokenWidgets.Insert( w );
-		} else if ( w.GetTypeName() == "MapWidget" )
-		{
-			m_BrokenWidgets.Insert( w );
-		} else
-		{
-			RecursiveCheckWidget( w.GetChildren() );
+			w = c;
 		}
-
-		RecursiveCheckWidget( w.GetSibling() );
+*/
 	}
 
 	void Update( float timeSlice )

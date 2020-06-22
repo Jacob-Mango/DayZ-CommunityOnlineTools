@@ -228,10 +228,6 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		// TODO: FIX TO BE PLAYERS INSTEAD!
-		array< EntityAI > entities = new array< EntityAI >;
-        entities.Insert( GetGame().GetPlayer() );
-
 		int quantity = -1;
 
 		string quantText = m_QuantityItem.GetText();
@@ -243,7 +239,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			quantity = quantText.ToInt();
 		}
 
-		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), entities, quantity, -1 );
+		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected(), quantity, -1 );
 	}
 
 	void DeleteCursor( UIEvent eid, ref UIActionBase action )
