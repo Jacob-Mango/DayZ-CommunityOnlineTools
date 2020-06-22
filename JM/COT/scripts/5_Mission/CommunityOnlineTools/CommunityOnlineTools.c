@@ -161,7 +161,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		JMPlayerInstance instance;
 		GetPermissionsManager().OnClientDisconnected( guid, instance );
 
-		RemoveSelectedPlayer( guid );
+		JM_GetSelected().RemovePlayer( guid );
 	}
 
 	private void RPC_RemoveClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )

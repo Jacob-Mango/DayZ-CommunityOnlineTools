@@ -5,7 +5,7 @@ modded class DayZPlayerImplement
 
     void DayZPlayerImplement()
     {
-		SetEventMask( EntityEvent.FRAME );
+		SetEventMask( EntityEvent.FRAME | EntityEvent.SIMULATE );
     }
 
 	void OnSpectateStart( JMSpectatorCamera camera )
@@ -22,15 +22,13 @@ modded class DayZPlayerImplement
         SetHeadInvisible( false );
 	}
 
-	override void EOnFrame( IEntity other, float timeSlice )
+	void UpdateSpecatorCamera()
 	{
         if ( !m_SpectatorCamera )
             return;
         
         HumanInputController input = GetInputController();
-        float heading = -GetOrientation()[0];
-        if ( input )
-            heading -= input.GetHeadingAngle() * Math.RAD2DEG;
+        float heading = GetOrientation()[0];
         
         HumanCommandWeapons hcw = GetCommandModifier_Weapons();
         
@@ -47,11 +45,21 @@ modded class DayZPlayerImplement
 		vector cameraMat[4];
         Math3D.YawPitchRollMatrix( Vector( heading + lr, ud, 0 ), localMat );
         localMat[3] = GetBonePositionMS( GetBoneIndexByName( "Head" ) ) + "0.04 0.04 0";
-		GetTransformWS( worldMat );
 
+		GetTransformWS( worldMat );
         Math3D.MatrixMultiply4( localMat, worldMat, cameraMat );
 
         m_SpectatorCamera.SetTransform( cameraMat );
+	}
+
+	override void EOnFrame( IEntity other, float timeSlice )
+	{
+		UpdateSpecatorCamera();
+	}
+
+	override void EOnSimulate( IEntity other, float timeSlice )
+	{
+		UpdateSpecatorCamera();
 	}
 
 	void SetHeadInvisible( bool invisible )

@@ -87,7 +87,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 					Name.SetColor( 0xFFFFFFFF );
 				}
 
-				if ( PlayerAlreadySelected( m_GUID ) )
+				if ( JM_GetSelected().IsSelected( m_GUID ) )
 				{
 					Checkbox.SetChecked( true );
 				} else

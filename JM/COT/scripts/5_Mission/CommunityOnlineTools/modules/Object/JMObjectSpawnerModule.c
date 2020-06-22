@@ -263,23 +263,23 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity = -1, float health = -1 )
+	void SpawnEntity_Inventory( string ent, JMSelectedObjects selected, float quantity = -1, float health = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( ent );
-			rpc.Write( objects );
+			rpc.Write( selected );
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		} else
 		{
-			Server_SpawnEntity_Inventory( ent, objects, quantity, health, NULL );
+			Server_SpawnEntity_Inventory( ent, selected, quantity, health, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string ent, array< EntityAI > objects, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string ent, JMSelectedObjects selected, float quantity, float health, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
 		{
@@ -291,36 +291,39 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		Object obj;
+		int flags = ECE_CREATEPHYSICS;
+		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+			flags |= 0x800;
 
-		for ( int i = 0; i < objects.Count(); i++ )
+		array< string > players = selected.GetPlayers();
+
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			obj = NULL;
+			JMPlayerInstance instance = GetPermissionsManager().GetPlayer( players[i] );
+			if ( !instance || !instance.PlayerObject )
+				continue;
 
-			obj = objects[i].GetInventory().CreateInInventory( ent );
+			Object obj = instance.PlayerObject.GetInventory().CreateInInventory( ent );
 			if ( !obj )
 			{
-				vector position = objects[i].GetPosition();
-				obj = GetGame().CreateObject( ent, position );
+				vector position = instance.PlayerObject.GetPosition();
 
+				obj = GetGame().CreateObjectEx( ent, position, flags );
 				if ( !obj )
+					return;
+
+				EntityAI e;
+				if ( Class.CastTo( e, obj ) )
 				{
-					continue;
+					vector tmItem[4];
+					e.GetTransform( tmItem );
+					e.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 				}
-				
-				vector boundingBox[2];
-				obj.GetCollisionBox( boundingBox );
-
-				float height = Math.AbsFloat( boundingBox[1][1] ) + Math.AbsFloat( boundingBox[0][1] );
-
-				position[1] = position[1] + ( height * 2.0 );
-
-				obj.SetPosition( position );
 			}
 
 			SetupEntity( obj, quantity, health );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + objects[i] );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() );
 		}
 	}
 
@@ -334,8 +337,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			array< EntityAI > objects;
-			if ( !ctx.Read( objects ) )
+			JMSelectedObjects selected;
+			if ( !ctx.Read( selected ) )
 			{
 				return;
 			}
@@ -352,7 +355,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			Server_SpawnEntity_Inventory( ent, objects, quantity, health, senderRPC );
+			Server_SpawnEntity_Inventory( ent, selected, quantity, health, senderRPC );
 		}
 	}
 
