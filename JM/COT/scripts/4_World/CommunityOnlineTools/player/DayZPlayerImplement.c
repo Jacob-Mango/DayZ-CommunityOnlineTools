@@ -1,55 +1,55 @@
 modded class DayZPlayerImplement
 {
-    private JMSpectatorCamera m_SpectatorCamera;
-    private Head_Default m_PlayerHead;
+	private JMSpectatorCamera m_SpectatorCamera;
+	private Head_Default m_PlayerHead;
 
-    void DayZPlayerImplement()
-    {
+	void DayZPlayerImplement()
+	{
 		SetEventMask( EntityEvent.FRAME | EntityEvent.SIMULATE );
-    }
+	}
 
 	void OnSpectateStart( JMSpectatorCamera camera )
 	{
-        m_SpectatorCamera = camera;
+		m_SpectatorCamera = camera;
 
-        SetHeadInvisible( true );
+		SetHeadInvisible( true );
 	}
 
 	void OnSpectateEnd()
 	{
-        m_SpectatorCamera = NULL;
+		m_SpectatorCamera = NULL;
 
-        SetHeadInvisible( false );
+		SetHeadInvisible( false );
 	}
 
 	void UpdateSpecatorCamera()
 	{
-        if ( !m_SpectatorCamera )
-            return;
-        
-        HumanInputController input = GetInputController();
-        float heading = GetOrientation()[0];
-        
-        HumanCommandWeapons hcw = GetCommandModifier_Weapons();
-        
+		if ( !m_SpectatorCamera )
+			return;
+		
+		HumanInputController input = GetInputController();
+		float heading = GetOrientation()[0];
+		
+		HumanCommandWeapons hcw = GetCommandModifier_Weapons();
+		
 		float lr = 0;
 		float ud = 0;
-        if ( hcw )
-        {
-            lr = hcw.GetBaseAimingAngleLR();
-            ud = hcw.GetBaseAimingAngleUD();
-        }
+		if ( hcw )
+		{
+			lr = hcw.GetBaseAimingAngleLR();
+			ud = hcw.GetBaseAimingAngleUD();
+		}
 
 		vector localMat[4];
 		vector worldMat[4];
 		vector cameraMat[4];
-        Math3D.YawPitchRollMatrix( Vector( heading + lr, ud, 0 ), localMat );
-        localMat[3] = GetBonePositionMS( GetBoneIndexByName( "Head" ) ) + "0.04 0.04 0";
+		Math3D.YawPitchRollMatrix( Vector( heading + lr, ud, 0 ), localMat );
+		localMat[3] = GetBonePositionMS( GetBoneIndexByName( "Head" ) ) + "0.04 0.04 0";
 
 		GetTransformWS( worldMat );
-        Math3D.MatrixMultiply4( localMat, worldMat, cameraMat );
+		Math3D.MatrixMultiply4( localMat, worldMat, cameraMat );
 
-        m_SpectatorCamera.SetTransform( cameraMat );
+		m_SpectatorCamera.SetTransform( cameraMat );
 	}
 
 	override void EOnFrame( IEntity other, float timeSlice )

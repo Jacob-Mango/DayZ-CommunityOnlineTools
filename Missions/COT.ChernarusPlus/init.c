@@ -1,6 +1,6 @@
 Mission CreateCustomMission(string path)
 {
-    return new MissionGameplay();
+	return new MissionGameplay();
 }
 
 void main()

@@ -3,9 +3,9 @@ class JMStatics
 	static Widget ESP_CONTAINER;
 	static Widget WINDOWS_CONTAINER;
 
-    static void SortStringArray( out array< string > arr )
+	static void SortStringArray( out array< string > arr )
 	{
-        int count = arr.Count();
+		int count = arr.Count();
 		string strs[ 1000 ];
 
 		for ( int i = 0; i < count; i++ )
@@ -15,20 +15,20 @@ class JMStatics
 
 		Sort( strs, count );
 
-        arr.Clear();
+		arr.Clear();
 
 		for ( i = 0; i < count; i++ )
 		{
-            arr.Insert( strs[i] );
+			arr.Insert( strs[i] );
 		}
 	}
 
-    static void SortStringArrayKVPair( out array< string > arrKey, out array< string > arrValue )
+	static void SortStringArrayKVPair( out array< string > arrKey, out array< string > arrValue )
 	{
 		if ( arrKey.Count() != arrValue.Count() )
 			return;
 
-        int count = arrKey.Count();
+		int count = arrKey.Count();
 
 		string strs[ 1000 ];
 		int pIndices[ 1000 ];
@@ -60,7 +60,7 @@ class JMStatics
 		for ( i = 0; i < count; i++ )
 		{
 			narrKey.Set( pIndices[i], arrKey[i] );
-            narrValue.Set( pIndices[i], arrValue[i] );
+			narrValue.Set( pIndices[i], arrValue[i] );
 		}
 
 		arrKey.Clear();
