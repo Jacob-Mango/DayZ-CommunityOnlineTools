@@ -1,7 +1,5 @@
 class JMESPMeta : Managed
 {
-	private bool m_IsDestroyed;
-
 	string name;
 	JMESPViewType type;
 	int colour;
@@ -17,6 +15,8 @@ class JMESPMeta : Managed
 	UIActionEditableVector m_Action_Orientation;
 	UIActionEditableText m_Action_Health;
 
+	UIActionButton m_Action_Delete;
+
 	void ~JMESPMeta()
 	{
 		Destroy();
@@ -26,17 +26,15 @@ class JMESPMeta : Managed
 	{
 		module = mod;
 
-		widgetRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER );
+		if ( widgetRoot )
+			return;
 
-		if ( widgetRoot == NULL )
+		if ( !Class.CastTo( widgetRoot, GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER ) ) )
 			return;
 
 		widgetRoot.GetScript( widgetHandler );
-
-		if ( widgetHandler == NULL )
+		if ( !widgetHandler )
 			return;
-
-		m_IsDestroyed = false;
 
 		widgetHandler.SetInfo( this, viewTypeActions );
 
@@ -65,23 +63,11 @@ class JMESPMeta : Managed
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPMeta::Destroy() void;" );
-		Print( "  m_IsDestroyed = " + m_IsDestroyed );
 		Print( "  m_Action_Position = " + m_Action_Position );
 		Print( "  m_Action_Orientation = " + m_Action_Orientation );
 		Print( "  m_Action_Health = " + m_Action_Health );
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
-
-		if ( m_IsDestroyed )
-		{
-			#ifdef JM_COT_ESP_DEBUG
-			Print( "-JMESPMeta::Destroy() void;" );
-			#endif
-
-			return;
-		}
-
-		m_IsDestroyed = true;
 
 		if ( widgetRoot )
 			widgetRoot.Unlink();
@@ -96,13 +82,15 @@ class JMESPMeta : Managed
 		m_Action_Position = UIActionManager.CreateEditableVector( parent, "Position: ", this, "Action_SetPosition", "Set" );
 		m_Action_Orientation = UIActionManager.CreateEditableVector( parent, "Orientation: ", this, "Action_SetOrientation", "Set" );
 
-		m_Action_Health = UIActionManager.CreateEditableText( parent, "Global Health: ", this, "Action_SetOrientation", "Set" );
+		m_Action_Health = UIActionManager.CreateEditableText( parent, "Global Health: ", this, "Action_SetOrientation", "", "Set" );
 		m_Action_Health.SetOnlyNumbers( true );
+
+		m_Action_Delete = UIActionManager.CreateButton( parent, "Delete", this, "Action_Delete" );
 	}
 
 	void UpdateActions()
 	{
-		if ( !viewTypeActions || m_IsDestroyed )
+		if ( !viewTypeActions || !widgetRoot )
 			return;
 		
 		m_Action_Position.SetValue( target.GetPosition() );
@@ -132,5 +120,13 @@ class JMESPMeta : Managed
 			return;
 
 		module.SetHealth( m_Action_Health.GetText().ToFloat(), target );
+	}
+
+	void Action_Delete( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.DeleteObject(  target );
 	}
 }

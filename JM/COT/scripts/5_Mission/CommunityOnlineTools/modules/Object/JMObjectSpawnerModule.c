@@ -202,29 +202,27 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_SpawnEntity_Position( string ent, vector position, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, PlayerIdentity ident )
 	{
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident ) )
 			return;
-
+		
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
-		Object obj = GetGame().CreateObjectEx( ent, position, flags );
-		if ( !obj )
+
+		EntityAI ent;
+		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
 			return;
 
-		EntityAI e;
-		if ( Class.CastTo( e, obj ) )
-		{
-			vector tmItem[4];
-			e.GetTransform( tmItem );
-			e.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
-		}
+		vector tmItem[4];
+		ent.GetTransform( tmItem );
+		ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
-		SetupEntity( obj, quantity, health );
+		SetupEntity( ent, quantity, health );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
 	}
 
 	private void RPC_SpawnEntity_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -279,9 +277,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string ent, JMSelectedObjects selected, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, JMSelectedObjects selected, float quantity, float health, PlayerIdentity ident )
 	{
-		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 		{
 			return;
 		}
@@ -292,7 +290,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( ent, "DZ_LightAI" ) )
+		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
 		array< string > players = selected.GetPlayers();
@@ -303,27 +301,27 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !instance || !instance.PlayerObject )
 				continue;
 
-			Object obj = instance.PlayerObject.GetInventory().CreateInInventory( ent );
-			if ( !obj )
+			string loggedSuffix = "";
+
+			EntityAI ent;
+			if ( !Class.CastTo( ent, instance.PlayerObject.GetInventory().CreateInInventory( className ) ) )
 			{
 				vector position = instance.PlayerObject.GetPosition();
+		
+				//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+				if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
+					continue;
 
-				obj = GetGame().CreateObjectEx( ent, position, flags );
-				if ( !obj )
-					return;
+				vector tmItem[4];
+				ent.GetTransform( tmItem );
+				ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
-				EntityAI e;
-				if ( Class.CastTo( e, obj ) )
-				{
-					vector tmItem[4];
-					e.GetTransform( tmItem );
-					e.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
-				}
+				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( obj, quantity, health );
+			SetupEntity( ent, quantity, health );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + obj.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() + loggedSuffix );
 		}
 	}
 
@@ -359,7 +357,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SetupEntity( Object obj, out float quantity, out float health )
+	private void SetupEntity( EntityAI obj, out float quantity, out float health )
 	{
 		ItemBase item;
 		if ( Class.CastTo( item, obj ) )

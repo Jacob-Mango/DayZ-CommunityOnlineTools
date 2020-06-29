@@ -61,7 +61,7 @@ class JMESPForm extends JMFormBase
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 		UIActionManager.CreateText( headingSpacer, "Filters: ", "" );
-		UIActionManager.CreateText( headingSpacer, "Actions: ", "" );
+		UIActionManager.CreateText( headingSpacer, "Actions: (Will be in before 2020/07/11)", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -135,7 +135,7 @@ class JMESPForm extends JMFormBase
 		right_bottom.SetPos( 0.5, 0.0 );
 
 		ESPFilters( left_bottom );
-		ESPSelectedObjects( right_bottom );
+		//ESPSelectedObjects( right_bottom );
 	}
 
 	override void OnShow()

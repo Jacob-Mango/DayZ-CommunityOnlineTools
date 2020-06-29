@@ -231,40 +231,38 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		// EntityAI vehicle = EntityAI.Cast( GetGame().CreateObject( file.VehicleName, position ) );
-		//Print( "Vehicle PreSpawn");
-		EntityAI vehicle = EntityAI.Cast( GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) );
-		//Print( "Vehicle PostSpawn - " + vehicle );
-        if ( vehicle )
+		EntityAI vehicle;
+		//if ( !Class.CastTo( vehicle, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
+		if ( !Class.CastTo( vehicle, GetGame().CreateObject( file.VehicleName, position, false, false, true ) ) )
+			return NULL;
+
+        for ( int j = 0; j < attachments.Count(); j++ )
         {
-            for ( int j = 0; j < attachments.Count(); j++ )
-            {
-				//Print( "Vehicle CreateInInventory - " + vehicle  + " - " + attachments[j] );
-                vehicle.GetInventory().CreateInInventory( attachments[j] );
-            }
-
-            Car car;
-            if ( Class.CastTo( car, vehicle ) )
-            {
-                FillCar( car, CarFluid.FUEL );
-                FillCar( car, CarFluid.OIL );
-                FillCar( car, CarFluid.BRAKE );
-                FillCar( car, CarFluid.COOLANT );
-            }
-			//Print( "Vehicle Car - " + car );
-
-			vehicle.SetPosition( position );
-			vehicle.SetDirection( direction );
-			
-			//Print( "Vehicle SetPosition - " + vehicle  + " - " + position );
-			//Print( "Vehicle SetDirection - " + vehicle  + " - " + direction );
-
-			vector tmItem[4];
-			vehicle.GetTransform( tmItem );
-			vehicle.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
-			tmItem[3] = position + "0 5 0";
-			vehicle.SetTransform( tmItem );
+			//Print( "Vehicle CreateInInventory - " + vehicle  + " - " + attachments[j] );
+            vehicle.GetInventory().CreateInInventory( attachments[j] );
         }
+
+        Car car;
+        if ( Class.CastTo( car, vehicle ) )
+        {
+            FillCar( car, CarFluid.FUEL );
+            FillCar( car, CarFluid.OIL );
+            FillCar( car, CarFluid.BRAKE );
+            FillCar( car, CarFluid.COOLANT );
+        }
+		//Print( "Vehicle Car - " + car );
+
+		vehicle.SetPosition( position );
+		vehicle.SetDirection( direction );
+		
+		//Print( "Vehicle SetPosition - " + vehicle  + " - " + position );
+		//Print( "Vehicle SetDirection - " + vehicle  + " - " + direction );
+
+		vector tmItem[4];
+		vehicle.GetTransform( tmItem );
+		vehicle.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
+		tmItem[3] = position + "0 5 0";
+		vehicle.SetTransform( tmItem );
 		
 		//Print( "Vehicle Finish Setup - " + vehicle );
 		return vehicle;

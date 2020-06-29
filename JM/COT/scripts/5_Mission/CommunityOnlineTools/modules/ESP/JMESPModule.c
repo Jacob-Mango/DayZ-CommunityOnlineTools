@@ -6,6 +6,7 @@ enum JMESPModuleRPC
 	SetPosition,
 	SetOrientation,
 	SetHealth,
+	DeleteObject,
 	COUNT
 };
 
@@ -61,6 +62,11 @@ class JMESPModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetPosition" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetOrientation" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetHealth" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Delete" );
 	}
 
 	void ~JMESPModule()
@@ -573,6 +579,9 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.SetHealth:
 			RPC_SetHealth( ctx, sender, target );
 			break;
+		case JMESPModuleRPC.DeleteObject:
+			RPC_DeleteObject( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -629,7 +638,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( position ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Position", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC ) )
 			return;
 
 		Exec_SetPosition( position, target, senderRPC );
@@ -661,7 +670,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( orientation ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Orientation", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetOrientation", senderRPC ) )
 			return;
 
 		Exec_SetOrientation( orientation, target, senderRPC );
@@ -693,10 +702,37 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( health ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Object.Set.Health", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC ) )
 			return;
 
 		Exec_SetHealth( health, target, senderRPC );
+	}
+
+	void DeleteObject( Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_DeleteObject( target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( target, JMESPModuleRPC.DeleteObject, false, NULL );
+		}
+	}
+
+	private void Exec_DeleteObject( Object target, PlayerIdentity ident )
+	{
+		GetGame().ObjectDelete( target );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " deleted" );
+	}
+
+	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC ) )
+			return;
+
+		Exec_DeleteObject( target, senderRPC );
 	}
 
 	private void OnAddObject( Object obj )

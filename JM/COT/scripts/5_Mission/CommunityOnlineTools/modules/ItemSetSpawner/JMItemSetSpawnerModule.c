@@ -314,7 +314,10 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
-		EntityAI ent = EntityAI.Cast( GetGame().CreateObjectEx( className, pos, flags ) );
+		EntityAI ent;
+		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, pos, flags ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObject( className, pos, false, flags & 0x800, true ) ) )
+			return NULL;
 		
 		vector tmItem[4];
 		ent.GetTransform( tmItem );
