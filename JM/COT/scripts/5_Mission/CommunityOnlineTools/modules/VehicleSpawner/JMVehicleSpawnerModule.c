@@ -236,20 +236,20 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		if ( !Class.CastTo( vehicle, GetGame().CreateObject( file.VehicleName, position, false, false, true ) ) )
 			return NULL;
 
-        for ( int j = 0; j < attachments.Count(); j++ )
-        {
+		for ( int j = 0; j < attachments.Count(); j++ )
+		{
 			//Print( "Vehicle CreateInInventory - " + vehicle  + " - " + attachments[j] );
-            vehicle.GetInventory().CreateInInventory( attachments[j] );
-        }
+			vehicle.GetInventory().CreateInInventory( attachments[j] );
+		}
 
-        Car car;
-        if ( Class.CastTo( car, vehicle ) )
-        {
-            FillCar( car, CarFluid.FUEL );
-            FillCar( car, CarFluid.OIL );
-            FillCar( car, CarFluid.BRAKE );
-            FillCar( car, CarFluid.COOLANT );
-        }
+		Car car;
+		if ( Class.CastTo( car, vehicle ) )
+		{
+			FillCar( car, CarFluid.FUEL );
+			FillCar( car, CarFluid.OIL );
+			FillCar( car, CarFluid.BRAKE );
+			FillCar( car, CarFluid.COOLANT );
+		}
 		//Print( "Vehicle Car - " + car );
 
 		vehicle.SetPosition( position );
