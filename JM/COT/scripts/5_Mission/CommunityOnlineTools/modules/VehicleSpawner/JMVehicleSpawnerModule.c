@@ -231,40 +231,34 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		EntityAI vehicle;
-		//if ( !Class.CastTo( vehicle, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
-		if ( !Class.CastTo( vehicle, GetGame().CreateObject( file.VehicleName, position, false, false, true ) ) )
+		EntityAI ent;
+		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObject( file.VehicleName, position, false, false, true ) ) )
 			return NULL;
 
 		for ( int j = 0; j < attachments.Count(); j++ )
 		{
-			//Print( "Vehicle CreateInInventory - " + vehicle  + " - " + attachments[j] );
-			vehicle.GetInventory().CreateInInventory( attachments[j] );
+			ent.GetInventory().CreateInInventory( attachments[j] );
 		}
 
 		Car car;
-		if ( Class.CastTo( car, vehicle ) )
+		if ( Class.CastTo( car, ent ) )
 		{
 			FillCar( car, CarFluid.FUEL );
 			FillCar( car, CarFluid.OIL );
 			FillCar( car, CarFluid.BRAKE );
 			FillCar( car, CarFluid.COOLANT );
 		}
-		//Print( "Vehicle Car - " + car );
 
-		vehicle.SetPosition( position );
-		vehicle.SetDirection( direction );
-		
-		//Print( "Vehicle SetPosition - " + vehicle  + " - " + position );
-		//Print( "Vehicle SetDirection - " + vehicle  + " - " + direction );
+		ent.SetPosition( position );
+		ent.SetDirection( direction );
 
 		vector tmItem[4];
-		vehicle.GetTransform( tmItem );
-		vehicle.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
+		ent.GetTransform( tmItem );
+		//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 		tmItem[3] = position + "0 5 0";
-		vehicle.SetTransform( tmItem );
+		ent.SetTransform( tmItem );
 		
-		//Print( "Vehicle Finish Setup - " + vehicle );
-		return vehicle;
+		return ent;
 	}
 }

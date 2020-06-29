@@ -321,7 +321,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		
 		vector tmItem[4];
 		ent.GetTransform( tmItem );
-		ent.PlaceOnSurfaceRotated( tmItem, pos, 0, 0, 0, true );
+		//ent.PlaceOnSurfaceRotated( tmItem, pos, 0, 0, 0, true );
 
 		return ent;
 	}

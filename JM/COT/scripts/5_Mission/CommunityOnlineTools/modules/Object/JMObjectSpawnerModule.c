@@ -218,7 +218,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		vector tmItem[4];
 		ent.GetTransform( tmItem );
-		ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
+		//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
 		SetupEntity( ent, quantity, health );
 
@@ -314,7 +314,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 				vector tmItem[4];
 				ent.GetTransform( tmItem );
-				ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
+				//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
 				loggedSuffix = " at " + position.ToString();
 			}
