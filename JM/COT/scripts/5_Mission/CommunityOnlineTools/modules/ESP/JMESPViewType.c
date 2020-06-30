@@ -192,43 +192,6 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 	}
 };
 
-class JMESPViewTypeBaseBuilding: JMESPViewType
-{
-	void JMESPViewTypeBaseBuilding()
-	{
-		Permission = "BaseBuilding";
-		Localisation = "Base Building";
-
-		Colour = ARGB( 255, 144, 182, 240 );
-	}
-
-	override bool IsValid( Object obj, out JMESPMeta meta )
-	{
-		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPViewTypeBaseBuilding::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
-		#endif
-		
-		bool isValid = obj.IsContainer() || obj.CanUseConstruction() || obj.IsFireplace() || obj.IsInherited( GardenBase );
-		
-		if ( !isValid )
-			return false;
-		
-		CreateMeta( meta );
-		
-		meta.target = obj;
-		meta.colour = Colour;
-		meta.type = this;
-		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
-
-		return true;
-	}
-};
-
 class JMESPViewTypeWeapon: JMESPViewType
 {
 	void JMESPViewTypeWeapon()
@@ -264,6 +227,42 @@ class JMESPViewTypeWeapon: JMESPViewType
 		return true;
 	}
 }
+
+class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeBoltRifle()
+	{
+		Permission = "Weapon.BoltRifle";
+		Localisation = "Bolt Rifles";
+
+		Colour = ARGB( 255, 100, 255, 218 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		
+		BoltRifle_Base wpn;
+		if ( !Class.CastTo( wpn, obj ) )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
 
 class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 {
@@ -373,9 +372,9 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 	}
 };
 
-class JMESPViewTypeItem: JMESPViewType
+class JMESPViewTypeItemBase: JMESPViewType
 {
-	void JMESPViewTypeItem()
+	void JMESPViewTypeItemBase()
 	{
 		Permission = "Item";
 		Localisation = "Items";
@@ -386,7 +385,7 @@ class JMESPViewTypeItem: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPViewTypeItem::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		Print( "+JMESPViewTypeItemBase::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
 		#endif
 		
 		bool isValid = obj.IsItemBase() || obj.IsInventoryItem();
@@ -418,12 +417,12 @@ class JMESPViewTypeItem: JMESPViewType
 	}
 };
 
-class JMESPViewTypeItemTool: JMESPViewTypeItem
+class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemTool()
+	void JMESPViewTypeUnknown()
 	{
-		Permission = "Item.Tool";
-		Localisation = "Tools";
+		Permission = "Item.Unknown";
+		Localisation = "Unknown Items";
 
 		Colour = ARGB( 255, 40, 112, 255 );
 	}
@@ -431,46 +430,56 @@ class JMESPViewTypeItemTool: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemTool::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeUnknown::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Tools" )
+
+		ItemBase item;
+		if ( !Class.CastTo( item, obj ) )
+			return false;
+
+		if ( Edible_Base.Cast( obj ) != NULL )
+			return false;
+
+		if ( item.IsFood() )
+			return false;
+
+		if ( item.IsItemTent() )
+			return false;
+
+		if ( BaseBuildingBase.Cast( obj ) != NULL )
+			return false;
+
+		if ( item.IsExplosive() )
+			return false;
+
+		if ( ItemBook.Cast( obj ) != NULL )
+			return false;
+
+		if ( item.IsContainer() )
+			return false;
+
+		if ( item.IsTransmitter() )
+			return false;
+
+		if ( item.IsClothing() )
+			return false;
+
+		if ( item.IsMagazine() )
+			return false;
+
+		if ( item.IsAmmoPile() )
+			return false;
+
+		if ( item.IsWeapon() )
 			return false;
 
 		return true;
 	}
 };
 
-class JMESPViewTypeItemCrafted: JMESPViewTypeItem
+class JMESPViewTypeTent: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemCrafted()
-	{
-		Permission = "Item.Crafted";
-		Localisation = "Crafted";
-
-		Colour = ARGB( 255, 60, 112, 255 );
-	}
-
-	override bool CheckLootCategory( Object obj )
-	{
-		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemCrafted::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
-		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Crafted" )
-			return false;
-
-		return true;
-	}
-};
-
-class JMESPViewTypeItemTent: JMESPViewTypeItem
-{
-	void JMESPViewTypeItemTent()
+	void JMESPViewTypeTent()
 	{
 		Permission = "Item.Tent";
 		Localisation = "Tents";
@@ -481,71 +490,38 @@ class JMESPViewTypeItemTent: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemTent::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeTent::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Tents" )
-			return false;
 
-		return true;
+		return obj.IsItemTent();
 	}
 };
 
-class JMESPViewTypeItemMaterial: JMESPViewTypeItem
+class JMESPViewTypeBaseBuilding: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemMaterial()
+	void JMESPViewTypeBaseBuilding()
 	{
-		Permission = "Item.Material";
-		Localisation = "Materials";
-
-		Colour = ARGB( 255, 100, 112, 255 );
-	}
-
-	override bool CheckLootCategory( Object obj )
-	{
-		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemMaterial::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
-		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Materials" )
-			return false;
-
-		return true;
-	}
-};
-
-class JMESPViewTypeItemAttachment: JMESPViewTypeItem
-{
-	void JMESPViewTypeItemAttachment()
-	{
-		Permission = "Item.Attachment";
-		Localisation = "Attachments";
+		Permission = "Item.BaseBuilding";
+		Localisation = "Base Building";
 
 		Colour = ARGB( 255, 120, 112, 255 );
+
+		MetaType = JMESPMetaBaseBuilding;
 	}
 
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemAttachment::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeBaseBuilding::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Attachments" )
-			return false;
 
-		return true;
+		return BaseBuildingBase.Cast( obj ) != NULL;
 	}
 };
 
-class JMESPViewTypeItemFood: JMESPViewTypeItem
+class JMESPViewTypeFood: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemFood()
+	void JMESPViewTypeFood()
 	{
 		Permission = "Item.Food";
 		Localisation = "Food";
@@ -556,21 +532,16 @@ class JMESPViewTypeItemFood: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemFood::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeFood::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Food" )
-			return false;
 
-		return true;
+		return obj.IsFood() || Edible_Base.Cast( obj ) != NULL;
 	}
 };
 
-class JMESPViewTypeItemExplosive: JMESPViewTypeItem
+class JMESPViewTypeExplosive: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemExplosive()
+	void JMESPViewTypeExplosive()
 	{
 		Permission = "Item.Explosive";
 		Localisation = "Explosives";
@@ -581,21 +552,22 @@ class JMESPViewTypeItemExplosive: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemExplosive::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeExplosive::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
 		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Explosives" )
-			return false;
+		ItemBase item;
+		if ( Class.CastTo( item, obj ) )
+		{
+			return item.IsExplosive();
+		}
 
-		return true;
+		return false;
 	}
 };
 
-class JMESPViewTypeItemBook: JMESPViewTypeItem
+class JMESPViewTypeBook: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemBook()
+	void JMESPViewTypeBook()
 	{
 		Permission = "Item.Book";
 		Localisation = "Books";
@@ -606,21 +578,16 @@ class JMESPViewTypeItemBook: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemBook::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeBook::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Books" )
-			return false;
 
-		return true;
+		return ItemBook.Cast( obj ) != NULL;
 	}
 };
 
-class JMESPViewTypeItemContainer: JMESPViewTypeItem
+class JMESPViewTypeContainer: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemContainer()
+	void JMESPViewTypeContainer()
 	{
 		Permission = "Item.Container";
 		Localisation = "Containers";
@@ -631,24 +598,39 @@ class JMESPViewTypeItemContainer: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemContainer::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeContainer::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Containers" )
-			return false;
 
-		return true;
+		return obj.IsContainer() && !obj.IsItemTent();
 	}
 };
 
-class JMESPViewTypeItemEyewear: JMESPViewTypeItem
+class JMESPViewTypeTransmitter: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemEyewear()
+	void JMESPViewTypeTransmitter()
 	{
-		Permission = "Item.Eyewear";
-		Localisation = "Eyewear";
+		Permission = "Item.Transmitter";
+		Localisation = "Transmitters";
+
+		Colour = ARGB( 255, 200, 112, 255 );
+	}
+
+	override bool CheckLootCategory( Object obj )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeTransmitter::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+		
+		return obj.IsTransmitter();
+	}
+};
+
+class JMESPViewTypeClothing: JMESPViewTypeItemBase
+{
+	void JMESPViewTypeClothing()
+	{
+		Permission = "Item.Clothing";
+		Localisation = "Clothing";
 
 		Colour = ARGB( 255, 220, 112, 255 );
 	}
@@ -656,21 +638,36 @@ class JMESPViewTypeItemEyewear: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemEyewear::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeClothing::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
 		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Eyewear" )
-			return false;
-
-		return true;
+		return obj.IsClothing();
 	}
 };
 
-class JMESPViewTypeItemAmmo: JMESPViewTypeItem
+class JMESPViewTypeMagazine: JMESPViewTypeItemBase
 {
-	void JMESPViewTypeItemAmmo()
+	void JMESPViewTypeMagazine()
+	{
+		Permission = "Item.Magazine";
+		Localisation = "Magazines";
+
+		Colour = ARGB( 255, 240, 112, 255 );
+	}
+
+	override bool CheckLootCategory( Object obj )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		Print( "JMESPViewTypeMagazine::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		#endif
+
+		return obj.IsMagazine() && !obj.IsAmmoPile();
+	}
+};
+
+class JMESPViewTypeAmmo: JMESPViewTypeItemBase
+{
+	void JMESPViewTypeAmmo()
 	{
 		Permission = "Item.Ammo";
 		Localisation = "Ammo";
@@ -681,14 +678,9 @@ class JMESPViewTypeItemAmmo: JMESPViewTypeItem
 	override bool CheckLootCategory( Object obj )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "JMESPViewTypeItemAmmo::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
+		Print( "JMESPViewTypeAmmo::CheckLootCategory( obj = " + Object.GetDebugName( obj ) + " ) bool;" );
 		#endif
-		
-		string lootCategory;
-		GetGame().ConfigGetText( "cfgVehicles " + obj.GetType() + " lootCategory", lootCategory );
-		if ( lootCategory != "Ammo" )
-			return false;
 
-		return true;
+		return obj.IsAmmoPile();
 	}
 };

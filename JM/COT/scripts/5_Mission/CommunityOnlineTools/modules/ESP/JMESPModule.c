@@ -145,23 +145,21 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeInfected );
 		types.Insert( JMESPViewTypeAnimal );
 		types.Insert( JMESPViewTypeCar );
-		types.Insert( JMESPViewTypeBaseBuilding );
 		types.Insert( JMESPViewTypeBoltActionRifle );
+		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
-		types.Insert( JMESPViewTypeWeapon );
-		types.Insert( JMESPViewTypeItemTool );
-		types.Insert( JMESPViewTypeItemCrafted );
-		types.Insert( JMESPViewTypeItemTent );
-		types.Insert( JMESPViewTypeItemMaterial );
-		types.Insert( JMESPViewTypeItemAttachment );
-		types.Insert( JMESPViewTypeItemFood );
-		types.Insert( JMESPViewTypeItemExplosive );
-		types.Insert( JMESPViewTypeItemBook );
-		types.Insert( JMESPViewTypeItemContainer );
-		types.Insert( JMESPViewTypeItemEyewear );
-		types.Insert( JMESPViewTypeItemAmmo );
-		types.Insert( JMESPViewTypeItem );
+		types.Insert( JMESPViewTypeUnknown );
+		types.Insert( JMESPViewTypeTent );
+		types.Insert( JMESPViewTypeBaseBuilding );
+		types.Insert( JMESPViewTypeFood );
+		types.Insert( JMESPViewTypeExplosive );
+		types.Insert( JMESPViewTypeBook );
+		types.Insert( JMESPViewTypeContainer );
+		types.Insert( JMESPViewTypeTransmitter );
+		types.Insert( JMESPViewTypeClothing );
+		types.Insert( JMESPViewTypeMagazine );
+		types.Insert( JMESPViewTypeAmmo );
 	}
 
 	array< ref JMESPViewType > GetViewTypes()

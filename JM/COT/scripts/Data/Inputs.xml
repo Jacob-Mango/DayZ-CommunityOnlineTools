@@ -17,9 +17,6 @@
             <input name="UACOTToggleVehicle" loc="STR_COT_INPUT_TOGGLE_MENU_VEHICLE" />
             <input name="UACOTToggleWeather" loc="STR_COT_INPUT_TOGGLE_MENU_WEATHER" />
             <input name="UACOTToggleServerInfo" loc="STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO" />
-
-            <input name="UACOTModuleFocusGame" loc="" visible="false" />
-            <input name="UACOTModuleFocusUI" loc="" visible="false" />
             
             <input name="UATeleportModuleTeleportCursor" loc="STR_COT_INPUT_TELEPORT_CROSSHAIR" />
             <input name="UATeleportModuleWorldToModelLookAt" loc="STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT" />
@@ -39,12 +36,6 @@
     </inputs>
 
     <preset>
-        <input name="UACOTModuleFocusGame">
-            <btn name="mBLeft" />
-        </input>
-        <input name="UACOTModuleFocusUI">
-            <btn name="mBLeft" />
-        </input>
         <input name="UACOTModuleToggleCOT">
             <btn name="kEnd">
             </btn>
