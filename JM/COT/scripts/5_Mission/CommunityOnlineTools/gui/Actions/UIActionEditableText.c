@@ -117,6 +117,11 @@ class UIActionEditableText extends UIActionBase
 							hasDecimal = true;
 							continue;
 						}
+
+						if ( newText.Get( i ) == "-" && i == 0 )
+						{
+							continue;
+						}
 					}
 					failed = true;
 					break;
