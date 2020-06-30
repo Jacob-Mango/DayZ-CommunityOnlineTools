@@ -61,7 +61,7 @@ class JMESPForm extends JMFormBase
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 		UIActionManager.CreateText( headingSpacer, "Filters: ", "" );
-		UIActionManager.CreateText( headingSpacer, "Actions: (Will be in before 2020/07/11)", "" );
+		//UIActionManager.CreateText( headingSpacer, "Actions: ", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -105,6 +105,7 @@ class JMESPForm extends JMFormBase
 
 	private void ESPSelectedObjects( Widget parent )
 	{
+		/*
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
@@ -115,6 +116,7 @@ class JMESPForm extends JMFormBase
 		UIActionManager.CreateButton( container, "Move To Cursor (Absolute)", this, "Click_MoveToCursorAbsolute" );
 
 		m_ESPSelectedObjects.UpdateScroller();
+		*/
 	}
 
 	override void OnInit()
@@ -126,13 +128,10 @@ class JMESPForm extends JMFormBase
 		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 
-		//left_bottom.SetFlags( WidgetFlags.EXACTPOS | WidgetFlags.EXACTSIZE );
-		//right_bottom.SetFlags( WidgetFlags.EXACTPOS | WidgetFlags.EXACTSIZE );
-
-		left_bottom.SetSize( 0.5, 1.0 );
-		right_bottom.SetSize( 0.5, 1.0 );
+		left_bottom.SetSize( 1.0, 1.0 );
+		right_bottom.SetSize( 0.0, 1.0 );
 		left_bottom.SetPos( 0.0, 0.0 );
-		right_bottom.SetPos( 0.5, 0.0 );
+		right_bottom.SetPos( 1.0, 0.0 );
 
 		ESPFilters( left_bottom );
 		//ESPSelectedObjects( right_bottom );
