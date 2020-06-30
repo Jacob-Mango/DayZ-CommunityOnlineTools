@@ -103,7 +103,7 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetPosition( m_Action_Position.GetValue(), target );
+		module.SetPosition( action.GetValue(), target );
 	}
 
 	void Action_SetOrientation( UIEvent eid, ref UIActionBase action )
@@ -111,7 +111,7 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetOrientation( m_Action_Orientation.GetValue(), target );
+		module.SetOrientation( action.GetValue(), target );
 	}
 
 	void Action_SetHealth( UIEvent eid, ref UIActionBase action )
@@ -119,7 +119,7 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetHealth( m_Action_Health.GetText().ToFloat(), target );
+		module.SetHealth( action.GetText().ToFloat(), target );
 	}
 
 	void Action_Delete( UIEvent eid, ref UIActionBase action )
@@ -128,5 +128,14 @@ class JMESPMeta : Managed
 			return;
 
 		module.DeleteObject(  target );
+	}
+}
+
+class JMESPMetaBaseBuilding : JMESPMeta
+{
+	override void CreateActions( Widget parent )
+	{
+		super.CreateActions( parent );
+
 	}
 }

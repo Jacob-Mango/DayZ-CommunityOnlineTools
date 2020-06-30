@@ -8,6 +8,8 @@ class COTModule : JMModuleBase
 
 	protected bool m_GameActive;
 
+	protected bool m_LeftMouseDown;
+
 	void COTModule()
 	{
 		COTInstance = this;
@@ -56,8 +58,6 @@ class COTModule : JMModuleBase
 	override void RegisterKeyMouseBindings() 
 	{
 		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
-		RegisterBinding( new JMModuleBinding( "FocusGame",		"UACOTModuleFocusGame",		true 	) );
-		RegisterBinding( new JMModuleBinding( "FocusUI",		"UACOTModuleFocusUI",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
 		RegisterBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
@@ -67,6 +67,24 @@ class COTModule : JMModuleBase
 		if ( m_COTMenu )
 		{
 			m_COTMenu.OnUpdate( timeslice );
+
+			if ( m_LeftMouseDown )
+			{
+				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
+				{
+					OnMouseUp();
+
+					m_LeftMouseDown = false;
+				}
+			} else
+			{
+				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) != 0 )
+				{
+					OnMouseDown();
+					
+					m_LeftMouseDown = true;
+				}
+			}
 		}
 
 		if ( m_ForceHUD )
@@ -145,14 +163,8 @@ class COTModule : JMModuleBase
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
-	void FocusUI( UAInput input )
+	void OnMouseUp()
 	{
-		if ( !( input.LocalRelease() ) )
-			return;
-
-		if ( m_COTMenu == NULL )
-			return;
-		
 		if ( m_GameActive )
 		{
 			m_GameActive = false;
@@ -161,15 +173,9 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	void FocusGame( UAInput input )
+	void OnMouseDown()
 	{
-		if ( !( input.LocalPress() ) )
-			return;
-
 		if ( GetGame().GetUIManager().GetMenu() )
-			return;
-
-		if ( m_COTMenu == NULL )
 			return;
 
 		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().Count() > 0 )

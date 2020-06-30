@@ -2,7 +2,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 {
 	private Widget layoutRoot;
 	
-	private JMWindowBase m_Window;
+	private Managed m_Base;
 	
 	private TextWidget m_TextTitle;
 	private TextWidget m_TextMessage;
@@ -40,9 +40,9 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		layoutRoot.SetHandler( this );
 	}
 
-	void Init( JMWindowBase wdw )
+	void Init( Managed base )
 	{
-		m_Window = wdw;
+        m_Base = base;
 
 		OnInit();
 	}
@@ -65,6 +65,14 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		return layoutRoot.IsVisible();
 	}
 
+	protected void CallCallback( string callback )
+	{
+		if ( callback != "" )
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<ref JMConfirmation>( this ) );
+		}
+	}
+
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
@@ -78,10 +86,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 			Close();
 
-			if ( m_Callback1 != "" )
-			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback1, new Param1<ref JMConfirmation>( this ) );
-			}
+			CallCallback( m_Callback1 );
 			return true;
 		}
 
@@ -91,10 +96,8 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 			Close();
 
-			if ( m_Callback2 != "" )
-			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback2, new Param1<ref JMConfirmation>( this ) );
-			}
+			CallCallback( m_Callback2 );
+
 			return true;
 		}
 
@@ -104,10 +107,8 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 			Close();
 
-			if ( m_Callback3 != "" )
-			{
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), m_Callback3, new Param1<ref JMConfirmation>( this ) );
-			}
+			CallCallback( m_Callback3 );
+
 			return true;
 		}
 
