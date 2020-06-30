@@ -49,6 +49,8 @@ class JMESPViewTypePlayer: JMESPViewType
 		Localisation = "Players";
 
 		Colour = ARGB( 255, 80, 255, 240 );
+
+		MetaType = JMESPMetaPlayer;
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )

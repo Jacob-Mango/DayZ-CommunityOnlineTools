@@ -120,9 +120,26 @@ class JMESPMeta : Managed
 		m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetOrientation", "", "Set" );
 		m_Action_Health.SetOnlyNumbers( true );
 
-		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+		if ( CanDelete() )
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
-		m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
+			m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
+		}
+	}
+
+	bool CanDelete()
+	{
+		return true;
+	}
+
+	private string FloatToString( float num )
+	{
+		string ret = num.ToString();
+		if ( ret == "" )
+			ret = "0";
+
+		return ret;
 	}
 
 	void UpdateActions()
@@ -130,15 +147,15 @@ class JMESPMeta : Managed
 		if ( !viewTypeActions || !widgetRoot )
 			return;
 		
-		m_Action_PositionX.SetText( target.GetPosition()[0].ToString() );
-		m_Action_PositionY.SetText( target.GetPosition()[1].ToString() );
-		m_Action_PositionZ.SetText( target.GetPosition()[2].ToString() );
+		m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
+		m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
+		m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
 		
-		m_Action_OrientationX.SetText( target.GetOrientation()[0].ToString() );
-		m_Action_OrientationY.SetText( target.GetOrientation()[1].ToString() );
-		m_Action_OrientationZ.SetText( target.GetOrientation()[2].ToString() );
+		m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
+		m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
+		m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
 
-		m_Action_Health.SetText( "0" );
+		m_Action_Health.SetText( "-1" );
 	}
 
 	void Action_SetPosition( UIEvent eid, ref UIActionBase action )
@@ -172,7 +189,11 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetHealth( action.GetText().ToFloat(), target );
+		float health = action.GetText().ToFloat();
+		if ( health == -1 )
+			return;
+
+		module.SetHealth( health, target );
 	}
 
 	void Action_Delete( UIEvent eid, ref UIActionBase action )
@@ -184,11 +205,27 @@ class JMESPMeta : Managed
 	}
 }
 
+class JMESPMetaPlayer : JMESPMeta
+{
+	override void CreateActions( Widget parent )
+	{
+		UIActionManager.CreateText( parent, "Name: ", player.GetName() );
+		UIActionManager.CreateText( parent, "GUID: ", player.GetGUID() );
+		UIActionManager.CreateText( parent, "Steam: ", player.GetSteam64ID() );
+
+		super.CreateActions( parent );
+	}
+
+	override bool CanDelete()
+	{
+		return false;
+	}
+}
+
 class JMESPMetaBaseBuilding : JMESPMeta
 {
 	override void CreateActions( Widget parent )
 	{
 		super.CreateActions( parent );
-
 	}
 }
