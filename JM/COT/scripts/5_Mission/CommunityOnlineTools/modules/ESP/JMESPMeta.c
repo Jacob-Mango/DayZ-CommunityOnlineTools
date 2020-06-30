@@ -11,8 +11,16 @@ class JMESPMeta : Managed
 	Widget widgetRoot;
 	Widget viewTypeActions;
 
-	UIActionEditableVector m_Action_Position;
-	UIActionEditableVector m_Action_Orientation;
+	UIActionEditableText m_Action_PositionX;
+	UIActionEditableText m_Action_PositionY;
+	UIActionEditableText m_Action_PositionZ;
+	UIActionButton m_Action_Position;
+	
+	UIActionEditableText m_Action_OrientationX;
+	UIActionEditableText m_Action_OrientationY;
+	UIActionEditableText m_Action_OrientationZ;
+	UIActionButton m_Action_Orientation;
+
 	UIActionEditableText m_Action_Health;
 
 	UIActionButton m_Action_Delete;
@@ -79,13 +87,42 @@ class JMESPMeta : Managed
 
 	void CreateActions( Widget parent )
 	{
-		m_Action_Position = UIActionManager.CreateEditableVector( parent, "Position: ", this, "Action_SetPosition", "Set" );
-		m_Action_Orientation = UIActionManager.CreateEditableVector( parent, "Orientation: ", this, "Action_SetOrientation", "Set" );
+		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
+		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
 
-		m_Action_Health = UIActionManager.CreateEditableText( parent, "Global Health: ", this, "Action_SetOrientation", "", "Set" );
+		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:" );
+		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:" );
+		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:" );
+
+		m_Action_PositionX.SetOnlyNumbers( true );
+		m_Action_PositionY.SetOnlyNumbers( true );
+		m_Action_PositionZ.SetOnlyNumbers( true );
+		
+		m_Action_Position = UIActionManager.CreateButton( positionActions, "Set Position", this, "Action_SetPosition" );
+
+		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+		Widget orientationActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
+		Widget orientationActionsVec = UIActionManager.CreateGridSpacer( orientationActions, 1, 3 );
+
+		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:" );
+		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:" );
+		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:" );
+
+		m_Action_OrientationX.SetOnlyNumbers( true );
+		m_Action_OrientationY.SetOnlyNumbers( true );
+		m_Action_OrientationZ.SetOnlyNumbers( true );
+		
+		m_Action_Orientation = UIActionManager.CreateButton( orientationActions, "Set Orientation", this, "Action_SetOrientation" );
+
+		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+		m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetOrientation", "", "Set" );
 		m_Action_Health.SetOnlyNumbers( true );
 
-		m_Action_Delete = UIActionManager.CreateButton( parent, "Delete", this, "Action_Delete" );
+		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+		m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
 	}
 
 	void UpdateActions()
@@ -93,8 +130,14 @@ class JMESPMeta : Managed
 		if ( !viewTypeActions || !widgetRoot )
 			return;
 		
-		m_Action_Position.SetValue( target.GetPosition() );
-		m_Action_Orientation.SetValue( target.GetOrientation() );
+		m_Action_PositionX.SetText( target.GetPosition()[0].ToString() );
+		m_Action_PositionY.SetText( target.GetPosition()[1].ToString() );
+		m_Action_PositionZ.SetText( target.GetPosition()[2].ToString() );
+		
+		m_Action_OrientationX.SetText( target.GetOrientation()[0].ToString() );
+		m_Action_OrientationY.SetText( target.GetOrientation()[1].ToString() );
+		m_Action_OrientationZ.SetText( target.GetOrientation()[2].ToString() );
+
 		m_Action_Health.SetText( "0" );
 	}
 
@@ -103,7 +146,12 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetPosition( action.GetValue(), target );
+		vector pos = vector.Zero;
+		pos[0] = m_Action_PositionX.GetText().ToFloat();
+		pos[1] = m_Action_PositionY.GetText().ToFloat();
+		pos[2] = m_Action_PositionZ.GetText().ToFloat();
+
+		module.SetPosition( pos, target );
 	}
 
 	void Action_SetOrientation( UIEvent eid, ref UIActionBase action )
@@ -111,7 +159,12 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.SetOrientation( action.GetValue(), target );
+		vector pos = vector.Zero;
+		pos[0] = m_Action_OrientationX.GetText().ToFloat();
+		pos[1] = m_Action_OrientationY.GetText().ToFloat();
+		pos[2] = m_Action_OrientationZ.GetText().ToFloat();
+
+		module.SetOrientation( pos, target );
 	}
 
 	void Action_SetHealth( UIEvent eid, ref UIActionBase action )

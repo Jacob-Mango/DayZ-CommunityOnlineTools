@@ -624,7 +624,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector pos = "0 0 0";
+		vector pos = vector.Zero;
 		pos[0] = m_PositionX.GetText().ToFloat();
 		pos[1] = m_PositionY.GetText().ToFloat();
 		pos[2] = m_PositionZ.GetText().ToFloat();
@@ -637,7 +637,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector position = "0 0 0";
+		vector position = vector.Zero;
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
