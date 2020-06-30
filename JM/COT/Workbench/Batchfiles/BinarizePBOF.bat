@@ -42,7 +42,8 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	goto:eof
+
+	exit 0
 )
 
 set workDrive=
@@ -159,9 +160,7 @@ if %failed%==1 (
 
 	echo Failed to package the mod.
 	
-	if EXIST %~p2 (
-		exit 0
-	)
+	exit 0
 )
 
 set pboProject="%_MIKEDLL%\bin\pboProject.exe"
@@ -220,9 +219,7 @@ if not errorlevel 1 (
 	
 	endlocal
 
-	if EXIST %~p2 (
-		exit 0
-	)
+	exit 0
 ) else (
 	echo /////////////////////////////////////////////////////////////
 	echo Something went wrong with %%D for !pboName!.pbo - this tool will not work until you fix it. Please check %workDrive%Temp\ for the issue should be the most recent packing/bin log
@@ -230,18 +227,9 @@ if not errorlevel 1 (
 	
 	endlocal
 
-	if EXIST %~p3 (
-		exit 1
-	) else (
-		pause
-		if EXIST %~p2 (
-			exit 1
-		)
-	)
+	exit 1
 )
 
 :end
 
-if EXIST %~p2 (
-	exit 0
-)
+exit 0
