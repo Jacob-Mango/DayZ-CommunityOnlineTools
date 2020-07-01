@@ -26,7 +26,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	float FOV;
 	vector ScreenPos;
 
-	ref JMESPMeta Info;
+	JMESPMeta Info;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -168,7 +168,14 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	}
 
 	void Update() 
-	{			
+	{
+		if ( Info == NULL || Info.target == NULL ) 
+		{
+			ShowOnScreen = false;
+			Hide();
+			return;
+		}
+
 		ScreenPos = GetGame().GetScreenPos( GetPosition() );
 
 		float distance = vector.Distance( GetCurrentPosition(), GetPosition() );

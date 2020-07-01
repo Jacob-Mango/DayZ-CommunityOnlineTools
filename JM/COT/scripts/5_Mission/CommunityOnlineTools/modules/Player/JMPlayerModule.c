@@ -933,7 +933,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.GetBleedingManagerServer().RemoveAllSources();
+			if ( player.GetBleedingManagerServer() )
+				player.GetBleedingManagerServer().RemoveAllSources();
 
 			player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
 			player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
@@ -983,7 +984,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.RemoveAllItems();
 
-			GetCommunityOnlineToolsBase().Log( ident, "Striped [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 		}
 	}
 
