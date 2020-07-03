@@ -800,7 +800,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_BloodUpdated = false;
+		m_BloodUpdated = true;
 	}
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionBase action )
@@ -808,7 +808,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_EnergyUpdated = false;
+		m_EnergyUpdated = true;
 	}
 
 	void Click_SetWater( UIEvent eid, ref UIActionBase action )
@@ -816,7 +816,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_WaterUpdated = false;
+		m_WaterUpdated = true;
 	}
 
 	void Click_SetShock( UIEvent eid, ref UIActionBase action )
@@ -824,7 +824,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_ShockUpdated = false;
+		m_ShockUpdated = true;
 	}
 
 	void Click_SetStamina( UIEvent eid, ref UIActionBase action )
@@ -832,7 +832,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_StaminaUpdated = false;
+		m_StaminaUpdated = true;
 	}
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
