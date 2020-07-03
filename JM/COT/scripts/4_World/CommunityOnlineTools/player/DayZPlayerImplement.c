@@ -5,7 +5,8 @@ modded class DayZPlayerImplement
 
 	void DayZPlayerImplement()
 	{
-		SetEventMask( EntityEvent.FRAME | EntityEvent.SIMULATE );
+		if ( IsMissionClient() )
+			SetEventMask( EntityEvent.FRAME | EntityEvent.SIMULATE );
 	}
 
 	void OnSpectateStart( JMSpectatorCamera camera )

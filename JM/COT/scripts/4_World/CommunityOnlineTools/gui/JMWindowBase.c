@@ -20,7 +20,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	private JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
-	private JMConfirmation m_Confirmation;
+	private JMConfirmationForm m_Confirmation;
 
 	private autoptr array< Widget > m_BrokenWidgets;
 

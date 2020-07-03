@@ -134,12 +134,12 @@ class JMWeatherForm extends JMFormBase
 		CreateConfirmation_Two( "Confirm", "Do you wish to remove the preset " + preset, "No", "RemovePreset_No", "Yes", "RemovePreset_Yes" );
 	}
 
-	void RemovePreset_No( ref JMConfirmation confirmation )
+	void RemovePreset_No( JMConfirmation confirmation )
 	{
 		// do nothing
 	}
 
-	void RemovePreset_Yes( ref JMConfirmation confirmation )
+	void RemovePreset_Yes( JMConfirmation confirmation )
 	{
 		if ( m_SelectedPreset == m_RemovePreset )
 		{

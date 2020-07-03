@@ -44,6 +44,33 @@ class COTModule : JMModuleBase
 				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
 			}
 		}
+
+		if ( IsMissionHost() )
+		{
+			if ( !Assert_Null( GetPermissionsManager() ) )
+				Assert_Null( GetPermissionsManager().RootPermission );
+
+			array< string > data = new array< string >;
+			GetPermissionsManager().RootPermission.Serialize( data );
+
+			if ( !GetPermissionsManager().RoleExists( "everyone" ) )
+			{
+				GetPermissionsManager().CreateRole( "everyone", data );
+			}
+
+			if ( !GetPermissionsManager().RoleExists( "admin" ) )
+			{
+				for ( int i = 0; i < data.Count(); i++ )
+				{
+					string s = data[i];
+					s.Replace( "0", "2" );
+					data.Remove( i );
+					data.InsertAt( s, i );
+				}
+
+				GetPermissionsManager().CreateRole( "admin", data );
+			}
+		}
 	}
 
 	override void OnMissionFinish()
@@ -240,6 +267,11 @@ class COTModule : JMModuleBase
 
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
+		Print( "+COTModule::OnInvokeConnect - " + identity.GetId() );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( identity );
+
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
 			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement( i ), identity );
@@ -249,8 +281,11 @@ class COTModule : JMModuleBase
 		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
 		{
 			instance.PlayerObject = player;
+
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
 		}
+
+		Print( "-COTModule::OnInvokeConnect - " + identity.GetId() );
 	}
 
 	/**
@@ -258,11 +293,20 @@ class COTModule : JMModuleBase
 	 */
 	override void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
 	{
+		Print( "+COTModule::OnClientRespawn - " + identity.GetId() );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( identity );
+
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		
+		Assert_Null( instance );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
+
+		Print( "-COTModule::OnClientRespawn - " + identity.GetId() );
 	}
 
 	/**
@@ -270,11 +314,20 @@ class COTModule : JMModuleBase
 	 */
 	override void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
 	{
+		Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( identity );
+
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+
+		Assert_Null( instance );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
+
+		Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
 	}
 
 	/**
@@ -282,11 +335,20 @@ class COTModule : JMModuleBase
 	 */
 	override void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
 	{
+		Print( "+COTModule::OnClientLogout - " + identity.GetId() );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( identity );
+
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+
+		Assert_Null( instance );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
+
+		Print( "-COTModule::OnClientLogout - " + identity.GetId() );
 	}
 
 	/**
@@ -294,11 +356,18 @@ class COTModule : JMModuleBase
 	 */
 	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
 	{
+		Print( "+COTModule::OnClientDisconnect - " + uid );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( identity );
+
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
 		{
 			GetCommunityOnlineToolsBase().RemoveClient( uid );
 		}
+
+		Print( "-COTModule::OnClientDisconnect - " + uid );
 	}
 
 	/**
@@ -306,10 +375,22 @@ class COTModule : JMModuleBase
 	 */
 	override void OnClientLogoutCancelled( PlayerBase player )
 	{
+		Print( "+COTModule::OnClientLogoutCancelled" );
+
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( player );
+		Assert_Null( player.GetIdentity() );
+
+		Print( "  COTModule::OnClientLogoutCancelled - " + player.GetIdentity().GetId() );
+
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
+
+		Assert_Null( instance );
 		if ( instance )
 		{
 			instance.PlayerObject = player;
 		}
+
+		Print( "-COTModule::OnClientLogoutCancelled" );
 	}
 }

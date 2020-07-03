@@ -69,7 +69,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	{
 		if ( callback != "" )
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<ref JMConfirmation>( this ) );
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
 		}
 	}
 

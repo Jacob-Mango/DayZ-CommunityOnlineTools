@@ -13,7 +13,7 @@ class JMConfirmationForm extends JMConfirmation
 	{
 		if ( callback != "" )
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<ref JMConfirmation>( this ) );
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<JMConfirmation>( this ) );
 		}
 	}
 }
