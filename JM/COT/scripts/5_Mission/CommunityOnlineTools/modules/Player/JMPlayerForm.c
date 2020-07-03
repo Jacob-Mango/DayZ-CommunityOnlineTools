@@ -797,7 +797,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetBlood( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_BloodUpdated = true;
@@ -805,7 +805,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetEnergy( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_EnergyUpdated = true;
@@ -813,7 +813,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetWater( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_WaterUpdated = true;
@@ -821,7 +821,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetShock( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_ShockUpdated = true;
@@ -829,7 +829,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetStamina( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_StaminaUpdated = true;
@@ -837,7 +837,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		m_BloodyHandsUpdated = true;
