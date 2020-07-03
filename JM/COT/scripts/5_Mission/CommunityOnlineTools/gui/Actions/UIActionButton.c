@@ -1,14 +1,14 @@
 class UIActionButton extends UIActionBase 
 {
-	protected ref TextWidget m_Text;
-	protected ref ButtonWidget m_Button;
+	protected TextWidget m_Text;
+	protected ButtonWidget m_Button;
 
 	override void OnInit() 
 	{
 		super.OnInit();
 		
-		m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget("action_button") );
-		m_Text = TextWidget.Cast( m_Button.FindAnyWidget("action") );
+		Class.CastTo( m_Button, layoutRoot.FindAnyWidget( "action_button" ) );
+		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void OnShow()

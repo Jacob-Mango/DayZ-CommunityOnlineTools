@@ -1,14 +1,14 @@
 class UIActionCheckbox extends UIActionBase 
 {
-	protected ref TextWidget m_Label;
-	protected ref CheckBoxWidget m_Checkbox;
+	protected TextWidget m_Label;
+	protected CheckBoxWidget m_Checkbox;
 	
 	override void OnInit() 
 	{
 		super.OnInit();
 		
-		m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
-		m_Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("action"));
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Checkbox, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void OnShow()

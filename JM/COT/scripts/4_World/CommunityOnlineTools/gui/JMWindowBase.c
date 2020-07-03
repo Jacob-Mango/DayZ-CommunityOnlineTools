@@ -5,7 +5,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	reference float m_DragXP;
 	reference float m_DragYP;
 
-	private ref Widget layoutRoot;
+	private Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;

@@ -104,7 +104,7 @@ static Weapon GetWeaponInHands()
 	return weapon_in_hands;
 }
 
-static ref PlayerBase GetPlayer()
+static PlayerBase GetPlayer()
 {
 	return PlayerBase.Cast( GetGame().GetPlayer() );
 }

@@ -63,7 +63,7 @@ class JMVehicleSpawnerSettings
 
 	void Default_CivilianSedan()
 	{
-		ref array< string> attArr = new array< string>;
+		array< string> attArr = new array< string>;
 
 		attArr.Insert("CivSedanHood");
 		attArr.Insert("CivSedanTrunk");
@@ -79,19 +79,18 @@ class JMVehicleSpawnerSettings
 		attArr.Insert("CarRadiator");
 		attArr.Insert("SparkPlug");
 
-		ref JMVehicleSpawnerSerialize file = new JMVehicleSpawnerSerialize;
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
 		file.VehicleName = "CivilianSedan";
-		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
-		file.Parts = attArr;
+		file.Parts.Copy( attArr );
 
 		Vehicles.Insert( file.VehicleName, file );
 	}
 
 	void Default_OffroadHatchback()
 	{
-		ref array< string> attArr = new array< string>;
+		array< string> attArr = new array< string>;
 
 		attArr.Insert("HatchbackHood");
 		attArr.Insert("HatchbackTrunk");
@@ -105,19 +104,18 @@ class JMVehicleSpawnerSettings
 		attArr.Insert("CarRadiator");
 		attArr.Insert("SparkPlug");
 
-		ref JMVehicleSpawnerSerialize file = new JMVehicleSpawnerSerialize;
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
 		file.VehicleName = "OffroadHatchback";
-		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
-		file.Parts = attArr;
+		file.Parts.Copy( attArr );
 
 		Vehicles.Insert( file.VehicleName, file );
 	}
 
 	void Default_Hatchback_02()
 	{
-		ref array< string> attArr = new array< string>;
+		array< string> attArr = new array< string>;
 
 		attArr.Insert("Hatchback_02_Hood");
 		attArr.Insert("Hatchback_02_Trunk");
@@ -133,19 +131,18 @@ class JMVehicleSpawnerSettings
 		attArr.Insert("CarRadiator");
 		attArr.Insert("SparkPlug");
 
-		ref JMVehicleSpawnerSerialize file = new JMVehicleSpawnerSerialize;
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
 		file.VehicleName = "Hatchback_02";
-		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
-		file.Parts = attArr;
+		file.Parts.Copy( attArr );
 
 		Vehicles.Insert( file.VehicleName, file );
 	}
 
 	void Default_Sedan_02()
 	{
-		ref array< string> attArr = new array< string>;
+		array< string> attArr = new array< string>;
 
 		attArr.Insert("Sedan_02_Hood");
 		attArr.Insert("Sedan_02_Trunk");
@@ -161,12 +158,11 @@ class JMVehicleSpawnerSettings
 		attArr.Insert("CarRadiator");
 		attArr.Insert("SparkPlug");
 
-		ref JMVehicleSpawnerSerialize file = new JMVehicleSpawnerSerialize;
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
 		file.VehicleName = "Sedan_02";
-		file.DisplayName = file.VehicleName;
 		file.m_FileName = file.VehicleName;
-		file.Parts = attArr;
+		file.Parts.Copy( attArr );
 
 		Vehicles.Insert( file.VehicleName, file );
 	}

@@ -1,7 +1,17 @@
 class JMItemSetSettings
 {
-	autoptr map< string, ref JMItemSetSerialize > ItemSets = new map< string, ref JMItemSetSerialize >;
+	ref map< string, ref JMItemSetSerialize > ItemSets;
 	
+	private void JMItemSetSettings()
+	{
+		ItemSets = new map< string, ref JMItemSetSerialize >;
+	}
+
+	void ~JMItemSetSettings()
+	{
+		delete ItemSets;
+	}
+
 	static ref JMItemSetSettings Load()
 	{
 		ref JMItemSetSettings settings = new JMItemSetSettings();
@@ -83,7 +93,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "CamoNet", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Fence Metal";
 		file.m_FileName = file.Name;
@@ -107,7 +117,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "CamoNet", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Fence Wood";
 		file.m_FileName = file.Name;
@@ -133,7 +143,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "CamoNet", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Gate Metal";
 		file.m_FileName = file.Name;
@@ -158,7 +168,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "CamoNet", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Gate Wood";
 		file.m_FileName = file.Name;
@@ -177,7 +187,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "Hammer", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Platform";
 		file.m_FileName = file.Name;
@@ -204,7 +214,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "Crowbar", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Watchtower Metal";
 		file.m_FileName = file.Name;
@@ -230,7 +240,7 @@ class JMItemSetSettings
 		attArr.Insert( new JMItemSetItemInfo( "Crowbar", 1, 1 ) );
 		attArr.Insert( new JMItemSetItemInfo( "DuctTape", 5, 100 ) );
 
-		ref JMItemSetSerialize file = new JMItemSetSerialize;
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
 
 		file.Name = "Watchtower Wood";
 		file.m_FileName = file.Name;

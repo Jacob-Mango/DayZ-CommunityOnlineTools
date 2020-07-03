@@ -1,8 +1,8 @@
 class UIActionSlider extends UIActionBase 
 {
-	protected ref TextWidget m_Label;
-	protected ref SliderWidget m_Slider;
-	protected ref TextWidget m_Value;
+	protected TextWidget m_Label;
+	protected SliderWidget m_Slider;
+	protected TextWidget m_Value;
 
 	protected float m_Min;
 	protected float m_Max;
@@ -18,9 +18,9 @@ class UIActionSlider extends UIActionBase
 	{
 		super.OnInit();
 		
-		m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
-		m_Slider = SliderWidget.Cast(layoutRoot.FindAnyWidget("action"));
-		m_Value = TextWidget.Cast(layoutRoot.FindAnyWidget("action_value"));
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Slider, layoutRoot.FindAnyWidget( "action" ) );
+		Class.CastTo( m_Value, layoutRoot.FindAnyWidget( "action_value" ) );
 	}
 
 	override void OnShow()

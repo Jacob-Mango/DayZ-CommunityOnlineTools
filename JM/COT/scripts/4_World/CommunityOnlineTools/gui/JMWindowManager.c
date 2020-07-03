@@ -1,6 +1,6 @@
 class JMWindowManager
 {
-	private autoptr array< JMWindowBase > m_Windows;
+	private ref array< JMWindowBase > m_Windows;
 
 	private ImageWidget m_MainCursorWidget;
 
@@ -11,6 +11,7 @@ class JMWindowManager
 
 	void ~JMWindowManager()
 	{
+		delete m_Windows;
 	}
 
 	JMWindowBase Create()

@@ -1,4 +1,4 @@
-class JMRole
+class JMRole : Managed
 {
 	ref JMPermission RootPermission;
 
@@ -18,6 +18,8 @@ class JMRole
 	void ~JMRole()
 	{
 		delete RootPermission;
+		
+		delete SerializedData;
 	}
 
 	void CopyPermissions( ref JMPermission copy )

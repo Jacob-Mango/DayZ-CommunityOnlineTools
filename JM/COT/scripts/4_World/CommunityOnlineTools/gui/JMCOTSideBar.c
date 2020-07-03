@@ -62,7 +62,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		Hide();
 	}
 
-	private void SortModuleArray( array< ref JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
+	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
 	{
 		string pNames[ 1000 ];
 		int pIndices[ 1000 ];
@@ -182,7 +182,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		if ( !IsMissionClient() ) 
 			return false;
 		
-		array< ref JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
+		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
 
 		for ( int i = 0; i < modules.Count(); i++ )
 		{

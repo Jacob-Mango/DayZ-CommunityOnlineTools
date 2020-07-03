@@ -8,7 +8,22 @@ class JMItemSetSerialize
 	string Name;
 	string ContainerClassName;
 
-	ref array< ref JMItemSetItemInfo > Items = new array< ref JMItemSetItemInfo >;
+	ref array< ref JMItemSetItemInfo > Items;
+	
+	/*private*/ void JMItemSetSerialize()
+	{
+		Items = new array< ref JMItemSetItemInfo >;
+	}
+
+	void ~JMItemSetSerialize()
+	{
+		delete Items;
+	}
+
+	static ref JMItemSetSerialize Create()
+	{
+		return new JMItemSetSerialize;
+	}
 
 	static ref JMItemSetSerialize Load( string file )
 	{
@@ -24,9 +39,4 @@ class JMItemSetSerialize
 	{
 		JsonFileLoader< JMItemSetSerialize >.JsonSaveFile( JMConstants.DIR_ITEMS + m_FileName + JMConstants.EXT_ITEM, this );
 	}
-
-	void Defaults()
-	{
-	}
-
 }

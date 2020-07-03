@@ -1,10 +1,10 @@
 class UIActionEditableVector extends UIActionBase 
 {
-	protected ref TextWidget m_Label;
-	protected ref EditBoxWidget m_TextX;
-	protected ref EditBoxWidget m_TextY;
-	protected ref EditBoxWidget m_TextZ;
-	protected ref ButtonWidget m_Button;
+	protected TextWidget m_Label;
+	protected EditBoxWidget m_TextX;
+	protected EditBoxWidget m_TextY;
+	protected EditBoxWidget m_TextZ;
+	protected ButtonWidget m_Button;
 
 	override void OnInit() 
 	{
@@ -37,11 +37,10 @@ class UIActionEditableVector extends UIActionBase
 			layoutRoot.Show( true );
 		}
 
-		m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
-
-		m_TextX = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_x" ) );
-		m_TextY = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_y" ) );
-		m_TextZ = EditBoxWidget.Cast( layoutRoot.FindAnyWidget( "action_z" ) );
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_TextX, layoutRoot.FindAnyWidget( "action_x" ) );
+		Class.CastTo( m_TextY, layoutRoot.FindAnyWidget( "action_y" ) );
+		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
 
 		SetValue( vector.Zero );
 	}

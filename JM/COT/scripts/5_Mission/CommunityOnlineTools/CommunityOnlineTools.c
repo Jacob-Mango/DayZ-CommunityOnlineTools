@@ -24,8 +24,6 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		RefreshClients();
-
 		if ( IsMissionOffline() )
 		{
 			// GetPermissionsManager().CreateFakePlayers();

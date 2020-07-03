@@ -1,6 +1,6 @@
 class JMFormBase extends ScriptedWidgetEventHandler 
 {
-	protected ref Widget layoutRoot;
+	protected Widget layoutRoot;
 	
 	protected JMWindowBase window;
 
