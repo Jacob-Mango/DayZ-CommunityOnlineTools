@@ -1,8 +1,8 @@
-class JMPermission
+class JMPermission : Managed
 {
 	JMPermission Parent;
 
-	autoptr array< ref JMPermission > Children;
+	ref array< ref JMPermission > Children;
 
 	string Name;
 
@@ -41,8 +41,8 @@ class JMPermission
 	void UpdateFullName()
 	{
 		m_SerializedFullName = Name;
-		ref JMPermission parent = Parent;
 
+		JMPermission parent = Parent;
 		while ( parent != NULL )
 		{
 			if ( parent.Parent == NULL ) 
@@ -273,10 +273,12 @@ class JMPermission
 
 	void Clear()
 	{
+		/*
 		for ( int i = 0; i < Children.Count(); ++i )
 		{
 			delete Children[i];
 		}
+		*/
 
 		Children.Clear();
 	}

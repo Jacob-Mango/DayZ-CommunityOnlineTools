@@ -1,8 +1,6 @@
 class COTModule : JMModuleBase
 {
-	static ref COTModule COTInstance;
-
-	protected ref JMCOTSideBar m_COTMenu;
+	protected JMCOTSideBar m_COTMenu;
 
 	protected bool m_ForceHUD;
 
@@ -12,8 +10,6 @@ class COTModule : JMModuleBase
 
 	void COTModule()
 	{
-		COTInstance = this;
-
 		MakeDirectory( JMConstants.DIR_COT );
 
 		JMScriptInvokers.COT_ON_OPEN.Insert( SetMenuState );
@@ -23,11 +19,14 @@ class COTModule : JMModuleBase
 
 	void ~COTModule()
 	{
-		m_COTMenu.Hide();
-
 		JMScriptInvokers.COT_ON_OPEN.Remove( SetMenuState );
 
-		delete m_COTMenu;
+		if ( m_COTMenu )
+		{
+			m_COTMenu.Hide();
+
+			delete m_COTMenu;
+		}
 	}
 
 	override void OnMissionLoaded()

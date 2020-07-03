@@ -2,9 +2,9 @@ class UIActionEditableText extends UIActionBase
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
-	protected ref TextWidget m_Label;
-	protected ref EditBoxWidget m_Text;
-	protected ref ButtonWidget m_Button;
+	protected TextWidget m_Label;
+	protected EditBoxWidget m_Text;
+	protected ButtonWidget m_Button;
 
 	protected bool m_OnlyNumbers;
 	protected bool m_OnlyIntegers;
@@ -60,8 +60,8 @@ class UIActionEditableText extends UIActionBase
 			root.Show( true );
 		}
 
-		m_Label = TextWidget.Cast( root.FindAnyWidget( "action_label" ) );
-		m_Text = EditBoxWidget.Cast( root.FindAnyWidget( "action" ) );
+		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
 	}
 
 	override void SetLabel( string text )

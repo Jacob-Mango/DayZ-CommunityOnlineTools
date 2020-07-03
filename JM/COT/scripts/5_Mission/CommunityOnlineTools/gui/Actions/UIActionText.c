@@ -2,15 +2,15 @@ class UIActionText extends UIActionBase
 {
 	protected string m_ActualText;
 
-	protected ref TextWidget m_Label;
-	protected ref TextWidget m_Text;
+	protected TextWidget m_Label;
+	protected TextWidget m_Text;
 
 	override void OnInit() 
 	{
 		super.OnInit();
 		
-		m_Label = TextWidget.Cast(layoutRoot.FindAnyWidget("action_label"));
-		m_Text = TextWidget.Cast(layoutRoot.FindAnyWidget("action"));
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void OnShow()

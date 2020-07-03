@@ -1,4 +1,4 @@
-class JMPlayerInstance
+class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
 	private ref array< string > m_Roles;
@@ -38,7 +38,7 @@ class JMPlayerInstance
 	private bool m_GodMode;
 	private bool m_Invisibility;
 
-	private autoptr JMPlayerSerialize m_PlayerFile;
+	private ref JMPlayerSerialize m_PlayerFile;
 
 	void JMPlayerInstance( PlayerIdentity identity )
 	{
@@ -57,13 +57,15 @@ class JMPlayerInstance
 		}
 
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
-		m_Roles = new array< string >;
+		m_Roles = new array< string >();
+		m_PlayerFile = new JMPlayerSerialize();
 	}
 
 	void ~JMPlayerInstance()
 	{
 		delete m_RootPermission;
 		delete m_Roles;
+		delete m_PlayerFile;
 	}
 
 	void MakeFake( string gid, string sid, string nid )
@@ -329,7 +331,7 @@ class JMPlayerInstance
 		if ( !GetGame().IsServer() )
 			return;
 
-		ref array< string > permissions = new array< string >;
+		array< string > permissions = new array< string >;
 		m_RootPermission.Serialize( permissions );
 
 		m_PlayerFile.Roles.Clear();

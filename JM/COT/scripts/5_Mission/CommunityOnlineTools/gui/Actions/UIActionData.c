@@ -1,4 +1,4 @@
-class UIActionData
+class UIActionData : Managed
 {
 	
 }

@@ -1,6 +1,16 @@
 class JMItemSetMeta
 {
-	autoptr ref array< string > ItemSets = new array< string >;
+	ref array< string > ItemSets;
+
+	private void JMItemSetMeta()
+	{
+		ItemSets = new array< string >;
+	}
+
+	void ~JMItemSetMeta()
+	{
+		delete ItemSets;
+	}
 
 	static ref JMItemSetMeta DeriveFromSettings( ref JMItemSetSettings settings )
 	{

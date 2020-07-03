@@ -24,6 +24,13 @@ class JMPermissionManager
 		}
 	}
 
+	void ~JMPermissionManager()
+	{
+		delete Players;
+		delete Roles;
+		delete RootPermission;
+	}
+
 	void GetRolesAsList( out array< JMRole > roles )
 	{
 		if ( roles == NULL )
@@ -142,7 +149,7 @@ class JMPermissionManager
 			}
 			
 			JMPlayerInstance instance = GetClientPlayer();
-			if ( instance == NULL )
+			if ( Assert_Null( instance ) )
 			{
 				return false;
 			}
@@ -177,7 +184,7 @@ class JMPermissionManager
 				return true;
 			}
 			
-			if ( instance == NULL )
+			if ( Assert_Null( instance ) )
 			{
 				return false;
 			}
@@ -186,12 +193,13 @@ class JMPermissionManager
 		}
 
 		instance = Players.Get( identity.GetId() );
-		if ( instance )
+		if ( Assert_Null( instance ) )
 		{
-			return instance.HasPermission( permission );
+			Print( "JMPlayerInstance does not exist for " + identity.GetId() );
+			return false;
 		}
 
-		return false;
+		return instance.HasPermission( permission );
 	}
 
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
@@ -381,20 +389,20 @@ class JMPermissionManager
 		return Roles.Contains( role );
 	}
 
-	ref JMRole GetRole( string name )
+	JMRole GetRole( string name )
 	{
 		return Roles.Get( name );
 	}
 }
 
-ref JMPermissionManager g_com_PermissionsManager;
+ref JMPermissionManager g_cot_PermissionsManager;
 
 ref JMPermissionManager GetPermissionsManager()
 {
-	if( !g_com_PermissionsManager )
+	if( !g_cot_PermissionsManager )
 	{
-		g_com_PermissionsManager = new JMPermissionManager();
+		g_cot_PermissionsManager = new JMPermissionManager();
 	}
 
-	return g_com_PermissionsManager;
+	return g_cot_PermissionsManager;
 }

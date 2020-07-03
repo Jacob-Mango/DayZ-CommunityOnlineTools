@@ -1,10 +1,10 @@
 modded class JMModuleManager
 {
-	protected autoptr array< ref JMRenderableModuleBase > m_COTModules;
+	protected autoptr array< JMRenderableModuleBase > m_COTModules;
 
 	void JMModuleManager()
 	{
-		m_COTModules = new array< ref JMRenderableModuleBase >;
+		m_COTModules = new array< JMRenderableModuleBase >;
 
 		JMScriptInvokers.COT_ON_OPEN.Insert( SetPreventModuleBindings );
 	}
@@ -24,7 +24,7 @@ modded class JMModuleManager
 		}
 	}
 
-	array< ref JMRenderableModuleBase > GetCOTModules()
+	array< JMRenderableModuleBase > GetCOTModules()
 	{
 		return m_COTModules;
 	}

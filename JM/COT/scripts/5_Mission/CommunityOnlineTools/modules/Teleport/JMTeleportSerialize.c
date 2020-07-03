@@ -1,10 +1,15 @@
-class JMTeleportSerialize
+class JMTeleportSerialize : Managed
 {
 	ref array< ref JMTeleportLocation > Locations;
 
-	void JMTeleportSerialize()
+	private void JMTeleportSerialize()
 	{
 		Locations = new array< ref JMTeleportLocation >;
+	}
+
+	void ~JMTeleportSerialize()
+	{
+		delete Locations;
 	}
 
 	static JMTeleportSerialize Load()

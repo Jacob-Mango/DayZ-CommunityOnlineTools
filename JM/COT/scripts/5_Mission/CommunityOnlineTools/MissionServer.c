@@ -38,7 +38,7 @@ modded class MissionServer
 	{
 		super.OnMissionLoaded();
 
-		ref array< string > data = new array< string >;
+		array< string > data = new array< string >;
 		GetPermissionsManager().RootPermission.Serialize( data );
 
 		if ( !GetPermissionsManager().RoleExists( "everyone" ) )

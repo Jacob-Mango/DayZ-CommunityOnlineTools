@@ -20,16 +20,16 @@ enum JMESPState
 
 class JMESPModule: JMRenderableModuleBase
 {
-	private autoptr array< Object > m_SelectedObjects;
+	private ref array< Object > m_SelectedObjects;
 	
-	private autoptr array< ref JMESPMeta > m_ActiveESPObjects;
+	private ref array< ref JMESPMeta > m_ActiveESPObjects;
 
-	private autoptr array< ref JMESPMeta > m_ESPToCreate;
-	private autoptr array< JMESPMeta > m_ESPToDestroy;
+	private ref array< ref JMESPMeta > m_ESPToCreate;
+	private ref array< JMESPMeta > m_ESPToDestroy;
 
-	private autoptr map< Object, JMESPMeta > m_MappedESPObjects;
+	private ref map< Object, JMESPMeta > m_MappedESPObjects;
 
-	private autoptr array< ref JMESPViewType > m_ViewTypes;
+	private ref array< ref JMESPViewType > m_ViewTypes;
 
 	private bool m_IsCreatingWidgets;
 	private bool m_IsDestroyingWidgets;
@@ -44,17 +44,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	void JMESPModule()
 	{
-		m_SelectedObjects = new array< Object >;
-
-		m_ActiveESPObjects = new array< ref JMESPMeta >;
-
-		m_ESPToCreate = new array< ref JMESPMeta >;
-		m_ESPToDestroy = new array< JMESPMeta >;
-
-		m_MappedESPObjects = new map< Object, JMESPMeta >;
-
-		m_ViewTypes = new array< ref JMESPViewType >;
-
 		ESPRadius = 200;
 
 		ESPUpdateTime = 1;
@@ -71,6 +60,13 @@ class JMESPModule: JMRenderableModuleBase
 
 	void ~JMESPModule()
 	{
+		delete m_SelectedObjects;
+		delete m_ActiveESPObjects;
+		delete m_ESPToCreate;
+		delete m_ESPToDestroy;
+		delete m_MappedESPObjects;
+		delete m_ViewTypes;
+
 		Hide();
 	}
 
@@ -122,6 +118,17 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnInit()
 	{
+		m_SelectedObjects = new array< Object >;
+
+		m_ActiveESPObjects = new array< ref JMESPMeta >;
+
+		m_ESPToCreate = new array< ref JMESPMeta >;
+		m_ESPToDestroy = new array< JMESPMeta >;
+
+		m_MappedESPObjects = new map< Object, JMESPMeta >;
+
+		m_ViewTypes = new array< ref JMESPViewType >;
+
 		TTypenameArray espTypes = new TTypenameArray;
 		RegisterTypes( espTypes );
 		

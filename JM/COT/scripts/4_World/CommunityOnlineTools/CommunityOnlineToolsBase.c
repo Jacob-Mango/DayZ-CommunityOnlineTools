@@ -16,7 +16,7 @@ class CommunityOnlineToolsBase
 
 	void ~CommunityOnlineToolsBase()
 	{
-		array< ref JMRenderableModuleBase > cotModules = GetModuleManager().GetCOTModules();
+		array< JMRenderableModuleBase > cotModules = GetModuleManager().GetCOTModules();
 		for ( int i = 0; i < cotModules.Count(); i++ )
 		{
 			cotModules[i].Hide();

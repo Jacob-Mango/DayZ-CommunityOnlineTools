@@ -1,4 +1,4 @@
-class JMVehicleSpawnerSerialize
+class JMVehicleSpawnerSerialize : Managed
 {
 	[NonSerialized()]
 	string m_FileName;
@@ -6,7 +6,22 @@ class JMVehicleSpawnerSerialize
 	string VehicleName;
 	string DisplayName;
 
-	ref array< string > Parts = new array< string >;
+	ref array< string > Parts;
+	
+	/*private*/ void JMVehicleSpawnerSerialize()
+	{
+		Parts = new array< string >;
+	}
+
+	void ~JMVehicleSpawnerSerialize()
+	{
+		delete Parts;
+	}
+
+	static ref JMVehicleSpawnerSerialize Create()
+	{
+		return new JMVehicleSpawnerSerialize;
+	}
 
 	static ref JMVehicleSpawnerSerialize Load( string file )
 	{

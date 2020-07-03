@@ -1,4 +1,4 @@
-class JMPlayerSerialize
+class JMPlayerSerialize : Managed
 {
 	[NonSerialized()]
 	string m_FileName;
@@ -8,6 +8,11 @@ class JMPlayerSerialize
 	void JMPlayerSerialize()
 	{
 		Roles = new array< string >;
+	}
+
+	void ~JMPlayerSerialize()
+	{
+		delete Roles;
 	}
 
 	static string FileReadyStripName( string name )
@@ -20,10 +25,8 @@ class JMPlayerSerialize
 		return name;
 	}
 
-	static bool Load( JMPlayerInstance inst, out JMPlayerSerialize playerFile )
+	static bool Load( JMPlayerInstance inst, inout JMPlayerSerialize playerFile )
 	{
-		playerFile = new JMPlayerSerialize;
-
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 		if ( FileExist( playerFile.m_FileName ) )
 		{

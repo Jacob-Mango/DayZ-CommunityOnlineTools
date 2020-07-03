@@ -1,13 +1,14 @@
 class UIActionSelectBox extends UIActionBase 
 {
-	protected ref TextWidget m_Label;
+	protected TextWidget m_Label;
+
 	protected ref OptionSelectorMultistate m_Selection;
 
 	override void OnInit() 
 	{
 		super.OnInit();
-		
-		m_Label = TextWidget.Cast( layoutRoot.FindAnyWidget( "action_label" ) );
+				
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 	}
 
 	override void OnShow()

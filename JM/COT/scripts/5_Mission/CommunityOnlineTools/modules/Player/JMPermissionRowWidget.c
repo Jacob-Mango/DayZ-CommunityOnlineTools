@@ -9,13 +9,13 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	string FullName;
 	int Type;
 
-	protected Widget layoutRoot;
-	protected autoptr TStringArray stateOptions;
+	private Widget layoutRoot;
+	private ref TStringArray stateOptions;
 
-	TextWidget perm_name;
-	ref OptionSelectorMultistate perm_state;
+	private TextWidget m_txt_PermissionName;
+	private ref OptionSelectorMultistate m_state_Permission;
 
-	protected bool m_IsEnabled = false;
+	private bool m_IsEnabled = false;
 
 	void OnWidgetScriptInit( Widget w )
 	{
@@ -25,24 +25,28 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Init();
 	}
 
+	void JMPermissionRowWidget()
+	{
+		Children = new array< JMPermissionRowWidget >;
+
+		stateOptions = new TStringArray;
+		stateOptions.Insert( "INHERIT" );
+		stateOptions.Insert( "DISALLOW" );
+		stateOptions.Insert( "ALLOW" );
+	}
+
 	void ~JMPermissionRowWidget()
 	{
 		delete Children;
+		delete stateOptions;
 	}
 
 	void Init() 
 	{
-		Children = new array< JMPermissionRowWidget >;
+		Class.CastTo( m_txt_PermissionName, layoutRoot.FindAnyWidget( "permission_name" ) );
 
-		perm_name = TextWidget.Cast(layoutRoot.FindAnyWidget("permission_name"));
-
-		stateOptions = new TStringArray;
-		stateOptions.Insert("INHERIT");
-		stateOptions.Insert("DISALLOW");
-		stateOptions.Insert("ALLOW");
-
-		perm_state = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
-		perm_state.m_OptionChanged.Insert( OnPermissionStateChanged );
+		m_state_Permission = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
+		m_state_Permission.m_OptionChanged.Insert( OnPermissionStateChanged );
 
 		Disable();
 	}
@@ -82,7 +86,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void OnPermissionStateChanged()
 	{
-		Type = perm_state.GetValue();
+		Type = m_state_Permission.GetValue();
 	}
 
 	void InitPermission( ref JMPermission permission )
@@ -94,8 +98,8 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 		permission.View = layoutRoot;
 
-		perm_name.SetText( indent + Name );
-		perm_state.SetValue( 0, true );
+		m_txt_PermissionName.SetText( indent + Name );
+		m_state_Permission.SetValue( 0, true );
 	}
 
 	bool IsEnabled()
@@ -131,16 +135,16 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	bool OnEnable()
 	{
-		perm_state.Enable();
+		m_state_Permission.Enable();
 
 		return true;
 	}
 
 	bool OnDisable()
 	{
-		perm_state.SetValue( 0, true );
+		m_state_Permission.SetValue( 0, true );
 
-		perm_state.Disable();
+		m_state_Permission.Disable();
 
 		return true;
 	}
@@ -222,12 +226,12 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		}
 		
 		Enable();
-		perm_state.SetValue( type, true );
+		m_state_Permission.SetValue( type, true );
 		return this;
 	}
 
 	void SetType( JMPermissionType type )
 	{
-		perm_state.SetValue( type, true );
+		m_state_Permission.SetValue( type, true );
 	}
 }

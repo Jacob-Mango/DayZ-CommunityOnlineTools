@@ -5,7 +5,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	static bool UseClassName = false;
 
-	private ref Widget layoutRoot;
+	private Widget layoutRoot;
 
 	private CheckBoxWidget m_chbx_SelectedObject;
 	private TextWidget m_txt_ObjectName;
@@ -195,7 +195,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			ShowOnScreen = false;
 		}
 
-		if ( ShowOnScreen && ( distance > espModule.ESPRadius || ScreenPos[2] < 0 ) )
+		if ( ShowOnScreen && ScreenPos[2] < 0 )
 		{
 			ShowOnScreen = false;
 		}

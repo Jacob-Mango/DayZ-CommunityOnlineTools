@@ -4,7 +4,6 @@ modded class JMModuleConstructor
 	{
 		super.RegisterModules( modules );
 
-		// modules.Insert( JMServerInfoModule );
 		modules.Insert( JMPlayerModule );
 		modules.Insert( JMObjectSpawnerModule );
 		modules.Insert( JMESPModule );

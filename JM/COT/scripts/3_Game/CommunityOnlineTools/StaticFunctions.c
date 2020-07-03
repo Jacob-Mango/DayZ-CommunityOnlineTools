@@ -442,3 +442,14 @@ static bool ArrayContains( array< string > arr, string match )
 
 	return false;
 }
+
+static bool Assert_Null( Class cls )
+{
+	if ( cls == NULL )
+	{
+		Error( "Assertion failed! NULL found (=" + cls + ")" );
+		return true;
+	}
+	
+	return false;
+}
