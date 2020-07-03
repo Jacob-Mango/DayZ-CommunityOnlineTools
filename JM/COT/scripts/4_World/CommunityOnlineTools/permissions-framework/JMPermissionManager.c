@@ -22,10 +22,18 @@ class JMPermissionManager
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
 		}
+		
+		Assert_Null( Players );
+		Assert_Null( Roles );
+		Assert_Null( RootPermission );
 	}
 
 	void ~JMPermissionManager()
 	{
+		Assert_Null( Players );
+		Assert_Null( Roles );
+		Assert_Null( RootPermission );
+
 		delete Players;
 		delete Roles;
 		delete RootPermission;
@@ -33,6 +41,8 @@ class JMPermissionManager
 
 	void GetRolesAsList( out array< JMRole > roles )
 	{
+		Assert_Null( Roles );
+
 		if ( roles == NULL )
 			roles = new array< JMRole >();
 
@@ -43,14 +53,19 @@ class JMPermissionManager
 
 	void GetPermissionsAsList( out array< JMPermission > permissions )
 	{
+		Assert_Null( RootPermission );
+
 		if ( permissions == NULL )
 			permissions = new array< JMPermission >();
 
 		GetPermissionsAsList( RootPermission, -1, permissions );
 	}
 
-	private void GetPermissionsAsList( ref JMPermission permission, int depth, out array< JMPermission > permissions )
+	private void GetPermissionsAsList( ref JMPermission permission, int depth, inout array< JMPermission > permissions )
 	{
+		Assert_Null( RootPermission );
+		Assert_Null( permission );
+
 		permission.Depth = depth;
 
 		for ( int i = 0; i < permission.Children.Count(); ++i )
@@ -78,6 +93,9 @@ class JMPermissionManager
 
 	void ResetMission()
 	{
+		Assert_Null( Players );
+		Assert_Null( Roles );
+
 		if ( !IsMissionClient() )
 			return;
 
@@ -105,6 +123,8 @@ class JMPermissionManager
 	 */
 	ref array< JMPlayerInstance > GetPlayers( ref array< string > guidsGetPlayers = NULL )
 	{
+		Assert_Null( Players );
+		
 		if ( guidsGetPlayers == NULL || !GetGame().IsMultiplayer() )
 		{
 			return Players.GetValueArray();
@@ -124,11 +144,15 @@ class JMPermissionManager
 
 	void RegisterPermission( string permission )
 	{
+		Assert_Null( RootPermission );
+
 		RootPermission.AddPermission( permission, JMPermissionType.INHERIT );
 	}
 
 	ref array< string > Serialize()
 	{
+		Assert_Null( RootPermission );
+
 		ref array< string > data = new array< string >;
 		RootPermission.Serialize( data );
 		return data;
@@ -136,6 +160,8 @@ class JMPermissionManager
 
 	ref JMPermission GetRootPermission()
 	{
+		Assert_Null( RootPermission );
+
 		return RootPermission;
 	}
 
@@ -204,6 +230,9 @@ class JMPermissionManager
 
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
+		Assert_Null( RootPermission );
+		Assert_Null( Players );
+
 		string guid = "";
 		
 		if ( ident == NULL )
@@ -239,6 +268,8 @@ class JMPermissionManager
 
 	bool OnClientDisconnected( string guid, out JMPlayerInstance inst )
 	{
+		Assert_Null( Players );
+
 		inst = Players.Get( guid );
 		if ( inst )
 		{
@@ -267,6 +298,8 @@ class JMPermissionManager
 
 	ref JMPlayerInstance GetPlayer( string guid )
 	{
+		Assert_Null( Players );
+
 		return Players.Get( guid );
 	}
 
@@ -317,8 +350,10 @@ class JMPermissionManager
 		return true;
 	}
 	
-	ref JMRole CreateRole( string name, ref array< string > data )
+	JMRole CreateRole( string name, ref array< string > data )
 	{
+		Assert_Null( Roles );
+
 		ref JMRole role = new JMRole( name );
 
 		role.SerializedData.Copy( data );
@@ -333,6 +368,8 @@ class JMPermissionManager
 
 	bool LoadRole( string name, out JMRole role )
 	{
+		Assert_Null( Roles );
+
 		role = GetRole( name );
 
 		if ( !role )
@@ -348,6 +385,8 @@ class JMPermissionManager
 
 	void LoadRoleFromFile( string name )
 	{
+		Assert_Null( Roles );
+
 		ref JMRole role = new JMRole( name );
 		
 		if ( role.Load() )
@@ -391,6 +430,8 @@ class JMPermissionManager
 
 	JMRole GetRole( string name )
 	{
+		Assert_Null( Roles );
+
 		return Roles.Get( name );
 	}
 }
@@ -399,10 +440,12 @@ ref JMPermissionManager g_cot_PermissionsManager;
 
 ref JMPermissionManager GetPermissionsManager()
 {
-	if( !g_cot_PermissionsManager )
+	if ( !g_cot_PermissionsManager )
 	{
 		g_cot_PermissionsManager = new JMPermissionManager();
 	}
+
+	Assert_Null( g_cot_PermissionsManager );
 
 	return g_cot_PermissionsManager;
 }

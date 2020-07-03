@@ -293,14 +293,14 @@ class JMObjectSpawnerForm extends JMFormBase
 		CreateConfirmation_Two( "Confirm", "Do you wish to remove the object " + Object.GetDebugName( obj ), "No", "DeleteEntity_No", "Yes", "DeleteEntity_Yes" );
 	}
 
-	private void DeleteEntity_Yes( ref JMConfirmation confirmation )
+	private void DeleteEntity_Yes( JMConfirmation confirmation )
 	{
 		m_Module.DeleteEntity( m_DeletingObject );
 
 		m_DeletingObject = NULL;
 	}
 
-	private void DeleteEntity_No( ref JMConfirmation confirmation )
+	private void DeleteEntity_No( JMConfirmation confirmation )
 	{
 		
 	}

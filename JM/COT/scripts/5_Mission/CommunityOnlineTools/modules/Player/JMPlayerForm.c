@@ -837,7 +837,7 @@ class JMPlayerForm extends JMFormBase
 
 	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CLICK )
 			return;
 
 		m_BloodyHandsUpdated = true;

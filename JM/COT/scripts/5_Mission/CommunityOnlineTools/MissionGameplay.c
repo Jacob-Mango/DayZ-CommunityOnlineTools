@@ -37,14 +37,6 @@ modded class MissionGameplay
 	}
 
 	// ------------------------------------------------------------
-	// Override OnInit
-	// ------------------------------------------------------------
-	override void OnInit()
-	{
-		super.OnInit();
-	}
-
-	// ------------------------------------------------------------
 	// COT OfflineMissionStart
 	// ------------------------------------------------------------
 	void OfflineMissionStart()
@@ -177,13 +169,5 @@ modded class MissionGameplay
 			return;
 
 		super.ShowInventory();
-	}
-
-	// ------------------------------------------------------------
-	// Override ShowChat
-	// ------------------------------------------------------------
-	override void ShowChat()
-	{
-		super.ShowChat();
 	}
 }

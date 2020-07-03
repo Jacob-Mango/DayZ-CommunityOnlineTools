@@ -63,6 +63,10 @@ class JMPlayerInstance : Managed
 
 	void ~JMPlayerInstance()
 	{
+		Assert_Null( m_RootPermission );
+		Assert_Null( m_Roles );
+		Assert_Null( m_PlayerFile );
+
 		delete m_RootPermission;
 		delete m_Roles;
 		delete m_PlayerFile;
@@ -118,6 +122,9 @@ class JMPlayerInstance : Managed
 
 	void CopyPermissions( ref JMPermission copy )
 	{
+		Assert_Null( m_RootPermission );
+		Assert_Null( copy );
+
 		array< string > data = new array< string >;
 
 		copy.Serialize( data );
@@ -127,21 +134,27 @@ class JMPlayerInstance : Managed
 
 	void ClearPermissions()
 	{
+		Assert_Null( m_RootPermission );
+
 		m_RootPermission.Clear();
 	}
 
 	void LoadPermissions( array< string > permissions )
 	{
+		Assert_Null( m_RootPermission );
+
 		m_RootPermission.Deserialize( permissions );
 		Save();
 	}
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
+		Assert_Null( m_RootPermission );
+
 		m_RootPermission.AddPermission( permission, type );
 	}
 
-	void LoadRoles( array< string > roles )
+	void LoadRoles( notnull array< string > roles )
 	{
 		ClearRoles();
 
@@ -155,6 +168,9 @@ class JMPlayerInstance : Managed
 
 	void AddRole( string role )
 	{
+		Assert_Null( GetPermissionsManager() );
+		Assert_Null( m_Roles );
+
 		if ( !GetPermissionsManager().IsRole( role ) )
 			return;
 
@@ -172,6 +188,8 @@ class JMPlayerInstance : Managed
 	// doesn't check through roles.
 	JMPermissionType GetRawPermissionType( string permission )
 	{
+		Assert_Null( m_RootPermission );
+
 		JMPermissionType permType;
 		m_RootPermission.HasPermission( permission, permType );
 		return permType;
@@ -186,7 +204,7 @@ class JMPlayerInstance : Managed
 
 	bool HasPermission( string permission )
 	{
-		// m_RootPermission.DebugPrint( 0 );
+		Assert_Null( m_RootPermission );
 		
 		JMPermissionType permType;
 		bool hasPermission = m_RootPermission.HasPermission( permission, permType );
@@ -248,7 +266,9 @@ class JMPlayerInstance : Managed
 
 	void OnSendPermissions( ref ParamsWriteContext ctx )
 	{
-		ref array< string > permissions = new array< string >;
+		Assert_Null( m_RootPermission );
+
+		array< string > permissions = new array< string >;
 		m_RootPermission.Serialize( permissions );
 
 		ctx.Write( permissions );
@@ -257,8 +277,10 @@ class JMPlayerInstance : Managed
 
 	void OnRecievePermissions( ref ParamsReadContext ctx )
 	{
-		ref array< string > permissions = new array< string >;
-		ref array< string > roles = new array< string >;
+		Assert_Null( m_RootPermission );
+		
+		array< string > permissions = new array< string >;
+		array< string > roles = new array< string >;
 
 		ctx.Read( permissions );
 		ctx.Read( roles );
@@ -328,6 +350,10 @@ class JMPlayerInstance : Managed
 
 	void Save()
 	{
+		Assert_Null( m_RootPermission );
+		if ( !Assert_Null( m_PlayerFile ) )
+			Assert_Null( m_PlayerFile.Roles );
+
 		if ( !GetGame().IsServer() )
 			return;
 
@@ -339,7 +365,6 @@ class JMPlayerInstance : Managed
 		m_PlayerFile.Save();
 
 		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION, FileMode.WRITE );
-
 		if ( file != 0 )
 		{
 			string line;
@@ -348,7 +373,7 @@ class JMPlayerInstance : Managed
 				FPrintln( file, permissions[i] );
 			}
 			
-			CloseFile(file);
+			CloseFile( file );
 		}
 	}
 
@@ -364,6 +389,8 @@ class JMPlayerInstance : Managed
 
 	protected bool ReadPermissions( string filename )
 	{
+		Assert_Null( m_RootPermission );
+
 		if ( !FileExist( filename ) )
 			return false;
 
@@ -393,6 +420,8 @@ class JMPlayerInstance : Managed
 
 	void Load()
 	{
+		Assert_Null( m_PlayerFile );
+
 		if ( !IsMissionHost() )
 			return;
 
@@ -430,8 +459,6 @@ class JMPlayerInstance : Managed
 
 		m_RootPermission.DebugPrint( 2 );
 	}
-
-
 
 	string GetGUID()
 	{

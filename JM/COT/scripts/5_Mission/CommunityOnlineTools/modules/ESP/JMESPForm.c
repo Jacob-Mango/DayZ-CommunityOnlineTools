@@ -270,12 +270,12 @@ class JMESPForm extends JMFormBase
 	
 	}
 
-	void MakeItemSet_Cancel( ref JMConfirmation confirmation )
+	void MakeItemSet_Cancel( JMConfirmation confirmation )
 	{
 		// do nothing
 	}
 
-	void MakeItemSet_Create( ref JMConfirmation confirmation )
+	void MakeItemSet_Create( JMConfirmation confirmation )
 	{
 		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
 	}
