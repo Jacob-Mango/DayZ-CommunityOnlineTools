@@ -72,17 +72,9 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	override void OnHide() 
 	{
-		Widget child = m_ActionsWrapper.GetChildren();
-		while ( child != NULL )
-		{
-			child.Unlink();
-
-			child = child.GetSibling();
-		}
-
-		m_VehicleButtons.Clear();
-		
-		m_sclr_MainActions.UpdateScroller();
+		//m_VehicleButtons.Clear();
+		//
+		//m_sclr_MainActions.UpdateScroller();
 	}
 
 	void SpawnVehicle( UIEvent eid, ref UIActionBase action ) 

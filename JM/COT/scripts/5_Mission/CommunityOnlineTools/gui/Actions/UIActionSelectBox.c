@@ -4,6 +4,11 @@ class UIActionSelectBox extends UIActionBase
 
 	protected ref OptionSelectorMultistate m_Selection;
 
+	void ~UIActionSelectBox()
+	{
+		delete m_Selection;
+	}
+
 	override void OnInit() 
 	{
 		super.OnInit();

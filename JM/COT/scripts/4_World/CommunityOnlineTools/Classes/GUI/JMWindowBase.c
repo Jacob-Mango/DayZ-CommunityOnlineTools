@@ -5,7 +5,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	reference float m_DragXP;
 	reference float m_DragYP;
 
-	private Widget layoutRoot;
+	private ref Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
@@ -42,11 +42,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
+		//Print( "+JMWindowBase::~JMWindowBase" );
 		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
 
-		layoutRoot.Unlink();
+		//layoutRoot.Unlink();
+		//Print( "-JMWindowBase::~JMWindowBase" );
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -184,7 +186,15 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Hide()
 	{
-		if ( !layoutRoot )
+		//Print( "+JMWindowBase::Hide" );
+		
+		if ( Assert_Null( layoutRoot ) )
+			return;
+
+		if ( Assert_Null( m_Form ) )
+			return;
+
+		if ( Assert_Null( this ) )
 			return;
 
 		layoutRoot.Show( false );
@@ -200,6 +210,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			
 			GetDayZGame().COTPreventMenuOpen = false;
 		}
+
+		//Print( "-JMWindowBase::Hide" );
 	}
 
 	void Focus()
