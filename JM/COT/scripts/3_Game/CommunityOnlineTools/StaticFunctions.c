@@ -443,6 +443,17 @@ static bool ArrayContains( array< string > arr, string match )
 	return false;
 }
 
+static bool Assert_Empty( string str )
+{
+	if ( str == "" )
+	{
+		Error( "Assertion failed! String empty (=" + str + ")" );
+		return true;
+	}
+	
+	return false;
+}
+
 static bool Assert_Null( Class cls )
 {
 	if ( cls == NULL )

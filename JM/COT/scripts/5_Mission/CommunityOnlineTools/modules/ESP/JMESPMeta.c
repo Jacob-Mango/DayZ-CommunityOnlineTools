@@ -224,8 +224,170 @@ class JMESPMetaPlayer : JMESPMeta
 
 class JMESPMetaBaseBuilding : JMESPMeta
 {
+	ref map< string, ref JMConstructionPartData > m_Parts;
+
+	ref array< UIActionText > m_StateHeaders;
+	ref array< UIActionButton > m_BuildButtons;
+	ref array< UIActionButton > m_DismantleButtons;
+	ref array< UIActionButton > m_RepairButtons;
+
+	BaseBuildingBase m_BaseBuilding;
+
+	void JMESPMetaBaseBuilding()
+	{
+		m_Parts = new map< string, ref JMConstructionPartData >;
+
+		m_StateHeaders = new array< UIActionText >;
+		m_BuildButtons = new array< UIActionButton >;
+		m_DismantleButtons = new array< UIActionButton >;
+		m_RepairButtons = new array< UIActionButton >;
+	}
+
+	void ~JMESPMetaBaseBuilding()
+	{
+		if ( m_BaseBuilding )
+		{
+			m_BaseBuilding.m_COT_ConstructionUpdate.Remove( OnPartsUpdate );
+		}
+
+		delete m_Parts;
+
+		delete m_StateHeaders;
+		delete m_BuildButtons;
+		delete m_DismantleButtons;
+		delete m_RepairButtons;
+	}
+
 	override void CreateActions( Widget parent )
 	{
 		super.CreateActions( parent );
+
+		m_BaseBuilding = BaseBuildingBase.Cast( target );
+
+		m_BaseBuilding.m_COT_ConstructionUpdate.Insert( OnPartsUpdate );
+
+		m_BaseBuilding.GetConstruction().COT_GetParts( m_Parts, false );
+
+		for ( int i = 0; i < m_Parts.Count(); ++i )
+		{
+			string partName = m_Parts.GetKey( i );
+			JMConstructionPartData part = m_Parts.Get( partName );
+
+			Widget partActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
+
+			UIActionText txt_H = UIActionManager.CreateText( partActions, part.m_DisplayName, "INIT" );
+
+			Widget buttonActions = UIActionManager.CreateGridSpacer( partActions, 1, 3 );
+			UIActionButton btn_B = UIActionManager.CreateButton( buttonActions, "Build", this, "Action_Build" );
+			UIActionButton btn_D = UIActionManager.CreateButton( buttonActions, "Dismantle", this, "Action_Dismantle" );
+			UIActionButton btn_R = UIActionManager.CreateButton( buttonActions, "Repair", this, "Action_Repair" );
+
+			txt_H.SetData( part );
+			btn_B.SetData( part );
+			btn_D.SetData( part );
+			btn_R.SetData( part );
+
+			m_StateHeaders.Insert( txt_H );
+			m_BuildButtons.Insert( btn_B );
+			m_DismantleButtons.Insert( btn_D );
+			m_RepairButtons.Insert( btn_R );
+
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+		}
+
+		UpdateButtonStates();
+	}
+
+	void OnPartsUpdate()
+	{
+		m_BaseBuilding.GetConstruction().COT_GetParts( m_Parts, false );
+
+		UpdateButtonStates();
+	}
+
+	private string StateToString( JMConstructionPartState state )
+	{
+		switch ( state )
+		{
+			case JMConstructionPartState.BUILT:
+				return "Built";
+			case JMConstructionPartState.CAN_BUILD:
+				return "Can Build";
+			case JMConstructionPartState.REQUIRED_PART_NOT_BUILT:
+				return "Requires Part";
+			case JMConstructionPartState.CONFLICTING_PART:
+				return "Conflicting Part";
+			case JMConstructionPartState.NOT_ENOUGH_MATERIALS:
+				return "Not Enough Materials";
+		}
+
+		return "UNKNOWN";
+	}
+
+	private void UpdateButtonStates()
+	{
+		for ( int i = 0; i < m_StateHeaders.Count(); ++i )
+		{
+			JMConstructionPartData data;
+			Class.CastTo( data, m_StateHeaders[i].GetData() );
+
+			m_StateHeaders[i].SetText( StateToString( data.m_State ) );
+
+			if ( data.m_State == JMConstructionPartState.BUILT )
+			{
+				m_BuildButtons[i].Disable();
+				m_DismantleButtons[i].Enable();
+				m_RepairButtons[i].Enable();
+			} else if ( data.m_State == JMConstructionPartState.CAN_BUILD )
+			{
+				m_BuildButtons[i].Enable();
+				m_DismantleButtons[i].Disable();
+				m_RepairButtons[i].Disable();
+			} else 
+			{
+				m_BuildButtons[i].Hide();
+				m_DismantleButtons[i].Hide();
+				m_RepairButtons[i].Hide();
+
+				continue;
+			}
+
+			m_BuildButtons[i].Show();
+			m_DismantleButtons[i].Show();
+			m_RepairButtons[i].Show();
+		}
+	}
+
+	void Action_Build( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMConstructionPartData data;
+		Class.CastTo( data, action.GetData() );
+
+		module.BaseBuilding_Build( m_BaseBuilding, data.m_Name );
+	}
+
+	void Action_Dismantle( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMConstructionPartData data;
+		Class.CastTo( data, action.GetData() );
+
+		module.BaseBuilding_Dismantle( m_BaseBuilding, data.m_Name );
+	}
+
+	void Action_Repair( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMConstructionPartData data;
+		Class.CastTo( data, action.GetData() );
+
+		module.BaseBuilding_Repair( m_BaseBuilding, data.m_Name );
 	}
 }

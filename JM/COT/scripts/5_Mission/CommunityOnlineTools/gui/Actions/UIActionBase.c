@@ -39,7 +39,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 		m_Disable = layoutRoot.FindAnyWidget( "action_wrapper_disable" );
 
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+		Show();
 	}
 
 	void OnInit() 
@@ -50,6 +50,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	{
 		layoutRoot.Show( true );
 		OnShow();
+
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 	}
 
 	void Hide()
@@ -136,7 +138,6 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	{
 		layoutRoot.Enable( false );
 
-		m_Disable.SetFlags( WidgetFlags.IGNOREPOINTER );
 		m_Disable.Show( true );
 	}
 
@@ -144,7 +145,6 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	{
 		layoutRoot.Enable( true );
 
-		m_Disable.ClearFlags( WidgetFlags.IGNOREPOINTER );
 		m_Disable.Show( false );
 	}
 

@@ -359,7 +359,10 @@ class COTModule : JMModuleBase
 		Print( "+COTModule::OnClientDisconnect - " + uid );
 
 		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
+
+		// VPP Admin tool behaviour breaks the uid
+		if ( uid.Length() == 17 )
+			uid = GetPermissionsManager().GetGUIDForSteam( uid );
 
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
