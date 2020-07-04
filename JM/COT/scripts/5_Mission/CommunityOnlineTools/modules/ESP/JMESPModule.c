@@ -7,6 +7,9 @@ enum JMESPModuleRPC
 	SetOrientation,
 	SetHealth,
 	DeleteObject,
+	BaseBuilding_Build,
+	BaseBuilding_Dismantle,
+	BaseBuilding_Repair,
 	COUNT
 };
 
@@ -56,6 +59,11 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetOrientation" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetHealth" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Delete" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Dismantle" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Repair" );
 	}
 
 	void ~JMESPModule()
@@ -587,6 +595,15 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.DeleteObject:
 			RPC_DeleteObject( ctx, sender, target );
 			break;
+		case JMESPModuleRPC.BaseBuilding_Build:
+			RPC_BaseBuilding_Build( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.BaseBuilding_Dismantle:
+			RPC_BaseBuilding_Dismantle( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.BaseBuilding_Repair:
+			RPC_BaseBuilding_Repair( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -634,7 +651,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		target.SetPosition( position );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " position=" + position );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
 	}
 
 	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -666,7 +683,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		target.SetOrientation( orientation );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " orientation=" + orientation );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
 	}
 
 	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -698,7 +715,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		target.SetHealth( health );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " health=" + health );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
 	}
 
 	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -729,7 +746,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		GetGame().ObjectDelete( target );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " deleted" );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=delete" );
 	}
 
 	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -738,6 +755,115 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		Exec_DeleteObject( target, senderRPC );
+	}
+
+	void BaseBuilding_Build( BaseBuildingBase target, string part )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_BaseBuilding_Build( target, part, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( part );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, false, NULL );
+		}
+	}
+
+	private void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	{
+        bool requireMaterials = true;
+        if ( IsMissionOffline() )
+            requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident );
+		
+        target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
+	}
+
+	private void RPC_BaseBuilding_Build( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build", senderRPC ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+        BaseBuildingBase bb;
+        if ( Class.CastTo( bb, target ) )
+		    Exec_BaseBuilding_Build( bb, part_name, senderRPC );
+	}
+
+	void BaseBuilding_Dismantle( BaseBuildingBase target, string part )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_BaseBuilding_Dismantle( target, part, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+            rpc.Write( part );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, false, NULL );
+		}
+	}
+
+	private void Exec_BaseBuilding_Dismantle( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	{
+		PlayerBase player;
+		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
+
+        target.GetConstruction().COT_DismantlePart( part_name, player );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
+	}
+
+	private void RPC_BaseBuilding_Dismantle( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Dismantle", senderRPC ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+        BaseBuildingBase bb;
+        if ( Class.CastTo( bb, target ) )
+		    Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC );
+	}
+
+	void BaseBuilding_Repair( BaseBuildingBase target, string part )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_BaseBuilding_Repair( target, part, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+            rpc.Write( part );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, false, NULL );
+		}
+	}
+
+	private void Exec_BaseBuilding_Repair( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	{
+        target.GetConstruction().COT_RepairPart( part_name );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
+	}
+
+	private void RPC_BaseBuilding_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Repair", senderRPC ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+        BaseBuildingBase bb;
+        if ( Class.CastTo( bb, target ) )
+		    Exec_BaseBuilding_Repair( bb, part_name, senderRPC );
 	}
 
 	private void OnAddObject( Object obj )

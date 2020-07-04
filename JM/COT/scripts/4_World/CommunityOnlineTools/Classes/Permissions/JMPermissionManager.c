@@ -3,6 +3,8 @@ class JMPermissionManager
 	ref map< string, ref JMPlayerInstance > Players;
 	ref map< string, ref JMRole > Roles;
 
+	ref map< string, string > SteamToGUID;
+
 	ref JMPermission RootPermission;
 
 	private string m_ClientGUID;
@@ -11,6 +13,8 @@ class JMPermissionManager
 	{
 		Players = new map< string, ref JMPlayerInstance >;
 		Roles = new map< string, ref JMRole >;
+
+		SteamToGUID = new map< string, string >;
 
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		
@@ -25,6 +29,7 @@ class JMPermissionManager
 		
 		Assert_Null( Players );
 		Assert_Null( Roles );
+		Assert_Null( SteamToGUID );
 		Assert_Null( RootPermission );
 	}
 
@@ -32,10 +37,12 @@ class JMPermissionManager
 	{
 		Assert_Null( Players );
 		Assert_Null( Roles );
+		Assert_Null( SteamToGUID );
 		Assert_Null( RootPermission );
 
 		delete Players;
 		delete Roles;
+		delete SteamToGUID;
 		delete RootPermission;
 	}
 
@@ -246,6 +253,8 @@ class JMPermissionManager
 		} else
 		{
 			guid = ident.GetId();
+		
+			SteamToGUID.Insert( ident.GetPlainId(), guid );
 		}
 
 		inst = Players.Get( guid );
@@ -294,6 +303,11 @@ class JMPermissionManager
 				Players.GetElement( i ).DebugPrint();
 			}
 		}
+	}
+
+	string GetGUIDForSteam( string uid )
+	{
+		return SteamToGUID.Get( uid );
 	}
 
 	ref JMPlayerInstance GetPlayer( string guid )
