@@ -61,17 +61,9 @@ class JMItemSetForm extends JMFormBase
 
 	override void OnHide() 
 	{
-		Widget child = m_ActionsWrapper.GetChildren();
-		while ( child != NULL )
-		{
-			child.Unlink();
-			
-			child = child.GetSibling();
-		}
-
-		m_ItemSetButtons.Clear();
-		
-		m_sclr_MainActions.UpdateScroller();
+		//m_ItemSetButtons.Clear();
+		//
+		//m_sclr_MainActions.UpdateScroller();
 	}
 
 	void SpawnOnPlayers( UIEvent eid, ref UIActionBase action ) 

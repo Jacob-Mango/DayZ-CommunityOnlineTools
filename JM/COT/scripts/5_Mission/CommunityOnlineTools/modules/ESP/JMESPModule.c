@@ -773,7 +773,7 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident )
 	{
         bool requireMaterials = true;
-        if ( IsMissionOffline() )
+        if ( !IsMissionOffline() )
             requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident );
 		
         target.GetConstruction().COT_BuildPart( part_name, requireMaterials );

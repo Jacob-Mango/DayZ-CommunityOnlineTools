@@ -78,7 +78,7 @@ class JMESPMeta : Managed
 		#endif
 
 		if ( widgetRoot )
-			widgetRoot.Unlink();
+			widgetRoot.Show( false );
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );

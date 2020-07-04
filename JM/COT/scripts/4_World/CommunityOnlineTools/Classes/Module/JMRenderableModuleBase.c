@@ -141,10 +141,13 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	void Hide()
 	{
+		//Print( "+" + Type().ToString() + "::Hide" );
+		//Print( "  m_Window=" + m_Window );
 		if ( m_Window )
 		{
 			delete m_Window;
 		}
+		//Print( "-" + Type().ToString() + "::Hide" );
 	}
 
 	void ToggleShow()

@@ -62,11 +62,6 @@ class JMTeleportForm extends JMFormBase
 		UpdateList();
 	}
 
-	override void OnHide()
-	{
-		super.OnHide();
-	}
-
 	void Click_Teleport( UIEvent eid, ref UIActionBase action )
 	{
 		m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );

@@ -173,12 +173,26 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
-		GetCommunityOnlineToolsBase().SetOpen( false );
+		//Print( "+COTModule::CloseCOT" );
 
-		while ( GetCOTWindowManager().Count() > 0 )
+		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules()
+		for ( int i = 0; i < modules.Count(); ++i )
 		{
-			GetCOTWindowManager().Get( 0 ).GetModule().Hide();
+			//Print( "  +" + modules[i].Type().ToString() );
+			//Print( "  visible=" + modules[i].IsVisible() );
+			if ( modules[i].IsVisible() )
+			{
+				modules[i].Hide();
+			}
+			//Print( "  -" + modules[i].Type().ToString() );
 		}
+
+		//Print( "  +SetOpen" );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+
+		//Print( "  -SetOpen" );
+
+		//Print( "-COTModule::CloseCOT" );
 	}
 
 	void ToggleMenu( UAInput input = NULL )
