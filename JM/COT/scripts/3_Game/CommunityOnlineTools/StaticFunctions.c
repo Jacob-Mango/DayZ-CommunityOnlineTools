@@ -447,7 +447,7 @@ static bool Assert_Empty( string str )
 {
 	if ( str == "" )
 	{
-		Error( "Assertion failed! String empty (=" + str + ")" );
+		DebugPrint.LogWarningAndTrace( "Assertion failed! String empty (=" + str + ")" );
 		return true;
 	}
 	
@@ -458,7 +458,7 @@ static bool Assert_Null( Class cls )
 {
 	if ( cls == NULL )
 	{
-		Error( "Assertion failed! NULL found (=" + cls + ")" );
+		DebugPrint.LogWarningAndTrace( "Assertion failed! NULL found (=" + cls + ")" );
 		return true;
 	}
 	

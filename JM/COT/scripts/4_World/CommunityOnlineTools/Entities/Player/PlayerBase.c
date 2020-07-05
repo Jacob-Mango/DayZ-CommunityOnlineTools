@@ -13,6 +13,25 @@ modded class PlayerBase
 
 	override void Init()
 	{
+		/*
+		Print( "TOUCH: " + EntityEvent.TOUCH );
+		Print( "VISIBLE: " + EntityEvent.VISIBLE );
+		Print( "NOTVISIBLE: " + EntityEvent.NOTVISIBLE );
+		Print( "FRAME: " + EntityEvent.FRAME );
+		Print( "POSTFRAME: " + EntityEvent.POSTFRAME );
+		Print( "INIT: " + EntityEvent.INIT );
+		Print( "JOINTBREAK: " + EntityEvent.JOINTBREAK );
+		Print( "SIMULATE: " + EntityEvent.SIMULATE );
+		Print( "POSTSIMULATE: " + EntityEvent.POSTSIMULATE );
+		Print( "PHYSICSMOVE: " + EntityEvent.PHYSICSMOVE );
+		Print( "CONTACT: " + EntityEvent.CONTACT );
+		Print( "EXTRA: " + EntityEvent.EXTRA );
+		Print( "ANIMEVENT: " + EntityEvent.ANIMEVENT );
+		Print( "SOUNDEVENT: " + EntityEvent.SOUNDEVENT );
+		Print( "PHYSICSSTEADY: " + EntityEvent.PHYSICSSTEADY );
+		Print( "USER: " + EntityEvent.USER );
+		Print( "ALL: " + EntityEvent.ALL );
+		*/
 		super.Init();
 
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
