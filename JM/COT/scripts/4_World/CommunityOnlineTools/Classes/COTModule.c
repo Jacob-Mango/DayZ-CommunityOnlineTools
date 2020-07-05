@@ -303,27 +303,6 @@ class COTModule : JMModuleBase
 	}
 
 	/**
-	 * See: ClientRespawnEventTypeID
-	 */
-	override void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
-	{
-		Print( "+COTModule::OnClientRespawn - " + identity.GetId() );
-
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
-
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
-		
-		Assert_Null( instance );
-		if ( instance )
-		{
-			instance.PlayerObject = player;
-		}
-
-		Print( "-COTModule::OnClientRespawn - " + identity.GetId() );
-	}
-
-	/**
 	 * See: ClientReconnectEventTypeID
 	 */
 	override void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
