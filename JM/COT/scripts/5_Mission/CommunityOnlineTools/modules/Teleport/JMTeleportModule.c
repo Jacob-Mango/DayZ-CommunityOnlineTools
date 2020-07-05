@@ -80,7 +80,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() )
+		if ( GetGame().IsServer() && settings )
 			settings.Save();
 	}
 
