@@ -6,7 +6,7 @@ modded class DayZPlayerImplement
 	void DayZPlayerImplement()
 	{
 		if ( IsMissionClient() )
-			SetEventMask( EntityEvent.FRAME | EntityEvent.SIMULATE );
+			SetEventMask( EntityEvent.FRAME | EntityEvent.POSTFRAME );
 	}
 
 	void OnSpectateStart( JMSpectatorCamera camera )
@@ -55,11 +55,15 @@ modded class DayZPlayerImplement
 
 	override void EOnFrame( IEntity other, float timeSlice )
 	{
+		super.EOnFrame( other, timeSlice );
+
 		UpdateSpecatorCamera();
 	}
 
-	override void EOnSimulate( IEntity other, float timeSlice )
+	override void EOnPostFrame( IEntity other, int extra )
 	{
+		// super.EOnPostFrame( other, extra );
+
 		UpdateSpecatorCamera();
 	}
 
