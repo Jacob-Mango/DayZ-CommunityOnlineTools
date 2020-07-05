@@ -19,11 +19,6 @@ modded class PlayerBase
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
-
-		if ( IsMissionClient() )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( COTDeferredClientInit, 1000, false );
-		}
 	}
 
 	override void OnVariablesSynchronized()
@@ -42,28 +37,6 @@ modded class PlayerBase
 			}
 
 			//SetInvisible( m_JMIsInvisible );
-		}
-	}
-
-	private void COTDeferredClientInit()
-	{
-		if ( IsMissionOffline() )
-		{
-			m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
-		} else if ( IsMissionClient() )
-		{
-			if ( GetIdentity() )
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-			}
-		}
-
-		Assert_Null( GetIdentity() );
-		Assert_Null( m_AuthenticatedPlayer );
-
-		if ( m_AuthenticatedPlayer )
-		{
-			m_AuthenticatedPlayer.PlayerObject = this;
 		}
 	}
 
@@ -94,21 +67,6 @@ modded class PlayerBase
 		Object parent;
 		if ( Class.CastTo( parent, GetParent() ) )
 		{
-			/*
-			vector tmPlayer[4];
-			vector tmTarget[4];
-			vector tmLocal[4];
-
-			GetTransformWS( tmPlayer );
-			tmPlayer[3] = position;
-
-			parent.GetTransform( tmTarget );
-			Math3D.MatrixInvMultiply4( tmTarget, tmPlayer, tmLocal );
-
-			SetPosition( tmLocal[3] );
-			SetDirection( tmLocal[2] );
-			*/
-
 			SetPosition( parent.WorldToModel( position ) );
 		} else
 		{
@@ -118,6 +76,24 @@ modded class PlayerBase
 
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
+		if ( !GetIdentity() ) // Could be AI
+			return NULL;
+
+		if ( !m_AuthenticatedPlayer )
+		{
+			if ( IsMissionOffline() )
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+			} else
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
+			}
+		}
+
+		if ( Assert_Null( m_AuthenticatedPlayer ) )
+			return NULL;
+		
+		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
 	}
 
