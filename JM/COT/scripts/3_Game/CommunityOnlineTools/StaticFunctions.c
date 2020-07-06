@@ -445,11 +445,14 @@ static bool ArrayContains( array< string > arr, string match )
 
 static void Assert_Log( string str )
 {
-	Print( "[WARNING] Assertion failed! " + str );
+	Print( "==============================================WARNING=======================================================" );
+	string time = JMDate.Now( false ).ToString( "YYYY-MM-DD hh:mm:ss" );
+	Print( "[WARNING " + time + "] Assertion failed! " + str );
+	Print( "Do you see this message? Unless the time is within a second of the crash than this was not the cause." );
 
 	DumpStack();
 
-	Print( "Do you see this message? If so, this was not cause for the crash you experienced." );
+	Print( "============================================================================================================" );
 }
 
 static bool Assert_Empty( string str )
