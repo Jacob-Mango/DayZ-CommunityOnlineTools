@@ -443,11 +443,20 @@ static bool ArrayContains( array< string > arr, string match )
 	return false;
 }
 
+static void Assert_Log( string str )
+{
+	Print( "[WARNING] Assertion failed! " + str );
+
+	DumpStack();
+
+	Print( "Do you see this message? If so, this was not cause for the crash you experienced." );
+}
+
 static bool Assert_Empty( string str )
 {
 	if ( str == "" )
 	{
-		DebugPrint.LogWarningAndTrace( "Assertion failed! String empty (=" + str + ")" );
+		Assert_Log( "String empty (=" + str + ")" );
 		return true;
 	}
 	
@@ -458,7 +467,7 @@ static bool Assert_Null( Class cls )
 {
 	if ( cls == NULL )
 	{
-		DebugPrint.LogWarningAndTrace( "Assertion failed! NULL found (=" + cls + ")" );
+		Assert_Log( "NULL found (=" + cls + ")" );
 		return true;
 	}
 	
