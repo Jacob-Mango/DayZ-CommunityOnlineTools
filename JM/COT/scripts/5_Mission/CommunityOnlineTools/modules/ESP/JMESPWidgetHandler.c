@@ -222,7 +222,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 			m_txt_ObjectName.SetText( text );
 
-			Info.UpdateActions();
+			//Info.UpdateActions();
 
 			m_scrler_Actions.UpdateScroller();
 			

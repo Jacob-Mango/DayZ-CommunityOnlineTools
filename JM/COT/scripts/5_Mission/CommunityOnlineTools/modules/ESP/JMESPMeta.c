@@ -147,15 +147,15 @@ class JMESPMeta : Managed
 		if ( !viewTypeActions || !widgetRoot )
 			return;
 		
-		m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
-		m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
-		m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
+		if ( !m_Action_PositionX.IsFocused() ) m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
+		if ( !m_Action_PositionY.IsFocused() ) m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
+		if ( !m_Action_PositionZ.IsFocused() ) m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
 		
-		m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
-		m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
-		m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
+		if ( !m_Action_OrientationX.IsFocused() ) m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
+		if ( !m_Action_OrientationY.IsFocused() ) m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
+		if ( !m_Action_OrientationZ.IsFocused() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
 
-		m_Action_Health.SetText( "-1" );
+		if ( !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
 	}
 
 	void Action_SetPosition( UIEvent eid, ref UIActionBase action )
