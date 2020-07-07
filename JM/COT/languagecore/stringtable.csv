@@ -7,101 +7,169 @@ STR_COT_ON_C,ON,ON,ZAP,AN,–í–ö–õ,W≈Å.,ON,S√å,S√ç,OUI,Èñã,„Ç™„É≥,ON,ÂºÄ
 STR_COT_OFF_C,OFF,OFF,VYP,AUS,–í–´–ö–õ,WY≈Å.,OFF,NO,NO,NON,Èóú,„Ç™„Éï,OFF,ÂÖ≥
 STR_COT_ON,on,on,ZAP,AN,–í–ö–õ,W≈Å.,on,S√å,S√ç,OUI,Èñã,„Ç™„É≥,on,ÂºÄ
 STR_COT_OFF,off,off,VYP,AUS,–í–´–ö–õ,WY≈Å.,off,NO,NO,NON,Èóú,„Ç™„Éï,off,ÂÖ≥
-STR_COT_INPUT_TOGGLE,Enable/Disable Keybinds,Enable/Disable Keybinds,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_SIDEBAR,Open/Close Sidebar,Open/Close Sidebar,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_PLAYER,Open/Close Player Menu,Open/Close Player Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_CAMERA,Open/Close Camera Menu,Open/Close Camera Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ESP,Open/Close ESP Menu,Open/Close ESP Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_MAP,Open/Close Map Menu,Open/Close Map Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_MAP_EDITOR,Open/Close Map Editor,Open/Close Map Editor,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ENTITY,Open/Close Entity Menu,Open/Close Entity Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_SELECTED,Open/Close Selected Menu,Open/Close Selected Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_TELEPORT,Open/Close Teleport Menu,Open/Close Teleport Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ITEMSET,Open/Close Item Set Menu,Open/Close Item Set Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_VEHICLE,Open/Close Vehicle Menu,Open/Close Vehicle Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_WEATHER,Open/Close Weather Menu,Open/Close Weather Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO,Open/Close Server Info Menu,Open/Close Server Info Menu,,,,,,,,,,,,
-STR_COT_INPUT_TELEPORT_CROSSHAIR,Teleport Self (Crosshair),Teleport Self (Crosshair),,,,,,,,,,,,
-STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT,WorldToModelLookAt,WorldToModelLookAt,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_FREECAM,Toggles Freecam,Toggles Freecam,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_ZOOM_FORWARD,Zoom Freecam Forwards,Zoom Freecam Forwards,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_ZOOM_BACKWARD,Zoom Freecam Backwards,Zoom Freecam Backwards,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_SPEED_INCREASE,Increase Freecam Speed,Increase Freecam Speed,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_SPEED_DECREASE,Decrease Freecam Speed,Decrease Freecam Speed,,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_INFECTED,Spawn Infected (Crosshair),Spawn Infected (Crosshair),,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_ANIMAL,Spawn Animal (Crosshair),Spawn Animal (Crosshair),,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_WOLF,Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),,,,,,,,,,,,
-STR_COT_YES,Yes,Yes,,,,,,,,,,,,
-STR_COT_NO,No,No,,,,,,,,,,,,
-STR_COT_CANCEL,Cancel,Cancel,,,,,,,,,,,,
-STR_COT_CREATE,Create,Create,,,,,,,,,,,,
-STR_COT_SPAWN,Spawn,Spawn,,,,,,,,,,,,
-STR_COT_MAKE,Make,Make,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_BLUR,Blur:,Blur:,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_FOCUS,Focus:,Focus:,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_FOCAL_LENGTH,Focal (L):,Focal (L):,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_FOCAL_NEAR,Focal (N):,Focal (N):,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_EXPOSURE,Exposure:,Exposure:,,,,,,,,,,,,
-STR_COT_ESP_MODULE_TOGGLE,Toggle,Toggle,,,,,,,,,,,,
-STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME,Toggle Class Name,Toggle Class Name,,,,,,,,,,,,
-STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH,Auto Refresh,Auto Refresh,,,,,,,,,,,,
-STR_COT_ESP_MODULE_RADIUS,Radius:,Radius:,,,,,,,,,,,,
-STR_COT_ESP_MODULE_CLASS_FILTER,Class Filter:,Class Filter:,,,,,,,,,,,,
-STR_COT_ESP_MODULE_FILTERS_HEADER,Filters:,Filters:,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTIONS_HEADER,Actions:,Actions:,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET,Make†Item†Set,Make†Item†Set,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL,Duplicate†All,Duplicate†All,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_DELETE_ALL,Delete†All,Delete†All,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE,Move To Cursor (Relative),Move To Cursor (Relative),,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE,Move To Cursor (Absolute),Move To Cursor (Absolute),,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_SHOW_ESP,Show ESP,Show ESP,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_CLEAR_ESP,Clear ESP,Clear ESP,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_HIDE_ESP,Hide ESP,Hide ESP,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_CLEARING_ESP,Clearing ESP,Clearing ESP,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_ESP_UPDATING,ESP Updating,ESP Updating,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_VIEWING_ESP,Viewing ESP,Viewing ESP,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER,Item†Set,Item†Set,,,,,,,,,,,,
-STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION,What†do†you†want†to†call†this†item†set?,What†do†you†want†to†call†this†item†set?,,,,,,,,,,,,
-STR_COT_FORMAT_PERCENTAGE,%1%,%1%,,,,,,,,,,,,
-STR_COT_FORMAT_METRE,%1m,%1m,,,,,,,,,,,,
-STR_COT_FORMAT_NONE,%1,%1,,,,,,,,,,,,
-STR_COT_ESP_MODULE_NAME,ESP Tools,ESP Tools,,,,,,,,,,,,
-STR_COT_CAMERA_MODULE_NAME,Camera Tools,Camera Tools,,,,,,,,,,,,
-STR_COT_PLAYER_MODULE_NAME,Player Management,Player Management,,,,,,,,,,,,
-STR_COT_ITEMSET_MODULE_NAME,ItemSet Spawner,ItemSet Spawner,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_NAME,Object Spawner,Object Spawner,,,,,,,,,,,,
-STR_COT_VEHICLE_MODULE_NAME,Vehicle Spawner,Vehicle Spawner,,,,,,,,,,,,
-STR_COT_TELEPORT_MODULE_NAME,Teleport,Teleport,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_NAME,Weather,Weather,,,,,,,,,,,,
-STR_COT_MAP_MODULE_NAME,Map,Map,,,,,,,,,,,,
-STR_COT_ITEMSET_MODULE_SPAWN_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),,,,,,,,,,,,
-STR_COT_ITEMSET_MODULE_SPAWN_CURSOR,Cursor,Cursor,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL,All,All,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_FOOD,Food,Food,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_VEHICLES,Vehicles,Vehicles,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_FIREARMS,Firearms,Firearms,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_CLOTHING,Clothing,Clothing,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_ITEMS,Items,Items,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_BUILDINGS,Buildings,Buildings,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_FILTER_TYPE_AI,AI,AI,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_SEARCH,Search:,Search:,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_QUANTITY,Quantity:,Quantity:,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn On:,Spawn On:,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_CURSOR,Cursor,Cursor,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_SELF,Self,Self,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_INVENTORY,Inventory,Inventory,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_DELETE,Delete,Delete,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_HEADER,Confirm,Confirm,,,,,,,,,,,,
-STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY,Do†you†wish†to†remove†the†object†%1,Do†you†wish†to†remove†the†object†%1,,,,,,,,,,,,
-STR_COT_TELEPORT_MODULE_FILTER,Filter:,Filter:,,,,,,,,,,,,
-STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE,Teleport,Teleport,,,,,,,,,,,,
-STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE,Teleport†Selected†Player(s),Teleport†Selected†Player(s),,,,,,,,,,,,
-STR_COT_VEHICLE_MODULE_CURSOR,Cursor,Cursor,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_START_TIME,Time:,Time:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_START_DAY,Day:,Day:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_OVERCAST,Overcast:,Overcast:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_RAIN,Rain:,Rain:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_FOG,Fog:,Fog:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_WIND,Wind:,Wind:,,,,,,,,,,,,
-STR_COT_WEATHER_MODULE_APPLY,Apply,Apply,,,,,,,,,,,,
+STR_COT_INPUT_TOGGLE,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds,Enable/Disable Keybinds
+STR_COT_INPUT_TOGGLE_SIDEBAR,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar,Open/Close Sidebar
+STR_COT_INPUT_TOGGLE_MENU_PLAYER,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu,Open/Close Player Menu
+STR_COT_INPUT_TOGGLE_MENU_CAMERA,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu,Open/Close Camera Menu
+STR_COT_INPUT_TOGGLE_MENU_ESP,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu,Open/Close ESP Menu
+STR_COT_INPUT_TOGGLE_MENU_MAP,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu,Open/Close Map Menu
+STR_COT_INPUT_TOGGLE_MENU_MAP_EDITOR,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor,Open/Close Map Editor
+STR_COT_INPUT_TOGGLE_MENU_ENTITY,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu,Open/Close Entity Menu
+STR_COT_INPUT_TOGGLE_MENU_SELECTED,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu,Open/Close Selected Menu
+STR_COT_INPUT_TOGGLE_MENU_TELEPORT,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu,Open/Close Teleport Menu
+STR_COT_INPUT_TOGGLE_MENU_ITEMSET,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu,Open/Close Item Set Menu
+STR_COT_INPUT_TOGGLE_MENU_VEHICLE,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu,Open/Close Vehicle Menu
+STR_COT_INPUT_TOGGLE_MENU_WEATHER,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu,Open/Close Weather Menu
+STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu,Open/Close Server Info Menu
+STR_COT_INPUT_TELEPORT_CROSSHAIR,Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair),Teleport Self (Crosshair)
+STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt,WorldToModelLookAt
+STR_COT_INPUT_TOGGLE_FREECAM,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam,Toggles Freecam
+STR_COT_INPUT_FREECAM_ZOOM_FORWARD,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards,Zoom Freecam Forwards
+STR_COT_INPUT_FREECAM_ZOOM_BACKWARD,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards,Zoom Freecam Backwards
+STR_COT_INPUT_FREECAM_SPEED_INCREASE,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed,Increase Freecam Speed
+STR_COT_INPUT_FREECAM_SPEED_DECREASE,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed,Decrease Freecam Speed
+STR_COT_INPUT_SPAWN_INFECTED,Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair),Spawn Infected (Crosshair)
+STR_COT_INPUT_SPAWN_ANIMAL,Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair),Spawn Animal (Crosshair)
+STR_COT_INPUT_SPAWN_WOLF,Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),Spawn Wolf (Crosshair)
+STR_COT_YES,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+STR_COT_NO,No,No,No,No,No,No,No,No,No,No,No,No,No,No
+STR_COT_CANCEL,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel,Cancel
+STR_COT_CREATE,Create,Create,Create,Create,Create,Create,Create,Create,Create,Create,Create,Create,Create,Create
+STR_COT_SPAWN,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn,Spawn
+STR_COT_MAKE,Make,Make,Make,Make,Make,Make,Make,Make,Make,Make,Make,Make,Make,Make
+STR_COT_CAMERA_MODULE_BLUR,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:,Blur:
+STR_COT_CAMERA_MODULE_FOCUS,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:
+STR_COT_CAMERA_MODULE_FOCAL_LENGTH,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):
+STR_COT_CAMERA_MODULE_FOCAL_NEAR,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):
+STR_COT_CAMERA_MODULE_EXPOSURE,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:,Exposure:
+STR_COT_ESP_MODULE_TOGGLE,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle,Toggle
+STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name,Use Class Name
+STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh
+STR_COT_ESP_MODULE_RADIUS,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:,Radius:
+STR_COT_ESP_MODULE_CLASS_FILTER,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:,Class Filter:
+STR_COT_ESP_MODULE_FILTERS_HEADER,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:,Filters:
+STR_COT_ESP_MODULE_ACTIONS_HEADER,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:,Actions:
+STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set,Make Item Set
+STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All,Duplicate All
+STR_COT_ESP_MODULE_ACTION_DELETE_ALL,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All,Delete All
+STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE,Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative),Move To Cursor (Relative)
+STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE,Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute),Move To Cursor (Absolute)
+STR_COT_ESP_MODULE_ACTION_SHOW_ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP,Show ESP
+STR_COT_ESP_MODULE_ACTION_CLEAR_ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP
+STR_COT_ESP_MODULE_ACTION_HIDE_ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP,Hide ESP
+STR_COT_ESP_MODULE_ACTION_CLEARING_ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP
+STR_COT_ESP_MODULE_ACTION_ESP_UPDATING,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating,ESP Updating
+STR_COT_ESP_MODULE_ACTION_VIEWING_ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP,Viewing ESP
+STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set,Item Set
+STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?,What do you want to call this item set?
+STR_COT_FORMAT_PERCENTAGE,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%
+STR_COT_FORMAT_SECOND_LONG,%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s)
+STR_COT_FORMAT_SECOND,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s
+STR_COT_FORMAT_METRE_LONG,%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s)
+STR_COT_FORMAT_METRE,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m
+STR_COT_FORMAT_NONE,1%,1%,1%,1%,1%,1%,1%,1%,1%,1%,1%,1%,1%,1%
+STR_COT_ESP_MODULE_NAME,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools,ESP Tools
+STR_COT_CAMERA_MODULE_NAME,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Camera Tools
+STR_COT_PLAYER_MODULE_NAME,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management,Player Management
+STR_COT_ITEMSET_MODULE_NAME,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner,ItemSet Spawner
+STR_COT_OBJECT_MODULE_NAME,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Object Spawner
+STR_COT_VEHICLE_MODULE_NAME,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner
+STR_COT_TELEPORT_MODULE_NAME,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport
+STR_COT_WEATHER_MODULE_NAME,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather,Weather
+STR_COT_MAP_MODULE_NAME,Map,Map,Map,Map,Map,Map,Map,Map,Map,Map,Map,Map,Map,Map
+STR_COT_ITEMSET_MODULE_SPAWN_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s)
+STR_COT_ITEMSET_MODULE_SPAWN_CURSOR,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor
+STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL,All,All,All,All,All,All,All,All,All,All,All,All,All,All
+STR_COT_OBJECT_MODULE_FILTER_TYPE_FOOD,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food
+STR_COT_OBJECT_MODULE_FILTER_TYPE_VEHICLES,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles,Vehicles
+STR_COT_OBJECT_MODULE_FILTER_TYPE_FIREARMS,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms,Firearms
+STR_COT_OBJECT_MODULE_FILTER_TYPE_CLOTHING,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing
+STR_COT_OBJECT_MODULE_FILTER_TYPE_ITEMS,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items
+STR_COT_OBJECT_MODULE_FILTER_TYPE_BUILDINGS,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings
+STR_COT_OBJECT_MODULE_FILTER_TYPE_AI,AI,AI,AI,AI,AI,AI,AI,AI,AI,AI,AI,AI,AI,AI
+STR_COT_OBJECT_MODULE_SEARCH,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:,Search:
+STR_COT_OBJECT_MODULE_QUANTITY,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:,Quantity:
+STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:
+STR_COT_OBJECT_MODULE_CURSOR,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor
+STR_COT_OBJECT_MODULE_SELF,Self,Self,Self,Self,Self,Self,Self,Self,Self,Self,Self,Self,Self,Self
+STR_COT_OBJECT_MODULE_INVENTORY,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory,Inventory
+STR_COT_OBJECT_MODULE_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s)
+STR_COT_OBJECT_MODULE_DELETE,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete,Delete
+STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_HEADER,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm,Confirm
+STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1,Do you wish to remove the object %1
+STR_COT_TELEPORT_MODULE_FILTER,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:
+STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport,Teleport
+STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE,Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s),Teleport Selected Player(s)
+STR_COT_VEHICLE_MODULE_CURSOR,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor,Cursor
+STR_COT_WEATHER_MODULE_START_TIME,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:,Time:
+STR_COT_WEATHER_MODULE_START_DAY,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:,Day:
+STR_COT_WEATHER_MODULE_OVERCAST,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:,Overcast:
+STR_COT_WEATHER_MODULE_RAIN,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:,Rain:
+STR_COT_WEATHER_MODULE_FOG,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:,Fog:
+STR_COT_WEATHER_MODULE_WIND,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:,Wind:
+STR_COT_WEATHER_MODULE_APPLY,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply
+STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:,Player Count:
+STR_COT_PLAYER_MODULE_LEFT_FILTER,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:,Filter:
+STR_COT_PLAYER_MODULE_LEFT_SORT,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:,Sort:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:,Identity:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player,The identifying information for the selected player
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC_DISABLED,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected,Can only see when 1 player is selected
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:,Name:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:,GUID:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: ,Steam: 
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_HEADER,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:,Teleporting:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_REFRESH_COORDINATES,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates,Refresh Coordinates
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates,Teleport to Coordinates
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me,Teleport To Me
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To,Teleport Me To
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous,Teleport Previous
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEADER,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:,Player Variables:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh,Refresh
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:,Shock:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:,Blood:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:,Food:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:,Water:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:,Stamina:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:,Bloody Hands:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:,Godmode:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply,Apply
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HEADER,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:,Permission Management:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_PERMISSIONS,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions,Permissions
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_PERMISSIONS,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions,Save Permissions
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_ROLES,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles,Roles
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_ROLES,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles,Save Roles
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEADER,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:,Quick Actions:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_REPAIR_TRANSPORT,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport,Repair Transport
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate,Spectate
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal,Heal
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding,Stop Bleeding
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory,Clear Inventory
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_PERMISSIONS,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions,Show Permissions
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_PERMISSIONS,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions,Hide Permissions
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_ROLES,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles,Show Roles
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_ROLES,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles,Hide Roles
+STR_COT_PERMISSION_INHERIT_C,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT,INHERIT
+STR_COT_PERMISSION_DISALLOW_C,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW,DISALLOW
+STR_COT_PERMISSION_ALLOW_C,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW,ALLOW
+STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER,Players,Players,Players,Players,Players,Players,Players,Players,Players,Players,Players,Players,Players,Players
+STR_COT_ESP_MODULE_VIEW_TYPE_INFECTED,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected,Infected
+STR_COT_ESP_MODULE_VIEW_TYPE_ANIMAL,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal,Animal
+STR_COT_ESP_MODULE_VIEW_TYPE_CAR,Car,Car,Car,Car,Car,Car,Car,Car,Car,Car,Car,Car,Car,Car
+STR_COT_ESP_MODULE_VIEW_TYPE_WEAPONS,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons,Weapons
+STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_RIFLES,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles
+STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_ACTION_RIFLES,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles
+STR_COT_ESP_MODULE_VIEW_TYPE_RIFLES,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles,Rifles
+STR_COT_ESP_MODULE_VIEW_TYPE_PISTOLS,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols,Pistols
+STR_COT_ESP_MODULE_VIEW_TYPE_ITEMS,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items,Items
+STR_COT_ESP_MODULE_VIEW_TYPE_UNKNOWN_ITEMS,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Unknown Items
+STR_COT_ESP_MODULE_VIEW_TYPE_TENTS,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents,Tents
+STR_COT_ESP_MODULE_VIEW_TYPE_BASE_BUILDING,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building
+STR_COT_ESP_MODULE_VIEW_TYPE_FOOD,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food,Food
+STR_COT_ESP_MODULE_VIEW_TYPE_EXPLOSIVES,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives,Explosives
+STR_COT_ESP_MODULE_VIEW_TYPE_BOOKS,Books,Books,Books,Books,Books,Books,Books,Books,Books,Books,Books,Books,Books,Books
+STR_COT_ESP_MODULE_VIEW_TYPE_CONTAINERS,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers,Containers
+STR_COT_ESP_MODULE_VIEW_TYPE_TRANSMITTERS,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters,Transmitters
+STR_COT_ESP_MODULE_VIEW_TYPE_CLOTHING,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing,Clothing
+STR_COT_ESP_MODULE_VIEW_TYPE_MAGAZINES,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines,Magazines
+STR_COT_ESP_MODULE_VIEW_TYPE_AMMO,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo,Ammo

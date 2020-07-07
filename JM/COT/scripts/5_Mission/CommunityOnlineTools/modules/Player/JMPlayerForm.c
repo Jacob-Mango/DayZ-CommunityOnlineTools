@@ -143,9 +143,9 @@ class JMPlayerForm extends JMFormBase
 
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
 
-		m_PlayerListCount = UIActionManager.CreateText( leftPanelGrid, "Player Count: ", "" );
-		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "Filter: ", this, "Event_UpdatePlayerList" );
-		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "Sort: ", this, "Event_UpdatePlayerList" );
+		m_PlayerListCount = UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
+		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
+		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SORT", this, "Event_UpdatePlayerList" );
 		m_PlayerListScroller = UIActionManager.CreateScroller( leftPanelGrid );
 		m_PlayerListRows = UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 		
@@ -201,13 +201,13 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
 
-		m_IdentityHeading = UIActionManager.CreateText( parent, "Identity: ", "" );
+		m_IdentityHeading = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER", "" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 1 );
 
-		m_Name = UIActionManager.CreateText( actions, "Name: ", "" );
-		m_GUID = UIActionManager.CreateText( actions, "GUID: ", "" );
-		m_Steam64ID = UIActionManager.CreateText( actions, "Steam: ", "" );
+		m_Name = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
+		m_GUID = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
+		m_Steam64ID = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -218,7 +218,7 @@ class JMPlayerForm extends JMFormBase
 
 	private void ShowIdentityWidgets()
 	{
-		m_IdentityHeading.SetText( "The identifying information for the selected player" );
+		m_IdentityHeading.SetText( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC" );
 
 		m_Name.Show();
 		m_GUID.Show();
@@ -227,7 +227,7 @@ class JMPlayerForm extends JMFormBase
 
 	private void HideIdentityWidgets()
 	{
-		m_IdentityHeading.SetText( "Can only see when 1 player is selected" );
+		m_IdentityHeading.SetText( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC_DISABLED" );
 
 		m_Name.Hide();
 		m_GUID.Hide();
@@ -252,13 +252,13 @@ class JMPlayerForm extends JMFormBase
 		m_PositionZ.SetOnlyNumbers( true );
 		
 		Widget positionActionsBut = UIActionManager.CreateGridSpacer( positionActions, 1, 2 );
-		m_PositionRefresh = UIActionManager.CreateButton( positionActionsBut, "Refresh Coordinates", this, "Click_RefreshTeleports" );
-		m_Position = UIActionManager.CreateButton( positionActionsBut, "Telport to Coordinates", this, "Click_SetPosition" );
+		m_PositionRefresh = UIActionManager.CreateButton( positionActionsBut, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_REFRESH_COORDINATES", this, "Click_RefreshTeleports" );
+		m_Position = UIActionManager.CreateButton( positionActionsBut, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", this, "Click_SetPosition" );
 
 		Widget teleportActions = UIActionManager.CreateGridSpacer( parent, 1, 3 );
-		m_TeleportToMe = UIActionManager.CreateButton( teleportActions, "Teleport To Me", this, "Click_TeleportToMe" );
-		m_TeleportMeTo = UIActionManager.CreateButton( teleportActions, "Teleport Me To", this, "Click_TeleportMeTo" );
-		m_TeleportPrevious = UIActionManager.CreateButton( teleportActions, "Teleport Previous", this, "Click_TeleportPrevious" );
+		m_TeleportToMe = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", this, "Click_TeleportToMe" );
+		m_TeleportMeTo = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", this, "Click_TeleportMeTo" );
+		m_TeleportPrevious = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", this, "Click_TeleportPrevious" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -270,22 +270,22 @@ class JMPlayerForm extends JMFormBase
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
 
 		Widget header = UIActionManager.CreateGridSpacer( parent, 1, 2 );
-		UIActionManager.CreateText( header, "Player Variables: ", "" );
-		m_RefreshStats = UIActionManager.CreateButton( header, "Refresh", this, "Click_RefreshStats" );
+		UIActionManager.CreateText( header, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEADER", "" );
+		m_RefreshStats = UIActionManager.CreateButton( header, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 2 );
 
-		m_Health = UIActionManager.CreateEditableText( actions, "Health: ", this, "Click_SetHealth", "", "" );
-		m_Shock = UIActionManager.CreateEditableText( actions, "Shock: ", this, "Click_SetShock", "", "" );
-		m_Blood = UIActionManager.CreateEditableText( actions, "Blood: ", this, "Click_SetBlood", "", "" );
-		m_Energy = UIActionManager.CreateEditableText( actions, "Food: ", this, "Click_SetEnergy", "", "" );
-		m_Water = UIActionManager.CreateEditableText( actions, "Water: ", this, "Click_SetWater", "", "" );
-		m_Stamina = UIActionManager.CreateEditableText( actions, "Stamina: ", this, "Click_SetStamina", "", "" );
+		m_Health = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH", this, "Click_SetHealth", "", "" );
+		m_Shock = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", this, "Click_SetShock", "", "" );
+		m_Blood = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", this, "Click_SetBlood", "", "" );
+		m_Energy = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD", this, "Click_SetEnergy", "", "" );
+		m_Water = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", this, "Click_SetWater", "", "" );
+		m_Stamina = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", this, "Click_SetStamina", "", "" );
 
-		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "Bloody Hands: ", this, "Click_SetBloodyHands", false );
-		m_GodMode = UIActionManager.CreateCheckbox( actions, "Godmode: ", this, "Click_SetGodMode", false );
+		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_SetBloodyHands", false );
+		m_GodMode = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_SetGodMode", false );
 
-		m_ApplyStats = UIActionManager.CreateButton( parent, "Apply", this, "Click_ApplyStats" );
+		m_ApplyStats = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
 
 		m_Health.SetOnlyNumbers( true );
 		m_Shock.SetOnlyNumbers( true );
@@ -303,17 +303,17 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
 
-		UIActionManager.CreateText( parent, "Permission Management:", "" );
+		UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HEADER", "" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 1 );
 
-		m_ModifyPermissions = UIActionManager.CreateButton( actions, "Permissions", this, "Click_ModifyPermissions" );
-		m_SavePermissions = UIActionManager.CreateButton( actions, "Save Permissions", this, "Click_SavePermissions" );
+		m_ModifyPermissions = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_PERMISSIONS", this, "Click_ModifyPermissions" );
+		m_SavePermissions = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_PERMISSIONS", this, "Click_SavePermissions" );
 		m_PermissionsListScroller = UIActionManager.CreateScroller( actions );
 		m_PermissionsListScroller.SetFixedHeight( 400 );
 		
-		m_ModifyRoles = UIActionManager.CreateButton( actions, "Roles", this, "Click_ModifyRoles" );
-		m_SaveRoles = UIActionManager.CreateButton( actions, "Save Roles", this, "Click_SaveRoles" );
+		m_ModifyRoles = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_ROLES", this, "Click_ModifyRoles" );
+		m_SaveRoles = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_ROLES", this, "Click_SaveRoles" );
 		m_RolesListScroller = UIActionManager.CreateScroller( actions );
 		m_RolesListScroller.SetFixedHeight( 400 );
 
@@ -329,15 +329,15 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
 
-		UIActionManager.CreateText( parent, "Quick Actions:", "" );
+		UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEADER", "" );
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 2 );
 
-		m_RepairTransport = UIActionManager.CreateButton( actions, "Repair Transport", this, "Click_RepairTransport" );
-		m_SpectatePlayer = UIActionManager.CreateButton( actions, "Spectate", this, "Click_SpectatePlayer" );
-		m_HealPlayer = UIActionManager.CreateButton( actions, "Heal", this, "Click_HealPlayer" );
-		m_StopBleeding = UIActionManager.CreateButton( actions, "Stop Bleeding", this, "Click_StopBleeding" );
-		m_StripPlayer = UIActionManager.CreateButton( actions, "Clear Inventory", this, "Click_StripPlayer" );
+		m_RepairTransport = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_REPAIR_TRANSPORT", this, "Click_RepairTransport" );
+		m_SpectatePlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
+		m_HealPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "Click_HealPlayer" );
+		m_StopBleeding = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
+		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -351,7 +351,7 @@ class JMPlayerForm extends JMFormBase
 
 	void HidePermissions()
 	{
-		m_ModifyPermissions.SetButton( "Show Permissions" );
+		m_ModifyPermissions.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_PERMISSIONS" );
 		m_SavePermissions.Hide();
 		m_PermissionsListScroller.Hide();
 
@@ -365,7 +365,7 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowPermissions()
 	{
-		m_ModifyPermissions.SetButton( "Hide Permissions" );
+		m_ModifyPermissions.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_PERMISSIONS" );
 		m_SavePermissions.Show();
 		m_PermissionsListScroller.Show();
 
@@ -422,7 +422,7 @@ class JMPlayerForm extends JMFormBase
 
 	void HideRoles()
 	{
-		m_ModifyRoles.SetButton( "Show Roles" );
+		m_ModifyRoles.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_ROLES" );
 		m_SaveRoles.Hide();
 		m_RolesListScroller.Hide();
 
@@ -436,7 +436,7 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowRoles()
 	{
-		m_ModifyRoles.SetButton( "Hide Roles" );
+		m_ModifyRoles.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_ROLES" );
 		m_SaveRoles.Show();
 		m_RolesListScroller.Show();
 

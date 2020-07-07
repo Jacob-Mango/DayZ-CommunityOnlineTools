@@ -23,15 +23,17 @@ class UIActionText extends UIActionBase
 
 	override void SetLabel( string text )
 	{
+		text = Widget.TranslateString( text );
+
 		m_Label.SetText( text );
 	}
 
 	override void SetText( string text )
 	{
-		m_ActualText = text;
-		m_Text.SetText( text );
-	}
+		m_ActualText = Widget.TranslateString( text );
 
+		m_Text.SetText( m_ActualText );
+	}
 
 	void SetLabelHAlign( UIActionHAlign type )
 	{
