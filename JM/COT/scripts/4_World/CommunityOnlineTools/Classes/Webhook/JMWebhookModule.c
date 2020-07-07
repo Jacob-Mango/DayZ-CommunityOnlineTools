@@ -1,13 +1,29 @@
-class JMWebhookModuleSerialize
+class JMWebhookConnectionSerialize
 {
     string ContextURL;
     string Address;
 
-    ref array< ref JMWebhookConnection > Connections;
+    ref array< string > Types;
+
+    void JMWebhookConnectionSerialize()
+    {
+        Types = new array< string >;
+    }
+
+    void ~JMWebhookConnectionSerialize()
+    {
+        Types.Clear();
+        delete Types;
+    }
+};
+
+class JMWebhookModuleSerialize
+{
+    ref array< ref JMWebhookConnectionSerialize > Connections;
 
     void JMWebhookModuleSerialize()
     {
-        Connections = new array< ref JMWebhookConnection >;
+        Connections = new array< ref JMWebhookConnectionSerialize >;
     }
 
     void ~JMWebhookModuleSerialize()
@@ -53,34 +69,44 @@ class JMWebhookModule: JMModuleBase
 
 	override void OnMissionStart()
 	{
-        m_ContextURL = "https://discordapp.com/api/webhooks/";
-        m_Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
-
 		if ( FileExist( JMConstants.FILE_WEBHOOK ) )
 		{
             JMWebhookModuleSerialize serialize = new JMWebhookModuleSerialize;
 
 			JsonFileLoader< JMWebhookModuleSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, serialize );
 
-            m_ContextURL = serialize.ContextURL;
-            m_Address = serialize.Address;
-
             for ( int i = 0; i < serialize.Connections.Count(); ++i )
             {
-                array< JMWebhookConnection > connections = m_ConnectionMap.Get( serialize.Connections[i].Name );
-                if ( !connections )
-                {
-                    connections = new array< JMWebhookConnection >;
-                    m_ConnectionMap.Insert( serialize.Connections[i].Name, connections );
-                }
+                string contextURL = serialize.Connections[i].ContextURL;
+                string address = serialize.Connections[i].Address;
 
-                connections.Insert( serialize.Connections[i] );
-                m_Connections.Insert( serialize.Connections[i] );
+                for ( int j = 0; j < serialize.Connections[i].Types.Count(); ++j )
+                {
+                    string name = serialize.Connections[i].Types[j];
+
+                    ref JMWebhookConnection connection = new JMWebhookConnection;
+                    connection.Name = name;
+                    connection.ContextURL = contextURL;
+                    connection.Address = address;
+
+                    array< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
+                    if ( !connections )
+                    {
+                        connections = new array< JMWebhookConnection >;
+                        m_ConnectionMap.Insert( name, connections );
+                    }
+
+                    connections.Insert( connection );
+                    m_Connections.Insert( connection );
+                }
             }
 
             OnConnectionSetup();
 		} else 
 		{
+            m_ContextURL = "https://discordapp.com/api/webhooks/";
+            m_Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+
             OnConnectionSetup();
             SaveConnections();
 		}
@@ -88,9 +114,9 @@ class JMWebhookModule: JMModuleBase
 		RestApi core = CreateRestApi();
 		core.EnableDebug( true );
 
-        for ( int j = 0; j < m_Connections.Count(); ++j )
+        for ( int k = 0; k < m_Connections.Count(); ++k )
         {
-            m_Connections[j].Init( m_ContextURL, core );
+            m_Connections[k].Init( core );
         }
 
         m_IsLoading = false;
@@ -111,11 +137,28 @@ class JMWebhookModule: JMModuleBase
         
         for ( int i = 0; i < m_Connections.Count(); ++i )
         {
-            serialize.Connections.Insert( m_Connections[i] );
-        }
+            bool found = false;
 
-        serialize.ContextURL = m_ContextURL;
-        serialize.Address = m_Address;
+            for ( int j = 0; j < serialize.Connections.Count(); ++j )
+            {
+                if ( serialize.Connections[j].ContextURL != m_Connections[i].ContextURL )
+                    continue;
+                if ( serialize.Connections[j].Address != m_Connections[i].Address )
+                    continue;
+                
+                found = true;
+
+                serialize.Connections[j].Types.Insert( m_Connections[i].Name );
+            }
+
+            if ( !found )
+            {
+                JMWebhookConnectionSerialize conn = new JMWebhookConnectionSerialize;
+                conn.ContextURL = m_Connections[i].ContextURL;
+                conn.Address = m_Connections[i].Address;
+                serialize.Connections.Insert( conn );
+            }
+        }
 
 		JsonFileLoader< JMWebhookModuleSerialize >.JsonSaveFile( JMConstants.FILE_WEBHOOK, serialize );
     }
@@ -134,7 +177,15 @@ class JMWebhookModule: JMModuleBase
         array< JMModuleBase > modules = GetModuleManager().GetAllModules();
         for ( int i = 0; i < modules.Count(); ++i )
         {
-            AddConnection( modules[i].GetModuleName() );
+            JMModuleBase module = modules[i]
+            AddConnection( module.GetModuleName() );
+
+            array< string > types = new array< string >;
+            module.GetWebhookTypes( types );
+            for ( int j = 0; j < types.Count(); ++j )
+            {
+                AddConnection( module.GetModuleName() + types[j] );
+            }
         }
 
         AddConnection( "Server" );
@@ -167,8 +218,8 @@ class JMWebhookModule: JMModuleBase
 
         JMWebhookConnection connection = new JMWebhookConnection();
         connection.Name = name;
-        connection.ContextURL = context;
-        connection.Address = address;
+        connection.ContextURL = m_ContextURL;
+        connection.Address = m_Address;
 
         if ( m_IsLoading )
         {
@@ -198,7 +249,7 @@ class JMWebhookModule: JMModuleBase
 
         for ( int i = 0; i < connections.Count(); i++ )
         {
-            connections[i].Post( m_Address, m_Serializer, message );
+            connections[i].Post( m_Serializer, message );
         }
     }
 
