@@ -3,6 +3,9 @@ COT.View 2
 Admin 2
 Admin.Player 0
 Admin.Player.Godmode 0
+Admin.Player.Freeze 0
+Admin.Player.Invisibility 0
+Admin.Player.UnlimitedAmmo 0
 Admin.Player.StartSpectating 0
 Admin.Player.Invisible 0
 Admin.Player.Strip 0

@@ -43,8 +43,10 @@ class JMWebhookModule: JMModuleBase
 {
 	private ref JsonSerializer m_Serializer;
 
-    private string m_ContextURL;
-    private string m_Address;
+    private RestApi m_Core;
+
+    private string m_DefaultContextURL;
+    private string m_DefaultAddress;
 
     private bool m_IsLoading;
 
@@ -71,6 +73,9 @@ class JMWebhookModule: JMModuleBase
 
         m_Connections = new array< ref JMWebhookConnection >();
         m_ConnectionMap = new map< string, ref array< JMWebhookConnection > >();
+
+		m_Core = CreateRestApi();
+		m_Core.EnableDebug( true );
     }
 
 	override void OnMissionStart()
@@ -111,20 +116,12 @@ class JMWebhookModule: JMModuleBase
             OnConnectionSetup();
 		} else 
 		{
-            m_ContextURL = "https://discordapp.com/api/webhooks/";
-            m_Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+            m_DefaultContextURL = "https://discordapp.com/api/webhooks/";
+            m_DefaultAddress = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
 
             OnConnectionSetup();
             SaveConnections();
 		}
-
-		RestApi core = CreateRestApi();
-		core.EnableDebug( true );
-
-        for ( int k = 0; k < m_Connections.Count(); ++k )
-        {
-            m_Connections[k].Init( core );
-        }
 
         m_IsLoading = false;
 	}
@@ -135,7 +132,7 @@ class JMWebhookModule: JMModuleBase
                 
         message.GetEmbed().AddField( "Server Status", "Server is starting up." );
 
-        Post( "Server", message );
+        Post( "ServerStartup", message );
 	}
 
     void SaveConnections()
@@ -180,7 +177,7 @@ class JMWebhookModule: JMModuleBase
 
         message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
 
-        Post( "Server", message );
+        Post( "ServerShutdown", message );
     }
 
     void OnConnectionSetup()
@@ -199,12 +196,13 @@ class JMWebhookModule: JMModuleBase
             }
         }
 
-        AddConnection( "Server" );
+        AddConnection( "ServerStartup" );
+        AddConnection( "ServerShutdown" );
 
         AddConnection( "PlayerJoin" );
         AddConnection( "PlayerLeave" );
         AddConnection( "PlayerDeath" );
-        AddConnection( "PlayerDamaged" );
+        AddConnection( "PlayerDamage" );
     }
 
     void AddConnection( string name, string context = "", string address = "", bool enabled = true )
@@ -229,8 +227,8 @@ class JMWebhookModule: JMModuleBase
 
         JMWebhookConnection connection = new JMWebhookConnection();
         connection.Name = name;
-        connection.ContextURL = m_ContextURL;
-        connection.Address = m_Address;
+        connection.ContextURL = m_DefaultContextURL;
+        connection.Address = m_DefaultAddress;
 
         if ( m_IsLoading )
         {
@@ -260,7 +258,7 @@ class JMWebhookModule: JMModuleBase
 
         for ( int i = 0; i < connections.Count(); i++ )
         {
-            connections[i].Post( m_Serializer, message );
+            connections[i].Post( m_Core, m_Serializer, message );
         }
     }
 

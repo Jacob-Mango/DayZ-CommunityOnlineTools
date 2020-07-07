@@ -37,6 +37,15 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 
     ref JMWebhookDiscordEmbed GetEmbed( int idx = 0 )
     {
+        if ( embeds.Count() <= idx )
+            return embeds[idx];
+        
+        for ( int i = embeds.Count(); i <= idx; ++i )
+        {
+            JMWebhookDiscordEmbed embed = new JMWebhookDiscordEmbed;
+            embeds.Insert( embed );
+        }
+        
         return embeds[idx];
     }
 

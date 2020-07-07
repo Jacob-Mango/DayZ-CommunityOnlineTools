@@ -91,6 +91,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void AddObjectType( ref Widget parent, string name, string config )
 	{
+		name = Widget.TranslateString( name );
 		UIActionManager.CreateButton( parent, name, this, "SetListType" );
 		m_ObjectTypes.Insert( name, config );
 	}

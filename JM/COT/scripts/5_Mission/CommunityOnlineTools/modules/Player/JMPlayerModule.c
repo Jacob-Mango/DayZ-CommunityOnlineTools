@@ -15,6 +15,9 @@ enum JMPlayerModuleRPC
 	StartSpectating,
 	EndSpectating,
 	SetGodMode,
+	SetFreeze,
+	SetInvisible,
+	SetUnlimitedAmmo,
 	Heal,
 	Strip,
 	StopBleeding,
@@ -28,6 +31,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	void JMPlayerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedAmmo" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StartSpectating" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
@@ -175,6 +181,15 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetGodMode:
 			RPC_SetGodMode( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetFreeze:
+			RPC_SetFreeze( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetInvisible:
+			RPC_SetInvisible( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetUnlimitedAmmo:
+			RPC_SetUnlimitedAmmo( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Heal:
 			RPC_Heal( ctx, sender, target );
@@ -923,21 +938,21 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SetGodMode( bool godmode, array< string > guids )
+	void SetGodMode( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetGodMode( godmode, guids, NULL );
+			Exec_SetGodMode( value, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( godmode );
+			rpc.Write( value );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMPlayerModuleRPC.SetGodMode, true, NULL );
 		}
 	}
 
-	private void Exec_SetGodMode( bool godmode, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetGodMode( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -947,11 +962,11 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetGodMode( godmode );
+			player.SetGodMode( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + godmode + " [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
-			if ( godmode )
+			if ( value )
 			{
 				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " god mode" );
 			} else
@@ -965,8 +980,8 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_SetGodMode( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		bool godmode;
-		if ( !ctx.Read( godmode ) )
+		bool value;
+		if ( !ctx.Read( value ) )
 			return;
 
 		array< string > guids;
@@ -977,7 +992,178 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.GodMode", senderRPC, instance ) )
 			return;
 
-		Exec_SetGodMode( godmode, guids, senderRPC, instance );
+		Exec_SetGodMode( value, guids, senderRPC, instance );
+	}
+
+	void SetFreeze( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetFreeze( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetFreeze, true, NULL );
+		}
+	}
+
+	private void Exec_SetFreeze( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetFreeze( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Freeze To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " frozen" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " unfrozen" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetFreeze( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Freeze", senderRPC, instance ) )
+			return;
+
+		Exec_SetFreeze( value, guids, senderRPC, instance );
+	}
+
+	void SetInvisible( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetInvisible( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetInvisible, true, NULL );
+		}
+	}
+
+	private void Exec_SetInvisible( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetInvisibility( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Invisibility To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " invisibility" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " invisibility" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetInvisible( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Invisibility", senderRPC, instance ) )
+			return;
+
+		Exec_SetInvisible( value, guids, senderRPC, instance );
+	}
+
+	void SetUnlimitedAmmo( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetUnlimitedAmmo( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetUnlimitedAmmo, true, NULL );
+		}
+	}
+
+	private void Exec_SetUnlimitedAmmo( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = players[i].PlayerObject;
+			if ( player == NULL )
+				continue;
+
+			player.SetUnlimitedAmmo( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set UnlimitedAmmo To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited ammo" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited ammo" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetUnlimitedAmmo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedAmmo", senderRPC, instance ) )
+			return;
+
+		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
 	}
 
 	void Heal( array< string > guids )

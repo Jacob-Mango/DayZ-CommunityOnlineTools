@@ -1,24 +1,30 @@
 modded class JMModuleBase
 {
-	private JMWebhookModule m_Webhook;
+	protected JMWebhookModule m_Webhook;
 
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
 		
-		Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		if ( IsMissionOffline() )
+		{
+			m_Webhook = NULL;
+		} else
+		{
+			Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		}
 	}
 
-	void SendWebhook( JMPlayerInstance player, string message )
+	void SendWebhook( string type, string message )
 	{
-		if ( !m_Webhook || !player )
+		if ( !m_Webhook )
 			return;
 
-        auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );
+        auto msg = m_Webhook.CreateDiscordMessage();
 
         msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
-        m_Webhook.Post( GetModuleName(), msg );
+        m_Webhook.Post( GetModuleName() + type, msg );
 	}
 
 	void SendWebhook( string type, JMPlayerInstance player, string message )
