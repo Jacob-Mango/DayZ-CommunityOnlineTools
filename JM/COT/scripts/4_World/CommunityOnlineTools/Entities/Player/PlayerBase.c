@@ -36,6 +36,8 @@ modded class PlayerBase
 
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
+
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
 	}
