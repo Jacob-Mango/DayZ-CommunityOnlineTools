@@ -54,7 +54,7 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 		
 		if ( m_Type ) 
 		{
-			m_Name.SetText( type.Localisation );
+			m_Name.SetText( Widget.TranslateString( type.Localisation ) );
 			m_Checkbox.SetChecked( type.View );
 
 			Show();

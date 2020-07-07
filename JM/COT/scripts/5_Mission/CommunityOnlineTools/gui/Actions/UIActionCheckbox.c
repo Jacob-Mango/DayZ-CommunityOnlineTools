@@ -21,6 +21,8 @@ class UIActionCheckbox extends UIActionBase
 
 	override void SetLabel( string text )
 	{
+		text = Widget.TranslateString( text );
+		
 		m_Label.SetText( text );
 	}
 

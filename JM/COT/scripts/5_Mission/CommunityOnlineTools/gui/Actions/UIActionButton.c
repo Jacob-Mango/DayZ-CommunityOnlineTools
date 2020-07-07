@@ -21,6 +21,8 @@ class UIActionButton extends UIActionBase
 
 	override void SetButton( string text )
 	{
+		text = Widget.TranslateString( text );
+		
 		m_Button.SetName( text );
 		m_Text.SetText( text );
 	}

@@ -30,9 +30,9 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Children = new array< JMPermissionRowWidget >;
 
 		stateOptions = new TStringArray;
-		stateOptions.Insert( "INHERIT" );
-		stateOptions.Insert( "DISALLOW" );
-		stateOptions.Insert( "ALLOW" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_INHERIT_C" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_DISALLOW_C" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_ALLOW_C" );
 	}
 
 	void ~JMPermissionRowWidget()
