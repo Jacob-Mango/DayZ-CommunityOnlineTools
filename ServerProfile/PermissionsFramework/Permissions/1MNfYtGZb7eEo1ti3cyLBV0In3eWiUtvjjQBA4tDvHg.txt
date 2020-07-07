@@ -154,6 +154,8 @@ Admin.Player.Teleport.Location.Zelenogorsk 0
 Admin.Player.Teleport.Location.ZelenogorskTrainyard 0
 Admin.Player.Teleport.Location.ZubCastle 0
 Admin.Player.Teleport.Location.Zvir 0
+Admin.Player.Teleport.Cursor 0
+Admin.Player.Teleport.Cursor.NoLog 1
 Admin.Player.Teleport.View 0
 Admin.Player.Permissions 0
 Admin.Player.Roles 0
