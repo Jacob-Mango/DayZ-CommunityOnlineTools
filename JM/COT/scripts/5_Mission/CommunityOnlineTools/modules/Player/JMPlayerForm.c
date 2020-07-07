@@ -106,35 +106,46 @@ class JMPlayerForm extends JMFormBase
 	{
 		super.OnClientPermissionsUpdated();
 
-		m_HealPlayer.UpdatePermission( "Admin.Player.Set" );
-		m_Health.UpdatePermission( "Admin.Player.Set.Health" );
-		m_Shock.UpdatePermission( "Admin.Player.Set.Shock" );
-		m_Blood.UpdatePermission( "Admin.Player.Set.Blood" );
-		m_Energy.UpdatePermission( "Admin.Player.Set.Energy" );
-		m_Water.UpdatePermission( "Admin.Player.Set.Water" );
-		m_Stamina.UpdatePermission( "Admin.Player.Set.Stamina" );
-		m_BloodyHands.UpdatePermission( "Admin.Player.Set.BloodyHands" );
+		UpdatePermission( m_HealPlayer, "Admin.Player.Set" );
+		UpdatePermission( m_Health, "Admin.Player.Set.Health" );
+		UpdatePermission( m_Shock, "Admin.Player.Set.Shock" );
+		UpdatePermission( m_Blood, "Admin.Player.Set.Blood" );
+		UpdatePermission( m_Energy, "Admin.Player.Set.Energy" );
+		UpdatePermission( m_Water, "Admin.Player.Set.Water" );
+		UpdatePermission( m_Stamina, "Admin.Player.Set.Stamina" );
+		UpdatePermission( m_BloodyHands, "Admin.Player.Set.BloodyHands" );
 
-		m_ModifyPermissions.UpdatePermission( "Admin.Player.Permissions" );
-		m_ModifyRoles.UpdatePermission( "Admin.Player.Roles" );
+		UpdatePermission( m_ModifyPermissions, "Admin.Player.Permissions" );
+		UpdatePermission( m_ModifyRoles, "Admin.Player.Roles" );
 
-		m_GodMode.UpdatePermission( "Admin.Player.Godmode" );
-		m_SpectatePlayer.UpdatePermission( "Admin.Player.StartSpectating" );
-		m_StopBleeding.UpdatePermission( "Admin.Player.StopBleeding" );
-		m_StripPlayer.UpdatePermission( "Admin.Player.Strip" );
-		
-		m_PositionX.UpdatePermission( "Admin.Player.Teleport.Position" );
-		m_PositionY.UpdatePermission( "Admin.Player.Teleport.Position" );
-		m_PositionZ.UpdatePermission( "Admin.Player.Teleport.Position" );
-		m_Position.UpdatePermission( "Admin.Player.Teleport.Position" );
+		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
+		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
+		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
+		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
+		UpdatePermission( m_SpectatePlayer, "Admin.Player.StartSpectating" );
+		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
+		UpdatePermission( m_StripPlayer, "Admin.Player.Strip" );
 
-		m_TeleportToMe.UpdatePermission( "Admin.Player.Teleport.Position" );
-		m_TeleportMeTo.UpdatePermission( "Admin.Player.Teleport.SenderTo" );
-		m_TeleportPrevious.UpdatePermission( "Admin.Player.Teleport.Previous" );
+		UpdatePermission( m_PositionX, "Admin.Player.Teleport.Position" );
+		UpdatePermission( m_PositionY, "Admin.Player.Teleport.Position" );
+		UpdatePermission( m_PositionZ, "Admin.Player.Teleport.Position" );
+		UpdatePermission( m_Position, "Admin.Player.Teleport.Position" ); 
 
-		m_RepairTransport.UpdatePermission( "Admin.Transport.Repair" );
+		UpdatePermission( m_TeleportToMe, "Admin.Player.Teleport.Position" );
+		UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
+		UpdatePermission( m_TeleportPrevious, "Admin.Player.Teleport.Previous" );
+
+		UpdatePermission( m_RepairTransport, "Admin.Transport.Repair" );
 
 		UpdateUI();
+	}
+
+	private void UpdatePermission( ref UIActionBase base, string permission )
+	{
+		if ( !base )
+			return;
+
+		base.UpdatePermission( permission );
 	}
 
 	override void OnInit()
@@ -712,16 +723,39 @@ class JMPlayerForm extends JMFormBase
 		m_GodModeUpdated = false;
 		m_UnlimitedAmmoUpdated = false;
 		
-		m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
-		m_Blood.SetText( m_SelectedInstance.GetBlood().ToString() );
-		m_Energy.SetText( m_SelectedInstance.GetEnergy().ToString() );
-		m_Water.SetText( m_SelectedInstance.GetWater().ToString() );
-		m_Shock.SetText( m_SelectedInstance.GetShock().ToString() );
-		m_Stamina.SetText( m_SelectedInstance.GetStamina().ToString() );
+		if ( m_Health )
+			m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
+		
+		if ( m_Blood )
+			m_Blood.SetText( m_SelectedInstance.GetBlood().ToString() );
+		
+		if ( m_Energy )
+			m_Energy.SetText( m_SelectedInstance.GetEnergy().ToString() );
+		
+		if ( m_Water )
+			m_Water.SetText( m_SelectedInstance.GetWater().ToString() );
+		
+		if ( m_Shock )
+			m_Shock.SetText( m_SelectedInstance.GetShock().ToString() );
+		
+		if ( m_Stamina )
+			m_Stamina.SetText( m_SelectedInstance.GetStamina().ToString() );
 
-		m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
-		m_GodMode.SetChecked( m_SelectedInstance.HasGodMode() );
-		m_UnlimitedAmmo.SetChecked( m_SelectedInstance.HasUnlimitedAmmo() );
+		
+		if ( m_BloodyHands )
+			m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
+		
+		if ( m_GodMode )
+			m_GodMode.SetChecked( m_SelectedInstance.HasGodMode() );
+		
+		if ( m_Freeze )
+			m_Freeze.SetChecked( m_SelectedInstance.IsFrozen() );
+		
+		if ( m_Invisibility )
+			m_Invisibility.SetChecked( m_SelectedInstance.HasInvisibility() );
+		
+		if ( m_UnlimitedAmmo )
+			m_UnlimitedAmmo.SetChecked( m_SelectedInstance.HasUnlimitedAmmo() );
 	}
 
 	void RefreshTeleports()

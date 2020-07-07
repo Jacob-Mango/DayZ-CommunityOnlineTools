@@ -727,7 +727,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + other.GetGUID() + "]" );
-			SendWebhook( "Teleport", instance, "Teleported " + other.FormatSteamWebhook() + " to the admin" );
+			SendWebhook( "Teleport", instance, "Teleported the admin to " + other.FormatSteamWebhook() + "" );
 		}
 	}
 

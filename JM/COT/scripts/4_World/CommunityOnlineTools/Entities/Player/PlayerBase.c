@@ -146,6 +146,11 @@ modded class PlayerBase
 		return m_JMHasGodMode;
 	}
 
+	bool IsFrozen()
+	{
+		return m_JMIsFrozen;
+	}
+
 	bool IsInvisible()
 	{
 		return m_JMIsInvisible;

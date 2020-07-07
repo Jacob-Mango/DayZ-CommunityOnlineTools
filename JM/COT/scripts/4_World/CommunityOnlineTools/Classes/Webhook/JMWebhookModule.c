@@ -76,6 +76,12 @@ class JMWebhookModule: JMModuleBase
 
 		m_Core = CreateRestApi();
 		m_Core.EnableDebug( true );
+
+        PluginAdminLog adminLog;
+        if ( Class.CastTo( adminLog, GetPlugin( PluginAdminLog ) ) )
+        {
+            adminLog.InitWebhook();
+        }
     }
 
 	override void OnMissionStart()

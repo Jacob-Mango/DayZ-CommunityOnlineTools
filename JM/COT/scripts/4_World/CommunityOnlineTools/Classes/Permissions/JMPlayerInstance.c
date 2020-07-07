@@ -36,8 +36,8 @@ class JMPlayerInstance : Managed
 	private int m_LifeSpanState;
 	private bool m_BloodyHands;
 	private bool m_GodMode;
+	private bool m_Frozen;
 	private bool m_Invisibility;
-
 	private bool m_UnlimitedAmmo;
 
 	private ref JMPlayerSerialize m_PlayerFile;
@@ -117,6 +117,7 @@ class JMPlayerInstance : Managed
 				m_LifeSpanState = PlayerObject.GetLifeSpanState();
 				m_BloodyHands = PlayerObject.HasBloodyHands();
 				m_GodMode = PlayerObject.HasGodMode();
+				m_Frozen = PlayerObject.IsFrozen();
 				m_Invisibility = PlayerObject.IsInvisible();
 				m_UnlimitedAmmo = PlayerObject.HasUnlimitedAmmo();
 			}
@@ -330,6 +331,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_LifeSpanState );
 		ctx.Write( m_BloodyHands );
 		ctx.Write( m_GodMode );
+		ctx.Write( m_Frozen );
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
 	}
@@ -349,6 +351,7 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_LifeSpanState );
 		ctx.Read( m_BloodyHands );
 		ctx.Read( m_GodMode );
+		ctx.Read( m_Frozen );
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
 	}
@@ -573,6 +576,11 @@ class JMPlayerInstance : Managed
 	bool HasGodMode()
 	{
 		return m_GodMode;
+	}
+
+	bool IsFrozen()
+	{
+		return m_Frozen;
 	}
 
 	bool HasInvisibility()

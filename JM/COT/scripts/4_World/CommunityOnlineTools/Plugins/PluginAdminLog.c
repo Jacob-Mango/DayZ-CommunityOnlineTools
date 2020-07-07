@@ -4,7 +4,7 @@ modded class PluginAdminLog
 
     private string m_LoggingType;
 
-	void PluginAdminLog()
+	void InitWebhook()
 	{
 		if ( IsMissionOffline() )
 		{
