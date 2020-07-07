@@ -7,7 +7,7 @@ class CommunityOnlineToolsBase
 
 	private string m_FileLogName;
 
-	private JMWebhookModule m_Webhook;
+	protected JMWebhookModule m_Webhook;
 
 	void CommunityOnlineToolsBase()
 	{
@@ -63,7 +63,13 @@ class CommunityOnlineToolsBase
 
 		CreateNewLog();
 
-		Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		if ( IsMissionOffline() )
+		{
+			m_Webhook = NULL;
+		} else
+		{
+			Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		}
 	}
 
 	void OnFinish()
@@ -96,11 +102,19 @@ class CommunityOnlineToolsBase
 	void SetActive( bool active )
 	{
 		m_IsActive = active;
+
+		OnCOTActiveChanged( m_IsActive );
 	}
 
 	void ToggleActive()
 	{
 		m_IsActive = !m_IsActive;
+
+		OnCOTActiveChanged( m_IsActive );
+	}
+
+	void OnCOTActiveChanged( bool active )
+	{
 	}
 
 	bool IsOpen()

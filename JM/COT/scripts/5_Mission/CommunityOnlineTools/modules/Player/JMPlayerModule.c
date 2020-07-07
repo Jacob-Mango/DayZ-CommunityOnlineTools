@@ -1146,6 +1146,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 
 			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
 		}
 	}
 
@@ -1335,13 +1337,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		{		
 			players[i].LoadPermissions( permissions );
 
+			players[i].Update();
+
 			GetCommunityOnlineTools().SetClient( players[i] );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhook( "PF", instance, "Updated permissions for " + players[i].FormatSteamWebhook() );
-
-			players[i].Update();
 		}
 	}
 
@@ -1384,13 +1386,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		{		
 			players[i].LoadRoles( roles );
 
+			players[i].Update();
+
 			GetCommunityOnlineTools().SetClient( players[i] );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhook( "PF", instance, "Updated roles for " + players[i].FormatSteamWebhook() );
-
-			players[i].Update();
 		}
 	}
 

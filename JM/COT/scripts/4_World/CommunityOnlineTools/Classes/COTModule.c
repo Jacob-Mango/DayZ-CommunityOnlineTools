@@ -269,14 +269,6 @@ class COTModule : JMModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleActive();
-
-		if ( GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_ON" ) );
-		} else
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_OFF" ) );
-		}
 	}
 
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
