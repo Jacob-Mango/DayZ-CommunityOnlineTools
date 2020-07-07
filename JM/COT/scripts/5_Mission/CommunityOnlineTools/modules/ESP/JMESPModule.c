@@ -113,6 +113,18 @@ class JMESPModule: JMRenderableModuleBase
 		return "ESP Module";
 	}
 
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Log" );
+		types.Insert( "Position" );
+		types.Insert( "Orientation" );
+		types.Insert( "Health" );
+		types.Insert( "Delete" );
+		types.Insert( "BB_Build" );
+		types.Insert( "BB_Dismantle" );
+		types.Insert( "BB_Repair" );
+	}
+
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();
@@ -630,7 +642,7 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_Log( string log, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
-		SendWebhook( instance, "Logging ESP action: " + log );
+		SendWebhook( "Log", instance, "Logging ESP action: " + log );
 	}
 
 	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -660,7 +672,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.SetPosition( position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
-		SendWebhook( instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
+		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
 	}
 
 	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -694,7 +706,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.SetOrientation( orientation );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
-		SendWebhook( instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
+		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
 	}
 
 	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -728,7 +740,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
-		SendWebhook( instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
+		SendWebhook( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
 	}
 
 	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -771,7 +783,7 @@ class JMESPModule: JMRenderableModuleBase
 		GetGame().ObjectDelete( target );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
-		SendWebhook( instance, "Deleted " + obtype + " at " + transform[3].ToString() );
+		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
 	}
 
 	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -805,7 +817,7 @@ class JMESPModule: JMRenderableModuleBase
         target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
-		SendWebhook( instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Build( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -844,7 +856,7 @@ class JMESPModule: JMRenderableModuleBase
         target.GetConstruction().COT_DismantlePart( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
-		SendWebhook( instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Dismantle( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -880,7 +892,7 @@ class JMESPModule: JMRenderableModuleBase
         target.GetConstruction().COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
-		SendWebhook( instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )

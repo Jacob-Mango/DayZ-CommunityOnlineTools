@@ -51,6 +51,10 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return "Vehicle Module";
 	}
 
+	override void GetWebhookTypes( out array< string > types )
+	{
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();

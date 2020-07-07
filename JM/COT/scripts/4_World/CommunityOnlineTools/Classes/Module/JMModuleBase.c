@@ -21,9 +21,26 @@ modded class JMModuleBase
         m_Webhook.Post( GetModuleName(), msg );
 	}
 
+	void SendWebhook( string type, JMPlayerInstance player, string message )
+	{
+		if ( !m_Webhook || !player )
+			return;
+
+        auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );
+
+        msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
+
+        m_Webhook.Post( GetModuleName() + type, msg );
+	}
+
 	string GetWebhookTitle()
 	{
 		return "Unknown";
+	}
+
+	void GetWebhookTypes( out array< string > types )
+	{
+		
 	}
 
 	void OnClientPermissionsUpdated()

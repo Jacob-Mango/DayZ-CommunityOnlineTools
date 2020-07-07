@@ -56,6 +56,12 @@ class JMTeleportModule: JMRenderableModuleBase
 		return "Teleport Module";
 	}
 
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Vector" );
+		types.Insert( "Location" );
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -254,7 +260,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
 		
-			SendWebhook( instance, "Teleported to position " + position.ToString() );
+			SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
 		}
 	}
 
@@ -343,7 +349,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			SetPlayerPosition( player, tempPos );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
-			SendWebhook( instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+			SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
 
 			players[i].Update();
 		}

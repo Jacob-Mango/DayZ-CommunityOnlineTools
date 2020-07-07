@@ -52,6 +52,12 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return "Item Set Module";
 	}
 
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Vector" );
+		types.Insert( "Player" );
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -191,7 +197,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		SpawnItemSet( file, position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
-		SendWebhook( instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
+		SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
 	}
 
 	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -251,7 +257,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			SpawnItemSet( file, players[i].GetPosition() );
 			
 			GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
-			SendWebhook( instance, "Spawned item set \"" + file.Name + "\" on " + players[i].FormatSteamWebhook() );
+			SendWebhook( "Player", instance, "Spawned item set \"" + file.Name + "\" on " + players[i].FormatSteamWebhook() );
 		}
 	}
 

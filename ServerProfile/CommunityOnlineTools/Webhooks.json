@@ -1,102 +1,51 @@
 {
-    "ContextURL": "https://discordapp.com/api/webhooks/",
-    "Address": "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS",
     "Connections": [
         {
-            "Name": "COTModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMWebhookModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMPlayerModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMObjectSpawnerModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMESPModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMTeleportModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMCameraModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMVehicleSpawnerModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMItemSetSpawnerModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMWeatherOldModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "JMMapModule",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "Server",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "PlayerJoin",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "PlayerLeave",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "PlayerDeath",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
-        },
-        {
-            "Name": "PlayerDamaged",
-            "ContextURL": "",
-            "Address": "",
-            "Enabled": 1
+            "ContextURL": "https://discordapp.com/api/webhooks/",
+            "Address": "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS",
+            "Types": [
+                "JMWebhookModule",
+                "JMPlayerModule",
+                "JMPlayerModuleSet",
+                "JMPlayerModuleVehicle",
+                "JMPlayerModuleTeleport",
+                "JMPlayerModuleInventory",
+                "JMPlayerModulePF",
+                "JMObjectSpawnerModule",
+                "JMObjectSpawnerModuleDelete",
+                "JMObjectSpawnerModuleVector",
+                "JMObjectSpawnerModulePlayer",
+                "JMESPModule",
+                "JMESPModuleLog",
+                "JMESPModulePosition",
+                "JMESPModuleOrientation",
+                "JMESPModuleHealth",
+                "JMESPModuleDelete",
+                "JMESPModuleBB_Build",
+                "JMESPModuleBB_Dismantle",
+                "JMESPModuleBB_Repair",
+                "JMTeleportModule",
+                "JMTeleportModuleVector",
+                "JMTeleportModuleLocation",
+                "JMCameraModule",
+                "JMVehicleSpawnerModule",
+                "JMItemSetSpawnerModule",
+                "JMItemSetSpawnerModuleVector",
+                "JMItemSetSpawnerModulePlayer",
+                "JMWeatherOldModule",
+                "JMWeatherOldModuleDate",
+                "JMWeatherOldModuleWind",
+                "JMWeatherOldModuleOvercast",
+                "JMWeatherOldModuleFog",
+                "JMWeatherOldModuleRain",
+                "JMWeatherOldModuleStorm",
+                "JMMapModule",
+                "Server",
+                "PlayerJoin",
+                "PlayerLeave",
+                "PlayerDeath",
+                "PlayerDamaged"
+            ]
         }
     ]
 }

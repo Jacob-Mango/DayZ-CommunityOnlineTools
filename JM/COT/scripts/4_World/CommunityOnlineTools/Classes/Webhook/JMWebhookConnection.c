@@ -1,6 +1,5 @@
 class JMWebhookConnection: Managed
 {
-	[NonSerialized()]
     private RestContext m_Context;
 
     string Name;
@@ -9,27 +8,19 @@ class JMWebhookConnection: Managed
 
     bool Enabled;
 
-    void Init( string ctxUrl, RestApi core )
+    void Init( RestApi core )
     {
-        if ( ContextURL != "" ) 
-            ctxUrl = ContextURL;
-
-        Print( ctxUrl );
-        m_Context = core.GetRestContext( ctxUrl );
+        m_Context = core.GetRestContext( ContextURL );
     }
 
-	void Post( string adr, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
+	void Post( notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
 	{
         if ( Enabled )
         {
-            if ( Address != "" ) 
-                adr = Address;
-
             string data = message.Prepare( serializer );
-            Print( data );
-            Print( adr );
+
             m_Context.SetHeader( "application/json" );
-            m_Context.POST( new JMWebhookCallback, adr, data );
+            m_Context.POST( new JMWebhookCallback, Address, data );
         }
 	}
 };

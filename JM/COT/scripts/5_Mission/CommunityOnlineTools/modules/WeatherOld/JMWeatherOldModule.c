@@ -53,6 +53,21 @@ class JMWeatherOldModule: JMRenderableModuleBase
 	{
 		return false;
 	}
+
+	override string GetWebhookTitle()
+	{
+		return "Weather Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Date" );
+		types.Insert( "Wind" );
+		types.Insert( "Overcast" );
+		types.Insert( "Fog" );
+		types.Insert( "Rain" );
+		types.Insert( "Storm" );
+	}
 	
 	void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
 	{
@@ -65,7 +80,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Date", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Date", sender, instance ) )
 			return;
 
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -75,6 +91,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
+			SendWebhook( "Date", instance, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
 		}
 	}
 
@@ -89,7 +106,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", sender, instance ) )
 			return;
 
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -99,6 +117,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Wind", instance, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -113,7 +132,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", sender, instance ) )
 			return;
 		
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -123,6 +143,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Overcast", instance, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -137,7 +158,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Fog", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Fog", sender, instance ) )
 			return;
 		
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -147,6 +169,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Fog", instance, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -161,7 +184,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Rain", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Rain", sender, instance ) )
 			return;
 		
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -171,6 +195,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Rain", instance, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
@@ -185,7 +210,8 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Storm", sender ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Storm", sender, instance ) )
 			return;
 		
 		if( type == CallType.Server && GetGame().IsMultiplayer() )
@@ -195,6 +221,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Storm", instance, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
 
