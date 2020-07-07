@@ -1,13 +1,19 @@
-class JMWebhookConnectionSerialize
+class JMWebhookConnectionTypeSerialize : Managed
+{
+    string Name;
+    bool Enabled;
+};
+
+class JMWebhookConnectionSerialize : Managed
 {
     string ContextURL;
     string Address;
 
-    ref array< string > Types;
+    ref array< ref JMWebhookConnectionTypeSerialize > Types;
 
     void JMWebhookConnectionSerialize()
     {
-        Types = new array< string >;
+        Types = new array< ref JMWebhookConnectionTypeSerialize >;
     }
 
     void ~JMWebhookConnectionSerialize()
@@ -17,7 +23,7 @@ class JMWebhookConnectionSerialize
     }
 };
 
-class JMWebhookModuleSerialize
+class JMWebhookModuleSerialize : Managed
 {
     ref array< ref JMWebhookConnectionSerialize > Connections;
 
@@ -82,12 +88,7 @@ class JMWebhookModule: JMModuleBase
 
                 for ( int j = 0; j < serialize.Connections[i].Types.Count(); ++j )
                 {
-                    string name = serialize.Connections[i].Types[j];
-
-                    ref JMWebhookConnection connection = new JMWebhookConnection;
-                    connection.Name = name;
-                    connection.ContextURL = contextURL;
-                    connection.Address = address;
+                    string name = serialize.Connections[i].Types[j].Name;
 
                     array< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
                     if ( !connections )
@@ -95,6 +96,12 @@ class JMWebhookModule: JMModuleBase
                         connections = new array< JMWebhookConnection >;
                         m_ConnectionMap.Insert( name, connections );
                     }
+
+                    ref JMWebhookConnection connection = new JMWebhookConnection;
+                    connection.Name = name;
+                    connection.ContextURL = contextURL;
+                    connection.Address = address;
+                    connection.Enabled = serialize.Connections[i].Types[j].Enabled;
 
                     connections.Insert( connection );
                     m_Connections.Insert( connection );
@@ -126,7 +133,7 @@ class JMWebhookModule: JMModuleBase
 	{
         auto message = CreateDiscordMessage();
                 
-        message.GetEmbed().AddField( "Server Status", "Online" );
+        message.GetEmbed().AddField( "Server Status", "Server is starting up." );
 
         Post( "Server", message );
 	}
@@ -137,7 +144,7 @@ class JMWebhookModule: JMModuleBase
         
         for ( int i = 0; i < m_Connections.Count(); ++i )
         {
-            bool found = false;
+            JMWebhookConnectionSerialize conn = NULL;
 
             for ( int j = 0; j < serialize.Connections.Count(); ++j )
             {
@@ -146,18 +153,22 @@ class JMWebhookModule: JMModuleBase
                 if ( serialize.Connections[j].Address != m_Connections[i].Address )
                     continue;
                 
-                found = true;
-
-                serialize.Connections[j].Types.Insert( m_Connections[i].Name );
+                conn = serialize.Connections[j];
+                break;
             }
 
-            if ( !found )
+            if ( !conn )
             {
-                JMWebhookConnectionSerialize conn = new JMWebhookConnectionSerialize;
+                conn = new JMWebhookConnectionSerialize;
                 conn.ContextURL = m_Connections[i].ContextURL;
                 conn.Address = m_Connections[i].Address;
                 serialize.Connections.Insert( conn );
             }
+
+            JMWebhookConnectionTypeSerialize typeSerialize = new JMWebhookConnectionTypeSerialize();
+            typeSerialize.Name = m_Connections[i].Name;
+            typeSerialize.Enabled = m_Connections[i].Enabled;
+            conn.Types.Insert( typeSerialize );
         }
 
 		JsonFileLoader< JMWebhookModuleSerialize >.JsonSaveFile( JMConstants.FILE_WEBHOOK, serialize );
@@ -167,7 +178,7 @@ class JMWebhookModule: JMModuleBase
     {
         auto message = CreateDiscordMessage();
 
-        message.GetEmbed().AddField( "Server Status", "Offline" );
+        message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
 
         Post( "Server", message );
     }
