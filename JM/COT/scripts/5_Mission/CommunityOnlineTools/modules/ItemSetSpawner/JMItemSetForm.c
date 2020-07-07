@@ -47,23 +47,16 @@ class JMItemSetForm extends JMFormBase
 
 			UIActionManager.CreateText( wrapper, name );
 			
-			UIActionButton selButton = UIActionManager.CreateButton( wrapper, "Selected Player(s)", this, "SpawnOnPlayers" );
+			UIActionButton selButton = UIActionManager.CreateButton( wrapper, "#STR_COT_ITEMSET_MODULE_SPAWN_SELECTED_PLAYERS", this, "SpawnOnPlayers" );
 			selButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( selButton );
 
-			UIActionButton curButton = UIActionManager.CreateButton( wrapper, "Cursor", this, "SpawnOnCursor" );
+			UIActionButton curButton = UIActionManager.CreateButton( wrapper, "#STR_COT_ITEMSET_MODULE_SPAWN_CURSOR", this, "SpawnOnCursor" );
 			curButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( curButton );
 		}
 
 		m_sclr_MainActions.UpdateScroller();
-	}
-
-	override void OnHide() 
-	{
-		//m_ItemSetButtons.Clear();
-		//
-		//m_sclr_MainActions.UpdateScroller();
 	}
 
 	void SpawnOnPlayers( UIEvent eid, ref UIActionBase action ) 

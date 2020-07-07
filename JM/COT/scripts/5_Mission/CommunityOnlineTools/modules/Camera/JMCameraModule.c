@@ -42,7 +42,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Camera Tool";
+		return "#STR_COT_CAMERA_MODULE_NAME";
 	}
 	
 	override string GetImageSet()

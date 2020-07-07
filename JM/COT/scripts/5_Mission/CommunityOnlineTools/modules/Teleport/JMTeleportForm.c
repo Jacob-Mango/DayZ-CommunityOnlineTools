@@ -30,7 +30,7 @@ class JMTeleportForm extends JMFormBase
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "Filter: ", this, "Type_UpdateList" );
+		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
 
 		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
@@ -45,10 +45,10 @@ class JMTeleportForm extends JMFormBase
 
 		if ( GetGame().IsServer() )
 		{
-			m_Teleport = UIActionManager.CreateButton( rows, "Teleport", this, "Click_Teleport" );
+			m_Teleport = UIActionManager.CreateButton( rows, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
 		} else
 		{
-			m_Teleport = UIActionManager.CreateButton( rows, "Teleport Selected Player(s)", this, "Click_Teleport" );
+			m_Teleport = UIActionManager.CreateButton( rows, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
 		}
 	}
 
