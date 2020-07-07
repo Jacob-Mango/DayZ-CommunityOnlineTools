@@ -15,6 +15,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor.NoLog" );
 	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
 	}
@@ -128,9 +130,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		float distance = vector.Distance( currentPosition, hitPos );
 
+
 		if ( distance <= 1000 )
 		{
-			Position( hitPos );
+			Position( hitPos, true );
 		} else
 		{
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
@@ -210,35 +213,49 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	void Position( vector position )
+	void Position( vector position, bool isCursor = false )
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_Position( position, PlayerBase.Cast( GetGame().GetPlayer() ) );
+			Server_Position( position, isCursor, PlayerBase.Cast( GetGame().GetPlayer() ) );
 		} else if ( IsMissionClient() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
+			if ( !isCursor && !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
+			rpc.Write( isCursor );
 			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
 		}
 	}
 
-	private void Server_Position( vector position, PlayerBase player )
+	private void Server_Position( vector position, bool isCursor, PlayerBase player )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity(), instance ) )
-			return;
+		bool shouldLog = true;
+		if ( isCursor )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
+				return;
+
+			shouldLog = !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", player.GetIdentity() );
+		} else
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity(), instance ) )
+				return;
+		}
 
 		SetPlayerPosition( player, position );
 
 		// COTCreateNotification( player.GetIdentity(), new StringLocaliser( "Teleported to position " + position.ToString() ) );
 
-		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
-	
-		SendWebhook( instance, "Teleported to position " + position.ToString() );
+		if ( shouldLog )
+		{
+			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+		
+			SendWebhook( instance, "Teleported to position " + position.ToString() );
+		}
 	}
 
 	private void RPC_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -249,12 +266,15 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( pos ) )
 				return;
 
-			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
+			bool isCursor;
+			if ( !ctx.Read( isCursor ) )
+				return;
 
+			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 			if ( !player )
 				return;
 
-			Server_Position( pos, player );
+			Server_Position( pos, isCursor, player );
 		}
 	}
 
