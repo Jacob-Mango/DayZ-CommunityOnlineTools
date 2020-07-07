@@ -475,6 +475,11 @@ class JMPlayerInstance : Managed
 		return m_Name;
 	}
 
+	string FormatSteamWebhook()
+	{
+		return "[" + m_Name + "](https://steamcommunity.com/profiles/" + m_Steam64ID + ")";
+	}
+
 	int GetMaxPing()
 	{
 		return m_PingMax;

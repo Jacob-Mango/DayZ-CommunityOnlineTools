@@ -314,8 +314,7 @@ class COTModule : JMModuleBase
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
-		Assert_Null( instance );
-		if ( instance )
+		if ( !Assert_Null( instance ) )
 		{
 			instance.PlayerObject = player;
 		}
@@ -335,8 +334,7 @@ class COTModule : JMModuleBase
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
-		Assert_Null( instance );
-		if ( instance )
+		if ( !Assert_Null( instance ) )
 		{
 			instance.PlayerObject = player;
 		}

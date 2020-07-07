@@ -9,7 +9,7 @@ enum JMTeleportModuleRPC
 
 class JMTeleportModule: JMRenderableModuleBase
 {
-	private ref JMTeleportSerialize settings;
+	private ref JMTeleportSerialize m_Settings;
 	
 	void JMTeleportModule()
 	{
@@ -49,6 +49,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return false;
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Teleport Module";
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -60,14 +65,14 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnSettingsUpdated();
 
-		if ( settings )
+		if ( m_Settings )
 		{
-			if ( !settings.Locations )
+			if ( !m_Settings.Locations )
 				return;
 
-			for ( int i = 0; i < settings.Locations.Count(); i++ )
+			for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
 			{
-				JMTeleportLocation location = settings.Locations[i];
+				JMTeleportLocation location = m_Settings.Locations[i];
 
 				string permission = location.Permission;
 				permission.Replace( " ", "." );
@@ -80,8 +85,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() && settings )
-			settings.Save();
+		if ( GetGame().IsServer() && m_Settings )
+			m_Settings.Save();
 	}
 
 	override void RegisterKeyMouseBindings() 
@@ -93,7 +98,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	array< ref JMTeleportLocation > GetLocations()
 	{
-		return settings.Locations;
+		return m_Settings.Locations;
 	}
 
 	void Input_Cursor( UAInput input )
@@ -176,7 +181,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
 		} else
 		{
-			settings = JMTeleportSerialize.Load();
+			m_Settings = JMTeleportSerialize.Load();
 
 			OnSettingsUpdated();
 		}
@@ -185,7 +190,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( settings );
+		rpc.Write( m_Settings );
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
 	}
 
@@ -198,7 +203,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			if ( ctx.Read( settings ) )
+			if ( ctx.Read( m_Settings ) )
 			{
 				OnSettingsUpdated();
 			}
@@ -223,7 +228,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_Position( vector position, PlayerBase player )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity() ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity(), instance ) )
 			return;
 
 		SetPlayerPosition( player, position );
@@ -231,6 +237,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		// COTCreateNotification( player.GetIdentity(), new StringLocaliser( "Teleported to position " + position.ToString() ) );
 
 		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+	
+		SendWebhook( instance, "Teleported to position " + position.ToString() );
 	}
 
 	private void RPC_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -275,7 +283,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident, instance ) )
 			return;
 
 		JMTeleportLocation location = NULL;
@@ -314,6 +323,9 @@ class JMTeleportModule: JMRenderableModuleBase
 			SetPlayerPosition( player, tempPos );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
+			SendWebhook( instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+
+			players[i].Update();
 		}
 	}
 

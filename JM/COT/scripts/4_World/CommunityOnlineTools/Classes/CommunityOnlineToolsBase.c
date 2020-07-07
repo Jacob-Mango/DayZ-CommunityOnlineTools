@@ -7,6 +7,8 @@ class CommunityOnlineToolsBase
 
 	private string m_FileLogName;
 
+	private JMWebhookModule m_Webhook;
+
 	void CommunityOnlineToolsBase()
 	{
 		m_Loaded = false;
@@ -60,6 +62,8 @@ class CommunityOnlineToolsBase
 		}
 
 		CreateNewLog();
+
+		Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
 	}
 
 	void OnFinish()

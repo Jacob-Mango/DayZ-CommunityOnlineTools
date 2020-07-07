@@ -193,7 +193,7 @@ class JMESPMeta : Managed
 		if ( health == -1 )
 			return;
 
-		module.SetHealth( health, target );
+		module.SetHealth( health, "", target );
 	}
 
 	void Action_Delete( UIEvent eid, ref UIActionBase action )
