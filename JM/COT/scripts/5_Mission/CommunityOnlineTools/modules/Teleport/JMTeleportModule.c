@@ -38,7 +38,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Teleport";
+		return "#STR_COT_TELEPORT_MODULE_NAME";
 	}
 	
 	override string GetIconName()

@@ -36,32 +36,32 @@ class JMESPForm extends JMFormBase
 
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
-		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "Toggle", this, "Click_UpdateESP" );
+		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE", this, "Click_UpdateESP" );
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 
-		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "Auto refresh", this, "Click_UpdateAtRate" );
+		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate" );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
-		m_sldr_Refresh.SetAppend(" second(s)");
+		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "Radius", 0, 1000, this, "Change_Range" );
+		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, 1000, this, "Change_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
-		m_sldr_Radius.SetAppend(" metre(s)");
+		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		UIActionManager.CreateEditableText( filterSpacer, "Class Filter: ", this, "Change_Filter", m_Module.Filter );
+		UIActionManager.CreateEditableText( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
-		UIActionManager.CreateText( headingSpacer, "Filters: ", "" );
-		//UIActionManager.CreateText( headingSpacer, "Actions: ", "" );
+		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_FILTERS_HEADER", "" );
+		//UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER: ", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -109,11 +109,11 @@ class JMESPForm extends JMFormBase
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
-		UIActionManager.CreateButton( container, "Make Item Set", this, "Click_MakeItemSet" );
-		UIActionManager.CreateButton( container, "Duplicate All", this, "Click_DuplicateAll" );
-		UIActionManager.CreateButton( container, "Delete All", this, "Click_DeleteAll" );
-		UIActionManager.CreateButton( container, "Move To Cursor (Relative)", this, "Click_MoveToCursorRelative" );
-		UIActionManager.CreateButton( container, "Move To Cursor (Absolute)", this, "Click_MoveToCursorAbsolute" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 		*/
@@ -164,19 +164,19 @@ class JMESPForm extends JMFormBase
 
 		if ( m_Module.GetState() != JMESPState.Remove )
 		{
-			m_btn_Toggle.SetButton( "Clear ESP" );
+			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
 
 			m_sldr_Refresh.Disable();
 		} else
 		{
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
-				m_btn_Toggle.SetButton( "Show ESP" );
+				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Enable();
 			} else
 			{
-				m_btn_Toggle.SetButton( "Show ESP" );
+				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Disable();
 			}
@@ -266,7 +266,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( "Item Set", "What do you want to call this item set?", "Cancel", "MakeItemSet_Cancel", "Create", "MakeItemSet_Create" ).ShowEditBox();
+		CreateConfirmation_Two( "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_CANCEL", "MakeItemSet_Cancel", "#STR_COT_CREATE", "MakeItemSet_Create" ).ShowEditBox();
 	
 	}
 

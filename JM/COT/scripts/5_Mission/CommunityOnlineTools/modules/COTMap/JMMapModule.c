@@ -31,7 +31,7 @@ class JMMapModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Map";
+		return "#STR_COT_MAP_MODULE_NAME";
 	}
 	
 	override string GetIconName()

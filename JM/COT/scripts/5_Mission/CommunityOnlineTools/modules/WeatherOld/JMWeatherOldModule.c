@@ -41,7 +41,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 	
 	override string GetTitle()
 	{
-		return "Weather (TEMP)";
+		return "#STR_COT_WEATHER_MODULE_NAME";
 	}
 	
 	override string GetIconName()

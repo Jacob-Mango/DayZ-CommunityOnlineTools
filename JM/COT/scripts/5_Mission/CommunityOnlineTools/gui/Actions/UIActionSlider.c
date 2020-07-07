@@ -11,8 +11,7 @@ class UIActionSlider extends UIActionBase
 
 	protected float m_Current;
 
-	protected string m_Prepend;
-	protected string m_Append;
+	protected string m_Format;
 
 	override void OnInit() 
 	{
@@ -46,14 +45,9 @@ class UIActionSlider extends UIActionBase
 		return m_Value;
 	}
 
-	void SetPrepend( string prepend )
+	void SetFormat( string format )
 	{
-		m_Prepend = prepend;
-	}
-
-	void SetAppend( string append )
-	{
-		m_Append = append;
+		m_Format = format;
 	}
 
 	override void SetLabel( string text )
@@ -149,7 +143,7 @@ class UIActionSlider extends UIActionBase
 			}
 		}
 
-		m_Value.SetText( m_Prepend + m_Current + m_Append );
+		m_Value.SetText( string.Format( Widget.TranslateString( m_Format ), m_Current ) );
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )

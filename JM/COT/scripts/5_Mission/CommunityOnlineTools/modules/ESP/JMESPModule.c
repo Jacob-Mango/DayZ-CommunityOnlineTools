@@ -95,7 +95,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "ESP Tools";
+		return "#STR_COT_ESP_MODULE_NAME";
 	}
 	
 	override string GetIconName()
