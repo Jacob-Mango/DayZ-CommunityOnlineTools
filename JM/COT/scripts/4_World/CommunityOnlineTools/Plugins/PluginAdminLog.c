@@ -4,15 +4,9 @@ modded class PluginAdminLog
 
     private string m_LoggingType;
 
-	void InitWebhook()
+	void SetWebhook( ref JMWebhookModule webhook )
 	{
-		if ( IsMissionOffline() )
-		{
-			m_Webhook = NULL;
-		} else
-		{
-			Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
-		}
+        m_Webhook = webhook;
     }
 
 	override void PlayerKilled( PlayerBase player, Object source )  

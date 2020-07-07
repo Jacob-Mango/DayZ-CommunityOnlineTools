@@ -72,7 +72,56 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				RPC_UpdateRole( ctx, sender, target );
 				break;
 			}
+		} else if ( rpc_type > JMPermissionRPC.INVALID && rpc_type < JMPermissionRPC.COUNT )
+		{
+			switch ( rpc_type )
+			{
+			}
+		} else if ( rpc_type > JMCOTRPC.INVALID && rpc_type < JMCOTRPC.COUNT )
+		{
+			switch ( rpc_type )
+			{
+			case JMCOTRPC.Active:
+				RPC_Active( ctx, sender, target );
+				break;
+			}
 		}
+	}
+
+	override void OnCOTActiveChanged( bool active )
+	{
+		if ( active )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_ON" ) );
+		} else
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_OFF" ) );
+		}
+
+		if ( GetGame().IsClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( active );
+			rpc.Send( NULL, JMCOTRPC.Active, true, NULL );
+		}
+	}
+
+	private void RPC_Active( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool active;
+		if ( !ctx.Read( active ) )
+			return;
+
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( senderRPC.GetId() );
+
+        auto message = m_Webhook.CreateDiscordMessage();
+        
+		if ( active )
+        	message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has activated Community Online Tools" );
+		else
+        	message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has de-activated Community Online Tools" );
+
+        m_Webhook.Post( "AdminActive", message );
 	}
 
 	override void RefreshClients()

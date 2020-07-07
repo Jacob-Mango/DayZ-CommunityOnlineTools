@@ -80,7 +80,7 @@ class JMWebhookModule: JMModuleBase
         PluginAdminLog adminLog;
         if ( Class.CastTo( adminLog, GetPlugin( PluginAdminLog ) ) )
         {
-            adminLog.InitWebhook();
+            adminLog.SetWebhook( this );
         }
     }
 
@@ -209,6 +209,8 @@ class JMWebhookModule: JMModuleBase
         AddConnection( "PlayerLeave" );
         AddConnection( "PlayerDeath" );
         AddConnection( "PlayerDamage" );
+
+        AddConnection( "AdminActive" );
     }
 
     void AddConnection( string name, string context = "", string address = "", bool enabled = true )
