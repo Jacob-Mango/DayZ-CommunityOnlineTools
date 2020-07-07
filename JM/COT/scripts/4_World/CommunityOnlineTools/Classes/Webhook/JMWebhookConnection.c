@@ -23,4 +23,27 @@ class JMWebhookConnection: Managed
             m_Context.POST( new JMWebhookCallback, Address, data );
         }
 	}
+
+    string DebugString()
+    {
+        string str = "";
+        if ( m_Context )
+            str += "CTX CREATED";
+        else
+            str += "CTX NOT CREATED";
+
+        str += ":";
+        str += Name;
+        str += ":";
+        str += ContextURL;
+        str += ":";
+        str += Address;
+        str += ":";
+        if ( Enabled )
+            str += "TRUE";
+        else 
+            str += "FALSE";
+
+        return str;
+    }
 };
