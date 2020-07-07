@@ -297,6 +297,15 @@ class COTModule : JMModuleBase
 			instance.PlayerObject = player;
 
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
+
+			if ( m_Webhook )
+			{
+				auto msg = m_Webhook.CreateDiscordMessage();
+
+				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has joined the server.", false );
+
+				m_Webhook.Post( "PlayerJoin", msg );
+			}
 		}
 
 		Print( "-COTModule::OnInvokeConnect - " + identity.GetId() );
@@ -351,13 +360,18 @@ class COTModule : JMModuleBase
 
 		Assert_Null( GetPermissionsManager() );
 
-		// VPP Admin tool behaviour breaks the uid
-		if ( uid.Length() == 17 )
-			uid = GetPermissionsManager().GetGUIDForSteam( uid );
-
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
 		{
+			if ( m_Webhook )
+			{
+				auto msg = m_Webhook.CreateDiscordMessage();
+
+				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has left the server.", false );
+
+				m_Webhook.Post( "PlayerLeave", msg );
+			}
+
 			GetCommunityOnlineToolsBase().RemoveClient( uid );
 		}
 

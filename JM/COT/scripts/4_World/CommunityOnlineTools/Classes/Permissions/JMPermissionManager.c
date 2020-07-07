@@ -202,7 +202,7 @@ class JMPermissionManager
 		return HasPermission( permission, ihp, instance );
 	}
 
-	bool HasPermission( string permission, notnull PlayerIdentity identity, out JMPlayerInstance instance )
+	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
 	{		
 		if ( IsMissionClient() ) 
 		{

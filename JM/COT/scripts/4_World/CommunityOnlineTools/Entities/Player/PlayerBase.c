@@ -8,8 +8,13 @@ modded class PlayerBase
 	private bool m_JMIsInvisible;
 	private bool m_JMIsInvisibleRemoteSynch;
 
+	private bool m_JMIsFrozen;
+	private bool m_JMIsFrozenRemoteSynch;
+
 	private vector m_JMLastPosition;
 	private bool m_JMHasLastPosition;
+
+	private bool m_JMHasUnlimitedAmmo;
 
 	override void Init()
 	{
@@ -35,6 +40,7 @@ modded class PlayerBase
 		super.Init();
 
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
 
@@ -58,6 +64,15 @@ modded class PlayerBase
 			}
 
 			//SetInvisible( m_JMIsInvisible );
+		}
+
+		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
+		{
+			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
+
+			HumanInputController hic = GetInputController();
+			if ( hic )
+				hic.SetDisabled( m_JMIsFrozen );
 		}
 	}
 
@@ -97,6 +112,9 @@ modded class PlayerBase
 
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
+		if ( m_AuthenticatedPlayer )
+			return m_AuthenticatedPlayer;
+
 		if ( !GetIdentity() ) // Could be AI
 			return NULL;
 
@@ -117,6 +135,11 @@ modded class PlayerBase
 		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
 	}
+	
+	string FormatSteamWebhook()
+	{
+		return GetAuthenticatedPlayer().FormatSteamWebhook();
+	}
 
 	bool HasGodMode()
 	{
@@ -126,6 +149,11 @@ modded class PlayerBase
 	bool IsInvisible()
 	{
 		return m_JMIsInvisible;
+	}
+
+	bool HasUnlimitedAmmo()
+	{
+		return m_JMHasUnlimitedAmmo;
 	}
 
 	void SetGodMode( bool mode )
@@ -138,7 +166,22 @@ modded class PlayerBase
 		}
 	}
 
-	void SetInvisibility(bool mode)
+	void SetFreeze( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMIsFrozen = mode;
+			m_JMIsFrozenRemoteSynch = mode;
+
+			SetSynchDirty();
+
+			HumanInputController hic = GetInputController();
+			if ( hic )
+				hic.SetDisabled( m_JMIsFrozen );
+		}
+	}
+
+	void SetInvisibility( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -146,6 +189,14 @@ modded class PlayerBase
 			m_JMIsInvisibleRemoteSynch = mode;
 
 			SetSynchDirty();
+		}
+	}
+
+	void SetUnlimitedAmmo( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasUnlimitedAmmo = mode;
 		}
 	}
 }

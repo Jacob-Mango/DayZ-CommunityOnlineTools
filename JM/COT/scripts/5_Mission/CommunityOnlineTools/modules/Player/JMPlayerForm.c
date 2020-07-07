@@ -47,6 +47,12 @@ class JMPlayerForm extends JMFormBase
 	private bool m_BloodyHandsUpdated;
 	private UIActionCheckbox m_GodMode;
 	private bool m_GodModeUpdated;
+	private UIActionCheckbox m_Freeze;
+	private bool m_FreezeUpdated;
+	private UIActionCheckbox m_Invisibility;
+	private bool m_InvisibilityUpdated;
+	private UIActionCheckbox m_UnlimitedAmmo;
+	private bool m_UnlimitedAmmoUpdated;
 
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
@@ -282,9 +288,12 @@ class JMPlayerForm extends JMFormBase
 		m_Water = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", this, "Click_SetWater", "", "" );
 		m_Stamina = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", this, "Click_SetStamina", "", "" );
 
-		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_SetBloodyHands", false );
-		m_GodMode = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_SetGodMode", false );
-
+		m_BloodyHands = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_BloodyHands", false );
+		m_GodMode = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_GodMode", false );
+		m_Freeze = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
+		//m_Invisibility = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
+		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
+		
 		m_ApplyStats = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
 
 		m_Health.SetOnlyNumbers( true );
@@ -701,6 +710,7 @@ class JMPlayerForm extends JMFormBase
 		m_StaminaUpdated = false;
 		m_BloodyHandsUpdated = false;
 		m_GodModeUpdated = false;
+		m_UnlimitedAmmoUpdated = false;
 		
 		m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
 		m_Blood.SetText( m_SelectedInstance.GetBlood().ToString() );
@@ -711,6 +721,7 @@ class JMPlayerForm extends JMFormBase
 
 		m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
 		m_GodMode.SetChecked( m_SelectedInstance.HasGodMode() );
+		m_UnlimitedAmmo.SetChecked( m_SelectedInstance.HasUnlimitedAmmo() );
 	}
 
 	void RefreshTeleports()
@@ -734,56 +745,88 @@ class JMPlayerForm extends JMFormBase
 		{
 			m_HealthUpdated = false;
 
-			m_Module.SetHealth( ToFloat( m_Health.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Health )
+				m_Module.SetHealth( ToFloat( m_Health.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_BloodUpdated )
 		{
 			m_BloodUpdated = false;
 
-			m_Module.SetBlood( ToFloat( m_Blood.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Blood )
+				m_Module.SetBlood( ToFloat( m_Blood.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_EnergyUpdated )
 		{
 			m_EnergyUpdated = false;
 
-			m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Energy )
+				m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_WaterUpdated )
 		{
 			m_WaterUpdated = false;
 
-			m_Module.SetWater( ToFloat( m_Water.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Water )
+				m_Module.SetWater( ToFloat( m_Water.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_ShockUpdated )
 		{
 			m_ShockUpdated = false;
 
-			m_Module.SetShock( ToFloat( m_Shock.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Shock )
+				m_Module.SetShock( ToFloat( m_Shock.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_StaminaUpdated )
 		{
 			m_StaminaUpdated = false;
 
-			m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), JM_GetSelected().GetPlayers() );
+			if ( m_Stamina )
+				m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_BloodyHandsUpdated )
 		{
 			m_BloodyHandsUpdated = false;
 
-			m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), JM_GetSelected().GetPlayers() );
+			if ( m_BloodyHands )
+				m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_GodModeUpdated )
 		{
 			m_GodModeUpdated = false;
 
-			m_Module.SetGodMode( m_GodMode.IsChecked(), JM_GetSelected().GetPlayers() );
+			if ( m_GodMode )
+				m_Module.SetGodMode( m_GodMode.IsChecked(), JM_GetSelected().GetPlayers() );
+		}
+
+		if ( m_FreezeUpdated )
+		{
+			m_FreezeUpdated = false;
+
+			if ( m_Freeze )
+				m_Module.SetFreeze( m_Freeze.IsChecked(), JM_GetSelected().GetPlayers() );
+		}
+
+		if ( m_InvisibilityUpdated )
+		{
+			m_InvisibilityUpdated = false;
+
+			if ( m_Invisibility )
+				m_Module.SetInvisible( m_Invisibility.IsChecked(), JM_GetSelected().GetPlayers() );
+		}
+
+		if ( m_UnlimitedAmmoUpdated )
+		{
+			m_UnlimitedAmmoUpdated = false;
+
+			if ( m_UnlimitedAmmo )
+				m_Module.SetUnlimitedAmmo( m_UnlimitedAmmo.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
 	}
 
@@ -835,7 +878,7 @@ class JMPlayerForm extends JMFormBase
 		m_StaminaUpdated = true;
 	}
 
-	void Click_SetBloodyHands( UIEvent eid, ref UIActionBase action )
+	void Click_BloodyHands( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -843,12 +886,36 @@ class JMPlayerForm extends JMFormBase
 		m_BloodyHandsUpdated = true;
 	}
 
-	void Click_SetGodMode( UIEvent eid, ref UIActionBase action )
+	void Click_GodMode( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
 		m_GodModeUpdated = true;
+	}
+
+	void Click_Freeze( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_FreezeUpdated = true;
+	}
+
+	void Click_Invisible( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_InvisibilityUpdated = true;
+	}
+
+	void Click_UnlimitedAmmo( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_UnlimitedAmmoUpdated = true;
 	}
 
 	void HideUI()

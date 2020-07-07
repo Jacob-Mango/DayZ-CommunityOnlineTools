@@ -225,8 +225,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			flags |= 0x800;
 
 		EntityAI ent;
-		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
-		if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
 		vector tmItem[4];
@@ -319,8 +318,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				vector position = instance.PlayerObject.GetPosition();
 		
-				//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
-				if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
+				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 					continue;
 
 				vector tmItem[4];

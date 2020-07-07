@@ -38,6 +38,8 @@ class JMPlayerInstance : Managed
 	private bool m_GodMode;
 	private bool m_Invisibility;
 
+	private bool m_UnlimitedAmmo;
+
 	private ref JMPlayerSerialize m_PlayerFile;
 
 	void JMPlayerInstance( PlayerIdentity identity )
@@ -116,6 +118,7 @@ class JMPlayerInstance : Managed
 				m_BloodyHands = PlayerObject.HasBloodyHands();
 				m_GodMode = PlayerObject.HasGodMode();
 				m_Invisibility = PlayerObject.IsInvisible();
+				m_UnlimitedAmmo = PlayerObject.HasUnlimitedAmmo();
 			}
 		}
 	}
@@ -328,6 +331,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_BloodyHands );
 		ctx.Write( m_GodMode );
 		ctx.Write( m_Invisibility );
+		ctx.Write( m_UnlimitedAmmo );
 	}
 
 	void OnRecieveHealth( ref ParamsReadContext ctx )
@@ -346,6 +350,7 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_BloodyHands );
 		ctx.Read( m_GodMode );
 		ctx.Read( m_Invisibility );
+		ctx.Read( m_UnlimitedAmmo );
 	}
 
 	void Save()
@@ -575,4 +580,8 @@ class JMPlayerInstance : Managed
 		return m_Invisibility;
 	}
 
+	bool HasUnlimitedAmmo()
+	{
+		return m_UnlimitedAmmo;
+	}
 }

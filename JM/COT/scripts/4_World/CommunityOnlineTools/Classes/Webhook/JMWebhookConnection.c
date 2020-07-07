@@ -8,15 +8,15 @@ class JMWebhookConnection: Managed
 
     bool Enabled;
 
-    void Init( RestApi core )
-    {
-        m_Context = core.GetRestContext( ContextURL );
-    }
-
-	void Post( notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
+	void Post( RestApi core, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
 	{
         if ( Enabled )
         {
+            if ( !m_Context )
+            {
+                m_Context = core.GetRestContext( ContextURL );
+            }
+
             string data = message.Prepare( serializer );
 
             m_Context.SetHeader( "application/json" );
