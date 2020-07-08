@@ -113,6 +113,7 @@ class UIActionDropdownList extends UIActionBase
 
         m_Items.Clear();
         m_Items.Copy( items );
+        m_Items.Insert( "" );
 
         UpdateText();
     }
@@ -194,6 +195,9 @@ class UIActionDropdownList extends UIActionBase
 		{
 			item = "" + m_Items[i];
             item.ToLower();
+
+            if ( item == "" )
+                continue;
 
             if ( pText != "" && !item.Contains( pText ) )
                 continue;

@@ -11,7 +11,6 @@ enum JMWebhookCOTModuleRPC
 
 class JMWebhookCOTModule: JMRenderableModuleBase
 {
-
 	void JMWebhookCOTModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Webhook.View" );

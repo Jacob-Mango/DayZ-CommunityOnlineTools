@@ -3,14 +3,18 @@ class JMWebhookForm extends JMFormBase
 	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
 
+	private ref array< ref JMWebhookSection > m_Sections;
+
 	private JMWebhookCOTModule m_Module;
 
 	void JMWebhookForm()
 	{
+		m_Sections = new array< ref JMWebhookSection >;
 	}
 
 	void ~JMWebhookForm()
 	{
+		delete m_Sections;
 	}
 
 	protected override bool SetModule( ref JMRenderableModuleBase mdl )
