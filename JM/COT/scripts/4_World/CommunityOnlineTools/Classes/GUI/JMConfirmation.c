@@ -1,3 +1,10 @@
+enum JMConfirmationType
+{
+	INFO = 0,
+	EDIT,
+	SELECTION
+};
+
 class JMConfirmation extends ScriptedWidgetEventHandler 
 {
 	private Widget layoutRoot;
@@ -115,9 +122,11 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		return false;
 	}
 
-	void CreateConfirmation_One( string title, string message, string button1Title, string button1Callback )
+	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
 	{
 		layoutRoot.Show( true );
+
+		UpdateType( type );
 
 		m_Buttons1Panel.Show( true );
 
@@ -136,9 +145,11 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		}
 	}
 
-	void CreateConfirmation_Two( string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
+	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{		
 		layoutRoot.Show( true );
+
+		UpdateType( type );
 
 		m_Buttons2Panel.Show( true );
 
@@ -165,9 +176,11 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		}
 	}
 
-	void CreateConfirmation_Three( string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
+	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{		
 		layoutRoot.Show( true );
+
+		UpdateType( type );
 
 		m_Buttons3Panel.Show( true );
 
@@ -203,9 +216,20 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		}
 	}
 
-	void ShowEditBox()
+	void UpdateType( JMConfirmationType type )
 	{
-		m_EditBox.Show( true );
+		switch ( type )
+		{
+		case JMConfirmationType.INFO:
+			m_EditBox.Show( false );
+			break;
+		case JMConfirmationType.EDIT:
+			m_EditBox.Show( true );
+			break;
+		case JMConfirmationType.SELECTION:
+			m_EditBox.Show( false );
+			break;
+		}
 	}
 
 	void Close()

@@ -86,16 +86,19 @@ class JMWebhookModule: JMModuleBase
 
 	override void OnMissionStart()
 	{
+        array< string > types = new array< string >;
+        int i = 0;
+
 		if ( FileExist( JMConstants.FILE_WEBHOOK ) )
 		{
             JMWebhookModuleSerialize serialize = new JMWebhookModuleSerialize;
 
 			JsonFileLoader< JMWebhookModuleSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, serialize );
 
-            for ( int i = 0; i < serialize.Connections.Count(); ++i )
+            for ( i = serialize.Connections.Count() - 1; i >= 0; --i )
             {
-                string contextURL = serialize.Connections[i].ContextURL;
-                string address = serialize.Connections[i].Address;
+                m_DefaultContextURL = serialize.Connections[i].ContextURL;
+                m_DefaultAddress = serialize.Connections[i].Address;
 
                 for ( int j = 0; j < serialize.Connections[i].Types.Count(); ++j )
                 {
@@ -110,8 +113,8 @@ class JMWebhookModule: JMModuleBase
 
                     ref JMWebhookConnection connection = new JMWebhookConnection;
                     connection.Name = name;
-                    connection.ContextURL = contextURL;
-                    connection.Address = address;
+                    connection.ContextURL = m_DefaultContextURL;
+                    connection.Address = m_DefaultAddress;
                     connection.Enabled = serialize.Connections[i].Types[j].Enabled;
 
                     connections.Insert( connection );
@@ -119,13 +122,22 @@ class JMWebhookModule: JMModuleBase
                 }
             }
 
-            OnConnectionSetup();
+            JMWebhookConstructor.Generate( types );
+            for ( i = 0; i < types.Count(); ++i )
+            {
+                AddConnection( types[i], m_DefaultContextURL, m_DefaultAddress );
+            }
 		} else 
 		{
             m_DefaultContextURL = "https://discordapp.com/api/webhooks/";
             m_DefaultAddress = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
 
-            OnConnectionSetup();
+            JMWebhookConstructor.Generate( types );
+            for ( i = 0; i < types.Count(); ++i )
+            {
+                AddConnection( types[i], m_DefaultContextURL, m_DefaultAddress );
+            }
+
             SaveConnections();
 		}
 
@@ -186,34 +198,7 @@ class JMWebhookModule: JMModuleBase
         Post( "ServerShutdown", message );
     }
 
-    void OnConnectionSetup()
-    {
-        array< JMModuleBase > modules = GetModuleManager().GetAllModules();
-        for ( int i = 0; i < modules.Count(); ++i )
-        {
-            JMModuleBase module = modules[i]
-            AddConnection( module.GetModuleName() );
-
-            array< string > types = new array< string >;
-            module.GetWebhookTypes( types );
-            for ( int j = 0; j < types.Count(); ++j )
-            {
-                AddConnection( module.GetModuleName() + types[j] );
-            }
-        }
-
-        AddConnection( "ServerStartup" );
-        AddConnection( "ServerShutdown" );
-
-        AddConnection( "PlayerJoin" );
-        AddConnection( "PlayerLeave" );
-        AddConnection( "PlayerDeath" );
-        AddConnection( "PlayerDamage" );
-
-        AddConnection( "AdminActive" );
-    }
-
-    void AddConnection( string name, string context = "", string address = "", bool enabled = true )
+    private void AddConnection( string name, string context = "", string address = "", bool enabled = true )
     {
         array< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
         if ( !connections )
@@ -235,8 +220,8 @@ class JMWebhookModule: JMModuleBase
 
         JMWebhookConnection connection = new JMWebhookConnection();
         connection.Name = name;
-        connection.ContextURL = m_DefaultContextURL;
-        connection.Address = m_DefaultAddress;
+        connection.ContextURL = context;
+        connection.Address = address;
 
         if ( m_IsLoading )
         {

@@ -15,5 +15,6 @@ modded class JMModuleConstructor
 		// modules.Insert( JMWeatherModule );
 		modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
+		modules.Insert( JMWebhookCOTModule );
 	}
 }

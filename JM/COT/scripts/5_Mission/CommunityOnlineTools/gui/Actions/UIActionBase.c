@@ -11,6 +11,8 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	protected bool m_WasFocused;
 
+	protected bool m_LeftMouseDown;
+
 	protected ref UIActionData m_Data;
 
 	void ~UIActionBase()
@@ -74,6 +76,26 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Update( float timeSlice )
 	{
+		m_WasFocused = IsFocusWidget( GetFocus() );
+
+		if ( m_LeftMouseDown )
+		{
+			if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
+			{
+				m_LeftMouseDown = false;
+
+				if ( m_WasFocused && !IsFocusWidget( GetWidgetUnderCursor() ) )
+				{
+					SetFocus( NULL );
+				}
+			}
+		} else
+		{
+			if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) != 0 )
+			{
+				m_LeftMouseDown = true;
+			}
+		}
 	}
 
 	bool IsFocused()
@@ -81,41 +103,9 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		return m_WasFocused;
 	}
 
-	override bool OnFocus( Widget w, int x, int y )
-	{
-		if ( IsFocusWidget( w ) )
-		{
-			m_WasFocused = true;
-
-			return true;
-		}
-
-		return super.OnFocus( w, x, y );
-	}
-
-	override bool OnFocusLost( Widget w, int x, int y )
-	{
-		if ( IsFocusWidget( w ) )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateFocusState, 50, true );
-
-			return true;
-		}
-
-		return super.OnFocusLost( w, x, y );
-	}
-
 	bool IsFocusWidget( Widget widget )
 	{
 		return false;
-	}
-
-	void UpdateFocusState()
-	{
-		if ( IsFocusWidget( GetFocus() ) )
-			return;
-
-		m_WasFocused = false;
 	}
 
 	void UpdatePermission( string permission )
