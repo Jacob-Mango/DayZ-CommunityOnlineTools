@@ -4,13 +4,9 @@ class JMWebhookModule: JMModuleBase
 
     private RestApi m_Core;
 
-    private string m_DefaultContextURL;
-    private string m_DefaultAddress;
-
-    private bool m_IsLoading;
-
-    private ref array< ref JMWebhookConnection > m_Connections;
     private ref map< string, ref array< JMWebhookConnection > > m_ConnectionMap;
+
+    private JMWebhookSerialize m_Settings;
 
     void JMWebhookModule()
     {
@@ -20,17 +16,15 @@ class JMWebhookModule: JMModuleBase
     {
         delete m_Serializer;
 
-        delete m_Connections;
         delete m_ConnectionMap;
     }
 
     override void OnInit()
     {
-        m_IsLoading = false;
-
         m_Serializer = new JsonSerializer();
 
-        m_Connections = new array< ref JMWebhookConnection >();
+        m_Settings = GetCOTWebhookSettings();
+
         m_ConnectionMap = new map< string, ref array< JMWebhookConnection > >();
 
 		m_Core = CreateRestApi();
@@ -45,36 +39,42 @@ class JMWebhookModule: JMModuleBase
 
 	override void OnMissionStart()
 	{
-        JMWebhookSerialize serialize = new JMWebhookSerialize;
-
 		if ( FileExist( JMConstants.FILE_WEBHOOK ) )
 		{
-			serialize.Load();
-            serialize.Deserialize( m_Connections, m_ConnectionMap );
-
-            m_DefaultContextURL = "";
-            m_DefaultAddress = "";
+			m_Settings.Load();
 		} else
         {
-            m_DefaultContextURL = "https://discordapp.com/api/webhooks/";
-            m_DefaultAddress = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+            JMWebhookConnectionGroup group = m_Settings.Get( "Main" );
+
+        #ifdef JM_COT_WEBHOOK_DEBUG
+            group.ContextURL = "https://discordapp.com/api/webhooks/";
+            group.Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+        #else
+            group.ContextURL = "";
+            group.Address = "";
+        #endif
         }
 
         array< string > types = new array< string >;
         JMWebhookConstructor.Generate( types );
         for ( int i = 0; i < types.Count(); ++i )
         {
-            AddConnection( types[i], m_DefaultContextURL, m_DefaultAddress );
+        #ifdef JM_COT_WEBHOOK_DEBUG
+            AddConnection( types[i], "Main", true );
+        #else
+            AddConnection( types[i], "Main", false );
+        #endif
         }
 
-        serialize.Serialize( m_Connections );
-		serialize.Save();
+        FixConnectionMap();
 
-        m_IsLoading = false;
+		m_Settings.Save();
 	}
 
 	override void OnMissionLoaded()
 	{
+        super.OnMissionLoaded();
+
         auto message = CreateDiscordMessage();
                 
         message.GetEmbed().AddField( "Server Status", "Server is starting up." );
@@ -82,57 +82,111 @@ class JMWebhookModule: JMModuleBase
         Post( "ServerStartup", message );
 	}
 
-    void SaveConnections()
-    {
-        JMWebhookSerialize serialize = new JMWebhookSerialize;
-        serialize.Serialize( m_Connections );
-		serialize.Save();
-    }
-
-    override void OnMissionFinish()
-    {
+	override void OnMissionFinish()
+	{
         auto message = CreateDiscordMessage();
 
         message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
 
         Post( "ServerShutdown", message );
+        
+		m_Settings.Save();
     }
 
-    private void AddConnection( string name, string context = "", string address = "", bool enabled = true )
+    void SaveConnections()
     {
-        array< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
-        if ( !connections )
-        {
-            connections = new array< JMWebhookConnection >;
-            m_ConnectionMap.Insert( name, connections );
-        } else 
-        {
-            for ( int i = 0; i < connections.Count(); ++i )
-            {
-                if ( connections[i].ContextURL != context )
-                    continue;
-                if ( connections[i].Address != address )
-                    continue;
+        JMWebhookSerialize serialize = new JMWebhookSerialize;
+		m_Settings.Save();
+    }
 
-                return;
+    bool RemoveGroup( string name )
+    {
+        m_Settings.Remove( name );
+
+        FixConnectionMap();
+
+        return true;
+    }
+
+    void FixConnectionMap()
+    {
+        for ( int i = 0; i < m_ConnectionMap.Count(); ++i )
+        {
+            array< JMWebhookConnection > connections = m_ConnectionMap.GetElement( i );
+
+            for ( int j = 0; j < connections.Count(); ++j )
+            {
+                if ( connections[j] == NULL )
+                {
+                    connections.RemoveOrdered( j );
+                    j--;
+                }
             }
         }
 
-        JMWebhookConnection connection = new JMWebhookConnection();
-        connection.Name = name;
-        connection.ContextURL = context;
-        connection.Address = address;
+        for ( i = 0; i < m_Settings.Connections.Count(); ++i )
+        {
+            for ( j = 0; j < m_Settings.Connections[i].Types.Count(); ++j )
+            {
+                string name = m_Settings.Connections[i].Types[j].Name;
 
-        if ( m_IsLoading )
+                array< JMWebhookConnection > mappedConnections = m_ConnectionMap.Get( name );
+                if ( !mappedConnections )
+                {
+                    mappedConnections = new array< JMWebhookConnection >;
+                    m_ConnectionMap.Insert( name, mappedConnections );
+                }
+
+                mappedConnections.Insert( m_Settings.Connections[i].Types[j] );
+            }
+        }
+    }
+
+    bool SetConnection( string name, string grpName, bool enabled )
+    {
+        JMWebhookConnectionGroup group = m_Settings.Get( grpName );
+        if ( Assert_Null( group ) )
+            return false;
+
+        group.Set( name, enabled );
+        return true;
+    }
+
+    bool RemoveConnection( string name, string grpName )
+    {
+        JMWebhookConnectionGroup group = m_Settings.Get( grpName );
+        if ( Assert_Null( group ) )
+            return false;
+            
+        group.Remove( name );
+
+        FixConnectionMap();
+        return true;
+    }
+
+    bool AddConnection( string name, string grpName, bool enabled )
+    {
+        JMWebhookConnectionGroup group = m_Settings.Get( grpName );
+        if ( Assert_Null( group ) )
+            return false;
+
+        array< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
+        if ( !connections )
         {
-            connection.Enabled = false;
-        } else
-        {
-            connection.Enabled = enabled;
+            connections = new array< JMWebhookConnection >();
+            m_ConnectionMap.Insert( name, connections );
         }
 
-        connections.Insert( connection );
-        m_Connections.Insert( connection );
+        ref JMWebhookConnection conn = group.SetNoOverride( name, enabled );
+        if ( !conn )
+            return false;
+
+        int idx = connections.Find( conn );
+        if ( idx >= 0 )
+            return false;
+
+        connections.Insert( conn );
+        return true;
     }
 
     override bool IsClient()
@@ -144,7 +198,7 @@ class JMWebhookModule: JMModuleBase
     {
         if ( IsMissionClient() )
             return;
-            
+
         if ( Assert_Null( message ) )
             return;
 
@@ -180,5 +234,5 @@ class JMWebhookModule: JMModuleBase
 		embed.AddField( title, player.FormatSteamWebhook(), true );
 
         return message;
-    } 
+    }
 };

@@ -6,18 +6,12 @@ modded class JMModuleBase
 	{
 		super.OnMissionStart();
 		
-		if ( IsMissionOffline() )
-		{
-			m_Webhook = NULL;
-		} else
-		{
-			Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
-		}
+		Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
 	}
 
 	void SendWebhook( string type, string message )
 	{
-		if ( !m_Webhook )
+		if ( !m_Webhook || IsMissionOffline() )
 			return;
 
         auto msg = m_Webhook.CreateDiscordMessage();
@@ -29,7 +23,7 @@ modded class JMModuleBase
 
 	void SendWebhook( string type, JMPlayerInstance player, string message )
 	{
-		if ( !m_Webhook || !player )
+		if ( !m_Webhook || !player || IsMissionOffline() )
 			return;
 
         auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );

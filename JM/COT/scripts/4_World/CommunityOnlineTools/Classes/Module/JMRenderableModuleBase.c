@@ -172,6 +172,16 @@ class JMRenderableModuleBase extends JMModuleBase
 		}
 	}
 
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( GetForm() )
+		{
+			GetForm().OnSettingsUpdated();
+		}
+	}
+
 	override void OnClientPermissionsUpdated()
 	{
 		super.OnClientPermissionsUpdated();

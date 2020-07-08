@@ -1,6 +1,7 @@
 {
     "Connections": [
         {
+            "Name": "Main",
             "ContextURL": "https://discordapp.com/api/webhooks/",
             "Address": "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS",
             "Types": [
@@ -171,10 +172,47 @@
                 {
                     "Name": "PlayerDamaged",
                     "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleURL",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleURLSensitive",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleType",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleTypeSensitive",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "ServerStartup",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "ServerShutdown",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerDamage",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "AdminActive",
+                    "Enabled": 1
                 }
             ]
         },
         {
+            "Name": "Weather",
             "ContextURL": "https://discordapp.com/api/webhooks/",
             "Address": "730001221053579294/_MrpP0Jgj8EwjMfzDfaXC8EdnEqNL9rzU309xVdt8T3rRRZm071ZKwt_zQ9BMAso3uBW",
             "Types": [

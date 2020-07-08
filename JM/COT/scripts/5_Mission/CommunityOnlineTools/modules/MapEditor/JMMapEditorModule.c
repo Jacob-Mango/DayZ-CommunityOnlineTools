@@ -146,6 +146,8 @@ class JMMapEditorModule: JMModuleBase
 	
 	override void OnMissionLoaded()
 	{
+		super.OnMissionLoaded();
+		
 		if ( GetGame().IsClient() )
 		{
 			if ( m_Menu == NULL )

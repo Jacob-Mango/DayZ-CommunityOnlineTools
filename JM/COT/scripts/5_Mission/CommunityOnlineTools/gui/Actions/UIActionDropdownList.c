@@ -12,6 +12,8 @@ class UIActionDropdownList extends UIActionBase
 
     protected string m_PreviousText;
 
+    protected int m_SelectedIndex;
+
     void UIActionDropdownList()
     {
         m_Items = new array< string >();
@@ -103,13 +105,14 @@ class UIActionDropdownList extends UIActionBase
         {
 		    m_ToggleImage.SetImage( 1 );
             m_List.SelectRow( -1 );
+            m_SelectedIndex = 0;
         }
     }
 
     void SetItems( array< string > items )
     {
-        if ( m_PreviousText != "" )
-            return;
+        //if ( m_PreviousText != "" )
+        //    return;
 
         m_Items.Clear();
         m_Items.Copy( items );
@@ -227,22 +230,59 @@ class UIActionDropdownList extends UIActionBase
 		return m_Text.GetText();
 	}
 
+	override bool OnKeyPress( Widget w, int x, int y, int key )
+    {
+		//if ( w == m_Text || w == m_List )
+		{
+            if ( m_List.GetNumItems() != 0 )
+            {
+                if ( key == KeyCode.KC_UP )
+                {
+                    //if ( m_SelectedIndex == -1 )
+                    //    m_SelectedIndex = 0;
+                    //else
+                        m_SelectedIndex--;
+                } else if ( key == KeyCode.KC_DOWN )
+                {
+                    //if ( m_SelectedIndex == -1 )
+                    //    m_SelectedIndex = 0;
+                    //else
+                        m_SelectedIndex++;
+                }
+
+                if ( m_SelectedIndex >= m_List.GetNumItems() )
+                    m_SelectedIndex = m_List.GetNumItems() - 1;
+                else if ( m_SelectedIndex < 0 )
+                    m_SelectedIndex = 0;
+
+                m_List.SelectRow( m_SelectedIndex );
+
+                string result;
+                m_List.GetItemText( m_SelectedIndex, 0, result );
+                m_Text.SetText( result );
+            }
+        }
+
+        return super.OnKeyPress( w, x, y, key );
+    }
+
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( w == m_Text )
 		{
+            if ( m_PreviousText == m_Text.GetText() && !finished )
+                return true;
+
+            m_SelectedIndex = 0; // -1;
+
             if ( !finished )
-            {
                 ToggleList( true );
-            }
             
             bool success = UpdateText();
             m_List.SelectRow( 0 );
 
             if ( finished )
-            {
                 OnSelected();
-            }
 
 			return true;
 		}
