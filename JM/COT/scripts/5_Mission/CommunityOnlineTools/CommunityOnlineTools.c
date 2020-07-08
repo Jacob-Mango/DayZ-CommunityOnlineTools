@@ -92,10 +92,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( active )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_ON" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_TOGGLE", "STR_COT_GENERIC_ON" ) );
 		} else
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_TOGGLE", "STR_COT_GENERIC_OFF" ) );
 		}
 
 		if ( GetGame().IsClient() )
