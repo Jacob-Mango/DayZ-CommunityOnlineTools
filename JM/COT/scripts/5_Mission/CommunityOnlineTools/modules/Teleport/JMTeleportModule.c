@@ -111,7 +111,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor( UAInput input )
 	{
-		if ( !(input.LocalPress() || input.LocalHold()) )
+		if ( !(input.LocalPress()) )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -119,7 +119,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -136,13 +136,12 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		float distance = vector.Distance( currentPosition, hitPos );
 
-
 		if ( distance <= 1000 )
 		{
 			Position( hitPos, true );
 		} else
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
 		}
 	}
 
