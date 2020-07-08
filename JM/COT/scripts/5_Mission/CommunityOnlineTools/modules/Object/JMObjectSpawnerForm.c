@@ -71,7 +71,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
 
-		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR" );
+		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON" );
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnCursor" );
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELF", this, "SpawnPosition" );
