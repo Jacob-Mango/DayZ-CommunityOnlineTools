@@ -92,6 +92,34 @@ class UIActionManager
 		return NULL;
 	}
 
+	static UIActionDropdownList CreateDropdownBox( Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );
+
+		UIActionDropdownList action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			values.InsertAt( "", 0 );
+
+			if ( !dropDownParent )
+				dropDownParent = parent;
+			action.InitListWidget( dropDownParent );
+
+			action.SetItems( values );
+
+			action.SetCallback( instance, funcname );
+
+			action.SetLabel( label );
+			action.SetText( values[0] );
+
+			return action;
+		}
+
+		return NULL;
+	}
+
 	static UIActionEditableVector CreateEditableVector( Widget parent, string label, Class instance = NULL, string funcname = "", string button = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableVector.layout", parent );

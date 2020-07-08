@@ -266,8 +266,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_GENERIC_CANCEL", "MakeItemSet_Cancel", "#STR_COT_GENERIC_CREATE", "MakeItemSet_Create" ).ShowEditBox();
-	
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_GENERIC_CANCEL", "MakeItemSet_Cancel", "#STR_COT_GENERIC_CREATE", "MakeItemSet_Create" );
 	}
 
 	void MakeItemSet_Cancel( JMConfirmation confirmation )

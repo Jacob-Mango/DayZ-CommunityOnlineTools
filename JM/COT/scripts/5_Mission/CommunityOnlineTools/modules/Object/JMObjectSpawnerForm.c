@@ -291,7 +291,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		m_DeletingObject = obj;
 		
-		CreateConfirmation_Two( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_HEADER", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_HEADER", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
 	}
 
 	private void DeleteEntity_Yes( JMConfirmation confirmation )
