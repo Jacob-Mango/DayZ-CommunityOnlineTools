@@ -17,7 +17,7 @@ modded class PluginAdminLog
             return;
 
         auto message = m_Webhook.CreateDiscordMessage();
-        auto embed = message.CreateEmbed();
+        auto embed = message.GetEmbed();
         embed.SetColor( 16711680 ); // 0xFF0000
 
         PlayerBase pbKiller = NULL;
@@ -76,7 +76,7 @@ modded class PluginAdminLog
             return;
 
         auto message = m_Webhook.CreateDiscordMessage();
-        auto embed = message.CreateEmbed();
+        auto embed = message.GetEmbed();
         embed.SetColor( 16711680 ); // 0xFF0000
 
         PlayerBase pbKiller = NULL;
