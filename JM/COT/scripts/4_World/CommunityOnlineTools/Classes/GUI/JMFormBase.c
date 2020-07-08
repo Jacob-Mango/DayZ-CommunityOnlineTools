@@ -66,6 +66,10 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	{
 	}
 
+	void OnSettingsUpdated()
+	{
+	}
+
 	void OnClientPermissionsUpdated()
 	{
 	}

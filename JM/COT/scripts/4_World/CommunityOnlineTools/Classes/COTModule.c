@@ -31,6 +31,8 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
+		super.OnMissionLoaded();
+		
 		if ( IsMissionClient() )
 		{
 			if ( !JMStatics.ESP_CONTAINER )

@@ -1,26 +1,42 @@
-class JMWebhookConnection: Managed
+class JMWebhookConnection : Managed
 {
-    private RestContext m_Context;
-
     string Name;
-    string ContextURL;
-    string Address;
-
     bool Enabled;
+    
+    [NonSerialized()]
+    JMWebhookConnectionGroup m_Group;
+    
+    [NonSerialized()]
+    RestContext m_Context;
+
+    string GetContextURL()
+    {
+        return m_Group.ContextURL;
+    }
+
+    string GetAddress()
+    {
+        return m_Group.Address;
+    }
+
+    void Remove()
+    {
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Group.Remove, Name );
+    }
 
 	void Post( RestApi core, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
 	{
-        if ( Enabled )
+        if ( Enabled && !IsMissionClient() )
         {
             if ( !m_Context )
             {
-                m_Context = core.GetRestContext( ContextURL );
+                m_Context = core.GetRestContext( GetContextURL() );
             }
 
             string data = message.Prepare( serializer );
 
             m_Context.SetHeader( "application/json" );
-            m_Context.POST( new JMWebhookCallback, Address, data );
+            m_Context.POST( new JMWebhookCallback, GetAddress(), data );
         }
 	}
 
@@ -35,9 +51,9 @@ class JMWebhookConnection: Managed
         str += ":";
         str += Name;
         str += ":";
-        str += ContextURL;
+        str += GetContextURL();
         str += ":";
-        str += Address;
+        str += GetAddress();
         str += ":";
         if ( Enabled )
             str += "TRUE";

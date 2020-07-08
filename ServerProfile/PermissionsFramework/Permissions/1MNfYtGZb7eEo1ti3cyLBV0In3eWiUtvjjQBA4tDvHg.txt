@@ -251,3 +251,13 @@ Weather.Preset.Create 0
 Weather.Preset.Update 0
 Weather.Preset.Remove 0
 Weather.View 0
+Webhook 2
+Webhook.View 0
+Webhook.Manage 0
+Webhook.Manage.URL 0
+Webhook.Manage.URL.Add 0
+Webhook.Manage.URL.Remove 0
+Webhook.Manage.Type 0
+Webhook.Manage.Type.Add 0
+Webhook.Manage.Type.Remove 0
+Webhook.Manage.Type.State 0
