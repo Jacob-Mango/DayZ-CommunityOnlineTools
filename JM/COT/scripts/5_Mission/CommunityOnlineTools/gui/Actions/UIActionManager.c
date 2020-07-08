@@ -101,10 +101,9 @@ class UIActionManager
 
 		if ( action )
 		{
-			values.InsertAt( "", 0 );
-
 			if ( !dropDownParent )
 				dropDownParent = parent;
+				
 			action.InitListWidget( dropDownParent );
 
 			action.SetItems( values );
