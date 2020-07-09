@@ -44,6 +44,8 @@ class JMWebhookModule: JMModuleBase
 
     private JMWebhookSerialize m_Settings;
 
+    private ref ConfigFile m_ServerConfig;
+
     void JMWebhookModule()
     {
     }
@@ -55,6 +57,14 @@ class JMWebhookModule: JMModuleBase
 
     override void OnInit()
     {
+        Print( "Start reading config" );
+
+        string serverCfg;
+		GetGame().CommandlineGetParam( "config", serverCfg );
+        m_ServerConfig = ConfigFile.Parse( serverCfg );
+
+        Print( "Finished reading config" );
+
         m_Settings = GetCOTWebhookSettings();
 
         m_ConnectionMap = new map< string, ref set< JMWebhookConnection > >();
@@ -311,6 +321,12 @@ class JMWebhookModule: JMModuleBase
 
         embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 		
+        ConfigEntry entry = m_ServerConfig.Get( "hostname" );
+        if ( entry && entry.GetText() != "" )
+        {
+		    embed.AddField( "Server:", entry.GetText(), false );
+        }
+
         return message;
     }
 
@@ -321,8 +337,14 @@ class JMWebhookModule: JMModuleBase
         embed.SetColor( 16766720 );
 
         embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-		
-		embed.AddField( title, player.FormatSteamWebhook(), true );
+
+        ConfigEntry entry = m_ServerConfig.Get( "hostname" );
+        if ( entry && entry.GetText() != "" )
+        {
+		    embed.AddField( "Server:", entry.GetText(), true );
+        }
+
+		embed.AddField( title, player.FormatSteamWebhook(), entry && entry.GetText() != "" );
 
         return message;
     }
