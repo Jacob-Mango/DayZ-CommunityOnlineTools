@@ -260,6 +260,11 @@ class JMWebhookModule: JMModuleBase
 
         m_Queue = new array< ref JMWebhookQueueItem >();
 
+        int num = 0;
+        int startTime = GetGame().GetTickTime();
+        int lastSendTime = GetGame().GetTickTime();
+        int qps = 1;
+
         while ( true )
         {
             if ( m_Queue.Count() > 0 )
@@ -276,12 +281,23 @@ class JMWebhookModule: JMModuleBase
 
                 delete item;
                 m_Queue.RemoveOrdered( 0 );
-            }
 
-            if ( m_Queue.Count() > 4 )
-                Sleep( 500 );
-            else
-                Sleep( 250 );
+                num++;
+                lastSendTime = GetGame().GetTickTime();
+
+                int defer = (int) Math.Clamp( num * 0.1, 1, 2 );
+                Sleep( 250 * Math.Clamp( num, 1, 4 ) * defer );
+            } else
+            {
+                if ( startTime - lastSendTime > 1000 )
+                {
+                    startTime = GetGame().GetTickTime();
+                    lastSendTime = startTime;
+                    num = 0;
+                }
+
+                Sleep( 50 );
+            }
         }
 
         delete m_Queue;
