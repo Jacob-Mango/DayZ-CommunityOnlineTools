@@ -26,7 +26,7 @@ class JMWebhookConnectionGroup : Managed
         }
     }
 
-    ref JMWebhookConnection SetNoOverride( string name, bool enabled )
+    ref JMWebhookConnection Add( string name )
     {
         for ( int i = 0; i < Types.Count(); ++i )
         {
@@ -36,10 +36,14 @@ class JMWebhookConnectionGroup : Managed
             return Types[i];
         }
 
-        return Insert( name, enabled );
+        #ifdef JM_COT_WEBHOOK_DEBUG
+        return Insert( name, true );
+        #else
+        return Insert( name, false );
+        #endif
     }
 
-    ref JMWebhookConnection Insert( string name, bool enabled )
+    private ref JMWebhookConnection Insert( string name, bool enabled )
     {
         JMWebhookConnection type = new JMWebhookConnection();
 

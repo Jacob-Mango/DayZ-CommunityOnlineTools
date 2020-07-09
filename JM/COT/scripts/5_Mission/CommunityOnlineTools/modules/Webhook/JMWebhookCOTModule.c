@@ -251,7 +251,8 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
     private void Exec_AddType( string name, string group, bool enabled, JMPlayerInstance instance )
     {
-		m_Webhook.AddConnection( name, group, enabled );
+		m_Webhook.AddConnection( name, group );
+		m_Webhook.SetConnection( name, group, enabled );
 
         m_Settings.Save();
     }
