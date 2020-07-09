@@ -26,6 +26,13 @@ class JMWebhookConnection : Managed
 
 	void Post( RestApi core, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
 	{
+        Print( "+JMWebhookConnection::Post" );
+        Print( "name=" + Name );
+        Print( "this=" + this );
+        Print( "group=" + m_Group );
+        Print( "context=" + GetContextURL() );
+        Print( "address=" + GetAddress() );
+        Print( "enabled=" + Enabled );
         if ( Enabled && !IsMissionClient() )
         {
             if ( !m_Context )
@@ -34,10 +41,12 @@ class JMWebhookConnection : Managed
             }
 
             string data = message.Prepare( serializer );
+            Print( "data=" + data );
 
             m_Context.SetHeader( "application/json" );
             m_Context.POST( new JMWebhookCallback, GetAddress(), data );
         }
+        Print( "-JMWebhookConnection::Post" );
 	}
 
     string DebugString()
