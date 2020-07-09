@@ -153,6 +153,7 @@ class ConfigEntry : Managed
     bool Parse( ref ConfigReader reader, ref ConfigFile file )
     {
         Error( "Not implemented." );
+        return false;
     }
 
     ref ConfigEntry Get( string path )
