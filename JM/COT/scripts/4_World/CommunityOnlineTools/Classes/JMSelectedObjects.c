@@ -60,6 +60,22 @@ class JMSelectedObjects
 	{
 		delete objects;
 		delete players;
+
+		JMScriptInvokers.ADD_OBJECT.Remove( AddObject );
+		JMScriptInvokers.REMOVE_OBJECT.Remove( _RemoveObject );
+	}
+
+	bool IsObjectSelected( notnull Object obj )
+	{
+		for ( int i = 0; i < objects.Count(); ++i )
+		{
+			if ( objects[i].Equals( obj ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void AddObject( Object obj )
@@ -72,6 +88,11 @@ class JMSelectedObjects
 		RemoveObject( obj );
 	}
 
+	void ClearObjects()
+	{
+		objects.Clear();
+	}
+
 	bool RemoveObject( notnull Object obj )
 	{
 		for ( int i = 0; i < objects.Count(); ++i )
@@ -82,15 +103,15 @@ class JMSelectedObjects
 				return true;
 			}
 		}
-
 		return false;
 	}
 
 	void SerializeObjects( ParamsWriteContext ctx )
 	{
-		ctx.Write( objects.Count() );
+		int count = objects.Count();
+		ctx.Write( count );
 
-		for ( int i = 0; i < objects.Count(); ++i )
+		for ( int i = 0; i < count; ++i )
 		{
 			ctx.Write( objects[i].networkLow );
 			ctx.Write( objects[i].networkHigh );
@@ -105,12 +126,22 @@ class JMSelectedObjects
 
 		for ( int i = 0; i < count; ++i )
 		{
+			/*
+			Object obj;
+			if ( !ctx.Read( obj ) )
+				return false;
+
+			objects.Insert( obj );
+			*/
+
 			int netLow;
 			int netHigh;
-			if ( !ctx.Read( netLow ) ||  !ctx.Read( netHigh ) )
+			if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 				return false;
-			
-			objects.Insert( GetGame().GetObjectByNetworkId( netLow, netHigh ) );
+
+			Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+			if ( obj )
+				objects.Insert( obj );
 		}
 
 		return true;

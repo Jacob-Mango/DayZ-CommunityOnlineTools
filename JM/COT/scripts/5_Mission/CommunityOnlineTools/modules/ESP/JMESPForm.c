@@ -7,6 +7,8 @@ class JMESPForm extends JMFormBase
 
 	private UIActionScroller m_ESPSelectedObjects;
 
+	private UIActionButton m_btn_FullMap;
+
 	private UIActionButton m_btn_Toggle;
 	
 	private UIActionCheckbox m_chkbx_Refresh;
@@ -48,6 +50,19 @@ class JMESPForm extends JMFormBase
 		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
 
+		Widget fullMapSpacer = UIActionManager.CreatePanel( mainSpacer, 0x00000000, 30 );
+
+		m_btn_FullMap = UIActionManager.CreateButton( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_TOGGLE_FULLMAP", this, "Click_EnableFullMap" );
+		m_btn_FullMap.SetPosition( 0 );
+		m_btn_FullMap.SetWidth( 0.3 );
+
+		UIActionText fmHeading = UIActionManager.CreateText( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_HEADER", "" );
+		fmHeading.SetPosition( 0.3 );
+		fmHeading.SetWidth( 0.15 );
+		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_DESCRIPTION" );
+		fmText.SetPosition( 0.45 );
+		fmText.SetWidth( 0.55 );
+
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
 		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, 1000, this, "Change_Range" );
@@ -61,7 +76,7 @@ class JMESPForm extends JMFormBase
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_FILTERS_HEADER", "" );
-		//UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER", "" );
+		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -126,18 +141,18 @@ class JMESPForm extends JMFormBase
 		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 
-		left_bottom.SetSize( 1.0, 1.0 );
-		right_bottom.SetSize( 0.0, 1.0 );
-		left_bottom.SetPos( 0.0, 0.0 );
-		right_bottom.SetPos( 1.0, 0.0 );
-
-		//left_bottom.SetSize( 0.5, 1.0 );
-		//right_bottom.SetSize( 0.5, 1.0 );
+		//left_bottom.SetSize( 1.0, 1.0 );
+		//right_bottom.SetSize( 0.0, 1.0 );
 		//left_bottom.SetPos( 0.0, 0.0 );
-		//right_bottom.SetPos( 0.5, 0.0 );
+		//right_bottom.SetPos( 1.0, 0.0 );
+
+		left_bottom.SetSize( 0.5, 1.0 );
+		right_bottom.SetSize( 0.5, 1.0 );
+		left_bottom.SetPos( 0.0, 0.0 );
+		right_bottom.SetPos( 0.5, 0.0 );
 
 		ESPFilters( left_bottom );
-		//ESPSelectedObjects( right_bottom );
+		ESPSelectedObjects( right_bottom );
 	}
 
 	override void OnShow()
@@ -184,7 +199,13 @@ class JMESPForm extends JMFormBase
 				m_sldr_Refresh.Disable();
 			}
 		}
+
+		if ( COTPlayerIsRemoved )
+		{	
+			m_btn_FullMap.Disable();
+		}
 	}
+
 	void Click_UpdateESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -243,6 +264,16 @@ class JMESPForm extends JMFormBase
 			return;
 		
 		JMESPWidgetHandler.UseClassName = action.IsChecked();
+	}
+	
+	void Click_EnableFullMap( UIEvent eid, ref UIActionBase action )	
+	{	
+		if ( eid != UIEvent.CLICK ) return;	
+
+		m_Module.EnableFullMap();	
+
+		// TODO: Send RPC back to disable this	
+		// m_FullMapESP.Disable();	
 	}
 
 	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
