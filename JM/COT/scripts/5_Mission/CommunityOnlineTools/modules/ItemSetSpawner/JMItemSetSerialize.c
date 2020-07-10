@@ -35,6 +35,11 @@ class JMItemSetSerialize
 		return settings;
 	}
 
+	void AddItem( Object obj )
+	{
+		//string item, int numStacks, int stackSize
+	}
+
 	void Save()
 	{
 		JsonFileLoader< JMItemSetSerialize >.JsonSaveFile( JMConstants.DIR_ITEMS + m_FileName + JMConstants.EXT_ITEM, this );

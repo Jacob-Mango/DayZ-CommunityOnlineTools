@@ -19,6 +19,9 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	private bool m_DidUnlink;
 
+	private vector m_LastPosition;
+	private string m_TargetType;
+
 	bool ShowOnScreen;
 
 	int Width;
@@ -164,21 +167,23 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			}
 		}
 
-		return "0 0 0";
+		return m_LastPosition;
 	}
 
 	void Update() 
 	{
-		if ( Info == NULL || Info.target == NULL ) 
+		if ( Info == NULL ) 
 		{
 			ShowOnScreen = false;
 			Hide();
 			return;
 		}
 
-		ScreenPos = GetGame().GetScreenPos( GetPosition() );
+		m_LastPosition = GetPosition();
 
-		float distance = vector.Distance( GetCurrentPosition(), GetPosition() );
+		ScreenPos = GetGame().GetScreenPos( m_LastPosition );
+
+		float distance = vector.Distance( GetCurrentPosition(), m_LastPosition );
 
 		GetScreenSize( Width, Height );
 
@@ -213,7 +218,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			{
 				if ( UseClassName )
 				{
-					text = Info.target.GetType() + " (" + distance + "m)";
+					text = m_TargetType + " (" + distance + "m)";
 				} else
 				{
 					text = Info.name + " (" + distance + "m)";
@@ -250,6 +255,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			Hide();
 			return;
 		}
+
+		m_TargetType = Info.target.GetType();
 
 		m_txt_ObjectName.SetColor( Info.colour );
 

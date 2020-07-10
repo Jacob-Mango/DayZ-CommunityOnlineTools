@@ -26,6 +26,7 @@ class JMWebhookConnection : Managed
 
 	void Post( RestApi core, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
 	{
+        #ifdef JM_COT_WEBHOOK_DEBUG
         Print( "+JMWebhookConnection::Post" );
         Print( "name=" + Name );
         Print( "this=" + this );
@@ -33,6 +34,8 @@ class JMWebhookConnection : Managed
         Print( "context=" + GetContextURL() );
         Print( "address=" + GetAddress() );
         Print( "enabled=" + Enabled );
+        #endif
+        
         if ( Enabled && !IsMissionClient() )
         {
             if ( !m_Context )
@@ -41,12 +44,18 @@ class JMWebhookConnection : Managed
             }
 
             string data = message.Prepare( serializer );
+
+            #ifdef JM_COT_WEBHOOK_DEBUG
             Print( "data=" + data );
+            #endif
 
             m_Context.SetHeader( "application/json" );
             m_Context.POST( new JMWebhookCallback, GetAddress(), data );
         }
+
+        #ifdef JM_COT_WEBHOOK_DEBUG
         Print( "-JMWebhookConnection::Post" );
+        #endif
 	}
 
     string DebugString()

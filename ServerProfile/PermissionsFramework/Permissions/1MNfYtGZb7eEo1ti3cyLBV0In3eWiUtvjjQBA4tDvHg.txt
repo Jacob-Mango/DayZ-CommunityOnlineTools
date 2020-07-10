@@ -212,6 +212,8 @@ ESP.Object.SetPosition 0
 ESP.Object.SetOrientation 0
 ESP.Object.SetHealth 0
 ESP.Object.Delete 0
+ESP.Object.DuplicateAll 2
+ESP.Object.DeleteAll 2
 ESP.Object.BaseBuilding 2
 ESP.Object.BaseBuilding.Build 2
 ESP.Object.BaseBuilding.Build.MaterialsNotRequired 2
@@ -227,6 +229,7 @@ Vehicles.OffroadHatchback 0
 Vehicles.CivilianSedan 0
 Items 0
 Items.View 0
+Items.CreateSet 0
 Items.Platform 0
 Items.Gate 0
 Items.Gate.Wood 0
@@ -251,13 +254,3 @@ Weather.Preset.Create 0
 Weather.Preset.Update 0
 Weather.Preset.Remove 0
 Weather.View 0
-Webhook 2
-Webhook.View 0
-Webhook.Manage 0
-Webhook.Manage.URL 0
-Webhook.Manage.URL.Add 0
-Webhook.Manage.URL.Remove 0
-Webhook.Manage.Type 0
-Webhook.Manage.Type.Add 0
-Webhook.Manage.Type.Remove 0
-Webhook.Manage.Type.State 0

@@ -1321,7 +1321,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			Exec_SetPermissions( permissions, guids, NULL );
 		} else
 		{
-			// Print( "IsMissionHost() false" );
+			#ifdef JM_COT_LOGGING
+			Print( "IsMissionHost() false" );
+			#endif
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( permissions );
 			rpc.Write( guids );
