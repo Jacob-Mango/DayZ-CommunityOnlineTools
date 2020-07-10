@@ -15,6 +15,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	void JMItemSetSpawnerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Items.View" );
+		GetPermissionsManager().RegisterPermission( "Items.CreateSet" );
 	}
 
 	override bool HasAccess()
@@ -45,6 +46,17 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	override bool ImageIsIcon()
 	{
 		return false;
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "Item Set Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Vector" );
+		types.Insert( "Player" );
 	}
 
 	override void OnMissionLoaded()
@@ -173,25 +185,20 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnPosition( string itemSet, vector position, PlayerIdentity ident )
 	{
-		// Print("Test 1 " + itemSet);
 		JMItemSetSerialize file = settings.ItemSets.Get( itemSet );
 		if ( !file )
-		{
 			return;
-		}
 
-		// Print("Test 2 " + file);
 		string perm = file.Name;
 		perm.Replace( " ", "." );
-		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident ) )
-		{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident, instance ) )
 			return;
-		}
-		// Print("Test 3 " + perm);
 
 		SpawnItemSet( file, position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
+		SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
 	}
 
 	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -234,24 +241,24 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		JMItemSetSerialize file = settings.ItemSets.Get( itemSet );
 		if ( !file )
-		{
 			return;
-		}
 
 		string perm = file.Name;
 		perm.Replace( " ", "." );
-		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident ) )
-		{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident, instance ) )
 			return;
-		}
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
+			players[i].Update();
+			
 			SpawnItemSet( file, players[i].GetPosition() );
 			
 			GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
+			SendWebhook( "Player", instance, "Spawned item set \"" + file.Name + "\" on " + players[i].FormatSteamWebhook() );
 		}
 	}
 

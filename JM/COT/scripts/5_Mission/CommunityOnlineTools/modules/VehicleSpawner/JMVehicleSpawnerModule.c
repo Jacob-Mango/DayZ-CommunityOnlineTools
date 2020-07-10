@@ -33,7 +33,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Vehicle Spawner";
+		return "#STR_COT_VEHICLE_MODULE_NAME";
 	}
 	
 	override string GetIconName()
@@ -44,6 +44,15 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	override bool ImageIsIcon()
 	{
 		return false;
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "Vehicle Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
 	}
 
 	override void OnMissionLoaded()
@@ -178,24 +187,20 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		JMVehicleSpawnerSerialize file = settings.Vehicles.Get( vehicle );
 		if ( !file )
-		{
 			return;
-		}
 
 		string perm = file.VehicleName;
 		perm.Replace( " ", "." );
-		if ( !GetPermissionsManager().HasPermission( "Vehicles." + perm, ident ) )
-		{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles." + perm, ident, instance ) )
 			return;
-		}
 
 		EntityAI ent = SpawnVehicle( file, position, direction );
 		if ( !ent )
-		{
 			return;
-		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned vehicle " + ent.GetDisplayName() + " (" + vehicle + ") at " + position.ToString() );
+		SendWebhook( "", instance, "Spawned vehicle \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") at " + position.ToString() );
 	}
 
 	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )

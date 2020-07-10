@@ -31,6 +31,8 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
+		super.OnMissionLoaded();
+		
 		if ( IsMissionClient() )
 		{
 			if ( !JMStatics.ESP_CONTAINER )
@@ -269,14 +271,6 @@ class COTModule : JMModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleActive();
-
-		if ( GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_ON" ) );
-		} else
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLE", "STR_COT_OFF" ) );
-		}
 	}
 
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
@@ -297,30 +291,18 @@ class COTModule : JMModuleBase
 			instance.PlayerObject = player;
 
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
+
+			if ( m_Webhook )
+			{
+				auto msg = m_Webhook.CreateDiscordMessage();
+
+				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has joined the server.", false );
+
+				m_Webhook.Post( "PlayerJoin", msg );
+			}
 		}
 
 		Print( "-COTModule::OnInvokeConnect - " + identity.GetId() );
-	}
-
-	/**
-	 * See: ClientRespawnEventTypeID
-	 */
-	override void OnClientRespawn( PlayerBase player, PlayerIdentity identity )
-	{
-		Print( "+COTModule::OnClientRespawn - " + identity.GetId() );
-
-		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
-
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
-		
-		Assert_Null( instance );
-		if ( instance )
-		{
-			instance.PlayerObject = player;
-		}
-
-		Print( "-COTModule::OnClientRespawn - " + identity.GetId() );
 	}
 
 	/**
@@ -335,8 +317,7 @@ class COTModule : JMModuleBase
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
-		Assert_Null( instance );
-		if ( instance )
+		if ( !Assert_Null( instance ) )
 		{
 			instance.PlayerObject = player;
 		}
@@ -356,8 +337,7 @@ class COTModule : JMModuleBase
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
 
-		Assert_Null( instance );
-		if ( instance )
+		if ( !Assert_Null( instance ) )
 		{
 			instance.PlayerObject = player;
 		}
@@ -374,13 +354,18 @@ class COTModule : JMModuleBase
 
 		Assert_Null( GetPermissionsManager() );
 
-		// VPP Admin tool behaviour breaks the uid
-		if ( uid.Length() == 17 )
-			uid = GetPermissionsManager().GetGUIDForSteam( uid );
-
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
 		{
+			if ( m_Webhook )
+			{
+				auto msg = m_Webhook.CreateDiscordMessage();
+
+				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has left the server.", false );
+
+				m_Webhook.Post( "PlayerLeave", msg );
+			}
+
 			GetCommunityOnlineToolsBase().RemoveClient( uid );
 		}
 

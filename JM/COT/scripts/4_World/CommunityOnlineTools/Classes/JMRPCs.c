@@ -21,6 +21,13 @@ enum JMRoleRPC
 
 enum JMPermissionRPC
 {
+	INVALID = 10130,
+	COUNT
+};
+
+enum JMCOTRPC
+{
 	INVALID = 10140,
+	Active
 	COUNT
 };

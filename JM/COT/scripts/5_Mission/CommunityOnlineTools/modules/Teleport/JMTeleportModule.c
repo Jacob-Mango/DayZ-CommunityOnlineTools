@@ -9,12 +9,14 @@ enum JMTeleportModuleRPC
 
 class JMTeleportModule: JMRenderableModuleBase
 {
-	private ref JMTeleportSerialize settings;
+	private ref JMTeleportSerialize m_Settings;
 	
 	void JMTeleportModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor.NoLog" );
 	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
 	}
@@ -36,7 +38,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Teleport";
+		return "#STR_COT_TELEPORT_MODULE_NAME";
 	}
 	
 	override string GetIconName()
@@ -47,6 +49,17 @@ class JMTeleportModule: JMRenderableModuleBase
 	override bool ImageIsIcon()
 	{
 		return false;
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "Teleport Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Vector" );
+		types.Insert( "Location" );
 	}
 
 	override void OnMissionLoaded()
@@ -60,14 +73,14 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnSettingsUpdated();
 
-		if ( settings )
+		if ( m_Settings )
 		{
-			if ( !settings.Locations )
+			if ( !m_Settings.Locations )
 				return;
 
-			for ( int i = 0; i < settings.Locations.Count(); i++ )
+			for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
 			{
-				JMTeleportLocation location = settings.Locations[i];
+				JMTeleportLocation location = m_Settings.Locations[i];
 
 				string permission = location.Permission;
 				permission.Replace( " ", "." );
@@ -80,8 +93,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() )
-			settings.Save();
+		if ( GetGame().IsServer() && m_Settings )
+			m_Settings.Save();
 	}
 
 	override void RegisterKeyMouseBindings() 
@@ -93,12 +106,12 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	array< ref JMTeleportLocation > GetLocations()
 	{
-		return settings.Locations;
+		return m_Settings.Locations;
 	}
 
 	void Input_Cursor( UAInput input )
 	{
-		if ( !(input.LocalPress() || input.LocalHold()) )
+		if ( !(input.LocalPress()) )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -106,7 +119,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -125,10 +138,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( distance <= 1000 )
 		{
-			Position( hitPos );
+			Position( hitPos, true );
 		} else
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TELEPORT_TOO_FAR" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
 		}
 	}
 
@@ -176,7 +189,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
 		} else
 		{
-			settings = JMTeleportSerialize.Load();
+			m_Settings = JMTeleportSerialize.Load();
 
 			OnSettingsUpdated();
 		}
@@ -185,7 +198,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( settings );
+		rpc.Write( m_Settings );
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
 	}
 
@@ -198,39 +211,56 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			if ( ctx.Read( settings ) )
+			if ( ctx.Read( m_Settings ) )
 			{
 				OnSettingsUpdated();
 			}
 		}
 	}
 
-	void Position( vector position )
+	void Position( vector position, bool isCursor = false )
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_Position( position, PlayerBase.Cast( GetGame().GetPlayer() ) );
+			Server_Position( position, isCursor, PlayerBase.Cast( GetGame().GetPlayer() ) );
 		} else if ( IsMissionClient() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
+			if ( !isCursor && !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
+			rpc.Write( isCursor );
 			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
 		}
 	}
 
-	private void Server_Position( vector position, PlayerBase player )
+	private void Server_Position( vector position, bool isCursor, PlayerBase player )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity() ) )
-			return;
+		JMPlayerInstance instance;
+		bool shouldLog = true;
+		if ( isCursor )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
+				return;
+
+			shouldLog = !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", player.GetIdentity() );
+		} else
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity(), instance ) )
+				return;
+		}
 
 		SetPlayerPosition( player, position );
 
 		// COTCreateNotification( player.GetIdentity(), new StringLocaliser( "Teleported to position " + position.ToString() ) );
 
-		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+		if ( shouldLog )
+		{
+			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+		
+			SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+		}
 	}
 
 	private void RPC_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -241,12 +271,15 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( pos ) )
 				return;
 
-			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
+			bool isCursor;
+			if ( !ctx.Read( isCursor ) )
+				return;
 
+			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
 			if ( !player )
 				return;
 
-			Server_Position( pos, player );
+			Server_Position( pos, isCursor, player );
 		}
 	}
 
@@ -275,7 +308,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident, instance ) )
 			return;
 
 		JMTeleportLocation location = NULL;
@@ -314,6 +348,9 @@ class JMTeleportModule: JMRenderableModuleBase
 			SetPlayerPosition( player, tempPos );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
+			SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+
+			players[i].Update();
 		}
 	}
 

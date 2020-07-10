@@ -48,14 +48,14 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
 
 		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 8, 1 );
-		AddObjectType( typesButtons, "ALL", "" );
-		AddObjectType( typesButtons, "Food", "edible_base" );
-		AddObjectType( typesButtons, "Vehicles", "transport" );
-		AddObjectType( typesButtons, "Firearms", "weapon_base" );
-		AddObjectType( typesButtons, "Clothing", "clothing_base" );
-		AddObjectType( typesButtons, "Items", "inventory_base" );
-		AddObjectType( typesButtons, "Buildings", "house" );
-		AddObjectType( typesButtons, "AI", "dz_lightai" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL", "" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Food", "edible_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Vehicles", "transport" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Firearms", "weapon_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Clothing", "clothing_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Items", "inventory_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Buildings", "house" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_AI", "dz_lightai" );
 
 		Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
@@ -63,34 +63,35 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
-		m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "Search: ", this, "SearchInput_OnChange" );
-		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "Quantity: " );
+		m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
+		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_QUANTITY" );
 		m_QuantityItem.SetText( "MAX" );
 
 		Widget spawnButtons = NULL;
 
 		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
 
-		UIActionManager.CreateText( spawnButtons, "Spawn on: " );
+		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON" );
 
-		UIActionManager.CreateButton( spawnButtons, "Cursor", this, "SpawnCursor" );
-		UIActionManager.CreateButton( spawnButtons, "Self", this, "SpawnPosition" );
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnCursor" );
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELF", this, "SpawnPosition" );
 		
 		if ( GetGame().IsServer() )
 		{
-			UIActionManager.CreateButton( spawnButtons, "Inventory", this, "SpawnInventory" );
+			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_INVENTORY", this, "SpawnInventory" );
 		} else
 		{
-			UIActionManager.CreateButton( spawnButtons, "Selected Player(s)", this, "SpawnInventory" );
+			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS", this, "SpawnInventory" );
 		}
 
-		UIActionManager.CreateButton( spawnButtons, "Delete", this, "DeleteCursor" );
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
 		UpdateItemPreview();
 	}
 
 	void AddObjectType( ref Widget parent, string name, string config )
 	{
+		name = Widget.TranslateString( name );
 		UIActionManager.CreateButton( parent, name, this, "SetListType" );
 		m_ObjectTypes.Insert( name, config );
 	}
@@ -290,7 +291,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		m_DeletingObject = obj;
 		
-		CreateConfirmation_Two( "Confirm", "Do you wish to remove the object " + Object.GetDebugName( obj ), "No", "DeleteEntity_No", "Yes", "DeleteEntity_Yes" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_HEADER", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
 	}
 
 	private void DeleteEntity_Yes( JMConfirmation confirmation )

@@ -19,6 +19,9 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	private bool m_DidUnlink;
 
+	private vector m_LastPosition;
+	private string m_TargetType;
+
 	bool ShowOnScreen;
 
 	int Width;
@@ -72,6 +75,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		Class.CastTo( m_rows_Actions, m_scrler_Actions.GetContentWidget() );
 
 		HideActions();
+
+		JMScriptInvokers.ON_DELETE_ALL.Insert( OnDeleteAll );
 	}
 
 	void Show()
@@ -84,6 +89,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	{
 		OnHide();
 		layoutRoot.Show( false );
+
+		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 	}
 
 	void ToggleESPActions()
@@ -119,6 +126,14 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void OnHide() 
 	{
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
+	}
+
+	void OnDeleteAll()
+	{
+		if ( !Info.type.IsInherited( JMESPViewTypePlayer ) && m_chbx_SelectedObject.IsChecked() )
+		{
+			Hide();
+		}
 	}
 
 	float ATan( float a )
@@ -164,21 +179,23 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			}
 		}
 
-		return "0 0 0";
+		return m_LastPosition;
 	}
 
 	void Update() 
 	{
-		if ( Info == NULL || Info.target == NULL ) 
+		if ( Info == NULL ) 
 		{
 			ShowOnScreen = false;
 			Hide();
 			return;
 		}
 
-		ScreenPos = GetGame().GetScreenPos( GetPosition() );
+		m_LastPosition = GetPosition();
 
-		float distance = vector.Distance( GetCurrentPosition(), GetPosition() );
+		ScreenPos = GetGame().GetScreenPos( m_LastPosition );
+
+		float distance = vector.Distance( GetCurrentPosition(), m_LastPosition );
 
 		GetScreenSize( Width, Height );
 
@@ -213,7 +230,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			{
 				if ( UseClassName )
 				{
-					text = Info.target.GetType() + " (" + distance + "m)";
+					text = m_TargetType + " (" + distance + "m)";
 				} else
 				{
 					text = Info.name + " (" + distance + "m)";
@@ -222,7 +239,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 			m_txt_ObjectName.SetText( text );
 
-			Info.UpdateActions();
+			//Info.UpdateActions();
 
 			m_scrler_Actions.UpdateScroller();
 			
@@ -250,6 +267,10 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			Hide();
 			return;
 		}
+
+		m_chbx_SelectedObject.SetChecked( JM_GetSelected().IsObjectSelected( Info.target ) );
+
+		m_TargetType = Info.target.GetType();
 
 		m_txt_ObjectName.SetColor( Info.colour );
 

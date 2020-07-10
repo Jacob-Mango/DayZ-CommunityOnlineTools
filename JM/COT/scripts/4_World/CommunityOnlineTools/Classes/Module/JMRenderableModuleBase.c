@@ -164,11 +164,21 @@ class JMRenderableModuleBase extends JMModuleBase
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 				return;
 			}
 			
 			Show();
+		}
+	}
+
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( GetForm() )
+		{
+			GetForm().OnSettingsUpdated();
 		}
 	}
 

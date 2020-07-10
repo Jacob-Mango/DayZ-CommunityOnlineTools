@@ -47,6 +47,8 @@ class UIActionEditableVector extends UIActionBase
 
 	override void SetLabel( string text )
 	{
+		text = Widget.TranslateString( text );
+
 		m_Label.SetText( text );
 	}
 
@@ -79,6 +81,8 @@ class UIActionEditableVector extends UIActionBase
 
 	override void SetButton( string text )
 	{
+		text = Widget.TranslateString( text );
+		
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 

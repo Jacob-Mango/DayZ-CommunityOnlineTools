@@ -66,6 +66,8 @@ class UIActionEditableText extends UIActionBase
 
 	override void SetLabel( string text )
 	{
+		text = Widget.TranslateString( text );
+
 		m_Label.SetText( text );
 	}
 
@@ -106,34 +108,36 @@ class UIActionEditableText extends UIActionBase
 			bool hasDecimal = false;
 			bool failed = false;
 
-			for ( int i = 0; i < newText.Length(); i++ )
+			if ( newText.Length() > 0 )
 			{
-				if ( VALID_NUMBERS.Find( newText.Get( i ) ) == -1 )
+				int i = 0;
+				if ( newText.Get( i ) == "-" )
+					i = 1;
+
+				for ( i = i; i < newText.Length(); i++ )
 				{
-					if ( !hasDecimal && !m_OnlyIntegers )
+					if ( VALID_NUMBERS.Find( newText.Get( i ) ) == -1 )
 					{
-						if ( newText.Get( i ) == "." || newText.Get( i ) == "," )
+						if ( !hasDecimal && !m_OnlyIntegers )
 						{
-							hasDecimal = true;
-							continue;
+							if ( newText.Get( i ) == "." || newText.Get( i ) == "," )
+							{
+								hasDecimal = true;
+								continue;
+							}
 						}
-
-						if ( newText.Get( i ) == "-" && i == 0 )
-						{
-							continue;
-						}
+						failed = true;
+						break;
 					}
-					failed = true;
-					break;
 				}
-			}
 
-			if ( failed )
-			{
-				m_Text.SetText( m_PreviousText );
-			} else
-			{
-				m_PreviousText = newText;
+				if ( failed )
+				{
+					m_Text.SetText( m_PreviousText );
+				} else
+				{
+					m_PreviousText = newText;
+				}
 			}
 
 			return !failed;
@@ -162,6 +166,8 @@ class UIActionEditableText extends UIActionBase
 
 	override void SetButton( string text )
 	{
+		text = Widget.TranslateString( text );
+		
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 
@@ -190,7 +196,10 @@ class UIActionEditableText extends UIActionBase
 
 		bool ret = false;
 
-		if ( w == m_Button )
+		if ( w == m_Text )
+		{
+			SetFocus( m_Text );
+		} else if ( w == m_Button )
 		{
 			ret = CallEvent( UIEvent.CLICK );
 		}

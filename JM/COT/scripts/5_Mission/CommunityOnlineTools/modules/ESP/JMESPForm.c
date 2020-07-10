@@ -7,6 +7,8 @@ class JMESPForm extends JMFormBase
 
 	private UIActionScroller m_ESPSelectedObjects;
 
+	private UIActionButton m_btn_FullMap;
+
 	private UIActionButton m_btn_Toggle;
 	
 	private UIActionCheckbox m_chkbx_Refresh;
@@ -36,32 +38,45 @@ class JMESPForm extends JMFormBase
 
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
-		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "Toggle", this, "Click_UpdateESP" );
+		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE", this, "Click_UpdateESP" );
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "Use Class Name", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 
-		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "Auto refresh", this, "Click_UpdateAtRate" );
+		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate" );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
-		m_sldr_Refresh.SetAppend(" second(s)");
+		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
+
+		Widget fullMapSpacer = UIActionManager.CreatePanel( mainSpacer, 0x00000000, 30 );
+
+		m_btn_FullMap = UIActionManager.CreateButton( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_TOGGLE_FULLMAP", this, "Click_EnableFullMap" );
+		m_btn_FullMap.SetPosition( 0 );
+		m_btn_FullMap.SetWidth( 0.3 );
+
+		UIActionText fmHeading = UIActionManager.CreateText( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_HEADER", "" );
+		fmHeading.SetPosition( 0.3 );
+		fmHeading.SetWidth( 0.15 );
+		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_DESCRIPTION" );
+		fmText.SetPosition( 0.45 );
+		fmText.SetWidth( 0.55 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "Radius", 0, 1000, this, "Change_Range" );
+		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, 1000, this, "Change_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
-		m_sldr_Radius.SetAppend(" metre(s)");
+		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		UIActionManager.CreateEditableText( filterSpacer, "Class Filter: ", this, "Change_Filter", m_Module.Filter );
+		UIActionManager.CreateEditableText( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
-		UIActionManager.CreateText( headingSpacer, "Filters: ", "" );
-		//UIActionManager.CreateText( headingSpacer, "Actions: ", "" );
+		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_FILTERS_HEADER", "" );
+		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -105,18 +120,16 @@ class JMESPForm extends JMFormBase
 
 	private void ESPSelectedObjects( Widget parent )
 	{
-		/*
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
-		UIActionManager.CreateButton( container, "Make Item Set", this, "Click_MakeItemSet" );
-		UIActionManager.CreateButton( container, "Duplicate All", this, "Click_DuplicateAll" );
-		UIActionManager.CreateButton( container, "Delete All", this, "Click_DeleteAll" );
-		UIActionManager.CreateButton( container, "Move To Cursor (Relative)", this, "Click_MoveToCursorRelative" );
-		UIActionManager.CreateButton( container, "Move To Cursor (Absolute)", this, "Click_MoveToCursorAbsolute" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
 
 		m_ESPSelectedObjects.UpdateScroller();
-		*/
 	}
 
 	override void OnInit()
@@ -128,13 +141,18 @@ class JMESPForm extends JMFormBase
 		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 
-		left_bottom.SetSize( 1.0, 1.0 );
-		right_bottom.SetSize( 0.0, 1.0 );
+		//left_bottom.SetSize( 1.0, 1.0 );
+		//right_bottom.SetSize( 0.0, 1.0 );
+		//left_bottom.SetPos( 0.0, 0.0 );
+		//right_bottom.SetPos( 1.0, 0.0 );
+
+		left_bottom.SetSize( 0.5, 1.0 );
+		right_bottom.SetSize( 0.5, 1.0 );
 		left_bottom.SetPos( 0.0, 0.0 );
-		right_bottom.SetPos( 1.0, 0.0 );
+		right_bottom.SetPos( 0.5, 0.0 );
 
 		ESPFilters( left_bottom );
-		//ESPSelectedObjects( right_bottom );
+		ESPSelectedObjects( right_bottom );
 	}
 
 	override void OnShow()
@@ -164,24 +182,30 @@ class JMESPForm extends JMFormBase
 
 		if ( m_Module.GetState() != JMESPState.Remove )
 		{
-			m_btn_Toggle.SetButton( "Clear ESP" );
+			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
 
 			m_sldr_Refresh.Disable();
 		} else
 		{
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
-				m_btn_Toggle.SetButton( "Show ESP" );
+				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Enable();
 			} else
 			{
-				m_btn_Toggle.SetButton( "Show ESP" );
+				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Disable();
 			}
 		}
+
+		if ( COTPlayerIsRemoved )
+		{	
+			m_btn_FullMap.Disable();
+		}
 	}
+
 	void Click_UpdateESP( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -241,6 +265,16 @@ class JMESPForm extends JMFormBase
 		
 		JMESPWidgetHandler.UseClassName = action.IsChecked();
 	}
+	
+	void Click_EnableFullMap( UIEvent eid, ref UIActionBase action )	
+	{	
+		if ( eid != UIEvent.CLICK ) return;	
+
+		m_Module.EnableFullMap();	
+
+		// TODO: Send RPC back to disable this	
+		// m_FullMapESP.Disable();	
+	}
 
 	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
 	{
@@ -266,8 +300,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( "Item Set", "What do you want to call this item set?", "Cancel", "MakeItemSet_Cancel", "Create", "MakeItemSet_Create" ).ShowEditBox();
-	
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_GENERIC_CANCEL", "MakeItemSet_Cancel", "#STR_COT_GENERIC_CREATE", "MakeItemSet_Create" );
 	}
 
 	void MakeItemSet_Cancel( JMConfirmation confirmation )
@@ -301,7 +334,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorRelative();
+		m_Module.MoveToCursorRelative( "0 0 0" );
 	}
 	
 	void Click_MoveToCursorAbsolute( UIEvent eid, ref UIActionBase action )
@@ -309,6 +342,6 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorAbsolute();
+		m_Module.MoveToCursorAbsolute( "0 0 0" );
 	}
 }

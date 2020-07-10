@@ -443,11 +443,23 @@ static bool ArrayContains( array< string > arr, string match )
 	return false;
 }
 
+static void Assert_Log( string str )
+{
+	Print( "==============================================WARNING=======================================================" );
+	string time = JMDate.Now( false ).ToString( "YYYY-MM-DD hh:mm:ss" );
+	Print( "[WARNING " + time + "] Assertion failed! " + str );
+	Print( "Do you see this message? Unless the time is within a second of the crash than this was not the cause." );
+
+	DumpStack();
+
+	Print( "============================================================================================================" );
+}
+
 static bool Assert_Empty( string str )
 {
 	if ( str == "" )
 	{
-		Error( "Assertion failed! String empty (=" + str + ")" );
+		Assert_Log( "String empty (=" + str + ")" );
 		return true;
 	}
 	
@@ -458,7 +470,7 @@ static bool Assert_Null( Class cls )
 {
 	if ( cls == NULL )
 	{
-		Error( "Assertion failed! NULL found (=" + cls + ")" );
+		Assert_Log( "NULL found (=" + cls + ")" );
 		return true;
 	}
 	

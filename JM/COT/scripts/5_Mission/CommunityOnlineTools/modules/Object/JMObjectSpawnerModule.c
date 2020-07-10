@@ -55,6 +55,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		return false;
 	}
+
+	override string GetWebhookTitle()
+	{
+		return "Object Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Delete" );
+		types.Insert( "Vector" );
+		types.Insert( "Player" );
+	}
 	
 	void SpawnRandomInfected( UAInput input )
 	{
@@ -66,7 +78,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -86,7 +98,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -106,7 +118,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -156,16 +168,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	private void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident ) )
-		{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident, instance ) )
 			return;
-		}
 
 		if ( PlayerBase.Cast( obj ) )
 			return;
 
-		string obtype;
-		GetGame().ObjectGetType( obj, obtype );
+		string obtype = Object.GetDebugName( obj );
 
 		vector transform[4];
 		obj.GetTransform( transform );
@@ -173,6 +183,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		GetGame().ObjectDelete( obj );
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted Entity " + obtype + " at " + transform[3].ToString() );
+		SendWebhook( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString() );
 	}
 
 	private void RPC_DeleteEntity( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -204,7 +215,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, PlayerIdentity ident )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
 			return;
 		
 		int flags = ECE_CREATEPHYSICS;
@@ -212,8 +224,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			flags |= 0x800;
 
 		EntityAI ent;
-		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
-		if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
 		vector tmItem[4];
@@ -223,6 +234,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntity( ent, quantity, health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
 	private void RPC_SpawnEntity_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -280,18 +292,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnEntity_Inventory( string className, JMSelectedObjects selected, float quantity, float health, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
-		{
 			return;
-		}
 
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident ) )
-		{
+		JMPlayerInstance callerInstance;
+		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) )
 			return;
-		}
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
-			flags |= 0x800;
 
 		array< string > players = selected.GetPlayers();
 
@@ -301,6 +308,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !instance || !instance.PlayerObject )
 				continue;
 
+			instance.Update();
+
 			string loggedSuffix = "";
 
 			EntityAI ent;
@@ -308,8 +317,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				vector position = instance.PlayerObject.GetPosition();
 		
-				//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
-				if ( !Class.CastTo( ent, GetGame().CreateObject( className, position, false, flags & 0x800, true ) ) )
+				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 					continue;
 
 				vector tmItem[4];
@@ -322,6 +330,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			SetupEntity( ent, quantity, health );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() + loggedSuffix );
+			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
 		}
 	}
 

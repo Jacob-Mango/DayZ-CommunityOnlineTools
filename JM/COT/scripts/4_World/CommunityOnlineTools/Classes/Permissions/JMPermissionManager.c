@@ -177,15 +177,11 @@ class JMPermissionManager
 		if ( IsMissionClient() ) 
 		{
 			if ( IsMissionHost() )
-			{
 				return true;
-			}
 			
 			JMPlayerInstance instance = GetClientPlayer();
-			if ( Assert_Null( instance ) )
-			{
+			if ( !instance /*Assert_Null( instance )*/ )
 				return false;
-			}
 
 			return instance.HasPermission( permission );
 		}
@@ -206,7 +202,7 @@ class JMPermissionManager
 		return HasPermission( permission, ihp, instance );
 	}
 
-	bool HasPermission( string permission, notnull PlayerIdentity identity, out JMPlayerInstance instance )
+	bool HasPermission( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
 	{		
 		if ( IsMissionClient() ) 
 		{

@@ -29,11 +29,16 @@ modded class JMModuleManager
 		return m_COTModules;
 	}
 
+	array< JMModuleBase > GetAllModules()
+	{
+		return m_ModuleList;
+	}
+
 	void OnClientPermissionsUpdated()
 	{
-		for ( int i = 0; i < m_Modules.Count(); i++ )
+		for ( int i = 0; i < m_ModuleList.Count(); i++ )
 		{
-			m_Modules.GetElement(i).OnClientPermissionsUpdated();
+			m_ModuleList[i].OnClientPermissionsUpdated();
 		}
 	}
 }

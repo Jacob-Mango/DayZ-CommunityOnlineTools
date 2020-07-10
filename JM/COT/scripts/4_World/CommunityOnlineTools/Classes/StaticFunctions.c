@@ -22,12 +22,12 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObj
 
 static void COTCreateNotification( PlayerIdentity ident, ref StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
-	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIF_ADMIN_TITLE" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, ident );
+	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIFICATION_TITLE_ADMIN" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, ident );
 }
 
 static void COTCreateLocalAdminNotification( ref StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
-	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIF_ADMIN_TITLE" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, NULL );
+	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIFICATION_TITLE_ADMIN" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, NULL );
 }
 
 static vector GetCurrentPosition()

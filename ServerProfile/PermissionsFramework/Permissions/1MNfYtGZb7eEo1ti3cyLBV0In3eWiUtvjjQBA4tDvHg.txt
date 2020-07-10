@@ -3,6 +3,9 @@ COT.View 2
 Admin 2
 Admin.Player 0
 Admin.Player.Godmode 0
+Admin.Player.Freeze 0
+Admin.Player.Invisibility 0
+Admin.Player.UnlimitedAmmo 0
 Admin.Player.StartSpectating 0
 Admin.Player.Invisible 0
 Admin.Player.Strip 0
@@ -154,6 +157,8 @@ Admin.Player.Teleport.Location.Zelenogorsk 0
 Admin.Player.Teleport.Location.ZelenogorskTrainyard 0
 Admin.Player.Teleport.Location.ZubCastle 0
 Admin.Player.Teleport.Location.Zvir 0
+Admin.Player.Teleport.Cursor 0
+Admin.Player.Teleport.Cursor.NoLog 1
 Admin.Player.Teleport.View 0
 Admin.Player.Permissions 0
 Admin.Player.Roles 0
@@ -207,6 +212,8 @@ ESP.Object.SetPosition 0
 ESP.Object.SetOrientation 0
 ESP.Object.SetHealth 0
 ESP.Object.Delete 0
+ESP.Object.DuplicateAll 2
+ESP.Object.DeleteAll 2
 ESP.Object.BaseBuilding 2
 ESP.Object.BaseBuilding.Build 2
 ESP.Object.BaseBuilding.Build.MaterialsNotRequired 2
@@ -222,6 +229,7 @@ Vehicles.OffroadHatchback 0
 Vehicles.CivilianSedan 0
 Items 0
 Items.View 0
+Items.CreateSet 0
 Items.Platform 0
 Items.Gate 0
 Items.Gate.Wood 0

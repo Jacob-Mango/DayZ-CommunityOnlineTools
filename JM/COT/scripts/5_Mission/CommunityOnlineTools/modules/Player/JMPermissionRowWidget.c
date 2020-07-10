@@ -30,9 +30,9 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Children = new array< JMPermissionRowWidget >;
 
 		stateOptions = new TStringArray;
-		stateOptions.Insert( "INHERIT" );
-		stateOptions.Insert( "DISALLOW" );
-		stateOptions.Insert( "ALLOW" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_INHERIT_C" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_DISALLOW_C" );
+		stateOptions.Insert( "#STR_COT_PERMISSION_ALLOW_C" );
 	}
 
 	void ~JMPermissionRowWidget()
@@ -194,11 +194,15 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 			inp.Split( ".", tokens );
 		} else 
 		{
-			// Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+			#ifdef JM_COT_LOGGING
+			Print( "Warning, permission line improperly formatted! Read as \"" + inp + "\" but meant to be in format \"Perm.Perm {n}\"." );
+			#endif
 			return;
 		}
-
-		// Print( inp + " with type " + type );
+		
+		#ifdef JM_COT_LOGGING
+		Print( inp + " with type " + type );
+		#endif
 		
 		int depth = tokens.Find( Name );
 

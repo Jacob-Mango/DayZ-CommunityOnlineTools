@@ -32,8 +32,6 @@ modded class MissionGameplay
 	void ~MissionGameplay()
 	{
 		delete g_cotBase;
-		
-		GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
 	}
 
 	// ------------------------------------------------------------
@@ -73,6 +71,7 @@ modded class MissionGameplay
 		// If game is not multiplayer, add a default offline player
 		if ( IsMissionOffline() )
 		{
+			Print( "MissionGameplay::OnMissionStart - IsMissionOffline" );
 			OfflineMissionStart();
 		}
 	}
@@ -86,8 +85,14 @@ modded class MissionGameplay
 
 		super.OnMissionFinish();
 
-		if (m_CDebugMonitor)
+		if ( m_CDebugMonitor )
 			m_CDebugMonitor.Hide();
+		
+		if ( IsMissionOffline() )
+		{
+			Print( "MissionGameplay::OnMissionFinish - IsMissionOffline" );
+			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
+		}
 	}
 
 	// ------------------------------------------------------------

@@ -46,7 +46,7 @@ class JMESPViewTypePlayer: JMESPViewType
 	void JMESPViewTypePlayer()
 	{
 		Permission = "Player";
-		Localisation = "Players";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER";
 
 		Colour = ARGB( 255, 80, 255, 240 );
 
@@ -68,6 +68,8 @@ class JMESPViewTypePlayer: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		if ( man.GetIdentity() )
 		{
@@ -91,7 +93,7 @@ class JMESPViewTypeInfected: JMESPViewType
 	void JMESPViewTypeInfected()
 	{
 		Permission = "Infected";
-		Localisation = "Infected";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Infected";
 
 		Colour = ARGB( 255, 215, 219, 0 );
 	}
@@ -111,6 +113,8 @@ class JMESPViewTypeInfected: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -127,7 +131,7 @@ class JMESPViewTypeAnimal: JMESPViewType
 	void JMESPViewTypeAnimal()
 	{
 		Permission = "Animal";
-		Localisation = "Animal";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Animal";
 
 		Colour = ARGB( 255, 46, 219, 0 );
 	}
@@ -147,6 +151,8 @@ class JMESPViewTypeAnimal: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -163,7 +169,7 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 	void JMESPViewTypeCar()
 	{
 		Permission = "Car";
-		Localisation = "Car";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Car";
 
 		Colour = ARGB( 255, 255, 109, 237 );
 	}
@@ -183,6 +189,8 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -199,7 +207,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 	void JMESPViewTypeWeapon()
 	{
 		Permission = "Weapon";
-		Localisation = "Weapons";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Weapons";
 
 		Colour = ARGB( 255, 75, 255, 218 );
 	}
@@ -219,6 +227,8 @@ class JMESPViewTypeWeapon: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -235,7 +245,7 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 	void JMESPViewTypeBoltRifle()
 	{
 		Permission = "Weapon.BoltRifle";
-		Localisation = "Bolt Rifles";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Bolt_Rifles";
 
 		Colour = ARGB( 255, 100, 255, 218 );
 	}
@@ -255,6 +265,8 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -271,7 +283,7 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 	void JMESPViewTypeBoltActionRifle()
 	{
 		Permission = "Weapon.BoltActionRifle";
-		Localisation = "Bolt Action Rifles";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Bolt_Action_Rifles";
 
 		Colour = ARGB( 255, 100, 255, 218 );
 	}
@@ -291,6 +303,8 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -307,7 +321,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 	void JMESPViewTypeRifle()
 	{
 		Permission = "Weapon.Rifle";
-		Localisation = "Rifles";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Rifles";
 
 		Colour = ARGB( 255, 125, 255, 218 );
 	}
@@ -327,6 +341,8 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -343,7 +359,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 	void JMESPViewTypePistol()
 	{
 		Permission = "Weapon.Pistol";
-		Localisation = "Pistols";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Pistols";
 
 		Colour = ARGB( 255, 150, 255, 218 );
 	}
@@ -363,6 +379,8 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -379,7 +397,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 	void JMESPViewTypeItemBase()
 	{
 		Permission = "Item";
-		Localisation = "Items";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Items";
 
 		Colour = ARGB( 255, 20, 112, 255 );
 	}
@@ -403,6 +421,8 @@ class JMESPViewTypeItemBase: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -424,7 +444,7 @@ class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 	void JMESPViewTypeUnknown()
 	{
 		Permission = "Item.Unknown";
-		Localisation = "Unknown Items";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Unknown_Items";
 
 		Colour = ARGB( 255, 40, 112, 255 );
 	}
@@ -484,7 +504,7 @@ class JMESPViewTypeTent: JMESPViewTypeItemBase
 	void JMESPViewTypeTent()
 	{
 		Permission = "Item.Tent";
-		Localisation = "Tents";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Tents";
 
 		Colour = ARGB( 255, 80, 112, 255 );
 	}
@@ -504,7 +524,7 @@ class JMESPViewTypeBaseBuilding: JMESPViewTypeItemBase
 	void JMESPViewTypeBaseBuilding()
 	{
 		Permission = "Item.BaseBuilding";
-		Localisation = "Base Building";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Base_Building";
 
 		Colour = ARGB( 255, 120, 112, 255 );
 
@@ -526,7 +546,7 @@ class JMESPViewTypeFood: JMESPViewTypeItemBase
 	void JMESPViewTypeFood()
 	{
 		Permission = "Item.Food";
-		Localisation = "Food";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Food";
 
 		Colour = ARGB( 255, 140, 112, 255 );
 	}
@@ -546,7 +566,7 @@ class JMESPViewTypeExplosive: JMESPViewTypeItemBase
 	void JMESPViewTypeExplosive()
 	{
 		Permission = "Item.Explosive";
-		Localisation = "Explosives";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Explosives";
 
 		Colour = ARGB( 255, 160, 112, 255 );
 	}
@@ -572,7 +592,7 @@ class JMESPViewTypeBook: JMESPViewTypeItemBase
 	void JMESPViewTypeBook()
 	{
 		Permission = "Item.Book";
-		Localisation = "Books";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Books";
 
 		Colour = ARGB( 255, 180, 112, 255 );
 	}
@@ -592,7 +612,7 @@ class JMESPViewTypeContainer: JMESPViewTypeItemBase
 	void JMESPViewTypeContainer()
 	{
 		Permission = "Item.Container";
-		Localisation = "Containers";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Containers";
 
 		Colour = ARGB( 255, 200, 112, 255 );
 	}
@@ -612,7 +632,7 @@ class JMESPViewTypeTransmitter: JMESPViewTypeItemBase
 	void JMESPViewTypeTransmitter()
 	{
 		Permission = "Item.Transmitter";
-		Localisation = "Transmitters";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Transmitters";
 
 		Colour = ARGB( 255, 200, 112, 255 );
 	}
@@ -632,7 +652,7 @@ class JMESPViewTypeClothing: JMESPViewTypeItemBase
 	void JMESPViewTypeClothing()
 	{
 		Permission = "Item.Clothing";
-		Localisation = "Clothing";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Clothing";
 
 		Colour = ARGB( 255, 220, 112, 255 );
 	}
@@ -652,7 +672,7 @@ class JMESPViewTypeMagazine: JMESPViewTypeItemBase
 	void JMESPViewTypeMagazine()
 	{
 		Permission = "Item.Magazine";
-		Localisation = "Magazines";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Magazines";
 
 		Colour = ARGB( 255, 240, 112, 255 );
 	}
@@ -672,7 +692,7 @@ class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 	void JMESPViewTypeAmmo()
 	{
 		Permission = "Item.Ammo";
-		Localisation = "Ammo";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Ammo";
 
 		Colour = ARGB( 255, 240, 112, 255 );
 	}

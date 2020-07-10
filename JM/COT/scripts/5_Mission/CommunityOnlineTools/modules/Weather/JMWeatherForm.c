@@ -131,7 +131,7 @@ class JMWeatherForm extends JMFormBase
 	{
 		m_RemovePreset = preset;
 
-		CreateConfirmation_Two( "Confirm", "Do you wish to remove the preset " + preset, "No", "RemovePreset_No", "Yes", "RemovePreset_Yes" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Confirm", "Do you wish to remove the preset " + preset, "No", "RemovePreset_No", "Yes", "RemovePreset_Yes" );
 	}
 
 	void RemovePreset_No( JMConfirmation confirmation )
@@ -590,12 +590,12 @@ class JMWeatherForm extends JMFormBase
 
 			if ( preset.Permission == "" )
 			{
-				CreateConfirmation_One( "Error", "Permission can't be empty", "Ok" );
+				CreateConfirmation_One( JMConfirmationType.INFO, "Error", "Permission can't be empty", "Ok" );
 				return;
 			}
 			if ( preset.Name == "" )
 			{
-				CreateConfirmation_One( "Error", "Name can't be empty", "Ok" );
+				CreateConfirmation_One( JMConfirmationType.INFO, "Error", "Name can't be empty", "Ok" );
 				return;
 			}
 		} else
@@ -727,7 +727,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderStormDensity = UIActionManager.CreateSlider( actions, "Density", 0, 1, this, "OnChange_Storm" );
 		m_SliderStormDensity.SetCurrent( 0 );
-		m_SliderStormDensity.SetAppend( "%" );
+		m_SliderStormDensity.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormDensity.SetStepValue( 0.1 );
 		m_SliderStormDensity.SetMin( 0 );
 		m_SliderStormDensity.SetMax( 100 );
@@ -739,7 +739,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderStormThreshold = UIActionManager.CreateSlider( actions, "Overcast", 0, 1, this, "OnChange_Storm" );
 		m_SliderStormThreshold.SetCurrent( 0 );
-		m_SliderStormThreshold.SetAppend( "%" );
+		m_SliderStormThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormThreshold.SetStepValue( 0.1 );
 		m_SliderStormThreshold.SetMin( 0 );
 		m_SliderStormThreshold.SetMax( 100 );
@@ -786,7 +786,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderFogForecast = UIActionManager.CreateSlider( actions, "Forecast", 0, 1, this, "OnChange_Fog" );
 		m_SliderFogForecast.SetCurrent( 0 );
-		m_SliderFogForecast.SetAppend( "%" );
+		m_SliderFogForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderFogForecast.SetStepValue( 0.1 );
 		m_SliderFogForecast.SetMin( 0 );
 		m_SliderFogForecast.SetMax( 100 );
@@ -841,7 +841,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderRainForecast = UIActionManager.CreateSlider( actions, "Forecast", 0, 1, this, "OnChange_Rain" );
 		m_SliderRainForecast.SetCurrent( 0 );
-		m_SliderRainForecast.SetAppend( "%" );
+		m_SliderRainForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainForecast.SetStepValue( 0.1 );
 		m_SliderRainForecast.SetMin( 0 );
 		m_SliderRainForecast.SetMax( 100 );
@@ -896,7 +896,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderRainOvercastMin = UIActionManager.CreateSlider( actions, "Min", 0, 1, this, "OnChange_RainThresholds" );
 		m_SliderRainOvercastMin.SetCurrent( 0 );
-		m_SliderRainOvercastMin.SetAppend( "%" );
+		m_SliderRainOvercastMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMin.SetStepValue( 0.1 );
 		m_SliderRainOvercastMin.SetMin( 0 );
 		m_SliderRainOvercastMin.SetMax( 100 );
@@ -908,7 +908,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderRainOvercastMax = UIActionManager.CreateSlider( actions, "Max", 0, 1, this, "OnChange_RainThresholds" );
 		m_SliderRainOvercastMax.SetCurrent( 0 );
-		m_SliderRainOvercastMax.SetAppend( "%" );
+		m_SliderRainOvercastMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMax.SetStepValue( 0.1 );
 		m_SliderRainOvercastMax.SetMin( 0 );
 		m_SliderRainOvercastMax.SetMax( 100 );
@@ -955,7 +955,7 @@ class JMWeatherForm extends JMFormBase
 
 		m_SliderOvercastForecast = UIActionManager.CreateSlider( actions, "Forecast", 0, 1, this, "OnChange_Overcast" );
 		m_SliderOvercastForecast.SetCurrent( 0 );
-		m_SliderOvercastForecast.SetAppend( "%" );
+		m_SliderOvercastForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderOvercastForecast.SetStepValue( 0.1 );
 		m_SliderOvercastForecast.SetMin( 0 );
 		m_SliderOvercastForecast.SetMax( 100 );
@@ -1004,7 +1004,7 @@ class JMWeatherForm extends JMFormBase
 	{
 		action = UIActionManager.CreateSlider( parent, label, 0, 1, this, "OnChange_Wind" );
 		action.SetCurrent( 0 );
-		action.SetAppend( "%" );
+		action.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		action.SetStepValue( 0.01 );
 		action.SetMin( -1.0 );
 		action.SetMax( 1.0 );

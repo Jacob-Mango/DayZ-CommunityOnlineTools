@@ -10,6 +10,11 @@ enum JMESPModuleRPC
 	BaseBuilding_Build,
 	BaseBuilding_Dismantle,
 	BaseBuilding_Repair,
+	MakeItemSet,
+	DuplicateAll,
+	DeleteAll,
+	MoveToCursorRelative,
+	MoveToCursorAbsolute,
 	COUNT
 };
 
@@ -60,6 +65,9 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetHealth" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Delete" );
 
+		GetPermissionsManager().RegisterPermission( "ESP.Object.DuplicateAll" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.DeleteAll" );
+
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Dismantle" );
@@ -95,7 +103,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "ESP Tools";
+		return "#STR_COT_ESP_MODULE_NAME";
 	}
 	
 	override string GetIconName()
@@ -106,6 +114,28 @@ class JMESPModule: JMRenderableModuleBase
 	override bool ImageIsIcon()
 	{
 		return false;
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "ESP Module";
+	}
+
+	override void GetWebhookTypes( out array< string > types )
+	{
+		types.Insert( "Log" );
+		types.Insert( "Position" );
+		types.Insert( "Orientation" );
+		types.Insert( "Health" );
+		types.Insert( "Delete" );
+		types.Insert( "BB_Build" );
+		types.Insert( "BB_Dismantle" );
+		types.Insert( "BB_Repair" );
+		types.Insert( "MakeItemSet" );
+		types.Insert( "DuplicateAll" );
+		types.Insert( "DeleteAll" );
+		types.Insert( "MoveToCursorRelative" );
+		types.Insert( "MoveToCursorAbsolute" );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -184,6 +214,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMissionStart()
 	{
+		super.OnMissionStart();
+
 		if ( IsMissionClient() )
 		{
 			JMESPWidgetHandler.espModule = this;
@@ -604,6 +636,21 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.BaseBuilding_Repair:
 			RPC_BaseBuilding_Repair( ctx, sender, target );
 			break;
+		case JMESPModuleRPC.MakeItemSet:
+			RPC_MakeItemSet( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.DuplicateAll:
+			RPC_DuplicateAll( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.DeleteAll:
+			RPC_DeleteAll( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.MoveToCursorRelative:
+			RPC_MoveToCursorRelative( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.MoveToCursorAbsolute:
+			RPC_MoveToCursorAbsolute( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -620,9 +667,10 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Log( string log, PlayerIdentity ident )
+	private void Exec_Log( string log, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
+		SendWebhook( "Log", instance, "Logging ESP action: " + log );
 	}
 
 	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -631,7 +679,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( log ) )
 			return;
 
-		Exec_Log( log, senderRPC );
+		Exec_Log( log, senderRPC, GetPermissionsManager().GetPlayer( senderRPC.GetId() ) );
 	}
 
 	void SetPosition( vector position, Object target )
@@ -647,11 +695,12 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident )
+	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		target.SetPosition( position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
+		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
 	}
 
 	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -660,10 +709,11 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( position ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
 			return;
 
-		Exec_SetPosition( position, target, senderRPC );
+		Exec_SetPosition( position, target, senderRPC, instance );
 	}
 
 	void SetOrientation( vector orientation, Object target )
@@ -679,11 +729,12 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident )
+	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		target.SetOrientation( orientation );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
+		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
 	}
 
 	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -692,17 +743,18 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( orientation ) )
 			return;
 
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetOrientation", senderRPC ) )
 			return;
 
-		Exec_SetOrientation( orientation, target, senderRPC );
+		Exec_SetOrientation( orientation, target, senderRPC, instance );
 	}
 
-	void SetHealth( float health, Object target )
+	void SetHealth( float health, string zone, Object target )
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_SetHealth( health, target, NULL );
+			Exec_SetHealth( health, zone, target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -711,11 +763,12 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetHealth( float health, Object target, PlayerIdentity ident )
+	private void Exec_SetHealth( float health, string zone, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
+		SendWebhook( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
 	}
 
 	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -724,37 +777,60 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( health ) )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC ) )
+		string zone;
+		if ( !ctx.Read( zone ) )
 			return;
 
-		Exec_SetHealth( health, target, senderRPC );
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC, instance ) )
+			return;
+
+		Exec_SetHealth( health, zone, target, senderRPC, instance );
+	}
+
+	void DeleteObject( int networkLow, int networkHigh )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( networkLow );
+		rpc.Write( networkHigh );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, false, NULL );
 	}
 
 	void DeleteObject( Object target )
 	{
-		if ( IsMissionOffline() )
-		{
-			Exec_DeleteObject( target, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.DeleteObject, false, NULL );
-		}
+		Exec_DeleteObject( target, NULL );
 	}
 
-	private void Exec_DeleteObject( Object target, PlayerIdentity ident )
+	private void Exec_DeleteObject( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( !target )
+			return;
+
+		string obtype = Object.GetDebugName( target );
+
+		vector transform[4];
+		target.GetTransform( transform );
+
 		GetGame().ObjectDelete( target );
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=delete" );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
+		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
 	}
 
 	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC ) )
+		int netLow;
+		int netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
-		Exec_DeleteObject( target, senderRPC );
+		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC, instance ) )
+			return;
+
+		Exec_DeleteObject( obj, senderRPC, instance );
 	}
 
 	void BaseBuilding_Build( BaseBuildingBase target, string part )
@@ -770,29 +846,31 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	private void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
         bool requireMaterials = true;
         if ( !IsMissionOffline() )
-            requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident );
+            requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
         target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
+		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Build( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build", senderRPC ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build", senderRPC, instance ) )
+			return;
+
         BaseBuildingBase bb;
         if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Build( bb, part_name, senderRPC );
+		    Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
 	}
 
 	void BaseBuilding_Dismantle( BaseBuildingBase target, string part )
@@ -808,7 +886,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_BaseBuilding_Dismantle( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	private void Exec_BaseBuilding_Dismantle( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
@@ -816,20 +894,22 @@ class JMESPModule: JMRenderableModuleBase
         target.GetConstruction().COT_DismantlePart( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
+		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Dismantle( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Dismantle", senderRPC ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Dismantle", senderRPC, instance ) )
+			return;
+
         BaseBuildingBase bb;
         if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC );
+		    Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
 	}
 
 	void BaseBuilding_Repair( BaseBuildingBase target, string part )
@@ -845,25 +925,27 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_BaseBuilding_Repair( BaseBuildingBase target, string part_name, PlayerIdentity ident )
+	private void Exec_BaseBuilding_Repair( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
         target.GetConstruction().COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
+		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
 	private void RPC_BaseBuilding_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Repair", senderRPC ) )
-			return;
-
 		string part_name;
 		if ( !ctx.Read( part_name ) )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Repair", senderRPC, instance ) )
+			return;
+
         BaseBuildingBase bb;
         if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Repair( bb, part_name, senderRPC );
+		    Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )
@@ -885,42 +967,116 @@ class JMESPModule: JMRenderableModuleBase
 	
 	void MakeItemSet( string name )
 	{
-		COTCreateLocalAdminNotification( new StringLocaliser( "Creating Item Set: %1", name ) );
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( name );
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, false, NULL );
 	}
 
 	private void RPC_MakeItemSet( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Items.CreateSet", senderRPC, instance ) )
+			return;
+		
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+
+		Exec_MakeItemSet( name, objects, instance );
 	}
 
-	private void Exec_MakeItemSet( array< Object > objects, string name, PlayerIdentity ident )
+	private void Exec_MakeItemSet( string name, set< Object > objects, JMPlayerInstance instance )
 	{
 	}
 
 	void DuplicateAll()
 	{
+		ScriptRPC rpc = new ScriptRPC();
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, false, NULL );
 	}
 
 	private void RPC_DuplicateAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DuplicateAll", senderRPC, instance ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_DuplicateAll( objects, instance );
 	}
 
-	private void Exec_DuplicateAll( array< Object > objects, PlayerIdentity ident )
+	private void Exec_DuplicateAll( set< Object > objects, JMPlayerInstance instance )
 	{
 	}
 
 	void DeleteAll()
 	{
+		ScriptRPC rpc = new ScriptRPC();
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, false, NULL );
+
+		JMScriptInvokers.ON_DELETE_ALL.Invoke();
+
+		JM_GetSelected().ClearObjects();
 	}
 
 	private void RPC_DeleteAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DeleteAll", senderRPC, instance ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_DeleteAll( objects, instance );
 	}
 
-	private void Exec_DeleteAll( array< Object > objects, PlayerIdentity ident )
+	private void Exec_DeleteAll( set< Object > objects, JMPlayerInstance instance )
 	{
+		int removed = 0;
+		int count = objects.Count();
+
+		
+		int i = objects.Count();
+		while ( i > 0 )
+		{
+			Object obj = objects[i  - 1];
+			objects.Remove( i - 1 );
+
+			if ( obj != NULL )
+			{
+				vector transform[4];
+				obj.GetTransform( transform );
+				string obtype = Object.GetDebugName( obj );
+
+				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
+
+				GetGame().ObjectDelete( obj );
+				removed++;
+			}
+
+			i = objects.Count();
+		}
+
+		if ( removed > 0 )
+		{
+			GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + removed + " attempted=" + count );
+			SendWebhook( "DeleteAll", instance, "Performed a delete on " + removed + " objects." );
+		}
 	}
 
-	void MoveToCursorRelative()
+	void MoveToCursorRelative( vector cursor )
 	{
 	}
 
@@ -928,11 +1084,11 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	private void Exec_MoveToCursorRelative( array< Object > objects, PlayerIdentity ident )
+	private void Exec_MoveToCursorRelative( vector cursor, set< Object > objects, JMPlayerInstance instance )
 	{
 	}
 
-	void MoveToCursorAbsolute()
+	void MoveToCursorAbsolute( vector cursor )
 	{
 	}
 
@@ -940,7 +1096,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	private void Exec_MoveToCursorAbsolute( array< Object > objects, PlayerIdentity ident )
+	private void Exec_MoveToCursorAbsolute( vector cursor, set< Object > objects, JMPlayerInstance instance )
 	{
 	}
 }

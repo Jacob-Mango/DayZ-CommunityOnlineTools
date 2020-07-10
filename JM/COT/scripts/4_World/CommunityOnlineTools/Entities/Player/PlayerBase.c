@@ -8,22 +8,44 @@ modded class PlayerBase
 	private bool m_JMIsInvisible;
 	private bool m_JMIsInvisibleRemoteSynch;
 
+	private bool m_JMIsFrozen;
+	private bool m_JMIsFrozenRemoteSynch;
+
 	private vector m_JMLastPosition;
 	private bool m_JMHasLastPosition;
 
+	private bool m_JMHasUnlimitedAmmo;
+
 	override void Init()
 	{
+		/*
+		Print( "TOUCH: " + EntityEvent.TOUCH );
+		Print( "VISIBLE: " + EntityEvent.VISIBLE );
+		Print( "NOTVISIBLE: " + EntityEvent.NOTVISIBLE );
+		Print( "FRAME: " + EntityEvent.FRAME );
+		Print( "POSTFRAME: " + EntityEvent.POSTFRAME );
+		Print( "INIT: " + EntityEvent.INIT );
+		Print( "JOINTBREAK: " + EntityEvent.JOINTBREAK );
+		Print( "SIMULATE: " + EntityEvent.SIMULATE );
+		Print( "POSTSIMULATE: " + EntityEvent.POSTSIMULATE );
+		Print( "PHYSICSMOVE: " + EntityEvent.PHYSICSMOVE );
+		Print( "CONTACT: " + EntityEvent.CONTACT );
+		Print( "EXTRA: " + EntityEvent.EXTRA );
+		Print( "ANIMEVENT: " + EntityEvent.ANIMEVENT );
+		Print( "SOUNDEVENT: " + EntityEvent.SOUNDEVENT );
+		Print( "PHYSICSSTEADY: " + EntityEvent.PHYSICSSTEADY );
+		Print( "USER: " + EntityEvent.USER );
+		Print( "ALL: " + EntityEvent.ALL );
+		*/
 		super.Init();
 
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
-
-		if ( IsMissionClient() )
-		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( COTDeferredClientInit, 1000, false );
-		}
 	}
 
 	override void OnVariablesSynchronized()
@@ -43,27 +65,14 @@ modded class PlayerBase
 
 			//SetInvisible( m_JMIsInvisible );
 		}
-	}
 
-	private void COTDeferredClientInit()
-	{
-		if ( IsMissionOffline() )
+		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
 		{
-			m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
-		} else if ( IsMissionClient() )
-		{
-			if ( GetIdentity() )
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-			}
-		}
+			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
 
-		Assert_Null( GetIdentity() );
-		Assert_Null( m_AuthenticatedPlayer );
-
-		if ( m_AuthenticatedPlayer )
-		{
-			m_AuthenticatedPlayer.PlayerObject = this;
+			HumanInputController hic = GetInputController();
+			if ( hic )
+				hic.SetDisabled( m_JMIsFrozen );
 		}
 	}
 
@@ -94,21 +103,6 @@ modded class PlayerBase
 		Object parent;
 		if ( Class.CastTo( parent, GetParent() ) )
 		{
-			/*
-			vector tmPlayer[4];
-			vector tmTarget[4];
-			vector tmLocal[4];
-
-			GetTransformWS( tmPlayer );
-			tmPlayer[3] = position;
-
-			parent.GetTransform( tmTarget );
-			Math3D.MatrixInvMultiply4( tmTarget, tmPlayer, tmLocal );
-
-			SetPosition( tmLocal[3] );
-			SetDirection( tmLocal[2] );
-			*/
-
 			SetPosition( parent.WorldToModel( position ) );
 		} else
 		{
@@ -118,20 +112,56 @@ modded class PlayerBase
 
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
+		if ( m_AuthenticatedPlayer )
+			return m_AuthenticatedPlayer;
+
+		if ( !GetIdentity() ) // Could be AI
+			return NULL;
+
+		if ( !m_AuthenticatedPlayer )
+		{
+			if ( IsMissionOffline() )
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+			} else
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
+			}
+		}
+
+		if ( Assert_Null( m_AuthenticatedPlayer ) )
+			return NULL;
+		
+		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
 	}
+	
+	string FormatSteamWebhook()
+	{
+		return GetAuthenticatedPlayer().FormatSteamWebhook();
+	}
 
-	bool HasGodMode()
+	bool COTHasGodMode()
 	{
 		return m_JMHasGodMode;
 	}
 
-	bool IsInvisible()
+	bool COTIsFrozen()
+	{
+		return m_JMIsFrozen;
+	}
+
+	bool COTIsInvisible()
 	{
 		return m_JMIsInvisible;
 	}
 
-	void SetGodMode( bool mode )
+	bool COTHasUnlimitedAmmo()
+	{
+		return m_JMHasUnlimitedAmmo;
+	}
+
+	void COTSetGodMode( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -141,7 +171,22 @@ modded class PlayerBase
 		}
 	}
 
-	void SetInvisibility(bool mode)
+	void COTSetFreeze( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMIsFrozen = mode;
+			m_JMIsFrozenRemoteSynch = mode;
+
+			SetSynchDirty();
+
+			HumanInputController hic = GetInputController();
+			if ( hic )
+				hic.SetDisabled( m_JMIsFrozen );
+		}
+	}
+
+	void COTSetInvisibility( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -149,6 +194,14 @@ modded class PlayerBase
 			m_JMIsInvisibleRemoteSynch = mode;
 
 			SetSynchDirty();
+		}
+	}
+
+	void COTSetUnlimitedAmmo( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasUnlimitedAmmo = mode;
 		}
 	}
 }

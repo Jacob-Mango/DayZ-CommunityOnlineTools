@@ -1,0 +1,180 @@
+{
+    "m_TeleportLocations": [
+        {
+            "m_Name": "Severograd",
+            "m_Position": [
+                8428,
+                0,
+                12767.1
+            ]
+        },
+        {
+            "m_Name": "Krasnostav",
+            "m_Position": [
+                11172,
+                0,
+                12314.1
+            ]
+        },
+        {
+            "m_Name": "Mogilevka",
+            "m_Position": [
+                7537.8,
+                0,
+                5211.55
+            ]
+        },
+        {
+            "m_Name": "Stary",
+            "m_Position": [
+                6046.94,
+                0,
+                7733.97
+            ]
+        },
+        {
+            "m_Name": "Msta",
+            "m_Position": [
+                11322.5,
+                0,
+                5463.36
+            ]
+        },
+        {
+            "m_Name": "Vybor",
+            "m_Position": [
+                3784.16,
+                0,
+                8923.48
+            ]
+        },
+        {
+            "m_Name": "Gorka",
+            "m_Position": [
+                9514.27,
+                0,
+                8863.69
+            ]
+        },
+        {
+            "m_Name": "Solnichni",
+            "m_Position": [
+                13402.6,
+                0,
+                6303.35
+            ]
+        },
+        {
+            "m_Name": "NWAF",
+            "m_Position": [
+                4823.43,
+                0,
+                10457.2
+            ]
+        },
+        {
+            "m_Name": "Blota",
+            "m_Position": [
+                4467.61,
+                0,
+                2496.14
+            ]
+        },
+        {
+            "m_Name": "NEAF",
+            "m_Position": [
+                11921.4,
+                0,
+                12525.5
+            ]
+        },
+        {
+            "m_Name": "Cherno",
+            "m_Position": [
+                6649.22,
+                0,
+                2710.03
+            ]
+        },
+        {
+            "m_Name": "Elektro",
+            "m_Position": [
+                10553.5,
+                0,
+                2313.37
+            ]
+        },
+        {
+            "m_Name": "Berez",
+            "m_Position": [
+                12319.5,
+                0,
+                9530.15
+            ]
+        },
+        {
+            "m_Name": "Svetlojarsk",
+            "m_Position": [
+                13900.8,
+                0,
+                13258.1
+            ]
+        },
+        {
+            "m_Name": "Zelenogorsk",
+            "m_Position": [
+                2572.8,
+                0,
+                5105.09
+            ]
+        },
+        {
+            "m_Name": "Lopatino",
+            "m_Position": [
+                2714.74,
+                0,
+                9996.33
+            ]
+        },
+        {
+            "m_Name": "Tisy",
+            "m_Position": [
+                1723.1,
+                0,
+                13983.9
+            ]
+        },
+        {
+            "m_Name": "Novaya",
+            "m_Position": [
+                3395.28,
+                0,
+                13013.6
+            ]
+        },
+        {
+            "m_Name": "Novy",
+            "m_Position": [
+                7085.73,
+                0,
+                7720.85
+            ]
+        },
+        {
+            "m_Name": "Grishino",
+            "m_Position": [
+                5952.15,
+                0,
+                10367.7
+            ]
+        },
+        {
+            "m_Name": "Kabanino",
+            "m_Position": [
+                5363.97,
+                0,
+                8594.39
+            ]
+        }
+    ]
+}

@@ -61,7 +61,7 @@ class JMVehicleSpawnerForm extends JMFormBase
 			
 			UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
 
-			UIActionButton button = UIActionManager.CreateButton( wrapper, "Cursor", this, "SpawnVehicle" );
+			UIActionButton button = UIActionManager.CreateButton( wrapper, "#STR_COT_VEHICLE_MODULE_CURSOR", this, "SpawnVehicle" );
 			button.SetData( new JMVehicleSpawnerButtonData( vehicles[i] ) );
 
 			m_VehicleButtons.Insert( button );

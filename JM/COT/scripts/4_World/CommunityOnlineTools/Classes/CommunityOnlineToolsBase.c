@@ -7,6 +7,8 @@ class CommunityOnlineToolsBase
 
 	private string m_FileLogName;
 
+	protected JMWebhookModule m_Webhook;
+
 	void CommunityOnlineToolsBase()
 	{
 		m_Loaded = false;
@@ -60,6 +62,14 @@ class CommunityOnlineToolsBase
 		}
 
 		CreateNewLog();
+
+		if ( IsMissionOffline() )
+		{
+			m_Webhook = NULL;
+		} else
+		{
+			Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		}
 	}
 
 	void OnFinish()
@@ -92,11 +102,19 @@ class CommunityOnlineToolsBase
 	void SetActive( bool active )
 	{
 		m_IsActive = active;
+
+		OnCOTActiveChanged( m_IsActive );
 	}
 
 	void ToggleActive()
 	{
 		m_IsActive = !m_IsActive;
+
+		OnCOTActiveChanged( m_IsActive );
+	}
+
+	void OnCOTActiveChanged( bool active )
+	{
 	}
 
 	bool IsOpen()
@@ -120,7 +138,7 @@ class CommunityOnlineToolsBase
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 				return;
 			}
 		}
@@ -146,7 +164,7 @@ class CommunityOnlineToolsBase
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIF_TOGGLED_OFF" ) );
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 				return;
 			}
 		}
