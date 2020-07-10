@@ -25,7 +25,7 @@ class ConfigArray : ConfigEntry
             return false;
         }
 
-        while ( true )
+        for ( int vpp = 0; vpp < 100; vpp++ )
         {
             c = reader.SkipWhitespace();
 
@@ -75,7 +75,7 @@ class ConfigArray : ConfigEntry
             c = reader.SkipWhitespace();
 
             if ( c == "}" )
-                break;
+                return true;
 
             if ( c != "," && c != ";" )
             {
@@ -84,6 +84,7 @@ class ConfigArray : ConfigEntry
             }
         }
 
-        return true;
+        reader.Error( "Prematurely ending the array reading, going for too long." );
+        return false;
     }
 };
