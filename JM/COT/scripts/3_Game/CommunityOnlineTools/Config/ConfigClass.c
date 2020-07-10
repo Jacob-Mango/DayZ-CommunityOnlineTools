@@ -94,7 +94,7 @@ class ConfigClass : ConfigEntry
 
     override bool Parse( ref ConfigReader reader, ref ConfigFile file )
     {
-        while ( true )
+        for ( int vpp = 0; vpp < 100; vpp++ )
         {
             string c = reader.SkipWhitespace();
 
@@ -117,7 +117,7 @@ class ConfigClass : ConfigEntry
                     c = reader.GetCharacter();
 
                 reader.BackChar();
-                break;
+                return true;
             } else
             {
                 reader.BackChar();
@@ -315,6 +315,7 @@ class ConfigClass : ConfigEntry
             }
         }
 
-        return true;
+        reader.Error( "Prematurely ending the class reading, going for too long." );
+        return false;
     }
 };
