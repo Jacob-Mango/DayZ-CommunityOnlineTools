@@ -1,33 +1,33 @@
 Language,original,english,czech,german,russian,polish,hungarian,italian,spanish,french,chinese,japanese,portuguese,chinesesimp
 STR_COT_NOTIF_ADMIN_TITLE,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools,Community Online Tools
-STR_COT_NOTIF_TOGGLED_OFF,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.
-STR_COT_NOTIF_TELEPORT_TOO_FAR,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far
-STR_COT_NOTIF_TOGGLE,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1
+STR_COT_NOTIF_TOGGLED_OFF,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools в настоящий момент выключен.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.,Community Online Tools is currently toggled off.
+STR_COT_NOTIF_TELEPORT_TOO_FAR,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,Слишком далеко для телепортации,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far
+STR_COT_NOTIF_TOGGLE,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools был включён %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1,Community Online Tools has been toggled %1
 STR_COT_ON_C,ON,ON,ZAP,AN,ВКЛ,WŁ.,ON,SÌ,SÍ,OUI,開,オン,ON,开
 STR_COT_OFF_C,OFF,OFF,VYP,AUS,ВЫКЛ,WYŁ.,OFF,NO,NO,NON,關,オフ,OFF,关
-STR_COT_ON,on,on,ZAP,AN,ВКЛ,WŁ.,on,SÌ,SÍ,OUI,開,オン,on,开
-STR_COT_OFF,off,off,VYP,AUS,ВЫКЛ,WYŁ.,off,NO,NO,NON,關,オフ,off,关
-STR_COT_INPUT_TOGGLE,Enable/Disable Keybinds,Enable/Disable Keybinds,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_SIDEBAR,Open/Close Sidebar,Open/Close Sidebar,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_PLAYER,Open/Close Player Menu,Open/Close Player Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_CAMERA,Open/Close Camera Menu,Open/Close Camera Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ESP,Open/Close ESP Menu,Open/Close ESP Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_MAP,Open/Close Map Menu,Open/Close Map Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_MAP_EDITOR,Open/Close Map Editor,Open/Close Map Editor,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ENTITY,Open/Close Entity Menu,Open/Close Entity Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_SELECTED,Open/Close Selected Menu,Open/Close Selected Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_TELEPORT,Open/Close Teleport Menu,Open/Close Teleport Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_ITEMSET,Open/Close Item Set Menu,Open/Close Item Set Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_VEHICLE,Open/Close Vehicle Menu,Open/Close Vehicle Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_WEATHER,Open/Close Weather Menu,Open/Close Weather Menu,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO,Open/Close Server Info Menu,Open/Close Server Info Menu,,,,,,,,,,,,
-STR_COT_INPUT_TELEPORT_CROSSHAIR,Teleport Self (Crosshair),Teleport Self (Crosshair),,,,,,,,,,,,
+STR_COT_ON,on,on,ZAP,AN,вкл,WŁ.,on,SÌ,SÍ,OUI,開,オン,on,开
+STR_COT_OFF,off,off,VYP,AUS,выкл,WYŁ.,off,NO,NO,NON,關,オフ,off,关
+STR_COT_INPUT_TOGGLE,Enable/Disable Keybinds,Enable/Disable Keybinds,,,Включить/Выключить Ввод,,,,,,,,,
+STR_COT_INPUT_TOGGLE_SIDEBAR,Open/Close Sidebar,Open/Close Sidebar,,,Открыть/Закрыть Боковое меню,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_PLAYER,Open/Close Player Menu,Open/Close Player Menu,,,Открыть/Закрыть меню Игрока,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_CAMERA,Open/Close Camera Menu,Open/Close Camera Menu,,,Открыть/Закрыть меню Камеры,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_ESP,Open/Close ESP Menu,Open/Close ESP Menu,,,Открыть/Закрыть меню ESP,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_MAP,Open/Close Map Menu,Open/Close Map Menu,,,Открыть/Закрыть меню Карты,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_MAP_EDITOR,Open/Close Map Editor,Open/Close Map Editor,,,Открыть/Закрыть Редактор Карты,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_ENTITY,Open/Close Entity Menu,Open/Close Entity Menu,,,Открыть/Закрыть меню Объекта,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_SELECTED,Open/Close Selected Menu,Open/Close Selected Menu,,,Открыть/Закрыть меню Выбранного,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_TELEPORT,Open/Close Teleport Menu,Open/Close Teleport Menu,,,Открыть/Закрыть меню Телепорта,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_ITEMSET,Open/Close Item Set Menu,Open/Close Item Set Menu,,,Открыть/Закрыть меню Наборов,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_VEHICLE,Open/Close Vehicle Menu,Open/Close Vehicle Menu,,,Открыть/Закрыть меню Техники,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_WEATHER,Open/Close Weather Menu,Open/Close Weather Menu,,,Открыть/Закрыть меню Погоды,,,,,,,,,
+STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO,Open/Close Server Info Menu,Open/Close Server Info Menu,,,Открыть/Закрыть меню Информации о Сервере,,,,,,,,,
+STR_COT_INPUT_TELEPORT_CROSSHAIR,Teleport Self (Crosshair),Teleport Self (Crosshair),,,Открыть/Закрыть Телепортировать Себя (Прицел),,,,,,,,,
 STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT,WorldToModelLookAt,WorldToModelLookAt,,,,,,,,,,,,
-STR_COT_INPUT_TOGGLE_FREECAM,Toggles Freecam,Toggles Freecam,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_ZOOM_FORWARD,Zoom Freecam Forwards,Zoom Freecam Forwards,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_ZOOM_BACKWARD,Zoom Freecam Backwards,Zoom Freecam Backwards,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_SPEED_INCREASE,Increase Freecam Speed,Increase Freecam Speed,,,,,,,,,,,,
-STR_COT_INPUT_FREECAM_SPEED_DECREASE,Decrease Freecam Speed,Decrease Freecam Speed,,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_INFECTED,Spawn Infected (Crosshair),Spawn Infected (Crosshair),,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_ANIMAL,Spawn Animal (Crosshair),Spawn Animal (Crosshair),,,,,,,,,,,,
-STR_COT_INPUT_SPAWN_WOLF,Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),,,,,,,,,,,,
+STR_COT_INPUT_TOGGLE_FREECAM,Toggles Freecam,Toggles Freecam,,,Вкл/Выкл Свободную Камеру,,,,,,,,,
+STR_COT_INPUT_FREECAM_ZOOM_FORWARD,Zoom Freecam Forwards,Zoom Freecam Forwards,,,Увеличение Свободной Камеры +,,,,,,,,,
+STR_COT_INPUT_FREECAM_ZOOM_BACKWARD,Zoom Freecam Backwards,Zoom Freecam Backwards,,,Увеличение Свободной Камеры -,,,,,,,,,
+STR_COT_INPUT_FREECAM_SPEED_INCREASE,Increase Freecam Speed,Increase Freecam Speed,,,Увеличить Скорость Свободной Камеры,,,,,,,,,
+STR_COT_INPUT_FREECAM_SPEED_DECREASE,Decrease Freecam Speed,Decrease Freecam Speed,,,Уменьшить Скорость Свободной Камеры,,,,,,,,,
+STR_COT_INPUT_SPAWN_INFECTED,Spawn Infected (Crosshair),Spawn Infected (Crosshair),,,Заспавнить Зомби (Прицел),,,,,,,,,
+STR_COT_INPUT_SPAWN_ANIMAL,Spawn Animal (Crosshair),Spawn Animal (Crosshair),,,Заспавнить Животное (Прицел),,,,,,,,,
+STR_COT_INPUT_SPAWN_WOLF,Spawn Wolf (Crosshair),Spawn Wolf (Crosshair),,,Заспавнить Волка (Прицел),,,,,,,,,
