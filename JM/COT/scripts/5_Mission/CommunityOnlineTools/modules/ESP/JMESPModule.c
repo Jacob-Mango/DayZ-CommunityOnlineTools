@@ -131,7 +131,11 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "BB_Build" );
 		types.Insert( "BB_Dismantle" );
 		types.Insert( "BB_Repair" );
+		types.Insert( "MakeItemSet" );
+		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
+		types.Insert( "MoveToCursorRelative" );
+		types.Insert( "MoveToCursorAbsolute" );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -784,20 +788,24 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_SetHealth( health, zone, target, senderRPC, instance );
 	}
 
+	void DeleteObject( int networkLow, int networkHigh )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( networkLow );
+		rpc.Write( networkHigh );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, false, NULL );
+	}
+
 	void DeleteObject( Object target )
 	{
-		if ( IsMissionOffline() )
-		{
-			Exec_DeleteObject( target, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.DeleteObject, false, NULL );
-		}
+		Exec_DeleteObject( target, NULL );
 	}
 
 	private void Exec_DeleteObject( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( !target )
+			return;
+
 		string obtype = Object.GetDebugName( target );
 
 		vector transform[4];
@@ -811,11 +819,18 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow;
+		int netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC, instance ) )
 			return;
 
-		Exec_DeleteObject( target, senderRPC, instance );
+		Exec_DeleteObject( obj, senderRPC, instance );
 	}
 
 	void BaseBuilding_Build( BaseBuildingBase target, string part )
@@ -1008,6 +1023,10 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
 		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, false, NULL );
+
+		JMScriptInvokers.ON_DELETE_ALL.Invoke();
+
+		JM_GetSelected().ClearObjects();
 	}
 
 	private void RPC_DeleteAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1025,28 +1044,36 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_DeleteAll( set< Object > objects, JMPlayerInstance instance )
 	{
+		int removed = 0;
 		int count = objects.Count();
 
-		GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + count );
 		
 		int i = objects.Count();
 		while ( i > 0 )
 		{
-			Object obj = objects[i];
-			objects.Remove( i );
+			Object obj = objects[i  - 1];
+			objects.Remove( i - 1 );
 
-			vector transform[4];
-			obj.GetTransform( transform );
-			string obtype = Object.GetDebugName( obj );
+			if ( obj != NULL )
+			{
+				vector transform[4];
+				obj.GetTransform( transform );
+				string obtype = Object.GetDebugName( obj );
 
-			GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
+				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
 
-			GetGame().ObjectDelete( obj );
+				GetGame().ObjectDelete( obj );
+				removed++;
+			}
 
 			i = objects.Count();
 		}
 
-		SendWebhook( "DeleteAll", instance, "Performed a delete on " + count + " objects." );
+		if ( removed > 0 )
+		{
+			GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + removed + " attempted=" + count );
+			SendWebhook( "DeleteAll", instance, "Performed a delete on " + removed + " objects." );
+		}
 	}
 
 	void MoveToCursorRelative( vector cursor )

@@ -68,6 +68,8 @@ class JMESPViewTypePlayer: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		if ( man.GetIdentity() )
 		{
@@ -111,6 +113,8 @@ class JMESPViewTypeInfected: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -147,6 +151,8 @@ class JMESPViewTypeAnimal: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -183,6 +189,8 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -219,6 +227,8 @@ class JMESPViewTypeWeapon: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -255,6 +265,8 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -291,6 +303,8 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -327,6 +341,8 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -363,6 +379,8 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )
@@ -403,6 +421,8 @@ class JMESPViewTypeItemBase: JMESPViewType
 		meta.target = obj;
 		meta.colour = Colour;
 		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
 		meta.name = obj.GetDisplayName();
 		if ( meta.name == "" )

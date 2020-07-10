@@ -75,6 +75,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		Class.CastTo( m_rows_Actions, m_scrler_Actions.GetContentWidget() );
 
 		HideActions();
+
+		JMScriptInvokers.ON_DELETE_ALL.Insert( OnDeleteAll );
 	}
 
 	void Show()
@@ -87,6 +89,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	{
 		OnHide();
 		layoutRoot.Show( false );
+
+		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 	}
 
 	void ToggleESPActions()
@@ -122,6 +126,14 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void OnHide() 
 	{
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
+	}
+
+	void OnDeleteAll()
+	{
+		if ( !Info.type.IsInherited( JMESPViewTypePlayer ) && m_chbx_SelectedObject.IsChecked() )
+		{
+			Hide();
+		}
 	}
 
 	float ATan( float a )
@@ -255,6 +267,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 			Hide();
 			return;
 		}
+
+		m_chbx_SelectedObject.SetChecked( JM_GetSelected().IsObjectSelected( Info.target ) );
 
 		m_TargetType = Info.target.GetType();
 

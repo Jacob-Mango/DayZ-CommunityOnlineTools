@@ -6,6 +6,9 @@ class JMESPMeta : Managed
 	JMPlayerInstance player;
 	Object target;
 
+	int networkLow;
+	int networkHigh;
+
 	JMESPModule module;
 	JMESPWidgetHandler widgetHandler;
 	Widget widgetRoot;
@@ -201,7 +204,10 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.DeleteObject(  target );
+		if ( IsMissionOffline() )
+			module.DeleteObject( target );
+		else
+			module.DeleteObject( networkLow, networkHigh );
 	}
 }
 
