@@ -141,27 +141,27 @@ modded class PlayerBase
 		return GetAuthenticatedPlayer().FormatSteamWebhook();
 	}
 
-	bool HasGodMode()
+	bool COTHasGodMode()
 	{
 		return m_JMHasGodMode;
 	}
 
-	bool IsFrozen()
+	bool COTIsFrozen()
 	{
 		return m_JMIsFrozen;
 	}
 
-	bool IsInvisible()
+	bool COTIsInvisible()
 	{
 		return m_JMIsInvisible;
 	}
 
-	bool HasUnlimitedAmmo()
+	bool COTHasUnlimitedAmmo()
 	{
 		return m_JMHasUnlimitedAmmo;
 	}
 
-	void SetGodMode( bool mode )
+	void COTSetGodMode( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -171,7 +171,7 @@ modded class PlayerBase
 		}
 	}
 
-	void SetFreeze( bool mode )
+	void COTSetFreeze( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -186,7 +186,7 @@ modded class PlayerBase
 		}
 	}
 
-	void SetInvisibility( bool mode )
+	void COTSetInvisibility( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -197,7 +197,7 @@ modded class PlayerBase
 		}
 	}
 
-	void SetUnlimitedAmmo( bool mode )
+	void COTSetUnlimitedAmmo( bool mode )
 	{
 		if ( GetGame().IsServer() )
 		{

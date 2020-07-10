@@ -1,0 +1,19 @@
+{
+    "m_BanList": [
+        {
+            "playerName": "penacoladas",
+            "Steam64Id": "76561198130682592",
+            "GUID": "O38XSClr/j9BD5Ylv1NOSZ5C95NxFqMBr+g7PL1gRz4=",
+            "banReason": "Disrespectful behaviour.",
+            "issuedBy": "Hardcoded by DaOne",
+            "expirationDate": {
+                "Hour": 0,
+                "Minute": 0,
+                "Year": 0,
+                "Month": 0,
+                "Day": 0,
+                "Permanent": 1
+            }
+        }
+    ]
+}

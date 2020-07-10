@@ -116,10 +116,10 @@ class JMPlayerInstance : Managed
 				m_Stamina = PlayerObject.GetStatStamina().Get();
 				m_LifeSpanState = PlayerObject.GetLifeSpanState();
 				m_BloodyHands = PlayerObject.HasBloodyHands();
-				m_GodMode = PlayerObject.HasGodMode();
-				m_Frozen = PlayerObject.IsFrozen();
-				m_Invisibility = PlayerObject.IsInvisible();
-				m_UnlimitedAmmo = PlayerObject.HasUnlimitedAmmo();
+				m_GodMode = PlayerObject.COTHasGodMode();
+				m_Frozen = PlayerObject.COTIsFrozen();
+				m_Invisibility = PlayerObject.COTIsInvisible();
+				m_UnlimitedAmmo = PlayerObject.COTHasUnlimitedAmmo();
 			}
 		}
 	}

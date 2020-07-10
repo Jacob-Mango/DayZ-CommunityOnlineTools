@@ -962,7 +962,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetGodMode( value );
+			player.COTSetGodMode( value );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1019,7 +1019,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetFreeze( value );
+			player.COTSetFreeze( value );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Freeze To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1076,7 +1076,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetInvisibility( value );
+			player.COTSetInvisibility( value );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Invisibility To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1133,7 +1133,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetUnlimitedAmmo( value );
+			player.COTSetUnlimitedAmmo( value );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set UnlimitedAmmo To " + value + " [guid=" + players[i].GetGUID() + "]" );
 

@@ -5,7 +5,7 @@ modded class Weapon_Base
 		super.EEFired( muzzleType, mode, ammoType );
 
         PlayerBase player;
-		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) && player.HasUnlimitedAmmo() )
+		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) && player.COTHasUnlimitedAmmo() )
 		{
 			Magazine magazine = GetMagazine( GetCurrentMuzzle() );
             if ( magazine )
