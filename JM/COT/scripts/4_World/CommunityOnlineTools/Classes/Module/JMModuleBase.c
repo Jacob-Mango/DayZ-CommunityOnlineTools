@@ -23,7 +23,9 @@ modded class JMModuleBase
 
 	void SendWebhook( string type, JMPlayerInstance player, string message )
 	{
+		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "+JMModuleBase::SendWebhook() - Admin" );
+		#endif
 		if ( !m_Webhook || !player || IsMissionOffline() )
 			return;
 
@@ -31,11 +33,16 @@ modded class JMModuleBase
 
         msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
+		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "name=" + GetModuleName() + type );
 		Print( "message=" + message );
+		#endif
 
         m_Webhook.Post( GetModuleName() + type, msg );
+		
+		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "-JMModuleBase::SendWebhook() - Admin" );
+		#endif
 	}
 
 	string GetWebhookTitle()

@@ -175,8 +175,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( PlayerBase.Cast( obj ) )
 			return;
 
-		string obtype;
-		GetGame().ObjectGetType( obj, obtype );
+		string obtype = Object.GetDebugName( obj );
 
 		vector transform[4];
 		obj.GetTransform( transform );

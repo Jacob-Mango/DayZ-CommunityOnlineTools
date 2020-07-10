@@ -61,7 +61,7 @@ class JMESPForm extends JMFormBase
 
 		Widget headingSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 		UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_FILTERS_HEADER", "" );
-		//UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER: ", "" );
+		//UIActionManager.CreateText( headingSpacer, "#STR_COT_ESP_MODULE_ACTIONS_HEADER", "" );
 	}
 
 	private void ESPFilters( Widget parent )
@@ -105,18 +105,16 @@ class JMESPForm extends JMFormBase
 
 	private void ESPSelectedObjects( Widget parent )
 	{
-		/*
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
 
 		m_ESPSelectedObjects.UpdateScroller();
-		*/
 	}
 
 	override void OnInit()
@@ -132,6 +130,11 @@ class JMESPForm extends JMFormBase
 		right_bottom.SetSize( 0.0, 1.0 );
 		left_bottom.SetPos( 0.0, 0.0 );
 		right_bottom.SetPos( 1.0, 0.0 );
+
+		//left_bottom.SetSize( 0.5, 1.0 );
+		//right_bottom.SetSize( 0.5, 1.0 );
+		//left_bottom.SetPos( 0.0, 0.0 );
+		//right_bottom.SetPos( 0.5, 0.0 );
 
 		ESPFilters( left_bottom );
 		//ESPSelectedObjects( right_bottom );
@@ -300,7 +303,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorRelative();
+		m_Module.MoveToCursorRelative( "0 0 0" );
 	}
 	
 	void Click_MoveToCursorAbsolute( UIEvent eid, ref UIActionBase action )
@@ -308,6 +311,6 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorAbsolute();
+		m_Module.MoveToCursorAbsolute( "0 0 0" );
 	}
 }

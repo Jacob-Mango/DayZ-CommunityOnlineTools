@@ -45,6 +45,7 @@ class JMWebhookModule: JMModuleBase
     private JMWebhookSerialize m_Settings;
 
     private ref ConfigFile m_ServerConfig;
+    private string m_ServerHostName;
 
     void JMWebhookModule()
     {
@@ -53,17 +54,28 @@ class JMWebhookModule: JMModuleBase
     void ~JMWebhookModule()
     {
         delete m_ConnectionMap;
+
+        delete m_ServerConfig;
     }
 
     override void OnInit()
     {
-        Print( "Start reading config" );
-
         string serverCfg;
 		GetGame().CommandlineGetParam( "config", serverCfg );
-        m_ServerConfig = ConfigFile.Parse( serverCfg );
 
-        Print( "Finished reading config" );
+        // attempt to fallback to defaults since otherwise it would fail regardless
+        if ( serverCfg == "" )
+            serverCfg = "serverdz.cfg";
+        else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
+            serverCfg = "serverdz.cfg";
+
+        m_ServerConfig = ConfigFile.Parse( serverCfg );
+        if ( m_ServerConfig )
+        {
+            ConfigEntry entry = m_ServerConfig.Get( "hostname" );
+            if ( entry && entry.GetText() != "" )
+                m_ServerHostName = entry.GetText();
+        }
 
         m_Settings = GetCOTWebhookSettings();
 
@@ -321,11 +333,8 @@ class JMWebhookModule: JMModuleBase
 
         embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 		
-        ConfigEntry entry = m_ServerConfig.Get( "hostname" );
-        if ( entry && entry.GetText() != "" )
-        {
-		    embed.AddField( "Server:", entry.GetText(), false );
-        }
+        if ( m_ServerHostName != "" )
+		    embed.AddField( "Server:", m_ServerHostName, false );
 
         return message;
     }
@@ -338,13 +347,10 @@ class JMWebhookModule: JMModuleBase
 
         embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 
-        ConfigEntry entry = m_ServerConfig.Get( "hostname" );
-        if ( entry && entry.GetText() != "" )
-        {
-		    embed.AddField( "Server:", entry.GetText(), true );
-        }
+        if ( m_ServerHostName != "" )
+		    embed.AddField( "Server:", m_ServerHostName, true );
 
-		embed.AddField( title, player.FormatSteamWebhook(), entry && entry.GetText() != "" );
+		embed.AddField( title, player.FormatSteamWebhook(), m_ServerHostName != "" );
 
         return message;
     }
