@@ -1,6 +1,6 @@
 class JMSpectatorCamera extends JMCameraBase
 {
-	void OnTargetSelected( Object target )
+	override void OnTargetSelected( Object target )
 	{
 		DayZPlayerImplement impl;
 		if ( !Class.CastTo( impl, target ) )
@@ -9,7 +9,7 @@ class JMSpectatorCamera extends JMCameraBase
 		impl.OnSpectateStart( this );
 	}
 
-	void OnTargetDeselected( Object target )
+	override void OnTargetDeselected( Object target )
 	{
 		DayZPlayerImplement impl;
 		if ( !Class.CastTo( impl, target ) )
