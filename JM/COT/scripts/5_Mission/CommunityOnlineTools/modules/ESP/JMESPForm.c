@@ -52,7 +52,7 @@ class JMESPForm extends JMFormBase
 
 		Widget fullMapSpacer = UIActionManager.CreatePanel( mainSpacer, 0x00000000, 30 );
 
-		m_btn_FullMap = UIActionManager.CreateButton( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_TOGGLE_FULLMAP", this, "Click_EnableFullMap" );
+		m_btn_FullMap = UIActionManager.CreateButton( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_FULLMAP_BUTTON", this, "Click_EnableFullMap" );
 		m_btn_FullMap.SetPosition( 0 );
 		m_btn_FullMap.SetWidth( 0.3 );
 
