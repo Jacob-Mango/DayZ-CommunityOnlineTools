@@ -86,7 +86,7 @@ class UIActionSlider extends UIActionBase
 		CalculateValue();
 	}
 
-	bool IsFocusWidget( Widget widget )
+	override bool IsFocusWidget( Widget widget )
 	{
 		if ( widget == m_Slider )
 			return true;

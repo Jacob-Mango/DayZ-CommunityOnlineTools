@@ -177,7 +177,7 @@ class COTModule : JMModuleBase
 
 		//Print( "+COTModule::CloseCOT" );
 
-		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules()
+		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
 		for ( int i = 0; i < modules.Count(); ++i )
 		{
 			//Print( "  +" + modules[i].Type().ToString() );

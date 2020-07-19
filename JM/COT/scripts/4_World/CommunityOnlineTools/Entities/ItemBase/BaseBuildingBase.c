@@ -35,7 +35,7 @@ modded class BaseBuildingBase
 
 	override void EEItemAttached( EntityAI item, string slot_name )
 	{
-		super.EEItemAttached( item, slot_name )
+		super.EEItemAttached( item, slot_name );
 
 		if ( IsMissionClient() )
 			m_COT_ConstructionUpdate.Invoke();
@@ -43,7 +43,7 @@ modded class BaseBuildingBase
 
 	override void EEItemDetached( EntityAI item, string slot_name )
 	{
-		super.EEItemDetached( item, slot_name )
+		super.EEItemDetached( item, slot_name );
 
 		if ( IsMissionClient() )
 			m_COT_ConstructionUpdate.Invoke();

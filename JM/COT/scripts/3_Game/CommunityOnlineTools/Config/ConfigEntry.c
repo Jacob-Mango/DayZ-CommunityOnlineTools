@@ -160,7 +160,7 @@ class ConfigEntry : Managed
     {
 		TStringArray tokens = new TStringArray;
         path.Split( " ", tokens );
-        return Get( tokens, 0 )
+        return Get( tokens, 0 );
     }
 
     ref ConfigEntry Get( TStringArray tokens, int index = 0 )

@@ -225,7 +225,7 @@ class JMWeatherOldForm extends JMFormBase
 	{
 	}
 
-	void Update()
+	override void Update()
 	{
 	}
 
