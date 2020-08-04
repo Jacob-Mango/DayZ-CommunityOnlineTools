@@ -106,6 +106,8 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void UpdateItemPreview()
 	{
+		Print( "+" + this + "::UpdateItemPreview" );
+		
 		string strSelection = GetCurrentSelection();
 
 		if ( m_PreviewItem ) 
@@ -116,6 +118,8 @@ class JMObjectSpawnerForm extends JMFormBase
 		if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
 		{
 			m_ItemPreview.Show( false );
+
+			Print( "-" + this + "::UpdateItemPreview AI" );
 			return;
 		}
 
@@ -134,6 +138,8 @@ class JMObjectSpawnerForm extends JMFormBase
 		{
 			m_ItemPreview.Show( false );
 		}
+
+		Print( "-" + this + "::UpdateItemPreview" );
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )

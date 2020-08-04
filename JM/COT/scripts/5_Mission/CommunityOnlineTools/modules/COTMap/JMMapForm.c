@@ -7,10 +7,14 @@ class JMMapForm extends JMFormBase
 	
 	override void OnInit()
 	{
+		Print( "+" + this + "::OnInit" );
+
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
 
 		m_BackgroundWidget = window.GetLayoutRoot().FindAnyWidget( "background" );
 		m_BackgroundWidget.Show( false );
+
+		Print( "-" + this + "::OnInit" );
 	}
 
 	protected override bool SetModule( ref JMRenderableModuleBase mdl )

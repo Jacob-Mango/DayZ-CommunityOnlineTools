@@ -124,7 +124,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 
 		vector currentPosition = "0 0 0";
-		vector hitPos = GetCursorPos();
+		vector hitPos = GetCursorPos( Object.Cast( GetGame().GetPlayer().GetParent() ) );
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
@@ -147,9 +147,6 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void SetPlayerPosition( PlayerBase player, vector position )
 	{
-		if ( player.IsInTransport() )
-			return;
-
 		player.SetLastPosition();
 
 		player.SetWorldPosition( position );

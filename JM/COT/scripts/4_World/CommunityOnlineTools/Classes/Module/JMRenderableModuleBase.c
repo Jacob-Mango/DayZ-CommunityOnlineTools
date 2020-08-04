@@ -13,6 +13,8 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	bool InitButton( Widget button_bkg )
 	{
+		Print( "+" + this + "::InitButton" );
+
 		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
 
 		if ( button_bkg && m_MenuButton )
@@ -39,9 +41,11 @@ class JMRenderableModuleBase extends JMModuleBase
 				btn_txt.SetText( GetIconName() );
 			}
 
+			Print( "-" + this + "::InitButton true" );
 			return true;
 		}
 
+		Print( "-" + this + "::InitButton" );
 		return false;
 	}
 

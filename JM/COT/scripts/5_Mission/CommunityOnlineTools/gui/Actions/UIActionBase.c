@@ -18,8 +18,6 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	void ~UIActionBase()
 	{
 		delete m_Data;
-		
-		Hide();
 	}
 
 	void GetUserData( out Class data )
@@ -50,20 +48,29 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
+		Print( "+" + this + "::Show" );
+
 		layoutRoot.Show( true );
 		OnShow();
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+
+		Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
+		Print( "+" + this + "::Hide" );
+		Error("test");
+
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		OnHide();
 		
 		if ( layoutRoot )
 			layoutRoot.Show( false );
+
+		Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

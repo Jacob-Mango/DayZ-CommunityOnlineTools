@@ -26,20 +26,28 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
+		Print( "+" + this + "::Show" );
+
 		layoutRoot.Show( true );
 		Button.Show( true );
 		Checkbox.Show( true );
 		Name.Show( true );
 		OnShow();
+
+		Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
+		Print( "+" + this + "::Hide" );
+
 		OnHide();
 		Name.Show( false );
 		Button.Show( false );
 		Checkbox.Show( false );
 		layoutRoot.Show( false );
+
+		Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

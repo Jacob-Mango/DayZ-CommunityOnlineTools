@@ -76,6 +76,8 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 
 	void SetPreset( string name, string permission )
 	{
+		Print( "+" + this + "::SetPreset" );
+
 		m_Name = name;
 		m_Permission = permission;
 
@@ -99,6 +101,8 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 				m_WRemoveButton.Show( false );
 			}
 		}
+
+		Print( "-" + this + "::SetPreset" );
 	}
 
 	string GetName()

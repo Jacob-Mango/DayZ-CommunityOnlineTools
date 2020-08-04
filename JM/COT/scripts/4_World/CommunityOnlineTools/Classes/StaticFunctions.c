@@ -68,19 +68,24 @@ static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 	return hitPos;
 }
 
-static vector GetCursorPos()
+static vector GetCursorPos( Object ignore = NULL )
 {
-	if ( !GetPlayer() )
+	vector rayStart = GetGame().GetCurrentCameraPosition();
+	vector rayDirection = GetGame().GetCurrentCameraDirection();
+
+	if ( !ignore )
 	{
-		return "0 0 0";
+		ignore = GetPlayer();
+	} else
+	{
+		rayStart = rayStart + ( rayDirection * 5.0 )
 	}
 
-	vector rayStart = GetGame().GetCurrentCameraPosition();
-	vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * 10000;
+	vector rayEnd = rayStart + ( rayDirection * 10000.0 );
 	vector hitPos;
 	vector hitNormal;
 	int hitComponentIndex;
-	DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, GetPlayer(), false, false, ObjIntersectGeom);
+	DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, ignore, false, false, ObjIntersectGeom);
 
 	return hitPos;
 }

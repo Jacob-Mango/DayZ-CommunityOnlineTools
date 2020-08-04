@@ -169,6 +169,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
+		Print( "+" + this + "::Show" );
+
 		if ( !layoutRoot )
 			return;
 
@@ -180,11 +182,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
+
+		Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		//Print( "+JMWindowBase::Hide" );
+		Print( "+" + this + "::Hide" );
 		
 		if ( Assert_Null( layoutRoot ) )
 			return;
@@ -207,7 +211,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			GetGame().GetUIManager().ShowUICursor( false );
 		}
 
-		//Print( "-JMWindowBase::Hide" );
+		Print( "-" + this + "::Hide" );
 	}
 
 	void Focus()
@@ -215,10 +219,10 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
 		SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
 
-		foreach ( Widget widget : m_BrokenWidgets )
-		{
-			widget.Show( true );
-		}
+		//foreach ( Widget widget : m_BrokenWidgets )
+		//{
+		//	widget.Show( true );
+		//}
 
 		m_Form.OnFocus();
 	}
@@ -228,15 +232,14 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
 		SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
 
-		foreach ( Widget widget : m_BrokenWidgets )
-		{
-			widget.Show( false );
-
-			if ( widget.GetChildren() )
-			{
-				widget.GetChildren().Show( true );
-			}
-		}
+		//foreach ( Widget widget : m_BrokenWidgets )
+		//{
+		//	widget.Show( false );
+		//	if ( widget.GetChildren() )
+		//	{
+		//		widget.GetChildren().Show( true );
+		//	}
+		//}
 
 		m_Form.OnUnfocus();
 	}
