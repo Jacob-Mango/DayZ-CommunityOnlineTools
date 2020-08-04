@@ -213,15 +213,28 @@ class JMESPMeta : Managed
 
 class JMESPMetaPlayer : JMESPMeta
 {
+	UIActionText m_Player_Name;
+	UIActionText m_Player_GUID;
+	UIActionText m_Player_Steam;
+	
 	override void CreateActions( Widget parent )
 	{
-		UIActionManager.CreateText( parent, "Name: ", player.GetName() );
-		UIActionManager.CreateText( parent, "GUID: ", player.GetGUID() );
-		UIActionManager.CreateText( parent, "Steam: ", player.GetSteam64ID() );
+		m_Player_Name = UIActionManager.CreateText( parent, "Name: ", "" );
+		m_Player_GUID = UIActionManager.CreateText( parent, "GUID: ", "" );
+		m_Player_Steam = UIActionManager.CreateText( parent, "Steam: ", "" );
 
 		super.CreateActions( parent );
 	}
 
+	override void UpdateActions()
+	{
+		super.UpdateActions();
+		
+		m_Player_Name.SetText( player.GetName() );
+		m_Player_GUID.SetText( player.GetGUID() );
+		m_Player_Steam.SetText( player.GetSteam64ID() );
+	}
+	
 	override bool CanDelete()
 	{
 		return false;
