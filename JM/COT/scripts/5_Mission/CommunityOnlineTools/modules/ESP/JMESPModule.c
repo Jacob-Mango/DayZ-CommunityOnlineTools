@@ -699,6 +699,12 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		target.SetPosition( position );
 
+		Transport transport;
+		if ( Class.CastTo( transport, target ) )
+		{
+			transport.Synchronize();
+		}
+		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
 		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
 	}
@@ -732,6 +738,12 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		target.SetOrientation( orientation );
+
+		Transport transport;
+		if ( Class.CastTo( transport, target ) )
+		{
+			transport.Synchronize();
+		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
 		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );

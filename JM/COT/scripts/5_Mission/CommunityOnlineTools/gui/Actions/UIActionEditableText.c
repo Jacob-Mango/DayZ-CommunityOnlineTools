@@ -43,6 +43,8 @@ class UIActionEditableText extends UIActionBase
 
 	void HasButton( bool enabled )
 	{
+		Print( "+" + this + "::HasButton" );
+
 		Widget root = NULL;
 		if ( enabled )
 		{
@@ -62,6 +64,8 @@ class UIActionEditableText extends UIActionBase
 
 		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
+
+		Print( "-" + this + "::HasButton" );
 	}
 
 	override void SetLabel( string text )

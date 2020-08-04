@@ -96,6 +96,8 @@ class UIActionDropdownList extends UIActionBase
 
     void ToggleList( bool open )
     {
+		Print( "+" + this + "::ToggleList" );
+
         m_List.Show( open );
 
         if ( open )
@@ -107,6 +109,8 @@ class UIActionDropdownList extends UIActionBase
             m_List.SelectRow( -1 );
             m_SelectedIndex = 0;
         }
+
+		Print( "-" + this + "::ToggleList" );
     }
 
     void SetItems( array< string > items )

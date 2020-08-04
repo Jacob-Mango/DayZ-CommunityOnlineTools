@@ -19,6 +19,8 @@ class JMDebugMonitor
 	
 	void Init()
 	{
+		Print( "+" + this + "::Init" );
+
 		NamesListboxWidget.AddItem("HEALTH:", NULL, 0);
 		ValuesListboxWidget.AddItem("", NULL, 0);
 
@@ -32,6 +34,8 @@ class JMDebugMonitor
 		ValuesListboxWidget.AddItem("", NULL, 0);
 	
 		layoutRoot.Show(true);
+
+		Print( "-" + this + "::Init" );
 	}
 
 	void SetHealth(float value)
@@ -60,11 +64,19 @@ class JMDebugMonitor
 
 	void Hide()
 	{
+		Print( "+" + this + "::Hide" );
+
 		layoutRoot.Show(false);
+
+		Print( "-" + this + "::Hide" );
 	}
 
 	void Show()
 	{
+		Print( "+" + this + "::Show" );
+
 		layoutRoot.Show(true);
+
+		Print( "-" + this + "::Show" );
 	}
 };

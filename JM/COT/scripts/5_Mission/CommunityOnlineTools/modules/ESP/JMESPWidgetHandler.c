@@ -81,16 +81,24 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
+		Print( "+" + this + "::Show" );
+
 		layoutRoot.Show( true );
 		OnShow();
+
+		Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
+		Print( "+" + this + "::Hide" );
+
 		OnHide();
 		layoutRoot.Show( false );
 
 		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
+
+		Print( "-" + this + "::Hide" );
 	}
 
 	void ToggleESPActions()
@@ -106,16 +114,24 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void ShowActions()
 	{
+		Print( "+" + this + "::ShowActions" );
+
 		m_pnl_Actions.Show( true );
 
 		m_img_ToggleActions.SetImage( 0 );
+
+		Print( "-" + this + "::ShowActions" );
 	}
 
 	void HideActions()
-	{		
+	{
+		Print( "+" + this + "::HideActions" );
+
 		m_pnl_Actions.Show( false );
 
 		m_img_ToggleActions.SetImage( 1 );
+
+		Print( "-" + this + "::HideActions" );
 	}
 
 	void OnShow()
@@ -257,6 +273,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void SetInfo( ref JMESPMeta info, out Widget action_rows )
 	{
+		Print( "+" + this + "::SetInfo" );
+
 		action_rows = m_rows_Actions;
 
 		Info = info;
@@ -279,6 +297,8 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		ShowOnScreen = true;
 		
 		Show();
+
+		Print( "-" + this + "::SetInfo" );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )

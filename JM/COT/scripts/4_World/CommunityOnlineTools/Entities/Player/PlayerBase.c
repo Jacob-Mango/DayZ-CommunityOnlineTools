@@ -103,6 +103,25 @@ modded class PlayerBase
 		Object parent;
 		if ( Class.CastTo( parent, GetParent() ) )
 		{
+			Transport transport;
+			if ( Class.CastTo( transport, parent ) )
+			{
+				if ( transport.CrewMemberIndex( this ) != -1 )
+				{
+					vector transform[4];
+					transport.GetTransform( transform );
+
+					transform[3] = position;
+					
+					transport.PlaceOnSurfaceRotated( transform, position, 0, 0, 0, false );
+
+					transport.SetTransform( transform );
+					transport.Synchronize();
+
+					return;
+				}
+			}
+
 			SetPosition( parent.WorldToModel( position ) );
 		} else
 		{

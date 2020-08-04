@@ -665,7 +665,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = players[i].PlayerObject;
-			if ( player == NULL || player.IsInTransport() )
+			if ( player == NULL )
 				continue;
 
 			player.SetLastPosition();
@@ -715,7 +715,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance other = GetPermissionsManager().GetPlayer( guid );
 
 		PlayerBase player = other.PlayerObject;
-		if ( player == NULL || player.IsInTransport() )
+		if ( player == NULL )
 			return;
 
 		vector position = player.GetPosition();
@@ -764,7 +764,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = players[i].PlayerObject;
-			if ( player == NULL || !player.HasLastPosition() || player.IsInTransport() )
+			if ( player == NULL || !player.HasLastPosition() )
 				continue;
 
 			vector position = player.GetLastPosition();

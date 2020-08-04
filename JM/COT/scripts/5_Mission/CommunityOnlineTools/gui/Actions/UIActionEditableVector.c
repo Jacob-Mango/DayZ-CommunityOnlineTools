@@ -21,6 +21,8 @@ class UIActionEditableVector extends UIActionBase
 
 	void HasButton( bool enabled )
 	{
+		Print( "+" + this + "::HasButton" );
+
 		if ( enabled )
 		{
 			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
@@ -43,6 +45,8 @@ class UIActionEditableVector extends UIActionBase
 		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
 
 		SetValue( vector.Zero );
+
+		Print( "-" + this + "::HasButton" );
 	}
 
 	override void SetLabel( string text )
