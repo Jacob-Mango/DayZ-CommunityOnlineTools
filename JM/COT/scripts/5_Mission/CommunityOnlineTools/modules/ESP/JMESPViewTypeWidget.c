@@ -21,22 +21,22 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		m_LayoutRoot.Show( true );
 		OnShow();
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 
 		m_LayoutRoot.Show( false );
 		OnHide();
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

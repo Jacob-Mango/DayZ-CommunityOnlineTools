@@ -268,7 +268,7 @@ class JMESPModule: JMRenderableModuleBase
 	private void CreateNewWidgets()
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPModule::CreateNewWidgets() void;" );
+		//Print( "+JMESPModule::CreateNewWidgets() void;" );
 		#endif
 
 		m_IsCreatingWidgets = true;
@@ -285,14 +285,14 @@ class JMESPModule: JMRenderableModuleBase
 		m_IsCreatingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "-JMESPModule::CreateNewWidgets() void;" );
+		//Print( "-JMESPModule::CreateNewWidgets() void;" );
 		#endif
 	}
 
 	private void DestroyOldWidgets()
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPModule::DestroyOldWidgets() void;" );
+		//Print( "+JMESPModule::DestroyOldWidgets() void;" );
 		#endif
 
 		m_IsDestroyingWidgets = true;
@@ -332,7 +332,7 @@ class JMESPModule: JMRenderableModuleBase
 		m_IsDestroyingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "-JMESPModule::DestroyOldWidgets() void;" );
+		//Print( "-JMESPModule::DestroyOldWidgets() void;" );
 		#endif
 	}
 
@@ -511,7 +511,7 @@ class JMESPModule: JMRenderableModuleBase
 						{
 							#ifdef JM_COT_ESP_DEBUG
 							bool metaIsValid = meta.IsValid();
-							Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid );
+							//Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid );
 							if ( metaIsValid )
 							#else
 							if ( meta.IsValid() )
@@ -534,7 +534,7 @@ class JMESPModule: JMRenderableModuleBase
 							{
 								#ifdef JM_COT_ESP_DEBUG
 								bool viewTypeIsValid = validViewTypes[j].IsValid( obj, meta );
-								Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid );
+								//Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid );
 								if ( viewTypeIsValid )
 								#else
 								if ( validViewTypes[j].IsValid( obj, meta ) )
@@ -553,7 +553,7 @@ class JMESPModule: JMRenderableModuleBase
 					_Sleep( 1, totalTimeTaken );
 
 					#ifdef JM_COT_ESP_DEBUG
-					Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					//Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
 					#endif
 
 					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
@@ -574,7 +574,7 @@ class JMESPModule: JMRenderableModuleBase
 					m_MappedESPObjects.Remove( NULL );
 
 					#ifdef JM_COT_ESP_DEBUG
-					Print( "-JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					//Print( "-JMESPModule::ThreadESP() - Verifying ESP Objects" );
 					#endif
 
 					GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );

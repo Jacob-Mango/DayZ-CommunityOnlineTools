@@ -26,7 +26,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		layoutRoot.Show( true );
 		Button.Show( true );
@@ -34,12 +34,12 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		Name.Show( true );
 		OnShow();
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 
 		OnHide();
 		Name.Show( false );
@@ -47,7 +47,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		Checkbox.Show( false );
 		layoutRoot.Show( false );
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

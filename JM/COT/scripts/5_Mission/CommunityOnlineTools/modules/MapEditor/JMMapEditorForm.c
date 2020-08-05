@@ -33,7 +33,7 @@ class JMMapEditorForm
 	
 	Widget Init()
 	{
-		Print( "+" + this + "::Init" );
+		//Print( "+" + this + "::Init" );
 
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/mapeditor_form.layout" );
 		layoutRoot.Show( false );
@@ -51,14 +51,14 @@ class JMMapEditorForm
 		UIActionManager.CreateText( objectControlsGrid, "Select: ", "Left Mouse" );
 		UIActionManager.CreateText( objectControlsGrid, "Delete: ", "Delete" );
 
-		Print( "-" + this + "::Init" );
+		//Print( "-" + this + "::Init" );
 
 		return layoutRoot;
 	}
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 
@@ -70,12 +70,12 @@ class JMMapEditorForm
 
 		OnShow();
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 
@@ -85,7 +85,7 @@ class JMMapEditorForm
 
 		OnHide();
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void Update()

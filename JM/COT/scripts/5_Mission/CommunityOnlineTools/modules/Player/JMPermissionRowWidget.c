@@ -53,22 +53,22 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		layoutRoot.Show( true );
 		OnShow();
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 
 		OnHide();
 		layoutRoot.Show( false );
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

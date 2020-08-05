@@ -124,7 +124,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
 	{
-		Print( "+" + this + "::CreateConfirmation_One" );
+		//Print( "+" + this + "::CreateConfirmation_One" );
 
 		layoutRoot.Show( true );
 
@@ -146,12 +146,12 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText1.SetText( button1Title );
 		}
 
-		Print( "-" + this + "::CreateConfirmation_One" );
+		//Print( "-" + this + "::CreateConfirmation_One" );
 	}
 
 	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{
-		Print( "+" + this + "::CreateConfirmation_Two" );
+		//Print( "+" + this + "::CreateConfirmation_Two" );
 
 		layoutRoot.Show( true );
 
@@ -181,12 +181,12 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText2.SetText( button2Title );
 		}
 
-		Print( "-" + this + "::CreateConfirmation_Two" );
+		//Print( "-" + this + "::CreateConfirmation_Two" );
 	}
 
 	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{
-		Print( "+" + this + "::CreateConfirmation_Three" );
+		//Print( "+" + this + "::CreateConfirmation_Three" );
 
 		layoutRoot.Show( true );
 
@@ -225,12 +225,12 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText3.SetText( button2Title );
 		}
 
-		Print( "-" + this + "::CreateConfirmation_Three" );
+		//Print( "-" + this + "::CreateConfirmation_Three" );
 	}
 
 	void UpdateType( JMConfirmationType type )
 	{
-		Print( "+" + this + "::UpdateType" );
+		//Print( "+" + this + "::UpdateType" );
 
 		switch ( type )
 		{
@@ -245,18 +245,18 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			break;
 		}
 
-		Print( "-" + this + "::UpdateType" );
+		//Print( "-" + this + "::UpdateType" );
 	}
 
 	void Close()
 	{
-		Print( "+" + this + "::Close" );
+		//Print( "+" + this + "::Close" );
 
 		m_EditBox.SetText( "" );
 		m_EditBox.Show( false );
 		layoutRoot.Show( false );
 
-		Print( "-" + this + "::Close" );
+		//Print( "-" + this + "::Close" );
 	}
 
 	void OnShow()

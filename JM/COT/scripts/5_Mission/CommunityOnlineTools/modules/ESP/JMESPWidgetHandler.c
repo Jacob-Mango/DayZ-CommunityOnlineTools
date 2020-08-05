@@ -44,13 +44,13 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void ~JMESPWidgetHandler()
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		//Print( "+JMESPWidgetHandler::~JMESPWidgetHandler();" );
 		#endif
 
 		OnHide();
 
 		#ifdef JM_COT_ESP_DEBUG
-		Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		//Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
 		#endif
 	}
 
@@ -81,24 +81,24 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		layoutRoot.Show( true );
 		OnShow();
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 
 		OnHide();
 		layoutRoot.Show( false );
 
 		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void ToggleESPActions()
@@ -114,24 +114,24 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void ShowActions()
 	{
-		Print( "+" + this + "::ShowActions" );
+		//Print( "+" + this + "::ShowActions" );
 
 		m_pnl_Actions.Show( true );
 
 		m_img_ToggleActions.SetImage( 0 );
 
-		Print( "-" + this + "::ShowActions" );
+		//Print( "-" + this + "::ShowActions" );
 	}
 
 	void HideActions()
 	{
-		Print( "+" + this + "::HideActions" );
+		//Print( "+" + this + "::HideActions" );
 
 		m_pnl_Actions.Show( false );
 
 		m_img_ToggleActions.SetImage( 1 );
 
-		Print( "-" + this + "::HideActions" );
+		//Print( "-" + this + "::HideActions" );
 	}
 
 	void OnShow()
@@ -273,7 +273,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void SetInfo( ref JMESPMeta info, out Widget action_rows )
 	{
-		Print( "+" + this + "::SetInfo" );
+		//Print( "+" + this + "::SetInfo" );
 
 		action_rows = m_rows_Actions;
 
@@ -298,7 +298,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		
 		Show();
 
-		Print( "-" + this + "::SetInfo" );
+		//Print( "-" + this + "::SetInfo" );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
