@@ -48,19 +48,19 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		layoutRoot.Show( true );
 		OnShow();
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 		Error("test");
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
@@ -70,7 +70,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		if ( layoutRoot )
 			layoutRoot.Show( false );
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void OnShow()

@@ -42,13 +42,13 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
-		//Print( "+JMWindowBase::~JMWindowBase" );
+		////Print( "+JMWindowBase::~JMWindowBase" );
 		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
 
 		//layoutRoot.Unlink();
-		//Print( "-JMWindowBase::~JMWindowBase" );
+		////Print( "-JMWindowBase::~JMWindowBase" );
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -169,7 +169,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print( "+" + this + "::Show" );
+		//Print( "+" + this + "::Show" );
 
 		if ( !layoutRoot )
 			return;
@@ -183,12 +183,12 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 
-		Print( "-" + this + "::Show" );
+		//Print( "-" + this + "::Show" );
 	}
 
 	void Hide()
 	{
-		Print( "+" + this + "::Hide" );
+		//Print( "+" + this + "::Hide" );
 		
 		if ( Assert_Null( layoutRoot ) )
 			return;
@@ -211,7 +211,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			GetGame().GetUIManager().ShowUICursor( false );
 		}
 
-		Print( "-" + this + "::Hide" );
+		//Print( "-" + this + "::Hide" );
 	}
 
 	void Focus()

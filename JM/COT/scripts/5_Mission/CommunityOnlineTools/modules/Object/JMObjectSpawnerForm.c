@@ -106,7 +106,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	void UpdateItemPreview()
 	{
-		Print( "+" + this + "::UpdateItemPreview" );
+		//Print( "+" + this + "::UpdateItemPreview" );
 		
 		string strSelection = GetCurrentSelection();
 
@@ -119,7 +119,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		{
 			m_ItemPreview.Show( false );
 
-			Print( "-" + this + "::UpdateItemPreview AI" );
+			//Print( "-" + this + "::UpdateItemPreview AI" );
 			return;
 		}
 
@@ -139,7 +139,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			m_ItemPreview.Show( false );
 		}
 
-		Print( "-" + this + "::UpdateItemPreview" );
+		//Print( "-" + this + "::UpdateItemPreview" );
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )

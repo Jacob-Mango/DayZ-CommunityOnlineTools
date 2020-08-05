@@ -13,7 +13,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	bool InitButton( Widget button_bkg )
 	{
-		Print( "+" + this + "::InitButton" );
+		//Print( "+" + this + "::InitButton" );
 
 		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
 
@@ -41,11 +41,11 @@ class JMRenderableModuleBase extends JMModuleBase
 				btn_txt.SetText( GetIconName() );
 			}
 
-			Print( "-" + this + "::InitButton true" );
+			//Print( "-" + this + "::InitButton true" );
 			return true;
 		}
 
-		Print( "-" + this + "::InitButton" );
+		//Print( "-" + this + "::InitButton" );
 		return false;
 	}
 
@@ -145,13 +145,13 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	void Hide()
 	{
-		//Print( "+" + Type().ToString() + "::Hide" );
+		////Print( "+" + Type().ToString() + "::Hide" );
 		//Print( "  m_Window=" + m_Window );
 		if ( m_Window )
 		{
 			delete m_Window;
 		}
-		//Print( "-" + Type().ToString() + "::Hide" );
+		////Print( "-" + Type().ToString() + "::Hide" );
 	}
 
 	void ToggleShow()
