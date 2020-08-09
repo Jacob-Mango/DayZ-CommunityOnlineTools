@@ -61,7 +61,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	void Hide()
 	{
 		//Print( "+" + this + "::Hide" );
-		Error("test");
+		//Error("test");
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
