@@ -59,8 +59,57 @@ class JMESPViewTypePlayer: JMESPViewType
 		//Print( "+JMESPViewTypePlayer::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
 		#endif
 
+		PlayerBase man;
+		if ( !Class.CastTo( man, obj ) )
+			return false;
+		
+		CreateMeta( meta );
+
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		if ( man.GetIdentity() )
+		{
+			meta.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
+		} 
+
+		if ( meta.player )
+		{
+			meta.name = meta.player.GetName();
+		} else
+		{
+			meta.name = obj.GetDisplayName();
+		}
+
+		return true;
+	}
+};
+
+class JMESPViewTypePlayerAI: JMESPViewType
+{
+	void JMESPViewTypePlayerAI()
+	{
+		Permission = "Player AI";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER_AI";
+
+		Colour = ARGB( 255, 80, 255, 240 );
+
+		MetaType = JMESPMeta;
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		//Print( "+JMESPViewTypePlayerAI::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+
 		Man man;
-		if ( !Class.CastTo( man, obj ) || !man.IsPlayer() )
+		PlayerBase player;
+		// has to cast to man but can't cast to player
+		if ( !Class.CastTo( man, obj ) || Class.CastTo( player, obj ) )
 			return false;
 		
 		CreateMeta( meta );

@@ -187,6 +187,7 @@ class JMESPModule: JMRenderableModuleBase
 	void RegisterTypes( out TTypenameArray types )
 	{
 		types.Insert( JMESPViewTypePlayer );
+		types.Insert( JMESPViewTypePlayerAI );
 		types.Insert( JMESPViewTypeInfected );
 		types.Insert( JMESPViewTypeAnimal );
 		types.Insert( JMESPViewTypeCar );

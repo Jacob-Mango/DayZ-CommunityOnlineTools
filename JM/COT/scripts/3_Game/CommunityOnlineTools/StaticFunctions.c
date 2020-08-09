@@ -447,7 +447,7 @@ static void Assert_Log( string str )
 {
 	Print( "==============================================WARNING=======================================================" );
 	string time = JMDate.Now( false ).ToString( "YYYY-MM-DD hh:mm:ss" );
-	Print( "[WARNING " + time + "] Assertion failed! " + str );
+	Print( "[WARNING " + time + "] " + str );
 	Print( "Do you see this message? Unless the time is within a second of the crash than this was not the cause." );
 
 	DumpStack();
@@ -455,22 +455,56 @@ static void Assert_Log( string str )
 	Print( "============================================================================================================" );
 }
 
-static bool Assert_Empty( string str )
+static bool Assert_Empty( string str, string message = "" )
 {
 	if ( str == "" )
 	{
-		Assert_Log( "String empty (=" + str + ")" );
+		if ( message != "" )
+			message = ": " + message;
+
+		Assert_Log( "ASSERTION STRING EMPTY" + message );
 		return true;
 	}
 	
 	return false;
 }
 
-static bool Assert_Null( Class cls )
+static bool Assert_Null( Class cls, string message = "" )
 {
 	if ( cls == NULL )
 	{
-		Assert_Log( "NULL found (=" + cls + ")" );
+		if ( message != "" )
+			message = ": " + message;
+
+		Assert_Log( "ASSERTION NULL" + message );
+		return true;
+	}
+	
+	return false;
+}
+
+static bool Assert_False( bool cls, string message = "" )
+{
+	if ( cls == false )
+	{
+		if ( message != "" )
+			message = ": " + message;
+
+		Assert_Log( "ASSERTION FALSE" + message );
+		return true;
+	}
+	
+	return false;
+}
+
+static bool Assert_True( bool cls, string message = "" )
+{
+	if ( cls == true )
+	{
+		if ( message != "" )
+			message = ": " + message;
+
+		Assert_Log( "ASSERTION TRUE" + message );
 		return true;
 	}
 	
