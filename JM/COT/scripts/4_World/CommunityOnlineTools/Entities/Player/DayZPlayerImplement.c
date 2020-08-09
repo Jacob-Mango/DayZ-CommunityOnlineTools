@@ -91,4 +91,9 @@ modded class DayZPlayerImplement
 			ent.SetInvisible( invisible );
 		}
 	}
+
+	string FormatSteamWebhook()
+	{
+		return GetDisplayName();
+	}
 };
