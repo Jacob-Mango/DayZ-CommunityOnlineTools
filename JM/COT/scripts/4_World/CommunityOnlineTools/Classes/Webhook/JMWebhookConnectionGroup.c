@@ -53,7 +53,7 @@ class JMWebhookConnectionGroup : Managed
 
         Types.Insert( type );
 
-        return type
+        return type;
     }
 
     ref JMWebhookConnection Set( string name, bool enabled )

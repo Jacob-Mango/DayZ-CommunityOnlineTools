@@ -56,7 +56,7 @@ class UIActionEditableVector extends UIActionBase
 		m_Label.SetText( text );
 	}
 
-	bool IsFocusWidget( Widget widget )
+	override bool IsFocusWidget( Widget widget )
 	{
 		if ( widget == m_TextX )
 			return true;
