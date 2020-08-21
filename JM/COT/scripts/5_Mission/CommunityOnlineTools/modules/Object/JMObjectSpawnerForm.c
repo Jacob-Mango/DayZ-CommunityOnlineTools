@@ -379,7 +379,14 @@ class JMObjectSpawnerForm extends JMFormBase
 			"itemoptics",
 			"quickiebow",
 			"m203",
-			"gp25"
+			#ifndef DAYZ_1_09
+			"magnum",
+			#endif
+			"gp25",
+			"gp25_standalone",
+			"gp25_base",
+			"m203_base",
+			"m203_standalone"
 		};
 
 		for ( int i = 0; i < items.Count(); ++i )
