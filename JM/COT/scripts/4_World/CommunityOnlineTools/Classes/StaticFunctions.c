@@ -78,7 +78,7 @@ static vector GetCursorPos( Object ignore = NULL )
 		ignore = GetPlayer();
 	} else
 	{
-		rayStart = rayStart + ( rayDirection * 5.0 )
+		rayStart = rayStart + ( rayDirection * 5.0 );
 	}
 
 	vector rayEnd = rayStart + ( rayDirection * 10000.0 );

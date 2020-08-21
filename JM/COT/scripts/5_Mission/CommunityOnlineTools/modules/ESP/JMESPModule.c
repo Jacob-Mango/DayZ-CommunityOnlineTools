@@ -174,7 +174,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			if ( espTypes[i].IsInherited( JMESPViewType ) )
 			{
-				ref JMESPViewType viewType = espTypes[i].Spawn();
+				ref JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
 				if ( viewType )
 				{
 					m_ViewTypes.Insert( viewType );

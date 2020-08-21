@@ -19,7 +19,7 @@ class JMWebhookConstructor : Managed
         array< JMModuleBase > modules = GetModuleManager().GetAllModules();
         for ( int i = 0; i < modules.Count(); ++i )
         {
-            JMModuleBase module = modules[i]
+            JMModuleBase module = modules[i];
             constructor.AddConnection( module.GetModuleName() );
 
             array< string > moduleTypes = new array< string >;

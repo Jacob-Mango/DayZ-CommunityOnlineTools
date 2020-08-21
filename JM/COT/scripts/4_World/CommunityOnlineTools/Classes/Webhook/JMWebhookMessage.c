@@ -7,6 +7,6 @@ class JMWebhookMessage : Managed
 
     string GetType()
     {
-        return "Base"
+        return "Base";
     }
 };

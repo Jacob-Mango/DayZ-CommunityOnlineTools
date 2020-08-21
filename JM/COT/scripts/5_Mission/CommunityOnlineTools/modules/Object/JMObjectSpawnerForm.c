@@ -356,7 +356,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 				if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
 				{
-					if ( CheckItemCrash( strName ) ) 
+					if ( CheckItemCrash( strNameLower ) ) 
 					{
 						continue; 
 					}
@@ -374,14 +374,20 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	private bool CheckItemCrash( string name )
 	{
-		switch ( name )
+		static ref array< string > items =
 		{
-			case "ItemOptics":
+			"itemoptics",
+			"quickiebow",
+			"m203",
+			"gp25"
+		};
+
+		for ( int i = 0; i < items.Count(); ++i )
+		{
+			if ( items[i] == name )
+			{
 				return true;
-			case "QuickieBow":
-				return true;
-			case "M203":
-				return true;
+			}
 		}
 
 		return false;

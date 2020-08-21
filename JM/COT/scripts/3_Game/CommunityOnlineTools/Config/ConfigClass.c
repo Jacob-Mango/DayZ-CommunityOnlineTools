@@ -253,7 +253,7 @@ class ConfigClass : ConfigEntry
                     if (c == "}" )
                     {
                         reader.Warning( "'" + c + "' encountered instead of ';'" );
-                        reader.BackChar()
+                        reader.BackChar();
                     } else if (c != ";" )
                     {
                         reader.Error( "Missing ';' at the end of the line" );

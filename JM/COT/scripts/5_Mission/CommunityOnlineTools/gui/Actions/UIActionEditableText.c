@@ -80,7 +80,7 @@ class UIActionEditableText extends UIActionBase
 		SetText( "" + num );
 	}
 
-	bool IsFocusWidget( Widget widget )
+	override bool IsFocusWidget( Widget widget )
 	{
 		if ( widget == m_Text )
 			return true;

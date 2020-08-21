@@ -61,7 +61,7 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		return prepend + "\"embeds\": " + result + "}";
     }
 
-    string GetType()
+    override string GetType()
     {
         return "Discord";
     }
