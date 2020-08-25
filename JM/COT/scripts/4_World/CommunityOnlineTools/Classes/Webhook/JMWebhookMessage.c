@@ -1,12 +1,12 @@
 class JMWebhookMessage : Managed
 {
-    string Prepare( ref JsonSerializer serializer )
-    {
-        return "{}";
-    }
+	string Prepare( ref JsonSerializer serializer )
+	{
+		return "{}";
+	}
 
-    string GetType()
-    {
-        return "Base";
-    }
+	string GetType()
+	{
+		return "Base";
+	}
 };

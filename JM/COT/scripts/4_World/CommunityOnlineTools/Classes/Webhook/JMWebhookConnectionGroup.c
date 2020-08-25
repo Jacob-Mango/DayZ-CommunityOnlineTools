@@ -1,109 +1,109 @@
 class JMWebhookConnectionGroup : Managed
 {
-    string Name;
-    string ContextURL;
-    string Address;
+	string Name;
+	string ContextURL;
+	string Address;
 
-    ref array< ref JMWebhookConnection > Types;
+	ref array< ref JMWebhookConnection > Types;
 
-    void JMWebhookConnectionGroup()
-    {
-        Name = "Main";
-        Types = new array< ref JMWebhookConnection >;
-    }
+	void JMWebhookConnectionGroup()
+	{
+		Name = "Main";
+		Types = new array< ref JMWebhookConnection >;
+	}
 
-    void ~JMWebhookConnectionGroup()
-    {
-        Types.Clear();
-        delete Types;
-    }
+	void ~JMWebhookConnectionGroup()
+	{
+		Types.Clear();
+		delete Types;
+	}
 
-    void Init()
-    {
-        for ( int i = 0; i < Types.Count(); ++i )
-        {
-            Types[i].m_Group = this;
-        }
-    }
+	void Init()
+	{
+		for ( int i = 0; i < Types.Count(); ++i )
+		{
+			Types[i].m_Group = this;
+		}
+	}
 
-    ref JMWebhookConnection Add( string name )
-    {
-        for ( int i = 0; i < Types.Count(); ++i )
-        {
-            if ( Types[i].Name != name )
-                continue;
+	ref JMWebhookConnection Add( string name )
+	{
+		for ( int i = 0; i < Types.Count(); ++i )
+		{
+			if ( Types[i].Name != name )
+				continue;
 
-            return Types[i];
-        }
+			return Types[i];
+		}
 
-        #ifdef JM_COT_WEBHOOK_DEBUG
-        return Insert( name, true );
-        #else
-        return Insert( name, false );
-        #endif
-    }
+		#ifdef JM_COT_WEBHOOK_DEBUG
+		return Insert( name, true );
+		#else
+		return Insert( name, false );
+		#endif
+	}
 
-    private ref JMWebhookConnection Insert( string name, bool enabled )
-    {
-        JMWebhookConnection type = new JMWebhookConnection();
+	private ref JMWebhookConnection Insert( string name, bool enabled )
+	{
+		JMWebhookConnection type = new JMWebhookConnection();
 
-        type.Name = name;
-        type.Enabled = enabled;
-        type.m_Group = this;
+		type.Name = name;
+		type.Enabled = enabled;
+		type.m_Group = this;
 
-        Types.Insert( type );
+		Types.Insert( type );
 
-        return type;
-    }
+		return type;
+	}
 
-    ref JMWebhookConnection Set( string name, bool enabled )
-    {
-        for ( int i = 0; i < Types.Count(); ++i )
-        {
-            if ( Types[i].Name != name )
-                continue;
+	ref JMWebhookConnection Set( string name, bool enabled )
+	{
+		for ( int i = 0; i < Types.Count(); ++i )
+		{
+			if ( Types[i].Name != name )
+				continue;
 
-            Types[i].Enabled = enabled;
-            return Types[i];
-        }
+			Types[i].Enabled = enabled;
+			return Types[i];
+		}
 
-        return Insert( name, enabled );
-    }
+		return Insert( name, enabled );
+	}
 
-    void Remove( string name )
-    {
-        for ( int i = 0; i < Types.Count(); ++i )
-        {
-            if ( Types[i].Name != name )
-                continue;
+	void Remove( string name )
+	{
+		for ( int i = 0; i < Types.Count(); ++i )
+		{
+			if ( Types[i].Name != name )
+				continue;
 
-            delete Types[i];
-            Types.Remove( i );
-            return;
-        }
-    }
+			delete Types[i];
+			Types.Remove( i );
+			return;
+		}
+	}
 
-    bool Contains( string name )
-    {
-        for ( int i = 0; i < Types.Count(); ++i )
-        {
-            if ( Types[i].Name != name )
-                continue;
+	bool Contains( string name )
+	{
+		for ( int i = 0; i < Types.Count(); ++i )
+		{
+			if ( Types[i].Name != name )
+				continue;
 
-            Types.Remove( i );
-            return true;
-        }
+			Types.Remove( i );
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    JMWebhookConnection Get( int index )
-    {
-        return Types[index];
-    }
+	JMWebhookConnection Get( int index )
+	{
+		return Types[index];
+	}
 
-    int Count()
-    {
-        return Types.Count();
-    }
+	int Count()
+	{
+		return Types.Count();
+	}
 };

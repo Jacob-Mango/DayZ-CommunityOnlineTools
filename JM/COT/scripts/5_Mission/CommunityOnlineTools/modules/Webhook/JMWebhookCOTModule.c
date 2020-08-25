@@ -2,17 +2,17 @@ enum JMWebhookCOTModuleRPC
 {
 	INVALID = 10260,
 	Load,
-    AddConnectionGroup,
-    RemoveConnectionGroup,
-    AddType,
+	AddConnectionGroup,
+	RemoveConnectionGroup,
+	AddType,
 	RemoveType,
-    TypeState,
+	TypeState,
 	COUNT
 };
 
 class JMWebhookCOTModule: JMRenderableModuleBase
 {
-    private JMWebhookSerialize m_Settings;
+	private JMWebhookSerialize m_Settings;
 
 	void JMWebhookCOTModule()
 	{
@@ -29,7 +29,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	void ~JMWebhookCOTModule()
 	{
-    }
+	}
 
 	override bool HasAccess()
 	{
@@ -68,45 +68,45 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	override void GetWebhookTypes( out array< string > types )
 	{
-        types.Insert( "URL" );
-        types.Insert( "URLSensitive" );
-        types.Insert( "Type" );
-        types.Insert( "TypeSensitive" );
+		types.Insert( "URL" );
+		types.Insert( "URLSensitive" );
+		types.Insert( "Type" );
+		types.Insert( "TypeSensitive" );
 	}
 
-    array< ref JMWebhookConnectionGroup > GetConnections()
-    {
-        return m_Settings.Connections;
-    }
+	array< ref JMWebhookConnectionGroup > GetConnections()
+	{
+		return m_Settings.Connections;
+	}
 
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
 
-        m_Settings = GetCOTWebhookSettings();
+		m_Settings = GetCOTWebhookSettings();
 
-        if ( IsMissionHost() )
-        {
+		if ( IsMissionHost() )
+		{
 			OnSettingsUpdated();
-        } else
-        {
+		} else
+		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, NULL );
-        }
-    }
+		}
+	}
 
 	override void OnMissionFinish()
 	{
 		super.OnMissionFinish();
 
-        if ( IsMissionHost() )
-        {
-            m_Settings = NULL;
-        } else
-        {
-            delete m_Settings;
-        }
-    }
+		if ( IsMissionHost() )
+		{
+			m_Settings = NULL;
+		} else
+		{
+			delete m_Settings;
+		}
+	}
 
 	override int GetRPCMin()
 	{
@@ -126,20 +126,20 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			RPC_Load( ctx, sender, target );
 			break;
 		case JMWebhookCOTModuleRPC.AddConnectionGroup:
-            RPC_AddConnectionGroup( ctx, sender, target );
+			RPC_AddConnectionGroup( ctx, sender, target );
 			break;
 		case JMWebhookCOTModuleRPC.RemoveConnectionGroup:
-            RPC_RemoveConnectionGroup( ctx, sender, target );
+			RPC_RemoveConnectionGroup( ctx, sender, target );
 			break;
 		case JMWebhookCOTModuleRPC.AddType:
-            RPC_AddType( ctx, sender, target );
+			RPC_AddType( ctx, sender, target );
 			break;
 		case JMWebhookCOTModuleRPC.RemoveType:
-            RPC_RemoveType( ctx, sender, target );
+			RPC_RemoveType( ctx, sender, target );
 			break;
-        case JMWebhookCOTModuleRPC.TypeState:
-            RPC_TypeState( ctx, sender, target );
-            break;
+		case JMWebhookCOTModuleRPC.TypeState:
+			RPC_TypeState( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -164,201 +164,201 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		}
 	}
 
-    void AddConnectionGroup( string name, string url )
-    {
-        if ( !IsMissionClient() )
-            return;
+	void AddConnectionGroup( string name, string url )
+	{
+		if ( !IsMissionClient() )
+			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-        rpc.Write( name );
-        rpc.Write( url );
+		rpc.Write( name );
+		rpc.Write( url );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.AddConnectionGroup, true, NULL );
-    }
+	}
 
-    private void Exec_AddConnectionGroup( string name, string url, JMPlayerInstance instance )
-    {
-        JMWebhookConnectionGroup connection = m_Settings.Get( name );
+	private void Exec_AddConnectionGroup( string name, string url, JMPlayerInstance instance )
+	{
+		JMWebhookConnectionGroup connection = m_Settings.Get( name );
 
-        connection.ContextURL = "https://discordapp.com/api/webhooks/";
-        connection.Address = url;
+		connection.ContextURL = "https://discordapp.com/api/webhooks/";
+		connection.Address = url;
 
-        m_Settings.Save();
-    }
+		m_Settings.Save();
+	}
 
 	private void RPC_AddConnectionGroup( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-        if ( !IsMissionHost() )
-            return;
+		if ( !IsMissionHost() )
+			return;
 
-        string name;
-        if ( !ctx.Read( name ) )
-            return;
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
 
-        string url;
-        if ( !ctx.Read( url ) )
-            return;
-        
-        JMPlayerInstance instance;
+		string url;
+		if ( !ctx.Read( url ) )
+			return;
+		
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Add", senderRPC, instance ) )
 			return;
 
-        Exec_AddConnectionGroup( name, url, instance );
-    }
+		Exec_AddConnectionGroup( name, url, instance );
+	}
 
-    void RemoveConnectionGroup( string name )
-    {
-        if ( !IsMissionClient() )
-            return;
+	void RemoveConnectionGroup( string name )
+	{
+		if ( !IsMissionClient() )
+			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-        rpc.Write( name );
+		rpc.Write( name );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.RemoveConnectionGroup, true, NULL );
-    }
+	}
 
-    private void Exec_RemoveConnectionGroup( string name, JMPlayerInstance instance )
-    {
-        m_Webhook.RemoveGroup( name );
+	private void Exec_RemoveConnectionGroup( string name, JMPlayerInstance instance )
+	{
+		m_Webhook.RemoveGroup( name );
 
-        m_Settings.Save();
-    }
+		m_Settings.Save();
+	}
 
 	private void RPC_RemoveConnectionGroup( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-        if ( !IsMissionHost() )
-            return;
-        string name;
-        if ( !ctx.Read( name ) )
-            return;
-        
-        JMPlayerInstance instance;
+		if ( !IsMissionHost() )
+			return;
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
+		
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Rempve", senderRPC, instance ) )
 			return;
 
-        Exec_RemoveConnectionGroup( name, instance );
-    }
+		Exec_RemoveConnectionGroup( name, instance );
+	}
 
-    void AddType( string name, string group, bool enabled )
-    {
-        if ( !IsMissionClient() )
-            return;
+	void AddType( string name, string group, bool enabled )
+	{
+		if ( !IsMissionClient() )
+			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-        rpc.Write( name );
-        rpc.Write( group );
-        rpc.Write( enabled );
+		rpc.Write( name );
+		rpc.Write( group );
+		rpc.Write( enabled );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.AddType, true, NULL );
-    }
+	}
 
-    private void Exec_AddType( string name, string group, bool enabled, JMPlayerInstance instance )
-    {
+	private void Exec_AddType( string name, string group, bool enabled, JMPlayerInstance instance )
+	{
 		m_Webhook.AddConnection( name, group );
 		m_Webhook.SetConnection( name, group, enabled );
 
-        m_Settings.Save();
-    }
+		m_Settings.Save();
+	}
 
 	private void RPC_AddType( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-        if ( !IsMissionHost() )
-            return;
+		if ( !IsMissionHost() )
+			return;
 
-        string name;
-        if ( !ctx.Read( name ) )
-            return;
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
 
-        string group;
-        if ( !ctx.Read( group ) )
-            return;
+		string group;
+		if ( !ctx.Read( group ) )
+			return;
 
-        bool enabled;
-        if ( !ctx.Read( enabled ) )
-            return;
-        
-        JMPlayerInstance instance;
+		bool enabled;
+		if ( !ctx.Read( enabled ) )
+			return;
+		
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Add", senderRPC, instance ) )
 			return;
 
-        Exec_AddType( name, group, enabled, instance );
-    }
+		Exec_AddType( name, group, enabled, instance );
+	}
 
-    void RemoveType( string name, string group )
-    {
-        if ( !IsMissionClient() )
-            return;
+	void RemoveType( string name, string group )
+	{
+		if ( !IsMissionClient() )
+			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-        rpc.Write( name );
-        rpc.Write( group );
+		rpc.Write( name );
+		rpc.Write( group );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.RemoveType, true, NULL );
-    }
+	}
 
-    private void Exec_RemoveType( string name, string group, JMPlayerInstance instance )
-    {
+	private void Exec_RemoveType( string name, string group, JMPlayerInstance instance )
+	{
 		m_Webhook.RemoveConnection( name, group );
 
-        m_Settings.Save();
-    }
+		m_Settings.Save();
+	}
 
 	private void RPC_RemoveType( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-        if ( !IsMissionHost() )
-            return;
+		if ( !IsMissionHost() )
+			return;
 
-        string name;
-        if ( !ctx.Read( name ) )
-            return;
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
 
-        string group;
-        if ( !ctx.Read( group ) )
-            return;
-        
-        JMPlayerInstance instance;
+		string group;
+		if ( !ctx.Read( group ) )
+			return;
+		
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Remove", senderRPC, instance ) )
 			return;
 
-        Exec_RemoveType( name, group, instance );
-    }
+		Exec_RemoveType( name, group, instance );
+	}
 
-    void TypeState( string name, string group, bool enabled )
-    {
-        if ( !IsMissionClient() )
-            return;
+	void TypeState( string name, string group, bool enabled )
+	{
+		if ( !IsMissionClient() )
+			return;
 
 		ScriptRPC rpc = new ScriptRPC();
-        rpc.Write( name );
-        rpc.Write( group );
-        rpc.Write( enabled );
+		rpc.Write( name );
+		rpc.Write( group );
+		rpc.Write( enabled );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.TypeState, true, NULL );
-    }
+	}
 
-    private void Exec_TypeState( string name, string group, bool enabled, JMPlayerInstance instance )
-    {
+	private void Exec_TypeState( string name, string group, bool enabled, JMPlayerInstance instance )
+	{
 		m_Webhook.SetConnection( name, group, enabled );
 
-        m_Settings.Save();
-    }
+		m_Settings.Save();
+	}
 
 	private void RPC_TypeState( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-        if ( !IsMissionHost() )
-            return;
+		if ( !IsMissionHost() )
+			return;
 
-        string name;
-        if ( !ctx.Read( name ) )
-            return;
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
 
-        string group;
-        if ( !ctx.Read( group ) )
-            return;
+		string group;
+		if ( !ctx.Read( group ) )
+			return;
 
-        bool enabled;
-        if ( !ctx.Read( enabled ) )
-            return;
-        
-        JMPlayerInstance instance;
+		bool enabled;
+		if ( !ctx.Read( enabled ) )
+			return;
+		
+		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.State", senderRPC, instance ) )
 			return;
 
-        Exec_TypeState( name, group, enabled, instance );
-    }
+		Exec_TypeState( name, group, enabled, instance );
+	}
 };

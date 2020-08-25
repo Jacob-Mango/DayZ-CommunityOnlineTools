@@ -1,86 +1,86 @@
 class JMWebhookSerialize : Managed
 {
-    ref array< ref JMWebhookConnectionGroup > Connections;
+	ref array< ref JMWebhookConnectionGroup > Connections;
 
-    void JMWebhookSerialize()
-    {
-        Connections = new array< ref JMWebhookConnectionGroup >;
-    }
+	void JMWebhookSerialize()
+	{
+		Connections = new array< ref JMWebhookConnectionGroup >;
+	}
 
-    void ~JMWebhookSerialize()
-    {
-        Connections.Clear();
-        delete Connections;
-    }
+	void ~JMWebhookSerialize()
+	{
+		Connections.Clear();
+		delete Connections;
+	}
 
-    void Load()
-    {
+	void Load()
+	{
 		JsonFileLoader< JMWebhookSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, this );
-        
-        for ( int i = 0; i < Connections.Count(); ++i )
-        {
-            Connections[i].Init();
-        }
-    }
+		
+		for ( int i = 0; i < Connections.Count(); ++i )
+		{
+			Connections[i].Init();
+		}
+	}
 
-    void Save()
-    {
+	void Save()
+	{
 		JsonFileLoader< JMWebhookSerialize >.JsonSaveFile( JMConstants.FILE_WEBHOOK, this );
-    }
+	}
 
-    void OnSend( ParamsWriteContext ctx )
-    {
-        ctx.Write( Connections );
-    }
+	void OnSend( ParamsWriteContext ctx )
+	{
+		ctx.Write( Connections );
+	}
 
-    bool OnRecieve( ParamsReadContext ctx )
-    {
-        ctx.Read( Connections );
+	bool OnRecieve( ParamsReadContext ctx )
+	{
+		ctx.Read( Connections );
 
-        return true;
-    }
+		return true;
+	}
 
-    bool Remove( string name )
-    {
-        for ( int i = 0; i < Connections.Count(); ++i )
-        {
-            if ( Connections[i].Name == name )
-            {
-                delete Connections[i];
+	bool Remove( string name )
+	{
+		for ( int i = 0; i < Connections.Count(); ++i )
+		{
+			if ( Connections[i].Name == name )
+			{
+				delete Connections[i];
 
-                Connections.Remove( i );
-                return true;
-            }
-        }
+				Connections.Remove( i );
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    ref JMWebhookConnectionGroup Get( string name )
-    {
-        for ( int i = 0; i < Connections.Count(); ++i )
-        {
-            if ( Connections[i].Name == name )
-            {
-                return Connections[i];
-            }
-        }
+	ref JMWebhookConnectionGroup Get( string name )
+	{
+		for ( int i = 0; i < Connections.Count(); ++i )
+		{
+			if ( Connections[i].Name == name )
+			{
+				return Connections[i];
+			}
+		}
 
-        ref JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
-        group.Name = name;
+		ref JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
+		group.Name = name;
 
-        Connections.Insert( group );
+		Connections.Insert( group );
 
-        return group;
-    }
+		return group;
+	}
 };
 
 static ref JMWebhookSerialize g_cot_Webhook;
 
 static ref JMWebhookSerialize GetCOTWebhookSettings()
 {
-    if ( !g_cot_Webhook )
-        g_cot_Webhook = new JMWebhookSerialize();
+	if ( !g_cot_Webhook )
+		g_cot_Webhook = new JMWebhookSerialize();
 
-    return g_cot_Webhook;
+	return g_cot_Webhook;
 }

@@ -4,26 +4,26 @@ modded class Weapon_Base
 	{
 		super.EEFired( muzzleType, mode, ammoType );
 
-        PlayerBase player;
+		PlayerBase player;
 		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) && player.COTHasUnlimitedAmmo() )
 		{
 			Magazine magazine = GetMagazine( GetCurrentMuzzle() );
-            if ( magazine )
-            {
-                if ( GetGame().IsServer() )
-                {
-                    if ( GetGame().IsMultiplayer() && magazine )
-                        GetGame().RemoteObjectDelete( magazine );
+			if ( magazine )
+			{
+				if ( GetGame().IsServer() )
+				{
+					if ( GetGame().IsMultiplayer() && magazine )
+						GetGame().RemoteObjectDelete( magazine );
 
-                    magazine.ServerSetAmmoMax();
+					magazine.ServerSetAmmoMax();
 
-                    if ( GetGame().IsMultiplayer() && magazine )
-                        GetGame().RemoteObjectCreate( magazine );
-                } else
-                {
-                    magazine.LocalSetAmmoMax();
-                }
-            }
+					if ( GetGame().IsMultiplayer() && magazine )
+						GetGame().RemoteObjectCreate( magazine );
+				} else
+				{
+					magazine.LocalSetAmmoMax();
+				}
+			}
 		}
 	}
 };
