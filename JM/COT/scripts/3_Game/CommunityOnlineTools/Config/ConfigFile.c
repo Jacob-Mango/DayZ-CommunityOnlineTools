@@ -1,22 +1,22 @@
 class ConfigFile : ConfigClass
 {
-    private ref ConfigReader _reader;
+	private ref ConfigReader _reader;
 
-    private void ConfigFile()
-    {
-    }
+	private void ConfigFile()
+	{
+	}
 
-    override string GetType()
-    {
-        return "FILE";
-    }
+	override string GetType()
+	{
+		return "FILE";
+	}
 
-    static ref ConfigFile Parse( string fileName )
-    {
-        ref ConfigFile file = new ConfigFile();
+	static ref ConfigFile Parse( string fileName )
+	{
+		ref ConfigFile file = new ConfigFile();
 
-        file.Parse( ConfigReader.Open( fileName ), file );
+		file.Parse( ConfigReader.Open( fileName ), file );
 
-        return file;
-    }
+		return file;
+	}
 };

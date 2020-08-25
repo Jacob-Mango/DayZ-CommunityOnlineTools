@@ -49,7 +49,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 	void Init( Managed base )
 	{
-        m_Base = base;
+		m_Base = base;
 
 		OnInit();
 	}

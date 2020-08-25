@@ -4,7 +4,7 @@ class JMConfirmationForm extends JMConfirmation
 
 	override void Init( Managed base )
 	{
-        Class.CastTo( m_Window, base );
+		Class.CastTo( m_Window, base );
 
 		OnInit();
 	}

@@ -14,11 +14,11 @@ modded class JMModuleBase
 		if ( !m_Webhook || IsMissionOffline() )
 			return;
 
-        auto msg = m_Webhook.CreateDiscordMessage();
+		auto msg = m_Webhook.CreateDiscordMessage();
 
-        msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
+		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
-        m_Webhook.Post( GetModuleName() + type, msg );
+		m_Webhook.Post( GetModuleName() + type, msg );
 	}
 
 	void SendWebhook( string type, JMPlayerInstance player, string message )
@@ -29,16 +29,16 @@ modded class JMModuleBase
 		if ( !m_Webhook || !player || IsMissionOffline() )
 			return;
 
-        auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );
+		auto msg = m_Webhook.CreateDiscordMessage( player, "Admin Account: " );
 
-        msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
+		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
 		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "name=" + GetModuleName() + type );
 		Print( "message=" + message );
 		#endif
 
-        m_Webhook.Post( GetModuleName() + type, msg );
+		m_Webhook.Post( GetModuleName() + type, msg );
 		
 		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "-JMModuleBase::SendWebhook() - Admin" );

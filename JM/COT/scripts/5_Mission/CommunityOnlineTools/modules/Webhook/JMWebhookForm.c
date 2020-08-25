@@ -38,13 +38,13 @@ class JMWebhookForm extends JMFormBase
 	override void OnInit()
 	{
 		Widget spacer = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "header_panel" ), 2, 1 );
-        m_AddSectionButton = UIActionManager.CreateButton( spacer, "Add Webhook", this, "Action_AddWebhook" );
+		m_AddSectionButton = UIActionManager.CreateButton( spacer, "Add Webhook", this, "Action_AddWebhook" );
 		UIActionManager.CreatePanel( spacer, 0xFF000000, 5 );
 
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		m_ActionsWrapper = m_sclr_MainActions.GetContentWidget();
 
-        OnSettingsUpdated();
+		OnSettingsUpdated();
 
 		m_sclr_MainActions.UpdateScroller();
 	}

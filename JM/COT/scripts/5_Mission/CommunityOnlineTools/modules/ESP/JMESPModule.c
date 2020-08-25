@@ -861,11 +861,11 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_BaseBuilding_Build( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-        bool requireMaterials = true;
-        if ( !IsMissionOffline() )
-            requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
+		bool requireMaterials = true;
+		if ( !IsMissionOffline() )
+			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
-        target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
+		target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -881,9 +881,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build", senderRPC, instance ) )
 			return;
 
-        BaseBuildingBase bb;
-        if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
+		BaseBuildingBase bb;
+		if ( Class.CastTo( bb, target ) )
+			Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
 	}
 
 	void BaseBuilding_Dismantle( BaseBuildingBase target, string part )
@@ -894,7 +894,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-            rpc.Write( part );
+			rpc.Write( part );
 			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, false, NULL );
 		}
 	}
@@ -904,7 +904,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-        target.GetConstruction().COT_DismantlePart( part_name, player );
+		target.GetConstruction().COT_DismantlePart( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
 		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -920,9 +920,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Dismantle", senderRPC, instance ) )
 			return;
 
-        BaseBuildingBase bb;
-        if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
+		BaseBuildingBase bb;
+		if ( Class.CastTo( bb, target ) )
+			Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
 	}
 
 	void BaseBuilding_Repair( BaseBuildingBase target, string part )
@@ -933,14 +933,14 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-            rpc.Write( part );
+			rpc.Write( part );
 			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, false, NULL );
 		}
 	}
 
 	private void Exec_BaseBuilding_Repair( BaseBuildingBase target, string part_name, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-        target.GetConstruction().COT_RepairPart( part_name );
+		target.GetConstruction().COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
 		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -956,9 +956,9 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Repair", senderRPC, instance ) )
 			return;
 
-        BaseBuildingBase bb;
-        if ( Class.CastTo( bb, target ) )
-		    Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
+		BaseBuildingBase bb;
+		if ( Class.CastTo( bb, target ) )
+			Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )
