@@ -69,6 +69,12 @@ class JMRenderableModuleBase extends JMModuleBase
 		return m_Window.GetForm();
 	}
 
+	ref JMFormBase InitForm( Widget root )
+	{
+		Error( "Not implemented." );
+		return NULL;
+	}
+
 	string GetInputToggle()
 	{
 		return "";
