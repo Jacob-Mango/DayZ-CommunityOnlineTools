@@ -18,7 +18,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	private Widget m_ResizeDragLeft;
 	private Widget m_ResizeDragRight;
 
-	private JMFormBase m_Form;
+	private ref JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
 	private JMConfirmationForm m_Confirmation;
 
@@ -76,28 +76,37 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	void SetModule( JMRenderableModuleBase module )
 	{
 		m_Module = module;
+		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
+			return; 
 
 		Widget content_ctr = layoutRoot.FindAnyWidget( "content" );
+		Widget menu = content_ctr;
 
-		Widget menu = GetGame().GetWorkspace().CreateWidgets( module.GetLayoutRoot(), content_ctr );
-
-		float width = -1;
-		float height = -1;
-		menu.GetSize( width, height );
-
-		content_ctr.SetSize( width, height );
-		SetSize( width, height );
-
-		menu.GetScript( m_Form );
-
-		if ( m_Form )
+		if ( m_Module.GetLayoutRoot() != "" )
 		{
-			m_Form.Init( this, module );
+			menu = GetGame().GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), content_ctr );
+			if ( Assert_Null( menu, "No valid widget supplied." ) )
+				return; 
 
-			m_TitleText.SetText( module.GetTitle() );
-			
-			GetCOTWindowManager().BringFront( this );
+			float width = -1;
+			float height = -1;
+			menu.GetSize( width, height );
+
+			content_ctr.SetSize( width, height );
+			SetSize( width, height );
+
+			menu.GetScript( m_Form );
 		}
+
+		if ( !m_Form )
+			m_Form = m_Module.InitForm( menu );
+		
+		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
+			return; 
+
+		m_Form.Init( this, m_Module );
+		m_TitleText.SetText( m_Module.GetTitle() );
+		GetCOTWindowManager().BringFront( this );
 
 		layoutRoot.FindAnyWidget( "confirmation_panel" ).GetScript( m_Confirmation );
 
