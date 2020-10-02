@@ -1,4 +1,8 @@
+#ifdef CF_MODEL_VIEW_BINDING
+class JMFormBase extends Controller
+#else
 class JMFormBase extends ScriptedWidgetEventHandler 
+#endif
 {
 	protected Widget layoutRoot;
 	
@@ -12,11 +16,19 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	{
 	}
 
+	#ifdef CF_MODEL_VIEW_BINDING
+	override void OnWidgetScriptInit( Widget w )
+	{
+		super.OnWidgetScriptInit( w );
+		layoutRoot = w;
+	}
+	#else
 	void OnWidgetScriptInit( Widget w )
 	{
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
 	}
+	#endif
 
 	void Init( ref JMWindowBase wdw, ref JMRenderableModuleBase mdl )
 	{
