@@ -4,4 +4,4 @@ modded class DayZGame
 	{
 		DebugPrint.OnInit();
 	}
-}
+};
