@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigValueFloat : ConfigValue
 {
 	private float _value;
@@ -22,3 +23,4 @@ class ConfigValueFloat : ConfigValue
 		_value = value;
 	}
 };
+#endif

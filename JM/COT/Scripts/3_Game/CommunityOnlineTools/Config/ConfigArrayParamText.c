@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigArrayParamText : ConfigArrayParam
 {
 	private string _value;
@@ -22,3 +23,4 @@ class ConfigArrayParamText : ConfigArrayParam
 		_value = value;
 	}
 };
+#endif

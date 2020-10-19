@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class JMPermissionManager
 {
 	ref map< string, ref JMPlayerInstance > Players;
@@ -459,3 +460,4 @@ ref JMPermissionManager GetPermissionsManager()
 
 	return g_cot_PermissionsManager;
 }
+#endif

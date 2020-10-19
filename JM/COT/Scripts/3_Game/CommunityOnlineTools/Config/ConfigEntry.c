@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigEntry : Managed
 {
 	protected ref array< ref ConfigEntry > _entries;
@@ -191,3 +192,4 @@ class ConfigEntry : Managed
 		return NULL;
 	}
 };
+#endif

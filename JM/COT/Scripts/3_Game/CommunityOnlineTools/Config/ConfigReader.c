@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigReader : Managed
 {	
 	private int _arrIdx = 0;
@@ -281,3 +282,4 @@ class ConfigReader : Managed
 		Print( "[" + ( _arrIdx + 1 ) + ":" + _bufIdx + "] WARNING: " + msg );
 	}
 };
+#endif

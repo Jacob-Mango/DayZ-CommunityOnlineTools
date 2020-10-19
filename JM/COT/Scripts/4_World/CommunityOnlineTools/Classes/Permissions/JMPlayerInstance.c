@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
@@ -592,4 +593,5 @@ class JMPlayerInstance : Managed
 	{
 		return m_UnlimitedAmmo;
 	}
-}
+};
+#endif

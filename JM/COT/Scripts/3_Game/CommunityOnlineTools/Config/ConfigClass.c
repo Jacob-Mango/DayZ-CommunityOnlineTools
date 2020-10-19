@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigClassDeclaration : ConfigClass
 {
 	override bool IsClassDecl()
@@ -319,3 +320,4 @@ class ConfigClass : ConfigEntry
 		return false;
 	}
 };
+#endif

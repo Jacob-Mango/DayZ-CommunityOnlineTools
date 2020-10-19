@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class JMPermission : Managed
 {
 	JMPermission Parent;
@@ -344,4 +345,5 @@ class JMPermission : Managed
 			Children[i].DebugPrint( depth + 1 );
 		}
 	}
-}
+};
+#endif

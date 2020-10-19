@@ -58,9 +58,11 @@ modded class JMModuleBase
 		
 	}
 
+#ifndef CF_COT_MOVE
 	void OnClientPermissionsUpdated()
 	{
 	}
+#endif
 
 	void GetCommands( inout array< ref JMCommand > commands )
 	{

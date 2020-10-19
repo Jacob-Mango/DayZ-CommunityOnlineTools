@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigArrayParam : ConfigEntry
 {
 	override string GetType()
@@ -10,3 +11,4 @@ class ConfigArrayParam : ConfigEntry
 		return true;
 	}
 };
+#endif

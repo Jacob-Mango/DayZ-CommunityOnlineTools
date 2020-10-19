@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigValueText : ConfigValue
 {
 	private string _value;
@@ -22,3 +23,4 @@ class ConfigValueText : ConfigValue
 		_value = value;
 	}
 };
+#endif

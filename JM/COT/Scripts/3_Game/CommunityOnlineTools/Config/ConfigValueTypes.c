@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 enum ConfigValueTypes
 {
 	Text,
@@ -8,3 +9,4 @@ enum ConfigValueTypes
 	UKN_2,
 	Int64
 };
+#endif

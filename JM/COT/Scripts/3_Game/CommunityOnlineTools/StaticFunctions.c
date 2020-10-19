@@ -443,6 +443,7 @@ static bool ArrayContains( array< string > arr, string match )
 	return false;
 }
 
+#ifndef CF_COT_MOVE
 static void Assert_Log( string str )
 {
 	Print( "==============================================WARNING=======================================================" );
@@ -510,3 +511,4 @@ static bool Assert_True( bool cls, string message = "" )
 	
 	return false;
 }
+#endif

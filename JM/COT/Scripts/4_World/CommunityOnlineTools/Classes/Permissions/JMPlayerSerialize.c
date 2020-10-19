@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class JMPlayerSerialize : Managed
 {
 	[NonSerialized()]
@@ -81,4 +82,5 @@ class JMPlayerSerialize : Managed
 	{
 		JsonFileLoader<JMPlayerSerialize>.JsonSaveFile( m_FileName, this );
 	}
-}
+};
+#endif
