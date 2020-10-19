@@ -1,7 +1,9 @@
 
 modded class PlayerBase
 {
+#ifndef CF_COT_MOVE
 	private JMPlayerInstance m_AuthenticatedPlayer;
+#endif
 
 	private bool m_JMHasGodMode;
 
@@ -42,7 +44,9 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 
+#ifndef CF_COT_MOVE
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
+#endif
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
@@ -129,6 +133,7 @@ modded class PlayerBase
 		}
 	}
 
+#ifndef CF_COT_MOVE
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		if ( m_AuthenticatedPlayer )
@@ -154,7 +159,7 @@ modded class PlayerBase
 		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
 	}
-	
+
 	override string FormatSteamWebhook()
 	{
 		if ( Assert_Null( GetAuthenticatedPlayer(), "Player has no identity or improperly programmed AI mod" ) )
@@ -164,6 +169,7 @@ modded class PlayerBase
 
 		return GetAuthenticatedPlayer().FormatSteamWebhook();
 	}
+#endif
 
 	bool COTHasGodMode()
 	{

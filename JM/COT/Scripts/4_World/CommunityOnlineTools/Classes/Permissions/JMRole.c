@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class JMRole : Managed
 {
 	ref JMPermission RootPermission;
@@ -139,4 +140,5 @@ class JMRole : Managed
 	{
 		RootPermission.DebugPrint( 0 );
 	}
-}
+};
+#endif

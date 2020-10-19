@@ -34,6 +34,7 @@ modded class JMModuleManager
 		return m_ModuleList;
 	}
 
+#ifndef CF_COT_MOVE
 	void OnClientPermissionsUpdated()
 	{
 		for ( int i = 0; i < m_ModuleList.Count(); i++ )
@@ -41,4 +42,5 @@ modded class JMModuleManager
 			m_ModuleList[i].OnClientPermissionsUpdated();
 		}
 	}
+#endif
 }

@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigArrayParamArray : ConfigArrayParam
 {
 	private ref ConfigArray _value;
@@ -27,3 +28,4 @@ class ConfigArrayParamArray : ConfigArrayParam
 		return true;
 	}
 };
+#endif

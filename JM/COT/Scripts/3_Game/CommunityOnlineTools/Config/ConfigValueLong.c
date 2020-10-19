@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigValueLong : ConfigValue
 {
 	private int _value;
@@ -22,3 +23,4 @@ class ConfigValueLong : ConfigValue
 		_value = value;
 	}
 };
+#endif

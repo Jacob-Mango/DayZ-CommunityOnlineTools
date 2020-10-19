@@ -1,3 +1,4 @@
+#ifndef CF_COT_MOVE
 class ConfigFile : ConfigClass
 {
 	private ref ConfigReader _reader;
@@ -20,3 +21,4 @@ class ConfigFile : ConfigClass
 		return file;
 	}
 };
+#endif

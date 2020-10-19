@@ -92,8 +92,10 @@ modded class DayZPlayerImplement
 		}
 	}
 
+#ifndef CF_COT_MOVE
 	string FormatSteamWebhook()
 	{
 		return GetDisplayName();
 	}
+#endif
 };
