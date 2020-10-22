@@ -36,7 +36,11 @@ modded class Construction
 		}
 	}
 
-	void COT_BuildPart( string part_name, bool checkMaterials = true )
+	#ifdef DAYZ_1_10
+	void COT_BuildPart(PlayerBase player, string part_name, bool checkMaterials = true )
+	#else
+	void COT_BuildPart(string part_name, bool checkMaterials = true )
+	#endif
 	{
 		if ( !HasRequiredPart( part_name ) )
 			return;
@@ -56,7 +60,11 @@ modded class Construction
 		if ( m_ConstructionBoxTrigger )
 			DestroyCollisionTrigger();
 
+		#ifdef DAYZ_1_10
+		GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
+		#else
 		GetParent().OnPartBuiltServer( part_name, AT_BUILD_PART );
+		#endif
 	}
 
 	void COT_DismantlePart( string part_name, PlayerBase player )
