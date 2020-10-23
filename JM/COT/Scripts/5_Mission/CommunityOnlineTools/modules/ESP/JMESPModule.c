@@ -865,7 +865,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !IsMissionOffline() )
 			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
-		target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
+		PlayerBase player;
+		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
+		
+		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
