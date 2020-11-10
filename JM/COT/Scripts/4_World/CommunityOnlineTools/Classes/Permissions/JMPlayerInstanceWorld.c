@@ -1,8 +1,11 @@
 #ifdef CF_COT_MOVE
-modded class JMPlayerInstanceWorld
+modded class CF_Permission_Player
 {
-	override void OnUpdateData()
+	override bool OnUpdateData()
 	{
+		if ( !super.OnUpdateData() )
+			return false;
+
 		m_Position = PBObject.GetPosition();
 		m_Orientation = PBObject.GetOrientation();
 	
@@ -24,6 +27,8 @@ modded class JMPlayerInstanceWorld
 		m_Frozen = PBObject.COTIsFrozen();
 		m_Invisibility = PBObject.COTIsInvisible();
 		m_UnlimitedAmmo = PBObject.COTHasUnlimitedAmmo();
+
+		return true;
 	}
 };
 #endif
