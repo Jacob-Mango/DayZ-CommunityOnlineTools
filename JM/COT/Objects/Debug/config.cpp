@@ -66,4 +66,35 @@ class CfgVehicles
         scope = 2;
         hiddenSelectionsTextures[] = { "#(argb,8,8,3)color(0.5,0,1,0.5,co)" };
     };
+
+	class CarScript;
+	class Truck_01_Base: CarScript
+	{
+        scope = 2;
+	};
+
+	class Truck_01_Chassis;
+		class AnimationSources;
+	class Truck_01_Command: Truck_01_Chassis
+	{
+		displayName = "M3S Command";
+		model = "\dz\vehicles\wheeled\Truck_01\Truck_01_Command.p3d";
+		attachments[] = {"TruckBattery","Reflector_1_1","Reflector_2_1","Truck_01_Door_1_1","Truck_01_Door_2_1","Truck_01_Hood","Truck_01_Wheel_1_1","Truck_01_Wheel_1_2","Truck_01_Wheel_1_3","Truck_01_Wheel_2_1","Truck_01_Wheel_2_2","Truck_01_Wheel_2_3","Truck_01_Wheel_Spare_1","Truck_01_Wheel_Spare_2"};
+		
+		class Cargo
+		{
+			itemsCargoSize[] = {10,60};
+			allowOwnedCargoManipulation = 1;
+			openable = 0;
+		};
+		class AnimationSources: AnimationSources
+		{
+			class DoorsTrunk
+			{
+				source = "user";
+				initPhase = 0;
+				animPeriod = 0.5;
+			};
+		};
+	};
 };
