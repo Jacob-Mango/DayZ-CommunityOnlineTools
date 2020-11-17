@@ -60,9 +60,6 @@ class JMVehicleSpawnerSettings
 		Default_Hatchback_02();
 		Default_Sedan_02();
 		Default_Truck_01_Covered();
-		Default_Truck_01_Chassis();
-		Default_Truck_01_Cargo();
-		Default_Truck_01_Command();
 	}
 
 	void Default_CivilianSedan()
@@ -197,85 +194,4 @@ class JMVehicleSpawnerSettings
 
 		Vehicles.Insert( file.VehicleName, file );
 	}
-
-	void Default_Truck_01_Chassis()
-	{
-		array< string> attArr = new array< string>;
-
-		attArr.Insert("Truck_01_Hood");
-		attArr.Insert("Truck_01_Door_1_1");
-		attArr.Insert("Truck_01_Door_2_1");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("TruckBattery");
-		attArr.Insert("SparkPlug");
-
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
-
-		file.VehicleName = "Truck_01_Chassis_Blue";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
-
-		Vehicles.Insert( file.VehicleName, file );
-	}
-
-	void Default_Truck_01_Cargo()
-	{
-		array< string> attArr = new array< string>;
-
-		attArr.Insert("Truck_01_Hood");
-		attArr.Insert("Truck_01_Door_1_1");
-		attArr.Insert("Truck_01_Door_2_1");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("TruckBattery");
-		attArr.Insert("SparkPlug");
-
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
-
-		file.VehicleName = "Truck_01_Cargo_Blue";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
-
-		Vehicles.Insert( file.VehicleName, file );
-	}
-
-	void Default_Truck_01_Command()
-	{
-		array< string> attArr = new array< string>;
-
-		attArr.Insert("Truck_01_Hood");
-		attArr.Insert("Truck_01_Door_1_1");
-		attArr.Insert("Truck_01_Door_2_1");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("TruckBattery");
-		attArr.Insert("SparkPlug");
-
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
-
-		file.VehicleName = "Truck_01_Command";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
-
-		Vehicles.Insert( file.VehicleName, file );
-	}
-}
+};
