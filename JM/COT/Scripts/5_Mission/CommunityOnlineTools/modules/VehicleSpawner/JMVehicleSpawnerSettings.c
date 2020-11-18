@@ -59,6 +59,7 @@ class JMVehicleSpawnerSettings
 		Default_OffroadHatchback();
 		Default_Hatchback_02();
 		Default_Sedan_02();
+		Default_Truck_01_Covered();
 	}
 
 	void Default_CivilianSedan()
@@ -166,4 +167,31 @@ class JMVehicleSpawnerSettings
 
 		Vehicles.Insert( file.VehicleName, file );
 	}
-}
+
+	void Default_Truck_01_Covered()
+	{
+		array< string> attArr = new array< string>;
+
+		attArr.Insert("Truck_01_Hood");
+		attArr.Insert("Truck_01_Door_1_1_Blue");
+		attArr.Insert("Truck_01_Door_2_1_Blue");
+		attArr.Insert("Truck_01_WheelDouble");
+		attArr.Insert("Truck_01_WheelDouble");
+		attArr.Insert("Truck_01_WheelDouble");
+		attArr.Insert("Truck_01_WheelDouble");
+		attArr.Insert("Truck_01_Wheel");
+		attArr.Insert("Truck_01_Wheel");
+		attArr.Insert("Truck_01_Wheel");
+		attArr.Insert("Truck_01_Wheel");
+		attArr.Insert("TruckBattery");
+		attArr.Insert("SparkPlug");
+
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+
+		file.VehicleName = "Truck_01_Covered_Blue";
+		file.m_FileName = file.VehicleName;
+		file.Parts.Copy( attArr );
+
+		Vehicles.Insert( file.VehicleName, file );
+	}
+};

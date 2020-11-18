@@ -49,16 +49,10 @@ class COTModule : JMModuleBase
 
 		if ( IsMissionHost() )
 		{
-			if ( !Assert_Null( GetPermissionsManager() ) )
-				Assert_Null( GetPermissionsManager().RootPermission );
-
-			array< string > data = new array< string >;
-			GetPermissionsManager().RootPermission.Serialize( data );
+			array< string > data = GetPermissionsManager().Serialize();
 
 			if ( !GetPermissionsManager().RoleExists( "everyone" ) )
-			{
 				GetPermissionsManager().CreateRole( "everyone", data );
-			}
 
 			if ( !GetPermissionsManager().RoleExists( "admin" ) )
 			{
@@ -273,6 +267,8 @@ class COTModule : JMModuleBase
 		GetCommunityOnlineToolsBase().ToggleActive();
 	}
 
+	//TODO: URGENT: MOVE TO COMMUNITY FRAMEWORK, FULLY DECOUPLE FROM COMMUNITY ONLINE TOOLS
+
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		//Print( "+COTModule::OnInvokeConnect - " + identity.GetId() );
@@ -280,9 +276,9 @@ class COTModule : JMModuleBase
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( identity );
 
-		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
+		for ( int i = 0; i < GetPermissionsManager().RoleCount(); i++ )
 		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement( i ), identity );
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
 		}
 		
 		JMPlayerInstance instance;
