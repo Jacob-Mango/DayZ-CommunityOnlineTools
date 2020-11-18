@@ -331,7 +331,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		
 		for ( int j = 0; j < players.Count(); j++ )
 		{
-			PlayerBase player = players[j].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[j].PlayerObject );
 
 			if ( player == NULL )
 				continue;
