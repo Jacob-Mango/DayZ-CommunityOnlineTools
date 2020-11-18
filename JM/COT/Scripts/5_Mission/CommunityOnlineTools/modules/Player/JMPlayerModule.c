@@ -229,7 +229,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -280,7 +280,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -331,7 +331,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -382,7 +382,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -433,7 +433,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -484,7 +484,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -535,7 +535,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -593,7 +593,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -664,7 +664,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -714,7 +714,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		JMPlayerInstance other = GetPermissionsManager().GetPlayer( guid );
 
-		PlayerBase player = other.PlayerObject;
+		PlayerBase player = PlayerBase.Cast( other.PlayerObject );
 		if ( player == NULL )
 			return;
 
@@ -763,7 +763,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL || !player.HasLastPosition() )
 				continue;
 
@@ -815,12 +815,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !spectateInstance )
 			return;
 
-		PlayerBase spectatePlayer = spectateInstance.PlayerObject;
+		PlayerBase spectatePlayer = PlayerBase.Cast( spectateInstance.PlayerObject );
 		if ( !spectatePlayer )
 			return;
 
 		bool spectatorObjectExists = false;
-		PlayerBase spectatorPlayer = GetPlayerObjectByIdentity( ident );
+		PlayerBase spectatorPlayer = PlayerBase.Cast( GetPlayerObjectByIdentity( ident ) );
 		if ( spectatorPlayer )
 		{
 			spectatorObjectExists = true;
@@ -958,7 +958,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1015,7 +1015,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1072,7 +1072,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1129,7 +1129,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1187,7 +1187,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1241,7 +1241,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
@@ -1287,7 +1287,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
-			PlayerBase player = players[i].PlayerObject;
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
