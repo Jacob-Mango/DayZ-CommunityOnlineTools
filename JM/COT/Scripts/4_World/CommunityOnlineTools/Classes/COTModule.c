@@ -276,10 +276,17 @@ class COTModule : JMModuleBase
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( identity );
 
+		#ifdef CF_COT_MOVE
 		for ( int i = 0; i < GetPermissionsManager().RoleCount(); i++ )
 		{
 			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
 		}
+		#else
+		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
+		{
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
+		}
+		#endif
 		
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
