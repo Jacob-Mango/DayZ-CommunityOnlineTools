@@ -56,10 +56,12 @@ class CommunityOnlineToolsBase
 
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 		
+		#ifndef CF_COT_MOVE
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
 		}
+		#endif
 
 		CreateNewLog();
 

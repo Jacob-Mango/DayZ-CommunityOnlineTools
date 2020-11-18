@@ -1,5 +1,5 @@
 #ifdef CF_COT_MOVE
-modded class JMPlayerInstance
+modded class CF_Permission_PlayerBase
 {
 	protected vector m_Position;
 	protected vector m_Orientation;
