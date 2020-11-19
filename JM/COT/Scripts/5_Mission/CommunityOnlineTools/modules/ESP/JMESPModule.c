@@ -869,7 +869,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_BuildPart( player, part_name, requireMaterials );
+		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
 		#else
 		target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
 		#endif
