@@ -58,7 +58,7 @@ modded class JMModuleBase
 		
 	}
 
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 	void OnClientPermissionsUpdated()
 	{
 	}

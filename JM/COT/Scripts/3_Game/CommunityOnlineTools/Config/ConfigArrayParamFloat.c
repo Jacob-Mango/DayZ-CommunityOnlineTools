@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 class ConfigArrayParamFloat : ConfigArrayParam
 {
 	private float _value;

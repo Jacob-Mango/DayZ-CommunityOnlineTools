@@ -443,7 +443,7 @@ static bool ArrayContains( array< string > arr, string match )
 	return false;
 }
 
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 static void Assert_Log( string str )
 {
 	Print( "==============================================WARNING=======================================================" );

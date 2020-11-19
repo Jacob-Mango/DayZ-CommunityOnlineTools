@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 enum JMPermissionType 
 {
 	INHERIT = 0,

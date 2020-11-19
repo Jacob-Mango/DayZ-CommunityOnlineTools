@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 class ConfigValueFloat : ConfigValue
 {
 	private float _value;

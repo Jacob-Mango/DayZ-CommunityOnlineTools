@@ -1,4 +1,4 @@
-#ifdef CF_COT_MOVE
+#ifdef CF_MODULE_PERMISSIONS
 modded class CF_Permission_Player
 {
 	override bool OnUpdateData()
