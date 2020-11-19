@@ -1,4 +1,4 @@
-#ifdef VPPADMINTOOLS
+/*#ifdef VPPADMINTOOLS
 class JMVPPModuleBase : JMRenderableModuleBase
 {
 	override ref JMFormBase InitForm( Widget root )
@@ -40,4 +40,4 @@ class JMVPPModuleBase : JMRenderableModuleBase
 		return name;
 	}
 };
-#endif
+#endif*/
