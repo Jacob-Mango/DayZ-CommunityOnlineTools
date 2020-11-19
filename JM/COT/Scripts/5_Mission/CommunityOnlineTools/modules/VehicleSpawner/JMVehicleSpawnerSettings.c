@@ -173,8 +173,8 @@ class JMVehicleSpawnerSettings
 		array< string> attArr = new array< string>;
 
 		attArr.Insert("Truck_01_Hood");
-		attArr.Insert("Truck_01_Door_1_1_Blue");
-		attArr.Insert("Truck_01_Door_2_1_Blue");
+		attArr.Insert("Truck_01_Door_1_1");
+		attArr.Insert("Truck_01_Door_2_1");
 		attArr.Insert("Truck_01_WheelDouble");
 		attArr.Insert("Truck_01_WheelDouble");
 		attArr.Insert("Truck_01_WheelDouble");
@@ -188,7 +188,7 @@ class JMVehicleSpawnerSettings
 
 		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		file.VehicleName = "Truck_01_Covered_Blue";
+		file.VehicleName = "Truck_01_Covered";
 		file.m_FileName = file.VehicleName;
 		file.Parts.Copy( attArr );
 
