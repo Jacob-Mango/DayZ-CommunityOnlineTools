@@ -36,7 +36,11 @@ modded class Construction
 		}
 	}
 
-	void COT_BuildPart( string part_name, PlayerBase player, bool checkMaterials = true )
+	#ifdef DAYZ_1_10
+	void COT_BuildPart(PlayerBase player, string part_name, bool checkMaterials = true )
+	#else
+	void COT_BuildPart(string part_name, bool checkMaterials = true )
+	#endif
 	{
 		if ( !HasRequiredPart( part_name ) )
 			return;
