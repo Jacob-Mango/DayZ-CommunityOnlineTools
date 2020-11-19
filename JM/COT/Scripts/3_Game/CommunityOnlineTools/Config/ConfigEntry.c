@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 class ConfigEntry : Managed
 {
 	protected ref array< ref ConfigEntry > _entries;

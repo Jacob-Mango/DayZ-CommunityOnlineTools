@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 class ConfigArrayParamArray : ConfigArrayParam
 {
 	private ref ConfigArray _value;

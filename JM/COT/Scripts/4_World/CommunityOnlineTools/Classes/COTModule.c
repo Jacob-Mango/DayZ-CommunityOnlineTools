@@ -276,7 +276,7 @@ class COTModule : JMModuleBase
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( identity );
 
-		#ifdef CF_COT_MOVE
+		#ifdef CF_MODULE_PERMISSIONS
 		for ( int i = 0; i < GetPermissionsManager().RoleCount(); i++ )
 		{
 			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
@@ -284,7 +284,7 @@ class COTModule : JMModuleBase
 		#else
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement(i), identity );
 		}
 		#endif
 		

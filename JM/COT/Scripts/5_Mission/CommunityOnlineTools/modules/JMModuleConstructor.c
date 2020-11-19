@@ -17,7 +17,7 @@ modded class JMModuleConstructor
 		modules.Insert( JMMapModule );
 
 		//modules.Insert( JMWebhookCOTModule );
-
+/*
 #ifdef VPPADMINTOOLS
 		modules.Insert( JMVPPMenuPlayerManager );
 		modules.Insert( JMVPPMenuItemManager );
@@ -32,5 +32,6 @@ modded class JMModuleConstructor
 		modules.Insert( JMVPPMenuWebHooks );
 		modules.Insert( JMVPPMenuXMLEditor );
 #endif
+*/
 	}
 }

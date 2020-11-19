@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;

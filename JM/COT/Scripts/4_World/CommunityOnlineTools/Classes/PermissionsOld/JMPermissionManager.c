@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 class JMPermissionManager
 {
 	ref map< string, ref JMPlayerInstance > Players;

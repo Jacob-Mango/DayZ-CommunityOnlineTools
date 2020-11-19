@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 class JMRole : Managed
 {
 	ref JMPermission RootPermission;

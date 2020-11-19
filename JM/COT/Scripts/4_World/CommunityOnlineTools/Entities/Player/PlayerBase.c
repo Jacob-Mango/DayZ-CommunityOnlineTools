@@ -1,7 +1,7 @@
 
 modded class PlayerBase
 {
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
@@ -44,7 +44,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
 #endif
 
@@ -133,7 +133,7 @@ modded class PlayerBase
 		}
 	}
 
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_PERMISSIONS
 	JMPlayerInstance GetAuthenticatedPlayer()
 	{
 		if ( m_AuthenticatedPlayer )

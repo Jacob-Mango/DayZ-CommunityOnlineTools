@@ -1,4 +1,4 @@
-#ifndef CF_COT_MOVE
+#ifndef CF_MODULE_CONFIG
 class ConfigReader : Managed
 {	
 	private int _arrIdx = 0;
