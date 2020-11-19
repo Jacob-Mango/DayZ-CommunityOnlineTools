@@ -1,4 +1,4 @@
-#ifdef VPPADMINTOOLS
+/*#ifdef VPPADMINTOOLS
 class JMVPPMenuPlayerManager: JMVPPModuleBase
 {
 	override string GetIconName()
@@ -106,4 +106,4 @@ class JMVPPMenuXMLEditor: JMVPPModuleBase
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_XMLEDITOR";
 };
-#endif
+#endif*/

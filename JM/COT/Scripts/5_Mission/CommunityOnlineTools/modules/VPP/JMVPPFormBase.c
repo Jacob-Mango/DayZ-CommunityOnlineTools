@@ -1,4 +1,4 @@
-#ifdef VPPADMINTOOLS
+/*#ifdef VPPADMINTOOLS
 class JMVPPFormBase : JMFormBase
 {
 	private ref AdminHudSubMenu m_VPPMenu;
@@ -24,4 +24,4 @@ class JMVPPFormBase : JMFormBase
 		layoutRoot.SetHandler( this );
 	}
 };
-#endif
+#endif*/

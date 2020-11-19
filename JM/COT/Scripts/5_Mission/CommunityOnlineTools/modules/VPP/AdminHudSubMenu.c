@@ -1,4 +1,4 @@
-#ifdef VPPADMINTOOLS
+/*#ifdef VPPADMINTOOLS
 modded class AdminHudSubMenu
 {
 	private JMFormBase m_COTForm;
@@ -61,4 +61,4 @@ modded class AdminHudSubMenu
 		return m_VPPRoot;
 	}
 };
-#endif
+#endif*/
