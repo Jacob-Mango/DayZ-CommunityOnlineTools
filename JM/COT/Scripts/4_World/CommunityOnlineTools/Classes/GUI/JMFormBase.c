@@ -90,11 +90,18 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	{
 		
 	}
-
+	
+#ifdef CF_MODEL_VIEW_BINDING
+	override Widget GetLayoutRoot() 
+	{
+		return layoutRoot;
+	}
+#else
 	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}
+#endif
 
 	ref JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
 	{
