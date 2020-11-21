@@ -237,33 +237,28 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		array< string > attachments = file.Parts;
 
 		EntityAI ent;
-		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
-		if ( !Class.CastTo( ent, GetGame().CreateObject( file.VehicleName, position, false, false, true ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_PLACE_ON_SURFACE ) ) )
 			return NULL;
 
 		for ( int j = 0; j < attachments.Count(); j++ )
 		{
 			ent.GetInventory().CreateInInventory( attachments[j] );
 		}
-
-		Car car;
-		if ( Class.CastTo( car, ent ) )
-		{
-			FillCar( car, CarFluid.FUEL );
-			FillCar( car, CarFluid.OIL );
-			FillCar( car, CarFluid.BRAKE );
-			FillCar( car, CarFluid.COOLANT );
-		}
-
-		ent.SetPosition( position );
-		ent.SetDirection( direction );
-
-		vector tmItem[4];
-		ent.GetTransform( tmItem );
-		//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
-		tmItem[3] = position + "0 5 0";
-		ent.SetTransform( tmItem );
 		
+		OnSpawnVehicle(ent);
+
 		return ent;
 	}
-}
+	
+	void OnSpawnVehicle(EntityAI entity)
+	{
+		Car car;
+		if (Class.CastTo(car, entity))
+		{
+			FillCar(car, CarFluid.FUEL);
+			FillCar(car, CarFluid.OIL);
+			FillCar(car, CarFluid.BRAKE);
+			FillCar(car, CarFluid.COOLANT);
+		}
+	}
+};

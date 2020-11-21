@@ -59,7 +59,7 @@ modded class JMModuleBase
 	}
 
 #ifndef CF_MODULE_PERMISSIONS
-	void OnClientPermissionsUpdated()
+	override void OnClientPermissionsUpdated()
 	{
 	}
 #endif
