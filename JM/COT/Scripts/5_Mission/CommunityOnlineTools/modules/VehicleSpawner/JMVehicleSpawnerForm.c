@@ -43,10 +43,10 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 			if ( text == "" || text.Get( 0 ) == " " )
 			{
-				vehiclesDisplay.Insert( displayName );
+				vehiclesDisplay.Insert( displayName + " (" + vehicles[i] + ")" );
 			} else
 			{
-				vehiclesDisplay.Insert( text );
+				vehiclesDisplay.Insert( text + " (" + vehicles[i] + ")" );
 			}
 		}
 
@@ -57,12 +57,16 @@ class JMVehicleSpawnerForm extends JMFormBase
 			if ( vehicles[i] == "" )
 				continue;
 				
-			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+			Widget wrapper = UIActionManager.CreatePanel( m_ActionsWrapper, 0x00000000, 30 );
 			
-			UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
+			UIActionBase name = UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
+
+			name.SetWidth(0.8);
 
 			UIActionButton button = UIActionManager.CreateButton( wrapper, "#STR_COT_VEHICLE_MODULE_CURSOR", this, "SpawnVehicle" );
 			button.SetData( new JMVehicleSpawnerButtonData( vehicles[i] ) );
+			button.SetWidth(0.2);
+			button.SetPosition(0.8);
 
 			m_VehicleButtons.Insert( button );
 		}

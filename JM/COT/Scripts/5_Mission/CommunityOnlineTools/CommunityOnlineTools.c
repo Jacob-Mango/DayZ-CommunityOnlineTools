@@ -292,6 +292,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				return;
 			
 			JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
+			if (!player)
+			{
+				return;
+			}
 
 			player.OnRecievePosition( ctx );
 		}

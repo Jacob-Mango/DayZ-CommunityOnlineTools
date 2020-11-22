@@ -1,7 +1,7 @@
 PanelWidgetClass JMVehicleSpawnerForm {
  color 0 0 0 0
  position 0 0
- size 400 350
+ size 500 350
  hexactpos 0
  vexactpos 0
  hexactsize 1
