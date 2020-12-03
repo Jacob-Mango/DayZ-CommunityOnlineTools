@@ -166,6 +166,8 @@ class JMESPForm extends JMFormBase
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateUI, 500, true );
 
 		UpdateUI();
+
+		GetCommunityOnlineTools().RefreshClients();
 	}
 
 	override void OnHide()
