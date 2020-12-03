@@ -274,7 +274,13 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_IsCreatingWidgets = true;
 
-		for ( int i = 0; i < m_ESPToCreate.Count(); ++i )
+		int count = m_ESPToCreate.Count();
+		if (count > 0)
+		{
+			GetCommunityOnlineTools().RefreshClients();
+		}
+
+		for ( int i = 0; i < count; ++i )
 		{
 			m_ESPToCreate[i].Create( this );
 
