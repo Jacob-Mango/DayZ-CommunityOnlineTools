@@ -85,7 +85,8 @@ modded class DayZPlayerImplement
 
 	void SetAttachmentInvisible( string slot, bool invisible )
 	{
-		EntityAI ent = GetInventory().FindAttachment( InventorySlots.GetSlotIdFromString( slot ) );
+		int slot_id = InventorySlots.GetSlotIdFromString( slot );
+		EntityAI ent = GetInventory().FindAttachment( slot_id );
 		if ( ent )
 		{
 			ent.SetInvisible( invisible );
