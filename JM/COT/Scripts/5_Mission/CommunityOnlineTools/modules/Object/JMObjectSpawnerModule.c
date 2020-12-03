@@ -172,7 +172,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident, instance ) )
 			return;
 
-		if ( PlayerBase.Cast( obj ) )
+		PlayerBase player;
+		if ( Class.CastTo( player, obj ) && ( player.IsAlive() || player.GetIdentity() != null ) )
 			return;
 
 		string obtype = Object.GetDebugName( obj );
