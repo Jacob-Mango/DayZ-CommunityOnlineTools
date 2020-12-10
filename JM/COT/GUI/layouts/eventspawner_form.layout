@@ -1,0 +1,26 @@
+PanelWidgetClass JMEventSpawnerForm {
+ color 0 0 0 0
+ position 0 0
+ size 500 350
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMEventSpawnerForm"
+ style EditorPanel
+ {
+  FrameWidgetClass panel {
+   position 0 0
+   size 1 1
+   halign left
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+  }
+ }
+ {
+  ScriptParamsClass {
+  }
+ }
+}

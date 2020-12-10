@@ -15,6 +15,9 @@ modded class JMModuleConstructor
 		//modules.Insert( JMWeatherModule );
 		modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
+//#ifdef NAMALSK_SURVIVAL
+		modules.Insert( JMEventSpawnerModule );
+//#endif
 
 		//modules.Insert( JMWebhookCOTModule );
 /*#ifdef VPPADMINTOOLS
