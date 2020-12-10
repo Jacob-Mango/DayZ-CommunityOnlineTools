@@ -49,7 +49,7 @@ class JMEventSpawnerForm: JMFormBase
 	{
 		JMEventSpawnerButtonData data = action.GetData();
 		if (!data) return;
-		Print(data.ClassName);
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(data.ClassName);
 		rpc.Send(null, JMEventSpawnerRPC.StartEvent, true, null);
