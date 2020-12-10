@@ -18,7 +18,7 @@ class JMEventSpawnerModule: JMRenderableModuleBase
 	{
 		return "Namalsk";
 	}
-	
+		
 	override string GetIconName()
 	{
 		return "N";
