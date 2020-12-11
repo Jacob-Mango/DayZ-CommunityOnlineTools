@@ -1,4 +1,4 @@
-//#ifdef NAMALSK_SURVIVAL
+
 enum JMEventSpawnerRPC
 {
 	INVALID = 10400,
@@ -57,4 +57,3 @@ class JMEventSpawnerModule: JMRenderableModuleBase
 		}
 	}
 }
-//#endif
