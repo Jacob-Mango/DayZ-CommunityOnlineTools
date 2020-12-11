@@ -15,9 +15,11 @@ modded class JMModuleConstructor
 		//modules.Insert( JMWeatherModule );
 		modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
-//#ifdef NAMALSK_SURVIVAL
-		modules.Insert( JMEventSpawnerModule );
-//#endif
+
+		if (IsModLoaded("EventManager") && IsModLoaded("EVRStorm")) {
+			modules.Insert( JMEventSpawnerModule );
+		}
+
 
 		//modules.Insert( JMWebhookCOTModule );
 /*#ifdef VPPADMINTOOLS
@@ -35,4 +37,9 @@ modded class JMModuleConstructor
 		modules.Insert( JMVPPMenuXMLEditor );
 #endif*/
 	}
+}
+
+static bool IsModLoaded(string type_name_from_mod)
+{
+	return (type_name_from_mod.ToType().ToString().Length() > 0);
 }

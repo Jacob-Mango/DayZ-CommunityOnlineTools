@@ -1,3 +1,4 @@
+
 class JMEventSpawnerButtonData: UIActionData
 {
 	string ClassName;

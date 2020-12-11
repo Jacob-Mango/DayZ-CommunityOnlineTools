@@ -1,4 +1,4 @@
-//#ifdef NAMALSK_SURVIVAL
+
 class JMEventSpawnerForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
@@ -55,4 +55,3 @@ class JMEventSpawnerForm: JMFormBase
 		rpc.Send(null, JMEventSpawnerRPC.StartEvent, true, null);
 	}
 }
-//#endif
