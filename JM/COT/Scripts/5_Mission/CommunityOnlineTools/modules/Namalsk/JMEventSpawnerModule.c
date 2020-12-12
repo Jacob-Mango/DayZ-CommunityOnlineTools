@@ -3,6 +3,8 @@ enum JMEventSpawnerRPC
 {
 	INVALID = 10400,
 	StartEvent,
+	ShitPants,
+	ShitPantsServer,
 	COUNT
 }
 
@@ -54,6 +56,30 @@ class JMEventSpawnerModule: JMRenderableModuleBase
 				break;
 			}
 			
+			
+			case JMEventSpawnerRPC.ShitPants: {
+				
+				if (GetGame().IsClient()) {
+					thread ShitPants();
+				}
+				
+				break;
+			}
+			
+			case JMEventSpawnerRPC.ShitPantsServer: {
+				
+				GetGame().RPCSingleParam(null, JMEventSpawnerRPC.ShitPants, null, true);
+				break;
+			}
 		}
+	}
+	
+	void ShitPants()
+	{
+		EVRStorm storm = new EVRStorm();
+		storm.CreateBlowoutClient(1);
+		LerpColorization(0, 1, 1, 1, 1000, 0.5, 0.15, 0.15);
+		Sleep(10000);
+		delete storm;
 	}
 }
