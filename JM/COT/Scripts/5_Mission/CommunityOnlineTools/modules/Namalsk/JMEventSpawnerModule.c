@@ -76,9 +76,16 @@ class JMEventSpawnerModule: JMRenderableModuleBase
 	
 	void ShitPants()
 	{
-		EVRStorm storm = new EVRStorm();
-		storm.CreateBlowoutClient(1);
-		LerpColorization(0, 1, 1, 1, 1000, 0.5, 0.15, 0.15);
+		string storm_name = "EVRStorm";
+		
+		if (!storm_name.ToType()) return;
+		Class storm = storm_name.ToType().Spawn();
+		
+		if (!storm) return;
+		
+		g_Script.CallFunction(storm, "CreateBlowoutClient", null, 1);
+		
+//		LerpColorization(0, 1, 1, 1, 1000, 0.5, 0.15, 0.15);
 		Sleep(10000);
 		delete storm;
 	}
