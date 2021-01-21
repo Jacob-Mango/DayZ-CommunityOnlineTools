@@ -871,7 +871,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !IsMissionOffline() )
 			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
-		#ifdef DAYZ_1_10
+		#ifndef DAYZ_1_09
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
