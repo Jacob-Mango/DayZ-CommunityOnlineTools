@@ -4,7 +4,11 @@ modded class StaminaHandler
 	{
         if (m_Player && m_Player.COTHasUnlimitedStamina())
         {
-			m_Player.SetStamina(m_Stamina, m_StaminaCap);
+		    m_Stamina = GameConstants.STAMINA_MAX; 
+		    m_StaminaCap = GameConstants.STAMINA_MAX;
+            m_IsInCooldown = false;
+            
+			SetStamina(m_Stamina);
             return;
         }
 
