@@ -756,7 +756,7 @@ class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 	}
 };
 
-class JMESPViewTypeImmovable: JMESPViewTypeWeapon
+class JMESPViewTypeImmovable: JMESPViewType
 {
 	void JMESPViewTypeImmovable()
 	{
@@ -773,15 +773,15 @@ class JMESPViewTypeImmovable: JMESPViewTypeWeapon
 		#endif
 
 		ItemBase itm;
-		if ( !Class.CastTo( itm, obj ) )
+		if ( Class.CastTo( itm, obj ) )
 			return false;
 
 		DayZCreature ctr;
-		if ( !Class.CastTo( ctr, obj ) )
+		if ( Class.CastTo( ctr, obj ) )
 			return false;
 
 		DayZPlayer plr;
-		if ( !Class.CastTo( plr, obj ) )
+		if ( Class.CastTo( plr, obj ) )
 			return false;
 				
 		CreateMeta( meta );
