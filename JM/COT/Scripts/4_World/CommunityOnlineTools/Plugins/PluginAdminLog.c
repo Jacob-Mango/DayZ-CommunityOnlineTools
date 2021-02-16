@@ -24,6 +24,8 @@ modded class PluginAdminLog
 
 		string deathBreakdown;
 
+		deathBreakdown += "Position: " + player.GetPosition() + "\n";
+
 		if ( player == source )
 		{
 			m_StatWater  = player.GetStatWater();
@@ -47,7 +49,6 @@ modded class PluginAdminLog
 				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " died of natural causes." );
 			}
 
-			embed.AddField( "Breakdown", deathBreakdown );
 		} else if ( source.IsWeapon() || source.IsMeleeWeapon() )
 		{
 			Class.CastTo( pbKiller, EntityAI.Cast( source ).GetHierarchyParent() );
@@ -58,12 +59,16 @@ modded class PluginAdminLog
 				if ( !source.IsMeleeWeapon() )
 					distanceWeapon = " from " + vector.Distance( player.GetPosition(), pbKiller.GetPosition() ) + " meters.";
 
+				deathBreakdown += "Killer Position: " + pbKiller.GetPosition() + "\n";
+
 				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " was killed by " + pbKiller.FormatSteamWebhook() + " with " + source.GetDisplayName() + distanceWeapon );
 			}
 		} else
 		{
 			embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " was killed by " + source.GetDisplayName() );
 		}
+
+		embed.AddField( "Breakdown", deathBreakdown );
 
 		m_Webhook.Post( "PlayerDeath", message );
 	}
