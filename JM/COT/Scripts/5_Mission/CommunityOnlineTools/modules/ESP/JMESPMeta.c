@@ -216,14 +216,14 @@ class JMESPMetaPlayer : JMESPMeta
 	UIActionText m_Player_Name;
 	UIActionText m_Player_GUID;
 	UIActionText m_Player_Steam;
-	UIActionText m_Player_Speaking;
+	//UIActionText m_Player_Speaking;
 	
 	override void CreateActions( Widget parent )
 	{
 		m_Player_Name = UIActionManager.CreateText( parent, "Name: ", "" );
 		m_Player_GUID = UIActionManager.CreateText( parent, "GUID: ", "" );
 		m_Player_Steam = UIActionManager.CreateText( parent, "Steam: ", "" );
-		m_Player_Speaking = UIActionManager.CreateText( parent, "Talking: ", "" );
+		//m_Player_Speaking = UIActionManager.CreateText( parent, "Talking: ", "" );
 
 		super.CreateActions( parent );
 	}
@@ -239,8 +239,8 @@ class JMESPMetaPlayer : JMESPMeta
 		PlayerBase player = PlayerBase.Cast(target);
 		if (player)
 		{
-			if (player.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
-			else m_Player_Speaking.SetText("No");
+			//if (player.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
+			//else m_Player_Speaking.SetText("No");
 		}
 	}
 	
