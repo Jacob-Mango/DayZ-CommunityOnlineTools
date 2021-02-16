@@ -771,6 +771,18 @@ class JMESPViewTypeImmovable: JMESPViewTypeWeapon
 		#ifdef JM_COT_ESP_DEBUG
 		//Print( "+JMESPViewTypeImmovable::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
 		#endif
+
+		ItemBase itm;
+		if ( !Class.CastTo( itm, obj ) )
+			return false;
+
+		DayZCreature ctr;
+		if ( !Class.CastTo( ctr, obj ) )
+			return false;
+
+		DayZPlayer plr;
+		if ( !Class.CastTo( plr, obj ) )
+			return false;
 				
 		CreateMeta( meta );
 		
