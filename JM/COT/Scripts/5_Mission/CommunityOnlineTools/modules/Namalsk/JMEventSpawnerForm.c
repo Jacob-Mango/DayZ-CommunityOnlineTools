@@ -82,8 +82,8 @@ class JMNamalskEventManagerForm: JMFormBase
 	
 	void StartEvent(UIEvent eid, ref UIActionBase action)
 	{
-		JMNamalskEventManagerButtonData data = action.GetData();
-		if (!data) return;
+		JMNamalskEventManagerButtonData data;
+		if (!Class.CastTo(data, action.GetData())) return;
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(data.ClassName);
@@ -92,8 +92,8 @@ class JMNamalskEventManagerForm: JMFormBase
 	
 	void CancelEvent(UIEvent eid, ref UIActionBase action)
 	{
-		JMNamalskEventManagerButtonData data = action.GetData();
-		if (!data) return;
+		JMNamalskEventManagerButtonData data;
+		if (!Class.CastTo(data, action.GetData())) return;
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(data.ClassName);
