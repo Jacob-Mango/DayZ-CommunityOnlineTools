@@ -39,6 +39,7 @@ GameProjectClass {
       "JM/CF/Defines"
       "JM/CF/XML/1_Core"
       "JM/CF/Scripts/1_Core"
+      "nst/ns_dayz/scripts/1_Core"
      }
      EntryPoint ""
     }
@@ -58,6 +59,7 @@ GameProjectClass {
       "JM/CF/Scripts/3_Game"
       "JM/COT/scripts/Common"
       "JM/COT/scripts/3_Game"
+      "nst/ns_dayz/Scripts/3_Game"
      }
      EntryPoint "CF_CreateGame"
     }
@@ -70,6 +72,7 @@ GameProjectClass {
       "JM/CF/Scripts/4_World"
       "JM/COT/scripts/Common"
       "JM/COT/scripts/4_World"
+      "nst/ns_dayz/scripts/4_World"
      }
      EntryPoint "CF_CreateWorld"
     }
@@ -82,6 +85,7 @@ GameProjectClass {
       "JM/CF/Scripts/5_Mission"
       "JM/COT/scripts/Common"
       "JM/COT/scripts/5_Mission"
+      "nst/ns_dayz/scripts/5_Mission"
      }
      EntryPoint "CreateMission"
     }
