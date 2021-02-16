@@ -1261,8 +1261,16 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			if (value) player.SetBrokenLegs(eBrokenLegs.BROKEN_LEGS);
-			else player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
+			if (value)
+			{
+				player.SetHealth("RightLeg", "Health", 0.1);
+				player.SetHealth("LeftLeg", "Health", 0.1);
+			}
+			else
+			{
+				player.SetHealth("RightLeg", "Health", 100);
+				player.SetHealth("LeftLeg", "Health", 100);
+			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Broken Legs To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1323,10 +1331,11 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
 
-			player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
-			player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
-			player.SetHealth( "GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
-			player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
+			player.SetHealth("GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
+			player.SetHealth("GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
+			player.SetHealth("GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
+			player.SetHealth("RightLeg", "Health", 100);
+			player.SetHealth("LeftLeg", "Health", 100);
 
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );
