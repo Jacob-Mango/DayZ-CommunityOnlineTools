@@ -999,7 +999,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.GodMode", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.GodMode", senderRPC, instance ) )
 			return;
 
 		Exec_SetGodMode( value, guids, senderRPC, instance );
@@ -1056,7 +1056,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Freeze", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Freeze", senderRPC, instance ) )
 			return;
 
 		Exec_SetFreeze( value, guids, senderRPC, instance );
@@ -1113,7 +1113,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Invisibility", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisibility", senderRPC, instance ) )
 			return;
 
 		Exec_SetInvisible( value, guids, senderRPC, instance );
@@ -1172,7 +1172,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedAmmo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.UnlimitedAmmo", senderRPC, instance ) )
 			return;
 
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
@@ -1231,7 +1231,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedStamina", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.UnlimitedStamina", senderRPC, instance ) )
 			return;
 
 		Exec_SetUnlimitedStamina( value, guids, senderRPC, instance );
@@ -1301,7 +1301,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BrokenLegs", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.BrokenLegs", senderRPC, instance ) )
 			return;
 
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
