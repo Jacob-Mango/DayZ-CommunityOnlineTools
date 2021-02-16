@@ -17,7 +17,9 @@ modded class PlayerBase
 	private bool m_JMHasLastPosition;
 
 	private bool m_JMHasUnlimitedAmmo;
+
 	private bool m_JMHasUnlimitedStamina;
+	private bool m_JMHasUnlimitedStaminaRemoteSynch;
 
 	override void Init()
 	{
@@ -44,6 +46,7 @@ modded class PlayerBase
 
 		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStaminaRemoteSynch" );
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -78,6 +81,11 @@ modded class PlayerBase
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
+		}
+
+		if ( m_JMHasUnlimitedStaminaRemoteSynch != m_JMHasUnlimitedStamina )
+		{
+			m_JMHasUnlimitedStaminaRemoteSynch = m_JMHasUnlimitedStamina;
 		}
 	}
 
@@ -271,6 +279,7 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedStamina = mode;
+			m_JMHasUnlimitedStaminaRemoteSynch = mode;
 		}
 	}
 }
