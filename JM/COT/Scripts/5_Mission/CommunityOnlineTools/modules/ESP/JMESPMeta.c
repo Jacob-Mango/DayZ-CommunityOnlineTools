@@ -216,12 +216,14 @@ class JMESPMetaPlayer : JMESPMeta
 	UIActionText m_Player_Name;
 	UIActionText m_Player_GUID;
 	UIActionText m_Player_Steam;
+	UIActionText m_Player_Speaking;
 	
 	override void CreateActions( Widget parent )
 	{
 		m_Player_Name = UIActionManager.CreateText( parent, "Name: ", "" );
 		m_Player_GUID = UIActionManager.CreateText( parent, "GUID: ", "" );
 		m_Player_Steam = UIActionManager.CreateText( parent, "Steam: ", "" );
+		m_Player_Speaking = UIActionManager.CreateText( parent, "Talking: ", "" );
 
 		super.CreateActions( parent );
 	}
@@ -233,6 +235,13 @@ class JMESPMetaPlayer : JMESPMeta
 		m_Player_Name.SetText( player.GetName() );
 		m_Player_GUID.SetText( player.GetGUID() );
 		m_Player_Steam.SetText( player.GetSteam64ID() );
+
+		PlayerBase player = PlayerBase.Cast(target);
+		if (player)
+		{
+			if (player.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
+			else m_Player_Speaking.SetText("No");
+		}
 	}
 	
 	override bool CanDelete()
