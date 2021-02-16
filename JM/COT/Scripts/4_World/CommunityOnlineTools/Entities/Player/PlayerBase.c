@@ -45,7 +45,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 
 #ifndef CF_MODULE_PERMISSIONS
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetAuthenticatedPlayer, 2000, false );
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
 #endif
 
 		m_JMHasLastPosition = false;
@@ -158,6 +158,31 @@ modded class PlayerBase
 		
 		m_AuthenticatedPlayer.PlayerObject = this;
 		return m_AuthenticatedPlayer;
+	}
+
+	private void Safe_SetAuthenticatedPlayer()
+	{
+		if ( m_AuthenticatedPlayer )
+			return;
+
+		if ( !GetIdentity() ) // Could be AI
+			return;
+
+		if ( !m_AuthenticatedPlayer )
+		{
+			if ( IsMissionOffline() )
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+			} else
+			{
+				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
+			}
+		}
+
+		if ( m_AuthenticatedPlayer )		
+			m_AuthenticatedPlayer.PlayerObject = this;
+		else
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
 	}
 
 	override string FormatSteamWebhook()

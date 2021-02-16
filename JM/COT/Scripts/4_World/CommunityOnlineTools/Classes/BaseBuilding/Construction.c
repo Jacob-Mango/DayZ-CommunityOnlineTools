@@ -36,7 +36,7 @@ modded class Construction
 		}
 	}
 
-	#ifdef DAYZ_1_10
+	#ifndef DAYZ_1_09
 	void COT_BuildPart(string part_name, PlayerBase player, bool checkMaterials = true )
 	#else
 	void COT_BuildPart(string part_name, bool checkMaterials = true )
@@ -60,7 +60,7 @@ modded class Construction
 		if ( m_ConstructionBoxTrigger )
 			DestroyCollisionTrigger();
 
-		#ifdef DAYZ_1_10
+		#ifndef DAYZ_1_09
 		GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
 		#else
 		GetParent().OnPartBuiltServer( part_name, AT_BUILD_PART );
