@@ -496,6 +496,7 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj.IsInherited( Camera ) )
 							continue;
 
+						/*
 						if ( obj.IsRock() )
 							continue;
 
@@ -510,6 +511,7 @@ class JMESPModule: JMRenderableModuleBase
 
 						if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
 							continue;
+						*/
 
 						if ( isUsingFilter && !type.Contains( filter ) )
 							continue;
