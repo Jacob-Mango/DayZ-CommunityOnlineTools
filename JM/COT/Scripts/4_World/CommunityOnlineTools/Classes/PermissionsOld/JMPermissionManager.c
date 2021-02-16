@@ -365,14 +365,19 @@ class JMPermissionManager
 	{
 		Assert_Null( Roles );
 
-		ref JMRole role = new JMRole( name );
+		ref JMRole role = GetRole( name );
+
+		if ( !role )
+		{
+			role = new JMRole( name );
+
+			Roles.Insert( name, role );
+		}
 
 		role.SerializedData.Copy( data );
 		role.Deserialize();
 
 		role.Save();
-
-		Roles.Insert( name, role );
 
 		return role;
 	}
