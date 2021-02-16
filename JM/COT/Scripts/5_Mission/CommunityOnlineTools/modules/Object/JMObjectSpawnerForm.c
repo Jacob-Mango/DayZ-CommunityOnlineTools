@@ -24,6 +24,18 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	private Object m_DeletingObject;
 
+	static ref array< string > m_ItemsThatCrash =
+	{
+		"itemoptics",
+		"quickiebow",
+		"m203",
+		"gp25",
+		"gp25_standalone",
+		"gp25_base",
+		"m203_base",
+		"m203_standalone"
+	};
+
 	void JMObjectSpawnerForm()
 	{
 		m_ObjectTypes = new map< string, string >;
@@ -331,13 +343,16 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		strSearch.ToLower();
 
-		for ( int nConfig = 0; nConfig < configs.Count(); ++nConfig )
+		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
 		{
 			string strConfigPath = configs.Get( nConfig );
 
 			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
 
-			for ( int nClass = 0; nClass < nClasses; ++nClass )
+			int nClassStart = 0;
+			if (nConfig == 0) nClassStart = 20;
+
+			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
 			{
 				string strName;
 
@@ -374,29 +389,8 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	private bool CheckItemCrash( string name )
 	{
-		static ref array< string > items =
-		{
-			"itemoptics",
-			"quickiebow",
-			"m203",
-			#ifndef DAYZ_1_09
-			"magnum",
-			#endif
-			"gp25",
-			"gp25_standalone",
-			"gp25_base",
-			"m203_base",
-			"m203_standalone"
-		};
-
-		for ( int i = 0; i < items.Count(); ++i )
-		{
-			if ( items[i] == name )
-			{
-				return true;
-			}
-		}
-
+		for (int i = 0; i < m_ItemsThatCrash.Count(); i++) if ( m_ItemsThatCrash[i] == name ) return true;
+		
 		return false;
 	}
 
