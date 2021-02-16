@@ -18,6 +18,7 @@ enum JMPlayerModuleRPC
 	SetFreeze,
 	SetInvisible,
 	SetUnlimitedAmmo,
+	SetBrokenLegs,
 	Heal,
 	Strip,
 	StopBleeding,
@@ -38,6 +39,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
@@ -190,6 +192,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetUnlimitedAmmo:
 			RPC_SetUnlimitedAmmo( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetBrokenLegs:
+			RPC_SetBrokenLegs( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Heal:
 			RPC_Heal( ctx, sender, target );
@@ -1168,6 +1173,66 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
 	}
 
+	void SetBrokenLegs( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetBrokenLegs( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetBrokenLegs, true, NULL );
+		}
+	}
+
+	private void Exec_SetBrokenLegs( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			if (value) player.SetBrokenLegs(eBrokenLegs.BROKEN_LEGS);
+			else player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Broken Legs To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " broken legs" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Fixed " + players[i].FormatSteamWebhook() + " broken legs" );
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetBrokenLegs( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedAmmo", senderRPC, instance ) )
+			return;
+
+		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
+	}
+
 	void Heal( array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1197,6 +1262,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetHealth( "GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
 			player.SetHealth( "GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
 			player.SetHealth( "GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
+			player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );

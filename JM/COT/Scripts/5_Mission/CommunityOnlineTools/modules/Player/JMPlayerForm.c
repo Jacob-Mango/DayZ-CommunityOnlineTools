@@ -53,6 +53,8 @@ class JMPlayerForm extends JMFormBase
 	private bool m_InvisibilityUpdated;
 	private UIActionCheckbox m_UnlimitedAmmo;
 	private bool m_UnlimitedAmmoUpdated;
+	private UIActionCheckbox m_BrokenLegs;
+	private bool m_BrokenLegsUpdated;
 
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
@@ -121,6 +123,7 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
+		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
 		UpdatePermission( m_SpectatePlayer, "Admin.Player.StartSpectating" );
 		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
@@ -308,6 +311,7 @@ class JMPlayerForm extends JMFormBase
 		m_Freeze = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
 		//m_Invisibility = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
+		m_BrokenLegs = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
 		
 		m_ApplyStats = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
 
@@ -859,6 +863,14 @@ class JMPlayerForm extends JMFormBase
 				m_Module.SetFreeze( m_Freeze.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
 
+		if ( m_BrokenLegsUpdated )
+		{
+			m_BrokenLegsUpdated = false;
+
+			if ( m_BrokenLegs )
+				m_Module.SetBrokenLegs( m_BrokenLegs.IsChecked(), JM_GetSelected().GetPlayers() );
+		}
+
 		if ( m_InvisibilityUpdated )
 		{
 			m_InvisibilityUpdated = false;
@@ -946,6 +958,14 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		m_FreezeUpdated = true;
+	}
+
+	void Click_SetBrokenLegs( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_BrokenLegsUpdated = true;
 	}
 
 	void Click_Invisible( UIEvent eid, ref UIActionBase action )
