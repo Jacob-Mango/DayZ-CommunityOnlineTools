@@ -40,6 +40,8 @@ class JMPlayerInstance : Managed
 	private bool m_Frozen;
 	private bool m_Invisibility;
 	private bool m_UnlimitedAmmo;
+	private bool m_UnlimitedStamina;
+	private bool m_BrokenLegs;
 
 	private ref JMPlayerSerialize m_PlayerFile;
 
@@ -121,6 +123,8 @@ class JMPlayerInstance : Managed
 				m_Frozen = PlayerObject.COTIsFrozen();
 				m_Invisibility = PlayerObject.COTIsInvisible();
 				m_UnlimitedAmmo = PlayerObject.COTHasUnlimitedAmmo();
+				m_UnlimitedStamina = PlayerObject.COTHasUnlimitedStamina();
+				m_BrokenLegs = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
 			}
 		}
 	}
@@ -335,6 +339,8 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Frozen );
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
+		ctx.Write( m_UnlimitedStamina );
+		ctx.Write( m_BrokenLegs );
 	}
 
 	void OnRecieveHealth( ref ParamsReadContext ctx )
@@ -355,6 +361,8 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_Frozen );
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
+		ctx.Read( m_UnlimitedStamina );
+		ctx.Read( m_BrokenLegs );
 	}
 
 	void Save()
@@ -592,6 +600,16 @@ class JMPlayerInstance : Managed
 	bool HasUnlimitedAmmo()
 	{
 		return m_UnlimitedAmmo;
+	}
+
+	bool HasUnlimitedStamina()
+	{
+		return m_UnlimitedStamina;
+	}
+
+	bool HasBrokenLegs()
+	{
+		return m_BrokenLegs;
 	}
 };
 #endif

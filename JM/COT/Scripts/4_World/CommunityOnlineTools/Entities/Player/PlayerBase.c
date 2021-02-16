@@ -17,6 +17,7 @@ modded class PlayerBase
 	private bool m_JMHasLastPosition;
 
 	private bool m_JMHasUnlimitedAmmo;
+	private bool m_JMHasUnlimitedStamina;
 
 	override void Init()
 	{
@@ -216,6 +217,11 @@ modded class PlayerBase
 		return m_JMHasUnlimitedAmmo;
 	}
 
+	bool COTHasUnlimitedStamina()
+	{
+		return m_JMHasUnlimitedStamina;
+	}
+
 	void COTSetGodMode( bool mode )
 	{
 		if ( GetGame().IsServer() )
@@ -257,6 +263,14 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedAmmo = mode;
+		}
+	}
+
+	void COTSetUnlimitedStamina( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasUnlimitedStamina = mode;
 		}
 	}
 }
