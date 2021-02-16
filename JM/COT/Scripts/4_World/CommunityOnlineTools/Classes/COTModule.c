@@ -54,7 +54,7 @@ class COTModule : JMModuleBase
 			if ( !GetPermissionsManager().RoleExists( "everyone" ) )
 				GetPermissionsManager().CreateRole( "everyone", data );
 
-			if ( !GetPermissionsManager().RoleExists( "admin" ) )
+			//if ( !GetPermissionsManager().RoleExists( "admin" ) )
 			{
 				for ( int i = 0; i < data.Count(); i++ )
 				{
