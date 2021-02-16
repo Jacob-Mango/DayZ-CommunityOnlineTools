@@ -1,9 +1,9 @@
 
-class JMEventSpawnerButtonData: UIActionData
+class JMNamalskEventManagerButtonData: UIActionData
 {
 	string ClassName;
 
-	void JMEventSpawnerButtonData(string clsName)
+	void JMNamalskEventManagerButtonData(string clsName)
 	{
 		ClassName = clsName;
 	}

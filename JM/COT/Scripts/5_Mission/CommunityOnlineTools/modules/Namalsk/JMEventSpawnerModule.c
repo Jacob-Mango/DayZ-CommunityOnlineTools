@@ -1,16 +1,32 @@
 
-enum JMEventSpawnerRPC
+enum JMNamalskEventManagerRPC
 {
 	INVALID = 10400,
+	LoadEvents,
+	RequestEvents,
 	StartEvent,
-	ShitPants,
-	ShitPantsServer,
+	CancelEvent,
 	COUNT
-}
+};
 
-class JMEventSpawnerModule: JMRenderableModuleBase
+class JMNamalskEventManagerModule: JMRenderableModuleBase
 {
+	private Class m_EventManager;
+
+	autoptr array<string> Events = new array<string>();
+	bool AllowMultipleEvents;
 	
+	void JMNamalskEventManagerModule()
+	{
+		GetPermissionsManager().RegisterPermission( "Namalsk" );
+		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
+	}
+
+	override bool HasAccess()
+	{
+		return GetPermissionsManager().HasPermission( "Namalsk.View" );
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/eventspawner_form.layout";
@@ -26,67 +42,157 @@ class JMEventSpawnerModule: JMRenderableModuleBase
 		return "N";
 	}
 	
+	override void OnMissionLoaded()
+	{
+		super.OnMissionLoaded();
+
+		if (GetGame().IsServer())
+		{
+			RetrievePossibleEvents();
+		}
+		else if (GetPermissionsManager().HasPermission("Namalsk"))
+		{
+			RequestEvents();
+		}
+	}
+	
+	override void OnClientPermissionsUpdated()
+	{
+		super.OnClientPermissionsUpdated();
+
+		if (Events.Count() > 0) return;
+
+		if (GetPermissionsManager().HasPermission("Namalsk"))
+		{
+			RequestEvents();
+		}
+	}
+	
 	override int GetRPCMin()
 	{
-		return JMEventSpawnerRPC.INVALID;
+		return JMNamalskEventManagerRPC.INVALID;
 	}
 	
 	override int GetRPCMax()
 	{
-		return JMEventSpawnerRPC.COUNT;
+		return JMNamalskEventManagerRPC.COUNT;
 	}
-	
+
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
 	{
-		switch (rpc_type) {
-			
-			case JMEventSpawnerRPC.StartEvent: {
-			
-				string event_param;
-				if (!ctx.Read(event_param)) {
-					break;
-				}
+		JMPlayerInstance instance;
+
+		string evt;
+
+		switch (rpc_type)
+		{
+			case JMNamalskEventManagerRPC.StartEvent:
+			{
+				if (!ctx.Read(evt)) return;
+
+				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Start", sender, instance)) return;
 				
-				Class event_manager;
-				EnScript.GetClassVar(GetGame().GetMission(), "m_EventManagerServer", 0, event_manager);
-				if (event_manager) {
-					g_Script.CallFunction(event_manager, "StartEventServer", null, event_param.ToType());
-				}
+				StartEvent(evt);
+
+				return;
+			}
+
+			case JMNamalskEventManagerRPC.CancelEvent:
+			{
+				if (!ctx.Read(evt)) return;
+
+				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Cancel", sender, instance)) return;
+				
+				CancelEvent(evt);
+
+				return;
+			}
+			
+			case JMNamalskEventManagerRPC.LoadEvents:
+			{
+				if (!GetGame().IsClient()) return;
+
+				array<string> evts;
+				if (!ctx.Read(evts)) return;
+				Events.Copy(evts);
+
+				if (!ctx.Read(AllowMultipleEvents)) return;
+
+				OnSettingsUpdated();
 				
 				break;
 			}
 			
-			
-			case JMEventSpawnerRPC.ShitPants: {
-				
-				if (GetGame().IsClient()) {
-					thread ShitPants();
-				}
-				
-				break;
-			}
-			
-			case JMEventSpawnerRPC.ShitPantsServer: {
-				
-				GetGame().RPCSingleParam(null, JMEventSpawnerRPC.ShitPants, null, true);
+			case JMNamalskEventManagerRPC.RequestEvents:
+			{
+				if (!GetPermissionsManager().HasPermission("Namalsk", sender, instance)) return;
+
+				ScriptRPC rpc = new ScriptRPC();
+				rpc.Write(Events);
+				rpc.Write(AllowMultipleEvents);
+				rpc.Send(NULL, JMNamalskEventManagerRPC.LoadEvents, true, NULL);
+
 				break;
 			}
 		}
 	}
-	
-	void ShitPants()
+
+	bool IsEventActive(string evt)
 	{
-		string storm_name = "EVRStorm";
-		
-		if (!storm_name.ToType()) return;
-		Class storm = storm_name.ToType().Spawn();
-		
-		if (!storm) return;
-		
-		g_Script.CallFunction(storm, "CreateBlowoutClient", null, 1);
-		
-//		LerpColorization(0, 1, 1, 1, 1000, 0.5, 0.15, 0.15);
-		Sleep(10000);
-		delete storm;
+		if (!m_EventManager) return false;
+
+		bool active = false;
+		g_Script.CallFunction(m_EventManager, "IsEventActive", evt, null);
+		return active;
 	}
-}
+
+	void RetrievePossibleEvents()
+	{
+		g_Script.CallFunction(GetGame().GetMission(), "GetEventManager", m_EventManager, null);
+		if (!m_EventManager) return;
+		
+		map<typename, float> possibleEvents;
+		EnScript.GetClassVar(m_EventManager, "m_PossibleEventTypes", 0, possibleEvents);
+
+		EnScript.GetClassVar(m_EventManager, "m_AllowMultipleEvents", 0, AllowMultipleEvents);
+
+		Events.Clear();
+
+		array<typename> types = possibleEvents.GetKeyArray();
+		for (int i = 0; i < types.Count(); i++)
+		{
+			string evt = types[i].ToString();
+			Events.Insert(evt);
+
+			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Start");
+			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Cancel");
+		}
+	}
+
+	void StartEvent(string evt)
+	{
+		if (!m_EventManager) return;
+
+		g_Script.CallFunction(m_EventManager, "StartEvent", null, evt);
+	}
+
+	void CancelEvent(string evt)
+	{
+		if (!m_EventManager) return;
+
+		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt);
+	}
+	
+	void RequestEvents()
+	{
+		if (IsMissionClient() && !IsMissionOffline())
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send(NULL, JMNamalskEventManagerRPC.RequestEvents, true, NULL);
+		}
+		else
+		{
+			OnSettingsUpdated();
+		}
+	}
+};
