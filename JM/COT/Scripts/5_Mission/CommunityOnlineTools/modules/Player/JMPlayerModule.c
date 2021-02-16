@@ -1265,11 +1265,13 @@ class JMPlayerModule: JMRenderableModuleBase
 			{
 				player.SetHealth("RightLeg", "Health", 0.1);
 				player.SetHealth("LeftLeg", "Health", 0.1);
+				player.SetBrokenLegs(eBrokenLegs.BROKEN_LEGS);
 			}
 			else
 			{
 				player.SetHealth("RightLeg", "Health", 100);
 				player.SetHealth("LeftLeg", "Health", 100);
+				player.UpdateBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Broken Legs To " + value + " [guid=" + players[i].GetGUID() + "]" );
@@ -1336,6 +1338,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetHealth("GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
 			player.SetHealth("RightLeg", "Health", 100);
 			player.SetHealth("LeftLeg", "Health", 100);
+			player.UpdateBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );
