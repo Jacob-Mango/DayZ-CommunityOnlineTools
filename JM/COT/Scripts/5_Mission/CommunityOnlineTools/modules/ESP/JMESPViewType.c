@@ -755,3 +755,37 @@ class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 		return obj.IsAmmoPile();
 	}
 };
+
+class JMESPViewTypeImmovable: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeImmovable()
+	{
+		Permission = "Immovable";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Immovable";
+
+		Colour = ARGB( 255, 250, 105, 218 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		//Print( "+JMESPViewTypeImmovable::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};

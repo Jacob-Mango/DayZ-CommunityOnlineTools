@@ -195,7 +195,6 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
-		types.Insert( JMESPViewTypeUnknown );
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
 		types.Insert( JMESPViewTypeFood );
@@ -206,6 +205,8 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeClothing );
 		types.Insert( JMESPViewTypeMagazine );
 		types.Insert( JMESPViewTypeAmmo );
+		types.Insert( JMESPViewTypeUnknown );
+		types.Insert( JMESPViewTypeImmovable );
 	}
 
 	array< ref JMESPViewType > GetViewTypes()
