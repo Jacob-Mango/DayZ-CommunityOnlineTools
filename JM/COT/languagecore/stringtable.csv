@@ -51,6 +51,7 @@ STR_COT_ESP_MODULE_VIEW_TYPE_TENTS,Tents,Tents,Tents,Tents,Палатки,Tents,
 STR_COT_ESP_MODULE_VIEW_TYPE_TRANSMITTERS,Transmitters,Transmitters,Transmitters,Transmitters,Передатчики,Transmitters,Transmitters,Transmitters,Transmitters,Transmetteurs,Transmitters,Transmitters,Transmitters,������
 STR_COT_ESP_MODULE_VIEW_TYPE_UNKNOWN_ITEMS,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Неизвестные предметы,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Objets inconnus,Unknown Items,Unknown Items,Unknown Items,δ֪����
 STR_COT_ESP_MODULE_VIEW_TYPE_WEAPONS,Weapons,Weapons,Weapons,Weapons,Оружие,Weapons,Weapons,Weapons,Weapons,Armes,Weapons,Weapons,Weapons,����
+STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable
 STR_COT_FORMAT_METRE,%1m,%1m,%1m,%1m,%1м,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1��
 STR_COT_FORMAT_METRE_LONG,%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 метр(-ов),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 ��
 STR_COT_FORMAT_NONE,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1
