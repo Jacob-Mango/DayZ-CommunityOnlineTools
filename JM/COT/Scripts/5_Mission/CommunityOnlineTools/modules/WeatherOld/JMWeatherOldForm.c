@@ -3,6 +3,7 @@ class JMWeatherOldForm extends JMFormBase
 	private static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	protected ButtonWidget m_BtnSave;
+	protected ButtonWidget m_BtnRefresh;
 	protected ButtonWidget m_BtnCancel;
 	protected SliderWidget m_SldStartTime;
 	protected TextWidget m_TxtStartTimeValue;
@@ -56,6 +57,7 @@ class JMWeatherOldForm extends JMFormBase
 	{
 		m_BtnSave			= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_save" ) );
 		m_BtnCancel			= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_cancel" ) );
+		m_BtnRefresh		= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "btn_refresh" ) );
 
 		m_SldStartTime		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_start_time" ) );
 		m_TxtStartTimeValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_start_time_value" ) );
@@ -96,6 +98,13 @@ class JMWeatherOldForm extends JMFormBase
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
+
+			return true;
+		}
+
+		if ( w == m_BtnRefresh )
+		{
+			ResetSliders();
 
 			return true;
 		}

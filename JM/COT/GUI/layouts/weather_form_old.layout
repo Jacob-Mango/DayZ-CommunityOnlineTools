@@ -1,5 +1,4 @@
-PanelWidgetClass JMWeatherOldForm
-{
+PanelWidgetClass JMWeatherOldForm {
  color 0 0 0 0
  position 0 0
  size 570 190
@@ -10,8 +9,7 @@ PanelWidgetClass JMWeatherOldForm
  scriptclass "JMWeatherOldForm"
  style EditorPanel
  {
-  PanelWidgetClass slider_wrapper
-  {
+  PanelWidgetClass slider_wrapper {
    position 5 5
    size 560 1
    hexactpos 1
@@ -19,8 +17,7 @@ PanelWidgetClass JMWeatherOldForm
    hexactsize 1
    vexactsize 0
    {
-    TextWidgetClass txt_ppp_st_start_time
-    {
+    TextWidgetClass txt_ppp_st_start_time {
      position 0 0
      size 1 20
      hexactpos 1
@@ -32,8 +29,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_start_time
-      {
+      SliderWidgetClass sld_ppp_st_start_time {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -42,8 +38,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_start_time_value
-        {
+        TextWidgetClass txt_ppp_st_start_time_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -61,8 +56,7 @@ PanelWidgetClass JMWeatherOldForm
       }
      }
     }
-    TextWidgetClass txt_ppp_st_start_day
-    {
+    TextWidgetClass txt_ppp_st_start_day {
      position 0 25
      size 1 20
      hexactpos 1
@@ -74,8 +68,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_start_day
-      {
+      SliderWidgetClass sld_ppp_st_start_day {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -84,8 +77,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_start_day_value
-        {
+        TextWidgetClass txt_ppp_st_start_day_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -103,8 +95,7 @@ PanelWidgetClass JMWeatherOldForm
       }
      }
     }
-    TextWidgetClass txt_ppp_st_overcast
-    {
+    TextWidgetClass txt_ppp_st_overcast {
      position 0 50
      size 1 20
      hexactpos 1
@@ -116,8 +107,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_overcast
-      {
+      SliderWidgetClass sld_ppp_st_overcast {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -126,8 +116,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_overcast_value
-        {
+        TextWidgetClass txt_ppp_st_overcast_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -145,8 +134,7 @@ PanelWidgetClass JMWeatherOldForm
       }
      }
     }
-    TextWidgetClass txt_ppp_st_rain
-    {
+    TextWidgetClass txt_ppp_st_rain {
      position 0 75
      size 1 20
      hexactpos 1
@@ -158,8 +146,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_rain
-      {
+      SliderWidgetClass sld_ppp_st_rain {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -168,8 +155,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_rain_value
-        {
+        TextWidgetClass txt_ppp_st_rain_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -187,8 +173,7 @@ PanelWidgetClass JMWeatherOldForm
       }
      }
     }
-    TextWidgetClass txt_ppp_st_fog
-    {
+    TextWidgetClass txt_ppp_st_fog {
      position 0 100
      size 1 20
      hexactpos 1
@@ -200,8 +185,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_fog
-      {
+      SliderWidgetClass sld_ppp_st_fog {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -210,8 +194,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_fog_value
-        {
+        TextWidgetClass txt_ppp_st_fog_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -229,8 +212,7 @@ PanelWidgetClass JMWeatherOldForm
       }
      }
     }
-    TextWidgetClass txt_ppp_st_wind_force
-    {
+    TextWidgetClass txt_ppp_st_wind_force {
      position 0 125
      size 1 20
      hexactpos 1
@@ -242,8 +224,7 @@ PanelWidgetClass JMWeatherOldForm
      "exact text" 1
      "text valign" center
      {
-      SliderWidgetClass sld_ppp_st_wind_force
-      {
+      SliderWidgetClass sld_ppp_st_wind_force {
        position 0.3 0
        size 0.7 1
        hexactpos 0
@@ -252,8 +233,7 @@ PanelWidgetClass JMWeatherOldForm
        vexactsize 0
        style Editor
        {
-        TextWidgetClass txt_ppp_st_wind_force_value
-        {
+        TextWidgetClass txt_ppp_st_wind_force_value {
          size 1 1
          halign center_ref
          valign center_ref
@@ -273,8 +253,7 @@ PanelWidgetClass JMWeatherOldForm
     }
    }
   }
-  ButtonWidgetClass btn_save
-  {
+  ButtonWidgetClass btn_save {
    position 5 5
    size 80 20
    halign right_ref
@@ -284,6 +263,17 @@ PanelWidgetClass JMWeatherOldForm
    hexactsize 1
    vexactsize 1
    text "#STR_COT_WEATHER_MODULE_APPLY"
+  }
+  ButtonWidgetClass btn_refresh {
+   position 477.29999 6.06614
+   size 80 20
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "#STR_COT_WEATHER_MODULE_REFRESH"
   }
  }
 }
