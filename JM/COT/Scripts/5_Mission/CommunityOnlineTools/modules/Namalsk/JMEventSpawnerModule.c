@@ -22,6 +22,11 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
 	}
 
+	override bool HasButton()
+	{
+		return m_EventManager != null;
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Namalsk.View" );
@@ -142,7 +147,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		if (!m_EventManager) return false;
 
 		bool active = false;
-		g_Script.CallFunction(m_EventManager, "IsEventActive", evt, null);
+		g_Script.CallFunction(m_EventManager, "IsEventActive", active, evt.ToType());
 		return active;
 	}
 
@@ -173,14 +178,14 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		if (!m_EventManager) return;
 
-		g_Script.CallFunction(m_EventManager, "StartEvent", null, evt);
+		g_Script.CallFunction(m_EventManager, "StartEvent", null, evt.ToType());
 	}
 
 	void CancelEvent(string evt)
 	{
 		if (!m_EventManager) return;
 
-		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt);
+		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt.ToType());
 	}
 	
 	void RequestEvents()
