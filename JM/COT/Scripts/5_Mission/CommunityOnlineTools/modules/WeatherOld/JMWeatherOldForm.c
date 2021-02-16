@@ -17,6 +17,10 @@ class JMWeatherOldForm extends JMFormBase
 	protected TextWidget m_TxtFogValue;
 	protected SliderWidget m_SldWindForce;
 	protected TextWidget m_TxtWindForceValue;
+	protected SliderWidget m_SldTemperature;
+	protected TextWidget m_TxtTemperatureValue;
+
+	
 
 	private int	  m_OrigYear;
 	private int	  m_OrigMonth;
@@ -27,6 +31,7 @@ class JMWeatherOldForm extends JMFormBase
 	private float m_OrigRain;
 	private float m_OrigFog;
 	private float m_OrigWindForce;
+	private float m_OrigTemperature;
 
 	private int	  m_CurrYear;
 	private int	  m_CurrMonth;
@@ -37,6 +42,7 @@ class JMWeatherOldForm extends JMFormBase
 	private float m_CurrRain;
 	private float m_CurrFog;
 	private float m_CurrWindForce;
+	private float m_CurrTemperature;
 
 	private JMWeatherOldModule m_Module;
 
@@ -76,6 +82,9 @@ class JMWeatherOldForm extends JMFormBase
 
 		m_SldWindForce		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_wind_force" ) );
 		m_TxtWindForceValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_wind_force_value" ) );
+
+		m_SldTemperature		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_temperature" ) );
+		m_TxtTemperatureValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_temperature_value" ) );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -99,12 +108,15 @@ class JMWeatherOldForm extends JMFormBase
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
 
+			//! not possible rn. Maybe Adam could make it possible without me modding it :think:
+			//GetRPCManager().SendRPC( "COT_Weather", "Weather_SetTemperature", new Param1< float >( Temperature ), true );
+
 			return true;
 		}
 
 		if ( w == m_BtnRefresh )
 		{
-			ResetSliders();
+			RefreshFields();
 
 			return true;
 		}
@@ -205,7 +217,22 @@ class JMWeatherOldForm extends JMFormBase
 	override void OnShow()
 	{
 		super.OnShow();
-		
+
+		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert(Update);
+
+		RefreshFields();
+	}
+
+	override void OnHide()
+	{
+	}
+
+	override void Update()
+	{
+	}
+
+	void RefreshFields()
+	{
 		GetGame().GetWorld().GetDate( m_OrigYear, m_OrigMonth, m_OrigDay, m_OrigHour, m_OrigMinute );
 
 		Weather weather = GetGame().GetWeather();
@@ -214,6 +241,8 @@ class JMWeatherOldForm extends JMFormBase
 		m_OrigRain = weather.GetRain().GetActual();
 		m_OrigFog = weather.GetFog().GetActual();
 		m_OrigWindForce = weather.GetWindSpeed();
+
+		m_OrigTemperature = GetGame().GetMission().GetWorldData().GetBaseEnvTemperature();
 
 		m_CurrYear = m_OrigYear;
 		m_CurrMonth = m_OrigMonth;
@@ -224,18 +253,9 @@ class JMWeatherOldForm extends JMFormBase
 		m_CurrRain = m_OrigRain;
 		m_CurrFog = m_OrigFog;
 		m_CurrWindForce = m_OrigWindForce;
-
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert(Update);
+		m_CurrTemperature = m_OrigTemperature;
 
 		ResetSliders();
-	}
-
-	override void OnHide()
-	{
-	}
-
-	override void Update()
-	{
 	}
 
 	void ResetSliders()
@@ -247,7 +267,6 @@ class JMWeatherOldForm extends JMFormBase
 		m_SldStartTime.SetCurrent( ((hour * 60) + minute) / 14.39 );
 
 		UpdateSliderStartTime( hour, minute );
-
 
 		float start_day = day;
 
@@ -284,6 +303,10 @@ class JMWeatherOldForm extends JMFormBase
 		m_SldWindForce.SetCurrent( slider_wind_value );
 
 		UpdateSliderWindForce();
+
+		//m_SldTemperature.SetCurrent();
+
+		UpdateSliderTemperature();
 	}
 
 	void UpdateSliderStartTime( int hour, int minute )
@@ -320,5 +343,11 @@ class JMWeatherOldForm extends JMFormBase
 	{
 		string label_text = m_SldWindForce.GetCurrent().ToString() + "%";
 		m_TxtWindForceValue.SetText( label_text );
+	}
+
+	void UpdateSliderTemperature()
+	{
+		string label_text = m_CurrTemperature.ToString() + "°C";
+		m_TxtTemperatureValue.SetText( label_text );
 	}
 }
