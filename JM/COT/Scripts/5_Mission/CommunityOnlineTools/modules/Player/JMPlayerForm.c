@@ -53,6 +53,8 @@ class JMPlayerForm extends JMFormBase
 	private bool m_InvisibilityUpdated;
 	private UIActionCheckbox m_UnlimitedAmmo;
 	private bool m_UnlimitedAmmoUpdated;
+	private UIActionCheckbox m_UnlimitedStamina;
+	private bool m_UnlimitedStaminaUpdated;
 	private UIActionCheckbox m_BrokenLegs;
 	private bool m_BrokenLegsUpdated;
 
@@ -123,6 +125,7 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
+		UpdatePermission( m_UnlimitedStamina, "Admin.Player.UnlimitedStamina" );
 		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
 		UpdatePermission( m_SpectatePlayer, "Admin.Player.StartSpectating" );
@@ -311,6 +314,7 @@ class JMPlayerForm extends JMFormBase
 		m_Freeze = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
 		//m_Invisibility = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
+		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
 		
 		m_ApplyStats = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
@@ -738,6 +742,8 @@ class JMPlayerForm extends JMFormBase
 		m_BloodyHandsUpdated = false;
 		m_GodModeUpdated = false;
 		m_UnlimitedAmmoUpdated = false;
+		m_UnlimitedStaminaUpdated = false;
+		m_BrokenLegsUpdated = false;
 		
 		if ( m_Health )
 			m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
@@ -772,6 +778,12 @@ class JMPlayerForm extends JMFormBase
 		
 		if ( m_UnlimitedAmmo )
 			m_UnlimitedAmmo.SetChecked( m_SelectedInstance.HasUnlimitedAmmo() );
+		
+		if ( m_UnlimitedStamina )
+			m_UnlimitedStamina.SetChecked( m_SelectedInstance.HasUnlimitedStamina() );
+		
+		if ( m_BrokenLegs )
+			m_BrokenLegs.SetChecked( m_SelectedInstance.HasBrokenLegs() );
 	}
 
 	void RefreshTeleports()
@@ -886,6 +898,14 @@ class JMPlayerForm extends JMFormBase
 			if ( m_UnlimitedAmmo )
 				m_Module.SetUnlimitedAmmo( m_UnlimitedAmmo.IsChecked(), JM_GetSelected().GetPlayers() );
 		}
+
+		if ( m_UnlimitedStaminaUpdated )
+		{
+			m_UnlimitedStaminaUpdated = false;
+
+			if ( m_UnlimitedStamina )
+				m_Module.SetUnlimitedStamina( m_UnlimitedStamina.IsChecked(), JM_GetSelected().GetPlayers() );
+		}
 	}
 
 	void Click_SetHealth( UIEvent eid, ref UIActionBase action )
@@ -982,6 +1002,14 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		m_UnlimitedAmmoUpdated = true;
+	}
+
+	void Click_UnlimitedStamina( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_UnlimitedStaminaUpdated = true;
 	}
 
 	void HideUI()

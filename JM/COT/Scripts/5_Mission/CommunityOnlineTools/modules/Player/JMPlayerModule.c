@@ -18,6 +18,7 @@ enum JMPlayerModuleRPC
 	SetFreeze,
 	SetInvisible,
 	SetUnlimitedAmmo,
+	SetUnlimitedStamina,
 	SetBrokenLegs,
 	Heal,
 	Strip,
@@ -35,6 +36,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedAmmo" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedStamina" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StartSpectating" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
@@ -192,6 +194,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetUnlimitedAmmo:
 			RPC_SetUnlimitedAmmo( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetUnlimitedStamina:
+			RPC_SetUnlimitedStamina( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.SetBrokenLegs:
 			RPC_SetBrokenLegs( ctx, sender, target );
@@ -1173,6 +1178,65 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
 	}
 
+	void SetUnlimitedStamina( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetUnlimitedStamina( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetUnlimitedStamina, true, NULL );
+		}
+	}
+
+	private void Exec_SetUnlimitedStamina( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetUnlimitedStamina( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set UnlimitedStamina To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited stamina" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited stamina" );
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetUnlimitedStamina( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedStamina", senderRPC, instance ) )
+			return;
+
+		Exec_SetUnlimitedStamina( value, guids, senderRPC, instance );
+	}
+
 	void SetBrokenLegs( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1227,7 +1291,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.UnlimitedAmmo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BrokenLegs", senderRPC, instance ) )
 			return;
 
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
