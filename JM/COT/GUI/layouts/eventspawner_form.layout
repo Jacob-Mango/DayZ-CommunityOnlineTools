@@ -1,4 +1,4 @@
-PanelWidgetClass JMEventSpawnerForm {
+PanelWidgetClass JMNamalskEventManagerForm {
  color 0 0 0 0
  position 0 0
  size 500 350
@@ -6,7 +6,7 @@ PanelWidgetClass JMEventSpawnerForm {
  vexactpos 0
  hexactsize 1
  vexactsize 1
- scriptclass "JMEventSpawnerForm"
+ scriptclass "JMNamalskEventManagerForm"
  style EditorPanel
  {
   FrameWidgetClass panel {

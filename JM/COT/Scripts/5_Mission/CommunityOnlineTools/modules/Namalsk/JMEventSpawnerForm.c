@@ -1,22 +1,14 @@
 
-class JMEventSpawnerForm: JMFormBase
+class JMNamalskEventManagerForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
+
 	private Widget m_ActionsWrapper;
-	private JMEventSpawnerModule m_Module;	
-	private ref array<ref UIActionButton> m_EventButtons = {};
-	
-	static const ref array<string> EVENT_TYPES = {
-		"Snowfall",
-		"Blizzard",
-		"ExtremeCold",
-		"Aurora",
-		"EVRStorm"
-	};
+	private JMNamalskEventManagerModule m_Module;
 	
 	override void OnInit()
 	{
-		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
+		m_sclr_MainActions = UIActionManager.CreateScroller(layoutRoot.FindAnyWidget("panel"));
 		m_ActionsWrapper = m_sclr_MainActions.GetContentWidget();
 
 		m_sclr_MainActions.UpdateScroller();
@@ -27,7 +19,6 @@ class JMEventSpawnerForm: JMFormBase
 		return Class.CastTo(m_Module, mdl);
 	}
 	
-	
 	private void AddSimpleButton(string text, string button_text, string function)
 	{
 		Widget wrapper = UIActionManager.CreatePanel(m_ActionsWrapper, 0x00000000, 30);
@@ -35,38 +26,77 @@ class JMEventSpawnerForm: JMFormBase
 		name.SetWidth(0.8);
 		
 		UIActionButton button = UIActionManager.CreateButton(wrapper, button_text, this, function);
-		button.SetData(new JMEventSpawnerButtonData(text));
+		button.SetData(new JMNamalskEventManagerButtonData(text));
 		button.SetWidth(0.2);
 		button.SetPosition(0.8);
+	}
 
-		m_EventButtons.Insert(button);
+	private void AddSimpleText(string text, string field_text)
+	{
+		Widget wrapper = UIActionManager.CreatePanel(m_ActionsWrapper, 0x00000000, 30);
+		UIActionBase name = UIActionManager.CreateText(wrapper, text);
+		name.SetWidth(0.6);
+		
+		UIActionBase field = UIActionManager.CreateText(wrapper, field_text);
+		field.SetWidth(0.4);
+		field.SetPosition(0.6);
 	}
 	
 	override void OnShow()
 	{
-		foreach (string event_name: EVENT_TYPES) {
-			AddSimpleButton(event_name, "Start", "BeginEvent");
+		foreach (string event_name: m_Module.Events)
+		{
+			if (m_Module.IsEventActive(event_name))
+			{
+				if (GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Cancel"))
+				{
+					AddSimpleButton(event_name, "Cancel", "CancelEvent");
+					continue;
+				}
+
+				AddSimpleText(event_name, "(C) No Permission");
+				continue;
+			} 
+
+			if (!m_Module.IsEventActive(event_name))
+			{
+				if (GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Start"))
+				{
+					AddSimpleButton(event_name, "Start", "StartEvent");
+					continue;
+				}
+
+				AddSimpleText(event_name, "(S) No Permission");
+				continue;
+			}
+
+			if (GetPermissionsManager().HasPermission("Namalsk." + event_name))
+			{
+				AddSimpleText(event_name, "Invalid Permission");
+				continue;
+			}
 		}
-		
-		AddSimpleButton("Make server shit pants", "Now", "ShitPants");
-		
 		
 		m_sclr_MainActions.UpdateScroller();
 	}
 	
-	void BeginEvent(UIEvent eid, ref UIActionBase action)
+	void StartEvent(UIEvent eid, ref UIActionBase action)
 	{
-		JMEventSpawnerButtonData data = action.GetData();
+		JMNamalskEventManagerButtonData data = action.GetData();
 		if (!data) return;
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(data.ClassName);
-		rpc.Send(null, JMEventSpawnerRPC.StartEvent, true, null);
+		rpc.Send(null, JMNamalskEventManagerRPC.StartEvent, true, null);
 	}
 	
-	void ShitPants(UIEvent eid, ref UIActionBase action)
+	void CancelEvent(UIEvent eid, ref UIActionBase action)
 	{
+		JMNamalskEventManagerButtonData data = action.GetData();
+		if (!data) return;
+
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Send(null, JMEventSpawnerRPC.ShitPantsServer, true, null);
+		rpc.Write(data.ClassName);
+		rpc.Send(null, JMNamalskEventManagerRPC.CancelEvent, true, null);
 	}
-}
+};

@@ -18,7 +18,7 @@ modded class JMModuleConstructor
 		
 		// Namalsk specific checks
 		if (IsModLoaded("EventManager") && IsModLoaded("EVRStorm")) {
-			modules.Insert( JMEventSpawnerModule );
+			modules.Insert( JMNamalskEventManagerModule );
 		}
 
 
