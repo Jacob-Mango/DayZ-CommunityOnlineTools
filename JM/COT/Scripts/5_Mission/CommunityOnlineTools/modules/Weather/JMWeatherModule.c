@@ -838,6 +838,9 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
 	{
+		// might be exposed and causing hacks, but im too lazy to check right now
+		return;
+
 		switch ( rpc_type )
 		{
 		case JMWeatherModuleRPC.Load:
