@@ -401,4 +401,54 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			obj.SetHealth( "", "", health );
 		}
 	}
+
+	void Command_Spawn(ref JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
+	{
+		string className;
+		if (!params.Next(className)) return;
+
+		vector position;
+		if (params.HasNext())
+		{
+			float x, y, z;
+
+			if (!params.Next(x)) return;
+			if (!params.Next(y)) return;
+			if (!params.Next(z)) return;
+
+			position = Vector(x, y, z);
+		}
+		else
+		{
+			PlayerBase player = GetPlayerObjectByIdentity(sender);
+			if (player) position = player.GetPosition();
+		}
+		
+		int flags = ECE_CREATEPHYSICS;
+		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
+			flags |= 0x800;
+
+		EntityAI ent;
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+			return;
+
+		float quantity = -1;
+		float health = -1;
+		SetupEntity( ent, quantity, health );
+		
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
+	}
+
+	override void GetSubCommands(inout array<ref JMCommand> commands)
+	{
+		AddSubCommand(commands, "spawn", "Command_Spawn", "Entity.Spawn.Position");
+	}
+
+	override array<string> GetCommandNames()
+	{
+		auto names = new array<string>();
+		names.Insert("object");
+		return names;
+	}
 }
