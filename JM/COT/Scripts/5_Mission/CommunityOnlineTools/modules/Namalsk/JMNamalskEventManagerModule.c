@@ -24,7 +24,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	override bool HasButton()
 	{
-		return m_EventManager != null;
+		return true; // module isn't loaded if namalsk isn't loaded anyways
 	}
 
 	override bool HasAccess()
