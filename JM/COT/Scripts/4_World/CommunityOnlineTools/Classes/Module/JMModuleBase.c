@@ -2,9 +2,6 @@ modded class JMModuleBase
 {
 	protected JMWebhookModule m_Webhook;
 
-	private array< ref JMCommand > m_Commands;
-	private ref JMCommand m_LastCommand;
-
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
@@ -64,30 +61,17 @@ modded class JMModuleBase
 	}
 #endif
 
-	void GetCommands( inout array< ref JMCommand > commands )
+	void GetSubCommands(inout array<ref JMCommand> commands)
 	{
-		m_Commands = commands;
-		SetCommands();
 	}
 
-	void SetCommands()
+	void AddSubCommand(inout array<ref JMCommand> commands, string command, string function, string permission)
 	{
-
+		commands.Insert(new JMSubCommand(this, command, function, permission));
 	}
 
-	void AddCommand( string command, string function )
+	array<string> GetCommandNames()
 	{
-		m_LastCommand = new JMCommand( command, function );
-		m_Commands.Insert( m_LastCommand );
+		return new array<string>();
 	}
-
-	void AddParameter( JMCommandParameterType type, string name )
-	{
-		m_LastCommand.AddParameter( type, name );
-	}
-
-	private void FinishCommand()
-	{
-		
-	}
-}
+};

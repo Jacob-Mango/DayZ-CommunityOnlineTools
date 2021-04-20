@@ -1,68 +1,44 @@
-enum JMCommandParameterType
-{
-	STRING,
-	FLOAT,
-	VECTOR,
-	INT,
-	PLAYER,
-	OBJECT //! Don't think 
-};
-
-class JMCommandParameter
-{
-	JMCommandParameterType m_Type;
-	string m_Name;
-
-	//string ToString()
-	//{
-	//	string type = "UNKNOWN";
-	//	return "[" + m_Name + ":" + type + "]";
-	//}
-};
-
 class JMCommand
 {
-	private string m_Command;
+	protected string m_Command;
 
-	private Class m_Instance;
-	private string m_Function;
+	protected Class m_Instance;
+	protected string m_Function;
 
-	private ref array< JMCommandParameter > m_Parameters;
-	private ref Param m_PassThroughParameters;
+	protected string m_Permission;
 
-	void JMCommand( string command, string function )
+	void JMCommand(Class instance, string command, string function, string permission)
 	{
+		m_Instance = instance;
 		m_Command = command;
 		m_Function = function;
-		m_Parameters = new array< JMCommandParameter >();
+		m_Permission = permission;
 	}
 
-	void ~JMCommand()
+	void Execute(PlayerIdentity sender, array<string> arguments)
 	{
-		delete m_PassThroughParameters;
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission(m_Permission, sender, instance)) return;
+
+		g_Script.CallFunctionParams(m_Instance, m_Function, null, new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(new JMCommandParameterList(arguments), sender, instance));
 	}
 
-	void AddParameter( JMCommandParameterType type, string name )
+	string GetCommand()
 	{
-		m_Parameters.Insert( new JMCommandParameter() );
+		return m_Command;
 	}
 
-	/**
-	 * Called once the command is finished initializing
-	 */
-	void Finish()
+	Class GetInstance()
 	{
-		//m_Parameters
-		//m_PassThroughParameters = 
+		return m_Instance;
 	}
 
-	void Error()
+	string GetFunction()
 	{
-		
+		return m_Function;
 	}
+};
 
-	void Execute( array< string > arguments )
-	{
-		//g_Script.Call( m_Instance, m_Function );
-	}
+class JMSubCommand extends JMCommand
+{
 };
