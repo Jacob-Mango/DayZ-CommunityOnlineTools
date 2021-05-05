@@ -370,4 +370,41 @@ class JMTeleportModule: JMRenderableModuleBase
 			Server_Location( loc, guids, senderRPC );
 		}
 	}
+
+	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
+	{
+		PlayerBase player = GetPlayerObjectByIdentity(sender);
+		if (!player) return;
+
+		vector position;
+		if (params.HasNext())
+		{
+			float x, y, z;
+
+			if (!params.Next(x)) return;
+			if (!params.Next(y)) return;
+			if (!params.Next(z)) return;
+
+			position = Vector(x, y, z);
+		} else return;
+
+		SetPlayerPosition( player, position );
+
+		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+		SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+	}
+
+	override void GetSubCommands(inout array<ref JMCommand> commands)
+	{
+		AddSubCommand(commands, "position", "Command_Position", "Admin.Player.Teleport.Position");
+		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");
+	}
+
+	override array<string> GetCommandNames()
+	{
+		auto names = new array<string>();
+		names.Insert("teleport");
+		names.Insert("tp");
+		return names;
+	}
 }
