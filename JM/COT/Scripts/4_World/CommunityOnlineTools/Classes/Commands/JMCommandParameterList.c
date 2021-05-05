@@ -7,6 +7,7 @@ class JMCommandParameterList
 	{
 		m_Arguments = new array<string>();
 		m_Arguments.Copy(arguments);
+
 		m_Index = -1;
 	}
 	
@@ -17,7 +18,7 @@ class JMCommandParameterList
 
 	bool HasNext()
 	{
-		return m_Index + 1 < m_Arguments.Count();
+		return m_Arguments.Count() > (m_Index + 1);
 	}
 	
 	bool Next()

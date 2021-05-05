@@ -402,7 +402,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void Command_Spawn(ref JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
+	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
 		string className;
 		if (!params.Next(className)) return;
