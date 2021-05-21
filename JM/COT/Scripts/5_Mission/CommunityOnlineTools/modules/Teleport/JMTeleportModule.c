@@ -394,10 +394,20 @@ class JMTeleportModule: JMRenderableModuleBase
 		SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
 	}
 
+	void Command_Get(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
+	{
+		PlayerBase player = GetPlayerObjectByIdentity(sender);
+		if (!player) return;
+
+		Message(player, "Your position is: " + player.GetPosition());
+	}
+
 	override void GetSubCommands(inout array<ref JMCommand> commands)
 	{
 		AddSubCommand(commands, "position", "Command_Position", "Admin.Player.Teleport.Position");
 		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");
+		
+		AddSubCommand(commands, "get", "Command_Get", "Admin.Player.Teleport.Position");
 	}
 
 	override array<string> GetCommandNames()
