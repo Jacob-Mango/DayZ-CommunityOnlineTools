@@ -16,6 +16,8 @@ modded class JMModuleConstructor
 		modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
+
+		//modules.Insert( JMTestingModule );
 		
 		// Namalsk specific checks
 		if (IsModLoaded("EventManager") && IsModLoaded("EVRStorm")) {
