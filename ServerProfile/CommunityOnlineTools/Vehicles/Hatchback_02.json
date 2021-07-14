@@ -1,11 +1,13 @@
 {
     "VehicleName": "Hatchback_02",
-    "DisplayName": "Hatchback_02",
+    "DisplayName": "",
     "Parts": [
         "Hatchback_02_Hood",
         "Hatchback_02_Trunk",
-        "Hatchback_02_Doors_Driver",
-        "Hatchback_02_Doors_CoDriver",
+        "Hatchback_02_Door_1_1",
+        "Hatchback_02_Door_1_2",
+        "Hatchback_02_Door_2_1",
+        "Hatchback_02_Door_2_2",
         "Hatchback_02_Wheel",
         "Hatchback_02_Wheel",
         "Hatchback_02_Wheel",

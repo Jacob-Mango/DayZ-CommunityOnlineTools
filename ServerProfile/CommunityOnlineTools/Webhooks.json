@@ -1,0 +1,250 @@
+{
+    "Connections": [
+        {
+            "Name": "Main",
+            "ContextURL": "https://discordapp.com/api/webhooks/",
+            "Address": "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS",
+            "Types": [
+                {
+                    "Name": "COTModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModuleSet",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModuleVehicle",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModuleTeleport",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModuleInventory",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMPlayerModulePF",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMObjectSpawnerModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMObjectSpawnerModuleDelete",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMObjectSpawnerModuleVector",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMObjectSpawnerModulePlayer",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleLog",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModulePosition",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleOrientation",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleHealth",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleDelete",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleBB_Build",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleBB_Dismantle",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMESPModuleBB_Repair",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMTeleportModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMTeleportModuleVector",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMTeleportModuleLocation",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMCameraModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMVehicleSpawnerModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMItemSetSpawnerModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMItemSetSpawnerModuleVector",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMItemSetSpawnerModulePlayer",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleDate",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleWind",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleOvercast",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleFog",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleRain",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleStorm",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMMapModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "Server",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerJoin",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerLeave",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerDeath",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerDamaged",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleURL",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleURLSensitive",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleType",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWebhookCOTModuleTypeSensitive",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "ServerStartup",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "ServerShutdown",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "PlayerDamage",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "AdminActive",
+                    "Enabled": 1
+                }
+            ]
+        },
+        {
+            "Name": "Weather",
+            "ContextURL": "https://discordapp.com/api/webhooks/",
+            "Address": "730001221053579294/_MrpP0Jgj8EwjMfzDfaXC8EdnEqNL9rzU309xVdt8T3rRRZm071ZKwt_zQ9BMAso3uBW",
+            "Types": [
+                {
+                    "Name": "JMWeatherOldModule",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleDate",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleWind",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleOvercast",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleFog",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleRain",
+                    "Enabled": 1
+                },
+                {
+                    "Name": "JMWeatherOldModuleStorm",
+                    "Enabled": 1
+                }
+            ]
+        }
+    ]
+}
