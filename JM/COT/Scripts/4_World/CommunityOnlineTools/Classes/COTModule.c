@@ -38,9 +38,11 @@ class COTModule : JMModuleBase
 			if ( !JMStatics.ESP_CONTAINER )
 				JMStatics.ESP_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
 			
+			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
 				JMStatics.WINDOWS_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
-			
+			#endif
+
 			if ( m_COTMenu == NULL )
 			{
 				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
@@ -86,10 +88,20 @@ class COTModule : JMModuleBase
 
 	override void OnUpdate( float timeslice )
 	{
+		JMStatics.COT_MENU = null;
 		if ( m_COTMenu )
 		{
+			JMStatics.COT_MENU = m_COTMenu.GetLayoutRoot();
+
 			m_COTMenu.OnUpdate( timeslice );
 
+			#ifdef CF_WINDOWS
+
+			if (m_COTMenu.IsVisible())
+			{
+				CF_Windows.InputFocus(true);
+			}
+			#else
 			if ( m_LeftMouseDown )
 			{
 				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
@@ -107,6 +119,7 @@ class COTModule : JMModuleBase
 					m_LeftMouseDown = true;
 				}
 			}
+			#endif
 		}
 
 		if ( m_ForceHUD )
@@ -115,6 +128,7 @@ class COTModule : JMModuleBase
 		}
 	}
 
+	#ifndef CF_WINDOWS
 	void UpdateMouseControls()
 	{
 		bool isMenuOpen = m_COTMenu && m_COTMenu.IsVisible();
@@ -133,6 +147,7 @@ class COTModule : JMModuleBase
 			GetGame().GetUIManager().ShowUICursor( true );
 		}
 	}
+	#endif
 
 	void COTForceHud( bool enable )
 	{
@@ -199,6 +214,7 @@ class COTModule : JMModuleBase
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
+	#ifndef CF_WINDOWS
 	void OnMouseUp()
 	{
 		if ( m_GameActive )
@@ -252,6 +268,7 @@ class COTModule : JMModuleBase
 			}
 		}
 	}
+	#endif
 
 	void ToggleCOT( UAInput input )
 	{

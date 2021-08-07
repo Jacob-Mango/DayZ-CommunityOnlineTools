@@ -111,9 +111,11 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 
 		m_IsAnimatingIn = true;
 		m_AnimateTime = 0.0;
-
+		
+		#ifndef CF_WINDOWS
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
+		#endif
 	}
 
 	void Hide()
@@ -125,12 +127,14 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 
 		m_IsAnimatingOut = true;
 		m_AnimateTime = 0.0;
-
+		
+		#ifndef CF_WINDOWS
 		if ( GetCOTWindowManager().Count() == 0 )
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );
 		}
+		#endif
 	}
 
 	void OnUpdate( float timeslice )

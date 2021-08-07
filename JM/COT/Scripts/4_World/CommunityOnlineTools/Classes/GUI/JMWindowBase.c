@@ -1,3 +1,5 @@
+#ifndef CF_WINDOWS
+typedef JMWindowBase CF_Window;
 class JMWindowBase extends ScriptedWidgetEventHandler  
 {
 	reference float m_DragXN;
@@ -127,6 +129,11 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	}
 
 	Widget GetLayoutRoot()
+	{
+		return layoutRoot;
+	}
+
+	Widget GetWidgetRoot()
 	{
 		return layoutRoot;
 	}
@@ -463,4 +470,5 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		// layoutRoot.SetSize( newWidth, newHeight );
 	}
-}
+};
+#endif

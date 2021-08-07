@@ -2,7 +2,11 @@ class JMFormBase extends ScriptedWidgetEventHandler
 {
 	protected Widget layoutRoot;
 	
+	protected CF_Window m_Window;
+	
+	#ifndef CF_WINDOWS
 	protected JMWindowBase window;
+	#endif
 
 	void JMFormBase() 
 	{
@@ -18,19 +22,21 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		layoutRoot.SetHandler( this );
 	}
 
-	void Init( ref JMWindowBase wdw, ref JMRenderableModuleBase mdl )
+	void Init( CF_Window wdw, JMRenderableModuleBase mdl )
 	{
+		m_Window = wdw;
+		
+		#ifndef CF_WINDOWS
 		window = wdw;
+		#endif
 
 		if ( SetModule( mdl ) )
 		{
 			OnInit();
-			
-			window.OnFormLoaded();
 		}
 	}
 
-	protected bool SetModule( ref JMRenderableModuleBase mdl )
+	protected bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return false;
 	}
@@ -42,12 +48,14 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 	bool IsVisible()
 	{
-		return window.IsVisible();
+		return m_Window != null;
 	}
 
 	void SetSize( float w, float h )
 	{
-		window.SetSize( w, h );
+		if (!IsVisible()) return;
+		
+		m_Window.SetSize(w, h);
 	}
 
 	void OnShow()
@@ -84,33 +92,57 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	ref JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return window.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne );
+		#endif
 	}
 
-	ref JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName )
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return CreateConfirmation_One( type, title, message, callBackOneName, "" );
+		#endif
 	}
 
-	ref JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return window.CreateConfirmation_Two( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
+		#endif
 	}
 
-	ref JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return CreateConfirmation_Two( type, title, message, callBackOneName, "", callBackTwoName, "" );
+		#endif
 	}
 
-	ref JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return window.CreateConfirmation_Three( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
+		#endif
 	}
 
-	ref JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName )
 	{
+		#ifdef CF_WINDOWS
+		return null;
+		#else
 		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
+		#endif
 	}
 }

@@ -1,3 +1,4 @@
+#ifndef CF_WINDOWS
 class JMWindowManager
 {
 	private ref array< JMWindowBase > m_Windows;
@@ -120,3 +121,4 @@ ref JMWindowManager GetCOTWindowManager()
 
 	return g_cot_WindowManager;
 }
+#endif

@@ -21,7 +21,7 @@ class JMTeleportForm extends JMFormBase
 	{
 	}
 
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}
@@ -36,9 +36,9 @@ class JMTeleportForm extends JMFormBase
 
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		ref Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
+		Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
 
-		ref Widget coords = UIActionManager.CreateGridSpacer( rows, 1, 2 );
+		Widget coords = UIActionManager.CreateGridSpacer( rows, 1, 2 );
 
 		m_PositionX = UIActionManager.CreateText( coords, "X: " );
 		m_PositionZ = UIActionManager.CreateText( coords, "Z: " );

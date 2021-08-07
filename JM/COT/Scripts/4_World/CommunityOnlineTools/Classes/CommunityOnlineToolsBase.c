@@ -24,8 +24,6 @@ class CommunityOnlineToolsBase
 			cotModules[i].Hide();
 		}
 
-		delete g_cot_WindowManager;
-
 		GetDayZGame().Event_OnRPC.Remove( OnRPC );
 	}
 
