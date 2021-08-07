@@ -101,7 +101,7 @@ class JMPlayerForm extends JMFormBase
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}

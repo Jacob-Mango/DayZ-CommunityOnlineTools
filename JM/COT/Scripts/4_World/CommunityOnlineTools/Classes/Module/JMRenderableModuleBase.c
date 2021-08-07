@@ -1,6 +1,7 @@
 class JMRenderableModuleBase extends JMModuleBase
 {
-	private ref JMWindowBase m_Window;
+	private ref CF_Window m_Window;
+	private JMFormBase m_Form;
 
 	private ButtonWidget m_MenuButton;
 
@@ -63,13 +64,10 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	JMFormBase GetForm()
 	{
-		if ( !m_Window )
-			return NULL;
-
-		return m_Window.GetForm();
+		return m_Form;
 	}
 
-	ref JMFormBase InitForm( Widget root )
+	JMFormBase InitForm( Widget root )
 	{
 		Error( "Not implemented." );
 		return NULL;
@@ -129,16 +127,29 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	bool IsVisible()
 	{
+		#ifdef CF_WINDOWS
+		return m_Window != null;
+		#else
 		if ( !m_Window )
 			return false;
 		
 		return m_Window.IsVisible();
+		#endif
 	}
 
 	void Show()
 	{
 		if ( HasAccess() )
 		{
+			#ifdef CF_WINDOWS
+			m_Window = new CF_Window();
+			
+			Widget widgets = m_Window.CreateWidgets(GetLayoutRoot());
+			
+			widgets.GetScript(m_Form);
+			
+			m_Form.Init(m_Window, this);
+			#else
 			if ( !m_Window )
 			{
 				m_Window = GetCOTWindowManager().Create();
@@ -146,18 +157,13 @@ class JMRenderableModuleBase extends JMModuleBase
 			}
 
 			m_Window.Show();
+			#endif
 		}
 	}
 
 	void Hide()
 	{
-		////Print( "+" + Type().ToString() + "::Hide" );
-		//Print( "  m_Window=" + m_Window );
-		if ( m_Window )
-		{
-			delete m_Window;
-		}
-		////Print( "-" + Type().ToString() + "::Hide" );
+		delete m_Window;
 	}
 
 	void ToggleShow()
@@ -226,4 +232,4 @@ class JMRenderableModuleBase extends JMModuleBase
 		
 		ToggleShow();
 	}
-}
+};

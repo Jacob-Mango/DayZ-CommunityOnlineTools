@@ -21,7 +21,7 @@ class JMWebhookForm extends JMFormBase
 		m_Types = new array< string >();
 		JMWebhookConstructor.Generate( m_Types );
 
-		m_Sections = new map< string,ref JMWebhookSection >();
+		m_Sections = new map< string, ref JMWebhookSection >();
 	}
 
 	void ~JMWebhookForm()
@@ -30,7 +30,7 @@ class JMWebhookForm extends JMFormBase
 		delete m_Types;
 	}
 
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}

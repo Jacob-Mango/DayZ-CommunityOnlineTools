@@ -26,6 +26,7 @@ GameProjectClass {
     "gui/imagesets/playstation_buttons.imageset"
     "gui/imagesets/selection.imageset"
     "gui/imagesets/console_toolbar.imageset"
+    "JM/CF/GUI/textures/imageset.imageset"
    }
    widgetStyles {
     "gui/looknfeel/dayzwidgets.styles" 
@@ -47,6 +48,8 @@ GameProjectClass {
      Name "gameLib"
      Paths {
       "scripts/2_GameLib"
+      "JM/CF/Defines"
+      "JM/CF/Scripts/2_GameLib"
      }
      EntryPoint ""
     }

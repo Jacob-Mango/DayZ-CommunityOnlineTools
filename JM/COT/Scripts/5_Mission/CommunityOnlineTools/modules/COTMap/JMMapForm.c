@@ -11,13 +11,13 @@ class JMMapForm extends JMFormBase
 
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
 
-		m_BackgroundWidget = window.GetLayoutRoot().FindAnyWidget( "background" );
+		m_BackgroundWidget = m_Window.GetWidgetRoot().FindAnyWidget( "background" );
 		m_BackgroundWidget.Show( false );
 
 		//Print( "-" + this + "::OnInit" );
 	}
 
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}

@@ -1,6 +1,8 @@
 class JMStatics
 {
 	static Widget ESP_CONTAINER;
+	static Widget COT_MENU;
+
 	static Widget WINDOWS_CONTAINER;
 
 	static void SortStringArray( out array< string > arr )
