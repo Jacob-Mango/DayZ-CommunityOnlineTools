@@ -112,7 +112,7 @@ class JMWindowManager
 
 ref JMWindowManager g_cot_WindowManager;
 
-ref JMWindowManager GetCOTWindowManager()
+JMWindowManager GetCOTWindowManager()
 {
 	if ( !g_cot_WindowManager )
 	{

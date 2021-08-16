@@ -69,7 +69,7 @@ class JMPermissionManager
 		GetPermissionsAsList( RootPermission, -1, permissions );
 	}
 
-	private void GetPermissionsAsList( ref JMPermission permission, int depth, inout array< JMPermission > permissions )
+	private void GetPermissionsAsList( JMPermission permission, int depth, inout array< JMPermission > permissions )
 	{
 		Assert_Null( RootPermission );
 		Assert_Null( permission );
@@ -129,7 +129,7 @@ class JMPermissionManager
 	/**
 	 * This uses GUIDs now.
 	 */
-	ref array< JMPlayerInstance > GetPlayers( ref array< string > guidsGetPlayers = NULL )
+	array< JMPlayerInstance > GetPlayers( array< string > guidsGetPlayers = NULL )
 	{
 		Assert_Null( Players );
 		
@@ -157,16 +157,16 @@ class JMPermissionManager
 		RootPermission.AddPermission( permission, JMPermissionType.INHERIT );
 	}
 
-	ref array< string > Serialize()
+	array< string > Serialize()
 	{
 		Assert_Null( RootPermission );
 
-		ref array< string > data = new array< string >;
+		array< string > data = new array< string >;
 		RootPermission.Serialize( data );
 		return data;
 	}
 
-	ref JMPermission GetRootPermission()
+	JMPermission GetRootPermission()
 	{
 		Assert_Null( RootPermission );
 
@@ -307,14 +307,14 @@ class JMPermissionManager
 		return SteamToGUID.Get( uid );
 	}
 
-	ref JMPlayerInstance GetPlayer( string guid )
+	JMPlayerInstance GetPlayer( string guid )
 	{
 		Assert_Null( Players );
 
 		return Players.Get( guid );
 	}
 
-	ref JMPlayerInstance UpdatePlayer( string guid, ref ParamsReadContext ctx, PlayerBase playerUpdatePlayer = NULL )
+	JMPlayerInstance UpdatePlayer( string guid, ParamsReadContext ctx, PlayerBase playerUpdatePlayer = NULL )
 	{
 		JMPlayerInstance instance = GetPlayer( guid );
 
@@ -361,11 +361,11 @@ class JMPermissionManager
 		return true;
 	}
 	
-	JMRole CreateRole( string name, ref array< string > data )
+	JMRole CreateRole( string name, array< string > data )
 	{
 		Assert_Null( Roles );
 
-		ref JMRole role = GetRole( name );
+		JMRole role = GetRole( name );
 
 		if ( !role )
 		{
@@ -403,7 +403,7 @@ class JMPermissionManager
 	{
 		Assert_Null( Roles );
 
-		ref JMRole role = new JMRole( name );
+		JMRole role = new JMRole( name );
 		
 		if ( role.Load() )
 		{
@@ -454,7 +454,7 @@ class JMPermissionManager
 
 ref JMPermissionManager g_cot_PermissionsManager;
 
-ref JMPermissionManager GetPermissionsManager()
+JMPermissionManager GetPermissionsManager()
 {
 	if ( !g_cot_PermissionsManager )
 	{

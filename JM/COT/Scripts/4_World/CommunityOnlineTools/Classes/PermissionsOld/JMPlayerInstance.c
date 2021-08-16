@@ -129,7 +129,7 @@ class JMPlayerInstance : Managed
 		}
 	}
 
-	void CopyPermissions( ref JMPermission copy )
+	void CopyPermissions( JMPermission copy )
 	{
 		Assert_Null( m_RootPermission );
 		Assert_Null( copy );
@@ -249,7 +249,7 @@ class JMPlayerInstance : Managed
 		return false;
 	}
 
-	void OnSend( ref ParamsWriteContext ctx /* param here for helper class so only necessary data is filled based on permissions */ )
+	void OnSend( ParamsWriteContext ctx /* param here for helper class so only necessary data is filled based on permissions */ )
 	{
 		ctx.Write( m_GUID );
 		ctx.Write( m_Steam64ID );
@@ -261,7 +261,7 @@ class JMPlayerInstance : Managed
 		OnSendHealth( ctx );
 	}
 
-	void OnRecieve( ref ParamsReadContext ctx )
+	void OnRecieve( ParamsReadContext ctx )
 	{
 		ctx.Read( m_GUID );
 		ctx.Read( m_Steam64ID );
@@ -273,7 +273,7 @@ class JMPlayerInstance : Managed
 		OnRecieveHealth( ctx );
 	}
 
-	void OnSendPermissions( ref ParamsWriteContext ctx )
+	void OnSendPermissions( ParamsWriteContext ctx )
 	{
 		Assert_Null( m_RootPermission );
 
@@ -284,7 +284,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Roles );
 	}
 
-	void OnRecievePermissions( ref ParamsReadContext ctx )
+	void OnRecievePermissions( ParamsReadContext ctx )
 	{
 		Assert_Null( m_RootPermission );
 		
@@ -301,27 +301,27 @@ class JMPlayerInstance : Managed
 			AddRole( roles[j] );
 	}
 	
-	void OnSendPosition( ref ParamsWriteContext ctx )
+	void OnSendPosition( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Position );
 	}
 
-	void OnRecievePosition( ref ParamsReadContext ctx )
+	void OnRecievePosition( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Position );
 	}
 	
-	void OnSendOrientation( ref ParamsWriteContext ctx )
+	void OnSendOrientation( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Orientation );
 	}
 
-	void OnRecieveOrientation( ref ParamsReadContext ctx )
+	void OnRecieveOrientation( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Orientation );
 	}
 	
-	void OnSendHealth( ref ParamsWriteContext ctx )
+	void OnSendHealth( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Health );
 		ctx.Write( m_Blood );
@@ -343,7 +343,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_BrokenLegs );
 	}
 
-	void OnRecieveHealth( ref ParamsReadContext ctx )
+	void OnRecieveHealth( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Health );
 		ctx.Read( m_Blood );

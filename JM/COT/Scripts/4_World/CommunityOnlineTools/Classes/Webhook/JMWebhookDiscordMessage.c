@@ -28,14 +28,14 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		embeds.Insert( obj );
 	}
 
-	ref JMWebhookDiscordEmbed CreateEmbed()
+	JMWebhookDiscordEmbed CreateEmbed()
 	{
 		JMWebhookDiscordEmbed embed = new JMWebhookDiscordEmbed;
 		embeds.Insert( embed );
 		return embed;
 	}
 
-	ref JMWebhookDiscordEmbed GetEmbed( int idx = 0 )
+	JMWebhookDiscordEmbed GetEmbed( int idx = 0 )
 	{
 		if ( embeds.Count() <= idx )
 			return embeds[idx];
@@ -49,7 +49,7 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		return embeds[idx];
 	}
 
-	override string Prepare( ref JsonSerializer serializer )
+	override string Prepare( JsonSerializer serializer )
 	{
 		string result = "";
 		serializer.WriteToString( embeds, false, result );
@@ -160,7 +160,7 @@ class JMWebhookDiscordEmbed : Managed
 
 	void AddField( string name, string value, bool inline = false )
 	{
-		ref JMWebhookDiscordEmbedField field = new JMWebhookDiscordEmbedField;
+		JMWebhookDiscordEmbedField field = new JMWebhookDiscordEmbedField;
 
 		field.name = name;
 		field.value = value;

@@ -23,9 +23,9 @@ class JMRole : Managed
 		delete SerializedData;
 	}
 
-	void CopyPermissions( ref JMPermission copy )
+	void CopyPermissions( JMPermission copy )
 	{
-		ref array< string > data = new array< string >;
+		array< string > data = new array< string >;
 		copy.Serialize( data );
 
 		for ( int i = 0; i < data.Count(); i++ )
@@ -51,7 +51,7 @@ class JMRole : Managed
 		return RootPermission.HasPermission( permission, permType );
 	}
 
-	ref array< string > Serialize()
+	array< string > Serialize()
 	{
 		SerializedData.Clear();
 
@@ -109,7 +109,7 @@ class JMRole : Managed
 		string filename = FileReadyStripName( Name );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );
 			
-		ref array< string > data = new array< string >;
+		array< string > data = new array< string >;
 
 		if ( file != 0 )
 		{
