@@ -24,7 +24,7 @@ class JMWebhookConnection : Managed
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Group.Remove, Name );
 	}
 
-	void Post( RestApi core, notnull ref JsonSerializer serializer, notnull ref JMWebhookMessage message )
+	void Post( RestApi core, notnull JsonSerializer serializer, notnull JMWebhookMessage message )
 	{
 		#ifdef JM_COT_WEBHOOK_DEBUG
 		Print( "+JMWebhookConnection::Post" );

@@ -6,7 +6,7 @@ class JMWebhookQueueItem : Managed
 
 	ref JMWebhookMessage m_Message;
 
-	void JMWebhookQueueItem( string type, ref JMWebhookMessage message )
+	void JMWebhookQueueItem( string type, JMWebhookMessage message )
 	{
 		m_Type = type;
 		m_Message = message;
@@ -28,7 +28,7 @@ class JMWebhookQueueItem : Managed
 		return m_Time;
 	}
 
-	ref JMWebhookMessage GetMessage()
+	JMWebhookMessage GetMessage()
 	{
 		return m_Message;
 	}
@@ -219,7 +219,7 @@ class JMWebhookModule: JMModuleBase
 			if ( Assert_Null( group ) )
 				return false;
 
-			ref JMWebhookConnection conn = group.Add( name );
+			JMWebhookConnection conn = group.Add( name );
 			if ( Assert_Null( conn ) )
 				return false;
 
@@ -234,7 +234,7 @@ class JMWebhookModule: JMModuleBase
 		return true;
 	}
 
-	bool AddConnection( string name, ref JMWebhookConnectionGroup group = NULL )
+	bool AddConnection( string name, JMWebhookConnectionGroup group = NULL )
 	{
 		set< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
 		if ( !connections )
@@ -245,7 +245,7 @@ class JMWebhookModule: JMModuleBase
 
 		if (group != NULL)
 		{
-			ref JMWebhookConnection conn = group.Add( name );
+			JMWebhookConnection conn = group.Add( name );
 			if ( Assert_Null( conn ) )
 				return false;
 
@@ -265,7 +265,7 @@ class JMWebhookModule: JMModuleBase
 		return false;
 	}
 
-	void Post( string connectionType, ref JMWebhookMessage message )
+	void Post( string connectionType, JMWebhookMessage message )
 	{
 		if ( IsMissionClient() )
 			return;
@@ -291,7 +291,7 @@ class JMWebhookModule: JMModuleBase
 		{
 			if ( m_Queue.Count() > 0 )
 			{
-				ref JMWebhookQueueItem item = m_Queue[0];
+				JMWebhookQueueItem item = m_Queue[0];
 
 				if ( !Assert_Null( item ) )
 				{
@@ -328,9 +328,9 @@ class JMWebhookModule: JMModuleBase
 		delete m_Queue;
 	}
 
-	ref JMWebhookDiscordMessage CreateDiscordMessage()
+	JMWebhookDiscordMessage CreateDiscordMessage()
 	{
-		ref JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
+		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
 		embed.SetColor( 16766720 );
 
@@ -342,9 +342,9 @@ class JMWebhookModule: JMModuleBase
 		return message;
 	}
 
-	ref JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
+	JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
 	{
-		ref JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
+		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
 		embed.SetColor( 16766720 );
 

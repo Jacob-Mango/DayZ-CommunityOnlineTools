@@ -56,7 +56,7 @@ class JMWebhookSerialize : Managed
 		return false;
 	}
 
-	ref JMWebhookConnectionGroup Get( string name )
+	JMWebhookConnectionGroup Get( string name )
 	{
 		for ( int i = 0; i < Connections.Count(); ++i )
 		{
@@ -66,7 +66,7 @@ class JMWebhookSerialize : Managed
 			}
 		}
 
-		ref JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
+		JMWebhookConnectionGroup group = new JMWebhookConnectionGroup();
 		group.Name = name;
 
 		Connections.Insert( group );
@@ -77,7 +77,7 @@ class JMWebhookSerialize : Managed
 
 static ref JMWebhookSerialize g_cot_Webhook;
 
-static ref JMWebhookSerialize GetCOTWebhookSettings()
+static JMWebhookSerialize GetCOTWebhookSettings()
 {
 	if ( !g_cot_Webhook )
 		g_cot_Webhook = new JMWebhookSerialize();

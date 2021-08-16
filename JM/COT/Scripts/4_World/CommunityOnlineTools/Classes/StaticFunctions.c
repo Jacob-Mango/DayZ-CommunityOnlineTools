@@ -20,12 +20,12 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObj
 	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
 }
 
-static void COTCreateNotification( PlayerIdentity ident, ref StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
+static void COTCreateNotification( PlayerIdentity ident, StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
 	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIFICATION_TITLE_ADMIN" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, ident );
 }
 
-static void COTCreateLocalAdminNotification( ref StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
+static void COTCreateLocalAdminNotification( StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
 {
 	NotificationSystem.Create( new StringLocaliser( "STR_COT_NOTIFICATION_TITLE_ADMIN" ), message, icon, ARGB( 255, 221, 38, 38 ), 1.5, NULL );
 }

@@ -15,7 +15,7 @@ class JMPermission : Managed
 
 	int Depth;
 
-	void JMPermission( string name, ref JMPermission parent = NULL )
+	void JMPermission( string name, JMPermission parent = NULL )
 	{
 		Name = name;
 		Parent = parent;
@@ -111,7 +111,7 @@ class JMPermission : Managed
 		{
 			string name = tokens[depth];
 
-			ref JMPermission nChild = VerifyAddPermission( name );
+			JMPermission nChild = VerifyAddPermission( name );
 
 			nChild.AddPermissionInternal( tokens, depth + 1, value );
 		} else {
@@ -119,9 +119,9 @@ class JMPermission : Managed
 		}
 	}
 
-	private ref JMPermission VerifyAddPermission( string name )
+	private JMPermission VerifyAddPermission( string name )
 	{
-		ref JMPermission nChild = NULL;
+		JMPermission nChild = NULL;
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -143,7 +143,7 @@ class JMPermission : Managed
 		return nChild;
 	}
 
-	ref JMPermission GetPermission( string inp )
+	JMPermission GetPermission( string inp )
 	{
 		array<string> tokens = new array<string>;
 		inp.Split( ".", tokens );
@@ -159,11 +159,11 @@ class JMPermission : Managed
 		}
 	}
 
-	private ref JMPermission Get( array<string> tokens, int depth )
+	private JMPermission Get( array<string> tokens, int depth )
 	{
 		if ( depth < tokens.Count() )
 		{
-			ref JMPermission nChild = NULL;
+			JMPermission nChild = NULL;
 
 			for ( int i = 0; i < Children.Count(); i++ )
 			{
@@ -251,7 +251,7 @@ class JMPermission : Managed
 
 		if ( depth < tokens.Count() )
 		{
-			ref JMPermission nChild = NULL;
+			JMPermission nChild = NULL;
 
 			for ( int i = 0; i < Children.Count(); i++ )
 			{
@@ -284,7 +284,7 @@ class JMPermission : Managed
 		Children.Clear();
 	}
 
-	void Serialize( ref array< string > output, string prepend = "" )
+	void Serialize( array< string > output, string prepend = "" )
 	{
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
@@ -299,7 +299,7 @@ class JMPermission : Managed
 		}
 	}
 
-	void Deserialize( ref array< string > input )
+	void Deserialize( array< string > input )
 	{
 		Clear();
 

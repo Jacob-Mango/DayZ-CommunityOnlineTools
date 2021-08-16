@@ -2,6 +2,8 @@ class COTModule : JMModuleBase
 {
 	protected JMCOTSideBar m_COTMenu;
 
+	protected bool m_WasVisible;
+
 	protected bool m_ForceHUD;
 
 	protected bool m_GameActive;
@@ -96,10 +98,18 @@ class COTModule : JMModuleBase
 			m_COTMenu.OnUpdate( timeslice );
 
 			#ifdef CF_WINDOWS
-
 			if (m_COTMenu.IsVisible())
 			{
-				CF_Windows.InputFocus(true);
+				if (!m_WasVisible)
+				{
+					m_WasVisible = true;
+				}
+				
+				CF_Windows.OverrideInputState(true, CF_WindowsFocusState.WINDOW);
+			} else if (!m_COTMenu.IsVisible() && m_WasVisible)
+			{
+				m_WasVisible = false;
+				CF_Windows.OverrideInputState(false);
 			}
 			#else
 			if ( m_LeftMouseDown )
@@ -119,6 +129,13 @@ class COTModule : JMModuleBase
 					m_LeftMouseDown = true;
 				}
 			}
+			#endif
+		}
+		else if (m_WasVisible)
+		{
+			m_WasVisible = false;
+			#ifdef CF_WINDOWS
+			CF_Windows.OverrideInputState(false);
 			#endif
 		}
 

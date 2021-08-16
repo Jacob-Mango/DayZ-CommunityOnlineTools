@@ -138,7 +138,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	ref JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
 	{
 		if ( !m_Confirmation )
 			return NULL;
@@ -148,7 +148,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		return m_Confirmation;
 	}
 
-	ref JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
 		if ( !m_Confirmation )
 			return NULL;
@@ -158,7 +158,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		return m_Confirmation;
 	}
 
-	ref JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
 	{
 		if ( !m_Confirmation )
 			return NULL;
