@@ -16,6 +16,8 @@ class UIActionScroller extends UIActionBase
 	protected bool m_IsDragScrolling;
 	protected bool m_IsMouseScrolling;
 
+	protected bool m_IsUpdating;
+
 	override void OnInit() 
 	{
 		super.OnInit();
@@ -43,6 +45,15 @@ class UIActionScroller extends UIActionBase
 	}
 
 	void UpdateScroller()
+	{
+		m_IsUpdating = true;
+		
+		_UpdateScroller();
+
+		m_IsUpdating = false;
+	}
+
+	void _UpdateScroller()
 	{
 		//Print( "+" + this + "::UpdateScroller" );
 
@@ -231,13 +242,13 @@ class UIActionScroller extends UIActionBase
 		return true;
 	}
 	
-	override bool OnResize( Widget w, int x, int y )
-	{
-		if ( w == layoutRoot || w == m_Content ) 
-		{
-			// UpdateScroller();
-		}
-
-		return false;
-	}
+	//override bool OnUpdate(Widget w)
+	//{
+	//	//if (!m_IsUpdating) 
+	//	//{
+	//	//	UpdateScroller();
+	//	//}
+//
+	//	return false;
+	//}
 }
