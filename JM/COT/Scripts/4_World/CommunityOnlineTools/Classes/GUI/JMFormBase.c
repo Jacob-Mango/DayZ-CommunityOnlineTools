@@ -14,6 +14,7 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 	void ~JMFormBase() 
 	{
+		OnHide();
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -33,6 +34,8 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		if ( SetModule( mdl ) )
 		{
 			OnInit();
+
+			OnShow();
 		}
 	}
 
