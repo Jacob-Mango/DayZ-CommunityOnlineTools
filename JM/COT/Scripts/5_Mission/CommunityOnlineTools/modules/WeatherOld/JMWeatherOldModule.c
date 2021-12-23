@@ -38,6 +38,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 	{
 		return "JM/COT/gui/layouts/weather_form_old.layout";
 	}
+
+	override bool IsDeprecatedWindowing()
+	{
+		return true;
+	}
 	
 	override string GetTitle()
 	{

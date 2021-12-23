@@ -83,6 +83,16 @@ class JMRenderableModuleBase extends JMModuleBase
 		return "";
 	}
 
+	override string GetLayoutFile()
+	{
+		return GetLayoutRoot();
+	}
+
+	bool IsDeprecatedWindowing()
+	{
+		return false;
+	}
+
 	string GetTitle()
 	{
 		return "";
@@ -143,12 +153,22 @@ class JMRenderableModuleBase extends JMModuleBase
 		{
 			#ifdef CF_WINDOWS
 			m_Window = new CF_Window();
-			
-			Widget widgets = m_Window.CreateWidgets(GetLayoutRoot());
-			
-			widgets.GetScript(m_Form);
-			
-			m_Form.Init(m_Window, this);
+
+			if (IsDeprecatedWindowing())
+			{
+				Widget widgets = m_Window.CreateWidgets(GetLayoutRoot());
+				
+				widgets.GetScript(m_Form);
+				
+				if (m_Form)
+				{
+					m_Form.Init(m_Window, this);
+				}
+			}
+			else
+			{
+				m_Window.SetModel(this);
+			}
 			#else
 			if ( !m_Window )
 			{

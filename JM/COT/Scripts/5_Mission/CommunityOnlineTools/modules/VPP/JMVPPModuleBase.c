@@ -13,6 +13,11 @@ class JMVPPModuleBase : JMRenderableModuleBase
 		return "";
 	}
 
+	override bool IsDeprecatedWindowing()
+	{
+		return true;
+	}
+
 	override bool ImageIsIcon()
 	{
 		return true;

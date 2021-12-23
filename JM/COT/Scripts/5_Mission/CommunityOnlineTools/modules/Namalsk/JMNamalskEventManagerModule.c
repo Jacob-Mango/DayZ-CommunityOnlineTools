@@ -36,6 +36,11 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		return "JM/COT/GUI/layouts/eventspawner_form.layout";
 	}
+
+	override bool IsDeprecatedWindowing()
+	{
+		return true;
+	}
 	
 	override string GetTitle()
 	{
