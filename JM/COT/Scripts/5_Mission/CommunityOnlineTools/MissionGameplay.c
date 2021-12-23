@@ -18,6 +18,8 @@ modded class MissionGameplay
 		{
 			if ( g_Game.GetGameState() != DayZGameState.MAIN_MENU )
 			{
+				CreateCustomDefaultCharacter();
+
 				if ( GetPermissionsManager().OnClientConnected( NULL, m_OfflineInstance ) )
 				{
 					GetCommunityOnlineToolsBase().SetClient( m_OfflineInstance );

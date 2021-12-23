@@ -29,6 +29,11 @@ class JMMapModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/mapview_form.layout";
 	}
 
+	override bool IsDeprecatedWindowing()
+	{
+		return true;
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_MAP_MODULE_NAME";

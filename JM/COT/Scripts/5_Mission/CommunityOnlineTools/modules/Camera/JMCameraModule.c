@@ -40,6 +40,11 @@ class JMCameraModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/camera_form.layout";
 	}
 
+	override bool IsDeprecatedWindowing()
+	{
+		return true;
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_CAMERA_MODULE_NAME";
