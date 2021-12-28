@@ -2,10 +2,18 @@ class JMCommandConstructor : Managed
 {
 	static void Generate(inout map<string, ref map<string, ref JMCommand>> commands)
 	{
-		array<JMModuleBase> modules = GetModuleManager().GetAllModules();
-		for (int i = 0; i < modules.Count(); i++)
+#ifdef CF_MODULES
+		int count = CF_ModuleCoreManager.Count();
+		for (int i = 0; i < count; i++)
+		{
+			JMModuleBase module;
+			if (!Class.CastTo(module, CF_ModuleCoreManager.Get(i))) continue;
+#else
+		array< JMModuleBase > modules = GetModuleManager().GetAllModules();
+		for ( int i = 0; i < modules.Count(); ++i )
 		{
 			JMModuleBase module = modules[i];
+#endif
 			array<string> commandNames = module.GetCommandNames();
 			if (commandNames.Count() == 0) continue;
 
