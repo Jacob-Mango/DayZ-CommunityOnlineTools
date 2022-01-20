@@ -20,21 +20,21 @@ class JMWebhookConstructor : Managed
 		int count = CF_ModuleCoreManager.Count();
 		for (int i = 0; i < count; i++)
 		{
-			JMModuleBase module;
+			CF_ModuleWorld module;
 			if (!Class.CastTo(module, CF_ModuleCoreManager.Get(i))) continue;
 #else
-		array< JMModuleBase > modules = GetModuleManager().GetAllModules();
+		array< CF_ModuleWorld > modules = GetModuleManager().GetAllModules();
 		for ( int i = 0; i < modules.Count(); ++i )
 		{
-			JMModuleBase module = modules[i];
+			CF_ModuleWorld module = modules[i];
 #endif
-			constructor.AddConnection( module.GetModuleName() );
+			constructor.AddConnection( module.ClassName() );
 
 			array< string > moduleTypes = new array< string >;
 			module.GetWebhookTypes( moduleTypes );
 			for ( int j = 0; j < moduleTypes.Count(); ++j )
 			{
-				constructor.AddConnection( module.GetModuleName() + moduleTypes[j] );
+				constructor.AddConnection( module.ClassName() + moduleTypes[j] );
 			}
 		}
 

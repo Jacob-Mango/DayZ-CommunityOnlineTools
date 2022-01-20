@@ -34,32 +34,27 @@ class JMWebhookQueueItem : Managed
 	}
 };
 
-class JMWebhookModule: JMModuleBase
+[CF_RegisterModule(JMWebhookModule)]
+class JMWebhookModule: CF_ModuleWorld
 {
 	private RestApi m_Core;
 
-	private ref map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
+	private autoptr map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
 
-	private ref array< ref JMWebhookQueueItem > m_Queue;
+	private autoptr array< ref JMWebhookQueueItem > m_Queue;
 
 	private JMWebhookSerialize m_Settings;
 
-	private ref ConfigFile m_ServerConfig;
+	private autoptr ConfigFile m_ServerConfig;
 	private string m_ServerHostName;
-
-	void JMWebhookModule()
-	{
-	}
-
-	void ~JMWebhookModule()
-	{
-		delete m_ConnectionMap;
-
-		delete m_ServerConfig;
-	}
 
 	override void OnInit()
 	{
+		super.OnInit();
+		
+		if (!GetGame().IsDedicatedServer())
+			return;
+		
 		string serverCfg;
 		GetGame().CommandlineGetParam( "config", serverCfg );
 
@@ -89,9 +84,13 @@ class JMWebhookModule: JMModuleBase
 		{
 			adminLog.SetWebhook( this );
 		}
+		
+		EnableMissionStart();
+		EnableMissionFinish();
+		EnableMissionLoaded();
 	}
 
-	override void OnMissionStart()
+	override void OnMissionStart(Class sender, CF_EventArgs args)
 	{
 		JMWebhookConnectionGroup group = NULL;
 
@@ -125,10 +124,8 @@ class JMWebhookModule: JMModuleBase
 		GetGame().GameScript.Call( this, "Thread_ProcessQueue", NULL );
 	}
 
-	override void OnMissionLoaded()
+	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionLoaded();
-
 		auto message = CreateDiscordMessage();
 				
 		message.GetEmbed().AddField( "Server Status", "Server is starting up." );
@@ -136,7 +133,7 @@ class JMWebhookModule: JMModuleBase
 		Post( "ServerStartup", message );
 	}
 
-	override void OnMissionFinish()
+	override void OnMissionFinish(Class sender, CF_EventArgs args)
 	{
 		auto message = CreateDiscordMessage();
 

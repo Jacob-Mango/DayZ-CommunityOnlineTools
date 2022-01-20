@@ -10,7 +10,7 @@ modded class ChatInputMenu
 			text = text.Substring(1, text.Length() - 1);
 
 			JMCommandModule mod;
-			if ( Class.CastTo( mod, GetModuleManager().GetModule( JMCommandModule ) ) )
+			if (CF_Modules<JMCommandModule>.Get(mod))
 			{
 				mod.PerformCommand(text);
 			}

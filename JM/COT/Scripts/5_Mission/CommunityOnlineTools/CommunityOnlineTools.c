@@ -335,7 +335,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
 
-		GetModuleManager().OnClientPermissionsUpdated();
+		CF_ModuleCoreManager.OnPermissionsChanged(this, new CF_EventArgs());
 	}
 
 	private void Server_SetClient( JMPlayerInstance player )
@@ -389,7 +389,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			role.Deserialize();
 		}
 
-		GetModuleManager().OnClientPermissionsUpdated();
+		CF_ModuleCoreManager.OnPermissionsChanged(this, new CF_EventArgs());
 	}
 
 	private void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )

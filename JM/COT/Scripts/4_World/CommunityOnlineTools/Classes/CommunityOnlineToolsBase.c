@@ -18,10 +18,9 @@ class CommunityOnlineToolsBase
 
 	void ~CommunityOnlineToolsBase()
 	{
-		array< JMRenderableModuleBase > cotModules = GetModuleManager().GetCOTModules();
-		for ( int i = 0; i < cotModules.Count(); i++ )
+		foreach (auto module : COTModule.s_All)
 		{
-			cotModules[i].Hide();
+			module.Hide();
 		}
 
 		GetDayZGame().Event_OnRPC.Remove( OnRPC );

@@ -5,15 +5,19 @@ enum JMCommandModuleRPC
 	COUNT
 };
 
-class JMCommandModule: JMModuleBase
+[CF_RegisterModule(JMCommandModule)]
+class JMCommandModule: CF_ModuleWorld
 {
 	private ref map<string, ref map<string, ref JMCommand>> m_CommandMap = new map<string, ref map<string, ref JMCommand>>();
-
-	void JMCommandModule() 
+	
+	override void OnInit()
 	{
+		super.OnInit();
+		
+		EnableMissionStart();
 	}
 
-	override void OnMissionStart()
+	override void OnMissionStart(Class sender, CF_EventArgs args)
 	{
 		JMCommandConstructor.Generate(m_CommandMap);
 	}
@@ -28,14 +32,15 @@ class JMCommandModule: JMModuleBase
 		return JMCommandModuleRPC.COUNT;
 	}
 
-	override void OnRPC(PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx)
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch (rpc_type)
+		auto rpc = CF_EventRPCArgs.Cast(args);
+		switch (rpc.ID)
 		{
 			case JMCommandModuleRPC.PerformCommand:
 			{
 				string input;
-				if (!ctx.Read(input)) return;
+				if (!rpc.Context.Read(input)) return;
 
 				array<string> tokens = new array<string>();
 				input.Split(" ", tokens);
@@ -55,7 +60,7 @@ class JMCommandModule: JMModuleBase
 						tokens.RemoveOrdered(0);
 						tokens.RemoveOrdered(0);
 
-						subCommand.Execute(sender, tokens);
+						subCommand.Execute(rpc.Sender, tokens);
 					}
 				}
 			}

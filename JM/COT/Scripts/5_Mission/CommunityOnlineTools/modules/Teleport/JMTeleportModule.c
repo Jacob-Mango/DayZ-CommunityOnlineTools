@@ -7,12 +7,21 @@ enum JMTeleportModuleRPC
 	COUNT
 };
 
+[CF_RegisterModule(JMTeleportModule)]
 class JMTeleportModule: JMRenderableModuleBase
 {
 	private ref JMTeleportSerialize m_Settings;
 	
-	void JMTeleportModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		EnableRPC();
+		EnableMissionLoaded();
+		EnableMissionFinish();
+		
+		Bind("Input_Cursor", "UATeleportModuleTeleportCursor", true);
+	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor" );
@@ -67,16 +76,14 @@ class JMTeleportModule: JMRenderableModuleBase
 		types.Insert( "Location" );
 	}
 
-	override void OnMissionLoaded()
+	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionLoaded();
-
 		Load();
 	}
 	
-	override void OnSettingsUpdated()
+	override void OnSettingsChanged(Class sender, CF_EventArgs args)
 	{
-		super.OnSettingsUpdated();
+		super.OnSettingsChanged(sender, args);
 
 		if ( m_Settings )
 		{
@@ -94,19 +101,10 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	override void OnMissionFinish()
+	override void OnMissionFinish(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionFinish();
-
 		if ( GetGame().IsServer() && m_Settings )
 			m_Settings.Save();
-	}
-
-	override void RegisterKeyMouseBindings() 
-	{
-		super.RegisterKeyMouseBindings();
-		
-		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()
@@ -167,18 +165,20 @@ class JMTeleportModule: JMRenderableModuleBase
 		return JMTeleportModuleRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch ( rpc_type )
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
+
+		switch (rpcArgs.ID)
 		{
 		case JMTeleportModuleRPC.Load:
-			RPC_Load( ctx, sender, target );
+			RPC_Load(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMTeleportModuleRPC.Position:
-			RPC_Position( ctx, sender, target );
+			RPC_Position(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMTeleportModuleRPC.Location:
-			RPC_Location( ctx, sender, target );
+			RPC_Location(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		}
 	}
@@ -193,7 +193,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			m_Settings = JMTeleportSerialize.Load();
 
-			OnSettingsUpdated();
+			OnSettingsChanged(this, new CF_EventArgs);
 		}
 	}
 
@@ -215,7 +215,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			if ( ctx.Read( m_Settings ) )
 			{
-				OnSettingsUpdated();
+				OnSettingsChanged(this, new CF_EventArgs);
 			}
 		}
 	}

@@ -236,10 +236,10 @@ class JMESPMetaPlayer : JMESPMeta
 		m_Player_GUID.SetText( player.GetGUID() );
 		m_Player_Steam.SetText( player.GetSteam64ID() );
 
-		PlayerBase player = PlayerBase.Cast(target);
-		if (player)
+		PlayerBase playerBase = PlayerBase.Cast(target);
+		if (playerBase)
 		{
-			//if (player.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
+			//if (playerBase.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
 			//else m_Player_Speaking.SetText("No");
 		}
 	}
