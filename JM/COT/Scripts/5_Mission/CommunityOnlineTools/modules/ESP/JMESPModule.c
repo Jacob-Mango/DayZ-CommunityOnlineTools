@@ -123,11 +123,6 @@ class JMESPModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/esp_form.layout";
 	}
 
-	override bool IsDeprecatedWindowing()
-	{
-		return true;
-	}
-
 	override string GetTitle()
 	{
 		return "#STR_COT_ESP_MODULE_NAME";

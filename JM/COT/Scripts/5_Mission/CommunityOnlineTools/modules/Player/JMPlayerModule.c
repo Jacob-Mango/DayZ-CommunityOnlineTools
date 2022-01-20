@@ -106,11 +106,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/player_form.layout";
 	}
 
-	override bool IsDeprecatedWindowing()
-	{
-		return true;
-	}
-
 	override string GetTitle()
 	{
 		return "Player Management";

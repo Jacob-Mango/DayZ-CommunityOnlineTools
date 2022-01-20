@@ -41,11 +41,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/objectspawner_form.layout";
 	}
 
-	override bool IsDeprecatedWindowing()
-	{
-		return true;
-	}
-
 	override string GetTitle()
 	{
 		return "Object Spawner";
