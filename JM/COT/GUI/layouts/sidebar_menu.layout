@@ -9,7 +9,7 @@ PanelWidgetClass JMCOTSideBar {
  hexactsize 1
  vexactsize 0
  style DayZDefaultPanelTop
- scriptclass "JMCOTSideBar"
+ scriptclass "COTSideBarEventHandler"
  {
   PanelWidgetClass TitleBar {
    visible 1

@@ -1,4 +1,4 @@
-class JMCOTSideBar extends ScriptedWidgetEventHandler
+class COTSideBarEventHandler extends ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 
@@ -11,12 +11,12 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 	private float m_TotalAnimateTime;
 	private float m_AnimateTime;
 
-	void JMCOTSideBar()
+	void COTSideBarEventHandler()
 	{
 		m_TotalAnimateTime = 0.05; //0.35;
 	}
 	
-	void ~JMCOTSideBar()
+	void ~COTSideBarEventHandler()
 	{
 		Hide();
 	}

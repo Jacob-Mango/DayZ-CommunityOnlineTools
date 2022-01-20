@@ -1,11 +1,11 @@
-enum JMConfirmationType
+enum COTConfirmationModalType
 {
 	INFO = 0,
 	EDIT,
 	SELECTION
 };
 
-class JMConfirmation extends ScriptedWidgetEventHandler 
+class COTConfirmationModal extends ScriptedWidgetEventHandler 
 {
 	private Widget layoutRoot;
 	
@@ -33,11 +33,11 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 	private string m_EditBoxValue;
 
-	void JMConfirmation() 
+	void COTConfirmationModal() 
 	{
 	}
 
-	void ~JMConfirmation() 
+	void ~COTConfirmationModal() 
 	{
 	}
 
@@ -76,7 +76,7 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	{
 		if ( callback != "" )
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<COTConfirmationModal>( this ) );
 		}
 	}
 
@@ -122,10 +122,8 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		return false;
 	}
 
-	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
+	void CreateConfirmation_One( COTConfirmationModalType type, string title, string message, string button1Title, string button1Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_One" );
-
 		layoutRoot.Show( true );
 
 		UpdateType( type );
@@ -145,14 +143,10 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
-
-		//Print( "-" + this + "::CreateConfirmation_One" );
 	}
 
-	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
+	void CreateConfirmation_Two( COTConfirmationModalType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_Two" );
-
 		layoutRoot.Show( true );
 
 		UpdateType( type );
@@ -180,14 +174,10 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText2, m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2.SetText( button2Title );
 		}
-
-		//Print( "-" + this + "::CreateConfirmation_Two" );
 	}
 
-	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
+	void CreateConfirmation_Three( COTConfirmationModalType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_Three" );
-
 		layoutRoot.Show( true );
 
 		UpdateType( type );
@@ -224,39 +214,29 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText3, m_Button3.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText3.SetText( button2Title );
 		}
-
-		//Print( "-" + this + "::CreateConfirmation_Three" );
 	}
 
-	void UpdateType( JMConfirmationType type )
+	void UpdateType( COTConfirmationModalType type )
 	{
-		//Print( "+" + this + "::UpdateType" );
-
 		switch ( type )
 		{
-		case JMConfirmationType.INFO:
+		case COTConfirmationModalType.INFO:
 			m_EditBox.Show( false );
 			break;
-		case JMConfirmationType.EDIT:
+		case COTConfirmationModalType.EDIT:
 			m_EditBox.Show( true );
 			break;
-		case JMConfirmationType.SELECTION:
+		case COTConfirmationModalType.SELECTION:
 			m_EditBox.Show( false );
 			break;
 		}
-
-		//Print( "-" + this + "::UpdateType" );
 	}
 
 	void Close()
 	{
-		//Print( "+" + this + "::Close" );
-
 		m_EditBox.SetText( "" );
 		m_EditBox.Show( false );
 		layoutRoot.Show( false );
-
-		//Print( "-" + this + "::Close" );
 	}
 
 	void OnShow()
@@ -276,4 +256,4 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	{
 		return layoutRoot;
 	}
-}
+};
