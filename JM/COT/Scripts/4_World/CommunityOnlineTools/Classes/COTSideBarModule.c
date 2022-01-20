@@ -1,7 +1,7 @@
 [CF_RegisterModule(COTSideBarModule)]
 class COTSideBarModule : CF_ModuleWorld
 {
-	protected JMCOTSideBar m_COTMenu;
+	protected COTSideBarEventHandler m_COTMenu;
 
 	protected bool m_WasVisible;
 
@@ -15,15 +15,25 @@ class COTSideBarModule : CF_ModuleWorld
 	{
 		super.OnInit();
 		
+		EnableMissionLoaded();
+		EnableMissionFinish();
+		EnableUpdate();
+		
+		EnableInvokeConnect();
+		EnableClientLogoutReconnect();
+		EnableClientLogout();
+		EnableClientDisconnect();
+		EnableClientLogoutCancelled();
+		
 		MakeDirectory( JMConstants.DIR_COT );
 
 		JMScriptInvokers.COT_ON_OPEN.Insert( SetMenuState );
 
 		GetPermissionsManager().RegisterPermission( "COT.View" );
 		
-		Bind("ToggleMenu",		"UACOTToggleButtons",		true 	 );
-		Bind("ToggleCOT",		"UACOTModuleToggleCOT",		false 	 );
-		Bind("CloseCOT",		"UAUIBack",					true 	 );
+		Bind("ToggleMenu", "UACOTToggleButtons", true);
+		Bind("ToggleCOT", "UACOTModuleToggleCOT", false);
+		Bind("CloseCOT", "UAUIBack", true);
 	}
 
 	void ~COTSideBarModule()
@@ -40,16 +50,12 @@ class COTSideBarModule : CF_ModuleWorld
 
 	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
+		Print("OnMissionLoaded");
 		if ( IsMissionClient() )
 		{
 			if ( !JMStatics.ESP_CONTAINER )
 				JMStatics.ESP_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
 			
-			#ifndef CF_WINDOWS
-			if ( !JMStatics.WINDOWS_CONTAINER )
-				JMStatics.WINDOWS_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
-			#endif
-
 			if ( m_COTMenu == NULL )
 			{
 				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
@@ -176,66 +182,12 @@ class COTSideBarModule : CF_ModuleWorld
 		GetCommunityOnlineToolsBase().ToggleOpen();
 	}
 
-	#ifndef CF_WINDOWS
-	void OnMouseUp()
-	{
-		if ( m_GameActive )
-		{
-			m_GameActive = false;
-
-			UpdateMouseControls();
-		}
-	}
-
-	void OnMouseDown()
-	{
-		if ( GetGame().GetUIManager().GetMenu() )
-			return;
-
-		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().Count() > 0 )
-		{
-			bool canContinue = false;
-
-			Widget parentWidget = GetWidgetUnderCursor();
-			while ( parentWidget != NULL )
-			{   
-				if ( m_COTMenu && m_COTMenu.GetLayoutRoot() == parentWidget )
-				{
-					canContinue = true;
-					break;
-				}
-
-				if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
-				{
-					canContinue = true;
-					break;
-				}
-
-				if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
-				{
-					canContinue = true;
-					break;
-				}
-
-				parentWidget = parentWidget.GetParent();
-			}
-
-			if ( !canContinue )
-			{
-				m_GameActive = true;
-
-				SetFocus( NULL );
-
-				UpdateMouseControls();
-			}
-		}
-	}
-	#endif
-
 	void ToggleCOT( UAInput input )
 	{
-		if ( !( input.LocalPress() ) )
+		if (!(input.LocalPress()))
 			return;
+
+			Print(m_COTMenu);
 
 		if ( m_COTMenu == NULL )
 			return;
@@ -245,8 +197,6 @@ class COTSideBarModule : CF_ModuleWorld
 
 		GetCommunityOnlineToolsBase().ToggleActive();
 	}
-
-	//TODO: URGENT: MOVE TO COMMUNITY FRAMEWORK, FULLY DECOUPLE FROM COMMUNITY ONLINE TOOLS
 
 	override void OnInvokeConnect(Class sender, CF_EventArgs args)
 	{
@@ -282,17 +232,10 @@ class COTSideBarModule : CF_ModuleWorld
 				m_Webhook.Post( "PlayerJoin", msg );
 			}
 		}
-
-		//Print( "-COTSideBarModule::OnInvokeConnect - " + identity.GetId() );
 	}
 
-	/**
-	 * See: ClientReconnectEventTypeID
-	 */
 	override void OnClientReconnect(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTSideBarModule::OnClientReconnect - " + identity.GetId() );
-
 		Assert_Null( GetPermissionsManager() );
 		
 		auto cArgs = CF_EventPlayerArgs.Cast(args);
@@ -303,17 +246,10 @@ class COTSideBarModule : CF_ModuleWorld
 		{
 			instance.PlayerObject = cArgs.Player;
 		}
-
-		//Print( "+COTSideBarModule::OnClientReconnect - " + identity.GetId() );
 	}
 
-	/**
-	 * See: ClientDisconnectedEventTypeID
-	 */
 	override void OnClientLogout(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTSideBarModule::OnClientLogout - " + identity.GetId() );
-
 		Assert_Null( GetPermissionsManager() );
 		
 		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
@@ -324,17 +260,10 @@ class COTSideBarModule : CF_ModuleWorld
 		{
 			instance.PlayerObject = cArgs.Player;
 		}
-
-		//Print( "-COTSideBarModule::OnClientLogout - " + identity.GetId() );
 	}
 
-	/**
-	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
-	 */
 	override void OnClientDisconnect(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTSideBarModule::OnClientDisconnect - " + uid );
-
 		Assert_Null( GetPermissionsManager() );
 		
 		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
@@ -353,17 +282,10 @@ class COTSideBarModule : CF_ModuleWorld
 
 			GetCommunityOnlineToolsBase().RemoveClient( cArgs.UID );
 		}
-
-		//Print( "-COTSideBarModule::OnClientDisconnect - " + uid );
 	}
 
-	/**
-	 * See: LogoutCancelEventTypeID
-	 */
 	override void OnClientLogoutCancelled(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTSideBarModule::OnClientLogoutCancelled" );
-
 		Assert_Null( GetPermissionsManager() );
 		
 		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
@@ -374,7 +296,5 @@ class COTSideBarModule : CF_ModuleWorld
 		{
 			instance.PlayerObject = cArgs.Player;
 		}
-
-		//Print( "-COTSideBarModule::OnClientLogoutCancelled" );
 	}
-}
+};
