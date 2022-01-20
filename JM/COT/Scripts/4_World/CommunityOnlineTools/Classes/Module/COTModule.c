@@ -117,11 +117,6 @@ class COTModule extends CF_ModuleWorld
 		return GetLayoutRoot();
 	}
 
-	bool IsDeprecatedWindowing()
-	{
-		return false;
-	}
-
 	string GetTitle()
 	{
 		return "";
@@ -175,13 +170,26 @@ class COTModule extends CF_ModuleWorld
 			return;
 
 		m_Window = new CF_Window();
+		m_Window.OnClose.AddSubscriber(OnHide);
 
 		m_Window.SetModel(this);
+
+		OnShow(this, new CF_EventArgs());
 	}
 
 	void Hide()
 	{
 		delete m_Window;
+	}
+
+	void OnShow(Class sender, CF_EventArgs args)
+	{
+
+	}
+
+	void OnHide(Class sender, CF_EventArgs args)
+	{
+
 	}
 
 	void ToggleShow()

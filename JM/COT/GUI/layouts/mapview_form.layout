@@ -1,4 +1,5 @@
-FrameWidgetClass COTMap {
+FrameWidgetClass cot_mapmodule {
+ clipchildren 0
  color 0 0 0 0
  position 0 0
  size 600 600
@@ -6,12 +7,10 @@ FrameWidgetClass COTMap {
  vexactpos 0
  hexactsize 1
  vexactsize 1
- scriptclass "JMMapForm"
- style EditorPanel
- clipchildren 0
  priority 50
+ scriptclass "CF_FrameWidget"
  {
-  WindowWidgetClass WindowWidget {
+  WindowWidgetClass cot_mapmodule_window {
    position 0 0
    size 1 1
    halign center_ref
@@ -22,7 +21,7 @@ FrameWidgetClass COTMap {
    vexactsize 0
    style Default
    {
-    PanelWidgetClass Background {
+    PanelWidgetClass cot_mapmodule_background {
      clipchildren 0
      ignorepointer 1
      position 0 0
@@ -34,7 +33,7 @@ FrameWidgetClass COTMap {
      draggable 0
      style blank
     }
-    PanelWidgetClass BackPanelWidget {
+    PanelWidgetClass cot_mapmodule_mapwidget_container {
      visible 1
      ignorepointer 1
      position 0 0
@@ -47,18 +46,28 @@ FrameWidgetClass COTMap {
      vexactsize 0
      style blank
      {
-      MapWidgetClass map_widget {
+      MapWidgetClass cot_mapmodule_mapwidget {
        ignorepointer 0
        position 0 0
-       size 1 1
+       size 1 0.99
        hexactpos 1
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       scriptclass "CF_MapWidget"
+       {
+        ScriptParamsClass {
+         Event_DoubleClick "OnDoubleClick"
+        }
+       }
       }
      }
     }
    }
+  }
+ }
+ {
+  ScriptParamsClass {
   }
  }
 }
