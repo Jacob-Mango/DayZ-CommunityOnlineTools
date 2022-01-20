@@ -1,4 +1,5 @@
-class COTModule : JMModuleBase
+[CF_RegisterModule(COTSideBarModule)]
+class COTSideBarModule : CF_ModuleWorld
 {
 	protected JMCOTSideBar m_COTMenu;
 
@@ -10,16 +11,22 @@ class COTModule : JMModuleBase
 
 	protected bool m_LeftMouseDown;
 
-	void COTModule()
+	override void OnInit()
 	{
+		super.OnInit();
+		
 		MakeDirectory( JMConstants.DIR_COT );
 
 		JMScriptInvokers.COT_ON_OPEN.Insert( SetMenuState );
 
 		GetPermissionsManager().RegisterPermission( "COT.View" );
+		
+		Bind("ToggleMenu",		"UACOTToggleButtons",		true 	 );
+		Bind("ToggleCOT",		"UACOTModuleToggleCOT",		false 	 );
+		Bind("CloseCOT",		"UAUIBack",					true 	 );
 	}
 
-	void ~COTModule()
+	void ~COTSideBarModule()
 	{
 		JMScriptInvokers.COT_ON_OPEN.Remove( SetMenuState );
 
@@ -31,10 +38,8 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	override void OnMissionLoaded()
+	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionLoaded();
-		
 		if ( IsMissionClient() )
 		{
 			if ( !JMStatics.ESP_CONTAINER )
@@ -73,31 +78,23 @@ class COTModule : JMModuleBase
 		}
 	}
 
-	override void OnMissionFinish()
+	override void OnMissionFinish(Class sender, CF_EventArgs args)
 	{
-		if ( IsMissionClient() )
+		if (IsMissionClient())
 		{
 			delete m_COTMenu;
 		}
 	}
 
-	override void RegisterKeyMouseBindings() 
-	{
-		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
-		RegisterBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
-	}
-
-	override void OnUpdate( float timeslice )
+	override void OnUpdate(Class sender, CF_EventArgs args)
 	{
 		JMStatics.COT_MENU = null;
 		if ( m_COTMenu )
 		{
 			JMStatics.COT_MENU = m_COTMenu.GetLayoutRoot();
 
-			m_COTMenu.OnUpdate( timeslice );
+			m_COTMenu.OnUpdate(CF_EventUpdateArgs.Cast(args).DeltaTime);
 
-			#ifdef CF_WINDOWS
 			if (m_COTMenu.IsVisible())
 			{
 				if (!m_WasVisible)
@@ -111,32 +108,12 @@ class COTModule : JMModuleBase
 				m_WasVisible = false;
 				CF_Windows.OverrideInputState(false);
 			}
-			#else
-			if ( m_LeftMouseDown )
-			{
-				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
-				{
-					OnMouseUp();
-
-					m_LeftMouseDown = false;
-				}
-			} else
-			{
-				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) != 0 )
-				{
-					OnMouseDown();
-					
-					m_LeftMouseDown = true;
-				}
-			}
-			#endif
 		}
 		else if (m_WasVisible)
 		{
 			m_WasVisible = false;
-			#ifdef CF_WINDOWS
+			
 			CF_Windows.OverrideInputState(false);
-			#endif
 		}
 
 		if ( m_ForceHUD )
@@ -144,27 +121,6 @@ class COTModule : JMModuleBase
 			GetGame().GetMission().GetHud().Show( false );
 		}
 	}
-
-	#ifndef CF_WINDOWS
-	void UpdateMouseControls()
-	{
-		bool isMenuOpen = m_COTMenu && m_COTMenu.IsVisible();
-		bool windowsOpen = GetCOTWindowManager().Count() > 0;
-
-		if ( !isMenuOpen && !windowsOpen )
-			return;
-
-		if ( m_GameActive )
-		{
-			GetGame().GetInput().ResetGameFocus();
-			GetGame().GetUIManager().ShowUICursor( false );
-		} else
-		{
-			GetGame().GetInput().ChangeGameFocus( 1 );
-			GetGame().GetUIManager().ShowUICursor( true );
-		}
-	}
-	#endif
 
 	void COTForceHud( bool enable )
 	{
@@ -198,29 +154,18 @@ class COTModule : JMModuleBase
 
 	void CloseCOT( UAInput input )
 	{
-		if ( !( input.LocalPress() ) )
+		if (!(input.LocalPress()))
 			return;
 
-		////Print( "+COTModule::CloseCOT" );
-
-		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
-		for ( int i = 0; i < modules.Count(); ++i )
+		foreach (auto module : COTModule.s_All)
 		{
-			//Print( "  +" + modules[i].Type().ToString() );
-			//Print( "  visible=" + modules[i].IsVisible() );
-			if ( modules[i].IsVisible() )
+			if (module.IsVisible())
 			{
-				modules[i].Hide();
+				module.Hide();
 			}
-			//Print( "  -" + modules[i].Type().ToString() );
 		}
 
-		//Print( "  +SetOpen" );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
-
-		//Print( "  -SetOpen" );
-
-		////Print( "-COTModule::CloseCOT" );
+		GetGame().GetCallQueue(CALL_CATEGORY_GUI).Call(GetCommunityOnlineToolsBase().SetOpen, false);
 	}
 
 	void ToggleMenu( UAInput input = NULL )
@@ -303,31 +248,30 @@ class COTModule : JMModuleBase
 
 	//TODO: URGENT: MOVE TO COMMUNITY FRAMEWORK, FULLY DECOUPLE FROM COMMUNITY ONLINE TOOLS
 
-	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
+	override void OnInvokeConnect(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTModule::OnInvokeConnect - " + identity.GetId() );
-
+		auto cArgs = CF_EventPlayerArgs.Cast(args);
+		
 		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
 
 		#ifdef CF_MODULE_PERMISSIONS
 		for ( int i = 0; i < GetPermissionsManager().RoleCount(); i++ )
 		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), identity );
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().GetRole( i ), cArgs.Identity );
 		}
 		#else
 		for ( int i = 0; i < GetPermissionsManager().Roles.Count(); i++ )
 		{
-			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement(i), identity );
+			GetCommunityOnlineToolsBase().UpdateRole( GetPermissionsManager().Roles.GetElement(i), cArgs.Identity );
 		}
 		#endif
 		
 		JMPlayerInstance instance;
-		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
+		if ( GetPermissionsManager().OnClientConnected( cArgs.Identity, instance ) )
 		{
-			instance.PlayerObject = player;
+			instance.PlayerObject = cArgs.Player;
 
-			GetCommunityOnlineToolsBase().SetClient( instance, identity );
+			GetCommunityOnlineToolsBase().SetClient( instance, cArgs.Identity );
 
 			if ( m_Webhook )
 			{
@@ -339,60 +283,64 @@ class COTModule : JMModuleBase
 			}
 		}
 
-		//Print( "-COTModule::OnInvokeConnect - " + identity.GetId() );
+		//Print( "-COTSideBarModule::OnInvokeConnect - " + identity.GetId() );
 	}
 
 	/**
 	 * See: ClientReconnectEventTypeID
 	 */
-	override void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
+	override void OnClientReconnect(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
+		//Print( "+COTSideBarModule::OnClientReconnect - " + identity.GetId() );
 
 		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
+		
+		auto cArgs = CF_EventPlayerArgs.Cast(args);
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( cArgs.Identity.GetId() );
 
 		if ( !Assert_Null( instance ) )
 		{
-			instance.PlayerObject = player;
+			instance.PlayerObject = cArgs.Player;
 		}
 
-		//Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
+		//Print( "+COTSideBarModule::OnClientReconnect - " + identity.GetId() );
 	}
 
 	/**
 	 * See: ClientDisconnectedEventTypeID
 	 */
-	override void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
+	override void OnClientLogout(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTModule::OnClientLogout - " + identity.GetId() );
+		//Print( "+COTSideBarModule::OnClientLogout - " + identity.GetId() );
 
 		Assert_Null( GetPermissionsManager() );
-		Assert_Null( identity );
+		
+		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( identity.GetId() );
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( cArgs.Identity.GetId() );
 
 		if ( !Assert_Null( instance ) )
 		{
-			instance.PlayerObject = player;
+			instance.PlayerObject = cArgs.Player;
 		}
 
-		//Print( "-COTModule::OnClientLogout - " + identity.GetId() );
+		//Print( "-COTSideBarModule::OnClientLogout - " + identity.GetId() );
 	}
 
 	/**
 	 * See: MissionServer::PlayerDisconnected - Fires when the player has disconnected from the server (OnClientReconnect won't fire)
 	 */
-	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
+	override void OnClientDisconnect(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTModule::OnClientDisconnect - " + uid );
+		//Print( "+COTSideBarModule::OnClientDisconnect - " + uid );
 
 		Assert_Null( GetPermissionsManager() );
+		
+		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
 
 		JMPlayerInstance instance;
-		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )
+		if ( GetPermissionsManager().OnClientDisconnected( cArgs.UID, instance ) )
 		{
 			if ( m_Webhook )
 			{
@@ -403,33 +351,30 @@ class COTModule : JMModuleBase
 				m_Webhook.Post( "PlayerLeave", msg );
 			}
 
-			GetCommunityOnlineToolsBase().RemoveClient( uid );
+			GetCommunityOnlineToolsBase().RemoveClient( cArgs.UID );
 		}
 
-		//Print( "-COTModule::OnClientDisconnect - " + uid );
+		//Print( "-COTSideBarModule::OnClientDisconnect - " + uid );
 	}
 
 	/**
 	 * See: LogoutCancelEventTypeID
 	 */
-	override void OnClientLogoutCancelled( PlayerBase player )
+	override void OnClientLogoutCancelled(Class sender, CF_EventArgs args)
 	{
-		//Print( "+COTModule::OnClientLogoutCancelled" );
+		//Print( "+COTSideBarModule::OnClientLogoutCancelled" );
 
 		Assert_Null( GetPermissionsManager() );
-		Assert_Null( player );
-		Assert_Null( player.GetIdentity() );
+		
+		auto cArgs = CF_EventPlayerDisconnectedArgs.Cast(args);
 
-		Print( "  COTModule::OnClientLogoutCancelled - " + player.GetIdentity().GetId() );
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( cArgs.Player.GetIdentity().GetId() );
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
-
-		Assert_Null( instance );
-		if ( instance )
+		if ( !Assert_Null( instance ) )
 		{
-			instance.PlayerObject = player;
+			instance.PlayerObject = cArgs.Player;
 		}
 
-		//Print( "-COTModule::OnClientLogoutCancelled" );
+		//Print( "-COTSideBarModule::OnClientLogoutCancelled" );
 	}
 }

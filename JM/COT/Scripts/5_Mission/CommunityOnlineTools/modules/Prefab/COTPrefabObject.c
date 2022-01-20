@@ -51,7 +51,7 @@ class COTPrefabObject
 		return object;
 	}
 
-	COTPrefabObject SetQuantity(quantity)
+	COTPrefabObject SetQuantity(int quantity)
 	{
 		Quantity = quantity;
 

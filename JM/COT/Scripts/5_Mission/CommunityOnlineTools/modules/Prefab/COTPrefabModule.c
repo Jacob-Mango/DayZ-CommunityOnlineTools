@@ -1,4 +1,5 @@
-class COTPrefabModule : JMRenderableModuleBase
+[CF_RegisterModule(COTPrefabModule)]
+class COTPrefabModule : COTModule
 {
 	autoptr array<ref COTPrefabFile> PrefabFiles = new array<ref COTPrefabFile>();
 
@@ -13,9 +14,6 @@ class COTPrefabModule : JMRenderableModuleBase
 		return "Prefab Module";
 	}
 
-	
-
-
 
 	//! DEFAULTS
 
@@ -27,7 +25,7 @@ class COTPrefabModule : JMRenderableModuleBase
 	{
 		auto pCivilianSedan = COTPrefabFile.Create("CivilianSedan", "Civilian Sedan");
 
-		pCivilianSedan.BeginAttachment();
+		pCivilianSedan.BeginAttachment("");
 	}
 
 };

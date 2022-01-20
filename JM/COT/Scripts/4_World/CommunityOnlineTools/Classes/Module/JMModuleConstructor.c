@@ -4,7 +4,7 @@ modded class JMModuleConstructorBase
 	{
 		super.RegisterModules( modules );
 
-		modules.Insert( COTModule );
+		modules.Insert( COTSideBarModule );
 		modules.Insert( JMWebhookModule );
 	}
 }

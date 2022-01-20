@@ -1,12 +1,12 @@
-modded class JMModuleBase
+modded class CF_ModuleWorld
 {
 	protected JMWebhookModule m_Webhook;
 
-	override void OnMissionStart()
+	override void OnInit()
 	{
-		super.OnMissionStart();
+		super.OnInit();
 		
-		Class.CastTo( m_Webhook, GetModuleManager().GetModule( JMWebhookModule ) );
+		m_Webhook = CF_Modules<JMWebhookModule>.Get();
 	}
 
 	void SendWebhook( string type, string message )
@@ -18,14 +18,11 @@ modded class JMModuleBase
 
 		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
-		m_Webhook.Post( GetModuleName() + type, msg );
+		m_Webhook.Post( ClassName() + type, msg );
 	}
 
 	void SendWebhook( string type, JMPlayerInstance player, string message )
 	{
-		#ifdef JM_COT_WEBHOOK_DEBUG
-		Print( "+JMModuleBase::SendWebhook() - Admin" );
-		#endif
 		if ( !m_Webhook || !player || IsMissionOffline() )
 			return;
 
@@ -33,16 +30,7 @@ modded class JMModuleBase
 
 		msg.GetEmbed().AddField( GetWebhookTitle(), message, false );
 
-		#ifdef JM_COT_WEBHOOK_DEBUG
-		Print( "name=" + GetModuleName() + type );
-		Print( "message=" + message );
-		#endif
-
-		m_Webhook.Post( GetModuleName() + type, msg );
-		
-		#ifdef JM_COT_WEBHOOK_DEBUG
-		Print( "-JMModuleBase::SendWebhook() - Admin" );
-		#endif
+		m_Webhook.Post( ClassName() + type, msg );
 	}
 
 	string GetWebhookTitle()
@@ -54,12 +42,6 @@ modded class JMModuleBase
 	{
 		
 	}
-
-#ifndef CF_MODULE_PERMISSIONS
-	override void OnClientPermissionsUpdated()
-	{
-	}
-#endif
 
 	void GetSubCommands(inout array<ref JMCommand> commands)
 	{

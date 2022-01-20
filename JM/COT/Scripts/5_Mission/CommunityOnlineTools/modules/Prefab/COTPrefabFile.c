@@ -42,7 +42,7 @@ class COTPrefabFile : COTPrefabObject
 
 		s_Begin.Clear();
 
-		GetModuleManager().GetModule(COTPrefabModule).PrefabFiles.Insert(prefab);
+		CF_Modules<COTPrefabModule>.Get().PrefabFiles.Insert(prefab);
 
 		return prefab;
 	}

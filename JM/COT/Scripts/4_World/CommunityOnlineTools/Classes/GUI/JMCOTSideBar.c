@@ -43,17 +43,17 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 	{
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "PayPal.Me/JacobMango" );
 
-		array< JMRenderableModuleBase > modules = new array< JMRenderableModuleBase >;
-		SortModuleArray( GetModuleManager().GetCOTModules(), modules );
+		array<COTModule> modules();
+		SortModuleArray( COTModule.s_All, modules );
 
-		for ( int i = 0; i < modules.Count(); i++ )
+		foreach (auto module : modules)
 		{
-			JMRenderableModuleBase module = modules.Get( i );
-
-			if ( modules[i] && modules[i].HasButton() )
+			if (!module || !module.HasButton())
 			{
-				modules[i].InitButton( GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget( "Buttons" ) ) );
+				continue;
 			}
+
+			module.InitButton(GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget("Buttons")));
 		}
 
 		float h;
@@ -62,7 +62,7 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		Hide();
 	}
 
-	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
+	private void SortModuleArray( array<COTModule> modules, out array<COTModule> sorted )
 	{
 		string pNames[ 1000 ];
 		int pIndices[ 1000 ];
@@ -190,12 +190,8 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 		if ( !IsMissionClient() ) 
 			return false;
 		
-		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
-
-		for ( int i = 0; i < modules.Count(); i++ )
+		foreach (auto module : COTModule.s_All)
 		{
-			JMRenderableModuleBase module = modules[i];
-
 			if ( w == module.GetMenuButton() )
 			{
 				module.ToggleShow();

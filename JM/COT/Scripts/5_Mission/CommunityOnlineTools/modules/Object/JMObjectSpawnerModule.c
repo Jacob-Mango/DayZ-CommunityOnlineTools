@@ -7,23 +7,23 @@ enum JMObjectSpawnerModuleRPC
 	COUNT
 };
 
+[CF_RegisterModule(JMObjectSpawnerModule)]
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
-	void JMObjectSpawnerModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		EnableRPC();
+
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Position" );
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Inventory" );
 		GetPermissionsManager().RegisterPermission( "Entity.Delete" );
 		GetPermissionsManager().RegisterPermission( "Entity.View" );
-	}
 
-	override void RegisterKeyMouseBindings() 
-	{
-		super.RegisterKeyMouseBindings();
-		
-		RegisterBinding( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
-		RegisterBinding( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
-		RegisterBinding( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
+		Bind("SpawnRandomInfected", "UAObjectModuleSpawnInfected", true);
+		Bind("SpawnRandomAnimal", "UAObjectModuleSpawnAnimal", true);
+		Bind("SpawnRandomWolf", "UAObjectModuleSpawnWolf", true);
 	}
 
 	override bool HasAccess()
@@ -143,18 +143,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return JMObjectSpawnerModuleRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch ( rpc_type )
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
+
+		switch (rpcArgs.ID)
 		{
 		case JMObjectSpawnerModuleRPC.Position:
-			RPC_SpawnEntity_Position( ctx, sender, target );
+			RPC_SpawnEntity_Position(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMObjectSpawnerModuleRPC.Inventory:
-			RPC_SpawnEntity_Inventory( ctx, sender, target );
+			RPC_SpawnEntity_Inventory(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMObjectSpawnerModuleRPC.Delete:
-			RPC_DeleteEntity( ctx, sender, target );
+			RPC_DeleteEntity(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		}
 	}

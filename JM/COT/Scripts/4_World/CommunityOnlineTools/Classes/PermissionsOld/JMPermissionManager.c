@@ -335,7 +335,7 @@ class JMPermissionManager
 		{
 			if ( m_ClientGUID == guid )
 			{
-				GetModuleManager().OnClientPermissionsUpdated();
+				CF_ModuleCoreManager.OnPermissionsChanged(this, new CF_EventArgs());
 			}
 
 			instance.PlayerObject = playerUpdatePlayer;

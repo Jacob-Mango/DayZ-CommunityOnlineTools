@@ -6,23 +6,26 @@ enum JMCameraModuleRPC
 	COUNT
 };
 
+[CF_RegisterModule(JMCameraModule)]
 class JMCameraModule: JMRenderableModuleBase
 {
 	protected float m_CurrentSmoothBlur;
 	protected float m_CurrentFOV;
 	protected float m_TargetFOV;
 
-	void JMCameraModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		Bind("ToggleCamera", "UACameraToolToggleCamera", true);
+		Bind("ZoomForwards", "UACameraToolZoomForwards", true);
+		Bind("ZoomBackwards", "UACameraToolZoomBackwards", true);
+		
 		GetPermissionsManager().RegisterPermission( "Camera.View" );
 
 		m_CurrentSmoothBlur = 0.0;
 		m_CurrentFOV = 1.0;
 		m_TargetFOV = 1.0;
-	}
-
-	void ~JMCameraModule()
-	{
 	}
 
 	override bool HasAccess()
@@ -65,57 +68,50 @@ class JMCameraModule: JMRenderableModuleBase
 		return true;
 	}
 	
-	override void OnUpdate( float timeslice )
-	{
-		if ( IsMissionClient() && CurrentActiveCamera )
+	override void OnUpdate(Class sender, CF_EventArgs args)
+	{		
+		if (!IsMissionClient() || !CurrentActiveCamera)
 		{
-			float speed = 0.2;
-			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
-			PPEffects.SetBlur( m_CurrentSmoothBlur );
+			return;
+		}
+	
+		float speed = 0.2;
+		m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
+		PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-			if ( m_CurrentFOV != m_TargetFOV ) 
+		if ( m_CurrentFOV != m_TargetFOV ) 
+		{
+			m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, CF_EventUpdateArgs.Cast(args).DeltaTime * CAMERA_FOV_SPEED_MODIFIER );
+			CurrentActiveCamera.SetFOV( m_CurrentFOV );
+		}
+
+		if ( CAMERA_DOF )
+		{
+			vector from = GetGame().GetCurrentCameraPosition();
+
+			float dist = 0.0;
+
+			if ( CurrentActiveCamera.SelectedTarget )
 			{
-				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
-				CurrentActiveCamera.SetFOV( m_CurrentFOV );
-			}
-
-			if ( CAMERA_DOF )
+				dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
+			} else if ( CAMERA_AFOCUS )
 			{
-				vector from = GetGame().GetCurrentCameraPosition();
-
-				float dist = 0.0;
-
-				if ( CurrentActiveCamera.SelectedTarget )
-				{
-					dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
-				} else if ( CAMERA_AFOCUS )
-				{
-					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
-					vector contact_pos;
-					
-					DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
-					dist = vector.Distance( from, contact_pos );
-				}
-
-				if ( dist > 0 )
-					CAMERA_FDIST = dist;
+				vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
+				vector contact_pos;
 				
-				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
-				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
-				// PPEffects.SetBlurOptics( 0 );
+				DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
+				dist = vector.Distance( from, contact_pos );
 			}
+
+			if ( dist > 0 )
+				CAMERA_FDIST = dist;
+			
+			// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
+			PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+			// PPEffects.SetBlurOptics( 0 );
 		}
 	}
 	
-	override void RegisterKeyMouseBindings() 
-	{
-		super.RegisterKeyMouseBindings();
-		
-		RegisterBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
-	}
-
 	Camera GetCamera()
 	{
 		return CurrentActiveCamera;
@@ -131,15 +127,17 @@ class JMCameraModule: JMRenderableModuleBase
 		return JMCameraModuleRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch ( rpc_type )
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
+
+		switch (rpcArgs.ID)
 		{
 		case JMCameraModuleRPC.Enter:
-			RPC_Enter( ctx, sender, target );
+			RPC_Enter(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMCameraModuleRPC.Leave:
-			RPC_Leave( ctx, sender, target );
+			RPC_Leave(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		}
 	}

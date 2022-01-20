@@ -9,6 +9,7 @@ enum JMNamalskEventManagerRPC
 	COUNT
 };
 
+[CF_RegisterModule(JMNamalskEventManagerModule)]
 class JMNamalskEventManagerModule: JMRenderableModuleBase
 {
 	private Class m_EventManager;
@@ -16,15 +17,20 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	autoptr array<string> Events = new array<string>();
 	bool AllowMultipleEvents;
 	
-	void JMNamalskEventManagerModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		EnableMissionLoaded();
+		EnableRPC();
+
 		GetPermissionsManager().RegisterPermission( "Namalsk" );
 		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
 	}
 
 	override bool HasButton()
 	{
-		return true; // module isn't loaded if namalsk isn't loaded anyways
+		return true;
 	}
 
 	override bool HasAccess()
@@ -52,10 +58,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		return "N";
 	}
 	
-	override void OnMissionLoaded()
+	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionLoaded();
-
 		if (GetGame().IsServer())
 		{
 			RetrievePossibleEvents();
@@ -66,10 +70,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		}
 	}
 	
-	override void OnClientPermissionsUpdated()
+	override void OnPermissionsChanged(Class sender, CF_EventArgs args)
 	{
-		super.OnClientPermissionsUpdated();
-
 		if (Events.Count() > 0) return;
 
 		if (GetPermissionsManager().HasPermission("Namalsk"))
@@ -88,19 +90,20 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		return JMNamalskEventManagerRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		JMPlayerInstance instance;
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
 
+		JMPlayerInstance instance;
 		string evt;
 
-		switch (rpc_type)
+		switch (rpcArgs.ID)
 		{
 			case JMNamalskEventManagerRPC.StartEvent:
 			{
-				if (!ctx.Read(evt)) return;
+				if (!rpcArgs.Context.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Start", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Start", rpcArgs.Sender, instance)) return;
 				
 				StartEvent(evt);
 
@@ -109,9 +112,9 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 			case JMNamalskEventManagerRPC.CancelEvent:
 			{
-				if (!ctx.Read(evt)) return;
+				if (!rpcArgs.Context.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Cancel", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Cancel", rpcArgs.Sender, instance)) return;
 				
 				CancelEvent(evt);
 
@@ -123,19 +126,19 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 				if (!GetGame().IsClient()) return;
 
 				array<string> evts;
-				if (!ctx.Read(evts)) return;
+				if (!rpcArgs.Context.Read(evts)) return;
 				Events.Copy(evts);
 
-				if (!ctx.Read(AllowMultipleEvents)) return;
+				if (!rpcArgs.Context.Read(AllowMultipleEvents)) return;
 
-				OnSettingsUpdated();
+				OnSettingsChanged(this, new CF_EventArgs);
 				
 				break;
 			}
 			
 			case JMNamalskEventManagerRPC.RequestEvents:
 			{
-				if (!GetPermissionsManager().HasPermission("Namalsk", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermission("Namalsk", rpcArgs.Sender, instance)) return;
 
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(Events);
@@ -202,7 +205,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		}
 		else
 		{
-			OnSettingsUpdated();
+			OnSettingsChanged(this, new CF_EventArgs);
 		}
 	}
 };

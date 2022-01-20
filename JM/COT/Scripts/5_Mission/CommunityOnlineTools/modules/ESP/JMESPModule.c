@@ -26,6 +26,7 @@ enum JMESPState
 	Remove
 };
 
+[CF_RegisterModule(JMESPModule)]
 class JMESPModule: JMRenderableModuleBase
 {
 	private ref array< Object > m_SelectedObjects;
@@ -50,8 +51,14 @@ class JMESPModule: JMRenderableModuleBase
 	private JMESPState m_CurrentState = JMESPState.Remove;
 	private bool m_StateChanged = false;
 
-	void JMESPModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		EnableMissionStart();
+		EnableMissionFinish();
+		EnableRPC();
+
 		ESPRadius = 200;
 
 		ESPUpdateTime = 1;
@@ -72,18 +79,33 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Dismantle" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Repair" );
-	}
 
-	void ~JMESPModule()
-	{
-		delete m_SelectedObjects;
-		delete m_ActiveESPObjects;
-		delete m_ESPToCreate;
-		delete m_ESPToDestroy;
-		delete m_MappedESPObjects;
-		delete m_ViewTypes;
+		m_SelectedObjects = new array< Object >;
 
-		Hide();
+		m_ActiveESPObjects = new array< ref JMESPMeta >;
+
+		m_ESPToCreate = new array< ref JMESPMeta >;
+		m_ESPToDestroy = new array< JMESPMeta >;
+
+		m_MappedESPObjects = new map< Object, JMESPMeta >;
+
+		m_ViewTypes = new array< ref JMESPViewType >;
+
+		TTypenameArray espTypes = new TTypenameArray;
+		RegisterTypes( espTypes );
+		
+		for(int i = 0; i < espTypes.Count(); i++)
+		{
+			if ( espTypes[i].IsInherited( JMESPViewType ) )
+			{
+				ref JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
+				if ( viewType )
+				{
+					m_ViewTypes.Insert( viewType );
+					GetPermissionsManager().RegisterPermission( "ESP.View." + viewType.Permission );
+				}
+			}
+		}
 	}
 
 	override bool HasAccess()
@@ -143,10 +165,8 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "MoveToCursorAbsolute" );
 	}
 
-	override void OnClientPermissionsUpdated()
+	override void OnPermissionsChanged(Class sender, CF_EventArgs args)
 	{
-		super.OnClientPermissionsUpdated();
-
 		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
 		{
 			m_ViewTypes[i].HasPermission = GetPermissionsManager().HasPermission( "ESP.View." + m_ViewTypes[i].Permission );
@@ -156,36 +176,6 @@ class JMESPModule: JMRenderableModuleBase
 		if ( Class.CastTo( form, GetForm() ) )
 		{
 			form.DisableToggleableOptions();
-		}
-	}
-
-	override void OnInit()
-	{
-		m_SelectedObjects = new array< Object >;
-
-		m_ActiveESPObjects = new array< ref JMESPMeta >;
-
-		m_ESPToCreate = new array< ref JMESPMeta >;
-		m_ESPToDestroy = new array< JMESPMeta >;
-
-		m_MappedESPObjects = new map< Object, JMESPMeta >;
-
-		m_ViewTypes = new array< ref JMESPViewType >;
-
-		TTypenameArray espTypes = new TTypenameArray;
-		RegisterTypes( espTypes );
-		
-		for(int i = 0; i < espTypes.Count(); i++)
-		{
-			if ( espTypes[i].IsInherited( JMESPViewType ) )
-			{
-				ref JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
-				if ( viewType )
-				{
-					m_ViewTypes.Insert( viewType );
-					GetPermissionsManager().RegisterPermission( "ESP.View." + viewType.Permission );
-				}
-			}
 		}
 	}
 
@@ -219,10 +209,8 @@ class JMESPModule: JMRenderableModuleBase
 		return m_ViewTypes;
 	}
 
-	override void OnMissionStart()
+	override void OnMissionStart(Class sender, CF_EventArgs args)
 	{
-		super.OnMissionStart();
-
 		if ( IsMissionClient() )
 		{
 			JMESPWidgetHandler.espModule = this;
@@ -262,7 +250,7 @@ class JMESPModule: JMRenderableModuleBase
 		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 	}
 
-	override void OnMissionFinish()
+	override void OnMissionFinish(Class sender, CF_EventArgs args)
 	{
 		for (int j = 0; j < m_ActiveESPObjects.Count(); j++ )
 		{
@@ -623,48 +611,50 @@ class JMESPModule: JMRenderableModuleBase
 		return JMESPModuleRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch ( rpc_type )
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
+
+		switch (rpcArgs.ID)
 		{
 		case JMESPModuleRPC.Log:
-			RPC_Log( ctx, sender, target );
+			RPC_Log(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.SetPosition:
-			RPC_SetPosition( ctx, sender, target );
+			RPC_SetPosition(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.SetOrientation:
-			RPC_SetOrientation( ctx, sender, target );
+			RPC_SetOrientation(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.SetHealth:
-			RPC_SetHealth( ctx, sender, target );
+			RPC_SetHealth(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.DeleteObject:
-			RPC_DeleteObject( ctx, sender, target );
+			RPC_DeleteObject(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.BaseBuilding_Build:
-			RPC_BaseBuilding_Build( ctx, sender, target );
+			RPC_BaseBuilding_Build(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.BaseBuilding_Dismantle:
-			RPC_BaseBuilding_Dismantle( ctx, sender, target );
+			RPC_BaseBuilding_Dismantle(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.BaseBuilding_Repair:
-			RPC_BaseBuilding_Repair( ctx, sender, target );
+			RPC_BaseBuilding_Repair(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.MakeItemSet:
-			RPC_MakeItemSet( ctx, sender, target );
+			RPC_MakeItemSet(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.DuplicateAll:
-			RPC_DuplicateAll( ctx, sender, target );
+			RPC_DuplicateAll(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.DeleteAll:
-			RPC_DeleteAll( ctx, sender, target );
+			RPC_DeleteAll(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.MoveToCursorRelative:
-			RPC_MoveToCursorRelative( ctx, sender, target );
+			RPC_MoveToCursorRelative(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMESPModuleRPC.MoveToCursorAbsolute:
-			RPC_MoveToCursorAbsolute( ctx, sender, target );
+			RPC_MoveToCursorAbsolute(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		}
 	}

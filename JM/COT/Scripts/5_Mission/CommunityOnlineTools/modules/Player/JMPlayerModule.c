@@ -28,10 +28,15 @@ enum JMPlayerModuleRPC
 	COUNT
 };
 
+[CF_RegisterModule(JMPlayerModule)]
 class JMPlayerModule: JMRenderableModuleBase
 {
-	void JMPlayerModule()
+	override void OnInit()
 	{
+		super.OnInit();
+
+		EnableRPC();
+
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
@@ -145,81 +150,83 @@ class JMPlayerModule: JMRenderableModuleBase
 		return JMPlayerModuleRPC.COUNT;
 	}
 
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+	override void OnRPC(Class sender, CF_EventArgs args)
 	{
-		switch ( rpc_type )
+		auto rpcArgs = CF_EventRPCArgs.Cast(args);
+
+		switch (rpcArgs.ID)
 		{
 		case JMPlayerModuleRPC.SetHealth:
-			RPC_SetHealth( ctx, sender, target );
+			RPC_SetHealth(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetBlood:
-			RPC_SetBlood( ctx, sender, target );
+			RPC_SetBlood(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetShock:
-			RPC_SetShock( ctx, sender, target );
+			RPC_SetShock(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetEnergy:
-			RPC_SetEnergy( ctx, sender, target );
+			RPC_SetEnergy(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetWater:
-			RPC_SetWater( ctx, sender, target );
+			RPC_SetWater(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetStamina:
-			RPC_SetStamina( ctx, sender, target );
+			RPC_SetStamina(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetBloodyHands:
-			RPC_SetBloodyHands( ctx, sender, target );
+			RPC_SetBloodyHands(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.RepairTransport:
-			RPC_RepairTransport( ctx, sender, target );
+			RPC_RepairTransport(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.TeleportTo:
-			RPC_TeleportTo( ctx, sender, target );
+			RPC_TeleportTo(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.TeleportSenderTo:
-			RPC_TeleportSenderTo( ctx, sender, target );
+			RPC_TeleportSenderTo(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.TeleportToPrevious:
-			RPC_TeleportToPrevious( ctx, sender, target );
+			RPC_TeleportToPrevious(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.StartSpectating:
-			RPC_StartSpectating( ctx, sender, target );
+			RPC_StartSpectating(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.EndSpectating:
-			RPC_EndSpectating( ctx, sender, target );
+			RPC_EndSpectating(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetGodMode:
-			RPC_SetGodMode( ctx, sender, target );
+			RPC_SetGodMode(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetFreeze:
-			RPC_SetFreeze( ctx, sender, target );
+			RPC_SetFreeze(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetInvisible:
-			RPC_SetInvisible( ctx, sender, target );
+			RPC_SetInvisible(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetUnlimitedAmmo:
-			RPC_SetUnlimitedAmmo( ctx, sender, target );
+			RPC_SetUnlimitedAmmo(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetUnlimitedStamina:
-			RPC_SetUnlimitedStamina( ctx, sender, target );
+			RPC_SetUnlimitedStamina(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetBrokenLegs:
-			RPC_SetBrokenLegs( ctx, sender, target );
+			RPC_SetBrokenLegs(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.Heal:
-			RPC_Heal( ctx, sender, target );
+			RPC_Heal(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.Strip:
-			RPC_Strip( ctx, sender, target );
+			RPC_Strip(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.StopBleeding:
-			RPC_StopBleeding( ctx, sender, target );
+			RPC_StopBleeding(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetPermissions:
-			RPC_SetPermissions( ctx, sender, target );
+			RPC_SetPermissions(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		case JMPlayerModuleRPC.SetRoles:
-			RPC_SetRoles( ctx, sender, target );
+			RPC_SetRoles(rpcArgs.Context, rpcArgs.Sender, rpcArgs.Target);
 			break;
 		}
 	}
@@ -1561,4 +1568,4 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		Exec_SetRoles( roles, guids, senderRPC, instance );
 	}
-}
+};
