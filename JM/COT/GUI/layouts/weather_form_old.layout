@@ -1,44 +1,66 @@
-PanelWidgetClass JMWeatherOldForm {
+WrapSpacerWidgetClass cot_weathermodule {
  color 0 0 0 0
  position 0 0
- size 570 220
+ size 452.65601 248.24899
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
- scriptclass "JMWeatherOldForm"
- style EditorPanel
+ scriptclass "CF_WrapSpacerWidget"
+ style Colorable
+ content_halign center
  {
-  PanelWidgetClass slider_wrapper {
-   position 5 5
-   size 560 1
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
+  GridSpacerWidgetClass cot_weathermodule_controls {
+   size 1 1
+   halign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
    vexactsize 0
+   "Size To Content V" 1
+   Columns 1
+   Rows 7
    {
-    TextWidgetClass txt_ppp_st_start_time {
+    GridSpacerWidgetClass cot_weathermodule_time {
+     ignorepointer 1
      position 0 0
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_START_TIME"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_start_time {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_time_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_START_TIME"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_time_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_start_time_value {
+        TextWidgetClass cot_weathermodule_time_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -46,38 +68,68 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
+         scriptclass "CF_TextWidget"
          text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_TimeString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Time"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_start_day {
-     position 0 25
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_day {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_START_DAY"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_start_day {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_day_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_START_DAY"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_day_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_start_day_value {
+        TextWidgetClass cot_weathermodule_day_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -85,38 +137,68 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_DateString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Date"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_overcast {
-     position 0 50
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_overcast {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_OVERCAST"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_overcast {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_overcast_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_OVERCAST"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_overcast_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_overcast_value {
+        TextWidgetClass cot_weathermodule_overcast_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -124,38 +206,68 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_OvercastString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Overcast"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_rain {
-     position 0 75
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_rain {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_RAIN"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_rain {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_rain_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_RAIN"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_rain_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_rain_value {
+        TextWidgetClass cot_weathermodule_rain_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -163,38 +275,68 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_RainString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Rain"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_fog {
-     position 0 100
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_fog {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_FOG"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_fog {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_fog_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_FOG"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_fog_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_fog_value {
+        TextWidgetClass cot_weathermodule_fog_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -202,38 +344,68 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_FogString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Fog"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_wind_force {
-     position 0 125
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_wind {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_WIND"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_wind_force {
-       position 0.3 0
-       size 0.7 1
+      TextWidgetClass cot_weathermodule_wind_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_WIND"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_wind_slider {
+       position 0 0
+       size 1 22
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_wind_force_value {
+        TextWidgetClass cot_weathermodule_wind_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -241,39 +413,69 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_WindString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Wind"
         }
        }
       }
      }
     }
-    TextWidgetClass txt_ppp_st_temperature {
-     position 0 148.455
-     size 1 20
-     hexactpos 1
-     vexactpos 1
+    GridSpacerWidgetClass cot_weathermodule_temperature {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
-     text "#STR_COT_WEATHER_MODULE_TEMPERATURE"
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text valign" center
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
      {
-      SliderWidgetClass sld_ppp_st_temperature {
+      TextWidgetClass cot_weathermodule_temperature_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_TEMPERATURE"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_weathermodule_temperature_slider {
        disabled 1
-       position 0.3 0
-       size 0.7 1
+       position 0 0
+       size 1 21
        hexactpos 0
        vexactpos 1
        hexactsize 0
-       vexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
        style Editor
+       maximum 1
+       step 0.01
        {
-        TextWidgetClass txt_ppp_st_temperature_value {
+        TextWidgetClass cot_weathermodule_temperature_slider_value {
+         ignorepointer 1
          size 1 1
          halign center_ref
          valign center_ref
@@ -281,11 +483,23 @@ PanelWidgetClass JMWeatherOldForm {
          vexactpos 1
          hexactsize 0
          vexactsize 0
-         text "50.5%"
+         scriptclass "CF_TextWidget"
+         text ""
          font "gui/fonts/Metron"
          "exact text" 1
          "text halign" center
          "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_TemperatureString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Temperature"
         }
        }
       }
@@ -293,27 +507,54 @@ PanelWidgetClass JMWeatherOldForm {
     }
    }
   }
-  ButtonWidgetClass btn_save {
-   position 5 5
-   size 80 20
-   halign right_ref
-   valign bottom_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   text "#STR_COT_WEATHER_MODULE_APPLY"
+  GridSpacerWidgetClass cot_weathermodule_buttons {
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Columns 2
+   Rows 1
+   {
+    ButtonWidgetClass cot_weathermodule_buttons_refresh {
+     size 80 19
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scriptclass "CF_ButtonWidget"
+     text "#STR_COT_WEATHER_MODULE_REFRESH"
+     {
+      ScriptParamsClass {
+       Event_Click "Click_Refresh"
+      }
+     }
+    }
+    ButtonWidgetClass cot_weathermodule_buttons_apply {
+     size 80 20
+     halign right_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scriptclass "CF_ButtonWidget"
+     text "#STR_COT_WEATHER_MODULE_APPLY"
+     {
+      ScriptParamsClass {
+       Event_Click "Click_Apply"
+      }
+     }
+    }
+   }
   }
-  ButtonWidgetClass btn_refresh {
-   position 477.29999 6.06614
-   size 80 20
-   halign right_ref
-   valign bottom_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   text "#STR_COT_WEATHER_MODULE_REFRESH"
+ }
+ {
+  ScriptParamsClass {
   }
  }
 }
