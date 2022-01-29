@@ -1,4 +1,4 @@
-WrapSpacerWidgetClass cot_weathermodule {
+GridSpacerWidgetClass cot_weathermodule {
  color 0 0 0 0
  position 0 0
  size 452.65601 248.24899
@@ -7,7 +7,11 @@ WrapSpacerWidgetClass cot_weathermodule {
  hexactsize 1
  vexactsize 1
  scriptclass "CF_WrapSpacerWidget"
+ valign center_ref
  style Colorable
+ "Size To Content V" 1
+ Columns 1
+ Rows 2
  content_halign center
  {
   GridSpacerWidgetClass cot_weathermodule_controls {
@@ -57,7 +61,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_time_slider_value {
          ignorepointer 1
@@ -126,7 +130,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_day_slider_value {
          ignorepointer 1
@@ -195,7 +199,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_overcast_slider_value {
          ignorepointer 1
@@ -264,7 +268,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_rain_slider_value {
          ignorepointer 1
@@ -333,7 +337,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_fog_slider_value {
          ignorepointer 1
@@ -402,7 +406,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_wind_slider_value {
          ignorepointer 1
@@ -472,7 +476,7 @@ WrapSpacerWidgetClass cot_weathermodule {
        scriptclass "CF_SliderWidget"
        style Editor
        maximum 1
-       step 0.01
+       step 0.000001
        {
         TextWidgetClass cot_weathermodule_temperature_slider_value {
          ignorepointer 1

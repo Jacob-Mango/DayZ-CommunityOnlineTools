@@ -2,16 +2,17 @@
 class COTWeatherModule : COTModule
 {
 	static const int s_DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	static const int s_DaysTotal[12] = {31,59,90,120,151,181,212,243,273,304,334,365};
 
 	int m_Hour;
 	int m_Minute;
-	int m_Time;
+	float m_Time;
 	string m_TimeString;
 
 	int m_Day;
 	int m_Month;
 	int m_Year;
-	int m_Date;
+	float m_Date;
 	string m_DateString;
 
 	float m_Overcast;
@@ -60,6 +61,13 @@ class COTWeatherModule : COTModule
 		GetPermissionsManager().RegisterPermission("Weather.View");
 	}
 
+	override void OnShow(Class sender, CF_EventArgs args)
+	{
+		super.OnShow(sender, args);
+
+		Reset();
+	}
+
 	void Click_Refresh(Class sender, CF_EventArgs args)
 	{
 		Reset();
@@ -78,6 +86,8 @@ class COTWeatherModule : COTModule
 		{
 			GetRPCManager().SendRPC("COT_Weather", "Weather_SetWindFunctionParams", new Param3<float, float, float>(m_Wind * weather.GetWindMaximumSpeed(), weather.GetWindMaximumSpeed(), 1), true);
 		}
+
+		Reset();
 	}
 
 	void OnChange(Class sender, CF_EventArgs args)
@@ -87,31 +97,44 @@ class COTWeatherModule : COTModule
 
 	void UpdateStrings()
 	{
-		int time = m_Time * 14.39;
+		int time = m_Time * 1439;
 		m_Hour = time / 60;
 		m_Minute = time % 60;
 
-		int start_day = m_Date * 3.64 + 1;
-
-		for (int i = 0; i < 12; i++)
+		int days = m_Date * 364;
+		m_Month = 0;
+		m_Day = 0;
+		for (m_Month = 0; m_Month < 12; m_Month++)
 		{
-			int days = s_DaysInMonth[i];
-			if (start_day <= days)
+			if (days - s_DaysTotal[m_Month] < 0)
 			{
-				m_Month = i + 1;
-				m_Day = start_day;
+				m_Day = s_DaysInMonth[m_Month] - (s_DaysTotal[m_Month] - days);
 				break;
 			}
-
-			start_day -= days;
 		}
 
-		m_TimeString = m_Hour.ToString() + ":" + m_Minute.ToString();
-		m_DateString = m_Day.ToString() + "/" + m_Month.ToString() + "/" + m_Year.ToString();
-		m_OvercastString = m_Overcast.ToString() + "%";
-		m_RainString = m_Rain.ToString() + "%";
-		m_FogString = m_Fog.ToString() + "%";
-		m_WindString = m_Wind.ToString() + "%";
+		CF_String minute = m_Minute.ToString();
+		string sminute = minute.PadStringFront(2, "0");
+
+		CF_String hour = m_Hour.ToString();
+		string shour = hour.PadStringFront(2, "0");
+
+		CF_String day = m_Day.ToString();
+		string sday = day.PadStringFront(2, "0");
+
+		CF_String month = (m_Month + 1).ToString();
+		string smonth = month.PadStringFront(2, "0");
+
+		CF_String year = m_Year.ToString();
+		string syear = year.PadStringFront(4, "0");
+
+		m_TimeString = shour + ":" + sminute;
+		m_DateString = sday + "/" + smonth + "/" + syear;
+
+		m_OvercastString = (m_Overcast * 100.0).ToString() + "%";
+		m_RainString = (m_Rain * 100.0).ToString() + "%";
+		m_FogString = (m_Fog * 100.0).ToString() + "%";
+		m_WindString = (m_Wind * 100.0).ToString() + "%";
 		m_TemperatureString = m_Temperature.ToString() + "°C";
 
 		NotifyPropertyChanged("m_TimeString");
@@ -119,27 +142,34 @@ class COTWeatherModule : COTModule
 		NotifyPropertyChanged("m_OvercastString");
 		NotifyPropertyChanged("m_RainString");
 		NotifyPropertyChanged("m_FogString");
+		NotifyPropertyChanged("m_WindString");
 		NotifyPropertyChanged("m_TemperatureString");
 	}
 
 	void Reset()
 	{
+		m_Time = 0;
+		m_Date = 0;
+		m_Overcast = 0;
+		m_Rain = 0;
+		m_Fog = 0;
+		m_Wind = 0;
+		m_Temperature = 0;
+
 		World world = GetGame().GetWorld();
 		if (world)
 		{
 			world.GetDate(m_Year, m_Month, m_Day, m_Hour, m_Minute);
 
-			m_Time = ((m_Hour * 60) + m_Minute) / 14.39;
-
-			float start_day = m_Date;
-			int month_tmp = m_Month;
-			while (month_tmp > 1)
+			m_Time = ((m_Hour * 60.0) + m_Minute) / 1439.0;
+			
+			m_Date = m_Day;
+			for (int month = m_Month - 1; month >= 0; month--)
 			{
-				month_tmp--;
-				start_day += s_DaysInMonth[month_tmp];
+				m_Date += s_DaysInMonth[month];
 			}
 
-			m_Date = start_day / 3.64;
+			m_Date = m_Date / 364;
 		}
 
 		Weather weather = GetGame().GetWeather();
@@ -151,6 +181,24 @@ class COTWeatherModule : COTModule
 			m_Wind = weather.GetWindSpeed() / weather.GetWindMaximumSpeed();
 		}
 
+		Mission mission = GetGame().GetMission();
+		if (mission)
+		{
+			WorldData worldData = mission.GetWorldData();
+			if (worldData)
+			{
+				m_Temperature = worldData.GetBaseEnvTemperatureExact(m_Month, m_Day, m_Hour, m_Minute);
+			}
+		}
+
+		NotifyPropertyChanged("m_Time");
+		NotifyPropertyChanged("m_Date");
+		NotifyPropertyChanged("m_Overcast");
+		NotifyPropertyChanged("m_Rain");
+		NotifyPropertyChanged("m_Fog");
+		NotifyPropertyChanged("m_Wind");
+		NotifyPropertyChanged("m_Temperature");
+
 		UpdateStrings();
 	}
 
@@ -161,7 +209,7 @@ class COTWeatherModule : COTModule
 
 	override string GetLayoutRoot()
 	{
-		return "JM/COT/gui/layouts/weather_form_old.layout";
+		return "JM/COT/gui/layouts/weather.layout";
 	}
 
 	override string GetTitle()
