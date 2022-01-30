@@ -1,0 +1,746 @@
+GridSpacerWidgetClass cot_cameramodule {
+ color 0 0 0 0
+ size 452.65601 248.24899
+ halign center_ref
+ valign center_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "CF_WrapSpacerWidget"
+ style Colorable
+ "Size To Content V" 1
+ content_halign center
+ Columns 1
+ Rows 1
+ {
+  GridSpacerWidgetClass cot_cameramodule_controls {
+   size 1 1
+   halign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Columns 1
+   Rows 7
+   {
+    GridSpacerWidgetClass cot_cameramodule_fov {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
+     {
+      TextWidgetClass cot_cameramodule_fov_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_CAMERA_MODULE_FOV"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_cameramodule_fov_slider {
+       position 0 0
+       size 1 22
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
+       style Editor
+       maximum 1
+       step 0.00001
+       {
+        TextWidgetClass cot_cameramodule_fov_slider_value {
+         ignorepointer 1
+         size 1 1
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         scriptclass "CF_TextWidget"
+         text ""
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_FOVString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_FOVTarget"
+        }
+       }
+      }
+     }
+    }
+    GridSpacerWidgetClass cot_cameramodule_dof_enable {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
+     {
+      CheckBoxWidgetClass cot_cameramodule_dof_enable_checkbox {
+       position 0 0
+       size 1 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       text "#STR_COT_CAMERA_MODULE_FOV"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+	   scriptclass "CF_CheckBoxWidget"
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Checked "m_DOF"
+        }
+       }
+      }
+     }
+    }
+    GridSpacerWidgetClass cot_cameramodule_dof {
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content V" 1
+     Columns 1
+     Rows 7
+     scriptclass "CF_GridSpacerWidget"
+     {
+      GridSpacerWidgetClass cot_cameramodule_dof_focusdistanceauto {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 1
+       Rows 1
+       {
+        CheckBoxWidgetClass cot_cameramodule_dof_enable_checkbox {
+         position 0 0
+         size 1 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFFOCUSDISTANCEAUTO"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+         scriptclass "CF_CheckBoxWidget"
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+           Checked "m_DOFFocusDistanceAuto"
+          }
+         }
+        }
+       }
+      }
+      GridSpacerWidgetClass cot_cameramodule_dof_focusdistance {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 2
+       Rows 1
+       {
+        TextWidgetClass cot_cameramodule_dof_focusdistance_header {
+         position 0 0
+         size 100 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFFOCUSDISTANCE"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+        }
+        SliderWidgetClass cot_cameramodule_dof_focusdistance_slider {
+         position 0 0
+         size 1 22
+         hexactpos 0
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         scriptclass "CF_SliderWidget"
+         style Editor
+         maximum 1
+         step 0.00001
+         {
+          TextWidgetClass cot_cameramodule_dof_focusdistance_slider_value {
+           ignorepointer 1
+           size 1 0.99
+           halign center_ref
+           valign center_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           scriptclass "CF_TextWidget"
+           text ""
+           font "gui/fonts/Metron"
+           "exact text" 1
+           "text halign" center
+           "text valign" center
+           {
+            ScriptParamsClass {
+             Text "m_DOFFocusDistanceString"
+            }
+           }
+          }
+         }
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+		   Enabled "m_DOFFocusDistanceAuto:CF_TypeConverter_BoolInvert"
+           Current "m_DOFFocusDistance"
+          }
+         }
+        }
+       }
+      }
+      GridSpacerWidgetClass cot_cameramodule_dof_focuslength {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 2
+       Rows 1
+       {
+        TextWidgetClass cot_cameramodule_dof_focuslength_header {
+         position 0 0
+         size 100 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFFOCUSLENGTH"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+        }
+        SliderWidgetClass cot_cameramodule_dof_focuslength_slider {
+         position 0 0
+         size 1 22
+         hexactpos 0
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         scriptclass "CF_SliderWidget"
+         style Editor
+         maximum 1
+         step 0.00001
+         {
+          TextWidgetClass cot_cameramodule_dof_focuslength_slider_value {
+           ignorepointer 1
+           size 1 1
+           halign center_ref
+           valign center_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           scriptclass "CF_TextWidget"
+           text ""
+           font "gui/fonts/Metron"
+           "exact text" 1
+           "text halign" center
+           "text valign" center
+           {
+            ScriptParamsClass {
+             Text "m_DOFFocusLengthString"
+            }
+           }
+          }
+         }
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+           Current "m_DOFFocusLength"
+          }
+         }
+        }
+       }
+      }
+      GridSpacerWidgetClass cot_cameramodule_dof_focusnear {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 2
+       Rows 1
+       {
+        TextWidgetClass cot_cameramodule_dof_focusnear_header {
+         position 0 0
+         size 100 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFFOCUSNEAR"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+        }
+        SliderWidgetClass cot_cameramodule_dof_focusnear_slider {
+         position 0 0
+         size 1 22
+         hexactpos 0
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         scriptclass "CF_SliderWidget"
+         style Editor
+         maximum 1
+         step 0.00001
+         {
+          TextWidgetClass cot_cameramodule_dof_focusnear_slider_value {
+           ignorepointer 1
+           size 1 1
+           halign center_ref
+           valign center_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           scriptclass "CF_TextWidget"
+           text ""
+           font "gui/fonts/Metron"
+           "exact text" 1
+           "text halign" center
+           "text valign" center
+           {
+            ScriptParamsClass {
+             Text "m_DOFFocusNearString"
+            }
+           }
+          }
+         }
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+           Current "m_DOFFocusNear"
+          }
+         }
+        }
+       }
+      }
+      GridSpacerWidgetClass cot_cameramodule_dof_focusdepthoffset {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 2
+       Rows 1
+       {
+        TextWidgetClass cot_cameramodule_dof_focusdepthoffset_header {
+         position 0 0
+         size 100 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFFOCUSDEPTHOFFSET"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+        }
+        SliderWidgetClass cot_cameramodule_dof_focusdepthoffset_slider {
+         position 0 0
+         size 1 22
+         hexactpos 0
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         scriptclass "CF_SliderWidget"
+         style Editor
+         maximum 1
+         step 0.00001
+         {
+          TextWidgetClass cot_cameramodule_dof_focusdepthoffset_slider_value {
+           ignorepointer 1
+           size 1 1
+           halign center_ref
+           valign center_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           scriptclass "CF_TextWidget"
+           text ""
+           font "gui/fonts/Metron"
+           "exact text" 1
+           "text halign" center
+           "text valign" center
+           {
+            ScriptParamsClass {
+             Text "m_DOFFocusDepthOffsetString"
+            }
+           }
+          }
+         }
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+           Current "m_DOFFocusDepthOffset"
+          }
+         }
+        }
+       }
+      }
+      GridSpacerWidgetClass cot_cameramodule_dof_blur {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "Size To Content H" 1
+       "Size To Content V" 1
+       Columns 2
+       Rows 1
+       {
+        TextWidgetClass cot_cameramodule_dof_blur_header {
+         position 0 0
+         size 100 22
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "#STR_COT_CAMERA_MODULE_DOFBLUR"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text valign" center
+        }
+        SliderWidgetClass cot_cameramodule_dof_blur_slider {
+         position 0 0
+         size 1 22
+         hexactpos 0
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         scriptclass "CF_SliderWidget"
+         style Editor
+         maximum 1
+         step 0.00001
+         {
+          TextWidgetClass cot_cameramodule_dof_blur_slider_value {
+           ignorepointer 1
+           size 1 1
+           halign center_ref
+           valign center_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 0
+           scriptclass "CF_TextWidget"
+           text ""
+           font "gui/fonts/Metron"
+           "exact text" 1
+           "text halign" center
+           "text valign" center
+           {
+            ScriptParamsClass {
+             Text "m_DOFBlurString"
+            }
+           }
+          }
+         }
+         {
+          ScriptParamsClass {
+           Event_Change "OnChange"
+           Current "m_DOFBlur"
+          }
+         }
+        }
+       }
+      }
+	 }
+     {
+      ScriptParamsClass {
+       Visible "m_DOF"
+      }
+     }
+	}
+    GridSpacerWidgetClass cot_cameramodule_blur {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
+     {
+      TextWidgetClass cot_cameramodule_blur_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_CAMERA_MODULE_BLUR"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_cameramodule_blur_slider {
+       position 0 0
+       size 1 21
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
+       style Editor
+       maximum 1
+       step 0.00001
+       {
+        TextWidgetClass cot_cameramodule_blur_slider_value {
+         ignorepointer 1
+         size 1 1
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         scriptclass "CF_TextWidget"
+         text ""
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_BlurString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_BlurTarget"
+        }
+       }
+      }
+     }
+    }
+    GridSpacerWidgetClass cot_cameramodule_speed {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
+     {
+      TextWidgetClass cot_cameramodule_speed_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_CAMERA_MODULE_SPEED"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_cameramodule_speed_slider {
+       position 0 0
+       size 1 22
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
+       style Editor
+       maximum 1
+       step 0.00001
+       {
+        TextWidgetClass cot_cameramodule_speed_slider_value {
+         ignorepointer 1
+         size 1 1
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         scriptclass "CF_TextWidget"
+         text ""
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_SpeedString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Speed"
+        }
+       }
+      }
+     }
+    }
+    GridSpacerWidgetClass cot_cameramodule_exposure {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     "Size To Content V" 1
+     Columns 2
+     Rows 1
+     {
+      TextWidgetClass cot_cameramodule_exposure_header {
+       position 0 0
+       size 100 22
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_CAMERA_MODULE_EXPOSURE"
+       font "gui/fonts/Metron"
+       "exact text" 1
+       "text valign" center
+      }
+      SliderWidgetClass cot_cameramodule_exposure_slider {
+       position 0 0
+       size 1 22
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       scriptclass "CF_SliderWidget"
+       style Editor
+       maximum 1
+       step 0.00001
+       {
+        TextWidgetClass cot_cameramodule_exposure_slider_value {
+         ignorepointer 1
+         size 1 1
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         scriptclass "CF_TextWidget"
+         text ""
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+         {
+          ScriptParamsClass {
+           Text "m_ExposureString"
+          }
+         }
+        }
+       }
+       {
+        ScriptParamsClass {
+         Event_Change "OnChange"
+         Current "m_Exposure"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+ {
+  ScriptParamsClass {
+  }
+ }
+}

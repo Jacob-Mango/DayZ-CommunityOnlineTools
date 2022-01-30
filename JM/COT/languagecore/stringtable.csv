@@ -1,9 +1,15 @@
 Language,original,english,czech,german,russian,polish,hungarian,italian,spanish,french,chinese,japanese,portuguese,chinesesimp
+STR_COT_CAMERA_MODULE_SPEED,Speed:,Speed:,,,,,,,,,,,,
+STR_COT_CAMERA_MODULE_FOV,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Фокусное расстояние (Д):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,���� (L):
 STR_COT_CAMERA_MODULE_BLUR,Blur:,Blur:,Blur:,Blur:,Размытие:,Blur:,Blur:,Blur:,Blur:,Flou:,Blur:,Blur:,Blur:,ģ��:
 STR_COT_CAMERA_MODULE_EXPOSURE,Exposure:,Exposure:,Exposure:,Exposure:,Экспозиция:,Exposure:,Exposure:,Exposure:,Exposure:,Exposition:,Exposure:,Exposure:,Exposure:,�ع�:
-STR_COT_CAMERA_MODULE_FOCAL_LENGTH,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Фокусное расстояние (Д):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,���� (L):
-STR_COT_CAMERA_MODULE_FOCAL_NEAR,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Фокусное расстояние (Б):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,���� (N):
-STR_COT_CAMERA_MODULE_FOCUS,Focus:,Focus:,Focus:,Focus:,Фокус:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,Focus:,����:
+STR_COT_CAMERA_MODULE_DOFBLUR,Blur:,Blur:,Blur:,Blur:,Размытие:,Blur:,Blur:,Blur:,Blur:,Flou:,Blur:,Blur:,Blur:,ģ��:
+STR_COT_CAMERA_MODULE_DOFFOCUSDISTANCEAUTO,Auto:,Auto:,,,,,,,,,,,,
+STR_COT_CAMERA_MODULE_DOFFOCUSDISTANCE,Distance:,Distance:,,,,,,,,,,,,
+STR_COT_CAMERA_MODULE_DOFFOCUSDEPTHOFFSET,Offset:,Offset:,,,,,,,,,,,,
+STR_COT_CAMERA_MODULE_DOFFOCUSLENGTH,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Фокусное расстояние (Д):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,Focal (L):,���� (L):
+STR_COT_CAMERA_MODULE_DOFFOCUSNEAR,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Фокусное расстояние (Б):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,Focal (N):,���� (N):
+STR_COT_CAMERA_MODULE_DOF,DOF:,DOF:,,,,,,,,,,,,
 STR_COT_CAMERA_MODULE_NAME,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Камера,Camera Tools,Camera Tools,Camera Tools,Camera Tools,Outils Caméra,Camera Tools,Camera Tools,Camera Tools,�������
 STR_COT_ESP_MODULE_ACTION_CLEAR_ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Очистить ESP,Clear ESP,Clear ESP,Clear ESP,Clear ESP,Reset l'ESP,Clear ESP,Clear ESP,Clear ESP,�ر�͸��
 STR_COT_ESP_MODULE_ACTION_CLEARING_ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Очистка ESP,Clearing ESP,Clearing ESP,Clearing ESP,Clearing ESP,Reset de l'ESP,Clearing ESP,Clearing ESP,Clearing ESP,͸�ӹر���
@@ -51,7 +57,7 @@ STR_COT_ESP_MODULE_VIEW_TYPE_TENTS,Tents,Tents,Tents,Tents,Палатки,Tents,
 STR_COT_ESP_MODULE_VIEW_TYPE_TRANSMITTERS,Transmitters,Transmitters,Transmitters,Transmitters,Передатчики,Transmitters,Transmitters,Transmitters,Transmitters,Transmetteurs,Transmitters,Transmitters,Transmitters,������
 STR_COT_ESP_MODULE_VIEW_TYPE_UNKNOWN_ITEMS,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Неизвестные предметы,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Objets inconnus,Unknown Items,Unknown Items,Unknown Items,δ֪����
 STR_COT_ESP_MODULE_VIEW_TYPE_WEAPONS,Weapons,Weapons,Weapons,Weapons,Оружие,Weapons,Weapons,Weapons,Weapons,Armes,Weapons,Weapons,Weapons,����
-STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable
+STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,
 STR_COT_FORMAT_METRE,%1m,%1m,%1m,%1m,%1м,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1��
 STR_COT_FORMAT_METRE_LONG,%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 метр(-ов),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 ��
 STR_COT_FORMAT_NONE,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1
@@ -166,8 +172,8 @@ STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK,Shock:,Shock:,Shock:,Shock:,�
 STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA,Stamina:,Stamina:,Stamina:,Stamina:,Выносливость:,Stamina:,Stamina:,Stamina:,Stamina:,Energie:,Stamina:,Stamina:,Stamina:,����:
 STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO,Unlimited Ammo:,Unlimited Ammo:,Unlimited Ammo:,Unlimited Ammo:,Бесконечный БК:,Unlimited Ammo:,Unlimited Ammo:,Unlimited Ammo:,Unlimited Ammo:,Munitions illimitées:,Unlimited Ammo:,Unlimited Ammo:,Unlimited Ammo:,���޵�ҩ:
 STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER,Water:,Water:,Water:,Water:,Вода:,Water:,Water:,Water:,Water:,Eau:,Water:,Water:,Water:,ˮ��:
-STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:
-STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,Broken Legs:,
+STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,Pause Stamina:,
 STR_COT_TELEPORT_MODULE_FILTER,Filter:,Filter:,Filter:,Filter:,Фильтр:,Filter:,Filter:,Filter:,Filter:,Filtre:,Filter:,Filter:,Filter:,����:
 STR_COT_TELEPORT_MODULE_NAME,Teleport,Teleport,Teleport,Teleport,Телепортировать,Teleport,Teleport,Teleport,Teleport,Téléporter,Teleport,Teleport,Teleport,����
 STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,Слишком далеко для телепортации,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,La distance de téléportation est trop élevée,The distance for teleportation is too far,The distance for teleportation is too far,The distance for teleportation is too far,���;���̫Զ
@@ -184,4 +190,4 @@ STR_COT_WEATHER_MODULE_RAIN,Rain:,Rain:,Rain:,Rain:,Дождь:,Rain:,Rain:,Rain
 STR_COT_WEATHER_MODULE_START_DAY,Day:,Day:,Day:,Day:,День:,Day:,Day:,Day:,Day:,Jour:,Day:,Day:,Day:,ʱ��:
 STR_COT_WEATHER_MODULE_START_TIME,Time:,Time:,Time:,Time:,Время:,Time:,Time:,Time:,Time:,Temps:,Time:,Time:,Time:,ʱ��:
 STR_COT_WEATHER_MODULE_WIND,Wind:,Wind:,Wind:,Wind:,Ветер:,Wind:,Wind:,Wind:,Wind:,Vent:,Wind:,Wind:,Wind:,��:
-STR_COT_WEATHER_MODULE_TEMPERATURE,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:
+STR_COT_WEATHER_MODULE_TEMPERATURE,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,Temperature:,
