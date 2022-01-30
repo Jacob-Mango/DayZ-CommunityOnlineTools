@@ -11,6 +11,9 @@ class COTSideBarModule : CF_ModuleWorld
 
 	protected bool m_LeftMouseDown;
 
+	COTWebhook WH_PlayerJoin;
+	COTWebhook WH_PlayerLeave;
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -198,6 +201,11 @@ class COTSideBarModule : CF_ModuleWorld
 		GetCommunityOnlineToolsBase().ToggleActive();
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Players";
+	}
+
 	override void OnInvokeConnect(Class sender, CF_EventArgs args)
 	{
 		auto cArgs = CF_EventPlayerArgs.Cast(args);
@@ -223,14 +231,7 @@ class COTSideBarModule : CF_ModuleWorld
 
 			GetCommunityOnlineToolsBase().SetClient( instance, cArgs.Identity );
 
-			if ( m_Webhook )
-			{
-				auto msg = m_Webhook.CreateDiscordMessage();
-
-				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has joined the server.", false );
-
-				m_Webhook.Post( "PlayerJoin", msg );
-			}
+			WH_PlayerJoin.Send("" + instance.FormatSteamWebhook() + " has joined the server.");
 		}
 	}
 
@@ -271,14 +272,7 @@ class COTSideBarModule : CF_ModuleWorld
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( cArgs.UID, instance ) )
 		{
-			if ( m_Webhook )
-			{
-				auto msg = m_Webhook.CreateDiscordMessage();
-
-				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has left the server.", false );
-
-				m_Webhook.Post( "PlayerLeave", msg );
-			}
+			WH_PlayerLeave.Send("" + instance.FormatSteamWebhook() + " has left the server.");
 
 			GetCommunityOnlineToolsBase().RemoveClient( cArgs.UID );
 		}

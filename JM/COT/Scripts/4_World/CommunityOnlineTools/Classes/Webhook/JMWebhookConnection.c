@@ -24,18 +24,8 @@ class JMWebhookConnection : Managed
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Group.Remove, Name );
 	}
 
-	void Post( RestApi core, notnull JsonSerializer serializer, notnull JMWebhookMessage message )
+	void Post(RestApi core, notnull JsonSerializer serializer, notnull COTWebhookMessage message)
 	{
-		#ifdef JM_COT_WEBHOOK_DEBUG
-		Print( "+JMWebhookConnection::Post" );
-		Print( "name=" + Name );
-		Print( "this=" + this );
-		Print( "group=" + m_Group );
-		Print( "context=" + GetContextURL() );
-		Print( "address=" + GetAddress() );
-		Print( "enabled=" + Enabled );
-		#endif
-		
 		if ( Enabled && !IsMissionClient() )
 		{
 			if ( !m_Context )
@@ -45,23 +35,16 @@ class JMWebhookConnection : Managed
 
 			string data = message.Prepare( serializer );
 
-			#ifdef JM_COT_WEBHOOK_DEBUG
-			Print( "data=" + data );
-			#endif
-
 			m_Context.SetHeader( "application/json" );
-			m_Context.POST( new JMWebhookCallback, GetAddress(), data );
+			m_Context.POST( new COTWebhookCallback, GetAddress(), data );
 		}
-
-		#ifdef JM_COT_WEBHOOK_DEBUG
-		Print( "-JMWebhookConnection::Post" );
-		#endif
 	}
 
-	string DebugString()
+	override string GetDebugName()
 	{
-		string str = "";
-		if ( m_Context )
+		string str = super.GetDebugName() + " ";
+		
+		if (m_Context)
 			str += "CTX CREATED";
 		else
 			str += "CTX NOT CREATED";

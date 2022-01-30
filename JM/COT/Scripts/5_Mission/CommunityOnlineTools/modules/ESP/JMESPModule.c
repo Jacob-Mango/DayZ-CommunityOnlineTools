@@ -51,6 +51,20 @@ class JMESPModule: JMRenderableModuleBase
 	private JMESPState m_CurrentState = JMESPState.Remove;
 	private bool m_StateChanged = false;
 
+	COTWebhook WH_Log;
+	COTWebhook WH_Position;
+	COTWebhook WH_Orientation;
+	COTWebhook WH_Health;
+	COTWebhook WH_Delete;
+	COTWebhook WH_BB_Build;
+	COTWebhook WH_BB_Dismantle;
+	COTWebhook WH_BB_Repair;
+	COTWebhook WH_MakeItemSet;
+	COTWebhook WH_DuplicateAll;
+	COTWebhook WH_DeleteAll;
+	COTWebhook WH_MoveToCursorRelative;
+	COTWebhook WH_MoveToCursorAbsolute;
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -141,23 +155,6 @@ class JMESPModule: JMRenderableModuleBase
 	override string GetWebhookTitle()
 	{
 		return "ESP Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Log" );
-		types.Insert( "Position" );
-		types.Insert( "Orientation" );
-		types.Insert( "Health" );
-		types.Insert( "Delete" );
-		types.Insert( "BB_Build" );
-		types.Insert( "BB_Dismantle" );
-		types.Insert( "BB_Repair" );
-		types.Insert( "MakeItemSet" );
-		types.Insert( "DuplicateAll" );
-		types.Insert( "DeleteAll" );
-		types.Insert( "MoveToCursorRelative" );
-		types.Insert( "MoveToCursorAbsolute" );
 	}
 
 	override void OnPermissionsChanged(Class sender, CF_EventArgs args)
@@ -670,7 +667,8 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_Log( string log, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
-		SendWebhook( "Log", instance, "Logging ESP action: " + log );
+
+		WH_Log.Send(instance, "Logging ESP action: " + log);
 	}
 
 	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -706,7 +704,8 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
-		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
+		
+		WH_Position.Send(instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString());
 	}
 
 	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -746,7 +745,8 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
-		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
+		
+		WH_Orientation.Send(instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString());
 	}
 
 	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -780,7 +780,8 @@ class JMESPModule: JMRenderableModuleBase
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
-		SendWebhook( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
+		
+		WH_Health.Send(instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health.ToString());
 	}
 
 	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -826,7 +827,8 @@ class JMESPModule: JMRenderableModuleBase
 		GetGame().ObjectDelete( target );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
-		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
+		
+		WH_Delete.Send(instance, "Deleted " + obtype + " at " + transform[3].ToString());
 	}
 
 	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -874,7 +876,8 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
-		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		
+		WH_BB_Build.Send(instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")");
 	}
 
 	private void RPC_BaseBuilding_Build( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -913,7 +916,8 @@ class JMESPModule: JMRenderableModuleBase
 		target.GetConstruction().COT_DismantlePart( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
-		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		
+		WH_BB_Dismantle.Send(instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")");
 	}
 
 	private void RPC_BaseBuilding_Dismantle( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -949,7 +953,8 @@ class JMESPModule: JMRenderableModuleBase
 		target.GetConstruction().COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
-		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		
+		WH_BB_Repair.Send(instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")");
 	}
 
 	private void RPC_BaseBuilding_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1091,7 +1096,8 @@ class JMESPModule: JMRenderableModuleBase
 		if ( removed > 0 )
 		{
 			GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + removed + " attempted=" + count );
-			SendWebhook( "DeleteAll", instance, "Performed a delete on " + removed + " objects." );
+			
+			WH_DeleteAll.Send(instance, "Performed a delete on " + removed + " objects." );
 		}
 	}
 

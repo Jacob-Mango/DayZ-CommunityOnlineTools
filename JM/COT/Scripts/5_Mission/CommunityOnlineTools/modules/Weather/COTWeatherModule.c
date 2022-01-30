@@ -14,18 +14,27 @@ class COTWeatherModule : COTModule
 	int m_Year;
 	float m_Date;
 	string m_DateString;
+	COTWebhook WH_Date;
 
 	float m_Overcast;
 	string m_OvercastString;
+	COTWebhook WH_Overcast;
 
 	float m_Rain;
 	string m_RainString;
+	COTWebhook WH_Rain;
+
+	float m_Storm;
+	string m_StormString;
+	COTWebhook WH_Storm;
 
 	float m_Fog;
 	string m_FogString;
+	COTWebhook WH_Fog;
 
 	float m_Wind;
 	string m_WindString;
+	COTWebhook WH_Wind;
 
 	float m_Temperature;
 	string m_TemperatureString;
@@ -133,6 +142,7 @@ class COTWeatherModule : COTModule
 
 		m_OvercastString = (m_Overcast * 100.0).ToString() + "%";
 		m_RainString = (m_Rain * 100.0).ToString() + "%";
+		m_StormString = (m_Storm * 100.0).ToString() + "%";
 		m_FogString = (m_Fog * 100.0).ToString() + "%";
 		m_WindString = (m_Wind * 100.0).ToString() + "%";
 		m_TemperatureString = m_Temperature.ToString() + "°C";
@@ -195,6 +205,7 @@ class COTWeatherModule : COTModule
 		NotifyPropertyChanged("m_Date");
 		NotifyPropertyChanged("m_Overcast");
 		NotifyPropertyChanged("m_Rain");
+		NotifyPropertyChanged("m_Storm");
 		NotifyPropertyChanged("m_Fog");
 		NotifyPropertyChanged("m_Wind");
 		NotifyPropertyChanged("m_Temperature");
@@ -232,16 +243,6 @@ class COTWeatherModule : COTModule
 		return "Weather Module";
 	}
 
-	override void GetWebhookTypes(out array<string> types)
-	{
-		types.Insert("Date");
-		types.Insert("Wind");
-		types.Insert("Overcast");
-		types.Insert("Fog");
-		types.Insert("Rain");
-		types.Insert("Storm");
-	}
-
 	void Weather_SetDate(CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target)
 	{
 		Param5<int, int, int, int, int> data;
@@ -265,7 +266,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWorld().SetDate(data.param1, data.param2, data.param3, data.param4, data.param5);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5);
-			SendWebhook("Date", instance, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5);
+			
+			WH_Date.Send(instance, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5);
 		}
 	}
 
@@ -292,7 +294,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWeather().SetWindFunctionParams(data.param1, data.param2, data.param3);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3);
-			SendWebhook("Wind", instance, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3);
+			
+			WH_Wind.Send(instance, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3);
 		}
 	}
 
@@ -319,7 +322,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWeather().GetOvercast().Set(data.param1, data.param2, data.param3);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3);
-			SendWebhook("Overcast", instance, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3);
+			
+			WH_Overcast.Send(instance, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3);
 		}
 	}
 
@@ -346,7 +350,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWeather().GetFog().Set(data.param1, data.param2, data.param3);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3);
-			SendWebhook("Fog", instance, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3);
+			
+			WH_Fog.Send(instance, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3);
 		}
 	}
 
@@ -373,7 +378,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWeather().GetRain().Set(data.param1, data.param2, data.param3);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3);
-			SendWebhook("Rain", instance, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3);
+			
+			WH_Rain.Send(instance, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3);
 		}
 	}
 
@@ -400,7 +406,8 @@ class COTWeatherModule : COTModule
 			GetGame().GetWeather().SetStorm(data.param1, data.param2, data.param3);
 
 			GetCommunityOnlineToolsBase().Log(sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3);
-			SendWebhook("Storm", instance, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3);
+			
+			WH_Storm.Send(instance, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3);
 		}
 	}
 };

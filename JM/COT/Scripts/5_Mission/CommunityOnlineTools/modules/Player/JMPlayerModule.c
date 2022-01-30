@@ -31,6 +31,12 @@ enum JMPlayerModuleRPC
 [CF_RegisterModule(JMPlayerModule)]
 class JMPlayerModule: JMRenderableModuleBase
 {
+	COTWebhook WH_Set;
+	COTWebhook WH_Vehicle;
+	COTWebhook WH_Teleport;
+	COTWebhook WH_Inventory;
+	COTWebhook WH_PF;
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -124,15 +130,6 @@ class JMPlayerModule: JMRenderableModuleBase
 	override string GetWebhookTitle()
 	{
 		return "Player Management Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Set" );
-		types.Insert( "Vehicle" );
-		types.Insert( "Teleport" );
-		types.Insert( "Inventory" );
-		types.Insert( "PF" );
 	}
 
 	override int GetRPCMin()
@@ -254,7 +251,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Health To " + health + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " health to " + health );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " health to " + health );
 
 			players[i].Update();
 		}
@@ -305,7 +302,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Blood To " + blood + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " blood to " + blood );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " blood to " + blood );
 
 			players[i].Update();
 		}
@@ -356,7 +353,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Shock To " + shock + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " shock to " + shock );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " shock to " + shock );
 
 			players[i].Update();
 		}
@@ -407,7 +404,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Energy To " + energy + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " energy to " + energy );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " energy to " + energy );
 
 			players[i].Update();
 		}
@@ -458,7 +455,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Water To " + water + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " water to " + water );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " water to " + water );
 
 			players[i].Update();
 		}
@@ -509,7 +506,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set Stamina To " + stamina + " [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " stamina to " + stamina );
+			WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " stamina to " + stamina );
 
 			players[i].Update();
 		}
@@ -562,10 +559,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( bloodyhands )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " bloody hands" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " bloody hands" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " bloody hands" );
+				WH_Set.Send(instance, "Removed " + players[i].FormatSteamWebhook() + " bloody hands" );
 			}
 
 			players[i].Update();
@@ -642,7 +639,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
-			SendWebhook( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle" );
+			WH_Vehicle.Send(instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle" );
 
 			players[i].Update();
 		}
@@ -690,8 +687,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
-
-			SendWebhook( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to " + position.ToString() );
+			
+			WH_Teleport.Send(instance, "Teleported " + players[i].FormatSteamWebhook() + " to " + position.ToString() );
 
 			players[i].Update();
 		}
@@ -744,7 +741,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + other.GetGUID() + "]" );
-			SendWebhook( "Teleport", instance, "Teleported the admin to " + other.FormatSteamWebhook() + "" );
+
+			WH_Teleport.Send(instance, "Teleported the admin to " + other.FormatSteamWebhook() + "" );
 		}
 	}
 
@@ -791,7 +789,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position + " [previous]" );
-			SendWebhook( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to their previous position" );
+
+			WH_Teleport.Send(instance, "Teleported " + players[i].FormatSteamWebhook() + " to their previous position" );
 
 			players[i].Update();
 		}
@@ -985,10 +984,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " god mode" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " god mode" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " god mode" );
+				WH_Set.Send(instance, "Removed " + players[i].FormatSteamWebhook() + " god mode" );
 			}
 
 			players[i].Update();
@@ -1042,10 +1041,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " frozen" );
+				WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " frozen" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " unfrozen" );
+				WH_Set.Send(instance, "Set " + players[i].FormatSteamWebhook() + " unfrozen" );
 			}
 
 			players[i].Update();
@@ -1099,10 +1098,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " invisibility" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " invisibility" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " invisibility" );
+				WH_Set.Send(instance, "Removed " + players[i].FormatSteamWebhook() + " invisibility" );
 			}
 
 			players[i].Update();
@@ -1156,10 +1155,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited ammo" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited ammo" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited ammo" );
+				WH_Set.Send(instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited ammo" );
 			}
 
 			players[i].Update();
@@ -1215,10 +1214,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited stamina" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited stamina" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited stamina" );
+				WH_Set.Send(instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited stamina" );
 			}
 
 			players[i].Update();
@@ -1285,10 +1284,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " broken legs" );
+				WH_Set.Send(instance, "Gave " + players[i].FormatSteamWebhook() + " broken legs" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Fixed " + players[i].FormatSteamWebhook() + " broken legs" );
+				WH_Set.Send(instance, "Fixed " + players[i].FormatSteamWebhook() + " broken legs" );
 			}
 
 			players[i].Update();
@@ -1352,7 +1351,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
+			WH_Set.Send(instance, "Healed " + players[i].FormatSteamWebhook() );
 
 			players[i].Update();
 		}
@@ -1398,7 +1397,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Inventory", instance, "Stripped " + players[i].FormatSteamWebhook() );
+			WH_Inventory.Send(instance, "Stripped " + players[i].FormatSteamWebhook() );
 
 			players[i].Update();
 		}
@@ -1444,7 +1443,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Bleeding stopped [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Stopped " + players[i].FormatSteamWebhook() + " bleeding." );
+			WH_Set.Send(instance, "Stopped " + players[i].FormatSteamWebhook() + " bleeding." );
 
 			players[i].Update();
 		}
@@ -1494,7 +1493,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "PF", instance, "Updated permissions for " + players[i].FormatSteamWebhook() );
+			WH_PF.Send(instance, "Updated permissions for " + players[i].FormatSteamWebhook() );
 		}
 	}
 
@@ -1543,7 +1542,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "PF", instance, "Updated roles for " + players[i].FormatSteamWebhook() );
+			WH_PF.Send(instance, "Updated roles for " + players[i].FormatSteamWebhook() );
 		}
 	}
 

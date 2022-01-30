@@ -1,9 +1,13 @@
 class CommunityOnlineTools: CommunityOnlineToolsBase
 {
+	COTWebhook WH_AdminActive;
+
 	void CommunityOnlineTools()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
 		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
+
+		COTWebhook.RegisterWebhooks(this);
 	}
 
 	void ~CommunityOnlineTools()
@@ -114,14 +118,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( senderRPC.GetId() );
 
-		auto message = m_Webhook.CreateDiscordMessage();
-		
-		if ( active )
-			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has activated Community Online Tools" );
-		else
-			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has de-activated Community Online Tools" );
+		string message = "" + instance.FormatSteamWebhook() + " ";
+		if (active) message += "has activated Community Online Tools";
+		else message += "has de-activated Community Online Tools";
 
-		m_Webhook.Post( "AdminActive", message );
+		WH_AdminActive.Send(message);
 	}
 
 	override void RefreshClients()
