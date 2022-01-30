@@ -1,20 +1,10 @@
-class JMWebhookDiscordMessage : JMWebhookMessage
+class JMWebhookDiscordMessage : COTWebhookMessage
 {
 	string username;
 	string avatar_url;
 	string content;
 
-	ref array< ref JMWebhookDiscordEmbed > embeds;
-
-	void JMWebhookDiscordMessage()
-	{
-		embeds = new array< ref JMWebhookDiscordEmbed >;
-	}
-
-	void ~JMWebhookDiscordMessage()
-	{
-		delete embeds;
-	}
+	autoptr array< ref JMWebhookDiscordEmbed > embeds = new array< ref JMWebhookDiscordEmbed >;
 
 	void SetHeader( string username, string avatar_url, string content )
 	{
@@ -99,34 +89,17 @@ class JMWebhookDiscordEmbedFooter : Managed
 
 class JMWebhookDiscordEmbed : Managed
 {
-	ref JMWebhookDiscordEmbedAuthor author = NULL;
+	autoptr JMWebhookDiscordEmbedAuthor author = NULL;
 
 	string title;
 	string url;
 	string description;
 	int color;
 
-	ref array< ref JMWebhookDiscordEmbedField > fields;
-
-	ref JMWebhookDiscordEmbedThumbnail thumbnail = NULL;
-
-	ref JMWebhookDiscordEmbedImage image = NULL;
-
-	ref JMWebhookDiscordEmbedFooter footer = NULL;
-
-	void JMWebhookDiscordEmbed()
-	{
-		fields = new array< ref JMWebhookDiscordEmbedField >;
-	}
-
-	void ~JMWebhookDiscordEmbed()
-	{
-		delete author;
-		delete fields;
-		delete thumbnail;
-		delete image;
-		delete footer;
-	}
+	autoptr array< ref JMWebhookDiscordEmbedField > fields = new array< ref JMWebhookDiscordEmbedField >;
+	autoptr JMWebhookDiscordEmbedThumbnail thumbnail = NULL;
+	autoptr JMWebhookDiscordEmbedImage image = NULL;
+	autoptr JMWebhookDiscordEmbedFooter footer = NULL;
 
 	void SetTitle( string txt )
 	{

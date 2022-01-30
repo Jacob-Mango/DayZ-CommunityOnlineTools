@@ -1,22 +1,23 @@
 modded class PluginAdminLog
 {
-	private JMWebhookModule m_Webhook;
+	COTWebhook WH_PlayerDeath;
+	COTWebhook WH_PlayerDamage;
 
 	private string m_LoggingType;
 
-	void SetWebhook( ref JMWebhookModule webhook )
+	void PluginAdminLog()
 	{
-		m_Webhook = webhook;
+		COTWebhook.RegisterWebhooks(this);
 	}
 
 	override void PlayerKilled( PlayerBase player, Object source )  
 	{
 		super.PlayerKilled( player, source );
 
-		if ( !player || !source || !m_Webhook )
+		if ( !player || !source )
 			return;
 
-		auto message = m_Webhook.CreateDiscordMessage();
+		auto message = WH_PlayerDeath.Create();
 		auto embed = message.GetEmbed();
 		embed.SetColor( 16711680 ); // 0xFF0000
 
@@ -70,17 +71,17 @@ modded class PluginAdminLog
 
 		embed.AddField( "Breakdown", deathBreakdown );
 
-		m_Webhook.Post( "PlayerDeath", message );
+		message.Send();
 	}
 	
 	override void PlayerHitBy( TotalDamageResult damageResult, int damageType, PlayerBase player, EntityAI source, int component, string dmgZone, string ammo ) // PlayerBase.c 
 	{
 		super.PlayerHitBy( damageResult, damageType, player, source, component, dmgZone, ammo );
 
-		if ( !player || !source || !m_Webhook )
+		if ( !player || !source )
 			return;
 
-		auto message = m_Webhook.CreateDiscordMessage();
+		auto message = WH_PlayerDamage.Create();
 		auto embed = message.GetEmbed();
 		embed.SetColor( 16711680 ); // 0xFF0000
 
@@ -153,7 +154,7 @@ modded class PluginAdminLog
 
 		embed.AddField( "Damage Breakdown", hitMessage );
 
-		m_Webhook.Post( "PlayerDamage", message );
+		message.Send();
 	}
 
 };

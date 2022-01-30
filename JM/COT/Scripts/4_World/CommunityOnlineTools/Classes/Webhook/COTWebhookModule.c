@@ -4,9 +4,9 @@ class JMWebhookQueueItem : Managed
 
 	int m_Time;
 
-	ref JMWebhookMessage m_Message;
+	ref COTWebhookMessage m_Message;
 
-	void JMWebhookQueueItem( string type, JMWebhookMessage message )
+	void JMWebhookQueueItem( string type, COTWebhookMessage message )
 	{
 		m_Type = type;
 		m_Message = message;
@@ -28,14 +28,14 @@ class JMWebhookQueueItem : Managed
 		return m_Time;
 	}
 
-	JMWebhookMessage GetMessage()
+	COTWebhookMessage GetMessage()
 	{
 		return m_Message;
 	}
 };
 
-[CF_RegisterModule(JMWebhookModule)]
-class JMWebhookModule: CF_ModuleWorld
+[CF_RegisterModule(COTWebhookModule)]
+class COTWebhookModule: COTModule
 {
 	private RestApi m_Core;
 
@@ -46,13 +46,16 @@ class JMWebhookModule: CF_ModuleWorld
 	private JMWebhookSerialize m_Settings;
 
 	private autoptr ConfigFile m_ServerConfig;
-	private string m_ServerHostName;
+	string m_ServerHostName;
+
+	COTWebhook WH_ServerStartup;
+	COTWebhook WH_ServerShutdown;
 
 	override void OnInit()
 	{
 		super.OnInit();
 		
-		if (!GetGame().IsDedicatedServer())
+		if (!GetGame().IsServer())
 			return;
 		
 		string serverCfg;
@@ -78,12 +81,6 @@ class JMWebhookModule: CF_ModuleWorld
 
 		m_Core = CreateRestApi();
 		m_Core.EnableDebug( true );
-
-		PluginAdminLog adminLog;
-		if ( IsMissionHost() && Class.CastTo( adminLog, GetPlugin( PluginAdminLog ) ) )
-		{
-			adminLog.SetWebhook( this );
-		}
 		
 		EnableMissionStart();
 		EnableMissionFinish();
@@ -102,19 +99,17 @@ class JMWebhookModule: CF_ModuleWorld
 			group = m_Settings.Get( "Main" );
 
 		#ifdef JM_COT_WEBHOOK_DEBUG
-			group.ContextURL = "https://discordapp.com/api/webhooks/";
-			group.Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+			group.ContextURL = "https://discord.com/api/webhooks/";
+			group.Address = "937215489648783411/5HVZ-tgloq_oA7MuTFO1jEh56ZVKcjWxeFEJIFGKWTJ3oUykShBK6jCeptX_x8djkBXX";
 		#else
 			group.ContextURL = "";
 			group.Address = "";
 		#endif
 		}
 
-		array< string > types = new array< string >;
-		JMWebhookConstructor.Generate( types );
-		for ( int i = 0; i < types.Count(); ++i )
+		foreach (auto name, auto webhook : COTWebhook.s_All)
 		{
-			AddConnection( types[i], group );
+			AddConnection(name, group );
 		}
 
 		FixConnectionMap();
@@ -124,22 +119,19 @@ class JMWebhookModule: CF_ModuleWorld
 		GetGame().GameScript.Call( this, "Thread_ProcessQueue", NULL );
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Server Status";
+	}
+
 	override void OnMissionLoaded(Class sender, CF_EventArgs args)
 	{
-		auto message = CreateDiscordMessage();
-				
-		message.GetEmbed().AddField( "Server Status", "Server is starting up." );
-
-		Post( "ServerStartup", message );
+		WH_ServerStartup.Send("Server is starting up.");
 	}
 
 	override void OnMissionFinish(Class sender, CF_EventArgs args)
 	{
-		auto message = CreateDiscordMessage();
-
-		message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
-
-		Post( "ServerShutdown", message );
+		WH_ServerShutdown.Send("Server is shutting down.");
 		
 		m_Settings.Save();
 	}
@@ -257,12 +249,7 @@ class JMWebhookModule: CF_ModuleWorld
 		return true;
 	}
 
-	override bool IsClient()
-	{
-		return false;
-	}
-
-	void Post( string connectionType, JMWebhookMessage message )
+	void Post( string connectionType, COTWebhookMessage message )
 	{
 		if ( IsMissionClient() )
 			return;
@@ -323,35 +310,5 @@ class JMWebhookModule: CF_ModuleWorld
 		}
 
 		delete m_Queue;
-	}
-
-	JMWebhookDiscordMessage CreateDiscordMessage()
-	{
-		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
-		auto embed = message.CreateEmbed();
-		embed.SetColor( 16766720 );
-
-		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-		
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, false );
-
-		return message;
-	}
-
-	JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
-	{
-		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
-		auto embed = message.CreateEmbed();
-		embed.SetColor( 16766720 );
-
-		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-
-		if ( m_ServerHostName != "" )
-			embed.AddField( "Server:", m_ServerHostName, true );
-
-		embed.AddField( title, player.FormatSteamWebhook(), m_ServerHostName != "" );
-
-		return message;
 	}
 };

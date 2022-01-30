@@ -10,6 +10,10 @@ enum JMObjectSpawnerModuleRPC
 [CF_RegisterModule(JMObjectSpawnerModule)]
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
+	COTWebhook WH_Delete;
+	COTWebhook WH_Vector;
+	COTWebhook WH_Player;
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -59,13 +63,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	override string GetWebhookTitle()
 	{
 		return "Object Module";
-	}
-
-	override void GetWebhookTypes( out array< string > types )
-	{
-		types.Insert( "Delete" );
-		types.Insert( "Vector" );
-		types.Insert( "Player" );
 	}
 	
 	void SpawnRandomInfected( UAInput input )
@@ -186,7 +183,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		GetGame().ObjectDelete( obj );
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted Entity " + obtype + " at " + transform[3].ToString() );
-		SendWebhook( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString() );
+
+		WH_Delete.Send(instance, "Deleted object " + obtype + " at " + transform[3].ToString());
 	}
 
 	private void RPC_DeleteEntity( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -237,7 +235,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntity( ent, quantity, health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
-		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
+		
+		WH_Vector.Send(instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position);
 	}
 
 	private void RPC_SpawnEntity_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -333,7 +332,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			SetupEntity( ent, quantity, health );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() + loggedSuffix );
-			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
+			
+			WH_Player.Send(callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix);
 		}
 	}
 
@@ -439,7 +439,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntity( ent, quantity, health );
 		
 		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
-		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
+		
+		WH_Vector.Send(instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position);
 	}
 
 	override void GetSubCommands(inout array<ref JMCommand> commands)
