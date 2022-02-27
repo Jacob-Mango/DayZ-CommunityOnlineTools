@@ -616,14 +616,44 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			transports.Insert( transport );
 
-			ItemBase radiator;
-			if ( Class.CastTo( radiator, transport.FindAttachmentBySlotName( "CarRadiator" ) ) )
+			for ( int j = 0; j < transport.GetInventory().AttachmentCount(); j++ )
 			{
-				radiator.SetHealth( "", "", 100 );
+				ItemBase attachment = ItemBase.Cast(transport.GetInventory().GetAttachmentFromIndex(j));
+				if ( attachment )
+				{
+					attachment.SetHealthMax("","");
+					if ( attachment.IsInherited(CarWheel_Ruined) )
+					{
+						string att_str = attachment.GetType();
+						string new_attachment = att_str.Substring(0, att_str.Length() - 7);
+
+						if ( GetGame().IsKindOf(new_attachment, "CarWheel") )
+						{
+							ReplaceWheelLambda lambda = new ReplaceWheelLambda(attachment, new_attachment, null);
+							lambda.SetTransferParams(true, true, true);
+							transport.GetInventory().ReplaceItemWithNew(InventoryMode.SERVER, lambda);
+						}
+					}
+
+					if ( attachment.IsInherited(CarDoor) )
+					{
+						array<string> att_dmgZones = new array<string>;
+						attachment.GetDamageZones(att_dmgZones);
+						foreach (string att_dmgZone: att_dmgZones)
+						{
+							attachment.SetHealthMax( att_dmgZone, "Health" );
+						}
+					}
+				}
 			}
 
-			transport.SetHealth( "Engine", "", 100 );
-			transport.SetHealth( "FuelTank", "", 100 );
+			array<string> dmgZones = new array<string>;
+			transport.GetDamageZones(dmgZones);
+			foreach (string dmgZone: dmgZones)
+			{
+				transport.SetHealthMax( dmgZone, "Health" );
+			}
+			transport.SetHealthMax( "", "" );
 
 			CarScript car;
 			if ( Class.CastTo( car, transport ) )

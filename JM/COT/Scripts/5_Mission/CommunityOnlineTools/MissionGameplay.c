@@ -48,14 +48,25 @@ modded class MissionGameplay
 		{
 			EntityAI item = NULL;
 			
-			item = player.GetInventory().CreateInInventory( "AviatorGlasses" );
-			item = player.GetInventory().CreateInInventory( "MilitaryBeret_UN" );
-			item = player.GetInventory().CreateInInventory( "M65Jacket_Black" );
+			item = player.GetInventory().CreateInInventory( "AirborneMask" );
+			item = player.GetInventory().CreateInInventory( "Mich2001Helmet" );
+			item.GetInventory().CreateInInventory( "NVGoggles" );
+			item.GetInventory().CreateInInventory( "UniversalLight" );
+			item.GetInventory().CreateInInventory( "Battery9V" );
+			item.GetInventory().CreateInInventory( "Battery9V" );
 			item = player.GetInventory().CreateInInventory( "TacticalGloves_Black" );
-			item = player.GetInventory().CreateInInventory( "HunterPants_Autumn" );
-			item = player.GetInventory().CreateInInventory( "MilitaryBoots_Black" );
+			item = player.GetInventory().CreateInInventory( "TTsKOJacket_Camo" );
+			item = player.GetInventory().CreateInInventory( "TTSKOPants" );
+			item = player.GetInventory().CreateInInventory( "TTSKOBoots" );
 			item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
+			item = player.GetInventory().CreateInInventory( "MilitaryBelt" );
+			item.GetInventory().CreateInInventory( "NylonKnifeSheath" );
+			item.GetInventory().CreateInInventory( "CombatKnife" );
+			item.GetInventory().CreateInInventory( "PlateCarrierHolster" );
+			item.GetInventory().CreateInInventory( "Magnum" );
+			item.GetInventory().CreateInInventory( "Canteen" );
 			item = player.GetInventory().CreateInInventory( "Shovel" );
+			item = player.GetInventory().CreateInInventory( "Hatchet" );
 		}
 	}
 
