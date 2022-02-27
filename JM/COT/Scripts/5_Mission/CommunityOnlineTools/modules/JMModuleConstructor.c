@@ -20,7 +20,8 @@ modded class JMModuleConstructor
 		//modules.Insert( JMTestingModule );
 		
 		// Namalsk specific checks
-		if (IsModLoaded("EventManager") && IsModLoaded("EVRStorm")) {
+		if ( IsModLoaded("EventManager") && IsModLoaded("EVRStorm") )
+		{
 			modules.Insert( JMNamalskEventManagerModule );
 		}
 

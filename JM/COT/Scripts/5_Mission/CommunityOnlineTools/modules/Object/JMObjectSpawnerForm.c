@@ -24,16 +24,51 @@ class JMObjectSpawnerForm extends JMFormBase
 
 	private Object m_DeletingObject;
 
-	static ref array< string > m_ItemsThatCrash =
+	private static ref array< string > m_ItemsThatCrash =
 	{
-		"itemoptics",
 		"quickiebow",
-		"m203",
+		"recurvebow",
+		"gp25base",
 		"gp25",
 		"gp25_standalone",
-		"gp25_base",
-		"m203_base",
-		"m203_standalone"
+		"m203base",
+		"m203",
+		"m203_standalone",
+		"red9",
+		"pvcbow",
+		"crossbow",
+		"augsteyr",
+		"m249",
+		"undersluggrenadem4",
+		"groza",
+		"pm73rak",
+		"trumpet",
+		"lawbase",
+		"law",
+		"rpg7base",
+		"rpg7",
+		"dartgun",
+		"shockpistol",
+		"shockpistol_black",
+		"derringer_black",
+		"derringer_pink",
+		"derringer_grey",
+		"fnx45_arrow",
+		"longhorn",
+		"p1",
+		"makarovpb",
+		"mp133shotgun_pistolgrip",
+
+		"largetentbackpack",
+		"splint_applied",
+		"leatherbelt_natural",
+		"leatherbelt_beige",
+		"leatherbelt_brown",
+		"leatherbelt_black",
+		"leatherknifeshealth",
+
+		"itemoptics",
+		"fx"
 	};
 
 	void JMObjectSpawnerForm()
@@ -387,10 +422,28 @@ class JMObjectSpawnerForm extends JMFormBase
 		}
 	}
 
+	private static ref array< string > itemsList =
+	{
+		"placing",
+		"debug",
+		"bldr_",
+		"proxy"
+	};
+
 	private bool CheckItemCrash( string name )
 	{
-		for (int i = 0; i < m_ItemsThatCrash.Count(); i++) if ( m_ItemsThatCrash[i] == name ) return true;
-		
+		if ( m_ItemsThatCrash.Find( name ) > -1 )
+		{
+			return true;
+		}
+
+		for ( int i = 0; i < itemsList.Count(); ++i )
+		{
+			if ( name.Contains( itemsList[i] ) )
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 

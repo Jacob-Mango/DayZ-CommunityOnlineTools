@@ -56,8 +56,8 @@ class JMVehicleSpawnerSettings
 
 	void Defaults()
 	{
-		Default_CivilianSedan();
 		Default_OffroadHatchback();
+		Default_CivilianSedan();
 		Default_Hatchback_02();
 		Default_Sedan_02();
 		Default_Truck_01_Covered();
@@ -65,134 +65,168 @@ class JMVehicleSpawnerSettings
 
 	void Default_CivilianSedan()
 	{
-		array< string> attArr = new array< string>;
+		array<string> colorArr = {"","_Wine","_Black"};
 
-		attArr.Insert("CivSedanHood");
-		attArr.Insert("CivSedanTrunk");
-		attArr.Insert("CivSedanDoors_Driver");
-		attArr.Insert("CivSedanDoors_BackRight");
-		attArr.Insert("CivSedanDoors_BackLeft");
-		attArr.Insert("CivSedanDoors_CoDriver");
-		attArr.Insert("CivSedanWheel");
-		attArr.Insert("CivSedanWheel");
-		attArr.Insert("CivSedanWheel");
-		attArr.Insert("CivSedanWheel");
-		attArr.Insert("CarBattery");
-		attArr.Insert("CarRadiator");
-		attArr.Insert("SparkPlug");
+		foreach (string color : colorArr)
+		{
+			array<string> attArr = new array<string>;
 
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+			attArr.Insert("CivSedanHood"+color);
+			attArr.Insert("CivSedanTrunk"+color);
+			attArr.Insert("CivSedanDoors_Driver"+color);
+			attArr.Insert("CivSedanDoors_BackRight"+color);
+			attArr.Insert("CivSedanDoors_BackLeft"+color);
+			attArr.Insert("CivSedanDoors_CoDriver"+color);
+			attArr.Insert("CivSedanWheel");
+			attArr.Insert("CivSedanWheel");
+			attArr.Insert("CivSedanWheel");
+			attArr.Insert("CivSedanWheel");
+			attArr.Insert("CarBattery");
+			attArr.Insert("CarRadiator");
+			attArr.Insert("SparkPlug");
+			attArr.Insert("HeadlightH7");
+			attArr.Insert("HeadlightH7");
 
-		file.VehicleName = "CivilianSedan";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
+			JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		Vehicles.Insert( file.VehicleName, file );
+			file.VehicleName = "CivilianSedan"+color;
+			file.m_FileName = file.VehicleName;
+			file.Parts.Copy( attArr );
+
+			Vehicles.Insert( file.VehicleName, file );
+		}
 	}
 
 	void Default_OffroadHatchback()
 	{
-		array< string> attArr = new array< string>;
+		array<string> colorArr = {"","_Blue","_White"};
 
-		attArr.Insert("HatchbackHood");
-		attArr.Insert("HatchbackTrunk");
-		attArr.Insert("HatchbackDoors_Driver");
-		attArr.Insert("HatchbackDoors_CoDriver");
-		attArr.Insert("HatchbackWheel");
-		attArr.Insert("HatchbackWheel");
-		attArr.Insert("HatchbackWheel");
-		attArr.Insert("HatchbackWheel");
-		attArr.Insert("CarBattery");
-		attArr.Insert("CarRadiator");
-		attArr.Insert("SparkPlug");
+		foreach (string color : colorArr)
+		{
+			array< string> attArr = new array< string>;
 
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+			attArr.Insert("HatchbackHood"+color);
+			attArr.Insert("HatchbackTrunk"+color);
+			attArr.Insert("HatchbackDoors_Driver"+color);
+			attArr.Insert("HatchbackDoors_CoDriver"+color);
+			attArr.Insert("HatchbackWheel");
+			attArr.Insert("HatchbackWheel");
+			attArr.Insert("HatchbackWheel");
+			attArr.Insert("HatchbackWheel");
+			attArr.Insert("CarBattery");
+			attArr.Insert("CarRadiator");
+			attArr.Insert("SparkPlug");
+			attArr.Insert("HeadlightH7");
+			attArr.Insert("HeadlightH7");
 
-		file.VehicleName = "OffroadHatchback";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
+			JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		Vehicles.Insert( file.VehicleName, file );
+			file.VehicleName = "OffroadHatchback"+color;
+			file.m_FileName = file.VehicleName;
+			file.Parts.Copy( attArr );
+
+			Vehicles.Insert( file.VehicleName, file );
+		}
 	}
 
 	void Default_Hatchback_02()
 	{
-		array< string> attArr = new array< string>;
+		array<string> colorArr = {"","_Black","_Blue"};
 
-		attArr.Insert("Hatchback_02_Hood");
-		attArr.Insert("Hatchback_02_Trunk");
-		attArr.Insert("Hatchback_02_Door_1_1");
-		attArr.Insert("Hatchback_02_Door_1_2");
-		attArr.Insert("Hatchback_02_Door_2_1");
-		attArr.Insert("Hatchback_02_Door_2_2");
-		attArr.Insert("Hatchback_02_Wheel");
-		attArr.Insert("Hatchback_02_Wheel");
-		attArr.Insert("Hatchback_02_Wheel");
-		attArr.Insert("Hatchback_02_Wheel");
-		attArr.Insert("CarBattery");
-		attArr.Insert("CarRadiator");
-		attArr.Insert("SparkPlug");
+		foreach (string color : colorArr)
+		{
+			array< string> attArr = new array< string>;
 
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+			attArr.Insert("Hatchback_02_Hood"+color);
+			attArr.Insert("Hatchback_02_Trunk"+color);
+			attArr.Insert("Hatchback_02_Door_1_1"+color);
+			attArr.Insert("Hatchback_02_Door_1_2"+color);
+			attArr.Insert("Hatchback_02_Door_2_1"+color);
+			attArr.Insert("Hatchback_02_Door_2_2"+color);
+			attArr.Insert("Hatchback_02_Wheel");
+			attArr.Insert("Hatchback_02_Wheel");
+			attArr.Insert("Hatchback_02_Wheel");
+			attArr.Insert("Hatchback_02_Wheel");
+			attArr.Insert("CarBattery");
+			attArr.Insert("CarRadiator");
+			attArr.Insert("SparkPlug");
+			attArr.Insert("HeadlightH7");
+			attArr.Insert("HeadlightH7");
 
-		file.VehicleName = "Hatchback_02";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
+			JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		Vehicles.Insert( file.VehicleName, file );
+			file.VehicleName = "Hatchback_02"+color;
+			file.m_FileName = file.VehicleName;
+			file.Parts.Copy( attArr );
+
+			Vehicles.Insert( file.VehicleName, file );
+		}
 	}
 
 	void Default_Sedan_02()
 	{
-		array< string> attArr = new array< string>;
+		array<string> colorArr = {"","_Red","_Grey"};
 
-		attArr.Insert("Sedan_02_Hood");
-		attArr.Insert("Sedan_02_Trunk");
-		attArr.Insert("Sedan_02_Door_1_1");
-		attArr.Insert("Sedan_02_Door_1_2");
-		attArr.Insert("Sedan_02_Door_2_1");
-		attArr.Insert("Sedan_02_Door_2_2");
-		attArr.Insert("Sedan_02_Wheel");
-		attArr.Insert("Sedan_02_Wheel");
-		attArr.Insert("Sedan_02_Wheel");
-		attArr.Insert("Sedan_02_Wheel");
-		attArr.Insert("CarBattery");
-		attArr.Insert("CarRadiator");
-		attArr.Insert("SparkPlug");
+		foreach (string color : colorArr)
+		{
+			array< string> attArr = new array< string>;
 
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+			attArr.Insert("Sedan_02_Hood"+color);
+			attArr.Insert("Sedan_02_Trunk"+color);
+			attArr.Insert("Sedan_02_Door_1_1"+color);
+			attArr.Insert("Sedan_02_Door_1_2"+color);
+			attArr.Insert("Sedan_02_Door_2_1"+color);
+			attArr.Insert("Sedan_02_Door_2_2"+color);
+			attArr.Insert("Sedan_02_Wheel");
+			attArr.Insert("Sedan_02_Wheel");
+			attArr.Insert("Sedan_02_Wheel");
+			attArr.Insert("Sedan_02_Wheel");
+			attArr.Insert("CarBattery");
+			attArr.Insert("CarRadiator");
+			attArr.Insert("SparkPlug");
+			attArr.Insert("HeadlightH7");
+			attArr.Insert("HeadlightH7");
 
-		file.VehicleName = "Sedan_02";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
+			JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		Vehicles.Insert( file.VehicleName, file );
+			file.VehicleName = "Sedan_02"+color;
+			file.m_FileName = file.VehicleName;
+			file.Parts.Copy( attArr );
+
+			Vehicles.Insert( file.VehicleName, file );
+		}
 	}
 
 	void Default_Truck_01_Covered()
 	{
-		array< string> attArr = new array< string>;
+		array<string> colorArr = {"","_Orange","_Blue"};
 
-		attArr.Insert("Truck_01_Hood");
-		attArr.Insert("Truck_01_Door_1_1");
-		attArr.Insert("Truck_01_Door_2_1");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_WheelDouble");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("Truck_01_Wheel");
-		attArr.Insert("TruckBattery");
-		attArr.Insert("SparkPlug");
+		foreach (string color : colorArr)
+		{
+			array< string> attArr = new array< string>;
 
-		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+			attArr.Insert("Truck_01_Hood"+color);
+			attArr.Insert("Truck_01_Door_1_1"+color);
+			attArr.Insert("Truck_01_Door_2_1"+color);
+			attArr.Insert("Truck_01_WheelDouble");
+			attArr.Insert("Truck_01_WheelDouble");
+			attArr.Insert("Truck_01_WheelDouble");
+			attArr.Insert("Truck_01_WheelDouble");
+			attArr.Insert("Truck_01_Wheel");
+			attArr.Insert("Truck_01_Wheel");
+			attArr.Insert("Truck_01_Wheel");
+			attArr.Insert("Truck_01_Wheel");
+			attArr.Insert("TruckBattery");
+			attArr.Insert("HeadlightH7");
+			attArr.Insert("HeadlightH7");
 
-		file.VehicleName = "Truck_01_Covered";
-		file.m_FileName = file.VehicleName;
-		file.Parts.Copy( attArr );
+			JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
 
-		Vehicles.Insert( file.VehicleName, file );
+			file.VehicleName = "Truck_01_Covered"+color;
+			file.m_FileName = file.VehicleName;
+			file.Parts.Copy( attArr );
+
+			Vehicles.Insert( file.VehicleName, file );
+		}
 	}
 };
