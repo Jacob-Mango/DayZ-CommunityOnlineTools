@@ -2,9 +2,16 @@ class JMTeleportSerialize : Managed
 {
 	ref array< ref JMTeleportLocation > Locations;
 
+	[NonSerialized()]
+	string Curr_map;
+
+	static string m_FileName;
+
 	private void JMTeleportSerialize()
 	{
 		Locations = new array< ref JMTeleportLocation >;
+		Curr_map = GetGame().GetWorldName();
+		m_FileName = JMConstants.FILE_TELEPORT + "_" + Curr_map + ".json"
 	}
 
 	void ~JMTeleportSerialize()
@@ -16,9 +23,9 @@ class JMTeleportSerialize : Managed
 	{
 		JMTeleportSerialize settings = new JMTeleportSerialize();
 
-		if ( FileExist( JMConstants.FILE_TELEPORT ) )
+		if ( FileExist( m_FileName ) )
 		{
-			JsonFileLoader<JMTeleportSerialize>.JsonLoadFile( JMConstants.FILE_TELEPORT, settings );
+			JsonFileLoader<JMTeleportSerialize>.JsonLoadFile( m_FileName, settings );
 		} else 
 		{
 			settings.Defaults();
@@ -30,7 +37,7 @@ class JMTeleportSerialize : Managed
 
 	void Save()
 	{
-		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( JMConstants.FILE_TELEPORT, this );
+		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( m_FileName, this );
 	}
 
 	void AddLocation( string name, vector position, float radius = 4.0 )
@@ -52,15 +59,13 @@ class JMTeleportSerialize : Managed
 
 	void Defaults()
 	{
-		string location_config_path = "CfgWorlds " + GetGame().GetWorldName() + " Names";
+		string location_config_path = "CfgWorlds " + Curr_map + " Names";
 		int classNamesCount = GetGame().ConfigGetChildrenCount( location_config_path );
-
-		TStringArray locations = { "AF", "MB", "Camp", "Ruin", "Settlement" };
 		
-		for ( int l = 0; l < classNamesCount; ++l ) 
+		for ( int i = 0; i < classNamesCount; ++i ) 
 		{
 			string location_class_name;
-			GetGame().ConfigGetChildName( location_config_path, l, location_class_name );
+			GetGame().ConfigGetChildName( location_config_path, i, location_class_name );
 
 			string location_class_name_path = location_config_path + " " + location_class_name;
 
@@ -79,41 +84,48 @@ class JMTeleportSerialize : Managed
 			if (location_position == null || location_position.Count() != 2)
 				continue;
 
-			foreach(string location: locations)
-			{
-				if ( location_class_name.Contains( location ) )
-				{
-					int loc_length = location.Length() + 1;
-					if ( loc_length == 3 )
-						loc_length = 9;
+			if ( location_name == "" )
+				continue;
 
-					location_name = location_class_name.Substring(loc_length, location_class_name.Length());
+			if ( location_type == "" )
+				continue;
 
-					switch (location)
-					{
-						case "AF":
-							location_name = "Airfield | " + location_name;
-						break;
-						case "MB":
-							location_name = "Millitary Base | " + location_name;
-						break;
-						case "Camp":
-						case "Ruin":
-							location_name = location + " | " + location_name;
-						break;
-						case "Settlement":
-							if ( location_type == "Local")
-								location_type = "Unknown";
+			if ( location_type.Substring(0, 4) == "Name" )
+				location_type = location_type.Substring(4, location_name.Length());
+				
+			if ( location_name_path.Substring(0, 2) == "AF" )
+				location_type = "Airfield";
+				
+			if ( location_name_path.Substring(0, 2) == "MB" )
+				location_type = "Military Base";
 
-							location_name = location_type + " | " + location_name;
-						break;
-					}
+			location_name = location_type + " | " + location_name;
 
-					AddLocation( location_name, Vector(location_position[0], 0, location_position[1]) );
-				}
-			}
+			AddLocation( location_name, Vector(location_position[0], 0, location_position[1]) );
+		}
+	
+		ref array< ref string > AfterSorting = new array< ref string >;
+		ref array< ref string > BeforeSorting = new array< ref string >;
+
+		int loc_count = Locations.Count();
+		
+		for ( int l = 0; l < loc_count; ++l ) 
+		{
+			BeforeSorting.Insert(Locations[l].Name);
+			AfterSorting.Insert(Locations[l].Name);
 		}
 
-		//Sort(Locations,Locations.Count());
+		AfterSorting.Sort();
+
+		ref array< ref JMTeleportLocation > tmp_locations = new array< ref JMTeleportLocation >;
+		
+		for ( int j = 0; j < loc_count; ++j ) 
+		{
+			int key = BeforeSorting.Find(AfterSorting[j]);
+			tmp_locations.Insert(Locations[key]);	
+		}
+
+		Locations = new array< ref JMTeleportLocation >;
+		Locations = tmp_locations;
 	}
 }

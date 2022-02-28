@@ -76,6 +76,59 @@ class JMItemSetSettings
 
 		DefaultWatchtowerMetal();
 		DefaultWatchtowerWood();
+
+		DefaultMedicalSet();
+		DefaultNBCSet();
+	}
+
+	void DefaultMedicalSet()
+	{
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
+
+		attArr.Insert( new JMItemSetItemInfo( "TetracyclineAntibiotics", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "PurificationTablets", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "DisinfectantAlcohol", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "PainkillerTablets", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "AntiChemInjector", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "BandageDressing", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "CharcoalTablets", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "VitaminBottle", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "Epinephrine", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "Thermometer", 2, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "Morphine", 5, 100 ) );
+		attArr.Insert( new JMItemSetItemInfo( "Heatpack", 5, 100 ) );		
+
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
+
+		file.Name = "Medical Set";
+		file.m_FileName = file.Name;
+		file.ContainerClassName = "SeaChest";
+		file.Items = attArr;
+
+		ItemSets.Insert( file.Name, file );
+	}
+
+	void DefaultNBCSet()
+	{
+		ref array< ref JMItemSetItemInfo > attArr = new array< ref JMItemSetItemInfo >;
+
+		attArr.Insert( new JMItemSetItemInfo( "NBCGlovesGray", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "NBCHoodGray", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "NBCPantsGray", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "NBCBootsGray", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "NBCJacketGray", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "AirborneMask", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "AirborneMask", 1, 1 ) );
+		attArr.Insert( new JMItemSetItemInfo( "GasMask_Filter", 4, 100 ) );
+
+		ref JMItemSetSerialize file = JMItemSetSerialize.Create();
+
+		file.Name = "NBC Set";
+		file.m_FileName = file.Name;
+		file.ContainerClassName = "SeaChest";
+		file.Items = attArr;
+
+		ItemSets.Insert( file.Name, file );
 	}
 
 	void DefaultFenceMetal()

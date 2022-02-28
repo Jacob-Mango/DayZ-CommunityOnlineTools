@@ -1369,6 +1369,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetHealth("RightLeg", "Health", 100);
 			player.SetHealth("LeftLeg", "Health", 100);
 			player.UpdateBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
+			player.COTRemoveAllDiseases();
 
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );

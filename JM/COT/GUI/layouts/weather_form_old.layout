@@ -1,7 +1,7 @@
 PanelWidgetClass JMWeatherOldForm {
  color 0 0 0 0
  position 0 0
- size 570 220
+ size 570 270
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -291,6 +291,109 @@ PanelWidgetClass JMWeatherOldForm {
       }
      }
     }
+    ContentWidgetClass TimeButtons {
+     ignorepointer 1
+     position 0 70
+     size 500 35
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     {
+      ButtonWidgetClass TimeButton1 {
+       position -150 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_NIGHT"
+      }
+      ButtonWidgetClass TimeButton2 {
+       position -50 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_DUSK"
+      }
+      ButtonWidgetClass TimeButton3 {
+       position 50 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_DAY"
+      }
+      ButtonWidgetClass TimeButton4 {
+       position 150 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_DAWN"
+      }
+     }
+    }
+    ContentWidgetClass WeatherButtons {
+     ignorepointer 1
+     position 0 35
+     size 500 35
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     {
+      ButtonWidgetClass WeatherButton1 {
+       position -100 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_CLEAR"
+      }
+      ButtonWidgetClass WeatherButton2 {
+       position 0 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_CLOUDY"
+      }
+      ButtonWidgetClass WeatherButton3 {
+       position 100 0
+       size 80 20
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "#STR_COT_WEATHER_MODULE_STORM"
+      }
+     }
+    }
    }
   }
   ButtonWidgetClass btn_save {
@@ -314,6 +417,17 @@ PanelWidgetClass JMWeatherOldForm {
    hexactsize 1
    vexactsize 1
    text "#STR_COT_WEATHER_MODULE_REFRESH"
+  }
+  CheckBoxWidgetClass toggle_autorefresh {
+   position 350.29999 6.0661
+   size 111 20
+   halign right_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "#STR_COT_WEATHER_MODULE_AUTOREFRESH"
   }
  }
 }

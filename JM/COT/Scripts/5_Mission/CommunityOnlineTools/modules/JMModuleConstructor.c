@@ -17,6 +17,14 @@ modded class JMModuleConstructor
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
+#ifdef EXPANSION_MODULES
+		modules.Insert( JMVehiclesModule );
+		modules.Insert( JMTerritoriesModule );
+#endif
+
+		if ( IsMissionOffline() )
+			modules.Insert( JMMissionSelectorModule );
+
 		//modules.Insert( JMTestingModule );
 		
 		// Namalsk specific checks
