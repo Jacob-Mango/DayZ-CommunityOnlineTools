@@ -5,6 +5,13 @@ class JMWeatherOldForm extends JMFormBase
 	protected ButtonWidget m_BtnSave;
 	protected ButtonWidget m_BtnRefresh;
 	protected ButtonWidget m_BtnCancel;
+	protected ButtonWidget m_BtnPresetNight;
+	protected ButtonWidget m_BtnPresetDusk;
+	protected ButtonWidget m_BtnPresetDay;
+	protected ButtonWidget m_BtnPresetDawn;
+	protected ButtonWidget m_BtnPresetWeatherClear;
+	protected ButtonWidget m_BtnPresetWeatherCloudy;
+	protected ButtonWidget m_BtnPresetWeatherStorm;
 	protected SliderWidget m_SldStartTime;
 	protected TextWidget m_TxtStartTimeValue;
 	protected SliderWidget m_SldStartDay;
@@ -18,9 +25,8 @@ class JMWeatherOldForm extends JMFormBase
 	protected SliderWidget m_SldWindForce;
 	protected TextWidget m_TxtWindForceValue;
 	protected SliderWidget m_SldTemperature;
-	protected TextWidget m_TxtTemperatureValue;
-
-	
+	protected TextWidget m_TxtTemperatureValue;	
+	private CheckBoxWidget m_AutoRefresh;
 
 	private int	  m_OrigYear;
 	private int	  m_OrigMonth;
@@ -52,6 +58,8 @@ class JMWeatherOldForm extends JMFormBase
 
 	void ~JMWeatherOldForm()
 	{
+		if ( m_AutoRefresh.IsChecked() )
+			GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -85,39 +93,78 @@ class JMWeatherOldForm extends JMFormBase
 
 		m_SldTemperature		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_temperature" ) );
 		m_TxtTemperatureValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_temperature_value" ) );
+		
+		m_BtnPresetNight		= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "TimeButton1" ) );
+		m_BtnPresetDusk			= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "TimeButton2" ) );
+		m_BtnPresetDay			= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "TimeButton3" ) );
+		m_BtnPresetDawn			= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "TimeButton4" ) );
+		
+		m_BtnPresetWeatherClear	= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "WeatherButton1" ) );
+		m_BtnPresetWeatherCloudy= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "WeatherButton2" ) );
+		m_BtnPresetWeatherStorm	= ButtonWidget.Cast( layoutRoot.FindAnyWidget( "WeatherButton3" ) );
+		
+		m_AutoRefresh 			= CheckBoxWidget.Cast( layoutRoot.FindAnyWidget( "toggle_autorefresh" ) );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( w == m_BtnSave )
 		{
-			m_OrigYear = m_CurrYear;
-			m_OrigMonth = m_CurrMonth;
-			m_OrigDay = m_CurrDay;
-			m_OrigHour = m_CurrHour;
-			m_OrigMinute = m_CurrMinute;
-			m_OrigOvercast = m_CurrOvercast;
-			m_OrigRain = m_CurrRain;
-			m_OrigFog = m_CurrFog;
-			m_OrigWindForce = m_CurrWindForce;
-			
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
-			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
-
-			//! not possible rn. Maybe Adam could make it possible without me modding it :think:
-			//GetRPCManager().SendRPC( "COT_Weather", "Weather_SetTemperature", new Param1< float >( Temperature ), true );
-
+			Save();
 			return true;
 		}
 
 		if ( w == m_BtnRefresh )
 		{
 			RefreshFields();
+			return true;
+		}
 
+		if ( w == m_AutoRefresh )
+		{
+			ToggleAutoRefresh();
+			return true;
+		}
+
+		if ( w == m_BtnPresetNight )
+		{
+			PresetNight();
+			return true;
+		}
+
+		if ( w == m_BtnPresetDusk )
+		{
+			PresetDusk();
+			return true;
+		}
+
+		if ( w == m_BtnPresetDay )
+		{
+			PresetDay();
+			return true;
+		}
+
+		if ( w == m_BtnPresetDawn )
+		{
+			PresetDawn();
+			return true;
+		}
+
+		if ( w == m_BtnPresetWeatherClear )
+		{
+			PresetClearSky();
+			return true;
+		}
+
+		if ( w == m_BtnPresetWeatherCloudy )
+		{
+			PresetCloudy();
+			return true;
+		}
+
+		if ( w == m_BtnPresetWeatherStorm )
+		{
+			PresetStorm();
 			return true;
 		}
 
@@ -218,8 +265,6 @@ class JMWeatherOldForm extends JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert(Update);
-
 		RefreshFields();
 	}
 
@@ -229,6 +274,141 @@ class JMWeatherOldForm extends JMFormBase
 
 	override void Update()
 	{
+	}
+
+	void ToggleAutoRefresh()
+	{
+		if ( !m_AutoRefresh.IsChecked() )
+		{
+			GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
+		} else {
+			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(RefreshFields, 1000, true);
+		}
+	}
+
+	void Save()
+	{
+		m_OrigYear = m_CurrYear;
+		m_OrigMonth = m_CurrMonth;
+		m_OrigDay = m_CurrDay;
+		m_OrigHour = m_CurrHour;
+		m_OrigMinute = m_CurrMinute;
+		m_OrigOvercast = m_CurrOvercast;
+		m_OrigRain = m_CurrRain;
+		m_OrigFog = m_CurrFog;
+		m_OrigWindForce = m_CurrWindForce;
+		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
+
+		//! not possible rn. Maybe Adam could make it possible without me modding it :think:
+		//GetRPCManager().SendRPC( "COT_Weather", "Weather_SetTemperature", new Param1< float >( Temperature ), true );
+	}
+
+	void PresetNight()
+	{
+		m_CurrHour = 0;
+		m_CurrMinute = 0;
+			
+		m_OrigHour = m_CurrHour;
+		m_OrigMinute = m_CurrMinute;
+
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+	}
+
+	void PresetDusk()
+	{
+		m_CurrHour = 6;
+		m_CurrMinute = 0;
+			
+		m_OrigHour = m_CurrHour;
+		m_OrigMinute = m_CurrMinute;
+
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+	}
+
+	void PresetDay()
+	{
+		m_CurrHour = 12;
+		m_CurrMinute = 0;
+			
+		m_OrigHour = m_CurrHour;
+		m_OrigMinute = m_CurrMinute;
+
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+	}
+
+	void PresetDawn()
+	{
+		m_CurrHour = 18;
+		m_CurrMinute = 0;
+			
+		m_OrigHour = m_CurrHour;
+		m_OrigMinute = m_CurrMinute;
+
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( m_CurrYear, m_CurrMonth, m_CurrDay, m_CurrHour, m_CurrMinute ), true );
+	}
+
+	void PresetClearSky()
+	{
+		m_CurrOvercast = 0;
+		m_CurrRain = 0;
+		m_CurrFog = 0;
+		m_CurrWindForce = 0;
+
+		m_OrigOvercast = m_CurrOvercast;
+		m_OrigRain = m_CurrRain;
+		m_OrigFog = m_CurrFog;
+		m_OrigWindForce = m_CurrWindForce;
+		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
+
+	}
+
+	void PresetCloudy()
+	{
+		m_CurrOvercast = 0.5;
+		m_CurrRain = 0;
+		m_CurrFog = 0.1;
+		m_CurrWindForce = 0.2;
+
+		m_OrigOvercast = m_CurrOvercast;
+		m_OrigRain = m_CurrRain;
+		m_OrigFog = m_CurrFog;
+		m_OrigWindForce = m_CurrWindForce;
+		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce, m_CurrWindForce, 1 ), true );
+	}
+
+	void PresetStorm()
+	{
+		m_CurrOvercast = 1;
+		m_CurrRain = 0.8;
+		m_CurrFog = 0.3;
+		m_CurrWindForce = 0.7;
+
+		m_OrigOvercast = m_CurrOvercast;
+		m_OrigRain = m_CurrRain;
+		m_OrigFog = m_CurrFog;
+		m_OrigWindForce = m_CurrWindForce;
+		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( m_CurrOvercast, 0, 0 ), true );
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( m_OrigWindForce*0.8, m_CurrWindForce, 1 ), true );
 	}
 
 	void RefreshFields()

@@ -27,7 +27,7 @@ class JMConstants
 	static const string EXT_WINDOWS_DEFAULT = "." + FT_WINDOWS_DEFAULT;
 	static const string EXT_LOG = "." + FT_LOG;
 
-	static const string FILE_TELEPORT = DIR_COT + "Teleports.json";
+	static const string FILE_TELEPORT = DIR_COT + "Teleports";
 	static const string FILE_WEBHOOK = DIR_COT + "Webhooks.json";
 	static const string FILE_WEATHER = DIR_COT + "Weather.json";
 

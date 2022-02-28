@@ -11,7 +11,9 @@ modded class Weapon_Base
 			if ( magazine )
 			{
 				if ( GetGame().IsServer() )
-				{
+				{					
+					SetHealthMax( "", "Health" );
+
 					if ( GetGame().IsMultiplayer() && magazine )
 						GetGame().RemoteObjectDelete( magazine );
 

@@ -282,4 +282,18 @@ modded class PlayerBase
 			m_JMHasUnlimitedStaminaRemoteSynch = mode;
 		}
 	}
+
+	void COTRemoveAllDiseases()
+	{
+		if ( GetGame().IsServer() )
+		{
+			GetModifiersManager().DeactivateAllModifiers();
+			
+			if ( m_AgentPool )
+				m_AgentPool.RemoveAllAgents();
+
+			if ( IsUnconscious() )
+				DayZPlayerSyncJunctures.SendPlayerUnconsciousness(this, false);
+		}
+	}
 }
