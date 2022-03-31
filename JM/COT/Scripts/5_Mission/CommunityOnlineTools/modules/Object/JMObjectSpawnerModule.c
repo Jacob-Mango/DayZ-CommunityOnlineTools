@@ -376,7 +376,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				if ( item.HasQuantity() )
 				{
-					quantity = item.GetQuantityInit();
+					quantity = item.GetQuantityMax();
 				}
 			}
 
@@ -390,6 +390,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				item.SetQuantity(quantity);
 			}
 		}
+
+		if ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") )
+			obj.OnDebugSpawn();
 
 		if ( health == -1 )
 		{

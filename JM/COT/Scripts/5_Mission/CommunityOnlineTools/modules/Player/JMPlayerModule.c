@@ -629,6 +629,11 @@ class JMPlayerModule: JMRenderableModuleBase
 
 						if ( GetGame().IsKindOf(new_attachment, "CarWheel") )
 						{
+							if ( attachment.IsLockedInSlot() )
+							{
+								attachment.UnlockFromParent();
+							}
+
 							ReplaceWheelLambda lambda = new ReplaceWheelLambda(attachment, new_attachment, null);
 							lambda.SetTransferParams(true, true, true);
 							transport.GetInventory().ReplaceItemWithNew(InventoryMode.SERVER, lambda);
@@ -1360,6 +1365,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
+			if ( player.COTHasGodMode() )
+				player.SetAllowDamage(true);
+
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
 
@@ -1377,6 +1385,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
+
+			if ( player.COTHasGodMode() )
+				player.SetAllowDamage(false);
 
 			players[i].Update();
 		}

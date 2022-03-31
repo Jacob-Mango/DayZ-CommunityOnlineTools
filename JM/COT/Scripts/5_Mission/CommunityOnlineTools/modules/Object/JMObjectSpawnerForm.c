@@ -54,8 +54,6 @@ class JMObjectSpawnerForm extends JMFormBase
 		"derringer_pink",
 		"derringer_grey",
 		"fnx45_arrow",
-		"longhorn",
-		"p1",
 		"makarovpb",
 		"mp133shotgun_pistolgrip",
 

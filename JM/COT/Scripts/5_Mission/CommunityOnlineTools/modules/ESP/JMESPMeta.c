@@ -320,7 +320,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 			m_DismantleButtons.Insert( btn_D );
 			m_RepairButtons.Insert( btn_R );
 
-			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+			//UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 		}
 
 		UpdateButtonStates();
@@ -373,6 +373,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 				m_RepairButtons[i].Disable();
 			} else 
 			{
+				m_StateHeaders[i].Hide();
 				m_BuildButtons[i].Hide();
 				m_DismantleButtons[i].Hide();
 				m_RepairButtons[i].Hide();

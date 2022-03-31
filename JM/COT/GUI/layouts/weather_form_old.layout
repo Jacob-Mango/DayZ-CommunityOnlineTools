@@ -36,6 +36,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_start_time_value {
@@ -75,6 +77,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_start_day_value {
@@ -114,6 +118,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_overcast_value {
@@ -153,6 +159,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_rain_value {
@@ -192,6 +200,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_fog_value {
@@ -231,6 +241,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_wind_force_value {
@@ -271,6 +283,8 @@ PanelWidgetClass JMWeatherOldForm {
        vexactpos 1
        hexactsize 0
        vexactsize 0
+       "fill in" 1
+       "listen to input" 1
        style Editor
        {
         TextWidgetClass txt_ppp_st_temperature_value {
