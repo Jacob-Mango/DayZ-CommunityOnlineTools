@@ -35,6 +35,8 @@ PanelWidgetClass UIActionSlider {
      halign right_ref
      valign center_ref
      vexactsize 1
+     "fill in" 1
+     "listen to input" 1
      style Editor
      step 0.01
      {

@@ -44,19 +44,12 @@ class JMPlayerForm extends JMFormBase
 	private UIActionEditableText m_Stamina;
 	private bool m_StaminaUpdated;
 	private UIActionCheckbox m_BloodyHands;
-	private bool m_BloodyHandsUpdated;
 	private UIActionCheckbox m_GodMode;
-	private bool m_GodModeUpdated;
 	private UIActionCheckbox m_Freeze;
-	private bool m_FreezeUpdated;
 	private UIActionCheckbox m_Invisibility;
-	private bool m_InvisibilityUpdated;
 	private UIActionCheckbox m_UnlimitedAmmo;
-	private bool m_UnlimitedAmmoUpdated;
 	private UIActionCheckbox m_UnlimitedStamina;
-	private bool m_UnlimitedStaminaUpdated;
 	private UIActionCheckbox m_BrokenLegs;
-	private bool m_BrokenLegsUpdated;
 
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
@@ -316,7 +309,7 @@ class JMPlayerForm extends JMFormBase
 		m_BloodyHands = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_BloodyHands", false );
 		m_GodMode = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_GodMode", false );
 		m_Freeze = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
-		m_Invisibility = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
+		//m_Invisibility = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
@@ -734,18 +727,6 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( !m_SelectedInstance )
 			return;
-
-		m_HealthUpdated = false;
-		m_BloodUpdated = false;
-		m_EnergyUpdated = false;
-		m_WaterUpdated = false;
-		m_ShockUpdated = false;
-		m_StaminaUpdated = false;
-		m_BloodyHandsUpdated = false;
-		m_GodModeUpdated = false;
-		m_UnlimitedAmmoUpdated = false;
-		m_UnlimitedStaminaUpdated = false;
-		m_BrokenLegsUpdated = false;
 		
 		if ( m_Health )
 			m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );

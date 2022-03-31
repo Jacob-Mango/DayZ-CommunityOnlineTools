@@ -239,6 +239,14 @@ modded class PlayerBase
 			SetAllowDamage( !m_JMHasGodMode );
 		}
 	}
+	
+	override void ProcessFeetDamageServer(int pUserInt)
+	{
+		if ( m_JMHasGodMode )
+			return;
+
+		super.ProcessFeetDamageServer(pUserInt);
+	}
 
 	void COTSetFreeze( bool mode )
 	{

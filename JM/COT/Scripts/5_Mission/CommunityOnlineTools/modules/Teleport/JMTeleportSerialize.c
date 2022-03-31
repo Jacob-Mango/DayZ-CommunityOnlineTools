@@ -11,7 +11,7 @@ class JMTeleportSerialize : Managed
 	{
 		Locations = new array< ref JMTeleportLocation >;
 		Curr_map = GetGame().GetWorldName();
-		m_FileName = JMConstants.FILE_TELEPORT + "_" + Curr_map + ".json"
+		m_FileName = JMConstants.FILE_TELEPORT + "_" + Curr_map + ".json";
 	}
 
 	void ~JMTeleportSerialize()
