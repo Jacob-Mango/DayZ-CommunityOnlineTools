@@ -2,13 +2,12 @@ class JMMissionSelectorModule extends JMRenderableModuleBase
 {
 	void JMMissionSelectorModule()
 	{
-		GetPermissionsManager().RegisterPermission( "GameMission" );
-		GetPermissionsManager().RegisterPermission( "GameMission.View" );
+
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "GameMission.View" );
+		return IsMissionOffline();
 	}
 
 	override string GetLayoutRoot()

@@ -109,9 +109,14 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		Man man;
 		PlayerBase player;
 		// has to cast to man but can't cast to player
-		if ( !Class.CastTo( man, obj ) || Class.CastTo( player, obj ) )
+		if ( !Class.CastTo( man, obj ) || !Class.CastTo( player, obj ) )
 			return false;
 		
+		#ifdef EXPANSIONMODAI
+		if ( !player.IsAI() ) 
+			return false;
+		#endif
+
 		CreateMeta( meta );
 
 		meta.target = obj;
