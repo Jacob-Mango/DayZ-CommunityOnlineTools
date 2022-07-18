@@ -23,7 +23,7 @@ modded class JMModuleConstructor
 #endif
 
 		if ( IsMissionOffline() )
-			//modules.Insert( JMMissionSelectorModule );
+			modules.Insert( JMMissionSelectorModule );
 
 		//modules.Insert( JMTestingModule );
 		
