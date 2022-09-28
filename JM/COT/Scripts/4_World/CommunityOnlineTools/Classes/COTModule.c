@@ -201,7 +201,7 @@ class COTModule : JMModuleBase
 		if ( !( input.LocalPress() ) )
 			return;
 
-		//#ifdef COT_DEBUGLOGS
+		#ifdef COT_DEBUGLOGS
 		Print(( "+COTModule::CloseCOT" ));
 		#endif
 
@@ -232,7 +232,7 @@ class COTModule : JMModuleBase
 		Print(( "  -SetOpen" ));
 		#endif
 
-		//#ifdef COT_DEBUGLOGS
+		#ifdef COT_DEBUGLOGS
 		Print(( "-COTModule::CloseCOT" ));
 		#endif
 	}

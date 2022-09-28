@@ -44,7 +44,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
-		//#ifdef COT_DEBUGLOGS
+		#ifdef COT_DEBUGLOGS
 		Print(( "+JMWindowBase::~JMWindowBase" ));
 		#endif
 		GetCOTWindowManager().RemoveWindow( this );
@@ -52,7 +52,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		Hide();
 
 		//layoutRoot.Unlink();
-		//#ifdef COT_DEBUGLOGS
+		#ifdef COT_DEBUGLOGS
 		Print(( "-JMWindowBase::~JMWindowBase" ));
 		#endif
 	}
