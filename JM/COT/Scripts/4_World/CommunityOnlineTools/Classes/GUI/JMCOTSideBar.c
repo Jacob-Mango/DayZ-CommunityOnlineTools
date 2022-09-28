@@ -147,11 +147,15 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 
 			if ( m_IsAnimatingIn )
 			{
-				//Print( "+" + this + "::OnUpdate m_IsAnimatingIn" );
+				#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::OnUpdate m_IsAnimatingIn" ));
+		#endif
 				
 				m_LayoutRoot.Show( true );
 
-				//Print( "-" + this + "::OnUpdate m_IsAnimatingIn" );
+				#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::OnUpdate m_IsAnimatingIn" ));
+		#endif
 
 				m_PosX = 0;
 
@@ -169,11 +173,15 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 			{
 				if ( m_IsAnimatingOut )
 				{
-					//Print( "+" + this + "::OnUpdate m_IsAnimatingOut" );
+					#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::OnUpdate m_IsAnimatingOut" ));
+		#endif
 
 					m_LayoutRoot.Show( false );
 
-					//Print( "-" + this + "::OnUpdate m_IsAnimatingOut" );
+					#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::OnUpdate m_IsAnimatingOut" ));
+		#endif
 				}
 
 				m_IsAnimatingIn = false;

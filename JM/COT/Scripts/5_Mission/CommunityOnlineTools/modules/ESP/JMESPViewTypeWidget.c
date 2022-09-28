@@ -21,22 +21,30 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		//Print( "+" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Show" ));
+		#endif
 
 		m_LayoutRoot.Show( true );
 		OnShow();
 
-		//Print( "-" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Show" ));
+		#endif
 	}
 
 	void Hide()
 	{
-		//Print( "+" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Hide" ));
+		#endif
 
 		m_LayoutRoot.Show( false );
 		OnHide();
 
-		//Print( "-" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Hide" ));
+		#endif
 	}
 
 	void OnShow()

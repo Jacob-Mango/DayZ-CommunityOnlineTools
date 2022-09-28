@@ -55,7 +55,9 @@ class UIActionScroller extends UIActionBase
 
 	void _UpdateScroller()
 	{
-		//Print( "+" + this + "::UpdateScroller" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::UpdateScroller" ));
+		#endif
 
 		m_Content.Update();
 		m_ScrollerContainer.Update();
@@ -115,7 +117,9 @@ class UIActionScroller extends UIActionBase
 		m_Scroller.SetPos( 0, scrollerPos );
 		m_Content.SetPos( 0, contentPos );
 
-		//Print( "-" + this + "::UpdateScroller" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::UpdateScroller" ));
+		#endif
 	}
 
 	protected void UpdateDragScroll( int mouse_x, int mouse_y, bool is_dragging )

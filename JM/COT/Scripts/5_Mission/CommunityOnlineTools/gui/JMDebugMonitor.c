@@ -19,7 +19,9 @@ class JMDebugMonitor
 	
 	void Init()
 	{
-		//Print( "+" + this + "::Init" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Init" ));
+		#endif
 
 		NamesListboxWidget.AddItem("HEALTH:", NULL, 0);
 		ValuesListboxWidget.AddItem("", NULL, 0);
@@ -35,7 +37,9 @@ class JMDebugMonitor
 	
 		layoutRoot.Show(true);
 
-		//Print( "-" + this + "::Init" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Init" ));
+		#endif
 	}
 
 	void SetHealth(float value)
@@ -64,19 +68,27 @@ class JMDebugMonitor
 
 	void Hide()
 	{
-		//Print( "+" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Hide" ));
+		#endif
 
 		layoutRoot.Show(false);
 
-		//Print( "-" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Hide" ));
+		#endif
 	}
 
 	void Show()
 	{
-		//Print( "+" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Show" ));
+		#endif
 
 		layoutRoot.Show(true);
 
-		//Print( "-" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Show" ));
+		#endif
 	}
 };
