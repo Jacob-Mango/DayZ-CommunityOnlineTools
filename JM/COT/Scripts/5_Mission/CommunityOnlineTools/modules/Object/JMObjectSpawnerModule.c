@@ -220,9 +220,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
 			return;
 		
-		int flags = ECE_CREATEPHYSICS;
+		int flags = ECE_CREATEPHYSICS|ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+		else if ( GetGame().IsKindOf( className, "CarScript" ) )
+			flags = ECE_CREATEPHYSICS|ECE_UPDATEPATHGRAPH;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
