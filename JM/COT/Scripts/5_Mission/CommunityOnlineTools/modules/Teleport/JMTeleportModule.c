@@ -114,6 +114,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !(input.LocalPress()) )
 			return;
 
+		if ( GetPlayer().GetCommand_Vehicle() )
+			return;
+
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
 			return;
 
