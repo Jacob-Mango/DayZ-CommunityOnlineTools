@@ -26,7 +26,9 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		//Print( "+" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Show" ));
+		#endif
 
 		layoutRoot.Show( true );
 		Button.Show( true );
@@ -34,12 +36,16 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		Name.Show( true );
 		OnShow();
 
-		//Print( "-" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Show" ));
+		#endif
 	}
 
 	void Hide()
 	{
-		//Print( "+" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Hide" ));
+		#endif
 
 		OnHide();
 		Name.Show( false );
@@ -47,7 +53,9 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		Checkbox.Show( false );
 		layoutRoot.Show( false );
 
-		//Print( "-" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Hide" ));
+		#endif
 	}
 
 	void OnShow()

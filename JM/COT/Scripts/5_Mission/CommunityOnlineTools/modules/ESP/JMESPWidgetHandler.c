@@ -44,13 +44,17 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void ~JMESPWidgetHandler()
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPWidgetHandler::~JMESPWidgetHandler();" ));
+		#endif
 		#endif
 
 		OnHide();
 
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-JMESPWidgetHandler::~JMESPWidgetHandler();" ));
+		#endif
 		#endif
 	}
 
@@ -81,24 +85,32 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		//Print( "+" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Show" ));
+		#endif
 
 		layoutRoot.Show( true );
 		OnShow();
 
-		//Print( "-" + this + "::Show" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Show" ));
+		#endif
 	}
 
 	void Hide()
 	{
-		//Print( "+" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Hide" ));
+		#endif
 
 		OnHide();
 		layoutRoot.Show( false );
 
 		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 
-		//Print( "-" + this + "::Hide" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Hide" ));
+		#endif
 	}
 
 	void ToggleESPActions()
@@ -114,24 +126,32 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void ShowActions()
 	{
-		//Print( "+" + this + "::ShowActions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::ShowActions" ));
+		#endif
 
 		m_pnl_Actions.Show( true );
 
 		m_img_ToggleActions.SetImage( 0 );
 
-		//Print( "-" + this + "::ShowActions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::ShowActions" ));
+		#endif
 	}
 
 	void HideActions()
 	{
-		//Print( "+" + this + "::HideActions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::HideActions" ));
+		#endif
 
 		m_pnl_Actions.Show( false );
 
 		m_img_ToggleActions.SetImage( 1 );
 
-		//Print( "-" + this + "::HideActions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::HideActions" ));
+		#endif
 	}
 
 	void OnShow()
@@ -273,7 +293,9 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 	void SetInfo( ref JMESPMeta info, out Widget action_rows )
 	{
-		//Print( "+" + this + "::SetInfo" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::SetInfo" ));
+		#endif
 
 		action_rows = m_rows_Actions;
 
@@ -298,7 +320,9 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		
 		Show();
 
-		//Print( "-" + this + "::SetInfo" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::SetInfo" ));
+		#endif
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )

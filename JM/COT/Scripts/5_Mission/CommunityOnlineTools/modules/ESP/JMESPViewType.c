@@ -23,14 +23,18 @@ class JMESPViewType
 	void CreateMeta( out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewType::CreateMeta( out = " + meta + " ) void;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewType::CreateMeta( out = " + meta + " ) void;" ));
+		#endif
 		#endif
 
 		if ( meta == NULL )
 			Class.CastTo( meta, MetaType.Spawn() );
 			
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "-JMESPViewType::CreateMeta( out = " + meta + " ) void;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-JMESPViewType::CreateMeta( out = " + meta + " ) void;" ));
+		#endif
 		#endif
 	}
 
@@ -56,7 +60,9 @@ class JMESPViewTypePlayer: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypePlayer::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypePlayer::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 
 		PlayerBase man;
@@ -103,7 +109,9 @@ class JMESPViewTypePlayerAI: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypePlayerAI::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypePlayerAI::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 
 		Man man;
@@ -155,7 +163,9 @@ class JMESPViewTypeInfected: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeInfected::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeInfected::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 
 		EntityAI entity;
@@ -193,7 +203,9 @@ class JMESPViewTypeAnimal: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeAnimal::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeAnimal::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		EntityAI entity;
@@ -231,7 +243,9 @@ class JMESPViewTypeCar: JMESPViewType // override this in expansion
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeCar::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeCar::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		CarScript car;
@@ -269,7 +283,9 @@ class JMESPViewTypeWeapon: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeWeapon::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeWeapon::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		Weapon_Base wpn;
@@ -307,7 +323,9 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		BoltRifle_Base wpn;
@@ -345,7 +363,9 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeBoltActionRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		BoltActionRifle_Base wpn;
@@ -383,7 +403,9 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeRifle::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		Rifle_Base wpn;
@@ -421,7 +443,9 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypePistol::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypePistol::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		Pistol_Base wpn;
@@ -459,7 +483,9 @@ class JMESPViewTypeItemBase: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeItemBase::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeItemBase::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 		
 		bool isValid = obj.IsItemBase() || obj.IsInventoryItem();
@@ -774,7 +800,9 @@ class JMESPViewTypeImmovable: JMESPViewType
 	override bool IsValid( Object obj, out JMESPMeta meta )
 	{
 		#ifdef JM_COT_ESP_DEBUG
-		//Print( "+JMESPViewTypeImmovable::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+JMESPViewTypeImmovable::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" ));
+		#endif
 		#endif
 
 		ItemBase itm;

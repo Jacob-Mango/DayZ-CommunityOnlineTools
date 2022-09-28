@@ -124,7 +124,9 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 
 	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_One" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::CreateConfirmation_One" ));
+		#endif
 
 		layoutRoot.Show( true );
 
@@ -146,12 +148,16 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText1.SetText( button1Title );
 		}
 
-		//Print( "-" + this + "::CreateConfirmation_One" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::CreateConfirmation_One" ));
+		#endif
 	}
 
 	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_Two" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::CreateConfirmation_Two" ));
+		#endif
 
 		layoutRoot.Show( true );
 
@@ -181,12 +187,16 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText2.SetText( button2Title );
 		}
 
-		//Print( "-" + this + "::CreateConfirmation_Two" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::CreateConfirmation_Two" ));
+		#endif
 	}
 
 	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{
-		//Print( "+" + this + "::CreateConfirmation_Three" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::CreateConfirmation_Three" ));
+		#endif
 
 		layoutRoot.Show( true );
 
@@ -225,12 +235,16 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			m_ButtonText3.SetText( button2Title );
 		}
 
-		//Print( "-" + this + "::CreateConfirmation_Three" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::CreateConfirmation_Three" ));
+		#endif
 	}
 
 	void UpdateType( JMConfirmationType type )
 	{
-		//Print( "+" + this + "::UpdateType" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::UpdateType" ));
+		#endif
 
 		switch ( type )
 		{
@@ -245,18 +259,24 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 			break;
 		}
 
-		//Print( "-" + this + "::UpdateType" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::UpdateType" ));
+		#endif
 	}
 
 	void Close()
 	{
-		//Print( "+" + this + "::Close" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::Close" ));
+		#endif
 
 		m_EditBox.SetText( "" );
 		m_EditBox.Show( false );
 		layoutRoot.Show( false );
 
-		//Print( "-" + this + "::Close" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::Close" ));
+		#endif
 	}
 
 	void OnShow()

@@ -155,7 +155,9 @@ class JMPlayerForm extends JMFormBase
 
 	private void InitWidgetsLeft()
 	{
-		//Print( "+" + this + "::InitWidgetsLeft" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::InitWidgetsLeft" ));
+		#endif
 
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
 
@@ -197,7 +199,9 @@ class JMPlayerForm extends JMFormBase
 
 		m_PlayerListScroller.UpdateScroller();
 
-		//Print( "-" + this + "::InitWidgetsLeft" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::InitWidgetsLeft" ));
+		#endif
 	}
 
 	private void InitWidgetsRight()
@@ -392,7 +396,9 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowPermissions()
 	{
-		//Print( "+" + this + "::ShowPermissions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::ShowPermissions" ));
+		#endif
 
 		m_ModifyPermissions.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_PERMISSIONS" );
 		m_SavePermissions.Show();
@@ -448,7 +454,9 @@ class JMPlayerForm extends JMFormBase
 		m_PermissionsListScroller.UpdateScroller();
 		m_ActionListScroller.UpdateScroller();
 
-		//Print( "-" + this + "::ShowPermissions" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::ShowPermissions" ));
+		#endif
 	}
 
 	void HideRoles()
@@ -467,7 +475,9 @@ class JMPlayerForm extends JMFormBase
 
 	void ShowRoles()
 	{
-		//Print( "+" + this + "::ShowRoles" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::ShowRoles" ));
+		#endif
 
 		m_ModifyRoles.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_ROLES" );
 		m_SaveRoles.Show();
@@ -530,7 +540,9 @@ class JMPlayerForm extends JMFormBase
 		m_RolesListScroller.UpdateScroller();
 		m_ActionListScroller.UpdateScroller();
 
-		//Print( "-" + this + "::ShowRoles" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::ShowRoles" ));
+		#endif
 	}
 
 	void Click_ModifyPermissions( UIEvent eid, ref UIActionBase action )
@@ -941,7 +953,9 @@ class JMPlayerForm extends JMFormBase
 
 	void HideUI()
 	{
-		//Print( "+" + this + "::HideUI" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::HideUI" ));
+		#endif
 
 		ShowIdentityWidgets();
 
@@ -949,16 +963,22 @@ class JMPlayerForm extends JMFormBase
 
 		m_SelectedInstance = NULL;
 
-		//Print( "-" + this + "::HideUI" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::HideUI" ));
+		#endif
 	}
 
 	void ShowUI()
 	{
-		//Print( "+" + this + "::ShowUI" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::ShowUI" ));
+		#endif
 
 		m_RightPanelDisable.Show( false );
 
-		//Print( "-" + this + "::ShowUI" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::ShowUI" ));
+		#endif
 	}
 
 	void UpdateUI()
@@ -1125,7 +1145,9 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerList()
 	{
-		//Print( "+" + this + "::UpdatePlayerList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::UpdatePlayerList" ));
+		#endif
 
 		if ( !IsMissionOffline() )
 		{
@@ -1199,7 +1221,9 @@ class JMPlayerForm extends JMFormBase
 
 		m_PlayerListScroller.UpdateScroller();	
 
-		//Print( "-" + this + "::UpdatePlayerList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::UpdatePlayerList" ));
+		#endif
 	}
 
 	override void OnFocus()

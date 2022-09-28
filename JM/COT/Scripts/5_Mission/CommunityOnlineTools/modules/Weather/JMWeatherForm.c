@@ -190,7 +190,9 @@ class JMWeatherForm extends JMFormBase
 
 	void ShowList()
 	{
-		//Print( "+" + this + "::ShowList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::ShowList" ));
+		#endif
 
 		m_PanelLeft.Show( true );
 		m_PanelRight.Show( true );
@@ -204,12 +206,16 @@ class JMWeatherForm extends JMFormBase
 
 		UpdateStates();
 
-		//Print( "-" + this + "::ShowList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::ShowList" ));
+		#endif
 	}
 
 	void HideList()
 	{
-		//Print( "+" + this + "::HideList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::HideList" ));
+		#endif
 
 		m_PanelLeft.Show( false );
 		m_PanelRight.Show( true );
@@ -223,7 +229,9 @@ class JMWeatherForm extends JMFormBase
 
 		UpdateStates();
 
-		//Print( "-" + this + "::HideList" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::HideList" ));
+		#endif
 	}
 
 	private void UpdateActionState( UIActionBase action, string permission, bool shouldDisable = false, bool shouldHide = false )

@@ -21,7 +21,9 @@ class UIActionEditableVector extends UIActionBase
 
 	void HasButton( bool enabled )
 	{
-		//Print( "+" + this + "::HasButton" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "+" + this + "::HasButton" ));
+		#endif
 
 		if ( enabled )
 		{
@@ -46,7 +48,9 @@ class UIActionEditableVector extends UIActionBase
 
 		SetValue( vector.Zero );
 
-		//Print( "-" + this + "::HasButton" );
+		#ifdef COT_DEBUGLOGS
+		Print(( "-" + this + "::HasButton" ));
+		#endif
 	}
 
 	override void SetLabel( string text )
