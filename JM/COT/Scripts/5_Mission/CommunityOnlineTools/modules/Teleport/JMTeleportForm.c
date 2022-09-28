@@ -92,14 +92,10 @@ class JMTeleportForm extends JMFormBase
 			name.ToLower();
 
 			if ( (filter != "" && (!name.Contains( filter ))) ) 
-			{
 				continue;
-			}
 
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locations[i].Permission ) )
-			{
 				continue;
-			}
 
 			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );
 		}
@@ -113,8 +109,7 @@ class JMTeleportForm extends JMFormBase
 		{
 			m_PositionX.SetText( "N/A" );
 			m_PositionZ.SetText( "N/A" );
-		} else 
-		{
+		} else {
 			m_PositionX.SetText( location.Position[0].ToString() );
 			m_PositionZ.SetText( location.Position[2].ToString() );
 		}

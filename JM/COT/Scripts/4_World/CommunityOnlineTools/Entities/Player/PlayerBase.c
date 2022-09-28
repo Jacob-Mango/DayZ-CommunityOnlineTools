@@ -1,4 +1,3 @@
-
 modded class PlayerBase
 {
 #ifndef CF_MODULE_PERMISSIONS
@@ -20,6 +19,24 @@ modded class PlayerBase
 
 	private bool m_JMHasUnlimitedStamina;
 	private bool m_JMHasUnlimitedStaminaRemoteSynch;
+
+	void PlayerBase()
+	{
+		if ( IsMissionOffline() )
+		{
+			JM_GetSelected().AddPlayer( JMConstants.OFFLINE_GUID );
+
+			GetStatEnergy().Set( GetStatEnergy().GetMax() );
+			GetStatWater().Set( GetStatWater().GetMax() );
+			COTSetGodMode(true);
+			COTSetUnlimitedAmmo(true);
+			COTSetUnlimitedStamina(true);
+		}
+		else if ( !GetGame().IsServer() )
+		{
+			JM_GetSelected().AddPlayer( GetPermissionsManager().GetClientGUID() );
+		}
+	}
 
 	override void Init()
 	{
