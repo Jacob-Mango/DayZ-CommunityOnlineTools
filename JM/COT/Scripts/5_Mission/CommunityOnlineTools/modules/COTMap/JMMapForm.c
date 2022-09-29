@@ -31,7 +31,14 @@ class JMMapForm extends JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
 			return;
 
+		UpdateMapPos( GetGame().GetPlayer().GetPosition() );
+
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
+	}
+
+	void UpdateMapPos(vector pos)
+	{
+		m_MapWidget.SetMapPos( pos );
 	}
 
 	override void OnHide() 
