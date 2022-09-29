@@ -26,11 +26,15 @@ class JMCinematicCamera extends JMCameraBase
 		float yawDiff = input.LocalValue( "UAAimLeft" ) - input.LocalValue( "UAAimRight" );
 		float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
 
-		float speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
+		float speedInc = 0;
+		if ( forward != 0 || strafe != 0 || altitude != 0 )
+		{
+			float zoomAmt = input.LocalValue( "UACameraToolZoomForwards" ) - input.LocalValue( "UACameraToolZoomBackwards" );
 
-		float zoomAmt = input.LocalValue( "UACameraToolZoomForwards" ) - input.LocalValue( "UACameraToolZoomBackwards" );
-		if ( zoomAmt != 0 )
-			speedInc = 0;
+			if ( zoomAmt == 0 )
+				speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
+		}
+
 
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
