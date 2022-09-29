@@ -60,6 +60,7 @@ class JMVehicleSpawnerSettings
 		Default_CivilianSedan();
 		Default_Hatchback_02();
 		Default_Sedan_02();
+		Default_Offroad_02();
 		Default_Truck_01_Covered();
 	}
 
@@ -77,6 +78,7 @@ class JMVehicleSpawnerSettings
 			attArr.Insert("CivSedanDoors_BackRight"+color);
 			attArr.Insert("CivSedanDoors_BackLeft"+color);
 			attArr.Insert("CivSedanDoors_CoDriver"+color);
+			attArr.Insert("CivSedanWheel");
 			attArr.Insert("CivSedanWheel");
 			attArr.Insert("CivSedanWheel");
 			attArr.Insert("CivSedanWheel");
@@ -109,6 +111,7 @@ class JMVehicleSpawnerSettings
 			attArr.Insert("HatchbackTrunk"+color);
 			attArr.Insert("HatchbackDoors_Driver"+color);
 			attArr.Insert("HatchbackDoors_CoDriver"+color);
+			attArr.Insert("HatchbackWheel");
 			attArr.Insert("HatchbackWheel");
 			attArr.Insert("HatchbackWheel");
 			attArr.Insert("HatchbackWheel");
@@ -147,6 +150,7 @@ class JMVehicleSpawnerSettings
 			attArr.Insert("Hatchback_02_Wheel");
 			attArr.Insert("Hatchback_02_Wheel");
 			attArr.Insert("Hatchback_02_Wheel");
+			attArr.Insert("Hatchback_02_Wheel");
 			attArr.Insert("CarBattery");
 			attArr.Insert("CarRadiator");
 			attArr.Insert("SparkPlug");
@@ -181,6 +185,7 @@ class JMVehicleSpawnerSettings
 			attArr.Insert("Sedan_02_Wheel");
 			attArr.Insert("Sedan_02_Wheel");
 			attArr.Insert("Sedan_02_Wheel");
+			attArr.Insert("Sedan_02_Wheel");
 			attArr.Insert("CarBattery");
 			attArr.Insert("CarRadiator");
 			attArr.Insert("SparkPlug");
@@ -195,6 +200,34 @@ class JMVehicleSpawnerSettings
 
 			Vehicles.Insert( file.VehicleName, file );
 		}
+	}
+
+	void Default_Offroad_02()
+	{
+		array< string> attArr = new array< string>;
+
+		attArr.Insert("Offroad_02_Hood");
+		attArr.Insert("Offroad_02_Trunk");
+		attArr.Insert("Offroad_02_Door_1_1");
+		attArr.Insert("Offroad_02_Door_1_2");
+		attArr.Insert("Offroad_02_Door_2_1");
+		attArr.Insert("Offroad_02_Door_2_2");
+		attArr.Insert("Offroad_02_Wheel");
+		attArr.Insert("Offroad_02_Wheel");
+		attArr.Insert("Offroad_02_Wheel");
+		attArr.Insert("Offroad_02_Wheel");
+		attArr.Insert("CarBattery");
+		attArr.Insert("GlowPlug");
+		attArr.Insert("HeadlightH7");
+		attArr.Insert("HeadlightH7");
+
+		JMVehicleSpawnerSerialize file = JMVehicleSpawnerSerialize.Create();
+
+		file.VehicleName = "Offroad_02";
+		file.m_FileName = file.VehicleName;
+		file.Parts.Copy( attArr );
+
+		Vehicles.Insert( file.VehicleName, file );
 	}
 
 	void Default_Truck_01_Covered()
