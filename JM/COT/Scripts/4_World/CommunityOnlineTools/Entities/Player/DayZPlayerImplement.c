@@ -55,15 +55,11 @@ modded class DayZPlayerImplement
 
 	override void EOnFrame( IEntity other, float timeSlice )
 	{
-		super.EOnFrame( other, timeSlice );
-
 		UpdateSpecatorCamera();
 	}
 
 	override void EOnPostFrame( IEntity other, int extra )
 	{
-		// super.EOnPostFrame( other, extra );
-
 		UpdateSpecatorCamera();
 	}
 
