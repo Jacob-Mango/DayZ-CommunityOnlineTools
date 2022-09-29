@@ -343,27 +343,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			string ent;
 			if ( !ctx.Read( ent ) )
-			{
 				return;
-			}
 
 			JMSelectedObjects selected;
 			if ( !ctx.Read( selected ) )
-			{
 				return;
-			}
 		
 			float quantity;
 			if ( !ctx.Read( quantity ) )
-			{
 				return;
-			}
 
 			float health;
 			if ( !ctx.Read( health ) )
-			{
 				return;
-			}
 
 			Server_SpawnEntity_Inventory( ent, selected, quantity, health, senderRPC );
 		}
@@ -377,17 +369,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( quantity == -1 )
 			{
 				if ( item.HasQuantity() )
-				{
 					quantity = item.GetQuantityMax();
-				}
 			}
 
 			if ( quantity > 0 )
 			{
 				if ( quantity > item.GetQuantityMax() )
-				{
 					quantity = item.GetQuantityMax();
-				}
 
 				item.SetQuantity(quantity);
 			}
@@ -397,14 +385,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			obj.OnDebugSpawn();
 
 		if ( health == -1 )
-		{
 			health = obj.GetMaxHealth();
-		}
 
 		if ( health >= 0 )
-		{
 			obj.SetHealth( "", "", health );
-		}
 	}
 
 	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)

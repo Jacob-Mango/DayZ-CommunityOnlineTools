@@ -37,7 +37,6 @@ class JMObjectSpawnerForm extends JMFormBase
 		"red9",
 		"pvcbow",
 		"crossbow",
-		"augsteyr",
 		"m249",
 		"undersluggrenadem4",
 		"groza",
@@ -164,8 +163,8 @@ class JMObjectSpawnerForm extends JMFormBase
 			m_ItemPreview.Show( false );
 
 			#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::UpdateItemPreview AI" ));
-		#endif
+			Print(( "-" + this + "::UpdateItemPreview AI" ));
+			#endif
 			return;
 		}
 
