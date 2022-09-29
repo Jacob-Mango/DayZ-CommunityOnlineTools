@@ -256,13 +256,17 @@ modded class PlayerBase
 			SetAllowDamage( !m_JMHasGodMode );
 		}
 	}
+
+	override void ProcessHandDamage(float delta_time, HumanMovementState pState)
+	{
+        if ( !COTHasGodMode() )
+			super.ProcessHandDamage(delta_time, pState);
+	}
 	
 	override void ProcessFeetDamageServer(int pUserInt)
 	{
-		if ( m_JMHasGodMode )
-			return;
-
-		super.ProcessFeetDamageServer(pUserInt);
+        if ( !COTHasGodMode() )
+			super.ProcessFeetDamageServer(pUserInt);
 	}
 
 	void COTSetFreeze( bool mode )
