@@ -88,7 +88,9 @@ modded class PlayerBase
 				SetFlags( EntityFlags.VISIBLE, true );
 			}
 
+			#ifdef COT_INVISIBILITY
 			//SetInvisible( m_JMIsInvisible );
+			#endif
 		}
 
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
