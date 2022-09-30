@@ -9,6 +9,11 @@ enum JMTeleportModuleRPC
 
 class JMTeleportModule: JMRenderableModuleBase
 {
+	#ifdef COT_TPMENU2MAPMENU
+	JMMapModule m_MapModule;
+	JMMapForm m_MapMenu;
+	#endif
+	
 	private ref JMTeleportSerialize m_Settings;
 	
 	void JMTeleportModule()
@@ -19,6 +24,29 @@ class JMTeleportModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor.NoLog" );
 	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
+		
+		#ifdef COT_TPMENU2MAPMENU
+		if (Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
+			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
+		#endif
+	}
+
+	void OnSelectLocation(vector pos)
+	{
+		#ifdef COT_TPMENU2MAPMENU
+		if( !m_MapMenu )
+		{
+			if (!Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
+				return;
+
+			Print("m_MapModule.GetForm() = "+m_MapModule.GetForm());
+			Print("m_MapModule = "+m_MapModule);
+
+			if (!Class.CastTo(m_MapMenu, m_MapModule.GetForm()) )
+				return;
+		}
+		m_MapMenu.UpdateMapPos(pos);
+		#endif
 	}
 
 	override bool HasAccess()

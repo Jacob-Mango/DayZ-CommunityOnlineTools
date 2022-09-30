@@ -112,6 +112,10 @@ class JMTeleportForm extends JMFormBase
 		} else {
 			m_PositionX.SetText( location.Position[0].ToString() );
 			m_PositionZ.SetText( location.Position[2].ToString() );
+
+			#ifdef COT_TPMENU2MAPMENU
+			m_Module.OnSelectLocation(location.Position);
+			#endif
 		}
 
 		return true;
