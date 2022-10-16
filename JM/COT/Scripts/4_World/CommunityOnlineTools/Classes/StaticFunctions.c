@@ -45,27 +45,55 @@ static vector GetCurrentPosition()
 	return "0 0 0";
 }
 
+
+static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore)
+{
+	Object hitObject;
+	vector hitPos;
+	vector hitNormal;
+	int hitComponentIndex;
+	float hitFraction;
+
+	vector p0;
+	vector p1;
+
+	bool h0 = DayZPhysics.RayCastBullet(rayStart, rayEnd, 0xFFFFFFFFFF, ignore, hitObject, p0, hitNormal, hitFraction);
+	bool h1 = DayZPhysics.RaycastRV(rayStart, rayEnd, p1, hitNormal, hitComponentIndex, NULL, NULL, ignore, false, false, ObjIntersectGeom);
+
+	if (h0 && h1)
+	{
+		float d0 = vector.Distance(rayStart, p0);
+		float d1 = vector.Distance(rayStart, p1);
+
+		if (d0 < d1)
+		{
+			return p0;
+		}
+
+		return p1;
+	}
+
+	if (h0)
+	{
+		return p0;
+	}
+
+	return p1;
+}
+
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 {
-	if ( !ignore )
+	if (!ignore)
 	{
-		ignore = GetGame().GetPlayer();
+		ignore = GetPlayer();
 	}
 
 	vector dir = GetGame().GetPointerDirection();
 
 	vector from = GetGame().GetCurrentCameraPosition();
+	vector to = from + (dir * distance);
 
-	vector to = from + ( dir * distance );
-
-	vector rayStart = from;
-	vector rayEnd = to;
-	vector hitPos;
-	vector hitNormal;
-	int hitComponentIndex;
-	DayZPhysics.RaycastRV( rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, ignore );
-
-	return hitPos;
+	return COT_PerformRayCast(from, to, ignore);
 }
 
 static vector GetCursorPos( Object ignore = NULL )
@@ -73,21 +101,14 @@ static vector GetCursorPos( Object ignore = NULL )
 	vector rayStart = GetGame().GetCurrentCameraPosition();
 	vector rayDirection = GetGame().GetCurrentCameraDirection();
 
-	if ( !ignore )
+	if (!ignore)
 	{
 		ignore = GetPlayer();
-	} else
-	{
-		rayStart = rayStart + ( rayDirection * 5.0 );
 	}
 
 	vector rayEnd = rayStart + ( rayDirection * 10000.0 );
-	vector hitPos;
-	vector hitNormal;
-	int hitComponentIndex;
-	DayZPhysics.RaycastRV(rayStart, rayEnd, hitPos, hitNormal, hitComponentIndex, NULL, NULL, ignore, false, false, ObjIntersectGeom);
 
-	return hitPos;
+	return COT_PerformRayCast(rayStart, rayEnd, ignore);
 }
 
 static void Message( PlayerBase player, string txt ) 

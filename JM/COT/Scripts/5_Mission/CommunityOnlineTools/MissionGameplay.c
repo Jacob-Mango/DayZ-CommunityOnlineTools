@@ -48,7 +48,7 @@ modded class MissionGameplay
 		{
 			EntityAI item = NULL;
 			
-			item = player.GetInventory().CreateInInventory( "AirborneMask" );
+			//item = player.GetInventory().CreateInInventory( "AirborneMask" );
 			item = player.GetInventory().CreateInInventory( "Mich2001Helmet" );
 			item.GetInventory().CreateInInventory( "NVGoggles" );
 			item.GetInventory().CreateInInventory( "UniversalLight" );

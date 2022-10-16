@@ -368,50 +368,39 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void ChunkGetObjects( out array<Object> objects, out int totalTimeTaken )
+	private void ChunkGetObjects(out set<Object> objects, out int totalTimeTaken)
 	{
 		vector centerPosition = GetCurrentPosition();
 
-		float maxRadiusChunk = 100;
+		float maxSizePerBox = 100;
+		float sizePerBox = ESPRadius / maxSizePerBox;
+		
+		int numIterations = Math.Ceil(sizePerBox) / 2;
 
-		int numIterations = Math.Ceil( ESPRadius / maxRadiusChunk );
-
-		array<Object> subObjects = new array<Object>;
-		GetGame().GetObjectsAtPosition( centerPosition, maxRadiusChunk, subObjects, NULL );
-
-		for ( int i = 0; i < subObjects.Count(); i++ )
-		{
-			if ( objects.Find( subObjects[i] ) < 0 )
-			{
-				objects.Insert( subObjects[i] );
-			}
-		}
-
-		subObjects.Clear();
+		sizePerBox = (sizePerBox / numIterations) * maxSizePerBox;
 
 		int sleepIdx = 0;
 
-		_Sleep( 1, totalTimeTaken, sleepIdx );
-
-		for ( int currIter = 2; currIter <= numIterations; ++currIter )
+		for (int x = -numIterations; x < numIterations; x++)
 		{
-			int numSubChunks = currIter * currIter;
-			for ( int chunkIdx = 1; chunkIdx <= numSubChunks; ++chunkIdx )
+			for (int z = -numIterations; z < numIterations; z++)
 			{
-				subObjects.Clear();
+				float xx0 = (x + 0) * sizePerBox;
+				float zz0 = (z + 0) * sizePerBox;
 
-				vector chunkPos = GetChunkCenterPosition( centerPosition, maxRadiusChunk, currIter, chunkIdx, numSubChunks );
+				float xx1 = (x + 1) * sizePerBox;
+				float zz1 = (z + 1) * sizePerBox;
 
-				GetGame().GetObjectsAtPosition( chunkPos, maxRadiusChunk, subObjects, NULL );
+				vector min = centerPosition + Vector(xx0, -1000, zz0);
+				vector max = centerPosition + Vector(xx1,  1000, zz1);
 
-				for ( i = 0; i < subObjects.Count(); i++ )
+				array<EntityAI> entities();
+				DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
+
+				foreach (auto entity : entities)
 				{
-					if ( objects.Find( subObjects[i] ) < 0 )
-					{
-						objects.Insert( subObjects[i] );
-					}
+					objects.Insert(entity);
 				}
-				subObjects.Clear();
 
 				_Sleep( 1, totalTimeTaken, sleepIdx );
 			}
@@ -459,8 +448,8 @@ class JMESPModule: JMRenderableModuleBase
 
 				didRun = true;
 
-				array<Object> objects = new array<Object>;
-				array<Object> addedObjects = new array<Object>;
+				set<Object> objects = new set<Object>;
+				set<Object> addedObjects = new set<Object>;
 
 				bool isUsingFilter = Filter.Length() > 0;
 

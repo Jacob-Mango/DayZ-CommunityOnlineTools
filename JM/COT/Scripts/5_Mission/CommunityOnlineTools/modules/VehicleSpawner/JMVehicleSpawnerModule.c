@@ -237,7 +237,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		array< string > attachments = file.Parts;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_PLACE_ON_SURFACE ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
 			return NULL;
 
 		for ( int j = 0; j < attachments.Count(); j++ )
