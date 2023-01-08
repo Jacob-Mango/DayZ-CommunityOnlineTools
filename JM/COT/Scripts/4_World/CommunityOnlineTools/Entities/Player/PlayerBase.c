@@ -170,6 +170,11 @@ modded class PlayerBase
 		if ( !GetIdentity() ) // Could be AI
 			return NULL;
 
+		#ifdef EXPANSIONMODAI
+		if ( IsAI() )
+			return NULL;
+		#endif
+
 		if ( !m_AuthenticatedPlayer )
 		{
 			if ( IsMissionOffline() )
@@ -195,6 +200,11 @@ modded class PlayerBase
 
 		if ( !GetIdentity() ) // Could be AI
 			return;
+			
+		#ifdef EXPANSIONMODAI
+		if ( IsAI() )
+			return NULL;
+		#endif
 
 		if ( !m_AuthenticatedPlayer )
 		{
