@@ -32,10 +32,6 @@ modded class PlayerBase
 			COTSetUnlimitedAmmo(true);
 			COTSetUnlimitedStamina(true);
 		}
-		else if ( !GetGame().IsServer() )
-		{
-			JM_GetSelected().AddPlayer( GetPermissionsManager().GetClientGUID() );
-		}
 	}
 
 	override void Init()
