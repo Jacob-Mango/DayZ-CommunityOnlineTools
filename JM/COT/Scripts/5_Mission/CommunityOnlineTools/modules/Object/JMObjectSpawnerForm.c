@@ -148,7 +148,7 @@ class JMObjectSpawnerForm extends JMFormBase
 	void UpdateItemPreview()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::UpdateItemPreview" ));
+		Print( "+" + this + "::UpdateItemPreview" );
 		#endif
 		
 		string strSelection = GetCurrentSelection();
@@ -163,7 +163,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			m_ItemPreview.Show( false );
 
 			#ifdef COT_DEBUGLOGS
-			Print(( "-" + this + "::UpdateItemPreview AI" ));
+			Print( "-" + this + "::UpdateItemPreview AI" );
 			#endif
 			return;
 		}
@@ -185,7 +185,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::UpdateItemPreview" ));
+		Print( "-" + this + "::UpdateItemPreview" );
 		#endif
 	}
 

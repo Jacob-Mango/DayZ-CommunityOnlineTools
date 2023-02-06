@@ -56,7 +56,7 @@ class UIActionScroller extends UIActionBase
 	void _UpdateScroller()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::UpdateScroller" ));
+		Print( "+" + this + "::UpdateScroller" );
 		#endif
 
 		m_Content.Update();
@@ -118,7 +118,7 @@ class UIActionScroller extends UIActionBase
 		m_Content.SetPos( 0, contentPos );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::UpdateScroller" ));
+		Print( "-" + this + "::UpdateScroller" );
 		#endif
 	}
 

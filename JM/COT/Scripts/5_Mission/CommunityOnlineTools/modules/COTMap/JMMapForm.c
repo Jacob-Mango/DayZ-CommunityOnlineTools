@@ -8,7 +8,7 @@ class JMMapForm extends JMFormBase
 	override void OnInit()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::OnInit" ));
+		Print( "+" + this + "::OnInit" );
 		#endif
 
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
@@ -17,7 +17,7 @@ class JMMapForm extends JMFormBase
 		m_BackgroundWidget.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::OnInit" ));
+		Print( "-" + this + "::OnInit" );
 		#endif
 	}
 

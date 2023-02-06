@@ -44,7 +44,7 @@ class UIActionEditableText extends UIActionBase
 	void HasButton( bool enabled )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::HasButton" ));
+		Print( "+" + this + "::HasButton" );
 		#endif
 
 		Widget root = NULL;
@@ -68,7 +68,7 @@ class UIActionEditableText extends UIActionBase
 		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::HasButton" ));
+		Print( "-" + this + "::HasButton" );
 		#endif
 	}
 

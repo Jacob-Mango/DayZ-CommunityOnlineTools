@@ -22,7 +22,7 @@ class UIActionEditableVector extends UIActionBase
 	void HasButton( bool enabled )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::HasButton" ));
+		Print( "+" + this + "::HasButton" );
 		#endif
 
 		if ( enabled )
@@ -49,7 +49,7 @@ class UIActionEditableVector extends UIActionBase
 		SetValue( vector.Zero );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::HasButton" ));
+		Print( "-" + this + "::HasButton" );
 		#endif
 	}
 

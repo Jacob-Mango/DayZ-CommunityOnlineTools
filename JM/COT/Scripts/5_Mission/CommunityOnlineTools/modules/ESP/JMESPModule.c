@@ -271,7 +271,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "+JMESPModule::CreateNewWidgets() void;" ));
+		Print( "+JMESPModule::CreateNewWidgets() void;" );
 		#endif
 		#endif
 
@@ -296,7 +296,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "-JMESPModule::CreateNewWidgets() void;" ));
+		Print( "-JMESPModule::CreateNewWidgets() void;" );
 		#endif
 		#endif
 	}
@@ -305,7 +305,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "+JMESPModule::DestroyOldWidgets() void;" ));
+		Print( "+JMESPModule::DestroyOldWidgets() void;" );
 		#endif
 		#endif
 
@@ -347,7 +347,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "-JMESPModule::DestroyOldWidgets() void;" ));
+		Print( "-JMESPModule::DestroyOldWidgets() void;" );
 		#endif
 		#endif
 	}
@@ -519,8 +519,8 @@ class JMESPModule: JMRenderableModuleBase
 							#ifdef JM_COT_ESP_DEBUG
 							bool metaIsValid = meta.IsValid();
 							#ifdef COT_DEBUGLOGS
-		Print(( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid ));
-		#endif
+							Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid );
+							#endif
 							if ( metaIsValid )
 							#else
 							if ( meta.IsValid() )
@@ -544,8 +544,8 @@ class JMESPModule: JMRenderableModuleBase
 								#ifdef JM_COT_ESP_DEBUG
 								bool viewTypeIsValid = validViewTypes[j].IsValid( obj, meta );
 								#ifdef COT_DEBUGLOGS
-		Print(( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid ));
-		#endif
+								Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid );
+								#endif
 								if ( viewTypeIsValid )
 								#else
 								if ( validViewTypes[j].IsValid( obj, meta ) )
@@ -565,8 +565,8 @@ class JMESPModule: JMRenderableModuleBase
 
 					#ifdef JM_COT_ESP_DEBUG
 					#ifdef COT_DEBUGLOGS
-		Print(( "+JMESPModule::ThreadESP() - Verifying ESP Objects" ));
-		#endif
+					Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					#endif
 					#endif
 
 					for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
@@ -588,8 +588,8 @@ class JMESPModule: JMRenderableModuleBase
 
 					#ifdef JM_COT_ESP_DEBUG
 					#ifdef COT_DEBUGLOGS
-		Print(( "-JMESPModule::ThreadESP() - Verifying ESP Objects" ));
-		#endif
+					Print( "-JMESPModule::ThreadESP() - Verifying ESP Objects" );
+					#endif
 					#endif
 
 					GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );

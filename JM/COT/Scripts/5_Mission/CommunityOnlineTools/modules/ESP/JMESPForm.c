@@ -82,7 +82,7 @@ class JMESPForm extends JMFormBase
 	private void ESPFilters( Widget parent )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::ESPFilters" ));
+		Print( "+" + this + "::ESPFilters" );
 		#endif
 
 		m_ESPListScroller = UIActionManager.CreateScroller( parent );
@@ -122,7 +122,7 @@ class JMESPForm extends JMFormBase
 		m_ESPListScroller.UpdateScroller();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::ESPFilters" ));
+		Print( "-" + this + "::ESPFilters" );
 		#endif
 	}
 

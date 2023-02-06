@@ -15,7 +15,7 @@ class JMRenderableModuleBase extends JMModuleBase
 	bool InitButton( Widget button_bkg )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::InitButton" ));
+		Print( "+" + this + "::InitButton" );
 		#endif
 
 		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
@@ -45,13 +45,13 @@ class JMRenderableModuleBase extends JMModuleBase
 			}
 
 			#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::InitButton true" ));
-		#endif
+			Print( "-" + this + "::InitButton true" );
+			#endif
 			return true;
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::InitButton" ));
+		Print( "-" + this + "::InitButton" );
 		#endif
 		return false;
 	}
