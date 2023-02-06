@@ -28,9 +28,4 @@ modded class Weapon_Base
 			}
 		}
 	}
-
-	override void OnDebugSpawn()
-	{
-		
-	}
 };
