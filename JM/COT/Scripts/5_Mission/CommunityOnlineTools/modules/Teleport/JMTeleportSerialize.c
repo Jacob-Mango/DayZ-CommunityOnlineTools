@@ -3,15 +3,15 @@ class JMTeleportSerialize : Managed
 	ref array< ref JMTeleportLocation > Locations;
 
 	[NonSerialized()]
-	string Curr_map;
+	string m_WorldName;
 
 	static string m_FileName;
 
 	private void JMTeleportSerialize()
 	{
 		Locations = new array< ref JMTeleportLocation >;
-		Curr_map = GetGame().GetWorldName();
-		m_FileName = JMConstants.FILE_TELEPORT + "_" + Curr_map + ".json";
+		m_WorldName = GetGame().GetWorldName();
+		m_FileName = JMConstants.FILE_TELEPORT + "_" + m_WorldName + ".json";
 	}
 
 	void ~JMTeleportSerialize()
@@ -59,7 +59,7 @@ class JMTeleportSerialize : Managed
 
 	void Defaults()
 	{
-		string location_config_path = "CfgWorlds " + Curr_map + " Names";
+		string location_config_path = "CfgWorlds " + m_WorldName + " Names";
 		int classNamesCount = GetGame().ConfigGetChildrenCount( location_config_path );
 		
 		for ( int i = 0; i < classNamesCount; ++i ) 
