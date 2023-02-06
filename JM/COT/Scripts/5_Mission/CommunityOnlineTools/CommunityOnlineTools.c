@@ -24,17 +24,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		if ( IsMissionOffline() )
-		{
+		//if ( IsMissionOffline() )
+		//{
 			// GetPermissionsManager().CreateFakePlayers();
-		}
+		//}
 
 		super.OnLoaded();
-	}
-
-	override void OnUpdate( float timeslice )
-	{
-		super.OnUpdate( timeslice );
 	}
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
