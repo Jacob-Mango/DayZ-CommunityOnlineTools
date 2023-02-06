@@ -771,6 +771,10 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	private void RPC_CreatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_CreatePreset").Add(senderRPC);
+		#endif
+
 		JMWeatherPreset p1;
 		if ( !ctx.Read( p1 ) )
 			return;

@@ -103,6 +103,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_Active( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_Active").Add(senderRPC);
+		#endif
+
 		bool active;
 		if ( !ctx.Read( active ) )
 			return;
@@ -130,6 +134,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_RefreshClients( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_RefreshClients").Add(senderRPC);
+		#endif
+
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 			return;
 
@@ -165,6 +173,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_RefreshClientPositions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_RefreshClientPositions").Add(senderRPC);
+		#endif
+
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
 			return;
 
@@ -208,6 +220,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_RemoveClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_RemoveClient").Add(senderRPC);
+		#endif
+
 		if ( IsMissionClient() )
 		{
 			string guid;
@@ -254,6 +270,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_UpdateClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_UpdateClient").Add(senderRPC);
+		#endif
+
 		if ( GetGame().IsServer() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
@@ -280,6 +300,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_UpdateClientPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_UpdateClientPosition").Add(senderRPC);
+		#endif
+
 		if ( GetGame().IsClient() )
 		{
 			string guid;
@@ -355,6 +379,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_SetClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_SetClient").Add(senderRPC);
+		#endif
+
 		if ( IsMissionClient() )
 		{
 			string guid;
@@ -402,6 +430,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_UpdateRole( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_UpdateRole").Add(senderRPC);
+		#endif
+
 		if ( IsMissionClient() )
 		{
 			string roleName;
