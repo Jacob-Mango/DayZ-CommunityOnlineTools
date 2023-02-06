@@ -202,38 +202,39 @@ class COTModule : JMModuleBase
 			return;
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::CloseCOT" ));
+		Print( "+COTModule::CloseCOT" );
 		#endif
 
 		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
 		for ( int i = 0; i < modules.Count(); ++i )
 		{
 			#ifdef COT_DEBUGLOGS
-		Print(( "  +" + modules[i].Type().ToString() ));
-		#endif
-			#ifdef COT_DEBUGLOGS
-		Print(( "  visible=" + modules[i].IsVisible() ));
-		#endif
+			Print( "  +" + modules[i].Type().ToString() );
+			Print( "  visible=" + modules[i].IsVisible() );
+			#endif
+
 			if ( modules[i].IsVisible() )
 			{
 				modules[i].Hide();
 			}
+
 			#ifdef COT_DEBUGLOGS
-		Print(( "  -" + modules[i].Type().ToString() ));
-		#endif
+			Print( "  -" + modules[i].Type().ToString() );
+			#endif
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "  +SetOpen" ));
+		Print( "  +SetOpen" );
 		#endif
+
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "  -SetOpen" ));
+		Print( "  -SetOpen" );
 		#endif
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-COTModule::CloseCOT" ));
+		Print( "-COTModule::CloseCOT" );
 		#endif
 	}
 
@@ -320,7 +321,7 @@ class COTModule : JMModuleBase
 	override void OnInvokeConnect( PlayerBase player, PlayerIdentity identity )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnInvokeConnect - " + identity.GetId() ));
+		Print( "+COTModule::OnInvokeConnect - " + identity.GetId() );
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
@@ -356,7 +357,7 @@ class COTModule : JMModuleBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-COTModule::OnInvokeConnect - " + identity.GetId() ));
+		Print( "-COTModule::OnInvokeConnect - " + identity.GetId() );
 		#endif
 	}
 
@@ -366,7 +367,7 @@ class COTModule : JMModuleBase
 	override void OnClientReconnect( PlayerBase player, PlayerIdentity identity )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnClientReconnect - " + identity.GetId() ));
+		Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
@@ -380,7 +381,7 @@ class COTModule : JMModuleBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnClientReconnect - " + identity.GetId() ));
+		Print( "+COTModule::OnClientReconnect - " + identity.GetId() );
 		#endif
 	}
 
@@ -390,7 +391,7 @@ class COTModule : JMModuleBase
 	override void OnClientLogout( PlayerBase player, PlayerIdentity identity, int logoutTime, bool authFailed )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnClientLogout - " + identity.GetId() ));
+		Print( "+COTModule::OnClientLogout - " + identity.GetId() );
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
@@ -404,7 +405,7 @@ class COTModule : JMModuleBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-COTModule::OnClientLogout - " + identity.GetId() ));
+		Print( "-COTModule::OnClientLogout - " + identity.GetId() );
 		#endif
 	}
 
@@ -414,7 +415,7 @@ class COTModule : JMModuleBase
 	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnClientDisconnect - " + uid ));
+		Print( "+COTModule::OnClientDisconnect - " + uid );
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
@@ -435,7 +436,7 @@ class COTModule : JMModuleBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-COTModule::OnClientDisconnect - " + uid ));
+		Print( "-COTModule::OnClientDisconnect - " + uid );
 		#endif
 	}
 
@@ -445,14 +446,16 @@ class COTModule : JMModuleBase
 	override void OnClientLogoutCancelled( PlayerBase player )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+COTModule::OnClientLogoutCancelled" ));
+		Print( "+COTModule::OnClientLogoutCancelled" );
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( player );
 		Assert_Null( player.GetIdentity() );
 
+		#ifdef COT_DEBUGLOGS
 		Print( "  COTModule::OnClientLogoutCancelled - " + player.GetIdentity().GetId() );
+		#endif
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
 
@@ -463,7 +466,7 @@ class COTModule : JMModuleBase
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-COTModule::OnClientLogoutCancelled" ));
+		Print( "-COTModule::OnClientLogoutCancelled" );
 		#endif
 	}
 }

@@ -45,7 +45,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	void ~JMWindowBase() 
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+JMWindowBase::~JMWindowBase" ));
+		Print( "+JMWindowBase::~JMWindowBase" );
 		#endif
 		GetCOTWindowManager().RemoveWindow( this );
 
@@ -53,7 +53,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 		//layoutRoot.Unlink();
 		#ifdef COT_DEBUGLOGS
-		Print(( "-JMWindowBase::~JMWindowBase" ));
+		Print( "-JMWindowBase::~JMWindowBase" );
 		#endif
 	}
 
@@ -190,7 +190,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		if ( !layoutRoot )
@@ -206,14 +206,14 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		GetGame().GetUIManager().ShowUICursor( true );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 		
 		if ( Assert_Null( layoutRoot ) )
@@ -238,7 +238,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 

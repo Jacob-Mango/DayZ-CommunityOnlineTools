@@ -54,28 +54,28 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		layoutRoot.Show( true );
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 
 		OnHide();
 		layoutRoot.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 

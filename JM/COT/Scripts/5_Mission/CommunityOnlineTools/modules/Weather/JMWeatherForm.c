@@ -191,7 +191,7 @@ class JMWeatherForm extends JMFormBase
 	void ShowList()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::ShowList" ));
+		Print( "+" + this + "::ShowList" );
 		#endif
 
 		m_PanelLeft.Show( true );
@@ -207,14 +207,14 @@ class JMWeatherForm extends JMFormBase
 		UpdateStates();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::ShowList" ));
+		Print( "-" + this + "::ShowList" );
 		#endif
 	}
 
 	void HideList()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::HideList" ));
+		Print( "+" + this + "::HideList" );
 		#endif
 
 		m_PanelLeft.Show( false );
@@ -230,7 +230,7 @@ class JMWeatherForm extends JMFormBase
 		UpdateStates();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::HideList" ));
+		Print( "-" + this + "::HideList" );
 		#endif
 	}
 

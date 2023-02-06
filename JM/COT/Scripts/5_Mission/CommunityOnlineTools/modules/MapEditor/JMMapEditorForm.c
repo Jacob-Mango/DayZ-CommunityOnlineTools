@@ -34,7 +34,7 @@ class JMMapEditorForm
 	Widget Init()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Init" ));
+		Print( "+" + this + "::Init" );
 		#endif
 
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/mapeditor_form.layout" );
@@ -54,7 +54,7 @@ class JMMapEditorForm
 		UIActionManager.CreateText( objectControlsGrid, "Delete: ", "Delete" );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Init" ));
+		Print( "-" + this + "::Init" );
 		#endif
 
 		return layoutRoot;
@@ -63,7 +63,7 @@ class JMMapEditorForm
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
@@ -77,14 +77,14 @@ class JMMapEditorForm
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
@@ -96,7 +96,7 @@ class JMMapEditorForm
 		OnHide();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 

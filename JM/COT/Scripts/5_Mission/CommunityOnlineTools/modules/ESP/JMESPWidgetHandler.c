@@ -45,7 +45,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "+JMESPWidgetHandler::~JMESPWidgetHandler();" ));
+		Print( "+JMESPWidgetHandler::~JMESPWidgetHandler();" );
 		#endif
 		#endif
 
@@ -53,7 +53,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
-		Print(( "-JMESPWidgetHandler::~JMESPWidgetHandler();" ));
+		Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
 		#endif
 		#endif
 	}
@@ -86,21 +86,21 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		layoutRoot.Show( true );
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 
 		OnHide();
@@ -109,7 +109,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 
@@ -127,7 +127,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void ShowActions()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::ShowActions" ));
+		Print( "+" + this + "::ShowActions" );
 		#endif
 
 		m_pnl_Actions.Show( true );
@@ -135,14 +135,14 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		m_img_ToggleActions.SetImage( 0 );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::ShowActions" ));
+		Print( "-" + this + "::ShowActions" );
 		#endif
 	}
 
 	void HideActions()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::HideActions" ));
+		Print( "+" + this + "::HideActions" );
 		#endif
 
 		m_pnl_Actions.Show( false );
@@ -150,7 +150,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		m_img_ToggleActions.SetImage( 1 );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::HideActions" ));
+		Print( "-" + this + "::HideActions" );
 		#endif
 	}
 
@@ -294,7 +294,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 	void SetInfo( ref JMESPMeta info, out Widget action_rows )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::SetInfo" ));
+		Print( "+" + this + "::SetInfo" );
 		#endif
 
 		action_rows = m_rows_Actions;
@@ -321,7 +321,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		Show();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::SetInfo" ));
+		Print( "-" + this + "::SetInfo" );
 		#endif
 	}
 

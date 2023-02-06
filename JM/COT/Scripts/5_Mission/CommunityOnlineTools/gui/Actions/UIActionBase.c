@@ -49,7 +49,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		layoutRoot.Show( true );
@@ -58,14 +58,14 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 		//Error("test");
 
@@ -77,7 +77,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 			layoutRoot.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 

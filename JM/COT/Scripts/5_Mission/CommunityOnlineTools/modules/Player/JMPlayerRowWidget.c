@@ -27,7 +27,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Show" ));
+		Print( "+" + this + "::Show" );
 		#endif
 
 		layoutRoot.Show( true );
@@ -37,14 +37,14 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Show" ));
+		Print( "-" + this + "::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print(( "+" + this + "::Hide" ));
+		Print( "+" + this + "::Hide" );
 		#endif
 
 		OnHide();
@@ -54,7 +54,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		layoutRoot.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print(( "-" + this + "::Hide" ));
+		Print( "-" + this + "::Hide" );
 		#endif
 	}
 
