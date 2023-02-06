@@ -425,8 +425,10 @@ class JMObjectSpawnerForm extends JMFormBase
 	private static ref array< string > itemsList =
 	{
 		"placing",
+#ifndef DIAG
 		"debug",
 		"bldr_",
+#endif
 		"proxy"
 	};
 
