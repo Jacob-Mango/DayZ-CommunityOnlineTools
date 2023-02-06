@@ -65,8 +65,11 @@ class JMESPViewTypePlayer: JMESPViewType
 		#endif
 		#endif
 
-		PlayerBase man;
-		if ( !Class.CastTo( man, obj ) )
+		PlayerBase player;
+		if ( !Class.CastTo( player, obj ) )
+			return false;
+		
+		if ( !player.GetIdentity() ) 
 			return false;
 		
 		CreateMeta( meta );
@@ -77,9 +80,9 @@ class JMESPViewTypePlayer: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		if ( man.GetIdentity() )
+		if ( player.GetIdentity() )
 		{
-			meta.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
+			meta.player = GetPermissionsManager().GetPlayer( player.GetIdentity().GetId() );
 		} 
 
 		if ( meta.player )
@@ -115,15 +118,11 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		#endif
 
 		Man man;
-		PlayerBase player;
-		// has to cast to man but can't cast to player
-		if ( !Class.CastTo( man, obj ) || !Class.CastTo( player, obj ) )
+		if ( !Class.CastTo( man, obj ) )
 			return false;
 		
-		#ifdef EXPANSIONMODAI
-		if ( !player.IsAI() ) 
+		if ( man.GetIdentity() ) 
 			return false;
-		#endif
 
 		CreateMeta( meta );
 
@@ -132,11 +131,6 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		meta.type = this;
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
-		
-		if ( man.GetIdentity() )
-		{
-			meta.player = GetPermissionsManager().GetPlayer( man.GetIdentity().GetId() );
-		} 
 
 		if ( meta.player )
 		{
