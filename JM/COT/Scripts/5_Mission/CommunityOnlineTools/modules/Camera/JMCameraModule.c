@@ -205,6 +205,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Enter( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_Enter").Add(senderRPC);
+		#endif
+
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
@@ -270,6 +274,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Leave( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RPC_Leave").Add(senderRPC);
+		#endif
+
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )

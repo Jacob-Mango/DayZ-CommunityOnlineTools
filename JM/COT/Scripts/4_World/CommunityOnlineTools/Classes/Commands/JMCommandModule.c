@@ -34,6 +34,10 @@ class JMCommandModule: JMModuleBase
 		{
 			case JMCommandModuleRPC.PerformCommand:
 			{
+				#ifdef DIAG
+				auto trace = CF_Trace_1(this, "JMCommandModuleRPC.PerformCommand").Add(sender);
+				#endif
+
 				string input;
 				if (!ctx.Read(input)) return;
 
