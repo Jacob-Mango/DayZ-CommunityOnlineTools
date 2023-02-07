@@ -58,6 +58,9 @@ class JMWeatherOldForm extends JMFormBase
 
 	void ~JMWeatherOldForm()
 	{
+		if ( !GetGame() )
+			return;
+
 		if ( m_AutoRefresh.IsChecked() )
 			GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
 	}
