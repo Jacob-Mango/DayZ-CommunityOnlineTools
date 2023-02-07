@@ -88,6 +88,11 @@ class COTModule : JMModuleBase
 		RegisterBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
 
+	#ifdef SERVER
+	override void EnableUpdate()
+	{
+	}
+	#else
 	override void OnUpdate( float timeslice )
 	{
 		JMStatics.COT_MENU = null;
@@ -144,6 +149,7 @@ class COTModule : JMModuleBase
 			GetGame().GetMission().GetHud().Show( false );
 		}
 	}
+	#endif
 
 	#ifndef CF_WINDOWS
 	void UpdateMouseControls()

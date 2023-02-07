@@ -70,6 +70,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	void OnPlayer_Checked( string guid, bool checked )
 	{
 		if ( checked )

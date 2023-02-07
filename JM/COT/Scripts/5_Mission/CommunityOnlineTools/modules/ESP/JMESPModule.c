@@ -86,6 +86,10 @@ class JMESPModule: JMRenderableModuleBase
 		Hide();
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "ESP.View" );

@@ -22,6 +22,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasButton()
 	{
 		return true; // module isn't loaded if namalsk isn't loaded anyways

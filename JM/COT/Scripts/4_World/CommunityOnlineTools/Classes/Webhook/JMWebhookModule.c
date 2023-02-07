@@ -58,8 +58,16 @@ class JMWebhookModule: JMModuleBase
 		delete m_ServerConfig;
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override void OnInit()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "OnInit");
+		#endif
+
 		string serverCfg;
 		GetGame().CommandlineGetParam( "config", serverCfg );
 
@@ -149,12 +157,20 @@ class JMWebhookModule: JMModuleBase
 
 	void SaveConnections()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "SaveConnections");
+		#endif
+
 		JMWebhookSerialize serialize = new JMWebhookSerialize;
 		m_Settings.Save();
 	}
 
 	bool RemoveGroup( string name )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_1(this, "RemoveGroup").Add(name);
+		#endif
+
 		m_Settings.Remove( name );
 
 		FixConnectionMap();
@@ -164,6 +180,10 @@ class JMWebhookModule: JMModuleBase
 
 	private void FixConnectionMap()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "FixConnectionMap");
+		#endif
+
 		for ( int i = 0; i < m_Settings.Connections.Count(); ++i )
 		{
 			for ( int j = 0; j < m_Settings.Connections[i].Types.Count(); ++j )
@@ -184,6 +204,10 @@ class JMWebhookModule: JMModuleBase
 
 	bool SetConnection( string name, string grpName, bool enabled )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_3(this, "SetConnection").Add(name).Add(grpName).Add(enabled);
+		#endif
+
 		JMWebhookConnectionGroup group = m_Settings.Get( grpName );
 		if ( Assert_Null( group ) )
 			return false;
@@ -194,6 +218,10 @@ class JMWebhookModule: JMModuleBase
 
 	bool RemoveConnection( string name, string grpName )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "RemoveConnection").Add(name).Add(grpName);
+		#endif
+
 		JMWebhookConnectionGroup group = m_Settings.Get( grpName );
 		if ( Assert_Null( group ) )
 			return false;
@@ -206,6 +234,10 @@ class JMWebhookModule: JMModuleBase
 
 	bool AddConnection( string name, string grpName = "" )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "AddConnection").Add(name).Add(grpName);
+		#endif
+
 		set< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
 		if ( !connections )
 		{
@@ -236,6 +268,10 @@ class JMWebhookModule: JMModuleBase
 
 	bool AddConnection( string name, JMWebhookConnectionGroup group = NULL )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "AddConnection").Add(name).Add(group);
+		#endif
+
 		set< JMWebhookConnection > connections = m_ConnectionMap.Get( name );
 		if ( !connections )
 		{
@@ -267,6 +303,10 @@ class JMWebhookModule: JMModuleBase
 
 	void Post( string connectionType, JMWebhookMessage message )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Post").Add(connectionType).Add(message);
+		#endif
+
 		if ( IsMissionClient() )
 			return;
 
@@ -278,6 +318,10 @@ class JMWebhookModule: JMModuleBase
 
 	private void Thread_ProcessQueue()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");
+		#endif
+
 		JsonSerializer serializer = new JsonSerializer();
 
 		m_Queue = new array< ref JMWebhookQueueItem >();
@@ -330,6 +374,10 @@ class JMWebhookModule: JMModuleBase
 
 	JMWebhookDiscordMessage CreateDiscordMessage()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "CreateDiscordMessage");
+		#endif
+
 		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
 		embed.SetColor( 16766720 );
@@ -344,6 +392,10 @@ class JMWebhookModule: JMModuleBase
 
 	JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "SetConnection").Add(player).Add(title);
+		#endif
+
 		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
 		embed.SetColor( 16766720 );

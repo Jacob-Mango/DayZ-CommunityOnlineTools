@@ -29,6 +29,10 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.View" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override string GetInputToggle()
 	{
 		return "UACOTToggleWeather";

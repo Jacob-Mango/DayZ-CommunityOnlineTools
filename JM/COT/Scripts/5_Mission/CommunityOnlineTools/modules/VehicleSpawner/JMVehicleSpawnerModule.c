@@ -16,6 +16,10 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Vehicles.View" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Vehicles.View" );

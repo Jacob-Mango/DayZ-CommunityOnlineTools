@@ -31,6 +31,10 @@ class JMTeleportModule: JMRenderableModuleBase
 		#endif
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	void OnSelectLocation(vector pos)
 	{
 		#ifdef COT_TPMENU2MAPMENU
