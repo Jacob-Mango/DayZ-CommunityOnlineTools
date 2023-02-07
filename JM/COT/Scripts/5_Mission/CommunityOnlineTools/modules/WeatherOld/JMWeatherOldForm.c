@@ -422,7 +422,8 @@ class JMWeatherOldForm extends JMFormBase
 		m_OrigFog = weather.GetFog().GetActual();
 		m_OrigWindForce = weather.GetWindSpeed();
 
-		m_OrigTemperature = GetGame().GetMission().GetWorldData().GetBaseEnvTemperature();
+		if ( GetGame().GetMission().GetWorldData() )
+			m_OrigTemperature = GetGame().GetMission().GetWorldData().GetBaseEnvTemperature();
 
 		m_CurrYear = m_OrigYear;
 		m_CurrMonth = m_OrigMonth;
