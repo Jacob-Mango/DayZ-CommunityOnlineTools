@@ -374,12 +374,15 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void ChunkGetObjects(out set<Object> objects, out int totalTimeTaken)
 	{
+		if (!ESPRadius)
+			return;
+
 		vector centerPosition = GetCurrentPosition();
 
 		float maxSizePerBox = 100;
 		float sizePerBox = ESPRadius / maxSizePerBox;
 		
-		int numIterations = Math.Ceil(sizePerBox) / 2;
+		int numIterations = Math.Ceil(sizePerBox / 2);
 
 		sizePerBox = (sizePerBox / numIterations) * maxSizePerBox;
 
