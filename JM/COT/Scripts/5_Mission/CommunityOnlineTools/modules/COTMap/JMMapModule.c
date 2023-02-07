@@ -14,6 +14,10 @@ class JMMapModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Admin.Map.View" );

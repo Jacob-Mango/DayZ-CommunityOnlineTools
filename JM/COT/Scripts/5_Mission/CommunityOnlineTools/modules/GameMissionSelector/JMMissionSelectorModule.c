@@ -5,6 +5,10 @@ class JMMissionSelectorModule extends JMRenderableModuleBase
 
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return IsMissionOffline();

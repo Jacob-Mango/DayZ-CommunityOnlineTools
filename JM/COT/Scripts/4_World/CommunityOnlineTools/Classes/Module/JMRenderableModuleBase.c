@@ -196,6 +196,10 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	override void OnSettingsUpdated()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "OnSettingsUpdated");
+		#endif
+
 		super.OnSettingsUpdated();
 
 		if ( GetForm() )
@@ -206,6 +210,10 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	override void OnClientPermissionsUpdated()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
+		#endif
+
 		super.OnClientPermissionsUpdated();
 
 		bool hasAccess = HasAccess();

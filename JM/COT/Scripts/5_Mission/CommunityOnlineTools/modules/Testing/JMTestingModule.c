@@ -7,6 +7,10 @@ class JMTestingModule : JMModuleBase
 {
 	//ref array<ref PlayerIdentity> m_Identities = new array<ref PlayerIdentity>();
 
+	override void EnableUpdate()
+	{
+	}
+
 	override void OnInvokeConnect(PlayerBase player, PlayerIdentity identity)
 	{
 		//m_Identities.Insert(identity);

@@ -60,6 +60,11 @@ class JMCameraModule: JMRenderableModuleBase
 		return true;
 	}
 	
+	#ifdef SERVER
+	override void EnableUpdate()
+	{
+	}
+	#else
 	override void OnUpdate( float timeslice )
 	{
 		if ( IsMissionClient() && CurrentActiveCamera )
@@ -101,6 +106,7 @@ class JMCameraModule: JMRenderableModuleBase
 			}
 		}
 	}
+	#endif
 	
 	override void RegisterKeyMouseBindings() 
 	{

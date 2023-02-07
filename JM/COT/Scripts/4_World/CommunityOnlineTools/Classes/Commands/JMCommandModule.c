@@ -13,6 +13,10 @@ class JMCommandModule: JMModuleBase
 	{
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override void OnMissionStart()
 	{
 		JMCommandConstructor.Generate(m_CommandMap);

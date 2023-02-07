@@ -31,6 +31,10 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	{
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Webhook.View" );

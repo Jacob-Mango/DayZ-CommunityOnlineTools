@@ -17,6 +17,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Entity.View" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override void RegisterKeyMouseBindings() 
 	{
 		super.RegisterKeyMouseBindings();

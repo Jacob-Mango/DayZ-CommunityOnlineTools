@@ -52,6 +52,10 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.View" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Weather.View" );

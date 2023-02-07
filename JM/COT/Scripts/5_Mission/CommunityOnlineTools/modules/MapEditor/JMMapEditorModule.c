@@ -11,6 +11,10 @@ class JMMapEditorModule: JMModuleBase
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	// override string GetInputToggle()
 	// {
 	// 	return "UACOTToggleMapEditor";

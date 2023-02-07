@@ -18,6 +18,10 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Items.CreateSet" );
 	}
 
+	override void EnableUpdate()
+	{
+	}
+
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Items.View" );
