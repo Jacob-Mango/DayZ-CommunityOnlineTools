@@ -120,7 +120,7 @@ class JMESPMeta : Managed
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
-		m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetOrientation", "", "Set" );
+		m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetHealth", "", "Set" );
 		m_Action_Health.SetOnlyNumbers( true );
 
 		if ( CanDelete() )
