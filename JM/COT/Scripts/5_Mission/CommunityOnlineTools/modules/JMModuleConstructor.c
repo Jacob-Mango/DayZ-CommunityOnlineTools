@@ -17,8 +17,9 @@ modded class JMModuleConstructor
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
-#ifdef EXPANSION_MODULES
 		modules.Insert( JMVehiclesModule );
+
+#ifdef EXPANSION_MODULES
 		modules.Insert( JMTerritoriesModule );
 #endif
 
