@@ -180,6 +180,8 @@ class JMVehiclesMenu: JMFormBase
 		#endif
 		
 		m_CurrentVehicle = vehicle;
+
+		UpdateMapPosition( false, vehicle.m_Position );
 	}
 
 	void SyncAndRefreshVehicles()
@@ -293,6 +295,8 @@ class JMVehiclesMenu: JMFormBase
 	{
 		super.OnShow();
 		
+		UpdateMapPosition( true );
+
 		SyncAndRefreshVehicles();
 	}
 
@@ -355,5 +359,23 @@ class JMVehiclesMenu: JMFormBase
 		}
 		
 		return false;
+	}
+
+	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
+	{
+		if ( usePlayerPosition )
+		{
+			PlayerBase player;
+			float scale;
+			if ( Class.CastTo( player, GetGame().GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
+			{
+				scale = 0.33;
+				mapPosition = player.GetWorldPosition();
+			}
+
+			m_VehiclesMap.SetScale( scale );
+		}
+
+		m_VehiclesMap.SetMapPos( mapPosition );
 	}
 };
