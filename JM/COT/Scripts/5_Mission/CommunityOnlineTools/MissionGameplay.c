@@ -186,4 +186,12 @@ modded class MissionGameplay
 
 		super.ShowInventory();
 	}
+
+	override void Pause()
+	{
+		if ( GetCommunityOnlineToolsBase().IsOpen() )
+			return;
+
+		super.Pause();
+	}
 }
