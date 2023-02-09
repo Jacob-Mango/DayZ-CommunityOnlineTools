@@ -33,6 +33,39 @@
             <input name="UAObjectModuleSpawnAnimal" loc="STR_COT_INPUT_SPAWN_ANIMAL" />
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
         </actions>
+
+        <sorting name="JM_COT" loc="STR_COT_NOTIFICATION_TITLE_ADMIN">
+			<input name="UACOTModuleToggleCOT" />
+			<input name="UACOTToggleButtons" />
+
+			<input name="UACOTTogglePlayer" />
+			<input name="UACOTToggleCamera" />
+			<input name="UACOTToggleESP" />
+			<input name="UACOTToggleMap" />
+			<input name="UACOTToggleMapEditor" />
+			<input name="UACOTToggleEntity" />
+			<input name="UACOTToggleSelected" />
+			<input name="UACOTToggleTeleport" />
+			<input name="UACOTToggleItem" />
+			<input name="UACOTToggleVehicle" />
+			<input name="UACOTToggleWeather" />
+			<input name="UACOTToggleServerInfo" />
+
+			<input name="UATeleportModuleTeleportCursor" />
+			<input name="UATeleportModuleWorldToModelLookAt" />
+
+			<input name="UACameraToolToggleCamera" />
+
+			<input name="UACameraToolZoomForwards" />
+			<input name="UACameraToolZoomBackwards" />
+
+			<input name="UACameraToolSpeedIncrease" />
+			<input name="UACameraToolSpeedDecrease" />
+
+			<input name="UAObjectModuleSpawnInfected" />
+			<input name="UAObjectModuleSpawnAnimal" />
+			<input name="UAObjectModuleSpawnWolf" />
+		</sorting>
     </inputs>
 
     <preset>
