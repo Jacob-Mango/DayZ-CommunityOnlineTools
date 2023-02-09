@@ -1,6 +1,6 @@
 enum JMWebhookCOTModuleRPC
 {
-	INVALID = 10260,
+	INVALID = 10440,
 	Load,
 	AddConnectionGroup,
 	RemoveConnectionGroup,
