@@ -812,8 +812,9 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		string zone;
-		if ( !ctx.Read( zone ) )
-			return;
+		//! TODO: Setting zone is not implemented in GUI, always sets global health
+		//if ( !ctx.Read( zone ) )
+			//return;
 
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC, instance ) )
