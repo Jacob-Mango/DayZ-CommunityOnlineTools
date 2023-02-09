@@ -8,8 +8,8 @@ class JMVehiclesMenu: JMFormBase
 	protected ButtonWidget m_VehicleListRefreshButton;
 	protected TextWidget m_VehicleListRefreshButtonLabel;
 	
-	protected Widget m_VehiclesMapPanel;
-	protected MapWidget m_VehiclesMap;
+	protected Widget m_MapWidgetPanel;
+	protected MapWidget m_MapWidget;
 	
 	protected ButtonWidget m_DeleteUnclaimedButton;
 	protected TextWidget m_DeleteUnclaimedButtonLabel;
@@ -69,8 +69,8 @@ class JMVehiclesMenu: JMFormBase
 		m_VehiclesListContent = GridSpacerWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
 		
 		//! Vehicles Map
-		m_VehiclesMapPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
-		m_VehiclesMap = MapWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_map" ) );
+		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
+		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_map" ) );
 		
 		//! Vehicles Options
 		m_VehicleListRefreshButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_refresh_button" ) );
@@ -132,7 +132,7 @@ class JMVehiclesMenu: JMFormBase
 				//! Create map marker for vehicle
 				if (!m_IsInVehicleInfo)
 				{
-					JMVehiclesMapMarker vehicleMapMarker = new JMVehiclesMapMarker( m_VehicleMapPanel, m_VehiclesMap, currentVehicle.m_Position, color, marker, currentVehicle, this );
+					JMVehiclesMapMarker vehicleMapMarker = new JMVehiclesMapMarker( m_VehicleMapPanel, m_MapWidget, currentVehicle.m_Position, color, marker, currentVehicle, this );
 					m_MapMarkers.Insert( vehicleMapMarker );
 				}
 				
@@ -152,7 +152,7 @@ class JMVehiclesMenu: JMFormBase
 	{		
 		m_IsInVehicleInfo = true;
 		
-		m_VehiclesMapPanel.Show( false );
+		m_MapWidgetPanel.Show( false );
 		
 		HideMapMarkers();
 		
@@ -216,7 +216,7 @@ class JMVehiclesMenu: JMFormBase
 		SyncAndRefreshVehicles();
 		
 		m_VehicleListPanel.Show( true );
-		m_VehiclesMapPanel.Show( true );
+		m_MapWidgetPanel.Show( true );
 		
 		m_VehicleInfoPanel.Show( false );
 		m_VehicleOptionsPanel.Show( false );
@@ -295,9 +295,9 @@ class JMVehiclesMenu: JMFormBase
 	{
 		super.OnShow();
 		
-		UpdateMapPosition( true );
-
 		SyncAndRefreshVehicles();
+
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true );
 	}
 
 	void TeleportToVehicle(int netLow, int netHigh)
@@ -373,9 +373,9 @@ class JMVehiclesMenu: JMFormBase
 				mapPosition = player.GetWorldPosition();
 			}
 
-			m_VehiclesMap.SetScale( scale );
+			m_MapWidget.SetScale( scale );
 		}
 
-		m_VehiclesMap.SetMapPos( mapPosition );
+		m_MapWidget.SetMapPos( mapPosition );
 	}
 };
