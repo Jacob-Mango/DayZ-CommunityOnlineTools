@@ -236,11 +236,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		int i;
 		
-		auto car = CarScript.s_JM_Head;
-		while ( car )
+		auto node = CarScript.s_JM_AllCars.m_Head;
+		while ( node )
 		{
-			m_Vehicles.Insert( JMVehicleMetaData.CreateCarScript( car ) );
-			car = car.m_JM_Next;
+			m_Vehicles.Insert( JMVehicleMetaData.CreateCarScript( node.m_Value ) );
+			node = node.m_Next;
 		}
 		
 		#ifdef EXPANSIONMODVEHICLES
@@ -407,13 +407,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		int i;
 		
-		auto car = CarScript.s_JM_Head;
-		while ( car )
+		auto node = CarScript.s_JM_AllCars.m_Head;
+		while ( node )
 		{
-			if ( !car.HasKey() )
-				car.Delete();
+			if ( !node.m_Value.HasKey() )
+				node.m_Value.Delete();
 
-			car = car.m_JM_Next;
+			node = node.m_Next;
 		}
 
 		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
@@ -440,13 +440,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		int i;
 		
-		auto car = CarScript.s_JM_Head;
-		while ( car )
+		auto node = CarScript.s_JM_AllCars.m_Head;
+		while ( node )
 		{
-			if ( car.IsDamageDestroyed() )
-				car.Delete();
+			if ( node.m_Value.IsDamageDestroyed() )
+				node.m_Value.Delete();
 
-			car = car.m_JM_Next;
+			node = node.m_Next;
 		}
 		
 		#ifdef EXPANSIONMODVEHICLE
@@ -474,11 +474,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		int i;
 		
-		auto car = CarScript.s_JM_Head;
-		while ( car )
+		auto node = CarScript.s_JM_AllCars.m_Head;
+		while ( node )
 		{
-			car.Delete();
-			car = car.m_JM_Next;
+			node.m_Value.Delete();
+			node = node.m_Next;
 		}
 		
 		#ifdef EXPANSIONMODVEHICLES

@@ -1,24 +1,17 @@
 modded class CarScript
 {
-	static CarScript s_JM_Head;
-	CarScript m_JM_Next;
-	CarScript m_JM_Prev;
+	static ref CF_DoublyLinkedNodes_WeakRef<CarScript> s_JM_AllCars = new CF_DoublyLinkedNodes_WeakRef<CarScript>();
+
+	ref CF_DoublyLinkedNode_WeakRef<CarScript> s_JM_Node;
 
 	void CarScript()
 	{
-		m_JM_Next = s_JM_Head;
-		s_JM_Head = this;
+		s_JM_Node = s_JM_AllCars.Add(this);
 	}
 
 	void ~CarScript()
 	{
-		if (s_JM_Head == this)
-			s_JM_Head = m_JM_Next;
-
-		if (m_JM_Next)
-			m_JM_Next.m_JM_Prev = m_JM_Prev;
-
-		if (m_JM_Prev)
-			m_JM_Prev.m_JM_Next = m_JM_Next;
+		if (s_JM_AllCars)
+			s_JM_AllCars.Remove(s_JM_Node);
 	}
 }
