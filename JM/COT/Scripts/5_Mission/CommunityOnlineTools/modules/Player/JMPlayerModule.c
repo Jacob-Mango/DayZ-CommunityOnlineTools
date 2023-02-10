@@ -22,6 +22,7 @@ enum JMPlayerModuleRPC
 	SetBrokenLegs,
 	Heal,
 	Strip,
+	Dry,
 	StopBleeding,
 	SetPermissions,
 	SetRoles,
@@ -44,6 +45,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StartSpectating" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisible" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
 
@@ -214,6 +216,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.Strip:
 			RPC_Strip( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Dry:
+			RPC_Dry( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.StopBleeding:
 			RPC_StopBleeding( ctx, sender, target );
@@ -1591,6 +1596,52 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_Strip( guids, senderRPC, instance );
+	}
+	
+	void Dry( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Dry( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Dry, true, NULL );
+		}
+	}
+
+	private void Exec_Dry( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTResetItemWetness();
+
+			GetCommunityOnlineToolsBase().Log( ident, "Dried [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Inventory", instance, "Dried " + players[i].FormatSteamWebhook() );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_Dry( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Dry", senderRPC, instance ) )
+			return;
+
+		Exec_Dry( guids, senderRPC, instance );
 	}
 	
 	void StopBleeding( array< string > guids )

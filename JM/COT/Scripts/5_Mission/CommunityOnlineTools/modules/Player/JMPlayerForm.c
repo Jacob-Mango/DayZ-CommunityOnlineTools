@@ -71,6 +71,7 @@ class JMPlayerForm extends JMFormBase
 	private UIActionButton m_HealPlayer;
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
+	private UIActionButton m_DryPlayer;
 
 	private int m_NumPlayerCount;
 
@@ -124,6 +125,7 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_SpectatePlayer, "Admin.Player.StartSpectating" );
 		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
 		UpdatePermission( m_StripPlayer, "Admin.Player.Strip" );
+		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
 
 		UpdatePermission( m_PositionX, "Admin.Player.Teleport.Position" );
 		UpdatePermission( m_PositionY, "Admin.Player.Teleport.Position" );
@@ -369,6 +371,7 @@ class JMPlayerForm extends JMFormBase
 		m_HealPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "Click_HealPlayer" );
 		m_StopBleeding = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
+		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY_INVENTORY", this, "Click_DryPlayer" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -605,6 +608,17 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		m_Module.Strip( JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_DryPlayer( UIEvent eid, ref UIActionBase action )
+	{
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.Dry( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, ref UIActionBase action )
