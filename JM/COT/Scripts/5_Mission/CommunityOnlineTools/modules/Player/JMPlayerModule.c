@@ -1102,6 +1102,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			m_SpectatorClient.GetInputController().SetDisabled( false );
 		}
+
+		COTModule cotModule;
+		if ( CF_Modules< COTModule >.Get( cotModule ) )
+			cotModule.UpdateMouseControls();
 	}
 
 	private void RPC_EndSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
