@@ -215,7 +215,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Load()
 	{
-		if ( IsMissionClient() && !IsMissionOffline() )
+		if ( GetGame().IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
@@ -236,7 +236,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( IsMissionHost() )
+		if ( GetGame().IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
