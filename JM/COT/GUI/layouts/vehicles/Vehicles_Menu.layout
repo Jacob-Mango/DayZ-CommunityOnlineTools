@@ -466,6 +466,7 @@ PanelWidgetClass JMVehiclesMenu {
          }
         }
         PanelWidgetClass vehicle_info_type {
+         visible 0
          ignorepointer 1
          position 0.016 0.024
          size 0.13 0.173
