@@ -264,6 +264,7 @@ PanelWidgetClass JMWeatherOldForm {
      }
     }
     TextWidgetClass txt_ppp_st_temperature {
+     visible 0
      position 0 148.455
      size 1 20
      hexactpos 1
