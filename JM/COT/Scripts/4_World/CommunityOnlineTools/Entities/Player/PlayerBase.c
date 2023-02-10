@@ -144,34 +144,34 @@ modded class PlayerBase
 		}
 	}
 
-	void SetWorldPosition( vector position )
+	void SetWorldPosition(vector position)
 	{
 		Object parent;
-		if ( Class.CastTo( parent, GetParent() ) )
+		if (Class.CastTo(parent, GetParent()))
 		{
 			Transport transport;
-			if ( Class.CastTo( transport, parent ) )
+			if (Class.CastTo(transport, parent))
 			{
-				if ( transport.CrewMemberIndex( this ) != -1 )
+				if (transport.CrewMemberIndex(this) != -1)
 				{
+					/*
 					vector transform[4];
-					transport.GetTransform( transform );
+					transport.GetTransform(transform);
 
 					transform[3] = position;
 					
-					transport.PlaceOnSurfaceRotated( transform, position, 0, 0, 0, false );
-
-					transport.SetTransform( transform );
-					transport.Synchronize();
-
+					transport.PlaceOnSurfaceRotated(transform, position, 0, 0, 0, false);
+					transport.SetTransform(transform);
+					*/
 					return;
 				}
 			}
 
-			SetPosition( parent.WorldToModel( position ) );
-		} else
+			SetPosition(parent.WorldToModel(position));
+		}
+		else
 		{
-			SetPosition( position );
+			SetPosition(position);
 		}
 	}
 
