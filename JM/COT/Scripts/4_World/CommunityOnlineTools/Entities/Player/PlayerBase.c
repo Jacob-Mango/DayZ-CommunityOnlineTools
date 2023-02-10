@@ -69,6 +69,14 @@ modded class PlayerBase
 		m_JMLastPosition = "0 0 0";
 	}
 
+	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
+	{
+		super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
+
+		if ( m_JMIsInvisible )
+			dBodySetInteractionLayer( this, PhxInteractionLayers.RAGDOLL );
+	}
+
 	override void OnVariablesSynchronized()
 	{
 		super.OnVariablesSynchronized();
@@ -306,6 +314,9 @@ modded class PlayerBase
 		{
 			m_JMIsInvisible = mode;
 			m_JMIsInvisibleRemoteSynch = mode;
+
+			if ( !mode )
+				dBodySetInteractionLayer( this, PhxInteractionLayers.CHARACTER );
 
 			SetSynchDirty();
 		}
