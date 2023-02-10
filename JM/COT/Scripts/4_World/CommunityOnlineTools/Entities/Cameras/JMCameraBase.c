@@ -30,7 +30,7 @@ class JMCameraBase extends Camera
 
 	void SelectedTarget( Object target )
 	{
-		if ( target != SelectedTarget )
+		if ( target && target != SelectedTarget )
 		{
 			TargetPosition = target.GetPosition();
 			MoveFreeze = true;
