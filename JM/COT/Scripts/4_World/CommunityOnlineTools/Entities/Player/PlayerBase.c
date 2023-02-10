@@ -359,6 +359,18 @@ modded class PlayerBase
 		}
 	}
 
+	void COTResetItemWetness()
+	{
+		array< EntityAI > items = new array< EntityAI >;
+		GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, items );
+		ItemBase item;
+		foreach ( EntityAI entity: items )
+		{
+			if ( Class.CastTo( item, entity ) )
+				item.SetWet( 0 );
+		}
+	}
+
 	void COTUpdateSpectatorPosition()
 	{
 		vector position = m_JM_SpectatedPlayer.GetPosition();
