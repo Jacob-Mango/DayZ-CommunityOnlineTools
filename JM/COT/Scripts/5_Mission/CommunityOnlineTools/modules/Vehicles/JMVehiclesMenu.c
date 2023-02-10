@@ -78,7 +78,7 @@ class JMVehiclesMenu: JMFormBase
 		m_DeleteUnclaimedButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_unclaimed_vehicle_button" ) );
 		m_DeleteUnclaimedButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_unclaimed_vehicle_button_label" ) );
 		#ifdef EXPANSIONMODVEHICLE
-		m_DeleteUnclaimedButton.Show();
+		m_DeleteUnclaimedButton.Show(true);
 		#endif
 		m_DeleteDestroyedButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_destroyed_vehicle_button" ) );
 		m_DeleteDestroyedButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_destroyed_vehicle_button_label" ) );
@@ -99,9 +99,9 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
-		m_VehicleInfoType.Show();
-		m_VehicleInfoExploded.Show();
-		m_VehicleInfoKeys.Show();
+		m_VehicleInfoType.Show(true);
+		m_VehicleInfoExploded.Show(true);
+		m_VehicleInfoKeys.Show(true);
 		#endif
 		
 		//! Vehicle Options
