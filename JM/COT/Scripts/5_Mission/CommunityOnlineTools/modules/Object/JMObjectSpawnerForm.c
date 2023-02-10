@@ -293,7 +293,7 @@ class JMObjectSpawnerForm extends JMFormBase
 			quantity = quantText.ToInt();
 		}
 
-		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected(), quantity, -1 );
+		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, -1 );
 	}
 
 	void DeleteCursor( UIEvent eid, ref UIActionBase action )

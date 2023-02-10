@@ -280,23 +280,23 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Inventory( string ent, JMSelectedObjects selected, float quantity = -1, float health = -1 )
+	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( ent );
-			rpc.Write( selected );
+			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		} else
 		{
-			Server_SpawnEntity_Inventory( ent, selected, quantity, health, NULL );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string className, JMSelectedObjects selected, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -306,8 +306,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 
 		int flags = ECE_CREATEPHYSICS;
-
-		array< string > players = selected.GetPlayers();
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
@@ -349,8 +347,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( ent ) )
 				return;
 
-			JMSelectedObjects selected;
-			if ( !ctx.Read( selected ) )
+			array< string > players;
+			if ( !ctx.Read( players ) )
 				return;
 		
 			float quantity;
@@ -361,7 +359,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( health ) )
 				return;
 
-			Server_SpawnEntity_Inventory( ent, selected, quantity, health, senderRPC );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, senderRPC );
 		}
 	}
 
