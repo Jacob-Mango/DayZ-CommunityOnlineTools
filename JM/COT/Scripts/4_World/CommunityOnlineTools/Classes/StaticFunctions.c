@@ -9,15 +9,8 @@ static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObj
 {
 	if ( !GetGame().IsMultiplayer() )
 		return PlayerBase.Cast( GetGame().GetPlayer() );
-	
-	if ( identityGetPlayerObjectByIdentity == NULL )
-		return NULL;
 
-	int networkIdLowBits;
-	int networkIdHighBits;
-	GetGame().GetPlayerNetworkIDByIdentityID( identityGetPlayerObjectByIdentity.GetPlayerId(), networkIdLowBits, networkIdHighBits );
-
-	return PlayerBase.Cast( GetGame().GetObjectByNetworkId( networkIdLowBits, networkIdHighBits ) );
+	return PlayerBase.Cast( identityGetPlayerObjectByIdentity.GetPlayer() );
 }
 
 static void COTCreateNotification( PlayerIdentity ident, StringLocaliser message, string icon = "set:ccgui_enforce image:HudBuild" )
