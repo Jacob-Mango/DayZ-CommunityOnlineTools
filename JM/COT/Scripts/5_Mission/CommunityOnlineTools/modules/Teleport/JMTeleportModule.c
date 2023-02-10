@@ -240,8 +240,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			Server_Load( senderRPC );
 		}
-
-		if ( IsMissionClient() )
+		else
 		{
 			if ( ctx.Read( m_Settings ) )
 			{
