@@ -24,6 +24,7 @@ class JMWeatherOldForm extends JMFormBase
 	protected TextWidget m_TxtFogValue;
 	protected SliderWidget m_SldWindForce;
 	protected TextWidget m_TxtWindForceValue;
+	protected Widget m_PnlTemperature;
 	protected SliderWidget m_SldTemperature;
 	protected TextWidget m_TxtTemperatureValue;	
 	private CheckBoxWidget m_AutoRefresh;
@@ -91,6 +92,9 @@ class JMWeatherOldForm extends JMFormBase
 		m_SldWindForce		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_wind_force" ) );
 		m_TxtWindForceValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_wind_force_value" ) );
 
+		m_PnlTemperature		= layoutRoot.FindAnyWidget( "txt_ppp_st_temperature" );
+		if ( !GetGame().IsMultiplayer() )
+			m_PnlTemperature.Show(true);
 		m_SldTemperature		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_temperature" ) );
 		m_TxtTemperatureValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_temperature_value" ) );
 		
