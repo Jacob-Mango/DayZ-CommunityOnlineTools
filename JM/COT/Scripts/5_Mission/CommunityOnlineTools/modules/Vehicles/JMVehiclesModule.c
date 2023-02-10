@@ -60,13 +60,17 @@ class JMVehicleMetaData
 		meta.m_Position = car.GetPosition();
 		meta.m_Orientation = car.GetOrientation();
 
-		meta.m_VehicleType = JMVT_CAR;
+		meta.m_VehicleType = JMVT_NONE;
+		#ifdef EXPANSIONMODVEHICLE
+		if ( car.IsCar() )
+		#endif
+			meta.m_VehicleType |= JMVT_CAR;
 		#ifdef EXPANSIONMODVEHICLE
 		if ( car.IsBoat() )
 			meta.m_VehicleType |= JMVT_BOAT;
-		else if ( car.IsHelicopter() )
+		if ( car.IsHelicopter() )
 			meta.m_VehicleType |= JMVT_HELICOPTER;
-		else if ( car.IsPlane() )
+		if ( car.IsPlane() )
 			meta.m_VehicleType |= JMVT_PLANE;
 		#endif
 		

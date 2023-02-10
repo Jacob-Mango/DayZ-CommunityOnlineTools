@@ -99,6 +99,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
+		m_VehicleInfoType.Show();
 		m_VehicleInfoExploded.Show();
 		m_VehicleInfoKeys.Show();
 		#endif
@@ -170,8 +171,8 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoClassName.SetText( vehicle.m_ClassName );
 		m_VehicleInfoPos.SetText( "X: " + vehicle.m_Position[0] + " Z: " + vehicle.m_Position[1] + " Y: " + vehicle.m_Position[2] );
 		m_VehicleInfoOri.SetText( "Yaw: " + vehicle.m_Orientation[0] + " Pitch: " + vehicle.m_Orientation[1] + " Roll: " + vehicle.m_Orientation[2] );
-		m_VehicleInfoType.SetText( vehicle.GetVehicleType() );
 		#ifdef EXPANSIONMODVEHICLE
+		m_VehicleInfoType.SetText( vehicle.GetVehicleType() );
 		m_VehicleInfoExploded.SetText( vehicle.IsExploded().ToString() );
 		#endif
 		m_VehicleInfoDestroyed.SetText( vehicle.IsDestroyed().ToString() );
