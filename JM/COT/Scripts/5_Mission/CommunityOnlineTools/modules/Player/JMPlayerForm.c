@@ -102,6 +102,10 @@ class JMPlayerForm extends JMFormBase
 
 	override void OnClientPermissionsUpdated()
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
+		#endif
+
 		super.OnClientPermissionsUpdated();
 
 		UpdatePermission( m_HealPlayer, "Admin.Player.Set" );

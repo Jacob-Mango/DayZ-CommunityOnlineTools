@@ -249,6 +249,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_UpdateClient( string guid, ref ParamsReadContext ctx, PlayerBase playerObj )
 	{
+		#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Client_UpdateClient").Add(guid).Add(playerObj.ToString());
+		#endif
+
 		GetPermissionsManager().UpdatePlayer( guid, ctx, playerObj );
 	}
 
