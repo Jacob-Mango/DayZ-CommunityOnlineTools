@@ -13,14 +13,14 @@ modded class DayZPlayerImplement
 	{
 		m_SpectatorCamera = camera;
 
-		SetHeadInvisible( true );
+		//SetHeadInvisible( true );
 	}
 
 	void OnSpectateEnd()
 	{
 		m_SpectatorCamera = NULL;
 
-		SetHeadInvisible( false );
+		//SetHeadInvisible( false );
 	}
 
 	void UpdateSpecatorCamera()
@@ -29,8 +29,6 @@ modded class DayZPlayerImplement
 			return;
 		
 		HumanInputController input = GetInputController();
-		float heading = GetOrientation()[0];
-		
 		HumanCommandWeapons hcw = GetCommandModifier_Weapons();
 		
 		float lr = 0;
@@ -41,16 +39,21 @@ modded class DayZPlayerImplement
 			ud = hcw.GetBaseAimingAngleUD();
 		}
 
-		vector localMat[4];
-		vector worldMat[4];
-		vector cameraMat[4];
-		Math3D.YawPitchRollMatrix( Vector( heading + lr, ud, 0 ), localMat );
-		localMat[3] = GetBonePositionMS( GetBoneIndexByName( "Head" ) ) + "0.04 0.04 0";
+		lr += input.GetAimChange()[0] * Math.RAD2DEG;
+		ud += input.GetAimChange()[1] * Math.RAD2DEG;
 
-		GetTransformWS( worldMat );
-		Math3D.MatrixMultiply4( localMat, worldMat, cameraMat );
+		//! @note this is not a controlled player since we are spectating,
+		//! so any values returned by input controller or weapon cmd will be zero anyway.
+		//! TODO: Workaround?
+		vector ori = GetOrientation();
+		ori[0] = ori[0] + lr;
+		ori[1] = ori[1] + ud;
 
-		m_SpectatorCamera.SetTransform( cameraMat );
+		m_SpectatorCamera.SetOrientation( ori );
+
+		vector headPos = GetBonePositionWS( GetBoneIndexByName( "Head" ) ) + "0 0.1 0";
+
+		m_SpectatorCamera.SetPosition( headPos - ori.AnglesToVector() * 1.33 );
 	}
 
 	override void EOnFrame( IEntity other, float timeSlice )
@@ -58,10 +61,10 @@ modded class DayZPlayerImplement
 		UpdateSpecatorCamera();
 	}
 
-	override void EOnPostFrame( IEntity other, int extra )
-	{
-		UpdateSpecatorCamera();
-	}
+	//override void EOnPostFrame( IEntity other, int extra )
+	//{
+		//UpdateSpecatorCamera();
+	//}
 
 	void SetHeadInvisible( bool invisible )
 	{
