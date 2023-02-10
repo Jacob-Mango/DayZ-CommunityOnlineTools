@@ -75,7 +75,7 @@ modded class PlayerBase
 
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
-			m_JMIsInvisibleRemoteSynch = m_JMIsInvisible;
+			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
 			if ( m_JMIsInvisible )
 			{
 				ClearFlags( EntityFlags.VISIBLE, true );
@@ -84,9 +84,7 @@ modded class PlayerBase
 				SetFlags( EntityFlags.VISIBLE, true );
 			}
 
-			#ifdef COT_INVISIBILITY
-			//SetInvisible( m_JMIsInvisible );
-			#endif
+			SetInvisible( m_JMIsInvisible );
 		}
 
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
@@ -102,6 +100,26 @@ modded class PlayerBase
 		{
 			m_JMHasUnlimitedStaminaRemoteSynch = m_JMHasUnlimitedStamina;
 		}
+	}
+
+#ifndef SERVER
+	override void EOnPostFrame( IEntity other, int extra )
+	{
+		if ( !m_JMIsInvisible )
+			return;
+
+		ClearFlags( EntityFlags.VISIBLE, true );
+
+		SetInvisible( true );
+	}
+#endif
+
+	override bool CanBeTargetedByAI( EntityAI ai )
+	{
+		if ( m_JMIsInvisible )
+			return false;
+
+		return super.CanBeTargetedByAI( ai );
 	}
 
 	bool HasLastPosition()
