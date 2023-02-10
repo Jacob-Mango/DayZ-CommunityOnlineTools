@@ -34,7 +34,7 @@
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
         </actions>
 
-        <sorting name="JM_COT" loc="STR_COT_NOTIFICATION_TITLE_ADMIN">
+        <sorting name="JM_COT" loc="COT">
 			<input name="UACOTModuleToggleCOT" />
 			<input name="UACOTToggleButtons" />
 
