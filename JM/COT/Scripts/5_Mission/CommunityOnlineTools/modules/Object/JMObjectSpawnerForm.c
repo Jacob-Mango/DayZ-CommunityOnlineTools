@@ -117,7 +117,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnCursor" );
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELF", this, "SpawnPosition" );
 		
-		if ( GetGame().IsMissionOffline() )
+		if ( GetGame().IsServer() )
 		{
 			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_INVENTORY", this, "SpawnInventory" );
 		} else
