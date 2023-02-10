@@ -99,9 +99,9 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
-		m_VehicleInfoType.Show(true);
-		m_VehicleInfoExploded.Show(true);
-		m_VehicleInfoKeys.Show(true);
+		m_VehicleInfoType.GetParent().Show(true);
+		m_VehicleInfoExploded.GetParent().Show(true);
+		m_VehicleInfoKeys.GetParent().Show(true);
 		#endif
 		
 		//! Vehicle Options
