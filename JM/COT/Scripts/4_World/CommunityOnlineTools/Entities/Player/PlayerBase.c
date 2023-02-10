@@ -5,9 +5,11 @@ modded class PlayerBase
 #endif
 
 	private bool m_JMHasGodMode;
+	bool m_JMHadGodMode;
 
 	private bool m_JMIsInvisible;
 	private bool m_JMIsInvisibleRemoteSynch;
+	bool m_JMWasInvisible;
 
 	private bool m_JMIsFrozen;
 	private bool m_JMIsFrozenRemoteSynch;
@@ -19,6 +21,8 @@ modded class PlayerBase
 
 	private bool m_JMHasUnlimitedStamina;
 	private bool m_JMHasUnlimitedStaminaRemoteSynch;
+
+	PlayerBase m_JM_SpectatedPlayer;
 
 	void PlayerBase()
 	{
@@ -87,9 +91,11 @@ modded class PlayerBase
 			if ( m_JMIsInvisible )
 			{
 				ClearFlags( EntityFlags.VISIBLE, true );
+				dBodySetInteractionLayer( this, PhxInteractionLayers.RAGDOLL );
 			} else
 			{
 				SetFlags( EntityFlags.VISIBLE, true );
+				dBodySetInteractionLayer( this, PhxInteractionLayers.CHARACTER );
 			}
 
 			SetInvisible( m_JMIsInvisible );
@@ -351,5 +357,13 @@ modded class PlayerBase
 			if ( IsUnconscious() )
 				DayZPlayerSyncJunctures.SendPlayerUnconsciousness(this, false);
 		}
+	}
+
+	void COTUpdateSpectatorPosition()
+	{
+		vector position = m_JM_SpectatedPlayer.GetPosition();
+		float surfaceY = GetGame().SurfaceY( position[0], position[2] );
+		SetPosition( Vector( position[0], surfaceY - 100, position[2] ) );
+		dBodyEnableGravity( this, false );
 	}
 }

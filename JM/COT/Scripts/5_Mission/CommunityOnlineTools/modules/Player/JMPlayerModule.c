@@ -30,6 +30,10 @@ enum JMPlayerModuleRPC
 
 class JMPlayerModule: JMRenderableModuleBase
 {
+	PlayerBase m_SpectatorClient;
+	string m_SpectatorClientUID;
+	ref map<string, PlayerBase> m_Spectators = new map<string, PlayerBase>();
+
 	void JMPlayerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
@@ -221,6 +225,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			RPC_SetRoles( ctx, sender, target );
 			break;
 		}
+	}
+
+	override void OnClientDisconnect( PlayerBase player, PlayerIdentity identity, string uid )
+	{
+		if ( m_Spectators.Contains( uid ) )
+			m_Spectators.Remove( uid );
 	}
 
 	void SetHealth( float health, array< string > guids )
@@ -844,6 +854,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void StartSpectating( string guid )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
+#endif
+
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -852,6 +866,8 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 		} else
 		{
+			m_SpectatorClient = GetPlayer();
+			m_SpectatorClientUID = guid;
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
 			rpc.Send( NULL, JMPlayerModuleRPC.StartSpectating, true, NULL );
@@ -860,6 +876,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Server_StartSpectating( string guid, PlayerIdentity ident )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Server_StartSpectating").Add(guid).Add(ident);
+#endif
+
 		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer( guid );
 		if ( !spectateInstance )
 			return;
@@ -868,22 +888,47 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !spectatePlayer )
 			return;
 
-		bool spectatorObjectExists = false;
-		PlayerBase spectatorPlayer = PlayerBase.Cast( GetPlayerObjectByIdentity( ident ) );
-		if ( spectatorPlayer )
-		{
-			spectatorObjectExists = true;
-		}
+#ifdef DIAG
+		Print(spectatePlayer);
+#endif
 
-		if ( spectatorObjectExists )
-		{
-			float distance = vector.Distance( spectatorPlayer.GetPosition(), spectatePlayer.GetPosition() );
-			if ( distance >= 1000 )
-			{
-				// notify error using notifications
-				return;
-			}
-		}
+		PlayerBase playerSpectator = GetPlayerObjectByIdentity( ident );
+		if ( !playerSpectator )
+			return;
+
+#ifdef DIAG
+		Print(playerSpectator);
+#endif
+
+		if ( playerSpectator == spectatePlayer )
+			return;
+
+		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
+
+		m_Spectators[guid] = playerSpectator;
+
+		playerSpectator.m_JMHadGodMode = playerSpectator.COTHasGodMode();
+		playerSpectator.COTSetGodMode( true );
+		playerSpectator.m_JMWasInvisible = playerSpectator.COTIsInvisible();
+		playerSpectator.COTSetInvisibility( true );
+
+		playerSpectator.SetLastPosition();
+
+		int delay;
+		float distance = vector.Distance( playerSpectator.GetPosition(), spectatePlayer.GetPosition() );
+		if ( distance >= 1000 )
+			delay = 1000;
+
+		playerSpectator.COTUpdateSpectatorPosition();
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Server_StartSpectatingEx, delay, false, spectatePlayer, ident, guid );
+	}
+
+	void Server_StartSpectatingEx( PlayerBase spectatePlayer, PlayerIdentity ident, string guid )
+	{
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Server_StartSpectatingEx").Add(spectatePlayer.ToString()).Add(ident);
+#endif
 
 		GetGame().SelectSpectator( ident, "JMSpectatorCamera", spectatePlayer.GetPosition() );
 		GetGame().SelectPlayer( ident, NULL );
@@ -896,6 +941,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Client_StartSpectating( PlayerBase player, PlayerIdentity ident )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Client_StartSpectating").Add(player.ToString()).Add(ident);
+#endif
+
 		CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
 		
 		if ( CurrentActiveCamera )
@@ -903,8 +952,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			CurrentActiveCamera.SelectedTarget( player );
 			CurrentActiveCamera.SetActive( true );
 			
+#ifdef DIAG
+			Print(GetGame().GetPlayer());
+#endif
 			if ( GetPlayer() )
 			{
+#ifdef DIAG
+				Print("Disabling input controller");
+#endif
 				GetPlayer().GetInputController().SetDisabled( true );
 			}
 		}
@@ -912,6 +967,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_StartSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "RPC_StartSpectating").Add(senderRPC).Add(target.ToString());
+#endif
+
 		if ( IsMissionHost() )
 		{
 			string guid;
@@ -933,8 +992,24 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
+	void UpdateSpectatorPositions()
+	{
+		if ( !m_Spectators.Count() )
+			return;
+
+		foreach ( PlayerBase playerSpectator: m_Spectators )
+		{
+			if ( playerSpectator && playerSpectator.m_JM_SpectatedPlayer)
+				playerSpectator.COTUpdateSpectatorPosition();
+		}
+	}
+
 	void EndSpectating()
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_0(this, "EndSpectating");
+#endif
+
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -944,20 +1019,68 @@ class JMPlayerModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
+#ifdef DIAG
+			Print(GetGame().GetPlayer());
+#endif
+			rpc.Write(m_SpectatorClientUID);
 			rpc.Send( GetGame().GetPlayer(), JMPlayerModuleRPC.EndSpectating, true, NULL );
 		}
 	}
 
-	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident )
+	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident, string guid )
 	{
-		GetGame().SelectPlayer( ident, player );
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "Server_EndSpectating").Add(player.ToString()).Add(ident);
+		Print(player);
+#endif
+
+		PlayerBase playerSpectator = m_Spectators[guid];
+		playerSpectator.m_JM_SpectatedPlayer = null;
+		m_Spectators.Remove( guid );
+
+#ifdef DIAG
+		Print(playerSpectator);
+#endif
+
+		GetGame().SelectPlayer( ident, playerSpectator );
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
+
+		int delay;
+		if ( playerSpectator.HasLastPosition() )
+		{
+			float distance = vector.Distance( playerSpectator.GetLastPosition(), playerSpectator.GetPosition() );
+			if ( distance >= 1000 )
+				delay = 1000;
+		}
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( ResetSpectator, delay, false, playerSpectator );
+	}
+
+	void ResetSpectator( PlayerBase playerSpectator )
+	{
+		if ( !playerSpectator )
+			return;
+
+		if ( playerSpectator.HasLastPosition() )
+			playerSpectator.SetPosition( playerSpectator.GetLastPosition() );
+
+		dBodyEnableGravity( playerSpectator, true );
+
+		if (!playerSpectator.m_JMHadGodMode)
+			playerSpectator.COTSetGodMode( false );
+
+		if (!playerSpectator.m_JMWasInvisible)
+			playerSpectator.COTSetInvisibility( false );
 	}
 
 	private void Client_EndSpectating( PlayerIdentity ident )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_1(this, "Client_EndSpectating").Add(ident);
+#endif
+
 		if ( CurrentActiveCamera )
 		{
 			CurrentActiveCamera.SetActive( false );
@@ -966,20 +1089,32 @@ class JMPlayerModule: JMRenderableModuleBase
 			PPEffects.ResetDOFOverride();
 		}
 
-		if ( GetGame().GetPlayer() )
+#ifdef DIAG
+		Print(GetGame().GetPlayer());
+		Print(m_SpectatorClient);
+#endif
+		if ( m_SpectatorClient )
 		{
-			GetGame().GetPlayer().GetInputController().SetDisabled( false );
+			m_SpectatorClient.GetInputController().SetDisabled( false );
 		}
 	}
 
 	private void RPC_EndSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+#ifdef DIAG
+		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
+#endif
+
 		if ( IsMissionHost() )
 		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+
 			PlayerBase player;
 			if ( Class.CastTo( player, target ) )
 			{
-				Server_EndSpectating( player, senderRPC );
+				Server_EndSpectating( player, senderRPC, guid );
 			}
 		} else
 		{

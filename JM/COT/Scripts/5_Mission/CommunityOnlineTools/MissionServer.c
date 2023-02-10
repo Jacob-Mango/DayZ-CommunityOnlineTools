@@ -1,5 +1,8 @@
 modded class MissionServer
 {
+	JMPlayerModule m_JM_PlayerModule;
+	float m_JM_UpdateTime;
+
 	void MissionServer()
 	{
 		m_bLoaded = false;
@@ -8,6 +11,8 @@ modded class MissionServer
 		{
 			g_cotBase = new CommunityOnlineTools;
 		}
+
+		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}
 
 	void ~MissionServer()
@@ -39,5 +44,13 @@ modded class MissionServer
 		super.OnUpdate( timeslice );
 
 		g_cotBase.OnUpdate( timeslice );
+
+		m_JM_UpdateTime += timeslice;
+
+		if ( m_JM_UpdateTime > 1.0 )
+		{
+			m_JM_UpdateTime = 0.0;
+			m_JM_PlayerModule.UpdateSpectatorPositions();
+		}
 	}
 }
