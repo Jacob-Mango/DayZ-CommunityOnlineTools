@@ -4,7 +4,7 @@ modded class DayZGame
 	{
 		DebugPrint.OnInit();
 
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		CF_Log.Level = CF_LogLevel.TRACE;
 #endif
 	}

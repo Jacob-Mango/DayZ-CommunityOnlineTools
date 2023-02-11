@@ -63,7 +63,7 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 
 	void ~CF_DoublyLinkedNode_WeakRef()
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "~CF_DoublyLinkedNode_WeakRef");
 #endif
 
@@ -90,7 +90,7 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 
 	void Unlink()
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Unlink");
 #endif
 
@@ -99,7 +99,7 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 
 		if (m_Next)
 		{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 			PrintFormat("[TRACE]    Assigning %1 as prev node to next node %2", m_Prev, m_Next);
 #endif
 			m_Next.m_Prev = m_Prev;
@@ -107,7 +107,7 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 
 		if (m_Prev)
 		{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 			PrintFormat("[TRACE]    Assigning %1 as next node to prev node %2", m_Next, m_Prev);
 #endif
 			m_Prev.m_Next = m_Next;

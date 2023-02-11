@@ -64,7 +64,7 @@ class JMWebhookModule: JMModuleBase
 
 	override void OnInit()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnInit");
 		#endif
 
@@ -157,7 +157,7 @@ class JMWebhookModule: JMModuleBase
 
 	void SaveConnections()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "SaveConnections");
 		#endif
 
@@ -167,7 +167,7 @@ class JMWebhookModule: JMModuleBase
 
 	bool RemoveGroup( string name )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RemoveGroup").Add(name);
 		#endif
 
@@ -180,7 +180,7 @@ class JMWebhookModule: JMModuleBase
 
 	private void FixConnectionMap()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "FixConnectionMap");
 		#endif
 
@@ -204,7 +204,7 @@ class JMWebhookModule: JMModuleBase
 
 	bool SetConnection( string name, string grpName, bool enabled )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_3(this, "SetConnection").Add(name).Add(grpName).Add(enabled);
 		#endif
 
@@ -218,7 +218,7 @@ class JMWebhookModule: JMModuleBase
 
 	bool RemoveConnection( string name, string grpName )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RemoveConnection").Add(name).Add(grpName);
 		#endif
 
@@ -234,7 +234,7 @@ class JMWebhookModule: JMModuleBase
 
 	bool AddConnection( string name, string grpName = "" )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "AddConnection").Add(name).Add(grpName);
 		#endif
 
@@ -268,7 +268,7 @@ class JMWebhookModule: JMModuleBase
 
 	bool AddConnection( string name, JMWebhookConnectionGroup group = NULL )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "AddConnection").Add(name).Add(group);
 		#endif
 
@@ -303,7 +303,7 @@ class JMWebhookModule: JMModuleBase
 
 	void Post( string connectionType, JMWebhookMessage message )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Post").Add(connectionType).Add(message);
 		#endif
 
@@ -318,7 +318,7 @@ class JMWebhookModule: JMModuleBase
 
 	private void Thread_ProcessQueue()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");
 		#endif
 
@@ -374,7 +374,7 @@ class JMWebhookModule: JMModuleBase
 
 	JMWebhookDiscordMessage CreateDiscordMessage()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "CreateDiscordMessage");
 		#endif
 
@@ -392,7 +392,7 @@ class JMWebhookModule: JMModuleBase
 
 	JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "SetConnection").Add(player).Add(title);
 		#endif
 

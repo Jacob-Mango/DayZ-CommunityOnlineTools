@@ -775,7 +775,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	private void RPC_CreatePreset( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_CreatePreset").Add(senderRPC);
 		#endif
 

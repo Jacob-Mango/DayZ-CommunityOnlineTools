@@ -859,7 +859,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void StartSpectating( string guid )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
@@ -881,7 +881,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Server_StartSpectating( string guid, PlayerIdentity ident )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_StartSpectating").Add(guid).Add(ident);
 #endif
 
@@ -893,7 +893,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !spectatePlayer )
 			return;
 
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		Print(spectatePlayer);
 #endif
 
@@ -901,7 +901,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !playerSpectator )
 			return;
 
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		Print(playerSpectator);
 #endif
 
@@ -931,7 +931,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void Server_StartSpectatingEx( PlayerBase spectatePlayer, PlayerIdentity ident, string guid )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_StartSpectatingEx").Add(spectatePlayer.ToString()).Add(ident);
 #endif
 
@@ -946,7 +946,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Client_StartSpectating( PlayerBase player, PlayerIdentity ident )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Client_StartSpectating").Add(player.ToString()).Add(ident);
 #endif
 
@@ -957,12 +957,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			CurrentActiveCamera.SelectedTarget( player );
 			CurrentActiveCamera.SetActive( true );
 			
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 			Print(GetGame().GetPlayer());
 #endif
 			if ( GetPlayer() )
 			{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 				Print("Disabling input controller");
 #endif
 				GetPlayer().GetInputController().SetDisabled( true );
@@ -972,7 +972,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_StartSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_StartSpectating").Add(senderRPC).Add(target.ToString());
 #endif
 
@@ -1011,7 +1011,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void EndSpectating()
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "EndSpectating");
 #endif
 
@@ -1024,7 +1024,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 			Print(GetGame().GetPlayer());
 #endif
 			rpc.Write(m_SpectatorClientUID);
@@ -1034,7 +1034,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident, string guid )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_EndSpectating").Add(player.ToString()).Add(ident);
 		Print(player);
 #endif
@@ -1043,7 +1043,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		playerSpectator.m_JM_SpectatedPlayer = null;
 		m_Spectators.Remove( guid );
 
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		Print(playerSpectator);
 #endif
 
@@ -1082,7 +1082,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void Client_EndSpectating( PlayerIdentity ident )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_EndSpectating").Add(ident);
 #endif
 
@@ -1094,7 +1094,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			PPEffects.ResetDOFOverride();
 		}
 
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		Print(GetGame().GetPlayer());
 		Print(m_SpectatorClient);
 #endif
@@ -1110,7 +1110,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_EndSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-#ifdef DIAG
+#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
 #endif
 
@@ -1701,9 +1701,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			Exec_SetPermissions( permissions, guids, NULL );
 		} else
 		{
-			#ifdef JM_COT_LOGGING
-			Print( "IsMissionHost() false" );
-			#endif
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( permissions );
 			rpc.Write( guids );
