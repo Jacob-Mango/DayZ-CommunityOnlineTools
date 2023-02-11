@@ -102,7 +102,7 @@ class JMPlayerForm extends JMFormBase
 
 	override void OnClientPermissionsUpdated()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
 		#endif
 

@@ -196,7 +196,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	override void OnSettingsUpdated()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnSettingsUpdated");
 		#endif
 
@@ -210,7 +210,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 	override void OnClientPermissionsUpdated()
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
 		#endif
 

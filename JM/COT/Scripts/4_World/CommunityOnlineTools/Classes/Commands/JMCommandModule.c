@@ -38,7 +38,7 @@ class JMCommandModule: JMModuleBase
 		{
 			case JMCommandModuleRPC.PerformCommand:
 			{
-				#ifdef DIAG
+				#ifdef JM_COT_DIAG_LOGGING
 				auto trace = CF_Trace_1(this, "JMCommandModuleRPC.PerformCommand").Add(sender);
 				#endif
 

@@ -211,7 +211,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Enter( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Enter").Add(senderRPC);
 		#endif
 
@@ -280,7 +280,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void RPC_Leave( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		#ifdef DIAG
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Leave").Add(senderRPC);
 		#endif
 
