@@ -35,6 +35,11 @@ class JMTeleportSerialize : Managed
 		return settings;
 	}
 
+	static JMTeleportSerialize Create()
+	{
+		return new JMTeleportSerialize();
+	}
+
 	void Save()
 	{
 		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( m_FileName, this );
@@ -127,5 +132,45 @@ class JMTeleportSerialize : Managed
 
 		Locations = new array< ref JMTeleportLocation >;
 		Locations = tmp_locations;
+	}
+
+	void Write( ParamsWriteContext ctx )
+	{
+		ctx.Write( Locations.Count() );
+		foreach ( auto location: Locations )
+		{
+			location.Write( ctx );
+		}
+	}
+
+	bool Read( ParamsReadContext ctx )
+	{
+		int count;
+		if ( !ctx.Read( count ) )
+			return false;
+
+		Locations.Clear();
+		for ( int i = 0; i < count; i++ )
+		{
+			string name;
+			if ( !ctx.Read( name ) )
+				return false;
+
+			string permission;
+			if ( !ctx.Read( permission ) )
+				return false;
+
+			vector position;
+			if ( !ctx.Read( position ) )
+				return false;
+
+			float radius;
+			if ( !ctx.Read( radius ) )
+				return false;
+
+			Locations.Insert( new JMTeleportLocation( name, permission, position, radius ) );
+		}
+
+		return true;
 	}
 }

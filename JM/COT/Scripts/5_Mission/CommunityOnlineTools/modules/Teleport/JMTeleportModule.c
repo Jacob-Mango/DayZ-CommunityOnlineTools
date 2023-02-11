@@ -230,7 +230,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_Load( PlayerIdentity ident )
 	{
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( m_Settings );
+		m_Settings.Write( rpc );
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
 	}
 
@@ -242,7 +242,10 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 		else
 		{
-			if ( ctx.Read( m_Settings ) )
+			if ( !m_Settings )
+				m_Settings = JMTeleportSerialize.Create();
+
+			if ( m_Settings.Read( ctx ) )
 			{
 				OnSettingsUpdated();
 			}
