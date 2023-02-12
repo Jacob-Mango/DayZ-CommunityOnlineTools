@@ -58,7 +58,7 @@ modded class Weapon_Base
 
 	//! @note this is a verbatim copy of the vanilla SpawnAttachedMagazine EXCEPT it doesn't use the vanilla GetMaxMagazineTypeName
 	//! because those CTD if there are entries in `magazines[]` whose rvConfig classes don't actually exist
-	Magazine SpawnAttachedMagazine( string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
+	override Magazine SpawnAttachedMagazine( string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
 	{
 		// Check if the gun has any magazines registered in config
 		if ( GetMagazineTypeCount(0) == 0 )
