@@ -22,3 +22,5 @@
 #define JM_COT_DOUBLYLINKEDNODES
 #endif
 #endif
+
+#define JM_COT_EXPTRANSITION_1

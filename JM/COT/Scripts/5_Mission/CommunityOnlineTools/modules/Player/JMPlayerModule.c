@@ -635,57 +635,11 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			transports.Insert( transport );
 
-			for ( int j = 0; j < transport.GetInventory().AttachmentCount(); j++ )
-			{
-				ItemBase attachment = ItemBase.Cast(transport.GetInventory().GetAttachmentFromIndex(j));
-				if ( attachment )
-				{
-					attachment.SetHealthMax("","");
-					if ( attachment.IsInherited(CarWheel_Ruined) )
-					{
-						string att_str = attachment.GetType();
-						string new_attachment = att_str.Substring(0, att_str.Length() - 7);
-
-						if ( GetGame().IsKindOf(new_attachment, "CarWheel") )
-						{
-							if ( attachment.IsLockedInSlot() )
-							{
-								attachment.UnlockFromParent();
-							}
-
-							ReplaceWheelLambda lambda = new ReplaceWheelLambda(attachment, new_attachment, null);
-							lambda.SetTransferParams(true, true, true);
-							transport.GetInventory().ReplaceItemWithNew(InventoryMode.SERVER, lambda);
-						}
-					}
-
-					if ( attachment.IsInherited(CarDoor) )
-					{
-						array<string> att_dmgZones = new array<string>;
-						attachment.GetDamageZones(att_dmgZones);
-						foreach (string att_dmgZone: att_dmgZones)
-						{
-							attachment.SetHealthMax( att_dmgZone, "Health" );
-						}
-					}
-				}
-			}
-
-			array<string> dmgZones = new array<string>;
-			transport.GetDamageZones(dmgZones);
-			foreach (string dmgZone: dmgZones)
-			{
-				transport.SetHealthMax( dmgZone, "Health" );
-			}
-			transport.SetHealthMax( "", "" );
-
 			CarScript car;
 			if ( Class.CastTo( car, transport ) )
 			{
-				car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
-				car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
-				car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
-				car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
+				car.COT_Repair();
+				car.COT_Refuel();
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );

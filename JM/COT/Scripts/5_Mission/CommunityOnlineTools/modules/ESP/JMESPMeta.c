@@ -419,4 +419,44 @@ class JMESPMetaBaseBuilding : JMESPMeta
 
 		module.BaseBuilding_Repair( m_BaseBuilding, data.m_Name );
 	}
-}
+};
+
+class JMESPMetaCar : JMESPMeta
+{
+	UIActionButton m_UnstuckButton;
+	UIActionButton m_RefuelButton;
+	UIActionButton m_RepairButton;
+
+	override void CreateActions( Widget parent )
+	{
+		super.CreateActions( parent );
+
+		m_UnstuckButton = UIActionManager.CreateButton( parent, "Unstuck", this, "Action_Unstuck" );
+		m_RefuelButton  = UIActionManager.CreateButton( parent, "Refuel",  this, "Action_Refuel" );
+		m_RepairButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_CarRepair" );
+	}
+
+	void Action_Unstuck( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Car_Unstuck( target );
+	}
+
+	void Action_Refuel( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Car_Refuel( target );
+	}
+
+	void Action_CarRepair( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Car_Repair( target );
+	}
+};

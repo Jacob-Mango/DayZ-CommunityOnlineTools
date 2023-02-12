@@ -224,12 +224,14 @@ class JMESPViewTypeAnimal: JMESPViewType
 	}
 };
 
-class JMESPViewTypeCar: JMESPViewType // override this in expansion
+class JMESPViewTypeCar: JMESPViewType
 {
 	void JMESPViewTypeCar()
 	{
 		Permission = "Car";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Car";
+
+		MetaType = JMESPMetaCar;
 
 		Colour = ARGB( 255, 255, 109, 237 );
 	}
