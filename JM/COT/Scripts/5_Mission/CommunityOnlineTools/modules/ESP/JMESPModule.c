@@ -7,9 +7,15 @@ enum JMESPModuleRPC
 	SetOrientation,
 	SetHealth,
 	DeleteObject,
+
 	BaseBuilding_Build,
 	BaseBuilding_Dismantle,
 	BaseBuilding_Repair,
+
+	Car_Unstuck,
+	Car_Refuel,
+	Car_Repair,
+
 	MakeItemSet,
 	DuplicateAll,
 	DeleteAll,
@@ -649,6 +655,8 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.DeleteObject:
 			RPC_DeleteObject( ctx, sender, target );
 			break;
+
+		// Basebuilding ESP
 		case JMESPModuleRPC.BaseBuilding_Build:
 			RPC_BaseBuilding_Build( ctx, sender, target );
 			break;
@@ -658,6 +666,18 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.BaseBuilding_Repair:
 			RPC_BaseBuilding_Repair( ctx, sender, target );
 			break;
+
+		// Car ESP
+		case JMESPModuleRPC.Car_Unstuck:
+			RPC_Car_Unstuck( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.Car_Refuel:
+			RPC_Car_Refuel( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.Car_Repair:
+			RPC_Car_Repair( ctx, sender, target );
+			break;
+
 		case JMESPModuleRPC.MakeItemSet:
 			RPC_MakeItemSet( ctx, sender, target );
 			break;
@@ -988,6 +1008,110 @@ class JMESPModule: JMRenderableModuleBase
 		BaseBuildingBase bb;
 		if ( Class.CastTo( bb, target ) )
 			Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
+	}
+
+	
+	void Car_Unstuck( Transport target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_Car_Unstuck( target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, false, NULL );
+		}
+	}
+
+	private void Exec_Car_Unstuck( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		CarScript car;
+		if ( Class.CastTo( car, target ) )
+		{
+			vector pos = car.GetPosition();
+			pos[0] += 1.25; // Offset Y pos
+			car.COT_VehicleSetPos(pos);
+		}
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
+		SendWebhook( "Car_Unstuck", instance, "Unstucked Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+	}
+
+	private void RPC_Car_Unstuck( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
+			return;
+
+		Transport vehi;
+		if ( Class.CastTo( vehi, target ) )
+			Exec_Car_Unstuck( vehi, senderRPC, instance );
+	}
+
+	void Car_Refuel( Transport target)
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_Car_Refuel( target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( target, JMESPModuleRPC.Car_Refuel, false, NULL );
+		}
+	}
+
+	private void Exec_Car_Refuel( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		CarScript car;
+		if ( Class.CastTo( car, target ) )
+			car.COT_Refuel();
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=refuel" );
+		SendWebhook( "Car_Refuel", instance, "Refuelled Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+	}
+
+	private void RPC_Car_Refuel( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Refuel", senderRPC, instance ) )
+			return;
+
+		Transport vehi;
+		if ( Class.CastTo( vehi, target ) )
+			Exec_Car_Refuel( vehi, senderRPC, instance );
+	}
+
+	void Car_Repair( Transport target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_Car_Repair( target, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( target, JMESPModuleRPC.Car_Repair, false, NULL );
+		}
+	}
+
+	private void Exec_Car_Repair( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		CarScript car;
+		if ( Class.CastTo( car, target ) )
+			car.COT_Repair();
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair" );
+		SendWebhook( "Car_Repair", instance, "Repaired the Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+	}
+
+	private void RPC_Car_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Repair", senderRPC, instance ) )
+			return;
+
+		Transport vehi;
+		if ( Class.CastTo( vehi, target ) )
+			Exec_Car_Repair( vehi, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )

@@ -168,15 +168,10 @@ modded class PlayerBase
 			{
 				if (transport.CrewMemberIndex(this) != -1)
 				{
-					/*
-					vector transform[4];
-					transport.GetTransform(transform);
+					CarScript car;
+					if (Class.CastTo(car, transport))
+						car.COT_VehicleSetPos(position);
 
-					transform[3] = position;
-					
-					transport.PlaceOnSurfaceRotated(transform, position, 0, 0, 0, false);
-					transport.SetTransform(transform);
-					*/
 					return;
 				}
 			}
