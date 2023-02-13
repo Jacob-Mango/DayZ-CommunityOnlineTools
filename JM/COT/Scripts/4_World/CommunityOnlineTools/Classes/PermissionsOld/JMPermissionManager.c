@@ -316,6 +316,10 @@ class JMPermissionManager
 
 	JMPlayerInstance UpdatePlayer( string guid, ParamsReadContext ctx, PlayerBase playerUpdatePlayer = NULL )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "UpdatePlayer").Add(guid).Add(playerUpdatePlayer.ToString());
+		#endif
+
 		JMPlayerInstance instance = GetPlayer( guid );
 
 		if ( !instance )
