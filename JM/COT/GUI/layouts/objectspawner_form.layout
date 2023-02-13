@@ -2,7 +2,7 @@ PanelWidgetClass JMObjectSpawnerForm {
  visible 1
  color 0 0 0 0
  position 0 0
- size 650 390
+ size 650 420
  hexactpos 0
  vexactpos 0
  hexactsize 1

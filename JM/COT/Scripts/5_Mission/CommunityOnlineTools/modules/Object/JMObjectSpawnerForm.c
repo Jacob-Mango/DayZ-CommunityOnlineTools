@@ -100,7 +100,7 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
-		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 4, 1 );
+		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 3, 1 );
 
 		Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -108,9 +108,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_QUANTITY" );
 		m_QuantityItem.SetText( "MAX" );
 
-		Widget spawnButtons = NULL;
-
-		spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
+		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
 
 		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON" );
 
@@ -127,7 +125,19 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
+		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+
+		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", true );
+		UIActionManager.CreatePanel( spawnOptions );
+
 		UpdateItemPreview();
+	}
+
+	void Click_OnDebugSpawn( UIEvent eid, ref UIActionBase action )	
+	{	
+		if ( eid != UIEvent.CLICK ) return;	
+
+		m_Module.m_OnDebugSpawn = action.IsChecked();	
 	}
 
 	void AddObjectType( ref Widget parent, string name, string config )
