@@ -240,8 +240,12 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
+		int flags = ECE_CREATEPHYSICS;
+		if ( !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE;
+
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, ECE_CREATEPHYSICS ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, flags ) ) )
 			return NULL;
 
 		for ( int j = 0; j < attachments.Count(); j++ )
