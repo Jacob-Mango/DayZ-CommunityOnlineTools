@@ -322,17 +322,14 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		*/
 
 		int flags = ECE_CREATEPHYSICS;
+		if ( !COT_SurfaceIsWater( pos ) )
+			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
 		EntityAI ent;
-		//if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, pos, flags ) ) )
-		if ( !Class.CastTo( ent, GetGame().CreateObject( className, pos, false, flags & 0x800, true ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, pos, flags ) ) )
 			return NULL;
-		
-		vector tmItem[4];
-		ent.GetTransform( tmItem );
-		//ent.PlaceOnSurfaceRotated( tmItem, pos, 0, 0, 0, true );
 
 		return ent;
 	}

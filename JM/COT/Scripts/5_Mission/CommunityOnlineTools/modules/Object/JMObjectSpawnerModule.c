@@ -224,19 +224,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
 			return;
 		
-		int flags = ECE_CREATEPHYSICS|ECE_PLACE_ON_SURFACE;
+		int flags = ECE_CREATEPHYSICS;
+		if ( !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
-		else if ( GetGame().IsKindOf( className, "CarScript" ) )
-			flags = ECE_CREATEPHYSICS|ECE_UPDATEPATHGRAPH;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
-
-		vector tmItem[4];
-		ent.GetTransform( tmItem );
-		//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
 		SetupEntity( ent, quantity, health );
 
@@ -305,8 +301,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) )
 			return;
 
-		int flags = ECE_CREATEPHYSICS;
-
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			JMPlayerInstance instance = GetPermissionsManager().GetPlayer( players[i] );
@@ -321,13 +315,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !Class.CastTo( ent, instance.PlayerObject.GetInventory().CreateInInventory( className ) ) )
 			{
 				vector position = instance.PlayerObject.GetPosition();
+
+				int flags = ECE_CREATEPHYSICS;
+				if ( !COT_SurfaceIsWater( position ) )
+					flags |= ECE_PLACE_ON_SURFACE;
 		
 				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 					continue;
-
-				vector tmItem[4];
-				ent.GetTransform( tmItem );
-				//ent.PlaceOnSurfaceRotated( tmItem, position, 0, 0, 0, true );
 
 				loggedSuffix = " at " + position.ToString();
 			}
@@ -416,6 +410,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		
 		int flags = ECE_CREATEPHYSICS;
+		if ( !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
