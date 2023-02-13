@@ -8,6 +8,8 @@ class JMFormBase extends ScriptedWidgetEventHandler
 	protected JMWindowBase window;
 	#endif
 
+	bool m_IsShown;
+
 	void JMFormBase() 
 	{
 	}
@@ -25,6 +27,10 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 	void Init( CF_Window wdw, JMRenderableModuleBase mdl )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "Init").Add(wdw.ToString()).Add(mdl.ToString());
+		#endif
+
 		m_Window = wdw;
 		
 		#ifndef CF_WINDOWS
@@ -36,6 +42,7 @@ class JMFormBase extends ScriptedWidgetEventHandler
 			OnInit();
 
 			OnShow();
+			m_IsShown = true;
 		}
 	}
 
