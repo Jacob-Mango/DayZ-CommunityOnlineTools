@@ -125,6 +125,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void RefreshClients()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "RefreshClients");
+		#endif
+
 		if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -236,6 +240,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void UpdateClient( string guid, PlayerIdentity sendTo )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "UpdateClient").Add(guid);
+		#endif
+
 		if ( IsMissionHost() )
 		{
 			Server_UpdateClient( guid, sendTo );

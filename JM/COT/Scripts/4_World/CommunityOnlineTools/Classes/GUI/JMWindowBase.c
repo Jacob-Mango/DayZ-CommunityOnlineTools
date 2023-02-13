@@ -193,7 +193,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		Print( "+" + this + "::Show" );
 		#endif
 
-		if ( !layoutRoot )
+		if ( !layoutRoot || layoutRoot.IsVisible() )
 			return;
 
 		layoutRoot.Show( true );
