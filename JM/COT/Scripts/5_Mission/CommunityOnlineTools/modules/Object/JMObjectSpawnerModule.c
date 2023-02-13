@@ -9,6 +9,8 @@ enum JMObjectSpawnerModuleRPC
 
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
+	bool m_OnDebugSpawn = true;
+
 	void JMObjectSpawnerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Position" );
@@ -211,6 +213,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( position );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		} else
 		{
@@ -272,6 +275,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
+			if ( !ctx.Read( m_OnDebugSpawn ) )
+				return;
+
 			Server_SpawnEntity_Position( ent, position, quantity, health, senderRPC );
 		}
 	}
@@ -285,6 +291,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		} else
 		{
@@ -353,6 +360,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( health ) )
 				return;
 
+			if ( !ctx.Read( m_OnDebugSpawn ) )
+				return;
+
 			Server_SpawnEntity_Inventory( ent, players, quantity, health, senderRPC );
 		}
 	}
@@ -377,7 +387,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		if ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") )
+		if ( m_OnDebugSpawn && ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") ) )
 			obj.OnDebugSpawn();
 
 		if ( health == -1 )
