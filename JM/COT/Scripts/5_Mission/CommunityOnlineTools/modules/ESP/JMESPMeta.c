@@ -295,7 +295,7 @@ class JMESPMetaPlayer : JMESPMeta
 	
 	override bool CanDelete()
 	{
-		return false;
+		return !target.IsAlive();
 	}
 }
 
