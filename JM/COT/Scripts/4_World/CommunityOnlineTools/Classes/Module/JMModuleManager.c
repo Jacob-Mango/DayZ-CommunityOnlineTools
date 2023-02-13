@@ -37,6 +37,10 @@ modded class JMModuleManager
 #ifndef CF_MODULE_PERMISSIONS
 	override void OnClientPermissionsUpdated()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
+		#endif
+
 		for ( int i = 0; i < m_ModuleList.Count(); i++ )
 		{
 			m_ModuleList[i].OnClientPermissionsUpdated();

@@ -67,6 +67,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	
 	override void OnClientPermissionsUpdated()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
+		#endif
+
 		super.OnClientPermissionsUpdated();
 
 		if (Events.Count() > 0) return;

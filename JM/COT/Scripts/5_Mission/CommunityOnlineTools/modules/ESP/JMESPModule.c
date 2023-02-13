@@ -154,6 +154,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnClientPermissionsUpdated()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnClientPermissionsUpdated");
+		#endif
+
 		super.OnClientPermissionsUpdated();
 
 		for ( int i = 0; i < m_ViewTypes.Count(); i++ )

@@ -407,6 +407,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_UpdateRole( string roleName, array< string > perms )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "Client_UpdateRole").Add(roleName);
+		#endif
+
 		JMRole role;
 		GetPermissionsManager().LoadRole( roleName, role );
 		if ( role )

@@ -1163,8 +1163,8 @@ class JMPlayerForm extends JMFormBase
 
 	void UpdatePlayerList()
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::UpdatePlayerList" );
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "UpdatePlayerList" );
 		#endif
 
 		if ( !IsMissionOffline() )
@@ -1237,11 +1237,7 @@ class JMPlayerForm extends JMFormBase
 
 		UpdatePlayerCount();
 
-		m_PlayerListScroller.UpdateScroller();	
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::UpdatePlayerList" );
-		#endif
+		m_PlayerListScroller.UpdateScroller();
 	}
 
 	override void OnFocus()

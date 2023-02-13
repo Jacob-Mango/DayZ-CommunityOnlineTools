@@ -3,6 +3,7 @@ class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
 	private ref array< string > m_Roles;
+	private bool m_PermissionsSyncedToClient;
 
 	PlayerBase PlayerObject;
 
@@ -153,6 +154,7 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Deserialize( permissions );
+		m_PermissionsSyncedToClient = false;
 		Save();
 	}
 
@@ -161,6 +163,8 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.AddPermission( permission, type );
+
+		m_PermissionsSyncedToClient = false;
 	}
 
 	void LoadRoles( notnull array< string > roles )
@@ -187,6 +191,8 @@ class JMPlayerInstance : Managed
 		{
 			m_Roles.Insert( role );
 		}
+
+		m_PermissionsSyncedToClient = false;
 	}
 
 	bool HasRole( string role )
@@ -263,6 +269,10 @@ class JMPlayerInstance : Managed
 
 	void OnRecieve( ParamsReadContext ctx )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnRecieve");
+		#endif
+
 		ctx.Read( m_GUID );
 		ctx.Read( m_Steam64ID );
 		ctx.Read( m_Name );
@@ -277,17 +287,33 @@ class JMPlayerInstance : Managed
 	{
 		Assert_Null( m_RootPermission );
 
+		ctx.Write( !m_PermissionsSyncedToClient );
+
+		if ( m_PermissionsSyncedToClient )
+			return;
+
 		array< string > permissions = new array< string >;
 		m_RootPermission.Serialize( permissions );
 
 		ctx.Write( permissions );
 		ctx.Write( m_Roles );
+
+		m_PermissionsSyncedToClient = true;
 	}
 
 	void OnRecievePermissions( ParamsReadContext ctx )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnRecievePermissions");
+		#endif
+
 		Assert_Null( m_RootPermission );
 		
+		bool permissionsUpdate;
+		ctx.Read( permissionsUpdate );
+		if ( !permissionsUpdate )
+			return;
+
 		array< string > permissions = new array< string >;
 		array< string > roles = new array< string >;
 

@@ -37,6 +37,10 @@ modded class CF_Permission_PlayerBase
 	
 	override void OnRecieve( ref ParamsReadContext ctx )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "OnRecieve");
+		#endif
+
 		super.OnRecieve( ctx );
 	
 		OnRecievePosition( ctx );
