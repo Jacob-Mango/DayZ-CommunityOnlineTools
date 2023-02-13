@@ -35,6 +35,8 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 	private int m_StartResizePositionX;
 	private int m_StartResizePositionY;
 
+	private bool m_IsShown;
+
 	void JMWindowBase() 
 	{
 		GetCOTWindowManager().AddWindow( this );
@@ -67,6 +69,10 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Init()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Init");
+		#endif
+
 		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 		m_TitlePanel = layoutRoot.FindAnyWidget( "title_wrapper" );
@@ -81,6 +87,10 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void SetModule( JMRenderableModuleBase module )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "SetModule").Add(module.ToString());
+		#endif
+
 		m_Module = module;
 		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
 			return; 
@@ -189,31 +199,35 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Show" );
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Show");
 		#endif
 
-		if ( !layoutRoot || layoutRoot.IsVisible() )
+		if ( !layoutRoot )
 			return;
 
 		layoutRoot.Show( true );
 
-		m_Form.OnShow();
+		if (!m_Form.m_IsShown)
+		{
+			m_Form.OnShow();
+			m_Form.m_IsShown = true;
+		}
+
+		if (m_IsShown)
+			return;
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Show" );
-		#endif
 	}
 
 	void Hide()
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Hide" );
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Hide");
 		#endif
 		
 		if ( Assert_Null( layoutRoot ) )
@@ -228,6 +242,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 		layoutRoot.Show( false );
 
 		m_Form.OnHide();
+		m_Form.m_IsShown = false;
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
@@ -237,9 +252,7 @@ class JMWindowBase extends ScriptedWidgetEventHandler
 			GetGame().GetUIManager().ShowUICursor( false );
 		}
 
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Hide" );
-		#endif
+		m_IsShown = false;
 	}
 
 	void Focus()
