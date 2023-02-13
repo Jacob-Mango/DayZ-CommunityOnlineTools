@@ -12,6 +12,18 @@ class UIActionManager
 		return NULL;
 	}
 
+	static WrapSpacerWidget CreateWrapSpacer( Widget parent )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
+
+		if ( widget )
+		{
+			return WrapSpacerWidget.Cast( widget );
+		}
+
+		return NULL;
+	}
+
 	static Widget CreateActionRows( Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
@@ -44,12 +56,20 @@ class UIActionManager
 		return widget;
 	}
 
-	static UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname )
+	static UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
 
 		UIActionButton action;
 		widget.GetScript( action );
+
+		if ( width != 1 )
+		{
+			float w;
+			float h;
+			widget.GetSize( w, h );
+			widget.SetSize( width, h );
+		}
 
 		if ( action )
 		{
@@ -148,12 +168,20 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false )
+	static UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
 
 		UIActionCheckbox action;
 		widget.GetScript( action );
+
+		if ( width != 1 )
+		{
+			float w;
+			float h;
+			widget.GetSize( w, h );
+			widget.SetSize( width, h );
+		}
 
 		if ( action )
 		{
