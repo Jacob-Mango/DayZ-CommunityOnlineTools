@@ -18,11 +18,15 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_PositionY;
 	UIActionEditableText m_Action_PositionZ;
 	UIActionButton m_Action_Position;
+	UIActionButton m_Action_RefreshPosition;
+	UIActionCheckbox m_Action_AutoRefreshPosition;
 	
 	UIActionEditableText m_Action_OrientationX;
 	UIActionEditableText m_Action_OrientationY;
 	UIActionEditableText m_Action_OrientationZ;
 	UIActionButton m_Action_Orientation;
+	UIActionButton m_Action_RefreshOrientation;
+	UIActionCheckbox m_Action_AutoRefreshOrientation;
 
 	UIActionEditableText m_Action_Health;
 
@@ -101,7 +105,11 @@ class JMESPMeta : Managed
 		m_Action_PositionY.SetOnlyNumbers( true );
 		m_Action_PositionZ.SetOnlyNumbers( true );
 		
-		m_Action_Position = UIActionManager.CreateButton( positionActions, "Set Position", this, "Action_SetPosition" );
+		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
+
+		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set Position", this, "Action_SetPosition", 0.5 );
+		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
+		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -116,7 +124,11 @@ class JMESPMeta : Managed
 		m_Action_OrientationY.SetOnlyNumbers( true );
 		m_Action_OrientationZ.SetOnlyNumbers( true );
 		
-		m_Action_Orientation = UIActionManager.CreateButton( orientationActions, "Set Orientation", this, "Action_SetOrientation" );
+		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
+
+		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set Orientation", this, "Action_SetOrientation", 0.5 );
+		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
+		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -149,16 +161,25 @@ class JMESPMeta : Managed
 	{
 		if ( !viewTypeActions || !widgetRoot )
 			return;
-		
+
+		RefreshPosition();
+		RefreshOrientation();
+
+		if ( !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
+	}
+
+	void RefreshPosition()
+	{
 		if ( !m_Action_PositionX.IsFocused() ) m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
 		if ( !m_Action_PositionY.IsFocused() ) m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
 		if ( !m_Action_PositionZ.IsFocused() ) m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
-		
+	}
+
+	void RefreshOrientation()
+	{
 		if ( !m_Action_OrientationX.IsFocused() ) m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
 		if ( !m_Action_OrientationY.IsFocused() ) m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
 		if ( !m_Action_OrientationZ.IsFocused() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
-
-		if ( !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
 	}
 
 	void Action_SetPosition( UIEvent eid, ref UIActionBase action )
@@ -174,6 +195,20 @@ class JMESPMeta : Managed
 		module.SetPosition( pos, target );
 	}
 
+	void Action_RefreshPosition( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		RefreshPosition();
+	}
+
+	void Click_AutoRefreshPosition( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+	}
+
 	void Action_SetOrientation( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -185,6 +220,20 @@ class JMESPMeta : Managed
 		pos[2] = m_Action_OrientationZ.GetText().ToFloat();
 
 		module.SetOrientation( pos, target );
+	}
+
+	void Action_RefreshOrientation( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		RefreshOrientation();
+	}
+
+	void Click_AutoRefreshOrientation( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
 	}
 
 	void Action_SetHealth( UIEvent eid, ref UIActionBase action )
