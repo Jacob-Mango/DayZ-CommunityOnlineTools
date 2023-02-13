@@ -402,6 +402,16 @@ class JMESPModule: JMRenderableModuleBase
 
 		int sleepIdx = 0;
 
+		bool includeImmovable;
+		foreach (auto viewType: m_ViewTypes)
+		{
+			if (viewType.IsInherited(JMESPViewTypeImmovable))
+			{
+				includeImmovable = viewType.View;
+				break;
+			}
+		}
+
 		for (int x = -numIterations; x < numIterations; x++)
 		{
 			for (int z = -numIterations; z < numIterations; z++)
@@ -416,7 +426,10 @@ class JMESPModule: JMRenderableModuleBase
 				vector max = centerPosition + Vector(xx1,  1000, zz1);
 
 				array<EntityAI> entities();
-				DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
+				if (includeImmovable)
+					DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
+				else
+					DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
 
 				foreach (auto entity : entities)
 				{
