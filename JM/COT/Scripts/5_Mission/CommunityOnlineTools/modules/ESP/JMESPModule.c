@@ -416,7 +416,7 @@ class JMESPModule: JMRenderableModuleBase
 				vector max = centerPosition + Vector(xx1,  1000, zz1);
 
 				array<EntityAI> entities();
-				DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
+				DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
 
 				foreach (auto entity : entities)
 				{
