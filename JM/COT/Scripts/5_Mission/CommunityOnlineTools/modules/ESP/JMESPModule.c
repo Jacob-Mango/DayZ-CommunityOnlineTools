@@ -78,6 +78,10 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Dismantle" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Repair" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Unstuck" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Refuel" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Repair" );
 	}
 
 	void ~JMESPModule()
@@ -739,12 +743,20 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		target.SetPosition( position );
-
+		CarScript car;
 		Transport transport;
-		if ( Class.CastTo( transport, target ) )
+		if ( Class.CastTo( car, target ) )
 		{
-			transport.Synchronize();
+			car.COT_ForcePositionAndOrientation(position, car.GetOrientation());
+		}
+		else
+		{
+			target.SetPosition( position );
+
+			if ( Class.CastTo( transport, target ) )
+			{
+				transport.Synchronize();
+			}
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
@@ -1028,9 +1040,7 @@ class JMESPModule: JMRenderableModuleBase
 		CarScript car;
 		if ( Class.CastTo( car, target ) )
 		{
-			vector pos = car.GetPosition();
-			pos[0] += 1.25; // Offset Y pos
-			car.COT_VehicleSetPos(pos);
+			car.COT_PlaceOnSurfaceAtPosition(car.GetPosition());
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );

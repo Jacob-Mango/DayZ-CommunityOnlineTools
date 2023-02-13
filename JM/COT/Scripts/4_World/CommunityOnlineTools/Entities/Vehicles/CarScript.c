@@ -15,9 +15,55 @@ modded class CarScript
 			s_JM_AllCars.Remove(s_JM_Node);
 	}
 
-	void COT_VehicleSetPos(vector position)
+	void COT_ForcePositionAndOrientation(vector position, vector orientation)
 	{
-		vector surface = Vector(position[0],GetGame().SurfaceY(position[0], position[2]),position[2]);
+		if (dBodyIsActive(this))
+		{
+			vector velocity = GetVelocity(this);
+			vector angularVelocity = dBodyGetAngularVelocity(this);
+
+			dBodyActive(this, ActiveState.INACTIVE);
+			dBodyDynamic(this, false);
+
+			SetPosition(position);
+			SetOrientation(orientation);
+
+			SetVelocity(this, velocity);
+			dBodySetAngularVelocity(this, angularVelocity);
+
+			dBodyDynamic(this, true);
+		}
+		else
+		{
+			//! Force position/orientation without setting vehicle active (avoids collision)
+			for (int i = 0; i < 2; i++)
+			{
+				SetPosition(position);
+				orientation[2] = orientation[2] - 1;
+				SetOrientation(orientation);
+				orientation[2] = orientation[2] + 1;
+				SetOrientation(orientation);
+				Synchronize();
+			}
+		}
+	}
+
+	void COT_PlaceOnSurfaceAtPosition(vector position)
+	{
+		vector surface = Vector(position[0], GetGame().SurfaceY(position[0], position[2]), position[2]);
+
+		vector entityMinMax[2];
+		if (!GetCollisionBox(entityMinMax))
+			ClippingInfo(entityMinMax);
+
+		float entityOffsetY = entityMinMax[0][1];
+		if (entityOffsetY > 0)
+			entityOffsetY = 0;
+
+		vector startPos = position;
+		startPos[1] = startPos[1] - entityOffsetY;
+		if (surface[1] > startPos[1])
+			startPos[1] = surface[1];
 
 		PhxInteractionLayers layerMask;
 		layerMask |= PhxInteractionLayers.BUILDING;
@@ -28,26 +74,49 @@ modded class CarScript
 		layerMask |= PhxInteractionLayers.ITEM_LARGE;
 		layerMask |= PhxInteractionLayers.FENCE;
 		vector hitPosition;
+		vector hitNormal;
 
-		if (DayZPhysics.RayCastBullet(position, surface, layerMask, this, null, hitPosition, null, null))
+		if (DayZPhysics.RayCastBullet(startPos + "0 1 0", surface - "0 1 0", layerMask, this, null, hitPosition, hitNormal, null))
 		{
 			position = hitPosition;
 		} else {
 			position = surface;
+			hitNormal = GetGame().SurfaceGetNormal(surface[0], surface[2]);
 		}
 
-		vector entityMinMax[2];
-		if (!GetCollisionBox(entityMinMax))
-			ClippingInfo(entityMinMax);
+		position[1] = position[1] - entityOffsetY;
 
-		float entityOffsetY = entityMinMax[0][1];
-		if (entityOffsetY > 0)
-			entityOffsetY = 0;
+		bool isActive = dBodyIsActive(this);
+		bool isDynamic = dBodyIsDynamic(this);
 
-		position[1] = position[1] + entityOffsetY;
+		vector velocity = GetVelocity(this);
+		vector angularVelocity = dBodyGetAngularVelocity(this);
 
-		SetPosition(position);
-		SetOrientation(Vector(GetOrientation()[0],0,0));
+		if (isActive)
+		{
+			dBodyActive(this, ActiveState.INACTIVE);
+			dBodyDynamic(this, false);
+		}
+
+		vector orientation = GetOrientation();
+		SetOrientation(Vector(orientation[0], 0, 0));
+
+		vector transform[4];
+		GetTransform(transform);
+		transform[3] = position;
+		PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
+		SetTransform(transform);
+
+		if (isActive)
+		{
+			SetVelocity(this, velocity);
+			dBodySetAngularVelocity(this, angularVelocity);
+			dBodyDynamic(this, true);
+		}
+		else
+		{
+			COT_ForcePositionAndOrientation(position, GetOrientation());
+		}
 	}
 
 	void COT_Repair()

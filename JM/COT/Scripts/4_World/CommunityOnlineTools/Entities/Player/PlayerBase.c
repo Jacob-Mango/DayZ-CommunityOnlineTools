@@ -170,7 +170,7 @@ modded class PlayerBase
 				{
 					CarScript car;
 					if (Class.CastTo(car, transport))
-						car.COT_VehicleSetPos(position);
+						car.COT_PlaceOnSurfaceAtPosition(position);
 
 					return;
 				}
