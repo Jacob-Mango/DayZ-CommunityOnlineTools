@@ -2,7 +2,6 @@ enum JMESPModuleRPC
 {
 	INVALID = 10300,
 	Log,
-	FullMap,
 	SetPosition,
 	SetOrientation,
 	SetHealth,
@@ -61,8 +60,6 @@ class JMESPModule: JMRenderableModuleBase
 		ESPRadius = 200;
 
 		ESPUpdateTime = 1;
-
-		GetRPCManager().AddRPC( "COT_ESP", "RequestFullMapESP", this, SingeplayerExecutionType.Both );
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
 
@@ -242,37 +239,6 @@ class JMESPModule: JMRenderableModuleBase
 
 			GetGame().GameScript.Call( this, "ThreadESP", NULL );
 		}
-	}
-
-	void RequestFullMapESP( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
-	{
-		if ( !GetPermissionsManager().HasPermission( "ESP.Manipulation.Delete", senderRPC ) )
-			return;
-
-		if ( type == CallType.Server )
-		{
-			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
-			if ( player )
-			{
-				GetCommunityOnlineToolsBase().Log( senderRPC, "Entering Full Map ESP" );
-				GetGame().ObjectDelete( player );
-			}
-			
-			GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
-		}
-		
-		if ( type == CallType.Client )
-		{
-			COTPlayerIsRemoved = true;
-		}
-	}
-
-	void EnableFullMap()
-	{
-		if ( CurrentActiveCamera == NULL )
-			return;
-
-		GetRPCManager().SendRPC( "COT_ESP", "RequestFullMapESP", new Param );
 	}
 
 	override void OnMissionFinish()

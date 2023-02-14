@@ -7,8 +7,6 @@ class JMESPForm extends JMFormBase
 
 	private UIActionScroller m_ESPSelectedObjects;
 
-	private UIActionButton m_btn_FullMap;
-
 	private UIActionButton m_btn_Toggle;
 	
 	private UIActionCheckbox m_chkbx_Refresh;
@@ -34,7 +32,7 @@ class JMESPForm extends JMFormBase
 
 	private void ESPControls( Widget parent )
 	{
-		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 5, 1 );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 4, 1 );
 
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
@@ -49,19 +47,6 @@ class JMESPForm extends JMFormBase
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
 		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
-
-		Widget fullMapSpacer = UIActionManager.CreatePanel( mainSpacer, 0x00000000, 30 );
-
-		m_btn_FullMap = UIActionManager.CreateButton( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_FULLMAP_BUTTON", this, "Click_EnableFullMap" );
-		m_btn_FullMap.SetPosition( 0 );
-		m_btn_FullMap.SetWidth( 0.3 );
-
-		UIActionText fmHeading = UIActionManager.CreateText( fullMapSpacer, "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_HEADER", "" );
-		fmHeading.SetPosition( 0.3 );
-		fmHeading.SetWidth( 0.15 );
-		UIActionText fmText = UIActionManager.CreateText( fullMapSpacer, "", "#STR_COT_ESP_MODULE_ACTION_FULLMAP_WARNING_DESCRIPTION" );
-		fmText.SetPosition( 0.45 );
-		fmText.SetWidth( 0.55 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
@@ -209,11 +194,6 @@ class JMESPForm extends JMFormBase
 				m_sldr_Refresh.Disable();
 			}
 		}
-
-		if ( COTPlayerIsRemoved )
-		{	
-			m_btn_FullMap.Disable();
-		}
 	}
 
 	void Click_UpdateESP( UIEvent eid, ref UIActionBase action )
@@ -274,16 +254,6 @@ class JMESPForm extends JMFormBase
 			return;
 		
 		JMESPWidgetHandler.UseClassName = action.IsChecked();
-	}
-	
-	void Click_EnableFullMap( UIEvent eid, ref UIActionBase action )	
-	{	
-		if ( eid != UIEvent.CLICK ) return;	
-
-		m_Module.EnableFullMap();	
-
-		// TODO: Send RPC back to disable this	
-		// m_FullMapESP.Disable();	
 	}
 
 	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
