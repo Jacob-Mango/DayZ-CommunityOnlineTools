@@ -29,8 +29,6 @@ modded class PlayerBase
 	{
 		if ( IsMissionOffline() )
 		{
-			JM_GetSelected().AddPlayer( JMConstants.OFFLINE_GUID );
-
 			GetStatEnergy().Set( GetStatEnergy().GetMax() );
 			GetStatWater().Set( GetStatWater().GetMax() );
 			COTSetGodMode(true);

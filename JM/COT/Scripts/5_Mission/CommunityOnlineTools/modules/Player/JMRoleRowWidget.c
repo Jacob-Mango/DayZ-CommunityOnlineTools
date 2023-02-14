@@ -16,7 +16,6 @@ class JMRoleRowWidget extends ScriptedWidgetEventHandler
 		Init();
 	}
 
-
 	void Init() 
 	{
 		Text = TextWidget.Cast(layoutRoot.FindAnyWidget("role_name"));
