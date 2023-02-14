@@ -23,8 +23,9 @@ modded class JMModuleConstructor
 		modules.Insert( JMTerritoriesModule );
 #endif
 
-		if ( IsMissionOffline() )
-			modules.Insert( JMMissionSelectorModule );
+		//! TODO: Find a way to check of offline mode without being triggered while in main menu
+		//if ( IsMissionOffline() )
+		//	modules.Insert( JMMissionSelectorModule );
 
 		//modules.Insert( JMTestingModule );
 		
