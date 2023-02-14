@@ -76,7 +76,8 @@ modded class PlayerBase
 
 	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
 	{
-		super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
+		if (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)
+			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
 
 		if ( m_JMIsInvisible )
 			dBodySetInteractionLayer( this, PhxInteractionLayers.RAGDOLL );
@@ -149,7 +150,7 @@ modded class PlayerBase
 
 	void SetLastPosition()
 	{
-		if ( GetGame().IsServer() )
+		if ( GetGame().IsServer() && !m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)
 		{
 			vector trans[4];
 			GetTransform( trans );
@@ -183,6 +184,9 @@ modded class PlayerBase
 		{
 			SetPosition(position);
 		}
+
+		if (m_JM_CameraPosition != vector.Zero)
+			m_JM_CameraPosition = vector.Zero;
 	}
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -277,6 +281,9 @@ modded class PlayerBase
 	{
 		if ( GetGame().IsServer() )
 		{
+			if (mode)
+				m_JMHadGodMode = m_JMHasGodMode;
+
 			m_JMHasGodMode = mode;
 
 			SetAllowDamage( !m_JMHasGodMode );
@@ -314,6 +321,9 @@ modded class PlayerBase
 	{
 		if ( GetGame().IsServer() )
 		{
+			if (mode)
+				m_JMWasInvisible = m_JMIsInvisible;
+
 			m_JMIsInvisible = mode;
 			m_JMIsInvisibleRemoteSynch = mode;
 
@@ -369,15 +379,64 @@ modded class PlayerBase
 
 	void COTUpdateSpectatorPosition()
 	{
+#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "COTUpdateSpectatorPosition");
+#endif
+
 		vector position;
+
 		if (m_JM_CameraPosition != vector.Zero)
 			position = m_JM_CameraPosition;
 		else if (m_JM_SpectatedPlayer)
 			position = m_JM_SpectatedPlayer.GetPosition();
 		else
-			position = GetPosition();
+			return;
+
 		float surfaceY = GetGame().SurfaceY( position[0], position[2] );
-		SetPosition( Vector( position[0], surfaceY - 100, position[2] ) );
-		dBodyEnableGravity( this, false );
+
+		if (vector.DistanceSq(m_JMLastPosition, position) <= 22500)
+		{
+			//! If we get close (within 150 m) of original position, place player at original position
+
+			if (COTIsInvisible() && !m_JMWasInvisible)
+				COTSetInvisibility( false );
+
+			SetPosition(m_JMLastPosition);
+			if (GetPosition()[1] < surfaceY)
+			{
+				dBodyEnableGravity( this, true );
+			}
+		}
+		else
+		{
+			position[1] = surfaceY - 100;
+
+			if (!COTHasGodMode())
+				COTSetGodMode( true );
+
+			if (!COTIsInvisible())
+				COTSetInvisibility( true );
+
+			SetPosition( position );
+			dBodyEnableGravity( this, false );
+		}
+	}
+
+	void COTResetSpectator()
+	{
+#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "COTResetSpectator");
+#endif
+
+		if ( HasLastPosition() )
+			SetPosition( GetLastPosition() );
+
+		dBodyEnableGravity( this, true );
+
+		if (!m_JMHadGodMode)
+			COTSetGodMode( false );
+
+		if (!m_JMWasInvisible)
+			COTSetInvisibility( false );
 	}
 }
