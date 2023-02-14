@@ -862,16 +862,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( playerSpectator == spectatePlayer )
 			return;
 
+		playerSpectator.SetLastPosition();
+
 		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
 
 		m_Spectators[guid] = playerSpectator;
-
-		playerSpectator.m_JMHadGodMode = playerSpectator.COTHasGodMode();
-		playerSpectator.COTSetGodMode( true );
-		playerSpectator.m_JMWasInvisible = playerSpectator.COTIsInvisible();
-		playerSpectator.COTSetInvisibility( true );
-
-		playerSpectator.SetLastPosition();
 
 		int delay;
 		float distance = vector.Distance( playerSpectator.GetPosition(), spectatePlayer.GetPosition() );
@@ -1001,7 +996,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		Print(playerSpectator);
 #endif
 
-		GetGame().SelectPlayer( ident, playerSpectator );
+		vector spectatorPosition = playerSpectator.GetPosition();
+		playerSpectator.COTResetSpectator();
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
@@ -1009,29 +1005,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		int delay;
 		if ( playerSpectator.HasLastPosition() )
 		{
-			float distance = vector.Distance( playerSpectator.GetLastPosition(), playerSpectator.GetPosition() );
+			float distance = vector.Distance( playerSpectator.GetLastPosition(), spectatorPosition );
 			if ( distance >= 1000 )
 				delay = 1000;
 		}
 
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( ResetSpectator, delay, false, playerSpectator );
-	}
-
-	void ResetSpectator( PlayerBase playerSpectator )
-	{
-		if ( !playerSpectator )
-			return;
-
-		if ( playerSpectator.HasLastPosition() )
-			playerSpectator.SetPosition( playerSpectator.GetLastPosition() );
-
-		dBodyEnableGravity( playerSpectator, true );
-
-		if (!playerSpectator.m_JMHadGodMode)
-			playerSpectator.COTSetGodMode( false );
-
-		if (!playerSpectator.m_JMWasInvisible)
-			playerSpectator.COTSetInvisibility( false );
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, ident, playerSpectator );
 	}
 
 	private void Client_EndSpectating( PlayerIdentity ident )

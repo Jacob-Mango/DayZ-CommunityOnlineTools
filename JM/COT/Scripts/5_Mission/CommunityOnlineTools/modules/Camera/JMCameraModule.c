@@ -291,7 +291,11 @@ class JMCameraModule: JMRenderableModuleBase
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
-			GetGame().SelectPlayer( sender, player );
+			vector spectatorPosition = player.GetPosition();
+			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+				player.COTResetSpectator();
+
+			player.m_JM_CameraPosition = vector.Zero;
 
 			//player.GetInputController().SetDisabled( false );
 
@@ -304,40 +308,18 @@ class JMCameraModule: JMRenderableModuleBase
 				Client_Leave();
 			}
 
-			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+			int delay;
+			if ( player.HasLastPosition() )
 			{
-				int delay;
-				if ( player.HasLastPosition() )
-				{
-					float distance = vector.Distance( player.GetLastPosition(), player.GetPosition() );
-					if ( distance >= 1000 )
-						delay = 1000;
-				}
-
-				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( ResetSpectator, delay, false, player );
+				float distance = vector.Distance( player.GetLastPosition(), spectatorPosition );
+				if ( distance >= 1000 )
+					delay = 1000;
 			}
 
-			player.m_JM_CameraPosition = vector.Zero;
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, sender, player );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
 		}
-	}
-
-	void ResetSpectator( PlayerBase player )
-	{
-		if ( !player )
-			return;
-
-		if ( player.HasLastPosition() )
-			player.SetPosition( player.GetLastPosition() );
-
-		dBodyEnableGravity( player, true );
-
-		if (!player.m_JMHadGodMode)
-			player.COTSetGodMode( false );
-
-		if (!player.m_JMWasInvisible)
-			player.COTSetInvisibility( false );
 	}
 
 	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -392,10 +374,6 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		if (player.m_JM_CameraPosition == vector.Zero)
 		{
-			player.m_JMHadGodMode = player.COTHasGodMode();
-			player.COTSetGodMode( true );
-			player.m_JMWasInvisible = player.COTIsInvisible();
-			player.COTSetInvisibility( true );
 			player.SetLastPosition();
 		}
 	}
