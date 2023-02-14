@@ -7,8 +7,7 @@ class CfgPatches
         requiredVersion=0.1;
         requiredAddons[]=
 		{
-            "DZ_Worlds_Chernarusplus_World",
-			"DZ_Data"
+            "DZ_Worlds_Chernarusplus_World"
 		};
     };
 };
