@@ -23,6 +23,7 @@ modded class PlayerBase
 	private bool m_JMHasUnlimitedStaminaRemoteSynch;
 
 	PlayerBase m_JM_SpectatedPlayer;
+	vector m_JM_CameraPosition;
 
 	void PlayerBase()
 	{
@@ -368,7 +369,13 @@ modded class PlayerBase
 
 	void COTUpdateSpectatorPosition()
 	{
-		vector position = m_JM_SpectatedPlayer.GetPosition();
+		vector position;
+		if (m_JM_CameraPosition != vector.Zero)
+			position = m_JM_CameraPosition;
+		else if (m_JM_SpectatedPlayer)
+			position = m_JM_SpectatedPlayer.GetPosition();
+		else
+			position = GetPosition();
 		float surfaceY = GetGame().SurfaceY( position[0], position[2] );
 		SetPosition( Vector( position[0], surfaceY - 100, position[2] ) );
 		dBodyEnableGravity( this, false );

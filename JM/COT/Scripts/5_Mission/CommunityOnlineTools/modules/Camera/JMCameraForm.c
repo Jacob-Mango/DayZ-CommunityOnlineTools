@@ -7,6 +7,7 @@ class JMCameraForm extends JMFormBase
 	private UIActionSlider m_SliderFocalLength;
 	private UIActionSlider m_SliderFocalNear;
 	private UIActionSlider m_SliderExposure;
+	private UIActionCheckbox m_EnableFullmapCamera;
 
 	private JMCameraModule m_Module;
 
@@ -82,6 +83,8 @@ class JMCameraForm extends JMFormBase
 		m_SliderExposure.SetWidth( 1.0 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.7 );
+
+		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap camera", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
 		
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -154,5 +157,13 @@ class JMCameraForm extends JMFormBase
 		EXPOSURE = action.GetCurrent();
 
 		OnSliderUpdate();
+	}
+
+	void OnClick_EnableFullmap( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.m_EnableFullmapCamera = action.IsChecked();
 	}
 }

@@ -3,6 +3,7 @@ enum JMCameraModuleRPC
 	INVALID = 10160,
 	Enter,
 	Leave,
+	UpdatePosition,
 	COUNT
 };
 
@@ -11,6 +12,8 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_CurrentSmoothBlur;
 	protected float m_CurrentFOV;
 	protected float m_TargetFOV;
+	protected float m_UpdateTime;
+	bool m_EnableFullmapCamera;
 
 	void JMCameraModule()
 	{
@@ -67,6 +70,8 @@ class JMCameraModule: JMRenderableModuleBase
 	#else
 	override void OnUpdate( float timeslice )
 	{
+		m_UpdateTime += timeslice;
+
 		if ( IsMissionClient() && CurrentActiveCamera )
 		{
 			float speed = 0.2;
@@ -103,6 +108,28 @@ class JMCameraModule: JMRenderableModuleBase
 				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
 				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
 				// PPEffects.SetBlurOptics( 0 );
+			}
+
+			if (m_UpdateTime > 1.0)
+			{
+				m_UpdateTime = 0.0;
+
+				if (m_EnableFullmapCamera)
+				{
+					auto player = PlayerBase.Cast(GetGame().GetPlayer());
+					if (GetGame().IsClient())
+					{
+						ScriptRPC rpc = new ScriptRPC();
+						rpc.Write(CurrentActiveCamera.GetPosition());
+						rpc.Send(player, JMCameraModuleRPC.UpdatePosition, true, NULL);
+					}
+					else if (!player.m_JM_SpectatedPlayer)
+					{
+						EnterFullmap(player);
+						player.m_JM_CameraPosition = CurrentActiveCamera.GetPosition();
+						player.COTUpdateSpectatorPosition();
+					}
+				}
 			}
 		}
 	}
@@ -141,6 +168,9 @@ class JMCameraModule: JMRenderableModuleBase
 			break;
 		case JMCameraModuleRPC.Leave:
 			RPC_Leave( ctx, sender, target );
+			break;
+		case JMCameraModuleRPC.UpdatePosition:
+			RPC_UpdatePosition( ctx, sender, target );
 			break;
 		}
 	}
@@ -209,7 +239,7 @@ class JMCameraModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
 	}
 
-	private void RPC_Enter( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Enter").Add(senderRPC);
@@ -274,11 +304,43 @@ class JMCameraModule: JMRenderableModuleBase
 				Client_Leave();
 			}
 
+			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+			{
+				int delay;
+				if ( player.HasLastPosition() )
+				{
+					float distance = vector.Distance( player.GetLastPosition(), player.GetPosition() );
+					if ( distance >= 1000 )
+						delay = 1000;
+				}
+
+				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( ResetSpectator, delay, false, player );
+			}
+
+			player.m_JM_CameraPosition = vector.Zero;
+
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
 		}
 	}
 
-	private void RPC_Leave( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	void ResetSpectator( PlayerBase player )
+	{
+		if ( !player )
+			return;
+
+		if ( player.HasLastPosition() )
+			player.SetPosition( player.GetLastPosition() );
+
+		dBodyEnableGravity( player, true );
+
+		if (!player.m_JMHadGodMode)
+			player.COTSetGodMode( false );
+
+		if (!player.m_JMWasInvisible)
+			player.COTSetInvisibility( false );
+	}
+
+	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Leave").Add(senderRPC);
@@ -297,7 +359,47 @@ class JMCameraModule: JMRenderableModuleBase
 			Client_Leave();
 		}
 	}
+
+	private void RPC_UpdatePosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "RPC_UpdatePosition").Add(senderRPC);
+		#endif
+
+		if ( GetGame().IsDedicatedServer() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+				return;
+
+			vector position;
+			if (!ctx.Read(position) || position == vector.Zero)
+				return;
+
+			PlayerBase player;
+			if (Class.CastTo(player, target))
+			{
+				if (!player.m_JM_SpectatedPlayer)
+				{
+					EnterFullmap(player);
+					player.m_JM_CameraPosition = position;
+					player.COTUpdateSpectatorPosition();
+				}
+			}
+		}
+	}
 	
+	void EnterFullmap(PlayerBase player)
+	{
+		if (player.m_JM_CameraPosition == vector.Zero)
+		{
+			player.m_JMHadGodMode = player.COTHasGodMode();
+			player.COTSetGodMode( true );
+			player.m_JMWasInvisible = player.COTIsInvisible();
+			player.COTSetInvisibility( true );
+			player.SetLastPosition();
+		}
+	}
+
 	void ToggleCamera( UAInput input )
 	{
 		if ( !( input.LocalPress() ) )
