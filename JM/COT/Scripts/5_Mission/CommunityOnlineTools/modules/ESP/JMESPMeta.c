@@ -279,6 +279,9 @@ class JMESPMetaPlayer : JMESPMeta
 
 	override void UpdateActions()
 	{
+		if ( !viewTypeActions || !widgetRoot )
+			return;
+
 		super.UpdateActions();
 		
 		m_Player_Name.SetText( player.GetName() );
