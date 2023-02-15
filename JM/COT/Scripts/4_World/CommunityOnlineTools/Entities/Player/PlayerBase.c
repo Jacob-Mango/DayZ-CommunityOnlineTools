@@ -4,7 +4,6 @@ modded class PlayerBase
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
-	private bool m_JMHasGodMode;
 	bool m_JMHadGodMode;
 
 	private bool m_JMIsInvisible;
@@ -252,7 +251,7 @@ modded class PlayerBase
 
 	bool COTHasGodMode()
 	{
-		return m_JMHasGodMode;
+		return !GetAllowDamage();
 	}
 
 	bool COTIsFrozen()
@@ -280,11 +279,9 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			if (mode)
-				m_JMHadGodMode = m_JMHasGodMode;
+				m_JMHadGodMode = !GetAllowDamage();
 
-			m_JMHasGodMode = mode;
-
-			SetAllowDamage( !m_JMHasGodMode );
+			SetAllowDamage( !mode );
 		}
 	}
 
