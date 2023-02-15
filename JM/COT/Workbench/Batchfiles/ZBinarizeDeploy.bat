@@ -165,6 +165,9 @@ IF NOT exist "%modBuildDirectory%%modName%\Keys\" (
 echo Copying over "%workDrive%%prefixLinkRoot%\mod.cpp" to "%modBuildDirectory%%modName%\"
 copy "%workDrive%%prefixLinkRoot%\mod.cpp" "%modBuildDirectory%%modName%\" > nul
 
+echo Copying over "%workDrive%%prefixLinkRoot%\meta.cpp" to "%modBuildDirectory%%modName%\"
+copy "%workDrive%%prefixLinkRoot%\meta.cpp" "%modBuildDirectory%%modName%\" > nul
+
 echo Copying over "%keyDirectory%\%keyName%.bikey" to "%modBuildDirectory%%modName%\Keys\"
 echo Copying over "%keyDirectory%\%keyName%.biprivatekey" to "%modBuildDirectory%%modName%\Keys\"
 
@@ -187,8 +190,8 @@ for /R %%D in ( config.cpp ) do (
 								IF NOT EXIST "%%~dD%%~pD..\..\..\..\..\..\..\config.cpp" (
 									IF NOT EXIST "%%~dD%%~pD..\..\..\..\..\..\..\..\config.cpp" (
 										rem echo No parent config.cpp found, building pbo %%D
-										echo START /W "BinarizePBO" "%batchDirectory%/BinarizePBO.bat" %%D fuckThurston %compression%
-										START /W "BinarizePBO" "%batchDirectory%/BinarizePBO.bat" %%D fuckThurston %compression%
+										echo START /MIN "BinarizePBO" "%batchDirectory%/BinarizePBO.bat" %%D fuckThurston %compression%
+										START /MIN "BinarizePBO" "%batchDirectory%/BinarizePBO.bat" %%D fuckThurston %compression%
 									)
 								)
 							)
