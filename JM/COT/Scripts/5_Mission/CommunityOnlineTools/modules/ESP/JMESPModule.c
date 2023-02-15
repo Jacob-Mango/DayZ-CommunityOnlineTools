@@ -1006,7 +1006,7 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	
-	void Car_Unstuck( Transport target )
+	void Car_Unstuck( Object target )
 	{
 		if ( IsMissionOffline() )
 		{
@@ -1018,7 +1018,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Car_Unstuck( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Car_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		CarScript car;
 		if ( Class.CastTo( car, target ) )
@@ -1036,12 +1036,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
 			return;
 
-		Transport vehi;
-		if ( Class.CastTo( vehi, target ) )
-			Exec_Car_Unstuck( vehi, senderRPC, instance );
+		Exec_Car_Unstuck( target, senderRPC, instance );
 	}
 
-	void Car_Refuel( Transport target)
+	void Car_Refuel( Object target)
 	{
 		if ( IsMissionOffline() )
 		{
@@ -1053,7 +1051,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Car_Refuel( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Car_Refuel( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		CarScript car;
 		if ( Class.CastTo( car, target ) )
@@ -1074,7 +1072,7 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Car_Refuel( vehi, senderRPC, instance );
 	}
 
-	void Car_Repair( Transport target )
+	void Car_Repair( Object target )
 	{
 		if ( IsMissionOffline() )
 		{
@@ -1086,7 +1084,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Car_Repair( Transport target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Car_Repair( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		CarScript car;
 		if ( Class.CastTo( car, target ) )
@@ -1102,9 +1100,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Repair", senderRPC, instance ) )
 			return;
 
-		Transport vehi;
-		if ( Class.CastTo( vehi, target ) )
-			Exec_Car_Repair( vehi, senderRPC, instance );
+		Exec_Car_Repair( target, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )
