@@ -2,6 +2,8 @@ modded class DayZPlayerImplement
 {
 	private JMSpectatorCamera m_SpectatorCamera;
 	private Head_Default m_PlayerHead;
+	bool m_JM_IsHeadInvisible;
+	float m_JM_3rdPersonInterpolate;
 
 	void DayZPlayerImplement()
 	{
@@ -13,58 +15,52 @@ modded class DayZPlayerImplement
 	{
 		m_SpectatorCamera = camera;
 
-		//SetHeadInvisible( true );
+		if (m_SpectatorCamera && !m_SpectatorCamera.m_JM_3rdPerson)
+			SetHeadInvisible( true );
 	}
 
 	void OnSpectateEnd()
 	{
 		m_SpectatorCamera = NULL;
 
-		//SetHeadInvisible( false );
+		if (m_JM_IsHeadInvisible)
+			SetHeadInvisible( false );
 	}
 
-	void UpdateSpecatorCamera()
+	void UpdateSpecatorCamera(float timeSlice)
 	{
 		if ( !m_SpectatorCamera )
 			return;
-		
-		HumanInputController input = GetInputController();
-		HumanCommandWeapons hcw = GetCommandModifier_Weapons();
-		
-		float lr = 0;
-		float ud = 0;
-		if ( hcw )
+
+		if (m_SpectatorCamera.m_JM_3rdPerson && m_JM_3rdPersonInterpolate < 1)
 		{
-			lr = hcw.GetBaseAimingAngleLR();
-			ud = hcw.GetBaseAimingAngleUD();
+			m_JM_3rdPersonInterpolate += timeSlice * 4;
+			if (m_JM_3rdPersonInterpolate > 0.25 && m_JM_IsHeadInvisible)
+				SetHeadInvisible(false);
+			if (m_JM_3rdPersonInterpolate > 1)
+				m_JM_3rdPersonInterpolate = 1;
+		}
+		else if (!m_SpectatorCamera.m_JM_3rdPerson && m_JM_3rdPersonInterpolate > 0)
+		{
+			m_JM_3rdPersonInterpolate -= timeSlice * 4;
+			if (m_JM_3rdPersonInterpolate < 0.25 && !m_JM_IsHeadInvisible)
+				SetHeadInvisible(true);
+			if (m_JM_3rdPersonInterpolate < 0)
+				m_JM_3rdPersonInterpolate = 0;
 		}
 
-		lr += input.GetAimChange()[0] * Math.RAD2DEG;
-		ud += input.GetAimChange()[1] * Math.RAD2DEG;
+		vector mat[4];
+		GetBoneTransformWS(GetBoneIndexByName( "Head" ), mat);
+		vector headPos = mat[3] + "0 0.1 0" - mat[1] * 1.33 * m_JM_3rdPersonInterpolate - mat[1].Perpend() * m_JM_3rdPersonInterpolate * 0.33;
 
-		//! @note this is not a controlled player since we are spectating,
-		//! so any values returned by input controller or weapon cmd will be zero anyway.
-		//! TODO: Workaround?
-		vector ori = GetOrientation();
-		ori[0] = ori[0] + lr;
-		ori[1] = ori[1] + ud;
-
-		m_SpectatorCamera.SetOrientation( ori );
-
-		vector headPos = GetBonePositionWS( GetBoneIndexByName( "Head" ) ) + "0 0.1 0";
-
-		m_SpectatorCamera.SetPosition( headPos - ori.AnglesToVector() * 1.33 );
+		m_SpectatorCamera.SetDirection( mat[1] );
+		m_SpectatorCamera.SetPosition( headPos );
 	}
 
 	override void EOnFrame( IEntity other, float timeSlice )
 	{
-		UpdateSpecatorCamera();
+		UpdateSpecatorCamera(timeSlice);
 	}
-
-	//override void EOnPostFrame( IEntity other, int extra )
-	//{
-		//UpdateSpecatorCamera();
-	//}
 
 	void SetHeadInvisible( bool invisible )
 	{
@@ -80,6 +76,8 @@ modded class DayZPlayerImplement
 		SetAttachmentInvisible( "Headgear", invisible );
 		SetAttachmentInvisible( "Mask", invisible );
 		SetAttachmentInvisible( "Eyewear", invisible );
+
+		m_JM_IsHeadInvisible = invisible;
 	}
 
 	void SetAttachmentInvisible( string slot, bool invisible )
