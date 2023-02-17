@@ -866,7 +866,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
 
-		m_Spectators[guid] = playerSpectator;
+		m_Spectators[ident.GetId()] = playerSpectator;
 
 		int delay;
 		float distance = vector.Distance( playerSpectator.GetPosition(), spectatePlayer.GetPosition() );
@@ -973,24 +973,19 @@ class JMPlayerModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-#ifdef JM_COT_DIAG_LOGGING
-			Print(GetGame().GetPlayer());
-#endif
-			rpc.Write(m_SpectatorClientUID);
-			rpc.Send( GetGame().GetPlayer(), JMPlayerModuleRPC.EndSpectating, true, NULL );
+			rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
 		}
 	}
 
-	private void Server_EndSpectating( PlayerBase player, PlayerIdentity ident, string guid )
+	private void Server_EndSpectating( PlayerIdentity ident )
 	{
 #ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "Server_EndSpectating").Add(player.ToString()).Add(ident);
-		Print(player);
+		auto trace = CF_Trace_2(this, "Server_EndSpectating").Add(ident);
 #endif
 
-		PlayerBase playerSpectator = m_Spectators[guid];
+		PlayerBase playerSpectator = m_Spectators[ident.GetId()];
 		playerSpectator.m_JM_SpectatedPlayer = null;
-		m_Spectators.Remove( guid );
+		m_Spectators.Remove( ident.GetId() );
 
 #ifdef JM_COT_DIAG_LOGGING
 		Print(playerSpectator);
@@ -1021,6 +1016,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( CurrentActiveCamera )
 		{
+			CurrentActiveCamera.SelectedTarget( NULL );
 			CurrentActiveCamera.SetActive( false );
 			CurrentActiveCamera = NULL;
 			
@@ -1049,15 +1045,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
-
-			PlayerBase player;
-			if ( Class.CastTo( player, target ) )
-			{
-				Server_EndSpectating( player, senderRPC, guid );
-			}
+			Server_EndSpectating( senderRPC );
 		} else
 		{
 			Client_EndSpectating( senderRPC );
