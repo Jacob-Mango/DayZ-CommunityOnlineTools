@@ -78,7 +78,8 @@ class JMCameraModule: JMRenderableModuleBase
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-			if ( m_CurrentFOV != m_TargetFOV ) 
+			m_CurrentFOV = CurrentActiveCamera.GetCurrentFOV();
+			if ( m_CurrentFOV != m_TargetFOV && (!CurrentActiveCamera.m_JM_IsADS || CurrentActiveCamera.m_JM_3rdPerson) ) 
 			{
 				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
 				CurrentActiveCamera.SetFOV( m_CurrentFOV );
@@ -142,6 +143,9 @@ class JMCameraModule: JMRenderableModuleBase
 		RegisterBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
 		RegisterBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
+		RegisterBinding( new JMModuleBinding( "Toggle3rdPerson",	"UAPersonView",	true 	) );
+		RegisterBinding( new JMModuleBinding( "LeftShoulder",		"UALeanLeft",	true 	) );
+		RegisterBinding( new JMModuleBinding( "RightShoulder",		"UALeanRight",	true 	) );
 	}
 
 	Camera GetCamera()
@@ -455,5 +459,28 @@ class JMCameraModule: JMRenderableModuleBase
 			return;
 
 		CurrentActiveCamera.LookFreeze = freeze;
+	}
+
+	void Toggle3rdPerson( UAInput input )
+	{
+		if ( input.LocalPress() && CurrentActiveCamera )
+			CurrentActiveCamera.m_JM_3rdPerson = !CurrentActiveCamera.m_JM_3rdPerson;
+	}
+
+	void LeftShoulder( UAInput input )
+	{
+		if ( input.LocalPress() && CurrentActiveCamera )
+			CurrentActiveCamera.m_JM_LeftShoulder = true;
+	}
+
+	void RightShoulder( UAInput input )
+	{
+		if ( input.LocalPress() && CurrentActiveCamera )
+			CurrentActiveCamera.m_JM_LeftShoulder = false;
+	}
+
+	void SetTargetFOV( float fov )
+	{
+		m_TargetFOV = fov;
 	}
 }

@@ -9,6 +9,8 @@ class JMCameraBase extends Camera
 	vector TargetPosition;
 
 	bool m_JM_3rdPerson;
+	bool m_JM_LeftShoulder;
+	bool m_JM_IsADS;
 
 	void JMCameraBase()
 	{

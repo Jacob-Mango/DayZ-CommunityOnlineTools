@@ -3,7 +3,6 @@ modded class DayZPlayerImplement
 	private JMSpectatorCamera m_SpectatorCamera;
 	private Head_Default m_PlayerHead;
 	bool m_JM_IsHeadInvisible;
-	float m_JM_3rdPersonInterpolate;
 
 	void DayZPlayerImplement()
 	{
@@ -32,29 +31,101 @@ modded class DayZPlayerImplement
 		if ( !m_SpectatorCamera )
 			return;
 
-		if (m_SpectatorCamera.m_JM_3rdPerson && m_JM_3rdPersonInterpolate < 1)
-		{
-			m_JM_3rdPersonInterpolate += timeSlice * 4;
-			if (m_JM_3rdPersonInterpolate > 0.25 && m_JM_IsHeadInvisible)
-				SetHeadInvisible(false);
-			if (m_JM_3rdPersonInterpolate > 1)
-				m_JM_3rdPersonInterpolate = 1;
-		}
-		else if (!m_SpectatorCamera.m_JM_3rdPerson && m_JM_3rdPersonInterpolate > 0)
-		{
-			m_JM_3rdPersonInterpolate -= timeSlice * 4;
-			if (m_JM_3rdPersonInterpolate < 0.25 && !m_JM_IsHeadInvisible)
-				SetHeadInvisible(true);
-			if (m_JM_3rdPersonInterpolate < 0)
-				m_JM_3rdPersonInterpolate = 0;
-		}
-
 		vector mat[4];
 		GetBoneTransformWS(GetBoneIndexByName( "Head" ), mat);
-		vector headPos = mat[3] + "0 0.1 0" - mat[1] * 1.33 * m_JM_3rdPersonInterpolate - mat[1].Perpend() * m_JM_3rdPersonInterpolate * 0.33;
+		vector headPos = mat[3];
 
-		m_SpectatorCamera.SetDirection( mat[1] );
-		m_SpectatorCamera.SetPosition( headPos );
+		float cameraDistanceToHeadSq = vector.DistanceSq(m_SpectatorCamera.GetPosition(), headPos);
+		if (cameraDistanceToHeadSq < 0.0625 && !m_JM_IsHeadInvisible)
+			SetHeadInvisible(true);
+		else if (cameraDistanceToHeadSq >= 0.0625 && m_JM_IsHeadInvisible)
+			SetHeadInvisible(false);
+
+		EntityAI hands = GetHumanInventory().GetEntityInHands();
+
+		Weapon_Base weapon;
+		ItemOptics optic;
+
+		vector eyePos;
+
+		vector dir;
+		vector pos;
+
+		float fov;
+
+		if (Class.CastTo(weapon, hands))
+		{
+			optic = weapon.GetAttachedOptics();
+			eyePos = weapon.ModelToWorld(weapon.GetSelectionPositionLS("eye"));
+			m_SpectatorCamera.m_JM_IsADS = vector.DistanceSq(eyePos, headPos) < 0.04;
+		}
+		else
+		{
+			m_SpectatorCamera.m_JM_IsADS = false;
+		}
+
+		if (m_SpectatorCamera.m_JM_IsADS)
+		{
+			if (optic)
+			{
+				optic.GetCameraPoint(pos, dir);
+				pos = optic.ModelToWorld(pos);
+
+				if (optic.GetCurrentStepFOV() < GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS)
+				{
+					if (!optic.IsInOptics())
+					{
+						optic.EnterOptics();
+						optic.OnOpticEnter();
+					}
+				}
+				else if (optic.IsInOptics())
+				{
+					optic.ExitOptics();
+					optic.OnOpticExit();
+				}
+			}
+			else
+			{
+				weapon.GetCameraPoint(weapon.GetCurrentMuzzle(), pos, dir);
+				pos = weapon.ModelToWorld(pos);
+			}
+
+			vector barrel_start = weapon.ModelToWorld(weapon.GetSelectionPositionLS("konec hlavne"));
+			vector barrel_end = weapon.ModelToWorld(weapon.GetSelectionPositionLS("usti hlavne"));
+			dir = vector.Direction(barrel_start, barrel_end).Normalized();
+
+			fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
+		}
+		else
+		{
+			if (optic && optic.IsInOptics())
+			{
+				optic.ExitOptics();
+				optic.OnOpticExit();
+			}
+
+			dir = mat[1];
+			pos = headPos + "0 0.1 0";
+
+			fov = GetDayZGame().GetUserFOV();
+		}
+
+		if (m_SpectatorCamera.m_JM_3rdPerson)
+		{
+			pos = pos - dir * 1.33;
+			vector offsetX = dir.Perpend() * 0.33;
+			if (m_SpectatorCamera.m_JM_LeftShoulder)
+				pos = pos + offsetX;
+			else
+				pos = pos - offsetX;
+		}
+
+		m_SpectatorCamera.SetDirection( vector.Lerp(m_SpectatorCamera.GetDirection(), dir, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
+		m_SpectatorCamera.SetPosition( vector.Lerp(m_SpectatorCamera.GetPosition(), pos, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
+
+		if (m_SpectatorCamera.m_JM_IsADS && !m_SpectatorCamera.m_JM_3rdPerson)
+			m_SpectatorCamera.SetFOV( Math.Lerp(m_SpectatorCamera.GetCurrentFOV(), fov, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
 	}
 
 	override void EOnFrame( IEntity other, float timeSlice )
