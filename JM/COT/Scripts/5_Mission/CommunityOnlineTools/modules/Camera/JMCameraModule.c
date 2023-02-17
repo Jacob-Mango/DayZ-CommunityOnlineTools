@@ -375,6 +375,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if (player.m_JM_CameraPosition == vector.Zero)
 		{
 			player.SetLastPosition();
+			player.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
 		}
 	}
 

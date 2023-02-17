@@ -873,6 +873,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( distance >= 1000 )
 			delay = 1000;
 
+		playerSpectator.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Server_StartSpectatingEx, delay, false, spectatePlayer, ident, guid );
