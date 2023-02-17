@@ -75,9 +75,6 @@ modded class PlayerBase
 	{
 		if (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
-
-		if ( m_JMIsInvisible )
-			dBodySetInteractionLayer( this, PhxInteractionLayers.RAGDOLL );
 	}
 
 	override void OnVariablesSynchronized()
@@ -90,11 +87,9 @@ modded class PlayerBase
 			if ( m_JMIsInvisible )
 			{
 				ClearFlags( EntityFlags.VISIBLE, true );
-				dBodySetInteractionLayer( this, PhxInteractionLayers.RAGDOLL );
 			} else
 			{
 				SetFlags( EntityFlags.VISIBLE, true );
-				dBodySetInteractionLayer( this, PhxInteractionLayers.CHARACTER );
 			}
 
 			SetInvisible( m_JMIsInvisible );
@@ -322,8 +317,7 @@ modded class PlayerBase
 			m_JMIsInvisible = mode;
 			m_JMIsInvisibleRemoteSynch = mode;
 
-			if ( !mode )
-				dBodySetInteractionLayer( this, PhxInteractionLayers.CHARACTER );
+			PhysicsSetSolid(!mode);
 
 			SetSynchDirty();
 		}
@@ -396,10 +390,10 @@ modded class PlayerBase
 			if (COTIsInvisible() && !m_JMWasInvisible)
 				COTSetInvisibility( false );
 
-			SetPosition(m_JMLastPosition);
 			if (GetPosition()[1] < surfaceY)
 			{
-				dBodyEnableGravity( this, true );
+				PhysicsEnableGravity( true );
+				SetPosition(m_JMLastPosition);
 			}
 		}
 		else
@@ -412,8 +406,8 @@ modded class PlayerBase
 			if (!COTIsInvisible())
 				COTSetInvisibility( true );
 
+			PhysicsEnableGravity( false );
 			SetPosition( position );
-			dBodyEnableGravity( this, false );
 		}
 	}
 
@@ -423,15 +417,15 @@ modded class PlayerBase
 		auto trace = CF_Trace_0(this, "COTResetSpectator");
 #endif
 
+		if (!m_JMWasInvisible)
+			COTSetInvisibility( false );
+
+		PhysicsEnableGravity( true );
+
 		if ( HasLastPosition() )
 			SetPosition( GetLastPosition() );
 
-		dBodyEnableGravity( this, true );
-
 		if (!m_JMHadGodMode)
 			COTSetGodMode( false );
-
-		if (!m_JMWasInvisible)
-			COTSetInvisibility( false );
 	}
 }
