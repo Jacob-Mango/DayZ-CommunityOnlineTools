@@ -8,6 +8,7 @@ class JMCameraForm extends JMFormBase
 	private UIActionSlider m_SliderFocalNear;
 	private UIActionSlider m_SliderExposure;
 	private UIActionCheckbox m_EnableFullmapCamera;
+	private UIActionCheckbox m_3rdPersonSpectate;
 
 	private JMCameraModule m_Module;
 
@@ -84,7 +85,9 @@ class JMCameraForm extends JMFormBase
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.7 );
 
-		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap camera", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
+		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap freecam update", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
+
+		m_3rdPersonSpectate = UIActionManager.CreateCheckbox( actions, "3rd person spectate", this, "OnClick_3rdPersonSpectate", GetCurrentCamera3rdPerson() );
 		
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -165,5 +168,22 @@ class JMCameraForm extends JMFormBase
 			return;
 
 		m_Module.m_EnableFullmapCamera = action.IsChecked();
+	}
+
+	void OnClick_3rdPersonSpectate( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (CurrentActiveCamera)
+			CurrentActiveCamera.m_JM_3rdPerson = action.IsChecked();
+	}
+
+	bool GetCurrentCamera3rdPerson()
+	{
+		if (CurrentActiveCamera)
+			return CurrentActiveCamera.m_JM_3rdPerson;
+
+		return false;
 	}
 }

@@ -8,6 +8,8 @@ class JMCameraBase extends Camera
 	Object SelectedTarget;
 	vector TargetPosition;
 
+	bool m_JM_3rdPerson;
+
 	void JMCameraBase()
 	{
 		SetEventMask( EntityEvent.FRAME );
