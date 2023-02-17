@@ -157,6 +157,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		InitWidgetsLeft();
 		InitWidgetsRight();
+
+		RefreshStats();  //! Show correct state on reinit
 	}
 
 	private void InitWidgetsLeft()
