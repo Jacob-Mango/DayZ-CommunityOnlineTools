@@ -134,6 +134,8 @@ modded class DayZPlayerImplement
 			fov = GetDayZGame().GetUserFOV();
 		}
 
+		dir = vector.Lerp(m_SpectatorCamera.GetDirection(), dir, timeSlice * CAMERA_FOV_SPEED_MODIFIER);
+
 		if (m_SpectatorCamera.m_JM_3rdPerson)
 		{
 			pos = pos.Multiply4(playerTransform);
@@ -146,7 +148,7 @@ modded class DayZPlayerImplement
 			pos = pos.InvMultiply4(playerTransform);
 		}
 
-		m_SpectatorCamera.SetDirection( vector.Lerp(m_SpectatorCamera.GetDirection(), dir, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
+		m_SpectatorCamera.SetDirection( dir );
 
 		if (m_JM_CameraPosMS == vector.Zero)
 		{
