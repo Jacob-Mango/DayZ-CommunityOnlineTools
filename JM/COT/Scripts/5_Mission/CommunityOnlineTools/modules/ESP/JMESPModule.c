@@ -131,7 +131,7 @@ class JMESPSkeleton
 		return limbs;
 	}
 
-	static void Draw(Human human, JMESPCanvas canvas = null, out array<Shape> shapes = null)
+	static void Draw(Human human, JMESPCanvas canvas = null, float lineThickness = 1, out array<Shape> shapes = null)
 	{
 #ifdef JM_COT_USE_DEBUGSHAPES
 		shapes = new array<Shape>;
@@ -147,7 +147,7 @@ class JMESPSkeleton
 #ifdef JM_COT_USE_DEBUGSHAPES
 		shapes.Insert(Debug.DrawLine(neckPos, neckEnd, COLOR_WHITE, ShapeFlags.NOZBUFFER));
 #else
-		canvas.DrawLine(neckPos, neckEnd, 1, COLOR_WHITE);
+		canvas.DrawLine(neckPos, neckEnd, lineThickness, COLOR_WHITE);
 #endif
 
 		//! Head
@@ -161,7 +161,7 @@ class JMESPSkeleton
 		ori[2] = 0;
 		vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * 0.12);
 		float radius = vector.Distance(p1, p2);
-		canvas.DrawCircle(headPos, radius, 1, COLOR_WHITE);
+		canvas.DrawCircle(headPos, radius, lineThickness, COLOR_WHITE);
 #endif
 
 		foreach (JMESPLimb limb: s_Limbs)
@@ -173,7 +173,7 @@ class JMESPSkeleton
 #ifdef JM_COT_USE_DEBUGSHAPES
 			shapes.Insert(Debug.DrawLine(bone1Position, bone2Position, COLOR_WHITE, ShapeFlags.NOZBUFFER));
 #else
-			canvas.DrawLine(bone1Position, bone2Position, 1, COLOR_WHITE);
+			canvas.DrawLine(bone1Position, bone2Position, lineThickness, COLOR_WHITE);
 #endif
 		}
 	}
@@ -200,6 +200,7 @@ class JMESPModule: JMRenderableModuleBase
 	float ESPRadius;
 	int ESPUpdateTime;
 	bool EnableDrawPlayerSkeletons;
+	float SkeletonLineThickness = 1;
 
 	private JMESPState m_CurrentState = JMESPState.Remove;
 	private bool m_StateChanged = false;
@@ -426,18 +427,24 @@ class JMESPModule: JMRenderableModuleBase
 			vector btm = GetGame().GetScreenPosRelative(human.GetPosition());
 			if (btm[2] < 0)
 				continue;
-			btm[2] = btm[1];
 
 			vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
+
+			vector cameraPos = GetGame().GetCurrentCameraPosition();
+			float distanceSq = vector.DistanceSq(cameraPos, headPos)
+			if (distanceSq < 0.0625 || distanceSq > ESPRadius * ESPRadius)
+				continue;
+
 			vector top = GetGame().GetScreenPosRelative(headPos);
 			if (top[2] < 0)
 				continue;
-			top[2] = top[1];
 
+			btm[2] = btm[1];
+			top[2] = top[1];
 			if (!Math.IsPointInRectangle("0 0 0", "1 0 1", btm) && !Math.IsPointInRectangle("0 0 0", "1 0 1", top))
 				continue;
 
-			JMESPSkeleton.Draw(human, m_ESPCanvas);
+			JMESPSkeleton.Draw(human, m_ESPCanvas, SkeletonLineThickness);
 		}
 	}
 

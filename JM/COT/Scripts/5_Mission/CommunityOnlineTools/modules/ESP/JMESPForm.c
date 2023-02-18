@@ -8,6 +8,7 @@ class JMESPForm extends JMFormBase
 	private UIActionScroller m_ESPSelectedObjects;
 
 	private UIActionCheckbox m_chkbx_PlayerSkeletons;
+	private UIActionSlider m_sldr_Skeletons_LineThickness;
 
 	private UIActionButton m_btn_Toggle;
 	
@@ -50,7 +51,12 @@ class JMESPForm extends JMFormBase
 		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
 
-		m_chkbx_PlayerSkeletons = UIActionManager.CreateCheckbox( mainSpacer, "Draw player skeletons", this, "Click_PlayerSkeletons", m_Module.EnableDrawPlayerSkeletons );
+		Widget skeletonSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
+
+		m_chkbx_PlayerSkeletons = UIActionManager.CreateCheckbox( skeletonSpacer, "Draw player skeletons", this, "Click_PlayerSkeletons", m_Module.EnableDrawPlayerSkeletons );
+		m_sldr_Skeletons_LineThickness = UIActionManager.CreateSlider( skeletonSpacer, "Line thickness", 1, 4, this, "Change_Skeleton_LineThickness" );m_sldr_Skeletons_LineThickness.GetSliderWidget().SetSize(0.35, 20);
+		m_sldr_Skeletons_LineThickness.SetCurrent( m_Module.SkeletonLineThickness );
+		m_sldr_Skeletons_LineThickness.SetStepValue( 1.0 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
@@ -289,6 +295,14 @@ class JMESPForm extends JMFormBase
 		m_Module.EnableDrawPlayerSkeletons = action.IsChecked();
 		if (!action.IsChecked())
 			m_Module.m_ESPCanvas.Clear();
+	}
+
+	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+		
+		m_Module.SkeletonLineThickness = action.GetCurrent();
 	}
 
 	void Click_MakeItemSet( UIEvent eid, UIActionBase action )
