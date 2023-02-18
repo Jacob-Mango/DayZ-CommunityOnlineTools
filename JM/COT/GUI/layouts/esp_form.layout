@@ -11,7 +11,7 @@ PanelWidgetClass JMESPForm {
  {
   FrameWidgetClass panel_top {
    position 0 0
-   size 1 150
+   size 1 180
    halign top_ref
    hexactpos 0
    vexactpos 0
@@ -20,7 +20,7 @@ PanelWidgetClass JMESPForm {
   }
   FrameWidgetClass panel_bottom {
    position 0 0
-   size 1 350
+   size 1 320
    valign bottom_ref
    hexactpos 0
    vexactpos 0
