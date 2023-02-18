@@ -311,10 +311,10 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 
 		CurrentActiveCamera.SetActive( false );
+		CurrentActiveCamera = m_PreviousActiveCamera;
 
 		if (m_PreviousActiveCamera)
 		{
-			CurrentActiveCamera = m_PreviousActiveCamera;
 			CurrentActiveCamera.SetActive(true);
 			m_PreviousActiveCamera = NULL;
 			return;
