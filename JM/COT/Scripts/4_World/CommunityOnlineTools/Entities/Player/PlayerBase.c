@@ -73,7 +73,14 @@ modded class PlayerBase
 
 	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
 	{
-		if (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)
+		bool skip;
+
+		if (GetGame().IsServer())
+			skip = (m_JM_SpectatedPlayer || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible;
+		else
+			skip = CurrentActiveCamera && m_JMIsInvisible;
+
+		if (!skip)
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
 	}
 
@@ -373,17 +380,27 @@ modded class PlayerBase
 #endif
 
 		vector position;
+		bool freeCam;
+		bool spectate;
 
 		if (m_JM_CameraPosition != vector.Zero)
+		{
 			position = m_JM_CameraPosition;
+			freeCam = true;
+		}
 		else if (m_JM_SpectatedPlayer)
+		{
 			position = m_JM_SpectatedPlayer.GetPosition();
+			spectate = true;
+		}
 		else
+		{
 			return;
+		}
 
 		float surfaceY = GetGame().SurfaceY( position[0], position[2] );
 
-		if (vector.DistanceSq(m_JMLastPosition, position) <= 22500)
+		if (freeCam && vector.DistanceSq(m_JMLastPosition, position) <= 22500)
 		{
 			//! If we get close (within 150 m) of original position, place player at original position
 
@@ -398,7 +415,7 @@ modded class PlayerBase
 		}
 		else
 		{
-			position[1] = surfaceY - 100;
+			position[1] = surfaceY - 10;
 
 			if (!COTHasGodMode())
 				COTSetGodMode( true );
