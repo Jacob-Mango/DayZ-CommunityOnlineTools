@@ -18,14 +18,14 @@ class JMVehicleSpawnerSerialize : Managed
 		delete Parts;
 	}
 
-	static ref JMVehicleSpawnerSerialize Create()
+	static JMVehicleSpawnerSerialize Create()
 	{
 		return new JMVehicleSpawnerSerialize;
 	}
 
-	static ref JMVehicleSpawnerSerialize Load( string file )
+	static JMVehicleSpawnerSerialize Load( string file )
 	{
-		ref JMVehicleSpawnerSerialize settings = new JMVehicleSpawnerSerialize;
+		JMVehicleSpawnerSerialize settings = new JMVehicleSpawnerSerialize;
 		settings.m_FileName = file;
 
 		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( JMConstants.DIR_VEHICLES + settings.m_FileName + JMConstants.EXT_VEHICLE, settings );

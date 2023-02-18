@@ -286,12 +286,12 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		}
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}
 
-	void SetInfo( ref JMESPMeta info, out Widget action_rows )
+	void SetInfo( JMESPMeta info, out Widget action_rows )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::SetInfo" );

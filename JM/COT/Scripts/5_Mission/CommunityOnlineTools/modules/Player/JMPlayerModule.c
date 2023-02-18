@@ -272,7 +272,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float health;
 		if ( !ctx.Read( health ) )
@@ -323,7 +323,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetBlood( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetBlood( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float blood;
 		if ( !ctx.Read( blood ) )
@@ -374,7 +374,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetShock( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetShock( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float shock;
 		if ( !ctx.Read( shock ) )
@@ -425,7 +425,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetEnergy( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetEnergy( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float energy;
 		if ( !ctx.Read( energy ) )
@@ -476,7 +476,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetWater( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetWater( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float water;
 		if ( !ctx.Read( water ) )
@@ -527,7 +527,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetStamina( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetStamina( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float stamina;
 		if ( !ctx.Read( stamina ) )
@@ -584,7 +584,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetBloodyHands( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetBloodyHands( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool bloodyhands;
 		if ( !ctx.Read( bloodyhands ) )
@@ -649,7 +649,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_RepairTransport( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target  )
+	private void RPC_RepairTransport( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target  )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -698,7 +698,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_TeleportTo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_TeleportTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		vector position;
 		if ( !ctx.Read( position ) )
@@ -749,7 +749,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_TeleportSenderTo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_TeleportSenderTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string guid;
 		if ( !ctx.Read( guid ) )
@@ -798,7 +798,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_TeleportToPrevious( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_TeleportToPrevious( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -920,7 +920,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_StartSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_StartSpectating( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_StartSpectating").Add(senderRPC).Add(target.ToString());
@@ -1040,7 +1040,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			cotModule.UpdateMouseControls();
 	}
 
-	private void RPC_EndSpectating( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_EndSpectating( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
@@ -1095,7 +1095,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetGodMode( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetGodMode( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1152,7 +1152,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetFreeze( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetFreeze( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1209,7 +1209,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetInvisible( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetInvisible( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1268,7 +1268,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetUnlimitedAmmo( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetUnlimitedAmmo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1327,7 +1327,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetUnlimitedStamina( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetUnlimitedStamina( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1399,7 +1399,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetBrokenLegs( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetBrokenLegs( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1467,7 +1467,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Heal( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -1513,7 +1513,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Strip( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Strip( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -1559,7 +1559,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Dry( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Dry( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -1605,7 +1605,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_StopBleeding( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_StopBleeding( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
@@ -1650,7 +1650,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetPermissions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetPermissions( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > permissions;
 		if ( !ctx.Read( permissions ) )
@@ -1699,7 +1699,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SetRoles( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetRoles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > roles;
 		if ( !ctx.Read( roles ) )

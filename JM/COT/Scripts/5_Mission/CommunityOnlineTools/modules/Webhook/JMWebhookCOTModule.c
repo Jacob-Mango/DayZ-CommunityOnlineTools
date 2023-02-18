@@ -154,7 +154,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Load").Add(senderRPC);
@@ -193,7 +193,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_AddConnectionGroup( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_AddConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_AddConnectionGroup").Add(senderRPC);
@@ -234,7 +234,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_RemoveConnectionGroup( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RemoveConnectionGroup( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RemoveConnectionGroup").Add(senderRPC);
@@ -273,7 +273,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_AddType( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_AddType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_AddType").Add(senderRPC);
@@ -319,7 +319,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_RemoveType( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RemoveType( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RemoveType").Add(senderRPC);
@@ -362,7 +362,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		m_Settings.Save();
 	}
 
-	private void RPC_TypeState( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_TypeState( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_TypeState").Add(senderRPC);

@@ -80,7 +80,7 @@ class JMNamalskEventManagerForm: JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 	
-	void StartEvent(UIEvent eid, ref UIActionBase action)
+	void StartEvent(UIEvent eid, UIActionBase action)
 	{
 		JMNamalskEventManagerButtonData data;
 		if (!Class.CastTo(data, action.GetData())) return;
@@ -90,7 +90,7 @@ class JMNamalskEventManagerForm: JMFormBase
 		rpc.Send(null, JMNamalskEventManagerRPC.StartEvent, true, null);
 	}
 	
-	void CancelEvent(UIEvent eid, ref UIActionBase action)
+	void CancelEvent(UIEvent eid, UIActionBase action)
 	{
 		JMNamalskEventManagerButtonData data;
 		if (!Class.CastTo(data, action.GetData())) return;

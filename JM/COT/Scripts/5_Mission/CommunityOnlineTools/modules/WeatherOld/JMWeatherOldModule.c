@@ -73,7 +73,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		types.Insert( "Storm" );
 	}
 	
-	void Weather_SetDate( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetDate( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param5< int, int, int, int, int > data;
 		if ( !ctx.Read( data ) ) return;
@@ -99,7 +99,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
-	void Weather_SetWindFunctionParams( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetWindFunctionParams( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -125,7 +125,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
-	void Weather_SetOvercast( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetOvercast( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -151,7 +151,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
-	void Weather_SetFog( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetFog( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -177,7 +177,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
-	void Weather_SetRain( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetRain( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;
@@ -203,7 +203,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
-	void Weather_SetStorm( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target )
+	void Weather_SetStorm( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
 		if ( !ctx.Read( data ) ) return;

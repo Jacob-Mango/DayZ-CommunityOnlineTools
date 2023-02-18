@@ -492,8 +492,8 @@ class JMWeatherForm extends JMFormBase
 	{
 		m_TextPresetCount = TextWidget.Cast( layoutRoot.FindAnyWidget( "count" ) );
 
-		ref Widget rwWidget = NULL;
-		ref JMWeatherPresetWidget rwScript = NULL;
+		Widget rwWidget = NULL;
+		JMWeatherPresetWidget rwScript = NULL;
 
 		for ( int i = 0; i < 10; i++ )
 		{
@@ -571,7 +571,7 @@ class JMWeatherForm extends JMFormBase
 		m_EditTextPresetPermission.SetWidgetPosition( m_EditTextPresetPermission.GetEditBoxWidget(), 0.7 );
 	}
 
-	void OnChange_PresetDetails( UIEvent eid, ref UIActionBase action )
+	void OnChange_PresetDetails( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -587,7 +587,7 @@ class JMWeatherForm extends JMFormBase
 		m_ButtonPresetRemove = UIActionManager.CreateButton( actionsParent, "Remove Preset", this, "OnClick_PresetRemove" );
 	}
 
-	void OnClick_PresetUpdate( UIEvent eid, ref UIActionBase action )
+	void OnClick_PresetUpdate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -648,7 +648,7 @@ class JMWeatherForm extends JMFormBase
 		UpdateStates();
 	}
 
-	void OnClick_PresetRun( UIEvent eid, ref UIActionBase action )
+	void OnClick_PresetRun( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -659,7 +659,7 @@ class JMWeatherForm extends JMFormBase
 		m_Module.UsePreset( m_SelectedPreset );
 	}
 
-	void OnClick_PresetRemove( UIEvent eid, ref UIActionBase action )
+	void OnClick_PresetRemove( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -716,7 +716,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Date( UIEvent eid, ref UIActionBase action )
+	void OnChange_Date( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -777,7 +777,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Storm( UIEvent eid, ref UIActionBase action )
+	void OnChange_Storm( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -832,7 +832,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Fog( UIEvent eid, ref UIActionBase action )
+	void OnChange_Fog( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -887,7 +887,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Rain( UIEvent eid, ref UIActionBase action )
+	void OnChange_Rain( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -946,7 +946,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_RainThresholds( UIEvent eid, ref UIActionBase action )
+	void OnChange_RainThresholds( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -1001,7 +1001,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Overcast( UIEvent eid, ref UIActionBase action )
+	void OnChange_Overcast( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -1066,7 +1066,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_Wind( UIEvent eid, ref UIActionBase action )
+	void OnChange_Wind( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -1127,7 +1127,7 @@ class JMWeatherForm extends JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
-	void OnChange_WindFunc( UIEvent eid, ref UIActionBase action )
+	void OnChange_WindFunc( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;

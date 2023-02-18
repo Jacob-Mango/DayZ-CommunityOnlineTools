@@ -26,7 +26,7 @@ modded class CF_Permission_PlayerBase
 	protected bool m_Invisibility;
 	protected bool m_UnlimitedAmmo;
 
-	override void OnSend( ref ParamsWriteContext ctx )
+	override void OnSend( ParamsWriteContext ctx )
 	{
 		super.OnSend( ctx );
 
@@ -35,7 +35,7 @@ modded class CF_Permission_PlayerBase
 		OnSendHealth( ctx );
 	}
 	
-	override void OnRecieve( ref ParamsReadContext ctx )
+	override void OnRecieve( ParamsReadContext ctx )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnRecieve");
@@ -48,27 +48,27 @@ modded class CF_Permission_PlayerBase
 		OnRecieveHealth( ctx );
 	}
 	
-	void OnSendPosition( ref ParamsWriteContext ctx )
+	void OnSendPosition( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Position );
 	}
 
-	void OnRecievePosition( ref ParamsReadContext ctx )
+	void OnRecievePosition( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Position );
 	}
 	
-	void OnSendOrientation( ref ParamsWriteContext ctx )
+	void OnSendOrientation( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Orientation );
 	}
 
-	void OnRecieveOrientation( ref ParamsReadContext ctx )
+	void OnRecieveOrientation( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Orientation );
 	}
 	
-	void OnSendHealth( ref ParamsWriteContext ctx )
+	void OnSendHealth( ParamsWriteContext ctx )
 	{
 		ctx.Write( m_Health );
 		ctx.Write( m_Blood );
@@ -88,7 +88,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_UnlimitedAmmo );
 	}
 
-	void OnRecieveHealth( ref ParamsReadContext ctx )
+	void OnRecieveHealth( ParamsReadContext ctx )
 	{
 		ctx.Read( m_Health );
 		ctx.Read( m_Blood );

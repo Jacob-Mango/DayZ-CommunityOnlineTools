@@ -194,7 +194,7 @@ class JMSelectedObjects
 
 static ref JMSelectedObjects g_cot_selected;
 
-static ref JMSelectedObjects JM_GetSelected()
+static JMSelectedObjects JM_GetSelected()
 {
 	//if ( !IsMissionClient() )
 	//	return NULL;

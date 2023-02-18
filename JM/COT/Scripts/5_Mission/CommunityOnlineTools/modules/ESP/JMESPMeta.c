@@ -191,7 +191,7 @@ class JMESPMeta : Managed
 		if ( !m_Action_OrientationZ.IsFocused() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
 	}
 
-	void Action_SetPosition( UIEvent eid, ref UIActionBase action )
+	void Action_SetPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -204,7 +204,7 @@ class JMESPMeta : Managed
 		module.SetPosition( pos, target );
 	}
 
-	void Action_RefreshPosition( UIEvent eid, ref UIActionBase action )
+	void Action_RefreshPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -212,13 +212,13 @@ class JMESPMeta : Managed
 		RefreshPosition();
 	}
 
-	void Click_AutoRefreshPosition( UIEvent eid, ref UIActionBase action )
+	void Click_AutoRefreshPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 	}
 
-	void Action_SetOrientation( UIEvent eid, ref UIActionBase action )
+	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -231,7 +231,7 @@ class JMESPMeta : Managed
 		module.SetOrientation( pos, target );
 	}
 
-	void Action_RefreshOrientation( UIEvent eid, ref UIActionBase action )
+	void Action_RefreshOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -239,13 +239,13 @@ class JMESPMeta : Managed
 		RefreshOrientation();
 	}
 
-	void Click_AutoRefreshOrientation( UIEvent eid, ref UIActionBase action )
+	void Click_AutoRefreshOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 	}
 
-	void Action_SetHealth( UIEvent eid, ref UIActionBase action )
+	void Action_SetHealth( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -257,7 +257,7 @@ class JMESPMeta : Managed
 		module.SetHealth( health, "", target );
 	}
 
-	void Action_Delete( UIEvent eid, ref UIActionBase action )
+	void Action_Delete( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -448,7 +448,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		}
 	}
 
-	void Action_Build( UIEvent eid, ref UIActionBase action )
+	void Action_Build( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -459,7 +459,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		module.BaseBuilding_Build( m_BaseBuilding, data.m_Name );
 	}
 
-	void Action_Dismantle( UIEvent eid, ref UIActionBase action )
+	void Action_Dismantle( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -470,7 +470,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		module.BaseBuilding_Dismantle( m_BaseBuilding, data.m_Name );
 	}
 
-	void Action_Repair( UIEvent eid, ref UIActionBase action )
+	void Action_Repair( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -497,7 +497,7 @@ class JMESPMetaCar : JMESPMeta
 		m_RepairButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_CarRepair" );
 	}
 
-	void Action_Unstuck( UIEvent eid, ref UIActionBase action )
+	void Action_Unstuck( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -505,7 +505,7 @@ class JMESPMetaCar : JMESPMeta
 		module.Car_Unstuck( target );
 	}
 
-	void Action_Refuel( UIEvent eid, ref UIActionBase action )
+	void Action_Refuel( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -513,7 +513,7 @@ class JMESPMetaCar : JMESPMeta
 		module.Car_Refuel( target );
 	}
 
-	void Action_CarRepair( UIEvent eid, ref UIActionBase action )
+	void Action_CarRepair( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

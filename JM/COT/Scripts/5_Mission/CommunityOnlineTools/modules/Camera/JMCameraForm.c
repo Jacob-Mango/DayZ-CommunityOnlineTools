@@ -114,7 +114,7 @@ class JMCameraForm extends JMFormBase
 		}
 	}
 
-	void OnChange_Blur( UIEvent eid, ref UIActionBase action )
+	void OnChange_Blur( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -124,7 +124,7 @@ class JMCameraForm extends JMFormBase
 		OnSliderUpdate();
 	}
 
-	void OnChange_Focus( UIEvent eid, ref UIActionBase action )
+	void OnChange_Focus( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -134,7 +134,7 @@ class JMCameraForm extends JMFormBase
 		OnSliderUpdate();
 	}
 
-	void OnChange_FocalLength( UIEvent eid, ref UIActionBase action )
+	void OnChange_FocalLength( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -144,7 +144,7 @@ class JMCameraForm extends JMFormBase
 		OnSliderUpdate();
 	}
 
-	void OnChange_FocalNear( UIEvent eid, ref UIActionBase action )
+	void OnChange_FocalNear( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -154,7 +154,7 @@ class JMCameraForm extends JMFormBase
 		OnSliderUpdate();
 	}
 
-	void OnChange_Exposure( UIEvent eid, ref UIActionBase action )
+	void OnChange_Exposure( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -164,7 +164,7 @@ class JMCameraForm extends JMFormBase
 		OnSliderUpdate();
 	}
 
-	void OnClick_EnableFullmap( UIEvent eid, ref UIActionBase action )
+	void OnClick_EnableFullmap( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -172,7 +172,7 @@ class JMCameraForm extends JMFormBase
 		m_Module.m_EnableFullmapCamera = action.IsChecked();
 	}
 
-	void OnClick_3rdPersonSpectate( UIEvent eid, ref UIActionBase action )
+	void OnClick_3rdPersonSpectate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -181,7 +181,7 @@ class JMCameraForm extends JMFormBase
 			CurrentActiveCamera.m_JM_3rdPerson = action.IsChecked();
 	}
 
-	void OnClick_1stPersonADS_HideScope( UIEvent eid, ref UIActionBase action )
+	void OnClick_1stPersonADS_HideScope( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

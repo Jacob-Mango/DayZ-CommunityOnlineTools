@@ -1,9 +1,9 @@
 /*#ifdef VPPADMINTOOLS
 class JMVPPModuleBase : JMRenderableModuleBase
 {
-	override ref JMFormBase InitForm( Widget root )
+	override JMFormBase InitForm( Widget root )
 	{
-		ref JMFormBase form = new JMVPPFormBase();
+		JMFormBase form = new JMVPPFormBase();
 		form.OnWidgetScriptInit( root );
 		return form;
 	}

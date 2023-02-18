@@ -4,7 +4,7 @@ modded class PluginAdminLog
 
 	private string m_LoggingType;
 
-	void SetWebhook( ref JMWebhookModule webhook )
+	void SetWebhook( JMWebhookModule webhook )
 	{
 		m_Webhook = webhook;
 	}

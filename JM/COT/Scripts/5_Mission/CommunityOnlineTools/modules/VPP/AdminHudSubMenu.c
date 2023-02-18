@@ -35,7 +35,7 @@ modded class AdminHudSubMenu
 		return m_VPPRoot;
 	}
 
-	Widget InitializeCOT( ref JMVPPFormBase form, ref JMWindowBase window )
+	Widget InitializeCOT( JMVPPFormBase form, JMWindowBase window )
 	{
 		m_COTForm = form;
 		m_COTWindow = window;

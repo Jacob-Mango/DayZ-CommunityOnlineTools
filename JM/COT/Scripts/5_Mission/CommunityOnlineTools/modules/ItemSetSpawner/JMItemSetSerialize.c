@@ -20,14 +20,14 @@ class JMItemSetSerialize
 		delete Items;
 	}
 
-	static ref JMItemSetSerialize Create()
+	static JMItemSetSerialize Create()
 	{
 		return new JMItemSetSerialize;
 	}
 
-	static ref JMItemSetSerialize Load( string file )
+	static JMItemSetSerialize Load( string file )
 	{
-		ref JMItemSetSerialize settings = new JMItemSetSerialize;
+		JMItemSetSerialize settings = new JMItemSetSerialize;
 		settings.m_FileName = file;
 
 		JsonFileLoader< JMItemSetSerialize >.JsonLoadFile( JMConstants.DIR_ITEMS + settings.m_FileName + JMConstants.EXT_ITEM, settings );

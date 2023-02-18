@@ -59,7 +59,7 @@ class JMItemSetForm extends JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 
-	void SpawnOnPlayers( UIEvent eid, ref UIActionBase action ) 
+	void SpawnOnPlayers( UIEvent eid, UIActionBase action ) 
 	{
 		JMItemSpawnerButtonData data;
 		if ( !Class.CastTo( data, action.GetData() ) )
@@ -68,7 +68,7 @@ class JMItemSetForm extends JMFormBase
 		m_Module.SpawnPlayers( data.ClassName, JM_GetSelected().GetPlayers() );
 	}
 
-	void SpawnOnCursor( UIEvent eid, ref UIActionBase action ) 
+	void SpawnOnCursor( UIEvent eid, UIActionBase action ) 
 	{
 		JMItemSpawnerButtonData data;
 		if ( !Class.CastTo( data, action.GetData() ) )

@@ -60,7 +60,7 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 		
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return m_LayoutRoot;
 	}

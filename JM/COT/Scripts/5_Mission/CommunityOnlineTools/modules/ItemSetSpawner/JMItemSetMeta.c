@@ -12,9 +12,9 @@ class JMItemSetMeta
 		delete ItemSets;
 	}
 
-	static ref JMItemSetMeta DeriveFromSettings( ref JMItemSetSettings settings )
+	static JMItemSetMeta DeriveFromSettings( JMItemSetSettings settings )
 	{
-		ref JMItemSetMeta meta = new JMItemSetMeta;
+		JMItemSetMeta meta = new JMItemSetMeta;
 
 		for ( int j = 0; j < settings.ItemSets.Count(); j++ )
 		{
