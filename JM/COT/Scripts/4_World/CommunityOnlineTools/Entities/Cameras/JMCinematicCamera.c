@@ -89,6 +89,9 @@ class JMCinematicCamera extends JMCameraBase
 				angularVelocity[2] = angularVelocity[2] + ( speedInc * CAMERA_MSENS );
 			}
 
+			if (orientation == vector.Zero)
+				orientation = GetOrientation();
+
 			orientation[0] = orientation[0] - ( angularVelocity[0] * timeslice );
 			orientation[1] = orientation[1] - ( angularVelocity[1] * timeslice );
 			orientation[2] = orientation[2] - ( angularVelocity[2] * timeslice );
