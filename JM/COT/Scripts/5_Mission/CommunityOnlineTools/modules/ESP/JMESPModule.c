@@ -135,8 +135,6 @@ class JMESPSkeleton
 	{
 #ifdef JM_COT_USE_DEBUGSHAPES
 		shapes = new array<Shape>;
-#else
-		canvas.Clear();
 #endif
 
 		vector neckPos = human.GetBonePositionWS(human.GetBoneIndexByName("neck"));
