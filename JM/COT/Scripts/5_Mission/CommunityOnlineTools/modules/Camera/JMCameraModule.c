@@ -195,6 +195,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void Client_Enter()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Client_Enter");
+		#endif
+
 		m_PreviousActiveCamera = CurrentActiveCamera;
 		if (m_PreviousActiveCamera)
 			m_PreviousActiveCamera.SetActive( false );
@@ -202,16 +206,31 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
 		{
 			CurrentActiveCamera.SetActive( true );
+
+			if (m_PreviousActiveCamera)
+				CurrentActiveCamera.SetDirection(m_PreviousActiveCamera.GetDirection());
 			
-			if ( GetGame().GetPlayer() )
+			Human player = Human.Cast(GetGame().GetPlayer());
+			if ( player )
 			{
-				GetGame().GetPlayer().GetInputController().SetDisabled( true );
+				if (!m_PreviousActiveCamera)
+				{
+					vector headTransform[4];
+					player.GetBoneTransformWS(player.GetBoneIndexByName( "Head" ), headTransform);
+					CurrentActiveCamera.SetDirection(headTransform[1]);
+				}
+
+				player.GetInputController().SetDisabled( true );
 			}
 		}
 	}
 
 	private void Server_Enter( PlayerIdentity sender, Object target )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "Server_Enter").Add(sender).Add(target.ToString());
+		#endif
+
 		vector position = Vector( 0, 0, 0 );
 
 		PlayerBase player;
@@ -254,7 +273,7 @@ class JMCameraModule: JMRenderableModuleBase
 	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "RPC_Enter").Add(senderRPC);
+		auto trace = CF_Trace_2(this, "RPC_Enter").Add(senderRPC).Add(target.ToString());
 		#endif
 
 		if ( IsMissionHost() )
@@ -287,6 +306,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void Client_Leave()
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "Client_Enter");
+		#endif
+
 		CurrentActiveCamera.SetActive( false );
 
 		if (m_PreviousActiveCamera)
@@ -307,6 +330,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	private void Server_Leave( PlayerIdentity sender, Object target )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "Server_Leave").Add(sender).Add(target.ToString());
+		#endif
+
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
@@ -347,7 +374,7 @@ class JMCameraModule: JMRenderableModuleBase
 	private void RPC_Leave( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "RPC_Leave").Add(senderRPC);
+		auto trace = CF_Trace_2(this, "RPC_Leave").Add(senderRPC).Add(target.ToString());
 		#endif
 
 		if ( IsMissionHost() )
