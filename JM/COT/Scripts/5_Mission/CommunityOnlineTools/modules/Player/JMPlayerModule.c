@@ -1007,6 +1007,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, ident, playerSpectator );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
 	}
 
 	private void Client_EndSpectating( PlayerIdentity ident )
