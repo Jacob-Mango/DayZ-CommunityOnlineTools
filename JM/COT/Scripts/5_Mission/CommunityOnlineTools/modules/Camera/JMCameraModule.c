@@ -15,6 +15,8 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_UpdateTime;
 	bool m_EnableFullmapCamera;
 
+	JMCameraBase m_PreviousActiveCamera;
+
 	void JMCameraModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Camera.View" );
@@ -192,7 +194,11 @@ class JMCameraModule: JMRenderableModuleBase
 	}
 
 	private void Client_Enter()
-	{		
+	{
+		m_PreviousActiveCamera = CurrentActiveCamera;
+		if (m_PreviousActiveCamera)
+			m_PreviousActiveCamera.SetActive( false );
+
 		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
 		{
 			CurrentActiveCamera.SetActive( true );
@@ -208,16 +214,18 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		vector position = Vector( 0, 0, 0 );
 
-		if ( target )
-		{
-			position = target.GetPosition();
-		}
-
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
+			if (player.m_JM_SpectatedPlayer)
+				player = player.m_JM_SpectatedPlayer;
+
 			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) );
 			//player.GetInputController().SetDisabled( true );
+		}
+		else if ( target )
+		{
+			position = target.GetPosition();
 		}
 
 		if ( IsMissionOffline() )
@@ -280,7 +288,14 @@ class JMCameraModule: JMRenderableModuleBase
 	private void Client_Leave()
 	{
 		CurrentActiveCamera.SetActive( false );
-		CurrentActiveCamera = NULL;
+
+		if (m_PreviousActiveCamera)
+		{
+			CurrentActiveCamera = m_PreviousActiveCamera;
+			CurrentActiveCamera.SetActive(true);
+			m_PreviousActiveCamera = NULL;
+			return;
+		}
 		
 		PPEffects.ResetDOFOverride();
 
@@ -312,6 +327,11 @@ class JMCameraModule: JMRenderableModuleBase
 				Client_Leave();
 			}
 
+			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
+
+			if (player.m_JM_SpectatedPlayer)
+				return;
+
 			int delay;
 			if ( player.HasLastPosition() )
 			{
@@ -321,8 +341,6 @@ class JMCameraModule: JMRenderableModuleBase
 			}
 
 			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, sender, player );
-
-			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
 		}
 	}
 
@@ -396,7 +414,7 @@ class JMCameraModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( CurrentActiveCamera )
+		if ( CurrentActiveCamera && CurrentActiveCamera.IsInherited(JMCinematicCamera) )
 		{
 			if ( !COTPlayerIsRemoved )
 			{

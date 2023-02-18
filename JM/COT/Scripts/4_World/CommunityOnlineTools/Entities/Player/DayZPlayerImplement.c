@@ -60,11 +60,22 @@ modded class DayZPlayerImplement
 			optic = weapon.GetAttachedOptics();
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
-			m_SpectatorCamera.m_JM_IsADS = vector.DistanceSq(eyePos, headPos) < 0.04;
+			m_SpectatorCamera.m_JM_IsADS = m_SpectatorCamera.IsActive() && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
 		{
 			m_SpectatorCamera.m_JM_IsADS = false;
+		}
+
+		if ( !m_SpectatorCamera.IsActive() )
+		{
+			if (m_JM_IsHeadInvisible)
+				SetHeadInvisible(false);
+
+			if (optic)
+				optic.SetInvisible(false);
+
+			return;
 		}
 
 		if (m_SpectatorCamera.m_JM_IsADS)
