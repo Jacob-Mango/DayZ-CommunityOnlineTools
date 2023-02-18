@@ -210,7 +210,7 @@ class JMCameraModule: JMRenderableModuleBase
 			if (m_PreviousActiveCamera)
 				CurrentActiveCamera.SetDirection(m_PreviousActiveCamera.GetDirection());
 			
-			Human player = Human.Cast(GetGame().GetPlayer());
+			Human player = GetGame().GetPlayer();
 			if ( player )
 			{
 				if (!m_PreviousActiveCamera)
