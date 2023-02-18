@@ -7,6 +7,8 @@ class JMESPForm extends JMFormBase
 
 	private UIActionScroller m_ESPSelectedObjects;
 
+	private UIActionCheckbox m_chkbx_PlayerSkeletons;
+
 	private UIActionButton m_btn_Toggle;
 	
 	private UIActionCheckbox m_chkbx_Refresh;
@@ -32,7 +34,7 @@ class JMESPForm extends JMFormBase
 
 	private void ESPControls( Widget parent )
 	{
-		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 4, 1 );
+		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 5, 1 );
 
 		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
 		
@@ -42,11 +44,13 @@ class JMESPForm extends JMFormBase
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 
-		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate" );
+		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
 		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
+
+		m_chkbx_PlayerSkeletons = UIActionManager.CreateCheckbox( mainSpacer, "Draw player skeletons", this, "Click_PlayerSkeletons", m_Module.EnableDrawPlayerSkeletons );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
@@ -146,6 +150,8 @@ class JMESPForm extends JMFormBase
 
 		ESPFilters( left_bottom );
 		ESPSelectedObjects( right_bottom );
+
+		m_Module.CreateCanvas();
 	}
 
 	override void OnShow()
@@ -275,6 +281,16 @@ class JMESPForm extends JMFormBase
 		UpdateUI();
 	}
 	
+	void Click_PlayerSkeletons( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.EnableDrawPlayerSkeletons = action.IsChecked();
+		if (!action.IsChecked())
+			m_Module.m_ESPCanvas.Clear();
+	}
+
 	void Click_MakeItemSet( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )

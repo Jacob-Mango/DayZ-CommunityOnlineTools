@@ -275,11 +275,7 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 			m_txt_ObjectName.SetText( text );
 
-			if (Info.m_Action_AutoRefreshPosition.IsChecked())
-				Info.RefreshPosition();
-
-			if (Info.m_Action_AutoRefreshOrientation.IsChecked())
-				Info.RefreshOrientation();
+			Info.Update();
 
 			m_scrler_Actions.UpdateScroller();
 			

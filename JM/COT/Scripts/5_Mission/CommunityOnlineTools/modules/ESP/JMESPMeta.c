@@ -168,6 +168,15 @@ class JMESPMeta : Managed
 		if ( !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
 	}
 
+	void Update()
+	{
+		if (m_Action_AutoRefreshPosition.IsChecked())
+			RefreshPosition();
+
+		if (m_Action_AutoRefreshOrientation.IsChecked())
+			RefreshOrientation();
+	}
+
 	void RefreshPosition()
 	{
 		if ( !m_Action_PositionX.IsFocused() ) m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
@@ -266,7 +275,7 @@ class JMESPMetaPlayer : JMESPMeta
 	UIActionText m_Player_GUID;
 	UIActionText m_Player_Steam;
 	//UIActionText m_Player_Speaking;
-	
+
 	override void CreateActions( Widget parent )
 	{
 		m_Player_Name = UIActionManager.CreateText( parent, "Name: ", "" );
@@ -295,7 +304,7 @@ class JMESPMetaPlayer : JMESPMeta
 			//else m_Player_Speaking.SetText("No");
 		}
 	}
-	
+
 	override bool CanDelete()
 	{
 		return !target.IsAlive();

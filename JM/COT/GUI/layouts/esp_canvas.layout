@@ -1,0 +1,9 @@
+CanvasWidgetClass JMESPCanvas {
+ ignorepointer 1
+ position 0 0
+ size 1 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 0
+}
