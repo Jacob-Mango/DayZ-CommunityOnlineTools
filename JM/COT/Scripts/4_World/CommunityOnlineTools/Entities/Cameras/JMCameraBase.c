@@ -11,6 +11,7 @@ class JMCameraBase extends Camera
 	bool m_JM_3rdPerson;
 	bool m_JM_LeftShoulder;
 	bool m_JM_IsADS;
+	bool m_JM_1stPersonADS_HideScope;
 
 	void JMCameraBase()
 	{
