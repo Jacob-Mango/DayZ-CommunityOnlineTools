@@ -9,6 +9,7 @@ class JMCameraForm extends JMFormBase
 	private UIActionSlider m_SliderExposure;
 	private UIActionCheckbox m_EnableFullmapCamera;
 	private UIActionCheckbox m_3rdPersonSpectate;
+	private UIActionCheckbox m_1stPersonADS_HideScope;
 
 	private JMCameraModule m_Module;
 
@@ -88,6 +89,7 @@ class JMCameraForm extends JMFormBase
 		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap freecam update", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
 
 		m_3rdPersonSpectate = UIActionManager.CreateCheckbox( actions, "3rd person spectate", this, "OnClick_3rdPersonSpectate", GetCurrentCamera3rdPerson() );
+		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( actions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
 		
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -177,6 +179,15 @@ class JMCameraForm extends JMFormBase
 
 		if (CurrentActiveCamera)
 			CurrentActiveCamera.m_JM_3rdPerson = action.IsChecked();
+	}
+
+	void OnClick_1stPersonADS_HideScope( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (CurrentActiveCamera)
+			CurrentActiveCamera.m_JM_1stPersonADS_HideScope = action.IsChecked();
 	}
 
 	bool GetCurrentCamera3rdPerson()

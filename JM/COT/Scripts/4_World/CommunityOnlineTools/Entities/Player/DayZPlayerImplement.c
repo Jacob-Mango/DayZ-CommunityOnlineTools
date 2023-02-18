@@ -46,7 +46,7 @@ modded class DayZPlayerImplement
 		Weapon_Base weapon;
 		vector weaponTransform[4];
 		ItemOptics optic;
-		vector opticTransform[4];
+		//vector opticTransform[4];
 
 		vector eyePos;
 
@@ -71,42 +71,50 @@ modded class DayZPlayerImplement
 		{
 			if (optic)
 			{
-				optic.GetCameraPoint(pos, dir);
-				optic.GetTransform(opticTransform);
-				pos = pos.Multiply4(opticTransform).InvMultiply4(playerTransform);
+				//optic.GetCameraPoint(pos, dir);
+				//optic.GetTransform(opticTransform);
+				//pos = pos.Multiply4(opticTransform).InvMultiply4(playerTransform);
 
-				if (optic.GetCurrentStepFOV() < GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS)
-				{
-					if (!optic.IsInOptics())
-					{
-						optic.EnterOptics();
-						optic.OnOpticEnter();
-					}
-				}
-				else if (optic.IsInOptics())
-				{
-					optic.ExitOptics();
-					optic.OnOpticExit();
-				}
+				//if (optic.GetCurrentStepFOV() < GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS)
+				//{
+					//if (!optic.IsInOptics())
+					//{
+						//optic.EnterOptics();
+						//optic.OnOpticEnter();
+					//}
+				//}
+				//else if (optic.IsInOptics())
+				//{
+					//optic.ExitOptics();
+					//optic.OnOpticExit();
+				//}
+
+				optic.SetInvisible(m_SpectatorCamera.m_JM_1stPersonADS_HideScope);
 			}
-			else
-			{
-				weapon.GetCameraPoint(weapon.GetCurrentMuzzle(), pos, dir);
-				pos = pos.Multiply4(weaponTransform).InvMultiply4(playerTransform);
-			}
+			//else
+			//{
+				//weapon.GetCameraPoint(weapon.GetCurrentMuzzle(), pos, dir);
+				//pos = pos.Multiply4(weaponTransform).InvMultiply4(playerTransform);
+			//}
 
 			vector barrel_start = weapon.GetSelectionPositionLS("konec hlavne").Multiply4(weaponTransform);
 			vector barrel_end = weapon.GetSelectionPositionLS("usti hlavne").Multiply4(weaponTransform);
 			dir = vector.Direction(barrel_start, barrel_end).Normalized();
+			pos = (eyePos - dir * 0.06).InvMultiply4(playerTransform);
 
 			fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
 		}
 		else
 		{
-			if (optic && optic.IsInOptics())
+			if (optic)
 			{
-				optic.ExitOptics();
-				optic.OnOpticExit();
+				//if (optic.IsInOptics())
+				//{
+					//optic.ExitOptics();
+					//optic.OnOpticExit();
+				//}
+
+				optic.SetInvisible(false);
 			}
 
 			dir = headTransform[1];
