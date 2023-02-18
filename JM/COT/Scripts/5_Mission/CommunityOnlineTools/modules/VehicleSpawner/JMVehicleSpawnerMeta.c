@@ -12,9 +12,9 @@ class JMVehicleSpawnerMeta
 		delete Vehicles;
 	}
 
-	static ref JMVehicleSpawnerMeta DeriveFromSettings( ref JMVehicleSpawnerSettings settings )
+	static JMVehicleSpawnerMeta DeriveFromSettings( JMVehicleSpawnerSettings settings )
 	{
-		ref JMVehicleSpawnerMeta meta = new JMVehicleSpawnerMeta;
+		JMVehicleSpawnerMeta meta = new JMVehicleSpawnerMeta;
 
 		for ( int i = 0; i < settings.Vehicles.Count(); i++ )
 		{

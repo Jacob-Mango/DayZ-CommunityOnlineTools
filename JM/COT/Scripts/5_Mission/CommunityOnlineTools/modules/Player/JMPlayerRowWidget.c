@@ -71,7 +71,7 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 		
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}

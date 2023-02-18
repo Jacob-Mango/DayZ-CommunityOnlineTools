@@ -87,7 +87,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	{
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}
@@ -105,7 +105,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Type = m_state_Permission.GetValue();
 	}
 
-	void InitPermission( ref JMPermission permission )
+	void InitPermission( JMPermission permission )
 	{
 		Indent( permission.Depth );
 
@@ -231,7 +231,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		}
 	}
 
-	private ref JMPermissionRowWidget Set( array<string> tokens, int depth, int type )
+	private JMPermissionRowWidget Set( array<string> tokens, int depth, int type )
 	{
 		if ( depth < tokens.Count() )
 		{

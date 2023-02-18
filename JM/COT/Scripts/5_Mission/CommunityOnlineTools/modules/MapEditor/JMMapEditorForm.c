@@ -15,7 +15,7 @@ class JMMapEditorForm
 
 	protected float m_DistanceFromObject;
 
-	void JMMapEditorForm( ref JMMapEditorModule module )
+	void JMMapEditorForm( JMMapEditorModule module )
 	{
 		m_Module = module;
 		m_MouseButtonPressed = false;
@@ -40,16 +40,16 @@ class JMMapEditorForm
 		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/mapeditor_form.layout" );
 		layoutRoot.Show( false );
 
-		ref Widget objectInfoWrapper = layoutRoot.FindAnyWidget( "object_info_wrapper" );
+		Widget objectInfoWrapper = layoutRoot.FindAnyWidget( "object_info_wrapper" );
 
-		ref Widget objectInfoGrid = UIActionManager.CreateGridSpacer( objectInfoWrapper, 1, 2 );
+		Widget objectInfoGrid = UIActionManager.CreateGridSpacer( objectInfoWrapper, 1, 2 );
 
 		UIActionManager.CreateEditableVector( objectInfoGrid, "Position: " );
 		UIActionManager.CreateEditableVector( objectInfoGrid, "Rotation: " );
 
-		ref Widget objectControlsWrapper = layoutRoot.FindAnyWidget( "object_controls" );
+		Widget objectControlsWrapper = layoutRoot.FindAnyWidget( "object_controls" );
 
-		ref Widget objectControlsGrid = UIActionManager.CreateGridSpacer( objectControlsWrapper, 1, 2 );
+		Widget objectControlsGrid = UIActionManager.CreateGridSpacer( objectControlsWrapper, 1, 2 );
 		UIActionManager.CreateText( objectControlsGrid, "Select: ", "Left Mouse" );
 		UIActionManager.CreateText( objectControlsGrid, "Delete: ", "Delete" );
 

@@ -129,7 +129,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	ref array< string > GetItemSets()
+	array< string > GetItemSets()
 	{
 		return meta.ItemSets;
 	}
@@ -157,7 +157,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -205,7 +205,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
 	}
 
-	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SpawnPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -266,7 +266,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SpawnPlayers( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SpawnPlayers( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{

@@ -193,7 +193,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SendWebhook( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString() );
 	}
 
-	private void RPC_DeleteEntity( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_DeleteEntity( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -243,7 +243,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
-	private void RPC_SpawnEntity_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SpawnEntity_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -340,7 +340,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_SpawnEntity_Inventory( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SpawnEntity_Inventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{

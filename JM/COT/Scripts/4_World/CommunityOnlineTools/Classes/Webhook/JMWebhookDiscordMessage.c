@@ -23,7 +23,7 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		this.content = content;
 	}
 
-	void AddEmbed( notnull ref JMWebhookDiscordEmbed obj )
+	void AddEmbed( notnull JMWebhookDiscordEmbed obj )
 	{
 		embeds.Insert( obj );
 	}

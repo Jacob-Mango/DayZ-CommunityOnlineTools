@@ -57,7 +57,7 @@ class JMWebhookForm extends JMFormBase
 		for ( int i = 0; i < groups.Count(); ++i )
 		{
 			string name = groups[i].Name;
-			ref JMWebhookSection section = m_Sections.Get( name );
+			JMWebhookSection section = m_Sections.Get( name );
 			if ( !section )
 			{
 				section = new JMWebhookSection( m_ActionsWrapper, this, groups[i], m_Types );
@@ -82,7 +82,7 @@ class JMWebhookForm extends JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 
-	void Action_AddWebhook( UIEvent eid, ref UIActionBase action )
+	void Action_AddWebhook( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -111,7 +111,7 @@ class JMWebhookForm extends JMFormBase
 		m_Module.AddConnectionGroup( m_CreatingName, m_CreatingURL );
 	}
 
-	void Action_RemoveWebhook( UIEvent eid, ref UIActionBase action )
+	void Action_RemoveWebhook( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -135,7 +135,7 @@ class JMWebhookForm extends JMFormBase
 		m_Module.RemoveConnectionGroup( m_RemovingName );
 	}
 
-	void Click_UpdateState( UIEvent eid, ref UIActionBase action )
+	void Click_UpdateState( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

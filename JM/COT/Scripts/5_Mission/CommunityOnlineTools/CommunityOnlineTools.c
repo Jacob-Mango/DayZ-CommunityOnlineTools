@@ -101,7 +101,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_Active( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Active( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_Active").Add(senderRPC);
@@ -136,7 +136,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_RefreshClients( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RefreshClients( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RefreshClients").Add(senderRPC);
@@ -175,7 +175,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_RefreshClientPositions( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RefreshClientPositions( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RefreshClientPositions").Add(senderRPC);
@@ -222,7 +222,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		JM_GetSelected().RemovePlayer( guid );
 	}
 
-	private void RPC_RemoveClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_RemoveClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_RemoveClient").Add(senderRPC);
@@ -255,7 +255,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_UpdateClient( string guid, ref ParamsReadContext ctx, PlayerBase playerObj )
+	private void Client_UpdateClient( string guid, ParamsReadContext ctx, PlayerBase playerObj )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Client_UpdateClient").Add(guid).Add(playerObj.ToString());
@@ -280,7 +280,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
 	}
 
-	private void RPC_UpdateClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_UpdateClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClient").Add(senderRPC);
@@ -310,7 +310,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateClientPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_UpdateClientPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateClientPosition").Add(senderRPC);
@@ -360,7 +360,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_SetClient( string guid, ref ParamsReadContext ctx )
+	private void Client_SetClient( string guid, ParamsReadContext ctx )
 	{
 		GetPermissionsManager().SetClientGUID( guid );
 
@@ -389,7 +389,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		rpc.Send( NULL, JMClientRPC.SetClient, true, identity );
 	}
 
-	private void RPC_SetClient( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetClient( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_SetClient").Add(senderRPC);
@@ -444,7 +444,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void RPC_UpdateRole( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateRole").Add(senderRPC);

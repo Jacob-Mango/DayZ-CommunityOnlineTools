@@ -133,14 +133,14 @@ class JMObjectSpawnerForm extends JMFormBase
 		UpdateItemPreview();
 	}
 
-	void Click_OnDebugSpawn( UIEvent eid, ref UIActionBase action )	
+	void Click_OnDebugSpawn( UIEvent eid, UIActionBase action )	
 	{	
 		if ( eid != UIEvent.CLICK ) return;	
 
 		m_Module.m_OnDebugSpawn = action.IsChecked();	
 	}
 
-	void AddObjectType( ref Widget parent, string name, string config )
+	void AddObjectType( Widget parent, string name, string config )
 	{
 		name = Widget.TranslateString( name );
 		UIActionManager.CreateButton( parent, name, this, "SetListType" );
@@ -240,7 +240,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		super.OnHide();
 	}
 
-	void SetListType( UIEvent eid, ref UIActionBase action )
+	void SetListType( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
@@ -249,7 +249,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		UpdateList();
 	}
 
-	void SpawnCursor( UIEvent eid, ref UIActionBase action )
+	void SpawnCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -268,7 +268,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
 	}
 
-	void SpawnPosition( UIEvent eid, ref UIActionBase action )
+	void SpawnPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -287,7 +287,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
 	}
 
-	void SpawnInventory( UIEvent eid, ref UIActionBase action )
+	void SpawnInventory( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -306,7 +306,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, -1 );
 	}
 
-	void DeleteCursor( UIEvent eid, ref UIActionBase action )
+	void DeleteCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -369,7 +369,7 @@ class JMObjectSpawnerForm extends JMFormBase
 		
 	}
 
-	void SearchInput_OnChange( UIEvent eid, ref UIActionBase action )
+	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
 	{
 		UpdateList();
 	}

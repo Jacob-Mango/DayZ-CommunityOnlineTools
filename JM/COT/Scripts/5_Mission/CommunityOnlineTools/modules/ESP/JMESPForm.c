@@ -202,7 +202,7 @@ class JMESPForm extends JMFormBase
 		}
 	}
 
-	void Click_UpdateESP( UIEvent eid, ref UIActionBase action )
+	void Click_UpdateESP( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -230,7 +230,7 @@ class JMESPForm extends JMFormBase
 		UpdateUI();
 	}
 	
-	void Change_Filter( UIEvent eid, ref UIActionBase action )
+	void Change_Filter( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -238,7 +238,7 @@ class JMESPForm extends JMFormBase
 		m_Module.Filter = action.GetText();
 	}
 
-	void Change_UpdateRate( UIEvent eid, ref UIActionBase action )
+	void Change_UpdateRate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -246,7 +246,7 @@ class JMESPForm extends JMFormBase
 		m_Module.ESPUpdateTime = action.GetCurrent();
 	}
 
-	void Change_Range( UIEvent eid, ref UIActionBase action )
+	void Change_Range( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -254,7 +254,7 @@ class JMESPForm extends JMFormBase
 		m_Module.ESPRadius = action.GetCurrent();
 	}
 
-	void Click_UseClassName( UIEvent eid, ref UIActionBase action )
+	void Click_UseClassName( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -262,7 +262,7 @@ class JMESPForm extends JMFormBase
 		JMESPWidgetHandler.UseClassName = action.IsChecked();
 	}
 
-	void Click_UpdateAtRate( UIEvent eid, ref UIActionBase action )
+	void Click_UpdateAtRate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -281,7 +281,7 @@ class JMESPForm extends JMFormBase
 		UpdateUI();
 	}
 	
-	void Click_PlayerSkeletons( UIEvent eid, ref UIActionBase action )
+	void Click_PlayerSkeletons( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -291,7 +291,7 @@ class JMESPForm extends JMFormBase
 			m_Module.m_ESPCanvas.Clear();
 	}
 
-	void Click_MakeItemSet( UIEvent eid, ref UIActionBase action )
+	void Click_MakeItemSet( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -309,7 +309,7 @@ class JMESPForm extends JMFormBase
 		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
 	}
 	
-	void Click_DuplicateAll( UIEvent eid, ref UIActionBase action )
+	void Click_DuplicateAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -317,7 +317,7 @@ class JMESPForm extends JMFormBase
 		m_Module.DuplicateAll();
 	}
 	
-	void Click_DeleteAll( UIEvent eid, ref UIActionBase action )
+	void Click_DeleteAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -325,7 +325,7 @@ class JMESPForm extends JMFormBase
 		m_Module.DeleteAll();
 	}
 	
-	void Click_MoveToCursorRelative( UIEvent eid, ref UIActionBase action )
+	void Click_MoveToCursorRelative( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -333,7 +333,7 @@ class JMESPForm extends JMFormBase
 		m_Module.MoveToCursorRelative( "0 0 0" );
 	}
 	
-	void Click_MoveToCursorAbsolute( UIEvent eid, ref UIActionBase action )
+	void Click_MoveToCursorAbsolute( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

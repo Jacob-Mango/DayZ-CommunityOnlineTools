@@ -20,7 +20,7 @@ class JMMapEditorModule: JMModuleBase
 	// 	return "UACOTToggleMapEditor";
 	// }
 	
-	void SetTransform( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
+	void SetTransform( CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.Transform.Position", senderRPC ) )
 			return;
@@ -40,7 +40,7 @@ class JMMapEditorModule: JMModuleBase
 		}
 	}
 	
-	void EnterEditor( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
+	void EnterEditor( CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{			
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.EnterEditor", senderRPC ) )
 			return;
@@ -99,7 +99,7 @@ class JMMapEditorModule: JMModuleBase
 		}
 	}
 	
-	void LeaveEditor( CallType type, ref ParamsReadContext ctx, PlayerIdentity senderRPC, ref Object target )
+	void LeaveEditor( CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{			
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.LeaveEditor", senderRPC ) )
 			return;

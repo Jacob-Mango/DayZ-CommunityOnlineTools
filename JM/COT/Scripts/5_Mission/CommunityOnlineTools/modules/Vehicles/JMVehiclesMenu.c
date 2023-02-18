@@ -51,11 +51,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleEntries = new array<ref JMVehiclesListEntry>;
 	}
 
-	#ifdef COT_BUGFIX_REF
-	protected override bool SetModule(  JMRenderableModuleBase mdl )
-	#else
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
-	#endif
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
 	}

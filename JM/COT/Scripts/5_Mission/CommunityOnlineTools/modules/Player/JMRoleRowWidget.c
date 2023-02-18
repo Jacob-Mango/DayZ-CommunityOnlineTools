@@ -58,7 +58,7 @@ class JMRoleRowWidget extends ScriptedWidgetEventHandler
 	{
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}

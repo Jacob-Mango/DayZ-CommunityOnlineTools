@@ -269,7 +269,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		m_Data = data;
 	}
 
-	ref UIActionData GetData()
+	UIActionData GetData()
 	{
 		return m_Data;
 	}

@@ -114,9 +114,9 @@ class JMWidgetStore
 		}
 	}
 
-	ref Widget GetWidget( string name ) 
+	Widget GetWidget( string name ) 
 	{
-		foreach( ref Widget widget : allWidgets ) 
+		foreach( Widget widget : allWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{
@@ -126,9 +126,9 @@ class JMWidgetStore
 		return null;
 	}
 
-	ref TextWidget GetTextWidget( string name ) 
+	TextWidget GetTextWidget( string name ) 
 	{
-		foreach( ref TextWidget widget : textWidgets ) 
+		foreach( TextWidget widget : textWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{
@@ -138,9 +138,9 @@ class JMWidgetStore
 		return null;
 	}
 
-	ref ButtonWidget GetButtonWidget( string name ) 
+	ButtonWidget GetButtonWidget( string name ) 
 	{
-		foreach( ref ButtonWidget widget : buttonWidgets ) 
+		foreach( ButtonWidget widget : buttonWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{
@@ -150,9 +150,9 @@ class JMWidgetStore
 		return null;
 	}
 
-	ref EditBoxWidget GetEditBoxWidget( string name ) 
+	EditBoxWidget GetEditBoxWidget( string name ) 
 	{
-		foreach( ref EditBoxWidget widget : editBoxWidgets ) 
+		foreach( EditBoxWidget widget : editBoxWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{
@@ -162,9 +162,9 @@ class JMWidgetStore
 		return null;
 	}
 
-	ref SliderWidget GetSliderWidget( string name ) 
+	SliderWidget GetSliderWidget( string name ) 
 	{
-		foreach( ref SliderWidget widget : sliderWidgets ) 
+		foreach( SliderWidget widget : sliderWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{
@@ -174,9 +174,9 @@ class JMWidgetStore
 		return null;
 	}
 
-	ref TextListboxWidget GetListboxWidget( string name ) 
+	TextListboxWidget GetListboxWidget( string name ) 
 	{
-		foreach( ref TextListboxWidget widget : textListBoxWidgets ) 
+		foreach( TextListboxWidget widget : textListBoxWidgets ) 
 		{
 			if ( widget.GetName() == name ) 
 			{

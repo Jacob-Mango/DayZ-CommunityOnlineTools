@@ -81,7 +81,7 @@ class JMVehicleSpawnerForm extends JMFormBase
 		//m_sclr_MainActions.UpdateScroller();
 	}
 
-	void SpawnVehicle( UIEvent eid, ref UIActionBase action ) 
+	void SpawnVehicle( UIEvent eid, UIActionBase action ) 
 	{
 		JMVehicleSpawnerButtonData data;
 		if ( !Class.CastTo( data, action.GetData() ) )

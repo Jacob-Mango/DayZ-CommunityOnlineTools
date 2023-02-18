@@ -231,7 +231,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( GetGame().IsDedicatedServer() )
 		{
@@ -294,7 +294,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Position( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -385,7 +385,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	private void RPC_Location( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Location( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{

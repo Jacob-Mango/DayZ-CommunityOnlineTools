@@ -59,7 +59,7 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 		
 	}
 
-	ref Widget GetLayoutRoot() 
+	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
 	}

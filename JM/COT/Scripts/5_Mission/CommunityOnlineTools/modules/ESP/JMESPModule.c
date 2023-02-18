@@ -342,7 +342,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			if ( espTypes[i].IsInherited( JMESPViewType ) )
 			{
-				ref JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
+				JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
 				if ( viewType )
 				{
 					m_ViewTypes.Insert( viewType );
@@ -892,7 +892,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Log", instance, "Logging ESP action: " + log );
 	}
 
-	private void RPC_Log( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string log;
 		if ( !ctx.Read( log ) )
@@ -936,7 +936,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
 	}
 
-	private void RPC_SetPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		vector position;
 		if ( !ctx.Read( position ) )
@@ -976,7 +976,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
 	}
 
-	private void RPC_SetOrientation( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		vector orientation;
 		if ( !ctx.Read( orientation ) )
@@ -1010,7 +1010,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
 	}
 
-	private void RPC_SetHealth( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		float health;
 		if ( !ctx.Read( health ) )
@@ -1057,7 +1057,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
 	}
 
-	private void RPC_DeleteObject( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		int netLow;
 		int netHigh;
@@ -1105,7 +1105,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
-	private void RPC_BaseBuilding_Build( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string part_name;
 		if ( !ctx.Read( part_name ) )
@@ -1144,7 +1144,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
-	private void RPC_BaseBuilding_Dismantle( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string part_name;
 		if ( !ctx.Read( part_name ) )
@@ -1180,7 +1180,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
 	}
 
-	private void RPC_BaseBuilding_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string part_name;
 		if ( !ctx.Read( part_name ) )
@@ -1220,7 +1220,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Car_Unstuck", instance, "Unstucked Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
 	}
 
-	private void RPC_Car_Unstuck( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Car_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
@@ -1251,7 +1251,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Car_Refuel", instance, "Refuelled Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
 	}
 
-	private void RPC_Car_Refuel( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Car_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Refuel", senderRPC, instance ) )
@@ -1284,7 +1284,7 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhook( "Car_Repair", instance, "Repaired the Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
 	}
 
-	private void RPC_Car_Repair( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Car_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Repair", senderRPC, instance ) )
@@ -1318,7 +1318,7 @@ class JMESPModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, false, NULL );
 	}
 
-	private void RPC_MakeItemSet( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_MakeItemSet( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Items.CreateSet", senderRPC, instance ) )
@@ -1346,7 +1346,7 @@ class JMESPModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, false, NULL );
 	}
 
-	private void RPC_DuplicateAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_DuplicateAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DuplicateAll", senderRPC, instance ) )
@@ -1374,7 +1374,7 @@ class JMESPModule: JMRenderableModuleBase
 		JM_GetSelected().ClearObjects();
 	}
 
-	private void RPC_DeleteAll( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_DeleteAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DeleteAll", senderRPC, instance ) )
@@ -1425,7 +1425,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	private void RPC_MoveToCursorRelative( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_MoveToCursorRelative( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 	}
 
@@ -1437,7 +1437,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	private void RPC_MoveToCursorAbsolute( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_MoveToCursorAbsolute( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 	}
 

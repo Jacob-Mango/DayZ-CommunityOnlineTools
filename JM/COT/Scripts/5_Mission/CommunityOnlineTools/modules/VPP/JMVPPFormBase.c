@@ -4,7 +4,7 @@ class JMVPPFormBase : JMFormBase
 	private ref AdminHudSubMenu m_VPPMenu;
 	private JMVPPModuleBase m_VPPModule;
 
-	protected override bool SetModule( ref JMRenderableModuleBase mdl )
+	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_VPPModule, mdl );
 	}
@@ -14,7 +14,7 @@ class JMVPPFormBase : JMFormBase
 		m_VPPMenu.OnUpdate( 1.0 / 40.0 );
 	}
 
-	override void Init( ref JMWindowBase wdw, ref JMRenderableModuleBase mdl )
+	override void Init( JMWindowBase wdw, JMRenderableModuleBase mdl )
 	{
 		super.Init( wdw, mdl );
 		

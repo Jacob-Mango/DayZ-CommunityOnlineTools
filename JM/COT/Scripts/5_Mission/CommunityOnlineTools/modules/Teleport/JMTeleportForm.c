@@ -62,12 +62,12 @@ class JMTeleportForm extends JMFormBase
 		UpdateList();
 	}
 
-	void Click_Teleport( UIEvent eid, ref UIActionBase action )
+	void Click_Teleport( UIEvent eid, UIActionBase action )
 	{
 		m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );
 	}
 
-	void Type_UpdateList( UIEvent eid, ref UIActionBase action )
+	void Type_UpdateList( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;

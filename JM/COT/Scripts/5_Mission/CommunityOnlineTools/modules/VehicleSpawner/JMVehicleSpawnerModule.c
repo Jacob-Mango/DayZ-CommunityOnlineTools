@@ -154,7 +154,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, ident );
 	}
 
-	private void RPC_Load( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -207,7 +207,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		SendWebhook( "", instance, "Spawned vehicle \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") at " + position.ToString() );
 	}
 
-	private void RPC_SpawnPosition( ref ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SpawnPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( IsMissionHost() )
 		{
@@ -233,7 +233,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		car.Fill( fluid, cap );
 	}
 
-	private EntityAI SpawnVehicle( ref JMVehicleSpawnerSerialize file, vector position, vector direction )
+	private EntityAI SpawnVehicle( JMVehicleSpawnerSerialize file, vector position, vector direction )
 	{
 		if ( file == NULL )
 			return NULL;

@@ -220,7 +220,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionSelectBox CreateSelectionBox( Widget parent, string label, notnull ref array< string > options, Class instance = NULL, string funcname = "" )
+	static UIActionSelectBox CreateSelectionBox( Widget parent, string label, notnull array< string > options, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
 

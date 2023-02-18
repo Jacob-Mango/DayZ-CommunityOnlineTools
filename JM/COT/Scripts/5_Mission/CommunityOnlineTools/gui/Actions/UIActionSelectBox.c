@@ -24,7 +24,7 @@ class UIActionSelectBox extends UIActionBase
 	{
 	}
 
-	void SetSelections( notnull ref array< string > options )
+	void SetSelections( notnull array< string > options )
 	{
 		m_Selection = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "action" ), 0, this, true, options );
 		m_Selection.m_OptionChanged.Insert( OnSelectionChange );
