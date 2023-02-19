@@ -53,7 +53,7 @@ class JMESPForm extends JMFormBase
 
 		Widget skeletonSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_chkbx_PlayerSkeletons = UIActionManager.CreateCheckbox( skeletonSpacer, "Draw player skeletons", this, "Click_PlayerSkeletons", m_Module.EnableDrawPlayerSkeletons );
+		m_chkbx_PlayerSkeletons = UIActionManager.CreateCheckbox( skeletonSpacer, "Draw player skeletons", this, "Click_PlayerSkeletons", m_Module.GetDrawPlayerSkeletonsEnabled() );
 		m_sldr_Skeletons_LineThickness = UIActionManager.CreateSlider( skeletonSpacer, "Line thickness", 1, 4, this, "Change_Skeleton_LineThickness" );m_sldr_Skeletons_LineThickness.GetSliderWidget().SetSize(0.35, 20);
 		m_sldr_Skeletons_LineThickness.SetCurrent( m_Module.SkeletonLineThickness );
 		m_sldr_Skeletons_LineThickness.SetStepValue( 1.0 );
@@ -292,9 +292,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.EnableDrawPlayerSkeletons = action.IsChecked();
-		if (!action.IsChecked())
-			m_Module.m_ESPCanvas.Clear();
+		m_Module.SetDrawPlayerSkeletonsEnabled(action.IsChecked());
 	}
 
 	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
