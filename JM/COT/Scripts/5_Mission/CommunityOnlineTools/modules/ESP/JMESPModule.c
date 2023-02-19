@@ -447,6 +447,8 @@ class JMESPModule: JMRenderableModuleBase
 		if (!EnableDrawPlayerSkeletons)
 			return;
 
+		auto spectatorCamera = JMSpectatorCamera.Cast(CurrentActiveCamera);
+
 		m_ESPCanvas.Clear();
 
 		foreach (Man player : ClientData.m_PlayerBaseList)
@@ -455,13 +457,16 @@ class JMESPModule: JMRenderableModuleBase
 			if (!Class.CastTo(human, player))
 				continue;
 
+			if (spectatorCamera && spectatorCamera.SelectedTarget == player && !spectatorCamera.m_JM_3rdPerson)
+				continue;
+
 			vector btm = GetGame().GetScreenPosRelative(human.GetPosition());
-			if (btm[2] < 0)
+			if (btm[2] < 0 || btm[2] > ESPRadius)
 				continue;
 
 			vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
 			vector top = GetGame().GetScreenPosRelative(headPos);
-			if (top[2] < 0.25 || top[2] > ESPRadius)
+			if (top[2] < 0.18)
 				continue;
 
 			btm[2] = btm[1];
