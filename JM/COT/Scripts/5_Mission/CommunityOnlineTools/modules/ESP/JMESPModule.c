@@ -222,6 +222,7 @@ class JMESPModule: JMRenderableModuleBase
 	private ref map< Object, JMESPMeta > m_MappedESPObjects;
 
 	private ref array< ref JMESPViewType > m_ViewTypes;
+	private ref map<typename, JMESPViewType> m_ViewTypesByType;
 
 	private bool m_IsCreatingWidgets;
 	private bool m_IsDestroyingWidgets;
@@ -366,18 +367,20 @@ class JMESPModule: JMRenderableModuleBase
 		m_MappedESPObjects = new map< Object, JMESPMeta >;
 
 		m_ViewTypes = new array< ref JMESPViewType >;
+		m_ViewTypesByType = new map<typename, JMESPViewType>;
 
 		TTypenameArray espTypes = new TTypenameArray;
 		RegisterTypes( espTypes );
 		
-		for(int i = 0; i < espTypes.Count(); i++)
+		foreach (typename espType: espTypes)
 		{
-			if ( espTypes[i].IsInherited( JMESPViewType ) )
+			if ( espType.IsInherited( JMESPViewType ) )
 			{
-				JMESPViewType viewType = JMESPViewType.Cast( espTypes[i].Spawn() );
+				JMESPViewType viewType = JMESPViewType.Cast( espType.Spawn() );
 				if ( viewType )
 				{
 					m_ViewTypes.Insert( viewType );
+					m_ViewTypesByType[espType] = viewType;
 					GetPermissionsManager().RegisterPermission( "ESP.View." + viewType.Permission );
 				}
 			}
@@ -455,6 +458,12 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			Human human;
 			if (!Class.CastTo(human, player))
+				continue;
+
+			if (player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayer].View)
+				continue;
+
+			if (!player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayerAI].View)
 				continue;
 
 			if (spectatorCamera && spectatorCamera.SelectedTarget == player && !spectatorCamera.m_JM_3rdPerson)
@@ -611,15 +620,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		int sleepIdx = 0;
 
-		bool includeImmovable;
-		foreach (auto viewType: m_ViewTypes)
-		{
-			if (viewType.IsInherited(JMESPViewTypeImmovable))
-			{
-				includeImmovable = viewType.View;
-				break;
-			}
-		}
+		bool includeImmovable = m_ViewTypesByType[JMESPViewTypeImmovable].View;
 
 		for (int x = -numIterations; x < numIterations; x++)
 		{

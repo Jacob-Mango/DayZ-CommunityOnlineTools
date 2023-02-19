@@ -1,6 +1,7 @@
 class JMESPForm extends JMFormBase
 {
 	private autoptr array< ref JMESPViewTypeWidget > m_ESPTypeList;
+	private ref map<typename, JMESPViewTypeWidget> m_ESPTypeWidgetsByType;
 
 	private UIActionScroller m_ESPListScroller;
 	private Widget m_ESPListRows;
@@ -22,6 +23,7 @@ class JMESPForm extends JMFormBase
 	void JMESPForm()
 	{
 		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
+		m_ESPTypeWidgetsByType = new map<typename, JMESPViewTypeWidget>;
 	}
 
 	void ~JMESPForm()
@@ -88,7 +90,9 @@ class JMESPForm extends JMFormBase
 
 		GridSpacerWidget gsw;
 
-		for ( int i = 0; i < m_Module.GetViewTypes().Count(); i++ )
+		auto viewTypes = m_Module.GetViewTypes();
+
+		foreach (auto viewType: viewTypes)
 		{
 			if ( totalInContentRow >= 100 )
 			{
@@ -109,9 +113,10 @@ class JMESPForm extends JMFormBase
 			if ( !rScript )
 				continue;
 
-			rScript.Set( m_Module.GetViewTypes()[i] );
+			rScript.Set( viewType );
 
 			m_ESPTypeList.Insert( rScript );
+			m_ESPTypeWidgetsByType[viewType.Type()] = rScript;
 		}
 
 		m_ESPListScroller.UpdateScroller();
@@ -291,6 +296,9 @@ class JMESPForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		if (action.IsChecked())
+			m_ESPTypeWidgetsByType[JMESPViewTypePlayer].SetChecked(true);
 
 		m_Module.SetDrawPlayerSkeletonsEnabled(action.IsChecked());
 	}
