@@ -133,7 +133,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		RegisterBinding( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
+		Bind( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()

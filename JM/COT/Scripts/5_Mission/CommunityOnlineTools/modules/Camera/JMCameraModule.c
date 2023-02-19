@@ -142,12 +142,12 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		RegisterBinding( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
-		RegisterBinding( new JMModuleBinding( "Toggle3rdPerson",	"UAPersonView",	true 	) );
-		RegisterBinding( new JMModuleBinding( "LeftShoulder",		"UALeanLeft",	true 	) );
-		RegisterBinding( new JMModuleBinding( "RightShoulder",		"UALeanRight",	true 	) );
+		Bind( new JMModuleBinding( "ToggleCamera",		"UACameraToolToggleCamera",		true 	) );
+		Bind( new JMModuleBinding( "ZoomForwards",		"UACameraToolZoomForwards",		true 	) );
+		Bind( new JMModuleBinding( "ZoomBackwards",		"UACameraToolZoomBackwards",	true 	) );
+		Bind( new JMModuleBinding( "Toggle3rdPerson",	"UAPersonView",	true 	) );
+		Bind( new JMModuleBinding( "LeftShoulder",		"UALeanLeft",	true 	) );
+		Bind( new JMModuleBinding( "RightShoulder",		"UALeanRight",	true 	) );
 	}
 
 	Camera GetCamera()

@@ -83,9 +83,9 @@ class COTModule : JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		RegisterBinding( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
-		RegisterBinding( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
-		RegisterBinding( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
+		Bind( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
+		Bind( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
+		Bind( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
 
 	#ifdef SERVER
