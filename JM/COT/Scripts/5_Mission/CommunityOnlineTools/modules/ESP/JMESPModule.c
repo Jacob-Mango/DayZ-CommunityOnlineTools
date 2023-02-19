@@ -147,6 +147,23 @@ class JMESPSkeleton
 		shapes = new array<Shape>;
 #endif
 
+		int color = COLOR_WHITE;
+		switch (human.GetHealthLevel())
+		{
+			case GameConstants.STATE_PRISTINE:
+			case GameConstants.STATE_WORN:
+				break;
+			case GameConstants.STATE_DAMAGED:
+				color = 0xFFDCDC00;
+				break;
+			case GameConstants.STATE_BADLY_DAMAGED:
+				color = 0xFFDC0000;
+				break;
+			case GameConstants.STATE_RUINED:
+				color = 0xFF232323;
+				break;
+		}
+
 		vector neckPos = human.GetBonePositionWS(human.GetBoneIndexByName("neck"));
 		vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
 
@@ -155,15 +172,15 @@ class JMESPSkeleton
 
 		//! Neck
 #ifdef JM_COT_USE_DEBUGSHAPES
-		shapes.Insert(Debug.DrawLine(neckPos, neckEnd, COLOR_WHITE, ShapeFlags.NOZBUFFER));
+		shapes.Insert(Debug.DrawLine(neckPos, neckEnd, color, ShapeFlags.NOZBUFFER));
 #else
-		canvas.DrawLine(neckPos, neckEnd, lineThickness, COLOR_WHITE);
+		canvas.DrawLine(neckPos, neckEnd, lineThickness, color);
 #endif
 
 		//! Head
 		headPos = headPos + dir * 0.06;
 #ifdef JM_COT_USE_DEBUGSHAPES
-		shapes.Insert(Debug.DrawSphere(headPos, 0.12, COLOR_WHITE, ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER));
+		shapes.Insert(Debug.DrawSphere(headPos, 0.12, color, ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER));
 #else
 		bool isInBounds;
 		vector p1 = canvas.TransformToScreenPos(headPos, isInBounds);
@@ -174,7 +191,7 @@ class JMESPSkeleton
 			ori[2] = 0;
 			vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * 0.12);
 			float radius = vector.Distance(p1, p2);
-			canvas.DrawCircle(headPos, radius, lineThickness, COLOR_WHITE);
+			canvas.DrawCircle(headPos, radius, lineThickness, color);
 		}
 #endif
 
@@ -185,9 +202,9 @@ class JMESPSkeleton
 			if (limb.Bone2.Contains("foot"))
 				bone2Position = bone2Position + vector.Direction(bone1Position, bone2Position).Normalized() * 0.1;
 #ifdef JM_COT_USE_DEBUGSHAPES
-			shapes.Insert(Debug.DrawLine(bone1Position, bone2Position, COLOR_WHITE, ShapeFlags.NOZBUFFER));
+			shapes.Insert(Debug.DrawLine(bone1Position, bone2Position, color, ShapeFlags.NOZBUFFER));
 #else
-			canvas.DrawLine(bone1Position, bone2Position, lineThickness, COLOR_WHITE);
+			canvas.DrawLine(bone1Position, bone2Position, lineThickness, color);
 #endif
 		}
 	}
