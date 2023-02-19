@@ -288,7 +288,7 @@ class JMESPMetaPlayer : JMESPMeta
 
 	override void UpdateActions()
 	{
-		if ( !viewTypeActions || !widgetRoot )
+		if ( !viewTypeActions || !widgetRoot || !player )
 			return;
 
 		super.UpdateActions();
@@ -297,10 +297,10 @@ class JMESPMetaPlayer : JMESPMeta
 		m_Player_GUID.SetText( player.GetGUID() );
 		m_Player_Steam.SetText( player.GetSteam64ID() );
 
-		PlayerBase player = PlayerBase.Cast(target);
-		if (player)
+		PlayerBase pb = PlayerBase.Cast(target);
+		if (pb)
 		{
-			//if (player.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
+			//if (pb.IsPlayerSpeaking() > 0.1) m_Player_Speaking.SetText("Yes");
 			//else m_Player_Speaking.SetText("No");
 		}
 	}
