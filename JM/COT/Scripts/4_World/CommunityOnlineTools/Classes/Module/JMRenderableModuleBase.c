@@ -235,7 +235,7 @@ class JMRenderableModuleBase extends JMModuleBase
 
 		if ( GetInputToggle() != "" )
 		{
-			RegisterBinding( new JMModuleBinding( "Input_ToggleShow", GetInputToggle(), true ) );
+			Bind( new JMModuleBinding( "Input_ToggleShow", GetInputToggle(), true ) );
 		}
 	}
 
