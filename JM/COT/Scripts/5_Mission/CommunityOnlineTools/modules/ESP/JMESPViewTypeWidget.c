@@ -87,6 +87,11 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 		m_Type.View = state;
 	}
 
+	bool IsChecked()
+	{
+		return m_Checkbox.IsChecked();
+	}
+
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
