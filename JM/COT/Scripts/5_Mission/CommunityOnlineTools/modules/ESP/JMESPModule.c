@@ -37,7 +37,7 @@ class JMESPCanvas
 
 	void JMESPCanvas()
 	{
-		CreateCanvas()
+		CreateCanvas();
 	}
 
 	void CreateCanvas()
