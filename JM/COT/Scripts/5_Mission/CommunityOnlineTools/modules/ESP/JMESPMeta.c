@@ -159,7 +159,7 @@ class JMESPMeta : Managed
 
 	void UpdateActions()
 	{
-		if ( !viewTypeActions || !widgetRoot )
+		if ( !viewTypeActions || !widgetRoot || !target )
 			return;
 
 		RefreshPosition();
@@ -170,6 +170,9 @@ class JMESPMeta : Managed
 
 	void Update()
 	{
+		if ( !target )
+			return;
+
 		if (m_Action_AutoRefreshPosition.IsChecked())
 			RefreshPosition();
 
