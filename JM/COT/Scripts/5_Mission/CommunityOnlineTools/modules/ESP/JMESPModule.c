@@ -230,7 +230,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	float ESPRadius;
 	int ESPUpdateTime;
-	bool EnableDrawPlayerSkeletons;
+	private bool DrawPlayerSkeletonsEnabled;
 	float SkeletonLineThickness = 1;
 
 	private JMESPState m_CurrentState = JMESPState.Remove;
@@ -444,7 +444,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnUpdate(float timeslice)
 	{
-		if (!EnableDrawPlayerSkeletons)
+		if (!DrawPlayerSkeletonsEnabled)
 			return;
 
 		auto spectatorCamera = JMSpectatorCamera.Cast(CurrentActiveCamera);
@@ -476,6 +476,22 @@ class JMESPModule: JMRenderableModuleBase
 
 			JMESPSkeleton.Draw(human, m_ESPCanvas, SkeletonLineThickness);
 		}
+	}
+
+	void SetDrawPlayerSkeletonsEnabled(bool state)
+	{
+		if (!HasAccess())
+			return;
+
+		DrawPlayerSkeletonsEnabled = state;
+
+		if (!state)
+			m_ESPCanvas.Clear();
+	}
+
+	bool GetDrawPlayerSkeletonsEnabled()
+	{
+		return DrawPlayerSkeletonsEnabled;
 	}
 
 	private void CreateNewWidgets()
