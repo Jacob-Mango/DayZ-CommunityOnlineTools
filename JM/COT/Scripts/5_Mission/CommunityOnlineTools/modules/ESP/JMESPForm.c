@@ -161,8 +161,6 @@ class JMESPForm extends JMFormBase
 
 		ESPFilters( left_bottom );
 		ESPSelectedObjects( right_bottom );
-
-		m_Module.CreateCanvas();
 	}
 
 	override void OnShow()

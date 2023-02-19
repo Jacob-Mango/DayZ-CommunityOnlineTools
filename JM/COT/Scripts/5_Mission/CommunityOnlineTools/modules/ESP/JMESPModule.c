@@ -37,7 +37,18 @@ class JMESPCanvas
 
 	void JMESPCanvas()
 	{
-		m_Canvas = CanvasWidget.Cast(GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/esp_canvas.layout"));
+		CreateCanvas()
+	}
+
+	void CreateCanvas()
+	{
+		if (!m_Canvas)
+			m_Canvas = CanvasWidget.Cast(GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/esp_canvas.layout"));
+	}
+
+	bool HasCanvas()
+	{
+		return m_Canvas != null;
 	}
 
 	void DrawLine(vector from, vector to, int width = 1, int color = COLOR_WHITE)
@@ -443,11 +454,13 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		if (!m_ESPCanvas)
 			m_ESPCanvas = new JMESPCanvas();
+		else
+			m_ESPCanvas.CreateCanvas();
 	}
 
 	override void OnUpdate(float timeslice)
 	{
-		if (!DrawPlayerSkeletonsEnabled)
+		if (!DrawPlayerSkeletonsEnabled || !m_ESPCanvas || !m_ESPCanvas.HasCanvas())
 			return;
 
 		auto spectatorCamera = JMSpectatorCamera.Cast(CurrentActiveCamera);
