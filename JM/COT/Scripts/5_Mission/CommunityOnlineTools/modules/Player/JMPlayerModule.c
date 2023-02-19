@@ -992,23 +992,18 @@ class JMPlayerModule: JMRenderableModuleBase
 		Print(playerSpectator);
 #endif
 
+		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
+
+		if (playerSpectator.m_JM_CameraPosition != vector.Zero)
+			return; //! We are currently in freecam. Nothing to do.
+
 		vector spectatorPosition = playerSpectator.GetPosition();
 		playerSpectator.COTResetSpectator();
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 
-		int delay;
-		if ( playerSpectator.HasLastPosition() )
-		{
-			float distance = vector.Distance( playerSpectator.GetLastPosition(), spectatorPosition );
-			if ( distance >= 1000 )
-				delay = 1000;
-		}
-
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, ident, playerSpectator );
-
-		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
+		GetGame().SelectPlayer( ident, playerSpectator );
 	}
 
 	private void Client_EndSpectating( PlayerIdentity ident )
