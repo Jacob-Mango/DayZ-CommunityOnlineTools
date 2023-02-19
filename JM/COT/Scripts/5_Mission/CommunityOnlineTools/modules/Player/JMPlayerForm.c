@@ -813,7 +813,11 @@ class JMPlayerForm extends JMFormBase
 		m_PositionZ.SetText( position[2].ToString() );
 	}
 
+#ifndef EXPANSION_COT_BUGFIX_REF_UIACTIONS
+	void Click_ApplyStats( UIEvent eid, ref UIActionBase action )
+#else
 	void Click_ApplyStats( UIEvent eid, UIActionBase action )
+#endif
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
