@@ -295,7 +295,7 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (action.IsChecked())
+		if (action.IsChecked() && !m_ESPTypeWidgetsByType[JMESPViewTypePlayerAI].IsChecked())
 			m_ESPTypeWidgetsByType[JMESPViewTypePlayer].SetChecked(true);
 
 		m_Module.SetDrawPlayerSkeletonsEnabled(action.IsChecked());
