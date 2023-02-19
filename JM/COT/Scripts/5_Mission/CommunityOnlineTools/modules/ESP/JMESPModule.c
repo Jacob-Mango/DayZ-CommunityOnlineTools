@@ -42,15 +42,24 @@ class JMESPCanvas
 
 	void DrawLine(vector from, vector to, int width = 1, int color = COLOR_WHITE)
 	{
-		from = TransformToScreenPos(from);
-		to = TransformToScreenPos(to);
+		bool isInBoundsFrom;
+		bool isInBoundsTo;
+		from = TransformToScreenPos(from, isInBoundsFrom);
+		to = TransformToScreenPos(to, isInBoundsTo);
+
+		if (!isInBoundsFrom || !isInBoundsTo)
+			return;
 
 		m_Canvas.DrawLine(from[0], from[1], to[0], to[1], width, color);
 	}
 
 	void DrawCircle(vector center, float radius, int width = 1, int color = COLOR_WHITE, int segments = 36)
 	{
-		center = TransformToScreenPos(center);
+		bool isInBounds;
+		center = TransformToScreenPos(center, isInBounds);
+
+		if (!isInBounds)
+			return;
 
 		float segmentLength = 360 / segments;
 
@@ -73,21 +82,22 @@ class JMESPCanvas
 		m_Canvas.Clear();
 	}
 
-	vector TransformToScreenPos(vector pWorldPos)
+	vector TransformToScreenPos(vector pWorldPos, out bool isInBounds = false)
 	{
 		float parent_width, parent_height;
-		vector transformed_pos, screen_pos;
+		vector screen_pos;
 		
 		//! get relative pos for screen from world pos vector
 		screen_pos = GetGame().GetScreenPosRelative(pWorldPos);
+		isInBounds = screen_pos[0] >= 0 && screen_pos[0] <= 1 && screen_pos[1] >= 0 && screen_pos[1] <= 1 && screen_pos[2] >= 0;
 		//! get size of parent widget
 		m_Canvas.GetScreenSize(parent_width, parent_height);
 		
 		//! calculate current position from relative pos and parent widget size
-		transformed_pos[0] = screen_pos[0] * parent_width;
-		transformed_pos[1] = screen_pos[1] * parent_height;
+		screen_pos[0] = screen_pos[0] * parent_width;
+		screen_pos[1] = screen_pos[1] * parent_height;
 		
-		return transformed_pos;
+		return screen_pos;
 	}
 };
 
@@ -155,13 +165,17 @@ class JMESPSkeleton
 #ifdef JM_COT_USE_DEBUGSHAPES
 		shapes.Insert(Debug.DrawSphere(headPos, 0.12, COLOR_WHITE, ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER));
 #else
-		vector p1 = canvas.TransformToScreenPos(headPos);
-		vector ori = GetGame().GetCurrentCameraDirection().VectorToAngles();
-		ori[1] = 0;
-		ori[2] = 0;
-		vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * 0.12);
-		float radius = vector.Distance(p1, p2);
-		canvas.DrawCircle(headPos, radius, lineThickness, COLOR_WHITE);
+		bool isInBounds;
+		vector p1 = canvas.TransformToScreenPos(headPos, isInBounds);
+		if (isInBounds && p1[0] > 0 && p1[1] > 0 && p1[2] > 0.12)
+		{
+			vector ori = GetGame().GetCurrentCameraDirection().VectorToAngles();
+			ori[1] = 0;
+			ori[2] = 0;
+			vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * 0.12);
+			float radius = vector.Distance(p1, p2);
+			canvas.DrawCircle(headPos, radius, lineThickness, COLOR_WHITE);
+		}
 #endif
 
 		foreach (JMESPLimb limb: s_Limbs)
@@ -429,14 +443,8 @@ class JMESPModule: JMRenderableModuleBase
 				continue;
 
 			vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
-
-			vector cameraPos = GetGame().GetCurrentCameraPosition();
-			float distanceSq = vector.DistanceSq(cameraPos, headPos)
-			if (distanceSq < 0.0625 || distanceSq > ESPRadius * ESPRadius)
-				continue;
-
 			vector top = GetGame().GetScreenPosRelative(headPos);
-			if (top[2] < 0)
+			if (top[2] < 0.25 || top[2] > ESPRadius)
 				continue;
 
 			btm[2] = btm[1];
