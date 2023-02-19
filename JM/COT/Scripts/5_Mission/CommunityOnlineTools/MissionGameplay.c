@@ -70,6 +70,15 @@ modded class MissionGameplay
 		}
 	}
 
+	override void OnInit()
+	{
+		super.OnInit();
+
+		JMESPModule espModule;
+		if (CF_Modules<JMESPModule>.Get(espModule))
+			espModule.CreateCanvas();
+	}
+
 	// ------------------------------------------------------------
 	// Override OnMissionStart
 	// ------------------------------------------------------------
