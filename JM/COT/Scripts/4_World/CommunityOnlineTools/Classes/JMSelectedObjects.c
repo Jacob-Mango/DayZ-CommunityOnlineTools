@@ -44,13 +44,13 @@ class JMSelectedObject : Managed
 
 class JMSelectedObjects
 {
-	private ref set< ref JMSelectedObject > objects;
-	private ref array< string > players;
+	private ref set< ref JMSelectedObject > m_Objects;
+	private ref array< string > m_Players;
 
 	void JMSelectedObjects()
 	{
-		objects = new set< ref JMSelectedObject >;
-		players = new array< string >;
+		m_Objects = new set< ref JMSelectedObject >;
+		m_Players = new array< string >;
 
 		JMScriptInvokers.ADD_OBJECT.Insert( AddObject );
 		JMScriptInvokers.REMOVE_OBJECT.Insert( _RemoveObject );
@@ -58,8 +58,8 @@ class JMSelectedObjects
 
 	void ~JMSelectedObjects()
 	{
-		delete objects;
-		delete players;
+		delete m_Objects;
+		delete m_Players;
 
 		JMScriptInvokers.ADD_OBJECT.Remove( AddObject );
 		JMScriptInvokers.REMOVE_OBJECT.Remove( _RemoveObject );
@@ -67,9 +67,9 @@ class JMSelectedObjects
 
 	bool IsObjectSelected( notnull Object obj )
 	{
-		for ( int i = 0; i < objects.Count(); ++i )
+		for ( int i = 0; i < m_Objects.Count(); ++i )
 		{
-			if ( objects[i].Equals( obj ) )
+			if ( m_Objects[i].Equals( obj ) )
 			{
 				return true;
 			}
@@ -80,7 +80,7 @@ class JMSelectedObjects
 
 	void AddObject( Object obj )
 	{
-		objects.Insert( new JMSelectedObject( obj ) );
+		m_Objects.Insert( new JMSelectedObject( obj ) );
 	}
 
 	private void _RemoveObject( Object obj )
@@ -90,16 +90,16 @@ class JMSelectedObjects
 
 	void ClearObjects()
 	{
-		objects.Clear();
+		m_Objects.Clear();
 	}
 
 	bool RemoveObject( notnull Object obj )
 	{
-		for ( int i = 0; i < objects.Count(); ++i )
+		for ( int i = 0; i < m_Objects.Count(); ++i )
 		{
-			if ( objects[i].Equals( obj ) )
+			if ( m_Objects[i].Equals( obj ) )
 			{
-				objects.Remove( i );
+				m_Objects.Remove( i );
 				return true;
 			}
 		}
@@ -108,13 +108,13 @@ class JMSelectedObjects
 
 	void SerializeObjects( ParamsWriteContext ctx )
 	{
-		int count = objects.Count();
+		int count = m_Objects.Count();
 		ctx.Write( count );
 
 		for ( int i = 0; i < count; ++i )
 		{
-			ctx.Write( objects[i].networkLow );
-			ctx.Write( objects[i].networkHigh );
+			ctx.Write( m_Objects[i].networkLow );
+			ctx.Write( m_Objects[i].networkHigh );
 		}
 	}
 
@@ -149,46 +149,46 @@ class JMSelectedObjects
 
 	bool IsSelected( string guid )
 	{
-		return players.Find( guid ) > -1;
+		return m_Players.Find( guid ) > -1;
 	}
 
 	int GetPlayer( string guid )
 	{
-		return players.Find( guid );
+		return m_Players.Find( guid );
 	}
 
 	int AddPlayer( string guid )
 	{
-		int idx = players.Find( guid );
+		int idx = m_Players.Find( guid );
 		if ( idx > -1 )
 			return idx;
 
-		return players.Insert( guid );
+		return m_Players.Insert( guid );
 	}
 
 	int RemovePlayer( string guid )
 	{
-		int idx = players.Find( guid );
+		int idx = m_Players.Find( guid );
 
 		if ( idx > -1 )
-			players.Remove( idx );
+			m_Players.Remove( idx );
 
 		return idx;
 	}
 
 	int NumPlayers()
 	{
-		return players.Count();
+		return m_Players.Count();
 	}
 
 	array< string > GetPlayers()
 	{
-		return players;
+		return m_Players;
 	}
 
 	void ClearPlayers()
 	{
-		players.Clear();
+		m_Players.Clear();
 	}
 };
 
