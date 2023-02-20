@@ -873,6 +873,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( distance >= 1000 )
 			delay = 1000;
 
+		GetGame().SelectPlayer( ident, NULL );
+
+		GetGame().SelectSpectator( ident, "JMSpectatorCamera", spectatePlayer.GetPosition() );
+
 		playerSpectator.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
 
@@ -884,9 +888,6 @@ class JMPlayerModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_StartSpectatingEx").Add(spectatePlayer.ToString()).Add(ident);
 #endif
-
-		GetGame().SelectSpectator( ident, "JMSpectatorCamera", spectatePlayer.GetPosition() );
-		GetGame().SelectPlayer( ident, NULL );
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( spectatePlayer, JMPlayerModuleRPC.StartSpectating, true, ident );
