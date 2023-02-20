@@ -359,7 +359,15 @@ class JMCameraModule: JMRenderableModuleBase
 			if (player.m_JM_SpectatedPlayer)
 				return;
 
-			GetGame().SelectPlayer( sender, player );
+			int delay;
+			if ( player.HasLastPosition() )
+			{
+				float distance = vector.Distance( player.GetLastPosition(), spectatorPosition );
+				if ( distance >= 1000 )
+					delay = 3000;
+			}
+
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, sender, player );
 		}
 	}
 
