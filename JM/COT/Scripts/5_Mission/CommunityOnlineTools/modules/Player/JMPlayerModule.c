@@ -875,7 +875,8 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		GetGame().SelectPlayer( ident, NULL );
 
-		GetGame().SelectSpectator( ident, "JMSpectatorCamera", spectatePlayer.GetPosition() );
+		vector position = spectatePlayer.GetBonePositionWS( spectatePlayer.GetBoneIndexByName( "Head" ) );
+		GetGame().SelectSpectator( ident, "JMSpectatorCamera", position );
 
 		playerSpectator.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
