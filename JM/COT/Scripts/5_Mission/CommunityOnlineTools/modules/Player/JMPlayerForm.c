@@ -658,9 +658,16 @@ class JMPlayerForm extends JMFormBase
 
 		if ( CurrentActiveCamera )
 		{
-			JMSpectatorCamera cam = JMSpectatorCamera.Cast( CurrentActiveCamera );
-			
-			if ( cam )
+			if ( CurrentActiveCamera.IsInherited(JMCinematicCamera) )
+			{
+				JMCameraModule cameraModule;
+				if (CF_Modules<JMCameraModule>.Get(cameraModule) && cameraModule.m_PreviousActiveCamera)
+				{
+					cameraModule.Leave();
+					return;
+				}
+			}
+			else if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
 			{
 				shouldSpectate = false;
 			}
