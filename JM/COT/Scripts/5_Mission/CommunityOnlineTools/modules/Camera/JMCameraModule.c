@@ -239,7 +239,7 @@ class JMCameraModule: JMRenderableModuleBase
 			if (player.m_JM_SpectatedPlayer)
 				player = player.m_JM_SpectatedPlayer;
 
-			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) );
+			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) ) + player.GetDirection() * 0.12;
 			//player.GetInputController().SetDisabled( true );
 		}
 		else if ( target )
