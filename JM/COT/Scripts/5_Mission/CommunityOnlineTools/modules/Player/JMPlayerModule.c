@@ -892,6 +892,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		Print("Starting spectate, timestamp " + GetGame().GetTickTime());
 		
+		if (COT_PreviousActiveCamera)
+			COT_PreviousActiveCamera.SetActive( false );
+
 		if ( CurrentActiveCamera )
 		{
 			CurrentActiveCamera.SelectedTarget( player );
@@ -935,6 +938,8 @@ class JMPlayerModule: JMRenderableModuleBase
 				return;
 			if ( !ctx.Read( networkHigh ) )
 				return;
+
+			COT_PreviousActiveCamera = CurrentActiveCamera;
 
 			Print("Starting spectate, waiting for player object, timestamp " + GetGame().GetTickTime());
 			Client_Check_StartSpectating(networkLow, networkHigh);
@@ -1000,8 +1005,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
 
+		bool switchToPreviousCamera = true;
+
 		if (playerSpectator.m_JM_CameraPosition == vector.Zero)
 		{
+			switchToPreviousCamera = false;
+
 			vector spectatorPosition = playerSpectator.GetPosition();
 			playerSpectator.COTResetSpectator();
 
@@ -1017,10 +1026,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(switchToPreviousCamera);
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 	}
 
-	private void Client_EndSpectating( PlayerIdentity ident )
+	private void Client_EndSpectating( PlayerIdentity ident, bool switchToPreviousCamera )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_EndSpectating").Add(ident);
@@ -1031,22 +1041,30 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( CurrentActiveCamera == m_SpectatorCamera )
 		{
 			CurrentActiveCamera.SetActive( false );
-			CurrentActiveCamera = NULL;
-			
-			PPEffects.ResetDOFOverride();
 
-			if ( m_SpectatorClient )
+			if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMCinematicCamera) && switchToPreviousCamera)
 			{
-				m_SpectatorClient.GetInputController().SetDisabled( false );
+				CurrentActiveCamera = COT_PreviousActiveCamera;
+				CurrentActiveCamera.SetActive(true);
 			}
+			else
+			{
+				CurrentActiveCamera = NULL;
 
-			COTModule cotModule;
-			if ( CF_Modules< COTModule >.Get( cotModule ) )
-				cotModule.UpdateMouseControls();
+				PPEffects.ResetDOFOverride();
+
+				if ( m_SpectatorClient )
+				{
+					m_SpectatorClient.GetInputController().SetDisabled( false );
+				}
+
+				COTModule cotModule;
+				if ( CF_Modules< COTModule >.Get( cotModule ) )
+					cotModule.UpdateMouseControls();
+			}
 		}
 
-		if (COT_PreviousActiveCamera == m_SpectatorCamera)
-			COT_PreviousActiveCamera = NULL;
+		COT_PreviousActiveCamera = NULL;
 
 		m_SpectatorCamera = NULL;
 	}
@@ -1066,7 +1084,11 @@ class JMPlayerModule: JMRenderableModuleBase
 			Server_EndSpectating( senderRPC );
 		} else
 		{
-			Client_EndSpectating( senderRPC );
+			bool switchToPreviousCamera;
+			if ( !ctx.Read( switchToPreviousCamera ) )
+				return;
+
+			Client_EndSpectating( senderRPC, switchToPreviousCamera );
 		}
 	}
 

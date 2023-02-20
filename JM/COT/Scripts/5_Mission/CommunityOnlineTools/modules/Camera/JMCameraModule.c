@@ -115,7 +115,7 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				m_UpdateTime = 0.0;
 
-				if (m_EnableFullmapCamera || COT_PreviousActiveCamera)
+				if (m_EnableFullmapCamera || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
 				{
 					auto player = PlayerBase.Cast(GetGame().GetPlayer());
 					if (GetGame().IsClient())
