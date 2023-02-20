@@ -117,7 +117,7 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				m_UpdateTime = 0.0;
 
-				if (m_EnableFullmapCamera)
+				if (m_EnableFullmapCamera || m_PreviousActiveCamera)
 				{
 					auto player = PlayerBase.Cast(GetGame().GetPlayer());
 					if (GetGame().IsClient())
@@ -410,11 +410,10 @@ class JMCameraModule: JMRenderableModuleBase
 			if (Class.CastTo(player, target))
 			{
 				if (!player.m_JM_SpectatedPlayer)
-				{
 					EnterFullmap(player);
-					player.m_JM_CameraPosition = position;
+				player.m_JM_CameraPosition = position;
+				if (!player.m_JM_SpectatedPlayer)
 					player.COTUpdateSpectatorPosition();
-				}
 			}
 		}
 	}
