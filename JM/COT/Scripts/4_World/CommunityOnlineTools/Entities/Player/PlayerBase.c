@@ -147,9 +147,9 @@ modded class PlayerBase
 		return m_JMLastPosition;
 	}
 
-	void SetLastPosition()
+	void SetLastPosition(bool force = false)
 	{
-		if ( GetGame().IsServer() && !m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)
+		if ( GetGame().IsServer() && (force || (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)))
 		{
 			vector trans[4];
 			GetTransform( trans );
@@ -184,8 +184,8 @@ modded class PlayerBase
 			SetPosition(position);
 		}
 
-		if (m_JM_CameraPosition != vector.Zero)
-			m_JM_CameraPosition = vector.Zero;
+		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedPlayer)
+			SetLastPosition(true);
 	}
 
 #ifndef CF_MODULE_PERMISSIONS
