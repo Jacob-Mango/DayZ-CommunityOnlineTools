@@ -443,6 +443,6 @@ modded class PlayerBase
 			SetPosition( GetLastPosition() );
 
 		if (!m_JMHadGodMode)
-			COTSetGodMode( false );
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false);
 	}
 }
