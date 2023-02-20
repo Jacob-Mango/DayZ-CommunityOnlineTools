@@ -1003,7 +1003,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 
-		GetGame().SelectPlayer( ident, playerSpectator );
+		int delay;
+		if ( playerSpectator.HasLastPosition() )
+		{
+			float distance = vector.Distance( playerSpectator.GetLastPosition(), spectatorPosition );
+			if ( distance >= 1000 )
+				delay = 3000;
+		}
+
+		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, ident, playerSpectator );
 	}
 
 	private void Client_EndSpectating( PlayerIdentity ident )
