@@ -126,7 +126,7 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_UnlimitedStamina, "Admin.Player.UnlimitedStamina" );
 		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
-		UpdatePermission( m_SpectatePlayer, "Admin.Player.StartSpectating" );
+		UpdatePermission( m_SpectatePlayer, "Admin.Player.Spectate" );
 		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
 		UpdatePermission( m_StripPlayer, "Admin.Player.Strip" );
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
@@ -658,19 +658,11 @@ class JMPlayerForm extends JMFormBase
 
 		if ( CurrentActiveCamera )
 		{
-			if ( CurrentActiveCamera.IsInherited(JMCinematicCamera) )
+			if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
 			{
-				JMCameraModule cameraModule;
-				if (CF_Modules<JMCameraModule>.Get(cameraModule) && cameraModule.m_PreviousActiveCamera)
-				{
-					action.Disable();
-					GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
-
-					cameraModule.Leave();
-					return;
-				}
+				shouldSpectate = false;
 			}
-			else if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
+			else if ( COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera) )
 			{
 				shouldSpectate = false;
 			}
