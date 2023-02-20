@@ -1,6 +1,7 @@
 // TODO: MOVE MOST OF THIS INTO A SEPERATE MOD
 
 static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
+static JMCameraBase COT_PreviousActiveCamera;
 static bool COTPlayerIsRemoved = false;
 
 static bool COT_ESP_Toggled = false;

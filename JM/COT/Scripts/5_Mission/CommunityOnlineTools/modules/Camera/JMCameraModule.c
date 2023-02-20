@@ -15,8 +15,6 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_UpdateTime;
 	bool m_EnableFullmapCamera;
 
-	JMCameraBase m_PreviousActiveCamera;
-
 	void JMCameraModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Camera.View" );
@@ -117,7 +115,7 @@ class JMCameraModule: JMRenderableModuleBase
 			{
 				m_UpdateTime = 0.0;
 
-				if (m_EnableFullmapCamera || m_PreviousActiveCamera)
+				if (m_EnableFullmapCamera || COT_PreviousActiveCamera)
 				{
 					auto player = PlayerBase.Cast(GetGame().GetPlayer());
 					if (GetGame().IsClient())
@@ -199,21 +197,21 @@ class JMCameraModule: JMRenderableModuleBase
 		auto trace = CF_Trace_0(this, "Client_Enter");
 		#endif
 
-		m_PreviousActiveCamera = CurrentActiveCamera;
-		if (m_PreviousActiveCamera)
-			m_PreviousActiveCamera.SetActive( false );
+		COT_PreviousActiveCamera = CurrentActiveCamera;
+		if (COT_PreviousActiveCamera)
+			COT_PreviousActiveCamera.SetActive( false );
 
 		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
 		{
 			CurrentActiveCamera.SetActive( true );
 
-			if (m_PreviousActiveCamera)
-				CurrentActiveCamera.SetDirection(m_PreviousActiveCamera.GetDirection());
+			if (COT_PreviousActiveCamera)
+				CurrentActiveCamera.SetDirection(COT_PreviousActiveCamera.GetDirection());
 			
 			Human player = GetGame().GetPlayer();
 			if ( player )
 			{
-				if (!m_PreviousActiveCamera)
+				if (!COT_PreviousActiveCamera)
 				{
 					vector headTransform[4];
 					player.GetBoneTransformWS(player.GetBoneIndexByName( "Head" ), headTransform);
@@ -307,16 +305,16 @@ class JMCameraModule: JMRenderableModuleBase
 	private void Client_Leave()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_0(this, "Client_Enter");
+		auto trace = CF_Trace_0(this, "Client_Leave");
 		#endif
 
 		CurrentActiveCamera.SetActive( false );
-		CurrentActiveCamera = m_PreviousActiveCamera;
+		CurrentActiveCamera = COT_PreviousActiveCamera;
 
-		if (m_PreviousActiveCamera)
+		if (COT_PreviousActiveCamera)
 		{
 			CurrentActiveCamera.SetActive(true);
-			m_PreviousActiveCamera = NULL;
+			COT_PreviousActiveCamera = NULL;
 			return;
 		}
 		
