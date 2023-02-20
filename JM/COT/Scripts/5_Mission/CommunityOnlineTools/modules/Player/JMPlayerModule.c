@@ -871,7 +871,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		int delay;
 		float distance = vector.Distance( playerSpectator.GetPosition(), spectatePlayer.GetPosition() );
 		if ( distance >= 1000 )
-			delay = 1000;
+			delay = 2000;
 
 		GetGame().SelectPlayer( ident, NULL );
 
