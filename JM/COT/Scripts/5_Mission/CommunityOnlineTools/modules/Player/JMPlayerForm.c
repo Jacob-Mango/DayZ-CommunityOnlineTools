@@ -663,6 +663,9 @@ class JMPlayerForm extends JMFormBase
 				JMCameraModule cameraModule;
 				if (CF_Modules<JMCameraModule>.Get(cameraModule) && cameraModule.m_PreviousActiveCamera)
 				{
+					action.Disable();
+					GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
+
 					cameraModule.Leave();
 					return;
 				}
@@ -678,9 +681,15 @@ class JMPlayerForm extends JMFormBase
 			if ( JM_GetSelected().GetPlayers().Count() != 1 )
 				return;
 
+			action.Disable();
+			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
+
 			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
 		} else
 		{
+			action.Disable();
+			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
+
 			m_Module.EndSpectating();
 		}
 	}
