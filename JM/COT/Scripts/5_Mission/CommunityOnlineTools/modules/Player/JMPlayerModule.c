@@ -1073,10 +1073,6 @@ Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_Spec
 				{
 					m_SpectatorClient.GetInputController().SetDisabled( false );
 				}
-
-				COTModule cotModule;
-				if ( CF_Modules< COTModule >.Get( cotModule ) )
-					cotModule.UpdateMouseControls();
 			}
 		}
 
