@@ -5,10 +5,31 @@ modded class DayZPlayerImplement
 	bool m_JM_IsHeadInvisible;
 	vector m_JM_CameraPosMS;
 
+	vector m_COT_HeadBonePositionWS;
+	float m_COT_HeadBoneIdleTime;
+	vector m_COT_LHandBonePositionWS;
+	float m_COT_LHandBoneIdleTime;
+	vector m_COT_RHandBonePositionWS;
+	float m_COT_RHandBoneIdleTime;
+	vector m_COT_LFootBonePositionWS;
+	float m_COT_LFootBoneIdleTime;
+	vector m_COT_RFootBonePositionWS;
+	float m_COT_RFootBoneIdleTime;
+
+	bool m_COT_EnableBonePositionUpdate;
+
 	void DayZPlayerImplement()
 	{
 		if ( IsMissionClient() )
 			SetEventMask( EntityEvent.FRAME | EntityEvent.POSTFRAME );
+	}
+
+	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
+	{
+		super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
+
+		if (m_COT_EnableBonePositionUpdate)
+			COT_UpdateBonePositionTimes(pDt);
 	}
 
 	void OnSpectateStart( JMSpectatorCamera camera )
@@ -210,4 +231,84 @@ modded class DayZPlayerImplement
 		return GetDisplayName();
 	}
 #endif
+
+	void COT_EnableBonePositionUpdate(bool state)
+	{
+		m_COT_HeadBoneIdleTime = 0;
+		m_COT_LHandBoneIdleTime = 0;
+		m_COT_RHandBoneIdleTime = 0;
+		m_COT_LFootBoneIdleTime = 0;
+		m_COT_RFootBoneIdleTime = 0;
+
+		m_COT_EnableBonePositionUpdate = state;
+	}
+
+	void COT_UpdateBonePositionTimes(float pDt)
+	{
+		vector headPosition = GetBonePositionWS(GetBoneIndexByName("Head"));
+		if (vector.DistanceSq(headPosition, m_COT_HeadBonePositionWS) < 0.0004)
+		{
+			m_COT_HeadBoneIdleTime += pDt;
+		}
+		else
+		{
+			m_COT_HeadBonePositionWS = headPosition;
+			m_COT_HeadBoneIdleTime = 0;
+		}
+		vector lHandPosition = GetBonePositionWS(GetBoneIndexByName("LeftHand"));
+		if (vector.DistanceSq(lHandPosition, m_COT_LHandBonePositionWS) < 0.01)
+		{
+			m_COT_LHandBoneIdleTime += pDt;
+		}
+		else
+		{
+			m_COT_LHandBonePositionWS = lHandPosition;
+			m_COT_LHandBoneIdleTime = 0;
+		}
+		vector rHandPosition = GetBonePositionWS(GetBoneIndexByName("RightHand"));
+		if (vector.DistanceSq(rHandPosition, m_COT_RHandBonePositionWS) < 0.01)
+		{
+			m_COT_RHandBoneIdleTime += pDt;
+		}
+		else
+		{
+			m_COT_RHandBonePositionWS = rHandPosition;
+			m_COT_RHandBoneIdleTime = 0;
+		}
+		vector lFootPosition = GetBonePositionWS(GetBoneIndexByName("LeftFoot"));
+		if (vector.DistanceSq(lFootPosition, m_COT_LFootBonePositionWS) < 0.0004)
+		{
+			m_COT_LFootBoneIdleTime += pDt;
+		}
+		else
+		{
+			m_COT_LFootBonePositionWS = lFootPosition;
+			m_COT_LFootBoneIdleTime = 0;
+		}
+		vector rFootPosition = GetBonePositionWS(GetBoneIndexByName("RightFoot"));
+		if (vector.DistanceSq(rFootPosition, m_COT_RFootBonePositionWS) < 0.0004)
+		{
+			m_COT_RFootBoneIdleTime += pDt;
+		}
+		else
+		{
+			m_COT_RFootBonePositionWS = rFootPosition;
+			m_COT_RFootBoneIdleTime = 0;
+		}
+	}
+
+	bool COT_IsAnimationIdle()
+	{
+		if (m_COT_HeadBoneIdleTime < 0.25)
+			return false;
+		if (m_COT_LHandBoneIdleTime < 0.25)
+			return false;
+		if (m_COT_RHandBoneIdleTime < 0.25)
+			return false;
+		if (m_COT_LFootBoneIdleTime < 0.25)
+			return false;
+		if (m_COT_RFootBoneIdleTime < 0.25)
+			return false;
+		return true;
+	}
 };
