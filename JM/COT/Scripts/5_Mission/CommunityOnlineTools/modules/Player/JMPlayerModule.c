@@ -870,6 +870,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		playerSpectator.SetLastPosition();
 
 		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
+		playerSpectator.m_JM_CameraPosition = vector.Zero;
 
 		m_Spectators[ident.GetId()] = playerSpectator;
 
@@ -1059,6 +1060,7 @@ Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCam
 Print("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_PreviousActiveCamera);
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
+				waitForPlayerIdle = false;
 			}
 			else
 			{
@@ -1074,6 +1076,10 @@ Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_Spec
 					m_SpectatorClient.GetInputController().SetDisabled( false );
 				}
 			}
+		}
+		else if (CurrentActiveCamera)
+		{
+			waitForPlayerIdle = false;
 		}
 
 		COT_PreviousActiveCamera = NULL;
