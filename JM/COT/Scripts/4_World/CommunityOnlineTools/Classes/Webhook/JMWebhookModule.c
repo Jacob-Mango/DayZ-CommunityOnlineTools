@@ -49,6 +49,7 @@ class JMWebhookModule: JMModuleBase
 
 	void JMWebhookModule()
 	{
+		m_Queue = new array< ref JMWebhookQueueItem >();
 	}
 
 	void ~JMWebhookModule()
@@ -324,8 +325,6 @@ class JMWebhookModule: JMModuleBase
 
 		JsonSerializer serializer = new JsonSerializer();
 
-		m_Queue = new array< ref JMWebhookQueueItem >();
-
 		int num = 0;
 		int startTime = GetGame().GetTickTime();
 		int lastSendTime = GetGame().GetTickTime();
@@ -369,7 +368,7 @@ class JMWebhookModule: JMModuleBase
 			}
 		}
 
-		delete m_Queue;
+		m_Queue.Clear();
 	}
 
 	JMWebhookDiscordMessage CreateDiscordMessage()
