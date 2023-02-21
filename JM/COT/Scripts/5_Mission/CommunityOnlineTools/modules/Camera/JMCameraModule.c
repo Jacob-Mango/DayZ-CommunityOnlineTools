@@ -3,6 +3,7 @@ enum JMCameraModuleRPC
 	INVALID = 10160,
 	Enter,
 	Leave,
+	Leave_Finish,
 	UpdatePosition,
 	COUNT
 };
@@ -173,6 +174,9 @@ class JMCameraModule: JMRenderableModuleBase
 		case JMCameraModuleRPC.Leave:
 			RPC_Leave( ctx, sender, target );
 			break;
+		case JMCameraModuleRPC.Leave_Finish:
+			RPC_Leave_Finish( ctx, sender, target );
+			break;
 		case JMCameraModuleRPC.UpdatePosition:
 			RPC_UpdatePosition( ctx, sender, target );
 			break;
@@ -302,7 +306,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Client_Leave()
+	private void Client_Leave(bool waitForPlayerIdle = false)
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Leave");
@@ -327,7 +331,31 @@ Print("JMCameraModule::Client_Leave - player " + GetGame().GetPlayer());
 		{
 			GetGame().GetPlayer().GetInputController().SetDisabled( false );
 		}
+
+		PlayerBase player;
+		if (waitForPlayerIdle && Class.CastTo(player, GetGame().GetPlayer()))
+		{
+Print("JMCameraModule::Client_Leave - waiting for player to be idle, timestamp " + GetGame().GetTickTime());
+			player.COT_EnableBonePositionUpdate(true);
+			Client_Check_Leave(player);
+		}
 Print("JMCameraModule::Client_Leave - left cam");
+	}
+
+	void Client_Check_Leave(PlayerBase player)
+	{
+		if (!player.COT_IsAnimationIdle())
+		{
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_Leave, 250, false, player );
+		}
+		else
+		{
+Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + GetGame().GetTickTime());
+			player.COT_EnableBonePositionUpdate(false);
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
+		}
 	}
 
 	private void Server_Leave( PlayerIdentity sender, Object target )
@@ -347,9 +375,18 @@ Print("JMCameraModule::Server_Leave - target " + target);
 
 			//player.GetInputController().SetDisabled( false );
 
+			bool waitForPlayerIdle;
+			if ( player.HasLastPosition() && !player.m_JM_SpectatedPlayer )
+			{
+				float distance = vector.DistanceSq( player.GetLastPosition(), spectatorPosition );
+				if ( distance > 22500 )  //! 150 m, needs to match value used in PlayerBase::COTUpdateSpectatorPosition
+					waitForPlayerIdle = true;
+			}
+
 			if ( GetGame().IsMultiplayer() )
 			{
 				ScriptRPC rpc = new ScriptRPC();
+				rpc.Write(waitForPlayerIdle);
 				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
 			} else
 			{
@@ -361,15 +398,8 @@ Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_Spectated
 			if (player.m_JM_SpectatedPlayer)
 				return;
 
-			int delay;
-			if ( player.HasLastPosition() )
-			{
-				float distance = vector.Distance( player.GetLastPosition(), spectatorPosition );
-				if ( distance >= 1000 )
-					delay = 3000;
-			}
-
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( GetGame().SelectPlayer, delay, false, sender, player );
+			if (!waitForPlayerIdle)
+				GetGame().SelectPlayer(sender, player);
 		}
 	}
 
@@ -378,7 +408,7 @@ Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_Spectated
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave").Add(senderRPC).Add(target.ToString());
 		#endif
-Print("JMCameraModule::RPC_Leave");
+Print("JMCameraModule::RPC_Leave - timestamp " + GetGame().GetTickTime());
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
@@ -389,8 +419,28 @@ Print("JMCameraModule::RPC_Leave");
 		{
 			// RPC was sent from the server, permission would've been verified there.
 
-			Client_Leave();
+			bool waitForPlayerIdle;
+			if ( !ctx.Read( waitForPlayerIdle ) )
+				return;
+
+			Client_Leave(waitForPlayerIdle);
 		}
+	}
+
+	private void RPC_Leave_Finish( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "RPC_Leave_Finish").Add(senderRPC).Add(target);
+#endif
+Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime());
+		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			return;
+
+		PlayerBase player;
+		if (!Class.CastTo(player, senderRPC.GetPlayer()) || player.m_JM_SpectatedPlayer)
+			return;
+
+		GetGame().SelectPlayer(senderRPC, player);
 	}
 
 	private void RPC_UpdatePosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
