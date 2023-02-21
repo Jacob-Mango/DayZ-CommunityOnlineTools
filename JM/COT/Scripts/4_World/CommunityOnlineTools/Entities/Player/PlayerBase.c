@@ -84,6 +84,16 @@ modded class PlayerBase
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
 	}
 
+	override void OnSelectPlayer()
+	{
+		super.OnSelectPlayer();
+
+#ifndef SERVER
+		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
+			GetGame().GetUIManager().ShowUICursor(true);
+#endif
+	}
+
 	override void OnVariablesSynchronized()
 	{
 		super.OnVariablesSynchronized();
