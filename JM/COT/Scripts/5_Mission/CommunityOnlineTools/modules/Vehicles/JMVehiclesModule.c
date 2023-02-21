@@ -247,7 +247,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 		
-		#ifdef EXPANSIONMODVEHICLES
+		#ifdef EXPANSIONMODVEHICLE
 		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
 		{
 			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
@@ -481,7 +481,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 		
-		#ifdef EXPANSIONMODVEHICLES
+		#ifdef EXPANSIONMODVEHICLE
 		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
 		{
 			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
