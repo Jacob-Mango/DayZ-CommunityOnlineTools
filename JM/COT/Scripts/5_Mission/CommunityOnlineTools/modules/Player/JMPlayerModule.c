@@ -33,7 +33,7 @@ class JMPlayerModule: JMRenderableModuleBase
 {
 	PlayerBase m_SpectatorClient;
 	ref map<string, PlayerBase> m_Spectators = new map<string, PlayerBase>();
-	JMSpectatorCamera m_SpectatorCamera;
+	JMCameraBase m_SpectatorCamera;
 
 	void JMPlayerModule()
 	{
@@ -858,7 +858,10 @@ class JMPlayerModule: JMRenderableModuleBase
 #endif
 
 		if ( playerSpectator == spectatePlayer )
+		{
+			COTCreateNotification(ident, new StringLocaliser("You can't spectate yourself"));
 			return;
+		}
 
 		playerSpectator.SetLastPosition();
 
@@ -993,6 +996,7 @@ class JMPlayerModule: JMRenderableModuleBase
 #endif
 
 		PlayerBase playerSpectator = m_Spectators[ident.GetId()];
+Print("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
 		if (!playerSpectator)
 			return;
 
@@ -1006,7 +1010,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
 
 		bool switchToPreviousCamera = true;
-
+Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectator.m_JM_CameraPosition);
 		if (playerSpectator.m_JM_CameraPosition == vector.Zero)
 		{
 			switchToPreviousCamera = false;
@@ -1035,7 +1039,9 @@ class JMPlayerModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_EndSpectating").Add(ident);
 #endif
-
+Print("JMPlayerModule::Client_EndSpectating - switch to prev cam requested? " + switchToPreviousCamera);
+Print("JMPlayerModule::Client_EndSpectating - current cam " + CurrentActiveCamera);
+Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCamera);
 		m_SpectatorCamera.SelectedTarget( NULL );
 
 		if ( CurrentActiveCamera == m_SpectatorCamera )
@@ -1044,15 +1050,19 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMCinematicCamera) && switchToPreviousCamera)
 			{
+Print("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_PreviousActiveCamera);
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
 			}
 			else
 			{
+Print("JMPlayerModule::Client_EndSpectating - leaving current cam " + CurrentActiveCamera);
 				CurrentActiveCamera = NULL;
 
 				PPEffects.ResetDOFOverride();
 
+Print("JMPlayerModule::Client_EndSpectating - player " + m_SpectatorClient);
+Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_SpectatorClient == GetGame().GetPlayer()));
 				if ( m_SpectatorClient )
 				{
 					m_SpectatorClient.GetInputController().SetDisabled( false );
@@ -1067,6 +1077,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		COT_PreviousActiveCamera = NULL;
 
 		m_SpectatorCamera = NULL;
+
+		COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating"));
+Print("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	}
 
 	private void RPC_EndSpectating( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1074,7 +1087,7 @@ class JMPlayerModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
 #endif
-
+Print("JMPlayerModule::RPC_EndSpectating");
 		if ( IsMissionHost() )
 		{
 			JMPlayerInstance instance;

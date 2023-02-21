@@ -307,12 +307,14 @@ class JMCameraModule: JMRenderableModuleBase
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Leave");
 		#endif
-
+Print("JMCameraModule::Client_Leave - current cam " + CurrentActiveCamera);
 		CurrentActiveCamera.SetActive( false );
 		CurrentActiveCamera = COT_PreviousActiveCamera;
 
+Print("JMCameraModule::Client_Leave - previous cam " + COT_PreviousActiveCamera);
 		if (COT_PreviousActiveCamera)
 		{
+Print("JMCameraModule::Client_Leave - switching to prev cam " + COT_PreviousActiveCamera);
 			CurrentActiveCamera.SetActive(true);
 			COT_PreviousActiveCamera = NULL;
 			return;
@@ -320,10 +322,12 @@ class JMCameraModule: JMRenderableModuleBase
 		
 		PPEffects.ResetDOFOverride();
 
+Print("JMCameraModule::Client_Leave - player " + GetGame().GetPlayer());
 		if ( GetGame().GetPlayer() )
 		{
 			GetGame().GetPlayer().GetInputController().SetDisabled( false );
 		}
+Print("JMCameraModule::Client_Leave - left cam");
 	}
 
 	private void Server_Leave( PlayerIdentity sender, Object target )
@@ -331,7 +335,7 @@ class JMCameraModule: JMRenderableModuleBase
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_Leave").Add(sender).Add(target.ToString());
 		#endif
-
+Print("JMCameraModule::Server_Leave - target " + target);
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
@@ -353,7 +357,7 @@ class JMCameraModule: JMRenderableModuleBase
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
-
+Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_SpectatedPlayer);
 			if (player.m_JM_SpectatedPlayer)
 				return;
 
@@ -374,7 +378,7 @@ class JMCameraModule: JMRenderableModuleBase
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave").Add(senderRPC).Add(target.ToString());
 		#endif
-
+Print("JMCameraModule::RPC_Leave");
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
