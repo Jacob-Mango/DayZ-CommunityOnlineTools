@@ -283,6 +283,8 @@ class JMPlayerInstance : Managed
 		OnRecievePosition( ctx );
 		OnRecieveOrientation( ctx );
 		OnRecieveHealth( ctx );
+
+		m_DataLastUpdated = GetGame().GetTime();
 	}
 
 	void OnSendPermissions( ParamsWriteContext ctx )
@@ -505,6 +507,11 @@ class JMPlayerInstance : Managed
 		// Print( "  SName: " + m_Name );
 
 		m_RootPermission.DebugPrint( 2 );
+	}
+
+	int GetDataLastUpdatedTime()
+	{
+		return m_DataLastUpdated;
 	}
 
 	string GetGUID()
