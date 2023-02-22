@@ -1131,11 +1131,11 @@ class JMPlayerForm extends JMFormBase
 		if ( m_SelectedInstance != instance )
 		{
 			m_SelectedInstance = instance;
-
-			RefreshTeleports();
 		}
 
 		RefreshStats();
+
+		RefreshTeleports();
 	}
 
 	override void OnShow()
