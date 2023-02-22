@@ -1132,10 +1132,10 @@ class JMPlayerForm extends JMFormBase
 		{
 			m_SelectedInstance = instance;
 
-			RefreshStats();
-
 			RefreshTeleports();
 		}
+
+		RefreshStats();
 	}
 
 	override void OnShow()
