@@ -243,6 +243,7 @@ class JMESPModule: JMRenderableModuleBase
 	float ESPRadius;
 	int ESPUpdateTime;
 	private bool DrawPlayerSkeletonsEnabled;
+	bool DrawPlayerSkeletonsIncludingMyself;
 	float SkeletonLineThickness = 1;
 
 	private JMESPState m_CurrentState = JMESPState.Remove;
@@ -464,6 +465,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		auto spectatorCamera = JMSpectatorCamera.Cast(CurrentActiveCamera);
+		Man gamePlayer = GetGame().GetPlayer();
 
 		m_ESPCanvas.Clear();
 
@@ -480,6 +482,9 @@ class JMESPModule: JMRenderableModuleBase
 				continue;
 
 			if (spectatorCamera && spectatorCamera.SelectedTarget == player && !spectatorCamera.m_JM_3rdPerson)
+				continue;
+
+			if (player == gamePlayer && !DrawPlayerSkeletonsIncludingMyself)
 				continue;
 
 			vector btm = GetGame().GetScreenPosRelative(human.GetPosition());
