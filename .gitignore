@@ -14,3 +14,10 @@ ServerProfile/*.log
 ServerProfile/*.ADM
 ServerProfile/*.cfg
 ServerProfile/*.mdmp
+*.bak
+*.pbo
+*.bisign
+/JM/COT/GUI/MakePbo.cmd
+/JM/COT/Objects/Debug/MakePbo.cmd
+/JM/COT/Scripts/MakePbo.cmd
+/JM/COT/languagecore/MakePbo.cmd
