@@ -24,24 +24,23 @@ class JMPlayerForm extends JMFormBase
 	private UIActionScroller m_ActionListScroller;
 	private Widget m_ActionsWrapper;
 
-	private UIActionText m_IdentityHeading;
 	private UIActionText m_GUID;
 	private UIActionText m_Name;
 	private UIActionText m_Steam64ID;
 
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
-	private UIActionEditableText m_Health;
+	private UIActionSlider m_Health;
 	private bool m_HealthUpdated;
-	private UIActionEditableText m_Blood;
+	private UIActionSlider m_Blood;
 	private bool m_BloodUpdated;
-	private UIActionEditableText m_Energy;
+	private UIActionSlider m_Energy;
 	private bool m_EnergyUpdated;
-	private UIActionEditableText m_Water;
+	private UIActionSlider m_Water;
 	private bool m_WaterUpdated;
-	private UIActionEditableText m_Shock;
+	private UIActionSlider m_Shock;
 	private bool m_ShockUpdated;
-	private UIActionEditableText m_Stamina;
+	private UIActionSlider m_Stamina;
 	private bool m_StaminaUpdated;
 	private UIActionCheckbox m_BloodyHands;
 	private UIActionCheckbox m_GodMode;
@@ -233,13 +232,9 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
 
-		m_IdentityHeading = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER", "" );
-
-		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 1 );
-
-		m_Name = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
-		m_GUID = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
-		m_Steam64ID = UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
+		m_Name = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
+		m_GUID = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
+		m_Steam64ID = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -250,8 +245,6 @@ class JMPlayerForm extends JMFormBase
 
 	private void ShowIdentityWidgets()
 	{
-		m_IdentityHeading.SetText( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC" );
-
 		m_Name.Show();
 		m_GUID.Show();
 		m_Steam64ID.Show();
@@ -259,8 +252,6 @@ class JMPlayerForm extends JMFormBase
 
 	private void HideIdentityWidgets()
 	{
-		m_IdentityHeading.SetText( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_HEADER_DESC_DISABLED" );
-
 		m_Name.Hide();
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
@@ -306,12 +297,19 @@ class JMPlayerForm extends JMFormBase
 
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 2 );
 
-		m_Health = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH", this, "Click_SetHealth", "", "" );
-		m_Shock = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", this, "Click_SetShock", "", "" );
-		m_Blood = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", this, "Click_SetBlood", "", "" );
-		m_Energy = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD", this, "Click_SetEnergy", "", "" );
-		m_Water = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", this, "Click_SetWater", "", "" );
-		m_Stamina = UIActionManager.CreateEditableText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", this, "Click_SetStamina", "", "" );
+		m_Health = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH", 0, 100, this, "Click_SetHealth" );
+		m_Shock = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", 0, 100, this, "Click_SetShock" );
+		m_Blood = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", 0, 5000, this, "Click_SetBlood" );
+		m_Energy = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD", 0, PlayerConstants.SL_ENERGY_MAX, this, "Click_SetEnergy" );
+		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
+		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
+
+		m_Health.SetSliderWidth(0.5);
+		m_Shock.SetSliderWidth(0.5);
+		m_Blood.SetSliderWidth(0.5);
+		m_Energy.SetSliderWidth(0.5);
+		m_Water.SetSliderWidth(0.5);
+		m_Stamina.SetSliderWidth(0.5);
 
 		m_ApplyStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
 		m_RefreshStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
@@ -325,13 +323,6 @@ class JMPlayerForm extends JMFormBase
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
-
-		m_Health.SetOnlyNumbers( true );
-		m_Shock.SetOnlyNumbers( true );
-		m_Blood.SetOnlyNumbers( true );
-		m_Energy.SetOnlyNumbers( true );
-		m_Water.SetOnlyNumbers( true );
-		m_Stamina.SetOnlyNumbers( true );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -769,22 +760,22 @@ class JMPlayerForm extends JMFormBase
 			return;
 		
 		if ( m_Health )
-			m_Health.SetText( m_SelectedInstance.GetHealth().ToString() );
+			m_Health.SetCurrent( m_SelectedInstance.GetHealth() );
 		
 		if ( m_Blood )
-			m_Blood.SetText( m_SelectedInstance.GetBlood().ToString() );
+			m_Blood.SetCurrent( m_SelectedInstance.GetBlood() );
 		
 		if ( m_Energy )
-			m_Energy.SetText( m_SelectedInstance.GetEnergy().ToString() );
+			m_Energy.SetCurrent( m_SelectedInstance.GetEnergy() );
 		
 		if ( m_Water )
-			m_Water.SetText( m_SelectedInstance.GetWater().ToString() );
+			m_Water.SetCurrent( m_SelectedInstance.GetWater() );
 		
 		if ( m_Shock )
-			m_Shock.SetText( m_SelectedInstance.GetShock().ToString() );
+			m_Shock.SetCurrent( m_SelectedInstance.GetShock() );
 		
 		if ( m_Stamina )
-			m_Stamina.SetText( m_SelectedInstance.GetStamina().ToString() );
+			m_Stamina.SetCurrent( m_SelectedInstance.GetStamina() );
 
 		
 		if ( m_BloodyHands )
@@ -835,7 +826,7 @@ class JMPlayerForm extends JMFormBase
 			m_HealthUpdated = false;
 
 			if ( m_Health )
-				m_Module.SetHealth( ToFloat( m_Health.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetHealth( m_Health.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_BloodUpdated )
@@ -843,7 +834,7 @@ class JMPlayerForm extends JMFormBase
 			m_BloodUpdated = false;
 
 			if ( m_Blood )
-				m_Module.SetBlood( ToFloat( m_Blood.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetBlood( m_Blood.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_EnergyUpdated )
@@ -851,7 +842,7 @@ class JMPlayerForm extends JMFormBase
 			m_EnergyUpdated = false;
 
 			if ( m_Energy )
-				m_Module.SetEnergy( ToFloat( m_Energy.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetEnergy( m_Energy.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_WaterUpdated )
@@ -859,7 +850,7 @@ class JMPlayerForm extends JMFormBase
 			m_WaterUpdated = false;
 
 			if ( m_Water )
-				m_Module.SetWater( ToFloat( m_Water.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetWater( m_Water.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_ShockUpdated )
@@ -867,7 +858,7 @@ class JMPlayerForm extends JMFormBase
 			m_ShockUpdated = false;
 
 			if ( m_Shock )
-				m_Module.SetShock( ToFloat( m_Shock.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetShock( m_Shock.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 
 		if ( m_StaminaUpdated )
@@ -875,7 +866,7 @@ class JMPlayerForm extends JMFormBase
 			m_StaminaUpdated = false;
 
 			if ( m_Stamina )
-				m_Module.SetStamina( ToFloat( m_Stamina.GetText() ), JM_GetSelected().GetPlayers() );
+				m_Module.SetStamina( m_Stamina.GetCurrent(), JM_GetSelected().GetPlayers() );
 		}
 	}
 
