@@ -1,6 +1,8 @@
 #ifdef CF_MODULE_PERMISSIONS
 modded class CF_Permission_PlayerBase
 {
+	protected int m_DataLastUpdated;
+
 	protected vector m_Position;
 	protected vector m_Orientation;
 
@@ -47,6 +49,8 @@ modded class CF_Permission_PlayerBase
 		OnRecievePosition( ctx );
 		OnRecieveOrientation( ctx );
 		OnRecieveHealth( ctx );
+
+		m_DataLastUpdated = GetGame().GetTime();
 	}
 	
 	void OnSendPosition( ParamsWriteContext ctx )
@@ -109,6 +113,11 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
 		ctx.Read( m_InvertDmgDealt );
+	}
+
+	int GetDataLastUpdatedTime()
+	{
+		return m_DataLastUpdated;
 	}
 
 	vector GetPosition()

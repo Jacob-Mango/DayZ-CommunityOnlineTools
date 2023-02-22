@@ -87,6 +87,8 @@ class JMPlayerForm extends JMFormBase
 
 	private JMPlayerModule m_Module;
 
+	private int m_LastChangeTime;
+
 	void JMPlayerForm()
 	{
 		m_PlayerList = new array< JMPlayerRowWidget >;
@@ -118,6 +120,7 @@ class JMPlayerForm extends JMFormBase
 
 		UpdatePermission( m_HealPlayer, "Admin.Player.Set" );
 		UpdatePermission( m_Health, "Admin.Player.Set.Health" );
+		UpdatePermission( m_KillPlayer, "Admin.Player.Set.Health" );
 		UpdatePermission( m_Shock, "Admin.Player.Set.Shock" );
 		UpdatePermission( m_Blood, "Admin.Player.Set.Blood" );
 		UpdatePermission( m_Energy, "Admin.Player.Set.Energy" );
@@ -138,6 +141,8 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
 		UpdatePermission( m_StripPlayer, "Admin.Player.Strip" );
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
+		UpdatePermission( m_InvertDmgDealt, "Admin.Player.InvertDamageDealt" );
+		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
 
 		UpdatePermission( m_PositionX, "Admin.Player.Teleport.Position" );
 		UpdatePermission( m_PositionY, "Admin.Player.Teleport.Position" );
@@ -595,6 +600,8 @@ class JMPlayerForm extends JMFormBase
 			permissions.Insert( m_PermissionList[i].FullName + " " + m_PermissionList[i].Type );
 		}
 
+		UpdateLastChangeTime();
+
 		m_Module.SetPermissions( permissions, JM_GetSelected().GetPlayers() );
 	}
 	
@@ -609,6 +616,8 @@ class JMPlayerForm extends JMFormBase
 			if ( m_RoleList[i].IsChecked() )
 				roles.Insert( m_RoleList[i].Name );
 		}
+
+		UpdateLastChangeTime();
 
 		m_Module.SetRoles( roles, JM_GetSelected().GetPlayers() );
 	}
@@ -828,6 +837,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_PositionXUpdated = true;
 	}
 	
@@ -835,6 +846,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_PositionYUpdated = true;
 	}
@@ -844,6 +857,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_PositionZUpdated = true;
 	}
 
@@ -852,6 +867,9 @@ class JMPlayerForm extends JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
+		if (!force && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
+			return;
+
 		RefreshTeleports(force);
 
 		if (force)
@@ -995,6 +1013,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_HealthUpdated = true;
 	}
 
@@ -1002,6 +1022,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_BloodUpdated = true;
 	}
@@ -1011,6 +1033,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_EnergyUpdated = true;
 	}
 
@@ -1018,6 +1042,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_WaterUpdated = true;
 	}
@@ -1027,6 +1053,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_ShockUpdated = true;
 	}
 
@@ -1034,6 +1062,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_StaminaUpdated = true;
 	}
@@ -1043,6 +1073,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_Module.SetBloodyHands( m_BloodyHands.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
@@ -1050,6 +1082,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_Module.SetGodMode( m_GodMode.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
@@ -1059,6 +1093,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_Module.SetFreeze( m_Freeze.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
@@ -1066,6 +1102,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_Module.SetBrokenLegs( m_BrokenLegs.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
@@ -1075,6 +1113,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_Module.SetInvertDamageDealt( m_InvertDmgDealt.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
@@ -1082,6 +1122,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_Module.SetInvisible( m_Invisibility.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
@@ -1091,6 +1133,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		UpdateLastChangeTime();
+
 		m_Module.SetUnlimitedAmmo( m_UnlimitedAmmo.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
@@ -1098,6 +1142,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		UpdateLastChangeTime();
 
 		m_Module.SetUnlimitedStamina( m_UnlimitedStamina.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
@@ -1192,7 +1238,7 @@ class JMPlayerForm extends JMFormBase
 		super.OnShow();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 1000, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true );
 
 		UpdateUI();
 
@@ -1381,5 +1427,10 @@ class JMPlayerForm extends JMFormBase
 	override void OnUnfocus()
 	{
 
+	}
+
+	void UpdateLastChangeTime()
+	{
+		m_LastChangeTime = GetGame().GetTime();
 	}
 }
