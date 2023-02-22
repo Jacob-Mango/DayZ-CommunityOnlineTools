@@ -24,6 +24,8 @@ modded class PlayerBase
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
 
+	private bool m_COT_InvertDamageDealt;
+
 	void PlayerBase()
 	{
 		if ( IsMissionOffline() )
@@ -145,6 +147,18 @@ modded class PlayerBase
 			return false;
 
 		return super.CanBeTargetedByAI( ai );
+	}
+
+	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
+	{
+		PlayerBase sourcePlayer;
+		if (source && Class.CastTo(sourcePlayer, source.GetHierarchyRootPlayer()) && sourcePlayer != this && sourcePlayer.COTGetInvertDamageDealt())
+		{
+			sourcePlayer.ProcessDirectDamage(damageType, source, dmgZone, ammo, modelPos, speedCoef);
+			return false;
+		}
+
+		return super.EEOnDamageCalculated(damageResult, damageType, source, component, dmgZone, ammo, modelPos, speedCoef);
 	}
 
 	bool HasLastPosition()
@@ -338,6 +352,16 @@ modded class PlayerBase
 
 			SetSynchDirty();
 		}
+	}
+
+	void COTSetInvertDamageDealt(bool state)
+	{
+		m_COT_InvertDamageDealt = state;
+	}
+
+	bool COTGetInvertDamageDealt()
+	{
+		return m_COT_InvertDamageDealt;
 	}
 
 	void COTSetUnlimitedAmmo( bool mode )

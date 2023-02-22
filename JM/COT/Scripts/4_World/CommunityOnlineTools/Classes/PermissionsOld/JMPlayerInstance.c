@@ -43,6 +43,7 @@ class JMPlayerInstance : Managed
 	private bool m_UnlimitedAmmo;
 	private bool m_UnlimitedStamina;
 	private bool m_BrokenLegs;
+	private bool m_InvertDmgDealt;
 
 	private ref JMPlayerSerialize m_PlayerFile;
 
@@ -126,6 +127,7 @@ class JMPlayerInstance : Managed
 				m_UnlimitedAmmo = PlayerObject.COTHasUnlimitedAmmo();
 				m_UnlimitedStamina = PlayerObject.COTHasUnlimitedStamina();
 				m_BrokenLegs = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
+				m_InvertDmgDealt = PlayerObject.COTGetInvertDamageDealt();
 			}
 		}
 	}
@@ -367,6 +369,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_UnlimitedAmmo );
 		ctx.Write( m_UnlimitedStamina );
 		ctx.Write( m_BrokenLegs );
+		ctx.Write( m_InvertDmgDealt );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -389,6 +392,7 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_UnlimitedAmmo );
 		ctx.Read( m_UnlimitedStamina );
 		ctx.Read( m_BrokenLegs );
+		ctx.Read( m_InvertDmgDealt );
 	}
 
 	void Save()
@@ -636,6 +640,11 @@ class JMPlayerInstance : Managed
 	bool HasBrokenLegs()
 	{
 		return m_BrokenLegs;
+	}
+
+	bool GetInvertDmgDealt()
+	{
+		return m_InvertDmgDealt;
 	}
 };
 #endif

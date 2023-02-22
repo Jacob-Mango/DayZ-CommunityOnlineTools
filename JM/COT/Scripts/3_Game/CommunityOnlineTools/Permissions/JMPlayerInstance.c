@@ -25,6 +25,7 @@ modded class CF_Permission_PlayerBase
 	protected bool m_Frozen;
 	protected bool m_Invisibility;
 	protected bool m_UnlimitedAmmo;
+	protected bool m_InvertDmgDealt;
 
 	override void OnSend( ParamsWriteContext ctx )
 	{
@@ -86,6 +87,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_Frozen );
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
+		ctx.Write( m_InvertDmgDealt );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -106,6 +108,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_Frozen );
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
+		ctx.Read( m_InvertDmgDealt );
 	}
 
 	vector GetPosition()
@@ -196,6 +199,11 @@ modded class CF_Permission_PlayerBase
 	bool HasUnlimitedAmmo()
 	{
 		return m_UnlimitedAmmo;
+	}
+
+	bool GetInvertDmgDealt()
+	{
+		return m_InvertDmgDealt;
 	}
 };
 #endif
