@@ -22,7 +22,7 @@ PanelWidgetClass action_wrapper {
      size 1 1
      {
       TextWidgetClass action_label {
-       size 0.4 20
+       size 1 20
        vexactsize 1
        halign left_ref
        valign center_ref
@@ -32,6 +32,7 @@ PanelWidgetClass action_wrapper {
        "bold text" 1
        "exact text" 1
        "exact text size" 16
+       "text valign" center
       }
       EditBoxWidgetClass action {
        position 0.16 -1
@@ -137,7 +138,7 @@ PanelWidgetClass action_wrapper {
      size 1 1
      {
       TextWidgetClass action_label {
-       size 0.3 20
+       size 1 20
        vexactsize 1
        halign left_ref
        valign center_ref
@@ -147,6 +148,7 @@ PanelWidgetClass action_wrapper {
        "bold text" 1
        "exact text" 1
        "exact text size" 16
+       "text valign" center
       }
       EditBoxWidgetClass action {
        position 0 -1

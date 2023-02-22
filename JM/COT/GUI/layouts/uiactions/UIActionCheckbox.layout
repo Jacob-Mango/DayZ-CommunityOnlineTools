@@ -33,6 +33,7 @@ PanelWidgetClass UIActionCheckbox {
      "bold text" 1
      "exact text" 1
      "exact text size" 16
+     "text valign" center
     }
     CheckBoxWidgetClass action {
      visible 1
