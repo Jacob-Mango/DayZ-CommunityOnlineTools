@@ -92,7 +92,7 @@ class UIActionSelectBox extends UIActionBase
 		return false;
 	}
 
-	void SetSelectBoxWidth( float width )
+	void SetSelectorWidth( float width )
 	{
 		float w;
 		float h;
