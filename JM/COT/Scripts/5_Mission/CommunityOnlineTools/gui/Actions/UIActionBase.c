@@ -76,6 +76,9 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		if ( layoutRoot )
 			layoutRoot.Show( false );
 
+		if (GetGame().GetMission().IsInputExcludeActive("menu"))
+			GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
+
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Hide" );
 		#endif
@@ -91,7 +94,20 @@ class UIActionBase extends ScriptedWidgetEventHandler
 
 	void Update( float timeSlice )
 	{
-		m_WasFocused = IsFocusWidget( GetFocus() );
+		bool isFocused = IsFocusWidget( GetFocus() );
+
+		if (isFocused && !m_WasFocused)
+		{
+			if (!GetGame().GetMission().IsInputExcludeActive("menu"))
+				GetGame().GetMission().AddActiveInputExcludes({"menu"});
+		}
+		else if (!isFocused && m_WasFocused)
+		{
+			if (GetGame().GetMission().IsInputExcludeActive("menu"))
+				GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
+		}
+
+		m_WasFocused = isFocused;
 
 		if ( m_LeftMouseDown )
 		{
