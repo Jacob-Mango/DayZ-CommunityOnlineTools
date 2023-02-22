@@ -867,7 +867,7 @@ class JMPlayerForm extends JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
-		if (!force && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
+		if (m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
 			return;
 
 		RefreshTeleports(force);
