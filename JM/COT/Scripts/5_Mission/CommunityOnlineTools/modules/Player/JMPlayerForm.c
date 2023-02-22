@@ -760,6 +760,8 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		UpdateLastChangeTime();
+
 		vector pos = vector.Zero;
 		pos[0] = m_PositionX.GetText().ToFloat();
 		pos[1] = m_PositionY.GetText().ToFloat();
@@ -958,6 +960,8 @@ class JMPlayerForm extends JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+
+		UpdateLastChangeTime();
 
 		if ( m_HealthUpdated )
 		{
