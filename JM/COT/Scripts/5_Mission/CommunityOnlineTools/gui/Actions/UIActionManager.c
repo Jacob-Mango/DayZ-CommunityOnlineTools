@@ -253,6 +253,7 @@ class UIActionManager
 			action.SetMin( min );
 			action.SetMax( max );
 			action.SetStepValue( 0 );
+			action.SetFormat( "#STR_COT_FORMAT_NONE" );
 
 			return action;
 		}
