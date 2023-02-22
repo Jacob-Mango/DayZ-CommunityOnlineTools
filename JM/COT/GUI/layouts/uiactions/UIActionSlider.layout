@@ -29,6 +29,7 @@ PanelWidgetClass UIActionSlider {
      "bold text" 1
      "exact text" 1
      "exact text size" 16
+     "text valign" center
     }
     SliderWidgetClass action {
      size 0.7 20
