@@ -18,12 +18,14 @@ enum JMPlayerModuleRPC
 	SetGodMode,
 	SetFreeze,
 	SetInvisible,
+	SetInvertDamageDealt,
 	SetUnlimitedAmmo,
 	SetUnlimitedStamina,
 	SetBrokenLegs,
 	Heal,
 	Strip,
 	Dry,
+	Kick,
 	StopBleeding,
 	SetPermissions,
 	SetRoles,
@@ -48,6 +50,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.InvertDamageDealt" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
@@ -231,6 +235,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetRoles:
 			RPC_SetRoles( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetInvertDamageDealt:
+			RPC_SetInvertDamageDealt( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Kick:
+			RPC_Kick( ctx, sender, target );
 			break;
 		}
 	}
@@ -1268,6 +1278,63 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetFreeze( value, guids, senderRPC, instance );
 	}
 
+	void SetInvertDamageDealt( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetInvertDamageDealt( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetInvertDamageDealt, true, NULL );
+		}
+	}
+
+	private void Exec_SetInvertDamageDealt( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetInvertDamageDealt( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set Invert Damage Dealt To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " invert damage dealt" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " invert damage dealt" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetInvertDamageDealt( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.InvertDamageDealt", senderRPC, instance ) )
+			return;
+
+		Exec_SetInvertDamageDealt( value, guids, senderRPC, instance );
+	}
+
 	void SetInvisible( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1538,8 +1605,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if ( player == NULL )
 				continue;
 
-			if ( player.COTHasGodMode() )
-				player.SetAllowDamage(true);
+			player.COTSetGodMode(false);
 
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
@@ -1559,8 +1625,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
 
-			if ( player.COTHasGodMode() )
-				player.SetAllowDamage(false);
+			if ( player.m_JMHadGodMode )
+				player.COTSetGodMode(true);
 
 			players[i].Update();
 		}
@@ -1577,6 +1643,52 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		Exec_Heal( guids, senderRPC, instance );
+	}
+
+	void Kick( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Kick( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Kick, true, NULL );
+		}
+	}
+
+	private void Exec_Kick( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			GetGame().DisconnectPlayer(player.GetIdentity(), player.GetIdentity().GetId());
+
+			GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Kick", instance, "Kicked " + players[i].FormatSteamWebhook() );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_Kick( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC, instance ) )
+			return;
+
+		Exec_Kick( guids, senderRPC, instance );
 	}
 	
 	void Strip( array< string > guids )

@@ -27,6 +27,7 @@ modded class CF_Permission_Player
 		m_Frozen = PBObject.COTIsFrozen();
 		m_Invisibility = PBObject.COTIsInvisible();
 		m_UnlimitedAmmo = PBObject.COTHasUnlimitedAmmo();
+		m_InvertDmgDealt = PBObject.COTGetInvertDamageDealt();
 
 		return true;
 	}

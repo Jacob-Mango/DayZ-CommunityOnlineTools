@@ -49,7 +49,9 @@ class JMPlayerForm extends JMFormBase
 	private UIActionCheckbox m_UnlimitedAmmo;
 	private UIActionCheckbox m_UnlimitedStamina;
 	private UIActionCheckbox m_BrokenLegs;
+	private UIActionCheckbox m_InvertDmgDealt;
 
+    private UIActionButton m_CopyPositionPlayer;
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
 	private UIActionButton m_TeleportPrevious;
@@ -71,6 +73,10 @@ class JMPlayerForm extends JMFormBase
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
 	private UIActionButton m_DryPlayer;
+	private UIActionButton m_KillPlayer;
+	private UIActionButton m_SendMessage;
+	private UIActionButton m_KickPlayer;
+	private UIActionButton m_BanPlayer;
 
 	private int m_NumPlayerCount;
 
@@ -261,7 +267,10 @@ class JMPlayerForm extends JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
 
-		UIActionManager.CreateText( parent, "Teleporting: ", "" );
+		Widget positionHeader = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+
+		UIActionManager.CreateText( positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_HEADER", "" );
+        m_CopyPositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_COPY", this, "Click_CopyPlayerPostion");
 
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
@@ -323,6 +332,7 @@ class JMPlayerForm extends JMFormBase
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
+		m_InvertDmgDealt = UIActionManager.CreateCheckbox( actions2, "Invert damage dealt:", this, "Click_SetInvertDamageDealt", false );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -369,6 +379,10 @@ class JMPlayerForm extends JMFormBase
 		m_StopBleeding = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
 		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
+		m_KillPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
+		//m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
+		m_KickPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
+		//m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -618,6 +632,50 @@ class JMPlayerForm extends JMFormBase
 		m_Module.Dry( JM_GetSelected().GetPlayers() );
 	}
 
+	void Click_KillPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_SendMessage( UIEvent eid, UIActionBase action )
+	{
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		//m_Module.SendMessage( JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_KickPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.Kick( JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_BanPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			return;
+
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		//m_Module.Ban( JM_GetSelected().GetPlayers() );
+	}
+
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )
 	{
 		if ( JM_GetSelected().GetPlayers().Count() != 1 )
@@ -719,6 +777,14 @@ class JMPlayerForm extends JMFormBase
 		m_Module.TeleportTo( position, JM_GetSelected().GetPlayers() );
 	}
 
+    void Click_CopyPlayerPostion( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
+	}
+
 	void Click_TeleportMeTo( UIEvent eid, UIActionBase action )
 	{
 		if ( JM_GetSelected().GetPlayers().Count() != 1 )
@@ -798,6 +864,9 @@ class JMPlayerForm extends JMFormBase
 		
 		if ( m_BrokenLegs )
 			m_BrokenLegs.SetChecked( m_SelectedInstance.HasBrokenLegs() );
+		
+		if ( m_InvertDmgDealt )
+			m_InvertDmgDealt.SetChecked( m_SelectedInstance.GetInvertDmgDealt() );
 	}
 
 	void RefreshTeleports()
@@ -948,6 +1017,14 @@ class JMPlayerForm extends JMFormBase
 			return;
 
 		m_Module.SetBrokenLegs( m_BrokenLegs.IsChecked(), JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_SetInvertDamageDealt( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.SetInvertDamageDealt( m_InvertDmgDealt.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_Invisible( UIEvent eid, UIActionBase action )
