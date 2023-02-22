@@ -56,13 +56,13 @@ class JMESPForm extends JMFormBase
 		Widget skeletonSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
 		m_slbx_PlayerSkeletons = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_ESP_MODULE_DRAW_PLAYER_SKELETONS", {"#STR_COT_GENERIC_NONE", "#STR_COT_GENERIC_OTHERS", "#STR_COT_GENERIC_ALL"}, this, "Change_PlayerSkeletons" );
-		m_slbx_PlayerSkeletons.SetSelectBoxWidth(0.4);
+		m_slbx_PlayerSkeletons.SetSelectorWidth(0.4);
 		int idx = m_Module.GetDrawPlayerSkeletonsEnabled();
 		if (idx)
 			idx |= m_Module.DrawPlayerSkeletonsIncludingMyself;
 		m_slbx_PlayerSkeletons.SetSelection(idx, false);
 		m_slbx_Skeletons_LineThickness = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_GENERIC_LINE_THICKNESS", {"1", "2", "3", "4"}, this, "Change_Skeleton_LineThickness" );
-		m_slbx_Skeletons_LineThickness.SetSelectBoxWidth(0.4);
+		m_slbx_Skeletons_LineThickness.SetSelectorWidth(0.4);
 		m_slbx_Skeletons_LineThickness.SetSelection( m_Module.SkeletonLineThickness - 1 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
