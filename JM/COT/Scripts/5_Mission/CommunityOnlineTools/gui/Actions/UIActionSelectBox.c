@@ -1,5 +1,6 @@
 class UIActionSelectBox extends UIActionBase 
 {
+	protected Widget m_Frame;
 	protected TextWidget m_Label;
 
 	protected ref OptionSelectorMultistate m_Selection;
@@ -13,6 +14,7 @@ class UIActionSelectBox extends UIActionBase
 	{
 		super.OnInit();
 				
+		Class.CastTo( m_Frame, layoutRoot.FindAnyWidget( "action" ) );
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 	}
 
@@ -26,7 +28,7 @@ class UIActionSelectBox extends UIActionBase
 
 	void SetSelections( notnull array< string > options )
 	{
-		m_Selection = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "action" ), 0, this, true, options );
+		m_Selection = new OptionSelectorMultistate( m_Frame, 0, this, true, options );
 		m_Selection.m_OptionChanged.Insert( OnSelectionChange );
 		m_Selection.Enable();
 	}
@@ -88,5 +90,14 @@ class UIActionSelectBox extends UIActionBase
 		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
 
 		return false;
+	}
+
+	void SetSelectBoxWidth( float width )
+	{
+		float w;
+		float h;
+		m_Frame.GetSize( w, h );
+		m_Frame.SetSize( width, h );
+		m_Frame.Update();
 	}
 }

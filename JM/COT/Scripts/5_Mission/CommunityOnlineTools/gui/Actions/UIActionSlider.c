@@ -170,4 +170,13 @@ class UIActionSlider extends UIActionBase
 
 		return false;
 	}
+
+	void SetSliderWidth( float width )
+	{
+		float w;
+		float h;
+		m_Slider.GetSize( w, h );
+		m_Slider.SetSize( width, h );
+		m_Slider.Update();
+	}
 }
