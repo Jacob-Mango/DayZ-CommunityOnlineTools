@@ -825,22 +825,22 @@ class JMPlayerForm extends JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
-		if ( m_Health )
+		if ( m_Health && !m_HealthUpdated )
 			m_Health.SetCurrent( m_SelectedInstance.GetHealth() );
 		
-		if ( m_Blood )
+		if ( m_Blood && !m_BloodUpdated )
 			m_Blood.SetCurrent( m_SelectedInstance.GetBlood() );
 		
-		if ( m_Energy )
+		if ( m_Energy && !m_EnergyUpdated )
 			m_Energy.SetCurrent( m_SelectedInstance.GetEnergy() );
 		
-		if ( m_Water )
+		if ( m_Water && !m_WaterUpdated )
 			m_Water.SetCurrent( m_SelectedInstance.GetWater() );
 		
-		if ( m_Shock )
+		if ( m_Shock && !m_ShockUpdated )
 			m_Shock.SetCurrent( m_SelectedInstance.GetShock() );
 		
-		if ( m_Stamina )
+		if ( m_Stamina && !m_StaminaUpdated )
 			m_Stamina.SetCurrent( m_SelectedInstance.GetStamina() );
 
 		
