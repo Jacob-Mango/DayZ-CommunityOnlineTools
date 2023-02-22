@@ -1143,6 +1143,7 @@ class JMPlayerForm extends JMFormBase
 		super.OnShow();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 1000, true );
 
 		UpdateUI();
 
@@ -1154,6 +1155,7 @@ class JMPlayerForm extends JMFormBase
 		super.OnHide();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( RefreshStats );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
