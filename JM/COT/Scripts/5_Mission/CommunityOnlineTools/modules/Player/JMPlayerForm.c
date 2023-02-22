@@ -57,8 +57,11 @@ class JMPlayerForm extends JMFormBase
 	private UIActionButton m_TeleportPrevious;
 
 	private UIActionEditableText m_PositionX;
+	private bool m_PositionXUpdated;
 	private UIActionEditableText m_PositionY;
+	private bool m_PositionYUpdated;
 	private UIActionEditableText m_PositionZ;
+	private bool m_PositionZUpdated;
 	private UIActionButton m_PositionRefresh;
 	private UIActionButton m_Position;
 
@@ -163,7 +166,7 @@ class JMPlayerForm extends JMFormBase
 		InitWidgetsLeft();
 		InitWidgetsRight();
 
-		RefreshStats();  //! Show correct state on reinit
+		RefreshStats(true);  //! Show correct state on reinit
 	}
 
 	private void InitWidgetsLeft()
@@ -275,9 +278,9 @@ class JMPlayerForm extends JMFormBase
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
 
-		m_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:" );
-		m_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:" );
-		m_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:" );
+		m_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:", this, "Change_PositionX" );
+		m_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:", this, "Change_PositionY" );
+		m_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:", this, "Change_PositionZ" );
 
 		m_PositionX.SetOnlyNumbers( true );
 		m_PositionY.SetOnlyNumbers( true );
@@ -809,7 +812,7 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		RefreshStats();
+		RefreshStats(true);
 	}
 	
 	void Click_RefreshTeleports( UIEvent eid, UIActionBase action )
@@ -817,14 +820,50 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 			
-		RefreshTeleports();
+		RefreshTeleports(true);
+	}
+	
+	void Change_PositionX( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_PositionXUpdated = true;
+	}
+	
+	void Change_PositionY( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_PositionYUpdated = true;
+	}
+	
+	void Change_PositionZ( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_PositionZUpdated = true;
 	}
 
-	void RefreshStats()
+	void RefreshStats(bool force = false)
 	{
 		if ( !m_SelectedInstance )
 			return;
 		
+		RefreshTeleports(force);
+
+		if (force)
+		{
+			m_HealthUpdated = false;
+			m_BloodUpdated = false;
+			m_EnergyUpdated = false;
+			m_WaterUpdated = false;
+			m_ShockUpdated = false;
+			m_StaminaUpdated = false;
+		}
+
 		if ( m_Health && !m_HealthUpdated )
 			m_Health.SetCurrent( m_SelectedInstance.GetHealth() );
 		
@@ -869,16 +908,28 @@ class JMPlayerForm extends JMFormBase
 			m_InvertDmgDealt.SetChecked( m_SelectedInstance.GetInvertDmgDealt() );
 	}
 
-	void RefreshTeleports()
+	void RefreshTeleports(bool force = false)
 	{
 		if ( !m_SelectedInstance )
 			return;
 
 		vector position = m_SelectedInstance.GetPosition();
 
-		m_PositionX.SetText( position[0].ToString() );
-		m_PositionY.SetText( position[1].ToString() );
-		m_PositionZ.SetText( position[2].ToString() );
+		if (force)
+		{
+			m_PositionXUpdated = false;
+			m_PositionYUpdated = false;
+			m_PositionZUpdated = false;
+		}
+
+		if ( m_PositionX && !m_PositionXUpdated )
+			m_PositionX.SetText( position[0].ToString() );
+
+		if ( m_PositionY && !m_PositionYUpdated )
+			m_PositionY.SetText( position[1].ToString() );
+
+		if ( m_PositionZ && !m_PositionZUpdated )
+			m_PositionZ.SetText( position[2].ToString() );
 	}
 
 #ifndef EXPANSION_COT_BUGFIX_REF_UIACTIONS
@@ -1134,8 +1185,6 @@ class JMPlayerForm extends JMFormBase
 		}
 
 		RefreshStats();
-
-		RefreshTeleports();
 	}
 
 	override void OnShow()
