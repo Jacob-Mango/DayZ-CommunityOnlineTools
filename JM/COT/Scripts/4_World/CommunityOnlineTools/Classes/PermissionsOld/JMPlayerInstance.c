@@ -44,6 +44,8 @@ class JMPlayerInstance : Managed
 	private bool m_UnlimitedStamina;
 	private bool m_BrokenLegs;
 	private bool m_ReceiveDmgDealt;
+	private bool m_CannotBeTargetedByAI;
+	private bool m_RemoveCollision;
 
 	private ref JMPlayerSerialize m_PlayerFile;
 
@@ -128,6 +130,8 @@ class JMPlayerInstance : Managed
 				m_UnlimitedStamina = PlayerObject.COTHasUnlimitedStamina();
 				m_BrokenLegs = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
 				m_ReceiveDmgDealt = PlayerObject.COTGetReceiveDamageDealt();
+				m_CannotBeTargetedByAI = PlayerObject.COTGetCannotBeTargetedByAI();
+				m_RemoveCollision = PlayerObject.COTGetRemoveCollision();
 			}
 		}
 	}
@@ -372,6 +376,8 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_UnlimitedStamina );
 		ctx.Write( m_BrokenLegs );
 		ctx.Write( m_ReceiveDmgDealt );
+		ctx.Write( m_CannotBeTargetedByAI );
+		ctx.Write( m_RemoveCollision );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -395,6 +401,8 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_UnlimitedStamina );
 		ctx.Read( m_BrokenLegs );
 		ctx.Read( m_ReceiveDmgDealt );
+		ctx.Read( m_CannotBeTargetedByAI );
+		ctx.Read( m_RemoveCollision );
 	}
 
 	void Save()
@@ -652,6 +660,16 @@ class JMPlayerInstance : Managed
 	bool GetReceiveDmgDealt()
 	{
 		return m_ReceiveDmgDealt;
+	}
+
+	bool GetCannotBeTargetedByAI()
+	{
+		return m_CannotBeTargetedByAI;
+	}
+
+	bool GetRemoveCollision()
+	{
+		return m_RemoveCollision;
 	}
 };
 #endif

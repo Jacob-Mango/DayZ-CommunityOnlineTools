@@ -50,6 +50,8 @@ class JMPlayerForm extends JMFormBase
 	private UIActionCheckbox m_UnlimitedStamina;
 	private UIActionCheckbox m_BrokenLegs;
 	private UIActionCheckbox m_ReceiveDmgDealt;
+	private UIActionCheckbox m_CannotBeTargetedByAI;
+	private UIActionCheckbox m_RemoveCollision;
 
     private UIActionButton m_CopyPositionPlayer;
 	private UIActionButton m_TeleportToMe;
@@ -143,6 +145,8 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
 		UpdatePermission( m_ReceiveDmgDealt, "Admin.Player.ReceiveDamageDealt" );
 		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
+		UpdatePermission( m_CannotBeTargetedByAI, "Admin.Player.CannotBeTargetedByAI" );
+		UpdatePermission( m_RemoveCollision, "Admin.Player.RemoveCollision" );
 
 		UpdatePermission( m_PositionX, "Admin.Player.Teleport.Position" );
 		UpdatePermission( m_PositionY, "Admin.Player.Teleport.Position" );
@@ -341,6 +345,8 @@ class JMPlayerForm extends JMFormBase
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
 		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
+		m_RemoveCollision = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REMOVE_COLLISION", this, "Click_RemoveCollision", false );
+		m_CannotBeTargetedByAI = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI", this, "Click_CannotBeTargetedByAI", false );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -926,6 +932,12 @@ class JMPlayerForm extends JMFormBase
 		
 		if ( m_ReceiveDmgDealt )
 			m_ReceiveDmgDealt.SetChecked( m_SelectedInstance.GetReceiveDmgDealt() );
+		
+		if ( m_CannotBeTargetedByAI )
+			m_CannotBeTargetedByAI.SetChecked( m_SelectedInstance.GetCannotBeTargetedByAI() );
+		
+		if ( m_RemoveCollision )
+			m_RemoveCollision.SetChecked( m_SelectedInstance.GetRemoveCollision() );
 	}
 
 	void RefreshTeleports(bool force = false)
@@ -1122,6 +1134,16 @@ class JMPlayerForm extends JMFormBase
 		m_Module.SetReceiveDamageDealt( m_ReceiveDmgDealt.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
+	void Click_CannotBeTargetedByAI( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UpdateLastChangeTime();
+
+		m_Module.SetCannotBeTargetedByAI( m_CannotBeTargetedByAI.IsChecked(), JM_GetSelected().GetPlayers() );
+	}
+
 	void Click_Invisible( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -1130,6 +1152,16 @@ class JMPlayerForm extends JMFormBase
 		UpdateLastChangeTime();
 
 		m_Module.SetInvisible( m_Invisibility.IsChecked(), JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_RemoveCollision( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UpdateLastChangeTime();
+
+		m_Module.SetRemoveCollision( m_RemoveCollision.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_UnlimitedAmmo( UIEvent eid, UIActionBase action )

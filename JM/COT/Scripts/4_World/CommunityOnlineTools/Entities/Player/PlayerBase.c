@@ -25,6 +25,8 @@ modded class PlayerBase
 	vector m_JM_CameraPosition;
 
 	private bool m_COT_ReceiveDamageDealt;
+	private bool m_COT_CannotBeTargetedByAI;
+	private bool m_COT_RemoveCollision;
 
 	void PlayerBase()
 	{
@@ -143,10 +145,13 @@ modded class PlayerBase
 
 	override bool CanBeTargetedByAI( EntityAI ai )
 	{
-		if ( m_JMIsInvisible )
+		if (!super.CanBeTargetedByAI( ai ))
 			return false;
 
-		return super.CanBeTargetedByAI( ai );
+		if (m_COT_CannotBeTargetedByAI)
+			return false;
+
+		return true;
 	}
 
 	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
@@ -351,10 +356,32 @@ modded class PlayerBase
 			m_JMIsInvisible = mode;
 			m_JMIsInvisibleRemoteSynch = mode;
 
-			PhysicsSetSolid(!mode);
+			COTSetRemoveCollision(mode);
+			COTSetCannotBeTargetedByAI(mode);
 
 			SetSynchDirty();
 		}
+	}
+
+	void COTSetCannotBeTargetedByAI( bool mode )
+	{
+		m_COT_CannotBeTargetedByAI = mode;
+	}
+
+	bool COTGetCannotBeTargetedByAI()
+	{
+		return m_COT_CannotBeTargetedByAI;
+	}
+
+	void COTSetRemoveCollision( bool mode )
+	{
+		m_COT_RemoveCollision = mode;
+		PhysicsSetSolid(!mode);
+	}
+
+	bool COTGetRemoveCollision()
+	{
+		return m_COT_RemoveCollision;
 	}
 
 	void COTSetReceiveDamageDealt(bool state)
