@@ -27,7 +27,7 @@ modded class CF_Permission_PlayerBase
 	protected bool m_Frozen;
 	protected bool m_Invisibility;
 	protected bool m_UnlimitedAmmo;
-	protected bool m_InvertDmgDealt;
+	protected bool m_ReceiveDmgDealt;
 
 	override void OnSend( ParamsWriteContext ctx )
 	{
@@ -91,7 +91,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_Frozen );
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
-		ctx.Write( m_InvertDmgDealt );
+		ctx.Write( m_ReceiveDmgDealt );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -112,7 +112,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_Frozen );
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
-		ctx.Read( m_InvertDmgDealt );
+		ctx.Read( m_ReceiveDmgDealt );
 	}
 
 	int GetDataLastUpdatedTime()
@@ -210,9 +210,9 @@ modded class CF_Permission_PlayerBase
 		return m_UnlimitedAmmo;
 	}
 
-	bool GetInvertDmgDealt()
+	bool GetReceiveDmgDealt()
 	{
-		return m_InvertDmgDealt;
+		return m_ReceiveDmgDealt;
 	}
 };
 #endif
