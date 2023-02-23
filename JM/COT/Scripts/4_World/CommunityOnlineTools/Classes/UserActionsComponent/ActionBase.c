@@ -6,7 +6,7 @@ modded class ActionBase
 		if (!super.Can(player, target, item, condition_mask))
 			return false;
 
-		if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0)
+		if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 || GetCOTWindowManager().PendingDeletionCount() > 0)
 			return false;
 
 		return true;
