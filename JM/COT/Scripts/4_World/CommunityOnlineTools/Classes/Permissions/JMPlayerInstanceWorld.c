@@ -28,6 +28,8 @@ modded class CF_Permission_Player
 		m_Invisibility = PBObject.COTIsInvisible();
 		m_UnlimitedAmmo = PBObject.COTHasUnlimitedAmmo();
 		m_ReceiveDmgDealt = PBObject.COTGetReceiveDamageDealt();
+		m_CannotBeTargetedByAI = PBObject.COTGetCannotBeTargetedByAI();
+		m_RemoveCollision = PBObject.COTGetRemoveCollision();
 
 		return true;
 	}

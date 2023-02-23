@@ -15,10 +15,12 @@ enum JMPlayerModuleRPC
 	StartSpectating,
 	EndSpectating,
 	EndSpectating_Finish,
+	SetCannotBeTargetedByAI,
 	SetGodMode,
 	SetFreeze,
 	SetInvisible,
 	SetReceiveDamageDealt,
+	SetRemoveCollision,
 	SetUnlimitedAmmo,
 	SetUnlimitedStamina,
 	SetBrokenLegs,
@@ -52,6 +54,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.ReceiveDamageDealt" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
@@ -208,6 +212,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetInvisible:
 			RPC_SetInvisible( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetRemoveCollision:
+			RPC_SetRemoveCollision( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetCannotBeTargetedByAI:
+			RPC_SetCannotBeTargetedByAI( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.SetUnlimitedAmmo:
 			RPC_SetUnlimitedAmmo( ctx, sender, target );
@@ -1335,6 +1345,63 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetReceiveDamageDealt( value, guids, senderRPC, instance );
 	}
 
+	void SetCannotBeTargetedByAI( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetCannotBeTargetedByAI( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetCannotBeTargetedByAI, true, NULL );
+		}
+	}
+
+	private void Exec_SetCannotBeTargetedByAI( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetCannotBeTargetedByAI( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set cannot be targeted by AI to " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " cannot be targeted by AI" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " cannot be targeted by AI" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetCannotBeTargetedByAI( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.CannotBeTargetedByAI", senderRPC, instance ) )
+			return;
+
+		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
+	}
+
 	void SetInvisible( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1390,6 +1457,63 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		Exec_SetInvisible( value, guids, senderRPC, instance );
+	}
+
+	void SetRemoveCollision( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetRemoveCollision( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetRemoveCollision, true, NULL );
+		}
+	}
+
+	private void Exec_SetRemoveCollision( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetRemoveCollision( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set remove collision to " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " remove collision" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " remove collision" );
+			}
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetRemoveCollision( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.RemoveCollision", senderRPC, instance ) )
+			return;
+
+		Exec_SetRemoveCollision( value, guids, senderRPC, instance );
 	}
 
 	void SetUnlimitedAmmo( bool value, array< string > guids )

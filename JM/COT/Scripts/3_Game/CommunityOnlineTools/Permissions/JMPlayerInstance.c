@@ -28,6 +28,8 @@ modded class CF_Permission_PlayerBase
 	protected bool m_Invisibility;
 	protected bool m_UnlimitedAmmo;
 	protected bool m_ReceiveDmgDealt;
+	protected bool m_CannotBeTargetedByAI;
+	protected bool m_RemoveCollision;
 
 	override void OnSend( ParamsWriteContext ctx )
 	{
@@ -92,6 +94,8 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
 		ctx.Write( m_ReceiveDmgDealt );
+		ctx.Write( m_CannotBeTargetedByAI );
+		ctx.Write( m_RemoveCollision );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -113,6 +117,8 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
 		ctx.Read( m_ReceiveDmgDealt );
+		ctx.Read( m_CannotBeTargetedByAI );
+		ctx.Read( m_RemoveCollision );
 	}
 
 	int GetDataLastUpdatedTime()
@@ -213,6 +219,16 @@ modded class CF_Permission_PlayerBase
 	bool GetReceiveDmgDealt()
 	{
 		return m_ReceiveDmgDealt;
+	}
+
+	bool GetCannotBeTargetedByAI()
+	{
+		return m_CannotBeTargetedByAI;
+	}
+
+	bool GetRemoveCollision()
+	{
+		return m_RemoveCollision;
 	}
 };
 #endif
