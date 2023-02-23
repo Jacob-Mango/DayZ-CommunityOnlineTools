@@ -3,6 +3,7 @@ enum JMTeleportModuleRPC
 	INVALID = 10240,
 	Load,
 	Position,
+	PositionRaycast,
 	Location,
 	COUNT
 };
@@ -133,7 +134,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		Bind( new JMModuleBinding( "Input_Cursor",				"UATeleportModuleTeleportCursor",		true 	) );
+		Bind( new JMModuleBinding( "Input_Cursor_RaycastOnServer",				"UATeleportModuleTeleportCursor",		true 	) );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()
@@ -177,6 +178,38 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
+	void Input_Cursor_RaycastOnServer( UAInput input )
+	{
+		if ( !(input.LocalPress()) )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		vector rayStart;
+		vector direction;
+		Camera camera = Camera.GetCurrentCamera();
+		if ( camera && camera.IsActive() )
+		{
+			Print("Input_Cursor_RaycastOnServer - Using current active camera: " + camera);
+			rayStart = CurrentActiveCamera.GetPosition();
+			direction = CurrentActiveCamera.GetDirection();
+		} else 
+		{
+			Print("Input_Cursor_RaycastOnServer - Using player camera");
+			rayStart = GetGame().GetCurrentCameraPosition();
+			direction = GetGame().GetCurrentCameraDirection();
+		}
+
+		PositionRaycast( rayStart, direction );
+	}
+
 	private void SetPlayerPosition( PlayerBase player, vector position )
 	{
 		player.SetLastPosition();
@@ -203,6 +236,9 @@ class JMTeleportModule: JMRenderableModuleBase
 			break;
 		case JMTeleportModuleRPC.Position:
 			RPC_Position( ctx, sender, target );
+			break;
+		case JMTeleportModuleRPC.PositionRaycast:
+			RPC_PositionRaycast( ctx, sender, target );
 			break;
 		case JMTeleportModuleRPC.Location:
 			RPC_Location( ctx, sender, target );
@@ -306,11 +342,83 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( isCursor ) )
 				return;
 
-			PlayerBase player = GetPlayerObjectByIdentity( senderRPC );
+			PlayerBase player = senderRPC.GetPlayer();
 			if ( !player )
 				return;
 
 			Server_Position( pos, isCursor, player );
+		}
+	}
+
+	void PositionRaycast( vector rayStart, vector direction )
+	{
+		if ( IsMissionOffline() )
+		{
+			Server_PositionRaycast( rayStart, direction, PlayerBase.Cast( GetGame().GetPlayer() ) );
+		} else if ( IsMissionClient() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( rayStart );
+			rpc.Write( direction );
+			rpc.Send( NULL, JMTeleportModuleRPC.PositionRaycast, true, NULL );
+		}
+	}
+
+	private void Server_PositionRaycast( vector rayStart, vector direction, PlayerBase player )
+	{
+		auto trace = CF_Trace_0(this, "Server_PositionRaycast");
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
+			return;
+
+		Object ignore;
+		if (!Class.CastTo(ignore, player.GetParent()))
+			ignore = player;
+
+		float distance = GetGame().ServerConfigGetInt("defaultVisibility");
+		if (distance < 1375)
+			distance = 1375;
+
+		bool hit;
+		vector position = COT_PerformRayCast( rayStart, rayStart + direction.Normalized() * distance, ignore, hit );
+
+		if ( !hit )
+		{
+			COTCreateNotification( player.GetIdentity(), new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
+			return;
+		}
+
+		SetPlayerPosition( player, position );
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", player.GetIdentity() ) )
+		{
+			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
+		
+			SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+		}
+	}
+
+	private void RPC_PositionRaycast( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			vector pos;
+			if ( !ctx.Read( pos ) )
+				return;
+
+			vector dir;
+			if ( !ctx.Read( dir ) )
+				return;
+
+			PlayerBase player = senderRPC.GetPlayer();
+			if ( !player )
+				return;
+
+			Server_PositionRaycast( pos, dir, player );
 		}
 	}
 
