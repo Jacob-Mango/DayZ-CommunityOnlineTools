@@ -14,7 +14,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	private Class m_EventManager;
 
 	autoptr array<string> Events = new array<string>();
-	bool AllowMultipleEvents;
+	int MaxEventCount;
 	
 	void JMNamalskEventManagerModule()
 	{
@@ -123,13 +123,15 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			
 			case JMNamalskEventManagerRPC.LoadEvents:
 			{
+				auto trace1 = CF_Trace_0(this, "OnRPC - LoadEvents");
+
 				if (!GetGame().IsClient()) return;
 
 				array<string> evts;
 				if (!ctx.Read(evts)) return;
 				Events.Copy(evts);
 
-				if (!ctx.Read(AllowMultipleEvents)) return;
+				if (!ctx.Read(MaxEventCount)) return;
 
 				OnSettingsUpdated();
 				
@@ -138,11 +140,13 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			
 			case JMNamalskEventManagerRPC.RequestEvents:
 			{
+				auto trace2 = CF_Trace_0(this, "OnRPC - RequestEvents");
+
 				if (!GetPermissionsManager().HasPermission("Namalsk", sender, instance)) return;
 
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(Events);
-				rpc.Write(AllowMultipleEvents);
+				rpc.Write(MaxEventCount);
 				rpc.Send(NULL, JMNamalskEventManagerRPC.LoadEvents, true, NULL);
 
 				break;
@@ -161,20 +165,36 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	void RetrievePossibleEvents()
 	{
-		g_Script.CallFunction(GetGame().GetMission(), "GetEventManager", m_EventManager, null);
+		auto trace = CF_Trace_0(this, "RetrievePossibleEvents");
+
+		g_Script.CallFunction(GetGame().GetMission(), "GetNamEventManager", m_EventManager, null);
+		Print("m_EventManager " + m_EventManager);
 		if (!m_EventManager) return;
 		
-		map<typename, float> possibleEvents;
-		EnScript.GetClassVar(m_EventManager, "m_PossibleEventTypes", 0, possibleEvents);
+		//! Always returns empty, but we want all possible event types (also unregistered ones) anyway...
+		//map<typename, float> possibleEvents;
+		//EnScript.GetClassVar(m_EventManager, "m_PossibleEventTypes", 0, possibleEvents);
+		//foreach (typename type, float duration: possibleEvents)
+		//{
+			//Print("Event type " + type + " duration " + duration);
+		//}
 
-		EnScript.GetClassVar(m_EventManager, "m_AllowMultipleEvents", 0, AllowMultipleEvents);
+		EnScript.GetClassVar(m_EventManager, "m_MaxEventCount", 0, MaxEventCount);
+		Print("MaxEventCount " + MaxEventCount);
 
 		Events.Clear();
 
-		array<typename> types = possibleEvents.GetKeyArray();
-		for (int i = 0; i < types.Count(); i++)
+		//array<typename> types = possibleEvents.GetKeyArray();
+		//for (int i = 0; i < types.Count(); i++)
+		//{
+			//string evt = types[i].ToString();
+		//! Just use a hardcoded list and be done with it
+		TStringArray evts = {"Aurora", "Blizzard", "ExtremeCold", "Snowfall", "EVRStorm", "EVRStormDeadly", "HeavyFog"};
+		foreach (string evt: evts)
 		{
-			string evt = types[i].ToString();
+			if (!evt.ToType())
+				continue;
+
 			Events.Insert(evt);
 
 			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Start");
@@ -184,13 +204,18 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	void StartEvent(string evt)
 	{
+		auto trace = CF_Trace_0(this, "StartEvent");
+
 		if (!m_EventManager) return;
 
-		g_Script.CallFunction(m_EventManager, "StartEvent", null, evt.ToType());
+		Param2<typename, bool> parms = new Param2<typename, bool>(evt.ToType(), true);
+		g_Script.CallFunctionParams(m_EventManager, "StartEvent", null, parms);
 	}
 
 	void CancelEvent(string evt)
 	{
+		auto trace = CF_Trace_0(this, "CancelEvent");
+
 		if (!m_EventManager) return;
 
 		g_Script.CallFunction(m_EventManager, "CancelEvent", null, evt.ToType());
@@ -198,6 +223,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	
 	void RequestEvents()
 	{
+		auto trace = CF_Trace_0(this, "RequestEvents");
+
 		if (IsMissionClient() && !IsMissionOffline())
 		{
 			ScriptRPC rpc = new ScriptRPC();
