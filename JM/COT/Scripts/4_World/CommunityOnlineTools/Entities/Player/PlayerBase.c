@@ -24,7 +24,7 @@ modded class PlayerBase
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
 
-	private bool m_COT_InvertDamageDealt;
+	private bool m_COT_ReceiveDamageDealt;
 
 	void PlayerBase()
 	{
@@ -152,7 +152,7 @@ modded class PlayerBase
 	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
 	{
 		PlayerBase sourcePlayer;
-		if (source && Class.CastTo(sourcePlayer, source.GetHierarchyRootPlayer()) && sourcePlayer != this && sourcePlayer.COTGetInvertDamageDealt())
+		if (source && Class.CastTo(sourcePlayer, source.GetHierarchyRootPlayer()) && sourcePlayer != this && sourcePlayer.COTGetReceiveDamageDealt())
 		{
 			sourcePlayer.ProcessDirectDamage(damageType, source, dmgZone, ammo, modelPos, speedCoef);
 			return false;
@@ -354,14 +354,14 @@ modded class PlayerBase
 		}
 	}
 
-	void COTSetInvertDamageDealt(bool state)
+	void COTSetReceiveDamageDealt(bool state)
 	{
-		m_COT_InvertDamageDealt = state;
+		m_COT_ReceiveDamageDealt = state;
 	}
 
-	bool COTGetInvertDamageDealt()
+	bool COTGetReceiveDamageDealt()
 	{
-		return m_COT_InvertDamageDealt;
+		return m_COT_ReceiveDamageDealt;
 	}
 
 	void COTSetUnlimitedAmmo( bool mode )

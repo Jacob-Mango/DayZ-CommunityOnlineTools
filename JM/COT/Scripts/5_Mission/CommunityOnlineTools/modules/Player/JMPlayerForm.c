@@ -49,7 +49,7 @@ class JMPlayerForm extends JMFormBase
 	private UIActionCheckbox m_UnlimitedAmmo;
 	private UIActionCheckbox m_UnlimitedStamina;
 	private UIActionCheckbox m_BrokenLegs;
-	private UIActionCheckbox m_InvertDmgDealt;
+	private UIActionCheckbox m_ReceiveDmgDealt;
 
     private UIActionButton m_CopyPositionPlayer;
 	private UIActionButton m_TeleportToMe;
@@ -141,7 +141,7 @@ class JMPlayerForm extends JMFormBase
 		UpdatePermission( m_StopBleeding, "Admin.Player.StopBleeding" );
 		UpdatePermission( m_StripPlayer, "Admin.Player.Strip" );
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
-		UpdatePermission( m_InvertDmgDealt, "Admin.Player.InvertDamageDealt" );
+		UpdatePermission( m_ReceiveDmgDealt, "Admin.Player.ReceiveDamageDealt" );
 		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
 
 		UpdatePermission( m_PositionX, "Admin.Player.Teleport.Position" );
@@ -340,7 +340,7 @@ class JMPlayerForm extends JMFormBase
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
-		m_InvertDmgDealt = UIActionManager.CreateCheckbox( actions2, "Invert damage dealt:", this, "Click_SetInvertDamageDealt", false );
+		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -924,8 +924,8 @@ class JMPlayerForm extends JMFormBase
 		if ( m_BrokenLegs )
 			m_BrokenLegs.SetChecked( m_SelectedInstance.HasBrokenLegs() );
 		
-		if ( m_InvertDmgDealt )
-			m_InvertDmgDealt.SetChecked( m_SelectedInstance.GetInvertDmgDealt() );
+		if ( m_ReceiveDmgDealt )
+			m_ReceiveDmgDealt.SetChecked( m_SelectedInstance.GetReceiveDmgDealt() );
 	}
 
 	void RefreshTeleports(bool force = false)
@@ -1112,14 +1112,14 @@ class JMPlayerForm extends JMFormBase
 		m_Module.SetBrokenLegs( m_BrokenLegs.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
-	void Click_SetInvertDamageDealt( UIEvent eid, UIActionBase action )
+	void Click_SetReceiveDamageDealt( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
 		UpdateLastChangeTime();
 
-		m_Module.SetInvertDamageDealt( m_InvertDmgDealt.IsChecked(), JM_GetSelected().GetPlayers() );
+		m_Module.SetReceiveDamageDealt( m_ReceiveDmgDealt.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_Invisible( UIEvent eid, UIActionBase action )

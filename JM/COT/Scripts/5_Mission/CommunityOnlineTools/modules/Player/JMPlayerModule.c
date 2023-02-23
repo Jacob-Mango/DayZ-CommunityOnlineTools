@@ -18,7 +18,7 @@ enum JMPlayerModuleRPC
 	SetGodMode,
 	SetFreeze,
 	SetInvisible,
-	SetInvertDamageDealt,
+	SetReceiveDamageDealt,
 	SetUnlimitedAmmo,
 	SetUnlimitedStamina,
 	SetBrokenLegs,
@@ -50,7 +50,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.InvertDamageDealt" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.ReceiveDamageDealt" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
@@ -236,8 +236,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.SetRoles:
 			RPC_SetRoles( ctx, sender, target );
 			break;
-		case JMPlayerModuleRPC.SetInvertDamageDealt:
-			RPC_SetInvertDamageDealt( ctx, sender, target );
+		case JMPlayerModuleRPC.SetReceiveDamageDealt:
+			RPC_SetReceiveDamageDealt( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Kick:
 			RPC_Kick( ctx, sender, target );
@@ -1278,21 +1278,21 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetFreeze( value, guids, senderRPC, instance );
 	}
 
-	void SetInvertDamageDealt( bool value, array< string > guids )
+	void SetReceiveDamageDealt( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetInvertDamageDealt( value, guids, NULL );
+			Exec_SetReceiveDamageDealt( value, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( value );
 			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetInvertDamageDealt, true, NULL );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetReceiveDamageDealt, true, NULL );
 		}
 	}
 
-	private void Exec_SetInvertDamageDealt( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetReceiveDamageDealt( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1302,23 +1302,23 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if ( player == NULL )
 				continue;
 
-			player.COTSetInvertDamageDealt( value );
+			player.COTSetReceiveDamageDealt( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Invert Damage Dealt To " + value + " [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Set Receive Damage Dealt To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
 			if ( value )
 			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " invert damage dealt" );
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " receive damage dealt" );
 			} else
 			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " invert damage dealt" );
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " receive damage dealt" );
 			}
 
 			players[i].Update();
 		}
 	}
 
-	private void RPC_SetInvertDamageDealt( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetReceiveDamageDealt( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		bool value;
 		if ( !ctx.Read( value ) )
@@ -1329,10 +1329,10 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.InvertDamageDealt", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.ReceiveDamageDealt", senderRPC, instance ) )
 			return;
 
-		Exec_SetInvertDamageDealt( value, guids, senderRPC, instance );
+		Exec_SetReceiveDamageDealt( value, guids, senderRPC, instance );
 	}
 
 	void SetInvisible( bool value, array< string > guids )
