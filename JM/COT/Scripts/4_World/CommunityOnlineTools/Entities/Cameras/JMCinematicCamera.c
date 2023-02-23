@@ -27,12 +27,14 @@ class JMCinematicCamera extends JMCameraBase
 		float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
 
 		float speedInc = 0;
-		if ( forward != 0 || strafe != 0 || altitude != 0 )
+		if ( input.HasGameFocus() )
 		{
 			float zoomAmt = input.LocalValue( "UACameraToolZoomForwards" ) - input.LocalValue( "UACameraToolZoomBackwards" );
 
 			if ( zoomAmt == 0 )
 				speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
+				if (speedInc)
+					Print(speedInc);
 		}
 
 
