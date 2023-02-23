@@ -19,7 +19,7 @@
             <input name="UACOTToggleServerInfo" loc="STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO" />
             
             <input name="UATeleportModuleTeleportCursor" loc="STR_COT_INPUT_TELEPORT_CROSSHAIR" />
-            <input name="UATeleportModuleWorldToModelLookAt" loc="STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT" />
+            <input name="UATeleportModuleWorldToModelLookAt" loc="STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT" visible="false" />
 
             <input name="UACameraToolToggleCamera" loc="STR_COT_INPUT_TOGGLE_FREECAM" />
 
