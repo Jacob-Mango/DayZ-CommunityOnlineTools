@@ -340,8 +340,8 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( isCursor ) )
 				return;
 
-			PlayerBase player = senderRPC.GetPlayer();
-			if ( !player )
+			PlayerBase player;
+			if ( !Class.CastTo(player, senderRPC.GetPlayer()) )
 				return;
 
 			Server_Position( pos, isCursor, player );
@@ -412,8 +412,8 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( dir ) )
 				return;
 
-			PlayerBase player = senderRPC.GetPlayer();
-			if ( !player )
+			PlayerBase player;
+			if ( !Class.CastTo(player, senderRPC.GetPlayer()) )
 				return;
 
 			Server_PositionRaycast( pos, dir, player );
