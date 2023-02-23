@@ -33,6 +33,8 @@ class COTModule : JMModuleBase
 
 	override void OnMissionLoaded()
 	{
+		auto trace = CF_Trace_0(this, "OnMissionLoaded");
+
 		super.OnMissionLoaded();
 		
 		if ( IsMissionClient() )

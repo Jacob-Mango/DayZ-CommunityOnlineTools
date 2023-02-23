@@ -10,6 +10,8 @@ class JMPermissionManager
 
 	private string m_ClientGUID;
 
+	private bool m_MissionLoaded;
+
 	void JMPermissionManager()
 	{
 		Players = new map< string, ref JMPlayerInstance >;
@@ -152,13 +154,22 @@ class JMPermissionManager
 
 	void RegisterPermission( string permission )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "RegisterPermission").Add(permission);
+		#endif
+
 		Assert_Null( RootPermission );
 
-		RootPermission.AddPermission( permission, JMPermissionType.INHERIT );
+		if (m_MissionLoaded)
+			Error("Cannot register new permissions once mission is loaded!");
+		else
+			RootPermission.AddPermission( permission, JMPermissionType.INHERIT, false );
 	}
 
 	array< string > Serialize()
 	{
+		auto trace = CF_Trace_0(this, "Serialize");
+
 		Assert_Null( RootPermission );
 
 		array< string > data = new array< string >;
@@ -262,7 +273,7 @@ class JMPermissionManager
 
 		inst = new JMPlayerInstance( ident );
 
-		inst.CopyPermissions( RootPermission );
+		//inst.CopyPermissions( RootPermission );
 		inst.Load();
 
 		Players.Insert( guid, inst );
@@ -453,6 +464,11 @@ class JMPermissionManager
 		Assert_Null( Roles );
 
 		return Roles.Get( name );
+	}
+
+	void SetMissionLoaded()
+	{
+		m_MissionLoaded = true;
 	}
 }
 

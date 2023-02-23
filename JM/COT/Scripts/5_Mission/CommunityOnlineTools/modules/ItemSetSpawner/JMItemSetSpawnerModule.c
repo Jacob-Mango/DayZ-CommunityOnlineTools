@@ -16,6 +16,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		GetPermissionsManager().RegisterPermission( "Items.View" );
 		GetPermissionsManager().RegisterPermission( "Items.CreateSet" );
+		GetPermissionsManager().RegisterPermission( "Items.Spawn" );
 	}
 
 	override void EnableUpdate()
@@ -68,31 +69,6 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		Load();
-	}
-
-	override void OnSettingsUpdated()
-	{
-		super.OnSettingsUpdated();
-
-		if ( settings )
-		{
-			for ( int i = 0; i < settings.ItemSets.Count(); i++ )
-			{
-				string vehicle = settings.ItemSets.GetKey( i );
-				vehicle.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Items." + vehicle );
-			}
-
-			meta = JMItemSetMeta.DeriveFromSettings( settings );
-		} else if ( meta )
-		{
-			for ( i = 0; i < meta.ItemSets.Count(); i++ )
-			{
-				vehicle = meta.ItemSets.Get( i );
-				vehicle.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Items." + vehicle );
-			}
-		}
 	}
 
 	override void OnMissionFinish()
@@ -193,10 +169,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		if ( !file )
 			return;
 
-		string perm = file.Name;
-		perm.Replace( " ", "." );
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Items.Spawn", ident, instance ) )
 			return;
 
 		SpawnItemSet( file, position );
@@ -247,10 +221,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		if ( !file )
 			return;
 
-		string perm = file.Name;
-		perm.Replace( " ", "." );
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Items." + perm, ident, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Items.Spawn", ident, instance ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );

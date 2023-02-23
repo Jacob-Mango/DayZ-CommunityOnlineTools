@@ -79,6 +79,9 @@ class JMTeleportForm extends JMFormBase
 	{
 		m_LstPositionList.ClearItems();
 
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
+			return;
+
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
 
@@ -92,9 +95,6 @@ class JMTeleportForm extends JMFormBase
 			name.ToLower();
 
 			if ( (filter != "" && (!name.Contains( filter ))) ) 
-				continue;
-
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locations[i].Permission ) )
 				continue;
 
 			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );

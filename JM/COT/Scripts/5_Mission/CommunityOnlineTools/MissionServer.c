@@ -32,6 +32,13 @@ modded class MissionServer
 		g_cotBase.OnStart();
 	}
 
+	override void OnMissionLoaded()
+	{
+		super.OnMissionLoaded();
+
+		GetPermissionsManager().SetMissionLoaded();
+	}
+
 	override void OnMissionFinish()
 	{
 		g_cotBase.OnFinish();

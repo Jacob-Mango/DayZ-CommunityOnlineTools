@@ -407,6 +407,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
+		auto trace = CF_Trace_2(this, "UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+
 		if ( IsMissionHost() )
 		{
 			Server_UpdateRole( role, toSendTo );
@@ -433,6 +435,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
+		auto trace = CF_Trace_2(this, "Server_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+
 		if ( GetGame().IsServer() )
 		{
 			role.Serialize();
