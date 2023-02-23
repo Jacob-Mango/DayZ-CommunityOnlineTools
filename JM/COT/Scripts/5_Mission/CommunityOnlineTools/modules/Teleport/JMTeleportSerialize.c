@@ -47,19 +47,7 @@ class JMTeleportSerialize : Managed
 
 	void AddLocation( string name, vector position, float radius = 4.0 )
 	{
-		string permission = name + "";
-		permission.Replace( " ", "" );
-		permission.Replace( "'", "" );
-		permission.Replace( "(", "" );
-		permission.Replace( ")", "" );
-		permission.Replace( "[", "" );
-		permission.Replace( "]", "" );
-		permission.Replace( "{", "" );
-		permission.Replace( "}", "" );
-		permission.Replace( "\\", "" );
-		permission.Replace( "/", "" );
-
-		Locations.Insert( new JMTeleportLocation( name, permission, position, radius ) );
+		Locations.Insert( new JMTeleportLocation( name, position, radius ) );
 	}
 
 	void Defaults()
@@ -156,10 +144,6 @@ class JMTeleportSerialize : Managed
 			if ( !ctx.Read( name ) )
 				return false;
 
-			string permission;
-			if ( !ctx.Read( permission ) )
-				return false;
-
 			vector position;
 			if ( !ctx.Read( position ) )
 				return false;
@@ -168,7 +152,7 @@ class JMTeleportSerialize : Managed
 			if ( !ctx.Read( radius ) )
 				return false;
 
-			Locations.Insert( new JMTeleportLocation( name, permission, position, radius ) );
+			Locations.Insert( new JMTeleportLocation( name, position, radius ) );
 		}
 
 		return true;

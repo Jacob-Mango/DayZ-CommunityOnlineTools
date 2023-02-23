@@ -167,6 +167,8 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void Serialize( out array< string > output, string prepend = "" )
 	{
+		auto trace = CF_Trace_0(this, "Serialize");
+
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
 			string serialize = prepend + Children[i].Name;

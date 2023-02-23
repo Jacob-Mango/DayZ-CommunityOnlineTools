@@ -1,3 +1,17 @@
+enum JMPlayerVariables
+{
+	BLOODY_HANDS = 1,
+	GODMODE = 2,
+	FROZEN = 4,
+	INVISIBILITY = 8,
+	UNLIMITED_AMMO = 16,
+	UNLIMITED_STAMINA = 32,
+	BROKEN_LEGS = 64,
+	RECEIVE_DMG_DEALT = 128,
+	CANNOT_BE_TARGETED_BY_AI = 256,
+	REMOVE_COLLISION = 512
+}
+
 #ifndef CF_MODULE_PERMISSIONS
 class JMPlayerInstance : Managed
 {
@@ -36,16 +50,8 @@ class JMPlayerInstance : Managed
 	private float m_Stamina;
 
 	private int m_LifeSpanState;
-	private bool m_BloodyHands;
-	private bool m_GodMode;
-	private bool m_Frozen;
-	private bool m_Invisibility;
-	private bool m_UnlimitedAmmo;
-	private bool m_UnlimitedStamina;
-	private bool m_BrokenLegs;
-	private bool m_ReceiveDmgDealt;
-	private bool m_CannotBeTargetedByAI;
-	private bool m_RemoveCollision;
+
+	private ref map<int, bool> m_PlayerVars;
 
 	private ref JMPlayerSerialize m_PlayerFile;
 
@@ -65,7 +71,10 @@ class JMPlayerInstance : Managed
 			m_Name = JMConstants.OFFLINE_NAME;
 		}
 
+		m_PlayerVars = new map<int, bool>;
+
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
+		m_RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		m_Roles = new array< string >();
 		m_PlayerFile = new JMPlayerSerialize();
 	}
@@ -122,22 +131,25 @@ class JMPlayerInstance : Managed
 				m_Tremor = PlayerObject.GetStatTremor().Get();
 				m_Stamina = PlayerObject.GetStatStamina().Get();
 				m_LifeSpanState = PlayerObject.GetLifeSpanState();
-				m_BloodyHands = PlayerObject.HasBloodyHands();
-				m_GodMode = PlayerObject.COTHasGodMode();
-				m_Frozen = PlayerObject.COTIsFrozen();
-				m_Invisibility = PlayerObject.COTIsInvisible();
-				m_UnlimitedAmmo = PlayerObject.COTHasUnlimitedAmmo();
-				m_UnlimitedStamina = PlayerObject.COTHasUnlimitedStamina();
-				m_BrokenLegs = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
-				m_ReceiveDmgDealt = PlayerObject.COTGetReceiveDamageDealt();
-				m_CannotBeTargetedByAI = PlayerObject.COTGetCannotBeTargetedByAI();
-				m_RemoveCollision = PlayerObject.COTGetRemoveCollision();
+
+				m_PlayerVars[JMPlayerVariables.BLOODY_HANDS] = PlayerObject.HasBloodyHands();
+				m_PlayerVars[JMPlayerVariables.GODMODE] = PlayerObject.COTHasGodMode();
+				m_PlayerVars[JMPlayerVariables.FROZEN] = PlayerObject.COTIsFrozen();
+				m_PlayerVars[JMPlayerVariables.INVISIBILITY] = PlayerObject.COTIsInvisible();
+				m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO] = PlayerObject.COTHasUnlimitedAmmo();
+				m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA] = PlayerObject.COTHasUnlimitedStamina();
+				m_PlayerVars[JMPlayerVariables.BROKEN_LEGS] = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
+				m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT] = PlayerObject.COTGetReceiveDamageDealt();
+				m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI] = PlayerObject.COTGetCannotBeTargetedByAI();
+				m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION] = PlayerObject.COTGetRemoveCollision();
 			}
 		}
 	}
 
 	void CopyPermissions( JMPermission copy )
 	{
+		auto trace = CF_Trace_0(this, "CopyPermissions");
+
 		Assert_Null( m_RootPermission );
 		Assert_Null( copy );
 
@@ -157,6 +169,8 @@ class JMPlayerInstance : Managed
 
 	void LoadPermissions( array< string > permissions )
 	{
+		auto trace = CF_Trace_0(this, "LoadPermissions");
+
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Deserialize( permissions );
@@ -263,10 +277,6 @@ class JMPlayerInstance : Managed
 
 	void OnSend( ParamsWriteContext ctx /* param here for helper class so only necessary data is filled based on permissions */ )
 	{
-		ctx.Write( m_GUID );
-		ctx.Write( m_Steam64ID );
-		ctx.Write( m_Name );
-
 		OnSendPermissions( ctx );
 		OnSendPosition( ctx );
 		OnSendOrientation( ctx );
@@ -278,10 +288,6 @@ class JMPlayerInstance : Managed
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "OnRecieve");
 		#endif
-
-		ctx.Read( m_GUID );
-		ctx.Read( m_Steam64ID );
-		ctx.Read( m_Name );
 
 		OnRecievePermissions( ctx );
 		OnRecievePosition( ctx );
@@ -300,10 +306,11 @@ class JMPlayerInstance : Managed
 		if ( m_PermissionsSyncedToClient )
 			return;
 
-		array< string > permissions = new array< string >;
-		m_RootPermission.Serialize( permissions );
+		ctx.Write( m_GUID );
+		ctx.Write( m_Steam64ID );
+		ctx.Write( m_Name );
 
-		ctx.Write( permissions );
+		m_RootPermission.OnSend( ctx );
 		ctx.Write( m_Roles );
 
 		m_PermissionsSyncedToClient = true;
@@ -322,14 +329,15 @@ class JMPlayerInstance : Managed
 		if ( !permissionsUpdate )
 			return;
 
-		array< string > permissions = new array< string >;
+		ctx.Read( m_GUID );
+		ctx.Read( m_Steam64ID );
+		ctx.Read( m_Name );
+
 		array< string > roles = new array< string >;
 
-		ctx.Read( permissions );
+		m_RootPermission.OnReceive( ctx );
 		ctx.Read( roles );
 
-		m_RootPermission.Deserialize( permissions );
-		
 		ClearRoles();
 		for ( int j = 0; j < roles.Count(); j++ )
 			AddRole( roles[j] );
@@ -368,16 +376,15 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Tremor );
 		ctx.Write( m_Stamina );
 		ctx.Write( m_LifeSpanState );
-		ctx.Write( m_BloodyHands );
-		ctx.Write( m_GodMode );
-		ctx.Write( m_Frozen );
-		ctx.Write( m_Invisibility );
-		ctx.Write( m_UnlimitedAmmo );
-		ctx.Write( m_UnlimitedStamina );
-		ctx.Write( m_BrokenLegs );
-		ctx.Write( m_ReceiveDmgDealt );
-		ctx.Write( m_CannotBeTargetedByAI );
-		ctx.Write( m_RemoveCollision );
+
+		int bitmask;
+		foreach (int value, bool enabled: m_PlayerVars)
+		{
+			if (enabled)
+				bitmask |= value;
+		}
+
+		ctx.Write( bitmask );
 	}
 
 	void OnRecieveHealth( ParamsReadContext ctx )
@@ -393,16 +400,15 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_Tremor );
 		ctx.Read( m_Stamina );
 		ctx.Read( m_LifeSpanState );
-		ctx.Read( m_BloodyHands );
-		ctx.Read( m_GodMode );
-		ctx.Read( m_Frozen );
-		ctx.Read( m_Invisibility );
-		ctx.Read( m_UnlimitedAmmo );
-		ctx.Read( m_UnlimitedStamina );
-		ctx.Read( m_BrokenLegs );
-		ctx.Read( m_ReceiveDmgDealt );
-		ctx.Read( m_CannotBeTargetedByAI );
-		ctx.Read( m_RemoveCollision );
+		
+		int bitmask;
+		ctx.Read( bitmask );
+
+		for (int i = 0; i < EnumTools.GetEnumSize(JMPlayerVariables); i++)
+		{
+			int value = EnumTools.GetEnumValue(JMPlayerVariables, i);
+			m_PlayerVars[value] = (bitmask & value) == value;
+		}
 	}
 
 	void Save()
@@ -624,52 +630,52 @@ class JMPlayerInstance : Managed
 
 	bool HasBloodyHands()
 	{
-		return m_BloodyHands;
+		return m_PlayerVars[JMPlayerVariables.BLOODY_HANDS];
 	}
 
 	bool HasGodMode()
 	{
-		return m_GodMode;
+		return m_PlayerVars[JMPlayerVariables.GODMODE];
 	}
 
 	bool IsFrozen()
 	{
-		return m_Frozen;
+		return m_PlayerVars[JMPlayerVariables.FROZEN];
 	}
 
 	bool HasInvisibility()
 	{
-		return m_Invisibility;
+		return m_PlayerVars[JMPlayerVariables.INVISIBILITY];
 	}
 
 	bool HasUnlimitedAmmo()
 	{
-		return m_UnlimitedAmmo;
+		return m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO];
 	}
 
 	bool HasUnlimitedStamina()
 	{
-		return m_UnlimitedStamina;
+		return m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA];
 	}
 
 	bool HasBrokenLegs()
 	{
-		return m_BrokenLegs;
+		return m_PlayerVars[JMPlayerVariables.BROKEN_LEGS];
 	}
 
 	bool GetReceiveDmgDealt()
 	{
-		return m_ReceiveDmgDealt;
+		return m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT];
 	}
 
 	bool GetCannotBeTargetedByAI()
 	{
-		return m_CannotBeTargetedByAI;
+		return m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI];
 	}
 
 	bool GetRemoveCollision()
 	{
-		return m_RemoveCollision;
+		return m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION];
 	}
 };
 #endif

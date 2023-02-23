@@ -20,6 +20,19 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		GetPermissionsManager().RegisterPermission( "Namalsk" );
 		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
+
+		//! Just use a hardcoded list and be done with it
+		TStringArray evts = {"Aurora", "Blizzard", "ExtremeCold", "Snowfall", "EVRStorm", "EVRStormDeadly", "HeavyFog"};
+		foreach (string evt: evts)
+		{
+			if (!evt.ToType())
+				continue;
+
+			Events.Insert(evt);
+
+			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Start");
+			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Cancel");
+		}
 	}
 
 	override void EnableUpdate()
@@ -181,25 +194,6 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 		EnScript.GetClassVar(m_EventManager, "m_MaxEventCount", 0, MaxEventCount);
 		Print("MaxEventCount " + MaxEventCount);
-
-		Events.Clear();
-
-		//array<typename> types = possibleEvents.GetKeyArray();
-		//for (int i = 0; i < types.Count(); i++)
-		//{
-			//string evt = types[i].ToString();
-		//! Just use a hardcoded list and be done with it
-		TStringArray evts = {"Aurora", "Blizzard", "ExtremeCold", "Snowfall", "EVRStorm", "EVRStormDeadly", "HeavyFog"};
-		foreach (string evt: evts)
-		{
-			if (!evt.ToType())
-				continue;
-
-			Events.Insert(evt);
-
-			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Start");
-			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Cancel");
-		}
 	}
 
 	void StartEvent(string evt)

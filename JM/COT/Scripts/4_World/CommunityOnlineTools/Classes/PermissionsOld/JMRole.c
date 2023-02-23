@@ -25,6 +25,8 @@ class JMRole : Managed
 
 	void CopyPermissions( JMPermission copy )
 	{
+		auto trace = CF_Trace_0(this, "CopyPermissions");
+
 		array< string > data = new array< string >;
 		copy.Serialize( data );
 
@@ -43,7 +45,7 @@ class JMRole : Managed
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
-		RootPermission.AddPermission( permission, type );
+		RootPermission.AddPermission( permission, type, false );
 	}
 
 	bool HasPermission( string permission, out JMPermissionType permType )
@@ -53,6 +55,8 @@ class JMRole : Managed
 
 	array< string > Serialize()
 	{
+		auto trace = CF_Trace_0(this, "Serialize");
+
 		SerializedData.Clear();
 
 		RootPermission.Serialize( SerializedData );
@@ -80,6 +84,8 @@ class JMRole : Managed
 
 	bool Save()
 	{
+		auto trace = CF_Trace_1(this, "Save").Add(Name);
+
 		string filename = FileReadyStripName( Name );
 
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );
@@ -106,6 +112,8 @@ class JMRole : Managed
 
 	bool Load()
 	{
+		auto trace = CF_Trace_1(this, "Load").Add(Name);
+
 		string filename = FileReadyStripName( Name );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );
 			

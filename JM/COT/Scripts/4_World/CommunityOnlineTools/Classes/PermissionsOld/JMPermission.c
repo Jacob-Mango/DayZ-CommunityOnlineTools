@@ -39,6 +39,17 @@ class JMPermission : Managed
 		delete Children;
 	}
 
+	void CopyPermissions(JMPermission from)
+	{
+		foreach (auto child: from.Children)
+		{
+			auto perm = new JMPermission(child.Name, this);
+			perm.Type = child.Type;
+			perm.CopyPermissions(child);
+			Children.Insert(perm);
+		}
+	}
+
 	void UpdateFullName()
 	{
 		m_SerializedFullName = Name;
@@ -61,7 +72,7 @@ class JMPermission : Managed
 		return m_SerializedFullName;
 	}
 
-	void AddPermission( string inp, JMPermissionType permType = JMPermissionType.INHERIT )
+	void AddPermission( string inp, JMPermissionType permType = JMPermissionType.INHERIT, bool requireRegistered = true )
 	{
 		array<string> tokens = new array<string>;
 
@@ -98,23 +109,28 @@ class JMPermission : Managed
 
 		if ( depth > -1 )
 		{
-			AddPermissionInternal( tokens, depth + 1, type );
+			AddPermissionInternal( tokens, depth + 1, type, requireRegistered );
 		} else 
 		{
-			AddPermissionInternal( tokens, 0, type );
+			AddPermissionInternal( tokens, 0, type, requireRegistered );
 		}
 	}
 
-	private void AddPermissionInternal( array<string> tokens, int depth, JMPermissionType value )
+	private void AddPermissionInternal( array<string> tokens, int depth, JMPermissionType value, bool requireRegistered = true )
 	{
 		if ( depth < tokens.Count() )
 		{
 			string name = tokens[depth];
 
+			if (requireRegistered && !IsRegistered(name))
+				return;
+
+			//Print(ClassName() + "::AddPermissionInternal " + m_SerializedFullName + "." + name);
+
 			JMPermission nChild = VerifyAddPermission( name );
 
-			nChild.AddPermissionInternal( tokens, depth + 1, value );
-		} else {
+			nChild.AddPermissionInternal( tokens, depth + 1, value, requireRegistered );
+		} else if (!requireRegistered) {
 			Type = value;
 		}
 	}
@@ -141,6 +157,17 @@ class JMPermission : Managed
 		}
 
 		return nChild;
+	}
+
+	private bool IsRegistered( string name )
+	{
+		foreach (auto child: Children)
+		{
+			if (child.Name == name)
+				return true;
+		}
+
+		return false;
 	}
 
 	JMPermission GetPermission( string inp )
@@ -286,6 +313,9 @@ class JMPermission : Managed
 
 	void Serialize( array< string > output, string prepend = "" )
 	{
+		if (!Parent)
+			auto trace = CF_Trace_0(this, "Serialize");
+
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
 			string serialize = prepend + Children[i].Name;
@@ -301,10 +331,47 @@ class JMPermission : Managed
 
 	void Deserialize( array< string > input )
 	{
+		if (!Parent)
+			auto trace = CF_Trace_0(this, "Deserialize");
+
 		Clear();
 
 		for ( int i = 0; i < input.Count(); i++ )
-			AddPermission( input[i], JMPermissionType.INHERIT );
+			AddPermission( input[i], JMPermissionType.INHERIT, false );
+	}
+
+	void OnSend(ParamsWriteContext ctx)
+	{
+		ctx.Write(Children.Count());
+
+		foreach (auto child: Children)
+		{
+			ctx.Write(child.Type);
+			child.OnSend(ctx);
+		}
+	}
+
+	bool OnReceive(ParamsReadContext ctx)
+	{
+		int count;
+		if (!ctx.Read(count))
+			return false;
+
+		if (count != Children.Count())
+			Error(string.Format("Received child count %1 for %2 does not match registered child count %3!", count, m_SerializedFullName, Children.Count()));
+
+		foreach (auto child: Children)
+		{
+			int type;
+			if (!ctx.Read(type))
+				return false;
+
+			child.Type = type;
+			if (!child.OnReceive(ctx))
+				return false;
+		}
+
+		return true;
 	}
 
 	void DebugPrint( int depth = 0 )

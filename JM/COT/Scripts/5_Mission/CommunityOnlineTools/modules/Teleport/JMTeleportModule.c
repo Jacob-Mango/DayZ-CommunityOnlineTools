@@ -105,21 +105,6 @@ class JMTeleportModule: JMRenderableModuleBase
 	override void OnSettingsUpdated()
 	{
 		super.OnSettingsUpdated();
-
-		if ( m_Settings )
-		{
-			if ( !m_Settings.Locations )
-				return;
-
-			for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
-			{
-				JMTeleportLocation location = m_Settings.Locations[i];
-
-				string permission = location.Permission;
-				permission.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location." + permission );
-			}
-		}
 	}
 
 	override void OnMissionFinish()
@@ -424,7 +409,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_Location( location.Permission, guids, NULL );
+			Server_Location( location.Name, guids, NULL );
 		} else if ( IsMissionClient() )
 		{
 			if ( location == NULL )
@@ -433,11 +418,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( guids.Count() == 0 )
 				return;
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + location.Permission ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
 				return;
 
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( location.Permission );
+			rpc.Write( location.Name );
 			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Location, true, NULL );
 		}
@@ -446,14 +431,14 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location." + locName, ident, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location", ident, instance ) )
 			return;
 
 		JMTeleportLocation location = NULL;
 
 		for ( int i = 0; i < GetLocations().Count(); i++ )
 		{
-			if ( GetLocations()[i].Permission == locName )
+			if ( GetLocations()[i].Name == locName )
 			{
 				location = GetLocations()[i];
 				break;

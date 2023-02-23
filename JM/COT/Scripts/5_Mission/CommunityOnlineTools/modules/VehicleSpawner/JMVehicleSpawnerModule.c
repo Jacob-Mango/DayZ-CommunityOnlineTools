@@ -14,6 +14,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	void JMVehicleSpawnerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Vehicles.View" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.Spawn" );
 	}
 
 	override void EnableUpdate()
@@ -64,37 +65,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		Load();
-	}
-
-	override void OnSettingsUpdated()
-	{
-		super.OnSettingsUpdated();
-
-		if ( IsMissionHost() )
-		{
-			if ( settings )
-			{
-				for ( int i = 0; i < settings.Vehicles.Count(); i++ )
-				{
-					string vehicle = settings.Vehicles.GetKey( i );
-					vehicle.Replace( " ", "." );
-					GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
-				}
-
-				meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
-			}
-		} else if ( IsMissionClient() )
-		{
-			if ( meta )
-			{
-				for ( i = 0; i < meta.Vehicles.Count(); i++ )
-				{
-					vehicle = meta.Vehicles.Get( i );
-					vehicle.Replace( " ", "." );
-					GetPermissionsManager().RegisterPermission( "Vehicles." + vehicle );
-				}
-			}
-		}
 	}
 
 	override void OnMissionFinish()
@@ -193,10 +163,8 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		if ( !file )
 			return;
 
-		string perm = file.VehicleName;
-		perm.Replace( " ", "." );
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles." + perm, ident, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Spawn", ident, instance ) )
 			return;
 
 		EntityAI ent = SpawnVehicle( file, position, direction );
