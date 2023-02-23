@@ -33,8 +33,6 @@ class JMCinematicCamera extends JMCameraBase
 
 			if ( zoomAmt == 0 )
 				speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
-				if (speedInc)
-					Print(speedInc);
 		}
 
 
