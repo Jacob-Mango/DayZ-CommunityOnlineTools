@@ -197,12 +197,10 @@ class JMTeleportModule: JMRenderableModuleBase
 		Camera camera = Camera.GetCurrentCamera();
 		if ( camera && camera.IsActive() )
 		{
-			Print("Input_Cursor_RaycastOnServer - Using current active camera: " + camera);
 			rayStart = CurrentActiveCamera.GetPosition();
 			direction = CurrentActiveCamera.GetDirection();
 		} else 
 		{
-			Print("Input_Cursor_RaycastOnServer - Using player camera");
 			rayStart = GetGame().GetCurrentCameraPosition();
 			direction = GetGame().GetCurrentCameraDirection();
 		}
