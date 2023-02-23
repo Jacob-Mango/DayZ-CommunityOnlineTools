@@ -368,20 +368,20 @@ Print("JMCameraModule::Server_Leave - target " + target);
 		if ( Class.CastTo( player, target ) )
 		{
 			vector spectatorPosition = player.GetPosition();
+			bool waitForPlayerIdle;
 			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+			{
 				player.COTResetSpectator();
 
-			player.m_JM_CameraPosition = vector.Zero;
-
-			//player.GetInputController().SetDisabled( false );
-
-			bool waitForPlayerIdle;
-			if ( player.HasLastPosition() && !player.m_JM_SpectatedPlayer )
-			{
-				float distance = vector.DistanceSq( player.GetLastPosition(), spectatorPosition );
-				if ( distance > 0.01 )
-					waitForPlayerIdle = true;
+				if ( player.HasLastPosition() )
+				{
+					float distance = vector.DistanceSq( player.GetLastPosition(), spectatorPosition );
+					if ( distance > 0.01 )
+						waitForPlayerIdle = true;
+				}
 			}
+
+			player.m_JM_CameraPosition = vector.Zero;
 
 			if ( GetGame().IsMultiplayer() )
 			{
