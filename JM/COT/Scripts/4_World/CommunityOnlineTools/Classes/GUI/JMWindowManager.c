@@ -2,12 +2,14 @@
 class JMWindowManager
 {
 	private ref array< JMWindowBase > m_Windows;
+	private ref array< JMWindowBase > m_WindowsPendingDeletion;
 
 	private ImageWidget m_MainCursorWidget;
 
 	void JMWindowManager()
 	{
 		m_Windows = new array< JMWindowBase >;
+		m_WindowsPendingDeletion = new array< JMWindowBase >;
 	}
 
 	void ~JMWindowManager()
@@ -36,6 +38,11 @@ class JMWindowManager
 		return m_Windows.Count();
 	}
 
+	int PendingDeletionCount()
+	{
+		return m_WindowsPendingDeletion.Count();
+	}
+
 	JMWindowBase Get( int index )
 	{
 		return m_Windows[index];
@@ -53,6 +60,20 @@ class JMWindowManager
 		if ( cIdx >= 0 )
 		{
 			m_Windows.RemoveOrdered( cIdx );
+		}
+
+		m_WindowsPendingDeletion.Insert( window );
+
+		//! Purge after a delay so we can still block certain actions while closing a window
+		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(PurgeDeletedWindows, 250);
+	}
+
+	void PurgeDeletedWindows()
+	{
+		for (int i = m_WindowsPendingDeletion.Count() - 1; i >= 0; i--)
+		{
+			if (!m_WindowsPendingDeletion[i])
+				m_WindowsPendingDeletion.RemoveOrdered(i);
 		}
 	}
 
