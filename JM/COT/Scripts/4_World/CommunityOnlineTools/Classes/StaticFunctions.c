@@ -40,7 +40,7 @@ static vector GetCurrentPosition()
 }
 
 
-static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore)
+static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore, out bool hit = false)
 {
 	Object hitObject;
 	vector hitPos;
@@ -53,6 +53,8 @@ static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore)
 
 	bool h0 = DayZPhysics.RayCastBullet(rayStart, rayEnd, 0xFFFFFFFFFF, ignore, hitObject, p0, hitNormal, hitFraction);
 	bool h1 = DayZPhysics.RaycastRV(rayStart, rayEnd, p1, hitNormal, hitComponentIndex, NULL, NULL, ignore, false, false, ObjIntersectGeom);
+
+	hit = h0 | h1;
 
 	if (h0 && h1)
 	{
