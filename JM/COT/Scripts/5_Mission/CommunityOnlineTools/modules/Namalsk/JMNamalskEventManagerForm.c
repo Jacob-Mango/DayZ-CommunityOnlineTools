@@ -19,62 +19,45 @@ class JMNamalskEventManagerForm: JMFormBase
 		return Class.CastTo(m_Module, mdl);
 	}
 	
-	private void AddSimpleButton(string text, string button_text, string function)
+	private void AddSimpleButton(Widget wrapper, string event_name, string button_text, string function, float position = 0.6)
 	{
-		Widget wrapper = UIActionManager.CreatePanel(m_ActionsWrapper, 0x00000000, 30);
-		UIActionBase name = UIActionManager.CreateText(wrapper, text);
-		name.SetWidth(0.8);
-		
 		UIActionButton button = UIActionManager.CreateButton(wrapper, button_text, this, function);
-		button.SetData(new JMNamalskEventManagerButtonData(text));
+		button.SetData(new JMNamalskEventManagerButtonData(event_name));
 		button.SetWidth(0.2);
-		button.SetPosition(0.8);
+		button.SetPosition(position);
 	}
 
-	private void AddSimpleText(string text, string field_text)
+	private void AddSimpleText(Widget wrapper, string field_text)
 	{
-		Widget wrapper = UIActionManager.CreatePanel(m_ActionsWrapper, 0x00000000, 30);
-		UIActionBase name = UIActionManager.CreateText(wrapper, text);
-		name.SetWidth(0.6);
-		
 		UIActionBase field = UIActionManager.CreateText(wrapper, field_text);
 		field.SetWidth(0.4);
 		field.SetPosition(0.6);
+	}
+	
+	private void AddEvent(string event_name)
+	{
+		Widget wrapper = UIActionManager.CreatePanel(m_ActionsWrapper, 0x00000000, 30);
+		UIActionBase name = UIActionManager.CreateText(wrapper, event_name);
+		name.SetWidth(0.8);
+
+		bool canStart = GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Start");
+		bool canCancel = GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Cancel");
+
+		if (canStart)
+			AddSimpleButton(wrapper, event_name, "Start", "StartEvent");
+
+		if (canCancel)
+			AddSimpleButton(wrapper, event_name, "Cancel", "CancelEvent", 0.8);
+
+		if (!canStart && !canCancel)
+			AddSimpleText(wrapper, "No Permission");
 	}
 	
 	override void OnShow()
 	{
 		foreach (string event_name: m_Module.Events)
 		{
-			if (m_Module.IsEventActive(event_name))
-			{
-				if (GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Cancel"))
-				{
-					AddSimpleButton(event_name, "Cancel", "CancelEvent");
-					continue;
-				}
-
-				AddSimpleText(event_name, "(C) No Permission");
-				continue;
-			} 
-
-			if (!m_Module.IsEventActive(event_name))
-			{
-				if (GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Start"))
-				{
-					AddSimpleButton(event_name, "Start", "StartEvent");
-					continue;
-				}
-
-				AddSimpleText(event_name, "(S) No Permission");
-				continue;
-			}
-
-			if (GetPermissionsManager().HasPermission("Namalsk." + event_name))
-			{
-				AddSimpleText(event_name, "Invalid Permission");
-				continue;
-			}
+			AddEvent(event_name);
 		}
 		
 		m_sclr_MainActions.UpdateScroller();
