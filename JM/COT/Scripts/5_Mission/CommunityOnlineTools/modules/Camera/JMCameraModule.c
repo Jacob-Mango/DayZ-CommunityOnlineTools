@@ -379,7 +379,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 			if ( player.HasLastPosition() && !player.m_JM_SpectatedPlayer )
 			{
 				float distance = vector.DistanceSq( player.GetLastPosition(), spectatorPosition );
-				if ( distance > 22500 )  //! 150 m, needs to match value used in PlayerBase::COTUpdateSpectatorPosition
+				if ( distance > 0.01 )
 					waitForPlayerIdle = true;
 			}
 
