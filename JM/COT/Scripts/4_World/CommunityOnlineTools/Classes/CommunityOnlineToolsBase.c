@@ -266,6 +266,33 @@ class CommunityOnlineToolsBase
 	void SetClient( JMPlayerInstance player, PlayerIdentity identity )
 	{
 	}
+
+	static void HealEntityRecursive(EntityAI entity, bool includeAttachments = true, bool includeCargo = true)
+	{
+		entity.SetFullHealth();
+
+		int i;
+
+		if (includeAttachments)
+		{
+			for (i = 0; i < entity.GetInventory().AttachmentCount(); i++)
+			{
+				HealEntityRecursive(entity.GetInventory().GetAttachmentFromIndex(i), true, includeCargo);
+			}
+		}
+
+		if (includeCargo)
+		{
+			CargoBase cargo = entity.GetInventory().GetCargo();
+			if (cargo)
+			{
+				for (i = 0; i < cargo.GetItemCount(); i++)
+				{
+					HealEntityRecursive(cargo.GetItem(i), includeAttachments, true);
+				}
+			}
+		}
+	}
 }
 
 static ref CommunityOnlineToolsBase g_cotBase;

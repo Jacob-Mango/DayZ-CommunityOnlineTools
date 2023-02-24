@@ -43,6 +43,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	void JMPlayerModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Heal" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Heal.Attachments" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Heal.Cargo" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
@@ -1725,6 +1727,9 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		bool includeAttachments = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Attachments", ident );
+		bool includeCargo = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Cargo", ident );
+		
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1738,11 +1743,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
 
-			player.SetHealth("GlobalHealth", "Health", player.GetMaxHealth( "GlobalHealth", "Health" ) );
-			player.SetHealth("GlobalHealth", "Blood", player.GetMaxHealth( "GlobalHealth", "Blood" ) );
-			player.SetHealth("GlobalHealth", "Shock", player.GetMaxHealth( "GlobalHealth", "Shock" ) );
-			player.SetHealth("RightLeg", "Health", 100);
-			player.SetHealth("LeftLeg", "Health", 100);
+			CommunityOnlineToolsBase.HealEntityRecursive(player, includeAttachments, includeCargo);
 			player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 			player.COTRemoveAllDiseases();
 
