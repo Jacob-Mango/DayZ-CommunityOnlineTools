@@ -67,6 +67,19 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		Load();
 	}
 
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( IsMissionHost() )
+		{
+			if ( settings )
+			{
+				meta = JMVehicleSpawnerMeta.DeriveFromSettings( settings );
+			}
+		}
+	}
+
 	override void OnMissionFinish()
 	{
 		super.OnMissionFinish();

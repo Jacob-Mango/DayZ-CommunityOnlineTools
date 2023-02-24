@@ -71,6 +71,16 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		Load();
 	}
 
+	override void OnSettingsUpdated()
+	{
+		super.OnSettingsUpdated();
+
+		if ( settings )
+		{
+			meta = JMItemSetMeta.DeriveFromSettings( settings );
+		}
+	}
+
 	override void OnMissionFinish()
 	{
 		super.OnMissionFinish();
