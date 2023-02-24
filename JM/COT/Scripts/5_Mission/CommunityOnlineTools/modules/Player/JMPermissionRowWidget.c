@@ -92,14 +92,6 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	void Indent( int depth )
-	{
-		for ( int i = 0; i < depth; i++ )
-		{
-			indent = "   " + indent;
-		}
-	}
-
 	void OnPermissionStateChanged()
 	{
 		Type = m_state_Permission.GetValue();
@@ -107,14 +99,13 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void InitPermission( JMPermission permission )
 	{
-		Indent( permission.Depth );
-
 		Name = permission.Name;
 		FullName = permission.GetFullName();
 
 		permission.View = layoutRoot;
 
-		m_txt_PermissionName.SetText( indent + Name );
+		m_txt_PermissionName.SetText( permission.Indent + Name );
+		permission.Indent = "";
 		m_state_Permission.SetValue( 0, true );
 	}
 
