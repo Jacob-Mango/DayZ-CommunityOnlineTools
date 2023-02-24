@@ -306,7 +306,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Client_Leave(bool waitForPlayerIdle = false)
+	private void Client_Leave(int waitForPlayerIdleTimeout = 0)
 	{
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_Leave");
@@ -333,25 +333,28 @@ Print("JMCameraModule::Client_Leave - player " + GetGame().GetPlayer());
 		}
 
 		PlayerBase player;
-		if (waitForPlayerIdle && Class.CastTo(player, GetGame().GetPlayer()))
+		if (waitForPlayerIdleTimeout && Class.CastTo(player, GetGame().GetPlayer()))
 		{
 Print("JMCameraModule::Client_Leave - waiting for player to be idle, timestamp " + GetGame().GetTickTime());
 			player.COT_EnableBonePositionUpdate(true);
-			Client_Check_Leave(player);
+			Client_Check_Leave(player, waitForPlayerIdleTimeout);
+			if (waitForPlayerIdleTimeout > 1000)
+				COTCreateLocalAdminNotification(new StringLocaliser("Leaving freecam..."));
 		}
 Print("JMCameraModule::Client_Leave - left cam");
 	}
 
-	void Client_Check_Leave(PlayerBase player)
+	void Client_Check_Leave(PlayerBase player, int waitForPlayerIdleTimeout)
 	{
-		if (!player.COT_IsAnimationIdle())
+		if (!player.COT_IsAnimationIdle() && waitForPlayerIdleTimeout > 0)
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_Leave, 250, false, player );
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_Leave, 250, false, player, waitForPlayerIdleTimeout - 250 );
 		}
 		else
 		{
 Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + GetGame().GetTickTime());
 			player.COT_EnableBonePositionUpdate(false);
+			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
@@ -368,16 +371,17 @@ Print("JMCameraModule::Server_Leave - target " + target);
 		if ( Class.CastTo( player, target ) )
 		{
 			vector spectatorPosition = player.GetPosition();
-			bool waitForPlayerIdle;
+			int waitForPlayerIdleTimeout;
 			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
 			{
 				player.COTResetSpectator();
 
 				if ( player.HasLastPosition() )
 				{
-					float distance = vector.DistanceSq( player.GetLastPosition(), spectatorPosition );
-					if ( distance > 0.01 )
-						waitForPlayerIdle = true;
+					if (COT_SurfaceIsWater(player.GetLastPosition()))
+						waitForPlayerIdleTimeout = 250;
+					else if ( vector.DistanceSq( player.GetLastPosition(), spectatorPosition ) > 0.01 )
+						waitForPlayerIdleTimeout = 5000;
 				}
 			}
 
@@ -386,7 +390,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 			if ( GetGame().IsMultiplayer() )
 			{
 				ScriptRPC rpc = new ScriptRPC();
-				rpc.Write(waitForPlayerIdle);
+				rpc.Write(waitForPlayerIdleTimeout);
 				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
 			} else
 			{
@@ -398,7 +402,7 @@ Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_Spectated
 			if (player.m_JM_SpectatedPlayer)
 				return;
 
-			if (!waitForPlayerIdle)
+			if (!waitForPlayerIdleTimeout)
 				GetGame().SelectPlayer(sender, player);
 		}
 	}
@@ -419,11 +423,11 @@ Print("JMCameraModule::RPC_Leave - timestamp " + GetGame().GetTickTime());
 		{
 			// RPC was sent from the server, permission would've been verified there.
 
-			bool waitForPlayerIdle;
-			if ( !ctx.Read( waitForPlayerIdle ) )
+			int waitForPlayerIdleTimeout;
+			if ( !ctx.Read( waitForPlayerIdleTimeout ) )
 				return;
 
-			Client_Leave(waitForPlayerIdle);
+			Client_Leave(waitForPlayerIdleTimeout);
 		}
 	}
 
