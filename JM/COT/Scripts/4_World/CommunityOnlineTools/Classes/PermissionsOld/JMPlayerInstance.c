@@ -424,6 +424,8 @@ class JMPlayerInstance : Managed
 
 	void Save()
 	{
+		auto trace = CF_Trace_1(this, "Save").Add(m_GUID);
+
 		Assert_Null( m_RootPermission );
 		if ( !Assert_Null( m_PlayerFile ) )
 			Assert_Null( m_PlayerFile.Roles );
@@ -494,6 +496,8 @@ class JMPlayerInstance : Managed
 
 	void Load()
 	{
+		auto trace = CF_Trace_1(this, "Load").Add(m_GUID);
+
 		Assert_Null( m_PlayerFile );
 
 		if ( !IsMissionHost() )
