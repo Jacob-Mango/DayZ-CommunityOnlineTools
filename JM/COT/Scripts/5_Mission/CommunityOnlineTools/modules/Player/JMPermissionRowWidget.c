@@ -1,7 +1,5 @@
 class JMPermissionRowWidget extends ScriptedWidgetEventHandler 
 {
-	private string indent = "";
-
 	JMPermissionRowWidget Parent;
 	ref array< JMPermissionRowWidget > Children;
 
@@ -12,6 +10,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	private Widget layoutRoot;
 	private ref TStringArray stateOptions;
 
+	private TextWidget m_txt_PermissionIndent;
 	private TextWidget m_txt_PermissionName;
 	private ref OptionSelectorMultistate m_state_Permission;
 
@@ -43,6 +42,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void Init() 
 	{
+		Class.CastTo( m_txt_PermissionIndent, layoutRoot.FindAnyWidget( "permission_indent" ) );
 		Class.CastTo( m_txt_PermissionName, layoutRoot.FindAnyWidget( "permission_name" ) );
 
 		m_state_Permission = new OptionSelectorMultistate( layoutRoot.FindAnyWidget( "permission_setting" ), 0, NULL, true, stateOptions );
@@ -104,8 +104,9 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 		permission.View = layoutRoot;
 
-		m_txt_PermissionName.SetText( permission.Indent + Name );
+		m_txt_PermissionIndent.SetText( permission.Indent );
 		permission.Indent = "";
+		m_txt_PermissionName.SetText( Name );
 		m_state_Permission.SetValue( 0, true );
 	}
 
