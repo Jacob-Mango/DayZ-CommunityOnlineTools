@@ -120,7 +120,7 @@ class JMPlayerForm extends JMFormBase
 
 		super.OnClientPermissionsUpdated();
 
-		UpdatePermission( m_HealPlayer, "Admin.Player.Set" );
+		UpdatePermission( m_HealPlayer, "Admin.Player.Heal" );
 		UpdatePermission( m_Health, "Admin.Player.Set.Health" );
 		UpdatePermission( m_KillPlayer, "Admin.Player.Set.Health" );
 		UpdatePermission( m_Shock, "Admin.Player.Set.Shock" );

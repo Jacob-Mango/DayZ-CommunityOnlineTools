@@ -42,6 +42,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void JMPlayerModule()
 	{
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Heal" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
@@ -1763,7 +1764,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Heal", senderRPC, instance ) )
 			return;
 
 		Exec_Heal( guids, senderRPC, instance );
