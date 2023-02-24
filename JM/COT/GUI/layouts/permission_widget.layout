@@ -22,8 +22,8 @@ PanelWidgetClass JMPermissionRowWidget {
    Columns 2
    Rows 1
    {
-    TextWidgetClass permission_name {
-     ignorepointer 1
+    WrapSpacerWidgetClass permission_label_wrapper
+    {
      position 0 0
      size 0.6 25
      halign left_ref
@@ -32,11 +32,46 @@ PanelWidgetClass JMPermissionRowWidget {
      vexactpos 1
      hexactsize 0
      vexactsize 1
-     text "{PERMISSION_HERE}"
-     "exact text" 1
-     "exact text size" 16
-     "text halign" left
-     "text valign" center
+     Padding 0
+     {
+      TextWidgetClass permission_indent {
+       ignorepointer 1
+       color 0.5 0.5 0.5 1.0
+       position 0 0
+       size 1 25
+       halign left_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       text ""
+       "exact text" 1
+       "exact text size" 16
+       "text halign" left
+       "text valign" center
+       "size to text h" 1
+       Margin 0
+      }
+      TextWidgetClass permission_name {
+       ignorepointer 1
+       position 0 0
+       size 1 25
+       halign left_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       text "{PERMISSION_HERE}"
+       "exact text" 1
+       "exact text size" 16
+       "text halign" left
+       "text valign" center
+       "size to text h" 1
+       Margin 0
+      }
+     }
     }
     FrameWidgetClass permission_setting {
      ignorepointer 1
