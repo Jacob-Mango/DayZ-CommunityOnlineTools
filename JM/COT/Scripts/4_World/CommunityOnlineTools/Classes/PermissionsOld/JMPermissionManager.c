@@ -340,7 +340,7 @@ class JMPermissionManager
 				return NULL;
 			}
 
-			instance = new JMPlayerInstance( NULL );
+			instance = new JMPlayerInstance( NULL, guid );
 			Players.Insert( guid, instance );
 		}
 

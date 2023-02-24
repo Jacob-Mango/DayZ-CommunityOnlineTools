@@ -17,7 +17,7 @@ class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
 	private ref array< string > m_Roles;
-	private bool m_PermissionsSyncedToClient;
+	private ref map<string, bool> m_PermissionsSyncedToClient;
 
 	PlayerBase PlayerObject;
 
@@ -55,7 +55,7 @@ class JMPlayerInstance : Managed
 
 	private ref JMPlayerSerialize m_PlayerFile;
 
-	void JMPlayerInstance( PlayerIdentity identity )
+	void JMPlayerInstance( PlayerIdentity identity, string guid = JMConstants.OFFLINE_GUID )
 	{
 		PlayerObject = NULL;
 
@@ -64,9 +64,9 @@ class JMPlayerInstance : Managed
 			m_GUID = identity.GetId();
 			m_Steam64ID = identity.GetPlainId();
 			m_Name = identity.GetName();
-		} else if ( IsMissionOffline() )
+		} else
 		{
-			m_GUID = JMConstants.OFFLINE_GUID;
+			m_GUID = guid;
 			m_Steam64ID = JMConstants.OFFLINE_STEAM;
 			m_Name = JMConstants.OFFLINE_NAME;
 		}
@@ -76,6 +76,7 @@ class JMPlayerInstance : Managed
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		m_RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		m_Roles = new array< string >();
+		m_PermissionsSyncedToClient = new map<string, bool>();
 		m_PlayerFile = new JMPlayerSerialize();
 	}
 
@@ -174,7 +175,7 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Deserialize( permissions );
-		m_PermissionsSyncedToClient = false;
+		m_PermissionsSyncedToClient.Clear();
 		Save();
 	}
 
@@ -184,7 +185,7 @@ class JMPlayerInstance : Managed
 
 		m_RootPermission.AddPermission( permission, type );
 
-		m_PermissionsSyncedToClient = false;
+		m_PermissionsSyncedToClient.Clear();
 	}
 
 	void LoadRoles( notnull array< string > roles )
@@ -212,7 +213,7 @@ class JMPlayerInstance : Managed
 			m_Roles.Insert( role );
 		}
 
-		m_PermissionsSyncedToClient = false;
+		m_PermissionsSyncedToClient.Clear();
 	}
 
 	bool HasRole( string role )
@@ -275,9 +276,9 @@ class JMPlayerInstance : Managed
 		return false;
 	}
 
-	void OnSend( ParamsWriteContext ctx /* param here for helper class so only necessary data is filled based on permissions */ )
+	void OnSend( ParamsWriteContext ctx, string sendToGUID = JMConstants.OFFLINE_GUID )
 	{
-		OnSendPermissions( ctx );
+		OnSendPermissions( ctx, sendToGUID );
 		OnSendPosition( ctx );
 		OnSendOrientation( ctx );
 		OnSendHealth( ctx );
@@ -297,23 +298,26 @@ class JMPlayerInstance : Managed
 		m_DataLastUpdated = GetGame().GetTime();
 	}
 
-	void OnSendPermissions( ParamsWriteContext ctx )
+	void OnSendPermissions( ParamsWriteContext ctx, string sendToGUID )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		Print("OnSendPermissions - GUID " + m_GUID + ", already synced to " + sendToGUID + " " + m_PermissionsSyncedToClient[sendToGUID]);
+		#endif
+
 		Assert_Null( m_RootPermission );
 
-		ctx.Write( !m_PermissionsSyncedToClient );
+		ctx.Write( !m_PermissionsSyncedToClient[sendToGUID] );
 
-		if ( m_PermissionsSyncedToClient )
+		if ( m_PermissionsSyncedToClient[sendToGUID] )
 			return;
 
-		ctx.Write( m_GUID );
 		ctx.Write( m_Steam64ID );
 		ctx.Write( m_Name );
 
 		m_RootPermission.OnSend( ctx );
 		ctx.Write( m_Roles );
 
-		m_PermissionsSyncedToClient = true;
+		m_PermissionsSyncedToClient[sendToGUID] = true;
 	}
 
 	void OnRecievePermissions( ParamsReadContext ctx )
@@ -326,10 +330,12 @@ class JMPlayerInstance : Managed
 		
 		bool permissionsUpdate;
 		ctx.Read( permissionsUpdate );
+		#ifdef JM_COT_DIAG_LOGGING
+		Print("OnRecievePermissions - GUID " + m_GUID + " update " + permissionsUpdate);
+		#endif
 		if ( !permissionsUpdate )
 			return;
 
-		ctx.Read( m_GUID );
 		ctx.Read( m_Steam64ID );
 		ctx.Read( m_Name );
 

@@ -157,7 +157,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				
 				rpc.Write( players[i].PlayerObject );
 				rpc.Write( players[i].GetGUID() );
-				players[i].OnSend( rpc );
+				players[i].OnSend( rpc, senderRPC.GetId() );
 
 				rpc.Send( NULL, JMClientRPC.UpdateClient, false, senderRPC );
 
@@ -275,7 +275,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.PlayerObject );
 		rpc.Write( player.GetGUID() );
-		player.OnSend( rpc );
+		player.OnSend( rpc, sendTo.GetId() );
 
 		rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
 	}
@@ -374,7 +374,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 
-		player.OnSend( rpc );
+		player.OnSend( rpc, player.PlayerObject.GetIdentity().GetId() );
 
 		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
@@ -384,7 +384,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 
-		player.OnSend( rpc );
+		player.OnSend( rpc, identity.GetId() );
 
 		rpc.Send( NULL, JMClientRPC.SetClient, true, identity );
 	}
