@@ -180,7 +180,7 @@ class JMPermissionManager
 
 	array< string > Serialize()
 	{
-		auto trace = CF_Trace_0(this, "Serialize");
+		auto trace = CF_Trace_1(this, "Serialize").Add(RootPermission.Children.Count());
 
 		Assert_Null( RootPermission );
 

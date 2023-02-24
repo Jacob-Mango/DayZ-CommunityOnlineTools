@@ -431,19 +431,17 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		}
 	}
 
-	private void Client_UpdateRole( string roleName, array< string > perms )
+	private void Client_UpdateRole( string roleName, ParamsReadContext ctx )
 	{
-		#ifdef JM_COT_DIAG_LOGGING
+		//#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_UpdateRole").Add(roleName);
-		#endif
+		//#endif
 
 		JMRole role;
 		GetPermissionsManager().LoadRole( roleName, role );
 		if ( role )
 		{
-			role.SerializedData.Clear();
-			role.SerializedData.Copy( perms );
-			role.Deserialize();
+			role.RootPermission.OnReceive(ctx);
 		}
 
 		GetModuleManager().OnClientPermissionsUpdated();
@@ -455,20 +453,18 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( GetGame().IsServer() )
 		{
-			role.Serialize();
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( role.Name );
-			rpc.Write( role.SerializedData );
+			role.RootPermission.OnSend(rpc);
 			rpc.Send( NULL, JMRoleRPC.UpdateRole, true, toSendTo );
 		}
 	}
 
 	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		#ifdef JM_COT_DIAG_LOGGING
+		//#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "RPC_UpdateRole").Add(senderRPC);
-		#endif
+		//#endif
 
 		if ( IsMissionClient() )
 		{
@@ -476,11 +472,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !ctx.Read( roleName ) )
 				return;
 
-			array< string > permissions;
-			if ( !ctx.Read( permissions ) )
-				return;
-
-			Client_UpdateRole( roleName, permissions );
+			Client_UpdateRole( roleName, ctx );
 		}
 	}
 }

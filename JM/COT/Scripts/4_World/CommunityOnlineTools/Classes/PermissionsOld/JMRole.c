@@ -12,6 +12,7 @@ class JMRole : Managed
 		Name = name;
 
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
+		RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		
 		SerializedData = new array< string >;
 	}
@@ -45,7 +46,11 @@ class JMRole : Managed
 
 	void AddPermission( string permission, JMPermissionType type = JMPermissionType.INHERIT )
 	{
-		RootPermission.AddPermission( permission, type, false );
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_2(this, "AddPermission").Add(permission).Add(typename.EnumToString(JMPermissionType, type));
+		#endif
+
+		RootPermission.AddPermission( permission, type );
 	}
 
 	bool HasPermission( string permission, out JMPermissionType permType )
@@ -55,7 +60,7 @@ class JMRole : Managed
 
 	array< string > Serialize()
 	{
-		auto trace = CF_Trace_0(this, "Serialize");
+		auto trace = CF_Trace_2(this, "Serialize").Add(Name).Add(RootPermission.Children.Count());
 
 		SerializedData.Clear();
 
@@ -66,6 +71,8 @@ class JMRole : Managed
 
 	void Deserialize()
 	{
+		auto trace = CF_Trace_2(this, "Deserialize").Add(Name).Add(SerializedData.Count());
+
 		for ( int i = 0; i < SerializedData.Count(); i++ )
 		{
 			AddPermission( SerializedData[i] );
@@ -135,7 +142,7 @@ class JMRole : Managed
 				AddPermission( data[i] );
 			}
 
-			Serialize();
+			//Serialize();
 		} else
 		{
 			return false;
