@@ -130,7 +130,7 @@ class JMPermission : Managed
 			JMPermission nChild = VerifyAddPermission( name );
 
 			nChild.AddPermissionInternal( tokens, depth + 1, value, requireRegistered );
-		} else if (!requireRegistered) {
+		} else {
 			Type = value;
 		}
 	}
@@ -314,7 +314,7 @@ class JMPermission : Managed
 	void Serialize( array< string > output, string prepend = "" )
 	{
 		if (!Parent)
-			auto trace = CF_Trace_0(this, "Serialize");
+			auto trace = CF_Trace_1(this, "Serialize").Add(m_SerializedFullName);
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{

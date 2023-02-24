@@ -157,7 +157,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				
 				rpc.Write( players[i].PlayerObject );
 				rpc.Write( players[i].GetGUID() );
-				players[i].OnSend( rpc, senderRPC.GetId() );
+				players[i].OnSend( rpc, senderRPC.GetPlayer() );
 
 				rpc.Send( NULL, JMClientRPC.UpdateClient, false, senderRPC );
 
@@ -275,7 +275,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.PlayerObject );
 		rpc.Write( player.GetGUID() );
-		player.OnSend( rpc, sendTo.GetId() );
+		player.OnSend( rpc, sendTo.GetPlayer() );
 
 		rpc.Send( NULL, JMClientRPC.UpdateClient, true, sendTo );
 	}
@@ -334,6 +334,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void SetClient( JMPlayerInstance player )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "SetClient").Add(player.GetGUID());
+		#endif
+
 		if ( IsMissionOffline() )
 		{
 			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
@@ -348,6 +352,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void SetClient( JMPlayerInstance player, PlayerIdentity identity )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "SetClient").Add(player.GetGUID());
+		#endif
+
 		if ( IsMissionOffline() )
 		{
 			ScriptReadWriteContext rwctx = new ScriptReadWriteContext;
@@ -362,6 +370,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_SetClient( string guid, ParamsReadContext ctx )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "Client_SetClient").Add(guid);
+		#endif
+
 		GetPermissionsManager().SetClientGUID( guid );
 
 		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
@@ -371,10 +383,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Server_SetClient( JMPlayerInstance player )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "Server_SetClient").Add(player.GetGUID());
+		#endif
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 
-		player.OnSend( rpc, player.PlayerObject.GetIdentity().GetId() );
+		player.OnSend( rpc, player.PlayerObject );
 
 		rpc.Send( NULL, JMClientRPC.SetClient, true, player.PlayerObject.GetIdentity() );
 	}
@@ -384,7 +400,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( player.GetGUID() );
 
-		player.OnSend( rpc, identity.GetId() );
+		player.OnSend( rpc, identity.GetPlayer() );
 
 		rpc.Send( NULL, JMClientRPC.SetClient, true, identity );
 	}

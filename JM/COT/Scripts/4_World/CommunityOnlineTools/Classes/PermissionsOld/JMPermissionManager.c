@@ -293,6 +293,12 @@ class JMPermissionManager
 			inst.Save();
 
 			Players.Remove( guid );
+
+			foreach (auto player: Players)
+			{
+				player.RemoveClient(inst.PlayerObject);
+			}
+
 			return true;
 		} else
 		{
