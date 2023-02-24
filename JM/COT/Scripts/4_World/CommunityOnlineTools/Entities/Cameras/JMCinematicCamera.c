@@ -4,6 +4,8 @@ class JMCinematicCamera extends JMCameraBase
 	vector angularVelocity;
 
 	vector orientation;
+
+	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
 	
 	void JMCinematicCamera()
 	{
@@ -27,7 +29,7 @@ class JMCinematicCamera extends JMCameraBase
 		float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
 
 		float speedInc = 0;
-		if ( input.HasGameFocus() )
+		if ( input.HasGameFocus() && !IsAnyInputExcludeActive() )
 		{
 			float zoomAmt = input.LocalValue( "UACameraToolZoomForwards" ) - input.LocalValue( "UACameraToolZoomBackwards" );
 
@@ -111,6 +113,17 @@ class JMCinematicCamera extends JMCameraBase
 
 			SetOrientation( orientation );
 		}
+	}
+
+	bool IsAnyInputExcludeActive()
+	{
+		foreach (string exclude: m_PossibleInputExcludes)
+		{
+			if (GetGame().GetMission().IsInputExcludeActive(exclude))
+				return true;
+		}
+
+		return false;
 	}
 
 	void AngleToQuat( float angle, vector dir, out float d[4] )
