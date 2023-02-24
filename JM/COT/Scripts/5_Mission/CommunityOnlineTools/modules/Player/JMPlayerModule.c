@@ -1036,7 +1036,7 @@ Print("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
 		GetCommunityOnlineToolsBase().Log( ident, "Stopped spectating" );
 
 		bool switchToPreviousCamera = true;
-		bool waitForPlayerIdle;
+		int waitForPlayerIdleTimeout;
 Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectator.m_JM_CameraPosition);
 		if (playerSpectator.m_JM_CameraPosition == vector.Zero)
 		{
@@ -1045,24 +1045,25 @@ Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectat
 			vector spectatorPosition = playerSpectator.GetPosition();
 			playerSpectator.COTResetSpectator();
 
-			//if ( playerSpectator.HasLastPosition() )
-			//{
-				//float distance = vector.Distance( playerSpectator.GetLastPosition(), spectatorPosition );
-				//if ( distance >= 1000 )
-					//waitForPlayerIdle = true;
-			//}
+			if ( playerSpectator.HasLastPosition() )
+			{
+				if (COT_SurfaceIsWater(playerSpectator.GetLastPosition()))
+					waitForPlayerIdleTimeout = 250;
+				else
+					waitForPlayerIdleTimeout = 5000;
+			}
 
-			//if (!waitForPlayerIdle)
-				//GetGame().SelectPlayer(ident, playerSpectator);
+			if (!waitForPlayerIdleTimeout)
+				GetGame().SelectPlayer(ident, playerSpectator);
 		}
 
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(switchToPreviousCamera);
-		//rpc.Write(waitForPlayerIdle);
+		rpc.Write(waitForPlayerIdleTimeout);
 		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, ident );
 	}
 
-	private void Client_EndSpectating(bool switchToPreviousCamera, bool waitForPlayerIdle )
+	private void Client_EndSpectating(bool switchToPreviousCamera, int waitForPlayerIdleTimeout )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_EndSpectating");
@@ -1081,7 +1082,7 @@ Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCam
 Print("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_PreviousActiveCamera);
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
-				waitForPlayerIdle = false;
+				waitForPlayerIdleTimeout = 0;
 			}
 			else
 			{
@@ -1100,34 +1101,35 @@ Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_Spec
 		}
 		else if (CurrentActiveCamera)
 		{
-			waitForPlayerIdle = false;
+			waitForPlayerIdleTimeout = 0;
 		}
 
 		COT_PreviousActiveCamera = NULL;
 
 		m_SpectatorCamera = NULL;
 
-		COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating"));
-
-		if (waitForPlayerIdle)
+		if (waitForPlayerIdleTimeout)
 		{
 Print("JMPlayerModule::Client_EndSpectating - waiting for player to be idle, timestamp " + GetGame().GetTickTime());
 			m_SpectatorClient.COT_EnableBonePositionUpdate(true);
-			Client_Check_EndSpectating(m_SpectatorClient);
+			Client_Check_EndSpectating(m_SpectatorClient, waitForPlayerIdleTimeout);
+			if (waitForPlayerIdleTimeout > 1000)
+				COTCreateLocalAdminNotification(new StringLocaliser("Stopping spectating..."));
 		}
 Print("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	}
 
-	void Client_Check_EndSpectating(PlayerBase playerSpectator)
+	void Client_Check_EndSpectating(PlayerBase playerSpectator, int waitForPlayerIdleTimeout)
 	{
-		if (!playerSpectator.COT_IsAnimationIdle())
+		if (!playerSpectator.COT_IsAnimationIdle() && waitForPlayerIdleTimeout > 0)
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_EndSpectating, 250, false, playerSpectator );
+			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_EndSpectating, 250, false, playerSpectator, waitForPlayerIdleTimeout - 250 );
 		}
 		else
 		{
 Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + GetGame().GetTickTime());
 			playerSpectator.COT_EnableBonePositionUpdate(false);
+			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send(NULL, JMPlayerModuleRPC.EndSpectating_Finish, true, NULL);
@@ -1153,12 +1155,11 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			if ( !ctx.Read( switchToPreviousCamera ) )
 				return;
 
-			bool waitForPlayerIdle;
-			//if ( !ctx.Read( waitForPlayerIdle ) )
-				//return;
+			int waitForPlayerIdleTimeout;
+			if ( !ctx.Read( waitForPlayerIdleTimeout ) )
+				return;
 
-			//Client_EndSpectating(switchToPreviousCamera, waitForPlayerIdle);
-			Client_EndSpectating(switchToPreviousCamera, true);
+			Client_EndSpectating(switchToPreviousCamera, waitForPlayerIdleTimeout);
 		}
 	}
 
