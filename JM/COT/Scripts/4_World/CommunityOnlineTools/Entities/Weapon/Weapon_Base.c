@@ -11,8 +11,15 @@ modded class Weapon_Base
 			if ( magazine )
 			{
 				if ( GetGame().IsServer() )
-				{					
+				{
 					SetHealthMax( "", "Health" );
+
+					for (int i = 0; i < GetInventory().AttachmentCount(); i++)
+					{
+						EntityAI attachment = GetInventory().GetAttachmentFromIndex(i);
+						if (attachment)
+							attachment.SetHealthMax( "", "Health" );
+					}
 
 					if ( GetGame().IsMultiplayer() && magazine )
 						GetGame().RemoteObjectDelete( magazine );
