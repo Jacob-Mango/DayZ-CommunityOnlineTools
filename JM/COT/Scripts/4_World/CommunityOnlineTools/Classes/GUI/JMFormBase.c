@@ -39,7 +39,11 @@ class JMFormBase extends ScriptedWidgetEventHandler
 
 		if ( SetModule( mdl ) )
 		{
+			mdl.SetForm(this);
+
 			OnInit();
+
+			OnClientPermissionsUpdated();
 
 			OnShow();
 			m_IsShown = true;

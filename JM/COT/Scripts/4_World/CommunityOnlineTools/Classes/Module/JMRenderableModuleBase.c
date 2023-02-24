@@ -68,6 +68,11 @@ class JMRenderableModuleBase extends JMModuleBase
 		return m_MenuButton;
 	}
 
+	void SetForm(JMFormBase form)
+	{
+		m_Form = form;
+	}
+
 	JMFormBase GetForm()
 	{
 		return m_Form;
