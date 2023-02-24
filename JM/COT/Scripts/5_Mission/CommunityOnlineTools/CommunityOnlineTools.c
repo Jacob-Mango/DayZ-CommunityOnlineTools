@@ -423,7 +423,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+		#endif
 
 		if ( IsMissionHost() )
 		{
@@ -433,9 +435,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Client_UpdateRole( string roleName, ParamsReadContext ctx )
 	{
-		//#ifdef JM_COT_DIAG_LOGGING
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "Client_UpdateRole").Add(roleName);
-		//#endif
+		#endif
 
 		JMRole role;
 		GetPermissionsManager().LoadRole( roleName, role );
@@ -449,7 +451,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void Server_UpdateRole( JMRole role, PlayerIdentity toSendTo )
 	{
+		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "Server_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
+		#endif
 
 		if ( GetGame().IsServer() )
 		{
@@ -462,9 +466,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	private void RPC_UpdateRole( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		//#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "RPC_UpdateRole").Add(senderRPC);
-		//#endif
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_0(this, "RPC_UpdateRole");
+		#endif
 
 		if ( IsMissionClient() )
 		{
