@@ -203,4 +203,12 @@ modded class MissionGameplay
 
 		super.Pause();
 	}
+
+	override protected void HandleMapToggleByKeyboardShortcut(Man player)
+	{
+		if ( GetCommunityOnlineToolsBase().IsOpen() )
+			return;
+
+		super.HandleMapToggleByKeyboardShortcut(player);
+	}
 }
