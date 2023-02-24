@@ -267,6 +267,26 @@ class CommunityOnlineToolsBase
 	{
 	}
 
+	static void ForceDisableInputs(bool state, inout TIntArray skipIDs = null)
+	{
+		if (!skipIDs)
+			skipIDs = new TIntArray;
+
+		skipIDs.Insert(UAUIBack);
+
+		TIntArray inputIDs = new TIntArray;
+
+		GetUApi().GetActiveInputs(inputIDs);
+
+		foreach (int inputID: inputIDs)
+		{
+			if (skipIDs.Find(inputID) == -1)
+			{
+				GetUApi().GetInputByID(inputID).ForceDisable(state);
+			}
+		}
+	}
+
 	static void HealEntityRecursive(EntityAI entity, bool includeAttachments = true, bool includeCargo = true)
 	{
 		entity.SetFullHealth();
