@@ -39,26 +39,6 @@ static vector GetCurrentPosition()
 	return "0 0 0";
 }
 
-static void COT_DisableAllInputs(bool state, inout TIntArray skipIDs = null)
-{
-	if (!skipIDs)
-		skipIDs = new TIntArray;
-
-	skipIDs.Insert(UAUIBack);
-
-	TIntArray inputIDs = new TIntArray;
-
-	GetUApi().GetActiveInputs(inputIDs);
-
-	foreach (int inputID: inputIDs)
-	{
-		if (skipIDs.Find(inputID) == -1)
-		{
-			GetUApi().GetInputByID(inputID).ForceDisable(state);
-		}
-	}
-}
-
 static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore, out bool hit = false)
 {
 	Object hitObject;

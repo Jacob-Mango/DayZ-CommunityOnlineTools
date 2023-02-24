@@ -79,7 +79,7 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
 			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
 		if (m_WasFocused)
-			COT_DisableAllInputs(false);
+			CommunityOnlineTools.ForceDisableInputs(false);
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Hide" );
@@ -102,13 +102,13 @@ class UIActionBase extends ScriptedWidgetEventHandler
 		{
 			//if (!GetGame().GetMission().IsInputExcludeActive("menu"))
 				//GetGame().GetMission().AddActiveInputExcludes({"menu"});
-			COT_DisableAllInputs(true);
+			CommunityOnlineTools.ForceDisableInputs(true);
 		}
 		else if (!isFocused && m_WasFocused)
 		{
 			//if (GetGame().GetMission().IsInputExcludeActive("menu"))
 				//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
-			COT_DisableAllInputs(false);
+			CommunityOnlineTools.ForceDisableInputs(false);
 		}
 
 		m_WasFocused = isFocused;
