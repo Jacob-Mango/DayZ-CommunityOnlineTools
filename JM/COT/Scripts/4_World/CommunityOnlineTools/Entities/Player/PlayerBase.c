@@ -4,11 +4,11 @@ modded class PlayerBase
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
-	bool m_JMHadGodMode;
+	private bool m_COT_GodMode_Preference;
 
 	private bool m_JMIsInvisible;
 	private bool m_JMIsInvisibleRemoteSynch;
-	bool m_JMWasInvisible;
+	private bool m_COT_Invisibility_Preference;
 
 	private bool m_JMIsFrozen;
 	private bool m_JMIsFrozenRemoteSynch;
@@ -26,7 +26,9 @@ modded class PlayerBase
 
 	private bool m_COT_ReceiveDamageDealt;
 	private bool m_COT_CannotBeTargetedByAI;
+	private bool m_COT_CannotBeTargetedByAI_Preference;
 	private bool m_COT_RemoveCollision;
+	private bool m_COT_RemoveCollision_Preference;
 
 	void PlayerBase()
 	{
@@ -308,12 +310,14 @@ modded class PlayerBase
 		return m_JMHasUnlimitedStamina;
 	}
 
-	void COTSetGodMode( bool mode )
+	void COTSetGodMode( bool mode, bool preference = true )
 	{
 		if ( GetGame().IsServer() )
 		{
-			if (mode)
-				m_JMHadGodMode = !GetAllowDamage();
+			if (preference)
+				m_COT_GodMode_Preference = mode;
+			else if (mode)
+				m_COT_GodMode_Preference = !GetAllowDamage();
 
 			SetAllowDamage( !mode );
 		}
@@ -346,25 +350,31 @@ modded class PlayerBase
 		}
 	}
 
-	void COTSetInvisibility( bool mode )
+	void COTSetInvisibility( bool mode, bool preference = true )
 	{
 		if ( GetGame().IsServer() )
 		{
-			if (mode)
-				m_JMWasInvisible = m_JMIsInvisible;
+			if (preference)
+				m_COT_Invisibility_Preference = mode;
 
 			m_JMIsInvisible = mode;
 			m_JMIsInvisibleRemoteSynch = mode;
 
-			COTSetRemoveCollision(mode);
-			COTSetCannotBeTargetedByAI(mode);
+			if (mode || preference || !m_COT_RemoveCollision_Preference)
+				COTSetRemoveCollision(mode, preference);
+
+			if (mode || preference || !m_COT_CannotBeTargetedByAI_Preference)
+				COTSetCannotBeTargetedByAI(mode, preference);
 
 			SetSynchDirty();
 		}
 	}
 
-	void COTSetCannotBeTargetedByAI( bool mode )
+	void COTSetCannotBeTargetedByAI( bool mode, bool preference = true )
 	{
+		if (preference)
+			m_COT_CannotBeTargetedByAI_Preference = mode;
+
 		m_COT_CannotBeTargetedByAI = mode;
 	}
 
@@ -373,8 +383,11 @@ modded class PlayerBase
 		return m_COT_CannotBeTargetedByAI;
 	}
 
-	void COTSetRemoveCollision( bool mode )
+	void COTSetRemoveCollision( bool mode, bool preference = true )
 	{
+		if (preference)
+			m_COT_RemoveCollision_Preference = mode;
+
 		m_COT_RemoveCollision = mode;
 		PhysicsSetSolid(!mode);
 	}
@@ -468,8 +481,8 @@ modded class PlayerBase
 		{
 			//! If we get close (within 150 m) of original position, place player at original position
 
-			if (COTIsInvisible() && !m_JMWasInvisible)
-				COTSetInvisibility( false );
+			if (COTIsInvisible() && !m_COT_Invisibility_Preference)
+				COTSetInvisibility( false, false );
 
 			if (GetPosition()[1] < surfaceY)
 			{
@@ -482,10 +495,10 @@ modded class PlayerBase
 			position[1] = surfaceY - 10;
 
 			if (!COTHasGodMode())
-				COTSetGodMode( true );
+				COTSetGodMode( true, false );
 
 			if (!COTIsInvisible())
-				COTSetInvisibility( true );
+				COTSetInvisibility( true, false );
 
 			PhysicsEnableGravity( false );
 			SetPosition( position );
@@ -498,15 +511,15 @@ modded class PlayerBase
 		auto trace = CF_Trace_0(this, "COTResetSpectator");
 #endif
 
-		if (!m_JMWasInvisible)
-			COTSetInvisibility( false );
+		if (!m_COT_Invisibility_Preference)
+			COTSetInvisibility( false, false );
 
 		PhysicsEnableGravity( true );
 
 		if ( HasLastPosition() )
 			SetPosition( GetLastPosition() );
 
-		if (!m_JMHadGodMode)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false);
+		if (!m_COT_GodMode_Preference)
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
 	}
 }

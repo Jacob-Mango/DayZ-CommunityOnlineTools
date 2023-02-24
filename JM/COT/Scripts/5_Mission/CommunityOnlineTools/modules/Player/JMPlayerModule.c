@@ -900,7 +900,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		vector position = spectatePlayer.GetBonePositionWS( spectatePlayer.GetBoneIndexByName( "Head" ) );
 		GetGame().SelectSpectator( ident, "JMSpectatorCamera", position );
 
-		playerSpectator.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
+		playerSpectator.COTSetGodMode( true, false );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -1730,7 +1730,9 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if ( player == NULL )
 				continue;
 
-			player.COTSetGodMode(false);
+			bool allowDamage = player.GetAllowDamage();
+			if (!allowDamage)
+				player.SetAllowDamage(true);
 
 			if ( player.GetBleedingManagerServer() )
 				player.GetBleedingManagerServer().RemoveAllSources();
@@ -1750,8 +1752,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
 
-			if ( player.m_JMHadGodMode )
-				player.COTSetGodMode(true);
+			if (!allowDamage)
+				player.SetAllowDamage(false);
 
 			players[i].Update();
 		}

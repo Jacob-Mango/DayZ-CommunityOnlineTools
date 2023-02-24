@@ -475,7 +475,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 		if (player.m_JM_CameraPosition == vector.Zero)
 		{
 			player.SetLastPosition();
-			player.COTSetGodMode( true );  //! Enable godmode and remember previous state of GetAllowDamage
+			player.COTSetGodMode( true, false );  //! Enable godmode and remember previous state of GetAllowDamage
 		}
 	}
 
