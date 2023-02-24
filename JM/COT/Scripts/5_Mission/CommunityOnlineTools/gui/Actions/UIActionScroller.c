@@ -48,9 +48,7 @@ class UIActionScroller extends UIActionBase
 	{
 		m_IsUpdating = true;
 		
-		_UpdateScroller();
-
-		m_IsUpdating = false;
+		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(_UpdateScroller, 34);
 	}
 
 	void _UpdateScroller()
@@ -116,6 +114,8 @@ class UIActionScroller extends UIActionBase
 
 		m_Scroller.SetPos( 0, scrollerPos );
 		m_Content.SetPos( 0, contentPos );
+
+		m_IsUpdating = false;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::UpdateScroller" );

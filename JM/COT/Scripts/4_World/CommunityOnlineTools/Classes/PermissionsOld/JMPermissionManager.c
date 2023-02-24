@@ -68,21 +68,33 @@ class JMPermissionManager
 		if ( permissions == NULL )
 			permissions = new array< JMPermission >();
 
-		GetPermissionsAsList( RootPermission, -1, permissions );
+		GetPermissionsAsList( RootPermission, "", permissions );
 	}
 
-	private void GetPermissionsAsList( JMPermission permission, int depth, inout array< JMPermission > permissions )
+	private void GetPermissionsAsList( JMPermission permission, string indent, inout array< JMPermission > permissions, bool last = false )
 	{
 		Assert_Null( RootPermission );
 		Assert_Null( permission );
 
-		permission.Depth = depth;
+		if (permission.Parent && permission.Parent.Name != "ROOT")
+		{
+			if (last)
+			{
+				permission.Indent = indent + " \\- ";
+				indent += "    ";
+			}
+			else
+			{
+				permission.Indent = indent + " |- ";
+				indent += " |  ";
+			}
+		}
 
 		for ( int i = 0; i < permission.Children.Count(); ++i )
 		{
 			permissions.Insert( permission.Children[i] );
 
-			GetPermissionsAsList( permission.Children[i], depth + 1, permissions );
+			GetPermissionsAsList( permission.Children[i], indent, permissions, i == permission.Children.Count() - 1 );
 		}
 	}
 

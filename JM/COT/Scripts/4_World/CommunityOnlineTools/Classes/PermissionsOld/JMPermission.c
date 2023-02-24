@@ -13,7 +13,7 @@ class JMPermission : Managed
 
 	Widget View;
 
-	int Depth;
+	string Indent;
 
 	void JMPermission( string name, JMPermission parent = NULL )
 	{
