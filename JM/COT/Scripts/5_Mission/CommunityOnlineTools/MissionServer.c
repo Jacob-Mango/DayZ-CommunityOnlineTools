@@ -60,4 +60,15 @@ modded class MissionServer
 			m_JM_PlayerModule.UpdateSpectatorPositions();
 		}
 	}
+
+	override bool ShouldPlayerBeKilled(PlayerBase player)
+	{
+		if (!super.ShouldPlayerBeKilled(player))
+			return false;
+
+		if (player.COTIsBeingKicked())
+			return false;
+
+		return true;
+	}
 }
