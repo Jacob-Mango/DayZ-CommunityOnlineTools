@@ -316,9 +316,9 @@ class JMPermissionManager
 
 			Players.Remove( guid );
 
-			foreach (auto player: Players)
+			foreach (JMPlayerInstance player: Players)
 			{
-				player.RemoveClient(inst.PlayerObject);
+				player.RemoveClient(guid);
 			}
 
 			return true;
