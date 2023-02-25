@@ -1797,7 +1797,15 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if ( player == NULL )
 				continue;
 
+			if (GetHive())
+			{
+				player.Save();
+				GetHive().CharacterExit(player);        
+			}
+
+			player.ReleaseNetworkControls();
 			GetGame().DisconnectPlayer(player.GetIdentity(), player.GetIdentity().GetId());
+			if (player) player.Delete();
 
 			GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + players[i].GetGUID() + "]" );
 
