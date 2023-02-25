@@ -154,11 +154,7 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 		Assert_Null( copy );
 
-		array< string > data = new array< string >;
-
-		copy.Serialize( data );
-
-		m_RootPermission.Deserialize( data );
+		m_RootPermission.CopyPermissions( copy );
 	}
 
 	void ClearPermissions()
@@ -465,6 +461,8 @@ class JMPlayerInstance : Managed
 
 	protected bool ReadPermissions( string filename )
 	{
+		auto trace = CF_Trace_1(this, "ReadPermissions").Add(filename);
+
 		Assert_Null( m_RootPermission );
 
 		if ( !FileExist( filename ) )
@@ -475,21 +473,14 @@ class JMPlayerInstance : Managed
 		if ( file < 0 )
 			return false;
 
-		array< string > data = new array< string >;
-
 		string line;
 
 		while ( FGets( file, line ) > 0 )
 		{
-			data.Insert( line );
+			AddPermission( line );
 		}
 
 		CloseFile( file );
-
-		for ( int i = 0; i < data.Count(); i++ )
-		{
-			AddPermission( data[i] );
-		}
 
 		return true;
 	}
@@ -576,6 +567,11 @@ class JMPlayerInstance : Managed
 	int GetAvgPing()
 	{
 		return m_PingAvg;
+	}
+
+	JMPermission GetPermissions()
+	{
+		return m_RootPermission;
 	}
 
 	vector GetPosition()

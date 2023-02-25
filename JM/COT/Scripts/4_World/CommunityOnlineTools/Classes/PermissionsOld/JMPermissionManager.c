@@ -71,6 +71,16 @@ class JMPermissionManager
 		GetPermissionsAsList( RootPermission, "", permissions );
 	}
 
+	void GetPermissionsAsList( JMPermission permission, out array< JMPermission > permissions )
+	{
+		Assert_Null( RootPermission );
+
+		if ( permissions == NULL )
+			permissions = new array< JMPermission >();
+
+		GetPermissionsAsList( permission, "", permissions );
+	}
+
 	private void GetPermissionsAsList( JMPermission permission, string indent, inout array< JMPermission > permissions, bool last = false )
 	{
 		Assert_Null( RootPermission );
