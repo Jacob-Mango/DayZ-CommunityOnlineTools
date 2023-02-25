@@ -28,6 +28,7 @@ enum JMPlayerModuleRPC
 	Strip,
 	Dry,
 	Kick,
+	KickMessage,
 	StopBleeding,
 	SetPermissions,
 	SetRoles,
@@ -254,6 +255,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.Kick:
 			RPC_Kick( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.KickMessage:
+			RPC_KickMessage( ctx, sender, target );
 			break;
 		}
 	}
@@ -1791,23 +1795,39 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		auto missionServer = MissionServer.Cast(GetGame().GetMission());
-
 		foreach (auto player: players)
 		{
 			if (!player.PlayerObject)
 				continue;
 
-			GetGame().SendLogoutTime(player.PlayerObject, 0);
+			SendKickMessage(player.PlayerObject.GetIdentity());
 
-			missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
-
-			GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + player.GetGUID() + "]" );
-
-			SendWebhook( "Kick", instance, "Kicked " + player.FormatSteamWebhook() );
+			//! Kick player after delay so client can still receive kickmessage RPC
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Kick_Single, 500, false, player, ident, instance);
 		}
 
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1000);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
+	}
+
+	private void Exec_Kick_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
+	{
+		if (!GetGame() || !player.PlayerObject)
+			return;
+
+		auto missionServer = MissionServer.Cast(GetGame().GetMission());
+
+		if (!missionServer)
+			return;
+
+		player.PlayerObject.COTSetIsBeingKicked(true);
+
+		GetGame().SendLogoutTime(player.PlayerObject, 0);
+
+		missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
+
+		GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + player.GetGUID() + "]" );
+
+		SendWebhook( "Kick", instance, "Kicked " + player.FormatSteamWebhook() );
 	}
 
 	private void RPC_Kick( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1823,6 +1843,28 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_Kick( guids, senderRPC, instance );
 	}
 	
+	private void SendKickMessage(PlayerIdentity identity)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send(NULL, JMPlayerModuleRPC.KickMessage, true, identity);
+	}
+
+	//! Because there is no way to check on client if the sender had permissions to send a kick message,
+	//! we queue the message for deferred display on the main menu screen.
+	//! That way, if the RPC is abused (hacking etc), it won't affect the player during gameplay.
+	private void RPC_KickMessage(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	{
+		auto trace = CF_Trace_0(this, "RPC_KickMessage");
+
+		if (GetGame().IsDedicatedServer())
+			return;
+
+		CF_Log.Debug("Inserting deferred message parameters");
+
+		JMDeferredMessage.QueuedMessages.Clear();
+		JMDeferredMessage.Queue("Community Online Tools", "Kicked by Admin");
+	}
+
 	void Strip( array< string > guids )
 	{
 		if ( IsMissionHost() )
