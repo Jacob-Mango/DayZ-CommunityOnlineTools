@@ -3,9 +3,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	JMPermissionRowWidget Parent;
 	ref array< JMPermissionRowWidget > Children;
 
-	string Name;
-	string FullName;
-	int Type;
+	ref JMPermission m_Permission;
 
 	private Widget layoutRoot;
 	private ref TStringArray stateOptions;
@@ -94,20 +92,23 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	void OnPermissionStateChanged()
 	{
-		Type = m_state_Permission.GetValue();
+		if (m_Permission)
+		{
+			CF_Log.Debug(ToString() + "::OnPermissionStateChanged - %1 %2 -> %3", m_Permission.GetFullName(), typename.EnumToString(JMPermissionType, m_Permission.Type), typename.EnumToString(JMPermissionType, m_state_Permission.GetValue()));
+			m_Permission.Type = m_state_Permission.GetValue();
+		}
 	}
 
 	void InitPermission( JMPermission permission )
 	{
-		Name = permission.Name;
-		FullName = permission.GetFullName();
+		m_Permission = permission;
 
 		permission.View = layoutRoot;
 
 		m_txt_PermissionIndent.SetText( permission.Indent );
 		permission.Indent = "";
-		m_txt_PermissionName.SetText( Name );
-		m_state_Permission.SetValue( 0, true );
+		m_txt_PermissionName.SetText( permission.Name );
+		m_state_Permission.SetValue( permission.Type, false );
 	}
 
 	bool IsEnabled()
@@ -163,9 +164,9 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
-			string serialize = prepend + Children[i].Name;
+			string serialize = prepend + Children[i].m_Permission.Name;
 				
-			output.Insert( serialize + " " + Children[i].Type );
+			output.Insert( serialize + " " + Children[i].m_Permission.Type );
 
 			if ( Children[i].Children.Count() > 0 ) 
 			{
@@ -176,6 +177,8 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	
 	void SetPermission( string inp )
 	{
+		auto trace = CF_Trace_1(this, "SetPermission").Add(inp);
+
 		array<string> tokens = new array<string>;
 
 		array<string> spaces = new array<string>;
@@ -214,7 +217,7 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 		Print( inp + " with type " + type );
 		#endif
 		
-		int depth = tokens.Find( Name );
+		int depth = tokens.Find( m_Permission.Name );
 
 		if ( depth > -1 )
 		{
@@ -227,11 +230,13 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 
 	private JMPermissionRowWidget Set( array<string> tokens, int depth, int type )
 	{
+		auto trace = CF_Trace_2(this, "Set").Add(depth).Add(typename.EnumToString(JMPermissionType, type));
+
 		if ( depth < tokens.Count() )
 		{
 			for ( int i = 0; i < Children.Count(); i++ )
 			{
-				if ( Children[i].Name == tokens[depth] )
+				if ( Children[i].m_Permission.Name == tokens[depth] )
 				{
 					return Children[i].Set( tokens, depth + 1, type );
 				}

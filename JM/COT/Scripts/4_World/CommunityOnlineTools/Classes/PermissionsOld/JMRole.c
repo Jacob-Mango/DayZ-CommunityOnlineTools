@@ -28,13 +28,7 @@ class JMRole : Managed
 	{
 		auto trace = CF_Trace_0(this, "CopyPermissions");
 
-		array< string > data = new array< string >;
-		copy.Serialize( data );
-
-		for ( int i = 0; i < data.Count(); i++ )
-		{
-			AddPermission( data[i] );
-		}
+		RootPermission.CopyPermissions(copy);
 	}
 
 	void ClearPermissions()
@@ -123,8 +117,6 @@ class JMRole : Managed
 
 		string filename = FileReadyStripName( Name );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );
-			
-		array< string > data = new array< string >;
 
 		if ( file != 0 )
 		{
@@ -132,17 +124,10 @@ class JMRole : Managed
 
 			while ( FGets( file, line ) > 0 )
 			{
-				data.Insert( line );
+				AddPermission( line );
 			}
 
 			CloseFile( file );
-
-			for ( int i = 0; i < data.Count(); i++ )
-			{
-				AddPermission( data[i] );
-			}
-
-			//Serialize();
 		} else
 		{
 			return false;

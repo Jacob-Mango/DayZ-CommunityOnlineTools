@@ -1958,27 +1958,32 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_StopBleeding( guids, senderRPC, instance );
 	}
 
-	void SetPermissions( array< string > permissions, array< string > guids )
+	void SetPermissions( JMPermission permission, array< string > guids )
 	{
+		auto trace = CF_Trace_0(this, "SetPermissions");
+
 		if ( IsMissionHost() )
 		{
-			Exec_SetPermissions( permissions, guids, NULL );
+			Exec_SetPermissions( permission, guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( permissions );
+			permission.OnSend(rpc);
 			rpc.Write( guids );
 			rpc.Send( NULL, JMPlayerModuleRPC.SetPermissions, true, NULL );
 		}
 	}
 
-	private void Exec_SetPermissions( array< string > permissions, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetPermissions( JMPermission permission, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
+		auto trace = CF_Trace_0(this, "Exec_SetPermissions");
+
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 		for ( int i = 0; i < players.Count(); i++ )
-		{		
-			players[i].LoadPermissions( permissions );
+		{
+			players[i].CopyPermissions( permission );
+			players[i].Save();
 
 			players[i].Update();
 
@@ -1992,8 +1997,11 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 	private void RPC_SetPermissions( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		array< string > permissions;
-		if ( !ctx.Read( permissions ) )
+		auto trace = CF_Trace_1(this, "RPC_SetPermissions").Add(senderRPC.GetId());
+
+		JMPermission permission = new JMPermission( JMConstants.PERM_ROOT );
+		permission.CopyPermissions(GetPermissionsManager().RootPermission);
+		if ( !permission.OnReceive( ctx ) )
 			return;
 
 		array< string > guids;
@@ -2004,7 +2012,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", senderRPC, instance ) )
 			return;
 
-		Exec_SetPermissions( permissions, guids, senderRPC, instance );
+		Exec_SetPermissions( permission, guids, senderRPC, instance );
 	}
 
 	void SetRoles( array< string > roles, array< string > guids )

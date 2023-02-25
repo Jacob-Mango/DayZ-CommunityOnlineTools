@@ -3,6 +3,7 @@ class JMPlayerForm extends JMFormBase
 	private autoptr array< JMPlayerRowWidget > m_PlayerList;
 	private autoptr array< JMPermissionRowWidget > m_PermissionList;
 	private autoptr array< JMRoleRowWidget > m_RoleList;
+	private ref JMPermission m_RootPermission;
 
 	private Widget m_LeftPanel;
 	private Widget m_RightPanel;
@@ -432,14 +433,15 @@ class JMPlayerForm extends JMFormBase
 		m_SavePermissions.Show();
 		m_PermissionsListScroller.Show();
 
-		array< JMPermission > permissions = new array< JMPermission >();
-		GetPermissionsManager().GetPermissionsAsList( permissions );
-
 		int permissionIdx = 0;
 
 		m_PermissionsRows = UIActionManager.CreateActionRows( m_PermissionsListScroller.GetContentWidget() );
 
 		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+
+		m_RootPermission = pi.GetPermissions();
+		array< JMPermission > permissions = new array< JMPermission >();
+		GetPermissionsManager().GetPermissionsAsList( m_RootPermission, permissions );
 
 		for ( int i = 0; i < 10; i++ )
 		{
@@ -469,8 +471,6 @@ class JMPlayerForm extends JMFormBase
 
 				prScript.InitPermission( permissions[permissionIdx - 1] );
 				prScript.Enable();
-
-				prScript.SetType( pi.GetRawPermissionType( permissions[permissionIdx - 1].GetFullName() ) );
 
 				m_PermissionList.Insert( prScript );
 			}
@@ -600,15 +600,9 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		array< string > permissions = new array< string >();
-		for ( int i = 0; i < m_PermissionList.Count(); ++i )
-		{
-			permissions.Insert( m_PermissionList[i].FullName + " " + m_PermissionList[i].Type );
-		}
-
 		UpdateLastChangeTime();
 
-		m_Module.SetPermissions( permissions, JM_GetSelected().GetPlayers() );
+		m_Module.SetPermissions( m_RootPermission, JM_GetSelected().GetPlayers() );
 	}
 	
 	void Click_SaveRoles( UIEvent eid, UIActionBase action )

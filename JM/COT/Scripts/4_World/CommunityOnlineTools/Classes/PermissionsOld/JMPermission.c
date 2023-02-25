@@ -41,9 +41,13 @@ class JMPermission : Managed
 
 	void CopyPermissions(JMPermission from)
 	{
+		Children.Clear();
 		foreach (auto child: from.Children)
 		{
 			auto perm = new JMPermission(child.Name, this);
+			#ifdef COT_DEBUGLOGS
+			CF_Log.Debug("Copying %1 %2", child.GetFullName(), child.Type.ToString());
+			#endif
 			perm.Type = child.Type;
 			perm.CopyPermissions(child);
 			Children.Insert(perm);
@@ -122,20 +126,17 @@ class JMPermission : Managed
 		{
 			string name = tokens[depth];
 
-			if (requireRegistered && !IsRegistered(name))
-				return;
-
 			//Print(ClassName() + "::AddPermissionInternal " + m_SerializedFullName + "." + name);
 
-			JMPermission nChild = VerifyAddPermission( name );
-
-			nChild.AddPermissionInternal( tokens, depth + 1, value, requireRegistered );
+			JMPermission nChild = VerifyAddPermission( name, requireRegistered );
+			if (nChild)
+				nChild.AddPermissionInternal( tokens, depth + 1, value, requireRegistered );
 		} else {
 			Type = value;
 		}
 	}
 
-	private JMPermission VerifyAddPermission( string name )
+	private JMPermission VerifyAddPermission( string name, bool requireRegistered = false )
 	{
 		JMPermission nChild = NULL;
 
@@ -148,7 +149,7 @@ class JMPermission : Managed
 			}
 		}
 			
-		if ( nChild == NULL )
+		if ( !requireRegistered && nChild == NULL )
 		{
 			nChild = new JMPermission( name, this );
 			nChild.Type = JMPermissionType.INHERIT;
@@ -157,17 +158,6 @@ class JMPermission : Managed
 		}
 
 		return nChild;
-	}
-
-	private bool IsRegistered( string name )
-	{
-		foreach (auto child: Children)
-		{
-			if (child.Name == name)
-				return true;
-		}
-
-		return false;
 	}
 
 	JMPermission GetPermission( string inp )
@@ -346,6 +336,9 @@ class JMPermission : Managed
 
 		foreach (auto child: Children)
 		{
+			#ifdef COT_DEBUGLOGS
+			CF_Log.Debug("Sending %1 %2", child.GetFullName(), child.Type.ToString());
+			#endif
 			ctx.Write(child.Type);
 			child.OnSend(ctx);
 		}
@@ -367,6 +360,9 @@ class JMPermission : Managed
 				return false;
 
 			child.Type = type;
+			#ifdef COT_DEBUGLOGS
+			CF_Log.Debug("Received %1 %2", child.GetFullName(), child.Type.ToString());
+			#endif
 			if (!child.OnReceive(ctx))
 				return false;
 		}
