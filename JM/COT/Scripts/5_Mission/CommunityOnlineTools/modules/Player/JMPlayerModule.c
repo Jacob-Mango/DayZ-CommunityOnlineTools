@@ -150,6 +150,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		types.Insert( "Teleport" );
 		types.Insert( "Inventory" );
 		types.Insert( "PF" );
+		types.Insert( "Kick" );
 	}
 
 	override int GetRPCMin()
