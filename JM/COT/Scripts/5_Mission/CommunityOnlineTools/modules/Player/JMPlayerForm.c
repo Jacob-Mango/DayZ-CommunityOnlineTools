@@ -1235,7 +1235,7 @@ class JMPlayerForm extends JMFormBase
 			m_Name.SetText( instance.GetName() );
 			m_Steam64ID.SetText( instance.GetSteam64ID() );
 
-			m_TeleportMeTo.Enable();
+			UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
 		} else
 		{
 			HideIdentityWidgets();
