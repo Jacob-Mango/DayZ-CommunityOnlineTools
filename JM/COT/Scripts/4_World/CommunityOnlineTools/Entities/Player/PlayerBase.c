@@ -30,6 +30,8 @@ modded class PlayerBase
 	private bool m_COT_RemoveCollision;
 	private bool m_COT_RemoveCollision_Preference;
 
+	private bool m_COT_IsBeingKicked;
+
 	void PlayerBase()
 	{
 		if ( IsMissionOffline() )
@@ -521,5 +523,15 @@ modded class PlayerBase
 
 		if (!m_COT_GodMode_Preference)
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
+	}
+
+	void COTSetIsBeingKicked(bool state)
+	{
+		m_COT_IsBeingKicked = state;
+	}
+
+	bool COTIsBeingKicked()
+	{
+		return m_COT_IsBeingKicked;
 	}
 }

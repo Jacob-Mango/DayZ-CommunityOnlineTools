@@ -155,6 +155,8 @@ class JMPlayerInstance : Managed
 		Assert_Null( copy );
 
 		m_RootPermission.CopyPermissions( copy );
+
+		m_PermissionsSyncedToClient.Clear();
 	}
 
 	void ClearPermissions()
@@ -162,6 +164,8 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Clear();
+
+		m_PermissionsSyncedToClient.Clear();
 	}
 
 	void RemoveClient(string guid)
