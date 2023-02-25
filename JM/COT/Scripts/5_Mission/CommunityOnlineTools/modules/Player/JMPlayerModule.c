@@ -1791,28 +1791,23 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		for ( int i = 0; i < players.Count(); i++ )
+		auto missionServer = MissionServer.Cast(GetGame().GetMission());
+
+		foreach (auto player: players)
 		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
+			if (!player.PlayerObject)
 				continue;
 
-			if (GetHive())
-			{
-				player.Save();
-				GetHive().CharacterExit(player);        
-			}
+			GetGame().SendLogoutTime(player.PlayerObject, 0);
 
-			player.ReleaseNetworkControls();
-			GetGame().DisconnectPlayer(player.GetIdentity(), player.GetIdentity().GetId());
-			if (player) player.Delete();
+			missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
 
-			GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + player.GetGUID() + "]" );
 
-			SendWebhook( "Kick", instance, "Kicked " + players[i].FormatSteamWebhook() );
-
-			players[i].Update();
+			SendWebhook( "Kick", instance, "Kicked " + player.FormatSteamWebhook() );
 		}
+
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1000);
 	}
 
 	private void RPC_Kick( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
