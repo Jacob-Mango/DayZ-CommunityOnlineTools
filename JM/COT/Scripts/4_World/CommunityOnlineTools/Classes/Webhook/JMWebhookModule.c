@@ -195,6 +195,9 @@ class JMWebhookModule: JMModuleBase
 				if ( !mappedConnections )
 				{
 					mappedConnections = new set< JMWebhookConnection >;
+					#ifdef JM_COT_DIAG_LOGGING
+					CF_Log.Debug("FixConnectionMap %1", name);
+					#endif
 					m_ConnectionMap.Insert( name, mappedConnections );
 				}
 
@@ -243,6 +246,9 @@ class JMWebhookModule: JMModuleBase
 		if ( !connections )
 		{
 			connections = new set< JMWebhookConnection >();
+			#ifdef JM_COT_DIAG_LOGGING
+			CF_Log.Debug("AddConnection(\"%1\", \"%2\")", name, grpName);
+			#endif
 			m_ConnectionMap.Insert( name, connections );
 		}
 
@@ -277,6 +283,9 @@ class JMWebhookModule: JMModuleBase
 		if ( !connections )
 		{
 			connections = new set< JMWebhookConnection >();
+			#ifdef JM_COT_DIAG_LOGGING
+			CF_Log.Debug("AddConnection(\"%1\", %2)", name, group.ToString());
+			#endif
 			m_ConnectionMap.Insert( name, connections );
 		}
 
@@ -341,9 +350,16 @@ class JMWebhookModule: JMModuleBase
 					set< JMWebhookConnection > connections = m_ConnectionMap.Get( item.GetType() );
 					if ( !Assert_Null( connections ) )
 					{
+						#ifdef JM_COT_DIAG_LOGGING
+						CF_Log.Debug("Thread_ProcessQueue - item type \"%1\"", item.GetType());
+						#endif
 						for ( int i = 0; i < connections.Count(); i++ )
 							if ( connections[i] != NULL )
 								connections[i].Post( m_Core, serializer, item.GetMessage() );
+					}
+					else
+					{
+						CF_Log.Error("Thread_ProcessQueue - webhook type \"%1\" not registered, please override JMModuleBase::GetWebhookTypes to insert it", item.GetType());
 					}
 					delete item;
 				}
