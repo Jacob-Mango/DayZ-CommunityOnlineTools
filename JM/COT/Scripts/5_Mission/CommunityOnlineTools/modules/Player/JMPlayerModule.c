@@ -1779,20 +1779,21 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_Heal( guids, senderRPC, instance );
 	}
 
-	void Kick( array< string > guids )
+	void Kick( array< string > guids, string messageText )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Kick( guids, NULL );
+			Exec_Kick( guids, NULL, NULL, messageText );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guids );
+			rpc.Write(messageText);
 			rpc.Send( NULL, JMPlayerModuleRPC.Kick, true, NULL );
 		}
 	}
 
-	private void Exec_Kick( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_Kick( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1801,7 +1802,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if (!player.PlayerObject)
 				continue;
 
-			SendKickMessage(player.PlayerObject.GetIdentity());
+			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
 
 			//! Kick player after delay so client can still receive kickmessage RPC
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Kick_Single, 500, false, player, ident, instance);
@@ -1837,16 +1838,21 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if ( !ctx.Read( guids ) )
 			return;
 
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC, instance ) )
 			return;
 
-		Exec_Kick( guids, senderRPC, instance );
+		Exec_Kick( guids, senderRPC, instance, messageText );
 	}
 	
-	private void SendKickMessage(PlayerIdentity identity)
+	private void SendKickMessage(PlayerIdentity identity, string messageText)
 	{
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(messageText);
 		rpc.Send(NULL, JMPlayerModuleRPC.KickMessage, true, identity);
 	}
 
@@ -1860,10 +1866,17 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if (GetGame().IsDedicatedServer())
 			return;
 
-		CF_Log.Debug("Inserting deferred message parameters");
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
 
+		if (messageText)
+			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN: " + messageText;
+		else
+			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN";
+		
 		JMDeferredMessage.QueuedMessages.Clear();
-		JMDeferredMessage.Queue("Community Online Tools", "Kicked by Admin");
+		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
 	}
 
 	void Strip( array< string > guids )

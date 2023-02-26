@@ -249,13 +249,13 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 		switch ( type )
 		{
 		case JMConfirmationType.INFO:
+		case JMConfirmationType.SELECTION:
+			m_TextMessage.SetSize(1, 1);
 			m_EditBox.Show( false );
 			break;
 		case JMConfirmationType.EDIT:
+			m_TextMessage.SetSize(1, 0.5);
 			m_EditBox.Show( true );
-			break;
-		case JMConfirmationType.SELECTION:
-			m_EditBox.Show( false );
 			break;
 		}
 

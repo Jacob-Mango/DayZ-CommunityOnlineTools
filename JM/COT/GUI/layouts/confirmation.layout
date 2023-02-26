@@ -84,14 +84,12 @@ PanelWidgetClass confirmation_panel_inner {
     EditBoxWidgetClass confirmation_message_input {
      visible 0
      position 0 0
-     size 1 18
+     size 1 22
      valign bottom_ref
      vexactsize 1
-     style Light
      text ""
-     font "gui/fonts/sdf_MetronLight16"
+     font "gui/fonts/Metron"
      "exact text" 1
-     "exact text size" 16
      "text halign" center
      "text valign" center
      style Editor
