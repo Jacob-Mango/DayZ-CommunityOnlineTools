@@ -109,12 +109,15 @@ modded class PlayerBase
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
 			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
-			if ( m_JMIsInvisible )
+
+			if (!IsControlledPlayer())  //! Other clients
 			{
-				ClearFlags( EntityFlags.VISIBLE, true );
-			} else
-			{
-				SetFlags( EntityFlags.VISIBLE, true );
+				//! Move out of the way so there is no blocking "ghost"
+				if (m_JMIsInvisible)
+					SetPosition("0 0 0");
+
+				//! Disable simulation to disable position update on client, footstep sounds, etc.
+				DisableSimulation(m_JMIsInvisible);
 			}
 
 			SetInvisible( m_JMIsInvisible );
@@ -140,8 +143,6 @@ modded class PlayerBase
 	{
 		if ( !m_JMIsInvisible )
 			return;
-
-		ClearFlags( EntityFlags.VISIBLE, true );
 
 		SetInvisible( true );
 	}
