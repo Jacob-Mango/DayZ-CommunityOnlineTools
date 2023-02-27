@@ -265,6 +265,24 @@ class JMPermissionManager
 		return instance.HasPermission( permission );
 	}
 
+	bool HasPermissions( TStringArray permissions, PlayerIdentity identity, out JMPlayerInstance instance, bool requireAll = true )
+	{
+		foreach (string permission: permissions)
+		{
+			if (HasPermission(permission, identity, instance))
+			{
+				if (!requireAll)
+					return true;
+			}
+			else if (requireAll)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
 		Assert_Null( RootPermission );
