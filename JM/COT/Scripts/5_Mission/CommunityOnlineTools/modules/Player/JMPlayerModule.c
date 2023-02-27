@@ -88,7 +88,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Player Management";
+		return "#STR_COT_PLAYER_MODULE_NAME";
 	}
 	
 	override string GetIconName()
