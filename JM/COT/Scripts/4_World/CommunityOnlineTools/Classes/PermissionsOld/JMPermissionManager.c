@@ -287,10 +287,12 @@ class JMPermissionManager
 			SteamToGUID.Insert( ident.GetPlainId(), guid );
 		}
 
+		RemoveSyncedToClient(guid);
+
 		inst = Players.Get( guid );
 		if ( inst )
 		{
-			return false;
+			return true;
 		}
 
 		inst = new JMPlayerInstance( ident );
@@ -316,15 +318,20 @@ class JMPermissionManager
 
 			Players.Remove( guid );
 
-			foreach (JMPlayerInstance player: Players)
-			{
-				player.RemoveClient(guid);
-			}
+			RemoveSyncedToClient(guid);
 
 			return true;
 		} else
 		{
 			return false;
+		}
+	}
+
+	private void RemoveSyncedToClient(string guid)
+	{
+		foreach (JMPlayerInstance player: Players)
+		{
+			player.RemoveSyncedToClient(guid);
 		}
 	}
 

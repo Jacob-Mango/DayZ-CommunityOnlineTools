@@ -17,7 +17,7 @@ class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
 	private ref array< string > m_Roles;
-	private ref map<string, bool> m_PermissionsSyncedToClient;
+	private ref map<string, bool> m_SyncedToClient;
 
 	PlayerBase PlayerObject;
 
@@ -76,7 +76,7 @@ class JMPlayerInstance : Managed
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		m_RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		m_Roles = new array< string >();
-		m_PermissionsSyncedToClient = new map<string, bool>();
+		m_SyncedToClient = new map<string, bool>();
 		m_PlayerFile = new JMPlayerSerialize();
 	}
 
@@ -156,7 +156,7 @@ class JMPlayerInstance : Managed
 
 		m_RootPermission.CopyPermissions( copy );
 
-		m_PermissionsSyncedToClient.Clear();
+		m_SyncedToClient.Clear();
 	}
 
 	void ClearPermissions()
@@ -165,12 +165,12 @@ class JMPlayerInstance : Managed
 
 		m_RootPermission.Clear();
 
-		m_PermissionsSyncedToClient.Clear();
+		m_SyncedToClient.Clear();
 	}
 
-	void RemoveClient(string guid)
+	void RemoveSyncedToClient(string guid)
 	{
-		m_PermissionsSyncedToClient.Remove(guid);
+		m_SyncedToClient.Remove(guid);
 	}
 
 	void LoadPermissions( array< string > permissions )
@@ -180,7 +180,7 @@ class JMPlayerInstance : Managed
 		Assert_Null( m_RootPermission );
 
 		m_RootPermission.Deserialize( permissions );
-		m_PermissionsSyncedToClient.Clear();
+		m_SyncedToClient.Clear();
 		Save();
 	}
 
@@ -190,7 +190,7 @@ class JMPlayerInstance : Managed
 
 		m_RootPermission.AddPermission( permission, type );
 
-		m_PermissionsSyncedToClient.Clear();
+		m_SyncedToClient.Clear();
 	}
 
 	void LoadRoles( notnull array< string > roles )
@@ -218,7 +218,7 @@ class JMPlayerInstance : Managed
 			m_Roles.Insert( role );
 		}
 
-		m_PermissionsSyncedToClient.Clear();
+		m_SyncedToClient.Clear();
 	}
 
 	bool HasRole( string role )
@@ -306,14 +306,14 @@ class JMPlayerInstance : Managed
 	void OnSendPermissions( ParamsWriteContext ctx, string sendToGUID )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		Print("OnSendPermissions - GUID " + m_GUID + ", already synced to " + sendToGUID + " " + m_PermissionsSyncedToClient[sendToGUID]);
+		Print("OnSendPermissions - GUID " + m_GUID + ", already synced to " + sendToGUID + " " + m_SyncedToClient[sendToGUID]);
 		#endif
 
 		Assert_Null( m_RootPermission );
 
-		ctx.Write( !m_PermissionsSyncedToClient[sendToGUID] );
+		ctx.Write( !m_SyncedToClient[sendToGUID] );
 
-		if ( m_PermissionsSyncedToClient[sendToGUID] )
+		if ( m_SyncedToClient[sendToGUID] )
 			return;
 
 		ctx.Write( m_Steam64ID );
@@ -322,7 +322,7 @@ class JMPlayerInstance : Managed
 		m_RootPermission.OnSend( ctx );
 		ctx.Write( m_Roles );
 
-		m_PermissionsSyncedToClient[sendToGUID] = true;
+		m_SyncedToClient[sendToGUID] = true;
 	}
 
 	void OnRecievePermissions( ParamsReadContext ctx )
