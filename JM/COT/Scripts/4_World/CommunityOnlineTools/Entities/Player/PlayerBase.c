@@ -520,7 +520,7 @@ modded class PlayerBase
 				//! Move to edge of network bubble of target (this is where an ESPer could "see" the admin position,
 				//! frozen in time) before moving directly under target.
 				//! Randomize the distance a bit to not make it too obvious.
-				position = position - dir.Normalized() * Math.RandomFloat(900, 999);
+				position = position - dir.Normalized() * Math.RandomFloat(990, 999);
 				position[1] = GetGame().SurfaceY(position[0], position[2]);
 			}
 			else
