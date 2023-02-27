@@ -28,7 +28,7 @@ enum JMPermissionRPC
 enum JMCOTRPC
 {
 	INVALID = 10140,
-	Active
+	Active,
 	COUNT
 };
 
