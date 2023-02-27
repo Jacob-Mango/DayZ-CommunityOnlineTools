@@ -1,28 +1,3 @@
-enum JMESPModuleRPC
-{
-	INVALID = 10300,
-	Log,
-	SetPosition,
-	SetOrientation,
-	SetHealth,
-	DeleteObject,
-
-	BaseBuilding_Build,
-	BaseBuilding_Dismantle,
-	BaseBuilding_Repair,
-
-	Car_Unstuck,
-	Car_Refuel,
-	Car_Repair,
-
-	MakeItemSet,
-	DuplicateAll,
-	DeleteAll,
-	MoveToCursorRelative,
-	MoveToCursorAbsolute,
-	COUNT
-};
-
 enum JMESPState
 {
 	UNKNOWN = 0,
