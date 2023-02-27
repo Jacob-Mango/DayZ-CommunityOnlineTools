@@ -1446,6 +1446,10 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
 			return;
 
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermissions({"Admin.Player.Invisibility", "Admin.Player.Spectate", "Camera.View"}, senderRPC, instance, false))
+			return;
+
 		player.COTSetInvisibility(JMInvisibilityType.Interactive, false);
 	}
 
@@ -1456,6 +1460,10 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 		PlayerBase player;
 		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+			return;
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermissions({"Admin.Player.Invisibility", "Admin.Player.Spectate", "Camera.View"}, senderRPC, instance, false))
 			return;
 
 		player.COTSetInvisibility(JMInvisibilityType.DisableSimulation, false);
