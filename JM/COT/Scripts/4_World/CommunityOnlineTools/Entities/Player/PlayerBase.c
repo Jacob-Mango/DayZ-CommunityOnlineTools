@@ -320,7 +320,7 @@ modded class PlayerBase
 		if (!type)
 			return m_JMIsInvisible;
 
-		return m_JMIsInvisible == type
+		return m_JMIsInvisible == type;
 	}
 
 	bool COTHasUnlimitedAmmo()
