@@ -1,40 +1,3 @@
-enum JMPlayerModuleRPC
-{
-	INVALID = 10320,
-	SetHealth,
-	SetBlood,
-	SetShock,
-	SetEnergy,
-	SetWater,
-	SetStamina,
-	SetBloodyHands,
-	RepairTransport,
-	TeleportTo,
-	TeleportSenderTo,
-	TeleportToPrevious,
-	StartSpectating,
-	EndSpectating,
-	EndSpectating_Finish,
-	SetCannotBeTargetedByAI,
-	SetGodMode,
-	SetFreeze,
-	SetInvisible,
-	SetReceiveDamageDealt,
-	SetRemoveCollision,
-	SetUnlimitedAmmo,
-	SetUnlimitedStamina,
-	SetBrokenLegs,
-	Heal,
-	Strip,
-	Dry,
-	Kick,
-	KickMessage,
-	StopBleeding,
-	SetPermissions,
-	SetRoles,
-	COUNT
-};
-
 class JMPlayerModule: JMRenderableModuleBase
 {
 	PlayerBase m_SpectatorClient;
@@ -259,6 +222,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.KickMessage:
 			RPC_KickMessage( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.VONStartedTransmitting:
+			RPC_VONStartedTransmitting( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.VONStoppedTransmitting:
+			RPC_VONStoppedTransmitting( ctx, sender, target );
 			break;
 		}
 	}
@@ -1411,7 +1380,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
 	}
 
-	void SetInvisible( bool value, array< string > guids )
+	void SetInvisible( int value, array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
@@ -1425,7 +1394,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		}
 	}
 
-	private void Exec_SetInvisible( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetInvisible( int value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1453,7 +1422,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 	private void RPC_SetInvisible( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		bool value;
+		int value;
 		if ( !ctx.Read( value ) )
 			return;
 
@@ -1466,6 +1435,30 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		Exec_SetInvisible( value, guids, senderRPC, instance );
+	}
+
+	private void RPC_VONStartedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if (!GetGame().IsServer())
+			return;
+
+		PlayerBase player;
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+			return;
+
+		player.COTSetInvisibility(JMInvisibilityType.Interactive, false);
+	}
+
+	private void RPC_VONStoppedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if (!GetGame().IsServer())
+			return;
+
+		PlayerBase player;
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+			return;
+
+		player.COTSetInvisibility(JMInvisibilityType.DisableSimulation, false);
 	}
 
 	void SetRemoveCollision( bool value, array< string > guids )
@@ -1779,20 +1772,21 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_Heal( guids, senderRPC, instance );
 	}
 
-	void Kick( array< string > guids )
+	void Kick( array< string > guids, string messageText )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Kick( guids, NULL );
+			Exec_Kick( guids, NULL, NULL, messageText );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guids );
+			rpc.Write(messageText);
 			rpc.Send( NULL, JMPlayerModuleRPC.Kick, true, NULL );
 		}
 	}
 
-	private void Exec_Kick( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_Kick( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1801,7 +1795,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			if (!player.PlayerObject)
 				continue;
 
-			SendKickMessage(player.PlayerObject.GetIdentity());
+			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
 
 			//! Kick player after delay so client can still receive kickmessage RPC
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Kick_Single, 500, false, player, ident, instance);
@@ -1837,16 +1831,21 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if ( !ctx.Read( guids ) )
 			return;
 
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC, instance ) )
 			return;
 
-		Exec_Kick( guids, senderRPC, instance );
+		Exec_Kick( guids, senderRPC, instance, messageText );
 	}
 	
-	private void SendKickMessage(PlayerIdentity identity)
+	private void SendKickMessage(PlayerIdentity identity, string messageText)
 	{
 		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(messageText);
 		rpc.Send(NULL, JMPlayerModuleRPC.KickMessage, true, identity);
 	}
 
@@ -1860,10 +1859,17 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		if (GetGame().IsDedicatedServer())
 			return;
 
-		CF_Log.Debug("Inserting deferred message parameters");
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
 
+		if (messageText)
+			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN: " + messageText;
+		else
+			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN";
+		
 		JMDeferredMessage.QueuedMessages.Clear();
-		JMDeferredMessage.Queue("Community Online Tools", "Kicked by Admin");
+		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
 	}
 
 	void Strip( array< string > guids )

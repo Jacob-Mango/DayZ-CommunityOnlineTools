@@ -1,14 +1,3 @@
-
-enum JMNamalskEventManagerRPC
-{
-	INVALID = 10400,
-	LoadEvents,
-	RequestEvents,
-	StartEvent,
-	CancelEvent,
-	COUNT
-};
-
 class JMNamalskEventManagerModule: JMRenderableModuleBase
 {
 	private Class m_EventManager;

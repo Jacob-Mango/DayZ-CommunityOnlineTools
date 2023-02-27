@@ -9,19 +9,6 @@ const int JMDT_NONE = 0;
 const int JMDT_EXPLODED = 2;
 const int JMDT_DESTROYED = 4;
 
-enum JMVehiclesModuleRPC
-{
-	INVALID = 10180,
-	RequestServerVehicles,
-	SendServerVehicles,
-	DeleteVehicle,
-	DeleteVehicleAll,
-	DeleteVehicleUnclaimed,
-	DeleteVehicleDestroyed,
-	TeleportToVehicle,
-	COUNT
-};
-
 class JMVehicleMetaData
 {
 	int m_NetworkIDLow;

@@ -1,10 +1,3 @@
-enum JMCommandModuleRPC
-{
-	INVALID = 10420,
-	PerformCommand,
-	COUNT
-};
-
 class JMCommandModule: JMModuleBase
 {
 	private ref map<string, ref map<string, ref JMCommand>> m_CommandMap = new map<string, ref map<string, ref JMCommand>>();

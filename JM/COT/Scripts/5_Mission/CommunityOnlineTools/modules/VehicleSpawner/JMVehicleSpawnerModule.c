@@ -1,11 +1,3 @@
-enum JMVehicleSpawnerModuleRPC
-{
-	INVALID = 10260,
-	Load,
-	SpawnPosition,
-	COUNT
-};
-
 class JMVehicleSpawnerModule: JMRenderableModuleBase
 {
 	protected ref JMVehicleSpawnerSettings settings;

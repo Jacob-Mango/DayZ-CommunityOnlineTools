@@ -1,13 +1,3 @@
-enum JMTeleportModuleRPC
-{
-	INVALID = 10240,
-	Load,
-	Position,
-	PositionRaycast,
-	Location,
-	COUNT
-};
-
 class JMTeleportModule: JMRenderableModuleBase
 {
 	#ifdef COT_TPMENU2MAPMENU
