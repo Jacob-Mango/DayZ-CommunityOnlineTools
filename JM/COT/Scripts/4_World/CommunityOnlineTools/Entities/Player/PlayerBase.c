@@ -478,8 +478,6 @@ modded class PlayerBase
 			return;
 		}
 
-		float surfaceY = GetGame().SurfaceY( position[0], position[2] );
-
 		if (freeCam && vector.DistanceSq(m_JMLastPosition, position) <= 22500)
 		{
 			//! If we get close (within 150 m) of original position, place player at original position
@@ -487,7 +485,7 @@ modded class PlayerBase
 			if (COTIsInvisible() && !m_COT_Invisibility_Preference)
 				COTSetInvisibility( false, false );
 
-			if (GetPosition()[1] < surfaceY)
+			if (GetPosition()[1] < GetGame().SurfaceY(position[0], position[2]))
 			{
 				PhysicsEnableGravity( true );
 				SetPosition(m_JMLastPosition);
@@ -495,7 +493,20 @@ modded class PlayerBase
 		}
 		else
 		{
-			position[1] = surfaceY - 10;
+			vector dir = vector.Direction(GetPosition(), position);
+
+			if (dir.LengthSq() >= 1000000)
+			{
+				//! Move to edge of network bubble of target (this is where an ESPer could "see" the admin position,
+				//! frozen in time) before moving directly under target.
+				//! Randomize the distance a bit to not make it too obvious.
+				position = position - dir.Normalized() * Math.RandomFloat(900, 999);
+				position[1] = GetGame().SurfaceY(position[0], position[2]);
+			}
+			else
+			{
+				position[1] = GetGame().SurfaceY(position[0], position[2]) - 10;
+			}
 
 			if (!COTHasGodMode())
 				COTSetGodMode( true, false );
