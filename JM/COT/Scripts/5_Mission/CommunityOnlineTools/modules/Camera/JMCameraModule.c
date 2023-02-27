@@ -1,13 +1,3 @@
-enum JMCameraModuleRPC
-{
-	INVALID = 10160,
-	Enter,
-	Leave,
-	Leave_Finish,
-	UpdatePosition,
-	COUNT
-};
-
 class JMCameraModule: JMRenderableModuleBase
 {
 	protected float m_CurrentSmoothBlur;

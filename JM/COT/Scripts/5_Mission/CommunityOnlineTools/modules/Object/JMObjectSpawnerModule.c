@@ -1,12 +1,3 @@
-enum JMObjectSpawnerModuleRPC
-{
-	INVALID = 10220,
-	Position,
-	Inventory,
-	Delete,
-	COUNT
-};
-
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	bool m_OnDebugSpawn = true;
