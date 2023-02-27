@@ -1,3 +1,10 @@
+enum JMInvisibilityType
+{
+	None,
+	DisableSimulation,
+	Interactive
+}
+
 modded class PlayerBase
 {
 #ifndef CF_MODULE_PERMISSIONS
@@ -6,9 +13,10 @@ modded class PlayerBase
 
 	private bool m_COT_GodMode_Preference;
 
-	private bool m_JMIsInvisible;
-	private bool m_JMIsInvisibleRemoteSynch;
-	private bool m_COT_Invisibility_Preference;
+	private int m_JMIsInvisible;
+	private int m_JMIsInvisibleRemoteSynch;
+	private int m_COT_Invisibility_Preference;
+	private bool m_COT_WasSpeaking;
 
 	private bool m_JMIsFrozen;
 	private bool m_JMIsFrozenRemoteSynch;
@@ -67,7 +75,7 @@ modded class PlayerBase
 		*/
 		super.Init();
 
-		RegisterNetSyncVariableBool( "m_JMIsInvisibleRemoteSynch" );
+		RegisterNetSyncVariableInt( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStaminaRemoteSynch" );
 
@@ -112,12 +120,21 @@ modded class PlayerBase
 
 			if (!IsControlledPlayer())  //! Other clients
 			{
-				//! Move out of the way so there is no blocking "ghost"
-				if (m_JMIsInvisible)
-					SetPosition("0 0 0");
+				if (m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
+				{
+					//! Set physics non-solid so there is no blocking "ghost"
+					//! Needed on client because of disabling simulation (below),
+					//! setting on server is not enough in this specific case
+					PhysicsSetSolid(false);
 
-				//! Disable simulation to disable position update on client, footstep sounds, etc.
-				DisableSimulation(m_JMIsInvisible);
+					//! Disable simulation to disable position update on client, footstep sounds, etc.
+					DisableSimulation(true);
+				}
+				else
+				{
+					DisableSimulation(false);
+					Update();
+				}
 			}
 
 			SetInvisible( m_JMIsInvisible );
@@ -298,9 +315,12 @@ modded class PlayerBase
 		return m_JMIsFrozen;
 	}
 
-	bool COTIsInvisible()
+	bool COTIsInvisible(int type = 0)
 	{
-		return m_JMIsInvisible;
+		if (!type)
+			return m_JMIsInvisible;
+
+		return m_JMIsInvisible == type
 	}
 
 	bool COTHasUnlimitedAmmo()
@@ -353,7 +373,7 @@ modded class PlayerBase
 		}
 	}
 
-	void COTSetInvisibility( bool mode, bool preference = true )
+	void COTSetInvisibility( int mode, bool preference = true )
 	{
 		if ( GetGame().IsServer() )
 		{
@@ -483,7 +503,7 @@ modded class PlayerBase
 			//! If we get close (within 150 m) of original position, place player at original position
 
 			if (COTIsInvisible() && !m_COT_Invisibility_Preference)
-				COTSetInvisibility( false, false );
+				COTSetInvisibility( JMInvisibilityType.None, false );
 
 			if (GetPosition()[1] < GetGame().SurfaceY(position[0], position[2]))
 			{
@@ -511,8 +531,8 @@ modded class PlayerBase
 			if (!COTHasGodMode())
 				COTSetGodMode( true, false );
 
-			if (!COTIsInvisible())
-				COTSetInvisibility( true, false );
+			if (!COTIsInvisible(JMInvisibilityType.DisableSimulation))
+				COTSetInvisibility( JMInvisibilityType.DisableSimulation, false );
 
 			PhysicsEnableGravity( false );
 			SetPosition( position );
@@ -526,7 +546,9 @@ modded class PlayerBase
 #endif
 
 		if (!m_COT_Invisibility_Preference)
-			COTSetInvisibility( false, false );
+			COTSetInvisibility( JMInvisibilityType.None, false );
+		else
+			COTSetInvisibility( m_COT_Invisibility_Preference, false );
 
 		PhysicsEnableGravity( true );
 
