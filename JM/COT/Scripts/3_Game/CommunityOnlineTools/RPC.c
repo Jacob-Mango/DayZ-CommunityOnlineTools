@@ -10,31 +10,31 @@ enum JMClientRPC
 	COUNT
 };
 
-enum JMRoleRPC
+enum JMRoleRPC : JMClientRPC
 {
-	INVALID = 10120,
+	INVALID,
 	RefreshRoles,
 	UpdateRole,
 	RemoveRole,
 	COUNT
 };
 
-enum JMPermissionRPC
+enum JMPermissionRPC : JMRoleRPC
 {
-	INVALID = 10130,
+	INVALID,
 	COUNT
 };
 
-enum JMCOTRPC
+enum JMCOTRPC : JMPermissionRPC
 {
-	INVALID = 10140,
+	INVALID,
 	Active,
 	COUNT
 };
 
-enum JMCameraModuleRPC
+enum JMCameraModuleRPC : JMCOTRPC
 {
-	INVALID = 10160,
+	INVALID,
 	Enter,
 	Leave,
 	Leave_Finish,
@@ -42,9 +42,9 @@ enum JMCameraModuleRPC
 	COUNT
 };
 
-enum JMVehiclesModuleRPC
+enum JMVehiclesModuleRPC : JMCameraModuleRPC
 {
-	INVALID = 10180,
+	INVALID,
 	RequestServerVehicles,
 	SendServerVehicles,
 	DeleteVehicle,
@@ -55,27 +55,27 @@ enum JMVehiclesModuleRPC
 	COUNT
 };
 
-enum JMItemSetSpawnerModuleRPC
+enum JMItemSetSpawnerModuleRPC : JMVehiclesModuleRPC
 {
-	INVALID = 10200,
+	INVALID,
 	Load,
 	SpawnPosition,
 	SpawnPlayers,
 	COUNT
 };
 
-enum JMObjectSpawnerModuleRPC
+enum JMObjectSpawnerModuleRPC : JMItemSetSpawnerModuleRPC
 {
-	INVALID = 10220,
+	INVALID,
 	Position,
 	Inventory,
 	Delete,
 	COUNT
 };
 
-enum JMTeleportModuleRPC
+enum JMTeleportModuleRPC : JMObjectSpawnerModuleRPC
 {
-	INVALID = 10240,
+	INVALID,
 	Load,
 	Position,
 	PositionRaycast,
@@ -83,17 +83,17 @@ enum JMTeleportModuleRPC
 	COUNT
 };
 
-enum JMVehicleSpawnerModuleRPC
+enum JMVehicleSpawnerModuleRPC : JMTeleportModuleRPC
 {
-	INVALID = 10260,
+	INVALID,
 	Load,
 	SpawnPosition,
 	COUNT
 };
 
-enum JMWeatherModuleRPC
+enum JMWeatherModuleRPC : JMVehicleSpawnerModuleRPC
 {
-	INVALID = 10280,
+	INVALID,
 	Load,
 	Storm,
 	Fog,
@@ -110,9 +110,9 @@ enum JMWeatherModuleRPC
 	COUNT
 };
 
-enum JMESPModuleRPC
+enum JMESPModuleRPC : JMWeatherModuleRPC
 {
-	INVALID = 10300,
+	INVALID,
 	Log,
 	SetPosition,
 	SetOrientation,
@@ -135,9 +135,9 @@ enum JMESPModuleRPC
 	COUNT
 };
 
-enum JMPlayerModuleRPC
+enum JMPlayerModuleRPC : JMESPModuleRPC
 {
-	INVALID = 10320,
+	INVALID,
 	SetHealth,
 	SetBlood,
 	SetShock,
@@ -174,9 +174,9 @@ enum JMPlayerModuleRPC
 	COUNT
 };
 
-enum JMNamalskEventManagerRPC
+enum JMNamalskEventManagerRPC : JMPlayerModuleRPC
 {
-	INVALID = 10400,
+	INVALID,
 	LoadEvents,
 	RequestEvents,
 	StartEvent,
@@ -184,16 +184,16 @@ enum JMNamalskEventManagerRPC
 	COUNT
 };
 
-enum JMCommandModuleRPC
+enum JMCommandModuleRPC : JMNamalskEventManagerRPC
 {
-	INVALID = 10420,
+	INVALID,
 	PerformCommand,
 	COUNT
 };
 
-enum JMWebhookCOTModuleRPC
+enum JMWebhookCOTModuleRPC : JMCommandModuleRPC
 {
-	INVALID = 10440,
+	INVALID,
 	Load,
 	AddConnectionGroup,
 	RemoveConnectionGroup,
@@ -202,4 +202,3 @@ enum JMWebhookCOTModuleRPC
 	TypeState,
 	COUNT
 };
-
