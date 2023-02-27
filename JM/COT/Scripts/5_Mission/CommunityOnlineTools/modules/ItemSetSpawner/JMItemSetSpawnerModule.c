@@ -1,12 +1,3 @@
-enum JMItemSetSpawnerModuleRPC
-{
-	INVALID = 10200,
-	Load,
-	SpawnPosition,
-	SpawnPlayers,
-	COUNT
-};
-
 class JMItemSetSpawnerModule: JMRenderableModuleBase
 {
 	protected ref JMItemSetSettings settings;

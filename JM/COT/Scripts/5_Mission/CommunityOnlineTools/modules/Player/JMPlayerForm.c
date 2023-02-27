@@ -674,7 +674,16 @@ class JMPlayerForm extends JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.Kick( JM_GetSelected().GetPlayers() );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "KickPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer" );
+	}
+
+	void KickPlayer_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void KickPlayer(JMConfirmation confirmation)
+	{
+		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_BanPlayer( UIEvent eid, UIActionBase action )

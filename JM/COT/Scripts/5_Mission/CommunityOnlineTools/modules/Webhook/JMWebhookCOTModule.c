@@ -1,15 +1,3 @@
-enum JMWebhookCOTModuleRPC
-{
-	INVALID = 10440,
-	Load,
-	AddConnectionGroup,
-	RemoveConnectionGroup,
-	AddType,
-	RemoveType,
-	TypeState,
-	COUNT
-};
-
 class JMWebhookCOTModule: JMRenderableModuleBase
 {
 	private JMWebhookSerialize m_Settings;

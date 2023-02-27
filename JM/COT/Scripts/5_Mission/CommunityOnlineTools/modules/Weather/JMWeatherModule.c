@@ -1,22 +1,3 @@
-enum JMWeatherModuleRPC
-{
-	INVALID = 10280,
-	Load,
-	Storm,
-	Fog,
-	Rain,
-	RainThresholds,
-	Overcast,
-	Wind,
-	WindFunctionParams,
-	Date,
-	UsePreset,
-	CreatePreset,
-	UpdatePreset,
-	RemovePreset,
-	COUNT
-};
-
 enum JMWeatherTypes
 {
 	INVALID,

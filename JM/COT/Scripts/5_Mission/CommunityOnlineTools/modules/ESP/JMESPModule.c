@@ -1,28 +1,3 @@
-enum JMESPModuleRPC
-{
-	INVALID = 10300,
-	Log,
-	SetPosition,
-	SetOrientation,
-	SetHealth,
-	DeleteObject,
-
-	BaseBuilding_Build,
-	BaseBuilding_Dismantle,
-	BaseBuilding_Repair,
-
-	Car_Unstuck,
-	Car_Refuel,
-	Car_Repair,
-
-	MakeItemSet,
-	DuplicateAll,
-	DeleteAll,
-	MoveToCursorRelative,
-	MoveToCursorAbsolute,
-	COUNT
-};
-
 enum JMESPState
 {
 	UNKNOWN = 0,
@@ -178,7 +153,7 @@ class JMESPSkeleton
 		vector neckPos = human.GetBonePositionWS(human.GetBoneIndexByName("neck"));
 		vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
 
-		vector dir = vector.Direction(neckPos, headPos).Normalized();
+		vector dir = vector.Direction(neckPos, headPos).Normalized() * human.GetScale();
 		vector neckEnd = headPos - dir * 0.06;
 
 		//! Neck
@@ -190,19 +165,20 @@ class JMESPSkeleton
 
 		//! Head
 		headPos = headPos + dir * 0.06;
+		float radius = 0.12 * human.GetScale();
 #ifdef JM_COT_USE_DEBUGSHAPES
-		shapes.Insert(Debug.DrawSphere(headPos, 0.12, color, ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER));
+		shapes.Insert(Debug.DrawSphere(headPos, radius, color, ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER));
 #else
 		bool isInBounds;
 		vector p1 = canvas.TransformToScreenPos(headPos, isInBounds);
-		if (isInBounds && p1[0] > 0 && p1[1] > 0 && p1[2] > 0.12)
+		if (isInBounds && p1[0] > 0 && p1[1] > 0 && p1[2] > radius)
 		{
 			vector ori = GetGame().GetCurrentCameraDirection().VectorToAngles();
 			ori[1] = 0;
 			ori[2] = 0;
-			vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * 0.12);
-			float radius = vector.Distance(p1, p2);
-			canvas.DrawCircle(headPos, radius, lineThickness, color);
+			vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * radius);
+			float dist = vector.Distance(p1, p2);
+			canvas.DrawCircle(headPos, dist, lineThickness, color);
 		}
 #endif
 
