@@ -1,40 +1,3 @@
-enum JMPlayerModuleRPC
-{
-	INVALID = 10320,
-	SetHealth,
-	SetBlood,
-	SetShock,
-	SetEnergy,
-	SetWater,
-	SetStamina,
-	SetBloodyHands,
-	RepairTransport,
-	TeleportTo,
-	TeleportSenderTo,
-	TeleportToPrevious,
-	StartSpectating,
-	EndSpectating,
-	EndSpectating_Finish,
-	SetCannotBeTargetedByAI,
-	SetGodMode,
-	SetFreeze,
-	SetInvisible,
-	SetReceiveDamageDealt,
-	SetRemoveCollision,
-	SetUnlimitedAmmo,
-	SetUnlimitedStamina,
-	SetBrokenLegs,
-	Heal,
-	Strip,
-	Dry,
-	Kick,
-	KickMessage,
-	StopBleeding,
-	SetPermissions,
-	SetRoles,
-	COUNT
-};
-
 class JMPlayerModule: JMRenderableModuleBase
 {
 	PlayerBase m_SpectatorClient;
@@ -259,6 +222,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.KickMessage:
 			RPC_KickMessage( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.VONStartedTransmitting:
+			RPC_VONStartedTransmitting( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.VONStoppedTransmitting:
+			RPC_VONStoppedTransmitting( ctx, sender, target );
 			break;
 		}
 	}
@@ -1411,7 +1380,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
 	}
 
-	void SetInvisible( bool value, array< string > guids )
+	void SetInvisible( int value, array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
@@ -1425,7 +1394,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		}
 	}
 
-	private void Exec_SetInvisible( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetInvisible( int value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -1453,7 +1422,7 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 	private void RPC_SetInvisible( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		bool value;
+		int value;
 		if ( !ctx.Read( value ) )
 			return;
 
@@ -1466,6 +1435,30 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		Exec_SetInvisible( value, guids, senderRPC, instance );
+	}
+
+	private void RPC_VONStartedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if (!GetGame().IsServer())
+			return;
+
+		PlayerBase player;
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+			return;
+
+		player.COTSetInvisibility(JMInvisibilityType.Interactive, false);
+	}
+
+	private void RPC_VONStoppedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if (!GetGame().IsServer())
+			return;
+
+		PlayerBase player;
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+			return;
+
+		player.COTSetInvisibility(JMInvisibilityType.DisableSimulation, false);
 	}
 
 	void SetRemoveCollision( bool value, array< string > guids )
