@@ -197,7 +197,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Vehicle Management";
+		return "#STR_COT_VEHICLE_MANAGEMENT_MODULE_NAME";
 	}
 
 	override string GetIconName()
