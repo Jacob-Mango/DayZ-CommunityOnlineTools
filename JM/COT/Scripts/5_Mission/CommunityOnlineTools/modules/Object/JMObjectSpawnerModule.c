@@ -40,7 +40,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Object Spawner";
+		return "#STR_COT_OBJECT_MODULE_NAME";
 	}
 	
 	override string GetIconName()

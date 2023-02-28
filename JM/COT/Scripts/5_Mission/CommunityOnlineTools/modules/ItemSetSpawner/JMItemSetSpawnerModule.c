@@ -31,7 +31,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "ItemSet Spawner";
+		return "#STR_COT_ITEMSET_MODULE_NAME";
 	}
 	
 	override string GetIconName()

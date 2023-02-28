@@ -21,3 +21,5 @@ ServerProfile/*.mdmp
 /JM/COT/Objects/Debug/MakePbo.cmd
 /JM/COT/Scripts/MakePbo.cmd
 /JM/COT/languagecore/MakePbo.cmd
+/JM/COT/Workbench/project.cfg.bat
+/JM/COT/Workbench/user.cfg.bat
