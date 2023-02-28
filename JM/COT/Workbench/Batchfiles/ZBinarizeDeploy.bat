@@ -1,8 +1,7 @@
 @echo off
+setlocal enableextensions enabledelayedexpansion
 
-cd /D "%~dp0"
-
-set batchDirectory=%cd%
+set batchDirectory=%~dp0
 
 set /a failed=0
 
@@ -35,43 +34,25 @@ if %failed%==1 (
 	goto:eof
 )
 
-set githubDirectory=%cd%\
+set githubDirectory=%~dp0\
 set workbenchDataDirectory=%githubDirectory%Workbench\
 set toolsDirectory=%workbenchDataDirectory%Tools\
 
-set workDrive=
-set modName=
-set modBuildDirectory=
-set prefixLinkRoot=
-set keyDirectory=
-set keyName=
+if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
-	set workDrive=%%a
+for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
+	echo set %%a>>"%~dp0..\project.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
-	set modName=%%a
+call "%~dp0..\project.cfg.bat"
+
+if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
+
+for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
+	echo set %%a>>"%~dp0..\user.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
-	set modBuildDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PrefixLinkRoot') do (
-	set prefixLinkRoot=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg KeyDirectory') do (
-	set keyDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg KeyName') do (
-	set keyName=%%a
-)
-
-
-setlocal enableextensions enabledelayedexpansion
+call "%~dp0..\user.cfg.bat"
 
 echo KeyDirectory is: "%keyDirectory%"
 if "%keyDirectory%"=="" (
@@ -165,8 +146,27 @@ IF NOT exist "%modBuildDirectory%%modName%\Keys\" (
 echo Copying over "%workDrive%%prefixLinkRoot%\mod.cpp" to "%modBuildDirectory%%modName%\"
 copy "%workDrive%%prefixLinkRoot%\mod.cpp" "%modBuildDirectory%%modName%\" > nul
 
-echo Copying over "%workDrive%%prefixLinkRoot%\meta.cpp" to "%modBuildDirectory%%modName%\"
-copy "%workDrive%%prefixLinkRoot%\meta.cpp" "%modBuildDirectory%%modName%\" > nul
+for /F "tokens=*" %%F in ('git rev-parse --abbrev-ref HEAD') do (
+	set branch=%%F
+)
+echo GIT branch: %branch%
+
+echo Creating "%modBuildDirectory%%modName%\meta.cpp"
+if exist "%modBuildDirectory%%modName%\meta.cpp" del /F "%modBuildDirectory%%modName%\meta.cpp"
+for /f "usebackq tokens=1,2 delims==;" %%a in ( "%~dp0..\..\meta.%branch%.cpp" ) do (
+	set key=%%a
+	set key=!key: =!
+	set value=%%b
+	set value=!value: =!
+	if !key!==timestamp (
+		set value1=!value:~0,11!
+		set value2=!value:~11!
+		set /a value2=!value2!+1
+		set value=!value1!!value2!
+	)
+	echo !key! = !value!;>>"%modBuildDirectory%%modName%\meta.cpp"
+)
+type "%modBuildDirectory%%modName%\meta.cpp"
 
 echo Copying over "%keyDirectory%\%keyName%.bikey" to "%modBuildDirectory%%modName%\Keys\"
 echo Copying over "%keyDirectory%\%keyName%.biprivatekey" to "%modBuildDirectory%%modName%\Keys\"
@@ -175,7 +175,7 @@ echo Packaging %modName% PBO's
 
 @echo off
 
-cd /D "%workDrive%%prefixLinkRoot%\"
+pushd "%workDrive%%prefixLinkRoot%\"
 
 for /R %%D in ( config.cpp ) do (
 	echo Checking directory %%~dD%%~pD, searching for config.cpp
@@ -202,6 +202,8 @@ for /R %%D in ( config.cpp ) do (
 		)
 	)
 )
+
+popd
 
 goto end
 
