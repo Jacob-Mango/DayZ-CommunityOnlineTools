@@ -219,7 +219,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( position ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
@@ -315,7 +315,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				vector position = instance.PlayerObject.GetPosition();
 
 				int flags = ECE_CREATEPHYSICS;
-				if ( !COT_SurfaceIsWater( position ) )
+				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
 		
 				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
@@ -411,7 +411,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( position ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
