@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 CALL Exit.bat
 

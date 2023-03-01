@@ -1,4 +1,5 @@
 @echo off
+setlocal enableextensions enabledelayedexpansion
 
 cd /D "%~dp0"
 
@@ -27,28 +28,21 @@ if %failed%==1 (
     goto:eof
 )
 
-set workbenchDirectory=
-set workbenchEXE=
-set workdrive=
-set prefixLinkRoot=
+if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchDirectory') do (
-    set workbenchDirectory=%%a
+for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
+	echo set %%a>>"%~dp0..\project.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchEXE') do (
-    set workbenchEXE=%%a
+call "%~dp0..\project.cfg.bat"
+
+if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
+
+for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
+	echo set %%a>>"%~dp0..\user.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
-	set workDrive=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PrefixLinkRoot') do (
-    set prefixLinkRoot=%%a
-)
-
-setlocal enableextensions enabledelayedexpansion
+call "%~dp0..\user.cfg.bat"
 
 echo WorkbenchEXE is: "%workbenchEXE%"
 if "%workbenchEXE%"=="" (
