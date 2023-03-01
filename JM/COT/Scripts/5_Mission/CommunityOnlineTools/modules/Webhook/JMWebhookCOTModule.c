@@ -82,6 +82,9 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			OnSettingsUpdated();
 		} else
 		{
+			if (!GetPermissionsManager().HasPermission( "Webhook.View" ))
+				return;
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, NULL );
 		}

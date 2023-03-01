@@ -112,6 +112,9 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if ( !GetPermissionsManager().HasPermission( "Vehicles.Spawn" ) )
+				return;
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, NULL );
 		} else
