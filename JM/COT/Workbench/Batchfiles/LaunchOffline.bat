@@ -1,4 +1,5 @@
 @echo off
+setlocal enableextensions enabledelayedexpansion
 
 cd /D "%~dp0"
 
@@ -25,49 +26,21 @@ if %failed%==1 (
     goto:eof
 )
 
-set gameDirectory=
-set modName=
-set mods=
-set mission=
-set clientEXE=
-set serverEXE=
-set clientLaunchParams=
-set modBuildDirectory=
-set playerName=
+if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
-    set modName=%%a
+for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
+	echo set %%a>>"%~dp0..\project.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg AdditionalSPMods') do (
-    set mods=%%a
+call "%~dp0..\project.cfg.bat"
+
+if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
+
+for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
+	echo set %%a>>"%~dp0..\user.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg GameDirectory') do (
-    set gameDirectory=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg SPMission') do (
-    set mission=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ClientEXE') do (
-    set clientEXE=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ClientLaunchParams') do (
-    set clientLaunchParams=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PlayerName') do (
-    set playerName=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
-	set modBuildDirectory=%%a
-)
-
-setlocal enableextensions enabledelayedexpansion
+call "%~dp0..\user.cfg.bat"
 
 echo ClientEXE is: "%clientEXE%"
 if "%clientEXE%"=="" (

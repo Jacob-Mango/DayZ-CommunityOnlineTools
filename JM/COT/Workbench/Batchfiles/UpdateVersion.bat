@@ -1,4 +1,5 @@
 @echo off
+setlocal enableextensions enabledelayedexpansion
 
 cd /D "%~dp0"
 
@@ -25,28 +26,21 @@ if %failed%==1 (
     goto:eof
 )
 
-set workDrive=
-set /a majorVersion=0
-set /a minorVersion=0
-set versionFileLocation=
+if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
-    set workDrive=%%a
+for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
+	echo set %%a>>"%~dp0..\project.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg MajorVersion') do (
-    set /a majorVersion=%%a
+call "%~dp0..\project.cfg.bat"
+
+if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
+
+for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
+	echo set %%a>>"%~dp0..\user.cfg.bat"
 )
 
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg MinorVersion') do (
-    set /a minorVersion=%%a
-)
-
-for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg VersionFileLocation') do (
-    set versionFileLocation=%%a
-)
-
-setlocal enableextensions enabledelayedexpansion
+call "%~dp0..\user.cfg.bat"
 
 echo WorkDrive is: "%workDrive%"
 if "%workDrive%"=="" (
