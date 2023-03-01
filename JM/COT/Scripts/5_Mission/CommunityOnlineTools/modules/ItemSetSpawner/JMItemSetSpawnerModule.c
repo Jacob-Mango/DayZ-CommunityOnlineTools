@@ -298,7 +298,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		*/
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( pos ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
 			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
