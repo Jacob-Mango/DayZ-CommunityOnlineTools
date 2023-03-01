@@ -223,6 +223,9 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
+				return;
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
 		} else

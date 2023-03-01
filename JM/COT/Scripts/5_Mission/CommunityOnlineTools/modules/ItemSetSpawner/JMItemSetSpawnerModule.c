@@ -115,6 +115,9 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if ( !GetPermissionsManager().HasPermission( "Items.Spawn" ) )
+				return;
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, NULL );
 		} else
