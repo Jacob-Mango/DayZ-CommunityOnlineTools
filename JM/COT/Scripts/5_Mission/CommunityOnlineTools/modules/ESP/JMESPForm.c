@@ -59,7 +59,7 @@ class JMESPForm extends JMFormBase
 		m_slbx_PlayerSkeletons.SetSelectorWidth(0.4);
 		int idx = m_Module.GetDrawPlayerSkeletonsEnabled();
 		if (idx)
-			idx |= m_Module.DrawPlayerSkeletonsIncludingMyself;
+			idx += m_Module.DrawPlayerSkeletonsIncludingMyself;
 		m_slbx_PlayerSkeletons.SetSelection(idx, false);
 		m_slbx_Skeletons_LineThickness = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_GENERIC_LINE_THICKNESS", {"1", "2", "3", "4"}, this, "Change_Skeleton_LineThickness" );
 		m_slbx_Skeletons_LineThickness.SetSelectorWidth(0.4);
