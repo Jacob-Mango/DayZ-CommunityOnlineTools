@@ -1,5 +1,4 @@
 @echo off
-setlocal enableextensions enabledelayedexpansion
 
 cd /D "%~dp0"
 
@@ -28,21 +27,43 @@ if %failed%==1 (
     goto:eof
 )
 
-if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
+set workbenchDirectory=
+set workbenchEXE=
+set workdrive=
+set prefixLinkRoot=
+set ModName=
+set mods=
+set modBuildDirectory=
 
-for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
-	echo set %%a>>"%~dp0..\project.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchDirectory') do (
+    set workbenchDirectory=%%a
 )
 
-call "%~dp0..\project.cfg.bat"
-
-if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
-
-for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
-	echo set %%a>>"%~dp0..\user.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchEXE') do (
+    set workbenchEXE=%%a
 )
 
-call "%~dp0..\user.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkDrive') do (
+	set workDrive=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg PrefixLinkRoot') do (
+    set prefixLinkRoot=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModName') do (
+    set ModName=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg AdditionalSPMods') do (
+    set mods=%%a
+)
+
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ModBuildDirectory') do (
+	set modBuildDirectory=%%a
+)
+
+setlocal enableextensions enabledelayedexpansion
 
 echo WorkbenchEXE is: "%workbenchEXE%"
 if "%workbenchEXE%"=="" (
@@ -68,6 +89,21 @@ if "%prefixLinkRoot%"=="" (
     echo PrefixLinkRoot parameter was not set in the project.cfg
 )
 
+echo AdditionalSPMods is: "%mods%"
+if "%mods%"=="" (
+    echo AdditionalSPMods parameter was not set in the project.cfg, ignoring.
+    
+    set mods=%ModName%;
+) else (
+    set mods=%mods%;%ModName%;
+)
+
+echo ModBuildDirectory is: "%modBuildDirectory%"
+if "%modBuildDirectory%"=="" (
+	set /a failed=1
+	echo ModBuildDirectory parameter was not set in the project.cfg
+)
+
 if %failed%==1 (
     endlocal
 
@@ -75,10 +111,21 @@ if %failed%==1 (
     goto:eof
 )
 
-REM call CopyProject.bat
+CALL Exit.bat
 
-chdir /D "%workbenchDirectory%"
-echo start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Workbench\dayz.gproj
-start %workbenchEXE% -gproj=%workDrive%%prefixLinkRoot%\Workbench\dayz.gproj
+for %%a in ("%mods:;=" "%") do (
+    set mod=%%~a
+    if not defined modList (
+        set modList=%modBuildDirectory%!mod!
+    ) else (
+        set modList=!modList!;%modBuildDirectory%!mod!
+    )
+)
+
+taskkill /F /IM %workbenchEXE% /T
+
+chdir /d "%workbenchDirectory%"
+echo start %workbenchEXE% %clientLaunchParams% "-mod=%modList%" -dologs -nopause -adminlog -freezecheck "-scriptDebug=true"
+start %workbenchEXE% %clientLaunchParams% "-mod=%modList%" -dologs -adminlog -freezecheck "-scriptDebug=true"
 
 endlocal
