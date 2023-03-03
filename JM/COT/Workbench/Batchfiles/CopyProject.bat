@@ -1,5 +1,4 @@
 @echo off
-setlocal enableextensions enabledelayedexpansion
 
 cd /D "%~dp0"
 
@@ -28,21 +27,23 @@ if %failed%==1 (
     goto:eof
 )
 
-if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
+set workbenchDirectory=
+set gameDirectory=
+set serverDirectory=
 
-for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
-	echo set %%a>>"%~dp0..\project.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg WorkbenchDirectory') do (
+    set workbenchDirectory=%%a
 )
 
-call "%~dp0..\project.cfg.bat"
-
-if exist "%~dp0..\user.cfg.bat" del "%~dp0..\user.cfg.bat"
-
-for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
-	echo set %%a>>"%~dp0..\user.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg GameDirectory') do (
+    set gameDirectory=%%a
 )
 
-call "%~dp0..\user.cfg.bat"
+for /f "delims=" %%a in ('call ExtractData.bat ../project.cfg ../user.cfg ServerDirectory') do (
+    set serverDirectory=%%a
+)
+
+setlocal enableextensions enabledelayedexpansion
 
 echo WorkbenchDirectory is: "%workbenchDirectory%"
 if "%workbenchDirectory%"=="" (
