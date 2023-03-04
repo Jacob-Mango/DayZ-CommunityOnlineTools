@@ -26,7 +26,7 @@ if %failed%==1 (
     goto:eof
 )
 
-set rootDirectory=%cd%\..\..\..\..\
+set rootDirectory=%cd%\..\..\..\
 
 if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
