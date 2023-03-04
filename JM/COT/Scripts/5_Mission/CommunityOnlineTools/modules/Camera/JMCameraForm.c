@@ -1,4 +1,4 @@
-class JMCameraForm extends JMFormBase 
+class JMCameraForm: JMFormBase 
 {
 	private UIActionScroller m_sclr_MainActions;
 
@@ -9,6 +9,7 @@ class JMCameraForm extends JMFormBase
 	private UIActionSlider m_SliderExposure;
 	private UIActionCheckbox m_EnableFullmapCamera;
 	private UIActionCheckbox m_1stPersonADS_HideScope;
+	private UIActionCheckbox m_HideGrass;
 
 	private JMCameraModule m_Module;
 
@@ -89,11 +90,29 @@ class JMCameraForm extends JMFormBase
 
 		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( actions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
 		
+		m_HideGrass = UIActionManager.CreateCheckbox( actions, "Hide grass", this, "OnClick_HideGrass", GetCurrentCamera3rdPerson() );
+
+		UpdateSpectatorSettings();
+
 		m_sclr_MainActions.UpdateScroller();
+	}
+
+	void UpdateSpectatorSettings()
+	{
+		if ( CurrentActiveCamera )
+		{
+			m_1stPersonADS_HideScope.Show();
+			m_HideGrass.Show();
+		} else {
+			m_1stPersonADS_HideScope.Hide();
+			m_HideGrass.Hide();
+		}
 	}
 
 	void OnSliderUpdate()
 	{
+		UpdateSpectatorSettings();
+		
 		if ( CAMERA_BLUR == 0 )
 		{
 			CAMERA_DOF = false;
@@ -179,6 +198,15 @@ class JMCameraForm extends JMFormBase
 			CurrentActiveCamera.m_JM_1stPersonADS_HideScope = action.IsChecked();
 	}
 
+	void OnClick_HideGrass( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (CurrentActiveCamera)
+			m_Module.m_HideGrass = action.IsChecked();
+	}
+
 	bool GetCurrentCamera3rdPerson()
 	{
 		if (CurrentActiveCamera)
@@ -186,4 +214,4 @@ class JMCameraForm extends JMFormBase
 
 		return false;
 	}
-}
+};
