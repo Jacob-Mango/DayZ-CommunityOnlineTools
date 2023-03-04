@@ -90,29 +90,13 @@ class JMCameraForm: JMFormBase
 
 		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( actions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
 		
-		m_HideGrass = UIActionManager.CreateCheckbox( actions, "Hide grass", this, "OnClick_HideGrass", GetCurrentCamera3rdPerson() );
-
-		UpdateSpectatorSettings();
+		m_HideGrass = UIActionManager.CreateCheckbox( actions, "Hide grass in freecam", this, "OnClick_HideGrass", m_Module.m_HideGrass );
 
 		m_sclr_MainActions.UpdateScroller();
 	}
 
-	void UpdateSpectatorSettings()
-	{
-		if ( CurrentActiveCamera )
-		{
-			m_1stPersonADS_HideScope.Show();
-			m_HideGrass.Show();
-		} else {
-			m_1stPersonADS_HideScope.Hide();
-			m_HideGrass.Hide();
-		}
-	}
-
 	void OnSliderUpdate()
 	{
-		UpdateSpectatorSettings();
-		
 		if ( CAMERA_BLUR == 0 )
 		{
 			CAMERA_DOF = false;
