@@ -159,7 +159,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				rpc.Write( players[i].GetGUID() );
 				players[i].OnSend( rpc, senderRPC.GetId() );
 
-				rpc.Send( NULL, JMClientRPC.UpdateClient, false, senderRPC );
+				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
 
 				rpc.Reset();
 			}
