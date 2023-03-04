@@ -930,7 +930,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( log );
-			rpc.Send( NULL, JMESPModuleRPC.Log, false, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.Log, true, NULL );
 		}
 	}
 
@@ -958,7 +958,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
-			rpc.Send( target, JMESPModuleRPC.SetPosition, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetPosition, true, NULL );
 		}
 	}
 
@@ -1006,7 +1006,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( orientation );
-			rpc.Send( target, JMESPModuleRPC.SetOrientation, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetOrientation, true, NULL );
 		}
 	}
 
@@ -1046,7 +1046,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( health );
-			rpc.Send( target, JMESPModuleRPC.SetHealth, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetHealth, true, NULL );
 		}
 	}
 
@@ -1081,7 +1081,7 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( networkLow );
 		rpc.Write( networkHigh );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, true, NULL );
 	}
 
 	void DeleteObject( Object target )
@@ -1130,7 +1130,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
 		}
 	}
 
@@ -1177,7 +1177,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
 		}
 	}
 
@@ -1216,7 +1216,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
 		}
 	}
 
@@ -1252,7 +1252,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, true, NULL );
 		}
 	}
 
@@ -1285,7 +1285,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Refuel, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Refuel, true, NULL );
 		}
 	}
 
@@ -1318,7 +1318,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Repair, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Repair, true, NULL );
 		}
 	}
 
@@ -1363,7 +1363,7 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( name );
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, true, NULL );
 	}
 
 	private void RPC_MakeItemSet( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1391,7 +1391,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, true, NULL );
 	}
 
 	private void RPC_DuplicateAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1415,7 +1415,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, true, NULL );
 
 		JMScriptInvokers.ON_DELETE_ALL.Invoke();
 
