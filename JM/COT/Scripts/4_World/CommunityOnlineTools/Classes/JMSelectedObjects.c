@@ -40,7 +40,8 @@ class JMSelectedObject : Managed
 
 		return obj == object;
 	}
-}
+};
+
 
 class JMSelectedObjects
 {

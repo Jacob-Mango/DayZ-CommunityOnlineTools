@@ -71,4 +71,5 @@ modded class MissionServer
 
 		return true;
 	}
-}
+};
+

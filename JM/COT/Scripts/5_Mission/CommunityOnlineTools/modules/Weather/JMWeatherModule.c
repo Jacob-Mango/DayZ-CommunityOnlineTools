@@ -875,4 +875,4 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		GetGame().GetWeather().MissionWeather( true );
 	}
-}
+};

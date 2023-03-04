@@ -1,4 +1,4 @@
-class UIActionScroller extends UIActionBase 
+class UIActionScroller: UIActionBase 
 {
 	const int WHEEL_STEP = 20;
 

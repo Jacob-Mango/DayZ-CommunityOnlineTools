@@ -419,7 +419,8 @@ static void DeleteFiles( string folder, array< string > files )
 	{
 		DeleteFile( folder + files[i] );
 	}
-}
+};
+
 
 static bool ArrayContains( array< string > arr, string match )
 {

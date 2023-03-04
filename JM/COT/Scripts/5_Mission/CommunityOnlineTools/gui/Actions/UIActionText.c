@@ -1,4 +1,4 @@
-class UIActionText extends UIActionBase 
+class UIActionText: UIActionBase 
 {
 	protected string m_ActualText;
 
@@ -126,4 +126,4 @@ class UIActionText extends UIActionBase
 
 		return false;
 	}
-}
+};

@@ -313,7 +313,8 @@ class CommunityOnlineToolsBase
 			}
 		}
 	}
-}
+};
+
 
 static ref CommunityOnlineToolsBase g_cotBase;
 

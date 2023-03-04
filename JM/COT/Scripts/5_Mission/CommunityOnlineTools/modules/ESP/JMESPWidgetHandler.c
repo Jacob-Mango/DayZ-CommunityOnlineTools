@@ -1,4 +1,4 @@
-class JMESPWidgetHandler extends ScriptedWidgetEventHandler 
+class JMESPWidgetHandler: ScriptedWidgetEventHandler 
 {
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
@@ -360,4 +360,4 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 		return false;
 	}
-}
+};

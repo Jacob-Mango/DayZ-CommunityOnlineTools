@@ -47,7 +47,8 @@ class CF_DoublyLinkedNodes_WeakRef<Class T>
 
 		m_Count--;
 	}
-}
+};
+
 
 class CF_DoublyLinkedNode_WeakRef<Class T>
 {
@@ -116,5 +117,6 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 		m_Next = null;
 		m_Prev = null;
 	}
-}
+};
+
 #endif

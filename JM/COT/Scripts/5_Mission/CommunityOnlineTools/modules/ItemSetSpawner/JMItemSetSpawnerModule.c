@@ -361,4 +361,4 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			chest = SpawnItemInContainer( file.ContainerClassName, position, chest, file.Items[j].ItemName, file.Items[j].NumberOfStacks, file.Items[j].StackSize );
 		}
 	}
-}
+};

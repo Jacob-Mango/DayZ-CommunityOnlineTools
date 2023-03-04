@@ -10,4 +10,4 @@ class JMItemSetItemInfo
 		NumberOfStacks = numStacks;
 		StackSize = stackSize;
 	}
-}
+};

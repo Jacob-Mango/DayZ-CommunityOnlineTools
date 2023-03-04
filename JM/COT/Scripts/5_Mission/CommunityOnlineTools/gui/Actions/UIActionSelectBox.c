@@ -1,4 +1,4 @@
-class UIActionSelectBox extends UIActionBase 
+class UIActionSelectBox: UIActionBase 
 {
 	protected Widget m_Frame;
 	protected TextWidget m_Label;
@@ -100,4 +100,5 @@ class UIActionSelectBox extends UIActionBase
 		m_Frame.SetSize( width, h );
 		m_Frame.Update();
 	}
-}
+};
+

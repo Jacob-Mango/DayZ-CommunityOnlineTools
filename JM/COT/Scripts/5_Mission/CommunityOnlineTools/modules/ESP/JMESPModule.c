@@ -1492,4 +1492,4 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_MoveToCursorAbsolute( vector cursor, set< Object > objects, JMPlayerInstance instance )
 	{
 	}
-}
+};

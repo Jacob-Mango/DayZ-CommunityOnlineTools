@@ -1,4 +1,4 @@
-class JMCinematicCamera extends JMCameraBase
+class JMCinematicCamera: JMCameraBase
 {
 	vector linearVelocity;
 	vector angularVelocity;
@@ -136,4 +136,4 @@ class JMCinematicCamera extends JMCameraBase
 		d[1] = dir[1] * sin;
 		d[0] = dir[0] * sin;
 	}
-}
+};

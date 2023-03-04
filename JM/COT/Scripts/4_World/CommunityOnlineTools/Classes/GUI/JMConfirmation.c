@@ -5,7 +5,7 @@ enum JMConfirmationType
 	SELECTION
 };
 
-class JMConfirmation extends ScriptedWidgetEventHandler 
+class JMConfirmation: ScriptedWidgetEventHandler 
 {
 	private Widget layoutRoot;
 	
@@ -296,4 +296,4 @@ class JMConfirmation extends ScriptedWidgetEventHandler
 	{
 		return layoutRoot;
 	}
-}
+};

@@ -1,4 +1,4 @@
-class JMESPForm extends JMFormBase
+class JMESPForm: JMFormBase
 {
 	private autoptr array< ref JMESPViewTypeWidget > m_ESPTypeList;
 	private ref map<typename, JMESPViewTypeWidget> m_ESPTypeWidgetsByType;
@@ -365,4 +365,4 @@ class JMESPForm extends JMFormBase
 
 		m_Module.MoveToCursorAbsolute( "0 0 0" );
 	}
-}
+};

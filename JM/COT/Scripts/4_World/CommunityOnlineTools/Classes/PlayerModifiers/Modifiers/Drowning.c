@@ -7,4 +7,5 @@ modded class DrowningMdfr
 
 		return super.CheckIsDrowning( player );
 	}
-}
+};
+

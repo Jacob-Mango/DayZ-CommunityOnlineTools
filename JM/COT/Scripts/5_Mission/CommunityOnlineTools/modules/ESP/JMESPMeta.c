@@ -270,7 +270,8 @@ class JMESPMeta : Managed
 		else
 			module.DeleteObject( networkLow, networkHigh );
 	}
-}
+};
+
 
 class JMESPMetaPlayer : JMESPMeta
 {
@@ -312,7 +313,8 @@ class JMESPMetaPlayer : JMESPMeta
 	{
 		return !target.IsAlive();
 	}
-}
+};
+
 
 class JMESPMetaBaseBuilding : JMESPMeta
 {

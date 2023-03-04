@@ -302,4 +302,4 @@ class JMItemSetSettings
 
 		ItemSets.Insert( file.Name, file );
 	}
-}
+};

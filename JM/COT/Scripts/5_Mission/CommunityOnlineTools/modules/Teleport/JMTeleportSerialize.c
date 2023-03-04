@@ -157,4 +157,4 @@ class JMTeleportSerialize : Managed
 
 		return true;
 	}
-}
+};

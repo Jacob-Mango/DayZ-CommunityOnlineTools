@@ -1,4 +1,4 @@
-class JMMissionSelectorModule extends JMRenderableModuleBase
+class JMMissionSelectorModule: JMRenderableModuleBase
 {
 	void JMMissionSelectorModule()
 	{

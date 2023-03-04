@@ -1,4 +1,4 @@
-class JMVehiclesListEntry extends ScriptedWidgetEventHandler
+class JMVehiclesListEntry: ScriptedWidgetEventHandler
 {
 	protected Widget m_Root;
 	protected TextWidget m_VehicleName;

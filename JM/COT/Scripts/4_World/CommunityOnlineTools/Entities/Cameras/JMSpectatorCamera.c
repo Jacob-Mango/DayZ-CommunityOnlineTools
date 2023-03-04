@@ -1,4 +1,4 @@
-class JMSpectatorCamera extends JMCameraBase
+class JMSpectatorCamera: JMCameraBase
 {
 	override void OnTargetSelected( Object target )
 	{
@@ -22,4 +22,4 @@ class JMSpectatorCamera extends JMCameraBase
 	{
 		super.OnUpdate( timeslice );
 	}
-}
+};

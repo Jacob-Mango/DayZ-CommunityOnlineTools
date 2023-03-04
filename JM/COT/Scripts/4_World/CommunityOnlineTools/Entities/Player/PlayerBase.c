@@ -568,4 +568,5 @@ modded class PlayerBase
 	{
 		return m_COT_IsBeingKicked;
 	}
-}
+};
+

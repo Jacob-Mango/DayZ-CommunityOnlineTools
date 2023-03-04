@@ -1,4 +1,4 @@
-class JMWebhookForm extends JMFormBase
+class JMWebhookForm: JMFormBase
 {
 	private UIActionButton m_AddSectionButton;
 
@@ -145,4 +145,4 @@ class JMWebhookForm extends JMFormBase
 
 		string name = data.Name;
 	}
-}
+};

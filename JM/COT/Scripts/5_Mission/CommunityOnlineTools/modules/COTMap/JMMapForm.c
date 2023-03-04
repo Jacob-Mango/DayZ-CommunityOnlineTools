@@ -1,4 +1,4 @@
-class JMMapForm extends JMFormBase 
+class JMMapForm: JMFormBase 
 {
 	private MapWidget m_MapWidget;
 	private Widget m_BackgroundWidget;
@@ -101,4 +101,4 @@ class JMMapForm extends JMFormBase
 
 		return false;
 	}
-}
+};

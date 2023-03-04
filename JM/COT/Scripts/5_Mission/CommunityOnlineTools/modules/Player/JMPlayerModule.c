@@ -2123,4 +2123,5 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 		Exec_SetRoles( roles, guids, senderRPC, instance );
 	}
-}
+};
+

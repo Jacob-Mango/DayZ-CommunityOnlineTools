@@ -439,4 +439,4 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		names.Insert("object");
 		return names;
 	}
-}
+};

@@ -523,7 +523,8 @@ class JMPermissionManager
 	{
 		m_MissionLoaded = true;
 	}
-}
+};
+
 
 ref JMPermissionManager g_cot_PermissionsManager;
 

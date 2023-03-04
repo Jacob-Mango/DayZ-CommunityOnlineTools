@@ -1,4 +1,4 @@
-class JMObjectSpawnerForm extends JMFormBase
+class JMObjectSpawnerForm: JMFormBase
 {
 	private autoptr map< string, string > m_ObjectTypes;
 	private string m_CurrentType;
@@ -470,4 +470,4 @@ class JMObjectSpawnerForm extends JMFormBase
 
 		return "";
 	}
-}
+};

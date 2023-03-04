@@ -215,4 +215,4 @@ class JMMapEditorForm
 			CurrentActiveCamera.LookFreeze = false;
 		}
 	}
-}
+};
