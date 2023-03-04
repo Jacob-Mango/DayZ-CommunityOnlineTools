@@ -9,16 +9,15 @@ class JMMapEditorModule: JMModuleBase
 		GetPermissionsManager().RegisterPermission( "MapEditor.EnterEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.LeaveEditor" );
 		GetPermissionsManager().RegisterPermission( "MapEditor.Transform.Position" );
+		
+		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Client );
+		GetRPCManager().AddRPC( "COT_MapEditor", "LeaveEditor", this, SingeplayerExecutionType.Client );
+		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Client );
 	}
 
 	override void EnableUpdate()
 	{
 	}
-
-	// override string GetInputToggle()
-	// {
-	// 	return "UACOTToggleMapEditor";
-	// }
 	
 	void SetTransform( CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
@@ -145,7 +144,7 @@ class JMMapEditorModule: JMModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		Bind( new JMModuleBinding( "ToggleEditor",		"UAMapEditorModuleToggleEditor",	true 	) );
+		Bind( new JMModuleBinding( "ToggleEditor",		"UACOTToggleMapEditor",	true 	) );
 	}
 	
 	override void OnMissionLoaded()
@@ -175,5 +174,4 @@ class JMMapEditorModule: JMModuleBase
 			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, false, NULL, GetPlayer() );
 		}
 	}
-
-}
+};
