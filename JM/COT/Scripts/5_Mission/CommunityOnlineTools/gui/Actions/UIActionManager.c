@@ -275,4 +275,4 @@ class UIActionManager
 
 		return NULL;
 	}
-}
+};

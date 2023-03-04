@@ -1,4 +1,4 @@
-class JMTeleportForm extends JMFormBase
+class JMTeleportForm: JMFormBase
 {
 	protected Widget m_ActionsFilterWrapper;
 	protected UIActionEditableText m_Filter;
@@ -144,4 +144,4 @@ class JMTeleportForm extends JMFormBase
 
 		return "";
 	}
-}
+};

@@ -479,7 +479,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_UpdateRole( roleName, ctx );
 		}
 	}
-}
+};
+
 
 CommunityOnlineTools GetCommunityOnlineTools()
 {

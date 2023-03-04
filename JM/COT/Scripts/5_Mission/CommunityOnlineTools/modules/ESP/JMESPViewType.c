@@ -304,7 +304,8 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 		return true;
 	}
-}
+};
+
 
 class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 {

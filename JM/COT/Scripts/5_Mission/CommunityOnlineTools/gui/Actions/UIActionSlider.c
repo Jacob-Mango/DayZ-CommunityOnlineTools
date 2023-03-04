@@ -1,4 +1,4 @@
-class UIActionSlider extends UIActionBase 
+class UIActionSlider: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected SliderWidget m_Slider;
@@ -179,4 +179,4 @@ class UIActionSlider extends UIActionBase
 		m_Slider.SetSize( width, h );
 		m_Slider.Update();
 	}
-}
+};

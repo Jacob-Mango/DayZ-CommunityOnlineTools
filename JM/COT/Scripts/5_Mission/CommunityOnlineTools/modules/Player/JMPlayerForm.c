@@ -1,4 +1,4 @@
-class JMPlayerForm extends JMFormBase
+class JMPlayerForm: JMFormBase
 {
 	private autoptr array< JMPlayerRowWidget > m_PlayerList;
 	private autoptr array< JMPermissionRowWidget > m_PermissionList;
@@ -1468,4 +1468,4 @@ class JMPlayerForm extends JMFormBase
 	{
 		m_LastChangeTime = GetGame().GetTime();
 	}
-}
+};

@@ -1,4 +1,4 @@
-class JMWeatherForm extends JMFormBase
+class JMWeatherForm: JMFormBase
 {
 	private static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -1141,4 +1141,4 @@ class JMWeatherForm extends JMFormBase
 
 		m_Module.SetWindFunctionParams( min, max, speed );
 	}
-}
+};

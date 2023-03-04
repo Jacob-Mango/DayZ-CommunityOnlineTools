@@ -1,4 +1,4 @@
-class JMCOTSideBar extends ScriptedWidgetEventHandler
+class JMCOTSideBar: ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 
@@ -213,5 +213,6 @@ class JMCOTSideBar extends ScriptedWidgetEventHandler
 
 		return false;
 	}
-}
+};
+
 

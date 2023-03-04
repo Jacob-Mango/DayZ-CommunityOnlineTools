@@ -1,4 +1,4 @@
-class UIActionEditableText extends UIActionBase 
+class UIActionEditableText: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -233,4 +233,4 @@ class UIActionEditableText extends UIActionBase
 		m_Text.SetSize( width, h );
 		m_Text.Update();
 	}
-}
+};

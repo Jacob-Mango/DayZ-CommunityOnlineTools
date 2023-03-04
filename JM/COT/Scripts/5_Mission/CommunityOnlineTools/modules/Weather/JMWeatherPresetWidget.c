@@ -1,4 +1,4 @@
-class JMWeatherPresetWidget extends ScriptedWidgetEventHandler 
+class JMWeatherPresetWidget: ScriptedWidgetEventHandler 
 {
 	private Widget layoutRoot;
 
@@ -139,4 +139,4 @@ class JMWeatherPresetWidget extends ScriptedWidgetEventHandler
 		
 		return false;
 	}
-}
+};

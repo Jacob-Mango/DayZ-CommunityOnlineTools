@@ -1,4 +1,4 @@
-class JMVehiclesMapMarker extends ScriptedWidgetEventHandler
+class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 {
 	protected Widget m_Root;
 	protected TextWidget m_Name;

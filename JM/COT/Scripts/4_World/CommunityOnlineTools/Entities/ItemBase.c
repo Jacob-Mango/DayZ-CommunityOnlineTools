@@ -14,4 +14,5 @@ modded class ItemBase
 
 		return true;
 	}
-}
+};
+

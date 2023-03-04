@@ -1,4 +1,4 @@
-class JMItemSetForm extends JMFormBase
+class JMItemSetForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
@@ -76,4 +76,4 @@ class JMItemSetForm extends JMFormBase
 
 		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
-}
+};

@@ -14,4 +14,5 @@ modded class MissionMainMenu
 
 		JMDeferredMessage.QueuedMessages.Clear();
 	}
-}
+};
+

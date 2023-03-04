@@ -17,4 +17,5 @@ modded class VONManagerImplementation
 				break;
 		}
 	}
-}
+};
+

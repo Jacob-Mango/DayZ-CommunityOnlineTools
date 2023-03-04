@@ -1,4 +1,4 @@
-class JMRoleRowWidget extends ScriptedWidgetEventHandler 
+class JMRoleRowWidget: ScriptedWidgetEventHandler 
 {
 	string Name;
 	int Type;
@@ -101,4 +101,4 @@ class JMRoleRowWidget extends ScriptedWidgetEventHandler
 		Checkbox.Enable( false );
 		Checkbox.Show( false );
 	}
-}
+};

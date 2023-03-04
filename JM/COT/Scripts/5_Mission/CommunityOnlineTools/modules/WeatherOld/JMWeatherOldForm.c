@@ -1,4 +1,4 @@
-class JMWeatherOldForm extends JMFormBase
+class JMWeatherOldForm: JMFormBase
 {
 	private static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -535,4 +535,4 @@ class JMWeatherOldForm extends JMFormBase
 		string label_text = m_CurrTemperature.ToString() + "°C";
 		m_TxtTemperatureValue.SetText( label_text );
 	}
-}
+};

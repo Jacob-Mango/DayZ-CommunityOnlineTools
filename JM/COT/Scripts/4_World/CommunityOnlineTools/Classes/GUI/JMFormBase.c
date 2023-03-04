@@ -1,4 +1,4 @@
-class JMFormBase extends ScriptedWidgetEventHandler 
+class JMFormBase: ScriptedWidgetEventHandler 
 {
 	protected Widget layoutRoot;
 	
@@ -159,4 +159,4 @@ class JMFormBase extends ScriptedWidgetEventHandler
 		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
 		#endif
 	}
-}
+};

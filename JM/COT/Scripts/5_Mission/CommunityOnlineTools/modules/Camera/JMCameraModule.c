@@ -5,6 +5,7 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_TargetFOV;
 	protected float m_UpdateTime;
 	bool m_EnableFullmapCamera;
+	bool m_HideGrass;
 
 	void JMCameraModule()
 	{
@@ -120,6 +121,21 @@ class JMCameraModule: JMRenderableModuleBase
 						EnterFullmap(player);
 						player.m_JM_CameraPosition = CurrentActiveCamera.GetPosition();
 						player.COTUpdateSpectatorPosition();
+					}
+				}
+				if ( m_HideGrass )
+				{
+					vector pos = CurrentActiveCamera.GetPosition();
+
+					//! @note: Flatten has a distance limit, 100 isnt the real value
+					GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2], 100, 0, 0, 0.1, 1.0);
+					for(int i=1; i < 4; i++)
+					{
+						int multiplier = 25 * i;
+						GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2] + multiplier, 100, 0, 0, 0.1, 1.0);
+						GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2] - multiplier, 100, 0, 0, 0.1, 1.0);
+						GetGame().GetWorld().FlattenGrassBox(pos[0] + multiplier, pos[2], 100, 0, 0, 0.1, 1.0);
+						GetGame().GetWorld().FlattenGrassBox(pos[0] - multiplier, pos[2], 100, 0, 0, 0.1, 1.0);
 					}
 				}
 			}
@@ -573,4 +589,4 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		m_TargetFOV = fov;
 	}
-}
+};

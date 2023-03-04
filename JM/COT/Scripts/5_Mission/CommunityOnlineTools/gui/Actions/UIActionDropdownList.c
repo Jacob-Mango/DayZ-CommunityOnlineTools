@@ -1,4 +1,4 @@
-class UIActionDropdownList extends UIActionBase 
+class UIActionDropdownList: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
@@ -332,4 +332,4 @@ class UIActionDropdownList extends UIActionBase
 
 		return false;
 	}
-}
+};

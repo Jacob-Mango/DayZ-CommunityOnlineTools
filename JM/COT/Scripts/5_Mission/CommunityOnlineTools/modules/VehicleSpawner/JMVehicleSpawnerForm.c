@@ -1,4 +1,4 @@
-class JMVehicleSpawnerForm extends JMFormBase
+class JMVehicleSpawnerForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
@@ -89,4 +89,4 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
-}
+};

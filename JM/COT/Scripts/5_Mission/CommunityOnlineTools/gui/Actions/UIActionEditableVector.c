@@ -1,4 +1,4 @@
-class UIActionEditableVector extends UIActionBase 
+class UIActionEditableVector: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_TextX;
@@ -133,4 +133,4 @@ class UIActionEditableVector extends UIActionBase
 
 		return false;
 	}
-}
+};

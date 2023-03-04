@@ -1,4 +1,3 @@
-
 class JMNamalskEventManagerButtonData: UIActionData
 {
 	string ClassName;
@@ -7,4 +6,4 @@ class JMNamalskEventManagerButtonData: UIActionData
 	{
 		ClassName = clsName;
 	}
-}
+};

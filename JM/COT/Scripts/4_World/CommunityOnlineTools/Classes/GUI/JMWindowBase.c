@@ -1,6 +1,6 @@
 #ifndef CF_WINDOWS
 typedef JMWindowBase CF_Window;
-class JMWindowBase extends ScriptedWidgetEventHandler  
+class JMWindowBase: ScriptedWidgetEventHandler  
 {
 	reference float m_DragXN;
 	reference float m_DragYN;

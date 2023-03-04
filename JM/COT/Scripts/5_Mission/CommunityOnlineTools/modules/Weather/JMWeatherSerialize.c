@@ -93,4 +93,4 @@ class JMWeatherSerialize
 
 		Presets.Insert( preset );
 	}
-}
+};

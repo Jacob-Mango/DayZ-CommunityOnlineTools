@@ -535,4 +535,4 @@ class JMTeleportModule: JMRenderableModuleBase
 		names.Insert("tp");
 		return names;
 	}
-}
+};

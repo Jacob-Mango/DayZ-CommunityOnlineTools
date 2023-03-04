@@ -188,4 +188,5 @@ modded class CarScript
 		Fill( CarFluid.BRAKE, GetFluidCapacity( CarFluid.BRAKE ) );
 		Fill( CarFluid.COOLANT, GetFluidCapacity( CarFluid.COOLANT ) );
 	}
-}
+};
+

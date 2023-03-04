@@ -23,4 +23,4 @@ class JMItemSetMeta
 
 		return meta;
 	}
-}
+};

@@ -44,4 +44,4 @@ class JMItemSetSerialize
 	{
 		JsonFileLoader< JMItemSetSerialize >.JsonSaveFile( JMConstants.DIR_ITEMS + m_FileName + JMConstants.EXT_ITEM, this );
 	}
-}
+};
