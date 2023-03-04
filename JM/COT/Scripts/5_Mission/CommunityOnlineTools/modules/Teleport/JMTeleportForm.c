@@ -59,6 +59,14 @@ class JMTeleportForm: JMFormBase
 		m_PositionX.SetText( "N/A" );
 		m_PositionZ.SetText( "N/A" );
 
+		if (m_Module.IsLoaded())
+			UpdateList();
+		else
+			m_Module.Load();
+	}
+
+	override void OnSettingsUpdated()
+	{
 		UpdateList();
 	}
 
@@ -77,6 +85,9 @@ class JMTeleportForm: JMFormBase
 
 	void UpdateList()
 	{
+		if (!m_Module.IsLoaded())
+			return;
+
 		m_LstPositionList.ClearItems();
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )

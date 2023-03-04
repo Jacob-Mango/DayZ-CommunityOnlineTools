@@ -59,7 +59,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		Load();
+		if (GetGame().IsServer())
+			Load();
 	}
 
 	override void OnSettingsUpdated()
@@ -115,8 +116,10 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Items.Spawn" ) )
+			if (meta)
 				return;
+
+			meta = JMItemSetMeta.Create();
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, NULL );
@@ -130,8 +133,17 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
+	bool IsLoaded()
+	{
+		return meta != null;
+	}
+
 	private void Server_Load( PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Items.Spawn", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( JMItemSetMeta.DeriveFromSettings( settings ) );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );

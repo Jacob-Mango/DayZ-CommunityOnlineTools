@@ -12,6 +12,11 @@ class JMVehicleSpawnerMeta
 		delete Vehicles;
 	}
 
+	static JMVehicleSpawnerMeta Create()
+	{
+		return new JMVehicleSpawnerMeta();
+	}
+
 	static JMVehicleSpawnerMeta DeriveFromSettings( JMVehicleSpawnerSettings settings )
 	{
 		JMVehicleSpawnerMeta meta = new JMVehicleSpawnerMeta;

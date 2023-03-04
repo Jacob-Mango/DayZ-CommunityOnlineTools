@@ -31,6 +31,17 @@ class JMItemSetForm: JMFormBase
 
 	override void OnShow()
 	{
+		if (m_Module.IsLoaded())
+			OnSettingsUpdated();
+		else
+			m_Module.Load();
+	}
+
+	override void OnSettingsUpdated()
+	{
+		if (!m_Module.IsLoaded())
+			return;
+
 		array< string > items = new array< string >;
 		items.Copy( m_Module.GetItemSets() );
 		

@@ -31,6 +31,17 @@ class JMVehicleSpawnerForm: JMFormBase
 
 	override void OnShow()
 	{
+		if (m_Module.IsLoaded())
+			OnSettingsUpdated();
+		else
+			m_Module.Load();
+	}
+
+	override void OnSettingsUpdated()
+	{
+		if (!m_Module.IsLoaded())
+			return;
+
 		array< string > vehicles = new array< string >;
 		array< string > vehiclesDisplay = new array< string >;
 		vehicles.Copy( m_Module.GetVehicles() );

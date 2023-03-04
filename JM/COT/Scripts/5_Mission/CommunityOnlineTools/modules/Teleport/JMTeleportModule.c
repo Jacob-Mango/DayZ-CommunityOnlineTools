@@ -89,7 +89,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		Load();
+		if (GetGame().IsServer())
+			Load();
 	}
 	
 	override void OnSettingsUpdated()
@@ -223,8 +224,10 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
+			if (m_Settings)
 				return;
+
+			m_Settings = JMTeleportSerialize.Create();
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
@@ -236,8 +239,17 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
+	bool IsLoaded()
+	{
+		return m_Settings != null;
+	}
+
 	private void Server_Load( PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		m_Settings.Write( rpc );
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
@@ -251,9 +263,6 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 		else
 		{
-			if ( !m_Settings )
-				m_Settings = JMTeleportSerialize.Create();
-
 			if ( m_Settings.Read( ctx ) )
 			{
 				OnSettingsUpdated();

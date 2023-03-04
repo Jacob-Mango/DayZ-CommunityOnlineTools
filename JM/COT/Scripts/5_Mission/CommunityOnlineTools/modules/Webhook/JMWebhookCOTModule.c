@@ -82,9 +82,6 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			OnSettingsUpdated();
 		} else
 		{
-			if (!GetPermissionsManager().HasPermission( "Webhook.View" ))
-				return;
-
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, NULL );
 		}
@@ -140,6 +137,10 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	private void Exec_Load( notnull PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		m_Settings.OnSend( rpc );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, ident );
