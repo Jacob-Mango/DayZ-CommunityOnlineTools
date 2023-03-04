@@ -13,7 +13,7 @@ IF "%workDrive%"=="" exit /B 1
 IF "%modBuildDirectory%"=="" exit /B 1
 IF "%keyName%"=="" exit /B 1
 
-for %%F in ("%modBuildDirectory%@%modName%\addons\*.pbo") do (
+for %%F in ("%modBuildDirectory%%modName%\addons\*.pbo") do (
 	IF NOT exist "%workDrive%Temp\PboNames\%pboNamesFoldername%\%%~nxF" (
 		echo !date! !time! Deleting orphaned "%%~F"
 		del "%%~F"

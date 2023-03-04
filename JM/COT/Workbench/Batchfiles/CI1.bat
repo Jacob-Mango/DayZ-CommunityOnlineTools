@@ -158,15 +158,15 @@ REM CLEANING UP JUST IN CASE
 
 REM CLIENT PBOS
 
-IF exist "%modBuildDirectory%@%modName%\addons" (
-	echo Removing folder "%modBuildDirectory%@%modName%\addons\"
-	del /f /s /q "%modBuildDirectory%@%modName%\addons\" > nul
-	rmdir /s /q "%modBuildDirectory%@%modName%\addons\"
+IF exist "%modBuildDirectory%%modName%\addons" (
+	echo Removing folder "%modBuildDirectory%%modName%\addons\"
+	del /f /s /q "%modBuildDirectory%%modName%\addons\" > nul
+	rmdir /s /q "%modBuildDirectory%%modName%\addons\"
 )
 
-IF exist "%modBuildDirectory%@%modName%\" (
-	echo Removing folder "%modBuildDirectory%@%modName%\"
-	rmdir /S /Q "%modBuildDirectory%@%modName%\"
+IF exist "%modBuildDirectory%%modName%\" (
+	echo Removing folder "%modBuildDirectory%%modName%\"
+	rmdir /S /Q "%modBuildDirectory%%modName%\"
 )
 
 :SETUPFOLDERS
@@ -323,9 +323,9 @@ for /F "usebackq delims=" %%D in ("%workDrive%Temp\%modName%-configpaths.list") 
 	REM Create dummy file so we can later remove orphaned PBOs that are no longer part of the build (if any)
 	echo.>"%workDrive%Temp\PboNames\%modName%\!pboName!.pbo"
 
-	if exist "%%~dpD..\CHANGES" copy /Y "%%~dpD..\CHANGES" "%modBuildDirectory%@%modName%\CHANGES"
-	if exist "%%~dpD..\LICENSE" copy /Y "%%~dpD..\LICENSE" "%modBuildDirectory%@%modName%\LICENSE"
-	if exist "%%~dpD..\NOTICE.txt" copy /Y "%%~dpD..\NOTICE.txt" "%modBuildDirectory%@%modName%\NOTICE.txt"
+	if exist "%%~dpD..\CHANGES" copy /Y "%%~dpD..\CHANGES" "%modBuildDirectory%%modName%\CHANGES"
+	if exist "%%~dpD..\LICENSE" copy /Y "%%~dpD..\LICENSE" "%modBuildDirectory%%modName%\LICENSE"
+	if exist "%%~dpD..\NOTICE.txt" copy /Y "%%~dpD..\NOTICE.txt" "%modBuildDirectory%%modName%\NOTICE.txt"
 
 )
 
@@ -335,7 +335,7 @@ if %skipPboCleanup% NEQ 1 (
 )
 
 :END
-call "%~dp0CI_MakeLowercase.bat" "%modBuildDirectory%@%modName%"
+call "%~dp0CI_MakeLowercase.bat" "%modBuildDirectory%%modName%"
 
 echo %time% > "%~dp0..\Logs\Build.success"
 echo %date% %time% Successfully packaged %modName%.
@@ -372,7 +372,7 @@ IF ERRORLEVEL 8 (
 )
 IF ERRORLEVEL 1 set changes=1
 REM When (re-)creating a missing PBO, we need to create config.bin
-IF NOT EXIST "%modBuildDirectory%@%modName%\addons\%pboName%.pbo" set changes=1
+IF NOT EXIST "%modBuildDirectory%%modName%\addons\%pboName%.pbo" set changes=1
 if %changes%==1 (
 	REM Files changed/copied
 	echo %date% %time% Changes in "%workDrive%Temp\%prefixName%"
@@ -465,10 +465,10 @@ IF %filesChanged%==0 IF %skipUnchanged%==1 (
 	)
 
 	REM Check if PBO already exists
-	IF EXIST "%modBuildDirectory%@%modName%\addons\%pboName%.pbo" (
-		IF EXIST "%modBuildDirectory%@%modName%\addons\%pboName%.pbo.%keyName%.bisign" (
+	IF EXIST "%modBuildDirectory%%modName%\addons\%pboName%.pbo" (
+		IF EXIST "%modBuildDirectory%%modName%\addons\%pboName%.pbo.%keyName%.bisign" (
 			REM Nothing to do
-			echo !date! !time! No change in "%workDrive%Temp\%prefixName%", nothing to do for "%modBuildDirectory%@%modName%\addons\%pboName%.pbo"
+			echo !date! !time! No change in "%workDrive%Temp\%prefixName%", nothing to do for "%modBuildDirectory%%modName%\addons\%pboName%.pbo"
 		) else (
 			set filesChanged=1
 			CALL :SIGN %modName% "%pboName%"
@@ -565,11 +565,11 @@ IF NOT EXIST "%workDrive%Temp\%modName%\addons\%pboName%.pbo" (
 )
 
 :MOVEPACKED
-echo Moving "%workDrive%Temp\%modName%\addons\%pboName%.pbo" to "%modBuildDirectory%@%modName%\addons\"
-move /Y "%workDrive%Temp\%modName%\addons\%pboName%.pbo" "%modBuildDirectory%@%modName%\addons\"
+echo Moving "%workDrive%Temp\%modName%\addons\%pboName%.pbo" to "%modBuildDirectory%%modName%\addons\"
+move /Y "%workDrive%Temp\%modName%\addons\%pboName%.pbo" "%modBuildDirectory%%modName%\addons\"
 IF ERRORLEVEL 1 (
 	echo /////////////////////////////////////////////////////////////
-	echo %date% %time% Something went wrong with %pboName%.pbo for %modName%, it could not be moved to "%modBuildDirectory%@%modName%\addons\"
+	echo %date% %time% Something went wrong with %pboName%.pbo for %modName%, it could not be moved to "%modBuildDirectory%%modName%\addons\"
 	echo /////////////////////////////////////////////////////////////
 
 	endlocal
@@ -608,8 +608,8 @@ set modName=%1
 set "pboName=%~2"
 
 if "%modName%"=="%clientModName%" (
-	echo %date% %time% Signing "%modBuildDirectory%@%modName%\addons\%pboName%.pbo"
-	"%_DAYZTOOLSPATH%\DsUtils\DSSignFile.exe" "%keyDirectory%%keyName%.biprivatekey" "%modBuildDirectory%@%modName%\addons\%pboName%.pbo"
+	echo %date% %time% Signing "%modBuildDirectory%%modName%\addons\%pboName%.pbo"
+	"%_DAYZTOOLSPATH%\DsUtils\DSSignFile.exe" "%keyDirectory%%keyName%.biprivatekey" "%modBuildDirectory%%modName%\addons\%pboName%.pbo"
 )
 exit /B
 REM End :SIGN

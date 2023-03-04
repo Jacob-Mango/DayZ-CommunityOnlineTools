@@ -34,18 +34,18 @@ IF NOT exist "%workDrive%Temp\PboNames\%modName%" (
 	mkdir "%workDrive%Temp\PboNames\%modName%"
 )
 
-IF NOT exist "%modBuildDirectory%@%modName%\addons\" (
-	echo Creating folder "%modBuildDirectory%@%modName%\addons\"
-	mkdir "%modBuildDirectory%@%modName%\addons\"
+IF NOT exist "%modBuildDirectory%%modName%\addons\" (
+	echo Creating folder "%modBuildDirectory%%modName%\addons\"
+	mkdir "%modBuildDirectory%%modName%\addons\"
 )
 
-IF NOT exist "%modBuildDirectory%@%modName%\keys\" (
-	echo Creating folder "%modBuildDirectory%@%modName%\keys\"
-	mkdir "%modBuildDirectory%@%modName%\keys\"
+IF NOT exist "%modBuildDirectory%%modName%\keys\" (
+	echo Creating folder "%modBuildDirectory%%modName%\keys\"
+	mkdir "%modBuildDirectory%%modName%\keys\"
 )
 
-IF NOT exist "%modBuildDirectory%@%modName%\addons\" (
-	echo CI0_SetupFolders - ERROR: %modBuildDirectory%@%modName%\addons\ does not exist
+IF NOT exist "%modBuildDirectory%%modName%\addons\" (
+	echo CI0_SetupFolders - ERROR: %modBuildDirectory%%modName%\addons\ does not exist
 	exit /B 1
 )
 
@@ -59,8 +59,8 @@ IF NOT exist "%workDrive%Temp\%modName%\addons\" (
 	mkdir "%workDrive%Temp\%modName%\addons\"
 )
 
-echo Copying over "%keyDirectory%%keyName%.bikey" to "%modBuildDirectory%@%modName%\keys\"
-copy "%keyDirectory%%keyName%.bikey" "%modBuildDirectory%@%modName%\keys\"
+echo Copying over "%keyDirectory%%keyName%.bikey" to "%modBuildDirectory%%modName%\keys\"
+copy "%keyDirectory%%keyName%.bikey" "%modBuildDirectory%%modName%\keys\"
 
 echo CI0_SetupFolders done
 
