@@ -187,8 +187,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (CurrentActiveCamera)
-			m_Module.m_HideGrass = action.IsChecked();
+		m_Module.m_HideGrass = action.IsChecked();
 	}
 
 	bool GetCurrentCamera3rdPerson()
