@@ -6,6 +6,8 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_UpdateTime;
 	bool m_EnableFullmapCamera;
 	bool m_HideGrass;
+	int m_GrassPatchX;
+	int m_GrassPatchY;
 
 	void JMCameraModule()
 	{
@@ -123,19 +125,42 @@ class JMCameraModule: JMRenderableModuleBase
 						player.COTUpdateSpectatorPosition();
 					}
 				}
-				if ( m_HideGrass )
-				{
-					vector pos = CurrentActiveCamera.GetPosition();
+			}
 
-					//! @note: Flatten has a distance limit, 100 isnt the real value
-					GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2], 100, 0, 0, 0.1, 1.0);
-					for(int i=1; i < 4; i++)
+			if ( m_HideGrass )
+			{
+				vector pos = CurrentActiveCamera.GetPosition();
+
+				//! @note: Flatten functions have a size/diameter limit of around 60
+				//! We also want some overlap so that there are no visible seams
+				float side = 50;
+				float x = pos[0] - side * 2;
+				float z = pos[2] - side * 2;
+				/*    _ _ _
+				 *  _|_|_|_|_
+				 * |_|_|_|_|_|
+				 * |_|_|X|_|_|
+				 * |_|_|_|_|_|
+				 *   |_|_|_|
+				 */
+				int row = m_GrassPatchX;
+				int col = m_GrassPatchY;
+				//for (int row = 0; row < 5; row++)
+				//{
+					//for (int col = 0; col < 5; col++)
+					//{
+						if ((row > 0 && row < 4) || (col > 0 && col < 4))
+							GetGame().GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
+					//}
+				//}
+				m_GrassPatchY++;
+				if (m_GrassPatchY == 5)
+				{
+					m_GrassPatchY = 0;
+					m_GrassPatchX++;
+					if (m_GrassPatchX == 5)
 					{
-						int multiplier = 25 * i;
-						GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2] + multiplier, 100, 0, 0, 0.1, 1.0);
-						GetGame().GetWorld().FlattenGrassBox(pos[0], pos[2] - multiplier, 100, 0, 0, 0.1, 1.0);
-						GetGame().GetWorld().FlattenGrassBox(pos[0] + multiplier, pos[2], 100, 0, 0, 0.1, 1.0);
-						GetGame().GetWorld().FlattenGrassBox(pos[0] - multiplier, pos[2], 100, 0, 0, 0.1, 1.0);
+						m_GrassPatchX = 0;
 					}
 				}
 			}
