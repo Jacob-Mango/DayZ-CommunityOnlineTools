@@ -145,14 +145,10 @@ class JMCameraModule: JMRenderableModuleBase
 				 */
 				int row = m_GrassPatchX;
 				int col = m_GrassPatchY;
-				//for (int row = 0; row < 5; row++)
-				//{
-					//for (int col = 0; col < 5; col++)
-					//{
-						if ((row > 0 && row < 4) || (col > 0 && col < 4))
-							GetGame().GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
-					//}
-				//}
+
+				if ((row > 0 && row < 4) || (col > 0 && col < 4))
+					GetGame().GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
+
 				m_GrassPatchY++;
 				if (m_GrassPatchY == 5)
 				{
