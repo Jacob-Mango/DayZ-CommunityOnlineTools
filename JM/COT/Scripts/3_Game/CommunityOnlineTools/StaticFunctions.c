@@ -2,10 +2,7 @@
 
 static const int COT_ZERO_PAD_SIZE = 8;
 static string m_COT_ZeroPad[COT_ZERO_PAD_SIZE] = {"", "0", "00", "000", "0000", "00000", "000000", "0000000"};
-	
-// ------------------------------------------------------------
-// COT FormatFloat
-// ------------------------------------------------------------
+
 static string FormatFloat( float value, int decimals ) 
 {
 	if ( decimals == -1 )
