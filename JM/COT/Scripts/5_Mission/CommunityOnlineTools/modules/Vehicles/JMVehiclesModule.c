@@ -27,6 +27,8 @@ class JMVehicleMetaData
 	int m_DestructionType;
 
 	bool m_HasKeys;
+
+	string m_LastDriverUID;
 	
 	static JMVehicleMetaData CreateCarScript( CarScript car )
 	{
@@ -73,6 +75,10 @@ class JMVehicleMetaData
 		meta.m_HasKeys = car.HasKey();
 		#endif
 
+		#ifdef EXPANSIONMODCORE
+		meta.m_LastDriverUID = car.ExpansionGetLastDriverUID();
+		#endif
+
 		return meta;
 	}
 	
@@ -109,6 +115,8 @@ class JMVehicleMetaData
 			meta.m_DestructionType |= JMDT_DESTROYED;
 
 		meta.m_HasKeys = vehicle.HasKey();
+		meta.m_LastDriverUID = vehicle.ExpansionGetLastDriverUID();
+		
 
 		return meta;
 	}
