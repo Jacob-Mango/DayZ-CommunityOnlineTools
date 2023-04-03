@@ -62,8 +62,11 @@ class JMObjectSpawnerForm: JMFormBase
 		"leatherknifeshealth",
 
 		"itemoptics",
+		"itemoptics_base",
 		"fx"
 	};
+
+	protected bool m_IknowWhatIamDoing;
 
 	void JMObjectSpawnerForm()
 	{
@@ -118,7 +121,8 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( GetGame().IsServer() )
 		{
 			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_INVENTORY", this, "SpawnInventory" );
-		} else
+		}
+		else
 		{
 			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS", this, "SpawnInventory" );
 		}
@@ -128,14 +132,22 @@ class JMObjectSpawnerForm: JMFormBase
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
 		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", m_Module.m_OnDebugSpawn );
+		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_IknowWhatIamDoing );
 		UIActionManager.CreatePanel( spawnOptions );
 
 		UpdateItemPreview();
 	}
 
+	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
+	{
+		if ( eid != UIEvent.CLICK ) return;
+
+		m_IknowWhatIamDoing = action.IsChecked();	
+	}
+
 	void Click_OnDebugSpawn( UIEvent eid, UIActionBase action )	
-	{	
-		if ( eid != UIEvent.CLICK ) return;	
+	{
+		if ( eid != UIEvent.CLICK ) return;
 
 		m_Module.m_OnDebugSpawn = action.IsChecked();	
 	}
@@ -432,13 +444,12 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 	}
 
-	private static ref array< string > itemsList =
+	private static ref array< string > m_RestrictiveBlacklistedClassnames =
 	{
 		"placing",
-#ifndef DIAG
 		"debug",
 		"bldr_",
-#endif
+		"StaticObj_",
 		"proxy"
 	};
 
@@ -449,13 +460,17 @@ class JMObjectSpawnerForm: JMFormBase
 			return true;
 		}
 
-		for ( int i = 0; i < itemsList.Count(); ++i )
+		if ( !m_IknowWhatIamDoing )
 		{
-			if ( name.Contains( itemsList[i] ) )
+			for ( int i = 0; i < m_RestrictiveBlacklistedClassnames.Count(); ++i )
 			{
-				return true;
+				if ( name.Contains( m_RestrictiveBlacklistedClassnames[i] ) )
+				{
+					return true;
+				}
 			}
 		}
+
 		return false;
 	}
 
