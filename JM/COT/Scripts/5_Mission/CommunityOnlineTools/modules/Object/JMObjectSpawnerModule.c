@@ -221,6 +221,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
@@ -284,7 +285,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( health );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
-		} else
+		}
+		else
 		{
 			Server_SpawnEntity_Inventory( ent, players, quantity, health, NULL );
 		}
@@ -366,15 +368,33 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( quantity == -1 )
 			{
 				if ( item.HasQuantity() )
-					quantity = item.GetQuantityMax();
+					item.SetQuantity(item.GetQuantityMax());
 			}
-
-			if ( quantity > 0 )
+			else if ( quantity > 0 )
 			{
-				if ( quantity > item.GetQuantityMax() )
-					quantity = item.GetQuantityMax();
+				if ( item.IsLiquidContainer() )
+				{
+					if ( quantity > 100 )
+						quantity = 100;
 
-				item.SetQuantity(quantity);
+					quantity = ( item.GetQuantityMax() / 100 ) * quantity
+
+					item.SetQuantity(quantity);
+				}
+				else if ( item.GetCompEM() )
+				{
+					if ( quantity > 100 )
+						quantity = 100;
+					
+					item.GetCompEM().SetEnergy0To1( quantity / 100 )
+				}
+				else
+				{
+					if ( quantity > item.GetQuantityMax() )
+						quantity = item.GetQuantityMax();
+
+					item.SetQuantity(quantity);
+				}
 			}
 		}
 
@@ -413,6 +433,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
