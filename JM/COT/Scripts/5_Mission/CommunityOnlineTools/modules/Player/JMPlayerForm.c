@@ -54,6 +54,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionCheckbox m_CannotBeTargetedByAI;
 	private UIActionCheckbox m_RemoveCollision;
 
+    private UIActionButton m_CopyRotationPlayer;
     private UIActionButton m_CopyPositionPlayer;
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
@@ -280,9 +281,10 @@ class JMPlayerForm: JMFormBase
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
 
-		Widget positionHeader = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+		Widget positionHeader = UIActionManager.CreateGridSpacer( parent, 1, 3 );
 
 		UIActionManager.CreateText( positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_HEADER", "" );
+		m_CopyRotationPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_ORIENTATION_COPY", this, "Click_CopyPlayerRotation");
         m_CopyPositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_COPY", this, "Click_CopyPlayerPostion");
 
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
@@ -806,6 +808,19 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
+	}
+
+    void Click_CopyPlayerRotation( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( !m_SelectedInstance )
+			return;
+
+		vector rotation = m_SelectedInstance.GetOrientation();
+
+		GetGame().CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
 	}
 
 	void Click_TeleportMeTo( UIEvent eid, UIActionBase action )
