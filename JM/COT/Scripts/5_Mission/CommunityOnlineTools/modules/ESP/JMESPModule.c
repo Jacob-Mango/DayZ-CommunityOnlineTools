@@ -1140,14 +1140,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !IsMissionOffline() )
 			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
-		#ifndef DAYZ_1_09
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
 		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
-		#else
-		target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
-		#endif
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
