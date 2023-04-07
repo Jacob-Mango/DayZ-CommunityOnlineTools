@@ -8,6 +8,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private UIActionEditableText m_QuantityItem;
 	private UIActionEditableText m_SearchBox;
+	private UIActionButton m_SpawnMode;
 
 	private TextListboxWidget m_ClassList;
 
@@ -23,6 +24,14 @@ class JMObjectSpawnerForm: JMFormBase
 	private JMObjectSpawnerModule m_Module;
 
 	private Object m_DeletingObject;
+
+	private int m_ObjSpawnMode = SpawnSelectMode.CURSOR;
+	private ref array< string > m_ObjSpawnModeText =
+	{
+		"None",
+		"#STR_COT_OBJECT_MODULE_CURSOR",
+		"#STR_COT_OBJECT_MODULE_SELF"
+	};
 
 	private static ref array< string > m_ItemsThatCrash =
 	{
@@ -90,6 +99,9 @@ class JMObjectSpawnerForm: JMFormBase
 		m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
 
 		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
+		Widget typesSpawnModes = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "object_spawn_mode_wrapper" ), 2, 1 );
+		UIActionManager.CreateText( typesSpawnModes, "Spawn Mode" );
+		m_SpawnMode = UIActionManager.CreateButton( typesSpawnModes, "#STR_COT_OBJECT_MODULE_CURSOR", this, "ChangeSpawnMode" );
 
 		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 8, 1 );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL", "" );
@@ -120,12 +132,12 @@ class JMObjectSpawnerForm: JMFormBase
 		
 		if ( GetGame().IsServer() )
 		{
-			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_INVENTORY", this, "SpawnInventory" );
+			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
+		} else {
+			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
 		}
-		else
-		{
-			UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS", this, "SpawnInventory" );
-		}
+
+		UIActionManager.CreateButton( spawnButtons, m_ObjSpawnModeText[3], this, "SpawnInventory" );
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
@@ -238,6 +250,20 @@ class JMObjectSpawnerForm: JMFormBase
 		return false;
 	}
 
+	override bool OnDoubleClick( Widget w, int x, int y, int button )
+	{
+		super.OnDoubleClick( w, x, y, button );
+
+		if ( w == m_ClassList && button == MouseState.LEFT )
+		{
+			SpawnObject(m_ObjSpawnMode);
+			
+			return true;
+		} 
+
+		return false;
+	}
+
 	override void OnShow()
 	{
 		super.OnShow();
@@ -261,23 +287,24 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateList();
 	}
 
+	void ChangeSpawnMode( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_ObjSpawnMode++;
+		if ( m_ObjSpawnMode == SpawnSelectMode.UNKNOWN )
+			m_ObjSpawnMode = 1;
+
+		m_SpawnMode.SetButton(m_ObjSpawnModeText[m_ObjSpawnMode]);
+	}
+
 	void SpawnCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		int quantity = -1;
-
-		string quantText = m_QuantityItem.GetText();
-
-		quantText.ToUpper();
-
-		if ( quantText != "MAX")
-		{
-			quantity = quantText.ToInt();
-		}
-
-		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
+		SpawnObject(SpawnSelectMode.CURSOR);
 	}
 
 	void SpawnPosition( UIEvent eid, UIActionBase action )
@@ -285,25 +312,22 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		int quantity = -1;
-
-		string quantText = m_QuantityItem.GetText();
-
-		quantText.ToUpper();
-
-		if ( quantText != "MAX")
-		{
-			quantity = quantText.ToInt();
-		}
-
-		m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
+		SpawnObject(SpawnSelectMode.POSITION);
 	}
 
 	void SpawnInventory( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid == UIEvent.CLICK )
 			return;
 
+		SpawnObject(SpawnSelectMode.INVENTORY);
+	}
+
+	void SpawnObject(int mode = SpawnSelectMode.NONE)
+	{
+		if ( mode == SpawnSelectMode.NONE || mode == SpawnSelectMode.UNKNOWN )
+			return;
+		
 		int quantity = -1;
 
 		string quantText = m_QuantityItem.GetText();
@@ -311,11 +335,21 @@ class JMObjectSpawnerForm: JMFormBase
 		quantText.ToUpper();
 
 		if ( quantText != "MAX")
-		{
 			quantity = quantText.ToInt();
-		}
 
-		m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, -1 );
+		switch(mode)
+		{
+			default:
+			case SpawnSelectMode.POSITION:
+				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
+			break;
+			case SpawnSelectMode.CURSOR:
+				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
+			break;
+			case SpawnSelectMode.INVENTORY:
+				m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, -1 );
+			break;
+		}
 	}
 
 	void DeleteCursor( UIEvent eid, UIActionBase action )

@@ -377,7 +377,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					if ( quantity > 100 )
 						quantity = 100;
 
-					quantity = ( item.GetQuantityMax() / 100 ) * quantity
+					quantity = ( item.GetQuantityMax() / 100 ) * quantity;
 
 					item.SetQuantity(quantity);
 				}
@@ -386,7 +386,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					if ( quantity > 100 )
 						quantity = 100;
 					
-					item.GetCompEM().SetEnergy0To1( quantity / 100 )
+					item.GetCompEM().SetEnergy0To1( quantity / 100 );
 				}
 				else
 				{
