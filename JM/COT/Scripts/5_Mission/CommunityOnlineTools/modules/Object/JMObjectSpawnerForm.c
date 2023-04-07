@@ -75,6 +75,15 @@ class JMObjectSpawnerForm: JMFormBase
 		"fx"
 	};
 
+	private static ref array< string > m_RestrictiveBlacklistedClassnames =
+	{
+		"placing",
+		"debug",
+		"bldr_",
+		"StaticObj_",
+		"proxy"
+	};
+
 	protected bool m_IknowWhatIamDoing;
 
 	void JMObjectSpawnerForm()
@@ -99,9 +108,6 @@ class JMObjectSpawnerForm: JMFormBase
 		m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
 
 		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
-		Widget typesSpawnModes = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "object_spawn_mode_wrapper" ), 2, 1 );
-		UIActionManager.CreateText( typesSpawnModes, "Spawn Mode" );
-		m_SpawnMode = UIActionManager.CreateButton( typesSpawnModes, "#STR_COT_OBJECT_MODULE_CURSOR", this, "ChangeSpawnMode" );
 
 		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 8, 1 );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL", "" );
@@ -123,12 +129,10 @@ class JMObjectSpawnerForm: JMFormBase
 		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_QUANTITY" );
 		m_QuantityItem.SetText( "MAX" );
 
-		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 5 );
+		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
 		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON" );
-
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnCursor" );
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SELF", this, "SpawnPosition" );
+		m_SpawnMode = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "ChangeSpawnMode" );
 		
 		if ( GetGame().IsServer() )
 		{
@@ -136,8 +140,6 @@ class JMObjectSpawnerForm: JMFormBase
 		} else {
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
 		}
-
-		UIActionManager.CreateButton( spawnButtons, m_ObjSpawnModeText[3], this, "SpawnInventory" );
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
@@ -259,7 +261,7 @@ class JMObjectSpawnerForm: JMFormBase
 			SpawnObject(m_ObjSpawnMode);
 			
 			return true;
-		} 
+		}
 
 		return false;
 	}
@@ -297,30 +299,6 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ObjSpawnMode = 1;
 
 		m_SpawnMode.SetButton(m_ObjSpawnModeText[m_ObjSpawnMode]);
-	}
-
-	void SpawnCursor( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		SpawnObject(SpawnSelectMode.CURSOR);
-	}
-
-	void SpawnPosition( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		SpawnObject(SpawnSelectMode.POSITION);
-	}
-
-	void SpawnInventory( UIEvent eid, UIActionBase action )
-	{
-		if ( eid == UIEvent.CLICK )
-			return;
-
-		SpawnObject(SpawnSelectMode.INVENTORY);
 	}
 
 	void SpawnObject(int mode = SpawnSelectMode.NONE)
@@ -477,15 +455,6 @@ class JMObjectSpawnerForm: JMFormBase
 			}
 		}
 	}
-
-	private static ref array< string > m_RestrictiveBlacklistedClassnames =
-	{
-		"placing",
-		"debug",
-		"bldr_",
-		"StaticObj_",
-		"proxy"
-	};
 
 	private bool CheckItemCrash( string name )
 	{
