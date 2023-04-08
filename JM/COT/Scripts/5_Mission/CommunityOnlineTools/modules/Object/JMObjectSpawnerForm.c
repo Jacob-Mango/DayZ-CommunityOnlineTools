@@ -434,6 +434,11 @@ class JMObjectSpawnerForm: JMFormBase
 					continue;
 				}
 
+				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+				{
+					continue;
+				}
+
 				string strNameLower = strName;
 
 				strNameLower.ToLower();
