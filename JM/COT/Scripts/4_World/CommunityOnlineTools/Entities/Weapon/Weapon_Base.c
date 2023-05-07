@@ -5,25 +5,26 @@ modded class Weapon_Base
 		super.EEFired( muzzleType, mode, ammoType );
 
 		PlayerBase player;
-		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) && player.COTHasUnlimitedAmmo() )
+		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) )
 		{
-			Magazine magazine = GetMagazine( GetCurrentMuzzle() );
-			if ( magazine )
+			if (GetGame().IsServer() && player.COTHasGodMode())
 			{
-				if ( GetGame().IsServer() )
+				CommunityOnlineToolsBase.HealEntityRecursive(this, true, false);
+			}
+
+			if (player.COTHasUnlimitedAmmo())
+			{
+				Magazine magazine = GetMagazine( GetCurrentMuzzle() );
+				if ( magazine )
 				{
-					CommunityOnlineToolsBase.HealEntityRecursive(this, true, false);
-
-					if ( GetGame().IsMultiplayer() && magazine )
-						GetGame().RemoteObjectDelete( magazine );
-
-					magazine.ServerSetAmmoMax();
-
-					if ( GetGame().IsMultiplayer() && magazine )
-						GetGame().RemoteObjectCreate( magazine );
-				} else
-				{
-					magazine.LocalSetAmmoMax();
+					if ( GetGame().IsServer() )
+					{
+						magazine.ServerSetAmmoMax();
+					}
+					else
+					{
+						magazine.LocalSetAmmoMax();
+					}
 				}
 			}
 		}
@@ -51,7 +52,10 @@ modded class Weapon_Base
 		{
 			int count = GetGame().ConfigGetInt("CfgMagazines " + magazine + " count");
 			if (count > max)
+			{
+				max = count;
 				magazineType = magazine;
+			}
 		}
 		return magazineType;
 	}
@@ -73,7 +77,7 @@ modded class Weapon_Base
 			if ( flags & WeaponWithAmmoFlags.MAX_CAPACITY_MAG)
 				magazineType = COTGetMaxMagazineTypeName(0);
 			else
-				magazineType = GetRandomMagazineTypeName(0);
+				magazineType = COTGetMagazineTypesValidated().GetRandomElement();
 		}
 		
 		EntityAI magAI = GetInventory().CreateAttachment(magazineType);

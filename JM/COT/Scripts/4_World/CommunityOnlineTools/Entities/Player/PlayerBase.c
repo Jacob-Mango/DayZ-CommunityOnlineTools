@@ -27,7 +27,6 @@ modded class PlayerBase
 	private bool m_JMHasUnlimitedAmmo;
 
 	private bool m_JMHasUnlimitedStamina;
-	private bool m_JMHasUnlimitedStaminaRemoteSynch;
 
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
@@ -77,7 +76,8 @@ modded class PlayerBase
 
 		RegisterNetSyncVariableInt( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
-		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStaminaRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
+		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -147,11 +147,6 @@ modded class PlayerBase
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
-		}
-
-		if ( m_JMHasUnlimitedStaminaRemoteSynch != m_JMHasUnlimitedStamina )
-		{
-			m_JMHasUnlimitedStaminaRemoteSynch = m_JMHasUnlimitedStamina;
 		}
 	}
 
@@ -365,7 +360,9 @@ modded class PlayerBase
 			m_JMIsFrozen = mode;
 			m_JMIsFrozenRemoteSynch = mode;
 
+			#ifdef SERVER
 			SetSynchDirty();
+			#endif
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
@@ -389,7 +386,9 @@ modded class PlayerBase
 			if (mode || preference || !m_COT_CannotBeTargetedByAI_Preference)
 				COTSetCannotBeTargetedByAI(mode, preference);
 
+			#ifdef SERVER
 			SetSynchDirty();
+			#endif
 		}
 	}
 
@@ -435,6 +434,10 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedAmmo = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
 		}
 	}
 
@@ -443,7 +446,10 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedStamina = mode;
-			m_JMHasUnlimitedStaminaRemoteSynch = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
 		}
 	}
 
