@@ -14,5 +14,17 @@ modded class ItemBase
 
 		return true;
 	}
+
+	override void OnEnergyConsumed()
+	{
+		Man player = GetHierarchyRootPlayer();
+		if (player && !player.GetAllowDamage())  //! UNLIMITED POWER
+		{
+			GetCompEM().SetEnergy0To1(1.0);
+			return;
+		}
+
+		super.OnEnergyConsumed();
+	}
 };
 
