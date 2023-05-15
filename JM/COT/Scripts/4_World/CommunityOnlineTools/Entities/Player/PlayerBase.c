@@ -291,7 +291,7 @@ modded class PlayerBase
 
 	override string FormatSteamWebhook()
 	{
-		if ( Assert_Null( GetAuthenticatedPlayer(), "Player has no identity or improperly programmed AI mod" ) )
+		if ( !GetAuthenticatedPlayer() )
 		{
 			return super.FormatSteamWebhook() + " (WARNING)";
 		}
