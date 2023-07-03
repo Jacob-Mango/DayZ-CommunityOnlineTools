@@ -102,6 +102,9 @@ class JMCameraModule: JMRenderableModuleBase
 				
 				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
 				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+				PPEffects.SetChromAbb( CHROMABERX );
+				PPEffects.SetVignette( VIGNETTE, 0, 0, 0, 0 );
+				PPEffects.SetBloom( EXPOSURE, EXPOSURE, EXPOSURE );
 				// PPEffects.SetBlurOptics( 0 );
 			}
 

@@ -183,4 +183,3 @@ modded class MissionGameplay
 		super.HandleMapToggleByKeyboardShortcut(player);
 	}
 };
-

@@ -17,14 +17,16 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_PositionX;
 	UIActionEditableText m_Action_PositionY;
 	UIActionEditableText m_Action_PositionZ;
-	UIActionButton m_Action_Position;
+	UIActionButton m_Action_SetPosition;
+	UIActionButton m_Action_GetPosition;
 	UIActionButton m_Action_RefreshPosition;
 	UIActionCheckbox m_Action_AutoRefreshPosition;
 	
 	UIActionEditableText m_Action_OrientationX;
 	UIActionEditableText m_Action_OrientationY;
 	UIActionEditableText m_Action_OrientationZ;
-	UIActionButton m_Action_Orientation;
+	UIActionButton m_Action_SetOrientation;
+	UIActionButton m_Action_GetOrientation;
 	UIActionButton m_Action_RefreshOrientation;
 	UIActionCheckbox m_Action_AutoRefreshOrientation;
 
@@ -78,8 +80,10 @@ class JMESPMeta : Managed
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPMeta::Destroy() void;" );
-		Print( "  m_Action_Position = " + m_Action_Position );
-		Print( "  m_Action_Orientation = " + m_Action_Orientation );
+		Print( "  m_Action_SetPosition = " + m_Action_SetPosition );
+		Print( "  m_Action_GetPosition = " + m_Action_GetPosition );
+		Print( "  m_Action_SetOrientation = " + m_Action_SetOrientation );
+		Print( "  m_Action_GetOrientation = " + m_Action_GetOrientation );
 		Print( "  m_Action_Health = " + m_Action_Health );
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
@@ -107,7 +111,8 @@ class JMESPMeta : Managed
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set Position", this, "Action_SetPosition", 0.5 );
+		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "Copy", this, "Action_GetPosition", 0.25 );
+		m_Action_SetPosition = UIActionManager.CreateButton( positionActionsButtons, "Paste", this, "Action_SetPosition", 0.25 );
 		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
 		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
@@ -126,7 +131,8 @@ class JMESPMeta : Managed
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set Orientation", this, "Action_SetOrientation", 0.5 );
+		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Copy", this, "Action_GetOrientation", 0.25 );
+		m_Action_SetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Paste", this, "Action_SetOrientation", 0.25 );
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
@@ -194,15 +200,30 @@ class JMESPMeta : Managed
 		if ( !m_Action_OrientationZ.IsFocused() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
 	}
 
+	void Action_GetPosition( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard("<" + m_Action_PositionX.GetText() + ", " + m_Action_PositionY.GetText() + ", " + m_Action_PositionZ.GetText() + ">");
+	}
+
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector pos = vector.Zero;
-		pos[0] = m_Action_PositionX.GetText().ToFloat();
-		pos[1] = m_Action_PositionY.GetText().ToFloat();
-		pos[2] = m_Action_PositionZ.GetText().ToFloat();
+		string clipboard;
+		GetGame().CopyFromClipboard(clipboard);
+
+		vector pos = clipboard.BeautifiedToVector();
+
+		if ( pos == vector.Zero )
+		{
+			pos[0] = m_Action_PositionX.GetText().ToFloat();
+			pos[1] = m_Action_PositionY.GetText().ToFloat();
+			pos[2] = m_Action_PositionZ.GetText().ToFloat();
+		}
 
 		module.SetPosition( pos, target );
 	}
@@ -221,17 +242,32 @@ class JMESPMeta : Managed
 			return;
 	}
 
+	void Action_GetOrientation( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard("<" + m_Action_OrientationX.GetText() + ", " + m_Action_OrientationY.GetText() + ", " + m_Action_OrientationZ.GetText() + ">");
+	}
+
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector pos = vector.Zero;
-		pos[0] = m_Action_OrientationX.GetText().ToFloat();
-		pos[1] = m_Action_OrientationY.GetText().ToFloat();
-		pos[2] = m_Action_OrientationZ.GetText().ToFloat();
+		string clipboard;
+		GetGame().CopyFromClipboard(clipboard);
 
-		module.SetOrientation( pos, target );
+		vector ori = clipboard.BeautifiedToVector();
+
+		if ( ori == vector.Zero )
+		{
+			ori[0] = m_Action_OrientationX.GetText().ToFloat();
+			ori[1] = m_Action_OrientationY.GetText().ToFloat();
+			ori[2] = m_Action_OrientationZ.GetText().ToFloat();
+		}
+
+		module.SetOrientation( ori, target );
 	}
 
 	void Action_RefreshOrientation( UIEvent eid, UIActionBase action )

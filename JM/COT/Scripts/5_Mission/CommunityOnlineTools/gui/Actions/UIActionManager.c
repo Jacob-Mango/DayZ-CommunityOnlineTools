@@ -82,6 +82,33 @@ class UIActionManager
 		return NULL;
 	}
 
+	static UIActionNavigateButton CreateNavButton( Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );
+
+		UIActionNavigateButton action;
+		widget.GetScript( action );
+
+		if ( width != 1 )
+		{
+			float w;
+			float h;
+			widget.GetSize( w, h );
+			widget.SetSize( width, h );
+		}
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+			action.SetButton( button );
+			action.SetImages( imageR, imageL );
+
+			return action;
+		}
+
+		return NULL;
+	}
+
 	static UIActionEditableText CreateEditableText( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableText.layout", parent );
@@ -270,6 +297,28 @@ class UIActionManager
 
 		if ( action )
 		{
+			return action;
+		}
+
+		return NULL;
+	}
+
+	static UIActionImage CreateImage( Widget parent, string image, Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImage.layout", parent );
+
+		UIActionImage action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+
+			action.SetImage( image );
+
+			action.SetLabelHAlign( lha );
+			action.SetLabelVAlign( lva );
+
 			return action;
 		}
 

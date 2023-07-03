@@ -6,9 +6,9 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_TypesActionsWrapper;
 	private Widget m_SpawnerActionsWrapper;
 
-	private UIActionEditableText m_QuantityItem;
+	private UIActionSlider m_QuantityItem;
 	private UIActionEditableText m_SearchBox;
-	private UIActionButton m_SpawnMode;
+	private UIActionNavigateButton m_SpawnMode;
 
 	private TextListboxWidget m_ClassList;
 
@@ -80,7 +80,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"placing",
 		"debug",
 		"bldr_",
-		"StaticObj_",
+		"staticobj_",
 		"proxy"
 	};
 
@@ -123,16 +123,24 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 3, 1 );
 
-		Widget spawnInfo = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
 
-		m_SearchBox = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
-		m_QuantityItem = UIActionManager.CreateEditableText( spawnInfo, "#STR_COT_OBJECT_MODULE_QUANTITY" );
-		m_QuantityItem.SetText( "MAX" );
+		m_SearchBox = UIActionManager.CreateEditableText( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
+		m_SearchBox.SetWidth( 0.5 );
 
+		UIActionButton button = UIActionManager.CreateButton( actions, "X", this, "SearchInput_OnClickReset" );
+		button.SetWidth( 0.05 );
+		button.SetPosition( 0.5 );
+
+		m_QuantityItem = UIActionManager.CreateSlider( actions, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
+		m_QuantityItem.SetWidth( 0.35 );
+		m_QuantityItem.SetPosition( 0.55 );
+		
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateText( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON" );
-		m_SpawnMode = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_CURSOR", this, "ChangeSpawnMode" );
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
+		m_SpawnMode = UIActionManager.CreateNavButton( spawnButtons, " #STR_COT_OBJECT_MODULE_CURSOR", JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "ChangeSpawnMode" );
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 		
 		if ( GetGame().IsServer() )
 		{
@@ -140,8 +148,6 @@ class JMObjectSpawnerForm: JMFormBase
 		} else {
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
 		}
-
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -156,7 +162,8 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_IknowWhatIamDoing = action.IsChecked();	
+		m_IknowWhatIamDoing = action.IsChecked();
+		UpdateList();
 	}
 
 	void Click_OnDebugSpawn( UIEvent eid, UIActionBase action )	
@@ -164,6 +171,13 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CLICK ) return;
 
 		m_Module.m_OnDebugSpawn = action.IsChecked();	
+	}
+
+	void Click_SpawnObject( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK ) return;
+
+		SpawnObject(m_ObjSpawnMode);
 	}
 
 	void AddObjectType( Widget parent, string name, string config )
@@ -208,6 +222,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
 
+		m_QuantityItem.Disable();
 		if ( m_PreviewItem )
 		{
 			m_ItemPreview.SetItem( m_PreviewItem );
@@ -215,7 +230,19 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.SetModelOrientation( vector.Zero );
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
-		} else
+
+			if (m_PreviewItem.IsInherited(ItemBase)) 
+			{
+				ItemBase item = ItemBase.Cast(m_PreviewItem);
+				if ( item.HasQuantity() )
+				{
+					m_QuantityItem.Enable();
+					m_QuantityItem.SetMin(item.GetQuantityMin());
+					m_QuantityItem.SetMax(item.GetQuantityMax());
+				}
+			}
+		}
+		else
 		{
 			m_ItemPreview.Show( false );
 		}
@@ -291,12 +318,24 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void ChangeSpawnMode( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid == UIEvent.CLICK || eid == UIEvent.CLICK_RIGHTSIDE )
+		{
+			m_ObjSpawnMode++;
+		}
+		else if ( eid == UIEvent.CLICK_LEFTSIDE )
+		{
+			m_ObjSpawnMode--;
+		}
+		else
+		{
 			return;
+		}
 
-		m_ObjSpawnMode++;
 		if ( m_ObjSpawnMode == SpawnSelectMode.UNKNOWN )
-			m_ObjSpawnMode = 1;
+			m_ObjSpawnMode = SpawnSelectMode.NONE + 1;
+
+		if ( m_ObjSpawnMode == SpawnSelectMode.NONE )
+			m_ObjSpawnMode = SpawnSelectMode.UNKNOWN - 1;
 
 		m_SpawnMode.SetButton(m_ObjSpawnModeText[m_ObjSpawnMode]);
 	}
@@ -305,27 +344,18 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( mode == SpawnSelectMode.NONE || mode == SpawnSelectMode.UNKNOWN )
 			return;
-		
-		int quantity = -1;
-
-		string quantText = m_QuantityItem.GetText();
-
-		quantText.ToUpper();
-
-		if ( quantText != "MAX")
-			quantity = quantText.ToInt();
 
 		switch(mode)
 		{
 			default:
 			case SpawnSelectMode.POSITION:
-				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, -1 );
+				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetCurrent(), -1 );
 			break;
 			case SpawnSelectMode.CURSOR:
-				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), quantity, -1 );
+				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetCurrent(), -1 );
 			break;
 			case SpawnSelectMode.INVENTORY:
-				m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, -1 );
+				m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), m_QuantityItem.GetCurrent(), -1 );
 			break;
 		}
 	}
@@ -393,8 +423,17 @@ class JMObjectSpawnerForm: JMFormBase
 		
 	}
 
-	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
+	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
 	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_SearchBox.SetText("");
+		UpdateList();
+	}
+
+	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
+	{		
 		UpdateList();
 	}
 

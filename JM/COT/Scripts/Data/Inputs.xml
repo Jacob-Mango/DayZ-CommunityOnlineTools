@@ -32,6 +32,10 @@
             <input name="UAObjectModuleSpawnInfected" loc="STR_COT_INPUT_SPAWN_INFECTED" />
             <input name="UAObjectModuleSpawnAnimal" loc="STR_COT_INPUT_SPAWN_ANIMAL" />
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
+            <input name="UAObjectModuleDeleteOnCursor" loc="STR_COT_INPUT_DELETE_CURSOR" />
+            
+            <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
+            <input name="UAPlayerModuleGodMode" loc="STR_COT_INPUT_GODMODE_SELF" />
         </actions>
 
         <sorting name="JM_COT" loc="COT">
@@ -65,6 +69,10 @@
 			<input name="UAObjectModuleSpawnInfected" />
 			<input name="UAObjectModuleSpawnAnimal" />
 			<input name="UAObjectModuleSpawnWolf" />
+			<input name="UAObjectModuleDeleteOnCursor" />
+
+			<input name="UAPlayerModuleHeal" />
+			<input name="UAPlayerModuleGodMode" />
 		</sorting>
     </inputs>
 
@@ -112,6 +120,13 @@
         <input name="UAObjectModuleSpawnAnimal">
         </input>
         <input name="UAObjectModuleSpawnWolf">
+        </input>
+        
+        <input name="UAPlayerModuleHeal">
+        </input>
+        <input name="UAPlayerModuleGodMode">
+            <btn name="kG">
+            </btn>
         </input>
 
         <input name="UACOTToggleButtons">
