@@ -13,6 +13,12 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void JMWeatherModule()
 	{
+		GetPermissionsManager().RegisterPermission( "Weather.QuickAction" );
+		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Clear" );
+		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Cloudy" );
+		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Storm" );
+		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Date" );
+
 		GetPermissionsManager().RegisterPermission( "Weather.Date" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Wind" );

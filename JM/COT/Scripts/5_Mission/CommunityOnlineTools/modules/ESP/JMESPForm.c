@@ -137,10 +137,12 @@ class JMESPForm: JMFormBase
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
 		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+
+		//UIActionManager.CreateText( parent, "Fog: ", "Sets the weather fog phenomenon" );
+		//Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAPSCAN", this, "Click_MoveToCursor" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -153,11 +155,6 @@ class JMESPForm: JMFormBase
 
 		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
-
-		//left_bottom.SetSize( 1.0, 1.0 );
-		//right_bottom.SetSize( 0.0, 1.0 );
-		//left_bottom.SetPos( 0.0, 0.0 );
-		//right_bottom.SetPos( 1.0, 0.0 );
 
 		left_bottom.SetSize( 0.5, 1.0 );
 		right_bottom.SetSize( 0.5, 1.0 );
@@ -199,15 +196,17 @@ class JMESPForm: JMFormBase
 		{
 			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
 
-			m_sldr_Refresh.Disable();
-		} else
+			//m_sldr_Refresh.Disable();
+		}
+		else
 		{
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Enable();
-			} else
+			}
+			else
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
@@ -233,7 +232,8 @@ class JMESPForm: JMFormBase
 				m_Module.UpdateState( JMESPState.Update );
 
 				m_Module.Log( "ESP updating" );
-			} else
+			}
+			else
 			{
 				m_Module.UpdateState( JMESPState.View );
 
@@ -285,10 +285,13 @@ class JMESPForm: JMFormBase
 		{
 			if ( action.IsChecked() )
 			{
+				m_sldr_Refresh.Enable();
 				m_Module.UpdateState( JMESPState.Update );
-			} else
+			}
+			else
 			{
-				m_Module.UpdateState( JMESPState.Remove );
+				m_sldr_Refresh.Disable();
+				m_Module.UpdateState( JMESPState.View );
 			}
 		}
 		
@@ -350,19 +353,19 @@ class JMESPForm: JMFormBase
 		m_Module.DeleteAll();
 	}
 	
-	void Click_MoveToCursorRelative( UIEvent eid, UIActionBase action )
+	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorRelative( "0 0 0" );
-	}
-	
-	void Click_MoveToCursorAbsolute( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		m_Module.MoveToCursorAbsolute( "0 0 0" );
+		vector dir = GetGame().GetCurrentCameraDirection();
+		vector from = GetGame().GetCurrentCameraPosition(); 
+		vector to = from + ( dir * 1000 );   
+		vector contact_pos;
+		vector contact_dir;
+		int contact_component;
+		
+		if ( DayZPhysics.RaycastRV(from, to, contact_pos, contact_dir, contact_component, NULL, NULL, NULL, false, true) )
+			m_Module.MoveToCursor( contact_pos );
 	}
 };

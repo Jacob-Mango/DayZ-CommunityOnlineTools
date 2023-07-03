@@ -193,6 +193,18 @@ static TStringArray WorkingZombieClasses()
 			 "ZmbF_Clerk_Normal_Base","ZmbF_Clerk_Normal_Blue","ZmbF_Clerk_Normal_White","ZmbF_Clerk_Normal_Green","ZmbF_Clerk_Normal_Red" };
 }
 
+static string JM_COT_ICON_BASE = "\\JM\\COT\\GUI\\textures\\";
+
+// Admin Map
+static string JM_COT_ICON_CAR = JM_COT_ICON_BASE + "icon_car";
+static string JM_COT_ICON_DOT = JM_COT_ICON_BASE + "icon_dot";
+static string JM_COT_ICON_ARROW_LEFT = JM_COT_ICON_BASE + "icon_arrow_left.paa";
+static string JM_COT_ICON_ARROW_RIGHT = JM_COT_ICON_BASE + "icon_arrow_right.paa";
+
+// ingamehud
+static string JM_COT_ICON_GOD = JM_COT_ICON_BASE + "icon_status_godmode.paa";
+static string JM_COT_ICON_INVISIBLE = JM_COT_ICON_BASE + "icon_status_invisible.paa";
+
 static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
 	vector contact_pos;

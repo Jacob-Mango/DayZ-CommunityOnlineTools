@@ -25,9 +25,10 @@ class JMPlayerForm: JMFormBase
 	private UIActionScroller m_ActionListScroller;
 	private Widget m_ActionsWrapper;
 
-	private UIActionText m_GUID;
-	private UIActionText m_Name;
-	private UIActionText m_Steam64ID;
+	private UIActionButton m_GUID;
+	private UIActionButton m_Name;
+	private UIActionButton m_Steam64ID;
+	private UIActionButton m_SteamProfile;
 
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
@@ -251,10 +252,28 @@ class JMPlayerForm: JMFormBase
 	private Widget InitActionWidgetsIdentity( Widget actionsParent )
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+	
+		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
+		m_Name = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", this, "Click_CopyPlayerName" );
+		m_Name.SetWidth( 0.8 );
+		m_Name.SetPosition( 0.2 );
 
-		m_Name = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
-		m_GUID = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
-		m_Steam64ID = UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
+		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
+		m_GUID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", this, "Click_CopyPlayerGUID" );
+		m_GUID.SetWidth( 0.8 );
+		m_GUID.SetPosition( 0.2 );
+
+		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
+		m_Steam64ID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", this, "Click_CopyPlayerSteam64ID" );
+		m_Steam64ID.SetWidth( 0.4 );
+		m_Steam64ID.SetPosition( 0.2 );
+
+		m_SteamProfile = UIActionManager.CreateButton( actions, "Profile", this, "Click_OpenPlayerSteamProfile" );
+		m_SteamProfile.SetWidth( 0.4 );
+		m_SteamProfile.SetPosition( 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -268,6 +287,7 @@ class JMPlayerForm: JMFormBase
 		m_Name.Show();
 		m_GUID.Show();
 		m_Steam64ID.Show();
+		m_SteamProfile.Show();
 	}
 
 	private void HideIdentityWidgets()
@@ -275,6 +295,7 @@ class JMPlayerForm: JMFormBase
 		m_Name.Hide();
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
+		m_SteamProfile.Hide();
 	}
 
 	private Widget InitActionWidgetsPosition( Widget actionsParent )
@@ -802,6 +823,38 @@ class JMPlayerForm: JMFormBase
 		m_Module.TeleportTo( position, JM_GetSelected().GetPlayers() );
 	}
 
+    void Click_CopyPlayerName( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard(m_Name.GetButton());
+	}
+
+    void Click_CopyPlayerGUID( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard(m_GUID.GetButton());
+	}
+
+    void Click_CopyPlayerSteam64ID( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
+	}
+
+    void Click_OpenPlayerSteamProfile( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
+	}
+
     void Click_CopyPlayerPostion( UIEvent eid, ref UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -956,6 +1009,114 @@ class JMPlayerForm: JMFormBase
 		
 		if ( m_RemoveCollision )
 			m_RemoveCollision.SetChecked( m_SelectedInstance.GetRemoveCollision() );
+
+		if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_HIGH )
+		{
+			m_Health.SetColor( Colors.COLOR_PRISTINE );
+			m_Health.SetAlpha( 1.0 );
+		}
+		else if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_NORMAL )
+		{
+			m_Health.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_LOW )
+		{
+			m_Health.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Health.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
+		if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_HIGH )
+		{
+			m_Blood.SetColor( Colors.COLOR_PRISTINE );
+			m_Blood.SetAlpha( 1.0 );
+		}
+		else if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_NORMAL )
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_LOW )
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
+		if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_HIGH )
+		{
+			m_Energy.SetColor( Colors.COLOR_PRISTINE );
+			m_Energy.SetAlpha( 1.0 );
+		}
+		else if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_NORMAL )
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_LOW )
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
+		if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_HIGH )
+		{
+			m_Water.SetColor( Colors.COLOR_PRISTINE );
+			m_Water.SetAlpha( 1.0 );
+		}
+		else if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_NORMAL )
+		{
+			m_Water.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_LOW )
+		{
+			m_Water.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Water.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
+		if ( m_Shock.GetCurrent() >= 75 )
+		{
+			m_Shock.SetColor( Colors.COLOR_PRISTINE );
+			m_Shock.SetAlpha( 1.0 );
+		}
+		else if ( m_Shock.GetCurrent() >= PlayerConstants.CONSCIOUS_THRESHOLD )
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Shock.GetCurrent() < PlayerConstants.UNCONSCIOUS_THRESHOLD )
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+		else
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+
+		if ( m_Stamina.GetCurrent() >= 75 )
+		{
+			m_Stamina.SetColor( Colors.COLOR_PRISTINE );
+			m_Stamina.SetAlpha( 1.0 );
+		}
+		else if ( m_Stamina.GetCurrent() >= 50 )
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Stamina.GetCurrent() >= 25 )
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
 	}
 
 	void RefreshTeleports(bool force = false)
@@ -1044,6 +1205,24 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		UpdateLastChangeTime();
+	
+		if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_HIGH )
+		{
+			m_Health.SetColor( Colors.COLOR_PRISTINE );
+			m_Health.SetAlpha( 1.0 );
+		}
+		else if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_NORMAL )
+		{
+			m_Health.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Health.GetCurrent() >= PlayerConstants.SL_HEALTH_LOW )
+		{
+			m_Health.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Health.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
 
 		m_HealthUpdated = true;
 	}
@@ -1055,6 +1234,24 @@ class JMPlayerForm: JMFormBase
 
 		UpdateLastChangeTime();
 
+		if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_HIGH )
+		{
+			m_Blood.SetColor( Colors.COLOR_PRISTINE );
+			m_Blood.SetAlpha( 1.0 );
+		}
+		else if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_NORMAL )
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Blood.GetCurrent() >= PlayerConstants.SL_BLOOD_LOW )
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Blood.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
 		m_BloodUpdated = true;
 	}
 
@@ -1064,6 +1261,24 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		UpdateLastChangeTime();
+
+		if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_HIGH )
+		{
+			m_Energy.SetColor( Colors.COLOR_PRISTINE );
+			m_Energy.SetAlpha( 1.0 );
+		}
+		else if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_NORMAL )
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Energy.GetCurrent() >= PlayerConstants.SL_ENERGY_LOW )
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Energy.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
 
 		m_EnergyUpdated = true;
 	}
@@ -1075,6 +1290,24 @@ class JMPlayerForm: JMFormBase
 
 		UpdateLastChangeTime();
 
+		if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_HIGH )
+		{
+			m_Water.SetColor( Colors.COLOR_PRISTINE );
+			m_Water.SetAlpha( 1.0 );
+		}
+		else if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_NORMAL )
+		{
+			m_Water.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Water.GetCurrent() >= PlayerConstants.SL_WATER_LOW )
+		{
+			m_Water.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Water.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+
 		m_WaterUpdated = true;
 	}
 
@@ -1085,6 +1318,24 @@ class JMPlayerForm: JMFormBase
 
 		UpdateLastChangeTime();
 
+		if ( m_Shock.GetCurrent() >= 75 )
+		{
+			m_Shock.SetColor( Colors.COLOR_PRISTINE );
+			m_Shock.SetAlpha( 1.0 );
+		}
+		else if ( m_Shock.GetCurrent() >= PlayerConstants.CONSCIOUS_THRESHOLD )
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Shock.GetCurrent() < PlayerConstants.UNCONSCIOUS_THRESHOLD )
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
+		else
+		{
+			m_Shock.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+
 		m_ShockUpdated = true;
 	}
 
@@ -1094,6 +1345,24 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		UpdateLastChangeTime();
+
+		if ( m_Stamina.GetCurrent() >= 75 )
+		{
+			m_Stamina.SetColor( Colors.COLOR_PRISTINE );
+			m_Stamina.SetAlpha( 1.0 );
+		}
+		else if ( m_Stamina.GetCurrent() >= 50 )
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 220, 220 ) );
+		}
+		else if ( m_Stamina.GetCurrent() >= 25 )
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 220, 0 ) );
+		}
+		else
+		{
+			m_Stamina.SetColor( ARGB( 255, 220, 0, 0 ) );
+		}
 
 		m_StaminaUpdated = true;
 	}
@@ -1255,9 +1524,9 @@ class JMPlayerForm: JMFormBase
 		{
 			ShowIdentityWidgets();
 
-			m_GUID.SetText( instance.GetGUID() );
-			m_Name.SetText( instance.GetName() );
-			m_Steam64ID.SetText( instance.GetSteam64ID() );
+			m_GUID.SetButton( instance.GetGUID() );
+			m_Name.SetButton( instance.GetName() );
+			m_Steam64ID.SetButton( instance.GetSteam64ID() );
 
 			UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
 		} else

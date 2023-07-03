@@ -231,7 +231,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ESPRadius = 200;
 
-		ESPUpdateTime = 1;
+		ESPUpdateTime = 5;
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
 
@@ -242,6 +242,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.DuplicateAll" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.DeleteAll" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.MoveToCursor" );		
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
@@ -319,8 +320,7 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "MakeItemSet" );
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
-		types.Insert( "MoveToCursorRelative" );
-		types.Insert( "MoveToCursorAbsolute" );
+		types.Insert( "MoveToCursor" );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -912,11 +912,8 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.DeleteAll:
 			RPC_DeleteAll( ctx, sender, target );
 			break;
-		case JMESPModuleRPC.MoveToCursorRelative:
-			RPC_MoveToCursorRelative( ctx, sender, target );
-			break;
-		case JMESPModuleRPC.MoveToCursorAbsolute:
-			RPC_MoveToCursorAbsolute( ctx, sender, target );
+		case JMESPModuleRPC.MoveToCursor:
+			RPC_MoveToCursor( ctx, sender, target );
 			break;
 		}
 	}
@@ -1465,27 +1462,61 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void MoveToCursorRelative( vector cursor )
+	void MoveToCursor( vector cursor )
 	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( cursor );
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.MoveToCursor, true, NULL );
 	}
 
-	private void RPC_MoveToCursorRelative( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_MoveToCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor", senderRPC, instance ) )
+			return;
+		
+		vector cursor;
+		if ( !ctx.Read( cursor ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_MoveToCursor( cursor, objects, instance );
 	}
 
-	private void Exec_MoveToCursorRelative( vector cursor, set< Object > objects, JMPlayerInstance instance )
+	private void Exec_MoveToCursor( vector cursor, set< Object > objects, JMPlayerInstance instance )
 	{
-	}
+		int moved = 0;
+		int count = objects.Count();
+		
+		int i = objects.Count();
+		while ( i > 0 )
+		{
+			Object obj = objects[i  - 1];
+			objects.Remove( i - 1 );
 
-	void MoveToCursorAbsolute( vector cursor )
-	{
-	}
+			if ( obj != NULL )
+			{
+				vector transform[4];
+				obj.GetTransform( transform );
+				string obtype = Object.GetDebugName( obj );
 
-	private void RPC_MoveToCursorAbsolute( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-	}
+				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
 
-	private void Exec_MoveToCursorAbsolute( vector cursor, set< Object > objects, JMPlayerInstance instance )
-	{
+				obj.SetPosition(cursor);
+				moved++;
+			}
+
+			i = objects.Count();
+		}
+
+		if ( moved > 0 )
+		{
+			GetCommunityOnlineToolsBase().Log( instance, "ESP action=move_to_cursor count=" + moved + " attempted=" + count );
+			SendWebhook( "MoveToCursor", instance, "Performed a move to cursor on " + moved + " objects." );
+		}
 	}
 };

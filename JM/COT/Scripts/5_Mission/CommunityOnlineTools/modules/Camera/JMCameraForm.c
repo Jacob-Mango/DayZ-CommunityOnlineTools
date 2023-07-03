@@ -7,6 +7,8 @@ class JMCameraForm: JMFormBase
 	private UIActionSlider m_SliderFocalLength;
 	private UIActionSlider m_SliderFocalNear;
 	private UIActionSlider m_SliderExposure;
+	private UIActionSlider m_SliderChromAbb
+	private UIActionSlider m_SliderVignette
 	private UIActionCheckbox m_EnableFullmapCamera;
 	private UIActionCheckbox m_1stPersonADS_HideScope;
 	private UIActionCheckbox m_HideGrass;
@@ -30,6 +32,12 @@ class JMCameraForm: JMFormBase
 	{
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		Widget actions = m_sclr_MainActions.GetContentWidget();
+		
+		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap freecam update", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
+
+		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( actions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
+		
+		m_HideGrass = UIActionManager.CreateCheckbox( actions, "Hide grass in freecam", this, "OnClick_HideGrass", m_Module.m_HideGrass );
 
 		m_SliderBlurStrength = UIActionManager.CreateSlider( actions, "#STR_COT_CAMERA_MODULE_BLUR", 0, 1, this, "OnChange_Blur" );
 		m_SliderBlurStrength.SetCurrent( 0 );
@@ -76,21 +84,37 @@ class JMCameraForm: JMFormBase
 		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetSliderWidget(), 0.7 );
 
 		m_SliderExposure = UIActionManager.CreateSlider( actions, "#STR_COT_CAMERA_MODULE_EXPOSURE", 0, 1, this, "OnChange_Exposure" );
-		m_SliderExposure.SetCurrent( 0.5 );
+		m_SliderExposure.SetCurrent( 0 );
 		m_SliderExposure.SetFormat( "#STR_COT_FORMAT_NONE" );
-		m_SliderExposure.SetStepValue( 0.1 );
-		m_SliderExposure.SetMin( -5.0 );
-		m_SliderExposure.SetMax( 5.0 );
+		m_SliderExposure.SetStepValue( 0.01 );
+		m_SliderExposure.SetMin( 0.0 );
+		m_SliderExposure.SetMax( 1.0 );
 		m_SliderExposure.SetPosition( 0.0 );
 		m_SliderExposure.SetWidth( 1.0 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.7 );
 
-		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( actions, "Enable fullmap freecam update", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
+		m_SliderChromAbb = UIActionManager.CreateSlider( actions, "Chrom Abb", 0, 1, this, "OnChange_ChromAbb" );
+		m_SliderChromAbb.SetCurrent( 0 );
+		m_SliderChromAbb.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderChromAbb.SetStepValue( 0.01 );
+		m_SliderChromAbb.SetMin( 0.0 );
+		m_SliderChromAbb.SetMax( 1.0 );
+		m_SliderChromAbb.SetPosition( 0.0 );
+		m_SliderChromAbb.SetWidth( 1.0 );
+		m_SliderChromAbb.SetWidgetWidth( m_SliderChromAbb.GetLabelWidget(), 0.3 );
+		m_SliderChromAbb.SetWidgetWidth( m_SliderChromAbb.GetSliderWidget(), 0.7 );
 
-		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( actions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
-		
-		m_HideGrass = UIActionManager.CreateCheckbox( actions, "Hide grass in freecam", this, "OnClick_HideGrass", m_Module.m_HideGrass );
+		m_SliderVignette = UIActionManager.CreateSlider( actions, "Vignette", 0, 1, this, "OnChange_Vignette" );
+		m_SliderVignette.SetCurrent( 0 );
+		m_SliderVignette.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderVignette.SetStepValue( 0.01 );
+		m_SliderVignette.SetMin( 0.0 );
+		m_SliderVignette.SetMax( 1.0 );
+		m_SliderVignette.SetPosition( 0.0 );
+		m_SliderVignette.SetWidth( 1.0 );
+		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.3 );
+		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.7 );
 
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -161,6 +185,26 @@ class JMCameraForm: JMFormBase
 			return;
 
 		EXPOSURE = action.GetCurrent();
+
+		OnSliderUpdate();
+	}
+
+	void OnChange_ChromAbb( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		CHROMABERX = action.GetCurrent();
+
+		OnSliderUpdate();
+	}
+
+	void OnChange_Vignette( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		VIGNETTE = action.GetCurrent();
 
 		OnSliderUpdate();
 	}

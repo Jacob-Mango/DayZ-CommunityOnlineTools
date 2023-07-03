@@ -75,17 +75,20 @@ class JMMapForm: JMFormBase
 
 		for ( int i = 0; i < players.Count(); ++i )
 		{
-			string marker = "\\JM\\COT\\GUI\\textures\\dot";
+			string marker = "";
+
+			//if ( players[i].PlayerObject.IsDriving() )
+			//	marker += JM_COT_ICON_CAR;
+			//else
+				marker += JM_COT_ICON_DOT;
 			
 			if ( JM_GetSelected().IsSelected( players[i].GetGUID() ) )
 				marker += "_selected";
 
-			/*
-			if ( !players[i].PlayerObject.IsAlive() )
-				marker += "_dead";
-			else if ( players[i].PlayerObject.IsUnconscious() )
-				marker += "_uncon";
-			*/		
+			//if ( !players[i].PlayerObject.IsAlive() )
+			//	marker += "_dead";
+			//else if ( players[i].PlayerObject.IsUnconscious() )
+			//	marker += "_uncon";
 
 			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), ARGB( 255, 230, 20, 20 ), marker + ".paa" );
 		}

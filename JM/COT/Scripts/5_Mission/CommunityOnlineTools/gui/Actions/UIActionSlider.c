@@ -179,4 +179,14 @@ class UIActionSlider: UIActionBase
 		m_Slider.SetSize( width, h );
 		m_Slider.Update();
 	}
+
+	void SetColor( int color )
+	{
+		m_Slider.SetColor(color);
+	}
+
+	void SetAlpha( float alpha )
+	{
+		m_Slider.SetAlpha(alpha);
+	}
 };

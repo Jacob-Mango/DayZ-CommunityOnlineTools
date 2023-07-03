@@ -55,6 +55,14 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 	}
 
+	override void RegisterKeyMouseBindings() 
+	{
+		super.RegisterKeyMouseBindings();
+		
+		Bind( new JMModuleBinding( "InputSelfHeal",			"UAPlayerModuleHeal",		true 	) );
+		Bind( new JMModuleBinding( "InputSetSelfGodMode",	"UAPlayerModuleGodMode",	true 	) );
+	}
+
 	void OnPlayer_Checked( string guid, bool checked )
 	{
 		if ( checked )
@@ -1144,7 +1152,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating_Finish").Add(senderRPC).Add(target);
 #endif
-Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTickTime());
+		Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTickTime());
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 			return;
@@ -1714,6 +1722,56 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			return;
 
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
+	}
+
+	void InputSelfHeal( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		SelfHeal();
+	}
+
+	void SelfHeal()
+	{
+		array< string > guids = new array< string >;
+		guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+		if ( IsMissionHost() )
+		{
+			Exec_Heal( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Heal, true, NULL );
+		}
+	}
+
+	void InputSetSelfGodMode( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		SetSelfGodMode();
+	}
+
+	void SetSelfGodMode()
+	{
+		array< string > guids = new array< string >;
+		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		guids.Insert(player.GetIdentity().GetId());
+		bool value = player.COTHasGodMode();
+
+		if ( IsMissionHost() )
+		{
+			Exec_SetGodMode( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetGodMode, true, NULL );
+		}
 	}
 
 	void Heal( array< string > guids )

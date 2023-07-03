@@ -21,6 +21,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
+		Bind( new JMModuleBinding( "DeleteAtCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
@@ -63,6 +64,54 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		types.Insert( "Delete" );
 		types.Insert( "Vector" );
 		types.Insert( "Player" );
+	}
+
+	void DeleteAtCursor( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		float distance = 10.0;
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.NEARESTCONTACT;
+		rayInput.radius = 1.0;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object obj;
+		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		{
+			for ( int i = 0; i < results.Count(); ++i )
+			{
+				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
+					continue;
+
+				if ( results[i].obj.GetType() == "" )
+					continue;
+
+				if ( results[i].obj.GetType() == "#particlesourceenf" )
+					continue;
+
+				obj = results[i].obj;
+				break;
+			}
+		}
+
+		if ( obj == NULL )
+			return;
+
+		DeleteEntity( obj );
 	}
 	
 	void SpawnRandomInfected( UAInput input )
@@ -365,37 +414,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		ItemBase item;
 		if ( Class.CastTo( item, obj ) )
 		{
-			if ( quantity == -1 )
-			{
-				if ( item.HasQuantity() )
-					item.SetQuantity(item.GetQuantityMax());
-			}
-			else if ( quantity > 0 )
-			{
-				if ( item.IsLiquidContainer() )
-				{
-					if ( quantity > 100 )
-						quantity = 100;
-
-					quantity = ( item.GetQuantityMax() / 100 ) * quantity;
-
-					item.SetQuantity(quantity);
-				}
-				else if ( item.GetCompEM() )
-				{
-					if ( quantity > 100 )
-						quantity = 100;
-					
-					item.GetCompEM().SetEnergy0To1( quantity / 100 );
-				}
-				else
-				{
-					if ( quantity > item.GetQuantityMax() )
-						quantity = item.GetQuantityMax();
-
-					item.SetQuantity(quantity);
-				}
-			}
+			if ( item.HasQuantity() )
+				item.SetQuantity(quantity);
 		}
 
 		if ( m_OnDebugSpawn && ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") ) )
