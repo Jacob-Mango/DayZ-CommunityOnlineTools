@@ -80,6 +80,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"placing",
 		"debug",
 		"bldr_",
+		"land_",
 		"staticobj_",
 		"proxy"
 	};
@@ -133,7 +134,8 @@ class JMObjectSpawnerForm: JMFormBase
 		button.SetPosition( 0.5 );
 
 		m_QuantityItem = UIActionManager.CreateSlider( actions, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
-		m_QuantityItem.SetWidth( 0.35 );
+		m_QuantityItem.SetCurrent( 100 );
+		m_QuantityItem.SetWidth( 0.45 );
 		m_QuantityItem.SetPosition( 0.55 );
 		
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
@@ -469,14 +471,13 @@ class JMObjectSpawnerForm: JMFormBase
 				int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
 				if ( scope == 0 )
-				{
 					continue;
-				}
+
+				if ( scope == 1 && !m_IknowWhatIamDoing )
+					continue;
 
 				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
-				{
 					continue;
-				}
 
 				string strNameLower = strName;
 
@@ -485,14 +486,10 @@ class JMObjectSpawnerForm: JMFormBase
 				if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
 				{
 					if ( CheckItemCrash( strNameLower ) ) 
-					{
 						continue; 
-					}
 
 					if ( ( strSearch != "" && ( !strNameLower.Contains( strSearch ) ) ) ) 
-					{
 						continue;
-					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
 				}
