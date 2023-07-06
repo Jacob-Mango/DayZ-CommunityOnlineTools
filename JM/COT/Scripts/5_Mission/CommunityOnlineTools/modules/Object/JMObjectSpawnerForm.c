@@ -7,7 +7,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
-	private UIActionEditableText m_SearchBox;
+	private UIActionEditableTextPreview m_SearchBox;
 	private UIActionNavigateButton m_SpawnMode;
 
 	private TextListboxWidget m_ClassList;
@@ -126,7 +126,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
 
-		m_SearchBox = UIActionManager.CreateEditableText( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
 		m_SearchBox.SetWidth( 0.5 );
 
 		UIActionButton button = UIActionManager.CreateButton( actions, "X", this, "SearchInput_OnClickReset" );
@@ -270,7 +270,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		super.OnMouseButtonDown( w, x, y, button );
 
-		if ( w == m_PreviewItem && button == MouseState.LEFT )
+		if ( w == m_ItemPreview && button == MouseState.LEFT )
 		{
 			GetGame().GetDragQueue().Call( this, "UpdateRotation" );
 			GetGame().GetMousePos( m_MouseX, m_MouseY );
@@ -288,6 +288,27 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( w == m_ClassList && button == MouseState.LEFT )
 		{
 			SpawnObject(m_ObjSpawnMode);
+			
+			return true;
+		}
+		
+		if ( w.GetParent() == m_SearchBox && button == MouseState.LEFT )
+		{
+			m_SearchBox.SetText(m_SearchBox.GetTextPreview());
+			
+			return true;
+		}
+
+		return false;
+	}
+	
+	override bool OnKeyPress(Widget w, int x, int y, int key)
+	{
+		super.OnKeyPress( w, x, y, key );
+		
+		if ( w.GetParent() == m_SearchBox && ( key == KeyCode.KC_RETURN || key == KeyCode.KC_TAB ) )
+		{
+			m_SearchBox.SetText(m_SearchBox.GetTextPreview());
 			
 			return true;
 		}
@@ -442,6 +463,7 @@ class JMObjectSpawnerForm: JMFormBase
 	void UpdateList()
 	{
 		m_ClassList.ClearItems();
+		TStringArray classnamelist = new TStringArray;
 
 		TStringArray configs = new TStringArray;
 		configs.Insert( CFG_VEHICLESPATH );
@@ -492,10 +514,38 @@ class JMObjectSpawnerForm: JMFormBase
 						continue;
 
 					m_ClassList.AddItem( strName, NULL, 0 );
+					classnamelist.Insert(strNameLower);
 				}
 			}
 		}
+		
+		if ( strSearch != "" )
+		{
+			m_SearchBox.SetTextPreview(FindClosestWord(classnamelist, strSearch));
+		}
+		else
+		{
+			m_SearchBox.SetTextPreview("");
+		}
 	}
+
+    static string FindClosestWord(TStringArray words, string inputWord)
+    {
+        TStringArray suggestions = new TStringArray;
+
+        foreach (string word : words)
+        {
+            if ( word == inputWord )
+                return word;
+
+            if ( word.IndexOf(inputWord) == 0 )
+                suggestions.Insert(word);
+        }
+
+		suggestions.Sort();
+
+        return suggestions[0];
+    }
 
 	private bool CheckItemCrash( string name )
 	{

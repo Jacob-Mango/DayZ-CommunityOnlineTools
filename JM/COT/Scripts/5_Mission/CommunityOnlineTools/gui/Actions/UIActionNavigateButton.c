@@ -5,9 +5,6 @@ class UIActionNavigateButton: UIActionBase
 	protected ImageWidget m_Image_Left;
 	protected ImageWidget m_Image_Right;
 
-	protected TextWidget m_Text_Left;
-	protected TextWidget m_Text_Right;
-
 	protected ButtonWidget m_Button_Left;
 	protected ButtonWidget m_Button_Right;
 
@@ -19,9 +16,6 @@ class UIActionNavigateButton: UIActionBase
 
 		Class.CastTo( m_Image_Left, layoutRoot.FindAnyWidget( "image_left" ) );
 		Class.CastTo( m_Image_Right, layoutRoot.FindAnyWidget( "image_right" ) );
-
-		Class.CastTo( m_Text_Left, layoutRoot.FindAnyWidget( "action_left" ) );
-		Class.CastTo( m_Text_Right, layoutRoot.FindAnyWidget( "action_right" ) );
 		
 		Class.CastTo( m_Button_Left, layoutRoot.FindAnyWidget( "action_button_left" ) );
 		Class.CastTo( m_Button_Right, layoutRoot.FindAnyWidget( "action_button_right" ) );
@@ -44,9 +38,6 @@ class UIActionNavigateButton: UIActionBase
 
 	void SetImages( string imageL, string imageR )
 	{
-		m_Text_Left.SetText("");
-		m_Text_Right.SetText("");
-
 		m_Button_Left.SetText("");
 		m_Button_Right.SetText("");
 

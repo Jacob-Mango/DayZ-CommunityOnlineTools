@@ -1,8 +1,9 @@
-class UIActionEditableText: UIActionBase 
+class UIActionEditableTextPreview: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 	protected TextWidget m_Label;
+	protected EditBoxWidget m_TextPreview;
 	protected EditBoxWidget m_Text;
 	protected ButtonWidget m_Button;
 
@@ -36,6 +37,11 @@ class UIActionEditableText: UIActionBase
 		return m_Text;
 	}
 
+	EditBoxWidget GetEditPreviewBoxWidget()
+	{
+		return m_TextPreview;
+	}
+
 	ButtonWidget GetButtonWidget()
 	{
 		return m_Button;
@@ -66,6 +72,9 @@ class UIActionEditableText: UIActionBase
 
 		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
+		Class.CastTo( m_TextPreview, root.FindAnyWidget( "action_preview" ) );
+		m_TextPreview.SetText("");
+		m_TextPreview.SetAlpha(0.5);
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::HasButton" );
@@ -105,6 +114,18 @@ class UIActionEditableText: UIActionBase
 	override string GetText()
 	{
 		return m_Text.GetText();
+	}
+
+	string GetTextPreview()
+	{		
+		return m_TextPreview.GetText();
+	}
+
+	void SetTextPreview( string text )
+	{
+		text = Widget.TranslateString( text );
+		
+		m_TextPreview.SetText( text );
 	}
 
 	bool UpdateText()
@@ -233,5 +254,9 @@ class UIActionEditableText: UIActionBase
 		m_Text.GetSize( w, h );
 		m_Text.SetSize( width, h );
 		m_Text.Update();
+		
+		m_TextPreview.GetSize( w, h );
+		m_TextPreview.SetSize( width, h );
+		m_TextPreview.Update();
 	}
 };

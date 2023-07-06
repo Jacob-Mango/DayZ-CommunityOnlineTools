@@ -126,23 +126,6 @@ PanelWidgetClass UIActionNavigateButton {
          hexactsize 0
          vexactsize 0
         }
-        TextWidgetClass action_left {
-         ignorepointer 1
-         size 1 1
-         halign center_ref
-         valign center_ref
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         style Light
-         text "{BUTTON}"
-         font "gui/fonts/sdf_MetronLight24"
-         "exact text" 1
-         "exact text size" 16
-         "text halign" center
-         "text valign" center
-        }
        }
       }
       ButtonWidgetClass action_button_right {
@@ -166,23 +149,6 @@ PanelWidgetClass UIActionNavigateButton {
          hexactsize 0
          vexactsize 0
          mode blend
-        }
-        TextWidgetClass action_right {
-         ignorepointer 1
-         size 1 1
-         halign center_ref
-         valign center_ref
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         style Light
-         text "{BUTTON}"
-         font "gui/fonts/sdf_MetronLight24"
-         "exact text" 1
-         "exact text size" 16
-         "text halign" center
-         "text valign" center
         }
        }
       }
