@@ -109,6 +109,36 @@ class UIActionManager
 		return NULL;
 	}
 
+	static UIActionEditableTextPreview CreateEditableTextPreview( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableTextPreview.layout", parent );
+
+		UIActionEditableTextPreview action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			if ( button == "" || instance == NULL || funcname == "" )
+			{
+				action.HasButton( false );
+			} else 
+			{
+				action.HasButton( true );
+
+				action.SetButton( button );
+			}
+
+			action.SetCallback( instance, funcname );
+
+			action.SetLabel( label );
+			action.SetText( text );
+
+			return action;
+		}
+
+		return NULL;
+	}
+
 	static UIActionEditableText CreateEditableText( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableText.layout", parent );

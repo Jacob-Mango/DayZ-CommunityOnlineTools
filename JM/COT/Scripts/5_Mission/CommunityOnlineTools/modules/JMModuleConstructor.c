@@ -10,10 +10,10 @@ modded class JMModuleConstructor
 		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
-		modules.Insert( JMVehicleSpawnerModule );
+		//modules.Insert( JMVehicleSpawnerModule );
 		modules.Insert( JMItemSetSpawnerModule );
-		//modules.Insert( JMWeatherModule );
-		modules.Insert( JMWeatherOldModule );
+		modules.Insert( JMWeatherModule );
+		//modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 

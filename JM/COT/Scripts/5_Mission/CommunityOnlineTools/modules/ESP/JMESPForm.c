@@ -20,6 +20,8 @@ class JMESPForm: JMFormBase
 
 	private JMESPModule m_Module;
 
+	private UIActionEditableTextPreview m_SearchBox;
+
 	void JMESPForm()
 	{
 		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
@@ -46,6 +48,7 @@ class JMESPForm: JMFormBase
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -72,7 +75,8 @@ class JMESPForm: JMFormBase
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		UIActionManager.CreateEditableText( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
@@ -215,6 +219,82 @@ class JMESPForm: JMFormBase
 		}
 	}
 
+	void UpdateList()
+	{
+		TStringArray classnamelist = new TStringArray;
+
+		TStringArray configs = new TStringArray;
+		configs.Insert( CFG_VEHICLESPATH );
+		configs.Insert( CFG_WEAPONSPATH );
+		configs.Insert( CFG_MAGAZINESPATH );
+		configs.Insert( "CfgNonAIVehicles" );
+
+		string strSearch = m_SearchBox.GetText();
+
+		strSearch.ToLower();
+
+		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+		{
+			string strConfigPath = configs.Get( nConfig );
+
+			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
+
+			int nClassStart = 0;
+			if (nConfig == 0) nClassStart = 20;
+
+			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+			{
+				string strName;
+
+				GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
+
+				int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
+
+				if ( scope == 0 )
+					continue;
+
+				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+					continue;
+
+				string strNameLower = strName;
+
+				strNameLower.ToLower();
+
+				if ( ( strSearch != "" && ( !strNameLower.Contains( strSearch ) ) ) ) 
+					continue;
+
+				classnamelist.Insert(strNameLower);
+			}
+		}
+		
+		if ( strSearch != "" )
+		{
+			m_SearchBox.SetTextPreview(FindClosestWord(classnamelist, strSearch));
+		}
+		else
+		{
+			m_SearchBox.SetTextPreview("");
+		}
+	}
+
+    static string FindClosestWord(TStringArray words, string inputWord)
+    {
+        TStringArray suggestions = new TStringArray;
+
+        foreach (string word : words)
+        {
+            if ( word == inputWord )
+                return word;
+
+            if ( word.IndexOf(inputWord) == 0 )
+                suggestions.Insert(word);
+        }
+
+		suggestions.Sort();
+
+        return suggestions[0];
+    }
+
 	void Click_UpdateESP( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -249,6 +329,8 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
+		UpdateList();
+
 		m_Module.Filter = action.GetText();
 	}
 
@@ -267,6 +349,14 @@ class JMESPForm: JMFormBase
 		
 		m_Module.ESPRadius = action.GetCurrent();
 	}
+
+	void Click_DisableSafety( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		m_Module.SetFilterSafetyState(action.IsChecked());
+	}	
 
 	void Click_UseClassName( UIEvent eid, UIActionBase action )
 	{

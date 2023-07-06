@@ -213,6 +213,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	private bool m_IsCreatingWidgets;
 	private bool m_IsDestroyingWidgets;
+	private bool m_IknowWhatIamDoing;
 
 	string Filter;
 
@@ -317,6 +318,9 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "BB_Build" );
 		types.Insert( "BB_Dismantle" );
 		types.Insert( "BB_Repair" );
+		types.Insert( "Car_Unstuck" );
+		types.Insert( "Car_Repair" );
+		types.Insert( "Car_Refuel" );
 		types.Insert( "MakeItemSet" );
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
@@ -381,11 +385,14 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypePlayerAI );
 		types.Insert( JMESPViewTypeInfected );
 		types.Insert( JMESPViewTypeAnimal );
+
 		types.Insert( JMESPViewTypeCar );
+		
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
+
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
 		types.Insert( JMESPViewTypeFood );
@@ -433,6 +440,16 @@ class JMESPModule: JMRenderableModuleBase
 			m_ESPCanvas = new JMESPCanvas();
 		else
 			m_ESPCanvas.CreateCanvas();
+	}
+
+	bool GetFilterSafetyState()
+	{
+		return m_IknowWhatIamDoing;
+	}
+
+	void SetFilterSafetyState(bool state)
+	{
+		m_IknowWhatIamDoing = state;
 	}
 
 	override void OnUpdate(float timeslice)
@@ -731,22 +748,23 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj.IsInherited( Camera ) )
 							continue;
 
-						/*
-						if ( obj.IsRock() )
-							continue;
+						if ( !m_IknowWhatIamDoing )
+						{
+							if ( obj.IsRock() )
+								continue;
 
-						if ( obj.IsWoodBase() )
-							continue;
+							if ( obj.IsWoodBase() )
+								continue;
 
-						if ( obj.IsBush() )
-							continue;
+							if ( obj.IsBush() )
+								continue;
 
-						if ( obj.IsTree() )
-							continue;
+							if ( obj.IsTree() )
+								continue;
 
-						if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
-							continue;
-						*/
+							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
+								continue;
+						}
 
 						if ( isUsingFilter && !type.Contains( filter ) )
 							continue;
@@ -766,7 +784,8 @@ class JMESPModule: JMRenderableModuleBase
 							{
 								addedObjects.Insert( obj );
 							}
-						} else
+						}
+						else
 						{
 							array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
 							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
