@@ -8,9 +8,11 @@ class JMWeatherForm: JMFormBase
 	private Widget m_PanelLeft;
 	private Widget m_PanelRight;
 
-	private TextWidget m_TextList;
-	private ButtonWidget m_ButtonList;
-	private ButtonWidget m_ButtonRefresh;
+	private UIActionButton m_ButtonList;
+	private UIActionButton m_ButtonRefresh;
+	private UIActionButton m_ButtonApply;
+	private UIActionCheckbox m_Checkbox_AutoRefresh;
+	private UIActionCheckbox m_Checkbox_EasyMode;	
 
 	private Widget m_PanelPresetManageActions;
 
@@ -101,14 +103,31 @@ class JMWeatherForm: JMFormBase
 		m_PanelLeft = layoutRoot.FindAnyWidget( "panel_left" );
 		m_PanelRight = layoutRoot.FindAnyWidget( "panel_right" );
 
-		m_TextList = TextWidget.Cast( m_PanelRight.FindAnyWidget( "actions_list_text" ) );
-		m_ButtonList = ButtonWidget.Cast( m_PanelRight.FindAnyWidget( "actions_list_button" ) );
-		m_ButtonRefresh = ButtonWidget.Cast( m_PanelRight.FindAnyWidget( "actions_refresh_button" ) );
+		Widget tParent = layoutRoot.FindAnyWidget( "actions_wrapper" );
+		Widget spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
+		m_ButtonList = UIActionManager.CreateButton( spacer, "Don't Use Presets", this, "OnClick_List" );
+		m_ButtonList.SetWidth( 0.24 );
+
+		UIActionButton button = UIActionManager.CreateButton( spacer, "Apply", this, "OnClick_Apply" );
+		button.SetWidth( 0.24 );
+
+		m_ButtonRefresh = UIActionManager.CreateButton( spacer, "Refresh Data", this, "OnClick_Refresh" );
+		m_ButtonRefresh.SetWidth( 0.24 );
+
+		spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
+		m_Checkbox_EasyMode = UIActionManager.CreateCheckbox( spacer, "Easy Mode", this, "OnClick_EasyMode" );
+		m_Checkbox_AutoRefresh = UIActionManager.CreateCheckbox( spacer, "Auto Refresh" );
 
 		InitLeftPanel( m_PanelLeft );
 		InitRightPanel( m_PanelRight );
 
 		HideList();
+	}
+
+	override void Update() 
+	{
+		if (m_Checkbox_AutoRefresh.IsChecked())
+			UpdateStates();
 	}
 
 	override void OnShow()
@@ -216,7 +235,7 @@ class JMWeatherForm: JMFormBase
 		SetWidthPos( m_PanelLeft, 0.25, 0 );
 		SetWidthPos( m_PanelRight, 0.75, 0.25 );
 
-		m_TextList.SetText( "Don't Use Presets" );
+		m_ButtonList.SetButton( "Don't Use Presets" );
 
 		m_PresetsShown = true;
 
@@ -239,7 +258,7 @@ class JMWeatherForm: JMFormBase
 		SetWidthPos( m_PanelLeft, 0.0, 0.0 );
 		SetWidthPos( m_PanelRight, 1.0, 0.0 );
 
-		m_TextList.SetText( "Use Presets" );
+		m_ButtonList.SetButton( "Use Presets" );
 
 		m_PresetsShown = false;
 
@@ -278,11 +297,18 @@ class JMWeatherForm: JMFormBase
 	void UpdateStates()
 	{
 		bool hasNotSelectedPreset = false;
+		bool easyModeEnabled = m_Checkbox_EasyMode.IsChecked();
 
 		if ( m_PresetsShown )
 		{
 			hasNotSelectedPreset = m_SelectedPreset == "";
 		}
+		
+		UpdateActionState( m_ButtonList, "Weather.Preset", easyModeEnabled );
+		
+		UpdateActionState( m_ButtonRefresh, "Weather", hasNotSelectedPreset );
+		UpdateActionState( m_Checkbox_EasyMode, "Weather", hasNotSelectedPreset );
+		UpdateActionState( m_Checkbox_AutoRefresh, "Weather", hasNotSelectedPreset );
 
 		UpdateActionState( m_BtnQuickActionClear, "Weather.QuickAction.Clear", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionCloudy, "Weather.QuickAction.Overcast", hasNotSelectedPreset );
@@ -300,33 +326,33 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderDateMinute, "Weather.Date", hasNotSelectedPreset );
 		
 		UpdateActionState( m_SliderStormDensity, "Weather.Storm", hasNotSelectedPreset );
-		UpdateActionState( m_SliderStormThreshold, "Weather.Storm", hasNotSelectedPreset );
-		UpdateActionState( m_SliderStormTimeout, "Weather.Storm", hasNotSelectedPreset );
+		UpdateActionState( m_SliderStormThreshold, "Weather.Storm", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_SliderStormTimeout, "Weather.Storm", hasNotSelectedPreset || easyModeEnabled );
 
 		UpdateActionState( m_SliderFogForecast, "Weather.Fog", hasNotSelectedPreset );
-		UpdateActionState( m_EditFogInterpTime, "Weather.Fog", hasNotSelectedPreset );
-		UpdateActionState( m_EditFogMinDuration, "Weather.Fog", hasNotSelectedPreset );
+		UpdateActionState( m_EditFogInterpTime, "Weather.Fog", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditFogMinDuration, "Weather.Fog", hasNotSelectedPreset || easyModeEnabled);
 
 		UpdateActionState( m_SliderRainForecast, "Weather.Rain", hasNotSelectedPreset );
-		UpdateActionState( m_EditRainInterpTime, "Weather.Rain", hasNotSelectedPreset );
-		UpdateActionState( m_EditRainMinDuration, "Weather.Rain", hasNotSelectedPreset );
+		UpdateActionState( m_EditRainInterpTime, "Weather.Rain", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditRainMinDuration, "Weather.Rain", hasNotSelectedPreset || easyModeEnabled );
 
 		UpdateActionState( m_SliderRainOvercastMin, "Weather.Rain.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_SliderRainOvercastMax, "Weather.Rain.Thresholds", hasNotSelectedPreset );
-		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset );
+		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset || easyModeEnabled );
 
 		UpdateActionState( m_SliderOvercastForecast, "Weather.Overcast", hasNotSelectedPreset );
-		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset );
-		UpdateActionState( m_EditOvercastMinDuration, "Weather.Overcast", hasNotSelectedPreset );
+		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditOvercastMinDuration, "Weather.Overcast", hasNotSelectedPreset || easyModeEnabled );
 
 		UpdateActionState( m_SliderWindDirectionX, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_SliderWindDirectionZ, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindSpeed, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindMaxSpeed, "Weather.Wind", hasNotSelectedPreset );
 
-		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindFuncSpeed, "Weather.Wind.FunctionParams", hasNotSelectedPreset );
+		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindFuncSpeed, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
 
 		if ( hasNotSelectedPreset )
 		{
@@ -486,34 +512,6 @@ class JMWeatherForm: JMFormBase
 		preset.WindFunc.Speed = ToFloat( m_EditWindFuncSpeed.GetText() );
 	}
 
-	override bool OnClick( Widget w, int x, int y, int button )
-	{
-		if ( w == NULL )
-		{
-			return false;
-		}
-
-		if ( w == m_ButtonRefresh )
-		{
-			UpdateStates();
-			return true;
-		}
-
-		if ( w == m_ButtonList )
-		{
-			if ( m_PresetsShown )
-			{
-				HideList();
-			} else
-			{
-				ShowList();
-			}
-			return true;
-		}
-
-		return false;
-	}
-
 	void InitLeftPanel( Widget parent )
 	{
 		m_TextPresetCount = TextWidget.Cast( layoutRoot.FindAnyWidget( "count" ) );
@@ -606,6 +604,108 @@ class JMWeatherForm: JMFormBase
 		m_ButtonPresetUse = UIActionManager.CreateButton( actionsParent, "Run Preset", this, "OnClick_PresetRun" );
 		m_ButtonPresetUpdate = UIActionManager.CreateButton( actionsParent, "Update Preset", this, "OnClick_PresetUpdate" );
 		m_ButtonPresetRemove = UIActionManager.CreateButton( actionsParent, "Remove Preset", this, "OnClick_PresetRemove" );
+	}
+
+	void OnClick_List( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_PresetsShown )
+		{
+			HideList();
+		} else
+		{
+			ShowList();
+		}
+	}
+	
+	void OnClick_EasyMode( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		UpdateStates();
+	}
+
+	void OnClick_Refresh( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		UpdateStates();
+	}
+
+	void OnClick_Apply( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_PresetsShown )
+			return;
+			
+		int year = m_EditTextDateYear.GetText().ToInt();
+		int month = m_SliderDateMonth.GetCurrent();
+		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+
+		int day = m_SliderDateDay.GetCurrent();
+		int hour = m_SliderDateHour.GetCurrent();
+		int minute = m_SliderDateMinute.GetCurrent();
+
+		float forecastFog = m_SliderFogForecast.GetCurrent() * 0.01;
+		float timeFog = m_EditFogInterpTime.GetText().ToFloat();
+		float minDurationFog = m_EditFogMinDuration.GetText().ToFloat();
+
+		float dirX = m_SliderWindDirectionX.GetCurrent();
+		float dirZ = m_SliderWindDirectionZ.GetCurrent();
+
+		vector dirWind = Vector( dirX, 0.0, dirZ ).Normalized();
+		float speedWind = m_EditWindSpeed.GetText().ToFloat();
+		float maxSpeedWind = m_EditWindMaxSpeed.GetText().ToFloat();
+
+		float minFunc = m_EditWindFuncMin.GetText().ToFloat();
+		float maxFunc = m_EditWindFuncMax.GetText().ToFloat();
+		float speedFunc = m_EditWindFuncSpeed.GetText().ToFloat();
+
+		float forecastOvercast = m_SliderOvercastForecast.GetCurrent() * 0.01;
+		float timeOvercast = m_EditOvercastInterpTime.GetText().ToFloat();
+		float minDurationOvercast = m_EditOvercastMinDuration.GetText().ToFloat();
+
+		float densityStorm = m_SliderStormDensity.GetCurrent() * 0.01;
+		float thresholdStorm = m_SliderStormThreshold.GetCurrent() * 0.01;
+		float timeoutStorm = m_SliderStormTimeout.GetCurrent();
+
+		float forecastRain = m_SliderRainForecast.GetCurrent() * 0.01;
+		float timeRain = m_EditRainInterpTime.GetText().ToFloat();
+		float minDurationRain = m_EditRainMinDuration.GetText().ToFloat();
+
+		float minRainThresh = m_SliderRainOvercastMin.GetCurrent() * 0.01;
+		float maxRainThresh = m_SliderRainOvercastMax.GetCurrent() * 0.01;
+		float transitionRainThresh = m_EditRainMinDuration.GetText().ToFloat();
+
+		if ( m_Checkbox_EasyMode.IsChecked() )
+		{
+			m_Module.SetDate( year, month, day, hour, minute );
+			m_Module.SetFog( forecastFog, 0, 0 );
+			m_Module.SetWind( dirWind, speedWind, maxSpeedWind );
+			m_Module.SetWindFunctionParams( minFunc, maxFunc, speedFunc );
+			m_Module.SetOvercast( forecastOvercast, 0, 0 );
+			m_Module.SetStorm( densityStorm, 0.8, 4000 );
+			m_Module.SetRain( forecastRain, 0, 0 );
+			//m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
+		}
+		else
+		{
+			m_Module.SetDate( year, month, day, hour, minute );
+			m_Module.SetFog( forecastFog, timeFog, minDurationFog );
+			m_Module.SetWind( dirWind, speedWind, maxSpeedWind );
+			m_Module.SetWindFunctionParams( minFunc, maxFunc, speedFunc );
+			m_Module.SetOvercast( forecastOvercast, timeOvercast, minDurationOvercast );
+			m_Module.SetStorm( densityStorm, thresholdStorm, timeoutStorm );
+			m_Module.SetRain( forecastRain, timeRain, minDurationRain );
+			m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
+		}
+
 	}
 
 	void OnClick_PresetUpdate( UIEvent eid, UIActionBase action )
@@ -721,11 +821,13 @@ class JMWeatherForm: JMFormBase
 
 		m_Module.SetWind( Vector( 0, 0, 0 ), 0, 0 );
 		m_Module.SetWindFunctionParams( 0, 0, 0 );
-		m_Module.SetOvercast( 0, 0, 36000 );
-		m_Module.SetRainThresholds( 0, 0, 0 );
-		m_Module.SetRain( 0, 0, 36000 );
-		m_Module.SetFog( 0, 0, 36000 );
-		m_Module.SetStorm( 0, 0, 0 );
+		m_Module.SetOvercast( 0, 30, 600 );
+		m_Module.SetRainThresholds( 0, 0, 600 );
+		m_Module.SetRain( 0, 30, 600 );
+		m_Module.SetFog( 0, 30, 600 );
+		m_Module.SetStorm( 0, 0, 600 );
+
+		UpdateStates();
 	}
 
 	void OnClick_PresetCloudy( UIEvent eid, UIActionBase action )
@@ -736,13 +838,16 @@ class JMWeatherForm: JMFormBase
 		if ( m_PresetsShown )
 			return;
 
-		m_Module.SetWind( Vector( 0, 0, 0 ), 0, 0 );
-		m_Module.SetWindFunctionParams( 0, 0, 0 );
-		m_Module.SetOvercast( 0, 0, 36000 );
-		m_Module.SetRainThresholds( 0, 0, 0 );
-		m_Module.SetRain( 0, 0, 36000 );
-		m_Module.SetFog( 0, 0, 36000 );
-		m_Module.SetStorm( 0, 0, 0 );
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
+		float windMin = Math.RandomFloatInclusive(0,0.8);
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
+		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetRainThresholds( 0, 0, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetRain( 0, 30, 600 );
+		m_Module.SetFog( 0, 30, 600 );
+		m_Module.SetStorm( 0, 0, 600 );
+		
+		UpdateStates();
 	}
 
 	void OnClick_PresetStorm( UIEvent eid, UIActionBase action )
@@ -753,13 +858,17 @@ class JMWeatherForm: JMFormBase
 		if ( m_PresetsShown )
 			return;
 
-		m_Module.SetWind( Vector( 0, 0, 0 ), 0, 0 );
-		m_Module.SetWindFunctionParams( 0, 0, 0 );
-		m_Module.SetOvercast( 0, 0, 36000 );
-		m_Module.SetRainThresholds( 0, 0, 0 );
-		m_Module.SetRain( 0, 0, 36000 );
-		m_Module.SetFog( 0, 0, 36000 );
-		m_Module.SetStorm( 0, 0, 0 );
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
+		float windMin = Math.RandomFloatInclusive(0,1);
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
+		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
+		float rainMin = Math.RandomFloatInclusive(0.25,1.0);
+		m_Module.SetRainThresholds( rainMin, Math.RandomFloatInclusive(rainMin,1), Math.RandomIntInclusive(60,600) );
+		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0), 30, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetStorm( Math.RandomFloatInclusive(0.5,1.0), Math.RandomFloatInclusive(0.5,1.0), Math.RandomIntInclusive(120,3600) );
+		
+		UpdateStates();
 	}
 
 	void OnClick_PresetNight( UIEvent eid, UIActionBase action )
@@ -778,6 +887,8 @@ class JMWeatherForm: JMFormBase
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
+		
+		UpdateStates();
 	}
 
 	void OnClick_PresetDusk( UIEvent eid, UIActionBase action )
@@ -796,6 +907,8 @@ class JMWeatherForm: JMFormBase
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
+		
+		UpdateStates();
 	}
 
 	void OnClick_PresetDay( UIEvent eid, UIActionBase action )
@@ -814,6 +927,8 @@ class JMWeatherForm: JMFormBase
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
+		
+		UpdateStates();
 	}
 
 	void OnClick_PresetDawn( UIEvent eid, UIActionBase action )
@@ -832,6 +947,8 @@ class JMWeatherForm: JMFormBase
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
+		
+		UpdateStates();
 	}
 
 	private void InitDateWidgets( Widget actionsParent )
@@ -842,7 +959,7 @@ class JMWeatherForm: JMFormBase
 	
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 2 );
 
-		m_EditTextDateYear = UIActionManager.CreateEditableText( actions, "Year", this, "OnChange_Date" );
+		m_EditTextDateYear = UIActionManager.CreateEditableText( actions, "Year", this );
 		m_EditTextDateYear.SetOnlyNumbers( true, true );
 		m_EditTextDateYear.SetText( "Year" );
 
@@ -852,19 +969,19 @@ class JMWeatherForm: JMFormBase
 		m_SliderDateMonth.SetMin( 1 );
 		m_SliderDateMonth.SetMax( 12 );
 
-		m_SliderDateDay = UIActionManager.CreateSlider( actions, "Day", 0, 1, this, "OnChange_Date" );
+		m_SliderDateDay = UIActionManager.CreateSlider( actions, "Day", 0, 1, this );
 		m_SliderDateDay.SetCurrent( 0 );
 		m_SliderDateDay.SetStepValue( 1 );
 		m_SliderDateDay.SetMin( 1 );
 		m_SliderDateDay.SetMax( 31 );
 
-		m_SliderDateHour = UIActionManager.CreateSlider( actions, "Hour", 0, 1, this, "OnChange_Date" );
+		m_SliderDateHour = UIActionManager.CreateSlider( actions, "Hour", 0, 1, this );
 		m_SliderDateHour.SetCurrent( 0 );
 		m_SliderDateHour.SetStepValue( 1 );
 		m_SliderDateHour.SetMin( 1 );
 		m_SliderDateHour.SetMax( 24 );
 
-		m_SliderDateMinute = UIActionManager.CreateSlider( actions, "Minute", 0, 1, this, "OnChange_Date" );
+		m_SliderDateMinute = UIActionManager.CreateSlider( actions, "Minute", 0, 1, this );
 		m_SliderDateMinute.SetCurrent( 0 );
 		m_SliderDateMinute.SetStepValue( 1 );
 		m_SliderDateMinute.SetMin( 1 );
@@ -880,16 +997,10 @@ class JMWeatherForm: JMFormBase
 
 		if ( m_PresetsShown )
 			return;
-
+	
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
-
-		int day = m_SliderDateDay.GetCurrent();
-		int hour = m_SliderDateHour.GetCurrent();
-		int minute = m_SliderDateMinute.GetCurrent();
-
-		m_Module.SetDate( year, month, day, hour, minute );
 	}
 
 	private void InitStormWidgets( Widget actionsParent )
@@ -902,7 +1013,7 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderStormDensity = UIActionManager.CreateSlider( actionsGrid, "Density", 0, 1, this, "OnChange_Storm" );
+		m_SliderStormDensity = UIActionManager.CreateSlider( actionsGrid, "Density", 0, 1, this );
 		m_SliderStormDensity.SetCurrent( 0 );
 		m_SliderStormDensity.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormDensity.SetStepValue( 0.1 );
@@ -911,7 +1022,7 @@ class JMWeatherForm: JMFormBase
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetLabelWidget(), 0.6 );
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetSliderWidget(), 0.6 );
 
-		m_SliderStormThreshold = UIActionManager.CreateSlider( actionsGrid, "Overcast", 0, 1, this, "OnChange_Storm" );
+		m_SliderStormThreshold = UIActionManager.CreateSlider( actionsGrid, "Overcast", 0, 1, this );
 		m_SliderStormThreshold.SetCurrent( 0 );
 		m_SliderStormThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormThreshold.SetStepValue( 0.1 );
@@ -920,7 +1031,7 @@ class JMWeatherForm: JMFormBase
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetLabelWidget(), 0.6 );
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetSliderWidget(), 0.6 );
 
-		m_SliderStormTimeout = UIActionManager.CreateSlider( actionsGrid, "Timeout", 0, 1, this, "OnChange_Storm" );
+		m_SliderStormTimeout = UIActionManager.CreateSlider( actionsGrid, "Timeout", 0, 1, this );
 		m_SliderStormTimeout.SetCurrent( 0 );
 		m_SliderStormTimeout.SetStepValue( 1 );
 		m_SliderStormTimeout.SetMin( 0 );
@@ -929,21 +1040,6 @@ class JMWeatherForm: JMFormBase
 		m_SliderStormTimeout.SetWidgetWidth( m_SliderStormTimeout.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_Storm( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float density = m_SliderStormDensity.GetCurrent() * 0.01;
-		float threshold = m_SliderStormThreshold.GetCurrent() * 0.01;
-		float timeout = m_SliderStormTimeout.GetCurrent();
-
-		m_Module.SetStorm( density, threshold, timeout );
 	}
 
 	private void InitFogWidgets( Widget actionsParent )
@@ -956,7 +1052,7 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderFogForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this, "OnChange_Fog" );
+		m_SliderFogForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this);
 		m_SliderFogForecast.SetCurrent( 0 );
 		m_SliderFogForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderFogForecast.SetStepValue( 0.1 );
@@ -965,34 +1061,19 @@ class JMWeatherForm: JMFormBase
 		m_SliderFogForecast.SetWidgetWidth( m_SliderFogForecast.GetLabelWidget(), 0.6 );
 		m_SliderFogForecast.SetWidgetWidth( m_SliderFogForecast.GetSliderWidget(), 0.6 );
 
-		m_EditFogInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this, "OnChange_Fog" );
+		m_EditFogInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this);
 		m_EditFogInterpTime.SetOnlyNumbers( true );
 		m_EditFogInterpTime.SetText( "0" );
 		m_EditFogInterpTime.SetWidgetWidth( m_EditFogInterpTime.GetLabelWidget(), 0.6 );
 		m_EditFogInterpTime.SetWidgetWidth( m_EditFogInterpTime.GetEditBoxWidget(), 0.6 );
 
-		m_EditFogMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this, "OnChange_Fog" );
+		m_EditFogMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this);
 		m_EditFogMinDuration.SetOnlyNumbers( true );
 		m_EditFogMinDuration.SetText( "0" );
 		m_EditFogMinDuration.SetWidgetWidth( m_EditFogMinDuration.GetLabelWidget(), 0.6 );
 		m_EditFogMinDuration.SetWidgetWidth( m_EditFogMinDuration.GetEditBoxWidget(), 0.3 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_Fog( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float forecast = m_SliderFogForecast.GetCurrent() * 0.01;
-		float time = m_EditFogInterpTime.GetText().ToFloat();
-		float minDuration = m_EditFogMinDuration.GetText().ToFloat();
-
-		m_Module.SetFog( forecast, time, minDuration );
 	}
 
 	private void InitRainWidgets( Widget actionsParent )
@@ -1005,7 +1086,7 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderRainForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this, "OnChange_Rain" );
+		m_SliderRainForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this );
 		m_SliderRainForecast.SetCurrent( 0 );
 		m_SliderRainForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainForecast.SetStepValue( 0.1 );
@@ -1014,34 +1095,19 @@ class JMWeatherForm: JMFormBase
 		m_SliderRainForecast.SetWidgetWidth( m_SliderRainForecast.GetLabelWidget(), 0.6 );
 		m_SliderRainForecast.SetWidgetWidth( m_SliderRainForecast.GetSliderWidget(), 0.6 );
 
-		m_EditRainInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this, "OnChange_Rain" );
+		m_EditRainInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this );
 		m_EditRainInterpTime.SetOnlyNumbers( true );
 		m_EditRainInterpTime.SetText( "0" );
 		m_EditRainInterpTime.SetWidgetWidth( m_EditRainInterpTime.GetLabelWidget(), 0.6 );
 		m_EditRainInterpTime.SetWidgetWidth( m_EditRainInterpTime.GetEditBoxWidget(), 0.6 );
 
-		m_EditRainMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this, "OnChange_Rain" );
+		m_EditRainMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this );
 		m_EditRainMinDuration.SetOnlyNumbers( true );
 		m_EditRainMinDuration.SetText( "0" );
 		m_EditRainMinDuration.SetWidgetWidth( m_EditRainMinDuration.GetLabelWidget(), 0.6 );
 		m_EditRainMinDuration.SetWidgetWidth( m_EditRainMinDuration.GetEditBoxWidget(), 0.3 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_Rain( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float forecast = m_SliderRainForecast.GetCurrent() * 0.01;
-		float time = m_EditRainInterpTime.GetText().ToFloat();
-		float minDuration = m_EditRainMinDuration.GetText().ToFloat();
-
-		m_Module.SetRain( forecast, time, minDuration );
 	}
 
 	private void InitRainThresholdWidgets( Widget actionsParent )
@@ -1054,7 +1120,7 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderRainOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 1, this, "OnChange_RainThresholds" );
+		m_SliderRainOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 1, this );
 		m_SliderRainOvercastMin.SetCurrent( 0 );
 		m_SliderRainOvercastMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMin.SetStepValue( 0.1 );
@@ -1063,7 +1129,7 @@ class JMWeatherForm: JMFormBase
 		m_SliderRainOvercastMin.SetWidgetWidth( m_SliderRainOvercastMin.GetLabelWidget(), 0.6 );
 		m_SliderRainOvercastMin.SetWidgetWidth( m_SliderRainOvercastMin.GetSliderWidget(), 0.6 );
 
-		m_SliderRainOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 1, this, "OnChange_RainThresholds" );
+		m_SliderRainOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 1, this );
 		m_SliderRainOvercastMax.SetCurrent( 0 );
 		m_SliderRainOvercastMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMax.SetStepValue( 0.1 );
@@ -1072,28 +1138,13 @@ class JMWeatherForm: JMFormBase
 		m_SliderRainOvercastMax.SetWidgetWidth( m_SliderRainOvercastMax.GetLabelWidget(), 0.6 );
 		m_SliderRainOvercastMax.SetWidgetWidth( m_SliderRainOvercastMax.GetSliderWidget(), 0.6 );
 
-		m_EditTextRainTransitionTime = UIActionManager.CreateEditableText( actionsGrid, "Transition Time", this, "OnChange_RainThresholds" );
+		m_EditTextRainTransitionTime = UIActionManager.CreateEditableText( actionsGrid, "Transition Time", this );
 		m_EditTextRainTransitionTime.SetOnlyNumbers( true );
 		m_EditTextRainTransitionTime.SetText( "0" );
 		m_EditTextRainTransitionTime.SetWidgetWidth( m_EditTextRainTransitionTime.GetLabelWidget(), 0.6 );
 		m_EditTextRainTransitionTime.SetWidgetWidth( m_EditTextRainTransitionTime.GetEditBoxWidget(), 0.3 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_RainThresholds( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float min = m_SliderRainOvercastMin.GetCurrent() * 0.01;
-		float max = m_SliderRainOvercastMax.GetCurrent() * 0.01;
-		float transition = m_EditRainMinDuration.GetText().ToFloat();
-
-		m_Module.SetRainThresholds( min, max, transition );
 	}
 
 	private void InitOvercastWidgets( Widget actionsParent )
@@ -1106,7 +1157,7 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderOvercastForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this, "OnChange_Overcast" );
+		m_SliderOvercastForecast = UIActionManager.CreateSlider( actionsGrid, "Forecast", 0, 1, this );
 		m_SliderOvercastForecast.SetCurrent( 0 );
 		m_SliderOvercastForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderOvercastForecast.SetStepValue( 0.1 );
@@ -1115,34 +1166,19 @@ class JMWeatherForm: JMFormBase
 		m_SliderOvercastForecast.SetWidgetWidth( m_SliderOvercastForecast.GetLabelWidget(), 0.6 );
 		m_SliderOvercastForecast.SetWidgetWidth( m_SliderOvercastForecast.GetSliderWidget(), 0.6 );
 
-		m_EditOvercastInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this, "OnChange_Overcast" );
+		m_EditOvercastInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Time", this );
 		m_EditOvercastInterpTime.SetOnlyNumbers( true );
 		m_EditOvercastInterpTime.SetText( "0" );
 		m_EditOvercastInterpTime.SetWidgetWidth( m_EditOvercastInterpTime.GetLabelWidget(), 0.6 );
 		m_EditOvercastInterpTime.SetWidgetWidth( m_EditOvercastInterpTime.GetEditBoxWidget(), 0.6 );
 
-		m_EditOvercastMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this, "OnChange_Overcast" );
+		m_EditOvercastMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Min Duration", this );
 		m_EditOvercastMinDuration.SetOnlyNumbers( true );
 		m_EditOvercastMinDuration.SetText( "0" );
 		m_EditOvercastMinDuration.SetWidgetWidth( m_EditOvercastMinDuration.GetLabelWidget(), 0.6 );
 		m_EditOvercastMinDuration.SetWidgetWidth( m_EditOvercastMinDuration.GetEditBoxWidget(), 0.3 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_Overcast( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float forecast = m_SliderOvercastForecast.GetCurrent() * 0.01;
-		float time = m_EditOvercastInterpTime.GetText().ToFloat();
-		float minDuration = m_EditOvercastMinDuration.GetText().ToFloat();
-
-		m_Module.SetOvercast( forecast, time, minDuration );
 	}
 
 	private void InitWindDirectionSlider( Widget parent, out UIActionSlider action, string label )
@@ -1174,13 +1210,13 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 2 );
 
-		m_EditWindSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this, "OnChange_Wind" );
+		m_EditWindSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this );
 		m_EditWindSpeed.SetOnlyNumbers( true );
 		m_EditWindSpeed.SetText( "0" );
 		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetLabelWidget(), 0.7 );
 		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetEditBoxWidget(), 0.3 );
 
-		m_EditWindMaxSpeed = UIActionManager.CreateEditableText( actionsGrid, "Maximum Speed", this, "OnChange_Wind" );
+		m_EditWindMaxSpeed = UIActionManager.CreateEditableText( actionsGrid, "Maximum Speed", this );
 		m_EditWindMaxSpeed.SetOnlyNumbers( true );
 		m_EditWindMaxSpeed.SetText( "0" );
 		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetLabelWidget(), 0.7 );
@@ -1200,14 +1236,6 @@ class JMWeatherForm: JMFormBase
 		vector dir = Vector( dirX, 0.0, dirZ ).Normalized();
 		m_SliderWindDirectionX.SetCurrent( dir[0] );
 		m_SliderWindDirectionZ.SetCurrent( dir[2] );
-
-		if ( m_PresetsShown )
-			return;
-
-		float speed = m_EditWindSpeed.GetText().ToFloat();
-		float maxSpeed = m_EditWindMaxSpeed.GetText().ToFloat();
-
-		m_Module.SetWind( dir, speed, maxSpeed );
 	}
 	
 	private void InitWindFuncWidgets( Widget actionsParent )
@@ -1220,39 +1248,24 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_EditWindFuncMin = UIActionManager.CreateEditableText( actionsGrid, "Min", this, "OnChange_WindFunc" );
+		m_EditWindFuncMin = UIActionManager.CreateEditableText( actionsGrid, "Min", this );
 		m_EditWindFuncMin.SetOnlyNumbers( true );
 		m_EditWindFuncMin.SetText( "0" );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetLabelWidget(), 0.7 );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetEditBoxWidget(), 0.3 );
 
-		m_EditWindFuncMax = UIActionManager.CreateEditableText( actionsGrid, "Max", this, "OnChange_WindFunc" );
+		m_EditWindFuncMax = UIActionManager.CreateEditableText( actionsGrid, "Max", this );
 		m_EditWindFuncMax.SetOnlyNumbers( true );
 		m_EditWindFuncMax.SetText( "0" );
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetLabelWidget(), 0.7 );
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetEditBoxWidget(), 0.3 );
 
-		m_EditWindFuncSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this, "OnChange_WindFunc" );
+		m_EditWindFuncSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this );
 		m_EditWindFuncSpeed.SetOnlyNumbers( true );
 		m_EditWindFuncSpeed.SetText( "0" );
 		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetLabelWidget(), 0.7 );
 		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetEditBoxWidget(), 0.3 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
-	}
-
-	void OnChange_WindFunc( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		if ( m_PresetsShown )
-			return;
-
-		float min = m_EditWindFuncMin.GetText().ToFloat();
-		float max = m_EditWindFuncMax.GetText().ToFloat();
-		float speed = m_EditWindFuncSpeed.GetText().ToFloat();
-
-		m_Module.SetWindFunctionParams( min, max, speed );
 	}
 };

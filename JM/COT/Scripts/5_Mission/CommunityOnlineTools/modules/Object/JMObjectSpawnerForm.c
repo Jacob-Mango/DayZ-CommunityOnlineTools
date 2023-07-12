@@ -15,6 +15,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private ItemPreviewWidget m_ItemPreview;
 	private EntityAI m_PreviewItem;
 	private vector m_Orientation;
+	private float m_Distance;
 
 	private int m_MouseX;
 	private int m_MouseY;
@@ -190,11 +191,18 @@ class JMObjectSpawnerForm: JMFormBase
 	}
 
 	void UpdateRotation( int mouse_x, int mouse_y, bool is_dragging )
-	{		
-		m_Orientation[0] = m_Orientation[0] + ( m_MouseY - mouse_y );
-		m_Orientation[1] = m_Orientation[1] - ( m_MouseX - mouse_x );
+	{
+		m_Orientation[0] = m_Orientation[0] + ( ( m_MouseY - mouse_y ) * 0.01 );
+		m_Orientation[1] = m_Orientation[1] - ( ( m_MouseX - mouse_x ) * 0.01 );
 			
 		m_ItemPreview.SetModelOrientation( m_Orientation );
+	}
+
+	void UpdateDistance( float drag )
+	{
+		m_Distance = m_Distance + (drag * 0.1);
+		
+		m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
 	}
 
 	void UpdateItemPreview()
@@ -228,7 +236,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( m_PreviewItem )
 		{
 			m_ItemPreview.SetItem( m_PreviewItem );
-			m_ItemPreview.SetModelPosition( Vector( 0, 0, 0.5 ) );
+			m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
 			m_ItemPreview.SetModelOrientation( vector.Zero );
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
@@ -238,9 +246,35 @@ class JMObjectSpawnerForm: JMFormBase
 				ItemBase item = ItemBase.Cast(m_PreviewItem);
 				if ( item.HasQuantity() )
 				{
-					m_QuantityItem.Enable();
 					m_QuantityItem.SetMin(item.GetQuantityMin());
 					m_QuantityItem.SetMax(item.GetQuantityMax());
+
+					if ( item.IsLiquidContainer() )
+					{
+						m_QuantityItem.SetStepValue(0.1);
+					}
+					else
+					{
+						if ( item.IsMagazine() )
+						{
+							Magazine_Base mag = Magazine_Base.Cast(item);
+
+							m_QuantityItem.SetMin(0);
+							m_QuantityItem.SetMax(mag.GetAmmoMax());
+						}
+						else if ( item.IsAmmoPile() )
+						{
+							Ammunition_Base ammo = Ammunition_Base.Cast(item);
+
+							m_QuantityItem.SetMin(0);
+							m_QuantityItem.SetMax(ammo.GetAmmoMax());
+						}
+
+						m_QuantityItem.SetStepValue(1);
+						int newCurrent = m_QuantityItem.GetCurrent();
+						m_QuantityItem.SetCurrent(newCurrent);
+					}
+					m_QuantityItem.Enable();
 				}
 			}
 		}
@@ -276,9 +310,23 @@ class JMObjectSpawnerForm: JMFormBase
 			GetGame().GetMousePos( m_MouseX, m_MouseY );
 
 			return true;
-		} 
+		}
 
 		return false;
+	}
+
+	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
+	{
+		super.OnMouseWheel( w, x, y, wheel );
+
+		if ( w == m_ItemPreview )
+		{
+			UpdateDistance(wheel);
+
+			return true;
+		}
+
+		return true;
 	}
 
 	override bool OnDoubleClick( Widget w, int x, int y, int button )
@@ -292,9 +340,10 @@ class JMObjectSpawnerForm: JMFormBase
 			return true;
 		}
 		
-		if ( w.GetParent() == m_SearchBox && button == MouseState.LEFT )
+		if ( ( w.GetParent() == m_SearchBox || w == m_SearchBox ) && button == MouseState.LEFT )
 		{
 			m_SearchBox.SetText(m_SearchBox.GetTextPreview());
+			UpdateList();
 			
 			return true;
 		}
@@ -304,14 +353,16 @@ class JMObjectSpawnerForm: JMFormBase
 	
 	override bool OnKeyPress(Widget w, int x, int y, int key)
 	{
-		super.OnKeyPress( w, x, y, key );
-		
-		if ( w.GetParent() == m_SearchBox && ( key == KeyCode.KC_RETURN || key == KeyCode.KC_TAB ) )
+		Print("key pressed is :"+ key);
+		if ( /*w.GetParent() == m_SearchBox && */( key == KeyCode.KC_RETURN || key == KeyCode.KC_TAB ) )
 		{
 			m_SearchBox.SetText(m_SearchBox.GetTextPreview());
+			UpdateList();
 			
 			return true;
 		}
+
+		super.OnKeyPress( w, x, y, key );
 
 		return false;
 	}
