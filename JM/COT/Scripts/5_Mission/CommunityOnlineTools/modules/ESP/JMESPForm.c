@@ -75,7 +75,6 @@ class JMESPForm: JMFormBase
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-
 		m_SearchBox = UIActionManager.CreateEditableTextPreview( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );

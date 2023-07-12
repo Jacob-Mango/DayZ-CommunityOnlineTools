@@ -107,6 +107,37 @@ class UIActionEditableText: UIActionBase
 		return m_Text.GetText();
 	}
 
+	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
+	{
+		super.OnMouseWheel( w, x, y, wheel );
+
+		if ( w == m_Text )
+		{
+			IncrementText(wheel);
+
+			return true;
+		}
+
+		return true;
+	}
+
+	void IncrementText(int wheel)
+	{
+		if ( !m_OnlyNumbers )
+			return;
+
+		float multiplier = 0.1;
+		if ( m_OnlyIntegers )
+			multiplier = 1.0;
+
+		float currValue = m_Text.GetText().ToFloat();
+		currValue = currValue + (wheel * multiplier);
+		m_Text.SetText(currValue.ToString());
+		
+		UpdateText();
+		CallEvent( UIEvent.CHANGE );
+	}
+
 	bool UpdateText()
 	{
 		if ( m_OnlyNumbers )

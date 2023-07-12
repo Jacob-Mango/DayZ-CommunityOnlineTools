@@ -10,7 +10,10 @@ modded class JMModuleConstructor
 		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
-		//modules.Insert( JMVehicleSpawnerModule );
+
+		//! TODO: Merge with ItemSets once it will use prefabs
+		modules.Insert( JMVehicleSpawnerModule );
+
 		modules.Insert( JMItemSetSpawnerModule );
 		modules.Insert( JMWeatherModule );
 		//modules.Insert( JMWeatherOldModule );
