@@ -187,6 +187,12 @@ class JMSelectedObjects
 		return m_Players;
 	}
 
+
+	set< ref JMSelectedObject > GetObjects()
+	{
+		return m_Objects;
+	}
+
 	void ClearPlayers()
 	{
 		m_Players.Clear();
