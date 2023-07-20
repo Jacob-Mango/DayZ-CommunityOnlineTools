@@ -13,14 +13,6 @@ class JMTeleportForm: JMFormBase
 
 	private JMTeleportModule m_Module;
 
-	void JMTeleportForm()
-	{
-	}
-
-	void ~JMTeleportForm()
-	{
-	}
-
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );

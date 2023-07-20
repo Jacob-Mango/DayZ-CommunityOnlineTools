@@ -1538,4 +1538,140 @@ class JMESPModule: JMRenderableModuleBase
 			SendWebhook( "MoveToCursor", instance, "Performed a move to cursor on " + moved + " objects." );
 		}
 	}
+
+	void CopyToClipboardRaw()
+	{
+		string clipboardOutput= "";
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			if (i > 0)
+				clipboardOutput = clipboardOutput + "\n";
+
+			clipboardOutput = clipboardOutput + JMobjects[i].obj.GetType() + "\n";
+			
+			EntityAI ent;
+			if (!Class.CastTo(ent, JMobjects[i].obj))
+				continue;
+
+			if (ent.IsEmpty())
+				continue;
+			
+			for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+			{
+				clipboardOutput = clipboardOutput + ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\n";
+			}
+
+			CargoBase cargo = ent.GetInventory().GetCargo();
+			if(!cargo)
+				continue;
+
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				clipboardOutput = clipboardOutput + cargo.GetItem(j).GetType() + "\n";
+			}
+		}
+
+		GetGame().CopyToClipboard(clipboardOutput);
+	}
+
+	void CopyToClipboardMarket()
+	{
+		string clipboardOutput= "";
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		
+		clipboardOutput = "{\n";
+		clipboardOutput += "    \"m_Version\": 12,\n";
+		clipboardOutput += "    \"DisplayName\": \"My Category Name\",\n";
+		clipboardOutput += "    \"Icon\": \"Deliver\",\n";
+		clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
+		clipboardOutput += "    \"IsExchange\": 0,\n";
+		clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
+		clipboardOutput += "    \"Items\": [\n";
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			clipboardOutput += "        {\n";
+			clipboardOutput += "            \"ClassName\": \"" + JMobjects[i].obj.GetType() + "\",\n";
+			clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
+			clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
+			clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
+			clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
+			clipboardOutput += "            \"MinStockThreshold\": 1,\n";
+			clipboardOutput += "            \"QuantityPercent\": -1,\n";
+
+			EntityAI ent;
+			if (Class.CastTo(ent, JMobjects[i].obj))
+			{
+				if (ent.IsEmpty())
+				{
+					clipboardOutput += "            \"SpawnAttachments\": [],\n";
+				}
+				else
+				{
+					clipboardOutput += "            \"SpawnAttachments\": [\n";
+					for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+					{
+						clipboardOutput += "                \""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\"";
+						if ( k+1 < ent.GetInventory().AttachmentCount() )
+							clipboardOutput += ","
+						
+						clipboardOutput += "\n"
+					}
+					clipboardOutput += "            ],\n";
+				}
+			}			
+
+			clipboardOutput += "            \"Variants\": []\n";
+
+			clipboardOutput += "        }";
+			if ( i + 1 < JMobjects.Count() )
+				clipboardOutput += ",";
+
+			clipboardOutput += "\n";
+		}
+		clipboardOutput += "    ]\n";
+		clipboardOutput += "}";
+		GetGame().CopyToClipboard(clipboardOutput);
+	}
+
+	void CopyToClipboardSpawnableTypes()
+	{
+		string clipboardOutput= "";
+		
+		clipboardOutput += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
+		clipboardOutput += "<spawnabletypes>\n";
+
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			clipboardOutput += "	<type name=\""+JMobjects[i].obj.GetType()+"\">\n";
+			
+			EntityAI ent;
+			if (Class.CastTo(ent, JMobjects[i].obj))
+			{
+				for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+				{
+					clipboardOutput += "		<attachments chance=\"1.00\">\n";
+					clipboardOutput += "			<item name=\""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType()+"\" chance=\"1.00\" />\n";
+					clipboardOutput += "		</attachments>\n";
+				}
+
+				CargoBase cargo = ent.GetInventory().GetCargo();
+				if(cargo)
+				{
+					for(int j=0; j < cargo.GetItemCount(); j++)
+					{
+						clipboardOutput += "		<cargo chance=\"1.00\">\n";
+						clipboardOutput += "			<item name=\""+cargo.GetItem(j).GetType()+"\" />\n";
+						clipboardOutput += "		</cargo>\n";
+					}
+				}
+			}
+
+			clipboardOutput += "	</type>\n";
+		}
+
+		clipboardOutput += "</spawnabletypes>\n";
+		GetGame().CopyToClipboard(clipboardOutput);
+	}
 };

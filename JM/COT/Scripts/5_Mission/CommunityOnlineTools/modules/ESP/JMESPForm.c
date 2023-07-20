@@ -140,12 +140,14 @@ class JMESPForm: JMFormBase
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
 		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
+		
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
 
-		//UIActionManager.CreateText( parent, "Fog: ", "Sets the weather fog phenomenon" );
-		//Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAPSCAN", this, "Click_MoveToCursor" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_RAW", this, "Click_CopyToClipboardRaw" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_MARKET", this, "Click_CopyToClipboardMarket" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_SPAWNABLETYPES", this, "Click_CopyToClipboardSpawnableTypes" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -456,5 +458,29 @@ class JMESPForm: JMFormBase
 		
 		if ( DayZPhysics.RaycastRV(from, to, contact_pos, contact_dir, contact_component, NULL, NULL, NULL, false, true) )
 			m_Module.MoveToCursor( contact_pos );
+	}
+	
+	void Click_CopyToClipboardRaw( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.CopyToClipboardRaw();
+	}
+	
+	void Click_CopyToClipboardMarket( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.CopyToClipboardMarket();
+	}
+	
+	void Click_CopyToClipboardSpawnableTypes( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.CopyToClipboardSpawnableTypes();
 	}
 };

@@ -1729,13 +1729,28 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if ( !input.LocalPress() )
 			return;
 
-		SelfHeal();
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+			SelfHeal();
 	}
 
 	void SelfHeal()
 	{
 		array< string > guids = new array< string >;
-		guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+		string message = "You healed";
+
+		if ( JM_GetSelected().GetPlayers().Count() != 0 )
+		{
+			message = " " + JM_GetSelected().GetPlayers().Count() + " Players"
+			guids = JM_GetSelected().GetPlayers();
+		}
+		else
+		{
+			message = " yourself"
+			guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+		}
+
+		COTCreateLocalAdminNotification( new StringLocaliser( message ) );
+
 		if ( IsMissionHost() )
 		{
 			Exec_Heal( guids, NULL );
@@ -1752,20 +1767,39 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if ( !input.LocalPress() )
 			return;
 
-		SetSelfGodMode();
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+			SetSelfGodMode();
 	}
 
 	void SetSelfGodMode()
 	{
 		array< string > guids = new array< string >;
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-		guids.Insert(player.GetIdentity().GetId());
 		bool value = player.COTHasGodMode();
+		string message = "";
+		if ( value )
+			message = "Enabled Godmode";
+		else
+			message = "Disabled Godmode"
+
+		if ( JM_GetSelected().GetPlayers().Count() != 0 )
+		{
+			message = " for " + JM_GetSelected().GetPlayers().Count() + " Players"
+			guids = JM_GetSelected().GetPlayers();
+		}
+		else
+		{
+			message = " for yourself"
+			guids.Insert(player.GetIdentity().GetId());
+		}
+
+		COTCreateLocalAdminNotification( new StringLocaliser( message ) );
 
 		if ( IsMissionHost() )
 		{
 			Exec_SetGodMode( value, guids, NULL );
-		} else
+		}
+		else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( value );

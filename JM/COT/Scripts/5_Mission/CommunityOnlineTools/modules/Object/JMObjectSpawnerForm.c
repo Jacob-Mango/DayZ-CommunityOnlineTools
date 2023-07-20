@@ -30,6 +30,11 @@ class JMObjectSpawnerForm: JMFormBase
 	private ref array< string > m_ObjSpawnModeText =
 	{
 		"None",
+
+		"#STR_COT_OBJECT_MODULE_EXPORT_RAW",
+		"#STR_COT_OBJECT_MODULE_EXPORT_TYPES",
+		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
+
 		"#STR_COT_OBJECT_MODULE_CURSOR",
 		"#STR_COT_OBJECT_MODULE_SELF"
 	};
@@ -416,21 +421,89 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void SpawnObject(int mode = SpawnSelectMode.NONE)
 	{
-		if ( mode == SpawnSelectMode.NONE || mode == SpawnSelectMode.UNKNOWN )
+		if (mode == SpawnSelectMode.NONE || mode == SpawnSelectMode.UNKNOWN)
 			return;
 
-		switch(mode)
+		string clipboardOutput = "";
+		string result;
+
+		switch (mode)
 		{
 			default:
 			case SpawnSelectMode.POSITION:
-				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetCurrent(), -1 );
-			break;
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetCurrent(), -1);
+				break;
+
 			case SpawnSelectMode.CURSOR:
-				m_Module.SpawnEntity_Position( GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetCurrent(), -1 );
-			break;
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetCurrent(), -1);
+				break;
+
 			case SpawnSelectMode.INVENTORY:
-				m_Module.SpawnEntity_Inventory( GetCurrentSelection(), JM_GetSelected().GetPlayers(), m_QuantityItem.GetCurrent(), -1 );
-			break;
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), m_QuantityItem.GetCurrent(), -1);
+				break;
+
+			case SpawnSelectMode.COPYLISTRAW:
+				for (int i = 0; i < m_ClassList.GetNumItems(); i++)
+				{
+					m_ClassList.GetItemText(i, 0, result);
+					clipboardOutput += result + "\n";
+				}
+				GetGame().CopyToClipboard(clipboardOutput);
+				break;
+
+			case SpawnSelectMode.COPYLISTTYPES:
+				clipboardOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+				clipboardOutput += "<types>\n";
+				for (int j = 0; j < m_ClassList.GetNumItems(); j++)
+				{
+					m_ClassList.GetItemText(j, 0, result);
+					clipboardOutput += "	<type name=\"" + result + "\">\n";
+					clipboardOutput += "		<nominal>0</nominal>\n";
+					clipboardOutput += "		<lifetime>3888000</lifetime>\n";
+					clipboardOutput += "		<restock>0</restock>\n";
+					clipboardOutput += "		<min>0</min>\n";
+					clipboardOutput += "		<quantmin>-1</quantmin>\n";
+					clipboardOutput += "		<quantmax>-1</quantmax>\n";
+					clipboardOutput += "		<cost>100</cost>\n";
+					clipboardOutput += "		<flags count_in_cargo=\"0\" count_in_hoarder=\"0\" count_in_map=\"1\" count_in_player=\"0\" crafted=\"0\" deloot=\"0\"/>\n";
+					clipboardOutput += "	</type>\n";
+				}
+				clipboardOutput += "</types>";
+				GetGame().CopyToClipboard(clipboardOutput);
+				break;
+
+			case SpawnSelectMode.COPYLISTEXPMARKET:
+				clipboardOutput = "{\n";
+				clipboardOutput += "    \"m_Version\": 12,\n";
+				clipboardOutput += "    \"DisplayName\": \"" + m_SearchBox.GetText() + "\",\n";
+				clipboardOutput += "    \"Icon\": \"Deliver\",\n";
+				clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
+				clipboardOutput += "    \"IsExchange\": 0,\n";
+				clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
+				clipboardOutput += "    \"Items\": [\n";
+				for (int k = 0; k < m_ClassList.GetNumItems(); k++)
+				{
+					m_ClassList.GetItemText(k, 0, result);
+					clipboardOutput += "        {\n";
+					clipboardOutput += "            \"ClassName\": \"" + result + "\",\n";
+					clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
+					clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
+					clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
+					clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
+					clipboardOutput += "            \"MinStockThreshold\": 1,\n";
+					clipboardOutput += "            \"QuantityPercent\": -1,\n";
+					clipboardOutput += "            \"SpawnAttachments\": [],\n";
+					clipboardOutput += "            \"Variants\": []\n";
+
+					if (k + 1 < m_ClassList.GetNumItems())
+						clipboardOutput += "        },\n";
+					else
+						clipboardOutput += "        }\n";
+				}
+				clipboardOutput += "    ]\n";
+				clipboardOutput += "}";
+				GetGame().CopyToClipboard(clipboardOutput);
+				break;
 		}
 	}
 
