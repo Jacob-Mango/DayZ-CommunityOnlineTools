@@ -124,7 +124,6 @@ class UIActionDropdownList: UIActionBase
 
 		m_Items.Clear();
 		m_Items.Copy( items );
-		m_Items.Insert( "" );
 
 		UpdateText();
 	}
@@ -204,15 +203,6 @@ class UIActionDropdownList: UIActionBase
 
 		for ( i = 0; i < m_Items.Count(); ++i )
 		{
-			item = "" + m_Items[i];
-			item.ToLower();
-
-			if ( item == "" )
-				continue;
-
-			if ( pText != "" && !item.Contains( pText ) )
-				continue;
-
 			m_List.AddItem( m_Items[i], NULL, 0 );
 		}  
 

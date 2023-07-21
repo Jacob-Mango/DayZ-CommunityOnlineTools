@@ -86,6 +86,16 @@ class UIActionSlider: UIActionBase
 		CalculateValue();
 	}
 
+	float GetMin()
+	{
+		return m_Min;
+	}
+
+	float GetMax()
+	{
+		return m_Max;
+	}
+
 	override bool IsFocusWidget( Widget widget )
 	{
 		if ( widget == m_Slider )

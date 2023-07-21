@@ -1,5 +1,10 @@
 class JMSpectatorCamera: JMCameraBase
 {
+	vector linearVelocity;
+	vector angularVelocity;
+
+	vector orientation;
+	
 	override void OnTargetSelected( Object target )
 	{
 		DayZPlayerImplement impl;
@@ -21,5 +26,41 @@ class JMSpectatorCamera: JMCameraBase
 	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
+
+		Input input = GetGame().GetInput();
+		bool freelook = input.LocalValue( "UALookAround" );
+		
+		if ( !LookFreeze || freelook )
+		{
+			float yawDiff = input.LocalValue( "UAAimLeft" ) - input.LocalValue( "UAAimRight" );
+			float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
+		
+			angularVelocity = angularVelocity * CAMERA_SMOOTH;
+
+			angularVelocity[0] = angularVelocity[0] + ( yawDiff * CAMERA_MSENS );
+			angularVelocity[1] = angularVelocity[1] + ( pitchDiff * CAMERA_MSENS );
+
+			if (orientation == vector.Zero)
+				orientation = GetOrientation();
+
+			orientation[0] = orientation[0] - ( angularVelocity[0] * timeslice );
+			orientation[1] = orientation[1] - ( angularVelocity[1] * timeslice );
+			orientation[2] = orientation[2] - ( angularVelocity[2] * timeslice );
+
+			if ( orientation[1] <= -90 )
+			{
+				angularVelocity[1] = Math.Min( angularVelocity[1], 0 );
+				orientation[1] = -90;
+			} else if ( orientation[1] >= 90 )
+			{
+				orientation[1] = 90;
+				angularVelocity[1] = Math.Max( angularVelocity[1], 0 );
+			}
+
+			orientation[0] = Math.NormalizeAngle( orientation[0] );
+			orientation[2] = Math.NormalizeAngle( orientation[2] );
+
+			SetOrientation( orientation );
+		}
 	}
 };
