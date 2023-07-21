@@ -244,7 +244,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1 )
+	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() )
 		{
@@ -261,7 +261,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, int itemState = -1, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
@@ -316,14 +316,21 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
+			int itemState;
+			if ( !ctx.Read( itemState ) )
+			{
+				Error("Failed");
+				return;
+			}
+
 			if ( !ctx.Read( m_OnDebugSpawn ) )
 				return;
 
-			Server_SpawnEntity_Position( ent, position, quantity, health, senderRPC );
+			Server_SpawnEntity_Position( ent, position, quantity, health, itemState, senderRPC );
 		}
 	}
 
-	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1 )
+	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
@@ -332,16 +339,17 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
 		{
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, NULL );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, int itemState = -1, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -400,6 +408,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			float health;
 			if ( !ctx.Read( health ) )
+				return;
+
+			float itemState;
+			if ( !ctx.Read( itemState ) )
 				return;
 
 			if ( !ctx.Read( m_OnDebugSpawn ) )

@@ -12,3 +12,19 @@ enum SpawnSelectMode
 
 	UNKNOWN
 };
+
+enum ItemStateEnum
+{
+	NONE,
+	
+	RAW,
+	COOKED,
+	BURNED,
+	SPOILED,
+
+	WATER,
+	TAINTEDWATER,
+	GASOLINE,
+
+	UNKNOWN
+};

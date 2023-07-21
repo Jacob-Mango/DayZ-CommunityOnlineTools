@@ -7,6 +7,9 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
+	private UIActionSlider m_HealthItem;
+	private UIActionDropdownList m_ItemDataList;
+	
 	private UIActionEditableTextPreview m_SearchBox;
 	private UIActionNavigateButton m_SpawnMode;
 
@@ -93,6 +96,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 	protected bool m_IknowWhatIamDoing;
 
+	private bool m_ItemIsPerishable;
+	private bool m_ItemHasLiquid;
+
 	void JMObjectSpawnerForm()
 	{
 		m_ObjectTypes = new map< string, string >;
@@ -128,22 +134,30 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
 
-		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 3, 1 );
+		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 4, 1 );
 
 		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
 
 		m_SearchBox = UIActionManager.CreateEditableTextPreview( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
-		m_SearchBox.SetWidth( 0.5 );
+		m_SearchBox.SetWidth( 0.65 );
 
 		UIActionButton button = UIActionManager.CreateButton( actions, "X", this, "SearchInput_OnClickReset" );
 		button.SetWidth( 0.05 );
-		button.SetPosition( 0.5 );
+		button.SetPosition( 0.65 );
 
-		m_QuantityItem = UIActionManager.CreateSlider( actions, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
+		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", {"Raw","Cooked","Burned","Spoiled"}, this, "Click_ItemData" );
+		m_ItemDataList.SetPosition( 0.70 );
+		m_ItemDataList.SetWidth( 0.3 );
+		m_ItemDataList.Disable();
+
+		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+
+		m_QuantityItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
 		m_QuantityItem.SetCurrent( 100 );
-		m_QuantityItem.SetWidth( 0.45 );
-		m_QuantityItem.SetPosition( 0.55 );
-		
+
+		m_HealthItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_HEALTH", 0, 100, this, "Click_SetHealth");
+		m_HealthItem.SetCurrent( 100 );
+
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
@@ -164,6 +178,43 @@ class JMObjectSpawnerForm: JMFormBase
 		UIActionManager.CreatePanel( spawnOptions );
 
 		UpdateItemPreview();
+	}
+
+	void Click_ItemData( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+	}
+
+	void Click_SetHealth( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		float percent = m_HealthItem.GetCurrent() / m_HealthItem.GetMax();
+
+		if ( percent >= 0.69999999 )
+		{
+			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
+		}
+		else if ( percent >= 0.5 )
+		{
+			m_HealthItem.SetColor( Colors.COLOR_WORN );
+		}
+		else if ( percent >= 0.30000001 )
+		{
+			m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
+		}
+		else if ( percent > 0.001 )
+		{
+			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
+		}
+		else
+		{
+			m_HealthItem.SetColor( Colors.COLOR_RUINED );
+		}		
+
+		m_HealthItem.SetAlpha( 1.0 );
 	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
@@ -238,6 +289,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
 
 		m_QuantityItem.Disable();
+		m_HealthItem.Disable();
 		if ( m_PreviewItem )
 		{
 			m_ItemPreview.SetItem( m_PreviewItem );
@@ -246,9 +298,17 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
 
+			m_HealthItem.Enable();
+			m_HealthItem.SetMin(0);
+			if ( m_HealthItem.GetCurrent() == -1 )
+				m_HealthItem.SetCurrent(m_PreviewItem.GetMaxHealth());
+				
+			m_HealthItem.SetMax(m_PreviewItem.GetMaxHealth());
+
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
 				ItemBase item = ItemBase.Cast(m_PreviewItem);
+
 				if ( item.HasQuantity() )
 				{
 					m_QuantityItem.SetMin(item.GetQuantityMin());
@@ -285,6 +345,9 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 		else
 		{
+			m_HealthItem.SetMin(-1);
+			m_HealthItem.SetMax(-1);
+			m_HealthItem.SetCurrent(-1);
 			m_ItemPreview.Show( false );
 		}
 
@@ -418,6 +481,14 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnMode.SetButton(m_ObjSpawnModeText[m_ObjSpawnMode]);
 	}
+	int GetItemStateType()
+	{
+		return -1;
+		//m_ItemDataList
+		//ItemStateEnum
+		//m_ItemIsPerishable
+		//m_ItemHasLiquid
+	}
 
 	void SpawnObject(int mode = SpawnSelectMode.NONE)
 	{
@@ -427,19 +498,21 @@ class JMObjectSpawnerForm: JMFormBase
 		string clipboardOutput = "";
 		string result;
 
+		int itemState = GetItemStateType();
+
 		switch (mode)
 		{
 			default:
 			case SpawnSelectMode.POSITION:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetCurrent(), -1);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), m_QuantityItem.GetCurrent(), m_HealthItem.GetCurrent(), itemState);
 				break;
 
 			case SpawnSelectMode.CURSOR:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetCurrent(), -1);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), m_QuantityItem.GetCurrent(), m_HealthItem.GetCurrent(), itemState);
 				break;
 
 			case SpawnSelectMode.INVENTORY:
-				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), m_QuantityItem.GetCurrent(), -1);
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), m_QuantityItem.GetCurrent(), m_HealthItem.GetCurrent(), itemState);
 				break;
 
 			case SpawnSelectMode.COPYLISTRAW:
