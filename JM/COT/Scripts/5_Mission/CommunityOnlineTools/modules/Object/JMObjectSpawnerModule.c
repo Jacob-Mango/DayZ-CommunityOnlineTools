@@ -253,15 +253,16 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( position );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		} else
 		{
-			Server_SpawnEntity_Position( ent, position, quantity, health, NULL );
+			Server_SpawnEntity_Position( ent, position, quantity, health, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, int itemState = -1, PlayerIdentity ident )
+	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
@@ -278,9 +279,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
-		SetupEntity( ent, quantity, health );
+		SetupEntity( ent, quantity, health, itemState );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+itemState +") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
@@ -349,7 +350,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, int itemState = -1, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, int itemState, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -383,9 +384,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( ent, quantity, health );
+			SetupEntity( ent, quantity, health, itemState );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() + loggedSuffix );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
 		}
 	}
@@ -417,11 +418,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( m_OnDebugSpawn ) )
 				return;
 
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, senderRPC );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, senderRPC );
 		}
 	}
 
-	private void SetupEntity( EntityAI obj, out float quantity, out float health )
+	private void SetupEntity( EntityAI obj, out float quantity, out float health, out int itemState )
 	{
 		ItemBase item;
 		if ( Class.CastTo( item, obj ) )
@@ -475,9 +476,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		float quantity = -1;
 		float health = -1;
-		SetupEntity( ent, quantity, health );
+		int itemState = -1;
+		SetupEntity( ent, quantity, health, itemState );
 		
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 

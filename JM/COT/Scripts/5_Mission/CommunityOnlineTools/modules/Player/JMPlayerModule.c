@@ -1740,12 +1740,12 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		if ( JM_GetSelected().GetPlayers().Count() != 0 )
 		{
-			message = " " + JM_GetSelected().GetPlayers().Count() + " Players"
+			message += " " + JM_GetSelected().GetPlayers().Count() + " Players";
 			guids = JM_GetSelected().GetPlayers();
 		}
 		else
 		{
-			message = " yourself"
+			message += " yourself";
 			guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
 		}
 
@@ -1776,20 +1776,20 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		array< string > guids = new array< string >;
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
 		bool value = player.COTHasGodMode();
-		string message = "";
+		string message;
 		if ( value )
 			message = "Enabled Godmode";
 		else
-			message = "Disabled Godmode"
+			message = "Disabled Godmode";
 
 		if ( JM_GetSelected().GetPlayers().Count() != 0 )
 		{
-			message = " for " + JM_GetSelected().GetPlayers().Count() + " Players"
+			message += " for " + JM_GetSelected().GetPlayers().Count() + " Players";
 			guids = JM_GetSelected().GetPlayers();
 		}
 		else
 		{
-			message = " for yourself"
+			message += " for yourself";
 			guids.Insert(player.GetIdentity().GetId());
 		}
 

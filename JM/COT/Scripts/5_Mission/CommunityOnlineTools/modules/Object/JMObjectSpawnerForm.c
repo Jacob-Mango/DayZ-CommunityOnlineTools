@@ -191,7 +191,15 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		float percent = m_HealthItem.GetCurrent() / m_HealthItem.GetMax();
+			UpdateHealthItemColor();
+	}
+
+	void UpdateHealthItemColor()
+	{
+		float percent = m_HealthItem.GetCurrent();
+		
+		if ( percent != 0)
+			percent = percent / m_HealthItem.GetMax();
 
 		if ( percent >= 0.69999999 )
 		{
@@ -209,10 +217,14 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
 		}
+		else if ( percent == -1 )
+		{
+			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );			
+		}
 		else
 		{
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
-		}		
+		}
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -299,11 +311,12 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.Show( true );
 
 			m_HealthItem.Enable();
-			m_HealthItem.SetMin(0);
+			m_HealthItem.SetMax(m_PreviewItem.GetMaxHealth());
 			if ( m_HealthItem.GetCurrent() == -1 )
 				m_HealthItem.SetCurrent(m_PreviewItem.GetMaxHealth());
-				
-			m_HealthItem.SetMax(m_PreviewItem.GetMaxHealth());
+
+			m_HealthItem.SetMin(0);
+			UpdateHealthItemColor();
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{

@@ -41,8 +41,9 @@ class UIActionNavigateButton: UIActionBase
 		m_Button_Left.SetText("");
 		m_Button_Right.SetText("");
 
-		m_Image_Left.LoadImageFile( 0, imageL );
-		m_Image_Right.LoadImageFile( 0, imageR );
+		//m_Image_Left.LoadImageFile( 0, imageL );
+		//m_Image_Right.LoadImageFile( 0, imageR );
+
 	}
 
 	override string GetButton()

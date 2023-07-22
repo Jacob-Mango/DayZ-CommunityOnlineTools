@@ -1613,9 +1613,9 @@ class JMESPModule: JMRenderableModuleBase
 					{
 						clipboardOutput += "                \""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\"";
 						if ( k+1 < ent.GetInventory().AttachmentCount() )
-							clipboardOutput += ","
+							clipboardOutput += ",";
 						
-						clipboardOutput += "\n"
+						clipboardOutput += "\n";
 					}
 					clipboardOutput += "            ],\n";
 				}
