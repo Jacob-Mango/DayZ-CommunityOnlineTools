@@ -1,5 +1,6 @@
 PanelWidgetClass JMCOTSideBar {
  color 0.03 0.04 0.06 0.9
+ priority 100
  position 0 0
  size 300 1
  halign right_ref

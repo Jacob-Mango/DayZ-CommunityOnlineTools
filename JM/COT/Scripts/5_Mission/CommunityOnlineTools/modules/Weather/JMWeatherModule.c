@@ -32,6 +32,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Preset" );
+		GetPermissionsManager().RegisterPermission( "Weather.Preset.Use" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Create" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Update" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Remove" );
@@ -88,26 +89,6 @@ class JMWeatherModule: JMRenderableModuleBase
 	array< ref JMWeatherPreset > GetPresets()
 	{
 		return settings.Presets;
-	}
-	
-	override void OnSettingsUpdated()
-	{
-		super.OnSettingsUpdated();
-
-		if ( settings )
-		{
-			if ( !settings.Presets )
-				return;
-
-			for ( int i = 0; i < settings.Presets.Count(); i++ )
-			{
-				JMWeatherPreset location = settings.Presets[i];
-
-				string permission = location.Permission;
-				permission.Replace( " ", "." );
-				GetPermissionsManager().RegisterPermission( "Weather.Preset." + permission );
-			}
-		}
 	}
 
 	void Load()
@@ -751,7 +732,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1, senderRPC ) )
+			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Use", senderRPC ) )
 				return;
 
 			Send_UsePreset( p1 );
@@ -792,9 +773,6 @@ class JMWeatherModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Update", senderRPC ) )
 				return;
 
-			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1.Permission, senderRPC ) )
-				return;
-
 			Send_UpdatePreset( p1 );
 		}
 
@@ -810,9 +788,6 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Remove", senderRPC ) )
-				return;
-
-			if ( !GetPermissionsManager().HasPermission( "Weather.Preset." + p1, senderRPC ) )
 				return;
 
 			Send_RemovePreset( p1 );

@@ -87,6 +87,30 @@ class UIActionEditableVector: UIActionBase
 		return Vector( m_TextX.GetText().ToFloat(), m_TextY.GetText().ToFloat(), m_TextZ.GetText().ToFloat() );
 	}
 
+	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
+	{
+		super.OnMouseWheel( w, x, y, wheel );
+
+		if ( w == m_TextX || w == m_TextY || w == m_TextZ )
+		{
+			EditBoxWidget editw = EditBoxWidget.Cast(w);
+			IncrementValue(editw, wheel);
+
+			return true;
+		}
+
+		return true;
+	}
+
+	void IncrementValue(EditBoxWidget w, int wheel)
+	{
+		float currValue = w.GetText().ToFloat();
+		currValue = currValue + (wheel * 0.1);
+		w.SetText(currValue.ToString());
+		
+		CallEvent( UIEvent.CHANGE );
+	}
+
 	override void SetButton( string text )
 	{
 		text = Widget.TranslateString( text );

@@ -1,6 +1,8 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	bool m_OnDebugSpawn = true;
+	string m_CurrentType;
+	string m_SearchText;
 
 	void JMObjectSpawnerModule()
 	{
@@ -429,6 +431,29 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			if ( item.HasQuantity() )
 				item.SetQuantity(quantity);
+
+			if ( itemState != 0 )
+			{
+				if ( item.IsLiquidContainer() )
+				{
+					if ( item.IsBloodContainer() )
+					{
+						item.SetLiquidType(Math.Pow(LIQUID_BLOOD_0_P, itemState));
+					}
+					else
+					{
+						item.SetLiquidType(Math.Pow(LIQUID_WATER, itemState));
+					}
+				}
+				else if ( item.HasFoodStage() && item.CanBeCooked() )
+				{
+					if (item.IsInherited(Edible_Base)) 
+					{
+						Edible_Base foodItem = Edible_Base.Cast(item);
+						foodItem.GetFoodStage().ChangeFoodStage( itemState );
+					}
+				}
+			}
 		}
 
 		if ( m_OnDebugSpawn && ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") ) )

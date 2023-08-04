@@ -819,13 +819,17 @@ class JMWeatherForm: JMFormBase
 		if ( m_PresetsShown )
 			return;
 
+		float timeout = 600;
+		if ( m_Checkbox_EasyMode.IsChecked() )
+			timeout = 0;
+
 		m_Module.SetWind( Vector( 0, 0, 0 ), 0, 0 );
 		m_Module.SetWindFunctionParams( 0, 0, 0 );
-		m_Module.SetOvercast( 0, 30, 600 );
-		m_Module.SetRainThresholds( 0, 0, 600 );
-		m_Module.SetRain( 0, 30, 600 );
-		m_Module.SetFog( 0, 30, 600 );
-		m_Module.SetStorm( 0, 0, 600 );
+		m_Module.SetOvercast( 0, 30, timeout );
+		m_Module.SetRainThresholds( 0, 0, timeout );
+		m_Module.SetRain( 0, 30, timeout );
+		m_Module.SetFog( 0, 30, timeout );
+		m_Module.SetStorm( 0, 0, timeout );
 
 		UpdateStates();
 	}
@@ -838,11 +842,15 @@ class JMWeatherForm: JMFormBase
 		if ( m_PresetsShown )
 			return;
 
+		float timeout = 600;
+		if ( m_Checkbox_EasyMode.IsChecked() )
+			timeout = 0;
+
 		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
 		float windMin = Math.RandomFloatInclusive(0,0.8);
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
-		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
-		m_Module.SetRainThresholds( 0, 0, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, timeout );
+		m_Module.SetRainThresholds( 0, 0, timeout );
 		m_Module.SetRain( 0, 30, 600 );
 		m_Module.SetFog( 0, 30, 600 );
 		m_Module.SetStorm( 0, 0, 600 );
@@ -857,16 +865,20 @@ class JMWeatherForm: JMFormBase
 
 		if ( m_PresetsShown )
 			return;
+			
+		float timeout = 600;
+		if ( m_Checkbox_EasyMode.IsChecked() )
+			timeout = 0;
 
 		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
 		float windMin = Math.RandomFloatInclusive(0,1);
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
-		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
+		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, timeout );
 		float rainMin = Math.RandomFloatInclusive(0.25,1.0);
 		m_Module.SetRainThresholds( rainMin, Math.RandomFloatInclusive(rainMin,1), Math.RandomIntInclusive(60,600) );
-		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), 30, Math.RandomIntInclusive(120,3600) );
-		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0), 30, Math.RandomIntInclusive(120,3600) );
-		m_Module.SetStorm( Math.RandomFloatInclusive(0.5,1.0), Math.RandomFloatInclusive(0.5,1.0), Math.RandomIntInclusive(120,3600) );
+		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), 30, timeout );
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0), 30, timeout );
+		m_Module.SetStorm( Math.RandomFloatInclusive(0.5,1.0), Math.RandomFloatInclusive(0.5,1.0), timeout );
 		
 		UpdateStates();
 	}

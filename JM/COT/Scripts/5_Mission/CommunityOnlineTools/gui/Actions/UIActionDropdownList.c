@@ -13,6 +13,7 @@ class UIActionDropdownList: UIActionBase
 	protected string m_PreviousText;
 
 	protected int m_SelectedIndex;
+	protected int m_SelectedItemId;
 
 	void UIActionDropdownList()
 	{
@@ -75,6 +76,20 @@ class UIActionDropdownList: UIActionBase
 		text = Widget.TranslateString( text );
 
 		m_Label.SetText( text );
+	}
+
+	int GetSelectedItemId()
+	{
+		return m_SelectedItemId;
+	}
+
+	void SetSelectedItemId(int id)
+	{
+		m_SelectedItemId = id;
+		
+		string result;
+		m_List.GetItemText( m_SelectedItemId, 0, result );
+		m_Text.SetText( result );
 	}
 
 	void SetText( float num )
@@ -215,6 +230,7 @@ class UIActionDropdownList: UIActionBase
 		{
 			string result;
 			m_List.GetItemText( m_List.GetSelectedRow(), 0, result );
+			m_SelectedItemId = m_List.GetSelectedRow();
 			m_Text.SetText( result );
 
 			CallEvent( UIEvent.CHANGE );
@@ -257,6 +273,7 @@ class UIActionDropdownList: UIActionBase
 
 				string result;
 				m_List.GetItemText( m_SelectedIndex, 0, result );
+				m_SelectedItemId = m_SelectedIndex;
 				m_Text.SetText( result );
 			}
 		}
