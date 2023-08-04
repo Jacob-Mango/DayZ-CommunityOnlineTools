@@ -1,7 +1,7 @@
 PanelWidgetClass JMCameraForm {
  color 0 0 0 0
  position 0 0
- size 400 270
+ size 600 275
  hexactpos 0
  vexactpos 0
  hexactsize 1

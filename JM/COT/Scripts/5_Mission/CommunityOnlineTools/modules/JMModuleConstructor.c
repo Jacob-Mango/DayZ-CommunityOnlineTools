@@ -16,7 +16,6 @@ modded class JMModuleConstructor
 
 		modules.Insert( JMItemSetSpawnerModule );
 		modules.Insert( JMWeatherModule );
-		//modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 

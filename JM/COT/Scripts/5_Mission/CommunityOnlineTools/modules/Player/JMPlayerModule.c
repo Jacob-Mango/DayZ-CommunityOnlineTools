@@ -1775,7 +1775,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		array< string > guids = new array< string >;
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-		bool value = player.COTHasGodMode();
+		bool value = !player.COTHasGodMode();
 		string message;
 		if ( value )
 			message = "Enabled Godmode";

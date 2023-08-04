@@ -5,11 +5,37 @@ class JMCinematicCamera: JMCameraBase
 
 	vector orientation;
 
-	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
+	vector positionOffset;
+
+	// Traveling stuff
+	ref TVectorArray travelPositions;
+	ref TFloatArray travelTimes; // in seconds
+	ref TBoolArray travelSmooth;
 	
+    private int currentTargetIndex;
+    private vector startPosition;
+    private vector endPosition;
+    private float currentTime;
+	private float targetTime;
+	private bool targetSmooth;
+	private bool shouldTravel;
+
+	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
+
 	void JMCinematicCamera()
 	{
+		//positionOffset = "0 1.5 0";
+		travelPositions = new TVectorArray;
+		travelTimes = new TFloatArray;
+		travelSmooth = new TBoolArray;
 		SetEventMask( EntityEvent.FRAME );
+	}
+
+	void ~JMCinematicCamera()
+	{
+		delete travelPositions;
+		delete travelTimes;
+		delete travelSmooth;
 	}
 
 	override void OnUpdate( float timeslice )
@@ -19,6 +45,7 @@ class JMCinematicCamera: JMCameraBase
 		vector transform[4];
 		GetTransform( transform );
 
+		// ================ Inputs ================
 		Input input = GetGame().GetInput();
 
 		float forward = input.LocalValue( "UAMoveForward" ) - input.LocalValue( "UAMoveBack" );
@@ -37,11 +64,11 @@ class JMCinematicCamera: JMCameraBase
 				speedInc = input.LocalValue( "UACameraToolSpeedIncrease" ) - input.LocalValue( "UACameraToolSpeedDecrease" );
 		}
 
-
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
+		// ================ Inputs ================
 
-		if ( !MoveFreeze )
+		if ( !MoveFreeze && !shouldTravel )
 		{
 			float cam_speed = CAMERA_SPEED;
 
@@ -52,6 +79,10 @@ class JMCinematicCamera: JMCameraBase
 				if ( CAMERA_SPEED < 0.001 ) 
 				{
 					CAMERA_SPEED = 0.001;
+				}
+				else if ( CAMERA_SPEED > 10 ) 
+				{
+					CAMERA_SPEED = 10;
 				}
 				
 				cam_speed = CAMERA_SPEED;
@@ -70,14 +101,40 @@ class JMCinematicCamera: JMCameraBase
 
 			transform[3] = transform[3] + ( linearVelocity * timeslice );
 
-			//float surfaceY = GetGame().SurfaceY( newPos[0], newPos[2] ) + 0.25;
-			//if ( newPos[1] < surfaceY ) 
-			//{
-			//	newPos[1] = surfaceY;
-			//}
+			SetTransform( transform );
 		}
+		else if ( shouldTravel )
+		{
+            currentTime += timeslice;
 
-		SetTransform( transform );
+            float t = Math.Clamp(currentTime / targetTime, 0.0, 1.0);
+
+            if (currentTime >= targetTime)
+            {
+                currentTargetIndex++;
+                if (currentTargetIndex >= travelPositions.Count())
+                {
+					shouldTravel = false;
+                }
+				else
+				{
+					currentTime = 0.0;
+					startPosition = travelPositions[currentTargetIndex - 1];
+					endPosition = travelPositions[currentTargetIndex];
+					targetTime = travelTimes[currentTargetIndex];
+					targetSmooth = travelSmooth[currentTargetIndex];
+				}
+            }
+            else
+            {
+                // Smooth step interpolation
+				if ( targetSmooth )
+                	t = SmoothStep(t);
+
+				vector pos = vector.Lerp(startPosition, endPosition, t);
+				SetPosition(pos + positionOffset);
+            }
+		}
 			
 		if ( !LookFreeze )
 		{
@@ -110,10 +167,51 @@ class JMCinematicCamera: JMCameraBase
 
 			orientation[0] = Math.NormalizeAngle( orientation[0] );
 			orientation[2] = Math.NormalizeAngle( orientation[2] );
-
+			
 			SetOrientation( orientation );
 		}
+		else
+		{
+			if ( SelectedTarget )
+			{
+				vector position = SelectedTarget.GetPosition();
+				LookAt(position + positionOffset);
+			}
+			else if ( TargetPosition )
+			{
+				LookAt(TargetPosition);
+			}
+		}
+
+		// ugly fix but works
+		vector finalpos = GetPosition();
+		float surfaceY = GetGame().SurfaceY( finalpos[0], finalpos[2] ) + 0.25;
+		if ( finalpos[1] < surfaceY ) 
+		{
+			finalpos[1] = surfaceY;
+		}
+		SetPosition(finalpos);
 	}
+	
+	void SetupTraveling(TVectorArray positions, TFloatArray time, TBoolArray smooth)
+	{
+		travelPositions = positions;
+		travelTimes = time;
+		travelSmooth = smooth;
+
+		currentTargetIndex = 1;
+		currentTime = 0.0;
+		startPosition = travelPositions[0];
+		endPosition = travelPositions[1];
+
+		shouldTravel = true;
+	}
+
+    // Custom smooth step interpolation function
+    private float SmoothStep(float t)
+    {
+        return t * t * (3 - 2 * t);
+    }
 
 	bool IsAnyInputExcludeActive()
 	{

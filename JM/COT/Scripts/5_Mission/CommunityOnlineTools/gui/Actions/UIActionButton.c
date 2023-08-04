@@ -44,6 +44,11 @@ class UIActionButton: UIActionBase
 		return ret;
 	}
 
+	void SetColor(int color)
+	{
+		m_Button.SetColor(color);
+	}
+
 	override bool CallEvent( UIEvent eid )
 	{
 		if ( !m_HasCallback )

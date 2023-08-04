@@ -1,5 +1,6 @@
 class JMTeleportSerialize : Managed
 {
+	ref TStringArray Types;
 	ref array< ref JMTeleportLocation > Locations;
 
 	[NonSerialized()]
@@ -9,6 +10,7 @@ class JMTeleportSerialize : Managed
 
 	private void JMTeleportSerialize()
 	{
+	 	Types = new TStringArray;
 		Locations = new array< ref JMTeleportLocation >;
 		m_WorldName = GetGame().GetWorldName();
 		m_FileName = JMConstants.FILE_TELEPORT + "_" + m_WorldName + ".json";
@@ -16,6 +18,7 @@ class JMTeleportSerialize : Managed
 
 	void ~JMTeleportSerialize()
 	{
+		delete Types;
 		delete Locations;
 	}
 
@@ -26,8 +29,14 @@ class JMTeleportSerialize : Managed
 		if ( FileExist( m_FileName ) )
 		{
 			JsonFileLoader<JMTeleportSerialize>.JsonLoadFile( m_FileName, settings );
-		} else 
-		{
+			
+			//! we dont have versionning so this is a fail safe
+			if ( settings.Types.Count() == 0 )
+			{
+				settings.Defaults();
+				settings.Save();
+			}
+		} else {
 			settings.Defaults();
 			settings.Save();
 		}
@@ -45,9 +54,9 @@ class JMTeleportSerialize : Managed
 		JsonFileLoader<JMTeleportSerialize>.JsonSaveFile( m_FileName, this );
 	}
 
-	void AddLocation( string name, vector position, float radius = 4.0 )
+	void AddLocation( string type, string name, vector position, float radius = 4.0 )
 	{
-		Locations.Insert( new JMTeleportLocation( name, position, radius ) );
+		Locations.Insert( new JMTeleportLocation( type, name, position, radius ) );
 	}
 
 	void Defaults()
@@ -86,16 +95,34 @@ class JMTeleportSerialize : Managed
 			if ( location_type.Substring(0, 4) == "Name" )
 				location_type = location_type.Substring(4, location_name.Length());
 				
-			if ( location_name_path.Substring(0, 2) == "AF" )
+			if ( location_class_name.Substring(0, 2) == "AF" )
 				location_type = "Airfield";
 				
-			if ( location_name_path.Substring(0, 2) == "MB" )
+			if ( location_class_name.Substring(0, 2) == "MB" )
 				location_type = "Military Base";
 
-			location_name = location_type + " | " + location_name;
+			TStringArray output = new TStringArray;
+			location_class_name.Split("_", output);
+			foreach(string slice: output)
+			{
+				if ( slice == "AF" )
+				{
+					location_type = "Airfield";
+				}
+				else if ( slice == "MB" )
+				{
+					location_type = "Military Base";
+				}
+			}
 
-			AddLocation( location_name, Vector(location_position[0], 0, location_position[1]) );
+			if ( Types.Find(location_type) == -1 )
+				Types.Insert(location_type);
+
+			AddLocation( location_type, location_name, Vector(location_position[0], 0, location_position[1]) );
 		}
+
+		Types.Sort();
+		Types.InsertAt("", 0);
 	
 		ref array< ref string > AfterSorting = new array< ref string >;
 		ref array< ref string > BeforeSorting = new array< ref string >;
@@ -124,6 +151,8 @@ class JMTeleportSerialize : Managed
 
 	void Write( ParamsWriteContext ctx )
 	{
+		ctx.Write( Types );
+
 		ctx.Write( Locations.Count() );
 		foreach ( auto location: Locations )
 		{
@@ -133,6 +162,12 @@ class JMTeleportSerialize : Managed
 
 	bool Read( ParamsReadContext ctx )
 	{
+		TStringArray locTypes
+		if ( !ctx.Read( locTypes ) )
+			return false;
+
+		Types = locTypes;
+
 		int count;
 		if ( !ctx.Read( count ) )
 			return false;
@@ -140,6 +175,10 @@ class JMTeleportSerialize : Managed
 		Locations.Clear();
 		for ( int i = 0; i < count; i++ )
 		{
+			string type;
+			if ( !ctx.Read( type ) )
+				return false;
+
 			string name;
 			if ( !ctx.Read( name ) )
 				return false;
@@ -152,7 +191,7 @@ class JMTeleportSerialize : Managed
 			if ( !ctx.Read( radius ) )
 				return false;
 
-			Locations.Insert( new JMTeleportLocation( name, position, radius ) );
+			Locations.Insert( new JMTeleportLocation( type, name, position, radius ) );
 		}
 
 		return true;

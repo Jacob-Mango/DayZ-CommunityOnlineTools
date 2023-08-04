@@ -1,9 +1,7 @@
 class JMTeleportModule: JMRenderableModuleBase
 {
-	#ifdef COT_TPMENU2MAPMENU
 	JMMapModule m_MapModule;
 	JMMapForm m_MapMenu;
-	#endif
 	
 	private ref JMTeleportSerialize m_Settings;
 	
@@ -16,32 +14,26 @@ class JMTeleportModule: JMRenderableModuleBase
 	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
 		
-		#ifdef COT_TPMENU2MAPMENU
 		if (Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
-		#endif
 	}
 
 	override void EnableUpdate()
 	{
 	}
 
-	void OnSelectLocation(vector pos)
+	void OnSelectLocation(vector pos, bool playerpos = false)
 	{
-		#ifdef COT_TPMENU2MAPMENU
 		if( !m_MapMenu )
 		{
 			if (!Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 				return;
 
-			Print("m_MapModule.GetForm() = "+m_MapModule.GetForm());
-			Print("m_MapModule = "+m_MapModule);
-
 			if (!Class.CastTo(m_MapMenu, m_MapModule.GetForm()) )
 				return;
 		}
-		m_MapMenu.UpdateMapPos(pos);
-		#endif
+
+		m_MapMenu.UpdateMapPosition(playerpos, pos);
 	}
 
 	override bool HasAccess()
@@ -118,6 +110,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return m_Settings.Locations;
 	}
 
+	TStringArray GetLocationTypes()
+	{
+		return m_Settings.Types;
+	}
+
 	void Input_Cursor( UAInput input )
 	{
 		if ( !(input.LocalPress()) )
@@ -138,8 +135,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
 			currentPosition = CurrentActiveCamera.GetPosition();
-		} else 
-		{
+		} else {
 			currentPosition = GetPlayer().GetPosition();
 		}
 
@@ -412,7 +408,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( IsMissionOffline() )
 		{
 			Server_Location( location.Name, guids, NULL );
-		} else if ( IsMissionClient() )
+		}
+		else if ( IsMissionClient() )
 		{
 			if ( location == NULL )
 				return;
@@ -532,8 +529,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	override void GetSubCommands(inout array<ref JMCommand> commands)
 	{
 		AddSubCommand(commands, "position", "Command_Position", "Admin.Player.Teleport.Position");
-		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");
-		
+		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");		
 		AddSubCommand(commands, "get", "Command_Get", "Admin.Player.Teleport.Position");
 	}
 

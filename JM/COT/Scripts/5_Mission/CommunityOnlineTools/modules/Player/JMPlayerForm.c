@@ -1557,7 +1557,7 @@ class JMPlayerForm: JMFormBase
 		super.OnShow();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
 
 		UpdateUI();
 

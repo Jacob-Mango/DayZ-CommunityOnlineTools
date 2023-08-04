@@ -3,6 +3,8 @@ class JMTeleportForm: JMFormBase
 	protected Widget m_ActionsFilterWrapper;
 	protected UIActionEditableText m_Filter;
 
+	private string m_CurrentType;
+	protected UIActionDropdownList m_CategoriesList;
 	protected TextListboxWidget m_LstPositionList;
 
 	protected Widget m_ActionsWrapper;
@@ -22,25 +24,28 @@ class JMTeleportForm: JMFormBase
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
+		Widget topRow = UIActionManager.CreateGridSpacer( m_ActionsFilterWrapper, 1, 2 );
+
+		m_Filter = UIActionManager.CreateEditableText( topRow, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
+		
+		m_CategoriesList = UIActionManager.CreateDropdownBox( topRow, m_ActionsFilterWrapper, "Type:", {""}, this, "Click_LocationType" );
 
 		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 1 );
+		Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
 
-		Widget coords = UIActionManager.CreateGridSpacer( rows, 1, 2 );
-
-		m_PositionX = UIActionManager.CreateText( coords, "X: " );
-		m_PositionZ = UIActionManager.CreateText( coords, "Z: " );
+		m_PositionX = UIActionManager.CreateText( rows, "X: " );
+		m_PositionZ = UIActionManager.CreateText( rows, "Z: " );
 
 		if ( GetGame().IsServer() )
 		{
-			m_Teleport = UIActionManager.CreateButton( rows, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
-		} else
+			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
+		}
+		else
 		{
-			m_Teleport = UIActionManager.CreateButton( rows, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
+			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
 		}
 	}
 
@@ -52,19 +57,51 @@ class JMTeleportForm: JMFormBase
 		m_PositionZ.SetText( "N/A" );
 
 		if (m_Module.IsLoaded())
+		{
 			UpdateList();
+		}
 		else
-			m_Module.Load();
+		{
+			m_Module.Load();	
+		}
+	}
+
+	override void OnHide()
+	{
+		super.OnHide();
+
+		//m_Module.OnSelectLocation(vector.Zero, true);
 	}
 
 	override void OnSettingsUpdated()
+	{		
+		UpdateList();
+	}
+
+	void Click_LocationType( UIEvent eid, UIActionBase action )
 	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_CurrentType = m_CategoriesList.GetText();
+
 		UpdateList();
 	}
 
 	void Click_Teleport( UIEvent eid, UIActionBase action )
 	{
-		m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		array< string > players = JM_GetSelected().GetPlayers();
+		if ( players.Count() == 0 )
+		{
+			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			if ( player.GetIdentity() )
+				players.Insert(player.GetIdentity().GetId());
+		}
+
+		m_Module.Location( GetCurrentLocation(), players );
 	}
 
 	void Type_UpdateList( UIEvent eid, UIActionBase action )
@@ -84,6 +121,9 @@ class JMTeleportForm: JMFormBase
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
 			return;
+		
+		TStringArray locationTypes = m_Module.GetLocationTypes();
+		m_CategoriesList.SetItems(locationTypes);
 
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
@@ -91,9 +131,14 @@ class JMTeleportForm: JMFormBase
 		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
 			return;
-
+		
 		for ( int i = 0; i < locations.Count(); i++ )
 		{
+			string type = "" + locations[i].Type;
+
+			if (  m_CurrentType != "" && type != m_CurrentType ) 
+				continue;
+
 			string name = "" + locations[i].Name;
 			name.ToLower();
 
@@ -116,9 +161,7 @@ class JMTeleportForm: JMFormBase
 			m_PositionX.SetText( location.Position[0].ToString() );
 			m_PositionZ.SetText( location.Position[2].ToString() );
 
-			#ifdef COT_TPMENU2MAPMENU
 			m_Module.OnSelectLocation(location.Position);
-			#endif
 		}
 
 		return true;
@@ -126,7 +169,7 @@ class JMTeleportForm: JMFormBase
 
 	JMTeleportLocation GetCurrentLocation()
 	{
-		if ( m_LstPositionList.GetSelectedRow() != -1 )
+		if ( m_LstPositionList && m_LstPositionList.GetSelectedRow() != -1 )
 		{
 			JMTeleportLocation position_name;
 			m_LstPositionList.GetItemData( m_LstPositionList.GetSelectedRow(), 0, position_name );

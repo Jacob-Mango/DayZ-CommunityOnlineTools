@@ -22,6 +22,8 @@ class JMESPForm: JMFormBase
 
 	private UIActionEditableTextPreview m_SearchBox;
 
+	private bool m_UseFilter;
+
 	void JMESPForm()
 	{
 		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
@@ -200,11 +202,11 @@ class JMESPForm: JMFormBase
 		if ( m_Module.GetState() != JMESPState.Remove )
 		{
 			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
-
-			//m_sldr_Refresh.Disable();
+			m_btn_Toggle.SetColor(COLOR_RED_A);
 		}
 		else
 		{
+			m_btn_Toggle.SetColor(COLOR_GREEN_A);
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
@@ -215,6 +217,7 @@ class JMESPForm: JMFormBase
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
+				m_sldr_Refresh.SetColor(COLOR_WHITE);
 				m_sldr_Refresh.Disable();
 			}
 		}
@@ -270,7 +273,11 @@ class JMESPForm: JMFormBase
 		
 		if ( strSearch != "" )
 		{
-			m_SearchBox.SetTextPreview(FindClosestWord(classnamelist, strSearch));
+			string wordPreview = FindClosestWord(classnamelist, strSearch);
+			m_SearchBox.SetTextPreview(wordPreview);
+			
+			m_UseFilter = strSearch == wordPreview;
+
 		}
 		else
 		{
@@ -332,7 +339,10 @@ class JMESPForm: JMFormBase
 
 		UpdateList();
 
-		m_Module.Filter = action.GetText();
+		if ( m_UseFilter )
+			m_Module.Filter = action.GetText();
+		else
+			m_Module.Filter = "";
 	}
 
 	void Change_UpdateRate( UIEvent eid, UIActionBase action )
@@ -340,6 +350,11 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
+		if ( m_sldr_Refresh.GetCurrent() > 1 )
+			m_sldr_Refresh.SetColor(COLOR_WHITE);
+		else
+			m_sldr_Refresh.SetColor(COLOR_RED_A);
+
 		m_Module.ESPUpdateTime = action.GetCurrent();
 	}
 
