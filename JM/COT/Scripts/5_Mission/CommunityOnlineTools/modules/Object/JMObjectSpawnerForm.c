@@ -262,7 +262,7 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		// Reset to default since 0 is used for NONE
-		m_ItemDataList.SetSelectedItemId(1);
+		m_ItemDataList.SetSelection(1, false);
 		
 		UpdateQuantityItemColor();
 
@@ -275,7 +275,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if (m_PreviewItem.IsInherited(Edible_Base)) 
 		{
 			Edible_Base item = Edible_Base.Cast(m_PreviewItem);
-			item.GetFoodStage().ChangeFoodStage( m_ItemDataList.GetSelectedItemId() );
+			item.GetFoodStage().ChangeFoodStage( m_ItemDataList.GetSelection() );
 		}
 	}
 
@@ -288,7 +288,7 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 		else if ( m_ItemIsLiquid )
 		{
-			liquidType = m_ItemDataList.GetSelectedItemId();
+			liquidType = m_ItemDataList.GetSelection();
 		}
 
 		switch(liquidType)
@@ -646,7 +646,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		int itemState = 0; // 0 mean don't do anything
 		if ( m_ItemIsBlood || m_ItemIsFood || m_ItemIsLiquid )
-			itemState = m_ItemDataList.GetSelectedItemId();
+			itemState = m_ItemDataList.GetSelection();
 
 		float health = m_HealthItem.GetCurrent();
 		float quantity = m_QuantityItem.GetCurrent();

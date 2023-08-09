@@ -13,7 +13,6 @@ class UIActionDropdownList: UIActionBase
 	protected string m_PreviousText;
 
 	protected int m_SelectedIndex;
-	protected int m_SelectedItemId;
 
 	void UIActionDropdownList()
 	{
@@ -78,18 +77,22 @@ class UIActionDropdownList: UIActionBase
 		m_Label.SetText( text );
 	}
 
-	int GetSelectedItemId()
+	override int GetSelection()
 	{
-		return m_SelectedItemId;
+		return m_SelectedIndex;
 	}
 
-	void SetSelectedItemId(int id)
+	override void SetSelection( int i, bool sendEvent = true )
 	{
-		m_SelectedItemId = id;
+		m_SelectedIndex = i;
+		m_List.SelectRow( m_SelectedIndex );
 		
 		string result;
-		m_List.GetItemText( m_SelectedItemId, 0, result );
+		m_List.GetItemText( m_SelectedIndex, 0, result );
 		m_Text.SetText( result );
+
+		if (sendEvent)
+			CallEvent( UIEvent.CHANGE );
 	}
 
 	void SetText( float num )
@@ -123,8 +126,6 @@ class UIActionDropdownList: UIActionBase
 		} else
 		{
 			m_ToggleImage.SetImage( 1 );
-			m_List.SelectRow( -1 );
-			m_SelectedIndex = 0;
 		}
 
 		#ifdef COT_DEBUGLOGS
@@ -190,36 +191,31 @@ class UIActionDropdownList: UIActionBase
 
 		string text = m_Text.GetText();
 
-		string item = "";
+		string item;
 
-		string nText = "" + text;
+		string nText = text;
 		nText.ToLower();
 
-		string pText = "" + m_PreviousText;
-		pText.ToLower();
+		m_List.ClearItems();
 
 		for ( int i = 0; i < m_Items.Count(); ++i )
 		{
-			item = "" + m_Items[i];
+			item = m_Items[i];
 			item.ToLower();
 
-			if ( item.Contains( nText ) )
+			if ( item.IndexOf( nText ) == 0 )
 			{
 				m_PreviousText = text;
-				pText = nText;
 				success = true;
-				break;
+				m_SelectedIndex = i;
 			}
+
+			m_List.AddItem( m_Items[i], NULL, 0 );
 		}
 
 		m_Text.SetText( m_PreviousText );
 
-		m_List.ClearItems();
-
-		for ( i = 0; i < m_Items.Count(); ++i )
-		{
-			m_List.AddItem( m_Items[i], NULL, 0 );
-		}  
+		m_List.SelectRow(m_SelectedIndex);
 
 		return success;
 	}
@@ -229,8 +225,8 @@ class UIActionDropdownList: UIActionBase
 		if ( m_List.GetNumItems() > 0 && m_List.GetSelectedRow() != -1 )
 		{
 			string result;
-			m_List.GetItemText( m_List.GetSelectedRow(), 0, result );
-			m_SelectedItemId = m_List.GetSelectedRow();
+			m_SelectedIndex = m_List.GetSelectedRow();
+			m_List.GetItemText( m_SelectedIndex, 0, result );
 			m_Text.SetText( result );
 
 			CallEvent( UIEvent.CHANGE );
@@ -250,6 +246,8 @@ class UIActionDropdownList: UIActionBase
 		{
 			if ( m_List.GetNumItems() != 0 )
 			{
+				int selectedIndex = m_SelectedIndex;
+
 				if ( key == KeyCode.KC_UP )
 				{
 					//if ( m_SelectedIndex == -1 )
@@ -269,12 +267,14 @@ class UIActionDropdownList: UIActionBase
 				else if ( m_SelectedIndex < 0 )
 					m_SelectedIndex = 0;
 
-				m_List.SelectRow( m_SelectedIndex );
+				if (m_SelectedIndex != selectedIndex)
+				{
+					m_List.SelectRow( m_SelectedIndex );
 
-				string result;
-				m_List.GetItemText( m_SelectedIndex, 0, result );
-				m_SelectedItemId = m_SelectedIndex;
-				m_Text.SetText( result );
+					string result;
+					m_List.GetItemText( m_SelectedIndex, 0, result );
+					m_Text.SetText( result );
+				}
 			}
 		}
 
@@ -288,13 +288,10 @@ class UIActionDropdownList: UIActionBase
 			if ( m_PreviousText == m_Text.GetText() && !finished )
 				return true;
 
-			m_SelectedIndex = 0; // -1;
-
 			if ( !finished )
 				ToggleList( true );
 			
 			bool success = UpdateText();
-			m_List.SelectRow( 0 );
 
 			if ( finished )
 				OnSelected();
