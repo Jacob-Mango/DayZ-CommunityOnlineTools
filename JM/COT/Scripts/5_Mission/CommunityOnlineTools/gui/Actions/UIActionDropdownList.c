@@ -339,4 +339,13 @@ class UIActionDropdownList: UIActionBase
 
 		return false;
 	}
+
+	void SetEditBoxWidth( float width )
+	{
+		float w;
+		float h;
+		m_Text.GetSize( w, h );
+		m_Text.SetSize( width, h );
+		m_Text.Update();
+	}
 };
