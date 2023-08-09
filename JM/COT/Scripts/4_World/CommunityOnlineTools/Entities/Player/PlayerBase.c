@@ -355,7 +355,9 @@ modded class PlayerBase
 			SetAllowDamage( !mode );
 
 			m_COT_GodMode = mode;
+			#ifdef SERVER
 			SetSynchDirty();
+			#endif
 		}
 		else
 		{
