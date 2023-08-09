@@ -317,10 +317,7 @@ modded class PlayerBase
 
 	bool COTHasGodMode()
 	{
-		if (GetGame().IsClient())
-			return m_COT_GodMode;
-
-		return !GetAllowDamage();
+		return m_COT_GodMode;
 	}
 
 	bool COTIsFrozen()
