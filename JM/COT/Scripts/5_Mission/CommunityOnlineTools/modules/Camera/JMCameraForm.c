@@ -32,24 +32,31 @@ class JMCameraForm: JMFormBase
 		m_Positions = new TVectorArray;
 	}
 
-	void ~JMCameraForm()
+	override void OnHide()
 	{
 		m_Module.m_Times 	 = m_Times;
 		m_Module.m_IsSmooth  = m_IsSmooth;
 		m_Module.m_Positions = m_Positions;
-		m_Module.m_EnableFullmapCamera = m_EnableFullmapCamera.IsChecked();
-		m_Module.m_HideGrass = m_HideGrass.IsChecked();
-		m_Module.m_BlurStrength = m_SliderBlurStrength.GetCurrent();
-		m_Module.m_FocusDistance = m_SliderFocusDistance.GetCurrent();
-		m_Module.m_FocalLength = m_SliderFocalLength.GetCurrent();
-		m_Module.m_FocalNear = m_SliderFocalNear.GetCurrent();
-		m_Module.m_Exposure = m_SliderExposure.GetCurrent();
-		m_Module.m_ChromAbb = m_SliderChromAbb.GetCurrent();
-		m_Module.m_Vignette = m_SliderVignette.GetCurrent();
+		if (m_EnableFullmapCamera)
+			m_Module.m_EnableFullmapCamera = m_EnableFullmapCamera.IsChecked();
+		if (m_HideGrass)
+			m_Module.m_HideGrass = m_HideGrass.IsChecked();
+		if (m_SliderBlurStrength)
+			m_Module.m_BlurStrength = m_SliderBlurStrength.GetCurrent();
+		if (m_SliderFocusDistance)
+			m_Module.m_FocusDistance = m_SliderFocusDistance.GetCurrent();
+		if (m_SliderFocalLength)
+			m_Module.m_FocalLength = m_SliderFocalLength.GetCurrent();
+		if (m_SliderFocalNear)
+			m_Module.m_FocalNear = m_SliderFocalNear.GetCurrent();
+		if (m_SliderExposure)
+			m_Module.m_Exposure = m_SliderExposure.GetCurrent();
+		if (m_SliderChromAbb)
+			m_Module.m_ChromAbb = m_SliderChromAbb.GetCurrent();
+		if (m_SliderVignette)
+			m_Module.m_Vignette = m_SliderVignette.GetCurrent();
 
-		delete m_Times;
-		delete m_IsSmooth;
-		delete m_Positions;
+		super.OnHide();
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
