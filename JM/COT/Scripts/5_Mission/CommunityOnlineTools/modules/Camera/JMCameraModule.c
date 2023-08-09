@@ -36,13 +36,6 @@ class JMCameraModule: JMRenderableModuleBase
 		m_TargetFOV = 1.0;
 	}
 
-	void ~JMCameraModule()
-	{
-		delete m_Times;
-		delete m_IsSmooth;
-		delete m_Positions;
-	}
-
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Camera.View" );
