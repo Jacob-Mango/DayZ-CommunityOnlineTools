@@ -417,7 +417,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( health ) )
 				return;
 
-			float itemState;
+			int itemState;
 			if ( !ctx.Read( itemState ) )
 				return;
 
@@ -442,11 +442,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				{
 					if ( item.IsBloodContainer() )
 					{
-						item.SetLiquidType(Math.Pow(LIQUID_BLOOD_0_P, itemState));
+						item.SetLiquidType(LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1));
 					}
 					else
 					{
-						item.SetLiquidType(Math.Pow(LIQUID_WATER, itemState));
+						item.SetLiquidType(LIQUID_WATER * Math.Pow(2, itemState - 1));
 					}
 				}
 				else if ( item.HasFoodStage() && item.CanBeCooked() )
