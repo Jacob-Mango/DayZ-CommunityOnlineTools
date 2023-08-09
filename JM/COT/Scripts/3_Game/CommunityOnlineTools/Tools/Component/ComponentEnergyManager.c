@@ -6,8 +6,8 @@ modded class ComponentEnergyManager
 	{
 		if (added_energy < 0)
 		{
-			Man player = m_ThisEntityAI.GetHierarchyRootPlayer();
-			if (player && !player.GetAllowDamage())
+			PlayerBase player = PlayerBase.Cast(m_ThisEntityAI.GetHierarchyRootPlayer());
+			if (player && player.COTHasGodMode())
 				return 0;  //! UNLIMITED POWER
 		}
 
