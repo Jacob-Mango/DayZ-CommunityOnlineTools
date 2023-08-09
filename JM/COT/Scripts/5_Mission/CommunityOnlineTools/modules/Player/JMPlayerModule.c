@@ -60,7 +60,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		super.RegisterKeyMouseBindings();
 		
 		Bind( new JMModuleBinding( "InputSelfHeal",			"UAPlayerModuleHeal",		true 	) );
-		Bind( new JMModuleBinding( "InputSetSelfGodMode",	"UAPlayerModuleGodMode",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
 	}
 
 	void OnPlayer_Checked( string guid, bool checked )
@@ -1164,6 +1164,17 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		GetGame().SelectPlayer(senderRPC, senderRPC.GetPlayer());
 	}
 
+	void ToggleGodMode()
+	{
+		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		bool value = !player.COTHasGodMode();
+		array< string > guids = JM_GetSelected().GetPlayers();
+		if (guids.Count() == 0)
+			guids.Insert(player.GetIdentity().GetId());
+
+		SetGodMode(value, guids);
+	}
+
 	void SetGodMode( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1182,6 +1193,8 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		int godModePlayers;
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1189,6 +1202,8 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 				continue;
 
 			player.COTSetGodMode( value );
+
+			godModePlayers++;
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1202,6 +1217,31 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 			players[i].Update();
 		}
+
+		//! TODO localization
+		string message;
+		if ( godModePlayers > 0 )
+		{
+			if ( value )
+				message = "Enabled Godmode";
+			else
+				message = "Disabled Godmode";
+		}
+		else
+		{
+			message = "Failed to toggle godmode";
+		}
+
+		if ( players.Count() > 1 )
+		{
+			message += " for " + players.Count() + " players";
+		}
+		else
+		{
+			message += " for yourself";
+		}
+
+		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
 
 	private void RPC_SetGodMode( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1766,50 +1806,13 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		}
 	}
 
-	void InputSetSelfGodMode( UAInput input )
+	void InputToggleGodMode( UAInput input )
 	{
 		if ( !input.LocalPress() )
 			return;
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
-			SetSelfGodMode();
-	}
-
-	void SetSelfGodMode()
-	{
-		array< string > guids = new array< string >;
-		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-		bool value = !player.COTHasGodMode();
-		string message;
-		if ( value )
-			message = "Enabled Godmode";
-		else
-			message = "Disabled Godmode";
-
-		if ( JM_GetSelected().GetPlayers().Count() != 0 )
-		{
-			message += " for " + JM_GetSelected().GetPlayers().Count() + " Players";
-			guids = JM_GetSelected().GetPlayers();
-		}
-		else
-		{
-			message += " for yourself";
-			guids.Insert(player.GetIdentity().GetId());
-		}
-
-		COTCreateLocalAdminNotification( new StringLocaliser( message ) );
-
-		if ( IsMissionHost() )
-		{
-			Exec_SetGodMode( value, guids, NULL );
-		}
-		else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( value );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetGodMode, true, NULL );
-		}
+			ToggleGodMode();
 	}
 
 	void Heal( array< string > guids )

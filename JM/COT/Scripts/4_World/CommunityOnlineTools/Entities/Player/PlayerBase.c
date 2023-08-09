@@ -11,6 +11,7 @@ modded class PlayerBase
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
+	private bool m_COT_GodMode;
 	private bool m_COT_GodMode_Preference;
 
 	private int m_JMIsInvisible;
@@ -78,6 +79,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
+		RegisterNetSyncVariableBool( "m_COT_GodMode" );
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -108,6 +110,19 @@ modded class PlayerBase
 		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
 			GetGame().GetUIManager().ShowUICursor(true);
 #endif
+	}
+
+	override void OnConnect()
+	{
+		super.OnConnect();
+
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(COTOnConnect);
+	}
+
+	void COTOnConnect()
+	{
+		m_COT_GodMode = !GetAllowDamage();
+		SetSynchDirty();
 	}
 
 	override void OnVariablesSynchronized()
@@ -302,6 +317,9 @@ modded class PlayerBase
 
 	bool COTHasGodMode()
 	{
+		if (GetGame().IsClient())
+			return m_COT_GodMode;
+
 		return !GetAllowDamage();
 	}
 
@@ -338,6 +356,13 @@ modded class PlayerBase
 				m_COT_GodMode_Preference = !GetAllowDamage();
 
 			SetAllowDamage( !mode );
+
+			m_COT_GodMode = mode;
+			SetSynchDirty();
+		}
+		else
+		{
+			Error("COTSetGodMode cannot be called on client");
 		}
 	}
 
