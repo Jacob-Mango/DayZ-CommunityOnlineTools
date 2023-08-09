@@ -59,7 +59,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		super.RegisterKeyMouseBindings();
 		
-		Bind( new JMModuleBinding( "InputSelfHeal",			"UAPlayerModuleHeal",		true 	) );
+		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
 	}
 
@@ -1768,41 +1768,18 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
 	}
 
-	void InputSelfHeal( UAInput input )
+	void InputHeal( UAInput input )
 	{
 		if ( !input.LocalPress() )
 			return;
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
-			SelfHeal();
-	}
-
-	void SelfHeal()
-	{
-		array< string > guids = new array< string >;
-		string message = "You healed";
-
-		if ( JM_GetSelected().GetPlayers().Count() != 0 )
 		{
-			message += " " + JM_GetSelected().GetPlayers().Count() + " Players";
-			guids = JM_GetSelected().GetPlayers();
-		}
-		else
-		{
-			message += " yourself";
-			guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
-		}
+			array< string > guids = JM_GetSelected().GetPlayers();
+			if (guids.Count() == 0)
+				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
 
-		COTCreateLocalAdminNotification( new StringLocaliser( message ) );
-
-		if ( IsMissionHost() )
-		{
-			Exec_Heal( guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.Heal, true, NULL );
+			Heal(guids);
 		}
 	}
 
@@ -1835,6 +1812,8 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		bool includeAttachments = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Attachments", ident );
 		bool includeCargo = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Cargo", ident );
 		
+		int healedPlayers;
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1855,6 +1834,8 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );
 
+			healedPlayers++;
+
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
@@ -1864,6 +1845,20 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 			players[i].Update();
 		}
+
+		//! TODO localization
+		string message;
+		if ( healedPlayers > 0 )
+			message = "You healed";
+		else
+			message = "Failed to heal";
+
+		if ( players.Count() > 1 )
+			message += " " + players.Count() + " players";
+		else
+			message += " yourself";
+
+		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
 
 	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
