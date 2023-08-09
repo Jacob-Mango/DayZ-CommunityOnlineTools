@@ -613,7 +613,8 @@ class JMObjectSpawnerForm: JMFormBase
 	override void OnHide() 
 	{
 		m_Module.m_CurrentType = m_CurrentType;
-		m_Module.m_SearchText = m_SearchBox.GetText();
+		if (m_SearchBox)
+			m_Module.m_SearchText = m_SearchBox.GetText();
 
 		super.OnHide();
 	}
