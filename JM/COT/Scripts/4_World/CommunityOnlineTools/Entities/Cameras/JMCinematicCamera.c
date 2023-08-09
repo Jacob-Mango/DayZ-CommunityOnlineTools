@@ -31,13 +31,6 @@ class JMCinematicCamera: JMCameraBase
 		SetEventMask( EntityEvent.FRAME );
 	}
 
-	void ~JMCinematicCamera()
-	{
-		delete travelPositions;
-		delete travelTimes;
-		delete travelSmooth;
-	}
-
 	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
