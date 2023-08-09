@@ -11,7 +11,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private UIActionDropdownList m_ItemDataList;
 	
 	private UIActionEditableTextPreview m_SearchBox;
-	private UIActionNavigateButton m_SpawnMode;
+	private UIActionSelectBox m_SpawnMode;
 
 	private TextListboxWidget m_ClassList;
 
@@ -27,11 +27,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private Object m_DeletingObject;
 
-	private int m_ObjSpawnMode = SpawnSelectMode.CURSOR;
+	private static int s_ObjSpawnMode = SpawnSelectMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
-		"None",
-
 		"#STR_COT_OBJECT_MODULE_EXPORT_RAW",
 		"#STR_COT_OBJECT_MODULE_EXPORT_TYPES",
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
@@ -206,15 +204,16 @@ class JMObjectSpawnerForm: JMFormBase
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
-		m_SpawnMode = UIActionManager.CreateNavButton( spawnButtons, " #STR_COT_OBJECT_MODULE_CURSOR", JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "ChangeSpawnMode" );
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 		
 		if ( GetGame().IsServer() )
-		{
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
-		} else {
+		else
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
-		}
+
+		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
+		m_SpawnMode.SetSelectorWidth(1.0);
+		m_SpawnMode.SetSelection(s_ObjSpawnMode - 1, false);
+		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -382,7 +381,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		SpawnObject(m_ObjSpawnMode);
+		SpawnObject(s_ObjSpawnMode);
 	}
 
 	void AddObjectType( Widget parent, string name, string config )
@@ -598,7 +597,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( w == m_ClassList && button == MouseState.LEFT )
 		{
-			SpawnObject(m_ObjSpawnMode);
+			SpawnObject(s_ObjSpawnMode);
 			
 			return true;
 		}
@@ -632,26 +631,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void ChangeSpawnMode( UIEvent eid, UIActionBase action )
 	{
-		if ( eid == UIEvent.CLICK || eid == UIEvent.CLICK_RIGHTSIDE )
-		{
-			m_ObjSpawnMode++;
-		}
-		else if ( eid == UIEvent.CLICK_LEFTSIDE )
-		{
-			m_ObjSpawnMode--;
-		}
-		else
-		{
+		if ( eid != UIEvent.CHANGE )
 			return;
-		}
 
-		if ( m_ObjSpawnMode == SpawnSelectMode.UNKNOWN )
-			m_ObjSpawnMode = SpawnSelectMode.NONE + 1;
-
-		if ( m_ObjSpawnMode == SpawnSelectMode.NONE )
-			m_ObjSpawnMode = SpawnSelectMode.UNKNOWN - 1;
-
-		m_SpawnMode.SetButton(m_ObjSpawnModeText[m_ObjSpawnMode]);
+		s_ObjSpawnMode = action.GetSelection() + 1;
 	}
 
 	void SpawnObject(int mode = SpawnSelectMode.NONE)
