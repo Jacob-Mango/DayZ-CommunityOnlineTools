@@ -289,8 +289,7 @@ class CommunityOnlineToolsBase
 
 	static void HealEntityRecursive(EntityAI entity, bool includeAttachments = true, bool includeCargo = true)
 	{
-		if (entity.GetHealthLevel() != GameConstants.STATE_PRISTINE)
-			entity.SetFullHealth();
+		entity.SetFullHealth();
 
 		int i;
 
