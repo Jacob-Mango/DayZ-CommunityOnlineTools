@@ -137,7 +137,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"proxy"
 	};
 
-	protected bool m_IknowWhatIamDoing;
+	protected static bool m_IknowWhatIamDoing;
 
 	void JMObjectSpawnerForm()
 	{
@@ -146,9 +146,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void ~JMObjectSpawnerForm()
 	{
-		m_Module.m_CurrentType = m_CurrentType;
-		m_Module.m_SearchText = m_SearchBox.GetText();
-
 		delete m_ObjectTypes;
 	}
 
@@ -616,6 +613,7 @@ class JMObjectSpawnerForm: JMFormBase
 	override void OnHide() 
 	{
 		m_Module.m_CurrentType = m_CurrentType;
+		m_Module.m_SearchText = m_SearchBox.GetText();
 
 		super.OnHide();
 	}
