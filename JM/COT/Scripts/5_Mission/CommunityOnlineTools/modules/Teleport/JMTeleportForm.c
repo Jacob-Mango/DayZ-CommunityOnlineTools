@@ -24,11 +24,11 @@ class JMTeleportForm: JMFormBase
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-		Widget topRow = UIActionManager.CreateGridSpacer( m_ActionsFilterWrapper, 1, 2 );
+		//Widget topRow = UIActionManager.CreateGridSpacer( m_ActionsFilterWrapper, 1, 2 );
 
-		m_Filter = UIActionManager.CreateEditableText( topRow, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
+		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
 		
-		m_CategoriesList = UIActionManager.CreateDropdownBox( topRow, m_ActionsFilterWrapper, "Type:", {""}, this, "Click_LocationType" );
+		//m_CategoriesList = UIActionManager.CreateDropdownBox( topRow, m_ActionsFilterWrapper, "Type:", {""}, this, "Click_LocationType" );
 
 		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
@@ -83,7 +83,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		m_CurrentType = m_CategoriesList.GetText();
+		//m_CurrentType = m_CategoriesList.GetText();
 
 		UpdateList();
 	}
@@ -122,8 +122,8 @@ class JMTeleportForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
 			return;
 		
-		TStringArray locationTypes = m_Module.GetLocationTypes();
-		m_CategoriesList.SetItems(locationTypes);
+		//TStringArray locationTypes = m_Module.GetLocationTypes();
+		//m_CategoriesList.SetItems(locationTypes);
 
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
