@@ -175,15 +175,6 @@ class JMCinematicCamera: JMCameraBase
 				LookAt(TargetPosition);
 			}
 		}
-
-		// ugly fix but works
-		vector finalpos = GetPosition();
-		float surfaceY = GetGame().SurfaceY( finalpos[0], finalpos[2] ) + 0.25;
-		if ( finalpos[1] < surfaceY ) 
-		{
-			finalpos[1] = surfaceY;
-		}
-		SetPosition(finalpos);
 	}
 	
 	void SetupTraveling(TVectorArray positions, TFloatArray time, TBoolArray smooth)
