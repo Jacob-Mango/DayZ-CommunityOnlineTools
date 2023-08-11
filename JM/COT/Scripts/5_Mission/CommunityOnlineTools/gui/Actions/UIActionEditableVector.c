@@ -89,9 +89,7 @@ class UIActionEditableVector: UIActionBase
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
 	{
-		super.OnMouseWheel( w, x, y, wheel );
-
-		if ( w == m_TextX || w == m_TextY || w == m_TextZ )
+		if ( (w == m_TextX || w == m_TextY || w == m_TextZ) && IsFocusWidget(GetFocus()) )
 		{
 			EditBoxWidget editw = EditBoxWidget.Cast(w);
 			IncrementValue(editw, wheel);
@@ -99,7 +97,7 @@ class UIActionEditableVector: UIActionBase
 			return true;
 		}
 
-		return true;
+		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
 	void IncrementValue(EditBoxWidget w, int wheel)
