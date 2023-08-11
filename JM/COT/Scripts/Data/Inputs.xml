@@ -125,7 +125,7 @@
         <input name="UAPlayerModuleHeal">
         </input>
         <input name="UAPlayerModuleGodMode">
-            <btn name="kG">
+            <btn name="kU">
             </btn>
         </input>
 
