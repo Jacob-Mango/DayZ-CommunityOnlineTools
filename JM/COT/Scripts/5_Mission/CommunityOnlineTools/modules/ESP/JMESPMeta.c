@@ -17,16 +17,18 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_PositionX;
 	UIActionEditableText m_Action_PositionY;
 	UIActionEditableText m_Action_PositionZ;
-	UIActionButton m_Action_PastePosition;
+	UIActionButton m_Action_Position;
 	UIActionButton m_Action_GetPosition;
+	UIActionButton m_Action_PastePosition;
 	UIActionButton m_Action_RefreshPosition;
 	UIActionCheckbox m_Action_AutoRefreshPosition;
 	
 	UIActionEditableText m_Action_OrientationX;
 	UIActionEditableText m_Action_OrientationY;
 	UIActionEditableText m_Action_OrientationZ;
-	UIActionButton m_Action_PasteOrientation;
+	UIActionButton m_Action_Orientation;
 	UIActionButton m_Action_GetOrientation;
+	UIActionButton m_Action_PasteOrientation;
 	UIActionButton m_Action_RefreshOrientation;
 	UIActionCheckbox m_Action_AutoRefreshOrientation;
 
@@ -80,9 +82,9 @@ class JMESPMeta : Managed
 	{
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPMeta::Destroy() void;" );
-		Print( "  m_Action_PastePosition = " + m_Action_PastePosition );
+		Print( "  m_Action_Position = " + m_Action_Position );
 		Print( "  m_Action_GetPosition = " + m_Action_GetPosition );
-		Print( "  m_Action_PasteOrientation = " + m_Action_PasteOrientation );
+		Print( "  m_Action_Orientation = " + m_Action_Orientation );
 		Print( "  m_Action_GetOrientation = " + m_Action_GetOrientation );
 		Print( "  m_Action_Health = " + m_Action_Health );
 		Print( "  widgetHandler = " + widgetHandler );
@@ -101,9 +103,9 @@ class JMESPMeta : Managed
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
 
-		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:", this, "Action_SetPosition" );
-		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:", this, "Action_SetPosition" );
-		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:", this, "Action_SetPosition" );
+		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:" );
+		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:" );
+		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:" );
 
 		m_Action_PositionX.SetOnlyNumbers( true );
 		m_Action_PositionY.SetOnlyNumbers( true );
@@ -111,8 +113,9 @@ class JMESPMeta : Managed
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "Copy", this, "Action_GetPosition", 0.25 );
-		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "Paste", this, "Action_PastePosition", 0.25 );
+		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.125 );
+		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.125 );
 		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
 		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
@@ -121,9 +124,9 @@ class JMESPMeta : Managed
 		Widget orientationActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget orientationActionsVec = UIActionManager.CreateGridSpacer( orientationActions, 1, 3 );
 
-		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:", this, "Action_SetOrientation" );
-		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:", this, "Action_SetOrientation" );
-		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:", this, "Action_SetOrientation" );
+		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:" );
+		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:" );
+		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:" );
 
 		m_Action_OrientationX.SetOnlyNumbers( true );
 		m_Action_OrientationY.SetOnlyNumbers( true );
@@ -131,8 +134,9 @@ class JMESPMeta : Managed
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Copy", this, "Action_GetOrientation", 0.25 );
-		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Paste", this, "Action_PasteOrientation", 0.25 );
+		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
+		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.125 );
+		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.125 );
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
@@ -210,9 +214,14 @@ class JMESPMeta : Managed
 
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CLICK )
 			return;
 
+		SetPosition();
+	}
+
+	void SetPosition()
+	{
 		vector pos;
 		pos[0] = m_Action_PositionX.GetText().ToFloat();
 		pos[1] = m_Action_PositionY.GetText().ToFloat();
@@ -231,14 +240,14 @@ class JMESPMeta : Managed
 
 		vector pos = clipboard.BeautifiedToVector();
 
-		if ( pos == vector.Zero )
+		if (pos != vector.Zero)
 		{
-			pos[0] = m_Action_PositionX.GetText().ToFloat();
-			pos[1] = m_Action_PositionY.GetText().ToFloat();
-			pos[2] = m_Action_PositionZ.GetText().ToFloat();
-		}
+			m_Action_PositionX.SetText(pos[0].ToString());
+			m_Action_PositionY.SetText(pos[1].ToString());
+			m_Action_PositionZ.SetText(pos[2].ToString());
 
-		module.SetPosition( pos, target );
+			SetPosition();
+		}
 	}
 
 	void Action_RefreshPosition( UIEvent eid, UIActionBase action )
@@ -265,9 +274,14 @@ class JMESPMeta : Managed
 
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CLICK )
 			return;
 
+		SetOrientation();
+	}
+
+	void SetOrientation()
+	{
 		vector ori;
 		ori[0] = m_Action_OrientationX.GetText().ToFloat();
 		ori[1] = m_Action_OrientationY.GetText().ToFloat();
@@ -286,14 +300,14 @@ class JMESPMeta : Managed
 
 		vector ori = clipboard.BeautifiedToVector();
 
-		if ( ori == vector.Zero )
+		if (ori != vector.Zero)
 		{
-			ori[0] = m_Action_OrientationX.GetText().ToFloat();
-			ori[1] = m_Action_OrientationY.GetText().ToFloat();
-			ori[2] = m_Action_OrientationZ.GetText().ToFloat();
-		}
+			m_Action_OrientationX.SetText(ori[0].ToString());
+			m_Action_OrientationY.SetText(ori[1].ToString());
+			m_Action_OrientationZ.SetText(ori[2].ToString());
 
-		module.SetOrientation( ori, target );
+			SetOrientation();
+		}
 	}
 
 	void Action_RefreshOrientation( UIEvent eid, UIActionBase action )
