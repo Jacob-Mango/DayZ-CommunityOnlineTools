@@ -227,61 +227,61 @@ class JMESPForm: JMFormBase
 	{
 		TStringArray classnamelist = new TStringArray;
 
-		TStringArray configs = new TStringArray;
-		configs.Insert( CFG_VEHICLESPATH );
-		configs.Insert( CFG_WEAPONSPATH );
-		configs.Insert( CFG_MAGAZINESPATH );
-		configs.Insert( "CfgNonAIVehicles" );
-
 		string strSearch = m_SearchBox.GetText();
-
-		strSearch.ToLower();
-
-		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
-		{
-			string strConfigPath = configs.Get( nConfig );
-
-			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
-
-			int nClassStart = 0;
-			if (nConfig == 0) nClassStart = 20;
-
-			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
-			{
-				string strName;
-
-				GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
-
-				int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
-
-				if ( scope == 0 )
-					continue;
-
-				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
-					continue;
-
-				string strNameLower = strName;
-
-				strNameLower.ToLower();
-
-				if ( ( strSearch != "" && ( !strNameLower.Contains( strSearch ) ) ) ) 
-					continue;
-
-				classnamelist.Insert(strNameLower);
-			}
-		}
 		
 		if ( strSearch != "" )
 		{
+			TStringArray configs = new TStringArray;
+			configs.Insert( CFG_VEHICLESPATH );
+			configs.Insert( CFG_WEAPONSPATH );
+			configs.Insert( CFG_MAGAZINESPATH );
+			configs.Insert( CFG_NONAI_VEHICLES );
+
+			strSearch.ToLower();
+
+			for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+			{
+				string strConfigPath = configs.Get( nConfig );
+
+				int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
+
+				int nClassStart = 0;
+				if (nConfig == 0) nClassStart = 20;
+
+				for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+				{
+					string strName;
+
+					GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
+
+					int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
+
+					if ( scope == 0 )
+						continue;
+
+					if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+						continue;
+
+					string strNameLower = strName;
+
+					strNameLower.ToLower();
+
+					if ( strNameLower.Contains( strSearch ) )
+						classnamelist.Insert(strNameLower);
+				}
+			}
+		}
+
+		if (classnamelist.Count())
+		{
 			string wordPreview = FindClosestWord(classnamelist, strSearch);
 			m_SearchBox.SetTextPreview(wordPreview);
-			
-			m_UseFilter = strSearch == wordPreview;
-
+			m_UseFilter = true;
 		}
 		else
 		{
 			m_SearchBox.SetTextPreview("");
+			m_UseFilter = false;
 		}
 	}
 
@@ -350,7 +350,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
-		if ( m_sldr_Refresh.GetCurrent() > 1 )
+		if ( m_sldr_Refresh.GetCurrent() > 0 )
 			m_sldr_Refresh.SetColor(COLOR_WHITE);
 		else
 			m_sldr_Refresh.SetColor(COLOR_RED_A);
