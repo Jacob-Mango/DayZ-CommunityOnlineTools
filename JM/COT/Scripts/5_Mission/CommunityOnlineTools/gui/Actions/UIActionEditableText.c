@@ -109,16 +109,14 @@ class UIActionEditableText: UIActionBase
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
 	{
-		super.OnMouseWheel( w, x, y, wheel );
-
-		if ( w == m_Text )
+		if ( w == m_Text && IsFocusWidget(GetFocus()) )
 		{
 			IncrementText(wheel);
 
 			return true;
 		}
 
-		return true;
+		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
 	void IncrementText(int wheel)
