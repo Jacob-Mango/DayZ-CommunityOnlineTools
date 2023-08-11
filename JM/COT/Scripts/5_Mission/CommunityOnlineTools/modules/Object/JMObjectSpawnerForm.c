@@ -27,7 +27,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private Object m_DeletingObject;
 
-	private static int s_ObjSpawnMode = SpawnSelectMode.CURSOR;
+	private static int s_ObjSpawnMode = COT_ObjectSpawnerMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
 		"#STR_COT_OBJECT_MODULE_EXPORT_RAW",
@@ -41,20 +41,19 @@ class JMObjectSpawnerForm: JMFormBase
 	private ref array< string > m_ObjItemStateFoodText =
 	{
 		// Food
-		"NONE",
+		"UNKNOWN",
 		"RAW",
 		"BAKED",
 		"BOILED",
 		"DRIED",
 		"BURNED",
-		"ROTTEN",
-		"UNKNOWN"
+		"ROTTEN"
 	};
 
 	private ref array< string > m_ObjItemStateBloodText =
 	{
 		// Blood bags
-		"NONE",
+		"UNKNOWN",
 		"0+",
 		"0-",
 		"A+",
@@ -62,14 +61,13 @@ class JMObjectSpawnerForm: JMFormBase
 		"B+",
 		"B-",
 		"AB+",
-		"AB-",
-		"UNKNOWN"
+		"AB-"
 	};
 
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
 		// Liquid containers
-		"NONE",
+		"UNKNOWN",
 		"WATER",
 		"RIVERWATER",
 		"VODKA",
@@ -77,13 +75,11 @@ class JMObjectSpawnerForm: JMFormBase
 		"GASOLINE",
 		"DIESEL",
 		"DISINFECTANT",
-		"SOLUTION",
-		"UNKNOWN"
+		"SOLUTION"
 	};
 
-	private bool m_ItemIsLiquid;
-	private bool m_ItemIsBlood;
-	private bool m_ItemIsFood;
+	private int m_ItemStateType = -1;
+	private int m_LiquidType;
 
 	private static ref array< string > m_ItemsThatCrash =
 	{
@@ -234,8 +230,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 		
 		UpdateQuantityItemColor();
-		if ( m_ItemIsFood )
-			UpdatePreviewItemState();
+		UpdatePreviewItemState();
 	}
 
 	void Click_SetHealth( UIEvent eid, UIActionBase action )
@@ -246,79 +241,92 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateHealthItemColor();
 	}
 
-	void UpdateItemStateType(int mode)
+	void UpdateItemStateType(int mode, int liquidType = 0)
 	{
+		m_ItemStateType = mode;
+		m_LiquidType = liquidType;
+
+		int idx = -1;
+
 		switch (mode)
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-			break;
+				idx = FindEnumValue(COT_LiquidTypes, liquidType);
+				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
-			break;
+				idx = FindEnumValue(COT_BloodTypes, liquidType);
+				break;
 			case 2: // Food
 				m_ItemDataList.SetItems(m_ObjItemStateFoodText);
-			break:
+				break:
 		}
 
-		// Reset to default since 0 is used for NONE
-		m_ItemDataList.SetSelection(1, false);
+		// Reset to default since 0 is used for UNKNOWN
+		if (idx == -1)
+			idx = 1;
+
+		m_ItemDataList.SetSelection(idx, false);
 		
 		UpdateQuantityItemColor();
+		UpdatePreviewItemState();
+	}
 
-		if ( m_ItemIsFood )
-			UpdatePreviewItemState();
+	int FindEnumValue(typename e, int enumValue)
+	{
+		int cnt = e.GetVariableCount();
+		int val;
+
+		for (int i = 0; i < cnt; i++)
+		{
+			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val) && val == enumValue)
+			{
+				return i;
+			}
+		}
+
+		return -1;
 	}
 
 	void UpdatePreviewItemState()
 	{
-		if (m_PreviewItem.IsInherited(Edible_Base)) 
-		{
-			Edible_Base item = Edible_Base.Cast(m_PreviewItem);
-			item.GetFoodStage().ChangeFoodStage( m_ItemDataList.GetSelection() );
-		}
+		Edible_Base edible;
+		if (Class.CastTo(edible, m_PreviewItem) && edible.HasFoodStage())
+			edible.GetFoodStage().ChangeFoodStage(m_ItemDataList.GetSelection());
 	}
 
 	void UpdateQuantityItemColor()
 	{
-		int liquidType = ItemStateLiquidEnum.LIQUID_NONE;
-		if ( m_ItemIsBlood )
+		switch (m_LiquidType)
 		{
-			liquidType = ItemStateBloodEnum.LIQUID_BLOOD_UNKNOWN;
-		}
-		else if ( m_ItemIsLiquid )
-		{
-			liquidType = m_ItemDataList.GetSelection();
-		}
-
-		switch(liquidType)
-		{
-			case ItemStateLiquidEnum.LIQUID_NONE:
-			case ItemStateLiquidEnum.LIQUID_VODKA:
-				m_QuantityItem.SetColor( ARGB( 255, 255, 255, 255 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_WATER:
+			case COT_LiquidTypes.WATER:
 				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_RIVERWATER:
+				break;
+			case COT_LiquidTypes.RIVERWATER:
 				m_QuantityItem.SetColor( ARGB( 255, 0, 128, 128 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_BEER:
+				break;
+			case COT_LiquidTypes.BEER:
 				m_QuantityItem.SetColor( ARGB( 255, 255, 215, 0 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_GASOLINE:
+				break;
+			case COT_LiquidTypes.GASOLINE:
 				m_QuantityItem.SetColor( ARGB( 255, 165, 123, 63 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_DIESEL:
+				break;
+			case COT_LiquidTypes.DIESEL:
 				m_QuantityItem.SetColor( ARGB( 255, 0, 100, 0 ) );
-			break;
-			case ItemStateLiquidEnum.LIQUID_DISINFECTANT:
-			case ItemStateLiquidEnum.LIQUID_SOLUTION:
+				break;
+			case COT_LiquidTypes.DISINFECTANT:
+			case COT_LiquidTypes.SOLUTION:
 				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-			break;
-			case ItemStateBloodEnum.LIQUID_BLOOD_UNKNOWN:
+				break;
+			case COT_BloodTypes.UNKNOWN:
 				m_QuantityItem.SetColor( ARGB( 255, 139, 0, 0 ) );
-			break;
+				break;
+			case COT_LiquidTypes.UNKNOWN:
+			case COT_LiquidTypes.VODKA:
+			default:
+				m_QuantityItem.SetColor( ARGB( 255, 255, 255, 255 ) );
+				break;
 		}
 
 		m_QuantityItem.SetAlpha( 1.0 );
@@ -459,41 +467,24 @@ class JMObjectSpawnerForm: JMFormBase
 				m_ItemDataList.Enable();
 				if ( item.IsLiquidContainer() )
 				{
+					int itemStateType;
 					if ( item.IsBloodContainer() )
-					{
-						if ( !m_ItemIsBlood )
-						{
-							UpdateItemStateType(1);
-							m_ItemIsBlood = true;
-						}
-					}
-					else
-					{
-						m_ItemIsBlood = false;
-					}
-					if ( !m_ItemIsLiquid )
-					{
-						m_ItemIsLiquid = true;
-
-						if ( !m_ItemIsBlood )
-							UpdateItemStateType(0);
-					}
-					m_ItemIsFood = false;
+						itemStateType = 1;
+					int liquidType = item.GetLiquidTypeInit();
+					if ( m_ItemStateType != itemStateType || m_LiquidType != liquidType )
+						UpdateItemStateType(itemStateType, liquidType);
 				}
 				else
 				{
-					m_ItemIsBlood = false;
-					m_ItemIsLiquid = false;
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
-						if ( !m_ItemIsFood )
+						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
-
-						m_ItemIsFood = true;
 					}
 					else
 					{
-						m_ItemIsFood = false;
+						m_ItemStateType = -1;
+						m_LiquidType = 0;
 						m_ItemDataList.SetItems({""});
 						UpdateQuantityItemColor();
 						m_ItemDataList.Disable();
@@ -576,8 +567,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
 	{
-		super.OnMouseWheel( w, x, y, wheel );
-
 		if ( w == m_ItemPreview )
 		{
 			UpdateDistance(wheel);
@@ -585,7 +574,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return true;
 		}
 
-		return true;
+		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
 	override bool OnDoubleClick( Widget w, int x, int y, int button )
@@ -636,16 +625,16 @@ class JMObjectSpawnerForm: JMFormBase
 		s_ObjSpawnMode = action.GetSelection() + 1;
 	}
 
-	void SpawnObject(int mode = SpawnSelectMode.NONE)
+	void SpawnObject(int mode = COT_ObjectSpawnerMode.NONE)
 	{
-		if (mode == SpawnSelectMode.NONE || mode == SpawnSelectMode.UNKNOWN)
+		if (mode == COT_ObjectSpawnerMode.NONE || mode == COT_ObjectSpawnerMode.UNKNOWN)
 			return;
 
 		string clipboardOutput = "";
 		string result;
 
 		int itemState = 0; // 0 mean don't do anything
-		if ( m_ItemIsBlood || m_ItemIsFood || m_ItemIsLiquid )
+		if ( m_ItemStateType != -1 )
 			itemState = m_ItemDataList.GetSelection();
 
 		float health = m_HealthItem.GetCurrent();
@@ -654,19 +643,19 @@ class JMObjectSpawnerForm: JMFormBase
 		switch (mode)
 		{
 			default:
-			case SpawnSelectMode.POSITION:
+			case COT_ObjectSpawnerMode.POSITION:
 				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, health, itemState);
 				break;
 
-			case SpawnSelectMode.CURSOR:
+			case COT_ObjectSpawnerMode.CURSOR:
 				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, itemState);
 				break;
 
-			case SpawnSelectMode.INVENTORY:
+			case COT_ObjectSpawnerMode.INVENTORY:
 				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, itemState);
 				break;
 
-			case SpawnSelectMode.COPYLISTRAW:
+			case COT_ObjectSpawnerMode.COPYLISTRAW:
 				for (int i = 0; i < m_ClassList.GetNumItems(); i++)
 				{
 					m_ClassList.GetItemText(i, 0, result);
@@ -675,7 +664,7 @@ class JMObjectSpawnerForm: JMFormBase
 				GetGame().CopyToClipboard(clipboardOutput);
 				break;
 
-			case SpawnSelectMode.COPYLISTTYPES:
+			case COT_ObjectSpawnerMode.COPYLISTTYPES:
 				clipboardOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 				clipboardOutput += "<types>\n";
 				for (int j = 0; j < m_ClassList.GetNumItems(); j++)
@@ -696,7 +685,7 @@ class JMObjectSpawnerForm: JMFormBase
 				GetGame().CopyToClipboard(clipboardOutput);
 				break;
 
-			case SpawnSelectMode.COPYLISTEXPMARKET:
+			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
 				clipboardOutput = "{\n";
 				clipboardOutput += "    \"m_Version\": 12,\n";
 				clipboardOutput += "    \"DisplayName\": \"" + m_SearchBox.GetText() + "\",\n";
