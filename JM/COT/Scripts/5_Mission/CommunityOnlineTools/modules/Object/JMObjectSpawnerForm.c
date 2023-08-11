@@ -502,19 +502,14 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 					else
 					{
-						if ( item.IsMagazine() )
+						Magazine mag;
+						if (Class.CastTo(mag, item))
 						{
-							Magazine_Base mag = Magazine_Base.Cast(item);
-
-							m_QuantityItem.SetMin(0);
+							if ( mag.IsAmmoPile() )
+								m_QuantityItem.SetMin(1);
+							else
+								m_QuantityItem.SetMin(0);
 							m_QuantityItem.SetMax(mag.GetAmmoMax());
-						}
-						else if ( item.IsAmmoPile() )
-						{
-							Ammunition_Base ammo = Ammunition_Base.Cast(item);
-
-							m_QuantityItem.SetMin(0);
-							m_QuantityItem.SetMax(ammo.GetAmmoMax());
 						}
 
 						m_QuantityItem.SetStepValue(1);
