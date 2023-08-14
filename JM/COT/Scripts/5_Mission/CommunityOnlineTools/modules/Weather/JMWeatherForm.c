@@ -643,7 +643,7 @@ class JMWeatherForm: JMFormBase
 
 		if ( m_PresetsShown )
 			return;
-			
+		
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
@@ -692,7 +692,7 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetOvercast( forecastOvercast, 0, 0 );
 			m_Module.SetStorm( densityStorm, 0.8, 4000 );
 			m_Module.SetRain( forecastRain, 0, 0 );
-			//m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
+			m_Module.SetRainThresholds( 0.0, 1.0, 0 );
 		}
 		else
 		{
@@ -874,9 +874,8 @@ class JMWeatherForm: JMFormBase
 		float windMin = Math.RandomFloatInclusive(0,1);
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
 		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), 30, timeout );
-		float rainMin = Math.RandomFloatInclusive(0.25,1.0);
-		m_Module.SetRainThresholds( rainMin, Math.RandomFloatInclusive(rainMin,1), Math.RandomIntInclusive(60,600) );
-		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), 30, timeout );
+		float minRainThresh = m_SliderRainOvercastMin.GetCurrent() * 0.01;
+		m_Module.SetRain( Math.RandomFloatInclusive(minRainThresh,1.0), 30, timeout );
 		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0), 30, timeout );
 		m_Module.SetStorm( Math.RandomFloatInclusive(0.5,1.0), Math.RandomFloatInclusive(0.5,1.0), timeout );
 		
