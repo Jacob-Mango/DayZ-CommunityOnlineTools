@@ -18,7 +18,7 @@ PanelWidgetClass base_window {
    vexactpos 1
    hexactsize 0
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
   }
   PanelWidgetClass content {
    visible 1
@@ -39,7 +39,7 @@ PanelWidgetClass base_window {
    vexactpos 1
    hexactsize 0
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    scriptclass "JMConfirmationForm"
   }
   PanelWidgetClass title_bar_drag {
@@ -53,7 +53,7 @@ PanelWidgetClass base_window {
    hexactsize 0
    vexactsize 1
    draggable 1
-   style rover_sim_colorable
+   style DayZDefaultPanel
   }
   PanelWidgetClass title_wrapper {
    ignorepointer 1
@@ -66,7 +66,7 @@ PanelWidgetClass base_window {
    hexactsize 0
    vexactsize 1
    draggable 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    {
     TextWidgetClass title_text {
      ignorepointer 1

@@ -7,7 +7,7 @@ PanelWidgetClass JMPlayerForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMPlayerForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   FrameWidgetClass panel_left {
    position 0 0
@@ -27,7 +27,7 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 1
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    color 0 0 0 1
   }
   PanelWidgetClass panel_right {
@@ -50,7 +50,7 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    color 0.06 0.08 0.11 0.985
    { 
     PanelWidgetClass panel_split {
@@ -62,7 +62,7 @@ PanelWidgetClass JMPlayerForm {
      vexactpos 0
      hexactsize 1
      vexactsize 0
-     style rover_sim_colorable
+     style DayZDefaultPanel
      color 0 0 0 1
     }
    }
