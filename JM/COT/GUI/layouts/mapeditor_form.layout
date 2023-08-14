@@ -16,7 +16,7 @@ FrameWidgetClass map_editor_menu {
    vexactpos 1
    hexactsize 1
    vexactsize 1
-   style rover_sim_colorable
+   style DayZDefaultPanel
   }
   PanelWidgetClass object_controls {
    color 0 0 0 0.95
@@ -27,7 +27,7 @@ FrameWidgetClass map_editor_menu {
    vexactpos 1
    hexactsize 1
    vexactsize 1
-   style rover_sim_colorable
+   style DayZDefaultPanel
   }
  }
 }

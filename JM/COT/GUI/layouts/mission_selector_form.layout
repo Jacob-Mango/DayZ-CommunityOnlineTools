@@ -10,7 +10,7 @@ PanelWidgetClass JMMissionSelectorForm {
  vexactsize 1
  draggable 1
  scriptclass "JMMissionSelectorForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   GridSpacerWidgetClass actions_filter_wrapper {
    position 0 0

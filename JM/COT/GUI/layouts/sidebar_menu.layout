@@ -9,7 +9,7 @@ PanelWidgetClass JMCOTSideBar {
  vexactpos 1
  hexactsize 1
  vexactsize 0
- style DayZDefaultPanelTop
+ style DayZDefaultPanelLeft
  scriptclass "JMCOTSideBar"
  {
   PanelWidgetClass TitleBar {
@@ -22,7 +22,7 @@ PanelWidgetClass JMCOTSideBar {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    {
     TextWidgetClass TitleBarText {
      visible 1

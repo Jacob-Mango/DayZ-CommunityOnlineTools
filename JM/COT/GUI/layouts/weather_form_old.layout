@@ -7,7 +7,7 @@ PanelWidgetClass JMWeatherOldForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMWeatherOldForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   PanelWidgetClass slider_wrapper {
    position 5 5

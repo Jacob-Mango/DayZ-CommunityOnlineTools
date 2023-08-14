@@ -10,7 +10,7 @@ PanelWidgetClass JMVehiclesMenu {
  vexactsize 1
  draggable 1
  scriptclass "JMVehiclesMenu"
- style EditorPanel
+ style DayZDefaultPanel
  {
   PanelWidgetClass vehicles_window_panel {
    ignorepointer 1

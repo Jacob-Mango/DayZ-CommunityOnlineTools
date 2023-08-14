@@ -7,7 +7,7 @@ FrameWidgetClass COTMap {
  hexactsize 1
  vexactsize 1
  scriptclass "JMMapForm"
- style EditorPanel
+ style DayZDefaultPanel
  clipchildren 0
  priority 50
  {

@@ -7,7 +7,7 @@ PanelWidgetClass JMWeatherForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMWeatherForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   PanelWidgetClass panel_left {
    color 0 0 0 0
@@ -18,7 +18,7 @@ PanelWidgetClass JMWeatherForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style EditorPanel
+   style DayZDefaultPanel
    {
     ScrollWidgetClass list_scroller {
      position 0 5
