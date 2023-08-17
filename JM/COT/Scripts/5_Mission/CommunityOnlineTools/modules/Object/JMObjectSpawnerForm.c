@@ -795,7 +795,8 @@ class JMObjectSpawnerForm: JMFormBase
 	void UpdateList()
 	{
 		m_ClassList.ClearItems();
-		TStringArray classnamelist = new TStringArray;
+		TStringArray suggestions = new TStringArray;
+		string closestMatch;
 		
 		TStringArray configs = new TStringArray;
 		configs.Insert( CFG_VEHICLESPATH );
@@ -844,10 +845,20 @@ class JMObjectSpawnerForm: JMFormBase
 
 					if ( strSearch != "" )
 					{
-						if ( strNameLower.Contains( strSearch ) )
-							classnamelist.Insert(strNameLower);
-						else
+						if ( strNameLower == strSearch )
+						{
+							suggestions.Clear();
+							closestMatch = strNameLower;
+						}
+						else if ( strNameLower.IndexOf(strSearch) == 0 )
+						{
+							if (!closestMatch)
+								suggestions.Insert(strNameLower);
+						}
+						else if ( !strNameLower.Contains(strSearch) )
+						{
 							continue;
+						}
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
@@ -855,33 +866,14 @@ class JMObjectSpawnerForm: JMFormBase
 			}
 		}
 
-		if (classnamelist.Count())
+		if (suggestions.Count())
 		{
-			m_SearchBox.SetTextPreview(FindClosestWord(classnamelist, strSearch));
+			suggestions.Sort();
+			closestMatch = suggestions[0];
 		}
-		else
-		{
-			m_SearchBox.SetTextPreview("");
-		}
+
+		m_SearchBox.SetTextPreview(closestMatch);
 	}
-
-    static string FindClosestWord(TStringArray words, string inputWord)
-    {
-        TStringArray suggestions = new TStringArray;
-
-        foreach (string word : words)
-        {
-            if ( word == inputWord )
-                return word;
-
-            if ( word.IndexOf(inputWord) == 0 )
-                suggestions.Insert(word);
-        }
-
-		suggestions.Sort();
-
-        return suggestions[0];
-    }
 
 	private bool CheckItemCrash( string name )
 	{
