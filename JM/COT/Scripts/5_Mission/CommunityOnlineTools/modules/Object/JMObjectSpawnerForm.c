@@ -796,60 +796,57 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		m_ClassList.ClearItems();
 		TStringArray classnamelist = new TStringArray;
+		
+		TStringArray configs = new TStringArray;
+		configs.Insert( CFG_VEHICLESPATH );
+		configs.Insert( CFG_WEAPONSPATH );
+		configs.Insert( CFG_MAGAZINESPATH );
+		configs.Insert( CFG_NONAI_VEHICLES );
 
 		string strSearch = m_SearchBox.GetText();
-		
-		if ( strSearch != "" )
+
+		strSearch.ToLower();
+
+		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
 		{
-			TStringArray configs = new TStringArray;
-			configs.Insert( CFG_VEHICLESPATH );
-			configs.Insert( CFG_WEAPONSPATH );
-			configs.Insert( CFG_MAGAZINESPATH );
-			configs.Insert( CFG_NONAI_VEHICLES );
+			string strConfigPath = configs.Get( nConfig );
 
-			strSearch.ToLower();
+			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
 
-			for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+			int nClassStart = 0;
+			if (nConfig == 0) nClassStart = 20;
+
+			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
 			{
-				string strConfigPath = configs.Get( nConfig );
+				string strName;
 
-				int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
+				GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
 
-				int nClassStart = 0;
-				if (nConfig == 0) nClassStart = 20;
+				int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
-				for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+				if ( scope == 0 )
+					continue;
+
+				if ( scope == 1 && !m_IknowWhatIamDoing )
+					continue;
+
+				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+					continue;
+
+				string strNameLower = strName;
+
+				strNameLower.ToLower();
+
+				if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
 				{
-					string strName;
+					if ( CheckItemCrash( strNameLower ) ) 
+						continue; 
 
-					GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
-
-					int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
-
-					if ( scope == 0 )
+					if ( strSearch != "" && !strNameLower.Contains( strSearch ) )
 						continue;
 
-					if ( scope == 1 && !m_IknowWhatIamDoing )
-						continue;
-
-					if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
-						continue;
-
-					string strNameLower = strName;
-
-					strNameLower.ToLower();
-
-					if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
-					{
-						if ( CheckItemCrash( strNameLower ) ) 
-							continue; 
-
-						if ( !strNameLower.Contains( strSearch ) )
-							continue;
-
-						m_ClassList.AddItem( strName, NULL, 0 );
-						classnamelist.Insert(strNameLower);
-					}
+					m_ClassList.AddItem( strName, NULL, 0 );
+					classnamelist.Insert(strNameLower);
 				}
 			}
 		}
