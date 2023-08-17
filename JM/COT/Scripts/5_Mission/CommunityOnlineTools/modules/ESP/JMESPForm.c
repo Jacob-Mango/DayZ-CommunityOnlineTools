@@ -225,12 +225,16 @@ class JMESPForm: JMFormBase
 
 	void UpdateList()
 	{
-		TStringArray classnamelist = new TStringArray;
+		string closestMatch;
 
 		string strSearch = m_SearchBox.GetText();
 		
+		m_UseFilter = false;
+
 		if ( strSearch != "" )
 		{
+			TStringArray suggestions = new TStringArray;
+
 			TStringArray configs = new TStringArray;
 			configs.Insert( CFG_VEHICLESPATH );
 			configs.Insert( CFG_WEAPONSPATH );
@@ -266,42 +270,34 @@ class JMESPForm: JMFormBase
 
 					strNameLower.ToLower();
 
-					if ( strNameLower.Contains( strSearch ) )
-						classnamelist.Insert(strNameLower);
+					if ( strNameLower == strSearch )
+					{
+						suggestions.Clear();
+						closestMatch = strNameLower;
+						m_UseFilter = true;
+						break;  //! We can end the search here because we got a perfect match
+					}
+					else if ( strNameLower.IndexOf(strSearch) == 0 )
+					{
+						suggestions.Insert(strNameLower);
+					}
+					else if ( strNameLower.Contains(strSearch) )
+					{
+						m_UseFilter = true;
+					}
 				}
+			}
+
+			if (suggestions.Count())
+			{
+				suggestions.Sort();
+				closestMatch = suggestions[0];
+				m_UseFilter = true;
 			}
 		}
 
-		if (classnamelist.Count())
-		{
-			string wordPreview = FindClosestWord(classnamelist, strSearch);
-			m_SearchBox.SetTextPreview(wordPreview);
-			m_UseFilter = true;
-		}
-		else
-		{
-			m_SearchBox.SetTextPreview("");
-			m_UseFilter = false;
-		}
+		m_SearchBox.SetTextPreview(closestMatch);
 	}
-
-    static string FindClosestWord(TStringArray words, string inputWord)
-    {
-        TStringArray suggestions = new TStringArray;
-
-        foreach (string word : words)
-        {
-            if ( word == inputWord )
-                return word;
-
-            if ( word.IndexOf(inputWord) == 0 )
-                suggestions.Insert(word);
-        }
-
-		suggestions.Sort();
-
-        return suggestions[0];
-    }
 
 	void Click_UpdateESP( UIEvent eid, UIActionBase action )
 	{
