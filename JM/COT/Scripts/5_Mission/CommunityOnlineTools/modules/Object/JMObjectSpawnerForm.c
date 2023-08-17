@@ -842,11 +842,10 @@ class JMObjectSpawnerForm: JMFormBase
 					if ( CheckItemCrash( strNameLower ) ) 
 						continue; 
 
-					if ( strSearch != "" && !strNameLower.Contains( strSearch ) )
-						continue;
+					if ( strSearch != "" && strNameLower.Contains( strSearch ) )
+						classnamelist.Insert(strNameLower);
 
 					m_ClassList.AddItem( strName, NULL, 0 );
-					classnamelist.Insert(strNameLower);
 				}
 			}
 		}
