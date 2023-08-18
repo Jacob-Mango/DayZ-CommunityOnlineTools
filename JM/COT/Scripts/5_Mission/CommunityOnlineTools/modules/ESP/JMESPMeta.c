@@ -97,8 +97,8 @@ class JMESPMeta : Managed
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
-		if ( widgetRoot )
-			widgetRoot.Show( false );
+		if ( GetGame() && widgetRoot )
+			widgetRoot.Unlink();
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );
