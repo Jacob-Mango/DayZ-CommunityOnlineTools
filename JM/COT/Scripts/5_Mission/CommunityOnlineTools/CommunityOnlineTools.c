@@ -145,7 +145,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 			return;
 
+		#ifdef SERVER
 		ScriptRPC rpc = new ScriptRPC();
+		#endif
 
 		if ( IsMissionHost() )
 		{
@@ -155,6 +157,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			{
 				players[i].Update();
 				
+				#ifdef SERVER
 				rpc.Write( players[i].PlayerObject );
 				rpc.Write( players[i].GetGUID() );
 				players[i].OnSend( rpc, senderRPC.GetId() );
@@ -162,6 +165,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
 
 				rpc.Reset();
+				#endif
 			}
 		}
 	}
