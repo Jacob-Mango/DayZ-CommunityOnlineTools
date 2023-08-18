@@ -1,6 +1,7 @@
 #ifndef CF_MODULE_PERMISSIONS
 class JMPermission : Managed
 {
+	JMPermission Root;
 	JMPermission Parent;
 
 	ref array< ref JMPermission > Children;
@@ -15,10 +16,16 @@ class JMPermission : Managed
 
 	string Indent;
 
+	bool m_Sync;  //! This will be set to true if any added permission is not INHERIT
+
 	void JMPermission( string name, JMPermission parent = NULL )
 	{
 		Name = name;
 		Parent = parent;
+		if (!parent)
+			Root = this;
+		else
+			Root = parent.Root;
 
 		Type = JMPermissionType.INHERIT;
 
@@ -51,6 +58,8 @@ class JMPermission : Managed
 			perm.Type = child.Type;
 			perm.CopyPermissions(child);
 			Children.Insert(perm);
+			if (child.Type != JMPermissionType.INHERIT)
+				Root.m_Sync = true;
 		}
 	}
 
@@ -133,6 +142,8 @@ class JMPermission : Managed
 				nChild.AddPermissionInternal( tokens, depth + 1, value, requireRegistered );
 		} else {
 			Type = value;
+			if (value != JMPermissionType.INHERIT)
+				Root.m_Sync = true;
 		}
 	}
 
@@ -332,6 +343,12 @@ class JMPermission : Managed
 
 	void OnSend(ParamsWriteContext ctx)
 	{
+		if (!Root.m_Sync)
+		{
+			ctx.Write(-1);
+			return;
+		}
+
 		ctx.Write(Children.Count());
 
 		foreach (auto child: Children)
@@ -349,6 +366,9 @@ class JMPermission : Managed
 		int count;
 		if (!ctx.Read(count))
 			return false;
+
+		if (count == -1)
+			return true;
 
 		if (count != Children.Count())
 			Error(string.Format("Received child count %1 for %2 does not match registered child count %3!", count, m_SerializedFullName, Children.Count()));
