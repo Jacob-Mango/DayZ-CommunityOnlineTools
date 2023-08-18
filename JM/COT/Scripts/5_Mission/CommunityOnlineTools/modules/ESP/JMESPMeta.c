@@ -36,6 +36,8 @@ class JMESPMeta : Managed
 
 	UIActionButton m_Action_Delete;
 
+	bool m_ActionsInitialized;
+
 	void ~JMESPMeta()
 	{
 		Destroy();
@@ -56,6 +58,11 @@ class JMESPMeta : Managed
 			return;
 
 		widgetHandler.SetInfo( this, viewTypeActions );
+	}
+
+	void InitActions()
+	{
+		m_ActionsInitialized = true;
 
 		CreateActions( viewTypeActions );
 
@@ -180,7 +187,7 @@ class JMESPMeta : Managed
 
 	void Update()
 	{
-		if ( !target )
+		if ( !target || !m_ActionsInitialized )
 			return;
 
 		if (m_Action_AutoRefreshPosition.IsChecked())

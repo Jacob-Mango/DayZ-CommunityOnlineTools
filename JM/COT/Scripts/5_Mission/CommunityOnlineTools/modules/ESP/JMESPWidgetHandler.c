@@ -130,6 +130,9 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		Print( "+" + this + "::ShowActions" );
 		#endif
 
+		if (!Info.m_ActionsInitialized)
+			Info.InitActions();
+
 		m_pnl_Actions.Show( true );
 
 		m_img_ToggleActions.SetImage( 0 );
