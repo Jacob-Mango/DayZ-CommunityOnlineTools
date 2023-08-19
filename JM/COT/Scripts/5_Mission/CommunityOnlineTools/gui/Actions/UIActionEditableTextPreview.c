@@ -30,7 +30,6 @@ class UIActionEditableTextPreview: UIActionEditableText
 
 	override bool OnKeyPress( Widget w, int x, int y, int key )
 	{
-		PrintFormat("%1::OnKeyPress %2 %3 %4 %5", ToString(), w, x, y, key);
 		string preview = GetTextPreview();
 
 		if ( preview != "" )
