@@ -47,6 +47,20 @@ PanelWidgetClass action_wrapper {
        font "gui/fonts/Metron"
        style Editor
       }
+      EditBoxWidgetClass action_preview {
+       ignorepointer 1
+       position 0.16 -1
+       size 0.40 22
+       vexactpos 1
+       vexactsize 1
+       halign right_ref
+       valign center_ref
+       text "{TEXT}"
+       "exact text" 1
+       "no focus" 1
+       font "gui/fonts/Metron"
+       style Editor
+      }
       ButtonWidgetClass action_button {
        size 0.15 1
        halign right_ref
