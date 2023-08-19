@@ -11,6 +11,8 @@ class UIActionEditableText: UIActionBase
 
 	protected string m_PreviousText;
 
+	protected bool m_Edited;
+
 	override void OnInit() 
 	{
 		super.OnInit();
@@ -111,11 +113,14 @@ class UIActionEditableText: UIActionBase
 		m_Text.SetText(currValue.ToString());
 		
 		UpdateText();
+		m_Edited = true;
 		CallEvent( UIEvent.CHANGE );
 	}
 
 	bool UpdateText()
 	{
+		m_Edited = false;
+
 		if ( m_OnlyNumbers )
 		{
 			string newText = m_Text.GetText();
@@ -184,6 +189,23 @@ class UIActionEditableText: UIActionBase
 		text = Widget.TranslateString( text );
 		
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
+	}
+
+	override bool OnKeyPress( Widget w, int x, int y, int key )
+	{
+		m_Edited = true;
+
+		return super.OnKeyPress( w, x, y, key );
+	}
+
+	void SetEdited(bool edited)
+	{
+		m_Edited = edited;
+	}
+
+	bool IsEdited()
+	{
+		return m_Edited;
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
