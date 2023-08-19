@@ -15,27 +15,27 @@ PanelWidgetClass UIActionEditableVector {
    position 0 0
    size 1 1
    {
-    PanelWidgetClass action_wrapper_input
+    PanelWidgetClass action_wrapper_check
     {
      position 0 0
-     size 1 1
+     size 1 20
+     vexactsize 1
+     valign center_ref
      {
       TextWidgetClass action_label {
-       size 0.3 1
+       size 0.35 1
        halign left_ref
-       valign center_ref
+       valign top_ref
        text "{LABEL}"
        font "gui/fonts/sdf_MetronLight24"
        "text offset" 10 0
        "bold text" 1
        "exact text" 1
        "exact text size" 16
-       "text valign" center
       }
       GridSpacerWidgetClass spacer {
        position 0.3 0
-       size 0.7 1
-       valign top_ref
+       size 0.5 1
        Padding 0
        Margin 0
        Columns 3
@@ -67,6 +67,29 @@ PanelWidgetClass UIActionEditableVector {
          "no focus" 0
          font "gui/fonts/Metron"
          style Editor
+        }
+       }
+      }
+      ButtonWidgetClass action_button {
+       size 0.15 1
+       halign right_ref
+       valign center_ref
+       {
+        TextWidgetClass action_button_text {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Light
+         text "{BUTTON}"
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 14
+         "text halign" center
+         "text valign" center
         }
        }
       }

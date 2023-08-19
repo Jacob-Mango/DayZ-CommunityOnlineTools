@@ -19,27 +19,10 @@ class UIActionEditableVector: UIActionBase
 	{
 	}
 
-	void HasButton( bool enabled )
+	void Init( bool hasButton )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HasButton" );
-		#endif
-
-		if ( enabled )
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
-
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			layoutRoot.Show( true );
-
+		if ( hasButton )
 			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
-		} else
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
-
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			layoutRoot.Show( true );
-		}
 
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_TextX, layoutRoot.FindAnyWidget( "action_x" ) );
@@ -47,10 +30,6 @@ class UIActionEditableVector: UIActionBase
 		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
 
 		SetValue( vector.Zero );
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HasButton" );
-		#endif
 	}
 
 	override void SetLabel( string text )
