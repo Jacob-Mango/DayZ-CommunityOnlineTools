@@ -41,35 +41,13 @@ class UIActionEditableText: UIActionBase
 		return m_Button;
 	}
 
-	void HasButton( bool enabled )
+	void Init( bool hasButton )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HasButton" );
-		#endif
+		if ( hasButton )
+			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
 
-		Widget root = NULL;
-		if ( enabled )
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			root.Show( true );
-
-			m_Button = ButtonWidget.Cast( root.FindAnyWidget( "action_button" ) );
-		} else
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			root.Show( true );
-		}
-
-		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
-		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HasButton" );
-		#endif
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void SetLabel( string text )

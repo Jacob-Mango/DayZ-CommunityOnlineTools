@@ -7,38 +7,13 @@ class UIActionEditableTextPreview: UIActionEditableText
 		return m_TextPreview;
 	}
 
-	void HasButton( bool enabled )
+	override void Init( bool hasButton )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HasButton" );
-		#endif
+		super.Init(hasButton);
 
-		Widget root = NULL;
-		if ( enabled )
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			root.Show( true );
-
-			m_Button = ButtonWidget.Cast( root.FindAnyWidget( "action_button" ) );
-		} else
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			root.Show( true );
-		}
-
-		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
-		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
-		Class.CastTo( m_TextPreview, root.FindAnyWidget( "action_preview" ) );
+		Class.CastTo( m_TextPreview, layoutRoot.FindAnyWidget( "action_preview" ) );
 		m_TextPreview.SetText("");
 		m_TextPreview.SetAlpha(0.5);
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HasButton" );
-		#endif
 	}
 
 	string GetTextPreview()

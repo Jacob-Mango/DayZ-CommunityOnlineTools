@@ -111,22 +111,27 @@ class UIActionManager
 
 	static UIActionEditableTextPreview CreateEditableTextPreview( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableTextPreview.layout", parent );
+		bool hasButton;
+		if (button != "" && instance != NULL && funcname != "")
+			hasButton = true;
+
+		string layoutName;
+		if (hasButton)
+			layoutName = "UIActionEditableTextPreviewButton";
+		else
+			layoutName = "UIActionEditableTextPreview";
+
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
 
 		UIActionEditableTextPreview action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			if ( button == "" || instance == NULL || funcname == "" )
-			{
-				action.HasButton( false );
-			} else 
-			{
-				action.HasButton( true );
+			action.Init( hasButton );
 
+			if ( hasButton )
 				action.SetButton( button );
-			}
 
 			action.SetCallback( instance, funcname );
 
@@ -141,22 +146,27 @@ class UIActionManager
 
 	static UIActionEditableText CreateEditableText( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableText.layout", parent );
+		bool hasButton;
+		if (button != "" && instance != NULL && funcname != "")
+			hasButton = true;
+
+		string layoutName;
+		if (hasButton)
+			layoutName = "UIActionEditableTextButton";
+		else
+			layoutName = "UIActionEditableText";
+
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
 
 		UIActionEditableText action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			if ( button == "" || instance == NULL || funcname == "" )
-			{
-				action.HasButton( false );
-			} else 
-			{
-				action.HasButton( true );
+			action.Init( hasButton );
 
+			if ( hasButton )
 				action.SetButton( button );
-			}
 
 			action.SetCallback( instance, funcname );
 
@@ -198,22 +208,27 @@ class UIActionManager
 
 	static UIActionEditableVector CreateEditableVector( Widget parent, string label, Class instance = NULL, string funcname = "", string button = "" )
 	{
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionEditableVector.layout", parent );
+		bool hasButton;
+		if (button != "" && instance != NULL && funcname != "")
+			hasButton = true;
+
+		string layoutName;
+		if (hasButton)
+			layoutName = "UIActionEditableVectorButton";
+		else
+			layoutName = "UIActionEditableVector";
+
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
 
 		UIActionEditableVector action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			if ( button == "" || instance == NULL || funcname == "" )
-			{
-				action.HasButton( false );
-			} else 
-			{
-				action.HasButton( true );
+			action.Init( hasButton );
 
+			if ( hasButton )
 				action.SetButton( button );
-			}
 
 			action.SetCallback( instance, funcname );
 
