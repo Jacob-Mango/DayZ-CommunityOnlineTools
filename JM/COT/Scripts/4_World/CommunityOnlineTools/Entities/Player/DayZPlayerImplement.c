@@ -221,7 +221,17 @@ modded class DayZPlayerImplement
 		EntityAI ent = GetInventory().FindAttachment( slot_id );
 		if ( ent )
 		{
-			ent.SetInvisible( invisible );
+			COT_SetEntityInvisibleRecursive( ent, invisible );
+		}
+	}
+
+	void COT_SetEntityInvisibleRecursive(EntityAI ent, bool invisible)
+	{
+		ent.SetInvisible(invisible);
+
+		for (int i = 0; i < ent.GetInventory().AttachmentCount(); i++)
+		{
+			COT_SetEntityInvisibleRecursive(ent.GetInventory().GetAttachmentFromIndex(i), invisible);
 		}
 	}
 
