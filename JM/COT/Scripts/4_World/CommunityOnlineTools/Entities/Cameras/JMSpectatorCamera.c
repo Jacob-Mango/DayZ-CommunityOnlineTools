@@ -4,6 +4,7 @@ class JMSpectatorCamera: JMCameraBase
 	vector angularVelocity;
 
 	vector orientation;
+	bool m_COT_IsInFreeLook;
 	
 	override void OnTargetSelected( Object target )
 	{
@@ -29,6 +30,13 @@ class JMSpectatorCamera: JMCameraBase
 
 		Input input = GetGame().GetInput();
 		bool freelook = input.LocalValue( "UALookAround" );
+
+		if (m_COT_IsInFreeLook != freelook)
+		{
+			m_COT_IsInFreeLook = freelook;
+			if (freelook)
+				orientation = GetOrientation();
+		}
 		
 		if ( !LookFreeze || freelook )
 		{
@@ -39,9 +47,6 @@ class JMSpectatorCamera: JMCameraBase
 
 			angularVelocity[0] = angularVelocity[0] + ( yawDiff * CAMERA_MSENS );
 			angularVelocity[1] = angularVelocity[1] + ( pitchDiff * CAMERA_MSENS );
-
-			if (orientation == vector.Zero)
-				orientation = GetOrientation();
 
 			orientation[0] = orientation[0] - ( angularVelocity[0] * timeslice );
 			orientation[1] = orientation[1] - ( angularVelocity[1] * timeslice );
