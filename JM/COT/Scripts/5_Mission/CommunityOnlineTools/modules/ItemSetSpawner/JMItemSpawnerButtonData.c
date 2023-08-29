@@ -6,4 +6,4 @@ class JMItemSpawnerButtonData: UIActionData
 	{
 		ClassName = clsName;
 	}
-}
+};

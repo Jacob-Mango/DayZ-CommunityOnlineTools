@@ -1,4 +1,4 @@
-class JMRenderableModuleBase extends JMModuleBase
+class JMRenderableModuleBase: JMModuleBase
 {
 	private ref CF_Window m_Window;
 	private JMFormBase m_Form;

@@ -1,4 +1,4 @@
-class UIActionSlider extends UIActionBase 
+class UIActionSlider: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected SliderWidget m_Slider;
@@ -84,6 +84,16 @@ class UIActionSlider extends UIActionBase
 		m_Max = max;
 
 		CalculateValue();
+	}
+
+	float GetMin()
+	{
+		return m_Min;
+	}
+
+	float GetMax()
+	{
+		return m_Max;
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -179,4 +189,14 @@ class UIActionSlider extends UIActionBase
 		m_Slider.SetSize( width, h );
 		m_Slider.Update();
 	}
-}
+
+	void SetColor( int color )
+	{
+		m_Slider.SetColor(color);
+	}
+
+	void SetAlpha( float alpha )
+	{
+		m_Slider.SetAlpha(alpha);
+	}
+};

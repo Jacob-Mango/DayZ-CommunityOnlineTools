@@ -1,4 +1,4 @@
-class JMVehicleSpawnerForm extends JMFormBase
+class JMVehicleSpawnerForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
 	private Widget m_ActionsWrapper;
@@ -31,6 +31,17 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 	override void OnShow()
 	{
+		if (m_Module.IsLoaded())
+			OnSettingsUpdated();
+		else
+			m_Module.Load();
+	}
+
+	override void OnSettingsUpdated()
+	{
+		if (!m_Module.IsLoaded())
+			return;
+
 		array< string > vehicles = new array< string >;
 		array< string > vehiclesDisplay = new array< string >;
 		vehicles.Copy( m_Module.GetVehicles() );
@@ -89,4 +100,4 @@ class JMVehicleSpawnerForm extends JMFormBase
 
 		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
-}
+};

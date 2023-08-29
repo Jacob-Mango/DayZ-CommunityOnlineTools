@@ -477,4 +477,4 @@ class COTModule : JMModuleBase
 		Print( "-COTModule::OnClientLogoutCancelled" );
 		#endif
 	}
-}
+};

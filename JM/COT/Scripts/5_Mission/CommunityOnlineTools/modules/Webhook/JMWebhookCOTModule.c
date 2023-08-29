@@ -110,7 +110,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		return JMWebhookCOTModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -137,6 +141,10 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	private void Exec_Load( notnull PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		m_Settings.OnSend( rpc );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, ident );

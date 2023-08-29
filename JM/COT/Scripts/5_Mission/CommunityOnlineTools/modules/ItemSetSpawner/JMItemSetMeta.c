@@ -12,6 +12,11 @@ class JMItemSetMeta
 		delete ItemSets;
 	}
 
+	static JMItemSetMeta Create()
+	{
+		return new JMItemSetMeta();
+	}
+
 	static JMItemSetMeta DeriveFromSettings( JMItemSetSettings settings )
 	{
 		JMItemSetMeta meta = new JMItemSetMeta;
@@ -23,4 +28,4 @@ class JMItemSetMeta
 
 		return meta;
 	}
-}
+};

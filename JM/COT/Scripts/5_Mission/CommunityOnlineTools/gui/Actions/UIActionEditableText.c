@@ -1,4 +1,4 @@
-class UIActionEditableText extends UIActionBase 
+class UIActionEditableText: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -10,6 +10,8 @@ class UIActionEditableText extends UIActionBase
 	protected bool m_OnlyIntegers;
 
 	protected string m_PreviousText;
+
+	protected bool m_Edited;
 
 	override void OnInit() 
 	{
@@ -41,35 +43,13 @@ class UIActionEditableText extends UIActionBase
 		return m_Button;
 	}
 
-	void HasButton( bool enabled )
+	void Init( bool hasButton )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HasButton" );
-		#endif
+		if ( hasButton )
+			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
 
-		Widget root = NULL;
-		if ( enabled )
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			root.Show( true );
-
-			m_Button = ButtonWidget.Cast( root.FindAnyWidget( "action_button" ) );
-		} else
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
-
-			root = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			root.Show( true );
-		}
-
-		Class.CastTo( m_Label, root.FindAnyWidget( "action_label" ) );
-		Class.CastTo( m_Text, root.FindAnyWidget( "action" ) );
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HasButton" );
-		#endif
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void SetLabel( string text )
@@ -107,8 +87,40 @@ class UIActionEditableText extends UIActionBase
 		return m_Text.GetText();
 	}
 
+	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
+	{
+		if ( w == m_Text && IsFocusWidget(GetFocus()) )
+		{
+			IncrementText(wheel);
+
+			return true;
+		}
+
+		return super.OnMouseWheel( w, x, y, wheel );
+	}
+
+	void IncrementText(int wheel)
+	{
+		if ( !m_OnlyNumbers )
+			return;
+
+		float multiplier = 0.1;
+		if ( m_OnlyIntegers )
+			multiplier = 1.0;
+
+		float currValue = m_Text.GetText().ToFloat();
+		currValue = currValue + (wheel * multiplier);
+		m_Text.SetText(currValue.ToString());
+		
+		UpdateText();
+		m_Edited = true;
+		CallEvent( UIEvent.CHANGE );
+	}
+
 	bool UpdateText()
 	{
+		m_Edited = false;
+
 		if ( m_OnlyNumbers )
 		{
 			string newText = m_Text.GetText();
@@ -179,6 +191,23 @@ class UIActionEditableText extends UIActionBase
 		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
 	}
 
+	override bool OnKeyPress( Widget w, int x, int y, int key )
+	{
+		m_Edited = true;
+
+		return super.OnKeyPress( w, x, y, key );
+	}
+
+	void SetEdited(bool edited)
+	{
+		m_Edited = edited;
+	}
+
+	bool IsEdited()
+	{
+		return m_Edited;
+	}
+
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
 		if ( !m_HasCallback )
@@ -229,8 +258,9 @@ class UIActionEditableText extends UIActionBase
 	{
 		float w;
 		float h;
+		
 		m_Text.GetSize( w, h );
 		m_Text.SetSize( width, h );
 		m_Text.Update();
 	}
-}
+};

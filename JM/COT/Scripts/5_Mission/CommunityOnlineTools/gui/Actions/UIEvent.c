@@ -1,5 +1,7 @@
 enum UIEvent 
 {
 	CLICK = 0,
+	CLICK_RIGHTSIDE,
+	CLICK_LEFTSIDE,
 	CHANGE
-}
+};

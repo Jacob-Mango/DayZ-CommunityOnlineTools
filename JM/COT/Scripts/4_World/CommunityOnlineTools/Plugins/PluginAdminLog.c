@@ -155,5 +155,4 @@ modded class PluginAdminLog
 
 		m_Webhook.Post( "PlayerDamage", message );
 	}
-
 };

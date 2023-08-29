@@ -40,7 +40,8 @@ class JMSelectedObject : Managed
 
 		return obj == object;
 	}
-}
+};
+
 
 class JMSelectedObjects
 {
@@ -184,6 +185,12 @@ class JMSelectedObjects
 	array< string > GetPlayers()
 	{
 		return m_Players;
+	}
+
+
+	set< ref JMSelectedObject > GetObjects()
+	{
+		return m_Objects;
 	}
 
 	void ClearPlayers()

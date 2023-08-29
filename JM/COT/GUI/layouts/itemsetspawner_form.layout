@@ -7,7 +7,7 @@ PanelWidgetClass JMItemSetForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMItemSetForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   FrameWidgetClass panel {
    position 0 0

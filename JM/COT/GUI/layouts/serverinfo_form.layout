@@ -7,7 +7,7 @@ GridSpacerWidgetClass JMServerInfoForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMServerInfoForm"
- style EditorPanel
+ style DayZDefaultPanel
  Columns 1
  Rows 1
  {

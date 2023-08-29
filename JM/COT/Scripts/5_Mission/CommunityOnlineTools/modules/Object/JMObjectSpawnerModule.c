@@ -1,6 +1,8 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	bool m_OnDebugSpawn = true;
+	string m_CurrentType;
+	string m_SearchText;
 
 	void JMObjectSpawnerModule()
 	{
@@ -21,6 +23,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
+		Bind( new JMModuleBinding( "DeleteAtCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
@@ -63,6 +66,54 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		types.Insert( "Delete" );
 		types.Insert( "Vector" );
 		types.Insert( "Player" );
+	}
+
+	void DeleteAtCursor( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		float distance = 10.0;
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.NEARESTCONTACT;
+		rayInput.radius = 1.0;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object obj;
+		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		{
+			for ( int i = 0; i < results.Count(); ++i )
+			{
+				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
+					continue;
+
+				if ( results[i].obj.GetType() == "" )
+					continue;
+
+				if ( results[i].obj.GetType() == "#particlesourceenf" )
+					continue;
+
+				obj = results[i].obj;
+				break;
+			}
+		}
+
+		if ( obj == NULL )
+			return;
+
+		DeleteEntity( obj );
 	}
 	
 	void SpawnRandomInfected( UAInput input )
@@ -135,7 +186,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return JMObjectSpawnerModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -195,7 +250,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1 )
+	void SpawnEntity_Position( string ent, vector position, float quantity = -1, float health = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() )
 		{
@@ -204,23 +259,25 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( position );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		} else
 		{
-			Server_SpawnEntity_Position( ent, position, quantity, health, NULL );
+			Server_SpawnEntity_Position( ent, position, quantity, health, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
 			return;
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( position ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
@@ -228,9 +285,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
-		SetupEntity( ent, quantity, health );
+		SetupEntity( ent, quantity, health, itemState );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+itemState +") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
@@ -266,14 +323,21 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
+			int itemState;
+			if ( !ctx.Read( itemState ) )
+			{
+				Error("Failed");
+				return;
+			}
+
 			if ( !ctx.Read( m_OnDebugSpawn ) )
 				return;
 
-			Server_SpawnEntity_Position( ent, position, quantity, health, senderRPC );
+			Server_SpawnEntity_Position( ent, position, quantity, health, itemState, senderRPC );
 		}
 	}
 
-	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1 )
+	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
@@ -282,15 +346,17 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
-		} else
+		}
+		else
 		{
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, NULL );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, int itemState, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -315,7 +381,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				vector position = instance.PlayerObject.GetPosition();
 
 				int flags = ECE_CREATEPHYSICS;
-				if ( !COT_SurfaceIsWater( position ) )
+				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
 		
 				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
@@ -324,9 +390,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( ent, quantity, health );
+			SetupEntity( ent, quantity, health, itemState );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") on " + instance.GetSteam64ID() + loggedSuffix );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
 		}
 	}
@@ -351,30 +417,49 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( health ) )
 				return;
 
+			int itemState;
+			if ( !ctx.Read( itemState ) )
+				return;
+
 			if ( !ctx.Read( m_OnDebugSpawn ) )
 				return;
 
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, senderRPC );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, senderRPC );
 		}
 	}
 
-	private void SetupEntity( EntityAI obj, out float quantity, out float health )
+	private void SetupEntity( EntityAI obj, out float quantity, out float health, out int itemState )
 	{
 		ItemBase item;
 		if ( Class.CastTo( item, obj ) )
 		{
-			if ( quantity == -1 )
-			{
-				if ( item.HasQuantity() )
-					quantity = item.GetQuantityMax();
-			}
-
-			if ( quantity > 0 )
-			{
-				if ( quantity > item.GetQuantityMax() )
-					quantity = item.GetQuantityMax();
-
+			Magazine mag;
+			if (Class.CastTo(mag, item))
+				mag.ServerSetAmmoCount(quantity);
+			else if ( item.HasQuantity() )
 				item.SetQuantity(quantity);
+
+			if ( itemState != 0 )
+			{
+				if ( item.IsLiquidContainer() )
+				{
+					if ( item.IsBloodContainer() )
+					{
+						item.SetLiquidType(LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1));
+					}
+					else
+					{
+						item.SetLiquidType(LIQUID_WATER * Math.Pow(2, itemState - 1));
+					}
+				}
+				else if ( item.HasFoodStage() && item.CanBeCooked() )
+				{
+					if (item.IsInherited(Edible_Base)) 
+					{
+						Edible_Base foodItem = Edible_Base.Cast(item);
+						foodItem.GetFoodStage().ChangeFoodStage( itemState );
+					}
+				}
 			}
 		}
 
@@ -411,8 +496,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( position ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
@@ -422,9 +508,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		float quantity = -1;
 		float health = -1;
-		SetupEntity( ent, quantity, health );
+		int itemState = -1;
+		SetupEntity( ent, quantity, health, itemState );
 		
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
@@ -439,4 +526,4 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		names.Insert("object");
 		return names;
 	}
-}
+};

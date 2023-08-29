@@ -41,4 +41,4 @@ class JMVehicleSpawnerSerialize : Managed
 	void Defaults()
 	{
 	}
-}
+};

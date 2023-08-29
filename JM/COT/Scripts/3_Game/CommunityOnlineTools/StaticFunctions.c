@@ -2,10 +2,7 @@
 
 static const int COT_ZERO_PAD_SIZE = 8;
 static string m_COT_ZeroPad[COT_ZERO_PAD_SIZE] = {"", "0", "00", "000", "0000", "00000", "000000", "0000000"};
-	
-// ------------------------------------------------------------
-// COT FormatFloat
-// ------------------------------------------------------------
+
 static string FormatFloat( float value, int decimals ) 
 {
 	if ( decimals == -1 )
@@ -195,6 +192,18 @@ static TStringArray WorkingZombieClasses()
 			 "ZmbM_priestPopSkinny","ZmbM_ClerkFat_Base","ZmbM_ClerkFat_Brown","ZmbM_ClerkFat_Grey","ZmbM_ClerkFat_Khaki","ZmbM_ClerkFat_White",
 			 "ZmbF_Clerk_Normal_Base","ZmbF_Clerk_Normal_Blue","ZmbF_Clerk_Normal_White","ZmbF_Clerk_Normal_Green","ZmbF_Clerk_Normal_Red" };
 }
+
+static string JM_COT_ICON_BASE = "\\JM\\COT\\GUI\\textures\\";
+
+// Admin Map
+static string JM_COT_ICON_CAR = JM_COT_ICON_BASE + "icon_car";
+static string JM_COT_ICON_DOT = JM_COT_ICON_BASE + "icon_dot";
+static string JM_COT_ICON_ARROW_LEFT = JM_COT_ICON_BASE + "icon_arrow_left.paa";
+static string JM_COT_ICON_ARROW_RIGHT = JM_COT_ICON_BASE + "icon_arrow_right.paa";
+
+// ingamehud
+static string JM_COT_ICON_GOD = JM_COT_ICON_BASE + "icon_status_godmode.paa";
+static string JM_COT_ICON_INVISIBLE = JM_COT_ICON_BASE + "icon_status_invisible.paa";
 
 static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
@@ -419,7 +428,8 @@ static void DeleteFiles( string folder, array< string > files )
 	{
 		DeleteFile( folder + files[i] );
 	}
-}
+};
+
 
 static bool ArrayContains( array< string > arr, string match )
 {

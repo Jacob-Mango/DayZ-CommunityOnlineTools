@@ -213,6 +213,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	private bool m_IsCreatingWidgets;
 	private bool m_IsDestroyingWidgets;
+	private bool m_IknowWhatIamDoing;
 
 	string Filter;
 
@@ -231,7 +232,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ESPRadius = 200;
 
-		ESPUpdateTime = 1;
+		ESPUpdateTime = 5;
 
 		GetPermissionsManager().RegisterPermission( "ESP.View" );
 
@@ -242,6 +243,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.DuplicateAll" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.DeleteAll" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.MoveToCursor" );		
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
@@ -316,11 +318,13 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "BB_Build" );
 		types.Insert( "BB_Dismantle" );
 		types.Insert( "BB_Repair" );
+		types.Insert( "Car_Unstuck" );
+		types.Insert( "Car_Repair" );
+		types.Insert( "Car_Refuel" );
 		types.Insert( "MakeItemSet" );
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
-		types.Insert( "MoveToCursorRelative" );
-		types.Insert( "MoveToCursorAbsolute" );
+		types.Insert( "MoveToCursor" );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -381,11 +385,14 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypePlayerAI );
 		types.Insert( JMESPViewTypeInfected );
 		types.Insert( JMESPViewTypeAnimal );
+
 		types.Insert( JMESPViewTypeCar );
+		
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
+
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
 		types.Insert( JMESPViewTypeFood );
@@ -433,6 +440,16 @@ class JMESPModule: JMRenderableModuleBase
 			m_ESPCanvas = new JMESPCanvas();
 		else
 			m_ESPCanvas.CreateCanvas();
+	}
+
+	bool GetFilterSafetyState()
+	{
+		return m_IknowWhatIamDoing;
+	}
+
+	void SetFilterSafetyState(bool state)
+	{
+		m_IknowWhatIamDoing = state;
 	}
 
 	override void OnUpdate(float timeslice)
@@ -731,22 +748,23 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj.IsInherited( Camera ) )
 							continue;
 
-						/*
-						if ( obj.IsRock() )
-							continue;
+						if ( !m_IknowWhatIamDoing )
+						{
+							if ( obj.IsRock() )
+								continue;
 
-						if ( obj.IsWoodBase() )
-							continue;
+							if ( obj.IsWoodBase() )
+								continue;
 
-						if ( obj.IsBush() )
-							continue;
+							if ( obj.IsBush() )
+								continue;
 
-						if ( obj.IsTree() )
-							continue;
+							if ( obj.IsTree() )
+								continue;
 
-						if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
-							continue;
-						*/
+							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
+								continue;
+						}
 
 						if ( isUsingFilter && !type.Contains( filter ) )
 							continue;
@@ -766,7 +784,8 @@ class JMESPModule: JMRenderableModuleBase
 							{
 								addedObjects.Insert( obj );
 							}
-						} else
+						}
+						else
 						{
 							array< JMESPViewType > validViewTypes = new array< JMESPViewType >;
 							for ( int j = 0; j < m_ViewTypes.Count(); j++ )
@@ -861,7 +880,11 @@ class JMESPModule: JMRenderableModuleBase
 		return JMESPModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -912,11 +935,8 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.DeleteAll:
 			RPC_DeleteAll( ctx, sender, target );
 			break;
-		case JMESPModuleRPC.MoveToCursorRelative:
-			RPC_MoveToCursorRelative( ctx, sender, target );
-			break;
-		case JMESPModuleRPC.MoveToCursorAbsolute:
-			RPC_MoveToCursorAbsolute( ctx, sender, target );
+		case JMESPModuleRPC.MoveToCursor:
+			RPC_MoveToCursor( ctx, sender, target );
 			break;
 		}
 	}
@@ -930,7 +950,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( log );
-			rpc.Send( NULL, JMESPModuleRPC.Log, false, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.Log, true, NULL );
 		}
 	}
 
@@ -958,7 +978,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
-			rpc.Send( target, JMESPModuleRPC.SetPosition, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetPosition, true, NULL );
 		}
 	}
 
@@ -1006,7 +1026,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( orientation );
-			rpc.Send( target, JMESPModuleRPC.SetOrientation, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetOrientation, true, NULL );
 		}
 	}
 
@@ -1046,7 +1066,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( health );
-			rpc.Send( target, JMESPModuleRPC.SetHealth, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.SetHealth, true, NULL );
 		}
 	}
 
@@ -1081,7 +1101,7 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( networkLow );
 		rpc.Write( networkHigh );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, true, NULL );
 	}
 
 	void DeleteObject( Object target )
@@ -1130,7 +1150,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
 		}
 	}
 
@@ -1140,14 +1160,10 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !IsMissionOffline() )
 			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
 		
-		#ifndef DAYZ_1_09
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
 		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
-		#else
-		target.GetConstruction().COT_BuildPart( part_name, requireMaterials );
-		#endif
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -1177,7 +1193,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
 		}
 	}
 
@@ -1216,7 +1232,7 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
 		}
 	}
 
@@ -1252,7 +1268,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, true, NULL );
 		}
 	}
 
@@ -1285,7 +1301,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Refuel, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Refuel, true, NULL );
 		}
 	}
 
@@ -1318,7 +1334,7 @@ class JMESPModule: JMRenderableModuleBase
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Repair, false, NULL );
+			rpc.Send( target, JMESPModuleRPC.Car_Repair, true, NULL );
 		}
 	}
 
@@ -1363,7 +1379,7 @@ class JMESPModule: JMRenderableModuleBase
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( name );
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.MakeItemSet, true, NULL );
 	}
 
 	private void RPC_MakeItemSet( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1391,7 +1407,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DuplicateAll, true, NULL );
 	}
 
 	private void RPC_DuplicateAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1415,7 +1431,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, false, NULL );
+		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, true, NULL );
 
 		JMScriptInvokers.ON_DELETE_ALL.Invoke();
 
@@ -1469,27 +1485,197 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void MoveToCursorRelative( vector cursor )
+	void MoveToCursor( vector cursor )
 	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( cursor );
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.MoveToCursor, true, NULL );
 	}
 
-	private void RPC_MoveToCursorRelative( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_MoveToCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor", senderRPC, instance ) )
+			return;
+		
+		vector cursor;
+		if ( !ctx.Read( cursor ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_MoveToCursor( cursor, objects, instance );
 	}
 
-	private void Exec_MoveToCursorRelative( vector cursor, set< Object > objects, JMPlayerInstance instance )
+	private void Exec_MoveToCursor( vector cursor, set< Object > objects, JMPlayerInstance instance )
 	{
+		int moved = 0;
+		int count = objects.Count();
+		
+		int i = objects.Count();
+		while ( i > 0 )
+		{
+			Object obj = objects[i  - 1];
+			objects.Remove( i - 1 );
+
+			if ( obj != NULL )
+			{
+				vector transform[4];
+				obj.GetTransform( transform );
+				string obtype = Object.GetDebugName( obj );
+
+				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
+
+				obj.SetPosition(cursor);
+				moved++;
+			}
+
+			i = objects.Count();
+		}
+
+		if ( moved > 0 )
+		{
+			GetCommunityOnlineToolsBase().Log( instance, "ESP action=move_to_cursor count=" + moved + " attempted=" + count );
+			SendWebhook( "MoveToCursor", instance, "Performed a move to cursor on " + moved + " objects." );
+		}
 	}
 
-	void MoveToCursorAbsolute( vector cursor )
+	void CopyToClipboardRaw()
 	{
+		string clipboardOutput= "";
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			if (i > 0)
+				clipboardOutput = clipboardOutput + "\n";
+
+			clipboardOutput = clipboardOutput + JMobjects[i].obj.GetType() + "\n";
+			
+			EntityAI ent;
+			if (!Class.CastTo(ent, JMobjects[i].obj))
+				continue;
+
+			if (ent.IsEmpty())
+				continue;
+			
+			for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+			{
+				clipboardOutput = clipboardOutput + ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\n";
+			}
+
+			CargoBase cargo = ent.GetInventory().GetCargo();
+			if(!cargo)
+				continue;
+
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				clipboardOutput = clipboardOutput + cargo.GetItem(j).GetType() + "\n";
+			}
+		}
+
+		GetGame().CopyToClipboard(clipboardOutput);
 	}
 
-	private void RPC_MoveToCursorAbsolute( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	void CopyToClipboardMarket()
 	{
+		string clipboardOutput= "";
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		
+		clipboardOutput = "{\n";
+		clipboardOutput += "    \"m_Version\": 12,\n";
+		clipboardOutput += "    \"DisplayName\": \"My Category Name\",\n";
+		clipboardOutput += "    \"Icon\": \"Deliver\",\n";
+		clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
+		clipboardOutput += "    \"IsExchange\": 0,\n";
+		clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
+		clipboardOutput += "    \"Items\": [\n";
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			clipboardOutput += "        {\n";
+			clipboardOutput += "            \"ClassName\": \"" + JMobjects[i].obj.GetType() + "\",\n";
+			clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
+			clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
+			clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
+			clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
+			clipboardOutput += "            \"MinStockThreshold\": 1,\n";
+			clipboardOutput += "            \"QuantityPercent\": -1,\n";
+
+			EntityAI ent;
+			if (Class.CastTo(ent, JMobjects[i].obj))
+			{
+				if (ent.IsEmpty())
+				{
+					clipboardOutput += "            \"SpawnAttachments\": [],\n";
+				}
+				else
+				{
+					clipboardOutput += "            \"SpawnAttachments\": [\n";
+					for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+					{
+						clipboardOutput += "                \""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\"";
+						if ( k+1 < ent.GetInventory().AttachmentCount() )
+							clipboardOutput += ",";
+						
+						clipboardOutput += "\n";
+					}
+					clipboardOutput += "            ],\n";
+				}
+			}			
+
+			clipboardOutput += "            \"Variants\": []\n";
+
+			clipboardOutput += "        }";
+			if ( i + 1 < JMobjects.Count() )
+				clipboardOutput += ",";
+
+			clipboardOutput += "\n";
+		}
+		clipboardOutput += "    ]\n";
+		clipboardOutput += "}";
+		GetGame().CopyToClipboard(clipboardOutput);
 	}
 
-	private void Exec_MoveToCursorAbsolute( vector cursor, set< Object > objects, JMPlayerInstance instance )
+	void CopyToClipboardSpawnableTypes()
 	{
+		string clipboardOutput= "";
+		
+		clipboardOutput += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
+		clipboardOutput += "<spawnabletypes>\n";
+
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
+		for(int i=0; i < JMobjects.Count(); i++)
+		{
+			clipboardOutput += "	<type name=\""+JMobjects[i].obj.GetType()+"\">\n";
+			
+			EntityAI ent;
+			if (Class.CastTo(ent, JMobjects[i].obj))
+			{
+				for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
+				{
+					clipboardOutput += "		<attachments chance=\"1.00\">\n";
+					clipboardOutput += "			<item name=\""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType()+"\" chance=\"1.00\" />\n";
+					clipboardOutput += "		</attachments>\n";
+				}
+
+				CargoBase cargo = ent.GetInventory().GetCargo();
+				if(cargo)
+				{
+					for(int j=0; j < cargo.GetItemCount(); j++)
+					{
+						clipboardOutput += "		<cargo chance=\"1.00\">\n";
+						clipboardOutput += "			<item name=\""+cargo.GetItem(j).GetType()+"\" />\n";
+						clipboardOutput += "		</cargo>\n";
+					}
+				}
+			}
+
+			clipboardOutput += "	</type>\n";
+		}
+
+		clipboardOutput += "</spawnabletypes>\n";
+		GetGame().CopyToClipboard(clipboardOutput);
 	}
-}
+};

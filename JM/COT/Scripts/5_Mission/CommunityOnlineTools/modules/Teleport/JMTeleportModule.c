@@ -1,9 +1,7 @@
 class JMTeleportModule: JMRenderableModuleBase
 {
-	#ifdef COT_TPMENU2MAPMENU
 	JMMapModule m_MapModule;
 	JMMapForm m_MapMenu;
-	#endif
 	
 	private ref JMTeleportSerialize m_Settings;
 	
@@ -16,32 +14,26 @@ class JMTeleportModule: JMRenderableModuleBase
 	
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
 		
-		#ifdef COT_TPMENU2MAPMENU
 		if (Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
-		#endif
 	}
 
 	override void EnableUpdate()
 	{
 	}
 
-	void OnSelectLocation(vector pos)
+	void OnSelectLocation(vector pos, bool playerpos = false)
 	{
-		#ifdef COT_TPMENU2MAPMENU
 		if( !m_MapMenu )
 		{
 			if (!Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 				return;
 
-			Print("m_MapModule.GetForm() = "+m_MapModule.GetForm());
-			Print("m_MapModule = "+m_MapModule);
-
 			if (!Class.CastTo(m_MapMenu, m_MapModule.GetForm()) )
 				return;
 		}
-		m_MapMenu.UpdateMapPos(pos);
-		#endif
+
+		m_MapMenu.UpdateMapPosition(playerpos, pos);
 	}
 
 	override bool HasAccess()
@@ -89,7 +81,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		Load();
+		if (GetGame().IsServer())
+			Load();
 	}
 	
 	override void OnSettingsUpdated()
@@ -117,6 +110,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return m_Settings.Locations;
 	}
 
+	TStringArray GetLocationTypes()
+	{
+		return m_Settings.Types;
+	}
+
 	void Input_Cursor( UAInput input )
 	{
 		if ( !(input.LocalPress()) )
@@ -137,8 +135,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
 			currentPosition = CurrentActiveCamera.GetPosition();
-		} else 
-		{
+		} else {
 			currentPosition = GetPlayer().GetPosition();
 		}
 
@@ -200,7 +197,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return JMTeleportModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -223,6 +224,11 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if (m_Settings)
+				return;
+
+			m_Settings = JMTeleportSerialize.Create();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
 		} else
@@ -233,8 +239,17 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
+	bool IsLoaded()
+	{
+		return m_Settings != null;
+	}
+
 	private void Server_Load( PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		m_Settings.Write( rpc );
 		rpc.Send( NULL, JMTeleportModuleRPC.Load, true, ident );
@@ -248,9 +263,6 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 		else
 		{
-			if ( !m_Settings )
-				m_Settings = JMTeleportSerialize.Create();
-
 			if ( m_Settings.Read( ctx ) )
 			{
 				OnSettingsUpdated();
@@ -400,7 +412,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( IsMissionOffline() )
 		{
 			Server_Location( location.Name, guids, NULL );
-		} else if ( IsMissionClient() )
+		}
+		else if ( IsMissionClient() )
 		{
 			if ( location == NULL )
 				return;
@@ -520,8 +533,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	override void GetSubCommands(inout array<ref JMCommand> commands)
 	{
 		AddSubCommand(commands, "position", "Command_Position", "Admin.Player.Teleport.Position");
-		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");
-		
+		AddSubCommand(commands, "pos", "Command_Position", "Admin.Player.Teleport.Position");		
 		AddSubCommand(commands, "get", "Command_Get", "Admin.Player.Teleport.Position");
 	}
 
@@ -532,4 +544,4 @@ class JMTeleportModule: JMRenderableModuleBase
 		names.Insert("tp");
 		return names;
 	}
-}
+};

@@ -18,6 +18,8 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_PositionY;
 	UIActionEditableText m_Action_PositionZ;
 	UIActionButton m_Action_Position;
+	UIActionButton m_Action_GetPosition;
+	UIActionButton m_Action_PastePosition;
 	UIActionButton m_Action_RefreshPosition;
 	UIActionCheckbox m_Action_AutoRefreshPosition;
 	
@@ -25,12 +27,16 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_OrientationY;
 	UIActionEditableText m_Action_OrientationZ;
 	UIActionButton m_Action_Orientation;
+	UIActionButton m_Action_GetOrientation;
+	UIActionButton m_Action_PasteOrientation;
 	UIActionButton m_Action_RefreshOrientation;
 	UIActionCheckbox m_Action_AutoRefreshOrientation;
 
 	UIActionEditableText m_Action_Health;
 
 	UIActionButton m_Action_Delete;
+
+	bool m_ActionsInitialized;
 
 	void ~JMESPMeta()
 	{
@@ -52,6 +58,11 @@ class JMESPMeta : Managed
 			return;
 
 		widgetHandler.SetInfo( this, viewTypeActions );
+	}
+
+	void InitActions()
+	{
+		m_ActionsInitialized = true;
 
 		CreateActions( viewTypeActions );
 
@@ -79,13 +90,15 @@ class JMESPMeta : Managed
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "+JMESPMeta::Destroy() void;" );
 		Print( "  m_Action_Position = " + m_Action_Position );
+		Print( "  m_Action_GetPosition = " + m_Action_GetPosition );
 		Print( "  m_Action_Orientation = " + m_Action_Orientation );
+		Print( "  m_Action_GetOrientation = " + m_Action_GetOrientation );
 		Print( "  m_Action_Health = " + m_Action_Health );
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
-		if ( widgetRoot )
-			widgetRoot.Show( false );
+		if ( GetGame() && widgetRoot )
+			widgetRoot.Unlink();
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );
@@ -107,7 +120,9 @@ class JMESPMeta : Managed
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set Position", this, "Action_SetPosition", 0.5 );
+		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.12 );
+		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
 		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
 		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
@@ -126,7 +141,9 @@ class JMESPMeta : Managed
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set Orientation", this, "Action_SetOrientation", 0.5 );
+		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
+		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
+		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
@@ -170,7 +187,7 @@ class JMESPMeta : Managed
 
 	void Update()
 	{
-		if ( !target )
+		if ( !target || !m_ActionsInitialized )
 			return;
 
 		if (m_Action_AutoRefreshPosition.IsChecked())
@@ -182,16 +199,24 @@ class JMESPMeta : Managed
 
 	void RefreshPosition()
 	{
-		if ( !m_Action_PositionX.IsFocused() ) m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
-		if ( !m_Action_PositionY.IsFocused() ) m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
-		if ( !m_Action_PositionZ.IsFocused() ) m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
+		if ( !m_Action_PositionX.IsFocused() && !m_Action_PositionX.IsEdited() ) m_Action_PositionX.SetText( FloatToString( target.GetPosition()[0] ) );
+		if ( !m_Action_PositionY.IsFocused() && !m_Action_PositionY.IsEdited() ) m_Action_PositionY.SetText( FloatToString( target.GetPosition()[1] ) );
+		if ( !m_Action_PositionZ.IsFocused() && !m_Action_PositionZ.IsEdited() ) m_Action_PositionZ.SetText( FloatToString( target.GetPosition()[2] ) );
 	}
 
 	void RefreshOrientation()
 	{
-		if ( !m_Action_OrientationX.IsFocused() ) m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
-		if ( !m_Action_OrientationY.IsFocused() ) m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
-		if ( !m_Action_OrientationZ.IsFocused() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
+		if ( !m_Action_OrientationX.IsFocused() && !m_Action_OrientationX.IsEdited() ) m_Action_OrientationX.SetText( FloatToString( target.GetOrientation()[0] ) );
+		if ( !m_Action_OrientationY.IsFocused() && !m_Action_OrientationY.IsEdited() ) m_Action_OrientationY.SetText( FloatToString( target.GetOrientation()[1] ) );
+		if ( !m_Action_OrientationZ.IsFocused() && !m_Action_OrientationZ.IsEdited() ) m_Action_OrientationZ.SetText( FloatToString( target.GetOrientation()[2] ) );
+	}
+
+	void Action_GetPosition( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard("<" + m_Action_PositionX.GetText() + ", " + m_Action_PositionY.GetText() + ", " + m_Action_PositionZ.GetText() + ">");
 	}
 
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
@@ -199,12 +224,41 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector pos = vector.Zero;
+		SetPosition();
+	}
+
+	void SetPosition()
+	{
+		vector pos;
 		pos[0] = m_Action_PositionX.GetText().ToFloat();
 		pos[1] = m_Action_PositionY.GetText().ToFloat();
 		pos[2] = m_Action_PositionZ.GetText().ToFloat();
 
+		m_Action_PositionX.SetEdited(false);
+		m_Action_PositionY.SetEdited(false);
+		m_Action_PositionZ.SetEdited(false);
+
 		module.SetPosition( pos, target );
+	}
+
+	void Action_PastePosition( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		string clipboard;
+		GetGame().CopyFromClipboard(clipboard);
+
+		vector pos = clipboard.BeautifiedToVector();
+
+		if (pos != vector.Zero)
+		{
+			m_Action_PositionX.SetText(pos[0].ToString());
+			m_Action_PositionY.SetText(pos[1].ToString());
+			m_Action_PositionZ.SetText(pos[2].ToString());
+
+			SetPosition();
+		}
 	}
 
 	void Action_RefreshPosition( UIEvent eid, UIActionBase action )
@@ -221,17 +275,54 @@ class JMESPMeta : Managed
 			return;
 	}
 
+	void Action_GetOrientation( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard("<" + m_Action_OrientationX.GetText() + ", " + m_Action_OrientationY.GetText() + ", " + m_Action_OrientationZ.GetText() + ">");
+	}
+
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		vector pos = vector.Zero;
-		pos[0] = m_Action_OrientationX.GetText().ToFloat();
-		pos[1] = m_Action_OrientationY.GetText().ToFloat();
-		pos[2] = m_Action_OrientationZ.GetText().ToFloat();
+		SetOrientation();
+	}
 
-		module.SetOrientation( pos, target );
+	void SetOrientation()
+	{
+		vector ori;
+		ori[0] = m_Action_OrientationX.GetText().ToFloat();
+		ori[1] = m_Action_OrientationY.GetText().ToFloat();
+		ori[2] = m_Action_OrientationZ.GetText().ToFloat();
+
+		m_Action_OrientationX.SetEdited(false);
+		m_Action_OrientationY.SetEdited(false);
+		m_Action_OrientationZ.SetEdited(false);
+
+		module.SetOrientation( ori, target );
+	}
+
+	void Action_PasteOrientation( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		string clipboard;
+		GetGame().CopyFromClipboard(clipboard);
+
+		vector ori = clipboard.BeautifiedToVector();
+
+		if (ori != vector.Zero)
+		{
+			m_Action_OrientationX.SetText(ori[0].ToString());
+			m_Action_OrientationY.SetText(ori[1].ToString());
+			m_Action_OrientationZ.SetText(ori[2].ToString());
+
+			SetOrientation();
+		}
 	}
 
 	void Action_RefreshOrientation( UIEvent eid, UIActionBase action )
@@ -270,7 +361,8 @@ class JMESPMeta : Managed
 		else
 			module.DeleteObject( networkLow, networkHigh );
 	}
-}
+};
+
 
 class JMESPMetaPlayer : JMESPMeta
 {
@@ -312,7 +404,8 @@ class JMESPMetaPlayer : JMESPMeta
 	{
 		return !target.IsAlive();
 	}
-}
+};
+
 
 class JMESPMetaBaseBuilding : JMESPMeta
 {

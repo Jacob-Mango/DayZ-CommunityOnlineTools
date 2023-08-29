@@ -125,7 +125,8 @@ static void Message( PlayerBase player, string txt )
 	{
 		GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
 	}
-}
+};
+
 
 static Weapon GetWeaponInHands()
 {

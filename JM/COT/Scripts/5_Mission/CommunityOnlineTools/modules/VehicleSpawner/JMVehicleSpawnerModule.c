@@ -56,7 +56,8 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		Load();
+		if (GetGame().IsServer())
+			Load();
 	}
 
 	override void OnSettingsUpdated()
@@ -95,7 +96,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return JMVehicleSpawnerModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -112,6 +117,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if (meta)
+				return;
+
+			meta = JMVehicleSpawnerMeta.Create();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, NULL );
 		} else
@@ -122,8 +132,19 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
+	bool IsLoaded()
+	{
+		return meta != null;
+	}
+
 	private void Server_Load( PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", ident, instance ) )
+			return;
+
+		CF_Log.Debug("Has permission");
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( meta );
 		rpc.Send( NULL, JMVehicleSpawnerModuleRPC.Load, true, ident );

@@ -1,4 +1,4 @@
-class JMPlayerRowWidget extends ScriptedWidgetEventHandler 
+class JMPlayerRowWidget: ScriptedWidgetEventHandler 
 {
 	private Widget layoutRoot;
 
@@ -145,4 +145,4 @@ class JMPlayerRowWidget extends ScriptedWidgetEventHandler
 
 		return false;
 	}
-}
+};

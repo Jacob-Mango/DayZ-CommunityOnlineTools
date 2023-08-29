@@ -11,5 +11,6 @@ modded class ActionBase
 
 		return true;
 	}
-}
+};
+
 #endif

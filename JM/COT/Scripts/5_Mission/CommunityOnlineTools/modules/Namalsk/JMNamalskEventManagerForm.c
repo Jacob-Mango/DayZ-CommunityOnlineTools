@@ -1,4 +1,3 @@
-
 class JMNamalskEventManagerForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;

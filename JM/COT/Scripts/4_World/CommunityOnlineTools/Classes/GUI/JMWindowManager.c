@@ -129,7 +129,8 @@ class JMWindowManager
 
 		return NULL;
 	}
-}
+};
+
 
 ref JMWindowManager g_cot_WindowManager;
 

@@ -55,6 +55,14 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 	}
 
+	override void RegisterKeyMouseBindings() 
+	{
+		super.RegisterKeyMouseBindings();
+		
+		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
+		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
+	}
+
 	void OnPlayer_Checked( string guid, bool checked )
 	{
 		if ( checked )
@@ -126,7 +134,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		return JMPlayerModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -1144,12 +1156,23 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating_Finish").Add(senderRPC).Add(target);
 #endif
-Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTickTime());
+		Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTickTime());
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 			return;
 
 		GetGame().SelectPlayer(senderRPC, senderRPC.GetPlayer());
+	}
+
+	void ToggleGodMode()
+	{
+		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		bool value = !player.COTHasGodMode();
+		array< string > guids = JM_GetSelected().GetPlayers();
+		if (guids.Count() == 0)
+			guids.Insert(player.GetIdentity().GetId());
+
+		SetGodMode(value, guids);
 	}
 
 	void SetGodMode( bool value, array< string > guids )
@@ -1170,6 +1193,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		int godModePlayers;
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1177,6 +1202,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 				continue;
 
 			player.COTSetGodMode( value );
+
+			godModePlayers++;
 
 			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
@@ -1190,6 +1217,31 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 			players[i].Update();
 		}
+
+		//! TODO localization
+		string message;
+		if ( godModePlayers > 0 )
+		{
+			if ( value )
+				message = "Enabled Godmode";
+			else
+				message = "Disabled Godmode";
+		}
+		else
+		{
+			message = "Failed to toggle godmode";
+		}
+
+		if ( players.Count() > 1 )
+		{
+			message += " for " + players.Count() + " players";
+		}
+		else
+		{
+			message += " for yourself";
+		}
+
+		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
 
 	private void RPC_SetGodMode( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1716,6 +1768,30 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
 	}
 
+	void InputHeal( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+		{
+			array< string > guids = JM_GetSelected().GetPlayers();
+			if (guids.Count() == 0)
+				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+
+			Heal(guids);
+		}
+	}
+
+	void InputToggleGodMode( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+			ToggleGodMode();
+	}
+
 	void Heal( array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1736,6 +1812,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 		bool includeAttachments = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Attachments", ident );
 		bool includeCargo = GetPermissionsManager().HasPermission( "Admin.Player.Heal.Cargo", ident );
 		
+		int healedPlayers;
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1756,6 +1834,8 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
 			player.GetStatWater().Set( player.GetStatWater().GetMax() );
 
+			healedPlayers++;
+
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
 			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
@@ -1765,6 +1845,20 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 			players[i].Update();
 		}
+
+		//! TODO localization
+		string message;
+		if ( healedPlayers > 0 )
+			message = "You healed";
+		else
+			message = "Failed to heal";
+
+		if ( players.Count() > 1 )
+			message += " " + players.Count() + " players";
+		else
+			message += " yourself";
+
+		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
 
 	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2123,4 +2217,5 @@ Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTic
 
 		Exec_SetRoles( roles, guids, senderRPC, instance );
 	}
-}
+};
+

@@ -1,4 +1,4 @@
-class JMESPViewTypeWidget extends ScriptedWidgetEventHandler 
+class JMESPViewTypeWidget: ScriptedWidgetEventHandler 
 {
 	private Widget m_LayoutRoot;
 	private CheckBoxWidget m_Checkbox;
@@ -108,4 +108,4 @@ class JMESPViewTypeWidget extends ScriptedWidgetEventHandler
 
 		return false;
 	}
-}
+};

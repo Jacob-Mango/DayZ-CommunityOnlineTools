@@ -1,4 +1,4 @@
-class UIActionEditableVector extends UIActionBase 
+class UIActionEditableVector: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_TextX;
@@ -19,27 +19,10 @@ class UIActionEditableVector extends UIActionBase
 	{
 	}
 
-	void HasButton( bool enabled )
+	void Init( bool hasButton )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HasButton" );
-		#endif
-
-		if ( enabled )
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_input" ).Show( false );
-
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_check" );
-			layoutRoot.Show( true );
-
+		if ( hasButton )
 			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
-		} else
-		{
-			layoutRoot.FindAnyWidget( "action_wrapper_check" ).Show( false );
-
-			layoutRoot = layoutRoot.FindAnyWidget( "action_wrapper_input" );
-			layoutRoot.Show( true );
-		}
 
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_TextX, layoutRoot.FindAnyWidget( "action_x" ) );
@@ -47,10 +30,6 @@ class UIActionEditableVector extends UIActionBase
 		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
 
 		SetValue( vector.Zero );
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HasButton" );
-		#endif
 	}
 
 	override void SetLabel( string text )
@@ -85,6 +64,28 @@ class UIActionEditableVector extends UIActionBase
 	override vector GetValue()
 	{
 		return Vector( m_TextX.GetText().ToFloat(), m_TextY.GetText().ToFloat(), m_TextZ.GetText().ToFloat() );
+	}
+
+	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
+	{
+		if ( (w == m_TextX || w == m_TextY || w == m_TextZ) && IsFocusWidget(GetFocus()) )
+		{
+			EditBoxWidget editw = EditBoxWidget.Cast(w);
+			IncrementValue(editw, wheel);
+
+			return true;
+		}
+
+		return super.OnMouseWheel( w, x, y, wheel );
+	}
+
+	void IncrementValue(EditBoxWidget w, int wheel)
+	{
+		float currValue = w.GetText().ToFloat();
+		currValue = currValue + (wheel * 0.1);
+		w.SetText(currValue.ToString());
+		
+		CallEvent( UIEvent.CHANGE );
 	}
 
 	override void SetButton( string text )
@@ -133,4 +134,4 @@ class UIActionEditableVector extends UIActionBase
 
 		return false;
 	}
-}
+};

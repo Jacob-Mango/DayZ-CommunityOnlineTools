@@ -1,4 +1,4 @@
-class JMCameraBase extends Camera
+class JMCameraBase: Camera
 {
 	float SendUpdateAccumalator = 0.0;
 	
@@ -71,4 +71,4 @@ class JMCameraBase extends Camera
 	void OnUpdate( float timeslice )
 	{
 	}
-}
+};

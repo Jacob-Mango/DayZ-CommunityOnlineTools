@@ -6,4 +6,4 @@ class JMVehicleSpawnerButtonData: UIActionData
 	{
 		ClassName = clsName;
 	}
-}
+};

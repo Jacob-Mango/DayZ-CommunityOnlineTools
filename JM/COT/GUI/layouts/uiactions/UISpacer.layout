@@ -7,5 +7,5 @@ PanelWidgetClass UISpacer {
  hexactsize 0
  vexactsize 1
  color 0 0 0 0
- style rover_sim_colorable
+ style DayZDefaultPanel
 }

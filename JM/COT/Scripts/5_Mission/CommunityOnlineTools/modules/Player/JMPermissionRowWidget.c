@@ -1,4 +1,4 @@
-class JMPermissionRowWidget extends ScriptedWidgetEventHandler 
+class JMPermissionRowWidget: ScriptedWidgetEventHandler 
 {
 	JMPermissionRowWidget Parent;
 	ref array< JMPermissionRowWidget > Children;
@@ -253,4 +253,4 @@ class JMPermissionRowWidget extends ScriptedWidgetEventHandler
 	{
 		m_state_Permission.SetValue( type, true );
 	}
-}
+};

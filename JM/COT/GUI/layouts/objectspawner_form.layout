@@ -2,13 +2,13 @@ PanelWidgetClass JMObjectSpawnerForm {
  visible 1
  color 0 0 0 0
  position 0 0
- size 650 420
+ size 650 460
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
  scriptclass "JMObjectSpawnerForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   PanelWidgetClass object_spawn_wrapper {
    position 0 0

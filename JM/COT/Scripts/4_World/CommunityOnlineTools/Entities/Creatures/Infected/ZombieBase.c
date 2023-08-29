@@ -14,4 +14,5 @@ modded class ZombieBase
 
 		return true;
 	}
-}
+};
+
