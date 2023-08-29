@@ -1,4 +1,4 @@
-class JMMissionSelectorForm extends JMFormBase
+class JMMissionSelectorForm: JMFormBase
 {
 	private Widget m_ActionsWrapper;
 	private Widget m_ActionsFilterWrapper;

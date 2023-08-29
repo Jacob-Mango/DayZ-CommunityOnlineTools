@@ -131,7 +131,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
    vexactpos 1
    hexactsize 0
    vexactsize 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
    scriptclass "JMConfirmation"
   }
  }

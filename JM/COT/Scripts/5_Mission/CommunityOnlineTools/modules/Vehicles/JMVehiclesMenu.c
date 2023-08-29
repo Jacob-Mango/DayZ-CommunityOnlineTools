@@ -30,6 +30,7 @@ class JMVehiclesMenu: JMFormBase
 	protected TextWidget m_VehicleInfoExploded;
 	protected TextWidget m_VehicleInfoDestroyed;
 	protected TextWidget m_VehicleInfoKeys;
+	protected TextWidget m_VehicleInfoLastDriver;	
 	
 	protected Widget m_VehicleOptionsPanel;
 	protected ButtonWidget m_DeleteVehicleButton;
@@ -94,10 +95,14 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoExploded = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_exploded_value" ) );
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
+		m_VehicleInfoLastDriver = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_last_driver_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoType.GetParent().Show(true);
 		m_VehicleInfoExploded.GetParent().Show(true);
 		m_VehicleInfoKeys.GetParent().Show(true);
+		#endif
+		#ifdef EXPANSIONMODCORE
+		m_VehicleInfoLastDriver.GetParent().Show(true);
 		#endif
 		
 		//! Vehicle Options
@@ -175,6 +180,9 @@ class JMVehiclesMenu: JMFormBase
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
 		#endif
+		#ifdef EXPANSIONMODCORE
+		m_VehicleInfoLastDriver.SetText( vehicle.m_LastDriverUID );
+		#endif
 		
 		m_CurrentVehicle = vehicle;
 
@@ -229,13 +237,11 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoExploded.SetText( "" );
 		m_VehicleInfoDestroyed.SetText( "" );
 		m_VehicleInfoKeys.SetText( "" );
+		m_VehicleInfoLastDriver.SetText( "" );
 		
 		m_CurrentVehicle = NULL;
 	}
-	
-	// ------------------------------------------------------------
-	// Override OnClick
-	// ------------------------------------------------------------	
+		
 	override bool OnClick( Widget w, int x, int y, int button )
 	{		
 		if ( w == m_VehicleListRefreshButton )

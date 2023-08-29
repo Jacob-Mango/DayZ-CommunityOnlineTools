@@ -1,4 +1,4 @@
-class JMConfirmationForm extends JMConfirmation 
+class JMConfirmationForm: JMConfirmation 
 {
 	#ifndef CF_WINDOWS
 	private JMWindowBase m_Window;

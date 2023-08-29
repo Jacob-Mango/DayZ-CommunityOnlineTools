@@ -228,5 +228,4 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			SendWebhook( "Storm", instance, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
-
-}
+};

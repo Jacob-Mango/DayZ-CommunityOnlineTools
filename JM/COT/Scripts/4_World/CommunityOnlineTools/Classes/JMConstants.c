@@ -38,4 +38,4 @@ class JMConstants
 	static const string DIR_ITEMS = DIR_COT + "Items\\";
 	static const string FT_ITEM = "json";
 	static const string EXT_ITEM = "." + FT_ITEM;
-}
+};

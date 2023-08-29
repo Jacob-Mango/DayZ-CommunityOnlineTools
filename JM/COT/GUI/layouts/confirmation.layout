@@ -9,7 +9,7 @@ PanelWidgetClass confirmation_panel_inner {
  vexactpos 0
  hexactsize 1
  vexactsize 1
- style rover_sim_colorable
+ style DayZDefaultPanel
  {
   FrameWidgetClass confirmation_title_panel {
    ignorepointer 1
@@ -49,7 +49,7 @@ PanelWidgetClass confirmation_panel_inner {
    vexactsize 1
    halign center_ref
    color 0 0 0 1
-   style rover_sim_colorable
+   style DayZDefaultPanel
    "Size To Content V" 1
   }
   FrameWidgetClass confirmation_message_panel {

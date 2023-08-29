@@ -14,4 +14,17 @@ modded class ItemBase
 
 		return true;
 	}
-}
+
+	override void OnEnergyConsumed()
+	{
+		PlayerBase player =  PlayerBase.Cast(GetHierarchyRootPlayer());
+		if (player && player.COTHasGodMode())  //! UNLIMITED POWER
+		{
+			GetCompEM().SetEnergy0To1(1.0);
+			return;
+		}
+
+		super.OnEnergyConsumed();
+	}
+};
+

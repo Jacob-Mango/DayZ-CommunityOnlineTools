@@ -83,7 +83,7 @@ PanelWidgetClass JMRoleRowWidget
    vexactsize 0
    Padding 0
    Margin 0
-   style rover_sim_colorable
+   style DayZDefaultPanel
   }
  }
 }

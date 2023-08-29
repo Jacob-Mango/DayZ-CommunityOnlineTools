@@ -39,6 +39,6 @@ class JMCommand
 	}
 };
 
-class JMSubCommand extends JMCommand
+class JMSubCommand: JMCommand
 {
 };

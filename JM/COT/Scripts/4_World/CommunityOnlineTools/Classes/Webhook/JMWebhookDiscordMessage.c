@@ -16,11 +16,11 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		delete embeds;
 	}
 
-	void SetHeader( string username, string avatar_url, string content )
+	void SetHeader( string userName, string avatarUrl, string msgContent )
 	{
-		this.username = username;
-		this.avatar_url = avatar_url;
-		this.content = content;
+		username = userName;
+		avatar_url = avatarUrl;
+		content = msgContent;
 	}
 
 	void AddEmbed( notnull JMWebhookDiscordEmbed obj )
@@ -148,13 +148,13 @@ class JMWebhookDiscordEmbed : Managed
 		color = txt;
 	}
 
-	void SetAuthor( string name, string url = "", string icon_url = "" )
+	void SetAuthor( string name, string urlLink = "", string icon_url = "" )
 	{
 		if ( !author )
 			author = new JMWebhookDiscordEmbedAuthor;
 
 		author.name = name;
-		author.url = url;
+		author.url = urlLink;
 		author.icon_url = icon_url;
 	}
 
@@ -169,20 +169,20 @@ class JMWebhookDiscordEmbed : Managed
 		fields.Insert( field );
 	}
 
-	void SetThumbnail( string url )
+	void SetThumbnail( string urlLink )
 	{
 		if ( !thumbnail )
 			thumbnail = new JMWebhookDiscordEmbedThumbnail;
 
-		thumbnail.url = url;
+		thumbnail.url = urlLink;
 	}
 
-	void SetImage( string url )
+	void SetImage( string urlLink )
 	{
 		if ( !image )
 			image = new JMWebhookDiscordEmbedImage;
 
-		image.url = url;
+		image.url = urlLink;
 	}
 
 	void SetFooter( string text, string icon_url = "" )

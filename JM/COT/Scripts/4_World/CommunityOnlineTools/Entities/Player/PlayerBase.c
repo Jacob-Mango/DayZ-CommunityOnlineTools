@@ -11,6 +11,7 @@ modded class PlayerBase
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
 
+	private bool m_COT_GodMode;
 	private bool m_COT_GodMode_Preference;
 
 	private int m_JMIsInvisible;
@@ -27,7 +28,6 @@ modded class PlayerBase
 	private bool m_JMHasUnlimitedAmmo;
 
 	private bool m_JMHasUnlimitedStamina;
-	private bool m_JMHasUnlimitedStaminaRemoteSynch;
 
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
@@ -77,7 +77,9 @@ modded class PlayerBase
 
 		RegisterNetSyncVariableInt( "m_JMIsInvisibleRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
-		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStaminaRemoteSynch" );
+		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
+		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
+		RegisterNetSyncVariableBool( "m_COT_GodMode" );
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -108,6 +110,19 @@ modded class PlayerBase
 		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
 			GetGame().GetUIManager().ShowUICursor(true);
 #endif
+	}
+
+	override void OnConnect()
+	{
+		super.OnConnect();
+
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(COTOnConnect);
+	}
+
+	void COTOnConnect()
+	{
+		m_COT_GodMode = !GetAllowDamage();
+		SetSynchDirty();
 	}
 
 	override void OnVariablesSynchronized()
@@ -147,11 +162,6 @@ modded class PlayerBase
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
-		}
-
-		if ( m_JMHasUnlimitedStaminaRemoteSynch != m_JMHasUnlimitedStamina )
-		{
-			m_JMHasUnlimitedStaminaRemoteSynch = m_JMHasUnlimitedStamina;
 		}
 	}
 
@@ -296,7 +306,7 @@ modded class PlayerBase
 
 	override string FormatSteamWebhook()
 	{
-		if ( Assert_Null( GetAuthenticatedPlayer(), "Player has no identity or improperly programmed AI mod" ) )
+		if ( !GetAuthenticatedPlayer() )
 		{
 			return super.FormatSteamWebhook() + " (WARNING)";
 		}
@@ -307,7 +317,7 @@ modded class PlayerBase
 
 	bool COTHasGodMode()
 	{
-		return !GetAllowDamage();
+		return m_COT_GodMode;
 	}
 
 	bool COTIsFrozen()
@@ -343,6 +353,15 @@ modded class PlayerBase
 				m_COT_GodMode_Preference = !GetAllowDamage();
 
 			SetAllowDamage( !mode );
+
+			m_COT_GodMode = mode;
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
+		}
+		else
+		{
+			Error("COTSetGodMode cannot be called on client");
 		}
 	}
 
@@ -365,7 +384,9 @@ modded class PlayerBase
 			m_JMIsFrozen = mode;
 			m_JMIsFrozenRemoteSynch = mode;
 
+			#ifdef SERVER
 			SetSynchDirty();
+			#endif
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
@@ -389,7 +410,9 @@ modded class PlayerBase
 			if (mode || preference || !m_COT_CannotBeTargetedByAI_Preference)
 				COTSetCannotBeTargetedByAI(mode, preference);
 
+			#ifdef SERVER
 			SetSynchDirty();
+			#endif
 		}
 	}
 
@@ -435,6 +458,10 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedAmmo = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
 		}
 	}
 
@@ -443,7 +470,10 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedStamina = mode;
-			m_JMHasUnlimitedStaminaRemoteSynch = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
 		}
 	}
 
@@ -568,4 +598,5 @@ modded class PlayerBase
 	{
 		return m_COT_IsBeingKicked;
 	}
-}
+};
+

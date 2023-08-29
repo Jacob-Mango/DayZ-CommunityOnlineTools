@@ -7,4 +7,4 @@ modded class JMModuleConstructorBase
 		modules.Insert( COTModule );
 		modules.Insert( JMWebhookModule );
 	}
-}
+};

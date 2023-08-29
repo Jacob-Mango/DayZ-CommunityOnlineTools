@@ -130,8 +130,7 @@ enum JMESPModuleRPC
 	MakeItemSet,
 	DuplicateAll,
 	DeleteAll,
-	MoveToCursorRelative,
-	MoveToCursorAbsolute,
+	MoveToCursor,
 	COUNT
 };
 

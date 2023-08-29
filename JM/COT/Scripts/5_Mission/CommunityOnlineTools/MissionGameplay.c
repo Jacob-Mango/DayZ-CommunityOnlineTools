@@ -4,9 +4,6 @@ modded class MissionGameplay
 
 	protected JMPlayerInstance m_OfflineInstance;
 
-	// ------------------------------------------------------------
-	// Constructor
-	// ------------------------------------------------------------
 	void MissionGameplay()
 	{
 		if ( !g_cotBase )
@@ -26,17 +23,11 @@ modded class MissionGameplay
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Deconstructor
-	// ------------------------------------------------------------
 	void ~MissionGameplay()
 	{
 		delete g_cotBase;
 	}
 
-	// ------------------------------------------------------------
-	// COT OfflineMissionStart
-	// ------------------------------------------------------------
 	void OfflineMissionStart()
 	{
 		vector position = GetSpawnPoints().GetRandomElement();
@@ -79,9 +70,6 @@ modded class MissionGameplay
 			espModule.CreateCanvas();
 	}
 
-	// ------------------------------------------------------------
-	// Override OnMissionStart
-	// ------------------------------------------------------------
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
@@ -91,14 +79,10 @@ modded class MissionGameplay
 		// If game is not multiplayer, add a default offline player
 		if ( IsMissionOffline() )
 		{
-			Print( "MissionGameplay::OnMissionStart - IsMissionOffline" );
 			OfflineMissionStart();
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Override OnMissionStart
-	// ------------------------------------------------------------
 	override void OnMissionFinish()
 	{
 		GetCommunityOnlineTools().OnFinish();
@@ -110,14 +94,10 @@ modded class MissionGameplay
 		
 		if ( IsMissionOffline() )
 		{
-			Print( "MissionGameplay::OnMissionFinish - IsMissionOffline" );
 			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Override OnUpdate
-	// ------------------------------------------------------------
 	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
@@ -143,9 +123,6 @@ modded class MissionGameplay
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Override CreateDebugMonitor
-	// ------------------------------------------------------------
 	override void CreateDebugMonitor()
 	{
 		super.CreateDebugMonitor();
@@ -164,9 +141,6 @@ modded class MissionGameplay
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Override UpdateDebugMonitor
-	// ------------------------------------------------------------
 	override void UpdateDebugMonitor()
 	{
 		if (!m_CDebugMonitor) return;
@@ -185,9 +159,6 @@ modded class MissionGameplay
 		}
 	}
 
-	// ------------------------------------------------------------
-	// Override ShowInventory
-	// ------------------------------------------------------------
 	override void ShowInventory()
 	{
 		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
@@ -211,4 +182,4 @@ modded class MissionGameplay
 
 		super.HandleMapToggleByKeyboardShortcut(player);
 	}
-}
+};

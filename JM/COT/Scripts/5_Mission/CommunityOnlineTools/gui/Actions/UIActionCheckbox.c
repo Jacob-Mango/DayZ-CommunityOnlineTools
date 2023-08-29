@@ -1,4 +1,4 @@
-class UIActionCheckbox extends UIActionBase 
+class UIActionCheckbox: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected CheckBoxWidget m_Checkbox;
@@ -56,4 +56,4 @@ class UIActionCheckbox extends UIActionBase
 
 		return false;
 	}
-}
+};

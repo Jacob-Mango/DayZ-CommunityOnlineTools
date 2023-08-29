@@ -1,4 +1,4 @@
-class UIActionBase extends ScriptedWidgetEventHandler 
+class UIActionBase: ScriptedWidgetEventHandler 
 {
 	protected Widget layoutRoot;
 
@@ -352,4 +352,4 @@ class UIActionBase extends ScriptedWidgetEventHandler
 	{
 		return -1;
 	}
-}
+};

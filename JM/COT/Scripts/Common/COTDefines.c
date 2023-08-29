@@ -3,7 +3,7 @@
 //#define JM_COT_LOGGING
 
 //#ifdef DIAG
-////#define JM_COT_DIAG_LOGGING
+//#define JM_COT_DIAG_LOGGING
 //#endif
 
 //#define JM_COT_ESP_DEBUG

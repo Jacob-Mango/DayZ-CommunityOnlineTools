@@ -59,7 +59,8 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		Load();
+		if (GetGame().IsServer())
+			Load();
 	}
 
 	override void OnSettingsUpdated()
@@ -76,6 +77,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
+		//! TODO: Only save if changed
 		if ( !GetGame().IsClient() && settings )
 			settings.Save();
 	}
@@ -90,7 +92,11 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		return JMItemSetSpawnerModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -115,6 +121,11 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
+			if (meta)
+				return;
+
+			meta = JMItemSetMeta.Create();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, NULL );
 		} else
@@ -127,8 +138,17 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
+	bool IsLoaded()
+	{
+		return meta != null;
+	}
+
 	private void Server_Load( PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Items.Spawn", ident, instance ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( JMItemSetMeta.DeriveFromSettings( settings ) );
 		rpc.Send( NULL, JMItemSetSpawnerModuleRPC.Load, true, ident );
@@ -295,7 +315,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		*/
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( pos ) )
+		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
 			flags |= ECE_PLACE_ON_SURFACE;
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
@@ -358,4 +378,4 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			chest = SpawnItemInContainer( file.ContainerClassName, position, chest, file.Items[j].ItemName, file.Items[j].NumberOfStacks, file.Items[j].StackSize );
 		}
 	}
-}
+};

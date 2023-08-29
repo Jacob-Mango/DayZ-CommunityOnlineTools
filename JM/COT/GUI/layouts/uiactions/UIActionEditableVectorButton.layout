@@ -1,0 +1,110 @@
+PanelWidgetClass UIActionEditableVector {
+ size 1 30
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style rover_sim_colorable
+ scriptclass "UIActionEditableVector"
+ {
+  PanelWidgetClass action_wrapper
+  {
+   position 0 0
+   size 1 1
+   {
+    PanelWidgetClass action_wrapper_check
+    {
+     position 0 0
+     size 1 20
+     vexactsize 1
+     valign center_ref
+     {
+      TextWidgetClass action_label {
+       size 0.35 1
+       halign left_ref
+       valign top_ref
+       text "{LABEL}"
+       font "gui/fonts/sdf_MetronLight24"
+       "text offset" 10 0
+       "bold text" 1
+       "exact text" 1
+       "exact text size" 16
+      }
+      GridSpacerWidgetClass spacer {
+       position 0.3 0
+       size 0.5 1
+       Padding 0
+       Margin 0
+       Columns 3
+       Rows 1
+       {
+        EditBoxWidgetClass action_x {
+         position 0 0
+         size 1 1
+         text "{X}"
+         "exact text" 1
+         "no focus" 0
+         font "gui/fonts/Metron"
+         style Editor
+        }
+        EditBoxWidgetClass action_y {
+         position 0 0
+         size 1 1
+         text "{Y}"
+         "exact text" 1
+         "no focus" 0
+         font "gui/fonts/Metron"
+         style Editor
+        }
+        EditBoxWidgetClass action_z {
+         position 0 0
+         size 1 1
+         text "{Z}"
+         "exact text" 1
+         "no focus" 0
+         font "gui/fonts/Metron"
+         style Editor
+        }
+       }
+      }
+      ButtonWidgetClass action_button {
+       size 0.15 1
+       halign right_ref
+       valign center_ref
+       {
+        TextWidgetClass action_button_text {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Light
+         text "{BUTTON}"
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 14
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.1569 0.1569 0.1569 0.902
+   position 0 0
+   size 1 1
+   style rover_sim_colorable
+  }
+ }
+}

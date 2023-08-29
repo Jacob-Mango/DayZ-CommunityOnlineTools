@@ -304,7 +304,8 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 		return true;
 	}
-}
+};
+
 
 class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 {
@@ -405,7 +406,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		#endif
 		
 		Rifle_Base wpn;
-		if ( !Class.CastTo( wpn, obj ) )
+		if ( !Class.CastTo( wpn, obj ) || obj.IsKindOf("Pistol_Base") )
 			return false;
 		
 		CreateMeta( meta );
@@ -444,8 +445,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		#endif
 		#endif
 		
-		Pistol_Base wpn;
-		if ( !Class.CastTo( wpn, obj ) )
+		if ( !obj.IsKindOf("Pistol_Base") )
 			return false;
 		
 		CreateMeta( meta );

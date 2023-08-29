@@ -1,4 +1,4 @@
-class UIActionDropdownList extends UIActionBase 
+class UIActionDropdownList: UIActionBase 
 {
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
@@ -77,6 +77,24 @@ class UIActionDropdownList extends UIActionBase
 		m_Label.SetText( text );
 	}
 
+	override int GetSelection()
+	{
+		return m_SelectedIndex;
+	}
+
+	override void SetSelection( int i, bool sendEvent = true )
+	{
+		m_SelectedIndex = i;
+		m_List.SelectRow( m_SelectedIndex );
+		
+		string result;
+		m_List.GetItemText( m_SelectedIndex, 0, result );
+		m_Text.SetText( result );
+
+		if (sendEvent)
+			CallEvent( UIEvent.CHANGE );
+	}
+
 	void SetText( float num )
 	{
 		SetText( "" + num );
@@ -108,8 +126,6 @@ class UIActionDropdownList extends UIActionBase
 		} else
 		{
 			m_ToggleImage.SetImage( 1 );
-			m_List.SelectRow( -1 );
-			m_SelectedIndex = 0;
 		}
 
 		#ifdef COT_DEBUGLOGS
@@ -124,7 +140,6 @@ class UIActionDropdownList extends UIActionBase
 
 		m_Items.Clear();
 		m_Items.Copy( items );
-		m_Items.Insert( "" );
 
 		UpdateText();
 	}
@@ -176,45 +191,31 @@ class UIActionDropdownList extends UIActionBase
 
 		string text = m_Text.GetText();
 
-		string item = "";
+		string item;
 
-		string nText = "" + text;
+		string nText = text;
 		nText.ToLower();
 
-		string pText = "" + m_PreviousText;
-		pText.ToLower();
+		m_List.ClearItems();
 
 		for ( int i = 0; i < m_Items.Count(); ++i )
 		{
-			item = "" + m_Items[i];
+			item = m_Items[i];
 			item.ToLower();
 
-			if ( item.Contains( nText ) )
+			if ( item.IndexOf( nText ) == 0 )
 			{
 				m_PreviousText = text;
-				pText = nText;
 				success = true;
-				break;
+				m_SelectedIndex = i;
 			}
+
+			m_List.AddItem( m_Items[i], NULL, 0 );
 		}
 
 		m_Text.SetText( m_PreviousText );
 
-		m_List.ClearItems();
-
-		for ( i = 0; i < m_Items.Count(); ++i )
-		{
-			item = "" + m_Items[i];
-			item.ToLower();
-
-			if ( item == "" )
-				continue;
-
-			if ( pText != "" && !item.Contains( pText ) )
-				continue;
-
-			m_List.AddItem( m_Items[i], NULL, 0 );
-		}  
+		m_List.SelectRow(m_SelectedIndex);
 
 		return success;
 	}
@@ -224,7 +225,8 @@ class UIActionDropdownList extends UIActionBase
 		if ( m_List.GetNumItems() > 0 && m_List.GetSelectedRow() != -1 )
 		{
 			string result;
-			m_List.GetItemText( m_List.GetSelectedRow(), 0, result );
+			m_SelectedIndex = m_List.GetSelectedRow();
+			m_List.GetItemText( m_SelectedIndex, 0, result );
 			m_Text.SetText( result );
 
 			CallEvent( UIEvent.CHANGE );
@@ -244,6 +246,8 @@ class UIActionDropdownList extends UIActionBase
 		{
 			if ( m_List.GetNumItems() != 0 )
 			{
+				int selectedIndex = m_SelectedIndex;
+
 				if ( key == KeyCode.KC_UP )
 				{
 					//if ( m_SelectedIndex == -1 )
@@ -263,11 +267,14 @@ class UIActionDropdownList extends UIActionBase
 				else if ( m_SelectedIndex < 0 )
 					m_SelectedIndex = 0;
 
-				m_List.SelectRow( m_SelectedIndex );
+				if (m_SelectedIndex != selectedIndex)
+				{
+					m_List.SelectRow( m_SelectedIndex );
 
-				string result;
-				m_List.GetItemText( m_SelectedIndex, 0, result );
-				m_Text.SetText( result );
+					string result;
+					m_List.GetItemText( m_SelectedIndex, 0, result );
+					m_Text.SetText( result );
+				}
 			}
 		}
 
@@ -281,13 +288,10 @@ class UIActionDropdownList extends UIActionBase
 			if ( m_PreviousText == m_Text.GetText() && !finished )
 				return true;
 
-			m_SelectedIndex = 0; // -1;
-
 			if ( !finished )
 				ToggleList( true );
 			
 			bool success = UpdateText();
-			m_List.SelectRow( 0 );
 
 			if ( finished )
 				OnSelected();
@@ -332,4 +336,13 @@ class UIActionDropdownList extends UIActionBase
 
 		return false;
 	}
-}
+
+	void SetEditBoxWidth( float width )
+	{
+		float w;
+		float h;
+		m_Text.GetSize( w, h );
+		m_Text.SetSize( width, h );
+		m_Text.Update();
+	}
+};

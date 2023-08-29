@@ -4,19 +4,36 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_CurrentFOV;
 	protected float m_TargetFOV;
 	protected float m_UpdateTime;
+
+	// UI stuff
+	float m_BlurStrength;
+	float m_FocusDistance;
+	float m_FocalLength;
+	float m_FocalNear;
+	float m_Exposure;
+	float m_ChromAbb;
+	float m_Vignette;
+
 	bool m_EnableFullmapCamera;
+	bool m_HideGrass;
+	int m_GrassPatchX;
+	int m_GrassPatchY;
+
+	ref TFloatArray m_Times;
+	ref TBoolArray m_IsSmooth;
+	ref TVectorArray m_Positions;
 
 	void JMCameraModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Camera.View" );
 
+		m_Times = new TFloatArray;
+		m_IsSmooth = new TBoolArray;
+		m_Positions = new TVectorArray;
+		
 		m_CurrentSmoothBlur = 0.0;
 		m_CurrentFOV = 1.0;
 		m_TargetFOV = 1.0;
-	}
-
-	void ~JMCameraModule()
-	{
 	}
 
 	override bool HasAccess()
@@ -99,6 +116,9 @@ class JMCameraModule: JMRenderableModuleBase
 				
 				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
 				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+				PPEffects.SetChromAbb( CHROMABERX );
+				PPEffects.SetVignette( VIGNETTE, 0, 0, 0, 0 );
+				PPEffects.SetBloom( EXPOSURE, EXPOSURE, EXPOSURE );
 				// PPEffects.SetBlurOptics( 0 );
 			}
 
@@ -120,6 +140,40 @@ class JMCameraModule: JMRenderableModuleBase
 						EnterFullmap(player);
 						player.m_JM_CameraPosition = CurrentActiveCamera.GetPosition();
 						player.COTUpdateSpectatorPosition();
+					}
+				}
+			}
+
+			if ( m_HideGrass )
+			{
+				vector pos = CurrentActiveCamera.GetPosition();
+
+				//! @note: Flatten functions have a size/diameter limit of around 60
+				//! We also want some overlap so that there are no visible seams
+				float side = 50;
+				float x = pos[0] - side * 2;
+				float z = pos[2] - side * 2;
+				/*    _ _ _
+				 *  _|_|_|_|_
+				 * |_|_|_|_|_|
+				 * |_|_|X|_|_|
+				 * |_|_|_|_|_|
+				 *   |_|_|_|
+				 */
+				int row = m_GrassPatchX;
+				int col = m_GrassPatchY;
+
+				if ((row > 0 && row < 4) || (col > 0 && col < 4))
+					GetGame().GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
+
+				m_GrassPatchY++;
+				if (m_GrassPatchY == 5)
+				{
+					m_GrassPatchY = 0;
+					m_GrassPatchX++;
+					if (m_GrassPatchX == 5)
+					{
+						m_GrassPatchX = 0;
 					}
 				}
 			}
@@ -154,7 +208,11 @@ class JMCameraModule: JMRenderableModuleBase
 		return JMCameraModuleRPC.COUNT;
 	}
 
+#ifdef CF_BUGFIX_REF
+	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
+#else
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
+#endif
 	{
 		switch ( rpc_type )
 		{
@@ -518,6 +576,71 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 			}
 		}
 	}
+
+	void LookAtSelection()
+	{
+		float distance = 100.0;
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.NEARESTCONTACT;
+		rayInput.radius = 1.0;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object obj;
+		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		{
+			for ( int i = 0; i < results.Count(); ++i )
+			{
+				if ( results[i].obj == NULL )
+					continue;
+
+				if ( results[i].obj.GetType() == "" )
+					continue;
+
+				if ( results[i].obj.GetType() == "#particlesourceenf" )
+					continue;
+
+				obj = results[i].obj;
+				break;
+			}
+		}
+
+		if ( obj == NULL )
+			return;
+			
+		if ( !CurrentActiveCamera )
+			Enter();
+
+		CurrentActiveCamera.SelectedTarget = obj;
+		CurrentActiveCamera.LookFreeze = !CurrentActiveCamera.LookFreeze;
+	}
+
+	void GoToSelection(TVectorArray positions, TFloatArray time, TBoolArray smooth)
+	{
+		JMCinematicCamera cineCamera
+		if ( !Class.CastTo(cineCamera, CurrentActiveCamera) )
+			return;
+
+		int count = positions.Count();
+		for (int i=0; i < count; i++ )
+		{
+			if ( positions[i] == "0 0 0" )
+			{
+				time.Remove(i);
+				smooth.Remove(i);
+				positions.Remove(i);
+			}
+			else if ( time[i] == 0 )
+				time[i] = 5;
+		}
+
+		if ( !CurrentActiveCamera )
+			Enter();
+
+		cineCamera.SetupTraveling(positions, time, smooth);
+	}
 	
 	Object GetTargetObject()
 	{
@@ -573,4 +696,4 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		m_TargetFOV = fov;
 	}
-}
+};

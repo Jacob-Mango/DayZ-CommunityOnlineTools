@@ -7,7 +7,7 @@ PanelWidgetClass JMWebhookForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMWebhookForm"
- style EditorPanel
+ style DayZDefaultPanel
  {
   FrameWidgetClass header_panel {
    position 0 0

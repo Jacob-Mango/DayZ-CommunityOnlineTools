@@ -1,4 +1,4 @@
-class JMMapForm extends JMFormBase 
+class JMMapForm: JMFormBase 
 {
 	private MapWidget m_MapWidget;
 	private Widget m_BackgroundWidget;
@@ -31,7 +31,7 @@ class JMMapForm extends JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
 			return;
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
 	}
@@ -75,7 +75,22 @@ class JMMapForm extends JMFormBase
 
 		for ( int i = 0; i < players.Count(); ++i )
 		{
-			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), ARGB( 255, 230, 20, 20 ), "\\JM\\COT\\GUI\\textures\\dot.paa" );
+			string marker = "";
+
+			//if ( players[i].PlayerObject.IsDriving() )
+			//	marker += JM_COT_ICON_CAR;
+			//else
+				marker += JM_COT_ICON_DOT;
+			
+			if ( JM_GetSelected().IsSelected( players[i].GetGUID() ) )
+				marker += "_selected";
+
+			//if ( !players[i].PlayerObject.IsAlive() )
+			//	marker += "_dead";
+			//else if ( players[i].PlayerObject.IsUnconscious() )
+			//	marker += "_uncon";
+
+			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), ARGB( 255, 230, 20, 20 ), marker + ".paa" );
 		}
 
 		GetCommunityOnlineTools().RefreshClientPositions();
@@ -101,4 +116,4 @@ class JMMapForm extends JMFormBase
 
 		return false;
 	}
-}
+};

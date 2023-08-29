@@ -1,4 +1,4 @@
-class JMESPWidgetHandler extends ScriptedWidgetEventHandler 
+class JMESPWidgetHandler: ScriptedWidgetEventHandler 
 {
 	static JMESPForm espMenu;
 	static JMESPModule espModule;
@@ -129,6 +129,9 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::ShowActions" );
 		#endif
+
+		if (!Info.m_ActionsInitialized)
+			Info.InitActions();
 
 		m_pnl_Actions.Show( true );
 
@@ -360,4 +363,4 @@ class JMESPWidgetHandler extends ScriptedWidgetEventHandler
 
 		return false;
 	}
-}
+};

@@ -1,4 +1,4 @@
-class JMESPForm extends JMFormBase
+class JMESPForm: JMFormBase
 {
 	private autoptr array< ref JMESPViewTypeWidget > m_ESPTypeList;
 	private ref map<typename, JMESPViewTypeWidget> m_ESPTypeWidgetsByType;
@@ -19,6 +19,10 @@ class JMESPForm extends JMFormBase
 	private UIActionSlider m_sldr_Radius;
 
 	private JMESPModule m_Module;
+
+	private UIActionEditableTextPreview m_SearchBox;
+
+	private bool m_UseFilter;
 
 	void JMESPForm()
 	{
@@ -46,6 +50,7 @@ class JMESPForm extends JMFormBase
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
+		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -59,7 +64,7 @@ class JMESPForm extends JMFormBase
 		m_slbx_PlayerSkeletons.SetSelectorWidth(0.4);
 		int idx = m_Module.GetDrawPlayerSkeletonsEnabled();
 		if (idx)
-			idx |= m_Module.DrawPlayerSkeletonsIncludingMyself;
+			idx += m_Module.DrawPlayerSkeletonsIncludingMyself;
 		m_slbx_PlayerSkeletons.SetSelection(idx, false);
 		m_slbx_Skeletons_LineThickness = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_GENERIC_LINE_THICKNESS", {"1", "2", "3", "4"}, this, "Change_Skeleton_LineThickness" );
 		m_slbx_Skeletons_LineThickness.SetSelectorWidth(0.4);
@@ -72,7 +77,7 @@ class JMESPForm extends JMFormBase
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		UIActionManager.CreateEditableText( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
@@ -137,10 +142,14 @@ class JMESPForm extends JMFormBase
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 
 		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DUPLICATE_ALL", this, "Click_DuplicateAll" );
+		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
+		
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_RELATIVE", this, "Click_MoveToCursorRelative" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR_ABSOLUTE", this, "Click_MoveToCursorAbsolute" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_RAW", this, "Click_CopyToClipboardRaw" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_MARKET", this, "Click_CopyToClipboardMarket" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_SPAWNABLETYPES", this, "Click_CopyToClipboardSpawnableTypes" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -153,11 +162,6 @@ class JMESPForm extends JMFormBase
 
 		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
-
-		//left_bottom.SetSize( 1.0, 1.0 );
-		//right_bottom.SetSize( 0.0, 1.0 );
-		//left_bottom.SetPos( 0.0, 0.0 );
-		//right_bottom.SetPos( 1.0, 0.0 );
 
 		left_bottom.SetSize( 0.5, 1.0 );
 		right_bottom.SetSize( 0.5, 1.0 );
@@ -198,22 +202,101 @@ class JMESPForm extends JMFormBase
 		if ( m_Module.GetState() != JMESPState.Remove )
 		{
 			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
-
-			m_sldr_Refresh.Disable();
-		} else
+			m_btn_Toggle.SetColor(COLOR_RED_A);
+		}
+		else
 		{
+			m_btn_Toggle.SetColor(COLOR_GREEN_A);
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
 				m_sldr_Refresh.Enable();
-			} else
+			}
+			else
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
+				m_sldr_Refresh.SetColor(COLOR_WHITE);
 				m_sldr_Refresh.Disable();
 			}
 		}
+	}
+
+	void UpdateList()
+	{
+		string closestMatch;
+
+		string strSearch = m_SearchBox.GetText();
+		
+		m_UseFilter = false;
+
+		if ( strSearch != "" )
+		{
+			TStringArray suggestions = new TStringArray;
+
+			TStringArray configs = new TStringArray;
+			configs.Insert( CFG_VEHICLESPATH );
+			configs.Insert( CFG_WEAPONSPATH );
+			configs.Insert( CFG_MAGAZINESPATH );
+			configs.Insert( CFG_NONAI_VEHICLES );
+
+			strSearch.ToLower();
+
+			for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+			{
+				string strConfigPath = configs.Get( nConfig );
+
+				int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
+
+				int nClassStart = 0;
+				if (nConfig == 0) nClassStart = 20;
+
+				for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+				{
+					string strName;
+
+					GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
+
+					int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
+
+					if ( scope == 0 )
+						continue;
+
+					if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+						continue;
+
+					string strNameLower = strName;
+
+					strNameLower.ToLower();
+
+					if ( strNameLower == strSearch )
+					{
+						suggestions.Clear();
+						closestMatch = strNameLower;
+						m_UseFilter = true;
+						break;  //! We can end the search here because we got a perfect match
+					}
+					else if ( strNameLower.IndexOf(strSearch) == 0 )
+					{
+						suggestions.Insert(strNameLower);
+					}
+					else if ( strNameLower.Contains(strSearch) )
+					{
+						m_UseFilter = true;
+					}
+				}
+			}
+
+			if (suggestions.Count())
+			{
+				suggestions.Sort();
+				closestMatch = suggestions[0];
+				m_UseFilter = true;
+			}
+		}
+
+		m_SearchBox.SetTextPreview(closestMatch);
 	}
 
 	void Click_UpdateESP( UIEvent eid, UIActionBase action )
@@ -233,7 +316,8 @@ class JMESPForm extends JMFormBase
 				m_Module.UpdateState( JMESPState.Update );
 
 				m_Module.Log( "ESP updating" );
-			} else
+			}
+			else
 			{
 				m_Module.UpdateState( JMESPState.View );
 
@@ -249,7 +333,12 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		m_Module.Filter = action.GetText();
+		UpdateList();
+
+		if ( m_UseFilter )
+			m_Module.Filter = action.GetText();
+		else
+			m_Module.Filter = "";
 	}
 
 	void Change_UpdateRate( UIEvent eid, UIActionBase action )
@@ -257,6 +346,11 @@ class JMESPForm extends JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
+		if ( m_sldr_Refresh.GetCurrent() > 0 )
+			m_sldr_Refresh.SetColor(COLOR_WHITE);
+		else
+			m_sldr_Refresh.SetColor(COLOR_RED_A);
+
 		m_Module.ESPUpdateTime = action.GetCurrent();
 	}
 
@@ -267,6 +361,14 @@ class JMESPForm extends JMFormBase
 		
 		m_Module.ESPRadius = action.GetCurrent();
 	}
+
+	void Click_DisableSafety( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		m_Module.SetFilterSafetyState(action.IsChecked());
+	}	
 
 	void Click_UseClassName( UIEvent eid, UIActionBase action )
 	{
@@ -285,10 +387,13 @@ class JMESPForm extends JMFormBase
 		{
 			if ( action.IsChecked() )
 			{
+				m_sldr_Refresh.Enable();
 				m_Module.UpdateState( JMESPState.Update );
-			} else
+			}
+			else
 			{
-				m_Module.UpdateState( JMESPState.Remove );
+				m_sldr_Refresh.Disable();
+				m_Module.UpdateState( JMESPState.View );
 			}
 		}
 		
@@ -350,19 +455,43 @@ class JMESPForm extends JMFormBase
 		m_Module.DeleteAll();
 	}
 	
-	void Click_MoveToCursorRelative( UIEvent eid, UIActionBase action )
+	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorRelative( "0 0 0" );
+		vector dir = GetGame().GetCurrentCameraDirection();
+		vector from = GetGame().GetCurrentCameraPosition(); 
+		vector to = from + ( dir * 1000 );   
+		vector contact_pos;
+		vector contact_dir;
+		int contact_component;
+		
+		if ( DayZPhysics.RaycastRV(from, to, contact_pos, contact_dir, contact_component, NULL, NULL, NULL, false, true) )
+			m_Module.MoveToCursor( contact_pos );
 	}
 	
-	void Click_MoveToCursorAbsolute( UIEvent eid, UIActionBase action )
+	void Click_CopyToClipboardRaw( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.MoveToCursorAbsolute( "0 0 0" );
+		m_Module.CopyToClipboardRaw();
 	}
-}
+	
+	void Click_CopyToClipboardMarket( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.CopyToClipboardMarket();
+	}
+	
+	void Click_CopyToClipboardSpawnableTypes( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.CopyToClipboardSpawnableTypes();
+	}
+};

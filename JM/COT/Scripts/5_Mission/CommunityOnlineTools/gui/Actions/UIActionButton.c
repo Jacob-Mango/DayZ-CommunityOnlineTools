@@ -1,4 +1,4 @@
-class UIActionButton extends UIActionBase 
+class UIActionButton: UIActionBase 
 {
 	protected TextWidget m_Text;
 	protected ButtonWidget m_Button;
@@ -44,6 +44,11 @@ class UIActionButton extends UIActionBase
 		return ret;
 	}
 
+	void SetColor(int color)
+	{
+		m_Button.SetColor(color);
+	}
+
 	override bool CallEvent( UIEvent eid )
 	{
 		if ( !m_HasCallback )
@@ -53,4 +58,4 @@ class UIActionButton extends UIActionBase
 
 		return false;
 	}
-}
+};
