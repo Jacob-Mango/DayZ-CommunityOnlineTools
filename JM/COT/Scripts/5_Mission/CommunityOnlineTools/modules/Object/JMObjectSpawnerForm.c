@@ -506,9 +506,9 @@ class JMObjectSpawnerForm: JMFormBase
 						if (Class.CastTo(mag, item))
 						{
 							if ( mag.IsAmmoPile() )
-								m_QuantityItem.SetMin(1);
+								m_QuantityItem.SetMin(1.0);
 							else
-								m_QuantityItem.SetMin(0);
+								m_QuantityItem.SetMin(0.0);
 							m_QuantityItem.SetMax(mag.GetAmmoMax());
 						}
 
@@ -516,7 +516,16 @@ class JMObjectSpawnerForm: JMFormBase
 						int newCurrent = m_QuantityItem.GetCurrent();
 						m_QuantityItem.SetCurrent(newCurrent);
 					}
-					m_QuantityItem.Enable();
+
+					if ( m_QuantityItem.GetMin() == m_QuantityItem.GetMax() )
+					{
+						m_QuantityItem.SetMin(mag.GetAmmoMax() - 1);
+						m_QuantityItem.SetCurrent(m_QuantityItem.GetMax());
+					}
+					else
+					{
+						m_QuantityItem.Enable();
+					}
 				}
 			}
 		}
