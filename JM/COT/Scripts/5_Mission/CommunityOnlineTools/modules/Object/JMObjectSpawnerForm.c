@@ -561,7 +561,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( w == m_ItemPreview && button == MouseState.LEFT )
 		{
 			GetGame().GetDragQueue().Call( this, "UpdateRotation" );
-			GetGame().GetMousePos( m_MouseX, m_MouseY );
+			GetMousePos( m_MouseX, m_MouseY );
 
 			return true;
 		}
