@@ -1233,13 +1233,11 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		}
 
 		if ( players.Count() > 1 )
-		{
 			message += " for " + players.Count() + " players";
-		}
+		else if ( ident && ident.GetId() != guids[0] )
+			message += " for player " + players[0].GetName();
 		else
-		{
 			message += " for yourself";
-		}
 
 		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
@@ -1855,6 +1853,8 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		if ( players.Count() > 1 )
 			message += " " + players.Count() + " players";
+		else if ( ident && ident.GetId() != guids[0] )
+			message += " player " + players[0].GetName();
 		else
 			message += " yourself";
 
