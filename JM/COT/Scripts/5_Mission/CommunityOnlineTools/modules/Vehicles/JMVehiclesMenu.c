@@ -300,7 +300,7 @@ class JMVehiclesMenu: JMFormBase
 		
 		SyncAndRefreshVehicles();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true );
+		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
 	}
 
 	void TeleportToVehicle(int netLow, int netHigh)
