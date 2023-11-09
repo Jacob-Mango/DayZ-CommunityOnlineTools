@@ -739,31 +739,37 @@ class JMObjectSpawnerForm: JMFormBase
 		rayInput.flags = CollisionFlags.NEARESTCONTACT;
 		rayInput.radius = 1.0;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+		
+		TStringArray configs = new TStringArray;
+		configs.Insert( CFG_VEHICLESPATH );
+		configs.Insert( CFG_WEAPONSPATH );
+		configs.Insert( CFG_MAGAZINESPATH );
+		configs.Insert( CFG_NONAI_VEHICLES );
 
 		Object obj;
 		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
 		{
-			for ( int i = 0; i < results.Count(); ++i )
+			foreach ( RaycastRVResult result: results )
 			{
-				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
+				if ( result.obj == NULL || PlayerBase.Cast( result.obj ) )
 				{
 					continue;
 				}
 
-				if ( results[i].obj.GetType() == "" )
+				string name = result.obj.GetType();
+
+				if ( name == "" )
 				{
 					continue;
 				}
 
-				if ( results[i].obj.GetType() == "#particlesourceenf" )
+				if ( name == "#particlesourceenf" )
 				{
 					continue;
 				}
 
 				if (!m_IknowWhatIamDoing)
 				{
-					string name = results[i].obj.GetType();
-
 					for ( int j = 0; j < m_RestrictiveBlacklistedClassnames.Count(); ++j )
 					{
 						if ( name.Contains( m_RestrictiveBlacklistedClassnames[j] ) )
@@ -785,7 +791,7 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 				}
 
-				obj = results[i].obj;
+				obj = result.obj;
 				break;
 			}
 		}
