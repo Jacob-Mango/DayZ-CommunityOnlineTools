@@ -31,6 +31,7 @@ modded class PlayerBase
 
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
+	private bool m_COT_EdgeTick;
 
 	private bool m_COT_ReceiveDamageDealt;
 	private bool m_COT_CannotBeTargetedByAI;
@@ -133,8 +134,8 @@ modded class PlayerBase
 		{
 			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
 
-			if (!IsControlledPlayer())  //! Other clients
-			{
+			//if (!IsControlledPlayer())  //! Other clients
+			//{
 				if (m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
 				{
 					//! Set physics non-solid so there is no blocking "ghost"
@@ -150,7 +151,7 @@ modded class PlayerBase
 					DisableSimulation(false);
 					Update();
 				}
-			}
+			//}
 
 			SetInvisible( m_JMIsInvisible );
 		}
@@ -401,18 +402,21 @@ modded class PlayerBase
 			if (preference)
 				m_COT_Invisibility_Preference = mode;
 
-			m_JMIsInvisible = mode;
-			m_JMIsInvisibleRemoteSynch = mode;
+			if (m_JMIsInvisible != mode)
+			{
+				m_JMIsInvisible = mode;
+				m_JMIsInvisibleRemoteSynch = mode;
+
+				#ifdef SERVER
+				SetSynchDirty();
+				#endif
+			}
 
 			if (mode || preference || !m_COT_RemoveCollision_Preference)
 				COTSetRemoveCollision(mode, preference);
 
 			if (mode || preference || !m_COT_CannotBeTargetedByAI_Preference)
 				COTSetCannotBeTargetedByAI(mode, preference);
-
-			#ifdef SERVER
-			SetSynchDirty();
-			#endif
 		}
 	}
 
@@ -545,13 +549,18 @@ modded class PlayerBase
 		{
 			vector dir = vector.Direction(GetPosition(), position);
 
-			if (dir.LengthSq() >= 1000000)
+			if (dir.LengthSq() >= 1000000 || m_COT_EdgeTick)
 			{
 				//! Move to edge of network bubble of target (this is where an ESPer could "see" the admin position,
 				//! frozen in time) before moving directly under target.
 				//! Randomize the distance a bit to not make it too obvious.
-				position = position - dir.Normalized() * Math.RandomFloat(990, 999);
+				position = position - dir.Normalized() * Math.RandomFloat(981, 990);
 				position[1] = GetGame().SurfaceY(position[0], position[2]);
+
+				if (m_COT_EdgeTick)
+					m_COT_EdgeTick--;
+				else
+					m_COT_EdgeTick = 3;
 			}
 			else
 			{
