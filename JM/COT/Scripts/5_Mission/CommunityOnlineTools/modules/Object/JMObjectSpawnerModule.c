@@ -121,9 +121,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	
 	Object GetObjectAtCursor()
 	{
-		float distance = 2.0;
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+		DayZPlayer player = GetGame().GetPlayer();
+		vector rayStart;
+		if (player)
+			rayStart = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
+		else
+			rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * UAMaxDistances.DEFAULT );
 
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
 		rayInput.flags = CollisionFlags.NEARESTCONTACT;
