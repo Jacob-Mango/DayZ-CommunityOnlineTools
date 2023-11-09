@@ -165,6 +165,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 	void OnHide() 
 	{
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
+
+		Deselect();
 	}
 
 	void OnDeleteAll()
@@ -328,6 +330,22 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		#endif
 	}
 
+	void Select()
+	{
+		if ( m_chbx_SelectedObject )
+			m_chbx_SelectedObject.SetChecked( true );
+
+		SetSelected( true );
+	}
+
+	void Deselect()
+	{
+		if ( m_chbx_SelectedObject )
+			m_chbx_SelectedObject.SetChecked( false );
+
+		SetSelected( false );
+	}
+
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
@@ -337,19 +355,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		
 		if ( w == m_chbx_SelectedObject )
 		{
-			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
-			{
-				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), m_chbx_SelectedObject.IsChecked() );
-			} else if ( Info.target )
-			{
-				if ( m_chbx_SelectedObject.IsChecked() )
-				{
-					JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
-				} else
-				{
-					JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target );
-				}
-			}
+			SetSelected( m_chbx_SelectedObject.IsChecked() );
 
 			return true;
 		}
@@ -362,5 +368,22 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		}
 
 		return false;
+	}
+
+	void SetSelected( bool selected )
+	{
+		if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
+		{
+			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), selected );
+		} else if ( Info.target )
+		{
+			if ( selected )
+			{
+				JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
+			} else
+			{
+				JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target );
+			}
+		}
 	}
 };

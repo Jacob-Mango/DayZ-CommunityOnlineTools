@@ -1403,7 +1403,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	void DuplicateAll()
+	void DuplicateSelected()
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
@@ -1427,7 +1427,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 	}
 
-	void DeleteAll()
+	void DeleteSelected()
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		JM_GetSelected().SerializeObjects( rpc );
