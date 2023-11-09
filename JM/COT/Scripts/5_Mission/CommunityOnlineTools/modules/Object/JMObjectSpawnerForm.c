@@ -760,6 +760,31 @@ class JMObjectSpawnerForm: JMFormBase
 					continue;
 				}
 
+				if (!m_IknowWhatIamDoing)
+				{
+					string name = results[i].obj.GetType();
+
+					for ( int j = 0; j < m_RestrictiveBlacklistedClassnames.Count(); ++j )
+					{
+						if ( name.Contains( m_RestrictiveBlacklistedClassnames[j] ) )
+						{
+							continue;
+						}
+					}
+
+					for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+					{
+						string strConfigPath = configs.Get( nConfig );
+						if ( GetGame().ConfigIsExisting(strConfigPath + " " + name + " scope") )
+						{
+							int scope = GetGame().ConfigGetInt( strConfigPath + " " + name + " scope" );
+
+							if ( scope != 2 )
+								continue;
+						}
+					}
+				}
+
 				obj = results[i].obj;
 				break;
 			}
