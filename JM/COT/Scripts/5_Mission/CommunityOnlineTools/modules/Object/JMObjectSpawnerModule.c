@@ -121,77 +121,85 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	
 	Object GetObjectAtCursor()
 	{
+		float distance = 3.0;  //! Distance is chosen such that if you can see the item hint on HUD, raycast should also hit
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+
 		DayZPlayer player = GetGame().GetPlayer();
-		vector rayStart;
-		if (player)
-			rayStart = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
-		else
-			rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * UAMaxDistances.DEFAULT );
+		DayZPlayerCamera3rdPerson camera3rdPerson;
+		if (player && !Camera.GetCurrentCamera() && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
+		{
+			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
+			distance += vector.Distance(rayStart, headPos);
+		}
+
+		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
 
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
-		rayInput.flags = CollisionFlags.NEARESTCONTACT;
-		rayInput.radius = 1.0;
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.5;
+		rayInput.sorted = true;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-		
-		TStringArray configs = new TStringArray;
-		configs.Insert( CFG_VEHICLESPATH );
-		configs.Insert( CFG_WEAPONSPATH );
-		configs.Insert( CFG_MAGAZINESPATH );
-		configs.Insert( CFG_NONAI_VEHICLES );
 
 		Object obj;
+		Object resultObj;
 		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
 		{
 			foreach ( RaycastRVResult result: results )
 			{
-				if ( result.obj == NULL || PlayerBase.Cast( result.obj ) )
+				resultObj = result.obj;
+
+				if ( resultObj == NULL )
 				{
 					continue;
 				}
 
-				string name = result.obj.GetType();
+				EntityAI entity;
+				if (Class.CastTo(entity, resultObj))
+					resultObj = entity.GetHierarchyRoot();
+
+				if ( PlayerBase.Cast( resultObj ) )
+				{
+					continue;
+				}
+
+				string name = resultObj.GetType();
 
 				if ( name == "" )
 				{
 					continue;
 				}
 
+				name.ToLower();
+
 				if ( name == "#particlesourceenf" )
 				{
 					continue;
 				}
 
-				if (!m_IknowWhatIamDoing)
+				if ( !m_IknowWhatIamDoing )
 				{
+					if (resultObj.ConfigGetInt("scope") != 2)
+						continue;
+
+					bool blacklisted = false;
+
 					foreach (string blacklistedName: m_RestrictiveBlacklistedClassnames)
 					{
-						if ( name.Contains( blacklistedName ) )
+						if ( name.Contains(blacklistedName) )
 						{
-							continue;
+							blacklisted = true;
+							break;
 						}
 					}
 
-					foreach (string strConfigPath: configs)
-					{
-						if ( GetGame().ConfigIsExisting(strConfigPath + " " + name + " scope") )
-						{
-							int scope = GetGame().ConfigGetInt( strConfigPath + " " + name + " scope" );
-
-							if ( scope != 2 )
-								continue;
-						}
-					}
+					if (blacklisted)
+						continue;
 				}
 
-				obj = result.obj;
+				obj = resultObj;
 				break;
 			}
 		}
-
-		EntityAI entity;
-		if (Class.CastTo(entity, obj))
-			obj = entity.GetHierarchyRoot();
 
 		return obj;
 	}
