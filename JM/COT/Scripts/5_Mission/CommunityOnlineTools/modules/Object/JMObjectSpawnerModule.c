@@ -23,7 +23,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
-		Bind( new JMModuleBinding( "DeleteAtCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
+		Bind( new JMModuleBinding( "DeleteCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
@@ -68,9 +68,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		types.Insert( "Player" );
 	}
 
-	void DeleteAtCursor( UAInput input )
+	void DeleteCursor( UAInput input )
 	{
 		if ( !input.LocalPress() )
+			return;
+
+		if ( GetGame().GetUIManager().GetMenu() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
@@ -82,38 +85,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		float distance = 10.0;
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+		if ( !IsVisible() )
+			Show();
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
-		rayInput.flags = CollisionFlags.NEARESTCONTACT;
-		rayInput.radius = 1.0;
-		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-
-		Object obj;
-		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
-		{
-			for ( int i = 0; i < results.Count(); ++i )
-			{
-				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
-					continue;
-
-				if ( results[i].obj.GetType() == "" )
-					continue;
-
-				if ( results[i].obj.GetType() == "#particlesourceenf" )
-					continue;
-
-				obj = results[i].obj;
-				break;
-			}
-		}
-
-		if ( obj == NULL )
-			return;
-
-		DeleteEntity( obj );
+		JMObjectSpawnerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.DeleteCursor( UIEvent.CLICK, null );
 	}
 	
 	void SpawnRandomInfected( UAInput input )
