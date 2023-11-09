@@ -144,12 +144,22 @@ class JMESPForm: JMFormBase
 		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
 		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
 		
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_ALL", this, "Click_DeleteAll" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_SelectAll" );
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
+
+		Widget spacer1 = UIActionManager.CreateGridSpacer( container, 1, 1 );
 
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_RAW", this, "Click_CopyToClipboardRaw" );
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_MARKET", this, "Click_CopyToClipboardMarket" );
 		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_SPAWNABLETYPES", this, "Click_CopyToClipboardSpawnableTypes" );
+
+		Widget spacer2 = UIActionManager.CreateGridSpacer( container, 1, 1 );
+
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+
+		Widget spacer3 = UIActionManager.CreateGridSpacer( container, 1, 1 );
+
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -439,20 +449,47 @@ class JMESPForm: JMFormBase
 		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
 	}
 	
-	void Click_DuplicateAll( UIEvent eid, UIActionBase action )
+	void Click_DuplicateSelected( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.DuplicateAll();
+		m_Module.DuplicateSelected();
 	}
 	
-	void Click_DeleteAll( UIEvent eid, UIActionBase action )
+	void Click_DeleteSelected( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.DeleteAll();
+		m_Module.DeleteSelected();
+	}
+	
+	void Click_SelectAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		auto node = JMESPMeta.s_JM_All.m_Head;
+		while ( node )
+		{
+			if ( node.m_Value.widgetRoot.IsVisible() )
+				node.m_Value.widgetHandler.Select();
+			node = node.m_Next;
+		}
+	}
+	
+	void Click_DeselectAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		auto node = JMESPMeta.s_JM_All.m_Head;
+		while ( node )
+		{
+			node.m_Value.widgetHandler.Deselect();
+			node = node.m_Next;
+		}
 	}
 	
 	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
