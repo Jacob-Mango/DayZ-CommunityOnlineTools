@@ -1,8 +1,21 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	bool m_OnDebugSpawn = true;
+	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
+
+	static ref array< string > m_RestrictiveBlacklistedClassnames =
+	{
+		"placing",
+		"debug",
+		"bldr_",
+		"land_",
+		"staticobj_",
+		"proxy"
+	};
+
+	static bool m_IknowWhatIamDoing;
 
 	void JMObjectSpawnerModule()
 	{
@@ -29,6 +42,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Entity.View" );
+	}
+
+	override void Hide()
+	{
+		m_AutoShow = false;
+
+		super.Hide();
 	}
 
 	override string GetInputToggle()
@@ -85,14 +105,93 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !IsVisible() )
+		Object obj = GetObjectAtCursor();
+
+		if (!obj)
+			return;
+
+		m_AutoShow = !IsVisible();
+		if ( m_AutoShow )
 			Show();
 
 		JMObjectSpawnerForm form;
 		if ( Class.CastTo( form, GetForm() ) )
-			form.DeleteCursor( UIEvent.CLICK, null );
+			form.DeleteCursor(obj);
 	}
 	
+	Object GetObjectAtCursor()
+	{
+		float distance = 2.0;
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.NEARESTCONTACT;
+		rayInput.radius = 1.0;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+		
+		TStringArray configs = new TStringArray;
+		configs.Insert( CFG_VEHICLESPATH );
+		configs.Insert( CFG_WEAPONSPATH );
+		configs.Insert( CFG_MAGAZINESPATH );
+		configs.Insert( CFG_NONAI_VEHICLES );
+
+		Object obj;
+		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		{
+			foreach ( RaycastRVResult result: results )
+			{
+				if ( result.obj == NULL || PlayerBase.Cast( result.obj ) )
+				{
+					continue;
+				}
+
+				string name = result.obj.GetType();
+
+				if ( name == "" )
+				{
+					continue;
+				}
+
+				if ( name == "#particlesourceenf" )
+				{
+					continue;
+				}
+
+				if (!m_IknowWhatIamDoing)
+				{
+					foreach (string blacklistedName: m_RestrictiveBlacklistedClassnames)
+					{
+						if ( name.Contains( blacklistedName ) )
+						{
+							continue;
+						}
+					}
+
+					foreach (string strConfigPath: configs)
+					{
+						if ( GetGame().ConfigIsExisting(strConfigPath + " " + name + " scope") )
+						{
+							int scope = GetGame().ConfigGetInt( strConfigPath + " " + name + " scope" );
+
+							if ( scope != 2 )
+								continue;
+						}
+					}
+				}
+
+				obj = result.obj;
+				break;
+			}
+		}
+
+		EntityAI entity;
+		if (Class.CastTo(entity, obj))
+			obj = entity.GetHierarchyRoot();
+
+		return obj;
+	}
+
 	void SpawnRandomInfected( UAInput input )
 	{
 		if ( !input.LocalPress() )

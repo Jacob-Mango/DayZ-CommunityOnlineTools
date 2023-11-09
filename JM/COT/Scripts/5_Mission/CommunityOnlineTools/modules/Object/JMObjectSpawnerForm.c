@@ -123,18 +123,6 @@ class JMObjectSpawnerForm: JMFormBase
 		"fx"
 	};
 
-	private static ref array< string > m_RestrictiveBlacklistedClassnames =
-	{
-		"placing",
-		"debug",
-		"bldr_",
-		"land_",
-		"staticobj_",
-		"proxy"
-	};
-
-	protected static bool m_IknowWhatIamDoing;
-
 	void JMObjectSpawnerForm()
 	{
 		m_ObjectTypes = new map< string, string >;
@@ -211,7 +199,7 @@ class JMObjectSpawnerForm: JMFormBase
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
 		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", m_Module.m_OnDebugSpawn );
-		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_IknowWhatIamDoing );
+		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_IknowWhatIamDoing );
 		UIActionManager.CreatePanel( spawnOptions );
 
 		if ( m_Module )
@@ -371,7 +359,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_IknowWhatIamDoing = action.IsChecked();
+		m_Module.m_IknowWhatIamDoing = action.IsChecked();
 		UpdateList();
 	}
 
@@ -729,78 +717,14 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_DeletingObject = NULL;
+		Object obj = m_Module.GetObjectAtCursor();
 
-		float distance = 2.0;
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+		if ( obj )
+			 DeleteCursor(obj);
+	}
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
-		rayInput.flags = CollisionFlags.NEARESTCONTACT;
-		rayInput.radius = 1.0;
-		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-		
-		TStringArray configs = new TStringArray;
-		configs.Insert( CFG_VEHICLESPATH );
-		configs.Insert( CFG_WEAPONSPATH );
-		configs.Insert( CFG_MAGAZINESPATH );
-		configs.Insert( CFG_NONAI_VEHICLES );
-
-		Object obj;
-		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
-		{
-			foreach ( RaycastRVResult result: results )
-			{
-				if ( result.obj == NULL || PlayerBase.Cast( result.obj ) )
-				{
-					continue;
-				}
-
-				string name = result.obj.GetType();
-
-				if ( name == "" )
-				{
-					continue;
-				}
-
-				if ( name == "#particlesourceenf" )
-				{
-					continue;
-				}
-
-				if (!m_IknowWhatIamDoing)
-				{
-					for ( int j = 0; j < m_RestrictiveBlacklistedClassnames.Count(); ++j )
-					{
-						if ( name.Contains( m_RestrictiveBlacklistedClassnames[j] ) )
-						{
-							continue;
-						}
-					}
-
-					for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
-					{
-						string strConfigPath = configs.Get( nConfig );
-						if ( GetGame().ConfigIsExisting(strConfigPath + " " + name + " scope") )
-						{
-							int scope = GetGame().ConfigGetInt( strConfigPath + " " + name + " scope" );
-
-							if ( scope != 2 )
-								continue;
-						}
-					}
-				}
-
-				obj = result.obj;
-				break;
-			}
-		}
-
-		if ( obj == NULL )
-		{
-			return;
-		}
-
+	void DeleteCursor(Object obj)
+	{
 		m_DeletingObject = obj;
 		
 		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
@@ -811,11 +735,17 @@ class JMObjectSpawnerForm: JMFormBase
 		m_Module.DeleteEntity( m_DeletingObject );
 
 		m_DeletingObject = NULL;
+
+		if (m_Module.m_AutoShow)
+			m_Module.Hide();
 	}
 
 	private void DeleteEntity_No( JMConfirmation confirmation )
 	{
-		
+		m_DeletingObject = NULL;
+
+		if (m_Module.m_AutoShow)
+			m_Module.Hide();
 	}
 
 	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
@@ -868,7 +798,7 @@ class JMObjectSpawnerForm: JMFormBase
 				if ( scope == 0 )
 					continue;
 
-				if ( scope == 1 && !m_IknowWhatIamDoing )
+				if ( scope == 1 && !m_Module.m_IknowWhatIamDoing )
 					continue;
 
 				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
@@ -922,11 +852,11 @@ class JMObjectSpawnerForm: JMFormBase
 			return true;
 		}
 
-		if ( !m_IknowWhatIamDoing )
+		if ( !m_Module.m_IknowWhatIamDoing )
 		{
-			for ( int i = 0; i < m_RestrictiveBlacklistedClassnames.Count(); ++i )
+			for ( int i = 0; i < m_Module.m_RestrictiveBlacklistedClassnames.Count(); ++i )
 			{
-				if ( name.Contains( m_RestrictiveBlacklistedClassnames[i] ) )
+				if ( name.Contains( m_Module.m_RestrictiveBlacklistedClassnames[i] ) )
 				{
 					return true;
 				}
