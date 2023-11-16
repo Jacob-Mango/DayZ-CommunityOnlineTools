@@ -66,16 +66,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
-		// Liquid containers
-		"UNKNOWN",
-		"WATER",
-		"RIVERWATER",
-		"VODKA",
-		"BEER",
-		"GASOLINE",
-		"DIESEL",
-		"DISINFECTANT",
-		"SOLUTION"
 	};
 
 	private int m_ItemStateType = -1;
@@ -169,6 +159,16 @@ class JMObjectSpawnerForm: JMFormBase
 		button.SetWidth( 0.05 );
 		button.SetPosition( 0.65 );
 
+		foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+		{
+			//! Liquids (except blood)
+			if (nutritionProfile.IsLiquid() && nutritionProfile.GetLiquidType() > 255)
+				m_ObjItemStateLiquidText.Insert(liquidClsName);
+		}
+
+		m_ObjItemStateLiquidText.Sort();
+		m_ObjItemStateLiquidText.InsertAt("UNKNOWN", 0);
+
 		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
@@ -240,7 +240,9 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				idx = FindEnumValue(COT_LiquidTypes, liquidType);
+				auto nutritionProfile = Liquid.GetNutritionalProfileByType(liquidType);
+				if (nutritionProfile)
+					idx = m_ObjItemStateLiquidText.Find(nutritionProfile.GetLiquidClassname());
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
@@ -627,7 +629,25 @@ class JMObjectSpawnerForm: JMFormBase
 
 		int itemState = 0; // 0 mean don't do anything
 		if ( m_ItemStateType != -1 )
+		{
 			itemState = m_ItemDataList.GetSelection();
+			if (m_ItemStateType == 0)
+			{
+				//! Liquid
+				string liquidClsnameSearch = m_ObjItemStateLiquidText[itemState];
+				foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+				{
+					if (liquidClsName == liquidClsnameSearch)
+					{
+						itemState = nutritionProfile.GetLiquidType();
+					#ifdef DIAG
+						PrintFormat("Liquid type %1 %2", liquidClsName, itemState);
+					#endif
+						break;
+					}
+				}
+			}
+		}
 
 		float health = m_HealthItem.GetCurrent();
 		float quantity = m_QuantityItem.GetCurrent();
