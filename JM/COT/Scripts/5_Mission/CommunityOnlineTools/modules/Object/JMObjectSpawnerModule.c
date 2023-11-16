@@ -531,14 +531,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				if ( item.IsLiquidContainer() )
 				{
+					int liquidType = itemState;
 					if ( item.IsBloodContainer() )
-					{
-						item.SetLiquidType(LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1));
-					}
+						liquidType = LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1);
+					
+					if (Liquid.GetNutritionalProfileByType(liquidType))
+						item.SetLiquidType(liquidType);
 					else
-					{
-						item.SetLiquidType(LIQUID_WATER * Math.Pow(2, itemState - 1));
-					}
+						Error("Invalid liquid type " + liquidType);
 				}
 				else if ( item.HasFoodStage() && item.CanBeCooked() )
 				{
