@@ -14,8 +14,10 @@ ServerProfile/*.log
 ServerProfile/*.ADM
 ServerProfile/*.cfg
 ServerProfile/*.mdmp
+ServerProfile/*
 *.bak
 *.pbo
 *.bisign
 JM/COT/Workbench/*.cfg.bat
+JM/COT/Workbench/*.cfg.*.bat
 JM/COT/Workbench/Logs/
