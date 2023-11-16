@@ -1,8 +1,21 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
 	bool m_OnDebugSpawn = true;
+	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
+
+	static ref array< string > m_RestrictiveBlacklistedClassnames =
+	{
+		"placing",
+		"debug",
+		"bldr_",
+		"land_",
+		"staticobj_",
+		"proxy"
+	};
+
+	static bool m_IknowWhatIamDoing;
 
 	void JMObjectSpawnerModule()
 	{
@@ -23,12 +36,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "SpawnRandomInfected",		"UAObjectModuleSpawnInfected",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomAnimal",			"UAObjectModuleSpawnAnimal",	true 	) );
 		Bind( new JMModuleBinding( "SpawnRandomWolf",			"UAObjectModuleSpawnWolf",		true 	) );
-		Bind( new JMModuleBinding( "DeleteAtCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
+		Bind( new JMModuleBinding( "DeleteCursor",			"UAObjectModuleDeleteOnCursor",	true 	) );
 	}
 
 	override bool HasAccess()
 	{
 		return GetPermissionsManager().HasPermission( "Entity.View" );
+	}
+
+	override void Hide()
+	{
+		m_AutoShow = false;
+
+		super.Hide();
 	}
 
 	override string GetInputToggle()
@@ -68,9 +88,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		types.Insert( "Player" );
 	}
 
-	void DeleteAtCursor( UAInput input )
+	void DeleteCursor( UAInput input )
 	{
 		if ( !input.LocalPress() )
+			return;
+
+		if ( GetGame().GetUIManager().GetMenu() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
@@ -82,40 +105,105 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		}
 
-		float distance = 10.0;
+		Object obj = GetObjectAtCursor();
+
+		if (!obj)
+			return;
+
+		m_AutoShow = !IsVisible();
+		if ( m_AutoShow )
+			Show();
+
+		JMObjectSpawnerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.DeleteCursor(obj);
+	}
+	
+	Object GetObjectAtCursor()
+	{
+		float distance = 3.0;  //! Distance is chosen such that if you can see the item hint on HUD, raycast should also hit
 		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+
+		DayZPlayer player = GetGame().GetPlayer();
+		DayZPlayerCamera3rdPerson camera3rdPerson;
+		if (player && !Camera.GetCurrentCamera() && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
+		{
+			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
+			distance += vector.Distance(rayStart, headPos);
+		}
+
+		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
 
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
-		rayInput.flags = CollisionFlags.NEARESTCONTACT;
-		rayInput.radius = 1.0;
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.5;
+		rayInput.sorted = true;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 
 		Object obj;
+		Object resultObj;
 		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
 		{
-			for ( int i = 0; i < results.Count(); ++i )
+			foreach ( RaycastRVResult result: results )
 			{
-				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
-					continue;
+				resultObj = result.obj;
 
-				if ( results[i].obj.GetType() == "" )
+				if ( resultObj == NULL )
+				{
 					continue;
+				}
 
-				if ( results[i].obj.GetType() == "#particlesourceenf" )
+				EntityAI entity;
+				if (Class.CastTo(entity, resultObj))
+					resultObj = entity.GetHierarchyRoot();
+
+				if ( PlayerBase.Cast( resultObj ) )
+				{
 					continue;
+				}
 
-				obj = results[i].obj;
+				string name = resultObj.GetType();
+
+				if ( name == "" )
+				{
+					continue;
+				}
+
+				name.ToLower();
+
+				if ( name == "#particlesourceenf" )
+				{
+					continue;
+				}
+
+				if ( !m_IknowWhatIamDoing )
+				{
+					if (resultObj.ConfigGetInt("scope") != 2)
+						continue;
+
+					bool blacklisted = false;
+
+					foreach (string blacklistedName: m_RestrictiveBlacklistedClassnames)
+					{
+						if ( name.Contains(blacklistedName) )
+						{
+							blacklisted = true;
+							break;
+						}
+					}
+
+					if (blacklisted)
+						continue;
+				}
+
+				obj = resultObj;
 				break;
 			}
 		}
 
-		if ( obj == NULL )
-			return;
-
-		DeleteEntity( obj );
+		return obj;
 	}
-	
+
 	void SpawnRandomInfected( UAInput input )
 	{
 		if ( !input.LocalPress() )
@@ -443,14 +531,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				if ( item.IsLiquidContainer() )
 				{
+					int liquidType = itemState;
 					if ( item.IsBloodContainer() )
-					{
-						item.SetLiquidType(LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1));
-					}
+						liquidType = LIQUID_BLOOD_0_P * Math.Pow(2, itemState - 1);
+					
+					if (Liquid.GetNutritionalProfileByType(liquidType))
+						item.SetLiquidType(liquidType);
 					else
-					{
-						item.SetLiquidType(LIQUID_WATER * Math.Pow(2, itemState - 1));
-					}
+						Error("Invalid liquid type " + liquidType);
 				}
 				else if ( item.HasFoodStage() && item.CanBeCooked() )
 				{

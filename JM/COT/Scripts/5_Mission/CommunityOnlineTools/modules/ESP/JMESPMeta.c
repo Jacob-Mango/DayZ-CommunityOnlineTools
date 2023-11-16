@@ -1,5 +1,9 @@
 class JMESPMeta : Managed
 {
+	static ref CF_DoublyLinkedNodes_WeakRef<JMESPMeta> s_JM_All = new CF_DoublyLinkedNodes_WeakRef<JMESPMeta>();
+
+	ref CF_DoublyLinkedNode_WeakRef<JMESPMeta> s_JM_Node;
+
 	string name;
 	JMESPViewType type;
 	int colour;
@@ -38,9 +42,17 @@ class JMESPMeta : Managed
 
 	bool m_ActionsInitialized;
 
+	void JMESPMeta()
+	{
+		s_JM_Node = s_JM_All.Add(this);
+	}
+
 	void ~JMESPMeta()
 	{
 		Destroy();
+
+		if (s_JM_All)
+			s_JM_All.Remove(s_JM_Node);
 	}
 
 	void Create( JMESPModule mod )

@@ -66,16 +66,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
-		// Liquid containers
-		"UNKNOWN",
-		"WATER",
-		"RIVERWATER",
-		"VODKA",
-		"BEER",
-		"GASOLINE",
-		"DIESEL",
-		"DISINFECTANT",
-		"SOLUTION"
 	};
 
 	private int m_ItemStateType = -1;
@@ -123,18 +113,6 @@ class JMObjectSpawnerForm: JMFormBase
 		"fx"
 	};
 
-	private static ref array< string > m_RestrictiveBlacklistedClassnames =
-	{
-		"placing",
-		"debug",
-		"bldr_",
-		"land_",
-		"staticobj_",
-		"proxy"
-	};
-
-	protected static bool m_IknowWhatIamDoing;
-
 	void JMObjectSpawnerForm()
 	{
 		m_ObjectTypes = new map< string, string >;
@@ -181,6 +159,16 @@ class JMObjectSpawnerForm: JMFormBase
 		button.SetWidth( 0.05 );
 		button.SetPosition( 0.65 );
 
+		foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+		{
+			//! Liquids (except blood)
+			if (nutritionProfile.IsLiquid() && nutritionProfile.GetLiquidType() > 255)
+				m_ObjItemStateLiquidText.Insert(liquidClsName);
+		}
+
+		m_ObjItemStateLiquidText.Sort();
+		m_ObjItemStateLiquidText.InsertAt("UNKNOWN", 0);
+
 		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
@@ -211,7 +199,7 @@ class JMObjectSpawnerForm: JMFormBase
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
 		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", m_Module.m_OnDebugSpawn );
-		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_IknowWhatIamDoing );
+		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_IknowWhatIamDoing );
 		UIActionManager.CreatePanel( spawnOptions );
 
 		if ( m_Module )
@@ -252,7 +240,9 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				idx = FindEnumValue(COT_LiquidTypes, liquidType);
+				auto nutritionProfile = Liquid.GetNutritionalProfileByType(liquidType);
+				if (nutritionProfile)
+					idx = m_ObjItemStateLiquidText.Find(nutritionProfile.GetLiquidClassname());
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
@@ -371,7 +361,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_IknowWhatIamDoing = action.IsChecked();
+		m_Module.m_IknowWhatIamDoing = action.IsChecked();
 		UpdateList();
 	}
 
@@ -639,7 +629,25 @@ class JMObjectSpawnerForm: JMFormBase
 
 		int itemState = 0; // 0 mean don't do anything
 		if ( m_ItemStateType != -1 )
+		{
 			itemState = m_ItemDataList.GetSelection();
+			if (m_ItemStateType == 0)
+			{
+				//! Liquid
+				string liquidClsnameSearch = m_ObjItemStateLiquidText[itemState];
+				foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+				{
+					if (liquidClsName == liquidClsnameSearch)
+					{
+						itemState = nutritionProfile.GetLiquidType();
+					#ifdef DIAG
+						PrintFormat("Liquid type %1 %2", liquidClsName, itemState);
+					#endif
+						break;
+					}
+				}
+			}
+		}
 
 		float health = m_HealthItem.GetCurrent();
 		float quantity = m_QuantityItem.GetCurrent();
@@ -729,47 +737,14 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_DeletingObject = NULL;
+		Object obj = m_Module.GetObjectAtCursor();
 
-		float distance = 2.0;
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+		if ( obj )
+			 DeleteCursor(obj);
+	}
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
-		rayInput.flags = CollisionFlags.NEARESTCONTACT;
-		rayInput.radius = 1.0;
-		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-
-		Object obj;
-		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
-		{
-			for ( int i = 0; i < results.Count(); ++i )
-			{
-				if ( results[i].obj == NULL || PlayerBase.Cast( results[i].obj ) )
-				{
-					continue;
-				}
-
-				if ( results[i].obj.GetType() == "" )
-				{
-					continue;
-				}
-
-				if ( results[i].obj.GetType() == "#particlesourceenf" )
-				{
-					continue;
-				}
-
-				obj = results[i].obj;
-				break;
-			}
-		}
-
-		if ( obj == NULL )
-		{
-			return;
-		}
-
+	void DeleteCursor(Object obj)
+	{
 		m_DeletingObject = obj;
 		
 		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
@@ -780,11 +755,17 @@ class JMObjectSpawnerForm: JMFormBase
 		m_Module.DeleteEntity( m_DeletingObject );
 
 		m_DeletingObject = NULL;
+
+		if (m_Module.m_AutoShow)
+			m_Module.Hide();
 	}
 
 	private void DeleteEntity_No( JMConfirmation confirmation )
 	{
-		
+		m_DeletingObject = NULL;
+
+		if (m_Module.m_AutoShow)
+			m_Module.Hide();
 	}
 
 	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
@@ -837,7 +818,7 @@ class JMObjectSpawnerForm: JMFormBase
 				if ( scope == 0 )
 					continue;
 
-				if ( scope == 1 && !m_IknowWhatIamDoing )
+				if ( scope == 1 && !m_Module.m_IknowWhatIamDoing )
 					continue;
 
 				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
@@ -891,11 +872,11 @@ class JMObjectSpawnerForm: JMFormBase
 			return true;
 		}
 
-		if ( !m_IknowWhatIamDoing )
+		if ( !m_Module.m_IknowWhatIamDoing )
 		{
-			for ( int i = 0; i < m_RestrictiveBlacklistedClassnames.Count(); ++i )
+			for ( int i = 0; i < m_Module.m_RestrictiveBlacklistedClassnames.Count(); ++i )
 			{
-				if ( name.Contains( m_RestrictiveBlacklistedClassnames[i] ) )
+				if ( name.Contains( m_Module.m_RestrictiveBlacklistedClassnames[i] ) )
 				{
 					return true;
 				}
