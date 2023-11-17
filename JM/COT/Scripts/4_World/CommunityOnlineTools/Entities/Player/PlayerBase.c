@@ -139,7 +139,7 @@ modded class PlayerBase
 			JMSpectatorCamera spectatorCam;
 			if ((!IsControlledPlayer() || Class.CastTo(spectatorCam, CurrentActiveCamera)) && m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
 			{
-				if (PhysicsIsSolid()
+				if (PhysicsIsSolid())
 				{
 					//! Set physics non-solid so there is no blocking "ghost"
 					//! Needed on client because of disabling simulation (below),
