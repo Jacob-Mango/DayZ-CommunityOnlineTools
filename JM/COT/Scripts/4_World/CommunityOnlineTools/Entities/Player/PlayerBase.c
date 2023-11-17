@@ -134,24 +134,30 @@ modded class PlayerBase
 		{
 			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
 
-			//if (!IsControlledPlayer())  //! Other clients
-			//{
-				if (m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
+			//! @note Not a controlled player = this player object on other clients
+			//! @note WARNING: Do NOT use Camera.GetCurrentCamera() after leaving spectator cam, crashes game
+			JMSpectatorCamera spectatorCam;
+			if ((!IsControlledPlayer() || Class.CastTo(spectatorCam, CurrentActiveCamera)) && m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
+			{
+				if (PhysicsIsSolid()
 				{
 					//! Set physics non-solid so there is no blocking "ghost"
 					//! Needed on client because of disabling simulation (below),
 					//! setting on server is not enough in this specific case
 					PhysicsSetSolid(false);
+				}
 
+				if (!GetIsSimulationDisabled())
+				{
 					//! Disable simulation to disable position update on client, footstep sounds, etc.
 					DisableSimulation(true);
 				}
-				else
-				{
-					DisableSimulation(false);
-					Update();
-				}
-			//}
+			}
+			else if (GetIsSimulationDisabled())
+			{
+				DisableSimulation(false);
+				Update();
+			}
 
 			SetInvisible( m_JMIsInvisible );
 		}
@@ -167,6 +173,7 @@ modded class PlayerBase
 	}
 
 #ifndef SERVER
+	//! @note after disabling simulation, this no longer gets called, just keep that in mind
 	override void EOnPostFrame( IEntity other, int extra )
 	{
 		if ( !m_JMIsInvisible )
