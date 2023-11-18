@@ -180,39 +180,12 @@ class JMObjectSpawnerForm: JMFormBase
 				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
 					translated = liquidClsName;  //! Use class name instead
 
-				//! Oh god, I can't believe I have to roll my own sorting function...
-				bool found = false;
 				int idx = 0;
-				foreach (int i, string liquidText: m_ObjItemStateLiquidText)
+				foreach (string liquidText: m_ObjItemStateLiquidText)
 				{
-					for (int j = 0; j < Math.Min(translated.Length(), liquidText.Length()); j++)
-					{
-						if (translated[j] > liquidText[j])
-							break;
-
-						if (translated[j] == liquidText[j])
-							continue;
-						
-						found = true;
-						idx = i;
+					if (StrCmp(translated, liquidText) < 0)
 						break;
-					}
-
-					if (found)
-					{
-					#ifdef DIAG
-						Print("INSERT " + translated + " BEFORE " + liquidText);
-					#endif
-						break;
-					}
-				}
-
-				if (!found)
-				{
-					idx = m_ObjItemStateLiquidText.Count();
-				#ifdef DIAG
-					Print("INSERT " + translated + " AT END");
-				#endif
+					idx++;
 				}
 
 				m_ObjItemStateLiquid.InsertAt(nutritionProfile, idx);
@@ -230,6 +203,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
+		m_ItemDataList.SetSelection(m_ObjItemStateLiquid.Find(Liquid.GetNutritionalProfileByType(LIQUID_WATER)), false);
 
 		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -268,6 +242,19 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		UpdateItemPreview();
+	}
+
+	int StrCmp(string a, string b)
+	{
+		for (int i = 0; i < Math.Min(a.Length(), b.Length()); i++)
+		{
+			if (a[i] < b[i])
+				return -1;
+			else if (a[i] > b[i])
+				return 1;
+		}
+
+		return a.Length() - b.Length();
 	}
 
 	void Click_ItemData( UIEvent eid, UIActionBase action )
