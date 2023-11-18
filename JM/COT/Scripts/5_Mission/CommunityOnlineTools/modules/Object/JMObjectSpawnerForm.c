@@ -40,14 +40,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private ref array< string > m_ObjItemStateFoodText =
 	{
-		// Food
-		"UNKNOWN",
-		"RAW",
-		"BAKED",
-		"BOILED",
-		"DRIED",
-		"BURNED",
-		"ROTTEN"
 	};
 
 	private ref array< string > m_ObjItemStateBloodText =
@@ -64,6 +56,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"AB-"
 	};
 
+	private ref array< ref NutritionalProfile > m_ObjItemStateLiquid = {};
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
 	};
@@ -159,19 +152,58 @@ class JMObjectSpawnerForm: JMFormBase
 		button.SetWidth( 0.05 );
 		button.SetPosition( 0.65 );
 
-		foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+		int foodStageCount = FoodStageType.COUNT;
+		for (int foodStage = 0; foodStage < FoodStageType.COUNT; foodStage++)
 		{
-			//! Liquids (except blood)
-			if (nutritionProfile.IsLiquid() && nutritionProfile.GetLiquidType() > 255)
-				m_ObjItemStateLiquidText.Insert(liquidClsName);
+			m_ObjItemStateFoodText.Insert(typename.EnumToString(FoodStageType, foodStage));
 		}
 
-		m_ObjItemStateLiquidText.Sort();
-		m_ObjItemStateLiquidText.InsertAt("UNKNOWN", 0);
+		string displayName;
+		string translated;
+		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
+		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
+		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
+		{
+			//! Liquids (except blood)
+			if (nutritionProfile.IsLiquid() && liquidType > 255)
+			{
+				string liquidClsName = nutritionProfile.GetLiquidClassname();
+				GetGame().ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
+				GetGame().FormatRawConfigStringKeys(displayName);
+
+				if (displayName.IndexOf("#") == 0)
+					translated = Widget.TranslateString(displayName);
+				else
+					translated = displayName;
+
+				//! Fix up vanilla liquid display name
+				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
+					translated = liquidClsName;  //! Use class name instead
+
+				int idx = 0;
+				foreach (string liquidText: m_ObjItemStateLiquidText)
+				{
+					if (StrCmp(translated, liquidText) < 0)
+						break;
+					idx++;
+				}
+
+				m_ObjItemStateLiquid.InsertAt(nutritionProfile, idx);
+				m_ObjItemStateLiquidText.InsertAt(translated, idx);
+			}
+		}
+		
+	#ifdef DIAG
+		for (int k = 0; k < m_ObjItemStateLiquidText.Count(); k++)
+		{
+			PrintFormat("LIQUID %1 %2 %3 %4 %5 %6", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], m_ObjItemStateLiquid[k].GetLiquidType(), m_ObjItemStateLiquid[k].GetLiquidClassname());
+		}
+	#endif
 
 		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
+		m_ItemDataList.SetSelection(m_ObjItemStateLiquid.Find(Liquid.GetNutritionalProfileByType(LIQUID_WATER)), false);
 
 		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -212,6 +244,19 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateItemPreview();
 	}
 
+	int StrCmp(string a, string b)
+	{
+		for (int i = 0; i < Math.Min(a.Length(), b.Length()); i++)
+		{
+			if (a[i] < b[i])
+				return -1;
+			else if (a[i] > b[i])
+				return 1;
+		}
+
+		return a.Length() - b.Length();
+	}
+
 	void Click_ItemData( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
@@ -240,9 +285,12 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
+				//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
+				//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
 				auto nutritionProfile = Liquid.GetNutritionalProfileByType(liquidType);
-				if (nutritionProfile)
-					idx = m_ObjItemStateLiquidText.Find(nutritionProfile.GetLiquidClassname());
+				if (!nutritionProfile)
+					nutritionProfile = Liquid.GetNutritionalProfileByType(LIQUID_WATER);  //! Fallback
+				idx = m_ObjItemStateLiquid.Find(nutritionProfile);
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
@@ -634,17 +682,13 @@ class JMObjectSpawnerForm: JMFormBase
 			if (m_ItemStateType == 0)
 			{
 				//! Liquid
-				string liquidClsnameSearch = m_ObjItemStateLiquidText[itemState];
-				foreach (string liquidClsName, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByName)
+				auto nutritionProfile = m_ObjItemStateLiquid[itemState];
+				if (nutritionProfile)
 				{
-					if (liquidClsName == liquidClsnameSearch)
-					{
-						itemState = nutritionProfile.GetLiquidType();
-					#ifdef DIAG
-						PrintFormat("Liquid type %1 %2", liquidClsName, itemState);
-					#endif
-						break;
-					}
+					itemState = nutritionProfile.GetLiquidType();
+				#ifdef DIAG
+					PrintFormat("Liquid type %1 %2", itemState, nutritionProfile.GetLiquidClassname());
+				#endif
 				}
 			}
 		}
