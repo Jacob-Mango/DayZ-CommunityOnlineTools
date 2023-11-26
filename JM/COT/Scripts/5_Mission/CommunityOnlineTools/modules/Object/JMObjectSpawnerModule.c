@@ -126,7 +126,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		DayZPlayer player = GetGame().GetPlayer();
 		DayZPlayerCamera3rdPerson camera3rdPerson;
-		if (player && !Camera.GetCurrentCamera() && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
+		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
 		{
 			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
 			distance += vector.Distance(rayStart, headPos);
