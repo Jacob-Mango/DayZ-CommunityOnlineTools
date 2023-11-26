@@ -56,7 +56,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"AB-"
 	};
 
-	private ref array< ref NutritionalProfile > m_ObjItemStateLiquid = {};
+	private ref array< int > m_ObjItemStateLiquid = {};
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
 	};
@@ -188,7 +188,7 @@ class JMObjectSpawnerForm: JMFormBase
 					idx++;
 				}
 
-				m_ObjItemStateLiquid.InsertAt(nutritionProfile, idx);
+				m_ObjItemStateLiquid.InsertAt(liquidType, idx);
 				m_ObjItemStateLiquidText.InsertAt(translated, idx);
 			}
 		}
@@ -196,14 +196,14 @@ class JMObjectSpawnerForm: JMFormBase
 	#ifdef DIAG
 		for (int k = 0; k < m_ObjItemStateLiquidText.Count(); k++)
 		{
-			PrintFormat("LIQUID %1 %2 %3 %4 %5 %6", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], m_ObjItemStateLiquid[k].GetLiquidType(), m_ObjItemStateLiquid[k].GetLiquidClassname());
+			PrintFormat("LIQUID %1 %2 %3 %4 %5", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname());
 		}
 	#endif
 
 		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
-		m_ItemDataList.SetSelection(m_ObjItemStateLiquid.Find(Liquid.GetNutritionalProfileByType(LIQUID_WATER)), false);
+		m_ItemDataList.SetSelection(m_ObjItemStateLiquid.Find(LIQUID_WATER), false);
 
 		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -285,12 +285,9 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
-				//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
-				auto nutritionProfile = Liquid.GetNutritionalProfileByType(liquidType);
-				if (!nutritionProfile)
-					nutritionProfile = Liquid.GetNutritionalProfileByType(LIQUID_WATER);  //! Fallback
-				idx = m_ObjItemStateLiquid.Find(nutritionProfile);
+				idx = m_ObjItemStateLiquid.Find(liquidType);
+				if (idx == -1)
+					idx = m_ObjItemStateLiquid.Find(LIQUID_WATER);  //! Fallback
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
@@ -682,14 +679,10 @@ class JMObjectSpawnerForm: JMFormBase
 			if (m_ItemStateType == 0)
 			{
 				//! Liquid
-				auto nutritionProfile = m_ObjItemStateLiquid[itemState];
-				if (nutritionProfile)
-				{
-					itemState = nutritionProfile.GetLiquidType();
-				#ifdef DIAG
-					PrintFormat("Liquid type %1 %2", itemState, nutritionProfile.GetLiquidClassname());
-				#endif
-				}
+				itemState = m_ObjItemStateLiquid[itemState];
+			#ifdef DIAG
+				PrintFormat("Liquid type %1 %2", itemState, Liquid.GetNutritionalProfileByType(itemState).GetLiquidClassname());
+			#endif
 			}
 		}
 
