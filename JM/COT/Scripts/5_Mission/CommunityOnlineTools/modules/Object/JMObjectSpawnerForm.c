@@ -200,10 +200,10 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 	#endif
 
-		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", m_ObjItemStateLiquidText, this, "Click_ItemData" );
+		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", {""}, this, "Click_ItemData" );
 		m_ItemDataList.SetPosition( 0.70 );
 		m_ItemDataList.SetWidth( 0.3 );
-		m_ItemDataList.SetSelection(m_ObjItemStateLiquid.Find(LIQUID_WATER), false);
+		m_ItemDataList.Disable();
 
 		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
@@ -475,6 +475,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
+
+		int itemStateType = m_ItemStateType;
+
 		if ( m_PreviewItem )
 		{
 			m_ItemPreview.SetItem( m_PreviewItem );
@@ -499,12 +502,12 @@ class JMObjectSpawnerForm: JMFormBase
 			{
 				ItemBase item = ItemBase.Cast(m_PreviewItem);
 
-				m_ItemDataList.Enable();
 				if ( item.IsLiquidContainer() )
 				{
-					int itemStateType;
 					if ( item.IsBloodContainer() )
 						itemStateType = 1;
+					else
+						itemStateType = 0;
 					int liquidType = item.GetLiquidTypeInit();
 					if ( m_ItemStateType != itemStateType || m_LiquidType != liquidType )
 						UpdateItemStateType(itemStateType, liquidType);
@@ -520,9 +523,6 @@ class JMObjectSpawnerForm: JMFormBase
 					{
 						m_ItemStateType = -1;
 						m_LiquidType = 0;
-						m_ItemDataList.SetItems({""});
-						UpdateQuantityItemColor();
-						m_ItemDataList.Disable();
 					}
 				}
 
@@ -570,6 +570,17 @@ class JMObjectSpawnerForm: JMFormBase
 			m_HealthItem.SetCurrent(-1);
 			m_HealthItem.SetMax(-1);
 			m_ItemPreview.Show( false );
+		}
+
+		if (m_ItemStateType > -1)
+		{
+			m_ItemDataList.Enable();
+		}
+		else if (m_ItemStateType != itemStateType)
+		{
+			m_ItemDataList.SetItems({""});
+			UpdateQuantityItemColor();
+			m_ItemDataList.Disable();
 		}
 
 		#ifdef COT_DEBUGLOGS
