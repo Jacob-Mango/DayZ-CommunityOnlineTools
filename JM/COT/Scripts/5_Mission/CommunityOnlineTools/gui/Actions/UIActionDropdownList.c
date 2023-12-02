@@ -84,11 +84,16 @@ class UIActionDropdownList: UIActionBase
 
 	override void SetSelection( int i, bool sendEvent = true )
 	{
+		if (i >= m_List.GetNumItems())
+			i = m_List.GetNumItems() - 1;
+
 		m_SelectedIndex = i;
 		m_List.SelectRow( m_SelectedIndex );
 		
 		string result;
-		m_List.GetItemText( m_SelectedIndex, 0, result );
+		if (m_SelectedIndex > -1)
+			m_List.GetItemText( m_SelectedIndex, 0, result );
+
 		m_Text.SetText( result );
 
 		if (sendEvent)
@@ -140,6 +145,16 @@ class UIActionDropdownList: UIActionBase
 
 		m_Items.Clear();
 		m_Items.Copy( items );
+
+		m_List.ClearItems();
+		foreach ( string item: m_Items )
+		{
+			m_List.AddItem( item, NULL, 0 );
+		}
+
+		m_SelectedIndex = -1;
+
+		m_PreviousText = "";
 
 		UpdateText();
 	}
@@ -196,8 +211,6 @@ class UIActionDropdownList: UIActionBase
 		string nText = text;
 		nText.ToLower();
 
-		m_List.ClearItems();
-
 		for ( int i = 0; i < m_Items.Count(); ++i )
 		{
 			item = m_Items[i];
@@ -208,9 +221,8 @@ class UIActionDropdownList: UIActionBase
 				m_PreviousText = text;
 				success = true;
 				m_SelectedIndex = i;
+				break;
 			}
-
-			m_List.AddItem( m_Items[i], NULL, 0 );
 		}
 
 		m_Text.SetText( m_PreviousText );
