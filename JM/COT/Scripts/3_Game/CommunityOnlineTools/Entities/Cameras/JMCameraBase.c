@@ -1,3 +1,25 @@
+static float CAMERA_FOV = 1.0;
+static float CAMERA_TARGETFOV = 1.0;
+static float CAMERA_FOV_SPEED_MODIFIER = 5.0;
+static float CAMERA_SPEED = 3.0;
+static float CAMERA_BOOST_MULT = 5.0;
+static float CAMERA_VELDRAG = 0.9;
+static float CAMERA_MSENS = 35.0;
+static float CAMERA_SMOOTH = 0.8;
+static bool  CAMERA_DOF = false;
+static bool  CAMERA_AFOCUS = true;
+
+static float CAMERA_FDIST = 0.2;
+static float CAMERA_FLENGTH = 20.0;
+static float CAMERA_FNEAR = 185.0;
+static float CAMERA_BLUR = 4.0;
+static float CAMERA_DOFFSET = 10.0;
+
+static float CAMERA_SMOOTH_BLUR = 0.0;
+
+static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
+static JMCameraBase COT_PreviousActiveCamera;
+
 class JMCameraBase: Camera
 {
 	float SendUpdateAccumalator = 0.0;

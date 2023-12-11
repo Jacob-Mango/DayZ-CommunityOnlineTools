@@ -198,7 +198,6 @@ class UIActionManager
 			action.SetCallback( instance, funcname );
 
 			action.SetLabel( label );
-			action.SetText( values[0] );
 
 			return action;
 		}
