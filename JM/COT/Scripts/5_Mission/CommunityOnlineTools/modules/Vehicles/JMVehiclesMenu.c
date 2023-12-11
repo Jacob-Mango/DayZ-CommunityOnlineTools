@@ -4,7 +4,7 @@ class JMVehiclesMenu: JMFormBase
 	
 	protected Widget m_VehicleMapPanel;	
 	protected Widget m_VehicleListPanel;
-	protected GridSpacerWidget m_VehiclesListContent;
+	protected Widget m_VehiclesListContent;
 	protected ButtonWidget m_VehicleListRefreshButton;
 	protected TextWidget m_VehicleListRefreshButtonLabel;
 	
@@ -30,6 +30,7 @@ class JMVehiclesMenu: JMFormBase
 	protected TextWidget m_VehicleInfoExploded;
 	protected TextWidget m_VehicleInfoDestroyed;
 	protected TextWidget m_VehicleInfoKeys;
+	protected TextWidget m_VehicleInfoCover;
 	protected TextWidget m_VehicleInfoLastDriver;	
 	
 	protected Widget m_VehicleOptionsPanel;
@@ -63,7 +64,7 @@ class JMVehiclesMenu: JMFormBase
 		
 		//! Vehicles List
 		m_VehicleListPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_panel" ) );
-		m_VehiclesListContent = GridSpacerWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
+		m_VehiclesListContent = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
 		
 		//! Vehicles Map
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
@@ -95,11 +96,13 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoExploded = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_exploded_value" ) );
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
+		m_VehicleInfoCover = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_cover_value" ) );
 		m_VehicleInfoLastDriver = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_last_driver_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoType.GetParent().Show(true);
 		m_VehicleInfoExploded.GetParent().Show(true);
 		m_VehicleInfoKeys.GetParent().Show(true);
+		m_VehicleInfoCover.GetParent().Show(true);
 		#endif
 		#ifdef EXPANSIONMODCORE
 		m_VehicleInfoLastDriver.GetParent().Show(true);
@@ -120,12 +123,13 @@ class JMVehiclesMenu: JMFormBase
 		m_MapMarkers.Clear();
 		m_VehicleEntries.Clear();
 		
-		if ( m_Module && m_Module.GetServerVehicles().Count() != 0 )
-		{		
-			for ( int i = 0; i < m_Module.GetServerVehicles().Count(); i++ )
+		if ( m_Module )
+		{
+			auto vehicles =  m_Module.GetServerVehicles();
+			TStringArray vehicleEntryLabels = {};
+
+			foreach (JMVehicleMetaData currentVehicle: vehicles)
 			{
-				JMVehicleMetaData currentVehicle = m_Module.GetServerVehicles().Get( i );
-				
 				int color;
 				string marker;
 
@@ -141,6 +145,24 @@ class JMVehiclesMenu: JMFormBase
 				//! Create list entry for vehicle
 				JMVehiclesListEntry vehicleListEntry = new JMVehiclesListEntry(m_VehiclesListContent, this, currentVehicle);
 				m_VehicleEntries.Insert( vehicleListEntry );
+
+				int idx = 0;
+				foreach (string vehicleEntryLabel: vehicleEntryLabels)
+				{
+					if (JMStatics.StrCmp(vehicleListEntry.GetLabel(), vehicleEntryLabel) < 0)
+						break;
+					idx++;
+				}
+
+				vehicleEntryLabels.InsertAt(vehicleListEntry.GetLabel(), idx);
+			}
+
+			int sort;
+			foreach (auto listEntry: m_VehicleEntries)
+			{
+				sort = vehicleEntryLabels.Find(listEntry.GetLabel());
+				if (sort > -1)
+					listEntry.SetSort(sort, false);
 			}
 		}
 	}
@@ -165,9 +187,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoPersistentABID.SetText( vehicle.m_PersistentIDA.ToString() + "    " + vehicle.m_PersistentIDB.ToString() );
 		m_VehicleInfoPersistentCDID.SetText( vehicle.m_PersistentIDC.ToString() + "    " + vehicle.m_PersistentIDD.ToString() );
 
-		string displayName;
-		GetGame().ConfigGetText( "cfgVehicles " + vehicle.m_ClassName + " displayName", displayName );
-		m_VehicleInfoName.SetText( displayName );
+		m_VehicleInfoName.SetText( vehicle.m_DisplayName );
 
 		m_VehicleInfoClassName.SetText( vehicle.m_ClassName );
 		m_VehicleInfoPos.SetText( "X: " + vehicle.m_Position[0] + " Z: " + vehicle.m_Position[1] + " Y: " + vehicle.m_Position[2] );
@@ -179,6 +199,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoDestroyed.SetText( vehicle.IsDestroyed().ToString() );
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
+		m_VehicleInfoCover.SetText( vehicle.m_IsCover.ToString() );
 		#endif
 		#ifdef EXPANSIONMODCORE
 		m_VehicleInfoLastDriver.SetText( vehicle.m_LastDriverUID );
@@ -192,8 +213,6 @@ class JMVehiclesMenu: JMFormBase
 	void SyncAndRefreshVehicles()
 	{		
 		m_Module.RequestServerVehicles();
-		
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( LoadVehicles, 500, false );
 	}
 
 	void ShowMapMarkers()
@@ -218,7 +237,7 @@ class JMVehiclesMenu: JMFormBase
 	{
 		m_IsInVehicleInfo = false;
 		
-		SyncAndRefreshVehicles();
+		ShowMapMarkers();
 		
 		m_VehicleListPanel.Show( true );
 		m_MapWidgetPanel.Show( true );
@@ -237,6 +256,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoExploded.SetText( "" );
 		m_VehicleInfoDestroyed.SetText( "" );
 		m_VehicleInfoKeys.SetText( "" );
+		m_VehicleInfoCover.SetText( "" );
 		m_VehicleInfoLastDriver.SetText( "" );
 		
 		m_CurrentVehicle = NULL;
@@ -252,25 +272,21 @@ class JMVehiclesMenu: JMFormBase
 		if ( w == m_CancleVehicleEdit )
 		{
 			BackToList();
-			SyncAndRefreshVehicles();
 		}
 
 		if ( w == m_DeleteAllButton )
 		{
 			m_Module.DeleteVehicleAll();
-			SyncAndRefreshVehicles();
 		}
 
 		if ( w == m_DeleteDestroyedButton )
 		{
 			m_Module.DeleteVehicleDestroyed();
-			SyncAndRefreshVehicles();
 		}
 
 		if ( w == m_DeleteUnclaimedButton )
 		{
 			m_Module.DeleteVehicleUnclaimed();
-			SyncAndRefreshVehicles();
 		}
 		
 		if ( w == m_DeleteVehicleButton )
@@ -279,7 +295,6 @@ class JMVehiclesMenu: JMFormBase
 			{
 				m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
 				BackToList();
-				SyncAndRefreshVehicles();
 			}
 		}
 		

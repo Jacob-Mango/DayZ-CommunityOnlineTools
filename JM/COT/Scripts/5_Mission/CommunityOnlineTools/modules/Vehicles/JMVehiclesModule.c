@@ -27,8 +27,12 @@ class JMVehicleMetaData
 	int m_DestructionType;
 
 	bool m_HasKeys;
+	bool m_IsCover;
 
 	string m_LastDriverUID;
+
+	[NonSerialized()]
+	string m_DisplayName;
 	
 	static JMVehicleMetaData CreateCarScript( CarScript car )
 	{
@@ -117,6 +121,44 @@ class JMVehicleMetaData
 		meta.m_HasKeys = vehicle.HasKey();
 		meta.m_LastDriverUID = vehicle.ExpansionGetLastDriverUID();
 		
+
+		return meta;
+	}
+	
+	static JMVehicleMetaData CreateCover( ExpansionVehicleCover cover )
+	{
+		JMVehicleMetaData meta = new JMVehicleMetaData();
+
+		cover.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		
+		cover.GetPersistentID(meta.m_PersistentIDA, meta.m_PersistentIDB, meta.m_PersistentIDC, meta.m_PersistentIDD);
+
+		string type = cover.Expansion_GetStoredEntityType();
+		meta.m_ClassName = type;
+		meta.m_Position = cover.GetPosition();
+		meta.m_Orientation = cover.GetOrientation();
+
+		meta.m_VehicleType = JMVT_NONE;
+		if ( GetGame().IsKindOf(type, "ExpansionHelicopterScript") )
+			meta.m_VehicleType |= JMVT_HELICOPTER;
+		else if ( GetGame().IsKindOf(type, "ExpansionBoatScript") )
+			meta.m_VehicleType |= JMVT_BOAT;
+		else
+			meta.m_VehicleType |= JMVT_CAR;
+		
+		meta.m_DestructionType = JMDT_NONE;
+		if ( cover.IsDamageDestroyed() )
+			meta.m_DestructionType |= JMDT_DESTROYED;
+
+		auto keychain = ExpansionKeyChainBase.Cast(cover.GetAttachmentByType(ExpansionKeyChainBase));
+		if (keychain && keychain.Expansion_HasOwner())
+		{
+			meta.m_HasKeys = true;
+
+			meta.m_LastDriverUID = keychain.Expansion_GetOwnerUID();
+		}
+
+		meta.m_IsCover = true;
 
 		return meta;
 	}
@@ -238,18 +280,28 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			m_Vehicles.Insert( JMVehicleMetaData.CreateCarScript( node.m_Value ) );
+			if ( !node.m_Value.IsSetForDeletion() )
+				m_Vehicles.Insert( JMVehicleMetaData.CreateCarScript( node.m_Value ) );
 			node = node.m_Next;
 		}
 		
 		#ifdef EXPANSIONMODVEHICLE
-		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
+		auto vehicles = ExpansionVehicleBase.GetAll();
+		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
-			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
 			if ( !vehicle ) // should not be possible
 				continue;
 
-			m_Vehicles.Insert( JMVehicleMetaData.CreateVehicle( vehicle ) );
+			if ( !vehicle.IsSetForDeletion() )
+				m_Vehicles.Insert( JMVehicleMetaData.CreateVehicle( vehicle ) );
+		}
+
+		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		while ( cover )
+		{
+			if ( !cover.m_Value.IsSetForDeletion() )
+				m_Vehicles.Insert( JMVehicleMetaData.CreateCover( cover.m_Value ) );
+			cover = cover.m_Next;
 		}
 		#endif
 	}
@@ -328,6 +380,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 		
 		ctx.Read( m_Vehicles );
+
+		foreach (auto vehicle: m_Vehicles)
+		{
+			if (GetGame().ConfigIsExisting("cfgVehicles " + vehicle.m_ClassName + " displayName"))
+				GetGame().ConfigGetText( "cfgVehicles " + vehicle.m_ClassName + " displayName", vehicle.m_DisplayName );
+			else
+				vehicle.m_DisplayName = vehicle.m_ClassName;
+		}
+
+		JMVehiclesMenu form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.LoadVehicles();
 	}
 
 	void DeleteVehicleUnclaimed( )
@@ -393,6 +457,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		GetGame().ObjectDelete( obj );
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 
 	#ifdef EXPANSIONMODVEHICLE
@@ -415,9 +481,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 
-		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
+		auto vehicles = ExpansionVehicleBase.GetAll();
+		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
-			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
 			if ( !vehicle )
 				continue;
 
@@ -426,6 +492,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 			
 			GetGame().ObjectDelete( vehicle );
 		}
+
+		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		while ( cover )
+		{
+			auto keychain = ExpansionKeyChainBase.Cast(cover.m_Value.GetAttachmentByType(ExpansionKeyChainBase));
+			if (!keychain || !keychain.Expansion_HasOwner())
+				cover.m_Value.Delete();
+
+			cover = cover.m_Next;
+		}
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 	#endif
 
@@ -449,9 +527,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		
 		#ifdef EXPANSIONMODVEHICLE
-		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
+		auto vehicles = ExpansionVehicleBase.GetAll();
+		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
-			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
 			if ( !vehicle )
 				continue;
 
@@ -460,7 +538,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			GetGame().ObjectDelete( vehicle );
 		}
+
+		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		while ( cover )
+		{
+			if ( cover.m_Value.IsDamageDestroyed() )
+				cover.m_Value.Delete();
+
+			cover = cover.m_Next;
+		}
 		#endif
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 
 	private void RPC_DeleteVehicleAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -481,15 +570,24 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		
 		#ifdef EXPANSIONMODVEHICLE
-		for ( i = 0; i < ExpansionVehicleBase.GetAll().Count(); i++ )
+		auto vehicles = ExpansionVehicleBase.GetAll();
+		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
-			ExpansionVehicleBase vehicle = ExpansionVehicleBase.GetAll()[i];
 			if ( !vehicle )
 				return;
 
 			GetGame().ObjectDelete( vehicle );
 		}
+
+		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		while ( cover )
+		{
+			cover.m_Value.Delete();
+			cover = cover.m_Next;
+		}
 		#endif
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 
 	void RequestTeleportToVehicle( int netLow, int netHigh )

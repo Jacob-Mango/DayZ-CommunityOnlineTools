@@ -36,7 +36,7 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 		m_Vehicle 			= vehicle;
 		m_COTVehicleMenu 	= menu;
 		
-		GetGame().ConfigGetText( "cfgVehicles " + m_Vehicle.m_ClassName + " displayName", m_MarkerName );
+		m_MarkerName = m_Vehicle.m_DisplayName;
 		
 		if (m_MarkerIcon)
 			m_Icon.LoadImageFile(0, m_MarkerIcon);
