@@ -183,7 +183,7 @@ class JMObjectSpawnerForm: JMFormBase
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
 				{
-					if (StrCmp(translated, liquidText) < 0)
+					if (JMStatics.StrCmp(translated, liquidText) < 0)
 						break;
 					idx++;
 				}

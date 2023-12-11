@@ -71,4 +71,17 @@ class JMStatics
 		arrKey.Copy( narrKey );
 		arrValue.Copy( narrValue );
 	}
+
+	static int StrCmp(string a, string b)
+	{
+		for (int i = 0; i < Math.Min(a.Length(), b.Length()); i++)
+		{
+			if (a[i] < b[i])
+				return -1;
+			else if (a[i] > b[i])
+				return 1;
+		}
+
+		return a.Length() - b.Length();
+	}
 };
