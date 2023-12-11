@@ -166,8 +166,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		vector rayStart;
 		vector direction;
-		Camera camera = Camera.GetCurrentCamera();
-		if ( camera && camera.IsActive() )
+		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 		{
 			rayStart = CurrentActiveCamera.GetPosition();
 			direction = CurrentActiveCamera.GetDirection();

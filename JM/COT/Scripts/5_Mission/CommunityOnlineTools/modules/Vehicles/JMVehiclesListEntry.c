@@ -3,6 +3,8 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 	protected Widget m_Root;
 	protected TextWidget m_VehicleName;
 	protected TextWidget m_VehicleID;
+	protected int m_Sort;
+	protected string m_Label;
 	protected ButtonWidget m_EditButton;
 	protected ImageWidget m_VehicleStatusIcon;
 	
@@ -31,15 +33,28 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 			m_Root.Unlink();
 	}
 
+	void SetSort(int sort, bool immedUpdate = true)
+	{
+		m_Sort = sort;
+		m_Root.SetSort(sort, immedUpdate);
+		SetEntry();
+	}
+
+	string GetLabel()
+	{
+		return m_Label;
+	}
+
 	void SetEntry()
 	{
 		if ( m_Vehicle )
 		{
-			string displayName;
-			GetGame().ConfigGetText( "cfgVehicles " + m_Vehicle.m_ClassName + " displayName", displayName );
-			m_VehicleName.SetText( displayName );
+			m_VehicleName.SetText( "#" + (m_Sort + 1).ToString() + " - " + m_Vehicle.m_DisplayName );
 
-			m_VehicleID.SetText( " - ID: " + m_Vehicle.m_NetworkIDLow.ToString() + "-" + m_Vehicle.m_NetworkIDHigh.ToString() );
+			string id = " - ID: " + m_Vehicle.m_NetworkIDLow.ToString() + "-" + m_Vehicle.m_NetworkIDHigh.ToString();
+			m_VehicleID.SetText( id );
+
+			m_Label = m_Vehicle.m_DisplayName + id;
 			
 			if ( m_Vehicle.m_DestructionType != JMDT_NONE )
 			{

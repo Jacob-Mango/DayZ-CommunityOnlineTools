@@ -1,10 +1,12 @@
 TextListboxWidgetClass action_list {
+ clipchildren 1
  position 0 0
- size 1 220
+ size 1 112
  vexactpos 1
  vexactpos 1
  hexactsize 1
  vexactsize 1
  style Editor
  font "gui/fonts/Metron12"
+ lines 8
 }
