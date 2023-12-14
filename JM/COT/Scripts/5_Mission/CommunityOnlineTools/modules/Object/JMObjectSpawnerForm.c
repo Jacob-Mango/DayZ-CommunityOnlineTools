@@ -183,7 +183,7 @@ class JMObjectSpawnerForm: JMFormBase
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
 				{
-					if (JMStatics.StrCmp(translated, liquidText) < 0)
+					if (JMStatics.StrCaseCmp(translated, liquidText) < 0)
 						break;
 					idx++;
 				}
@@ -242,19 +242,6 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		UpdateItemPreview();
-	}
-
-	int StrCmp(string a, string b)
-	{
-		for (int i = 0; i < Math.Min(a.Length(), b.Length()); i++)
-		{
-			if (a[i] < b[i])
-				return -1;
-			else if (a[i] > b[i])
-				return 1;
-		}
-
-		return a.Length() - b.Length();
 	}
 
 	void Click_ItemData( UIEvent eid, UIActionBase action )
