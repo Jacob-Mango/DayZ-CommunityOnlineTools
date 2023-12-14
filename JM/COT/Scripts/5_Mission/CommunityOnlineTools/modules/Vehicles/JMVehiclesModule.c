@@ -218,7 +218,6 @@ class JMVehicleMetaData
 class JMVehiclesModule: JMRenderableModuleBase
 {
 	private ref array<ref JMVehicleMetaData> m_Vehicles;
-	private int m_TimeSinceLastChecked;
 
 	void JMVehiclesModule()
 	{
@@ -260,22 +259,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 		return false;
 	}
 
-	override void OnMissionLoaded()
-	{
-		super.OnMissionLoaded();
-	}
-
 	private void UpdateVehiclesMetaData()
 	{
-		if ( m_TimeSinceLastChecked + 500 > GetGame().GetTime() )
-			return;
-
-		m_TimeSinceLastChecked = GetGame().GetTime();
-
-		if ( m_Vehicles.Count() >= 0 )
+		if ( m_Vehicles.Count() > 0 )
 			m_Vehicles.Clear();
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -368,7 +355,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 		
 		UpdateVehiclesMetaData();
-		
+
 		auto rpc = new ScriptRPC();
 		rpc.Write( m_Vehicles );
 		rpc.Send( NULL, JMVehiclesModuleRPC.SendServerVehicles, true, senderRPC );
@@ -378,7 +365,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	{
 		if ( !IsMissionClient() )
 			return;
-		
+
 		ctx.Read( m_Vehicles );
 
 		foreach (auto vehicle: m_Vehicles)
@@ -469,8 +456,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -514,8 +499,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -559,8 +542,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
