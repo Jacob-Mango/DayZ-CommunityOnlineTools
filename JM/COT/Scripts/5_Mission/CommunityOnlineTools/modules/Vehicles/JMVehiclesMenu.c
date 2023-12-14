@@ -149,7 +149,7 @@ class JMVehiclesMenu: JMFormBase
 				int idx = 0;
 				foreach (string vehicleEntryLabel: vehicleEntryLabels)
 				{
-					if (JMStatics.StrCmp(vehicleListEntry.GetLabel(), vehicleEntryLabel) < 0)
+					if (JMStatics.StrCaseCmp(vehicleListEntry.GetLabel(), vehicleEntryLabel) < 0)
 						break;
 					idx++;
 				}
