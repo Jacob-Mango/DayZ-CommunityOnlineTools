@@ -484,9 +484,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 		#endif
 		#endif
 		
-		bool isValid = obj.IsItemBase() || obj.IsInventoryItem();
-		
-		if ( !isValid )
+		if ( !obj.IsItemBase() && !obj.IsInventoryItem() )
 			return false;
 
 		if ( !CheckLootCategory( obj ) )
