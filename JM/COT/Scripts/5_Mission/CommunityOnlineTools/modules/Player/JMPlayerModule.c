@@ -1064,6 +1064,7 @@ Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCam
 		if ( CurrentActiveCamera == m_SpectatorCamera )
 		{
 			CurrentActiveCamera.SetActive( false );
+			CurrentActiveCamera = NULL;
 
 			if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMCinematicCamera) && switchToPreviousCamera)
 			{
@@ -1075,8 +1076,6 @@ Print("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_Prev
 			else
 			{
 Print("JMPlayerModule::Client_EndSpectating - leaving current cam " + CurrentActiveCamera);
-				CurrentActiveCamera = NULL;
-
 				PPEffects.ResetDOFOverride();
 
 Print("JMPlayerModule::Client_EndSpectating - player " + m_SpectatorClient);
