@@ -276,28 +276,27 @@ class JMVehiclesMenu: JMFormBase
 
 		if ( w == m_DeleteAllButton )
 		{
-			m_Module.DeleteVehicleAll();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEALL_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleAll_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleAll" );
 		}
 
 		if ( w == m_DeleteDestroyedButton )
 		{
-			m_Module.DeleteVehicleDestroyed();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEDESTROYED_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleDestroyed_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleDestroyed" );
 		}
 
 		if ( w == m_DeleteUnclaimedButton )
 		{
-			m_Module.DeleteVehicleUnclaimed();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEUNCLAIMED_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleUnclaimed_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleUnclaimed" );
 		}
-		
+
 		if ( w == m_DeleteVehicleButton )
 		{
 			if ( m_CurrentVehicle )
 			{
-				m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
-				BackToList();
+				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicle_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicle" );
 			}
 		}
-		
+
 		if ( w == m_TeleportButton )
 		{
 			if ( m_CurrentVehicle )
@@ -307,6 +306,43 @@ class JMVehiclesMenu: JMFormBase
 		}
 		
 		return false;
+	}
+
+	void DeleteVehicle_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void DeleteVehicle(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
+		BackToList();
+	}
+
+	void DeleteVehicleUnclaimed_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void DeleteVehicleUnclaimed(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleUnclaimed();
+	}
+
+	void DeleteVehicleDestroyed_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void DeleteVehicleDestroyed(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleDestroyed();
+	}
+
+	void DeleteVehicleAll_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void DeleteVehicleAll(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleAll();
 	}
 
 	override void OnShow()
