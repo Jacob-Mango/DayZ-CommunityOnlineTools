@@ -21,6 +21,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.ReceiveDamageDealt" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
 
@@ -122,6 +123,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		types.Insert( "Inventory" );
 		types.Insert( "PF" );
 		types.Insert( "Kick" );
+		types.Insert( "Message" );
 	}
 
 	override int GetRPCMin()
@@ -235,6 +237,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.KickMessage:
 			RPC_KickMessage( ctx, sender, target );
 			break;
+		case JMPlayerModuleRPC.Message:
+			RPC_Message( ctx, sender, target );
+			break;
 		case JMPlayerModuleRPC.VONStartedTransmitting:
 			RPC_VONStartedTransmitting( ctx, sender, target );
 			break;
@@ -248,6 +253,79 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		if ( m_Spectators.Contains( uid ) )
 			m_Spectators.Remove( uid );
+	}
+
+	void DoMessage( array< string > guids, string messageText )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Message( guids, NULL, NULL, messageText );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Write(messageText);
+			rpc.Send( NULL, JMPlayerModuleRPC.Message, true, NULL );
+		}
+	}
+
+	private void Exec_Message( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		foreach (JMPlayerInstance player: players)
+		{
+			if (!player.PlayerObject)
+				continue;
+
+			Message( player.PlayerObject, messageText );
+		}
+	}
+
+	private void RPC_Message( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Message", senderRPC, instance ) )
+			return;
+
+		Exec_Message( guids, senderRPC, instance, messageText );
+	}
+	
+	private void SendMessage(PlayerIdentity identity, string messageText)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(messageText);
+		rpc.Send(NULL, JMPlayerModuleRPC.Message, true, identity);
+	}
+	
+	private void SendMessageTarget(PlayerIdentity identity, string messageText)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(messageText);
+		rpc.Send(NULL, JMPlayerModuleRPC.MessageTarget, true, identity);
+	}
+
+	private void RPC_MessageTarget(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	{
+		auto trace = CF_Trace_0(this, "RPC_MessageTarget");
+
+		if (GetGame().IsDedicatedServer())
+			return;
+
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+		
+		JMDeferredMessage.QueuedMessages.Clear();
+		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
 	}
 
 	void SetHealth( float health, array< string > guids )

@@ -12,6 +12,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionText m_PlayerListCount;
 	private UIActionEditableText m_PlayerListFilter;
 	private UIActionCheckbox m_PlayerListSort; //TODO: make a new ui action type thing
+	private UIActionCheckbox m_PlayerListSelectAll;
 	
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
@@ -191,11 +192,12 @@ class JMPlayerForm: JMFormBase
 
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
 
-		m_PlayerListCount = UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
-		m_PlayerListFilter = UIActionManager.CreateEditableText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
-		m_PlayerListSort = UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SORT", this, "Event_UpdatePlayerList" );
-		m_PlayerListScroller = UIActionManager.CreateScroller( leftPanelGrid );
-		m_PlayerListRows = UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
+		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
+		m_PlayerListFilter 		= UIActionManager.CreateEditableText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
+		m_PlayerListSort 		= UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SORT", this, "Event_UpdatePlayerList" );
+		//m_PlayerListSelectAll 	= UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SELECTALL", this, "Event_SelectAllPlayerList" );
+		m_PlayerListScroller 	= UIActionManager.CreateScroller( leftPanelGrid );
+		m_PlayerListRows 		= UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 		
 		for ( int i = 0; i < 10; i++ )
 		{
@@ -419,7 +421,7 @@ class JMPlayerForm: JMFormBase
 		m_KillPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
 		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
-		//m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
+		m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
 		//m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
@@ -431,6 +433,11 @@ class JMPlayerForm: JMFormBase
 	{
 		UpdatePlayerList();
 	}
+
+	void Event_SelectAllPlayerList( UIEvent eid, UIActionBase action )
+	{
+		SelectAllPlayerList();
+	}	
 
 	void HidePermissions()
 	{
@@ -686,7 +693,20 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		//m_Module.SendMessage( JM_GetSelected().GetPlayers() );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "SendMessage_Cancel", "#STR_COT_GENERIC_CONFIRM", "SendMessage" );
+	}
+
+	void SendMessage_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void SendMessage(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
 	}
 
 	void Click_KickPlayer( UIEvent eid, UIActionBase action )
@@ -1657,6 +1677,20 @@ class JMPlayerForm: JMFormBase
 	void UpdatePlayerCount()
 	{
 		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + JM_GetSelected().GetPlayers().Count() + ")" );
+	}
+
+	void SelectAllPlayerList()
+	{
+		bool state = m_PlayerListSelectAll.IsChecked();
+
+		for ( int i = 0; i < m_PlayerList.Count(); i++ )
+		{
+			m_PlayerList[i].Checkbox.SetChecked( state );
+		}
+
+		UpdateUI();
+
+		UpdatePlayerCount();
 	}
 
 	void UpdatePlayerList()
