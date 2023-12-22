@@ -84,4 +84,12 @@ class JMStatics
 
 		return a.Length() - b.Length();
 	}
+
+	static int StrCaseCmp(string a, string b)
+	{
+		a.ToLower();
+		b.ToLower();
+
+		return StrCmp(a, b);
+	}
 };

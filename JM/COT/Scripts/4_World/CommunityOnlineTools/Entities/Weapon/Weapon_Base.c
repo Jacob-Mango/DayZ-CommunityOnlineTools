@@ -102,9 +102,7 @@ modded class Weapon_Base
 			mag.ServerSetAmmoCount(Math.RandomIntInclusive(0, mag.GetAmmoMax()));
 		
 		// Fill chamber when flagged
-		bool chamberRng = (flags & WeaponWithAmmoFlags.CHAMBER_RNG);
-		bool chamber = (flags & WeaponWithAmmoFlags.CHAMBER) || chamberRng;		
-		if (chamber || chamberRng)
+		if ((flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG))
 		{
 			FillChamber(magazineType, flags);
 		}

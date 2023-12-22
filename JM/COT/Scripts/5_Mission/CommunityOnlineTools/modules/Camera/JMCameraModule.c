@@ -361,15 +361,22 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 Print("JMCameraModule::Client_Leave - current cam " + CurrentActiveCamera);
 		CurrentActiveCamera.SetActive( false );
-		CurrentActiveCamera = COT_PreviousActiveCamera;
+		CurrentActiveCamera = null;
 
 Print("JMCameraModule::Client_Leave - previous cam " + COT_PreviousActiveCamera);
 		if (COT_PreviousActiveCamera)
 		{
+			if (!COT_PreviousActiveCamera.IsInherited(JMCinematicCamera))
+			{
 Print("JMCameraModule::Client_Leave - switching to prev cam " + COT_PreviousActiveCamera);
-			CurrentActiveCamera.SetActive(true);
+				CurrentActiveCamera = COT_PreviousActiveCamera;
+				CurrentActiveCamera.SetActive(true);
+			}
+
 			COT_PreviousActiveCamera = NULL;
-			return;
+
+			if (CurrentActiveCamera)
+				return;
 		}
 		
 		PPEffects.ResetDOFOverride();

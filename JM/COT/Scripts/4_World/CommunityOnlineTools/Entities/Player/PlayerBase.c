@@ -95,9 +95,14 @@ modded class PlayerBase
 		bool skip;
 
 		if (GetGame().IsServer())
-			skip = (m_JM_SpectatedPlayer || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible;
-		else
-			skip = CurrentActiveCamera && m_JMIsInvisible;
+		{
+			if ((m_JM_SpectatedPlayer || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible)
+				skip = true;
+		}
+		else if (CurrentActiveCamera && m_JMIsInvisible)
+		{
+			skip = true;
+		}
 
 		if (!skip)
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );

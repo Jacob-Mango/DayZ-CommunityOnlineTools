@@ -121,15 +121,14 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableTextPreview";
 
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
 		UIActionEditableTextPreview action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 
@@ -156,15 +155,14 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableText";
 
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
 		UIActionEditableText action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 
@@ -217,15 +215,14 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableVector";
 
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName), parent );
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
 		UIActionEditableVector action;
 		widget.GetScript( action );
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 

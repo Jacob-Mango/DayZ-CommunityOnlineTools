@@ -244,8 +244,7 @@ class JMESPViewTypeCar: JMESPViewType
 		#endif
 		#endif
 		
-		CarScript car;
-		if ( !Class.CastTo( car, obj ) )
+		if ( !obj.IsInherited(CarScript) && !CommunityOnlineToolsBase.IsHypeTrain(obj) )
 			return false;
 		
 		CreateMeta( meta );
@@ -484,9 +483,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 		#endif
 		#endif
 		
-		bool isValid = obj.IsItemBase() || obj.IsInventoryItem();
-		
-		if ( !isValid )
+		if ( !obj.IsItemBase() && !obj.IsInventoryItem() )
 			return false;
 
 		if ( !CheckLootCategory( obj ) )
@@ -811,6 +808,9 @@ class JMESPViewTypeImmovable: JMESPViewType
 
 		DayZPlayer plr;
 		if ( Class.CastTo( plr, obj ) )
+			return false;
+
+		if ( CommunityOnlineToolsBase.IsHypeTrain( obj ) )
 			return false;
 				
 		CreateMeta( meta );

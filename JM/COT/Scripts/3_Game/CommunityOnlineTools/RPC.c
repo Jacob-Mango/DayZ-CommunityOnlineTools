@@ -123,9 +123,9 @@ enum JMESPModuleRPC
 	BaseBuilding_Dismantle,
 	BaseBuilding_Repair,
 
-	Car_Unstuck,
-	Car_Refuel,
-	Car_Repair,
+	Vehicle_Unstuck,
+	Vehicle_Refuel,
+	Repair,
 
 	MakeItemSet,
 	DuplicateAll,
