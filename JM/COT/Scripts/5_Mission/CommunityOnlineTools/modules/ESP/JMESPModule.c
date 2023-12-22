@@ -318,9 +318,9 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "BB_Build" );
 		types.Insert( "BB_Dismantle" );
 		types.Insert( "BB_Repair" );
-		types.Insert( "Car_Unstuck" );
-		types.Insert( "Car_Repair" );
-		types.Insert( "Car_Refuel" );
+		types.Insert( "Vehicle_Unstuck" );
+		types.Insert( "Repair" );
+		types.Insert( "Vehicle_Refuel" );
 		types.Insert( "MakeItemSet" );
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
@@ -631,7 +631,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		int sleepIdx = 0;
 
-		bool includeImmovable = m_ViewTypesByType[JMESPViewTypeImmovable].View;
+		bool includeImmovable;
+		if (m_IknowWhatIamDoing || m_ViewTypesByType[JMESPViewTypeImmovable].View)
+			includeImmovable = true;
 
 		for (int x = -numIterations; x < numIterations; x++)
 		{
@@ -762,7 +764,7 @@ class JMESPModule: JMRenderableModuleBase
 							if ( obj.IsTree() )
 								continue;
 
-							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) )
+							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) && !CommunityOnlineToolsBase.IsHypeTrain(obj) )
 								continue;
 						}
 
@@ -916,14 +918,14 @@ class JMESPModule: JMRenderableModuleBase
 			break;
 
 		// Car ESP
-		case JMESPModuleRPC.Car_Unstuck:
-			RPC_Car_Unstuck( ctx, sender, target );
+		case JMESPModuleRPC.Vehicle_Unstuck:
+			RPC_Vehicle_Unstuck( ctx, sender, target );
 			break;
-		case JMESPModuleRPC.Car_Refuel:
-			RPC_Car_Refuel( ctx, sender, target );
+		case JMESPModuleRPC.Vehicle_Refuel:
+			RPC_Vehicle_Refuel( ctx, sender, target );
 			break;
-		case JMESPModuleRPC.Car_Repair:
-			RPC_Car_Repair( ctx, sender, target );
+		case JMESPModuleRPC.Repair:
+			RPC_Repair( ctx, sender, target );
 			break;
 
 		case JMESPModuleRPC.MakeItemSet:
@@ -1072,6 +1074,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetHealth( float health, string zone, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( (target.IsInherited(Man) || target.IsInherited(DayZCreature)) && !target.IsAlive() )
+			return;
+
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
@@ -1260,19 +1265,19 @@ class JMESPModule: JMRenderableModuleBase
 	}
 
 	
-	void Car_Unstuck( Object target )
+	void Vehicle_Unstuck( Object target )
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_Car_Unstuck( target, NULL );
+			Exec_Vehicle_Unstuck( target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Unstuck, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
 		}
 	}
 
-	private void Exec_Car_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Vehicle_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		CarScript car;
 		if ( Class.CastTo( car, target ) )
@@ -1281,80 +1286,74 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
-		SendWebhook( "Car_Unstuck", instance, "Unstucked Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+		SendWebhook( "Vehicle_Unstuck", instance, "Unstuck " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
 	}
 
-	private void RPC_Car_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Vehicle_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
 			return;
 
-		Exec_Car_Unstuck( target, senderRPC, instance );
+		Exec_Vehicle_Unstuck( target, senderRPC, instance );
 	}
 
-	void Car_Refuel( Object target)
+	void Vehicle_Refuel( Object target)
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_Car_Refuel( target, NULL );
+			Exec_Vehicle_Refuel( target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Refuel, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
 		}
 	}
 
-	private void Exec_Car_Refuel( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Vehicle_Refuel( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
-		if ( Class.CastTo( car, target ) )
-			car.COT_Refuel();
+		CommunityOnlineToolsBase.Refuel(target);
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=refuel" );
-		SendWebhook( "Car_Refuel", instance, "Refuelled Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+		SendWebhook( "Vehicle_Refuel", instance, "Refuelled " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
 	}
 
-	private void RPC_Car_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Vehicle_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Refuel", senderRPC, instance ) )
 			return;
 
-		Transport vehi;
-		if ( Class.CastTo( vehi, target ) )
-			Exec_Car_Refuel( vehi, senderRPC, instance );
+		Exec_Vehicle_Refuel( target, senderRPC, instance );
 	}
 
-	void Car_Repair( Object target )
+	void Repair( Object target )
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_Car_Repair( target, NULL );
+			Exec_Repair( target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Car_Repair, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Repair, true, NULL );
 		}
 	}
 
-	private void Exec_Car_Repair( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Repair( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
-		if ( Class.CastTo( car, target ) )
-			car.COT_Repair();
+		CommunityOnlineToolsBase.HealEntityRecursive(target);
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair" );
-		SendWebhook( "Car_Repair", instance, "Repaired the Vehicle " + target.GetDisplayName() + " (" + target.GetType() + ")" );
+		SendWebhook( "Repair", instance, "Repaired " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
 	}
 
-	private void RPC_Car_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Repair", senderRPC, instance ) )
 			return;
 
-		Exec_Car_Repair( target, senderRPC, instance );
+		Exec_Repair( target, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )

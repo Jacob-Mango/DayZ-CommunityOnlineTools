@@ -1,5 +1,8 @@
 class CommunityOnlineToolsBase
 {
+	static string s_HypeTrain_Loco_ClsName = "HypeTrain_LocomotiveBase";
+	static typename s_HypeTrain_Loco_Type = s_HypeTrain_Loco_ClsName.ToType();
+
 	private bool m_Loaded;
 
 	private bool m_IsActive;
@@ -287,17 +290,52 @@ class CommunityOnlineToolsBase
 		}
 	}
 
-	static void HealEntityRecursive(EntityAI entity, bool includeAttachments = true, bool includeCargo = true)
+	static void HealEntityRecursive(Object obj, bool includeAttachments = true, bool includeCargo = true)
 	{
-		entity.SetFullHealth();
+		obj.SetFullHealth();
+
+		EntityAI entity;
+		if (!Class.CastTo(entity, obj) || !entity.GetInventory())
+			return;
 
 		int i;
 
 		if (includeAttachments)
 		{
-			for (i = 0; i < entity.GetInventory().AttachmentCount(); i++)
+			EntityAI attachment;
+			CarWheel_Ruined ruinedWheel;
+
+			for (i = entity.GetInventory().AttachmentCount() - 1; i >= 0; i--)
 			{
-				HealEntityRecursive(entity.GetInventory().GetAttachmentFromIndex(i), true, includeCargo);
+				attachment = entity.GetInventory().GetAttachmentFromIndex(i);
+				if (Class.CastTo(ruinedWheel, attachment))
+				{
+					string ruinedWheelType = ruinedWheel.GetType();
+					string newWheelType = ruinedWheelType.Substring(0, ruinedWheelType.Length() - 7);
+
+					if (GetGame().IsKindOf(newWheelType, "CarWheel"))
+					{
+						bool isLockedInSlot = false;
+						InventoryLocation wheelLocation = new InventoryLocation();
+						ruinedWheel.GetInventory().GetCurrentInventoryLocation(wheelLocation);
+						int slotId = wheelLocation.GetSlot();
+						if (entity.GetInventory().GetSlotLock(slotId))
+						{
+							isLockedInSlot = true;
+							entity.GetInventory().SetSlotLock(slotId, false);
+						}
+
+						GetGame().ObjectDelete(ruinedWheel);
+						entity.GetInventory().CreateAttachmentEx(newWheelType, slotId);
+
+						if (isLockedInSlot)
+							entity.GetInventory().SetSlotLock(slotId, true);
+					}
+				}
+				else
+				{
+					HealEntityRecursive(attachment, true, includeCargo);
+				}
 			}
 		}
 
@@ -311,6 +349,132 @@ class CommunityOnlineToolsBase
 					HealEntityRecursive(cargo.GetItem(i), includeAttachments, true);
 				}
 			}
+		}
+	}
+
+	static bool IsHypeTrain(Object obj)
+	{
+		if (s_HypeTrain_Loco_Type && obj.IsInherited(s_HypeTrain_Loco_Type))
+			return true;
+
+		return false;
+	}
+
+	static void OnDebugSpawn(EntityAI entity) 
+	{
+		if (entity.GetInventory() && entity.GetInventory().GetAttachmentSlotsCount() > 0)
+		{
+			//! First, try OnDebugSpawn
+			if (entity.IsInherited(CarScript) || entity.IsInherited(ItemBase))
+				entity.OnDebugSpawn();
+
+			//! If no atts were spawned, do it ourself (except for weapons, in that case, respect if their OnDebugSpawn doesn't spawn any atts)
+			if (!entity.GetInventory().AttachmentCount() && !entity.IsInherited(Weapon_Base))
+				SpawnCompatibleAttachments(entity);
+		}
+
+		Refuel(entity);
+	}
+
+	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, case-insensitive match of slot names)
+	static void SpawnCompatibleAttachments(EntityAI entity) 
+	{
+		TIntArray slot_ids = {};
+		int slot_id;
+
+		TStringArray atts = {};
+		entity.ConfigGetTextArray("attachments", atts);
+
+		foreach (string att: atts)
+		{
+			slot_id = InventorySlots.GetSlotIdFromString(att);
+			if (slot_id != InventorySlots.INVALID)
+			{
+				PrintFormat("Entity %1 has attachment slot %2 (ID %3)", entity.GetType(), att, slot_id);
+				slot_ids.Insert(slot_id);
+			}
+		}
+
+		/*
+		array<string> mags = {};
+		entity.ConfigGetTextArray("magazines", mags);
+
+		foreach (string mag: mags)
+		{
+			slot_id = InventorySlots.GetSlotIdFromString(mag);
+			if (slot_id != InventorySlots.INVALID)
+				slot_ids.Insert(slot_id);
+		}
+		*/
+
+		TStringArray all_paths = new TStringArray;
+
+		all_paths.Insert(CFG_VEHICLESPATH);
+		all_paths.Insert(CFG_MAGAZINESPATH);
+		all_paths.Insert(CFG_WEAPONSPATH);
+
+		string child_name;
+		int scope;
+		string path;
+		int idx;
+		EntityAI child;
+
+		foreach (string config_path: all_paths)
+		{
+			int children_count = GetGame().ConfigGetChildrenCount(config_path);
+
+			for (int i = 0; i < children_count; i++)
+			{
+				GetGame().ConfigGetChildName(config_path, i, child_name);
+				path = config_path + " " + child_name;
+				scope = GetGame().ConfigGetInt( config_path + " " + child_name + " scope" );
+
+				if (scope != 0)
+				{
+					TStringArray inv_slots = {};
+					GetGame().ConfigGetTextArray(config_path + " " + child_name + " inventorySlot", inv_slots);
+
+					foreach (string inv_slot: inv_slots)
+					{
+						slot_id = InventorySlots.GetSlotIdFromString(inv_slot);
+						if (slot_id != InventorySlots.INVALID)
+						{
+							idx = slot_ids.Find(slot_id);
+							if (idx > -1)
+							{
+								PrintFormat("Trying to spawn %1 on %2", child_name, entity.GetType());
+								child = entity.GetInventory().CreateAttachmentEx(child_name, slot_id);
+								if (child)
+								{
+									slot_ids.Remove(idx);
+									OnDebugSpawn(child);
+								}
+							}
+						}
+					}
+
+					if (slot_ids.Count() == 0)
+						break;
+				}
+			}
+
+			if (slot_ids.Count() == 0)
+				break;
+		}
+	}
+
+	static void Refuel(Object obj)
+	{
+		CarScript car;
+		if (Class.CastTo(car, obj))
+		{
+			car.COT_Refuel();
+		}
+		else if (IsHypeTrain(obj))
+		{
+			int fuelQuantityMax;
+			GetGame().GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
+			GetGame().GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
 		}
 	}
 };

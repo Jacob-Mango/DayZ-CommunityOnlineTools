@@ -136,49 +136,7 @@ modded class CarScript
 
 	void COT_Repair()
 	{
-		for ( int j = 0; j < GetInventory().AttachmentCount(); j++ )
-		{
-			ItemBase attachment = ItemBase.Cast(GetInventory().GetAttachmentFromIndex(j));
-			if ( attachment )
-			{
-				attachment.SetHealthMax("","");
-				if ( attachment.IsInherited(CarWheel_Ruined) )
-				{
-					string att_str = attachment.GetType();
-					string new_attachment = att_str.Substring(0, att_str.Length() - 7);
-
-					if ( GetGame().IsKindOf(new_attachment, "CarWheel") )
-					{
-						if ( attachment.IsLockedInSlot() )
-						{
-							attachment.UnlockFromParent();
-						}
-
-						ReplaceWheelLambda lambda = new ReplaceWheelLambda(attachment, new_attachment, null);
-						lambda.SetTransferParams(true, true, true);
-						GetInventory().ReplaceItemWithNew(InventoryMode.SERVER, lambda);
-					}
-				}
-
-				if ( attachment.IsInherited(CarDoor) )
-				{
-					array<string> att_dmgZones = new array<string>;
-					attachment.GetDamageZones(att_dmgZones);
-					foreach (string att_dmgZone: att_dmgZones)
-					{
-						attachment.SetHealthMax( att_dmgZone, "Health" );
-					}
-				}
-			}
-		}
-
-		array<string> dmgZones = new array<string>;
-		GetDamageZones(dmgZones);
-		foreach (string dmgZone: dmgZones)
-		{
-			SetHealthMax( dmgZone, "Health" );
-		}
-		SetHealthMax( "", "" );
+		CommunityOnlineToolsBase.HealEntityRecursive(this);
 	}
 
 	void COT_Refuel()
