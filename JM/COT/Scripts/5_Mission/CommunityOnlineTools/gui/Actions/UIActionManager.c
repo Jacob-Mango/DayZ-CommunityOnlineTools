@@ -128,8 +128,6 @@ class UIActionManager
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 
@@ -163,8 +161,6 @@ class UIActionManager
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 
@@ -224,8 +220,6 @@ class UIActionManager
 
 		if ( action )
 		{
-			action.Init( hasButton );
-
 			if ( hasButton )
 				action.SetButton( button );
 

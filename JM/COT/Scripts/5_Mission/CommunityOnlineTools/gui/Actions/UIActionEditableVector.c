@@ -9,6 +9,15 @@ class UIActionEditableVector: UIActionBase
 	override void OnInit() 
 	{
 		super.OnInit();
+
+		m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
+
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_TextX, layoutRoot.FindAnyWidget( "action_x" ) );
+		Class.CastTo( m_TextY, layoutRoot.FindAnyWidget( "action_y" ) );
+		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
+
+		SetValue( vector.Zero );
 	}
 
 	override void OnShow()
@@ -17,19 +26,6 @@ class UIActionEditableVector: UIActionBase
 
 	override void OnHide() 
 	{
-	}
-
-	void Init( bool hasButton )
-	{
-		if ( hasButton )
-			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
-
-		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
-		Class.CastTo( m_TextX, layoutRoot.FindAnyWidget( "action_x" ) );
-		Class.CastTo( m_TextY, layoutRoot.FindAnyWidget( "action_y" ) );
-		Class.CastTo( m_TextZ, layoutRoot.FindAnyWidget( "action_z" ) );
-
-		SetValue( vector.Zero );
 	}
 
 	override void SetLabel( string text )

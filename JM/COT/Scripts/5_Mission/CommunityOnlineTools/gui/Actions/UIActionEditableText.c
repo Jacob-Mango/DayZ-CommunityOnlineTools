@@ -5,6 +5,7 @@ class UIActionEditableText: UIActionBase
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
 	protected ButtonWidget m_Button;
+	protected TextWidget m_ButtonText;
 
 	protected bool m_OnlyNumbers;
 	protected bool m_OnlyIntegers;
@@ -18,6 +19,12 @@ class UIActionEditableText: UIActionBase
 		super.OnInit();
 
 		m_PreviousText = "";
+
+		Class.CastTo( m_Button, layoutRoot.FindAnyWidget( "action_button" ) );
+		Class.CastTo( m_ButtonText, layoutRoot.FindAnyWidget( "action_button_text" ) );
+
+		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
+		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void OnShow()
@@ -41,15 +48,6 @@ class UIActionEditableText: UIActionBase
 	ButtonWidget GetButtonWidget()
 	{
 		return m_Button;
-	}
-
-	void Init( bool hasButton )
-	{
-		if ( hasButton )
-			m_Button = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "action_button" ) );
-
-		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
-		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
 	}
 
 	override void SetLabel( string text )
@@ -188,7 +186,7 @@ class UIActionEditableText: UIActionBase
 	{
 		text = Widget.TranslateString( text );
 		
-		TextWidget.Cast( layoutRoot.FindAnyWidget( "action_button_text" ) ).SetText( text );
+		m_ButtonText.SetText( text );
 	}
 
 	override bool OnKeyPress( Widget w, int x, int y, int key )

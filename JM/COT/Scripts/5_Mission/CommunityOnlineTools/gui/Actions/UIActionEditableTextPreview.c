@@ -7,9 +7,9 @@ class UIActionEditableTextPreview: UIActionEditableText
 		return m_TextPreview;
 	}
 
-	override void Init( bool hasButton )
+	override void OnInit()
 	{
-		super.Init(hasButton);
+		super.OnInit();
 
 		Class.CastTo( m_TextPreview, layoutRoot.FindAnyWidget( "action_preview" ) );
 		m_TextPreview.SetText("");
