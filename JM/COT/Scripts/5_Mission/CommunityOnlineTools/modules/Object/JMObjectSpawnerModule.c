@@ -551,14 +551,17 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		if ( m_OnDebugSpawn && ( obj.IsKindOf("Weapon_Base") || obj.IsKindOf("CarScript") ) )
-			obj.OnDebugSpawn();
+		if ( m_OnDebugSpawn )
+			CommunityOnlineToolsBase.OnDebugSpawn(obj);
 
-		if ( health == -1 )
-			health = obj.GetMaxHealth();
+		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(obj.GetType()) > 0 )
+		{
+			if ( health == -1 )
+				health = obj.GetMaxHealth();
 
-		if ( health >= 0 )
-			obj.SetHealth( "", "", health );
+			if ( health >= 0 )
+				obj.SetHealth( "", "", health );
+		}
 	}
 
 	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
