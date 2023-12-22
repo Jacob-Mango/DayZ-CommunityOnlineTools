@@ -213,12 +213,67 @@ class JMVehicleMetaData
 	{
 		return m_DestructionType & JMDT_EXPLODED;
 	}
+
+	void SetDisplayName()
+	{
+		if (GetGame().ConfigIsExisting("cfgVehicles " + m_ClassName + " displayName"))
+			GetGame().ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
+		else
+			m_DisplayName = m_ClassName;
+	}
+
+	void Write( ParamsWriteContext ctx )
+	{
+		ctx.Write(m_NetworkIDLow);
+		ctx.Write(m_NetworkIDHigh);
+
+		ctx.Write(m_PersistentIDA);
+		ctx.Write(m_PersistentIDB);
+		ctx.Write(m_PersistentIDC);
+		ctx.Write(m_PersistentIDD);
+
+		ctx.Write(m_ClassName);
+		ctx.Write(m_Position);
+		ctx.Write(m_Orientation);
+
+		ctx.Write(m_VehicleType);
+		ctx.Write(m_DestructionType);
+
+		ctx.Write(m_HasKeys);
+		ctx.Write(m_IsCover);
+
+		ctx.Write(m_LastDriverUID);
+	}
+
+	bool Read( ParamsReadContext ctx )
+	{
+		if (!ctx.Read(m_NetworkIDLow)) return false;
+		if (!ctx.Read(m_NetworkIDHigh)) return false;
+
+		if (!ctx.Read(m_PersistentIDA)) return false;
+		if (!ctx.Read(m_PersistentIDB)) return false;
+		if (!ctx.Read(m_PersistentIDC)) return false;
+		if (!ctx.Read(m_PersistentIDD)) return false;
+
+		if (!ctx.Read(m_ClassName)) return false;
+		if (!ctx.Read(m_Position)) return false;
+		if (!ctx.Read(m_Orientation)) return false;
+
+		if (!ctx.Read(m_VehicleType)) return false;
+		if (!ctx.Read(m_DestructionType)) return false;
+
+		if (!ctx.Read(m_HasKeys)) return false;
+		if (!ctx.Read(m_IsCover)) return false;
+
+		if (!ctx.Read(m_LastDriverUID)) return false;
+
+		return true;
+	}
 };
 
 class JMVehiclesModule: JMRenderableModuleBase
 {
 	private ref array<ref JMVehicleMetaData> m_Vehicles;
-	private int m_TimeSinceLastChecked;
 
 	void JMVehiclesModule()
 	{
@@ -260,22 +315,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 		return false;
 	}
 
-	override void OnMissionLoaded()
-	{
-		super.OnMissionLoaded();
-	}
-
 	private void UpdateVehiclesMetaData()
 	{
-		if ( m_TimeSinceLastChecked + 500 > GetGame().GetTime() )
-			return;
-
-		m_TimeSinceLastChecked = GetGame().GetTime();
-
-		if ( m_Vehicles.Count() >= 0 )
+		if ( m_Vehicles.Count() > 0 )
 			m_Vehicles.Clear();
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -368,9 +411,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 		
 		UpdateVehiclesMetaData();
-		
+
 		auto rpc = new ScriptRPC();
-		rpc.Write( m_Vehicles );
+		rpc.Write( m_Vehicles.Count() );
+		foreach ( auto vehicle: m_Vehicles )
+		{
+			vehicle.Write( rpc );
+		}
 		rpc.Send( NULL, JMVehiclesModuleRPC.SendServerVehicles, true, senderRPC );
 	}
 
@@ -378,15 +425,31 @@ class JMVehiclesModule: JMRenderableModuleBase
 	{
 		if ( !IsMissionClient() )
 			return;
-		
-		ctx.Read( m_Vehicles );
 
-		foreach (auto vehicle: m_Vehicles)
+		int count;
+		if ( !ctx.Read( count ) )
 		{
-			if (GetGame().ConfigIsExisting("cfgVehicles " + vehicle.m_ClassName + " displayName"))
-				GetGame().ConfigGetText( "cfgVehicles " + vehicle.m_ClassName + " displayName", vehicle.m_DisplayName );
-			else
-				vehicle.m_DisplayName = vehicle.m_ClassName;
+			Error("Couldn't read vehicles count");
+			return;
+		}
+
+		m_Vehicles.Clear();
+
+		while ( count )
+		{
+			auto vehicle = new JMVehicleMetaData();
+
+			if ( !vehicle.Read( ctx ) )
+			{
+				Error("Couldn't read vehicle");
+				return;
+			}
+
+			vehicle.SetDisplayName();
+
+			m_Vehicles.Insert( vehicle );
+
+			count--;
 		}
 
 		JMVehiclesMenu form;
@@ -469,8 +532,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -514,8 +575,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
@@ -559,8 +618,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC ) )
 			return;
-
-		int i;
 		
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )

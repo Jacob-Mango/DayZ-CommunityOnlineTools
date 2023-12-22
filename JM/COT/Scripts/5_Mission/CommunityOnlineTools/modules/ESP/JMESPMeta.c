@@ -39,6 +39,7 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_Health;
 
 	UIActionButton m_Action_Delete;
+	UIActionButton m_RepairButton;
 
 	bool m_ActionsInitialized;
 
@@ -159,10 +160,16 @@ class JMESPMeta : Managed
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
-		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
-		m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetHealth", "", "Set" );
-		m_Action_Health.SetOnlyNumbers( true );
+			m_Action_Health = UIActionManager.CreateEditableText( parent, "Health: ", this, "Action_SetHealth", "", "Set" );
+			m_Action_Health.SetOnlyNumbers( true );
+
+			if ( !target.IsInherited(Man) && !target.IsInherited(DayZCreature) )
+				m_RepairButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_Repair" );
+		}
 
 		if ( CanDelete() )
 		{
@@ -194,7 +201,7 @@ class JMESPMeta : Managed
 		RefreshPosition();
 		RefreshOrientation();
 
-		if ( !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
+		if ( m_Action_Health && !m_Action_Health.IsFocused() ) m_Action_Health.SetText( "-1" );
 	}
 
 	void Update()
@@ -372,6 +379,14 @@ class JMESPMeta : Managed
 			module.DeleteObject( target );
 		else
 			module.DeleteObject( networkLow, networkHigh );
+	}
+
+	void Action_Repair( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Repair( target );
 	}
 };
 
@@ -578,7 +593,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		module.BaseBuilding_Dismantle( m_BaseBuilding, data.m_Name );
 	}
 
-	void Action_Repair( UIEvent eid, UIActionBase action )
+	override void Action_Repair( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -594,15 +609,14 @@ class JMESPMetaCar : JMESPMeta
 {
 	UIActionButton m_UnstuckButton;
 	UIActionButton m_RefuelButton;
-	UIActionButton m_RepairButton;
 
 	override void CreateActions( Widget parent )
 	{
 		super.CreateActions( parent );
 
-		m_UnstuckButton = UIActionManager.CreateButton( parent, "Unstuck", this, "Action_Unstuck" );
+		if (target.IsInherited(CarScript))
+			m_UnstuckButton = UIActionManager.CreateButton( parent, "Unstuck", this, "Action_Unstuck" );
 		m_RefuelButton  = UIActionManager.CreateButton( parent, "Refuel",  this, "Action_Refuel" );
-		m_RepairButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_CarRepair" );
 	}
 
 	void Action_Unstuck( UIEvent eid, UIActionBase action )
@@ -610,7 +624,7 @@ class JMESPMetaCar : JMESPMeta
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.Car_Unstuck( target );
+		module.Vehicle_Unstuck( target );
 	}
 
 	void Action_Refuel( UIEvent eid, UIActionBase action )
@@ -618,14 +632,6 @@ class JMESPMetaCar : JMESPMeta
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.Car_Refuel( target );
-	}
-
-	void Action_CarRepair( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		module.Car_Repair( target );
+		module.Vehicle_Refuel( target );
 	}
 };
