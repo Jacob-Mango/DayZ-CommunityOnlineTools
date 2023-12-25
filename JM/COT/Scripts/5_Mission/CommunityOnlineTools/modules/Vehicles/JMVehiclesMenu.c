@@ -276,24 +276,24 @@ class JMVehiclesMenu: JMFormBase
 
 		if ( w == m_DeleteAllButton )
 		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEALL_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleAll_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleAll" );
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_ALL", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleAll" );
 		}
 
 		if ( w == m_DeleteDestroyedButton )
 		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEDESTROYED_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleDestroyed_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleDestroyed" );
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_DESTROYED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleDestroyed" );
 		}
 
 		if ( w == m_DeleteUnclaimedButton )
 		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETEUNCLAIMED_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicleUnclaimed_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicleUnclaimed" );
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_UNCLAIMED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleUnclaimed" );
 		}
 
 		if ( w == m_DeleteVehicleButton )
 		{
 			if ( m_CurrentVehicle )
 			{
-				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_DELETE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_VEHICLE_DELETE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "DeleteVehicle_Cancel", "#STR_COT_GENERIC_CONFIRM", "DeleteVehicle" );
+				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_DELETE", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicle" );
 			}
 		}
 
@@ -308,18 +308,10 @@ class JMVehiclesMenu: JMFormBase
 		return false;
 	}
 
-	void DeleteVehicle_Cancel(JMConfirmation confirmation)
-	{
-	}
-
 	void DeleteVehicle(JMConfirmation confirmation)
 	{
 		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
 		BackToList();
-	}
-
-	void DeleteVehicleUnclaimed_Cancel(JMConfirmation confirmation)
-	{
 	}
 
 	void DeleteVehicleUnclaimed(JMConfirmation confirmation)
@@ -327,17 +319,9 @@ class JMVehiclesMenu: JMFormBase
 		m_Module.DeleteVehicleUnclaimed();
 	}
 
-	void DeleteVehicleDestroyed_Cancel(JMConfirmation confirmation)
-	{
-	}
-
 	void DeleteVehicleDestroyed(JMConfirmation confirmation)
 	{
 		m_Module.DeleteVehicleDestroyed();
-	}
-
-	void DeleteVehicleAll_Cancel(JMConfirmation confirmation)
-	{
 	}
 
 	void DeleteVehicleAll(JMConfirmation confirmation)
