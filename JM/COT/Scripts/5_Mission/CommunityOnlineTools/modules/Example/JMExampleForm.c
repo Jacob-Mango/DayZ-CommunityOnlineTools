@@ -196,17 +196,17 @@ class JMExampleForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Example.Button" ) )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure ?", "Kick Selected Player(s)", "#STR_COT_GENERIC_YES", "OnFunnyButtons_01", "#STR_COT_GENERIC_YES", "OnFunnyButtons_01" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "Kick Selected Player(s)", "#STR_COT_GENERIC_YES", "OnFunnyButtons_01", "#STR_COT_GENERIC_NO", "" );
 	}
 
 	void OnFunnyButtons_01()
 	{
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure ?", "It will kick you included", "#STR_COT_GENERIC_YES", "OnFunnyButtons_02", "#STR_COT_GENERIC_YES", "OnFunnyButtons_02" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "It will kick you included", "#STR_COT_GENERIC_YES", "OnFunnyButtons_02", "#STR_COT_GENERIC_NO", "" );
 	}
 
 	void OnFunnyButtons_02()
 	{
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Please think twice", "You cannot undo this action !", "#STR_COT_GENERIC_YES", "OnConfirmationButton", "#STR_COT_GENERIC_YES", "OnConfirmationButton" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Please think twice", "You cannot undo this action!", "#STR_COT_GENERIC_YES", "OnConfirmationButton", "#STR_COT_GENERIC_YES", "OnConfirmationButton" );
 	}
 
 	void OnConfirmationButton()
