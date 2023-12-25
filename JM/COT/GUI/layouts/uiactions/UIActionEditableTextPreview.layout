@@ -1,4 +1,4 @@
-PanelWidgetClass action_wrapper {
+PanelWidgetClass UIActionEditableTextPreview {
  size 1 30
  halign left_ref
  valign top_ref

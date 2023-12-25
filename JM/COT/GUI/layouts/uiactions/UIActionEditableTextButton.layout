@@ -1,4 +1,4 @@
-PanelWidgetClass action_wrapper {
+PanelWidgetClass UIActionEditableTextButton {
  size 1 30
  halign left_ref
  valign top_ref
