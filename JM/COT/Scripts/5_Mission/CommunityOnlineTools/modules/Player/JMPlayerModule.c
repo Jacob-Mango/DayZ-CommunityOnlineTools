@@ -1565,15 +1565,12 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if (!GetGame().IsServer())
 			return;
 
+		CF_Log.Info("%1::RPC_VONStartedTransmitting target %2", ToString(), target.ToString());
 		PlayerBase player;
-		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
 			return;
 
-		JMPlayerInstance instance;
-		if (!GetPermissionsManager().HasPermissions({"Admin.Player.Invisibility", "Admin.Player.Spectate", "Camera.View"}, senderRPC, instance, false))
-			return;
-
-		player.COTSetInvisibility(JMInvisibilityType.Interactive, false);
+		player.COTSetInvisibilityOnly(JMInvisibilityType.Interactive, false);
 	}
 
 	private void RPC_VONStoppedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1581,15 +1578,12 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if (!GetGame().IsServer())
 			return;
 
+		CF_Log.Info("%1::RPC_VONStoppedTransmitting target %2", ToString(), target.ToString());
 		PlayerBase player;
-		if (!Class.CastTo(player, target) || !player.COTIsInvisible())
+		if (!Class.CastTo(player, target) || !player.COTIsInvisible(JMInvisibilityType.Interactive))
 			return;
 
-		JMPlayerInstance instance;
-		if (!GetPermissionsManager().HasPermissions({"Admin.Player.Invisibility", "Admin.Player.Spectate", "Camera.View"}, senderRPC, instance, false))
-			return;
-
-		player.COTSetInvisibility(JMInvisibilityType.DisableSimulation, false);
+		player.COTSetInvisibilityOnly(JMInvisibilityType.DisableSimulation, false);
 	}
 
 	void SetRemoveCollision( bool value, array< string > guids )
