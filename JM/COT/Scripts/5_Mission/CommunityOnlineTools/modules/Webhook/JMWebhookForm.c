@@ -94,7 +94,6 @@ class JMWebhookForm: JMFormBase
 	{
 		m_CreatingURL = "";
 		m_CreatingName = "";
-		// do nothing
 	}
 
 	void Action_AddWebhook_SelectName( JMConfirmation confirmation )
@@ -127,7 +126,6 @@ class JMWebhookForm: JMFormBase
 	void Action_RemoveWebhook_Cancel( JMConfirmation confirmation )
 	{
 		m_RemovingName = "";
-		// do nothing
 	}
 
 	void Action_RemoveWebhook_Remove( JMConfirmation confirmation )

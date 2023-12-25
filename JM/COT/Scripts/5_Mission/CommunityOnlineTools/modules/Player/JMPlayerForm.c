@@ -693,11 +693,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "SendMessage_Cancel", "#STR_COT_GENERIC_CONFIRM", "SendMessage" );
-	}
-
-	void SendMessage_Cancel(JMConfirmation confirmation)
-	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "SendMessage" );
 	}
 
 	void SendMessage(JMConfirmation confirmation)
