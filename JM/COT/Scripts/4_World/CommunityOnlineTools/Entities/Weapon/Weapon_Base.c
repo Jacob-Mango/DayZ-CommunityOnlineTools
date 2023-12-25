@@ -86,7 +86,7 @@ modded class Weapon_Base
 		EntityAI magAI = GetInventory().CreateAttachment(magazineType);
 		if (!magAI)
 		{
-			ErrorEx(string.Format("Failed to create and attach %1 to %2", GetDebugName(magAI), this));
+			ErrorEx(string.Format("Failed to create and attach %1 to %2", magazineType, this));
 			return null;
 		}
 		
