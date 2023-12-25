@@ -1570,7 +1570,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if (!Class.CastTo(player, target) || !player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
 			return;
 
-		player.COTSetInvisibilityOnly(JMInvisibilityType.Interactive, false);
+		player.COTSetInvisibilityOnly(JMInvisibilityType.Interactive);
 	}
 
 	private void RPC_VONStoppedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1583,7 +1583,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if (!Class.CastTo(player, target) || !player.COTIsInvisible(JMInvisibilityType.Interactive))
 			return;
 
-		player.COTSetInvisibilityOnly(JMInvisibilityType.DisableSimulation, false);
+		player.COTSetInvisibilityOnly(JMInvisibilityType.DisableSimulation);
 	}
 
 	void SetRemoveCollision( bool value, array< string > guids )
