@@ -5,17 +5,55 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	string m_CurrentType;
 	string m_SearchText;
 
-	static ref array< string > m_RestrictiveBlacklistedClassnames =
+	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
+	private ref array< string > m_UnfinishedItems =
+	{
+		"quickiebow",
+		"recurvebow",
+		"gp25base",
+		"gp25",
+		"gp25_standalone",
+		"m203base",
+		"m203",
+		"m203_standalone",
+		"red9",
+		"pvcbow",
+		"crossbow",
+		"m249",
+		"undersluggrenadem4",
+		"groza",
+		"pm73rak",
+		"trumpet",
+		"lawbase",
+		"law",
+		"rpg7base",
+		"rpg7",
+		"dartgun",
+		"shockpistol",
+		"shockpistol_black",
+		"fnx45_arrow",
+		"makarovpb",
+		"mp133shotgun_pistolgrip",
+
+		"largetentbackpack",
+		"splint_applied",
+		"leatherbelt_natural",
+		"leatherbelt_beige",
+		"leatherbelt_brown",
+		"leatherbelt_black",
+		"leatherknifesheath"
+	};
+
+	private ref array< string > m_RestrictedClassNames =
 	{
 		"placing",
 		"debug",
 		"bldr_",
 		"land_",
-		"staticobj_",
-		"proxy"
+		"staticobj_"
 	};
 
-	static bool m_IknowWhatIamDoing;
+	bool m_AllowRestrictedClassNames;
 
 	void JMObjectSpawnerModule()
 	{
@@ -176,14 +214,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					continue;
 				}
 
-				if ( !m_IknowWhatIamDoing )
+				if ( !m_AllowRestrictedClassNames )
 				{
 					if (resultObj.ConfigGetInt("scope") != 2)
 						continue;
 
 					bool blacklisted = false;
 
-					foreach (string blacklistedName: m_RestrictiveBlacklistedClassnames)
+					foreach (string blacklistedName: m_RestrictedClassNames)
 					{
 						if ( name.Contains(blacklistedName) )
 						{
@@ -516,10 +554,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SetupEntity( EntityAI obj, out float quantity, out float health, out int itemState )
+	private void SetupEntity( EntityAI entity, out float quantity, out float health, out int itemState )
 	{
 		ItemBase item;
-		if ( Class.CastTo( item, obj ) )
+		if ( Class.CastTo( item, entity ) )
 		{
 			Magazine mag;
 			if (Class.CastTo(mag, item))
@@ -552,16 +590,177 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		if ( m_OnDebugSpawn )
-			CommunityOnlineToolsBase.OnDebugSpawn(obj);
+		{
+			OnDebugSpawn(entity);
 
-		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(obj.GetType()) > 0 )
+			CommunityOnlineToolsBase.Refuel(entity);
+		}
+
+		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType()) > 0 )
 		{
 			if ( health == -1 )
-				health = obj.GetMaxHealth();
+				health = entity.GetMaxHealth();
 
 			if ( health >= 0 )
-				obj.SetHealth( "", "", health );
+				entity.SetHealth( "", "", health );
 		}
+	}
+
+	bool IsExcludedClassName( string className )
+	{
+		if ( m_UnfinishedItems.Find( className ) > -1 )
+		{
+			return true;
+		}
+
+		if ( !m_AllowRestrictedClassNames )
+		{
+			foreach ( string restrictedClassName: m_RestrictedClassNames )
+			{
+				if ( className.Contains( restrictedClassName ) )
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	void OnDebugSpawn(EntityAI entity, int depth = 3) 
+	{
+		//! Avoid calling EntityAI::OnDebugSpawn
+		if (entity.IsInherited(CarScript) || entity.IsInherited(Weapon_Base))
+			entity.OnDebugSpawn();
+
+		if (!entity.GetInventory())
+			return;
+
+		if (!entity.GetInventory().GetAttachmentSlotsCount())
+			return;
+
+		if (entity.GetInventory().AttachmentCount())
+			return;
+
+		if (entity.IsInherited(DayZCreature)  || entity.IsInherited(TentBase) || entity.IsInherited(Weapon_Base))
+			return;
+
+		//! If no atts were spawned, do it ourself (except for creatures, tents & weapons)
+		SpawnCompatibleAttachments(entity, depth);
+	}
+
+	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, use slot IDs instead of case-sensitive match of slot names, filter bad items)
+	void SpawnCompatibleAttachments(EntityAI entity, int depth = 3) 
+	{
+		TIntArray slot_ids = {};
+		int slot_id;
+
+		TStringArray atts = {};
+		entity.ConfigGetTextArray("attachments", atts);
+
+		foreach (string att: atts)
+		{
+			slot_id = InventorySlots.GetSlotIdFromString(att);
+			if (slot_id != InventorySlots.INVALID && InventorySlots.GetShowForSlotId(slot_id))
+			{
+				CF_Log.Info("Entity %1 has visible attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
+				slot_ids.Insert(slot_id);
+			}
+		}
+
+		/*
+		array<string> mags = {};
+		entity.ConfigGetTextArray("magazines", mags);
+
+		foreach (string mag: mags)
+		{
+			slot_id = InventorySlots.GetSlotIdFromString(mag);
+			if (slot_id != InventorySlots.INVALID)
+				slot_ids.Insert(slot_id);
+		}
+		*/
+
+		TStringArray all_paths = new TStringArray;
+
+		all_paths.Insert(CFG_VEHICLESPATH);
+		all_paths.Insert(CFG_MAGAZINESPATH);
+		all_paths.Insert(CFG_WEAPONSPATH);
+
+		string child_name;
+		int scope;
+		string path;
+		string model;
+		int idx;
+		EntityAI child;
+
+		foreach (string config_path: all_paths)
+		{
+			int children_count = GetGame().ConfigGetChildrenCount(config_path);
+
+			for (int i = 0; i < children_count; i++)
+			{
+				GetGame().ConfigGetChildName(config_path, i, child_name);
+				path = config_path + " " + child_name;
+				scope = GetGame().ConfigGetInt(path + " scope");
+
+				if (scope == 2)
+				{
+					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty)
+						continue;
+
+					TStringArray inv_slots = {};
+					GetGame().ConfigGetTextArray(path + " inventorySlot", inv_slots);
+
+					foreach (string inv_slot: inv_slots)
+					{
+						slot_id = InventorySlots.GetSlotIdFromString(inv_slot);
+						if (slot_id != InventorySlots.INVALID)
+						{
+							idx = slot_ids.Find(slot_id);
+							if (idx > -1)
+							{
+								//if (!IsInventoryBase(path))
+									//break;
+
+								child_name.ToLower();
+								if (IsExcludedClassName(child_name))
+									break;
+
+								CF_Log.Info("Trying to spawn %1 on %2", child_name, entity.GetType());
+								child = entity.GetInventory().CreateAttachmentEx(child_name, slot_id);
+								if (child)
+								{
+									slot_ids.Remove(idx);
+									if (depth > 0)
+										OnDebugSpawn(child, depth - 1);
+									if (slot_ids.Count() == 0)
+										return;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	bool IsInventoryBase( string path )
+	{
+		TStringArray full_path = new TStringArray;
+		
+		GetGame().ConfigGetFullPath(path, full_path);
+		
+		string cfg_parent_name = "inventory_base";
+		foreach (string tmp: full_path)
+		{
+			tmp.ToLower();
+			if (tmp == cfg_parent_name)
+			{
+				return true;
+			}
+		}
+	
+		return false;
 	}
 
 	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)

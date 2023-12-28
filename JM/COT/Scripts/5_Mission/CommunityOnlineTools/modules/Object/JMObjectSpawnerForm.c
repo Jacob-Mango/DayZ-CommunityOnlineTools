@@ -1,7 +1,6 @@
 class JMObjectSpawnerForm: JMFormBase
 {
 	private autoptr map< string, string > m_ObjectTypes;
-	private string m_CurrentType;
 
 	private Widget m_TypesActionsWrapper;
 	private Widget m_SpawnerActionsWrapper;
@@ -63,48 +62,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private int m_ItemStateType = -1;
 	private int m_LiquidType;
-
-	private static ref array< string > m_ItemsThatCrash =
-	{
-		"quickiebow",
-		"recurvebow",
-		"gp25base",
-		"gp25",
-		"gp25_standalone",
-		"m203base",
-		"m203",
-		"m203_standalone",
-		"red9",
-		"pvcbow",
-		"crossbow",
-		"m249",
-		"undersluggrenadem4",
-		"groza",
-		"pm73rak",
-		"trumpet",
-		"lawbase",
-		"law",
-		"rpg7base",
-		"rpg7",
-		"dartgun",
-		"shockpistol",
-		"shockpistol_black",
-		"fnx45_arrow",
-		"makarovpb",
-		"mp133shotgun_pistolgrip",
-
-		"largetentbackpack",
-		"splint_applied",
-		"leatherbelt_natural",
-		"leatherbelt_beige",
-		"leatherbelt_brown",
-		"leatherbelt_black",
-		"leatherknifeshealth",
-
-		"itemoptics",
-		"itemoptics_base",
-		"fx"
-	};
 
 	void JMObjectSpawnerForm()
 	{
@@ -231,15 +188,11 @@ class JMObjectSpawnerForm: JMFormBase
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
 
 		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", m_Module.m_OnDebugSpawn );
-		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_IknowWhatIamDoing );
+		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_AllowRestrictedClassNames );
 		UIActionManager.CreatePanel( spawnOptions );
 
-		if ( m_Module )
-		{
-			m_CurrentType = m_Module.m_CurrentType;
-			m_SearchBox.SetText(m_Module.m_SearchText);
-			UpdateList();
-		}
+		m_SearchBox.SetText(m_Module.m_SearchText);
+		UpdateList();
 
 		UpdateItemPreview();
 	}
@@ -393,7 +346,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_Module.m_IknowWhatIamDoing = action.IsChecked();
+		m_Module.m_AllowRestrictedClassNames = action.IsChecked();
 		UpdateList();
 	}
 
@@ -628,17 +581,8 @@ class JMObjectSpawnerForm: JMFormBase
 		return false;
 	}
 
-	override void OnShow()
-	{
-		super.OnShow();
-
-		UpdateList();
-		UpdateItemPreview();
-	}
-
 	override void OnHide() 
 	{
-		m_Module.m_CurrentType = m_CurrentType;
 		if (m_SearchBox)
 			m_Module.m_SearchText = m_SearchBox.GetText();
 
@@ -649,7 +593,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 
-		m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
+		m_Module.m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
 
 		UpdateList();
 	}
@@ -827,7 +771,6 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_VEHICLESPATH );
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
-		configs.Insert( CFG_NONAI_VEHICLES );
 
 		string strSearch = m_SearchBox.GetText();
 
@@ -853,19 +796,20 @@ class JMObjectSpawnerForm: JMFormBase
 				if ( scope == 0 )
 					continue;
 
-				if ( scope == 1 && !m_Module.m_IknowWhatIamDoing )
+				if ( scope == 1 && !m_Module.m_AllowRestrictedClassNames )
 					continue;
 
-				if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+				string model;
+				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty)
 					continue;
 
 				string strNameLower = strName;
 
 				strNameLower.ToLower();
 
-				if ( m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_CurrentType ) )
+				if ( m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
-					if ( CheckItemCrash( strNameLower ) ) 
+					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
 						continue; 
 
 					if ( strSearch != "" )
@@ -898,27 +842,6 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		m_SearchBox.SetTextPreview(closestMatch);
-	}
-
-	private bool CheckItemCrash( string name )
-	{
-		if ( m_ItemsThatCrash.Find( name ) > -1 )
-		{
-			return true;
-		}
-
-		if ( !m_Module.m_IknowWhatIamDoing )
-		{
-			for ( int i = 0; i < m_Module.m_RestrictiveBlacklistedClassnames.Count(); ++i )
-			{
-				if ( name.Contains( m_Module.m_RestrictiveBlacklistedClassnames[i] ) )
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	string GetCurrentSelection()
