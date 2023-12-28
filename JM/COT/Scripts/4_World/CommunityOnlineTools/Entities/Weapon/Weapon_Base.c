@@ -30,10 +30,16 @@ modded class Weapon_Base
 		}
 	}
 
-	TStringArray COTGetMagazineTypesValidated(string name = "magazines")
+	TStringArray COTGetMagazineTypesValidated(string name = "magazines", int muzzleIndex = 0)
 	{
+		TStringArray muzzles = {};
+		ConfigGetTextArray("muzzles", muzzles);
+
+		if (muzzleIndex > 0 && muzzleIndex < muzzles.Count())
+			name = muzzles[muzzleIndex] + " " + name;
+
 		auto magazines = new TStringArray;
-		ConfigGetTextArray(name, magazines);
+		GetGame().ConfigGetTextArray(CFG_WEAPONSPATH + " " + GetType() + " " + name, magazines);
 		auto magazinesValidated = new TStringArray;
 		foreach (string magazine: magazines)
 		{
@@ -45,7 +51,7 @@ modded class Weapon_Base
 
 	string COTGetMaxMagazineTypeName(int muzzleIndex)
 	{
-		auto magazines = COTGetMagazineTypesValidated();
+		auto magazines = COTGetMagazineTypesValidated("magazines", muzzleIndex);
 		int max;
 		string magazineType;
 		foreach (string magazine: magazines)
@@ -58,6 +64,27 @@ modded class Weapon_Base
 			}
 		}
 		return magazineType;
+	}
+
+	string COTGetRandomChamberableAmmoTypeName(int muzzleIndex)
+	{
+		TStringArray chamberableFrom = COTGetMagazineTypesValidated("chamberableFrom", muzzleIndex);
+		string ammoType = chamberableFrom.GetRandomElement();
+		
+		// Make sure the given ammoType is actually useable
+		if (ammoType != "")
+		{
+			//! Ammo_XXX -> Bullet_XXX
+			if (!AmmoTypesAPI.MagazineTypeToAmmoType(ammoType, ammoType))
+			{
+				CF_Log.Info("%1::COTGetRandomChamberableAmmoTypeName - ammo type isn't usable %2", ToString(), ammoType);
+				return "";
+			}
+
+			CF_Log.Info("%1::COTGetRandomChamberableAmmoTypeName - cartridge type %2", ToString(), ammoType);
+		}
+
+		return ammoType;
 	}
 
 	//! @note this is a verbatim copy of the vanilla SpawnAttachedMagazine EXCEPT it doesn't use the vanilla GetMaxMagazineTypeName/GetRandomMagazineTypeName
@@ -118,15 +145,23 @@ modded class Weapon_Base
 	//! because that CTDs if there are entries in `chamberableFrom[]` whose rvConfig classes don't actually exist
 	override bool FillInnerMagazine( string ammoType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
 	{
+		CF_Log.Info("%1::FillInnerMagazine(\"%2\", %3)", ToString(), ammoType, flags.ToString());
+	
 		// Don't try to fill it when there are none
 		if (!HasInternalMagazine(-1))
+		{
+			CF_Log.Info("%1::FillInnerMagazine - doesn't have internal mag", ToString());
 			return false;
-	
+		}
+
 		// Make sure the given ammoType is actually useable
 		if (ammoType != "")
 		{
 			if (!AmmoTypesAPI.MagazineTypeToAmmoType(ammoType, ammoType))
+			{
+				CF_Log.Info("%1::FillInnerMagazine - ammo type isn't usable", ToString());
 				return false;
+			}
 		}
 		
 		
@@ -138,8 +173,12 @@ modded class Weapon_Base
 		
 		// No full RNG flag, so pick one random and use only this one
 		if (ammoRng && !ammoFullRng)
-			ammoType = COTGetMagazineTypesValidated("chamberableFrom").GetRandomElement();
-		
+		{
+			ammoType = COTGetRandomChamberableAmmoTypeName(0);
+
+			CF_Log.Info("%1::FillInnerMagazine - selected random ammo type %2", ToString(), ammoType);
+		}
+
 		// Fill the internal magazine
 		for (int i = 0; i < muzzCount; ++i)
 		{
@@ -157,7 +196,11 @@ modded class Weapon_Base
 				{
 					// Full random, decide a new one for every cartridge
 					if ( ammoFullRng )
-						ammoType = COTGetMagazineTypesValidated("chamberableFrom").GetRandomElement();
+					{
+						ammoType = COTGetRandomChamberableAmmoTypeName(i);
+
+						CF_Log.Info("%1::FillInnerMagazine - selected random ammo type %2", ToString(), ammoType);
+					}
 					
 					if (!ammoType)
 						continue;
@@ -174,6 +217,8 @@ modded class Weapon_Base
 		{
 			didSomething = true;
 		}
+
+		CF_Log.Info("%1::FillInnerMagazine - did something? %2", ToString(), didSomething.ToString());
 		
 		// Does not need any FSM fixing, FSM does not care about inner magazines
 		
@@ -184,6 +229,8 @@ modded class Weapon_Base
 	//! because that CTDs if there are entries in `chamberableFrom[]` whose rvConfig classes don't actually exist
 	override bool FillChamber( string ammoType = "", int flags = WeaponWithAmmoFlags.CHAMBER )
 	{
+		CF_Log.Info("%1::FillChamber(\"%2\", %3)", ToString(), ammoType, flags.ToString());
+	
 		// Quickly check if there are any chambers we can fill
 		int muzzCount = GetMuzzleCount();
 		bool anyEmpty = false;
@@ -197,13 +244,22 @@ modded class Weapon_Base
 			}
 		}
 
+		CF_Log.Info("%1::FillChamber - any chamber empty? %2", ToString(), anyEmpty.ToString());
+
 		if (!anyEmpty)
 			return false;
 		
 		// Make sure the given ammoType is actually useable
 		if (ammoType != "")
+		{
 			if (!AmmoTypesAPI.MagazineTypeToAmmoType(ammoType, ammoType))
+			{
+				CF_Log.Info("%1::FillChamber - ammo type isn't usable", ToString());
 				return false;
+			}
+
+			CF_Log.Info("%1::FillChamber - cartridge type %2", ToString(), ammoType);
+		}
 		
 		// Just so we don't '&' wastefully in a loop
 		bool didSomething = false;		
@@ -224,7 +280,11 @@ modded class Weapon_Base
 			
 			// No full RNG flag, so pick one random and use only this one
 			if (chamberAmmoRng && !chamberAmmoFullRng)
-				ammoType = COTGetMagazineTypesValidated("chamberableFrom").GetRandomElement();
+			{
+				ammoType = COTGetRandomChamberableAmmoTypeName(0);
+
+				CF_Log.Info("%1::FillChamber - selected random ammo type %2", ToString(), ammoType);
+			}
 			
 			for (int i = 0; i < muzzCount; ++i)
 			{
@@ -241,7 +301,11 @@ modded class Weapon_Base
 				{
 					// Full random, decide a new one for every muzzle
 					if ( chamberAmmoFullRng )
-						ammoType = COTGetMagazineTypesValidated("chamberableFrom").GetRandomElement();
+					{
+						ammoType = COTGetRandomChamberableAmmoTypeName(i);
+
+						CF_Log.Info("%1::FillChamber - selected random ammo type %2", ToString(), ammoType);
+					}
 					
 					if (!ammoType)
 						continue;
@@ -257,6 +321,8 @@ modded class Weapon_Base
 				}
 			}
 		}
+
+		CF_Log.Info("%1::FillChamber - did something? %2", ToString(), didSomething.ToString());
 		
 		// Only fix the FSM and Synchronize when absolutely needed
 		if (!didSomething)
