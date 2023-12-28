@@ -32,14 +32,6 @@ modded class Weapon_Base
 		}
 	}
 
-	override bool SpawnAmmo(string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER)
-	{
-		if (super.SpawnAmmo(magazineType, flags))
-			m_COT_AmmoSpawned = true;
-
-		return m_COT_AmmoSpawned;
-	}
-
 	TStringArray COTGetMagazineTypesValidated(string name = "magazines", int muzzleIndex = 0)
 	{
 		TStringArray muzzles = {};
@@ -341,7 +333,9 @@ modded class Weapon_Base
 		// FSM cares about chamber state
 		RandomizeFSMState();		
 		Synchronize();
-		
+
+		m_COT_AmmoSpawned = true;
+
 		return true;
 	}
 
