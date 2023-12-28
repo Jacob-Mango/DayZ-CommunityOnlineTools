@@ -30,6 +30,11 @@ modded class CarScript
 		return true;
 	}
 
+	//! Prevent calling vanilla EntityAI::OnDebugSpawn
+	override void OnDebugSpawn()
+	{
+	}
+
 	void COT_ForcePositionAndOrientation(vector position, vector orientation)
 	{
 		if (dBodyIsActive(this))
