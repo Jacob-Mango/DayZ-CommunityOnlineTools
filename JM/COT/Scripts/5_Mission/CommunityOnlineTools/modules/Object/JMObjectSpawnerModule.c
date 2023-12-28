@@ -629,8 +629,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void OnDebugSpawn(EntityAI entity, int depth = 3) 
 	{
-		//! Avoid calling EntityAI::OnDebugSpawn
-		if (entity.IsInherited(CarScript) || entity.IsInherited(Weapon_Base))
+		if (entity.IsInherited(CarScript) || entity.IsInherited(ItemBase) || entity.IsInherited(BuildingBase))
 			entity.OnDebugSpawn();
 
 		if (!entity.GetInventory())
@@ -668,22 +667,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		/*
-		array<string> mags = {};
-		entity.ConfigGetTextArray("magazines", mags);
-
-		foreach (string mag: mags)
-		{
-			slot_id = InventorySlots.GetSlotIdFromString(mag);
-			if (slot_id != InventorySlots.INVALID)
-				slot_ids.Insert(slot_id);
-		}
-		*/
-
 		TStringArray all_paths = new TStringArray;
 
 		all_paths.Insert(CFG_VEHICLESPATH);
-		all_paths.Insert(CFG_MAGAZINESPATH);
 		all_paths.Insert(CFG_WEAPONSPATH);
 
 		string child_name;
