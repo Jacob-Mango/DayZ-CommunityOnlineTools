@@ -629,7 +629,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void OnDebugSpawn(EntityAI entity, int depth = 3) 
 	{
-		if (entity.IsInherited(CarScript) || entity.IsInherited(ItemBase) || entity.IsInherited(BuildingBase))
+		ItemBase item;
+		CarScript vehicle;
+
+		if (Class.CastTo(item, entity)
+			item.COT_OnDebugSpawn();
+		else if (Class.CastTo(vehicle, entity)
+			vehicle.COT_OnDebugSpawn();
+		else if (entity.IsInherited(BuildingBase))
 			entity.OnDebugSpawn();
 
 		if (!entity.GetInventory())

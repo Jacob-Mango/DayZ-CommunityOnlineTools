@@ -1,5 +1,7 @@
 modded class Weapon_Base
 {
+	protected bool m_COT_AmmoSpawned;
+
 	override void EEFired( int muzzleType, int mode, string ammoType )
 	{
 		super.EEFired( muzzleType, mode, ammoType );
@@ -28,6 +30,14 @@ modded class Weapon_Base
 				}
 			}
 		}
+	}
+
+	override bool SpawnAmmo(string magazineType = "", int flags = WeaponWithAmmoFlags.CHAMBER)
+	{
+		if (super.SpawnAmmo(magazineType, flags))
+			m_COT_AmmoSpawned = true;
+
+		return m_COT_AmmoSpawned;
 	}
 
 	TStringArray COTGetMagazineTypesValidated(string name = "magazines", int muzzleIndex = 0)
@@ -333,5 +343,13 @@ modded class Weapon_Base
 		Synchronize();
 		
 		return true;
+	}
+
+	override void COT_OnDebugSpawn()
+	{
+		super.COT_OnDebugSpawn();
+
+		if (!m_COT_AmmoSpawned)
+			SpawnAmmo();
 	}
 };
