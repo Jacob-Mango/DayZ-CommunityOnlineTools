@@ -31,5 +31,10 @@ modded class ItemBase
 	override void OnDebugSpawn()
 	{
 	}
+
+	void COT_OnDebugSpawn()
+	{
+		OnDebugSpawn();
+	}
 };
 

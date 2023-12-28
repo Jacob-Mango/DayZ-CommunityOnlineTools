@@ -35,6 +35,21 @@ modded class CarScript
 	{
 	}
 
+	void COT_OnDebugSpawn()
+	{
+		OnDebugSpawn();
+
+		COT_Refuel();
+	}
+
+	void COT_FillCarFluid(CarFluid fluid)
+	{
+		float fluidCap = GetFluidCapacity(fluid);
+		float fluidFraction = GetFluidFraction(fluid);
+		if (fluidCap > 0.0 && fluidFraction < 1.0)
+			Fill(fluid, fluidCap * (1.0 - fluidFraction));
+	}
+
 	void COT_ForcePositionAndOrientation(vector position, vector orientation)
 	{
 		if (dBodyIsActive(this))
@@ -146,10 +161,10 @@ modded class CarScript
 
 	void COT_Refuel()
 	{
-		Fill( CarFluid.FUEL, GetFluidCapacity( CarFluid.FUEL ) );
-		Fill( CarFluid.OIL, GetFluidCapacity( CarFluid.OIL ) );
-		Fill( CarFluid.BRAKE, GetFluidCapacity( CarFluid.BRAKE ) );
-		Fill( CarFluid.COOLANT, GetFluidCapacity( CarFluid.COOLANT ) );
+		COT_FillCarFluid( CarFluid.FUEL );
+		COT_FillCarFluid( CarFluid.OIL );
+		COT_FillCarFluid( CarFluid.BRAKE );
+		COT_FillCarFluid( CarFluid.COOLANT );
 	}
 };
 
