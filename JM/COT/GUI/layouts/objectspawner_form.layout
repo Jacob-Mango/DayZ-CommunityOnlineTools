@@ -43,7 +43,7 @@ PanelWidgetClass JMObjectSpawnerForm {
       }
       ItemPreviewWidgetClass object_preview {
        visible 0
-       clipchildren 0
+       clipchildren 1
        ignorepointer 0
        position 0.7 0
        size 0.3 1
