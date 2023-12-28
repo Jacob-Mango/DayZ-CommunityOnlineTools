@@ -350,6 +350,6 @@ modded class Weapon_Base
 		super.COT_OnDebugSpawn();
 
 		if (!m_COT_AmmoSpawned)
-			SpawnAmmo();
+			SpawnAmmo("", SAMF_DEFAULT);
 	}
 };
