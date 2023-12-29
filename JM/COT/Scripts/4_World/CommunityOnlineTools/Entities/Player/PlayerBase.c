@@ -17,6 +17,7 @@ modded class PlayerBase
 	private int m_JMIsInvisible;
 	private int m_JMIsInvisibleRemoteSynch;
 	private int m_COT_Invisibility_Preference;
+	protected ref Timer m_COT_InvisibilityUpdateTimer;
 	private bool m_COT_WasSpeaking;
 
 	private bool m_JMIsFrozen;
@@ -139,32 +140,17 @@ modded class PlayerBase
 		{
 			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
 
-			//! @note Not a controlled player = this player object on other clients
-			//! @note WARNING: Do NOT use Camera.GetCurrentCamera() after leaving spectator cam, crashes game
-			JMSpectatorCamera spectatorCam;
-			if ((!IsControlledPlayer() || Class.CastTo(spectatorCam, CurrentActiveCamera)) && m_JMIsInvisible == JMInvisibilityType.DisableSimulation)
-			{
-				if (PhysicsIsSolid())
-				{
-					//! Set physics non-solid so there is no blocking "ghost"
-					//! Needed on client because of disabling simulation (below),
-					//! setting on server is not enough in this specific case
-					PhysicsSetSolid(false);
-				}
-
-				if (!GetIsSimulationDisabled())
-				{
-					//! Disable simulation to disable position update on client, footstep sounds, etc.
-					DisableSimulation(true);
-				}
-			}
-			else if (GetIsSimulationDisabled())
-			{
-				DisableSimulation(false);
-				Update();
-			}
+			COTUpdateInvisibility();
 
 			SetInvisible( m_JMIsInvisible );
+
+			if (!m_COT_InvisibilityUpdateTimer)
+				m_COT_InvisibilityUpdateTimer = new Timer(CALL_CATEGORY_GUI);
+
+			if (m_JMIsInvisible && !m_COT_InvisibilityUpdateTimer.IsRunning())
+				m_COT_InvisibilityUpdateTimer.Run(0.1, this, "COTUpdateInvisibility", NULL, true);
+			else if (!m_JMIsInvisible && m_COT_InvisibilityUpdateTimer.IsRunning())
+				m_COT_InvisibilityUpdateTimer.Stop();
 		}
 
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
@@ -174,6 +160,34 @@ modded class PlayerBase
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
+		}
+	}
+
+	protected void COTUpdateInvisibility()
+	{
+		//! @note Not a controlled player = this player object on other clients
+		//! @note WARNING: Do NOT use Camera.GetCurrentCamera() after leaving spectator cam, crashes game
+		JMSpectatorCamera spectatorCam;
+		if (m_JMIsInvisible == JMInvisibilityType.DisableSimulation && ((!Class.CastTo(spectatorCam, CurrentActiveCamera) && !IsControlledPlayer()) || (spectatorCam && spectatorCam.SelectedTarget != this)))
+		{
+			if (PhysicsIsSolid())
+			{
+				//! Set physics non-solid so there is no blocking "ghost"
+				//! Needed on client because of disabling simulation (below),
+				//! setting on server is not enough in this specific case
+				PhysicsSetSolid(false);
+			}
+
+			if (!GetIsSimulationDisabled())
+			{
+				//! Disable simulation to disable position update on client, footstep sounds, etc.
+				DisableSimulation(true);
+			}
+		}
+		else if (GetIsSimulationDisabled() && IsAlive())
+		{
+			DisableSimulation(false);
+			Update();
 		}
 	}
 
@@ -414,21 +428,26 @@ modded class PlayerBase
 			if (preference)
 				m_COT_Invisibility_Preference = mode;
 
-			if (m_JMIsInvisible != mode)
-			{
-				m_JMIsInvisible = mode;
-				m_JMIsInvisibleRemoteSynch = mode;
-
-				#ifdef SERVER
-				SetSynchDirty();
-				#endif
-			}
+			COTSetInvisibilityOnly(mode);
 
 			if (mode || preference || !m_COT_RemoveCollision_Preference)
 				COTSetRemoveCollision(mode, preference);
 
 			if (mode || preference || !m_COT_CannotBeTargetedByAI_Preference)
 				COTSetCannotBeTargetedByAI(mode, preference);
+		}
+	}
+
+	void COTSetInvisibilityOnly(int mode)
+	{
+		if (m_JMIsInvisible != mode)
+		{
+			m_JMIsInvisible = mode;
+			m_JMIsInvisibleRemoteSynch = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
 		}
 	}
 

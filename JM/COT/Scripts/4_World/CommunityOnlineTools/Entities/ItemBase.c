@@ -26,5 +26,15 @@ modded class ItemBase
 
 		super.OnEnergyConsumed();
 	}
+
+	//! Prevent calling vanilla EntityAI::OnDebugSpawn
+	override void OnDebugSpawn()
+	{
+	}
+
+	void COT_OnDebugSpawn()
+	{
+		OnDebugSpawn();
+	}
 };
 
