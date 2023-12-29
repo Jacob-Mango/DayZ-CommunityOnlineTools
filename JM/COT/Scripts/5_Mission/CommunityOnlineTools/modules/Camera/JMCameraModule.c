@@ -304,10 +304,9 @@ class JMCameraModule: JMRenderableModuleBase
 			CurrentActiveCamera.SetActive( true );
 			
 			if ( GetGame().GetPlayer() )
-			{
 				GetGame().GetPlayer().GetInputController().SetDisabled( true );
-			}
-		} else 
+		}
+		else 
 		{
 			GetGame().SelectPlayer( sender, NULL );
 

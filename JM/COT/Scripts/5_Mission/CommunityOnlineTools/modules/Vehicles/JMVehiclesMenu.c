@@ -276,28 +276,27 @@ class JMVehiclesMenu: JMFormBase
 
 		if ( w == m_DeleteAllButton )
 		{
-			m_Module.DeleteVehicleAll();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_ALL", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleAll" );
 		}
 
 		if ( w == m_DeleteDestroyedButton )
 		{
-			m_Module.DeleteVehicleDestroyed();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_DESTROYED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleDestroyed" );
 		}
 
 		if ( w == m_DeleteUnclaimedButton )
 		{
-			m_Module.DeleteVehicleUnclaimed();
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_UNCLAIMED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleUnclaimed" );
 		}
-		
+
 		if ( w == m_DeleteVehicleButton )
 		{
 			if ( m_CurrentVehicle )
 			{
-				m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
-				BackToList();
+				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_DELETE", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicle" );
 			}
 		}
-		
+
 		if ( w == m_TeleportButton )
 		{
 			if ( m_CurrentVehicle )
@@ -307,6 +306,27 @@ class JMVehiclesMenu: JMFormBase
 		}
 		
 		return false;
+	}
+
+	void DeleteVehicle(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
+		BackToList();
+	}
+
+	void DeleteVehicleUnclaimed(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleUnclaimed();
+	}
+
+	void DeleteVehicleDestroyed(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleDestroyed();
+	}
+
+	void DeleteVehicleAll(JMConfirmation confirmation)
+	{
+		m_Module.DeleteVehicleAll();
 	}
 
 	override void OnShow()
