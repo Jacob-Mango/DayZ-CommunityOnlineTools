@@ -632,9 +632,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		ItemBase item;
 		CarScript vehicle;
 
-		if (Class.CastTo(item, entity)
+		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn();
-		else if (Class.CastTo(vehicle, entity)
+		else if (Class.CastTo(vehicle, entity))
 			vehicle.COT_OnDebugSpawn();
 		else if (entity.IsInherited(BuildingBase))
 			entity.OnDebugSpawn();
