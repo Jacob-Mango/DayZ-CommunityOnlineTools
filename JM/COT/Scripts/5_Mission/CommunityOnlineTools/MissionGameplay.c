@@ -32,11 +32,11 @@ modded class MissionGameplay
 	{
 	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
-		PrintFormat("Is GUI reset disabled? %1", m_COT_DisableResetGUI.ToString());
+		PrintFormat("Is GUI reset disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
 	#endif
 
-		if (m_COT_DisableResetGUI)
-			m_COT_DisableResetGUI = false;
+		if (m_COT_TempDisableOnSelectPlayer)
+			m_COT_TempDisableOnSelectPlayer = false;
 		else
 			super.ResetGUI();  //! This crashes client when called more than once because it's called from PlayerBase::OnSelectPlayer when leaving freecam
 	}

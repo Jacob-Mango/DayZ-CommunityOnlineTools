@@ -903,7 +903,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
-		MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
+		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+
+		GetPlayer().COT_RememberVehicle();
 
 		if ( IsMissionHost() )
 		{
@@ -952,12 +954,16 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
+		playerSpectator.COT_RememberVehicle();
+
 		playerSpectator.SetLastPosition();
 
 		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
 		playerSpectator.m_JM_CameraPosition = vector.Zero;
 
 		m_Spectators[ident.GetId()] = playerSpectator;
+
+		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
 
 		GetGame().SelectPlayer( ident, NULL );
 
@@ -1065,6 +1071,9 @@ class JMPlayerModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "EndSpectating");
 #endif
+
+		if (GetPlayer().COT_GetOutVehicle())
+			return;
 
 		if ( IsMissionHost() )
 		{
