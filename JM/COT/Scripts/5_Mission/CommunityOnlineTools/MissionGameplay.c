@@ -28,6 +28,19 @@ modded class MissionGameplay
 		delete g_cotBase;
 	}
 
+	override void ResetGUI()
+	{
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("Is GUI reset disabled? %1", m_COT_DisableResetGUI.ToString());
+	#endif
+
+		if (m_COT_DisableResetGUI)
+			m_COT_DisableResetGUI = false;
+		else
+			super.ResetGUI();  //! This crashes client when called more than once because it's called from PlayerBase::OnSelectPlayer when leaving freecam
+	}
+
 	void OfflineMissionStart()
 	{
 		vector position = GetSpawnPoints().GetRandomElement();

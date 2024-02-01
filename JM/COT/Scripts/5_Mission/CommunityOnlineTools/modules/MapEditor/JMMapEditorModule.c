@@ -74,6 +74,8 @@ class JMMapEditorModule: JMModuleBase
 
 		if ( type == CallType.Client )
 		{
+			MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
+
 			if ( GetGame().IsMultiplayer() )
 			{
 				CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );

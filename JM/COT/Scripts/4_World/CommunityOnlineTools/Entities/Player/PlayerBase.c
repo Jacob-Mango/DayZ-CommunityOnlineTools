@@ -111,7 +111,25 @@ modded class PlayerBase
 
 	override void OnSelectPlayer()
 	{
-		super.OnSelectPlayer();
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
+	#endif
+
+		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+
+	#ifdef DIAG
+		if (mission)
+		{
+			bool disableResetGUI = mission.COT_IsDisableResetGUI();
+			PrintFormat("Is GUI reset disabled? %1", disableResetGUI.ToString());
+		}
+	#endif
+
+		if (mission && mission.COT_IsDisableResetGUI())
+			mission.COT_DisableResetGUI(false);
+		else
+			super.OnSelectPlayer();
 
 #ifndef SERVER
 		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))

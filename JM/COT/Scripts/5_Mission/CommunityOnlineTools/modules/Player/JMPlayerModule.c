@@ -903,6 +903,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
+		MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
+
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
