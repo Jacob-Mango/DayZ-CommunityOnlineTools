@@ -1,14 +1,14 @@
 modded class MissionBaseWorld
 {
-	protected bool m_COT_DisableResetGUI;
+	protected bool m_COT_TempDisableOnSelectPlayer;
 
-	void COT_DisableResetGUI(bool disable = true)
+	void COT_TempDisableOnSelectPlayer(bool disable = true)
 	{
-		m_COT_DisableResetGUI = disable;
+		m_COT_TempDisableOnSelectPlayer = disable;
 	}
 
-	bool COT_IsDisableResetGUI()
+	bool COT_IsTempDisableOnSelectPlayer()
 	{
-		return m_COT_DisableResetGUI;
+		return m_COT_TempDisableOnSelectPlayer;
 	}
 }

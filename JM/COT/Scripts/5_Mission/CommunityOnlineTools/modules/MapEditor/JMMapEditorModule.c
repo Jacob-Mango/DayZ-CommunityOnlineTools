@@ -44,6 +44,8 @@ class JMMapEditorModule: JMModuleBase
 		if ( !GetPermissionsManager().HasPermission( "MapEditor.EnterEditor", senderRPC ) )
 			return;
 
+		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+
 		if ( type == CallType.Server )
 		{
 			vector position = Vector( 0, 0, 0 );
@@ -74,8 +76,6 @@ class JMMapEditorModule: JMModuleBase
 
 		if ( type == CallType.Client )
 		{
-			MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
-
 			if ( GetGame().IsMultiplayer() )
 			{
 				CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );

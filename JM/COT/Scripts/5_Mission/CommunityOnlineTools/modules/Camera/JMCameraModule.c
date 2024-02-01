@@ -233,7 +233,9 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
-		MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
+		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+
+		GetPlayer().COT_RememberVehicle();
 
 		if ( IsMissionOffline() )
 		{
@@ -288,6 +290,8 @@ class JMCameraModule: JMRenderableModuleBase
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
+			player.COT_RememberVehicle();
+
 			if (player.m_JM_SpectatedPlayer)
 				player = player.m_JM_SpectatedPlayer;
 
@@ -310,6 +314,8 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 		else 
 		{
+			MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+
 			GetGame().SelectPlayer( sender, NULL );
 
 			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
@@ -343,6 +349,9 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Leave()
 	{
+		if (GetPlayer().COT_GetOutVehicle())
+			return;
+
 		if ( IsMissionOffline() )
 		{
 			Server_Leave( NULL, GetGame().GetPlayer() );
