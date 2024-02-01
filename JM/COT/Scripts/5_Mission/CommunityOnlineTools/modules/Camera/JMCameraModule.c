@@ -233,6 +233,8 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
+		MissionBase.Cast(GetGame().GetMission()).COT_DisableResetGUI();
+
 		if ( IsMissionOffline() )
 		{
 			Server_Enter( NULL, GetGame().GetPlayer() );
