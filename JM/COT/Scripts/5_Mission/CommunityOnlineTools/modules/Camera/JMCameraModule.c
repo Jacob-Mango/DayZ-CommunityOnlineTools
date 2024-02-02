@@ -129,7 +129,13 @@ class JMCameraModule: JMRenderableModuleBase
 				if ((CurrentActiveCamera.IsInherited(JMCinematicCamera) && m_EnableFullmapCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
 				{
 					auto player = PlayerBase.Cast(GetGame().GetPlayer());
-					if (GetGame().IsClient())
+					if (m_EnableFullmapCamera && player.GetCommand_Vehicle())
+					{
+						COTCreateLocalAdminNotification(new StringLocaliser("Disabled fullmap freecam update because you are in a vehicle. Please leave the vehicle first if you want to use fullmap freecam update."));
+						m_EnableFullmapCamera = false;
+						JMCameraForm.Cast(GetForm()).SetEnableFullmapCamera(false);
+					}
+					else if (GetGame().IsClient())
 					{
 						ScriptRPC rpc = new ScriptRPC();
 						rpc.Write(CurrentActiveCamera.GetPosition());
