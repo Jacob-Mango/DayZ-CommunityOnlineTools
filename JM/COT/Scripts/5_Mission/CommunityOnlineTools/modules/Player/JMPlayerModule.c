@@ -903,6 +903,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
+		if (GetPlayer().GetCommand_Vehicle())
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser("Cannot spectate while in a vehicle. Please leave the vehicle first."));
+			return;
+		}
+
 		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
 
 		GetPlayer().COT_RememberVehicle();
