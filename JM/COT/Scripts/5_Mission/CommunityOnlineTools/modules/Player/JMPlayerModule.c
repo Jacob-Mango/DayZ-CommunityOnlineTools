@@ -1078,9 +1078,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_0(this, "EndSpectating");
 #endif
 
-		if (GetPlayer().COT_GetOutVehicle())
-			return;
-
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
