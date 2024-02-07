@@ -195,4 +195,11 @@ modded class MissionGameplay
 
 		super.HandleMapToggleByKeyboardShortcut(player);
 	}
+
+	override void COT_LeaveFreeCam()
+	{
+		JMCameraModule module;
+		CF_Modules<JMCameraModule>.Get(module);
+		module.Leave();
+	}
 };

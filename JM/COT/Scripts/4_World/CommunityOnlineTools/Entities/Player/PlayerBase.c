@@ -41,6 +41,7 @@ modded class PlayerBase
 	private bool m_COT_RemoveCollision_Preference;
 
 	private bool m_COT_IsBeingKicked;
+	private bool m_COT_IsLeavingFreeCam;
 
 	//private Transport m_COT_TransportCache;
 	//private int m_COT_TransportCache_CrewIndex;
@@ -663,6 +664,11 @@ modded class PlayerBase
 		return m_COT_IsBeingKicked;
 	}
 
+	bool COT_IsLeavingFreeCam()
+	{
+		return m_COT_IsLeavingFreeCam;
+	}
+
 	ActionBase COT_StartAction(typename actionType, ActionTarget target, ItemBase mainItem = null)
 	{
 		ActionManagerClient mngr_client;
@@ -719,9 +725,18 @@ modded class PlayerBase
 					if (!COT_StartActionObject(ActionGetOutTransport, null))
 					{
 						if (!COT_StartActionObject(ActionOpenCarDoors, null))
+						{
 							COTCreateLocalAdminNotification(new StringLocaliser("Couldn't get out of vehicle because a door is blocked. Please exit the vehicle first before leaving freecam."));
-						else
-							COTCreateLocalAdminNotification(new StringLocaliser("Please get out of the vehicle first before leaving freecam. Press the 'toggle freecam' key again to exit the vehicle."));
+
+							CurrentActiveCamera.SetPosition(GetPosition() + "0 1.5 0");
+							return true;
+						}
+					}
+
+					if (!m_COT_IsLeavingFreeCam)
+					{
+						m_COT_IsLeavingFreeCam = true;
+						COTCreateLocalAdminNotification(new StringLocaliser("Leaving freecam..."));
 					}
 				}
 
@@ -736,8 +751,11 @@ modded class PlayerBase
 	{
 		super.OnCommandVehicleFinish();
 
-		if (CurrentActiveCamera)
-			COTCreateLocalAdminNotification(new StringLocaliser("Got out of vehicle. Press the 'toggle freecam' key again to leave freecam."));
+		if (CurrentActiveCamera && m_COT_IsLeavingFreeCam)
+		{
+			MissionBaseWorld.Cast(GetGame().GetMission()).COT_LeaveFreeCam();
+			m_COT_IsLeavingFreeCam = false;
+		}
 	}
 
 	void COT_ResumeVehicleCommand()
