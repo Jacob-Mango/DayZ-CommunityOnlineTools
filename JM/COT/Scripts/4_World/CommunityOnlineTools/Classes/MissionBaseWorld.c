@@ -11,4 +11,8 @@ modded class MissionBaseWorld
 	{
 		return m_COT_TempDisableOnSelectPlayer;
 	}
+
+	void COT_LeaveFreeCam()
+	{
+	}
 }
