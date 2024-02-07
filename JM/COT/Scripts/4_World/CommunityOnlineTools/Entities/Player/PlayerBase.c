@@ -714,14 +714,30 @@ modded class PlayerBase
 			CarScript vehicle;
 			if (Class.CastTo(vehicle, hcv.GetTransport()))
 			{
-				if (!COT_StartActionObject(ActionGetOutTransport, null))
-					COT_StartActionObject(ActionOpenCarDoors, null);
+				if (!hcv.IsGettingOut())
+				{
+					if (!COT_StartActionObject(ActionGetOutTransport, null))
+					{
+						if (!COT_StartActionObject(ActionOpenCarDoors, null))
+							COTCreateLocalAdminNotification(new StringLocaliser("Couldn't get out of vehicle because a door is blocked. Please exit the vehicle first before leaving freecam."));
+						else
+							COTCreateLocalAdminNotification(new StringLocaliser("Please get out of the vehicle first before leaving freecam. Press the 'toggle freecam' key again to exit the vehicle."));
+					}
+				}
 
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	override void OnCommandVehicleFinish()
+	{
+		super.OnCommandVehicleFinish();
+
+		if (CurrentActiveCamera)
+			COTCreateLocalAdminNotification(new StringLocaliser("Got out of vehicle. Press the 'toggle freecam' key again to leave freecam."));
 	}
 
 	void COT_ResumeVehicleCommand()
