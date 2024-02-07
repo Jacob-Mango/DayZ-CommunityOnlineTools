@@ -356,7 +356,10 @@ class JMCameraModule: JMRenderableModuleBase
 	void Leave()
 	{
 		if (GetPlayer().COT_GetOutVehicle())
+		{
+			CurrentActiveCamera.SetPosition(GetPlayer().GetPosition() + "0 1.5 0");
 			return;
+		}
 
 		if ( IsMissionOffline() )
 		{
