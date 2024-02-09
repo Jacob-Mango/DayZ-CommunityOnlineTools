@@ -236,6 +236,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.Message:
 			RPC_Message( ctx, sender, target );
 			break;
+		case JMPlayerModuleRPC.Notif:
+			RPC_Notif( ctx, sender, target );
+			break;
 		case JMPlayerModuleRPC.VONStartedTransmitting:
 			RPC_VONStartedTransmitting( ctx, sender, target );
 			break;
@@ -301,27 +304,56 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Write(messageText);
 		rpc.Send(NULL, JMPlayerModuleRPC.Message, true, identity);
 	}
-	
-	private void SendMessageTarget(PlayerIdentity identity, string messageText)
+
+	void DoNotif( array< string > guids, string NotifText )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write(messageText);
-		rpc.Send(NULL, JMPlayerModuleRPC.MessageTarget, true, identity);
+		if ( IsMissionHost() )
+		{
+			Exec_Notif( guids, NULL, NULL, NotifText );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Write(NotifText);
+			rpc.Send( NULL, JMPlayerModuleRPC.Notif, true, NULL );
+		}
 	}
 
-	private void RPC_MessageTarget(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	private void Exec_Notif( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string NotifText = ""  )
 	{
-		auto trace = CF_Trace_0(this, "RPC_MessageTarget");
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		if (GetGame().IsDedicatedServer())
+		foreach (JMPlayerInstance player: players)
+		{
+			if (!player.PlayerObject)
+				continue;
+
+			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "COT/gui//textures/cot_icon.edds", COLOR_RED_A, 10, player.PlayerObject.GetIdentity() );
+		}
+	}
+
+	private void RPC_Notif( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
 			return;
 
-		string messageText;
-		if (!ctx.Read(messageText))
+		string NotifText;
+		if (!ctx.Read(NotifText))
 			return;
-		
-		JMDeferredMessage.QueuedMessages.Clear();
-		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Notif", senderRPC, instance ) )
+			return;
+
+		Exec_Notif( guids, senderRPC, instance, NotifText );
+	}
+	
+	private void SendNotif(PlayerIdentity identity, string NotifText)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(NotifText);
+		rpc.Send(NULL, JMPlayerModuleRPC.Notif, true, identity);
 	}
 
 	void SetHealth( float health, array< string > guids )

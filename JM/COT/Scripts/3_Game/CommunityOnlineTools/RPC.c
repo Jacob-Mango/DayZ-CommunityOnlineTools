@@ -166,7 +166,7 @@ enum JMPlayerModuleRPC
 	Kick,
 	KickMessage,
 	Message,
-	MessageTarget,
+	Notif,
 	StopBleeding,
 	SetPermissions,
 	SetRoles,

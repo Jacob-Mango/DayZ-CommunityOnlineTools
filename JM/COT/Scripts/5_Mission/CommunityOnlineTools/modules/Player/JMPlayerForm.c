@@ -693,7 +693,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "SendMessage" );
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessage", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
 	}
 
 	void SendMessage(JMConfirmation confirmation)
@@ -703,6 +703,15 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
+	}
+
+	void SendNotif(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
 	}
 
 	void Click_KickPlayer( UIEvent eid, UIActionBase action )
