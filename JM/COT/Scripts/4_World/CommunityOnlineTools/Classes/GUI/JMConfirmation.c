@@ -233,7 +233,7 @@ class JMConfirmation: ScriptedWidgetEventHandler
 			m_Callback3 = button3Callback;
 
 			Class.CastTo( m_ButtonText3, m_Button3.FindAnyWidget( "confirmation_text" ) );
-			m_ButtonText3.SetText( button2Title );
+			m_ButtonText3.SetText( button3Title );
 		}
 
 		#ifdef COT_DEBUGLOGS

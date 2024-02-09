@@ -1,6 +1,6 @@
 PanelWidgetClass confirmation_panel_inner {
  ignorepointer 1
- color 0.12 0.16 0.22 1.0
+ color 0.12 0.16 0.22 1
  position 0 0
  size 350 130
  halign center_ref
@@ -41,16 +41,15 @@ PanelWidgetClass confirmation_panel_inner {
    }
   }
   PanelWidgetClass confirmation_spacer_title_message {
+   color 0 0 0 1
    position 0 35
    size 0.95 1
+   halign center_ref
    hexactpos 0
    vexactpos 1
    hexactsize 0
    vexactsize 1
-   halign center_ref
-   color 0 0 0 1
    style DayZDefaultPanel
-   "Size To Content V" 1
   }
   FrameWidgetClass confirmation_message_panel {
    ignorepointer 1
@@ -72,7 +71,7 @@ PanelWidgetClass confirmation_panel_inner {
      vexactpos 1
      hexactsize 0
      vexactsize 0
-     style Light
+     style DayZNormal
      text ""
      font "gui/fonts/sdf_MetronLight24"
      "exact text" 1
@@ -87,12 +86,10 @@ PanelWidgetClass confirmation_panel_inner {
      size 1 22
      valign bottom_ref
      vexactsize 1
-     text ""
-     font "gui/fonts/Metron"
-     "exact text" 1
-     "text halign" center
-     "text valign" center
      style Editor
+     text ""
+     "exact text" 1
+     font "gui/fonts/Metron"
     }
    }
   }
@@ -120,15 +117,16 @@ PanelWidgetClass confirmation_panel_inner {
      vexactsize 0
      {
       ButtonWidgetClass confirmation_button_1 {
+       visible 1
        ignorepointer 0
        position 0 0
-       size 120 1
+       size 49 13
+       halign center_ref
+       valign center_ref
        hexactpos 1
        vexactpos 1
        hexactsize 1
-       vexactsize 0
-       halign center_ref
-       valign center_ref
+       vexactsize 1
        {
         TextWidgetClass confirmation_text {
          ignorepointer 1
@@ -139,8 +137,7 @@ PanelWidgetClass confirmation_panel_inner {
          hexactsize 0
          vexactsize 0
          style Light
-         text ""
-         font "gui/fonts/sdf_MetronLight24"
+         text "bob"
          "exact text" 1
          "exact text size" 16
          "text halign" center
@@ -236,11 +233,14 @@ PanelWidgetClass confirmation_panel_inner {
      {
       ButtonWidgetClass confirmation_button_1 {
        ignorepointer 0
-       size 1 1
+       position -100 0
+       size 90 1
        hexactpos 1
        vexactpos 1
-       hexactsize 0
+       hexactsize 1
        vexactsize 0
+       halign center_ref
+       valign center_ref
        {
         TextWidgetClass confirmation_text {
          ignorepointer 1
@@ -262,11 +262,14 @@ PanelWidgetClass confirmation_panel_inner {
       }
       ButtonWidgetClass confirmation_button_2 {
        ignorepointer 0
-       size 1 1
+       position 0 0
+       size 90 1
        hexactpos 1
        vexactpos 1
-       hexactsize 0
+       hexactsize 1
        vexactsize 0
+       halign center_ref
+       valign center_ref
        {
         TextWidgetClass confirmation_text {
          ignorepointer 1
@@ -288,7 +291,8 @@ PanelWidgetClass confirmation_panel_inner {
       }
       ButtonWidgetClass confirmation_button_3 {
        ignorepointer 0
-       size 1 1
+       size 0.33 1
+       halign right_ref
        hexactpos 1
        vexactpos 1
        hexactsize 0
