@@ -213,12 +213,8 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		return JMCameraModuleRPC.COUNT;
 	}
-
-#ifdef CF_BUGFIX_REF
+	
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
-#else
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
-#endif
 	{
 		switch ( rpc_type )
 		{
