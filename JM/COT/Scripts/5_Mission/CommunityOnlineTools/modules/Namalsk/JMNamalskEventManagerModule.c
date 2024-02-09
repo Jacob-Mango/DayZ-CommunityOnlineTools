@@ -93,11 +93,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		return JMNamalskEventManagerRPC.COUNT;
 	}
 
-#ifdef CF_BUGFIX_REF
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
-#else
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
-#endif
 	{
 		JMPlayerInstance instance;
 
