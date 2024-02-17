@@ -4,20 +4,28 @@
 			"DepartmentName": "Community Online Tools",
 			"Sections": [
 				{
-					"SectionName": "Sr. Developers",
+					"SectionName": "Active Developers",
+					"SectionLines": [
+						"LieutenantMaster",
+						"LAVA (liquidrock)"
+					]
+				},
+				{
+					"SectionName": "Inactive Developers",
+					"SectionLines": [
+						"Jacob_Mango",
+						"Arkensor",
+						"DannyDog68",
+						"Thurston",
+						"GrosTon1"
+					]
+				},
+				{
+					"SectionName": "Original Developers",
 					"SectionLines": [
 						"Jacob_Mango",
 						"Arkensor",
 						"DannyDog68"
-					]
-				},
-				{
-					"SectionName": "Jr. Developers",
-					"SectionLines": [
-						"Thurston",
-						"GrosTon1",
-						"LieutenantMaster",
-						"LAVA (Liquidrock)"
 					]
 				},
 				{
@@ -27,7 +35,8 @@
 						"1SKGaming",
 						"AWG",
 						"r/DayZUnderground",
-						"Trumps Wall"
+						"Trumps Wall",
+						"Expansion Mod Team"
 					]
 				},
 				{
@@ -41,10 +50,13 @@
 						"DM4",
 						"Dingo57",
 						"Grim",
-						"Cleetus",
+						"AussieCleetus",
 						"GrosTon1",
 						"DirtySanchez",
-						"Diesel"
+						"Diesel",
+						"ayano",
+						"wrdg",
+						"InclementDab"
 					]
 				}
 			]
