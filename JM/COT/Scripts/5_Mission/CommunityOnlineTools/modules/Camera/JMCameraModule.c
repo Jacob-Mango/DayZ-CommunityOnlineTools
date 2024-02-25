@@ -235,7 +235,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
-		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+		GetPlayer().COT_TempDisableOnSelectPlayer();
 
 		GetPlayer().COT_RememberVehicle();
 
@@ -316,7 +316,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 		else 
 		{
-			MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+			PlayerBase.Cast(sender.GetPlayer()).COT_TempDisableOnSelectPlayer();
 
 			GetGame().SelectPlayer( sender, NULL );
 

@@ -937,7 +937,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+		GetPlayer().COT_TempDisableOnSelectPlayer();
 
 		GetPlayer().COT_RememberVehicle();
 
@@ -997,7 +997,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		m_Spectators[ident.GetId()] = playerSpectator;
 
-		MissionBase.Cast(GetGame().GetMission()).COT_TempDisableOnSelectPlayer();
+		playerSpectator.COT_TempDisableOnSelectPlayer();
 
 		GetGame().SelectPlayer( ident, NULL );
 
