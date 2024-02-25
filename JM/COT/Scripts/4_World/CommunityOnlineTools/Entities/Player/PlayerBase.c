@@ -114,6 +114,19 @@ modded class PlayerBase
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
 	}
 
+	protected bool m_COT_TempDisableOnSelectPlayer;
+
+	void COT_TempDisableOnSelectPlayer(bool disable = true)
+	{
+		m_COT_TempDisableOnSelectPlayer = disable;
+
+	#ifndef SERVER
+		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		if (mission)
+			mission.COT_TempDisableOnSelectPlayer(disable);
+	#endif
+	}
+
 	override void OnSelectPlayer()
 	{
 	#ifdef DIAG
@@ -121,18 +134,12 @@ modded class PlayerBase
 		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
 	#endif
 
-		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
-
 	#ifdef DIAG
-		if (mission)
-		{
-			bool disableOnSelectPlayer = mission.COT_IsTempDisableOnSelectPlayer();
-			PrintFormat("Is OnSelectPlayer temporarily disabled? %1", disableOnSelectPlayer.ToString());
-		}
+		PrintFormat("Is OnSelectPlayer temporarily disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
 	#endif
 
-		if (mission && mission.COT_IsTempDisableOnSelectPlayer())
-			mission.COT_TempDisableOnSelectPlayer(false);
+		if (m_COT_TempDisableOnSelectPlayer)
+			COT_TempDisableOnSelectPlayer(false);
 		else
 			super.OnSelectPlayer();
 
@@ -753,7 +760,9 @@ modded class PlayerBase
 
 		if (CurrentActiveCamera && m_COT_IsLeavingFreeCam)
 		{
-			MissionBaseWorld.Cast(GetGame().GetMission()).COT_LeaveFreeCam();
+			auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+			if (mission)
+				mission.COT_LeaveFreeCam();
 			m_COT_IsLeavingFreeCam = false;
 		}
 	}
