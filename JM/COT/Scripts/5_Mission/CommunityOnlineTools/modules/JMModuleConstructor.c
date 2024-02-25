@@ -11,12 +11,16 @@ modded class JMModuleConstructor
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
 
+#ifdef DIAG
+		modules.Insert( JMExampleModule );
+		modules.Insert( JMWeatherModule );
+#else
+		modules.Insert( JMWeatherOldModule );
+
 		//! TODO: Merge with ItemSets once it will use prefabs
 		modules.Insert( JMVehicleSpawnerModule );
-
 		modules.Insert( JMItemSetSpawnerModule );
-		//modules.Insert( JMWeatherModule );
-		modules.Insert( JMWeatherOldModule );
+#endif
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
@@ -39,12 +43,6 @@ modded class JMModuleConstructor
 		{
 			modules.Insert( JMNamalskEventManagerModule );
 		}
-
-#ifdef DIAG
-		modules.Insert( JMExampleModule );
-#endif
-
-
 		//modules.Insert( JMWebhookCOTModule );
 	}
 };
