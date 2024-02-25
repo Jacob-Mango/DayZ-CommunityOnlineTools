@@ -16,11 +16,12 @@ modded class JMModuleConstructor
 		modules.Insert( JMWeatherModule );
 #else
 		modules.Insert( JMWeatherOldModule );
+#endif
 
 		//! TODO: Merge with ItemSets once it will use prefabs
 		modules.Insert( JMVehicleSpawnerModule );
+
 		modules.Insert( JMItemSetSpawnerModule );
-#endif
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
