@@ -114,15 +114,12 @@ static vector GetCursorPos( Object ignore = NULL )
 	return COT_PerformRayCast(rayStart, rayEnd, ignore);
 }
 
-static void Message( PlayerBase player, string txt ) 
+static void Message(PlayerBase player, string txt, string style = "colorImportant") 
 {
-	if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
-	{
-		player.MessageImportant( txt);
-	} else 
-	{
-		GetGame().GetMission().OnEvent( ChatMessageEventTypeID, new ChatMessageEventParams( CCDirect, "", txt, "" ) );
-	}
+	if (GetGame().IsServer() && GetGame().IsMultiplayer())
+		player.Message(txt, style);
+	else
+		GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCSystem, "", txt, style));
 };
 
 
