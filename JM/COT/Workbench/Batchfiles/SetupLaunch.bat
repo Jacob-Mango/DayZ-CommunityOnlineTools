@@ -84,4 +84,4 @@ echo PlayerName is: "%playerName%"
 
 if %failed%==1 exit /b 1
 
-CALL Exit.bat
+CALL KillGame.bat

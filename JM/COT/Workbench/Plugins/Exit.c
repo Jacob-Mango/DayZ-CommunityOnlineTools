@@ -5,7 +5,7 @@ class ExitModTool: DayZTool
 
 	void ExitModTool()
 	{
-		BatchFile = GetWorkDriveDirectory() + "Batchfiles\\Exit.bat";
+		BatchFile = GetWorkDriveDirectory() + "Batchfiles\\KillGame.bat";
 	}
 	
 	override void Run()
