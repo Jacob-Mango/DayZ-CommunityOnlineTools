@@ -377,44 +377,25 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void SpawnEntity_Position( string classname, vector position, float quantity = -1, float health = -1, int itemState = -1 )
 	{
-		Object obj = GetObjectAtCursor(false);
-		EntityAI ent;
-		if (obj)
-			ent = EntityAI.Cast(obj);
+		if ( IsMissionClient() )
+		{
+			EntityAI ent = EntityAI.Cast(GetObjectAtCursor(false));
 
-		if (ent)
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( classname );
+			if (!ent)
+				rpc.Write( position );
+			rpc.Write( quantity );
+			rpc.Write( health );
+			rpc.Write( itemState );
+			rpc.Write( m_OnDebugSpawn );
+			if (ent)
+				rpc.Send( ent, JMObjectSpawnerModuleRPC.TargetInventory, true, NULL );
+			else
+				rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
+		} else
 		{
-			if ( IsMissionClient() )
-			{
-				ScriptRPC rpc = new ScriptRPC();
-				rpc.Write( classname );
-				rpc.Write( ent );
-				rpc.Write( quantity );
-				rpc.Write( health );
-				rpc.Write( itemState );
-				rpc.Write( m_OnDebugSpawn );
-				rpc.Send( NULL, JMObjectSpawnerModuleRPC.TargetInventory, true, NULL );
-			} else
-			{
-				Server_SpawnTarget_Inventory( classname, ent, quantity, health, itemState, NULL );
-			}
-		}
-		else
-		{
-			if ( IsMissionClient() )
-			{
-				ScriptRPC rpc2 = new ScriptRPC();
-				rpc2.Write( classname );
-				rpc2.Write( position );
-				rpc2.Write( quantity );
-				rpc2.Write( health );
-				rpc2.Write( itemState );
-				rpc2.Write( m_OnDebugSpawn );
-				rpc2.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
-			} else
-			{
-				Server_SpawnEntity_Position( classname, position, quantity, health, itemState, NULL );
-			}
+			Server_SpawnEntity_Position( classname, position, quantity, health, itemState, NULL );
 		}
 	}
 
@@ -621,8 +602,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( classname ) )
 				return;
 
-			EntityAI ent;
-			if ( !ctx.Read( ent ) )
+			EntityAI ent = EntityAI.Cast(target);
+			if ( !ent )
 				return;
 		
 			float quantity;
