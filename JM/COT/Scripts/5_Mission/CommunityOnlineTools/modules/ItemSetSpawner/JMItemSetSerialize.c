@@ -10,7 +10,7 @@ class JMItemSetSerialize
 
 	ref array< ref JMItemSetItemInfo > Items;
 	
-	/*private*/ void JMItemSetSerialize()
+	void JMItemSetSerialize()
 	{
 		Items = new array< ref JMItemSetItemInfo >;
 	}
