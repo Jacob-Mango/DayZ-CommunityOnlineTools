@@ -50,12 +50,6 @@ if "%workDrive%"=="" (
     echo WorkDrive parameter was not set in the project.cfg
 )
 
-echo WorkbenchWorkDrive is: "%workbenchWorkDrive%"
-if "%workbenchWorkDrive%"=="" (
-    set /a failed=1
-    echo workbenchWorkDrive parameter was not set in the project.cfg
-)
-
 echo PrefixLinkRoot is: "%prefixLinkRoot%"
 if "%prefixLinkRoot%"=="" (
 	set /a failed=1

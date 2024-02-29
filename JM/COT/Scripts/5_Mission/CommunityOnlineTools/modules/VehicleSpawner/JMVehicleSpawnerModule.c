@@ -86,6 +86,11 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return meta.Vehicles;
 	}
 
+	array< string > GetVehiclesName()
+	{
+		return meta.VehiclesName;
+	}
+
 	override int GetRPCMin()
 	{
 		return JMVehicleSpawnerModuleRPC.INVALID;
@@ -96,11 +101,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		return JMVehicleSpawnerModuleRPC.COUNT;
 	}
 
-#ifdef CF_BUGFIX_REF
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
-#else
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
-#endif
 	{
 		switch ( rpc_type )
 		{
@@ -113,6 +114,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		}
 	}
 	
+	//! TODO: doesnt update between server restarts for clients
 	void Load()
 	{
 		if ( GetGame().IsClient() )

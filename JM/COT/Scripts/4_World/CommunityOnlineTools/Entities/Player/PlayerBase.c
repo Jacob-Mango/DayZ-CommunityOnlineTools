@@ -41,6 +41,11 @@ modded class PlayerBase
 	private bool m_COT_RemoveCollision_Preference;
 
 	private bool m_COT_IsBeingKicked;
+	private bool m_COT_IsLeavingFreeCam;
+
+	//private Transport m_COT_TransportCache;
+	//private int m_COT_TransportCache_CrewIndex;
+	//private int m_COT_TransportCache_Seat;
 
 	void PlayerBase()
 	{
@@ -109,9 +114,36 @@ modded class PlayerBase
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
 	}
 
+	protected bool m_COT_TempDisableOnSelectPlayer;
+
+	void COT_TempDisableOnSelectPlayer(bool disable = true)
+	{
+		m_COT_TempDisableOnSelectPlayer = disable;
+
+	#ifndef SERVER
+		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		if (mission)
+			mission.COT_TempDisableOnSelectPlayer(disable);
+	#endif
+	}
+
 	override void OnSelectPlayer()
 	{
-		super.OnSelectPlayer();
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("Is player selected? %1", m_PlayerSelected.ToString());
+	#endif
+
+	#ifdef DIAG
+		PrintFormat("Is OnSelectPlayer temporarily disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
+	#endif
+
+		if (m_COT_TempDisableOnSelectPlayer)
+			COT_TempDisableOnSelectPlayer(false);
+		else
+			super.OnSelectPlayer();
+
+		//COT_ResumeVehicleCommand();
 
 #ifndef SERVER
 		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
@@ -637,6 +669,137 @@ modded class PlayerBase
 	bool COTIsBeingKicked()
 	{
 		return m_COT_IsBeingKicked;
+	}
+
+	bool COT_IsLeavingFreeCam()
+	{
+		return m_COT_IsLeavingFreeCam;
+	}
+
+	ActionBase COT_StartAction(typename actionType, ActionTarget target, ItemBase mainItem = null)
+	{
+		ActionManagerClient mngr_client;
+		if (!Class.CastTo(mngr_client, GetActionManager()))
+			return null;
+
+		ActionBase action = mngr_client.GetAction(actionType);
+
+		if (!action.Can(this, target, mainItem))
+			return null;
+
+		if (!mainItem)
+			mainItem = GetItemInHands();
+
+		mngr_client.PerformActionStart(action, target, mainItem);
+
+		return action;
+	}
+
+	ActionBase COT_StartActionObject(typename actionType, Object target, ItemBase mainItem = null)
+	{
+		return COT_StartAction(actionType, new ActionTarget(target, null, -1, vector.Zero, -1.0), mainItem);
+	}
+
+	void COT_RememberVehicle()
+	{
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("GetCommand_Move? %1", GetCommand_Move().ToString());
+		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
+		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
+	#endif
+
+		//HumanCommandVehicle hcv = GetCommand_Vehicle();
+
+		//if (hcv && !hcv.IsGettingOut())
+		//{
+			//m_COT_TransportCache = hcv.GetTransport();
+			//m_COT_TransportCache_CrewIndex = m_COT_TransportCache.CrewMemberIndex(this);
+			//m_COT_TransportCache_Seat = m_COT_TransportCache.GetSeatAnimationType(m_COT_TransportCache_CrewIndex);
+		//}
+	}
+
+	bool COT_GetOutVehicle()
+	{
+		auto hcv = GetCommand_Vehicle();
+		if (hcv)
+		{
+			CarScript vehicle;
+			if (Class.CastTo(vehicle, hcv.GetTransport()))
+			{
+				if (!hcv.IsGettingOut())
+				{
+					if (!COT_StartActionObject(ActionGetOutTransport, null))
+					{
+						if (!COT_StartActionObject(ActionOpenCarDoors, null))
+						{
+							COTCreateLocalAdminNotification(new StringLocaliser("Couldn't get out of vehicle because a door is blocked. Please exit the vehicle first before leaving freecam."));
+
+							CurrentActiveCamera.SetPosition(GetPosition() + "0 1.5 0");
+							return true;
+						}
+					}
+
+					if (!m_COT_IsLeavingFreeCam)
+					{
+						m_COT_IsLeavingFreeCam = true;
+						COTCreateLocalAdminNotification(new StringLocaliser("Leaving freecam..."));
+					}
+				}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	override void OnCommandVehicleFinish()
+	{
+		super.OnCommandVehicleFinish();
+
+		if (CurrentActiveCamera && m_COT_IsLeavingFreeCam)
+		{
+			auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+			if (mission)
+				mission.COT_LeaveFreeCam();
+			m_COT_IsLeavingFreeCam = false;
+		}
+	}
+
+	void COT_ResumeVehicleCommand()
+	{
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("GetCommand_Vehicle? %1", GetCommand_Vehicle().ToString());
+		//PrintFormat("m_COT_TransportCache? %1", m_COT_TransportCache.ToString());
+	#endif
+
+		auto hcv = GetCommand_Vehicle();
+		if (hcv)
+		{
+			hcv.GetOutVehicle();  //! Needed to end vehicle cmd
+			Transport trans = hcv.GetTransport();
+			trans.CrewGetOut(trans.CrewMemberIndex(this));  //! Needed to unlink from seat
+			UnlinkFromLocalSpace();  //! DOESN'T WORK, still in vehicle space after getting out
+			OnCommandVehicleFinish();
+
+			CarScript car;
+			if (Class.CastTo(car, trans))
+			{
+				GetDayZGame().GetBacklit().OnLeaveCar();
+				if (GetGame().IsServer())
+				{
+					car.ForceUpdateLightsStart();
+					car.ForceUpdateLightsEnd();
+				}
+			}
+		}
+		//else if (m_COT_TransportCache)
+		//{
+			//StartCommand_Vehicle(m_COT_TransportCache, m_COT_TransportCache_CrewIndex, m_COT_TransportCache_Seat, IsUnconscious());
+			//m_COT_TransportCache = null;
+		//}
 	}
 };
 

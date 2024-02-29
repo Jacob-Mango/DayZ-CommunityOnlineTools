@@ -32,7 +32,7 @@ goto OPTIONS
 
 :MAIN
 
-if %killGame%==1 CALL Exit.bat
+if %killGame%==1 CALL KillGame.bat
 if %killWorkbench%==1 taskkill /F /IM workbenchApp.exe /T
 
 set "modsToCheck=%modsToBuild%"

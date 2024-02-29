@@ -471,13 +471,13 @@ class JMObjectSpawnerForm: JMFormBase
 					m_QuantityItem.SetMin(item.GetQuantityMin());
 					m_QuantityItem.SetMax(item.GetQuantityMax());
 
+					Magazine mag;
 					if ( item.IsLiquidContainer() )
 					{
 						m_QuantityItem.SetStepValue(0.1);
 					}
 					else
 					{
-						Magazine mag;
 						if (Class.CastTo(mag, item))
 						{
 							if ( mag.IsAmmoPile() )
@@ -494,7 +494,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 					if ( m_QuantityItem.GetMin() == m_QuantityItem.GetMax() )
 					{
-						m_QuantityItem.SetMin(mag.GetAmmoMax() - 1);
+						if (mag)
+							m_QuantityItem.SetMin(mag.GetAmmoMax() - 1);
 						m_QuantityItem.SetCurrent(m_QuantityItem.GetMax());
 					}
 					else

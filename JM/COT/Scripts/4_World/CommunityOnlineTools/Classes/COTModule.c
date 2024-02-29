@@ -206,6 +206,9 @@ class COTModule : JMModuleBase
 
 	void CloseCOT( UAInput input )
 	{
+		if (!GetGame())
+			return;
+
 		if ( !( input.LocalPress() ) )
 			return;
 
