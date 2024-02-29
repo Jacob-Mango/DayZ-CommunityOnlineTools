@@ -421,6 +421,11 @@ class JMCameraForm: JMFormBase
 		return false;
 	}
 
+	void SetEnableFullmapCamera(bool enable)
+	{
+		m_EnableFullmapCamera.SetChecked(enable);
+	}
+
 	void SavePosition()
 	{
 		vector pos = m_Positon.GetValue();

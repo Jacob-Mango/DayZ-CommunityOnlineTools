@@ -75,6 +75,7 @@ class JMMapForm: JMFormBase
 
 		for ( int i = 0; i < players.Count(); ++i )
 		{
+			int colors = ARGB( 255, 230, 20, 20 );
 			string marker = "";
 
 			//if ( players[i].PlayerObject.IsDriving() )
@@ -85,12 +86,18 @@ class JMMapForm: JMFormBase
 			if ( JM_GetSelected().IsSelected( players[i].GetGUID() ) )
 				marker += "_selected";
 
-			//if ( !players[i].PlayerObject.IsAlive() )
-			//	marker += "_dead";
-			//else if ( players[i].PlayerObject.IsUnconscious() )
-			//	marker += "_uncon";
+			if ( !players[i].PlayerObject.IsAlive() )
+			{
+				colors = ARGB( 255, 50, 0, 0 );
+				//marker += "_dead";
+			}
+			else if ( players[i].PlayerObject.IsUnconscious() )
+			{
+				colors = ARGB( 255, 100, 0, 0 );
+				//marker += "_uncon";
+			}
 
-			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), ARGB( 255, 230, 20, 20 ), marker + ".paa" );
+			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), colors, marker + ".paa" );
 		}
 
 		GetCommunityOnlineTools().RefreshClientPositions();

@@ -28,6 +28,19 @@ modded class MissionGameplay
 		delete g_cotBase;
 	}
 
+	override void ResetGUI()
+	{
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+		PrintFormat("Is GUI reset disabled? %1", m_COT_TempDisableOnSelectPlayer.ToString());
+	#endif
+
+		if (m_COT_TempDisableOnSelectPlayer)
+			m_COT_TempDisableOnSelectPlayer = false;
+		else
+			super.ResetGUI();  //! This crashes client when called more than once because it's called from PlayerBase::OnSelectPlayer when leaving freecam
+	}
+
 	void OfflineMissionStart()
 	{
 		vector position = GetSpawnPoints().GetRandomElement();
@@ -181,5 +194,12 @@ modded class MissionGameplay
 			return;
 
 		super.HandleMapToggleByKeyboardShortcut(player);
+	}
+
+	override void COT_LeaveFreeCam()
+	{
+		JMCameraModule module;
+		CF_Modules<JMCameraModule>.Get(module);
+		module.Leave();
 	}
 };

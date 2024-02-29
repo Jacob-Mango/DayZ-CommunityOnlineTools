@@ -129,7 +129,13 @@ class JMCameraModule: JMRenderableModuleBase
 				if ((CurrentActiveCamera.IsInherited(JMCinematicCamera) && m_EnableFullmapCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
 				{
 					auto player = PlayerBase.Cast(GetGame().GetPlayer());
-					if (GetGame().IsClient())
+					if (m_EnableFullmapCamera && player.GetCommand_Vehicle())
+					{
+						COTCreateLocalAdminNotification(new StringLocaliser("Disabled fullmap freecam update because you are in a vehicle. Please leave the vehicle first if you want to use fullmap freecam update."));
+						m_EnableFullmapCamera = false;
+						JMCameraForm.Cast(GetForm()).SetEnableFullmapCamera(false);
+					}
+					else if (GetGame().IsClient())
 					{
 						ScriptRPC rpc = new ScriptRPC();
 						rpc.Write(CurrentActiveCamera.GetPosition());
@@ -207,12 +213,8 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		return JMCameraModuleRPC.COUNT;
 	}
-
-#ifdef CF_BUGFIX_REF
+	
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
-#else
-	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ref ParamsReadContext ctx )
-#endif
 	{
 		switch ( rpc_type )
 		{
@@ -233,6 +235,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
+		GetPlayer().COT_TempDisableOnSelectPlayer();
+
+		GetPlayer().COT_RememberVehicle();
+
 		if ( IsMissionOffline() )
 		{
 			Server_Enter( NULL, GetGame().GetPlayer() );
@@ -286,6 +292,8 @@ class JMCameraModule: JMRenderableModuleBase
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
+			player.COT_RememberVehicle();
+
 			if (player.m_JM_SpectatedPlayer)
 				player = player.m_JM_SpectatedPlayer;
 
@@ -308,6 +316,8 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 		else 
 		{
+			PlayerBase.Cast(sender.GetPlayer()).COT_TempDisableOnSelectPlayer();
+
 			GetGame().SelectPlayer( sender, NULL );
 
 			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
@@ -341,6 +351,9 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Leave()
 	{
+		if (GetPlayer().COT_GetOutVehicle())
+			return;
+
 		if ( IsMissionOffline() )
 		{
 			Server_Leave( NULL, GetGame().GetPlayer() );

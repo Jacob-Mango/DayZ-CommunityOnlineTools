@@ -69,6 +69,7 @@ enum JMObjectSpawnerModuleRPC
 	INVALID = 10220,
 	Position,
 	Inventory,
+	TargetInventory,
 	Delete,
 	COUNT
 };
@@ -166,7 +167,7 @@ enum JMPlayerModuleRPC
 	Kick,
 	KickMessage,
 	Message,
-	MessageTarget,
+	Notif,
 	StopBleeding,
 	SetPermissions,
 	SetRoles,

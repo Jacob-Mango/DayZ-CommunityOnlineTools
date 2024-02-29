@@ -1,15 +1,18 @@
 class JMVehicleSpawnerMeta
 {
 	autoptr ref array< string > Vehicles;
+	autoptr ref array< string > VehiclesName;
 
 	private void JMVehicleSpawnerMeta()
 	{
 		Vehicles = new array< string >;
+		VehiclesName = new array< string >;
 	}
 
 	void ~JMVehicleSpawnerMeta()
 	{
 		delete Vehicles;
+		delete VehiclesName;
 	}
 
 	static JMVehicleSpawnerMeta Create()
@@ -23,7 +26,10 @@ class JMVehicleSpawnerMeta
 
 		for ( int i = 0; i < settings.Vehicles.Count(); i++ )
 		{
-			meta.Vehicles.Insert( settings.Vehicles.GetKey( i ) );
+			string classname = settings.Vehicles.GetKey(i);
+			JMVehicleSpawnerSerialize VSserialize = settings.Vehicles.Get(classname);
+			meta.Vehicles.Insert( classname );
+			meta.VehiclesName.Insert( VSserialize.DisplayName );
 		}
 
 		return meta;

@@ -14,11 +14,7 @@ modded class JMModuleManager
 		JMScriptInvokers.COT_ON_OPEN.Remove( SetPreventModuleBindings );
 	}
 	
-#ifdef CF_BUGFIX_REF
 	protected override void InitModule( JMModuleBase module )
-#else
-	protected override void InitModule( ref JMModuleBase module )
-#endif
 	{
 		super.InitModule( module );
 		
