@@ -8,7 +8,7 @@ class JMVehicleSpawnerSerialize : Managed
 
 	ref array< string > Parts;
 	
-	/*private*/ void JMVehicleSpawnerSerialize()
+	void JMVehicleSpawnerSerialize()
 	{
 		Parts = new array< string >;
 	}

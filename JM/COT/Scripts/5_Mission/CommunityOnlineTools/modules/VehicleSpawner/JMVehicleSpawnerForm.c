@@ -44,24 +44,32 @@ class JMVehicleSpawnerForm: JMFormBase
 
 		array< string > vehicles = new array< string >;
 		array< string > vehiclesDisplay = new array< string >;
+		array< string > textDisplay = new array< string >;
 		vehicles.Copy( m_Module.GetVehicles() );
+		vehiclesDisplay.Copy( m_Module.GetVehiclesName() );
 
 		for ( int i = 0; i < vehicles.Count(); i++ )
 		{
-			string displayName;
-			GetGame().ConfigGetText( "cfgVehicles " + vehicles[i] + " displayName", displayName );
-			string text = Widget.TranslateString( "#" + displayName );
-
-			if ( text == "" || text.Get( 0 ) == " " )
+			if ( vehiclesDisplay[i] != "" )
 			{
-				vehiclesDisplay.Insert( displayName + " (" + vehicles[i] + ")" );
-			} else
+				textDisplay.Insert(vehiclesDisplay[i]);
+			}
+			else
 			{
-				vehiclesDisplay.Insert( text + " (" + vehicles[i] + ")" );
+				string displayName;
+				GetGame().ConfigGetText( "cfgVehicles " + vehicles[i] + " displayName", displayName );
+				string text = Widget.TranslateString( "#" + displayName );
+				if ( text == "" || text.Get( 0 ) == " " )
+				{
+					textDisplay.Insert( displayName + " (" + vehicles[i] + ")" );
+				} else
+				{
+					textDisplay.Insert( text + " (" + vehicles[i] + ")" );
+				}
 			}
 		}
 
-		JMStatics.SortStringArrayKVPair( vehiclesDisplay, vehicles );
+		JMStatics.SortStringArrayKVPair( textDisplay, vehicles );
 
 		for ( i = 0; i < vehicles.Count(); i++ )
 		{
@@ -70,7 +78,7 @@ class JMVehicleSpawnerForm: JMFormBase
 				
 			Widget wrapper = UIActionManager.CreatePanel( m_ActionsWrapper, 0x00000000, 30 );
 			
-			UIActionBase name = UIActionManager.CreateText( wrapper, vehiclesDisplay[i] );
+			UIActionBase name = UIActionManager.CreateText( wrapper, textDisplay[i] );
 
 			name.SetWidth(0.8);
 
