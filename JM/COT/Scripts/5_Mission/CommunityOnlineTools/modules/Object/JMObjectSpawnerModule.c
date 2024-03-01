@@ -317,10 +317,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		switch ( rpc_type )
 		{
 		case JMObjectSpawnerModuleRPC.Position:
-			RPC_SpawnEntity_Position( ctx, sender, target );
+			RPC_SpawnEntity_Position( ctx, sender, null );
 			break;
 		case JMObjectSpawnerModuleRPC.TargetInventory:
-			RPC_SpawnTarget_Inventory( ctx, sender, target );
+			RPC_SpawnEntity_Position( ctx, sender, target );
 			break;
 		case JMObjectSpawnerModuleRPC.Inventory:
 			RPC_SpawnEntity_Inventory( ctx, sender, target );
@@ -375,27 +375,29 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Position( string classname, vector position, float quantity = -1, float health = -1, int itemState = -1 )
+	void SpawnEntity_Position( string className, vector position, float quantity = -1, float health = -1, int itemState = -1, bool targetInventory = false )
 	{
 		if ( IsMissionClient() )
 		{
-			EntityAI ent = EntityAI.Cast(GetObjectAtCursor(false));
+			EntityAI targetEnt;
+
+			if (targetInventory && !GetGame().IsKindOf(className, "DZ_LightAI"))
+			{
+				if (Class.CastTo(targetEnt, GetObjectAtCursor(false)) && !targetEnt.GetInventory())
+					targetEnt = null;
+			}
 
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( classname );
-			if (!ent)
-				rpc.Write( position );
+			rpc.Write( className );
+			rpc.Write( position );
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
-			if (ent)
-				rpc.Send( ent, JMObjectSpawnerModuleRPC.TargetInventory, true, NULL );
-			else
-				rpc.Send( NULL, JMObjectSpawnerModuleRPC.Position, true, NULL );
+			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		} else
 		{
-			Server_SpawnEntity_Position( classname, position, quantity, health, itemState, NULL );
+			Server_SpawnEntity_Position( className, position, quantity, health, itemState, NULL );
 		}
 	}
 
@@ -426,8 +428,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			string ent;
-			if ( !ctx.Read( ent ) )
+			string className;
+			if ( !ctx.Read( className ) )
 			{
 				Error("Failed");
 				return;
@@ -464,16 +466,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( m_OnDebugSpawn ) )
 				return;
 
-			Server_SpawnEntity_Position( ent, position, quantity, health, itemState, senderRPC );
+			EntityAI targetEnt;
+			if (Class.CastTo(targetEnt, target))
+				Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, itemState, senderRPC );
+			else
+				Server_SpawnEntity_Position( className, position, quantity, health, itemState, senderRPC );
 		}
 	}
 
-	void SpawnEntity_Inventory( string ent, array< string > players, float quantity = -1, float health = -1, int itemState = -1 )
+	void SpawnEntity_Inventory( string className, array< string > players, float quantity = -1, float health = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( ent );
+			rpc.Write( className );
 			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
@@ -483,7 +489,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		else
 		{
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, NULL );
+			Server_SpawnEntity_Inventory( className, players, quantity, health, itemState, NULL );
 		}
 	}
 
@@ -559,69 +565,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 	
-
-	private void Server_SpawnTarget_Inventory( string className, EntityAI ent, float quantity, float health, int itemState, PlayerIdentity ident )
+	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, int itemState, PlayerIdentity ident )
 	{
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
-			return;
-
 		JMPlayerInstance callerInstance;
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) )
-			return;
 
-		string loggedSuffix = "";
-
-		if ( ent.GetInventory() )
+		if ( GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) && !GetGame().IsKindOf( className, "DZ_LightAI" ) && targetEnt.GetInventory() && Class.CastTo( ent, targetEnt.GetInventory().CreateInInventory( className ) ) )
 		{
-			if ( !Class.CastTo( ent, ent.GetInventory().CreateInInventory( className ) ) )
-			{
-				vector position = ent.GetPosition();
+			string loggedSuffix = " at " + position.ToString();
 
-				int flags = ECE_CREATEPHYSICS;
-				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-					flags |= ECE_PLACE_ON_SURFACE;
-		
-				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
-					return;
+			SetupEntity( ent, quantity, health, itemState );
 
-				loggedSuffix = " at " + position.ToString();
-			}
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
+			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
 		}
-
-		SetupEntity( ent, quantity, health, itemState );
-
-		//GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
-		//SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
-	}
-
-	private void RPC_SpawnTarget_Inventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		if ( IsMissionHost() )
+		else
 		{
-			string classname;
-			if ( !ctx.Read( classname ) )
-				return;
-
-			EntityAI ent = EntityAI.Cast(target);
-			if ( !ent )
-				return;
-		
-			float quantity;
-			if ( !ctx.Read( quantity ) )
-				return;
-
-			float health;
-			if ( !ctx.Read( health ) )
-				return;
-
-			int itemState;
-			if ( !ctx.Read( itemState ) )
-				return;
-
-			if ( !ctx.Read( m_OnDebugSpawn ) )
-				return;
-
-			Server_SpawnTarget_Inventory( classname, ent, quantity, health, itemState, senderRPC );
+			Server_SpawnEntity_Position(className, position, quantity, health, itemState, ident);
 		}
 	}
 
