@@ -333,7 +333,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void DeleteEntity( Object obj )
 	{
-		if ( IsMissionClient() )
+		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( obj, JMObjectSpawnerModuleRPC.Delete, true, NULL );
@@ -377,16 +377,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void SpawnEntity_Position( string className, vector position, float quantity = -1, float health = -1, int itemState = -1, bool targetInventory = false )
 	{
+		EntityAI targetEnt;
+
 		if ( IsMissionClient() )
 		{
-			EntityAI targetEnt;
-
 			if (targetInventory && !GetGame().IsKindOf(className, "DZ_LightAI"))
 			{
 				if (Class.CastTo(targetEnt, GetObjectAtCursor(false)) && !targetEnt.GetInventory())
 					targetEnt = null;
 			}
+		}
 
+		if ( IsMissionClient() && !IsMissionOffline() )
+		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( className );
 			rpc.Write( position );
@@ -395,9 +398,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( itemState );
 			rpc.Write( m_OnDebugSpawn );
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
-		} else
+		}
+		else if (!targetEnt)
 		{
 			Server_SpawnEntity_Position( className, position, quantity, health, itemState, NULL );
+		}
+		else
+		{
+			Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, itemState, NULL );
 		}
 	}
 
