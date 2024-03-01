@@ -34,7 +34,8 @@ class JMObjectSpawnerForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
 
 		"#STR_COT_OBJECT_MODULE_CURSOR",
-		"#STR_COT_OBJECT_MODULE_SELF"
+		"#STR_COT_OBJECT_MODULE_SELF",
+		"#STR_COT_OBJECT_MODULE_TARGET"
 	};
 
 	private ref array< string > m_ObjItemStateFoodText =
@@ -607,11 +608,8 @@ class JMObjectSpawnerForm: JMFormBase
 		s_ObjSpawnMode = action.GetSelection() + 1;
 	}
 
-	void SpawnObject(int mode = COT_ObjectSpawnerMode.NONE)
+	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
 	{
-		if (mode == COT_ObjectSpawnerMode.NONE || mode == COT_ObjectSpawnerMode.UNKNOWN)
-			return;
-
 		string clipboardOutput = "";
 		string result;
 
@@ -635,7 +633,7 @@ class JMObjectSpawnerForm: JMFormBase
 		switch (mode)
 		{
 			default:
-			case COT_ObjectSpawnerMode.POSITION:
+			case COT_ObjectSpawnerMode.PLAYER_POSITION:
 				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, health, itemState);
 				break;
 
@@ -643,7 +641,11 @@ class JMObjectSpawnerForm: JMFormBase
 				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, itemState);
 				break;
 
-			case COT_ObjectSpawnerMode.INVENTORY:
+			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, itemState, true);
+				break;
+
+			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
 				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, itemState);
 				break;
 
