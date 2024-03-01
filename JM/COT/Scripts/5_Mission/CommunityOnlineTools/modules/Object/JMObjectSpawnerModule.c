@@ -569,6 +569,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		JMPlayerInstance callerInstance;
 
+		EntityAI ent;
+
 		if ( GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) && !GetGame().IsKindOf( className, "DZ_LightAI" ) && targetEnt.GetInventory() && Class.CastTo( ent, targetEnt.GetInventory().CreateInInventory( className ) ) )
 		{
 			string loggedSuffix = " at " + position.ToString();
