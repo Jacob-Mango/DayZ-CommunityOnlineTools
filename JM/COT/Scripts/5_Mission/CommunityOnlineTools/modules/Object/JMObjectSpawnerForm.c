@@ -183,7 +183,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
 		m_SpawnMode.SetSelectorWidth(1.0);
-		m_SpawnMode.SetSelection(s_ObjSpawnMode - 1, false);
+		m_SpawnMode.SetSelection(s_ObjSpawnMode, false);
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
@@ -605,7 +605,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		s_ObjSpawnMode = action.GetSelection() + 1;
+		s_ObjSpawnMode = action.GetSelection();
 	}
 
 	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
