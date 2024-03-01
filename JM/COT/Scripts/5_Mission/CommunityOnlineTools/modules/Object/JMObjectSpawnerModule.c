@@ -317,9 +317,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		switch ( rpc_type )
 		{
 		case JMObjectSpawnerModuleRPC.Position:
-			RPC_SpawnEntity_Position( ctx, sender, null );
-			break;
-		case JMObjectSpawnerModuleRPC.TargetInventory:
 			RPC_SpawnEntity_Position( ctx, sender, target );
 			break;
 		case JMObjectSpawnerModuleRPC.Inventory:

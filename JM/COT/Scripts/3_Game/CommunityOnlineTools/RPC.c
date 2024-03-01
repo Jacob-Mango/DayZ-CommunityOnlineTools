@@ -69,7 +69,6 @@ enum JMObjectSpawnerModuleRPC
 	INVALID = 10220,
 	Position,
 	Inventory,
-	TargetInventory,
 	Delete,
 	COUNT
 };
