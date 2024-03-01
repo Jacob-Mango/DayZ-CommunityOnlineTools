@@ -10,17 +10,6 @@ modded class MissionGameplay
 		{
 			g_cotBase = new CommunityOnlineTools;
 		}
-
-		if ( IsMissionOffline() )
-		{
-			if ( g_Game.GetGameState() != DayZGameState.MAIN_MENU )
-			{
-				if ( GetPermissionsManager().OnClientConnected( NULL, m_OfflineInstance ) )
-				{
-					GetCommunityOnlineToolsBase().SetClient( m_OfflineInstance );
-				}
-			}
-		}
 	}
 
 	void ~MissionGameplay()
@@ -93,6 +82,16 @@ modded class MissionGameplay
 		if ( IsMissionOffline() )
 		{
 			OfflineMissionStart();
+	
+			if ( g_Game.GetGameState() != DayZGameState.MAIN_MENU )
+			{
+				if ( GetPermissionsManager().OnClientConnected( NULL, m_OfflineInstance ) )
+				{
+					m_OfflineInstance.PlayerObject = GetPlayer();
+
+					GetCommunityOnlineToolsBase().SetClient( m_OfflineInstance );
+				}
+			}
 		}
 	}
 
