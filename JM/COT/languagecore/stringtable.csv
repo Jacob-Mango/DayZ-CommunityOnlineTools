@@ -138,6 +138,7 @@ STR_COT_OBJECT_MODULE_SEARCH,Search:,Search:,Search:,Suche:,Искать:,Search
 STR_COT_OBJECT_MODULE_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),Selected Player(s),Ausgewählte(r) Spieler,Выбранный игрок(-и),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Joueur(s) sélectionné(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s)
 STR_COT_OBJECT_MODULE_SELF,Self,Self,Self,Mir selbst,Себя,Self,Self,Self,Self,Sois-même,Self,Self,Self,Self
 STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn On:,Spawn On:,Spawn On:,Spawnen bei:,Заспавнить На:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:
+STR_COT_OBJECT_MODULE_TARGET,Target,Target,Target,Ziel,Target,Target,Target,Target,Target,Target,Target,Target,Target,Target
 STR_COT_PERMISSION_ALLOW_C,ALLOW,ALLOW,ALLOW,ERLAUBEN,РАЗРЕШИТЬ,ALLOW,ALLOW,ALLOW,ALLOW,AUTORISER,ALLOW,ALLOW,ALLOW,ALLOW
 STR_COT_PERMISSION_DISALLOW_C,DISALLOW,DISALLOW,DISALLOW,VERBIETEN,ЗАПРЕТИТЬ,DISALLOW,DISALLOW,DISALLOW,DISALLOW,INTERDIRE,DISALLOW,DISALLOW,DISALLOW,DISALLOW
 STR_COT_PERMISSION_INHERIT_C,INHERIT,INHERIT,INHERIT,ERBEN,НАСЛЕДОВАТЬ,INHERIT,INHERIT,INHERIT,INHERIT,HERITE,INHERIT,INHERIT,INHERIT,INHERIT
