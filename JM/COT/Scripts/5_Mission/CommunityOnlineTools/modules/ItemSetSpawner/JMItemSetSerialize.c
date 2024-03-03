@@ -32,6 +32,12 @@ class JMItemSetSerialize
 
 		JsonFileLoader< JMItemSetSerialize >.JsonLoadFile( JMConstants.DIR_ITEMS + settings.m_FileName + JMConstants.EXT_ITEM, settings );
 
+		if ( !settings )
+		{
+			Print("[Community Online Tools] ItemSets Module - Cannot read the file "+ file);
+			return NULL;
+		}
+
 		return settings;
 	}
 
