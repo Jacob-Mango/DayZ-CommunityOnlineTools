@@ -422,7 +422,9 @@ class JMPlayerForm: JMFormBase
 		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
 		m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-		//m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
+#ifdef DIAG
+		m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
+#endif
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -742,7 +744,16 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		//m_Module.Ban( JM_GetSelected().GetPlayers() );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "BanPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer" );
+	}
+
+	void BanPlayer_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void BanPlayer(JMConfirmation confirmation)
+	{
+		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )
