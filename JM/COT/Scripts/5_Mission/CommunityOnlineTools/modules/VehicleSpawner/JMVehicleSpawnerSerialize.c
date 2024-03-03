@@ -30,6 +30,12 @@ class JMVehicleSpawnerSerialize : Managed
 
 		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( JMConstants.DIR_VEHICLES + settings.m_FileName + JMConstants.EXT_VEHICLE, settings );
 
+		if ( !settings )
+		{
+			Print("[Community Online Tools] Vehicle Spawner Module - Cannot read the file "+ file);
+			return NULL;
+		}
+
 		return settings;
 	}
 
