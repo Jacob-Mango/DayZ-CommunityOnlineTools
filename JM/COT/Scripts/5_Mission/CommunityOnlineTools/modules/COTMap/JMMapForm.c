@@ -73,31 +73,34 @@ class JMMapForm: JMFormBase
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
-		for ( int i = 0; i < players.Count(); ++i )
+		foreach (JMPlayerInstance player: players)
 		{
 			int colors = ARGB( 255, 230, 20, 20 );
-			string marker = "";
+			string marker;
 
-			//if ( players[i].PlayerObject.IsDriving() )
-			//	marker += JM_COT_ICON_CAR;
+			//if ( player.PlayerObject && player.PlayerObject.GetParent() && player.PlayerObject.GetParent().IsInherited(CarScript) )
+				//marker = JM_COT_ICON_CAR;
 			//else
-				marker += JM_COT_ICON_DOT;
+				marker = JM_COT_ICON_DOT;
+
+			if ( player.PlayerObject )
+			{
+				if ( !player.PlayerObject.IsAlive() )
+				{
+					colors = ARGB( 255, 50, 0, 0 );
+					//marker += "_dead";
+				}
+				else if ( player.PlayerObject.IsUnconscious() )
+				{
+					colors = ARGB( 255, 100, 0, 0 );
+					//marker += "_uncon";
+				}
+			}
 			
-			if ( JM_GetSelected().IsSelected( players[i].GetGUID() ) )
+			if ( JM_GetSelected().IsSelected( player.GetGUID() ) )
 				marker += "_selected";
 
-			if ( !players[i].PlayerObject.IsAlive() )
-			{
-				colors = ARGB( 255, 50, 0, 0 );
-				//marker += "_dead";
-			}
-			else if ( players[i].PlayerObject.IsUnconscious() )
-			{
-				colors = ARGB( 255, 100, 0, 0 );
-				//marker += "_uncon";
-			}
-
-			m_MapWidget.AddUserMark( players[i].GetPosition(), players[i].GetName(), colors, marker + ".paa" );
+			m_MapWidget.AddUserMark( player.GetPosition(), player.GetName(), colors, marker + ".paa" );
 		}
 
 		GetCommunityOnlineTools().RefreshClientPositions();
