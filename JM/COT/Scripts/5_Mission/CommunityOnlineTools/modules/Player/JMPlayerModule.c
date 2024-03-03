@@ -21,6 +21,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.ReceiveDamageDealt" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
@@ -232,6 +233,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.KickMessage:
 			RPC_KickMessage( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Ban:
+			RPC_Ban( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.BanMessage:
+			RPC_BanMessage( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Message:
 			RPC_Message( ctx, sender, target );
@@ -1983,6 +1990,86 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_Heal( guids, senderRPC, instance );
 	}
 
+	void Ban( array< string > guids, string messageText = "" )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Ban( guids, NULL, NULL, messageText );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(guids);
+			rpc.Write(messageText);
+			rpc.Send( NULL, JMPlayerModuleRPC.Ban, true, NULL );
+		}
+	}
+
+	private void Exec_Ban( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		foreach (JMPlayerInstance player: players)
+		{
+			if (!player.PlayerObject)
+				continue;
+
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.Ban", player.PlayerObject.GetIdentity() ) )
+				continue;
+
+			SendBanMessage(player.PlayerObject.GetIdentity(), messageText);
+
+			//! Kick and Ban player after delay so client can still receive kickmessage RPC
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
+		}
+
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
+	}
+
+	private void Exec_Ban_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
+	{
+		if (!GetGame() || !player.PlayerObject)
+			return;
+
+		auto missionServer = MissionServer.Cast(GetGame().GetMission());
+
+		if (!missionServer)
+			return;
+
+		player.PlayerObject.COTSetIsBeingKicked(true);
+
+		GetGame().SendLogoutTime(player.PlayerObject, 0);
+
+		missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
+
+		GetCommunityOnlineToolsBase().Log( ident, "Banned [guid=" + player.GetGUID() + "]" );
+
+		SendWebhook( "Ban", instance, "Banned " + player.FormatSteamWebhook() );
+	}
+
+	private void RPC_Ban( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC, instance ) )
+			return;
+
+		Exec_Kick( guids, senderRPC, instance, messageText );
+	}
+	
+	private void SendBanMessage(PlayerIdentity identity, string messageText)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write(messageText);
+		rpc.Send(NULL, JMPlayerModuleRPC.BanMessage, true, identity);
+	}
+
 	void Kick( array< string > guids, string messageText )
 	{
 		if ( IsMissionHost() )
@@ -2001,9 +2088,12 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		foreach (auto player: players)
+		foreach (JMPlayerInstance player: players)
 		{
 			if (!player.PlayerObject)
+				continue;
+
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.Kick", player.PlayerObject.GetIdentity() ) )
 				continue;
 
 			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
@@ -2078,6 +2168,26 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN: " + messageText;
 		else
 			messageText = "#STR_COT_NOTIFICATION_KICKED_BY_ADMIN";
+		
+		JMDeferredMessage.QueuedMessages.Clear();
+		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
+	}
+
+	private void RPC_BanMessage(ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
+	{
+		auto trace = CF_Trace_0(this, "RPC_BanMessage");
+
+		if (GetGame().IsDedicatedServer())
+			return;
+
+		string messageText;
+		if (!ctx.Read(messageText))
+			return;
+
+		if (messageText)
+			messageText = "#STR_COT_NOTIFICATION_BANNED_BY_ADMIN: " + messageText;
+		else
+			messageText = "#STR_COT_NOTIFICATION_BANNED_BY_ADMIN";
 		
 		JMDeferredMessage.QueuedMessages.Clear();
 		JMDeferredMessage.Queue("#STR_COT_NOTIFICATION_TITLE_ADMIN", messageText);
