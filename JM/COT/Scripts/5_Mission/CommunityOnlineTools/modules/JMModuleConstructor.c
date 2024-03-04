@@ -7,11 +7,12 @@ modded class JMModuleConstructor
 		modules.Insert( JMPlayerModule );
 		modules.Insert( JMObjectSpawnerModule );
 		modules.Insert( JMESPModule );
-		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
 
 #ifdef DIAG
+		//modules.Insert( JMTestingModule );
+		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMExampleModule );
 		modules.Insert( JMWeatherModule );
 #else
@@ -20,8 +21,8 @@ modded class JMModuleConstructor
 
 		//! TODO: Merge with ItemSets once it will use prefabs
 		modules.Insert( JMVehicleSpawnerModule );
-
 		modules.Insert( JMItemSetSpawnerModule );
+		
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
@@ -37,7 +38,6 @@ modded class JMModuleConstructor
 		//if ( IsMissionOffline() )
 		//	modules.Insert( JMMissionSelectorModule );
 
-		//modules.Insert( JMTestingModule );
 		
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
