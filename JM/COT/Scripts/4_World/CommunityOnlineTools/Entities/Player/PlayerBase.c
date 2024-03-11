@@ -802,4 +802,3 @@ modded class PlayerBase
 		//}
 	}
 };
-
