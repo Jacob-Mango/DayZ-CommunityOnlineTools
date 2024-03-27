@@ -175,7 +175,7 @@ class JMPlayerInstance : Managed
 
 	void LoadPermissions( array< string > permissions )
 	{
-		auto trace = CF_Trace_0(this, "LoadPermissions");
+		auto trace = CF_Trace_1(this).Add(permissions.Count());
 
 		Assert_Null( m_RootPermission );
 
@@ -465,7 +465,7 @@ class JMPlayerInstance : Managed
 
 	protected bool ReadPermissions( string filename )
 	{
-		auto trace = CF_Trace_1(this, "ReadPermissions").Add(filename);
+		auto trace = CF_Trace_1(this).Add(filename);
 
 		Assert_Null( m_RootPermission );
 
