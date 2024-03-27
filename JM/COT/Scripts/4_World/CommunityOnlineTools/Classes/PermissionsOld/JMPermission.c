@@ -336,7 +336,7 @@ class JMPermission : Managed
 			auto trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
 
 		for ( int i = 0; i < input.Count(); i++ )
-			AddPermission( input[i], JMPermissionType.INHERIT, false );
+			AddPermission( input[i], JMPermissionType.INHERIT );
 	}
 
 	void OnSend(ParamsWriteContext ctx)
