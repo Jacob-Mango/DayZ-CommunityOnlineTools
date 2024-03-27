@@ -598,9 +598,16 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			Magazine mag;
 			if (Class.CastTo(mag, item))
+			{
 				mag.ServerSetAmmoCount(quantity);
-			else if ( item.HasQuantity() )
+			}
+			else if (item.HasQuantity())
+			{
 				item.SetQuantity(quantity);
+
+				if (item.GetCompEM())
+					item.GetCompEM().SetEnergy0To1(quantity / item.GetQuantityMax());
+			}
 
 			if ( itemState != 0 )
 			{
