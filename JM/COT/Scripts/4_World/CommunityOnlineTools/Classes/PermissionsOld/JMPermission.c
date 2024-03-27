@@ -335,8 +335,6 @@ class JMPermission : Managed
 		if (!Parent)
 			auto trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
 
-		Clear();
-
 		for ( int i = 0; i < input.Count(); i++ )
 			AddPermission( input[i], JMPermissionType.INHERIT, false );
 	}
