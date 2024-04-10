@@ -2013,9 +2013,6 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			if (!player.PlayerObject)
 				continue;
 
-			if ( GetPermissionsManager().HasPermission( "Admin.Player.Ban", player.PlayerObject.GetIdentity() ) )
-				continue;
-
 			SendBanMessage(player.PlayerObject.GetIdentity(), messageText);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
@@ -2060,7 +2057,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC, instance ) )
 			return;
 
-		Exec_Kick( guids, senderRPC, instance, messageText );
+		Exec_Ban( guids, senderRPC, instance, messageText );
 	}
 	
 	private void SendBanMessage(PlayerIdentity identity, string messageText)
@@ -2091,9 +2088,6 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		foreach (JMPlayerInstance player: players)
 		{
 			if (!player.PlayerObject)
-				continue;
-
-			if ( GetPermissionsManager().HasPermission( "Admin.Player.Kick", player.PlayerObject.GetIdentity() ) )
 				continue;
 
 			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
