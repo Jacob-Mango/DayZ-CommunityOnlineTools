@@ -27,6 +27,10 @@ modded class CarScript
 			return false;
 		}
 
+		Human driver = CrewMember(DayZPlayerConstants.VEHICLESEAT_DRIVER);
+		if (driver && !driver.GetAllowDamage())
+			return false;
+
 		return true;
 	}
 
