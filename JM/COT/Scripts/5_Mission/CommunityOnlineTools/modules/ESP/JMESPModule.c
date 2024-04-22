@@ -412,6 +412,11 @@ class JMESPModule: JMRenderableModuleBase
 		return m_ViewTypes;
 	}
 
+	JMESPViewType GetViewType(typename type)
+	{
+		return m_ViewTypesByType[type];
+	}
+
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
