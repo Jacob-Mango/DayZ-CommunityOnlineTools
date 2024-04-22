@@ -1,5 +1,9 @@
 class JMESPMeta : Managed
 {
+#ifdef DIAG
+	static int s_JMESPMetaCount;
+#endif
+
 	static ref CF_DoublyLinkedNodes_WeakRef<JMESPMeta> s_JM_All = new CF_DoublyLinkedNodes_WeakRef<JMESPMeta>();
 
 	ref CF_DoublyLinkedNode_WeakRef<JMESPMeta> s_JM_Node;
@@ -46,6 +50,10 @@ class JMESPMeta : Managed
 	void JMESPMeta()
 	{
 		s_JM_Node = s_JM_All.Add(this);
+
+	#ifdef DIAG
+		s_JMESPMetaCount++;
+	#endif
 	}
 
 	void ~JMESPMeta()
@@ -54,6 +62,12 @@ class JMESPMeta : Managed
 
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
+
+	#ifdef DIAG
+		s_JMESPMetaCount--;
+		if (s_JMESPMetaCount <= 0)
+			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
+	#endif
 	}
 
 	void Create( JMESPModule mod )

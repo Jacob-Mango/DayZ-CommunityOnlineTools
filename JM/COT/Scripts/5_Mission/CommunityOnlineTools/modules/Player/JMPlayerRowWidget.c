@@ -1,5 +1,9 @@
 class JMPlayerRowWidget: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMPlayerRowWidgetCount;
+#endif
+
 	private Widget layoutRoot;
 
 	private string m_GUID;
@@ -9,6 +13,37 @@ class JMPlayerRowWidget: ScriptedWidgetEventHandler
 	CheckBoxWidget Checkbox;
 
 	JMPlayerForm Menu;
+
+	void JMPlayerRowWidget()
+	{
+	#ifdef DIAG
+		s_JMPlayerRowWidgetCount++;
+	#ifdef COT_DEBUGLOGS
+		CF_Log.Info("JMPlayerRowWidget count: " + s_JMPlayerRowWidgetCount);
+	#endif
+	#endif
+	}
+
+	void ~JMPlayerRowWidget()
+	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMPlayerRowWidgetCount--;
+		if (s_JMPlayerRowWidgetCount <= 0)
+			CF_Log.Info("JMPlayerRowWidget count: " + s_JMPlayerRowWidgetCount);
+	#endif
+	}
 
 	void OnWidgetScriptInit( Widget w )
 	{

@@ -22,8 +22,6 @@ class UIActionDropdownList: UIActionBase
 	void ~UIActionDropdownList()
 	{
 		delete m_Items;
-
-		m_List.Unlink();
 	}
 	
 	override void OnInit() 

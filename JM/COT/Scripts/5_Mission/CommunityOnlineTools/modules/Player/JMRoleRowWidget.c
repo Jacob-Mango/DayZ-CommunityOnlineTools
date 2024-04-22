@@ -1,5 +1,9 @@
 class JMRoleRowWidget: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMRoleRowWidgetCount;
+#endif
+
 	string Name;
 	int Type;
 
@@ -7,6 +11,37 @@ class JMRoleRowWidget: ScriptedWidgetEventHandler
 	protected CheckBoxWidget  Checkbox;
 
 	protected Widget layoutRoot;
+
+	void JMRoleRowWidget()
+	{
+	#ifdef DIAG
+		s_JMRoleRowWidgetCount++;
+	#ifdef COT_DEBUGLOGS
+		CF_Log.Info("JMRoleRowWidget count: " + s_JMRoleRowWidgetCount);
+	#endif
+	#endif
+	}
+
+	void ~JMRoleRowWidget()
+	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMRoleRowWidgetCount--;
+		if (s_JMRoleRowWidgetCount <= 0)
+			CF_Log.Info("JMRoleRowWidget count: " + s_JMRoleRowWidgetCount);
+	#endif
+	}
 
 	void OnWidgetScriptInit( Widget w )
 	{

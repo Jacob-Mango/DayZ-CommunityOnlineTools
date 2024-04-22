@@ -1,5 +1,9 @@
 class JMFormBase: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMFormBaseCount;
+#endif
+
 	protected Widget layoutRoot;
 	
 	protected CF_Window m_Window;
@@ -12,11 +16,35 @@ class JMFormBase: ScriptedWidgetEventHandler
 
 	void JMFormBase() 
 	{
+	#ifdef DIAG
+		s_JMFormBaseCount++;
+		CF_Log.Info("JMFormBase count: " + s_JMFormBaseCount);
+	#endif
 	}
 
 	void ~JMFormBase() 
 	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		OnHide();
+
+		//! @note this should not be necessary since if the JMWindow handling this JMForm is destroyed,
+		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMFormBaseCount--;
+		if (s_JMFormBaseCount <= 0)
+			CF_Log.Info("JMFormBase count: " + s_JMFormBaseCount);
+	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )

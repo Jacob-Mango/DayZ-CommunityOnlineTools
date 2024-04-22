@@ -2,12 +2,16 @@
 typedef JMWindowBase CF_Window;
 class JMWindowBase: ScriptedWidgetEventHandler  
 {
+#ifdef DIAG
+	static int s_JMWindowBaseCount;
+#endif
+
 	reference float m_DragXN;
 	reference float m_DragYN;
 	reference float m_DragXP;
 	reference float m_DragYP;
 
-	private ref Widget layoutRoot;
+	private Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
 	private Widget m_TitleWrapper;
@@ -42,21 +46,37 @@ class JMWindowBase: ScriptedWidgetEventHandler
 		GetCOTWindowManager().AddWindow( this );
 
 		m_BrokenWidgets = new array< Widget >;
+
+	#ifdef DIAG
+		s_JMWindowBaseCount++;
+		CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
+	#endif
 	}
 
 	void ~JMWindowBase() 
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+JMWindowBase::~JMWindowBase" );
-		#endif
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
 
-		//layoutRoot.Unlink();
-		#ifdef COT_DEBUGLOGS
-		Print( "-JMWindowBase::~JMWindowBase" );
+		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
 		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMWindowBaseCount--;
+		if (s_JMWindowBaseCount <= 0)
+			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
+	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -200,7 +220,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_0(this, "Show");
+		auto trace = CF_Trace_0(this);
 		#endif
 
 		if ( !layoutRoot )
@@ -214,6 +234,8 @@ class JMWindowBase: ScriptedWidgetEventHandler
 			m_Form.m_IsShown = true;
 		}
 
+		layoutRoot.Update();
+
 		if (m_IsShown)
 			return;
 
@@ -222,6 +244,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 
+		m_IsShown = true;
 	}
 
 	void Hide()
