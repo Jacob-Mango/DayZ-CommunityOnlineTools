@@ -12,6 +12,8 @@ class JMObjectSpawnerForm: JMFormBase
 	private UIActionEditableTextPreview m_SearchBox;
 	private UIActionSelectBox m_SpawnMode;
 
+	private UIActionSelectBox m_ObjSetupMode;
+
 	private TextListboxWidget m_ClassList;
 
 	private ItemPreviewWidget m_ItemPreview;
@@ -186,11 +188,14 @@ class JMObjectSpawnerForm: JMFormBase
 		m_SpawnMode.SetSelection(s_ObjSpawnMode, false);
 		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
 
-		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_ONDEBUGSPAWN", this, "Click_OnDebugSpawn", m_Module.m_OnDebugSpawn );
+		UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
+		m_ObjSetupMode =  UIActionManager.CreateSelectionBox( spawnOptions, "", {"#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG", "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE", "#STR_COT_GENERIC_NONE"}, this, "Click_ObjSetupMode" );
+		m_ObjSetupMode.SetSelectorWidth(1.0);
+		m_ObjSetupMode.SetSelection(m_Module.m_ObjSetupMode, false);
+
 		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_AllowRestrictedClassNames );
-		UIActionManager.CreatePanel( spawnOptions );
 
 		m_SearchBox.SetText(m_Module.m_SearchText);
 		UpdateList();
@@ -351,11 +356,11 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateList();
 	}
 
-	void Click_OnDebugSpawn( UIEvent eid, UIActionBase action )	
+	void Click_ObjSetupMode( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CHANGE ) return;
 
-		m_Module.m_OnDebugSpawn = action.IsChecked();	
+		m_Module.m_ObjSetupMode = action.GetSelection();
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )

@@ -4,4 +4,16 @@ modded class BuildingBase
 	override void OnDebugSpawn()
 	{
 	}
+
+	void COT_OnDebugSpawn()
+	{
+		OnDebugSpawn();
+
+		COT_Refuel();
+	}
+
+	void COT_Refuel()
+	{
+		CommunityOnlineToolsBase.Refuel(this);
+	}
 }

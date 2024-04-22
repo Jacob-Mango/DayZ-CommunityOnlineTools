@@ -1,6 +1,6 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
-	bool m_OnDebugSpawn = true;
+	int m_ObjSetupMode = COT_ObjectSetupMode.DEBUGSPAWN;
 	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
@@ -174,8 +174,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
-		rayInput.radius = 0.5;
-		rayInput.sorted = true;
+		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 
 		Object obj;
@@ -393,7 +392,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Write( itemState );
-			rpc.Write( m_OnDebugSpawn );
+			rpc.Write( m_ObjSetupMode );
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
@@ -418,6 +417,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+
+		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+			flags |= ECE_EQUIP;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
@@ -468,7 +470,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			if ( !ctx.Read( m_OnDebugSpawn ) )
+			if ( !ctx.Read( m_ObjSetupMode ) )
 				return;
 
 			EntityAI targetEnt;
@@ -489,7 +491,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Write( itemState );
-			rpc.Write( m_OnDebugSpawn );
+			rpc.Write( m_ObjSetupMode );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
@@ -525,6 +527,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				int flags = ECE_CREATEPHYSICS;
 				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
+
+				if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+					flags |= ECE_EQUIP;
 		
 				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 					continue;
@@ -563,7 +568,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( itemState ) )
 				return;
 
-			if ( !ctx.Read( m_OnDebugSpawn ) )
+			if ( !ctx.Read( m_ObjSetupMode ) )
 				return;
 
 			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, senderRPC );
@@ -591,8 +596,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SetupEntity( EntityAI entity, out float quantity, out float health, out int itemState )
+	private void SetupEntity( EntityAI entity, float quantity, float health, int itemState )
 	{
+		switch (m_ObjSetupMode)
+		{
+			case COT_ObjectSetupMode.DEBUGSPAWN:
+				int depth;
+				if (!entity.IsMan())
+					depth = 3;
+				OnDebugSpawn(entity, depth);
+				break;
+
+			case COT_ObjectSetupMode.CE:
+				entity.EEOnCECreate();
+				break;
+		}
+
 		ItemBase item;
 		if ( Class.CastTo( item, entity ) )
 		{
@@ -633,13 +652,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		if ( m_OnDebugSpawn )
-		{
-			OnDebugSpawn(entity);
-
-			CommunityOnlineToolsBase.Refuel(entity);
-		}
-
 		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType()) > 0 )
 		{
 			if ( health == -1 )
@@ -675,13 +687,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		ItemBase item;
 		CarScript vehicle;
+		BuildingBase building;
 
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn();
 		else if (Class.CastTo(vehicle, entity))
 			vehicle.COT_OnDebugSpawn();
-		else if (entity.IsInherited(BuildingBase))
-			entity.OnDebugSpawn();
+		else if (Class.CastTo(building, entity))
+			building.COT_OnDebugSpawn();
 
 		if (!entity.GetInventory())
 			return;
@@ -763,10 +776,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 								if (IsExcludedClassName(child_name))
 									break;
 
-								CF_Log.Info("Trying to spawn %1 on %2", child_name, entity.GetType());
+								//! Limit character attachments to clothing
+								if (entity.IsMan() && !GetGame().IsKindOf(child_name, "Clothing_Base"))
+									break;
+
 								child = entity.GetInventory().CreateAttachmentEx(child_name, slot_id);
 								if (child)
 								{
+									CF_Log.Info("Successfully spawned %1 in slot %2 on %3", child_name, inv_slot, entity.GetType());
 									slot_ids.Remove(idx);
 									if (depth > 0)
 										OnDebugSpawn(child, depth - 1);
@@ -828,6 +845,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+
+		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+			flags |= ECE_EQUIP;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
