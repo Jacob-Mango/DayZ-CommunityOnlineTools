@@ -131,14 +131,16 @@ STR_COT_OBJECT_MODULE_FILTER_TYPE_ITEMS,Items,Items,Items,Gegenstände,Пред�
 STR_COT_OBJECT_MODULE_FILTER_TYPE_VEHICLES,Vehicles,Vehicles,Vehicles,Fahrzeuge,Транспорт,Vehicles,Vehicles,Vehicles,Vehicles,Véhicules,Vehicles,Vehicles,Vehicles,Vehicles
 STR_COT_OBJECT_MODULE_INVENTORY,Inventory,Inventory,Inventory,Inventar,Инвентарь,Inventory,Inventory,Inventory,Inventory,Inventaire,Inventory,Inventory,Inventory,Inventory
 STR_COT_OBJECT_MODULE_NAME,Object Spawner,Object Spawner,Object Spawner,Objekt-Spawner,Спавнер Объектов,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Spawneur d'Objets,Object Spawner,Object Spawner,Object Spawner,Object Spawner
-STR_COT_OBJECT_MODULE_ONDEBUGSPAWN,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Mit Zubehör/Treibstoff spawnen,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel,Spawn with attachments/fuel
-STR_COT_OBJECT_MODULE_SHOWUNSAFE,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects,Show Unsafe objects
+STR_COT_OBJECT_MODULE_SPAWN_WITH,Spawn with:,Spawn with:,Spawn with:,Spawnen mit:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:
+STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG,Default,Default,Default,Standard,Default,Default,Default,Default,Default,Default,Default,Default,Default,Default
+STR_COT_OBJECT_MODULE_SPAWN_WITH_CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE
+STR_COT_OBJECT_MODULE_SHOWUNSAFE,Show unsafe objects,Show unsafe objects,Show unsafe objects,Zeige Debug-Objekte,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects
 STR_COT_OBJECT_MODULE_QUANTITY,Quantity:,Quantity:,Quantity:,Menge:,Количество:,Quantity:,Quantity:,Quantity:,Quantity:,Quantité:,Quantity:,Quantity:,Quantity:,Quantity:
 STR_COT_OBJECT_MODULE_HEALTH,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:,Health:
 STR_COT_OBJECT_MODULE_SEARCH,Search:,Search:,Search:,Suche:,Искать:,Search:,Search:,Search:,Search:,Recherche:,Search:,Search:,Search:,Search:
 STR_COT_OBJECT_MODULE_SELECTED_PLAYERS,Selected Player(s),Selected Player(s),Selected Player(s),Ausgewählte(r) Spieler,Выбранный игрок(-и),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s),Joueur(s) sélectionné(s),Selected Player(s),Selected Player(s),Selected Player(s),Selected Player(s)
 STR_COT_OBJECT_MODULE_SELF,Self,Self,Self,Mir selbst,Себя,Self,Self,Self,Self,Sois-même,Self,Self,Self,Self
-STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn On:,Spawn On:,Spawn On:,Spawnen bei:,Заспавнить На:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:,Spawn On:
+STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn on:,Spawn on:,Spawn on:,Spawnen bei:,Заспавнить на:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Spawn on:
 STR_COT_OBJECT_MODULE_TARGET,Target,Target,Target,Ziel,Target,Target,Target,Target,Target,Target,Target,Target,Target,Target
 STR_COT_PERMISSION_ALLOW_C,ALLOW,ALLOW,ALLOW,ERLAUBEN,РАЗРЕШИТЬ,ALLOW,ALLOW,ALLOW,ALLOW,AUTORISER,ALLOW,ALLOW,ALLOW,ALLOW
 STR_COT_PERMISSION_DISALLOW_C,DISALLOW,DISALLOW,DISALLOW,VERBIETEN,ЗАПРЕТИТЬ,DISALLOW,DISALLOW,DISALLOW,DISALLOW,INTERDIRE,DISALLOW,DISALLOW,DISALLOW,DISALLOW
