@@ -175,6 +175,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
+		rayInput.type = ObjIntersectFire;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 
 		Object obj;
