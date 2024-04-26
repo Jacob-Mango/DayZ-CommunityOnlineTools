@@ -35,6 +35,8 @@ class UIActionBase: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+		Deactivate();
+
 		delete m_Data;
 
 		//! @note this should not be necessary since if the JMWindowBase handling this UIAction is destroyed,
@@ -52,6 +54,16 @@ class UIActionBase: ScriptedWidgetEventHandler
 		if (s_UIActionBaseCount <= 0)
 			CF_Log.Info("UIActionBase count: " + s_UIActionBaseCount);
 	#endif
+	}
+
+	void Deactivate()
+	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+
+		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
+			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
+		if (m_WasFocused)
+			CommunityOnlineTools.ForceDisableInputs(false);
 	}
 
 	void GetUserData( out Class data )
@@ -98,26 +110,12 @@ class UIActionBase: ScriptedWidgetEventHandler
 
 	void Hide()
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Hide" );
-		#endif
-		//Error("test");
-
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		Deactivate();
 
 		OnHide();
 		
 		if ( layoutRoot )
 			layoutRoot.Show( false );
-
-		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
-			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
-		if (m_WasFocused)
-			CommunityOnlineTools.ForceDisableInputs(false);
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Hide" );
-		#endif
 	}
 
 	void OnShow()
