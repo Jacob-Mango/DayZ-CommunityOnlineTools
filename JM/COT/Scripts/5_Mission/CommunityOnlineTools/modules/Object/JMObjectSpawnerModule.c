@@ -175,13 +175,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
-		rayInput.type = ObjIntersectFire;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 
 		Object obj;
 		Object resultObj;
-		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		TIntArray types = {ObjIntersectFire, ObjIntersectView};
+		foreach (int type: types)
 		{
+			rayInput.type = type;
+
+			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
+				continue;
+
 			foreach ( RaycastRVResult result: results )
 			{
 				resultObj = result.obj;
@@ -237,6 +242,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				obj = resultObj;
 				break;
 			}
+
+			if (obj)
+				break;
 		}
 
 		return obj;
