@@ -131,8 +131,8 @@ STR_COT_OBJECT_MODULE_FILTER_TYPE_ITEMS,Items,Items,Items,Gegenstände,Пред�
 STR_COT_OBJECT_MODULE_FILTER_TYPE_VEHICLES,Vehicles,Vehicles,Vehicles,Fahrzeuge,Транспорт,Vehicles,Vehicles,Vehicles,Vehicles,Véhicules,Vehicles,Vehicles,Vehicles,Vehicles
 STR_COT_OBJECT_MODULE_INVENTORY,Inventory,Inventory,Inventory,Inventar,Инвентарь,Inventory,Inventory,Inventory,Inventory,Inventaire,Inventory,Inventory,Inventory,Inventory
 STR_COT_OBJECT_MODULE_NAME,Object Spawner,Object Spawner,Object Spawner,Objekt-Spawner,Спавнер Объектов,Object Spawner,Object Spawner,Object Spawner,Object Spawner,Spawneur d'Objets,Object Spawner,Object Spawner,Object Spawner,Object Spawner
-STR_COT_OBJECT_MODULE_SPAWN_WITH,Spawn with:,Spawn with:,Spawn with:,Spawnen mit:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:,Spawn with:
-STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG,Default,Default,Default,Standard,Default,Default,Default,Default,Default,Default,Default,Default,Default,Default
+STR_COT_OBJECT_MODULE_SPAWN_WITH,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Mit Zubehör spawnen:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:,Spawn with attachments:
+STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG,Auto,Auto,Auto,Automatisch,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto
 STR_COT_OBJECT_MODULE_SPAWN_WITH_CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE,CE
 STR_COT_OBJECT_MODULE_SHOWUNSAFE,Show unsafe objects,Show unsafe objects,Show unsafe objects,Zeige Debug-Objekte,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects,Show unsafe objects
 STR_COT_OBJECT_MODULE_QUANTITY,Quantity:,Quantity:,Quantity:,Menge:,Количество:,Quantity:,Quantity:,Quantity:,Quantity:,Quantité:,Quantity:,Quantity:,Quantity:,Quantity:
