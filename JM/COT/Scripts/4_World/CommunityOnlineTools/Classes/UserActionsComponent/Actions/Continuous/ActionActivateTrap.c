@@ -70,4 +70,21 @@ class COT_ActionTriggerBearTrap: ActionClapBearTrapWithThisItem
 	{
 		return ContinuousInteractActionInput;
 	}
+
+	override bool ActionCondition( PlayerBase player, ActionTarget target, ItemBase item )
+	{
+		if (!super.ActionCondition(player, target, item))
+			return false;
+
+	#ifdef SERVER
+		PlayerIdentity identity = player.GetIdentity();
+		if (!GetCommunityOnlineToolsBase().IsActive(identity) || !GetPermissionsManager().HasPermission("Actions.QuickActions", identity))
+			return false;
+	#else
+		if (!GetCommunityOnlineToolsBase().IsActive() || !GetPermissionsManager().HasPermission("Actions.QuickActions"))
+			return false;
+	#endif
+
+		return true;
+	}
 }
