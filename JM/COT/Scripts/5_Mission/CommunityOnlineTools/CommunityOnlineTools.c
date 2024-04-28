@@ -4,6 +4,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
 		GetPermissionsManager().RegisterPermission( "Admin.Roles.Update" );
+		GetPermissionsManager().RegisterPermission("Actions.QuickActions");
 	}
 
 	void ~CommunityOnlineTools()
@@ -116,9 +117,17 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto message = m_Webhook.CreateDiscordMessage();
 		
 		if ( active )
+		{
 			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has activated Community Online Tools" );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Activated Community Online Tools [guid=" + instance.GetGUID() + "]" );
+		}
 		else
+		{
 			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has de-activated Community Online Tools" );
+			GetCommunityOnlineToolsBase().Log( senderRPC, "Deactivated Community Online Tools [guid=" + instance.GetGUID() + "]" );
+		}
+
+		m_ActiveGUIDs[senderRPC.GetId()] = active;
 
 		m_Webhook.Post( "AdminActive", message );
 	}

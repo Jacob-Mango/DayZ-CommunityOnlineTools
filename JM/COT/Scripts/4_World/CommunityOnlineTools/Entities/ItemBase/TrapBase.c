@@ -4,4 +4,11 @@ modded class TrapBase
 	override void COT_OnDebugSpawn()
 	{
 	}
+	
+	override void SetActions()
+	{
+		super.SetActions();
+		
+		AddAction(COT_QuickActionActivateTrap);
+	}
 }
