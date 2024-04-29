@@ -1,6 +1,6 @@
 modded class BearTrap
 {
-	//override void COT_OnDebugSpawn()
+	//override void COT_OnDebugSpawn(PlayerBase player)
 	//{
 		//SetActive();
 	//}
