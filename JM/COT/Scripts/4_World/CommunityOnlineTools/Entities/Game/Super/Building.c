@@ -5,7 +5,7 @@ modded class BuildingBase
 	{
 	}
 
-	void COT_OnDebugSpawn()
+	void COT_OnDebugSpawn(PlayerBase player)
 	{
 		OnDebugSpawn();
 

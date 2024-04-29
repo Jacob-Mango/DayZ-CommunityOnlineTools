@@ -1,11 +1,14 @@
 modded class ImprovisedExplosive
 {
-	override void COT_OnDebugSpawn()
+	override void COT_OnDebugSpawn(PlayerBase player)
 	{
 		GetInventory().CreateAttachment("Plastic_Explosive");
 		GetInventory().CreateAttachment("Plastic_Explosive");
 		UnlockTriggerSlots();
-		RemoteDetonatorTrigger trigger = RemoteDetonatorTrigger.Cast(GetGame().CreateObject("RemoteDetonatorTrigger", GetPosition()));
+		Object triggerObj = player.GetHumanInventory().CreateInHands("RemoteDetonatorTrigger");
+		if (!triggerObj)
+			triggerObj = GetGame().CreateObject("RemoteDetonatorTrigger", player.GetPosition());
+		RemoteDetonatorTrigger trigger = RemoteDetonatorTrigger.Cast(triggerObj);
 		RemoteDetonatorReceiver receiver = RemoteDetonatorReceiver.Cast(GetInventory().CreateAttachment("RemoteDetonatorReceiver"));
 		MiscGameplayFunctions.TransferItemProperties(trigger, receiver);
 		receiver.LockToParent();
