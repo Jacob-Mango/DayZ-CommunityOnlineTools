@@ -165,6 +165,8 @@ enum JMPlayerModuleRPC
 	Dry,
 	Kick,
 	KickMessage,
+	Ban,
+	BanMessage,
 	Message,
 	Notif,
 	StopBleeding,

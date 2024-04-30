@@ -1,5 +1,9 @@
 class JMPermissionRowWidget: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMPermissionsRowWidgetCount;
+#endif
+
 	JMPermissionRowWidget Parent;
 	ref array< JMPermissionRowWidget > Children;
 
@@ -30,12 +34,37 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 		stateOptions.Insert( "#STR_COT_PERMISSION_INHERIT_C" );
 		stateOptions.Insert( "#STR_COT_PERMISSION_DISALLOW_C" );
 		stateOptions.Insert( "#STR_COT_PERMISSION_ALLOW_C" );
+
+	#ifdef DIAG
+		s_JMPermissionsRowWidgetCount++;
+	#ifdef COT_DEBUGLOGS
+		CF_Log.Info("JMPermissionsRowWidget count: " + s_JMPermissionsRowWidgetCount);
+	#endif
+	#endif
 	}
 
 	void ~JMPermissionRowWidget()
 	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		delete Children;
 		delete stateOptions;
+
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMPermissionsRowWidgetCount--;
+		if (s_JMPermissionsRowWidgetCount <= 0)
+			CF_Log.Info("JMPermissionsRowWidget count: " + s_JMPermissionsRowWidgetCount);
+	#endif
 	}
 
 	void Init() 

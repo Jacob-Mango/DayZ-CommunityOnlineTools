@@ -12,6 +12,14 @@ modded class ItemBase
 			return false;
 		}
 
+		Transport transport;
+		if (Class.CastTo(transport, GetHierarchyRoot()))
+		{
+			Human driver = transport.CrewMember(DayZPlayerConstants.VEHICLESEAT_DRIVER);
+			if (driver && !driver.GetAllowDamage())
+				return false;
+		}
+
 		return true;
 	}
 
@@ -32,7 +40,7 @@ modded class ItemBase
 	{
 	}
 
-	void COT_OnDebugSpawn()
+	void COT_OnDebugSpawn(PlayerBase player)
 	{
 		OnDebugSpawn();
 	}

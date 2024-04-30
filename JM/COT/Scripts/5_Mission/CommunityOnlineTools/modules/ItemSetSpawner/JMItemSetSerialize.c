@@ -30,7 +30,12 @@ class JMItemSetSerialize
 		JMItemSetSerialize settings = new JMItemSetSerialize;
 		settings.m_FileName = file;
 
-		JsonFileLoader< JMItemSetSerialize >.JsonLoadFile( JMConstants.DIR_ITEMS + settings.m_FileName + JMConstants.EXT_ITEM, settings );
+		string errorMessage;
+		if ( !JsonFileLoader< JMItemSetSerialize >.LoadFile( JMConstants.DIR_ITEMS + settings.m_FileName + JMConstants.EXT_ITEM, settings, errorMessage ) )
+		{
+			Print("[Community Online Tools] ItemSets Module - " + errorMessage);
+			return NULL;
+		}
 
 		return settings;
 	}

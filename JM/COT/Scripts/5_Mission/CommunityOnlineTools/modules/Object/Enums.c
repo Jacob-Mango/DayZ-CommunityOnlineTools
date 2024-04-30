@@ -10,6 +10,13 @@ enum COT_ObjectSpawnerMode
 	PLAYER_INVENTORY
 };
 
+enum COT_ObjectSetupMode
+{
+	DEBUGSPAWN,
+	CE,
+	NONE
+}
+
 class COT_BloodTypes
 {
 	static const int UNKNOWN = GROUP_LIQUID_BLOOD;

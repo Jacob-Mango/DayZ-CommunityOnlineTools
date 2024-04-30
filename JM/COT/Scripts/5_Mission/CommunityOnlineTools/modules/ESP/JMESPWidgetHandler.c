@@ -374,7 +374,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 	{
 		if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 		{
-			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), selected );
+			if (Info.player)
+				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), selected );
 		} else if ( Info.target )
 		{
 			if ( selected )
