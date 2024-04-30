@@ -17,6 +17,7 @@ class JMPermission : Managed
 	string Indent;
 
 	bool m_Sync;  //! This will be set to true if any added permission is not INHERIT
+	bool m_Sorted;
 
 	void JMPermission( string name, JMPermission parent = NULL )
 	{
@@ -335,14 +336,15 @@ class JMPermission : Managed
 		if (!Parent)
 			auto trace = CF_Trace_1(this, "Deserialize").Add(input.Count());
 
-		Clear();
-
 		for ( int i = 0; i < input.Count(); i++ )
-			AddPermission( input[i], JMPermissionType.INHERIT, false );
+			AddPermission( input[i], JMPermissionType.INHERIT );
 	}
 
 	void OnSend(ParamsWriteContext ctx)
 	{
+		if (!m_Sorted)
+			Sort();
+
 		if (!Root.m_Sync)
 		{
 			ctx.Write(-1);
@@ -363,6 +365,9 @@ class JMPermission : Managed
 
 	bool OnReceive(ParamsReadContext ctx)
 	{
+		if (!m_Sorted)
+			Sort();
+
 		int count;
 		if (!ctx.Read(count))
 			return false;
@@ -426,6 +431,46 @@ class JMPermission : Managed
 		for ( int i = 0; i < Children.Count(); i++ )
 		{
 			Children[i].DebugPrint( depth + 1 );
+		}
+	}
+
+	void Sort()
+	{
+	#ifdef DIAG
+		CF_Trace trace;
+		if (!Parent)
+			trace = CF_Trace_2(this).Add(GetFullName()).Add(typename.EnumToString(JMPermissionType, Type));
+	#endif
+
+		m_Sorted = true;
+
+		if (Children.Count() < 2)
+			return;
+
+		TStringArray names = {};
+		map<string, ref JMPermission> permissions = new map<string, ref JMPermission>;
+
+		foreach (int i, JMPermission child: Children)
+		{
+			names.Insert(child.Name);
+			permissions.Insert(child.Name, child);
+		//#ifdef DIAG
+			//CF_Log.Trace(" IN  %1 %2 %3", i.ToString(), child.GetFullName(), typename.EnumToString(JMPermissionType, child.Type));
+		//#endif
+		}
+
+		names.Sort();
+
+		Children.Clear();
+
+		JMPermission permission;
+		foreach (int j, string name: names)
+		{
+			permission = permissions[name];
+			Children.Insert(permission);
+		//#ifdef DIAG
+			//CF_Log.Trace(" OUT %1 %2 %3", j.ToString(), permission.GetFullName(), typename.EnumToString(JMPermissionType, permission.Type));
+		//#endif
 		}
 	}
 };

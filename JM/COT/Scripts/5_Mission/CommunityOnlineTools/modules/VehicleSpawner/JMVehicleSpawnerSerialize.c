@@ -28,7 +28,12 @@ class JMVehicleSpawnerSerialize : Managed
 		JMVehicleSpawnerSerialize settings = new JMVehicleSpawnerSerialize;
 		settings.m_FileName = file;
 
-		JsonFileLoader< JMVehicleSpawnerSerialize >.JsonLoadFile( JMConstants.DIR_VEHICLES + settings.m_FileName + JMConstants.EXT_VEHICLE, settings );
+		string errorMessage;
+		if ( !JsonFileLoader< JMVehicleSpawnerSerialize >.LoadFile( JMConstants.DIR_VEHICLES + settings.m_FileName + JMConstants.EXT_VEHICLE, settings, errorMessage ) )
+		{
+			Print("[Community Online Tools] Vehicle Spawner Module - " + errorMessage);
+			return NULL;
+		}
 
 		return settings;
 	}

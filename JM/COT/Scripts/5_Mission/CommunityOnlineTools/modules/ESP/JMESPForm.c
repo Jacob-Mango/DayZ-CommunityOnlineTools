@@ -18,6 +18,8 @@ class JMESPForm: JMFormBase
 
 	private UIActionSlider m_sldr_Radius;
 
+	private UIActionCheckbox m_DisableSafetyCheckbox;
+
 	private JMESPModule m_Module;
 
 	private UIActionEditableTextPreview m_SearchBox;
@@ -28,10 +30,13 @@ class JMESPForm: JMFormBase
 	{
 		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
 		m_ESPTypeWidgetsByType = new map<typename, JMESPViewTypeWidget>;
+
+		JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Insert(OnESPViewTypeChanged);
 	}
 
 	void ~JMESPForm()
 	{
+		JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Remove(OnESPViewTypeChanged);
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -47,10 +52,11 @@ class JMESPForm: JMFormBase
 		
 		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE", this, "Click_UpdateESP" );
 
-		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 1, 2 );
+		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 2, 1 );
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
+		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
+		UpdateDisableSafetyCheckboxChecked();
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -202,6 +208,25 @@ class JMESPForm: JMFormBase
 
 	void DisableToggleableOptions()
 	{
+	}
+
+	void OnESPViewTypeChanged(JMESPViewType viewType)
+	{
+		switch (viewType.Type())
+		{
+			case JMESPViewTypeCar:
+			case JMESPViewTypeImmovable:
+				UpdateDisableSafetyCheckboxChecked();
+				break;
+		}
+	}
+
+	void UpdateDisableSafetyCheckboxChecked()
+	{
+		if (m_Module.GetViewType(JMESPViewTypeCar).View || m_Module.GetViewType(JMESPViewTypeImmovable).View)
+			m_DisableSafetyCheckbox.Enable();
+		else
+			m_DisableSafetyCheckbox.Disable();
 	}
 
 	void UpdateUI()

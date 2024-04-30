@@ -85,6 +85,8 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 	{
 		m_Checkbox.SetChecked(state);
 		m_Type.View = state;
+
+		JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Invoke(m_Type);
 	}
 
 	bool IsChecked()
@@ -102,6 +104,8 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 		if ( w == m_Checkbox )
 		{
 			m_Type.View = m_Checkbox.IsChecked();
+
+			JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Invoke(m_Type);
 
 			return true;
 		}

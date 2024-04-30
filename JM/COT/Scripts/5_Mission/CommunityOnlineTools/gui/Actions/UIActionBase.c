@@ -1,5 +1,9 @@
 class UIActionBase: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_UIActionBaseCount;
+#endif
+
 	protected Widget layoutRoot;
 
 	protected Widget m_Disable;
@@ -15,9 +19,51 @@ class UIActionBase: ScriptedWidgetEventHandler
 
 	protected ref UIActionData m_Data;
 
+	void UIActionBase()
+	{
+	#ifdef DIAG
+		s_UIActionBaseCount++;
+	#ifdef COT_DEBUGLOGS
+		CF_Log.Info("UIActionBase count: " + s_UIActionBaseCount);
+	#endif
+	#endif
+	}
+
 	void ~UIActionBase()
 	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		Deactivate();
+
 		delete m_Data;
+
+		//! @note this should not be necessary since if the JMWindowBase handling this UIAction is destroyed,
+		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_UIActionBaseCount--;
+		if (s_UIActionBaseCount <= 0)
+			CF_Log.Info("UIActionBase count: " + s_UIActionBaseCount);
+	#endif
+	}
+
+	void Deactivate()
+	{
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+
+		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
+			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
+		if (m_WasFocused)
+			CommunityOnlineTools.ForceDisableInputs(false);
 	}
 
 	void GetUserData( out Class data )
@@ -64,26 +110,12 @@ class UIActionBase: ScriptedWidgetEventHandler
 
 	void Hide()
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Hide" );
-		#endif
-		//Error("test");
-
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		Deactivate();
 
 		OnHide();
 		
 		if ( layoutRoot )
 			layoutRoot.Show( false );
-
-		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
-			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
-		if (m_WasFocused)
-			CommunityOnlineTools.ForceDisableInputs(false);
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Hide" );
-		#endif
 	}
 
 	void OnShow()

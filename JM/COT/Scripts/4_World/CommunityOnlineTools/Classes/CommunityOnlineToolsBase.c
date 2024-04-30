@@ -12,6 +12,8 @@ class CommunityOnlineToolsBase
 
 	protected JMWebhookModule m_Webhook;
 
+	protected ref map<string, bool> m_ActiveGUIDs = new map<string, bool>;
+
 	void CommunityOnlineToolsBase()
 	{
 		m_Loaded = false;
@@ -100,6 +102,25 @@ class CommunityOnlineToolsBase
 	bool IsActive()
 	{
 		return m_IsActive;
+	}
+
+	bool IsActive(Man player)
+	{
+		return IsActive(player.GetIdentity());
+	}
+
+	bool IsActive(PlayerIdentity identity)
+	{
+		return IsActive(identity.GetId());
+	}
+
+	bool IsActive(string guid)
+	{
+	#ifdef SERVER
+		return m_ActiveGUIDs[guid];
+	#else
+		return IsActive();
+	#endif
 	}
 
 	void SetActive( bool active )

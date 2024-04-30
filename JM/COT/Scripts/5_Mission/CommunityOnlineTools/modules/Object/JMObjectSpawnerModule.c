@@ -1,6 +1,6 @@
 class JMObjectSpawnerModule: JMRenderableModuleBase
 {
-	bool m_OnDebugSpawn = true;
+	int m_ObjSetupMode = COT_ObjectSetupMode.DEBUGSPAWN;
 	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
@@ -174,14 +174,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
-		rayInput.radius = 0.5;
-		rayInput.sorted = true;
+		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 
 		Object obj;
 		Object resultObj;
-		if ( DayZPhysics.RaycastRVProxy( rayInput, results ) )
+		TIntArray types = {ObjIntersectFire, ObjIntersectView};
+		foreach (int type: types)
 		{
+			rayInput.type = type;
+
+			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
+				continue;
+
 			foreach ( RaycastRVResult result: results )
 			{
 				resultObj = result.obj;
@@ -237,6 +242,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				obj = resultObj;
 				break;
 			}
+
+			if (obj)
+				break;
 		}
 
 		return obj;
@@ -393,7 +401,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Write( itemState );
-			rpc.Write( m_OnDebugSpawn );
+			rpc.Write( m_ObjSetupMode );
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
@@ -419,11 +427,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
+		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+			flags |= ECE_EQUIP;
+
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
-		SetupEntity( ent, quantity, health, itemState );
+		SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+itemState +") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
@@ -468,7 +479,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
-			if ( !ctx.Read( m_OnDebugSpawn ) )
+			if ( !ctx.Read( m_ObjSetupMode ) )
 				return;
 
 			EntityAI targetEnt;
@@ -489,7 +500,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( quantity );
 			rpc.Write( health );
 			rpc.Write( itemState );
-			rpc.Write( m_OnDebugSpawn );
+			rpc.Write( m_ObjSetupMode );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
@@ -525,6 +536,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				int flags = ECE_CREATEPHYSICS;
 				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
+
+				if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+					flags |= ECE_EQUIP;
 		
 				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 					continue;
@@ -532,7 +546,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( ent, quantity, health, itemState );
+			SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
@@ -563,7 +577,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( itemState ) )
 				return;
 
-			if ( !ctx.Read( m_OnDebugSpawn ) )
+			if ( !ctx.Read( m_ObjSetupMode ) )
 				return;
 
 			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, senderRPC );
@@ -580,7 +594,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			string loggedSuffix = " at " + position.ToString();
 
-			SetupEntity( ent, quantity, health, itemState );
+			SetupEntity( ent, quantity, health, itemState, callerInstance.PlayerObject );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
@@ -591,16 +605,37 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SetupEntity( EntityAI entity, out float quantity, out float health, out int itemState )
+	private void SetupEntity( EntityAI entity, float quantity, float health, int itemState, PlayerBase player )
 	{
+		switch (m_ObjSetupMode)
+		{
+			case COT_ObjectSetupMode.DEBUGSPAWN:
+				int depth;
+				if (!entity.IsMan())
+					depth = 3;
+				OnDebugSpawn(entity, player, depth);
+				break;
+
+			case COT_ObjectSetupMode.CE:
+				entity.EEOnCECreate();
+				break;
+		}
+
 		ItemBase item;
 		if ( Class.CastTo( item, entity ) )
 		{
 			Magazine mag;
 			if (Class.CastTo(mag, item))
+			{
 				mag.ServerSetAmmoCount(quantity);
-			else if ( item.HasQuantity() )
+			}
+			else if (item.HasQuantity())
+			{
 				item.SetQuantity(quantity);
+
+				if (item.GetCompEM())
+					item.GetCompEM().SetEnergy0To1(quantity / item.GetQuantityMax());
+			}
 
 			if ( itemState != 0 )
 			{
@@ -624,13 +659,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					}
 				}
 			}
-		}
-
-		if ( m_OnDebugSpawn )
-		{
-			OnDebugSpawn(entity);
-
-			CommunityOnlineToolsBase.Refuel(entity);
 		}
 
 		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType()) > 0 )
@@ -664,17 +692,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return false;
 	}
 
-	void OnDebugSpawn(EntityAI entity, int depth = 3) 
+	void OnDebugSpawn(EntityAI entity, PlayerBase player, int depth = 3) 
 	{
 		ItemBase item;
 		CarScript vehicle;
+		BuildingBase building;
 
 		if (Class.CastTo(item, entity))
-			item.COT_OnDebugSpawn();
+			item.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(vehicle, entity))
-			vehicle.COT_OnDebugSpawn();
-		else if (entity.IsInherited(BuildingBase))
-			entity.OnDebugSpawn();
+			vehicle.COT_OnDebugSpawn(player);
+		else if (Class.CastTo(building, entity))
+			building.COT_OnDebugSpawn(player);
 
 		if (!entity.GetInventory())
 			return;
@@ -689,11 +718,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 
 		//! If no atts were spawned, do it ourself (except for creatures, tents & weapons)
-		SpawnCompatibleAttachments(entity, depth);
+		SpawnCompatibleAttachments(entity, player, depth);
 	}
 
 	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, use slot IDs instead of case-sensitive match of slot names, filter bad items)
-	void SpawnCompatibleAttachments(EntityAI entity, int depth = 3) 
+	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3) 
 	{
 		TIntArray slot_ids = {};
 		int slot_id;
@@ -756,13 +785,17 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 								if (IsExcludedClassName(child_name))
 									break;
 
-								CF_Log.Info("Trying to spawn %1 on %2", child_name, entity.GetType());
+								//! Limit character attachments to clothing
+								if (entity.IsMan() && !GetGame().IsKindOf(child_name, "Clothing_Base"))
+									break;
+
 								child = entity.GetInventory().CreateAttachmentEx(child_name, slot_id);
 								if (child)
 								{
+									CF_Log.Info("Successfully spawned %1 in slot %2 on %3", child_name, inv_slot, entity.GetType());
 									slot_ids.Remove(idx);
 									if (depth > 0)
-										OnDebugSpawn(child, depth - 1);
+										OnDebugSpawn(child, player, depth - 1);
 									if (slot_ids.Count() == 0)
 										return;
 								}
@@ -822,6 +855,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
+		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+			flags |= ECE_EQUIP;
+
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
@@ -829,7 +865,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		float quantity = -1;
 		float health = -1;
 		int itemState = -1;
-		SetupEntity( ent, quantity, health, itemState );
+		SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
 		
 		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );

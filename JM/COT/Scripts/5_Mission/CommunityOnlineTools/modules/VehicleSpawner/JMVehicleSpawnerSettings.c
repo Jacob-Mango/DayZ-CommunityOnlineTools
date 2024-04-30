@@ -37,7 +37,10 @@ class JMVehicleSpawnerSettings
 				JMVehicleSpawnerSerialize serialize = JMVehicleSpawnerSerialize.Load(fileName);
 				
 				if (!GetGame().ConfigIsExisting("cfgVehicles " + serialize.VehicleName))
+				{
+					Print("[Community Online Tools] Vehicle Spawner Module - Couldnt find any classnames called <<"+ serialize.VehicleName +">> from the file "+ files[i]);
 					continue;
+				}
 				
 				settings.Vehicles.Insert( fileName, JMVehicleSpawnerSerialize.Load( fileName ) );
 			}

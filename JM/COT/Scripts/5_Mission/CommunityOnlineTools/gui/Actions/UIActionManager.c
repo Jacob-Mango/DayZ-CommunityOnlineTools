@@ -1,6 +1,6 @@
 class UIActionManager
 {
-	static GridSpacerWidget CreateGridSpacer( Widget parent, int rows, int columns )
+	static GridSpacerWidget CreateGridSpacer( notnull Widget parent, int rows, int columns )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/" + rows.ToString() + "/GridSpacer" + columns.ToString() + ".layout", parent );
 
@@ -12,7 +12,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static WrapSpacerWidget CreateWrapSpacer( Widget parent )
+	static WrapSpacerWidget CreateWrapSpacer( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
 
@@ -24,21 +24,21 @@ class UIActionManager
 		return NULL;
 	}
 
-	static Widget CreateActionRows( Widget parent )
+	static Widget CreateActionRows( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
 
 		return widget;
 	}
 	
-	static Widget CreateSpacer( Widget parent )
+	static Widget CreateSpacer( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UISpacer.layout", parent );
 
 		return widget;
 	}
 
-	static Widget CreatePanel( Widget parent, int color = 0x00000000, float height = -1 )
+	static Widget CreatePanel( notnull Widget parent, int color = 0x00000000, float height = -1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", parent );
 
@@ -56,7 +56,7 @@ class UIActionManager
 		return widget;
 	}
 
-	static UIActionButton CreateButton( Widget parent, string button, Class instance, string funcname, float width = 1 )
+	static UIActionButton CreateButton( notnull Widget parent, string button, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
 
@@ -82,7 +82,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionNavigateButton CreateNavButton( Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
+	static UIActionNavigateButton CreateNavButton( notnull Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );
 
@@ -109,7 +109,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionEditableTextPreview CreateEditableTextPreview( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
+	static UIActionEditableTextPreview CreateEditableTextPreview( notnull Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
 		bool hasButton;
 		if (button != "" && instance != NULL && funcname != "")
@@ -143,7 +143,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionEditableText CreateEditableText( Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
+	static UIActionEditableText CreateEditableText( notnull Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
 	{
 		bool hasButton;
 		if (button != "" && instance != NULL && funcname != "")
@@ -177,7 +177,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionDropdownList CreateDropdownBox( Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
+	static UIActionDropdownList CreateDropdownBox( notnull Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );
 
@@ -203,7 +203,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionEditableVector CreateEditableVector( Widget parent, string label, Class instance = NULL, string funcname = "", string button = "" )
+	static UIActionEditableVector CreateEditableVector( notnull Widget parent, string label, Class instance = NULL, string funcname = "", string button = "" )
 	{
 		bool hasButton;
 		if (button != "" && instance != NULL && funcname != "")
@@ -236,7 +236,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionCheckbox CreateCheckbox( Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
+	static UIActionCheckbox CreateCheckbox( notnull Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
 
@@ -263,7 +263,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionText CreateText( Widget parent, string label, string text = "", Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
+	static UIActionText CreateText( notnull Widget parent, string label, string text = "", Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", parent );
 
@@ -288,7 +288,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionSelectBox CreateSelectionBox( Widget parent, string label, notnull array< string > options, Class instance = NULL, string funcname = "" )
+	static UIActionSelectBox CreateSelectionBox( notnull Widget parent, string label, notnull array< string > options, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
 
@@ -307,7 +307,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionSlider CreateSlider( Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "" )
+	static UIActionSlider CreateSlider( notnull Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout", parent );
 
@@ -329,7 +329,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionScroller CreateScroller( Widget parent )
+	static UIActionScroller CreateScroller( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout", parent );
 
@@ -344,7 +344,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionImage CreateImage( Widget parent, string image, Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
+	static UIActionImage CreateImage( notnull Widget parent, string image, Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImage.layout", parent );
 

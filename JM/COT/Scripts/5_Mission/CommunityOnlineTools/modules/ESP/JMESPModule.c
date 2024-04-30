@@ -412,6 +412,11 @@ class JMESPModule: JMRenderableModuleBase
 		return m_ViewTypes;
 	}
 
+	JMESPViewType GetViewType(typename type)
+	{
+		return m_ViewTypesByType[type];
+	}
+
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
@@ -632,7 +637,7 @@ class JMESPModule: JMRenderableModuleBase
 		int sleepIdx = 0;
 
 		bool includeImmovable;
-		if (m_IknowWhatIamDoing || m_ViewTypesByType[JMESPViewTypeImmovable].View)
+		if ((m_IknowWhatIamDoing && m_ViewTypesByType[JMESPViewTypeCar].View) || m_ViewTypesByType[JMESPViewTypeImmovable].View)
 			includeImmovable = true;
 
 		for (int x = -numIterations; x < numIterations; x++)

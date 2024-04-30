@@ -71,5 +71,29 @@ modded class MissionServer
 
 		return true;
 	}
+
+    override void OnEvent(EventType eventTypeId, Param params)
+    {
+        super.OnEvent(eventTypeId, params);
+
+        switch(eventTypeId)
+        {
+            case ClientPrepareEventTypeID:
+            {
+                ClientPrepareEventParams clientPrepareParams;
+                Class.CastTo(clientPrepareParams, params);
+
+                PlayerIdentity identity = clientPrepareParams.param1;
+
+				//! TODO: Make a file or something to store the bans and try to find the banned player with his Identity
+				string banReason;
+                //if (IsCOTBanned(identity.GetId(), banReason))
+                {
+                    //! is faulty, yeet them out
+                }
+                break;
+            }
+        }
+    }
 };
 

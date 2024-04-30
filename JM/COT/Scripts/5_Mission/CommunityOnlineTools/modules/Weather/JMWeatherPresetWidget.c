@@ -1,5 +1,9 @@
 class JMWeatherPresetWidget: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMWeatherPresetWidgetCount;
+#endif
+
 	private Widget layoutRoot;
 
 	private TextWidget m_WName;
@@ -13,6 +17,37 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 	private JMWeatherForm m_Form;
 
 	private bool m_IsCreatingNew;
+
+	void JMWeatherPresetWidget()
+	{
+	#ifdef DIAG
+		s_JMWeatherPresetWidgetCount++;
+	#ifdef COT_DEBUGLOGS
+		CF_Log.Info("JMWeatherPresetWidget count: " + s_JMWeatherPresetWidgetCount);
+	#endif
+	#endif
+	}
+
+	void ~JMWeatherPresetWidget()
+	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMWeatherPresetWidgetCount--;
+		if (s_JMWeatherPresetWidgetCount <= 0)
+			CF_Log.Info("JMWeatherPresetWidget count: " + s_JMWeatherPresetWidgetCount);
+	#endif
+	}
 
 	void OnWidgetScriptInit( Widget w )
 	{

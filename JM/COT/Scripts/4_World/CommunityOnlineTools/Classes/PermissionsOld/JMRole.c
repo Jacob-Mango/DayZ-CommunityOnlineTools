@@ -113,7 +113,7 @@ class JMRole : Managed
 
 	bool Load()
 	{
-		auto trace = CF_Trace_1(this, "Load").Add(Name);
+		auto trace = CF_Trace_1(this).Add(Name);
 
 		string filename = FileReadyStripName( Name );
 		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.READ );

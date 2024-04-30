@@ -339,9 +339,9 @@ modded class Weapon_Base
 		return true;
 	}
 
-	override void COT_OnDebugSpawn()
+	override void COT_OnDebugSpawn(PlayerBase player)
 	{
-		super.COT_OnDebugSpawn();
+		super.COT_OnDebugSpawn(player);
 
 		if (!m_COT_AmmoSpawned)
 			SpawnAmmo("", SAMF_DEFAULT);

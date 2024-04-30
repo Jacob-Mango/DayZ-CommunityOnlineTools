@@ -7,6 +7,10 @@ enum JMConfirmationType
 
 class JMConfirmation: ScriptedWidgetEventHandler 
 {
+#ifdef DIAG
+	static int s_JMConfirmationCount;
+#endif
+
 	private Widget layoutRoot;
 	
 	private Managed m_Base;
@@ -35,10 +39,31 @@ class JMConfirmation: ScriptedWidgetEventHandler
 
 	void JMConfirmation() 
 	{
+	#ifdef DIAG
+		s_JMConfirmationCount++;
+		CF_Log.Info("JMConfirmation count: " + s_JMConfirmationCount);
+	#endif
 	}
 
 	void ~JMConfirmation() 
 	{
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
+		#endif
+			layoutRoot.Unlink();
+		}
+
+	#ifdef DIAG
+		s_JMConfirmationCount--;
+		if (s_JMConfirmationCount <= 0)
+			CF_Log.Info("JMConfirmation count: " + s_JMConfirmationCount);
+	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )
