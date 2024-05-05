@@ -31,6 +31,9 @@ class UIActionBase: ScriptedWidgetEventHandler
 
 	void ~UIActionBase()
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif

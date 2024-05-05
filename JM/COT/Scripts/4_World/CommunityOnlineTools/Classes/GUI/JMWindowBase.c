@@ -55,6 +55,9 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif

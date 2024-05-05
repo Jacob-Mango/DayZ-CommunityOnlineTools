@@ -58,6 +58,9 @@ class JMESPMeta : Managed
 
 	void ~JMESPMeta()
 	{
+		if (!GetGame())
+			return;
+
 		Destroy();
 
 		if (s_JM_All)
