@@ -157,9 +157,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			form.DeleteCursor(obj);
 	}
 	
-	Object GetObjectAtCursor(bool ignorePlayer = true)
-	{
-		float distance = 3.0;  //! Distance is chosen such that if you can see the item hint on HUD, raycast should also hit
+	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
+	Object GetObjectAtCursor(bool ignorePlayer = true, float distance = 3.0)
+	{ 
 		vector rayStart = GetGame().GetCurrentCameraPosition();
 
 		DayZPlayer player = GetGame().GetPlayer();
@@ -388,7 +388,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			if (targetInventory && !GetGame().IsKindOf(className, "DZ_LightAI"))
 			{
-				if (Class.CastTo(targetEnt, GetObjectAtCursor(false)) && !targetEnt.GetInventory())
+				if (Class.CastTo(targetEnt, GetObjectAtCursor(false, 1000.0)) && !targetEnt.GetInventory())
 					targetEnt = null;
 			}
 		}
