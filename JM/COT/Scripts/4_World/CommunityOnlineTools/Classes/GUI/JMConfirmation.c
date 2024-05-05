@@ -47,6 +47,9 @@ class JMConfirmation: ScriptedWidgetEventHandler
 
 	void ~JMConfirmation() 
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
