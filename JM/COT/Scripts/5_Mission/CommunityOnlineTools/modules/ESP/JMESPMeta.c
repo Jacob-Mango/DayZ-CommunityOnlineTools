@@ -186,7 +186,7 @@ class JMESPMeta : Managed
 
 			if ( !target.IsInherited(Man) && !target.IsInherited(DayZCreature) )
 				m_HealButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_Heal" );
-			else if (!target.IsDamageDestroyed())
+			else
 				m_HealButton  = UIActionManager.CreateButton( parent, "Heal",  this, "Action_Heal" );
 		}
 
@@ -405,7 +405,10 @@ class JMESPMeta : Managed
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.Heal( target );
+		if ((target.IsInherited(Man) || target.IsInherited(DayZCreature)) && target.IsDamageDestroyed())
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_ERROR_CANNOT_HEAL_DEAD_CREATURE" ) );
+		else
+			module.Heal( target );
 	}
 };
 
