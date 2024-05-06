@@ -125,7 +125,8 @@ enum JMESPModuleRPC
 
 	Vehicle_Unstuck,
 	Vehicle_Refuel,
-	Repair,
+
+	Heal,
 
 	MakeItemSet,
 	DuplicateAll,
