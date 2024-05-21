@@ -51,8 +51,9 @@ PanelWidgetClass UIActionSlider {
        hexactsize 0
        vexactsize 0
        text ""
-       font "gui/fonts/Metron"
+       font "gui/fonts/sdf_MetronLight24"
        "exact text" 1
+       "exact text size" 16
        "text halign" center
        "text valign" center
       }
