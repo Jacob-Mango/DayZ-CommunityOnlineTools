@@ -46,11 +46,7 @@ class UIActionManager
 
 		if ( height != -1 )
 		{
-			float w;
-			float h;
-			widget.SetFlags( WidgetFlags.VEXACTSIZE );
-			widget.GetSize( w, h );
-			widget.SetSize( w, height );
+			SetSize(widget, -1, height);
 		}
 
 		return widget;
@@ -65,10 +61,7 @@ class UIActionManager
 
 		if ( width != 1 )
 		{
-			float w;
-			float h;
-			widget.GetSize( w, h );
-			widget.SetSize( width, h );
+			SetSize(widget, width, -1);
 		}
 
 		if ( action )
@@ -91,10 +84,7 @@ class UIActionManager
 
 		if ( width != 1 )
 		{
-			float w;
-			float h;
-			widget.GetSize( w, h );
-			widget.SetSize( width, h );
+			SetSize(widget, width, -1);
 		}
 
 		if ( action )
@@ -245,10 +235,7 @@ class UIActionManager
 
 		if ( width != 1 )
 		{
-			float w;
-			float h;
-			widget.GetSize( w, h );
-			widget.SetSize( width, h );
+			SetSize(widget, width, -1);
 		}
 
 		if ( action )
@@ -364,5 +351,33 @@ class UIActionManager
 		}
 
 		return NULL;
+	}
+
+	static void SetSize( Widget widget, float width = -1, float height = -1 )
+	{
+		float w;
+		float h;
+
+		widget.SetFlags( WidgetFlags.VEXACTSIZE );
+		widget.GetSize( w, h );
+
+		if (width != -1)
+			w = width;
+
+		if (height != -1)
+			h = height;
+
+		int resX, resY;
+
+		GetScreenSize(resX, resY);
+
+		float scaleY;
+
+		if (resY > 1080)
+			scaleY = resY / 1080;
+		else
+			scaleY= 1.0;
+
+		widget.SetSize( w, h * scaleY );
 	}
 };
