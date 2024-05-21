@@ -627,7 +627,7 @@ modded class PlayerBase
 			}
 			else
 			{
-				position[1] = GetGame().SurfaceY(position[0], position[2]) - 10;
+				position[1] = GetGame().SurfaceRoadY3D(position[0], position[1], position[2], RoadSurfaceDetection.CLOSEST) - 3.0;
 			}
 
 			if (!COTHasGodMode())
