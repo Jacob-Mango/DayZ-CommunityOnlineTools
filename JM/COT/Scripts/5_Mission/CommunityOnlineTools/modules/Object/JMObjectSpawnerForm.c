@@ -808,7 +808,7 @@ class JMObjectSpawnerForm: JMFormBase
 					continue;
 
 				string model;
-				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty)
+				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
 				string strNameLower = strName;

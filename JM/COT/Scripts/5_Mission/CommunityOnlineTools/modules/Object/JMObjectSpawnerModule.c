@@ -764,7 +764,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 				if (scope == 2)
 				{
-					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty)
+					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
 						continue;
 
 					TStringArray inv_slots = {};
