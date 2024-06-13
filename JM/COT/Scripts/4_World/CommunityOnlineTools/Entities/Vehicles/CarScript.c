@@ -34,11 +34,6 @@ modded class CarScript
 		return true;
 	}
 
-	//! Prevent calling vanilla EntityAI::OnDebugSpawn
-	override void OnDebugSpawn()
-	{
-	}
-
 	void COT_OnDebugSpawn(PlayerBase player)
 	{
 		OnDebugSpawn();
