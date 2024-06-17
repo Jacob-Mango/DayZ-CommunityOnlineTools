@@ -125,6 +125,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		types.Insert( "PF" );
 		types.Insert( "Kick" );
 		types.Insert( "Message" );
+		types.Insert( "Ban" );
 	}
 
 	override int GetRPCMin()

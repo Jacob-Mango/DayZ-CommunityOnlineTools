@@ -76,6 +76,8 @@ modded class MissionServer
     {
         switch(eventTypeId)
         {
+			// This is late enough to kick the player safely
+			// but too early to send a message to the player
             case ClientNewEventTypeID:
             {
 				ClientNewEventParams newParams;
@@ -108,4 +110,3 @@ modded class MissionServer
 		return false;
 	}
 };
-
