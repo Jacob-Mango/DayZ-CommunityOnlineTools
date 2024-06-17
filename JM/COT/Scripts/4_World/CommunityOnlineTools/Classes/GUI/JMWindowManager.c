@@ -14,6 +14,11 @@ class JMWindowManager
 
 	void ~JMWindowManager()
 	{
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(DeleteWindows);
+	}
+
+	void DeleteWindows()
+	{
 		delete m_Windows;
 	}
 
