@@ -422,9 +422,7 @@ class JMPlayerForm: JMFormBase
 		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
 		m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-#ifdef DIAG
 		m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
-#endif
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
