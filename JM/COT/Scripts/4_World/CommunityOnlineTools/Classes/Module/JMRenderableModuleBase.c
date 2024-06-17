@@ -174,6 +174,11 @@ class JMRenderableModuleBase: JMModuleBase
 
 	void Hide()
 	{
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(HideModule); 
+	}
+
+	void HideModule()
+	{
 		delete m_Window;
 	}
 
