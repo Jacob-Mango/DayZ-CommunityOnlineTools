@@ -2062,6 +2062,11 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	
 	private void SendBanMessage(PlayerIdentity identity, string messageText)
 	{
+		JMPlayerBan banData = new JMPlayerBan;
+		banData.Message = messageText;
+		banData.BanDuration = -1;
+		banData.Save(banData, identity.GetId());
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(messageText);
 		rpc.Send(NULL, JMPlayerModuleRPC.BanMessage, true, identity);
