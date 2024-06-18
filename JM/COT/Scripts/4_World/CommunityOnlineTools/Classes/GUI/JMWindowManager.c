@@ -12,16 +12,6 @@ class JMWindowManager
 		m_WindowsPendingDeletion = new array< JMWindowBase >;
 	}
 
-	void ~JMWindowManager()
-	{
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(DeleteWindows);
-	}
-
-	void DeleteWindows()
-	{
-		delete m_Windows;
-	}
-
 	JMWindowBase Create()
 	{
 		JMWindowBase window;
