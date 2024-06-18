@@ -395,6 +395,10 @@ class CommunityOnlineToolsBase
 			GetGame().GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
 		}
 	}
+
+	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)
+	{
+	}
 };
 
 
