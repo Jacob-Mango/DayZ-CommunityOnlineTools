@@ -492,6 +492,13 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			Client_UpdateRole( roleName, ctx );
 		}
 	}
+
+	override void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)
+	{
+		JMObjectSpawnerModule objSpawnerModule;
+		if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
+			objSpawnerModule.SpawnCompatibleAttachments(entity, player, depth);
+	}
 };
 
 
