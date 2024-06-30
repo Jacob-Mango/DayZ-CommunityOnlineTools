@@ -32,15 +32,20 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_VEHICLE_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "VS";
+		return "JM\\COT\\GUI\\textures\\modules\\SetSpawner.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

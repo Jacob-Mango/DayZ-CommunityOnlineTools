@@ -66,12 +66,17 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "W";
+		return "JM\\COT\\GUI\\textures\\modules\\Weather.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override void OnMissionLoaded()

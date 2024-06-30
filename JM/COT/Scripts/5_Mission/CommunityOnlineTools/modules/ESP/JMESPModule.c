@@ -296,12 +296,17 @@ class JMESPModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "X";
+		return "JM\\COT\\GUI\\textures\\modules\\ESP.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

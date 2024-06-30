@@ -307,12 +307,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "V";
+		return "JM\\COT\\GUI\\textures\\modules\\Vehicles.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	private void UpdateVehiclesMetaData()
