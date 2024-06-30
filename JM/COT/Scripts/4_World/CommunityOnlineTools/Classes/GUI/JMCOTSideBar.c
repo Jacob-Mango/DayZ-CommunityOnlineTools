@@ -41,7 +41,8 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 	
 	void Init()
 	{
-		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "PayPal.Me/JacobMango" );
+		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "CreditsText" ) ).SetText("");
+		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText("");
 
 		array< JMRenderableModuleBase > modules = new array< JMRenderableModuleBase >;
 		SortModuleArray( GetModuleManager().GetCOTModules(), modules );
