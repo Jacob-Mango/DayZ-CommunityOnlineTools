@@ -132,6 +132,14 @@ modded class MissionGameplay
 					m_CDebugMonitor.Show();
 				}
 			}
+
+			PlayerBase player;
+			if (Class.CastTo(player, GetGame().GetPlayer()) && player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
+			{
+				//! Since PlayerBase::EOnFrame will no longer be called by the engine if simulation is disabled,
+				//! call stand-in from here so HUD gets updated
+				player.COT_SimulationDisabled_OnFrame(timeslice);
+			}
 		}
 	}
 
