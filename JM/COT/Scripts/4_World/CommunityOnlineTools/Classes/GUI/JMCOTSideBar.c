@@ -13,7 +13,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 	void JMCOTSideBar()
 	{
-		m_TotalAnimateTime = 0.1;
+		m_TotalAnimateTime = 0.35;
 	}
 	
 	void ~JMCOTSideBar()
@@ -150,7 +150,9 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 			if ( m_IsAnimatingIn )
 			{
 				m_LayoutRoot.Show( true );
-				m_PosX = 0;
+				m_PosX = -m_WidthX + (m_WidthX / scaledTime);
+				if (m_PosX > 0)
+					m_PosX = 0;
 			}
 			else if ( m_IsAnimatingOut )
 				m_PosX = -m_WidthX / scaledTime;
