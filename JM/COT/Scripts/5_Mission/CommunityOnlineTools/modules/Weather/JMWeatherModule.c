@@ -506,7 +506,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < presets.Count(); i++ )
 		{
-			if ( presets[i].Permission == name )
+			if ( presets[i].Name == name )
 			{
 				preset = presets[i];
 				break;
@@ -528,7 +528,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		array< ref JMWeatherPreset > presets = GetPresets();
 		for ( int i = 0; i < presets.Count(); i++ )
 		{
-			if ( presets[i].Permission == preset.Permission )
+			if ( presets[i].Name == preset.Name )
 			{
 				return;
 			}
@@ -536,7 +536,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		GetPresets().Insert( preset );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name + " (Permission: " + preset.Permission + ")" );
+		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name );
 
 		settings.Save();
 	}
@@ -551,7 +551,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < presets.Count(); i++ )
 		{
-			if ( presets[i].Permission == preset.Permission )
+			if ( presets[i].Name == preset.Name )
 			{
 				index = i;
 				break;
@@ -564,7 +564,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPresets().Remove( index );
 		GetPresets().InsertAt( preset, index );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name + " (Permission: " + preset.Permission + ")" );
+		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name );
 
 		settings.Save();
 	}
@@ -576,7 +576,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < presets.Count(); i++ )
 		{
-			if ( presets[i].Permission == name )
+			if ( presets[i].Name == name )
 			{
 				index = i;
 				break;
@@ -588,7 +588,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		
 		GetPresets().Remove( index );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Permission: " + name + ")" );
+		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Name: " + name + ")" );
 
 		settings.Save();
 	}
