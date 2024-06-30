@@ -2009,16 +2009,30 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		bool cantBanAdmin;
 		foreach (JMPlayerInstance player: players)
 		{
 			if (!player.PlayerObject)
 				continue;
+			
+			if (player.PlayerObject.GetIdentity() == ident)
+				continue;
+			
+			// Because we dont want to ban other staff members
+			if ( GetPermissionsManager().HasPermission( "COT", player.PlayerObject.GetIdentity(), player ) )
+			{
+				cantBanAdmin = true;
+				continue;
+			}
 
 			SendBanMessage(player.PlayerObject.GetIdentity(), messageText);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
 		}
+
+		if (cantBanAdmin)
+			COTCreateNotification(ident, new StringLocaliser("You cant ban admins"));
 
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}
