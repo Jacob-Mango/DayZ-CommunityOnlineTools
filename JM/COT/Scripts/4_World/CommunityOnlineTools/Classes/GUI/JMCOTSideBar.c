@@ -61,6 +61,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_LayoutRoot.GetSize( m_WidthX, h );
 
 		Hide();
+		m_LayoutRoot.Show( false );
 	}
 
 	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
