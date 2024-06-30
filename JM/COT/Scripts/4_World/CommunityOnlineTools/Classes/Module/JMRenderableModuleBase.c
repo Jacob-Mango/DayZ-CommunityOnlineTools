@@ -191,7 +191,7 @@ class JMRenderableModuleBase: JMModuleBase
 	{
 		if ( IsVisible() ) 
 		{
-			Hide();
+			Close();
 		} else
 		{
 			if ( GetGame().GetUIManager().GetMenu() )
