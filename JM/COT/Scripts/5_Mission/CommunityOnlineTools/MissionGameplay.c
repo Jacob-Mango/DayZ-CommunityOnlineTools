@@ -173,7 +173,7 @@ modded class MissionGameplay
 
 	override void ShowInventory()
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.ShowInventory();
@@ -181,7 +181,7 @@ modded class MissionGameplay
 
 	override void Pause()
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.Pause();
@@ -189,7 +189,7 @@ modded class MissionGameplay
 
 	override protected void HandleMapToggleByKeyboardShortcut(Man player)
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.HandleMapToggleByKeyboardShortcut(player);
