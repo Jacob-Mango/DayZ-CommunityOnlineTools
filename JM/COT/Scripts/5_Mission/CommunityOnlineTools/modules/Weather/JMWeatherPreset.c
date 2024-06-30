@@ -233,7 +233,6 @@ class JMWeatherRainThreshold: JMWeatherBase
 class JMWeatherPreset
 {
 	string Name;
-	string Permission;
 
 	float Time;
 
@@ -290,7 +289,7 @@ class JMWeatherPreset
 	{
 		if ( IsMissionHost() )
 		{
-			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name + "(Permission: " + Permission + ")" );
+			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name );
 
 			PDate.Log( pidentLogPP );
 			Storm.Log( pidentLogPP );
