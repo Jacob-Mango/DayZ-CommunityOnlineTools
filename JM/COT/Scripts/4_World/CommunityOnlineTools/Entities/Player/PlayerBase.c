@@ -237,7 +237,6 @@ modded class PlayerBase
 	void COT_SimulationDisabled_OnFrame(float timeSlice)
 	{
 		//! Verbatim copy of vanilla PlayerBase::EOnFrame, this is a stand-in to update HUD etc in case of true invis mode which disables simulation
-		//! This also enables manipulating hand items/inventory etc while true invis is on
 		if (GetInstanceType() == DayZPlayerInstanceType.INSTANCETYPE_CLIENT)
 		{
 			#ifndef NO_GUI
