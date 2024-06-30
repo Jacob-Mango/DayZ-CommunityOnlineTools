@@ -13,7 +13,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 	void JMCOTSideBar()
 	{
-		m_TotalAnimateTime = 0.05; //0.35;
+		m_TotalAnimateTime = 0.1;
 	}
 	
 	void ~JMCOTSideBar()
@@ -147,42 +147,16 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 			if ( m_IsAnimatingIn )
 			{
-				#ifdef COT_DEBUGLOGS
-				Print( "+" + this + "::OnUpdate m_IsAnimatingIn" );
-				#endif
-				
 				m_LayoutRoot.Show( true );
-
-				#ifdef COT_DEBUGLOGS
-				Print( "-" + this + "::OnUpdate m_IsAnimatingIn" );
-				#endif
-
 				m_PosX = 0;
-
-				//m_PosX = /*Easing.EaseInSine*/( 1.0 - scaledTime ) * -1.0;
 			}
-
-			if ( m_IsAnimatingOut )
-			{
-				m_PosX = -m_WidthX;
-
-				//m_PosX = /*Easing.EaseOutSine*/( scaledTime ) * -1.0;
-			}
+			else if ( m_IsAnimatingOut )
+				m_PosX = -m_WidthX / scaledTime;
 
 			if ( m_AnimateTime > m_TotalAnimateTime )
 			{
 				if ( m_IsAnimatingOut )
-				{
-					#ifdef COT_DEBUGLOGS
-					Print( "+" + this + "::OnUpdate m_IsAnimatingOut" );
-					#endif
-
 					m_LayoutRoot.Show( false );
-
-					#ifdef COT_DEBUGLOGS
-					Print( "-" + this + "::OnUpdate m_IsAnimatingOut" );
-					#endif
-				}
 
 				m_IsAnimatingIn = false;
 				m_IsAnimatingOut = false;
