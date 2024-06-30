@@ -345,6 +345,9 @@ class JMObjectSpawnerForm: JMFormBase
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
 
+		if(m_PreviewItem)
+			m_PreviewItem.SetHealth01( "", "", percent );
+
 		m_HealthItem.SetAlpha( 1.0 );
 	}
 
