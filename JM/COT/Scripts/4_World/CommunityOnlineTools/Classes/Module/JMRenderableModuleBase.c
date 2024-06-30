@@ -35,7 +35,10 @@ class JMRenderableModuleBase: JMModuleBase
 				btn_txt.Show( false );
 				btn_img.Show( true );
 
-				btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
+				if (ImageHasPath())
+					btn_img.LoadImageFile( 0, GetIconName());
+				else
+					btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
 			} else
 			{
 				btn_txt.Show( true );
@@ -122,6 +125,11 @@ class JMRenderableModuleBase: JMModuleBase
 	}
 
 	bool ImageIsIcon()
+	{
+		return false;
+	}
+
+	bool ImageHasPath()
 	{
 		return false;
 	}

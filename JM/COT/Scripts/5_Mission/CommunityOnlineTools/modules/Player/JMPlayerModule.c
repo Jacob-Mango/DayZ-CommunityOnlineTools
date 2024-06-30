@@ -100,15 +100,20 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_PLAYER_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "P";
+		return "JM\\COT\\GUI\\textures\\modules\\Player.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

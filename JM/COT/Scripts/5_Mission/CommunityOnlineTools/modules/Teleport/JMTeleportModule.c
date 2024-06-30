@@ -55,15 +55,20 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_TELEPORT_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "T";
+		return "JM\\COT\\GUI\\textures\\modules\\Teleport.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

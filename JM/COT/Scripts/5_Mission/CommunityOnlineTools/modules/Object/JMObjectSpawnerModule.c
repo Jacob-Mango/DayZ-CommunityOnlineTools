@@ -103,15 +103,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_OBJECT_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "OB";
+		return "JM\\COT\\GUI\\textures\\modules\\Object.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()
