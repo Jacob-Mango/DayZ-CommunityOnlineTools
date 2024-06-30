@@ -559,11 +559,14 @@ class JMWeatherForm: JMFormBase
 		
 		InitQuickActionsWidgets( m_PanelWeatherActions );
 		InitDateWidgets( m_PanelWeatherActions );
+
+		InitOvercastWidgets( m_PanelWeatherActions );
 		InitStormWidgets( m_PanelWeatherActions );
 		InitFogWidgets( m_PanelWeatherActions );
+
 		InitRainWidgets( m_PanelWeatherActions );
 		InitRainThresholdWidgets( m_PanelWeatherActions );
-		InitOvercastWidgets( m_PanelWeatherActions );
+
 		InitWindWidgets( m_PanelWeatherActions );
 		InitWindFuncWidgets( m_PanelWeatherActions );
 	}
@@ -651,13 +654,9 @@ class JMWeatherForm: JMFormBase
 		vector dirWind = Vector( dirX, 0.0, dirZ ).Normalized();
 		float speedWind = m_EditWindSpeed.GetCurrent();
 		float maxSpeedWind = m_EditWindMaxSpeed.GetText().ToFloat();
-		
-		m_EditWindSpeed.SetMax( maxSpeedWind );
 
 		float minFunc = m_EditWindFuncMin.GetCurrent();
 		float maxFunc = m_EditWindFuncMax.GetCurrent();
-
-		m_EditWindFuncMax.SetMin( minFunc );
 
 		float speedFunc = m_EditWindFuncSpeed.GetText().ToFloat();
 
@@ -1247,18 +1246,18 @@ class JMWeatherForm: JMFormBase
 		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetLabelWidget(), 0.6 );
 		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetSliderWidget(), 0.6 );
 
-		m_EditWindMaxSpeed = UIActionManager.CreateEditableText( actionsGrid, "Maximum Speed", this, "OnClick_UpdateWindSpeed");
+		m_EditWindMaxSpeed = UIActionManager.CreateEditableText( actionsGrid, "Max Speed", this, "OnClick_UpdateWindSpeed");
 		m_EditWindMaxSpeed.SetOnlyNumbers( true );
 		m_EditWindMaxSpeed.SetText( "0" );
-		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetLabelWidget(), 0.7 );
-		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetEditBoxWidget(), 0.3 );
+		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetLabelWidget(), 0.6 );
+		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
 
 	void OnClick_UpdateWindSpeed( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CLICK )
 			return;
 		
 		float max = ToFloat(m_EditWindMaxSpeed.GetText());
@@ -1311,8 +1310,8 @@ class JMWeatherForm: JMFormBase
 		m_EditWindFuncSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this );
 		m_EditWindFuncSpeed.SetOnlyNumbers( true );
 		m_EditWindFuncSpeed.SetText( "0" );
-		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetLabelWidget(), 0.7 );
-		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetEditBoxWidget(), 0.3 );
+		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetLabelWidget(), 0.6 );
+		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
