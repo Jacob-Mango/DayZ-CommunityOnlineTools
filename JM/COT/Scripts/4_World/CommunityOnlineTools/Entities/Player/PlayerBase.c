@@ -146,7 +146,7 @@ modded class PlayerBase
 		//COT_ResumeVehicleCommand();
 
 #ifndef SERVER
-		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
+		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive()))
 			GetGame().GetUIManager().ShowUICursor(true);
 #endif
 	}

@@ -113,6 +113,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_AnimateTime = 0.0;
 		
 		#ifndef CF_WINDOWS
+		GetCOTWindowManager().ShowAllActive();
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 		#endif
@@ -129,7 +130,8 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_AnimateTime = 0.0;
 		
 		#ifndef CF_WINDOWS
-		if ( GetCOTWindowManager().Count() == 0 )
+		GetCOTWindowManager().HideAllActive();
+		if ( !GetCOTWindowManager().HasAnyActive() )
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );

@@ -28,6 +28,28 @@ class JMWindowManager
 		}
 	}
 
+	void ShowAllActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+			window.Show();
+	}
+
+	void HideAllActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+			window.Hide();
+	}
+
+	bool HasAnyActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() )
+				return true;
+		}
+		return false;
+	}
+
 	int Count()
 	{
 		return m_Windows.Count();
