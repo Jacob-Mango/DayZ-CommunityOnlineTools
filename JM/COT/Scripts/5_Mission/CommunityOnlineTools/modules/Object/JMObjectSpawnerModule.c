@@ -36,7 +36,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"mp133shotgun_pistolgrip",
 
 		"largetentbackpack",
-		"splint_applied",
 		"leatherbelt_natural",
 		"leatherbelt_beige",
 		"leatherbelt_brown",
