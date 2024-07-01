@@ -14,7 +14,8 @@ class JMWeatherSerialize
 		if ( FileExist( JMConstants.FILE_WEATHER ) )
 		{
 			JsonFileLoader<JMWeatherSerialize>.JsonLoadFile( JMConstants.FILE_WEATHER, settings );
-		} else 
+		}
+		else
 		{
 			settings.Defaults();
 			settings.Save();
@@ -31,8 +32,8 @@ class JMWeatherSerialize
 	void Defaults()
 	{
 		PresetNoRain();
+		PresetNoFog();
 		PresetNoRainAndFog();
-		PresetPissingCows();
 	}
 
 	private void PresetNoRain()
@@ -41,6 +42,28 @@ class JMWeatherSerialize
 
 		preset.Name = "No Rain";
 
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.TimeOut = -1;
+
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
 		preset.POvercast.Forecast = 0.0;
 		preset.POvercast.Time = 180;
 		preset.POvercast.MinDuration = 21600;
@@ -48,6 +71,49 @@ class JMWeatherSerialize
 		preset.PRain.Forecast = 0.0;
 		preset.PRain.Time = 180;
 		preset.PRain.MinDuration = 21600;
+
+		Presets.Insert( preset );
+	}
+
+	private void PresetNoFog()
+	{
+		JMWeatherPreset preset = new JMWeatherPreset;
+
+		preset.Name = "No Fog";
+
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.TimeOut = -1;
+
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
+		preset.PFog.Forecast = 0.0;
+		preset.PFog.Time = 180;
+		preset.PFog.MinDuration = 21600;
+
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 180;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = -1;
+		preset.PRain.Time = -1;
+		preset.PRain.MinDuration = -1;
 
 		Presets.Insert( preset );
 	}
@@ -58,6 +124,28 @@ class JMWeatherSerialize
 
 		preset.Name = "No Rain and Fog";
 
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.TimeOut = -1;
+
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
 		preset.PFog.Forecast = 0.0;
 		preset.PFog.Time = 180;
 		preset.PFog.MinDuration = 21600;
@@ -67,27 +155,6 @@ class JMWeatherSerialize
 		preset.POvercast.MinDuration = 21600;
 
 		preset.PRain.Forecast = 0.0;
-		preset.PRain.Time = 180;
-		preset.PRain.MinDuration = 21600;
-
-		Presets.Insert( preset );
-	}
-
-	private void PresetPissingCows()
-	{
-		JMWeatherPreset preset = new JMWeatherPreset;
-
-		preset.Name = "Heavy RainThunder";
-
-		preset.PFog.Forecast = 0.0;
-		preset.PFog.Time = 180;
-		preset.PFog.MinDuration = 21600;
-
-		preset.POvercast.Forecast = 1.0;
-		preset.POvercast.Time = 180;
-		preset.POvercast.MinDuration = 21600;
-
-		preset.PRain.Forecast = 1.0;
 		preset.PRain.Time = 180;
 		preset.PRain.MinDuration = 21600;
 

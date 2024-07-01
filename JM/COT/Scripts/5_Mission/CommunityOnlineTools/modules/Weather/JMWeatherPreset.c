@@ -22,7 +22,8 @@ class JMWeatherStorm: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().SetStorm( Density, Threshold, TimeOut );
+		if (Density != -1)
+			GetGame().GetWeather().SetStorm( Density, Threshold, TimeOut );
 	}
 
 	override void SetFromWorld()
@@ -49,7 +50,8 @@ class JMWeatherFog: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().GetFog().Set( Forecast, Time, MinDuration );
+		if (Forecast != -1)
+			GetGame().GetWeather().GetFog().Set( Forecast, Time, MinDuration );
 	}
 
 	override void SetFromWorld()
@@ -76,7 +78,8 @@ class JMWeatherRain: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().GetRain().Set( Forecast, Time, MinDuration );
+		if (Forecast != -1)
+			GetGame().GetWeather().GetRain().Set( Forecast, Time, MinDuration );
 	}
 
 	override void SetFromWorld()
@@ -103,7 +106,8 @@ class JMWeatherOvercast: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().GetOvercast().Set( Forecast, Time, MinDuration );
+		if (Forecast != -1)
+			GetGame().GetWeather().GetOvercast().Set( Forecast, Time, MinDuration );
 	}
 
 	override void SetFromWorld()
@@ -130,9 +134,12 @@ class JMWeatherWind: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().SetWind( Dir * Speed );
-		// GetGame().GetWeather().SetWindSpeed( Speed );
-		GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
+		if (Speed != -1)
+		{
+			GetGame().GetWeather().SetWind( Dir * Speed );
+			// GetGame().GetWeather().SetWindSpeed( Speed );
+			GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
+		}
 	}
 
 	override void SetFromWorld()
@@ -159,7 +166,8 @@ class JMWeatherWindFunction: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().SetWindFunctionParams( Min, Max, Speed );
+		if (Speed != -1)
+			GetGame().GetWeather().SetWindFunctionParams( Min, Max, Speed );
 	}
 
 	override void SetFromWorld()
@@ -186,7 +194,8 @@ class JMWeatherDate: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWorld().SetDate( Year, Month, Day, Hour, Minute );
+		if (Year != -1)
+			GetGame().GetWorld().SetDate( Year, Month, Day, Hour, Minute );
 	}
 
 	override void SetFromWorld()
@@ -211,14 +220,15 @@ class JMWeatherRainThreshold: JMWeatherBase
 
 	override void Apply()
 	{
-		GetGame().GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
+		if (Time != -1)
+			GetGame().GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
 	}
 
 	override void SetFromWorld()
 	{
-		OvercastMin = 0.75;
+		OvercastMin = 0.0;
 		OvercastMax = 1.0;
-		Time = 30.0;
+		Time = 60.0;
 	}
 
 	override void Log( PlayerIdentity pidentLog )

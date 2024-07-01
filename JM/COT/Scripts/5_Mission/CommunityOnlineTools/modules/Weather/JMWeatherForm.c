@@ -431,40 +431,86 @@ class JMWeatherForm: JMFormBase
 	{
 		m_EditTextPresetName.SetText( preset.Name );
 
-		m_EditTextDateYear.SetText( preset.PDate.Year );
-		m_SliderDateMonth.SetCurrent( preset.PDate.Month );
-		m_SliderDateDay.SetCurrent( preset.PDate.Day );
-		m_SliderDateHour.SetCurrent( preset.PDate.Hour );
-		m_SliderDateMinute.SetCurrent( preset.PDate.Minute );
+		if ( preset.PDate.Year != -1 )
+			m_EditTextDateYear.SetText( preset.PDate.Year );
 
-		m_SliderStormDensity.SetCurrent( preset.Storm.Density * 100.0 );
-		m_SliderStormThreshold.SetCurrent( preset.Storm.Threshold * 100.0 );
-		m_SliderStormTimeout.SetCurrent( preset.Storm.TimeOut );
+		if ( preset.PDate.Month != -1 )
+			m_SliderDateMonth.SetCurrent( preset.PDate.Month );
 
-		m_SliderFogForecast.SetCurrent( preset.PFog.Forecast * 100.0 );
-		m_EditFogInterpTime.SetText( preset.PFog.Time );
-		m_EditFogMinDuration.SetText( preset.PFog.MinDuration );
+		if ( preset.PDate.Day != -1 )
+			m_SliderDateDay.SetCurrent( preset.PDate.Day );
 
-		m_SliderRainForecast.SetCurrent( preset.PRain.Forecast * 100.0 );
-		m_EditRainInterpTime.SetText( preset.PRain.Time );
-		m_EditRainMinDuration.SetText( preset.PRain.MinDuration );
+		if ( preset.PDate.Hour != -1 )
+			m_SliderDateHour.SetCurrent( preset.PDate.Hour );
 
-		m_SliderRainOvercastMin.SetCurrent( preset.RainThreshold.OvercastMin * 100.0 );
-		m_SliderRainOvercastMax.SetCurrent( preset.RainThreshold.OvercastMax * 100.0 );
-		m_EditTextRainTransitionTime.SetText( preset.RainThreshold.Time );
+		if ( preset.PDate.Minute != -1 )
+			m_SliderDateMinute.SetCurrent( preset.PDate.Minute );
 
-		m_SliderOvercastForecast.SetCurrent( preset.POvercast.Forecast * 100.0 );
-		m_EditOvercastInterpTime.SetText( preset.POvercast.Time );
-		m_EditOvercastMinDuration.SetText( preset.POvercast.MinDuration );
+		if ( preset.Storm.Density != -1 )
+			m_SliderStormDensity.SetCurrent( preset.Storm.Density * 100.0 );
 
-		m_SliderWindDirectionX.SetCurrent( preset.Wind.Dir[0] );
-		m_SliderWindDirectionZ.SetCurrent( preset.Wind.Dir[2] );
-		m_EditWindSpeed.SetCurrent( preset.Wind.Speed );
-		m_EditWindMaxSpeed.SetText( preset.Wind.MaxSpeed );
+		if ( preset.Storm.Threshold != -1 )
+			m_SliderStormThreshold.SetCurrent( preset.Storm.Threshold * 100.0 );
 
-		m_EditWindFuncMin.SetCurrent( preset.WindFunc.Min );
-		m_EditWindFuncMax.SetCurrent( preset.WindFunc.Max );
-		m_EditWindFuncSpeed.SetText( preset.WindFunc.Speed );
+		if ( preset.Storm.TimeOut != -1 )
+			m_SliderStormTimeout.SetCurrent( preset.Storm.TimeOut );
+
+		if ( preset.PFog.Forecast != -1 )
+			m_SliderFogForecast.SetCurrent( preset.PFog.Forecast * 100.0 );
+
+		if ( preset.PFog.Time != -1 )
+			m_EditFogInterpTime.SetText( preset.PFog.Time );
+
+		if ( preset.PFog.MinDuration != -1 )
+			m_EditFogMinDuration.SetText( preset.PFog.MinDuration );
+
+		if ( preset.PRain.Forecast != -1 )
+			m_SliderRainForecast.SetCurrent( preset.PRain.Forecast * 100.0 );
+
+		if ( preset.PRain.Time != -1 )
+			m_EditRainInterpTime.SetText( preset.PRain.Time );
+
+		if ( preset.PRain.MinDuration != -1 )
+			m_EditRainMinDuration.SetText( preset.PRain.MinDuration );
+
+		if ( preset.RainThreshold.OvercastMin != -1 )
+			m_SliderRainOvercastMin.SetCurrent( preset.RainThreshold.OvercastMin * 100.0 );
+
+		if ( preset.RainThreshold.OvercastMax != -1 )
+			m_SliderRainOvercastMax.SetCurrent( preset.RainThreshold.OvercastMax * 100.0 );
+
+		if ( preset.RainThreshold.Time != -1 )
+			m_EditTextRainTransitionTime.SetText( preset.RainThreshold.Time );
+
+		if ( preset.POvercast.Forecast != -1 )
+			m_SliderOvercastForecast.SetCurrent( preset.POvercast.Forecast * 100.0 );
+
+		if ( preset.POvercast.Time != -1 )
+			m_EditOvercastInterpTime.SetText( preset.POvercast.Time );
+
+		if ( preset.POvercast.MinDuration != -1 )
+			m_EditOvercastMinDuration.SetText( preset.POvercast.MinDuration );
+
+		if ( preset.Wind.Dir != "0 0 0" )
+		{
+			m_SliderWindDirectionX.SetCurrent( preset.Wind.Dir[0] );
+			m_SliderWindDirectionZ.SetCurrent( preset.Wind.Dir[2] );
+		}
+
+		if ( preset.Wind.Speed != -1 )
+			m_EditWindSpeed.SetCurrent( preset.Wind.Speed );
+
+		if ( preset.Wind.MaxSpeed != -1 )
+			m_EditWindMaxSpeed.SetText( preset.Wind.MaxSpeed );
+
+		if ( preset.WindFunc.Min != -1 )
+			m_EditWindFuncMin.SetCurrent( preset.WindFunc.Min );
+
+		if ( preset.WindFunc.Max != -1 )
+			m_EditWindFuncMax.SetCurrent( preset.WindFunc.Max );
+
+		if ( preset.WindFunc.Speed != -1 )
+			m_EditWindFuncSpeed.SetText( preset.WindFunc.Speed );
 	}
 
 	void GetUIActionValues( out JMWeatherPreset preset )
@@ -1257,12 +1303,11 @@ class JMWeatherForm: JMFormBase
 
 	void OnClick_UpdateWindSpeed( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 		
 		float max = ToFloat(m_EditWindMaxSpeed.GetText());
 
-		m_EditWindSpeed.SetMin( 0.0 );
 		m_EditWindSpeed.SetMax( max );
 	}
 
@@ -1324,10 +1369,7 @@ class JMWeatherForm: JMFormBase
 		float min = m_EditWindFuncMin.GetCurrent();
 		float max = m_EditWindFuncMax.GetCurrent();
 
-		m_EditWindFuncMin.SetMin( 0 );
 		m_EditWindFuncMin.SetMax( max );
-
 		m_EditWindFuncMax.SetMin( min );
-		m_EditWindFuncMax.SetMax( 1.0 );
 	}
 };
