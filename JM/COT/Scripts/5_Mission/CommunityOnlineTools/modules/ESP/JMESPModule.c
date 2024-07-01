@@ -256,18 +256,6 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Heal" );
 	}
 
-	void ~JMESPModule()
-	{
-		delete m_SelectedObjects;
-		delete m_ActiveESPObjects;
-		delete m_ESPToCreate;
-		delete m_ESPToDestroy;
-		delete m_MappedESPObjects;
-		delete m_ViewTypes;
-
-		Hide();
-	}
-
 #ifdef SERVER
 	override void EnableUpdate()
 	{
