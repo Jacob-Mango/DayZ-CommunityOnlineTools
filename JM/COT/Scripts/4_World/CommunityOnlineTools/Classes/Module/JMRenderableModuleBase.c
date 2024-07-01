@@ -193,6 +193,7 @@ class JMRenderableModuleBase: JMModuleBase
 	void CloseModule()
 	{
 		delete m_Window;
+		delete m_Form;
 	}
 
 	void ToggleShow()
