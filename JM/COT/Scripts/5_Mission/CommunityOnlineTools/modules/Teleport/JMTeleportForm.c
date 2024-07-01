@@ -20,6 +20,7 @@ class JMTeleportForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
+	//! TODO: Allow admins to add new positions from this menu
 	override void OnInit()
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
