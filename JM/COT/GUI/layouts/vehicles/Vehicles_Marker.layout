@@ -17,6 +17,7 @@ FrameWidgetClass JMVehicleMapMarker {
    vexactpos 0
    hexactsize 1
    vexactsize 1
+   priority 100
    {
     TextWidgetClass marker_name {
      ignorepointer 1
@@ -85,6 +86,7 @@ FrameWidgetClass JMVehicleMapMarker {
        hexactsize 0
        vexactsize 0
        draggable 1
+       priority 100
        style Empty
        "no focus" 0
       }
