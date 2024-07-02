@@ -3,8 +3,10 @@ class JMTeleportForm: JMFormBase
 	protected Widget m_ActionsFilterWrapper;
 	protected UIActionEditableText m_Filter;
 
-	private string m_CurrentType;
-	protected UIActionDropdownList m_CategoriesList;
+	protected string m_CurrentCategory = "ALL";
+	protected ref TStringArray m_Categories;
+	protected UIActionSelectBox m_CategoriesList;
+	
 	protected TextListboxWidget m_LstPositionList;
 
 	protected Widget m_ActionsWrapper;
@@ -25,15 +27,13 @@ class JMTeleportForm: JMFormBase
 	{
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-#ifdef COT_MODULE_TP_FILTERLIST_ENABLE
 		Widget topRow = UIActionManager.CreateGridSpacer( m_ActionsFilterWrapper, 1, 2 );
 
 		m_Filter = UIActionManager.CreateEditableText( topRow, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
 		
-		m_CategoriesList = UIActionManager.CreateDropdownBox( topRow, m_ActionsFilterWrapper, "Type:", {""}, this, "Click_LocationType" );
-#else
-		m_Filter = UIActionManager.CreateEditableText( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
-#endif
+		m_CategoriesList = UIActionManager.CreateSelectionBox( topRow, "", {"ALL"}, this, "Click_LocationType" );
+		m_CategoriesList.SetSelectorWidth(1.0);
+
 		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
@@ -66,7 +66,7 @@ class JMTeleportForm: JMFormBase
 		}
 		else
 		{
-			m_Module.Load();	
+			m_Module.Load();
 		}
 	}
 
@@ -78,7 +78,7 @@ class JMTeleportForm: JMFormBase
 	}
 
 	override void OnSettingsUpdated()
-	{		
+	{
 		UpdateList();
 	}
 
@@ -87,9 +87,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-#ifdef COT_MODULE_TP_FILTERLIST_ENABLE
-		m_CurrentType = m_CategoriesList.GetText();
-#endif
+		m_CurrentCategory = m_Categories[m_CategoriesList.GetSelection()];
 		UpdateList();
 	}
 
@@ -122,15 +120,19 @@ class JMTeleportForm: JMFormBase
 		if (!m_Module.IsLoaded())
 			return;
 
-		m_LstPositionList.ClearItems();
-
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
 			return;
 		
-#ifdef COT_MODULE_TP_FILTERLIST_ENABLE
-		TStringArray locationTypes = m_Module.GetLocationTypes();
-		m_CategoriesList.SetItems(locationTypes);
-#endif
+		if(!m_Categories)
+		{
+			m_Categories = new TStringArray;
+			m_Categories = m_Module.GetLocationTypes();
+			if(m_Categories)
+				m_CategoriesList.SetSelections(m_Categories);
+		}
+
+		m_LstPositionList.ClearItems();
+
 		string filter = "" + m_Filter.GetText();
 		filter.ToLower();
 
@@ -142,7 +144,7 @@ class JMTeleportForm: JMFormBase
 		{
 			string type = "" + locations[i].Type;
 
-			if (  m_CurrentType != "" && type != m_CurrentType ) 
+			if (  m_CurrentCategory != "ALL" && type != m_CurrentCategory ) 
 				continue;
 
 			string name = "" + locations[i].Name;
