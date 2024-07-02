@@ -267,6 +267,9 @@ class JMWeatherForm: JMFormBase
 
 	private void UpdateActionState( UIActionBase action, string permission, bool shouldDisable = false, bool shouldHide = false )
 	{
+		if (action == NULL)
+			return;
+		
 		bool disable = false;
 		if ( permission != "" )
 		{
