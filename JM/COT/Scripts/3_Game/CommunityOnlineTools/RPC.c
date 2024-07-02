@@ -80,6 +80,8 @@ enum JMTeleportModuleRPC
 	Position,
 	PositionRaycast,
 	Location,
+	AddLocation,
+	RemoveLocation,
 	COUNT
 };
 
