@@ -368,18 +368,6 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CHANGE ) return;
 
 		m_Module.m_ObjSetupMode = action.GetSelection();
-
-		switch (action.GetSelection())
-		{
-			default:
-			case COT_ObjectSetupMode.DEBUGSPAWN:
-			case COT_ObjectSetupMode.CE:
-				m_AttachmentsButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_WITH");
-			break;
-			case COT_ObjectSetupMode.NONE:
-				m_AttachmentsButton.SetButton("Spawn empty:");
-			break;
-		}
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )
