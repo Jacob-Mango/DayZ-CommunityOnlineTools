@@ -186,7 +186,9 @@ class JMObjectSpawnerForm: JMFormBase
 		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
 		m_SpawnMode.SetSelectorWidth(1.0);
 		m_SpawnMode.SetSelection(s_ObjSpawnMode, false);
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
+
+		UIActionButton delbtn = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
+		delbtn.SetColor(COLOR_RED_A);
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 

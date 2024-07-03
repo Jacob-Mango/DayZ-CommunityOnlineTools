@@ -576,8 +576,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		OnSettingsUpdated();
 
-		//GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
-		//SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+		GetCommunityOnlineToolsBase().Log( ident, "Added TP Location " + locName + " (" + catName + ": "+ playerpos +" )" );
+		SendWebhook( "Location", instance, "Added TP " + locName + " (" + catName + ": "+ playerpos +" )" );
 	}
 
 	private void RPC_RemoveLocation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -650,8 +650,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		OnSettingsUpdated();
 
-		//GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
-		//SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+		GetCommunityOnlineToolsBase().Log( ident, "Removed TP Location " + locName.Name + " (" + locName.Type + ")" );
+		SendWebhook( "Location", instance, "Removed TP " + locName.Name + " (" + locName.Type + ")" );
 	}
 
 	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
