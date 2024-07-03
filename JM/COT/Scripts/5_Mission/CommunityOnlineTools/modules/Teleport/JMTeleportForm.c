@@ -75,6 +75,7 @@ class JMTeleportForm: JMFormBase
 		m_InputCategory = UIActionManager.CreateEditableTextPreview( inputRows, "", this, "InputCategory_OnChange" );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetLabelWidget(), 0.0 );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditBoxWidget(), 1.0 );
+		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditPreviewBoxWidget(), 1.0 );
 		
 		Widget inputBtnRows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
 
@@ -277,18 +278,21 @@ class JMTeleportForm: JMFormBase
 			string name = locations[i].Name;
 			name.ToLower();
 
-			if (filter != "" && (!name.Contains( filter )))
-				continue;
-			
-			if ( name == filter )
+			if (filter != "")
 			{
-				suggestions.Clear();
-				closestMatch = name;
-			}
-			else if ( name.IndexOf(filter) == 0 )
-			{
-				if (!closestMatch)
-					suggestions.Insert(name);
+				if (!name.Contains( filter ))
+					continue;
+
+				if ( name == filter )
+				{
+					suggestions.Clear();
+					closestMatch = name;
+				}
+				else if ( name.IndexOf(filter) == 0 )
+				{
+					if (!closestMatch)
+						suggestions.Insert(name);
+				}
 			}
 
 			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );
