@@ -101,13 +101,18 @@ class JMESPForm: JMFormBase
 		#endif
 
 		m_ESPListScroller = UIActionManager.CreateScroller( parent );
-		m_ESPListRows = UIActionManager.CreateActionRows( m_ESPListScroller.GetContentWidget() );
+		Widget container = m_ESPListScroller.GetContentWidget();
+
+		Widget rowSelectors = UIActionManager.CreateGridSpacer( container, 1, 2 );
+		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_ESPSelectAll" );
+		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_ESPDeselectAll" );
+
+		m_ESPListRows = UIActionManager.CreateActionRows( container );
 
 		int totalInContentRow = 100;
 		int currentContentRow = 0;
 
 		GridSpacerWidget gsw;
-
 		auto viewTypes = m_Module.GetViewTypes();
 
 		foreach (auto viewType: viewTypes)
@@ -149,20 +154,20 @@ class JMESPForm: JMFormBase
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
 		
+		UIActionManager.CreateText(container,"Visible Items");
 		Widget rowSelectors = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_SelectAll" );
 		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
 
-		Widget spacer1 = UIActionManager.CreateGridSpacer( container, 1, 1 );
-
+		UIActionManager.CreateText(container,"Selected Items");
+	#ifdef COT_ENABLE_LOADOUTS
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
+	#endif
+	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
 		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market"}, this );
 		m_ExportTypeList.SetSelectorWidth(1.0);
-
-	#ifdef COT_ENABLE_LOADOUTS
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
-	#endif
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
@@ -477,6 +482,24 @@ class JMESPForm: JMFormBase
 			return;
 
 		m_Module.DuplicateSelected();
+	}
+	
+	void Click_ESPDeselectAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		foreach(JMESPViewTypeWidget espType: m_ESPTypeList)
+			espType.SetChecked(false);
+	}
+	
+	void Click_ESPSelectAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		foreach(JMESPViewTypeWidget espType: m_ESPTypeList)
+			espType.SetChecked(true);
 	}
 	
 	void Click_DeleteSelected( UIEvent eid, UIActionBase action )
