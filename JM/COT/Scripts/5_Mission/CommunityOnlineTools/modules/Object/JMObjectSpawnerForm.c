@@ -28,6 +28,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private Object m_DeletingObject;
 
+	private UIActionButton m_SpawnButton;
 	private static int s_ObjSpawnMode = COT_ObjectSpawnerMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
@@ -176,7 +177,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
+		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
 		
 		if ( GetGame().IsServer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
@@ -616,6 +617,22 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		s_ObjSpawnMode = action.GetSelection();
+		
+		switch (s_ObjSpawnMode)
+		{
+			default:
+			case COT_ObjectSpawnerMode.PLAYER_POSITION:
+			case COT_ObjectSpawnerMode.CURSOR:
+			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
+			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
+				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
+			break;
+			case COT_ObjectSpawnerMode.COPYLISTRAW:
+			case COT_ObjectSpawnerMode.COPYLISTTYPES:
+			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
+				m_SpawnButton.SetButton("Copy to Clipboard:");
+			break;
+		}
 	}
 
 	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
