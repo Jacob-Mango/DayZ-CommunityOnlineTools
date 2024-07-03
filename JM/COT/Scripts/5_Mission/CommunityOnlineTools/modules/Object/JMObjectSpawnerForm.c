@@ -29,6 +29,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private Object m_DeletingObject;
 
 	private UIActionButton m_SpawnButton;
+	private UIActionButton m_AttachmentsButton;
 	private static int s_ObjSpawnMode = COT_ObjectSpawnerMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
@@ -193,7 +194,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
+		m_AttachmentsButton = UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
 		m_ObjSetupMode =  UIActionManager.CreateSelectionBox( spawnOptions, "", {"#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG", "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE", "#STR_COT_GENERIC_NONE"}, this, "Click_ObjSetupMode" );
 		m_ObjSetupMode.SetSelectorWidth(1.0);
 		m_ObjSetupMode.SetSelection(m_Module.m_ObjSetupMode, false);
@@ -367,6 +368,18 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CHANGE ) return;
 
 		m_Module.m_ObjSetupMode = action.GetSelection();
+
+		switch (action.GetSelection())
+		{
+			default:
+			case COT_ObjectSetupMode.DEBUGSPAWN:
+			case COT_ObjectSetupMode.CE:
+				m_AttachmentsButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_WITH");
+			break;
+			case COT_ObjectSetupMode.NONE:
+				m_AttachmentsButton.SetButton("Spawn empty:");
+			break;
+		}
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )
