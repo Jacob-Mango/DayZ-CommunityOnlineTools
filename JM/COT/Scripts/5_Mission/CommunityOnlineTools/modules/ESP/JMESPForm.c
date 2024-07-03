@@ -20,6 +20,8 @@ class JMESPForm: JMFormBase
 
 	private UIActionCheckbox m_DisableSafetyCheckbox;
 
+	private UIActionSelectBox m_ExportTypeList;
+
 	private JMESPModule m_Module;
 
 	private UIActionEditableTextPreview m_SearchBox;
@@ -146,26 +148,26 @@ class JMESPForm: JMFormBase
 	{
 		m_ESPSelectedObjects = UIActionManager.CreateScroller( parent );
 		Widget container = m_ESPSelectedObjects.GetContentWidget();
-
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET", this, "Click_MakeItemSet" );
-		//UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
 		
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_SelectAll" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
+		Widget rowSelectors = UIActionManager.CreateGridSpacer( container, 1, 2 );
+		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_SelectAll" );
+		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
 
 		Widget spacer1 = UIActionManager.CreateGridSpacer( container, 1, 1 );
 
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_RAW", this, "Click_CopyToClipboardRaw" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_MARKET", this, "Click_CopyToClipboardMarket" );
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_SPAWNABLETYPES", this, "Click_CopyToClipboardSpawnableTypes" );
+		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
+		UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market"}, this );
+		m_ExportTypeList.SetSelectorWidth(1.0);
 
-		Widget spacer2 = UIActionManager.CreateGridSpacer( container, 1, 1 );
+	#ifdef COT_ENABLE_LOADOUTS
+		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
+	#endif
 
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
-
-		Widget spacer3 = UIActionManager.CreateGridSpacer( container, 1, 1 );
-
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
+		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
+		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
+		delbtn.SetColor(COLOR_RED_A);
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -456,7 +458,7 @@ class JMESPForm: JMFormBase
 		m_Module.SkeletonLineThickness = action.GetSelection() + 1;
 	}
 
-	void Click_MakeItemSet( UIEvent eid, UIActionBase action )
+	void Click_MakeLoadout( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -528,27 +530,22 @@ class JMESPForm: JMFormBase
 			m_Module.MoveToCursor( contact_pos );
 	}
 	
-	void Click_CopyToClipboardRaw( UIEvent eid, UIActionBase action )
+	void Click_CopyToClipboard( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.CopyToClipboardRaw();
-	}
-	
-	void Click_CopyToClipboardMarket( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		m_Module.CopyToClipboardMarket();
-	}
-	
-	void Click_CopyToClipboardSpawnableTypes( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		m_Module.CopyToClipboardSpawnableTypes();
+		switch(m_ExportTypeList.GetSelection())
+		{
+			case COT_ESPMode.COPYLISTRAW:
+				m_Module.CopyToClipboardRaw();
+			break;
+			case COT_ESPMode.COPYLISTSPAWNABLETYPES:
+				m_Module.CopyToClipboardSpawnableTypes();
+			break;
+			case COT_ESPMode.COPYLISTEXPMARKET:
+				m_Module.CopyToClipboardMarket();
+			break;
+		}
 	}
 };

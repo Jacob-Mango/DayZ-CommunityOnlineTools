@@ -125,7 +125,9 @@ class JMTeleportForm: JMFormBase
 
 	void RemoveLocation_Confirmed()
 	{
-		m_Module.RemoveLocation(GetCurrentLocation());
+		COTCreateLocalAdminNotification(new StringLocaliser("Removed " + GetCurrentLocation()));
+
+		m_Module.RemoveLocation(GetCurrentLocation());		
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
 			return;
@@ -142,6 +144,12 @@ class JMTeleportForm: JMFormBase
 			return;
 
 		m_Module.AddLocation(m_InputLocation.GetText(),  m_InputCategory.GetText(), GetGame().GetPlayer().GetPosition() );
+
+		COTCreateLocalAdminNotification(new StringLocaliser("Added "+ m_InputCategory.GetText()+" to Category "+ m_InputCategory.GetText()));
+
+		m_InputLocation.SetText("");
+		m_InputCategory.SetText("");
+		m_InputCategory.SetTextPreview("");
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
 			return;
