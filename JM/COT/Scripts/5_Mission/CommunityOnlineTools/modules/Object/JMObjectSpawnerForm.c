@@ -639,11 +639,15 @@ class JMObjectSpawnerForm: JMFormBase
 			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
 				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
+				m_AttachmentsButton.Enable();
+				m_ObjSetupMode.Enable();
 			break;
 			case COT_ObjectSpawnerMode.COPYLISTRAW:
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
 				m_SpawnButton.SetButton("Copy to Clipboard:");
+				m_AttachmentsButton.Disable();
+				m_ObjSetupMode.Disable();
 			break;
 		}
 	}
