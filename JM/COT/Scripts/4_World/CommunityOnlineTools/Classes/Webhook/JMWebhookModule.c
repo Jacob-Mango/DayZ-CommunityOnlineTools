@@ -74,9 +74,15 @@ class JMWebhookModule: JMModuleBase
 
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
+		{
+			CF_Log.Warn("No server config file set, using default serverdz.cfg");
 			serverCfg = "serverdz.cfg";
+		}
 		else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
+		{
+			CF_Log.Warn("Cannot resolve absolute path '%1', using default serverdz.cfg", serverCfg);
 			serverCfg = "serverdz.cfg";
+		}
 
 		m_ServerConfig = ConfigFile.Parse( serverCfg );
 		if ( m_ServerConfig )
