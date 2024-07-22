@@ -210,7 +210,8 @@ modded class PlayerBase
 				PhysicsSetSolid(false);
 			}
 
-			if (!GetIsSimulationDisabled())
+			PlayerBase spectatedPlayer;  //! The identity check is for determining if we're spectating AI, in which case we won't disable sim
+			if (!GetIsSimulationDisabled() && (!spectatorCam || !Class.CastTo(spectatedPlayer, spectatorCam.SelectedTarget) || spectatedPlayer.GetIdentity()))
 			{
 				//! Disable simulation to disable position update on client, footstep sounds, etc.
 				DisableSimulation(true);
