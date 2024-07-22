@@ -430,7 +430,7 @@ class JMWeatherForm: JMFormBase
 	{
 		auto preset = new JMWeatherPreset;
 		preset.SetFromWorld();
-		SetUIActionValues( preset );
+		SetUIActionValues( preset, actual );
 	}
 
 	void SetUIActionValues( JMWeatherPreset preset, bool actual = false )
