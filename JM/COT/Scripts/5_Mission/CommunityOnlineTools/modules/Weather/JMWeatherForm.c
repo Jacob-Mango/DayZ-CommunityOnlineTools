@@ -75,7 +75,7 @@ class JMWeatherForm: JMFormBase
 
 	private UIActionSlider m_EditWindFuncMin;
 	private UIActionSlider m_EditWindFuncMax;
-	private UIActionEditableText m_EditWindFuncSpeed;
+	private UIActionEditableText m_EditWindFuncChangeFreq;
 
 	//! Preset stuff !
 	private bool m_PresetsShown;
@@ -352,7 +352,7 @@ class JMWeatherForm: JMFormBase
 
 		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
 		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditWindFuncSpeed, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindFuncChangeFreq, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
 
 		if ( hasNotSelectedPreset )
 		{
@@ -524,7 +524,7 @@ class JMWeatherForm: JMFormBase
 			m_EditWindFuncMax.SetCurrent( preset.WindFunc.Max );
 
 		if ( preset.WindFunc.Speed != -1 )
-			m_EditWindFuncSpeed.SetText( preset.WindFunc.Speed );
+			m_EditWindFuncChangeFreq.SetText( preset.WindFunc.Speed );
 	}
 
 	void GetUIActionValues( out JMWeatherPreset preset )
@@ -564,7 +564,7 @@ class JMWeatherForm: JMFormBase
 
 		preset.WindFunc.Min = m_EditWindFuncMin.GetCurrent();
 		preset.WindFunc.Max = m_EditWindFuncMax.GetCurrent();
-		preset.WindFunc.Speed = ToFloat( m_EditWindFuncSpeed.GetText() );
+		preset.WindFunc.Speed = ToFloat( m_EditWindFuncChangeFreq.GetText() );
 	}
 
 	void InitLeftPanel( Widget parent )
@@ -718,7 +718,7 @@ class JMWeatherForm: JMFormBase
 		float minFunc = m_EditWindFuncMin.GetCurrent();
 		float maxFunc = m_EditWindFuncMax.GetCurrent();
 
-		float speedFunc = m_EditWindFuncSpeed.GetText().ToFloat();
+		float speedFunc = m_EditWindFuncChangeFreq.GetText().ToFloat();
 
 		float forecastOvercast = m_SliderOvercastForecast.GetCurrent() * 0.01;
 		float timeOvercast = m_EditOvercastInterpTime.GetText().ToFloat();
@@ -1357,11 +1357,11 @@ class JMWeatherForm: JMFormBase
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetLabelWidget(), 0.6 );
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetSliderWidget(), 0.6 );
 
-		m_EditWindFuncSpeed = UIActionManager.CreateEditableText( actionsGrid, "Speed", this );
-		m_EditWindFuncSpeed.SetOnlyNumbers( true );
-		m_EditWindFuncSpeed.SetText( "0" );
-		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetLabelWidget(), 0.6 );
-		m_EditWindFuncSpeed.SetWidgetWidth( m_EditWindFuncSpeed.GetEditBoxWidget(), 0.6 );
+		m_EditWindFuncChangeFreq = UIActionManager.CreateEditableText( actionsGrid, "Frequency", this );
+		m_EditWindFuncChangeFreq.SetOnlyNumbers( true );
+		m_EditWindFuncChangeFreq.SetText( "0" );
+		m_EditWindFuncChangeFreq.SetWidgetWidth( m_EditWindFuncChangeFreq.GetLabelWidget(), 0.6 );
+		m_EditWindFuncChangeFreq.SetWidgetWidth( m_EditWindFuncChangeFreq.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
