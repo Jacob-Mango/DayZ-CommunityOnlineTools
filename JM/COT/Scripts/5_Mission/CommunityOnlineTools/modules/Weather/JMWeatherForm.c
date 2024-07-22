@@ -870,8 +870,8 @@ class JMWeatherForm: JMFormBase
 		float duration = 240;
 		float transition = 0;
 
-		m_Module.SetWind( Vector( 0, 0, 0 ), 0, 0 );
-		m_Module.SetWindFunctionParams( 0, 0, 0 );
+		m_Module.SetWind( Vector( 0, 0, 0 ), 0.1, 20 );
+		m_Module.SetWindFunctionParams( 0, 1, 30 );
 		m_Module.SetOvercast( 0, transition, duration );
 		m_Module.SetRain( 0, transition, duration );
 		m_Module.SetFog( 0, transition, duration );
@@ -890,12 +890,16 @@ class JMWeatherForm: JMFormBase
 		float duration = 240;
 		float transition = 0;
 
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
+		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
 		float windMin = Math.RandomFloatInclusive(0,0.8);
-		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
-		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
+		float thresholdStorm = Math.Max(m_SliderStormThreshold.GetCurrent() * 0.01, 0.7);
+		//! Set overcast to below storm threshold
+		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
 		m_Module.SetRain( 0, transition, duration );
 		m_Module.SetFog( 0, transition, duration );
+		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
 		RefreshValues();
 	}
@@ -911,13 +915,17 @@ class JMWeatherForm: JMFormBase
 		float duration = 240;
 		float transition = 0;
 
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
+		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
 		float windMin = Math.RandomFloatInclusive(0,0.8);
-		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
-		m_Module.SetOvercast( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
+		float thresholdStorm = Math.Max(m_SliderStormThreshold.GetCurrent() * 0.01, 0.7);
+		//! Set overcast to below storm threshold
+		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
 		m_Module.SetRainThresholds( 0.5, 1.0, 120.0 );
 		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
 		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
+		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
 		RefreshValues();
 	}
@@ -933,14 +941,15 @@ class JMWeatherForm: JMFormBase
 		float duration = 240;
 		float transition = 0;
 
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0,10), Math.RandomFloatInclusive(0,20) );
+		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed), windMaxSpeed );
 		float windMin = Math.RandomFloatInclusive(0,1);
-		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,10) );
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
 		m_Module.SetOvercast( Math.RandomFloatInclusive(0.7,1.0), transition, duration );
 		float minRainThresh = m_SliderRainOvercastMin.GetCurrent() * 0.01;
 		m_Module.SetRain( Math.RandomFloatInclusive(minRainThresh,1.0), transition, duration );
 		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
-		m_Module.SetStorm( 1.0, 0.7, 25.0 );
+		m_Module.SetStorm( 1.0, 0.7, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
 		RefreshValues();
 	}
