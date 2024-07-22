@@ -133,12 +133,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		}
 	}
 
-	void SetStorm( float density, float threshold, float timeOut )
+	void SetStorm( float density, float threshold, float minTimeBetweenLightning )
 	{
 		JMWeatherStorm wBase = new JMWeatherStorm;
 		wBase.Density = density;
 		wBase.Threshold = threshold;
-		wBase.TimeOut = timeOut;
+		wBase.MinTimeBetweenLightning = minTimeBetweenLightning;
 
 		if ( IsMissionOffline() )
 		{

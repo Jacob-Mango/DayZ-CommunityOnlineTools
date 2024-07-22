@@ -50,7 +50,7 @@ class JMWeatherSerialize
 		
 		preset.Storm.Density = -1;
 		preset.Storm.Threshold = -1;
-		preset.Storm.TimeOut = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
 
 		preset.RainThreshold.OvercastMin = -1;
 		preset.RainThreshold.OvercastMax = -1;
@@ -65,11 +65,11 @@ class JMWeatherSerialize
 		preset.WindFunc.Speed = -1;
 
 		preset.POvercast.Forecast = 0.0;
-		preset.POvercast.Time = 180;
+		preset.POvercast.Time = 120;
 		preset.POvercast.MinDuration = 21600;
 
 		preset.PRain.Forecast = 0.0;
-		preset.PRain.Time = 180;
+		preset.PRain.Time = 120;
 		preset.PRain.MinDuration = 21600;
 
 		Presets.Insert( preset );
@@ -89,7 +89,7 @@ class JMWeatherSerialize
 		
 		preset.Storm.Density = -1;
 		preset.Storm.Threshold = -1;
-		preset.Storm.TimeOut = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
 
 		preset.RainThreshold.OvercastMin = -1;
 		preset.RainThreshold.OvercastMax = -1;
@@ -104,11 +104,11 @@ class JMWeatherSerialize
 		preset.WindFunc.Speed = -1;
 
 		preset.PFog.Forecast = 0.0;
-		preset.PFog.Time = 180;
+		preset.PFog.Time = 120.0;
 		preset.PFog.MinDuration = 21600;
 
 		preset.POvercast.Forecast = 0.0;
-		preset.POvercast.Time = 180;
+		preset.POvercast.Time = 120.0;
 		preset.POvercast.MinDuration = 21600;
 
 		preset.PRain.Forecast = -1;
@@ -132,7 +132,7 @@ class JMWeatherSerialize
 		
 		preset.Storm.Density = -1;
 		preset.Storm.Threshold = -1;
-		preset.Storm.TimeOut = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
 
 		preset.RainThreshold.OvercastMin = -1;
 		preset.RainThreshold.OvercastMax = -1;
@@ -147,15 +147,15 @@ class JMWeatherSerialize
 		preset.WindFunc.Speed = -1;
 
 		preset.PFog.Forecast = 0.0;
-		preset.PFog.Time = 180;
+		preset.PFog.Time = 120;
 		preset.PFog.MinDuration = 21600;
 
 		preset.POvercast.Forecast = 0.0;
-		preset.POvercast.Time = 180;
+		preset.POvercast.Time = 120;
 		preset.POvercast.MinDuration = 21600;
 
 		preset.PRain.Forecast = 0.0;
-		preset.PRain.Time = 180;
+		preset.PRain.Time = 120;
 		preset.PRain.MinDuration = 21600;
 
 		Presets.Insert( preset );
