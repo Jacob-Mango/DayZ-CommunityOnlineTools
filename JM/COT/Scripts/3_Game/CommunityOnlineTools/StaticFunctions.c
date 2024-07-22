@@ -300,13 +300,21 @@ static string FileAttributeToString( FileAttr attr )
 	return fileType;
 }
 
-static vector SnapToGround(vector pos)
+static vector SnapToGround(vector pos, bool aboveWater = true)
 {
 	float pos_x = pos[0];
 	float pos_z = pos[2];
 	float pos_y = GetGame().SurfaceY( pos_x, pos_z );
 	vector tmp_pos = Vector( pos_x, pos_y, pos_z );
 	tmp_pos[1] = tmp_pos[1] + pos[1];
+
+	if (aboveWater)
+	{
+		float waterDepth = GetGame().GetWaterDepth(tmp_pos);
+
+		if (waterDepth > 0)
+			tmp_pos[1] = tmp_pos[1] + waterDepth;
+	}
 
 	return tmp_pos;
 }
