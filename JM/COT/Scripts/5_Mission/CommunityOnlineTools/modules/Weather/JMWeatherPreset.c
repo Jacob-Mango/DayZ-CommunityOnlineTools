@@ -18,112 +18,89 @@ class JMWeatherStorm: JMWeatherBase
 {
 	float Density;
 	float Threshold;
-	float TimeOut;
+	float MinTimeBetweenLightning;
 
 	override void Apply()
 	{
 		if (Density != -1)
-			GetGame().GetWeather().SetStorm( Density, Threshold, TimeOut );
+			GetGame().GetWeather().SetStorm( Density, Threshold, MinTimeBetweenLightning );
 	}
 
 	override void SetFromWorld()
 	{
-		Density = 0.0;
-		Threshold = 0.5;
-		TimeOut = 60.0;
+		Density = 1.0;
+		Threshold = 0.7;
+		MinTimeBetweenLightning = 25.0;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
 	{
 		if ( IsMissionHost() )
 		{
-			GetCommunityOnlineToolsBase().Log( pidentLog, "Storm " + Density + ", " + Threshold + ", " + TimeOut );
+			GetCommunityOnlineToolsBase().Log( pidentLog, "Storm " + Density + ", " + Threshold + ", " + MinTimeBetweenLightning );
 		}
 	}
 };
 
-class JMWeatherFog: JMWeatherBase
+class JMWeatherPhenomenon: JMWeatherBase
 {
 	float Forecast;
 	float Time;
 	float MinDuration;
 
+	[NonSerialized()]
+	float Actual;
+
+	WeatherPhenomenon GetPhenomenon()
+	{
+		switch (Type())
+		{
+			case JMWeatherFog:
+				return GetGame().GetWeather().GetFog();
+			case JMWeatherRain:
+				return GetGame().GetWeather().GetRain();
+			case JMWeatherOvercast:
+				return GetGame().GetWeather().GetOvercast();
+		}
+
+		return null;
+	}
+
 	override void Apply()
 	{
 		if (Forecast != -1)
-			GetGame().GetWeather().GetFog().Set( Forecast, Time, MinDuration );
+			GetPhenomenon().Set( Forecast, Time, MinDuration );
 	}
 
 	override void SetFromWorld()
 	{
-		Forecast = GetGame().GetWeather().GetFog().GetForecast();
-		Time = GetGame().GetWeather().GetFog().GetNextChange();
-		MinDuration = 4000.0;
+		Forecast = GetPhenomenon().GetForecast();
+		Time = GetPhenomenon().GetNextChange();
+		MinDuration = 240.0;
+		Actual = GetPhenomenon().GetActual();
 	}
 
 	override void Log( PlayerIdentity pidentLog )
 	{
 		if ( IsMissionHost() )
 		{
-			GetCommunityOnlineToolsBase().Log( pidentLog, "Fog " + Forecast + ", " + Time + ", " + MinDuration );
+			string type = ClassName();
+			type.Replace("JMWeather", "");
+			GetCommunityOnlineToolsBase().Log( pidentLog, type + " " + Forecast + ", " + Time + ", " + MinDuration );
 		}
 	}
 };
 
-class JMWeatherRain: JMWeatherBase
+class JMWeatherFog: JMWeatherPhenomenon
 {
-	float Forecast;
-	float Time;
-	float MinDuration;
-
-	override void Apply()
-	{
-		if (Forecast != -1)
-			GetGame().GetWeather().GetRain().Set( Forecast, Time, MinDuration );
-	}
-
-	override void SetFromWorld()
-	{
-		Forecast = GetGame().GetWeather().GetRain().GetForecast();
-		Time = GetGame().GetWeather().GetRain().GetNextChange();
-		MinDuration = 4000.0;
-	}
-
-	override void Log( PlayerIdentity pidentLog )
-	{
-		if ( IsMissionHost() )
-		{
-			GetCommunityOnlineToolsBase().Log( pidentLog, "Rain " + Forecast + ", " + Time + ", " + MinDuration );
-		}
-	}
 };
 
-class JMWeatherOvercast: JMWeatherBase
+class JMWeatherRain: JMWeatherPhenomenon
 {
-	float Forecast;
-	float Time;
-	float MinDuration;
+};
 
-	override void Apply()
-	{
-		if (Forecast != -1)
-			GetGame().GetWeather().GetOvercast().Set( Forecast, Time, MinDuration );
-	}
-
-	override void SetFromWorld()
-	{
-		Forecast = GetGame().GetWeather().GetOvercast().GetForecast();
-		Time = GetGame().GetWeather().GetOvercast().GetNextChange();
-		MinDuration = 4000.0;
-	}
-
-	override void Log( PlayerIdentity pidentLog )
-	{
-		if ( IsMissionHost() )
-		{
-			GetCommunityOnlineToolsBase().Log( pidentLog, "Overcast " + Forecast + ", " + Time + ", " + MinDuration );
-		}
-	}
+class JMWeatherOvercast: JMWeatherPhenomenon
+{
 };
 
 class JMWeatherWind: JMWeatherBase
@@ -136,7 +113,7 @@ class JMWeatherWind: JMWeatherBase
 	{
 		if (Speed != -1)
 		{
-			GetGame().GetWeather().SetWind( Dir * Speed );
+			GetGame().GetWeather().SetWind( Dir );
 			// GetGame().GetWeather().SetWindSpeed( Speed );
 			GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
 		}
@@ -226,9 +203,9 @@ class JMWeatherRainThreshold: JMWeatherBase
 
 	override void SetFromWorld()
 	{
-		OvercastMin = 0.0;
+		OvercastMin = 0.5;
 		OvercastMax = 1.0;
-		Time = 60.0;
+		Time = 120.0;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
