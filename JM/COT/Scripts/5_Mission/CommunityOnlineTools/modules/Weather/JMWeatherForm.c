@@ -532,10 +532,10 @@ class JMWeatherForm: JMFormBase
 		preset.Name = m_EditTextPresetName.GetText();
 
 		preset.PDate.Year = ToFloat( m_EditTextDateYear.GetText() );
-		preset.PDate.Month = ToFloat( m_SliderDateMonth.GetText() );
-		preset.PDate.Day = ToFloat( m_SliderDateDay.GetText() );
-		preset.PDate.Hour = ToFloat( m_SliderDateHour.GetText() );
-		preset.PDate.Minute = ToFloat( m_SliderDateMinute.GetText() );
+		preset.PDate.Month = m_SliderDateMonth.GetCurrent();
+		preset.PDate.Day = m_SliderDateDay.GetCurrent();
+		preset.PDate.Hour = m_SliderDateHour.GetCurrent();
+		preset.PDate.Minute = m_SliderDateMinute.GetCurrent();
 
 		preset.Storm.Density = m_SliderStormDensity.GetCurrent() * 0.01;
 		preset.Storm.Threshold = m_SliderStormThreshold.GetCurrent() * 0.01;
