@@ -17,6 +17,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 	private UIActionScroller m_scrler_Actions;
 	private Widget m_rows_Actions;
 
+	private bool m_IsShown;
 	private bool m_DidUnlink;
 
 	private vector m_LastPosition;
@@ -159,7 +160,12 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void OnShow()
 	{
+		if (m_IsShown)
+			return;
+
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
+
+		m_IsShown = true;
 	}
 
 	void OnHide() 
@@ -167,6 +173,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
 
 		Deselect();
+
+		m_IsShown = false;
 	}
 
 	void OnDeleteAll()
