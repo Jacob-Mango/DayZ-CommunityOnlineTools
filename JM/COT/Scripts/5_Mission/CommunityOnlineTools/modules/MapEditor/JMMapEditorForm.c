@@ -7,6 +7,7 @@ class JMMapEditorForm
 
 	protected ref JMMapEditorModule m_Module;
 
+	protected bool m_IsShown;
 	protected bool m_MouseButtonPressed;
 	protected int m_PreviousTime;
 
@@ -68,6 +69,9 @@ class JMMapEditorForm
 
 		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
 
+		if (m_IsShown)
+			return;
+
 		layoutRoot.Show( true );
 
 		m_PreviousTime = GetGame().GetTime();
@@ -75,6 +79,8 @@ class JMMapEditorForm
 		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
 
 		OnShow();
+
+		m_IsShown = true;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Show" );
@@ -94,6 +100,8 @@ class JMMapEditorForm
 		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 
 		OnHide();
+
+		m_IsShown = false;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Hide" );
