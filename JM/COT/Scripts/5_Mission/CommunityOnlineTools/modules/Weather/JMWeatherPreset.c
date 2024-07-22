@@ -113,7 +113,7 @@ class JMWeatherWind: JMWeatherBase
 	{
 		if (Speed != -1)
 		{
-			GetGame().GetWeather().SetWind( Dir );
+			GetGame().GetWeather().SetWind( Dir * Speed );
 			// GetGame().GetWeather().SetWindSpeed( Speed );
 			GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
 		}
