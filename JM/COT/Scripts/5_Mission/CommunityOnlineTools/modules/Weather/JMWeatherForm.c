@@ -1061,14 +1061,14 @@ class JMWeatherForm: JMFormBase
 		m_SliderDateHour = UIActionManager.CreateSlider( actions, "Hour", 0, 1, this );
 		m_SliderDateHour.SetCurrent( 0 );
 		m_SliderDateHour.SetStepValue( 1 );
-		m_SliderDateHour.SetMin( 1 );
-		m_SliderDateHour.SetMax( 24 );
+		m_SliderDateHour.SetMin( 0 );
+		m_SliderDateHour.SetMax( 23 );
 
 		m_SliderDateMinute = UIActionManager.CreateSlider( actions, "Minute", 0, 1, this );
 		m_SliderDateMinute.SetCurrent( 0 );
 		m_SliderDateMinute.SetStepValue( 1 );
-		m_SliderDateMinute.SetMin( 1 );
-		m_SliderDateMinute.SetMax( 60 );
+		m_SliderDateMinute.SetMin( 0 );
+		m_SliderDateMinute.SetMax( 59 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}
