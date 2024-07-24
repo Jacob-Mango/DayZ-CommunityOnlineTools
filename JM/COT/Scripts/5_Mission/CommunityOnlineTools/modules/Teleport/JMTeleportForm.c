@@ -143,6 +143,12 @@ class JMTeleportForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
 			return;
 
+		if ( !m_InputLocation.GetText() )
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser("No name given!"));
+			return;
+		}
+
 		m_Module.AddLocation(m_InputLocation.GetText(),  m_InputCategory.GetText(), GetGame().GetPlayer().GetPosition() );
 
 		COTCreateLocalAdminNotification(new StringLocaliser("Added "+ m_InputLocation.GetText()+" to Category "+ m_InputCategory.GetText()));
