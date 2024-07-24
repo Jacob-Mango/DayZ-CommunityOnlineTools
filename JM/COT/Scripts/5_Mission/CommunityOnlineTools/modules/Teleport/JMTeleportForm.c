@@ -125,7 +125,7 @@ class JMTeleportForm: JMFormBase
 
 	void RemoveLocation_Confirmed()
 	{
-		COTCreateLocalAdminNotification(new StringLocaliser("Removed " + GetCurrentLocation()));
+		COTCreateLocalAdminNotification(new StringLocaliser("Removed " + GetCurrentPositionName()));
 
 		m_Module.RemoveLocation(GetCurrentLocation());		
 
@@ -145,7 +145,7 @@ class JMTeleportForm: JMFormBase
 
 		m_Module.AddLocation(m_InputLocation.GetText(),  m_InputCategory.GetText(), GetGame().GetPlayer().GetPosition() );
 
-		COTCreateLocalAdminNotification(new StringLocaliser("Added "+ m_InputCategory.GetText()+" to Category "+ m_InputCategory.GetText()));
+		COTCreateLocalAdminNotification(new StringLocaliser("Added "+ m_InputLocation.GetText()+" to Category "+ m_InputCategory.GetText()));
 
 		m_InputLocation.SetText("");
 		m_InputCategory.SetText("");
@@ -337,9 +337,9 @@ class JMTeleportForm: JMFormBase
 	{
 		if ( m_LstPositionList && m_LstPositionList.GetSelectedRow() != -1 )
 		{
-			JMTeleportLocation position_name;
-			m_LstPositionList.GetItemData( m_LstPositionList.GetSelectedRow(), 0, position_name );
-			return position_name;
+			JMTeleportLocation location;
+			m_LstPositionList.GetItemData( m_LstPositionList.GetSelectedRow(), 0, location );
+			return location;
 		}
 
 		return NULL;
