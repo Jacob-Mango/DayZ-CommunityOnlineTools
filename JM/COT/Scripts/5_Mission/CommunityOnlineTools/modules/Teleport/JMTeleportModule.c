@@ -488,7 +488,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
 			SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
 
-			players[i].Update();
+			players[j].Update();
 		}
 	}
 
