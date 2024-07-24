@@ -185,6 +185,20 @@ class JMTeleportForm: JMFormBase
 		UpdateList();
 	}
 
+	override bool OnDoubleClick( Widget w, int x, int y, int button )
+	{
+		super.OnDoubleClick( w, x, y, button );
+
+		if ( w == m_LstPositionList && button == MouseState.LEFT )
+		{
+			Teleport();
+			
+			return true;
+		}
+
+		return false;
+	}
+
 	void Click_LocationType( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
@@ -199,6 +213,11 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		Teleport();
+	}
+
+	void Teleport()
+	{
 		array< string > players = JM_GetSelected().GetPlayers();
 		if ( players.Count() == 0 )
 		{
