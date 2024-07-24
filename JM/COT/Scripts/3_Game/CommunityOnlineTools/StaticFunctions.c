@@ -304,9 +304,14 @@ static vector SnapToGround(vector pos, bool aboveWater = true)
 {
 	float pos_x = pos[0];
 	float pos_z = pos[2];
-	float pos_y = GetGame().SurfaceY( pos_x, pos_z );
+	float pos_y;
+
+	if (pos[1] == 0.0)
+		pos_y = GetGame().SurfaceRoadY3D( pos_x, 1000.0, pos_z, RoadSurfaceDetection.UNDER );
+	else
+		pos_y = GetGame().SurfaceRoadY3D( pos_x, pos[1], pos_z, RoadSurfaceDetection.CLOSEST );
+
 	vector tmp_pos = Vector( pos_x, pos_y, pos_z );
-	tmp_pos[1] = tmp_pos[1] + pos[1];
 
 	if (aboveWater)
 	{
@@ -322,7 +327,7 @@ static vector SnapToGround(vector pos, bool aboveWater = true)
 static void SnapToGroundNew( Object object ) 
 {
 	vector pos = object.GetPosition();
-	pos[1] = GetGame().SurfaceY(pos[0], pos[2]);
+	pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.CLOSEST);
 	
 	vector clippingInfo[2];
 	vector objectBBOX[2];

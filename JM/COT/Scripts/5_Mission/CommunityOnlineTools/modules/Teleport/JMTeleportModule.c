@@ -487,11 +487,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			vector tempPos = "0 0 0";
+			vector tempPos = position;
 			tempPos[0] = position[0] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * location.Radius );
 			tempPos[2] = position[2] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * location.Radius );
 
-			tempPos[1] = GetGame().SurfaceY( tempPos[0], tempPos[2] );
+			tempPos = SnapToGround(tempPos);
 
 			SetPlayerPosition( player, tempPos );
 
