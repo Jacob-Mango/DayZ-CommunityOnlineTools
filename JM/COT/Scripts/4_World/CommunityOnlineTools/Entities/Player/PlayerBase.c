@@ -146,7 +146,7 @@ modded class PlayerBase
 		//COT_ResumeVehicleCommand();
 
 #ifndef SERVER
-		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0))
+		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive()))
 			GetGame().GetUIManager().ShowUICursor(true);
 #endif
 	}
@@ -210,7 +210,8 @@ modded class PlayerBase
 				PhysicsSetSolid(false);
 			}
 
-			if (!GetIsSimulationDisabled())
+			PlayerBase spectatedPlayer;  //! The identity check is for determining if we're spectating AI, in which case we won't disable sim
+			if (!GetIsSimulationDisabled() && (!spectatorCam || !Class.CastTo(spectatedPlayer, spectatorCam.SelectedTarget) || spectatedPlayer.GetIdentity()))
 			{
 				//! Disable simulation to disable position update on client, footstep sounds, etc.
 				DisableSimulation(true);
@@ -233,6 +234,26 @@ modded class PlayerBase
 		SetInvisible( true );
 	}
 #endif
+
+	void COT_SimulationDisabled_OnFrame(float timeSlice)
+	{
+		//! Verbatim copy of vanilla PlayerBase::EOnFrame, this is a stand-in to update HUD etc in case of true invis mode which disables simulation
+		if (GetInstanceType() == DayZPlayerInstanceType.INSTANCETYPE_CLIENT)
+		{
+			#ifndef NO_GUI
+			m_Hud.Update(timeSlice);
+			m_Hud.ToggleHeatBufferPlusSign(m_HasHeatBuffer);
+			
+			if (IsControlledPlayer() && m_EffectWidgets && m_EffectWidgets.IsAnyEffectRunning())
+			{
+				m_EffectWidgets.Update(timeSlice);
+			}
+			#endif
+
+			if (m_UndergroundHandler)
+				m_UndergroundHandler.Tick(timeSlice);
+		}
+	}
 
 	override bool CanBeTargetedByAI( EntityAI ai )
 	{
@@ -627,7 +648,7 @@ modded class PlayerBase
 			}
 			else
 			{
-				position[1] = GetGame().SurfaceY(position[0], position[2]) - 10;
+				position[1] = GetGame().SurfaceRoadY3D(position[0], position[1], position[2], RoadSurfaceDetection.CLOSEST) - 3.0;
 			}
 
 			if (!COTHasGodMode())

@@ -36,6 +36,11 @@ class JMTeleportSerialize : Managed
 				settings.Defaults();
 				settings.Save();
 			}
+			else if (settings.Types[0] == "")
+			{
+				settings.Types[0] = "ALL";
+				settings.Save();
+			}
 		} else {
 			settings.Defaults();
 			settings.Save();
@@ -122,7 +127,7 @@ class JMTeleportSerialize : Managed
 		}
 
 		Types.Sort();
-		Types.InsertAt("", 0);
+		Types.InsertAt("ALL", 0);
 	
 		ref array< ref string > AfterSorting = new array< ref string >;
 		ref array< ref string > BeforeSorting = new array< ref string >;

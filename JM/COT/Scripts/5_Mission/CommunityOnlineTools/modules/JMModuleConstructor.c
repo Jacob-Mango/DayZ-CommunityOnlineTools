@@ -14,10 +14,10 @@ modded class JMModuleConstructor
 		//modules.Insert( JMTestingModule );
 		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMExampleModule );
-		modules.Insert( JMWeatherModule );
-#else
 		modules.Insert( JMWeatherOldModule );
 #endif
+
+		modules.Insert( JMWeatherModule );
 
 		//! TODO: Merge with ItemSets once it will use prefabs
 		modules.Insert( JMVehicleSpawnerModule );

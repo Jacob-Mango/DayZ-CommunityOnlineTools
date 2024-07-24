@@ -74,26 +74,39 @@ modded class MissionServer
 
     override void OnEvent(EventType eventTypeId, Param params)
     {
-        super.OnEvent(eventTypeId, params);
-
         switch(eventTypeId)
         {
-            case ClientPrepareEventTypeID:
+			// This is late enough to kick the player safely
+			// but too early to send a message to the player
+            case ClientNewEventTypeID:
             {
-                ClientPrepareEventParams clientPrepareParams;
-                Class.CastTo(clientPrepareParams, params);
+				ClientNewEventParams newParams;
+				Class.CastTo(newParams, params);
+				PlayerIdentity identity = newParams.param1;
 
-                PlayerIdentity identity = clientPrepareParams.param1;
-
-				//! TODO: Make a file or something to store the bans and try to find the banned player with his Identity
 				string banReason;
-                //if (IsCOTBanned(identity.GetId(), banReason))
+                if (IsCOTBanned(identity.GetId(), banReason))
                 {
-                    //! is faulty, yeet them out
+					Print("[COT] Player "+identity.GetId()+" was kicked. Reason(BAN): "+ banReason);
+					OnClientDisconnectedEvent(identity, NULL, 0, true);
+					return;
                 }
                 break;
             }
         }
-    }
-};
 
+        super.OnEvent(eventTypeId, params);
+    }
+
+	bool IsCOTBanned(string id, out string message)
+	{
+		JMPlayerBan banData = JMPlayerBan.Load(id);
+		if ( banData )
+		{
+			banData.Message = message;
+			return true;
+		}
+
+		return false;
+	}
+};

@@ -33,15 +33,20 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_ITEMSET_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "IS";
+		return "JM\\COT\\GUI\\textures\\modules\\SetSpawner.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

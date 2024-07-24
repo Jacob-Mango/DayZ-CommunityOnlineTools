@@ -51,8 +51,11 @@ PanelWidgetClass btn_bkg {
          valign center_ref
          hexactsize 0
          vexactsize 0
-         mode additive
+         mode blend
          "src alpha" 1
+         "no wrap" 1
+         stretch 1
+         filter 1
         }
         TextWidgetClass btn_txt {
          visible 0

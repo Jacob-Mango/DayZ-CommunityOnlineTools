@@ -12,8 +12,6 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 	private ButtonWidget m_WRemoveButton;
 	private ButtonWidget m_WSelectButton;
 
-	private string m_Permission;
-
 	private JMWeatherForm m_Form;
 
 	private bool m_IsCreatingNew;
@@ -30,6 +28,9 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 
 	void ~JMWeatherPresetWidget()
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
@@ -109,35 +110,22 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 		m_IsCreatingNew = true;
 	}
 
-	void SetPreset( string name, string permission )
+	void SetPreset( string name )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::SetPreset" );
 		#endif
 
 		m_Name = name;
-		m_Permission = permission;
 
 		m_IsCreatingNew = false;
 		
-		if ( m_Permission == "" ) 
-		{
-			Hide();
-		} else 
-		{
-			Show();
+		Show();
 
-			m_WName.SetText( m_Name );
-			m_WName.SetColor( 0xFFFFFFFF );
+		m_WName.SetText( m_Name );
+		m_WName.SetColor( 0xFFFFFFFF );
 
-			if ( GetPermissionsManager().HasPermission( "Weather.Preset.Remove" ) )
-			{
-				m_WRemoveButton.Show( true );
-			} else
-			{
-				m_WRemoveButton.Show( false );
-			}
-		}
+		m_WRemoveButton.Show( GetPermissionsManager().HasPermission( "Weather.Preset.Remove" ) );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::SetPreset" );
@@ -161,14 +149,14 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 				m_Form.CreateNew();
 			} else 
 			{
-				m_Form.SetSelectedPreset( m_Permission );
+				m_Form.SetSelectedPreset( m_Name );
 			}
 			return true;
 		}
 
 		if ( w == m_WRemoveButton )
 		{
-			m_Form.RemovePreset( m_Permission );
+			m_Form.RemovePreset( m_Name );
 			return true;
 		}
 		

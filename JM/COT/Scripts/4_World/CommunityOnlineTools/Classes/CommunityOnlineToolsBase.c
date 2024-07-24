@@ -26,7 +26,7 @@ class CommunityOnlineToolsBase
 		array< JMRenderableModuleBase > cotModules = GetModuleManager().GetCOTModules();
 		for ( int i = 0; i < cotModules.Count(); i++ )
 		{
-			cotModules[i].Hide();
+			cotModules[i].Close();
 		}
 
 		GetDayZGame().Event_OnRPC.Remove( OnRPC );
@@ -394,6 +394,10 @@ class CommunityOnlineToolsBase
 			GetGame().GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
 			GetGame().GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
 		}
+	}
+
+	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)
+	{
 	}
 };
 

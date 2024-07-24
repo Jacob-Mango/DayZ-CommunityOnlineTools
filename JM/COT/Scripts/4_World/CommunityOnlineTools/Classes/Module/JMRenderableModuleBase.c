@@ -35,7 +35,10 @@ class JMRenderableModuleBase: JMModuleBase
 				btn_txt.Show( false );
 				btn_img.Show( true );
 
-				btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
+				if (ImageHasPath())
+					btn_img.LoadImageFile( 0, GetIconName());
+				else
+					btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
 			} else
 			{
 				btn_txt.Show( true );
@@ -126,6 +129,11 @@ class JMRenderableModuleBase: JMModuleBase
 		return false;
 	}
 
+	bool ImageHasPath()
+	{
+		return false;
+	}
+
 	bool HasAccess()
 	{
 		return true;
@@ -174,14 +182,25 @@ class JMRenderableModuleBase: JMModuleBase
 
 	void Hide()
 	{
+		m_Window.Hide();
+	}
+
+	void Close()
+	{
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(CloseModule); 
+	}
+
+	void CloseModule()
+	{
 		delete m_Window;
+		delete m_Form;
 	}
 
 	void ToggleShow()
 	{
 		if ( IsVisible() ) 
 		{
-			Hide();
+			Close();
 		} else
 		{
 			if ( GetGame().GetUIManager().GetMenu() )

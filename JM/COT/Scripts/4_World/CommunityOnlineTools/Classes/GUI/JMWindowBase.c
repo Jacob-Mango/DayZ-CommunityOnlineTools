@@ -55,6 +55,9 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 	void ~JMWindowBase() 
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
@@ -269,7 +272,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
-		if ( !GetCommunityOnlineToolsBase().IsOpen() && GetCOTWindowManager().Count() == 0 )
+		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyActive() )
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );
@@ -388,7 +391,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	{
 		if ( w == m_CloseButton )
 		{
-			m_Module.Hide();
+			m_Module.Close();
 			return true;
 		}
 

@@ -13,7 +13,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 	void JMCOTSideBar()
 	{
-		m_TotalAnimateTime = 0.05; //0.35;
+		m_TotalAnimateTime = 0.35;
 	}
 	
 	void ~JMCOTSideBar()
@@ -41,7 +41,8 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 	
 	void Init()
 	{
-		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText( "PayPal.Me/JacobMango" );
+		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "CreditsText" ) ).SetText("");
+		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText("");
 
 		array< JMRenderableModuleBase > modules = new array< JMRenderableModuleBase >;
 		SortModuleArray( GetModuleManager().GetCOTModules(), modules );
@@ -60,6 +61,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_LayoutRoot.GetSize( m_WidthX, h );
 
 		Hide();
+		m_LayoutRoot.Show( false );
 	}
 
 	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
@@ -113,6 +115,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_AnimateTime = 0.0;
 		
 		#ifndef CF_WINDOWS
+		GetCOTWindowManager().ShowAllActive();
 		GetGame().GetInput().ChangeGameFocus( 1 );
 		GetGame().GetUIManager().ShowUICursor( true );
 		#endif
@@ -129,7 +132,8 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_AnimateTime = 0.0;
 		
 		#ifndef CF_WINDOWS
-		if ( GetCOTWindowManager().Count() == 0 )
+		GetCOTWindowManager().HideAllActive();
+		if ( !GetCOTWindowManager().HasAnyActive() )
 		{
 			GetGame().GetInput().ResetGameFocus();
 			GetGame().GetUIManager().ShowUICursor( false );
@@ -147,42 +151,18 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 			if ( m_IsAnimatingIn )
 			{
-				#ifdef COT_DEBUGLOGS
-				Print( "+" + this + "::OnUpdate m_IsAnimatingIn" );
-				#endif
-				
 				m_LayoutRoot.Show( true );
-
-				#ifdef COT_DEBUGLOGS
-				Print( "-" + this + "::OnUpdate m_IsAnimatingIn" );
-				#endif
-
-				m_PosX = 0;
-
-				//m_PosX = /*Easing.EaseInSine*/( 1.0 - scaledTime ) * -1.0;
+				m_PosX = -m_WidthX + (m_WidthX / scaledTime);
+				if (m_PosX > 0)
+					m_PosX = 0;
 			}
-
-			if ( m_IsAnimatingOut )
-			{
-				m_PosX = -m_WidthX;
-
-				//m_PosX = /*Easing.EaseOutSine*/( scaledTime ) * -1.0;
-			}
+			else if ( m_IsAnimatingOut )
+				m_PosX = -m_WidthX / scaledTime;
 
 			if ( m_AnimateTime > m_TotalAnimateTime )
 			{
 				if ( m_IsAnimatingOut )
-				{
-					#ifdef COT_DEBUGLOGS
-					Print( "+" + this + "::OnUpdate m_IsAnimatingOut" );
-					#endif
-
 					m_LayoutRoot.Show( false );
-
-					#ifdef COT_DEBUGLOGS
-					Print( "-" + this + "::OnUpdate m_IsAnimatingOut" );
-					#endif
-				}
 
 				m_IsAnimatingIn = false;
 				m_IsAnimatingOut = false;

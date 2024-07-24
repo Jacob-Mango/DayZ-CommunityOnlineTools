@@ -85,7 +85,7 @@ class COTModule : JMModuleBase
 
 	override void RegisterKeyMouseBindings() 
 	{
-		Bind( new JMModuleBinding( "ToggleMenu",		"UACOTToggleButtons",		true 	) );
+		Bind( new JMModuleBinding( "ToggleMenu",	"UACOTToggleButtons",		true 	) );
 		Bind( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
 		Bind( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
@@ -157,7 +157,7 @@ class COTModule : JMModuleBase
 	void UpdateMouseControls()
 	{
 		bool isMenuOpen = m_COTMenu && m_COTMenu.IsVisible();
-		bool windowsOpen = GetCOTWindowManager().Count() > 0;
+		bool windowsOpen = GetCOTWindowManager().HasAnyActive();
 
 		if ( !isMenuOpen && !windowsOpen )
 			return;
@@ -238,7 +238,8 @@ class COTModule : JMModuleBase
 		Print( "  +SetOpen" );
 		#endif
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+		if (GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen())
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "  -SetOpen" );
@@ -273,7 +274,7 @@ class COTModule : JMModuleBase
 		if ( GetGame().GetUIManager().GetMenu() )
 			return;
 
-		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().Count() > 0 )
+		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().HasAnyActive() )
 		{
 			bool canContinue = false;
 
