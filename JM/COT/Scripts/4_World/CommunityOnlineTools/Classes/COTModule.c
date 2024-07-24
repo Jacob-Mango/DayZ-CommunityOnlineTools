@@ -238,7 +238,8 @@ class COTModule : JMModuleBase
 		Print( "  +SetOpen" );
 		#endif
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+		if (GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen())
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "  -SetOpen" );
