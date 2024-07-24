@@ -14,7 +14,8 @@ class JMWeatherSerialize
 		if ( FileExist( JMConstants.FILE_WEATHER ) )
 		{
 			JsonFileLoader<JMWeatherSerialize>.JsonLoadFile( JMConstants.FILE_WEATHER, settings );
-		} else 
+		}
+		else
 		{
 			settings.Defaults();
 			settings.Save();
@@ -30,66 +31,132 @@ class JMWeatherSerialize
 
 	void Defaults()
 	{
-		DefaultPreset();
-		TestPreset();
+		PresetNoRain();
+		PresetNoFog();
+		PresetNoRainAndFog();
 	}
 
-	private void DefaultPreset()
+	private void PresetNoRain()
 	{
 		JMWeatherPreset preset = new JMWeatherPreset;
 
-		preset.Name = "Default";
-		preset.Permission = "Default";
+		preset.Name = "No Rain";
 
-		preset.PDate.Year = 2019;
-		preset.PDate.Month = 5;
-		preset.PDate.Day = 23;
-		preset.PDate.Hour = 12;
-		preset.PDate.Minute = 25;
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
 
-		preset.PFog.Forecast = 0.1;
-		preset.PFog.Time = 100;
-		preset.PFog.MinDuration = 100;
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
 
-		preset.POvercast.Forecast = 0.1;
-		preset.POvercast.Time = 100;
-		preset.POvercast.MinDuration = 100;
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
 
-		preset.PRain.Forecast = 0.1;
-		preset.PRain.Time = 100;
-		preset.PRain.MinDuration = 100;
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 120;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = 0.0;
+		preset.PRain.Time = 120;
+		preset.PRain.MinDuration = 21600;
 
 		Presets.Insert( preset );
 	}
 
-	private void TestPreset()
+	private void PresetNoFog()
 	{
 		JMWeatherPreset preset = new JMWeatherPreset;
 
-		preset.Name = "Test";
-		preset.Permission = "Test";
+		preset.Name = "No Fog";
 
-		preset.PDate.Year = 2019;
-		preset.PDate.Month = 2;
-		preset.PDate.Day = 18;
-		preset.PDate.Hour = 9;
-		preset.PDate.Minute = 5;
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
 
-		preset.PFog.Forecast = 0.1;
-		preset.PFog.Time = 100;
-		preset.PFog.MinDuration = 100;
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
 
-		preset.POvercast.Forecast = 0.1;
-		preset.POvercast.Time = 100;
-		preset.POvercast.MinDuration = 100;
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
 
-		preset.PRain.Forecast = 0.1;
-		preset.PRain.Time = 100;
-		preset.PRain.MinDuration = 100;
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
 
-		preset.RainThreshold.OvercastMin = 0.05;
-		preset.RainThreshold.OvercastMax = 1.0;
-		preset.RainThreshold.Time = 5;
+		preset.PFog.Forecast = 0.0;
+		preset.PFog.Time = 120.0;
+		preset.PFog.MinDuration = 21600;
+
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 120.0;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = -1;
+		preset.PRain.Time = -1;
+		preset.PRain.MinDuration = -1;
+
+		Presets.Insert( preset );
+	}
+
+	private void PresetNoRainAndFog()
+	{
+		JMWeatherPreset preset = new JMWeatherPreset;
+
+		preset.Name = "No Rain and Fog";
+
+		preset.PDate.Year = -1;
+		preset.PDate.Month = -1;
+		preset.PDate.Day = -1;
+		preset.PDate.Hour = -1;
+		preset.PDate.Minute = -1;
+		
+		preset.Storm.Density = -1;
+		preset.Storm.Threshold = -1;
+		preset.Storm.MinTimeBetweenLightning = -1;
+
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
+
+		preset.PFog.Forecast = 0.0;
+		preset.PFog.Time = 120;
+		preset.PFog.MinDuration = 21600;
+
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 120;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = 0.0;
+		preset.PRain.Time = 120;
+		preset.PRain.MinDuration = 21600;
 
 		Presets.Insert( preset );
 	}

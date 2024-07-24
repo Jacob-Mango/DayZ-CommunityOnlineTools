@@ -55,18 +55,18 @@ class JMCameraModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_CAMERA_MODULE_NAME";
 	}
-	
-	override string GetImageSet()
-	{
-		return "rover_imageset";
-	}
 
 	override string GetIconName()
 	{
-		return "camera";
+		return "JM\\COT\\GUI\\textures\\modules\\Camera.paa";
 	}
 
 	override bool ImageIsIcon()
+	{
+		return true;
+	}
+
+	override bool ImageHasPath()
 	{
 		return true;
 	}

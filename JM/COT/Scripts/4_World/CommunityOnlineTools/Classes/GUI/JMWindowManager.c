@@ -12,11 +12,6 @@ class JMWindowManager
 		m_WindowsPendingDeletion = new array< JMWindowBase >;
 	}
 
-	void ~JMWindowManager()
-	{
-		delete m_Windows;
-	}
-
 	JMWindowBase Create()
 	{
 		JMWindowBase window;
@@ -31,6 +26,28 @@ class JMWindowManager
 		{
 			
 		}
+	}
+
+	void ShowAllActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+			window.Show();
+	}
+
+	void HideAllActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+			window.Hide();
+	}
+
+	bool HasAnyActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() )
+				return true;
+		}
+		return false;
 	}
 
 	int Count()

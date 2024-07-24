@@ -11,6 +11,8 @@ class UIActionBase: ScriptedWidgetEventHandler
 	protected Class m_Instance;
 	protected string m_FuncName;
 
+	protected bool m_IsShown;
+
 	protected bool m_HasCallback;
 
 	protected bool m_WasFocused;
@@ -31,6 +33,9 @@ class UIActionBase: ScriptedWidgetEventHandler
 
 	void ~UIActionBase()
 	{
+		if (!GetGame())
+			return;
+
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
@@ -98,10 +103,15 @@ class UIActionBase: ScriptedWidgetEventHandler
 		Print( "+" + this + "::Show" );
 		#endif
 
+		if (m_IsShown)
+			return;
+
 		layoutRoot.Show( true );
 		OnShow();
 
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+
+		m_IsShown = true;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Show" );
@@ -116,6 +126,8 @@ class UIActionBase: ScriptedWidgetEventHandler
 		
 		if ( layoutRoot )
 			layoutRoot.Show( false );
+
+		m_IsShown = false;
 	}
 
 	void OnShow()

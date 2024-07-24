@@ -43,7 +43,7 @@ class JMESPMeta : Managed
 	UIActionEditableText m_Action_Health;
 
 	UIActionButton m_Action_Delete;
-	UIActionButton m_RepairButton;
+	UIActionButton m_HealButton;
 
 	bool m_ActionsInitialized;
 
@@ -58,6 +58,9 @@ class JMESPMeta : Managed
 
 	void ~JMESPMeta()
 	{
+		if (!GetGame())
+			return;
+
 		Destroy();
 
 		if (s_JM_All)
@@ -182,7 +185,9 @@ class JMESPMeta : Managed
 			m_Action_Health.SetOnlyNumbers( true );
 
 			if ( !target.IsInherited(Man) && !target.IsInherited(DayZCreature) )
-				m_RepairButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_Repair" );
+				m_HealButton  = UIActionManager.CreateButton( parent, "Repair",  this, "Action_Heal" );
+			else
+				m_HealButton  = UIActionManager.CreateButton( parent, "Heal",  this, "Action_Heal" );
 		}
 
 		if ( CanDelete() )
@@ -395,12 +400,15 @@ class JMESPMeta : Managed
 			module.DeleteObject( networkLow, networkHigh );
 	}
 
-	void Action_Repair( UIEvent eid, UIActionBase action )
+	void Action_Heal( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		module.Repair( target );
+		if ((target.IsInherited(Man) || target.IsInherited(DayZCreature)) && target.IsDamageDestroyed())
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_ERROR_CANNOT_HEAL_DEAD_CREATURE" ) );
+		else
+			module.Heal( target );
 	}
 };
 
@@ -607,7 +615,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		module.BaseBuilding_Dismantle( m_BaseBuilding, data.m_Name );
 	}
 
-	override void Action_Repair( UIEvent eid, UIActionBase action )
+	void Action_Repair( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

@@ -36,7 +36,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"mp133shotgun_pistolgrip",
 
 		"largetentbackpack",
-		"splint_applied",
 		"leatherbelt_natural",
 		"leatherbelt_beige",
 		"leatherbelt_brown",
@@ -103,15 +102,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_OBJECT_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "OB";
+		return "JM\\COT\\GUI\\textures\\modules\\Object.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()
@@ -157,9 +161,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			form.DeleteCursor(obj);
 	}
 	
-	Object GetObjectAtCursor(bool ignorePlayer = true)
-	{
-		float distance = 3.0;  //! Distance is chosen such that if you can see the item hint on HUD, raycast should also hit
+	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
+	Object GetObjectAtCursor(bool ignorePlayer = true, float distance = 3.0)
+	{ 
 		vector rayStart = GetGame().GetCurrentCameraPosition();
 
 		DayZPlayer player = GetGame().GetPlayer();
@@ -388,7 +392,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			if (targetInventory && !GetGame().IsKindOf(className, "DZ_LightAI"))
 			{
-				if (Class.CastTo(targetEnt, GetObjectAtCursor(false)) && !targetEnt.GetInventory())
+				if (Class.CastTo(targetEnt, GetObjectAtCursor(false, 1000.0)) && !targetEnt.GetInventory())
 					targetEnt = null;
 			}
 		}
@@ -764,7 +768,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 				if (scope == 2)
 				{
-					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty)
+					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
 						continue;
 
 					TStringArray inv_slots = {};

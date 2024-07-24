@@ -14,6 +14,7 @@ class JMConstants
 	static const string DIR_PERMISSIONS = DIR_PF + "Permissions\\";
 	static const string DIR_ROLES = DIR_PF + "Roles\\";
 	static const string DIR_PLAYERS = DIR_PF + "Players\\";
+	static const string DIR_BANS = DIR_PF + "Bans\\";
 
 	static const string FT_ROLE = "txt";
 	static const string FT_PERMISSION = "txt";

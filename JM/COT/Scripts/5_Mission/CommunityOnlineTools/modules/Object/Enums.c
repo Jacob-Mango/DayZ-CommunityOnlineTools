@@ -10,6 +10,13 @@ enum COT_ObjectSpawnerMode
 	PLAYER_INVENTORY
 };
 
+enum COT_ESPMode
+{
+	COPYLISTRAW,
+	COPYLISTSPAWNABLETYPES,
+	COPYLISTEXPMARKET
+};
+
 enum COT_ObjectSetupMode
 {
 	DEBUGSPAWN,

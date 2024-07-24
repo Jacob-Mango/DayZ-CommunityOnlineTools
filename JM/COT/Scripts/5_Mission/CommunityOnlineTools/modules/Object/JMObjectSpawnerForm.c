@@ -28,6 +28,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 	private Object m_DeletingObject;
 
+	private UIActionButton m_SpawnButton;
+	private UIActionButton m_AttachmentsButton;
 	private static int s_ObjSpawnMode = COT_ObjectSpawnerMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
@@ -176,7 +178,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
+		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
 		
 		if ( GetGame().IsServer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
@@ -186,11 +188,13 @@ class JMObjectSpawnerForm: JMFormBase
 		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
 		m_SpawnMode.SetSelectorWidth(1.0);
 		m_SpawnMode.SetSelection(s_ObjSpawnMode, false);
-		UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
+
+		UIActionButton delbtn = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_DELETE", this, "DeleteCursor" );
+		delbtn.SetColor(COLOR_RED);
 
 		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
-		UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
+		m_AttachmentsButton = UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
 		m_ObjSetupMode =  UIActionManager.CreateSelectionBox( spawnOptions, "", {"#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG", "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE", "#STR_COT_GENERIC_NONE"}, this, "Click_ObjSetupMode" );
 		m_ObjSetupMode.SetSelectorWidth(1.0);
 		m_ObjSetupMode.SetSelection(m_Module.m_ObjSetupMode, false);
@@ -344,6 +348,9 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
+
+		if (m_PreviewItem && MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType()) > 0 )
+			m_PreviewItem.SetHealth01( "", "", percent );
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -611,6 +618,26 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		s_ObjSpawnMode = action.GetSelection();
+		
+		switch (s_ObjSpawnMode)
+		{
+			default:
+			case COT_ObjectSpawnerMode.PLAYER_POSITION:
+			case COT_ObjectSpawnerMode.CURSOR:
+			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
+			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
+				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
+				m_AttachmentsButton.Enable();
+				m_ObjSetupMode.Enable();
+			break;
+			case COT_ObjectSpawnerMode.COPYLISTRAW:
+			case COT_ObjectSpawnerMode.COPYLISTTYPES:
+			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
+				m_SpawnButton.SetButton("Copy to Clipboard:");
+				m_AttachmentsButton.Disable();
+				m_ObjSetupMode.Disable();
+			break;
+		}
 	}
 
 	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
@@ -808,7 +835,7 @@ class JMObjectSpawnerForm: JMFormBase
 					continue;
 
 				string model;
-				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty)
+				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
 				string strNameLower = strName;

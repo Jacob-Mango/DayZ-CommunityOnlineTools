@@ -1,7 +1,7 @@
 PanelWidgetClass JMTeleportForm {
  color 0 0 0 0
  position 0 0
- size 400 410
+ size 400 510
  hexactpos 0
  vexactpos 0
  hexactsize 1

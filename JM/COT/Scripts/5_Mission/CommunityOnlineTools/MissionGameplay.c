@@ -132,6 +132,14 @@ modded class MissionGameplay
 					m_CDebugMonitor.Show();
 				}
 			}
+
+			PlayerBase player;
+			if (Class.CastTo(player, GetGame().GetPlayer()) && player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
+			{
+				//! Since PlayerBase::EOnFrame will no longer be called by the engine if simulation is disabled,
+				//! call stand-in from here so HUD gets updated
+				player.COT_SimulationDisabled_OnFrame(timeslice);
+			}
 		}
 	}
 
@@ -173,7 +181,7 @@ modded class MissionGameplay
 
 	override void ShowInventory()
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.ShowInventory();
@@ -181,7 +189,7 @@ modded class MissionGameplay
 
 	override void Pause()
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.Pause();
@@ -189,7 +197,7 @@ modded class MissionGameplay
 
 	override protected void HandleMapToggleByKeyboardShortcut(Man player)
 	{
-		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().Count() > 0 )
+		if ( GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() )
 			return;
 
 		super.HandleMapToggleByKeyboardShortcut(player);

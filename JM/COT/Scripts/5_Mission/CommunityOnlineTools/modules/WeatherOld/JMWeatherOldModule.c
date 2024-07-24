@@ -33,10 +33,12 @@ class JMWeatherOldModule: JMRenderableModuleBase
 	{
 	}
 
+/*
 	override string GetInputToggle()
 	{
 		return "UACOTToggleWeather";
 	}
+*/
 
 	override string GetLayoutRoot()
 	{
@@ -45,17 +47,22 @@ class JMWeatherOldModule: JMRenderableModuleBase
 	
 	override string GetTitle()
 	{
-		return "#STR_COT_WEATHER_MODULE_NAME";
+		return "#STR_COT_WEATHER_MODULE_NAME (legacy)";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "W";
+		return "JM\\COT\\GUI\\textures\\modules\\Weather.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

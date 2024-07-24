@@ -40,11 +40,16 @@ class JMMapModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "M";
+		return "JM\\COT\\GUI\\textures\\modules\\COTMap.paa";
 	}
-	
+
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 };

@@ -252,19 +252,8 @@ class JMESPModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Unstuck" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Refuel" );
-		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Repair" );
-	}
 
-	void ~JMESPModule()
-	{
-		delete m_SelectedObjects;
-		delete m_ActiveESPObjects;
-		delete m_ESPToCreate;
-		delete m_ESPToDestroy;
-		delete m_MappedESPObjects;
-		delete m_ViewTypes;
-
-		Hide();
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Heal" );
 	}
 
 #ifdef SERVER
@@ -295,12 +284,17 @@ class JMESPModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "X";
+		return "JM\\COT\\GUI\\textures\\modules\\ESP.paa";
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()
@@ -918,15 +912,15 @@ class JMESPModule: JMRenderableModuleBase
 			RPC_BaseBuilding_Repair( ctx, sender, target );
 			break;
 
-		// Car ESP
 		case JMESPModuleRPC.Vehicle_Unstuck:
 			RPC_Vehicle_Unstuck( ctx, sender, target );
 			break;
 		case JMESPModuleRPC.Vehicle_Refuel:
 			RPC_Vehicle_Refuel( ctx, sender, target );
 			break;
-		case JMESPModuleRPC.Repair:
-			RPC_Repair( ctx, sender, target );
+
+		case JMESPModuleRPC.Heal:
+			RPC_Heal( ctx, sender, target );
 			break;
 
 		case JMESPModuleRPC.MakeItemSet:
@@ -1328,33 +1322,54 @@ class JMESPModule: JMRenderableModuleBase
 		Exec_Vehicle_Refuel( target, senderRPC, instance );
 	}
 
-	void Repair( Object target )
+	void Heal( Object target )
 	{
 		if ( IsMissionOffline() )
 		{
-			Exec_Repair( target, NULL );
+			Exec_Heal( target, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Repair, true, NULL );
+			rpc.Send( target, JMESPModuleRPC.Heal, true, NULL );
 		}
 	}
 
-	private void Exec_Repair( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	private void Exec_Heal( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		bool allowDamage = target.GetAllowDamage();
+
+		if (!allowDamage)
+			target.SetAllowDamage(true);
+
 		CommunityOnlineToolsBase.HealEntityRecursive(target);
 
-		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair" );
-		SendWebhook( "Repair", instance, "Repaired " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
+		PlayerBase player;
+		if (Class.CastTo(player, target))
+		{
+			if ( player.GetBleedingManagerServer() )
+				player.GetBleedingManagerServer().RemoveAllSources();
+
+			player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
+			player.COTRemoveAllDiseases();
+
+			player.GetStatEnergy().Set( player.GetStatEnergy().GetMax() );
+			player.GetStatWater().Set( player.GetStatWater().GetMax() );
+		}
+
+		if (!allowDamage)
+			target.SetAllowDamage(false);
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=heal" );
+		SendWebhook( "Heal", instance, "Healed " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
 	}
 
-	private void RPC_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Repair", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Heal", senderRPC, instance ) )
 			return;
 
-		Exec_Repair( target, senderRPC, instance );
+		Exec_Heal( target, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )
