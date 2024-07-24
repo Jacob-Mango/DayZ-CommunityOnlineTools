@@ -231,18 +231,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Reload()
 	{
-		if ( GetGame().IsClient() )
-		{
-			m_Settings = JMTeleportSerialize.Create();
-
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( NULL, JMTeleportModuleRPC.Load, true, NULL );
-		} else
-		{
-			m_Settings = JMTeleportSerialize.Load();
-
-			OnSettingsUpdated();
-		}
+		m_Settings = null;
+		Load();
 	}
 
 	void Load()
