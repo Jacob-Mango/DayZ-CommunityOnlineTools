@@ -82,8 +82,8 @@ class JMTeleportForm: JMFormBase
 		m_InputAdd = UIActionManager.CreateButton( inputBtnRows, "Add", this, "Click_AddLocation" );
 		m_InputRefresh = UIActionManager.CreateButton( inputBtnRows, "Refresh", this, "Click_Refresh" );
 		m_InputRemove = UIActionManager.CreateButton( inputBtnRows, "Delete", this, "Click_RemoveLocation" );
-		m_InputAdd.SetColor(COLOR_GREEN_A);
-		m_InputRemove.SetColor(COLOR_RED_A);
+		m_InputAdd.SetColor(COLOR_GREEN);
+		m_InputRemove.SetColor(COLOR_RED);
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
 		{
