@@ -172,7 +172,7 @@ class JMESPForm: JMFormBase
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
 		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
-		delbtn.SetColor(COLOR_RED_A);
+		delbtn.SetColor(COLOR_RED);
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
