@@ -153,13 +153,6 @@ class JMWeatherForm: JMFormBase
 		UpdatePresetList();
 	}
 
-	override void OnHide() 
-	{
-		super.OnHide();
-
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePresetList );
-	}
-
 	void CreateNew()
 	{
 		m_IsCreatingPreset = true;
