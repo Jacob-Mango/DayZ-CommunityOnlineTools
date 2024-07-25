@@ -157,12 +157,11 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( IsMissionHost() )
+		if ( GetGame().IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
-
-		if ( IsMissionClient() )
+		else
 		{
 			if ( ctx.Read( meta ) )
 			{
