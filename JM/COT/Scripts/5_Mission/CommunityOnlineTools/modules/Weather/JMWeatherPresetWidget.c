@@ -120,7 +120,10 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 
 		m_IsCreatingNew = false;
 		
-		Show();
+		if (name)
+			Show();
+		else
+			Hide();
 
 		m_WName.SetText( m_Name );
 		m_WName.SetColor( 0xFFFFFFFF );
