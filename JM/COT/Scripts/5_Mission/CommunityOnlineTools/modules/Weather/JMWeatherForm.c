@@ -585,12 +585,13 @@ class JMWeatherForm: JMFormBase
 		Widget rwWidget = NULL;
 		JMWeatherPresetWidget rwScript = NULL;
 
-		for ( int i = 0; i < 10; i++ )
+		//for ( int i = 0; i < 10; i++ )
 		{
-			GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_0" + i ) );
+			//GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_0" + i ) );
+			GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_01" ) );
 			
-			if ( !gsw )
-				continue;
+			//if ( !gsw )
+				//break;
 
 			for ( int j = 0; j < 100; j++ )
 			{
@@ -598,14 +599,14 @@ class JMWeatherForm: JMFormBase
 				
 				if ( rwWidget == NULL )
 				{
-					continue;
+					break;
 				}
 
 				rwWidget.GetScript( rwScript );
 
 				if ( rwScript == NULL )
 				{
-					continue;
+					break;
 				}
 
 				rwScript.Init( this );
