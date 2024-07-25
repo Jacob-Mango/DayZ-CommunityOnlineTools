@@ -135,11 +135,22 @@ class JMWeatherForm: JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePresetList, 1500, true );
-
-		UpdatePresetList();
+		if (m_Module.IsLoaded())
+			OnSettingsUpdated();
+		else
+			m_Module.Load();
 
 		UpdateStates();
+	}
+
+	override void OnSettingsUpdated()
+	{
+		CF_Trace_0(this);
+
+		if (!m_Module.IsLoaded())
+			return;
+
+		UpdatePresetList();
 	}
 
 	override void OnHide() 
