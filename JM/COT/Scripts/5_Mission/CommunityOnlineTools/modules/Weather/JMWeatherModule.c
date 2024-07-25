@@ -855,7 +855,5 @@ class JMWeatherModule: JMRenderableModuleBase
 			RPC_RemovePreset( ctx, sender, target );
 			break;
 		}
-
-		GetGame().GetWeather().MissionWeather( true );
 	}
 };
