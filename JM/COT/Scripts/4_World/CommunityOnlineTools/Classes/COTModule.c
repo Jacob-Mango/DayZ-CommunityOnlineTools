@@ -75,7 +75,7 @@ class COTModule : JMModuleBase
 
 	override void OnMissionFinish()
 	{
-		if ( IsMissionClient() )
+		if ( m_COTMenu )
 		{
 			m_COTMenu.Destroy();
 			m_COTMenu = null;
