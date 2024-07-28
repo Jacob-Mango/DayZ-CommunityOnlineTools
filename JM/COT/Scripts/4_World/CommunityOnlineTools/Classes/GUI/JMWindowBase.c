@@ -53,6 +53,20 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	void ~JMWindowBase()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+
+		s_JMWindowBaseCount--;
+		if (s_JMWindowBaseCount <= 0)
+			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
+	#endif
+	}
+
 	void Destroy() 
 	{
 		if (!GetGame())
@@ -76,12 +90,6 @@ class JMWindowBase: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMWindowBaseCount--;
-		if (s_JMWindowBaseCount <= 0)
-			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )

@@ -35,6 +35,22 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+	#ifdef DIAG
+		s_JMWeatherPresetWidgetCount--;
+		if (s_JMWeatherPresetWidgetCount <= 0)
+			CF_Log.Info("JMWeatherPresetWidget count: " + s_JMWeatherPresetWidgetCount);
+	#endif
+	}
+
+	void Destroy()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		if (layoutRoot && layoutRoot.ToString() != "INVALID")
 		{
 		#ifdef DIAG
@@ -42,12 +58,6 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMWeatherPresetWidgetCount--;
-		if (s_JMWeatherPresetWidgetCount <= 0)
-			CF_Log.Info("JMWeatherPresetWidget count: " + s_JMWeatherPresetWidgetCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )

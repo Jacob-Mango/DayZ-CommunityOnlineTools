@@ -24,6 +24,22 @@ class JMPlayerRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	void ~JMPlayerRowWidget()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+	#ifdef DIAG
+		s_JMPlayerRowWidgetCount--;
+		if (s_JMPlayerRowWidgetCount <= 0)
+			CF_Log.Info("JMPlayerRowWidget count: " + s_JMPlayerRowWidgetCount);
+	#endif
+	}
+
 	void Destroy()
 	{
 		if (!GetGame())
@@ -40,12 +56,6 @@ class JMPlayerRowWidget: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMPlayerRowWidgetCount--;
-		if (s_JMPlayerRowWidgetCount <= 0)
-			CF_Log.Info("JMPlayerRowWidget count: " + s_JMPlayerRowWidgetCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )
