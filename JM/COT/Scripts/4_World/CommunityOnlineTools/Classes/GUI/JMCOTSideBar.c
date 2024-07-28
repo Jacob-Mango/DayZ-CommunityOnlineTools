@@ -25,6 +25,8 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+		Hide();
+
 		if (m_LayoutRoot && m_LayoutRoot.ToString() != "INVALID")
 		{
 		#ifdef DIAG
