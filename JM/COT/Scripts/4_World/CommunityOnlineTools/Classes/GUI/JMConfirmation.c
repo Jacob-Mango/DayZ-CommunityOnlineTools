@@ -54,6 +54,22 @@ class JMConfirmation: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+	#ifdef DIAG
+		s_JMConfirmationCount--;
+		if (s_JMConfirmationCount <= 0)
+			CF_Log.Info("JMConfirmation count: " + s_JMConfirmationCount);
+	#endif
+	}
+
+	void Destroy()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		if (layoutRoot && layoutRoot.ToString() != "INVALID")
 		{
 		#ifdef DIAG
@@ -61,12 +77,6 @@ class JMConfirmation: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMConfirmationCount--;
-		if (s_JMConfirmationCount <= 0)
-			CF_Log.Info("JMConfirmation count: " + s_JMConfirmationCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )

@@ -80,6 +80,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 		Hide();
 
+		m_Confirmation.Destroy();
 		m_Form.Destroy();
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
