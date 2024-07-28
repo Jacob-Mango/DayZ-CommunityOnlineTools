@@ -5,8 +5,10 @@ class UIActionSelectBox: UIActionBase
 
 	protected ref OptionSelectorMultistate m_Selection;
 
-	void Destroy()
+	override void Destroy()
 	{
+		super.Destroy();
+
 		if (!GetGame())
 			return;
 
