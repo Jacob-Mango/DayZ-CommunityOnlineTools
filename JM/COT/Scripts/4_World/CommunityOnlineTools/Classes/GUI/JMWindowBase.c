@@ -401,7 +401,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	{
 		if ( w == m_CloseButton )
 		{
-			m_Module.Close();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Close);
 			return true;
 		}
 
