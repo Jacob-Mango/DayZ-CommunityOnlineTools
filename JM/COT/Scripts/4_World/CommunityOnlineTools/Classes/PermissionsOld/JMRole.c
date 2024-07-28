@@ -17,13 +17,6 @@ class JMRole : Managed
 		SerializedData = new array< string >;
 	}
 
-	void ~JMRole()
-	{
-		delete RootPermission;
-		
-		delete SerializedData;
-	}
-
 	void CopyPermissions( JMPermission copy )
 	{
 		auto trace = CF_Trace_0(this, "CopyPermissions");
@@ -33,8 +26,6 @@ class JMRole : Managed
 
 	void ClearPermissions()
 	{
-		delete RootPermission;
-
 		RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 	}
 

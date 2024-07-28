@@ -40,13 +40,6 @@ class JMPermission : Managed
 		UpdateFullName();
 	}
 
-	void ~JMPermission()
-	{
-		Clear();
-
-		delete Children;
-	}
-
 	void CopyPermissions(JMPermission from)
 	{
 		Children.Clear();
@@ -303,13 +296,6 @@ class JMPermission : Managed
 
 	void Clear()
 	{
-		/*
-		for ( int i = 0; i < Children.Count(); ++i )
-		{
-			delete Children[i];
-		}
-		*/
-
 		Children.Clear();
 	}
 

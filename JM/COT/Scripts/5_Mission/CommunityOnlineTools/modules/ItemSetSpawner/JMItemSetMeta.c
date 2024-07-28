@@ -7,11 +7,6 @@ class JMItemSetMeta
 		ItemSets = new array< string >;
 	}
 
-	void ~JMItemSetMeta()
-	{
-		delete ItemSets;
-	}
-
 	static JMItemSetMeta Create()
 	{
 		return new JMItemSetMeta();

@@ -7,11 +7,6 @@ class JMItemSetSettings
 		ItemSets = new map< string, ref JMItemSetSerialize >;
 	}
 
-	void ~JMItemSetSettings()
-	{
-		delete ItemSets;
-	}
-
 	static JMItemSetSettings Load()
 	{
 		JMItemSetSettings settings = new JMItemSetSettings();

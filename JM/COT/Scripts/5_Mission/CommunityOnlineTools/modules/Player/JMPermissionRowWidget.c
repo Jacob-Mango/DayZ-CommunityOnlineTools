@@ -43,7 +43,7 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMPermissionRowWidget()
+	void Destroy()
 	{
 		if (!GetGame())
 			return;
@@ -52,8 +52,10 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
-		delete Children;
-		delete stateOptions;
+		foreach (auto child: Children)
+		{
+			child.Destroy();
+		}
 
 		if (layoutRoot && layoutRoot.ToString() != "INVALID")
 		{

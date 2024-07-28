@@ -15,11 +15,6 @@ modded class MissionServer
 		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}
 
-	void ~MissionServer()
-	{
-		delete g_cotBase;
-	}
-
 	override void OnInit()
 	{
 		super.OnInit();

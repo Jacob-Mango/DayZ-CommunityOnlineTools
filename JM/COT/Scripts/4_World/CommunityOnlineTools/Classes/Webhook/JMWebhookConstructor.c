@@ -7,11 +7,6 @@ class JMWebhookConstructor : Managed
 		m_Types = new array< string >();
 	}
 
-	void ~JMWebhookConstructor()
-	{
-		delete m_Types;
-	}
-
 	static void Generate( out array< string > types )
 	{
 		JMWebhookConstructor constructor = new JMWebhookConstructor();

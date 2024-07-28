@@ -16,12 +16,6 @@ class JMTeleportSerialize : Managed
 		m_FileName = JMConstants.FILE_TELEPORT + "_" + m_WorldName + ".json";
 	}
 
-	void ~JMTeleportSerialize()
-	{
-		delete Types;
-		delete Locations;
-	}
-
 	static JMTeleportSerialize Load()
 	{
 		JMTeleportSerialize settings = new JMTeleportSerialize();

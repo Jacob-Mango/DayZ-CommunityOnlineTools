@@ -22,7 +22,7 @@ class JMFormBase: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMFormBase() 
+	void Destroy() 
 	{
 		if (!GetGame())
 			return;

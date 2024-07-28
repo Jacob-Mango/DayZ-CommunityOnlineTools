@@ -80,17 +80,6 @@ class JMPlayerInstance : Managed
 		m_PlayerFile = new JMPlayerSerialize();
 	}
 
-	void ~JMPlayerInstance()
-	{
-		Assert_Null( m_RootPermission );
-		Assert_Null( m_Roles );
-		Assert_Null( m_PlayerFile );
-
-		delete m_RootPermission;
-		delete m_Roles;
-		delete m_PlayerFile;
-	}
-
 	void MakeFake( string gid, string sid, string nid )
 	{
 		m_GUID = gid;
