@@ -18,11 +18,6 @@ class UIActionDropdownList: UIActionBase
 	{
 		m_Items = new array< string >();
 	}
-
-	void ~UIActionDropdownList()
-	{
-		delete m_Items;
-	}
 	
 	override void OnInit() 
 	{

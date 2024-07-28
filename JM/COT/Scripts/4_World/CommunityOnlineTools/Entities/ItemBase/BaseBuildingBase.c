@@ -7,11 +7,6 @@ modded class BaseBuildingBase
 		m_COT_ConstructionUpdate = new ScriptInvoker();
 	}
 
-	void ~BaseBuildingBase()
-	{
-		delete m_COT_ConstructionUpdate;
-	}
-
 	override void OnPartBuiltClient( string part_name, int action_id )
 	{
 		super.OnPartBuiltClient( part_name, action_id );

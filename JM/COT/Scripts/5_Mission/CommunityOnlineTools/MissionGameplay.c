@@ -14,7 +14,7 @@ modded class MissionGameplay
 
 	void ~MissionGameplay()
 	{
-		delete g_cotBase;
+		g_cotBase = null;
 	}
 
 	override void ResetGUI()
@@ -150,7 +150,6 @@ modded class MissionGameplay
 		if ( m_DebugMonitor )
 		{
 			m_DebugMonitor.Hide();
-			delete m_DebugMonitor;
 		}
 
 		if (!m_CDebugMonitor)

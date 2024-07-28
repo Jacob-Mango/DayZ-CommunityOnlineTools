@@ -24,7 +24,7 @@ class JMPlayerRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMPlayerRowWidget()
+	void Destroy()
 	{
 		if (!GetGame())
 			return;

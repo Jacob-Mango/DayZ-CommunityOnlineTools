@@ -16,9 +16,22 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_TotalAnimateTime = 0.35;
 	}
 	
-	void ~JMCOTSideBar()
+	void Destroy()
 	{
-		Hide();
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+	#endif
+
+		if (m_LayoutRoot && m_LayoutRoot.ToString() != "INVALID")
+		{
+		#ifdef DIAG
+			CF_Log.Info("Unlinking %1 of %2", m_LayoutRoot.ToString(), ToString());
+		#endif
+			m_LayoutRoot.Unlink();
+		}
 	}
 
 	Widget GetLayoutRoot()

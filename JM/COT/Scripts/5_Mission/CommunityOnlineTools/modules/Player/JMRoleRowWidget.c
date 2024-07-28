@@ -22,7 +22,7 @@ class JMRoleRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMRoleRowWidget()
+	void Destroy()
 	{
 		if (!GetGame())
 			return;

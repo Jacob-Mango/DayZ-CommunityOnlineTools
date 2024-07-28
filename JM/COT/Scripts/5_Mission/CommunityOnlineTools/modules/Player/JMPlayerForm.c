@@ -111,6 +111,29 @@ class JMPlayerForm: JMFormBase
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
 
+	override void Destroy()
+	{
+		if (!GetGame())
+			return;
+
+		foreach (auto playerRow: m_PlayerList)
+		{
+			playerRow.Destroy();
+		}
+
+		foreach (auto permissionRow: m_PermissionList)
+		{
+			permissionRow.Destroy();
+		}
+
+		foreach (auto roleRow: m_RoleList)
+		{
+			roleRow.Destroy();
+		}
+
+		super.Destroy();
+	}
+
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );

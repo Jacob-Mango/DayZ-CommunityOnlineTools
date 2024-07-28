@@ -53,7 +53,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMWindowBase() 
+	void Destroy() 
 	{
 		if (!GetGame())
 			return;
@@ -65,6 +65,8 @@ class JMWindowBase: ScriptedWidgetEventHandler
 		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
+
+		m_Form.Destroy();
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
 		if (layoutRoot && layoutRoot.ToString() != "INVALID")

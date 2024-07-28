@@ -7,12 +7,6 @@ class JMWebhookSerialize : Managed
 		Connections = new array< ref JMWebhookConnectionGroup >;
 	}
 
-	void ~JMWebhookSerialize()
-	{
-		Connections.Clear();
-		delete Connections;
-	}
-
 	void Load()
 	{
 		JsonFileLoader< JMWebhookSerialize >.JsonLoadFile( JMConstants.FILE_WEBHOOK, this );
@@ -46,8 +40,6 @@ class JMWebhookSerialize : Managed
 		{
 			if ( Connections[i].Name == name )
 			{
-				delete Connections[i];
-
 				Connections.Remove( i );
 				return true;
 			}

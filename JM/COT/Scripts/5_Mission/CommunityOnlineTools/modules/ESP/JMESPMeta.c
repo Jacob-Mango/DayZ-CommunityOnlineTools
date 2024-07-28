@@ -56,23 +56,6 @@ class JMESPMeta : Managed
 	#endif
 	}
 
-	void ~JMESPMeta()
-	{
-		if (!GetGame())
-			return;
-
-		Destroy();
-
-		if (s_JM_All)
-			s_JM_All.Remove(s_JM_Node);
-
-	#ifdef DIAG
-		s_JMESPMetaCount--;
-		if (s_JMESPMetaCount <= 0)
-			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
-	#endif
-	}
-
 	void Create( JMESPModule mod )
 	{
 		module = mod;
@@ -129,6 +112,15 @@ class JMESPMeta : Managed
 
 		if ( GetGame() && widgetRoot )
 			widgetRoot.Unlink();
+
+		if (s_JM_All)
+			s_JM_All.Remove(s_JM_Node);
+
+	#ifdef DIAG
+		s_JMESPMetaCount--;
+		if (s_JMESPMetaCount <= 0)
+			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
+	#endif
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );
@@ -477,19 +469,14 @@ class JMESPMetaBaseBuilding : JMESPMeta
 		m_RepairButtons = new array< UIActionButton >;
 	}
 
-	void ~JMESPMetaBaseBuilding()
+	override void Destroy()
 	{
+		super.Destroy();
+
 		if ( m_BaseBuilding )
 		{
 			m_BaseBuilding.m_COT_ConstructionUpdate.Remove( OnPartsUpdate );
 		}
-
-		delete m_Parts;
-
-		delete m_StateHeaders;
-		delete m_BuildButtons;
-		delete m_DismantleButtons;
-		delete m_RepairButtons;
 	}
 
 	override void CreateActions( Widget parent )

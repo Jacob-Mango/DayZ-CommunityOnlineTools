@@ -9,12 +9,6 @@ class JMVehicleSpawnerMeta
 		VehiclesName = new array< string >;
 	}
 
-	void ~JMVehicleSpawnerMeta()
-	{
-		delete Vehicles;
-		delete VehiclesName;
-	}
-
 	static JMVehicleSpawnerMeta Create()
 	{
 		return new JMVehicleSpawnerMeta();

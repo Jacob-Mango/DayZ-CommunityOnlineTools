@@ -91,13 +91,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( IsMissionHost() )
-		{
-			m_Settings = NULL;
-		} else
-		{
-			delete m_Settings;
-		}
+		m_Settings = NULL;
 	}
 
 	override int GetRPCMin()
