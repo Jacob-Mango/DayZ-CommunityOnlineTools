@@ -191,6 +191,7 @@ class JMRenderableModuleBase: JMModuleBase
 		{
 			m_Window.Destroy();
 			m_Window = null;
+			m_Form = null;
 		}
 	}
 
