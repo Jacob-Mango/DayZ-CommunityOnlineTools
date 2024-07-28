@@ -89,7 +89,8 @@ class JMWindowManager
 	{
 		for (int i = m_WindowsPendingDeletion.Count() - 1; i >= 0; i--)
 		{
-			if (!m_WindowsPendingDeletion[i])
+			JMWindowBase window = m_WindowsPendingDeletion[i];
+			if (!window || !window.GetLayoutRoot())
 				m_WindowsPendingDeletion.RemoveOrdered(i);
 		}
 	}
