@@ -43,6 +43,22 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	void ~JMPermissionRowWidget()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+	#ifdef DIAG
+		s_JMPermissionsRowWidgetCount--;
+		if (s_JMPermissionsRowWidgetCount <= 0)
+			CF_Log.Info("JMPermissionsRowWidget count: " + s_JMPermissionsRowWidgetCount);
+	#endif
+	}
+
 	void Destroy()
 	{
 		if (!GetGame())
@@ -64,12 +80,6 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMPermissionsRowWidgetCount--;
-		if (s_JMPermissionsRowWidgetCount <= 0)
-			CF_Log.Info("JMPermissionsRowWidget count: " + s_JMPermissionsRowWidgetCount);
-	#endif
 	}
 
 	void Init() 

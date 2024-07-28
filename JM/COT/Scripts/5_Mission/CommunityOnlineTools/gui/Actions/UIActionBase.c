@@ -41,6 +41,12 @@ class UIActionBase: ScriptedWidgetEventHandler
 	#endif
 
 		Deactivate();
+
+	#ifdef DIAG
+		s_UIActionBaseCount--;
+		if (s_UIActionBaseCount <= 0)
+			CF_Log.Info("UIActionBase count: " + s_UIActionBaseCount);
+	#endif
 	}
 
 	void Destroy()
@@ -63,12 +69,6 @@ class UIActionBase: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_UIActionBaseCount--;
-		if (s_UIActionBaseCount <= 0)
-			CF_Log.Info("UIActionBase count: " + s_UIActionBaseCount);
-	#endif
 	}
 
 	void Deactivate()

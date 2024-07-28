@@ -56,6 +56,18 @@ class JMESPMeta : Managed
 	#endif
 	}
 
+	void ~JMESPMeta()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		s_JMESPMetaCount--;
+		if (s_JMESPMetaCount <= 0)
+			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
+	#endif
+	}
+
 	void Create( JMESPModule mod )
 	{
 		module = mod;
@@ -115,12 +127,6 @@ class JMESPMeta : Managed
 
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
-
-	#ifdef DIAG
-		s_JMESPMetaCount--;
-		if (s_JMESPMetaCount <= 0)
-			CF_Log.Info("JMESPMeta count: " + s_JMESPMetaCount);
-	#endif
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "-JMESPMeta::Destroy() void;" );

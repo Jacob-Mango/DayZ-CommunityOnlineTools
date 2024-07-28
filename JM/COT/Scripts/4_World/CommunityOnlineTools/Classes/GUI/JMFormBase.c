@@ -22,6 +22,20 @@ class JMFormBase: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	void ~JMFormBase()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+
+		s_JMFormBaseCount--;
+		if (s_JMFormBaseCount <= 0)
+			CF_Log.Info("JMFormBase count: " + s_JMFormBaseCount);
+	#endif
+	}
+
 	void Destroy() 
 	{
 		if (!GetGame())
@@ -42,12 +56,6 @@ class JMFormBase: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMFormBaseCount--;
-		if (s_JMFormBaseCount <= 0)
-			CF_Log.Info("JMFormBase count: " + s_JMFormBaseCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )

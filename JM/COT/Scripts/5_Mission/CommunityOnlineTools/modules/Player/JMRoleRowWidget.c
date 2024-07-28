@@ -22,6 +22,22 @@ class JMRoleRowWidget: ScriptedWidgetEventHandler
 	#endif
 	}
 
+	void ~JMRoleRowWidget()
+	{
+		if (!GetGame())
+			return;
+
+	#ifdef COT_DEBUGLOGS
+		auto trace = CF_Trace_0(this);
+	#endif
+
+	#ifdef DIAG
+		s_JMRoleRowWidgetCount--;
+		if (s_JMRoleRowWidgetCount <= 0)
+			CF_Log.Info("JMRoleRowWidget count: " + s_JMRoleRowWidgetCount);
+	#endif
+	}
+
 	void Destroy()
 	{
 		if (!GetGame())
@@ -38,12 +54,6 @@ class JMRoleRowWidget: ScriptedWidgetEventHandler
 		#endif
 			layoutRoot.Unlink();
 		}
-
-	#ifdef DIAG
-		s_JMRoleRowWidgetCount--;
-		if (s_JMRoleRowWidgetCount <= 0)
-			CF_Log.Info("JMRoleRowWidget count: " + s_JMRoleRowWidgetCount);
-	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )
