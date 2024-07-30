@@ -9,6 +9,8 @@ class UIActionManager
 			return GridSpacerWidget.Cast( widget );
 		}
 
+		Error("No widgets created");
+
 		return NULL;
 	}
 
@@ -21,6 +23,8 @@ class UIActionManager
 			return WrapSpacerWidget.Cast( widget );
 		}
 
+		Error("No widgets created");
+
 		return NULL;
 	}
 
@@ -28,12 +32,18 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
 
+		if (!widget)
+			Error("No widgets created");
+
 		return widget;
 	}
 	
 	static Widget CreateSpacer( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UISpacer.layout", parent );
+
+		if (!widget)
+			Error("No widgets created");
 
 		return widget;
 	}
@@ -72,6 +82,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -95,6 +107,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -130,6 +144,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -164,6 +180,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -189,6 +207,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -223,6 +243,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -246,6 +268,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -272,6 +296,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -290,6 +316,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -313,6 +341,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -327,6 +357,8 @@ class UIActionManager
 		{
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -349,6 +381,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
