@@ -777,7 +777,9 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
-		CF_Trace_1(this).Add(typename.EnumToString(JMWeatherModuleRPC, rpc_type));
+	#ifdef DIAG
+		auto trace = CF_Trace_1(this).Add(typename.EnumToString(JMWeatherModuleRPC, rpc_type));
+	#endif
 
 		switch ( rpc_type )
 		{
