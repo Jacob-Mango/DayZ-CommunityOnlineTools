@@ -579,7 +579,7 @@ class JMESPModule: JMRenderableModuleBase
 				Print( "  Removed." );
 				#endif
 
-				delete meta;
+				meta.Destroy();
 			}
 		}
 

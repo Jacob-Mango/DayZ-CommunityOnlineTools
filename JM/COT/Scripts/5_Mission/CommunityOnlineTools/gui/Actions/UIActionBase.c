@@ -1,4 +1,4 @@
-class UIActionBase: ScriptedWidgetEventHandler 
+class UIActionBase: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_UIActionBaseCount;
@@ -36,23 +36,15 @@ class UIActionBase: ScriptedWidgetEventHandler
 		if (!GetGame())
 			return;
 
-	#ifdef COT_DEBUGLOGS
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
 
 		Deactivate();
 
-		delete m_Data;
-
 		//! @note this should not be necessary since if the JMWindowBase handling this UIAction is destroyed,
 		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
+		DestroyWidget(layoutRoot);
 
 	#ifdef DIAG
 		s_UIActionBaseCount--;
@@ -68,7 +60,10 @@ class UIActionBase: ScriptedWidgetEventHandler
 		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
 			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
 		if (m_WasFocused)
+		{
 			CommunityOnlineTools.ForceDisableInputs(false);
+			m_WasFocused = false;
+		}
 	}
 
 	void GetUserData( out Class data )

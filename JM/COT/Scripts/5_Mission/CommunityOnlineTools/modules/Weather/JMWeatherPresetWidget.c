@@ -1,4 +1,4 @@
-class JMWeatherPresetWidget: ScriptedWidgetEventHandler 
+class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMWeatherPresetWidgetCount;
@@ -35,13 +35,7 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
+		DestroyWidget(layoutRoot);
 
 	#ifdef DIAG
 		s_JMWeatherPresetWidgetCount--;
@@ -120,7 +114,10 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 
 		m_IsCreatingNew = false;
 		
-		Show();
+		if (name)
+			Show();
+		else
+			Hide();
 
 		m_WName.SetText( m_Name );
 		m_WName.SetColor( 0xFFFFFFFF );

@@ -42,17 +42,6 @@ class JMWebhookSection : Managed
 		Init( serialize, types );
 	}
 
-	void ~JMWebhookSection()
-	{
-		delete m_Types;
-
-		delete m_URL;
-		delete m_ScrollerActiveTypes;
-		delete m_ActionsWrapper;
-		delete m_DropDownList;
-		delete m_AddButton;
-	}
-
 	void Init( JMWebhookConnectionGroup serialize, array< string > types )
 	{
 		Widget spacer = UIActionManager.CreateGridSpacer( m_Parent, 2, 1 );
@@ -76,15 +65,11 @@ class JMWebhookSection : Managed
 
 	void UpdateState( JMWebhookConnectionGroup serialize, array< string > types )
 	{
-		for ( int i = 0; i < m_Types.Count(); ++i )
-		{
-			delete m_Types[i];
-		}
 		m_Types.Clear();
 
 		int r = 0;
 		Widget parentTypeWidget = NULL;
-		for ( i = 0; i < serialize.Count(); ++i )
+		for ( int i = 0; i < serialize.Count(); ++i )
 		{
 			if ( m_Types.Count() % 100 == 0 )
 			{

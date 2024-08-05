@@ -15,11 +15,6 @@ class JMItemSetSerialize
 		Items = new array< ref JMItemSetItemInfo >;
 	}
 
-	void ~JMItemSetSerialize()
-	{
-		delete Items;
-	}
-
 	static JMItemSetSerialize Create()
 	{
 		return new JMItemSetSerialize;

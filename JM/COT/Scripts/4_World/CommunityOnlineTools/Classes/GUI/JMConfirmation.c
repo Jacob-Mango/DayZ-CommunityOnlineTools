@@ -5,7 +5,7 @@ enum JMConfirmationType
 	SELECTION
 };
 
-class JMConfirmation: ScriptedWidgetEventHandler 
+class JMConfirmation: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMConfirmationCount;
@@ -54,13 +54,7 @@ class JMConfirmation: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
+		DestroyWidget(layoutRoot);
 
 	#ifdef DIAG
 		s_JMConfirmationCount--;

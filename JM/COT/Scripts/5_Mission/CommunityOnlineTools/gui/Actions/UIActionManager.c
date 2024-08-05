@@ -2,12 +2,20 @@ class UIActionManager
 {
 	static GridSpacerWidget CreateGridSpacer( notnull Widget parent, int rows, int columns )
 	{
-		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/" + rows.ToString() + "/GridSpacer" + columns.ToString() + ".layout", parent );
+		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/Wrappers/%1/GridSpacer%2.layout", rows, columns);
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
-		if ( widget )
+		if (!widget)
+			Error("No widgets created " + layout);
+
+		GridSpacerWidget spacer;
+		if (Class.CastTo(spacer, widget))
 		{
-			return GridSpacerWidget.Cast( widget );
+			return spacer;
 		}
+
+		Error("Could not cast " + widget + " to GridSpacerWidget");
 
 		return NULL;
 	}
@@ -16,10 +24,16 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
 
-		if ( widget )
+		if (!widget)
+			Error("No widgets created");
+
+		WrapSpacerWidget spacer;
+		if (Class.CastTo(spacer, widget))
 		{
-			return WrapSpacerWidget.Cast( widget );
+			return spacer;
 		}
+
+		Error("Could not cast " + widget + " to WrapSpacerWidget");
 
 		return NULL;
 	}
@@ -28,12 +42,18 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
 
+		if (!widget)
+			Error("No widgets created");
+
 		return widget;
 	}
 	
 	static Widget CreateSpacer( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UISpacer.layout", parent );
+
+		if (!widget)
+			Error("No widgets created");
 
 		return widget;
 	}
@@ -72,6 +92,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -96,6 +118,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -111,6 +135,7 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableTextPreview";
 
+		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
@@ -130,6 +155,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -145,6 +172,7 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableText";
 
+		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
@@ -163,6 +191,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -190,6 +220,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -205,6 +237,7 @@ class UIActionManager
 		else
 			layoutName = "UIActionEditableVector";
 
+		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
@@ -222,6 +255,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -246,6 +281,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -272,6 +309,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -290,6 +329,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -313,6 +354,8 @@ class UIActionManager
 			return action;
 		}
 
+		Error("Couldn't get widget script");
+
 		return NULL;
 	}
 
@@ -327,6 +370,8 @@ class UIActionManager
 		{
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}
@@ -349,6 +394,8 @@ class UIActionManager
 
 			return action;
 		}
+
+		Error("Couldn't get widget script");
 
 		return NULL;
 	}

@@ -1,4 +1,4 @@
-class JMESPMeta : Managed
+class JMESPMeta: COT_WidgetHolder
 {
 #ifdef DIAG
 	static int s_JMESPMetaCount;
@@ -61,7 +61,17 @@ class JMESPMeta : Managed
 		if (!GetGame())
 			return;
 
-		Destroy();
+		#ifdef JM_COT_ESP_DEBUG
+		auto trace = CF_Trace_0(this);
+		Print( "  m_Action_Position = " + m_Action_Position );
+		Print( "  m_Action_GetPosition = " + m_Action_GetPosition );
+		Print( "  m_Action_Orientation = " + m_Action_Orientation );
+		Print( "  m_Action_GetOrientation = " + m_Action_GetOrientation );
+		Print( "  m_Action_Health = " + m_Action_Health );
+		Print( "  widgetHandler = " + widgetHandler );
+		#endif
+
+		DestroyWidget(widgetRoot);
 
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
@@ -113,26 +123,6 @@ class JMESPMeta : Managed
 			return false;
 
 		return type.IsValid( target, this );
-	}
-
-	void Destroy()
-	{
-		#ifdef JM_COT_ESP_DEBUG
-		Print( "+JMESPMeta::Destroy() void;" );
-		Print( "  m_Action_Position = " + m_Action_Position );
-		Print( "  m_Action_GetPosition = " + m_Action_GetPosition );
-		Print( "  m_Action_Orientation = " + m_Action_Orientation );
-		Print( "  m_Action_GetOrientation = " + m_Action_GetOrientation );
-		Print( "  m_Action_Health = " + m_Action_Health );
-		Print( "  widgetHandler = " + widgetHandler );
-		#endif
-
-		if ( GetGame() && widgetRoot )
-			widgetRoot.Unlink();
-
-		#ifdef JM_COT_ESP_DEBUG
-		Print( "-JMESPMeta::Destroy() void;" );
-		#endif
 	}
 
 	void CreateActions( Widget parent )
@@ -479,17 +469,13 @@ class JMESPMetaBaseBuilding : JMESPMeta
 
 	void ~JMESPMetaBaseBuilding()
 	{
+		if (!GetGame())
+			return;
+
 		if ( m_BaseBuilding )
 		{
 			m_BaseBuilding.m_COT_ConstructionUpdate.Remove( OnPartsUpdate );
 		}
-
-		delete m_Parts;
-
-		delete m_StateHeaders;
-		delete m_BuildButtons;
-		delete m_DismantleButtons;
-		delete m_RepairButtons;
 	}
 
 	override void CreateActions( Widget parent )

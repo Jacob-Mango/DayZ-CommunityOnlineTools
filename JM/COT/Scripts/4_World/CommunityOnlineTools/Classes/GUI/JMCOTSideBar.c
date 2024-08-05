@@ -1,4 +1,4 @@
-class JMCOTSideBar: ScriptedWidgetEventHandler
+class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 
@@ -18,7 +18,16 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 	
 	void ~JMCOTSideBar()
 	{
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+	#endif
+
 		Hide();
+
+		DestroyWidget(m_LayoutRoot);
 	}
 
 	Widget GetLayoutRoot()

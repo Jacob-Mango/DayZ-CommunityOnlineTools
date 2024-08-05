@@ -1,4 +1,4 @@
-class JMWidgetStore 
+class JMWidgetStore: COT_WidgetHolder
 {
 	private Widget layoutRoot;
 
@@ -24,14 +24,48 @@ class JMWidgetStore
 		Init();
 	}
 
-	void ~JMWidgetStore() 
+	void ~JMWidgetStore()
 	{
-		delete textWidgets;
-		delete buttonWidgets;
-		delete editBoxWidgets;
-		delete sliderWidgets;
-		delete textListBoxWidgets;
-		delete allWidgets;
+		if (!GetGame())
+			return;
+
+	#ifdef DIAG
+		auto trace = CF_Trace_0(this);
+	#endif
+
+	/*
+		foreach (auto textWidget: textWidgets)
+		{
+			DestroyWidget(textWidget);
+		}
+
+		foreach (auto buttonWidget: buttonWidgets)
+		{
+			DestroyWidget(buttonWidget);
+		}
+
+		foreach (auto editBoxWidget: editBoxWidgets)
+		{
+			DestroyWidget(editBoxWidget);
+		}
+
+		foreach (auto sliderWidget: sliderWidgets)
+		{
+			DestroyWidget(sliderWidget);
+		}
+
+		foreach (auto textListBoxWidget: textListBoxWidgets)
+		{
+			DestroyWidget(textListBoxWidget);
+		}
+	*/
+
+		foreach (auto w: allWidgets)
+		{
+			DestroyWidget(w);
+		}
+
+		DestroyWidget(layoutRoot);
 	}
 
 	void Init() 

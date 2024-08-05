@@ -135,18 +135,22 @@ class JMWeatherForm: JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePresetList, 1500, true );
-
-		UpdatePresetList();
+		if (m_Module.IsLoaded())
+			OnSettingsUpdated();
+		else
+			m_Module.Load();
 
 		UpdateStates();
 	}
 
-	override void OnHide() 
+	override void OnSettingsUpdated()
 	{
-		super.OnHide();
+		CF_Trace_0(this);
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePresetList );
+		if (!m_Module.IsLoaded())
+			return;
+
+		UpdatePresetList();
 	}
 
 	void CreateNew()
@@ -574,12 +578,13 @@ class JMWeatherForm: JMFormBase
 		Widget rwWidget = NULL;
 		JMWeatherPresetWidget rwScript = NULL;
 
-		for ( int i = 0; i < 10; i++ )
+		//for ( int i = 0; i < 10; i++ )
 		{
-			GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_0" + i ) );
+			//GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_0" + i ) );
+			GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_01" ) );
 			
-			if ( !gsw )
-				continue;
+			//if ( !gsw )
+				//break;
 
 			for ( int j = 0; j < 100; j++ )
 			{
@@ -587,14 +592,14 @@ class JMWeatherForm: JMFormBase
 				
 				if ( rwWidget == NULL )
 				{
-					continue;
+					break;
 				}
 
 				rwWidget.GetScript( rwScript );
 
 				if ( rwScript == NULL )
 				{
-					continue;
+					break;
 				}
 
 				rwScript.Init( this );

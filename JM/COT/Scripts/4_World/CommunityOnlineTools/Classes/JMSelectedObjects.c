@@ -59,9 +59,6 @@ class JMSelectedObjects
 
 	void ~JMSelectedObjects()
 	{
-		delete m_Objects;
-		delete m_Players;
-
 		JMScriptInvokers.ADD_OBJECT.Remove( AddObject );
 		JMScriptInvokers.REMOVE_OBJECT.Remove( _RemoveObject );
 	}

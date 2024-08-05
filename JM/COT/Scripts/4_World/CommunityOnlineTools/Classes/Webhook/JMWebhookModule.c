@@ -13,11 +13,6 @@ class JMWebhookQueueItem : Managed
 		m_Time = GetGame().GetTickTime();
 	}
 
-	void ~JMWebhookQueueItem()
-	{
-		delete m_Message;
-	}
-
 	string GetType()
 	{
 		return m_Type;
@@ -50,13 +45,6 @@ class JMWebhookModule: JMModuleBase
 	void JMWebhookModule()
 	{
 		m_Queue = new array< ref JMWebhookQueueItem >();
-	}
-
-	void ~JMWebhookModule()
-	{
-		delete m_ConnectionMap;
-
-		delete m_ServerConfig;
 	}
 
 	override void EnableUpdate()
@@ -367,7 +355,6 @@ class JMWebhookModule: JMModuleBase
 					{
 						CF_Log.Error("Thread_ProcessQueue - webhook type \"%1\" not registered, please override JMModuleBase::GetWebhookTypes to insert it", item.GetType());
 					}
-					delete item;
 				}
 
 				m_Queue.RemoveOrdered( 0 );

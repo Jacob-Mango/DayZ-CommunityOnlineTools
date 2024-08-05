@@ -13,11 +13,6 @@ class JMVehicleSpawnerSerialize : Managed
 		Parts = new array< string >;
 	}
 
-	void ~JMVehicleSpawnerSerialize()
-	{
-		delete Parts;
-	}
-
 	static JMVehicleSpawnerSerialize Create()
 	{
 		return new JMVehicleSpawnerSerialize;
