@@ -92,7 +92,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -118,7 +118,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -155,7 +155,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -192,7 +192,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -220,7 +220,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -256,7 +256,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -282,7 +282,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -309,7 +309,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -330,7 +330,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -354,7 +354,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -371,7 +371,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
@@ -395,7 +395,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error("Couldn't get widget script");
+		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
