@@ -189,9 +189,7 @@ class JMRenderableModuleBase: JMModuleBase
 	{
 		if (m_Window)
 		{
-			m_Window.Destroy();
-			m_Window = null;
-			m_Form = null;
+			m_Window.DestroyLater();
 		}
 	}
 

@@ -1,6 +1,6 @@
 #ifndef CF_WINDOWS
 typedef JMWindowBase CF_Window;
-class JMWindowBase: ScriptedWidgetEventHandler  
+class JMWindowBase: COT_ScriptedWidgetEventHandler  
 {
 #ifdef DIAG
 	static int s_JMWindowBaseCount;
@@ -60,37 +60,26 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
-
-		s_JMWindowBaseCount--;
-		if (s_JMWindowBaseCount <= 0)
-			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
-	#endif
-	}
-
-	void Destroy() 
-	{
-		if (!GetGame())
-			return;
-
-	#ifdef DIAG
-		auto trace = CF_Trace_0(this);
 	#endif
 
 		GetCOTWindowManager().RemoveWindow( this );
 
 		Hide();
 
-		m_Confirmation.Destroy();
-		m_Form.Destroy();
+		if (m_Confirmation)
+			m_Confirmation.Destroy();
+
+		if (m_Form)
+			m_Form.Destroy();
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
+		DestroyWidget(layoutRoot);
+
+	#ifdef DIAG
+		s_JMWindowBaseCount--;
+		if (s_JMWindowBaseCount <= 0)
+			CF_Log.Info("JMWindowBase count: " + s_JMWindowBaseCount);
+	#endif
 	}
 
 	void OnWidgetScriptInit( Widget w )
@@ -228,7 +217,10 @@ class JMWindowBase: ScriptedWidgetEventHandler
 
 	bool IsVisible()
 	{
-		return layoutRoot.IsVisible();
+		if (layoutRoot && layoutRoot.IsVisible())
+			return true;
+
+		return false;
 	}
 
 	void Show()
@@ -267,13 +259,13 @@ class JMWindowBase: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Hide");
 		#endif
 		
-		if ( Assert_Null( layoutRoot ) )
+		if (!layoutRoot)
 			return;
 
-		if ( Assert_Null( m_Form ) )
+		if (!m_Form)
 			return;
 
-		if ( Assert_Null( this ) )
+		if (!this)
 			return;
 
 		layoutRoot.Show( false );
@@ -402,7 +394,7 @@ class JMWindowBase: ScriptedWidgetEventHandler
 	{
 		if ( w == m_CloseButton )
 		{
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Close);
+			m_Module.Close();
 			return true;
 		}
 

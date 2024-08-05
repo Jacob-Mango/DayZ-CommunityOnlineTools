@@ -1,4 +1,4 @@
-class JMWidgetStore 
+class JMWidgetStore: COT_WidgetHolder
 {
 	private Widget layoutRoot;
 
@@ -24,7 +24,7 @@ class JMWidgetStore
 		Init();
 	}
 
-	void Destroy() 
+	void ~JMWidgetStore()
 	{
 		if (!GetGame())
 			return;
@@ -66,18 +66,6 @@ class JMWidgetStore
 		}
 
 		DestroyWidget(layoutRoot);
-	}
-
-	void DestroyWidget(Widget w)
-	{
-
-		if (w && w.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", w.ToString(), ToString());
-		#endif
-			w.Unlink();
-		}
 	}
 
 	void Init() 
