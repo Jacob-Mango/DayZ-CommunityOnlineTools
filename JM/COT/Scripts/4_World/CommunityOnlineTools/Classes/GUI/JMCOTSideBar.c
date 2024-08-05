@@ -1,4 +1,4 @@
-class JMCOTSideBar: ScriptedWidgetEventHandler
+class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 
@@ -16,7 +16,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 		m_TotalAnimateTime = 0.35;
 	}
 	
-	void Destroy()
+	void ~JMCOTSideBar()
 	{
 		if (!GetGame())
 			return;
@@ -27,13 +27,7 @@ class JMCOTSideBar: ScriptedWidgetEventHandler
 
 		Hide();
 
-		if (m_LayoutRoot && m_LayoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", m_LayoutRoot.ToString(), ToString());
-		#endif
-			m_LayoutRoot.Unlink();
-		}
+		DestroyWidget(m_LayoutRoot);
 	}
 
 	Widget GetLayoutRoot()

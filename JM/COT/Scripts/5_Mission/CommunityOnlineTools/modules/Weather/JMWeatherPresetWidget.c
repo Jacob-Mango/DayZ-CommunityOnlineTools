@@ -1,4 +1,4 @@
-class JMWeatherPresetWidget: ScriptedWidgetEventHandler 
+class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMWeatherPresetWidgetCount;
@@ -35,29 +35,13 @@ class JMWeatherPresetWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+		DestroyWidget(layoutRoot);
+
 	#ifdef DIAG
 		s_JMWeatherPresetWidgetCount--;
 		if (s_JMWeatherPresetWidgetCount <= 0)
 			CF_Log.Info("JMWeatherPresetWidget count: " + s_JMWeatherPresetWidgetCount);
 	#endif
-	}
-
-	void Destroy()
-	{
-		if (!GetGame())
-			return;
-
-	#ifdef COT_DEBUGLOGS
-		auto trace = CF_Trace_0(this);
-	#endif
-
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
 	}
 
 	void OnWidgetScriptInit( Widget w )

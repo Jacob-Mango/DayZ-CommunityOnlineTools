@@ -1,4 +1,4 @@
-class JMRoleRowWidget: ScriptedWidgetEventHandler 
+class JMRoleRowWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMRoleRowWidgetCount;
@@ -31,29 +31,13 @@ class JMRoleRowWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
+		DestroyWidget(layoutRoot);
+
 	#ifdef DIAG
 		s_JMRoleRowWidgetCount--;
 		if (s_JMRoleRowWidgetCount <= 0)
 			CF_Log.Info("JMRoleRowWidget count: " + s_JMRoleRowWidgetCount);
 	#endif
-	}
-
-	void Destroy()
-	{
-		if (!GetGame())
-			return;
-
-	#ifdef COT_DEBUGLOGS
-		auto trace = CF_Trace_0(this);
-	#endif
-
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
 	}
 
 	void OnWidgetScriptInit( Widget w )
