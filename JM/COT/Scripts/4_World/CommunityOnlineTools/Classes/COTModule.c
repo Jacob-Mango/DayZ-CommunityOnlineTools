@@ -25,9 +25,7 @@ class COTModule : JMModuleBase
 
 		if ( m_COTMenu )
 		{
-			m_COTMenu.Hide();
-
-			delete m_COTMenu;
+			m_COTMenu.Destroy();
 		}
 	}
 
@@ -77,9 +75,10 @@ class COTModule : JMModuleBase
 
 	override void OnMissionFinish()
 	{
-		if ( IsMissionClient() )
+		if ( m_COTMenu )
 		{
-			delete m_COTMenu;
+			m_COTMenu.Destroy();
+			m_COTMenu = null;
 		}
 	}
 

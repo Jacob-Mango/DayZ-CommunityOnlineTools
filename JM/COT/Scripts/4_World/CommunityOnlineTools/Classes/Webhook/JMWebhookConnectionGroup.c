@@ -12,12 +12,6 @@ class JMWebhookConnectionGroup : Managed
 		Types = new array< ref JMWebhookConnection >;
 	}
 
-	void ~JMWebhookConnectionGroup()
-	{
-		Types.Clear();
-		delete Types;
-	}
-
 	void Init()
 	{
 		for ( int i = 0; i < Types.Count(); ++i )
@@ -77,7 +71,6 @@ class JMWebhookConnectionGroup : Managed
 			if ( Types[i].Name != name )
 				continue;
 
-			delete Types[i];
 			Types.Remove( i );
 			return;
 		}

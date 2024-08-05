@@ -73,11 +73,6 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ObjectTypes = new map< string, string >;
 	}
 
-	void ~JMObjectSpawnerForm()
-	{
-		delete m_ObjectTypes;
-	}
-
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );

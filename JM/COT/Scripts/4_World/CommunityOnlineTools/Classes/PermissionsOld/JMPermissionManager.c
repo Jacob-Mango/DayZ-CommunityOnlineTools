@@ -36,19 +36,6 @@ class JMPermissionManager
 		Assert_Null( RootPermission );
 	}
 
-	void ~JMPermissionManager()
-	{
-		Assert_Null( Players );
-		Assert_Null( Roles );
-		Assert_Null( SteamToGUID );
-		Assert_Null( RootPermission );
-
-		delete Players;
-		delete Roles;
-		delete SteamToGUID;
-		delete RootPermission;
-	}
-
 	void GetRolesAsList( out array< JMRole > roles )
 	{
 		Assert_Null( Roles );

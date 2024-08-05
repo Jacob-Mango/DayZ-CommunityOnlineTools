@@ -11,11 +11,6 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		embeds = new array< ref JMWebhookDiscordEmbed >;
 	}
 
-	void ~JMWebhookDiscordMessage()
-	{
-		delete embeds;
-	}
-
 	void SetHeader( string userName, string avatarUrl, string msgContent )
 	{
 		username = userName;
@@ -117,15 +112,6 @@ class JMWebhookDiscordEmbed : Managed
 	void JMWebhookDiscordEmbed()
 	{
 		fields = new array< ref JMWebhookDiscordEmbedField >;
-	}
-
-	void ~JMWebhookDiscordEmbed()
-	{
-		delete author;
-		delete fields;
-		delete thumbnail;
-		delete image;
-		delete footer;
 	}
 
 	void SetTitle( string txt )

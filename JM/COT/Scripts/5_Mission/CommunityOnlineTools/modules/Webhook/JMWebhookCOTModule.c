@@ -91,13 +91,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( IsMissionHost() )
-		{
-			m_Settings = NULL;
-		} else
-		{
-			delete m_Settings;
-		}
+		m_Settings = NULL;
 	}
 
 	override int GetRPCMin()
@@ -135,7 +129,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_Load( notnull PlayerIdentity ident )
+	private void Server_Load( notnull PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident, instance ) )
@@ -152,10 +146,11 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "RPC_Load").Add(senderRPC);
 		#endif
 
-		if ( IsMissionHost() )
+		if ( GetGame().IsDedicatedServer() )
 		{
-			Exec_Load( senderRPC );
-		} else if ( IsMissionClient() )
+			Server_Load( senderRPC );
+		}
+		else
 		{
 			if ( m_Settings.OnRecieve( ctx ) )
 			{

@@ -187,13 +187,10 @@ class JMRenderableModuleBase: JMModuleBase
 
 	void Close()
 	{
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(CloseModule); 
-	}
-
-	void CloseModule()
-	{
-		delete m_Window;
-		delete m_Form;
+		if (m_Window)
+		{
+			m_Window.DestroyLater();
+		}
 	}
 
 	void ToggleShow()

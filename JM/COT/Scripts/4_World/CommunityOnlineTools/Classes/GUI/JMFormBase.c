@@ -1,4 +1,4 @@
-class JMFormBase: ScriptedWidgetEventHandler 
+class JMFormBase: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMFormBaseCount;
@@ -22,12 +22,12 @@ class JMFormBase: ScriptedWidgetEventHandler
 	#endif
 	}
 
-	void ~JMFormBase() 
+	void ~JMFormBase()
 	{
 		if (!GetGame())
 			return;
 
-	#ifdef COT_DEBUGLOGS
+	#ifdef DIAG
 		auto trace = CF_Trace_0(this);
 	#endif
 
@@ -35,13 +35,7 @@ class JMFormBase: ScriptedWidgetEventHandler
 
 		//! @note this should not be necessary since if the JMWindow handling this JMForm is destroyed,
 		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
-		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
-		}
+		DestroyWidget(layoutRoot);
 
 	#ifdef DIAG
 		s_JMFormBaseCount--;

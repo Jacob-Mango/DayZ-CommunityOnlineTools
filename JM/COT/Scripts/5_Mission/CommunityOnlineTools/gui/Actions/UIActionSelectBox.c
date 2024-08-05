@@ -7,6 +7,9 @@ class UIActionSelectBox: UIActionBase
 
 	void ~UIActionSelectBox()
 	{
+		if (!GetGame())
+			return;
+
 		delete m_Selection;
 	}
 

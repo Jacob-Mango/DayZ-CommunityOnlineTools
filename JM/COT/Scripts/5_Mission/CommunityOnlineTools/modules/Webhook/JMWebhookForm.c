@@ -24,12 +24,6 @@ class JMWebhookForm: JMFormBase
 		m_Sections = new map< string, ref JMWebhookSection >();
 	}
 
-	void ~JMWebhookForm()
-	{
-		delete m_Sections;
-		delete m_Types;
-	}
-
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
@@ -75,7 +69,6 @@ class JMWebhookForm: JMFormBase
 			if ( toKeep.Find( name ) != -1 )
 				continue;
 
-			delete m_Sections.Get( name );
 			m_Sections.Remove( name );
 		}
 

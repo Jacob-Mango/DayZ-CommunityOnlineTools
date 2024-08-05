@@ -11,11 +11,6 @@ class JMPlayerSerialize : Managed
 		Roles = new array< string >;
 	}
 
-	void ~JMPlayerSerialize()
-	{
-		delete Roles;
-	}
-
 	static string FileReadyStripName( string name )
 	{
 		name.Replace( "\\", "" );

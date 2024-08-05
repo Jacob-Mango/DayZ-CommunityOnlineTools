@@ -1,4 +1,4 @@
-class JMPermissionRowWidget: ScriptedWidgetEventHandler 
+class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
 	static int s_JMPermissionsRowWidgetCount;
@@ -52,16 +52,12 @@ class JMPermissionRowWidget: ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 	#endif
 
-		delete Children;
-		delete stateOptions;
-
-		if (layoutRoot && layoutRoot.ToString() != "INVALID")
+		foreach (auto child: Children)
 		{
-		#ifdef DIAG
-			CF_Log.Info("Unlinking %1 of %2", layoutRoot.ToString(), ToString());
-		#endif
-			layoutRoot.Unlink();
+			child.Destroy();
 		}
+
+		DestroyWidget(layoutRoot);
 
 	#ifdef DIAG
 		s_JMPermissionsRowWidgetCount--;
