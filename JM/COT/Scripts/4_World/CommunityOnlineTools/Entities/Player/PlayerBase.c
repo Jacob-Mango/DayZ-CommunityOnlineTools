@@ -242,7 +242,9 @@ modded class PlayerBase
 		{
 			#ifndef NO_GUI
 			m_Hud.Update(timeSlice);
+			#ifdef DAYZ_1_25
 			m_Hud.ToggleHeatBufferPlusSign(m_HasHeatBuffer);
+			#endif
 			
 			if (IsControlledPlayer() && m_EffectWidgets && m_EffectWidgets.IsAnyEffectRunning())
 			{
