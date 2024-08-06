@@ -218,6 +218,7 @@ STR_COT_VEHICLE_MODULE_NAME,Vehicle Spawner,Vehicle Spawner,Vehicle Spawner,Fahr
 STR_COT_WEATHER_MODULE_APPLY,Apply,Apply,Apply,Anwenden,Применить,Apply,Apply,Apply,Apply,Appliquer,Apply,Apply,Apply,Apply
 STR_COT_WEATHER_MODULE_REFRESH,Refresh,Refresh,Refresh,Aktualisieren,Обновить,Refresh,Refresh,Refresh,Refresh,Raffraichair,Refresh,Refresh,Refresh,Refresh
 STR_COT_WEATHER_MODULE_FOG,Fog:,Fog:,Fog:,Nebel:,Туман:,Fog:,Fog:,Fog:,Fog:,Brouillard:,Fog:,Fog:,Fog:,Fog:
+STR_COT_WEATHER_MODULE_SNOW,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:,Snow:
 STR_COT_WEATHER_MODULE_NAME,Weather,Weather,Weather,Wetter,Погода,Weather,Weather,Weather,Weather,Météo,Weather,Weather,Weather,Weather
 STR_COT_WEATHER_MODULE_OVERCAST,Overcast:,Overcast:,Overcast:,Bewölkung:,Облачность:,Overcast:,Overcast:,Overcast:,Overcast:,Couverture nuageuse:,Overcast:,Overcast:,Overcast:,Overcast:
 STR_COT_WEATHER_MODULE_RAIN,Rain:,Rain:,Rain:,Regen:,Дождь:,Rain:,Rain:,Rain:,Rain:,Pluie:,Rain:,Rain:,Rain:,Rain:

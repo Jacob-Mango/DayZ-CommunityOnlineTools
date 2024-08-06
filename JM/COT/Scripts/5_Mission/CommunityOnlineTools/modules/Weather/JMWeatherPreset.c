@@ -59,6 +59,10 @@ class JMWeatherPhenomenon: JMWeatherBase
 				return GetGame().GetWeather().GetFog();
 			case JMWeatherRain:
 				return GetGame().GetWeather().GetRain();
+	#ifndef DAYZ_1_25
+			case JMWeatherSnow:
+				return GetGame().GetWeather().GetSnowfall();
+	#endif
 			case JMWeatherOvercast:
 				return GetGame().GetWeather().GetOvercast();
 		}
@@ -96,6 +100,10 @@ class JMWeatherFog: JMWeatherPhenomenon
 };
 
 class JMWeatherRain: JMWeatherPhenomenon
+{
+};
+
+class JMWeatherSnow: JMWeatherPhenomenon
 {
 };
 
@@ -217,6 +225,36 @@ class JMWeatherRainThreshold: JMWeatherBase
 	}
 };
 
+class JMWeatherSnowThreshold: JMWeatherBase
+{
+	float OvercastMin;
+	float OvercastMax;
+	float Time;
+
+	override void Apply()
+	{
+	#ifndef DAYZ_1_25
+		if (Time != -1)
+			GetGame().GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
+	#endif
+	}
+
+	override void SetFromWorld()
+	{
+		OvercastMin = 0.5;
+		OvercastMax = 1.0;
+		Time = 120.0;
+	}
+
+	override void Log( PlayerIdentity pidentLog )
+	{
+		if ( IsMissionHost() )
+		{
+			GetCommunityOnlineToolsBase().Log( pidentLog, "SnowfallThreshold " + OvercastMin + ", " + OvercastMax + ", " + Time );
+		}
+	}
+};
+
 class JMWeatherPreset
 {
 	string Name;
@@ -229,9 +267,12 @@ class JMWeatherPreset
 
 	autoptr JMWeatherFog PFog;
 	autoptr JMWeatherOvercast POvercast;
-	autoptr JMWeatherRain PRain;
 
+	autoptr JMWeatherRain PRain;
 	autoptr JMWeatherRainThreshold RainThreshold;
+	
+	autoptr JMWeatherSnow PSnow;
+	autoptr JMWeatherSnowThreshold SnowThreshold;
 
 	autoptr JMWeatherWind Wind;
 	autoptr JMWeatherWindFunction WindFunc;
@@ -244,6 +285,8 @@ class JMWeatherPreset
 		POvercast = new JMWeatherOvercast;
 		PRain = new JMWeatherRain;
 		RainThreshold = new JMWeatherRainThreshold;
+		PSnow = new JMWeatherSnow;
+		SnowThreshold = new JMWeatherSnowThreshold;
 		Wind = new JMWeatherWind;
 		WindFunc = new JMWeatherWindFunction;
 	}
@@ -256,6 +299,8 @@ class JMWeatherPreset
 		POvercast.Apply();
 		PRain.Apply();
 		RainThreshold.Apply();
+		PSnow.Apply();
+		SnowThreshold.Apply();
 		Wind.Apply();
 		WindFunc.Apply();
 	}
@@ -268,6 +313,8 @@ class JMWeatherPreset
 		POvercast.SetFromWorld();
 		PRain.SetFromWorld();
 		RainThreshold.SetFromWorld();
+		PSnow.SetFromWorld();
+		SnowThreshold.SetFromWorld();
 		Wind.SetFromWorld();
 		WindFunc.SetFromWorld();
 	}
@@ -284,6 +331,8 @@ class JMWeatherPreset
 			POvercast.Log( pidentLogPP );
 			PRain.Log( pidentLogPP );
 			RainThreshold.Log( pidentLogPP );
+			PSnow.Log( pidentLogPP );
+			SnowThreshold.Log( pidentLogPP );
 			Wind.Log( pidentLogPP );
 			WindFunc.Log( pidentLogPP );
 		}

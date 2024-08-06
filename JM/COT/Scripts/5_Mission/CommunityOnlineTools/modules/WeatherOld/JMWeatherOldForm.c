@@ -20,6 +20,8 @@ class JMWeatherOldForm: JMFormBase
 	protected TextWidget m_TxtOvercastValue;
 	protected SliderWidget m_SldRain;
 	protected TextWidget m_TxtRainValue;
+	protected SliderWidget m_SldSnow;
+	protected TextWidget m_TxtSnowValue;
 	protected SliderWidget m_SldFog;
 	protected TextWidget m_TxtFogValue;
 	protected SliderWidget m_SldWindForce;
@@ -36,6 +38,7 @@ class JMWeatherOldForm: JMFormBase
 	private int	  m_OrigMinute;
 	private float m_OrigOvercast;
 	private float m_OrigRain;
+	private float m_OrigSnow;
 	private float m_OrigFog;
 	private float m_OrigWindForce;
 	private float m_OrigTemperature;
@@ -47,6 +50,7 @@ class JMWeatherOldForm: JMFormBase
 	private int	  m_CurrMinute;
 	private float m_CurrOvercast;
 	private float m_CurrRain;
+	private float m_CurrSnow;
 	private float m_CurrFog;
 	private float m_CurrWindForce;
 	private float m_CurrTemperature;
@@ -85,6 +89,9 @@ class JMWeatherOldForm: JMFormBase
 
 		m_SldRain			= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_rain" ) );
 		m_TxtRainValue		= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_rain_value" ) );
+
+		m_SldSnow			= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_snow" ) );
+		m_TxtSnowValue		= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_snow_value" ) );
 
 		m_SldFog			= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_fog" ) );
 		m_TxtFogValue		= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_fog_value" ) );
@@ -241,6 +248,17 @@ class JMWeatherOldForm: JMFormBase
 
 			return true;
 		}
+		else if ( w == m_SldSnow )
+		{
+			UpdateSliderSnow();
+
+			m_CurrSnow = m_SldSnow.GetCurrent() * 0.01;
+
+			//GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
+			//GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrSnow * m_CurrSnow, 0.8, 4000 ), true );
+
+			return true;
+		}
 		else if ( w == m_SldFog )
 		{
 			UpdateSliderFog();
@@ -299,9 +317,11 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigMinute = m_CurrMinute;
 		m_OrigOvercast = m_CurrOvercast;
 		m_OrigRain = m_CurrRain;
+		m_OrigSnow = m_CurrSnow;
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -361,14 +381,17 @@ class JMWeatherOldForm: JMFormBase
 	{
 		m_CurrOvercast = 0;
 		m_CurrRain = 0;
+		m_CurrSnow = 0;
 		m_CurrFog = 0;
 		m_CurrWindForce = 0;
 
 		m_OrigOvercast = m_CurrOvercast;
 		m_OrigRain = m_CurrRain;
+		m_OrigSnow = m_CurrSnow;
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -381,14 +404,17 @@ class JMWeatherOldForm: JMFormBase
 	{
 		m_CurrOvercast = 0.5;
 		m_CurrRain = 0;
+		m_CurrSnow = 0;
 		m_CurrFog = 0.1;
 		m_CurrWindForce = 0.2;
 
 		m_OrigOvercast = m_CurrOvercast;
+		m_OrigSnow = m_CurrSnow;
 		m_OrigRain = m_CurrRain;
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -400,14 +426,17 @@ class JMWeatherOldForm: JMFormBase
 	{
 		m_CurrOvercast = 1;
 		m_CurrRain = 0.8;
+		m_CurrSnow = 0.0;
 		m_CurrFog = 0.3;
 		m_CurrWindForce = 0.7;
 
 		m_OrigOvercast = m_CurrOvercast;
+		m_OrigSnow = m_CurrSnow;
 		m_OrigRain = m_CurrRain;
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
+		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -423,6 +452,7 @@ class JMWeatherOldForm: JMFormBase
 
 		m_OrigOvercast = weather.GetOvercast().GetActual();
 		m_OrigRain = weather.GetRain().GetActual();
+		m_OrigSnow = weather.GetSnowfall().GetActual();
 		m_OrigFog = weather.GetFog().GetActual();
 		m_OrigWindForce = weather.GetWindSpeed();
 
@@ -436,6 +466,7 @@ class JMWeatherOldForm: JMFormBase
 		m_CurrMinute = m_OrigMinute;
 		m_CurrOvercast = m_OrigOvercast;
 		m_CurrRain = m_OrigRain;
+		m_CurrSnow = m_OrigSnow;
 		m_CurrFog = m_OrigFog;
 		m_CurrWindForce = m_OrigWindForce;
 		m_CurrTemperature = m_OrigTemperature;
@@ -474,6 +505,9 @@ class JMWeatherOldForm: JMFormBase
 
 		m_SldRain.SetCurrent(weather.GetRain().GetActual() * 100);
 		UpdateSliderRain();
+
+		m_SldSnow.SetCurrent(weather.GetSnowfall().GetActual() * 100);
+		UpdateSliderSnow();
 
 		m_SldFog.SetCurrent(weather.GetFog().GetActual() * 100);
 		UpdateSliderFog();
@@ -516,6 +550,12 @@ class JMWeatherOldForm: JMFormBase
 	{
 		string label_text = m_SldRain.GetCurrent().ToString() + "%";
 		m_TxtRainValue.SetText( label_text );
+	}
+
+	void UpdateSliderSnow()
+	{
+		string label_text = m_SldSnow.GetCurrent().ToString() + "%";
+		m_TxtSnowValue.SetText( label_text );
 	}
 
 	void UpdateSliderFog()
