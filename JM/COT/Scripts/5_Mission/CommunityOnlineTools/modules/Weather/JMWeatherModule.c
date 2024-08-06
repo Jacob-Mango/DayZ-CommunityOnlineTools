@@ -31,6 +31,9 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.Rain" );
 		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
 
+		GetPermissionsManager().RegisterPermission( "Weather.Snow" );
+		GetPermissionsManager().RegisterPermission( "Weather.Snow.Thresholds" );
+
 		GetPermissionsManager().RegisterPermission( "Weather.Preset" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Use" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Create" );
@@ -206,6 +209,38 @@ class JMWeatherModule: JMRenderableModuleBase
 		} 
 	}
 
+	void SetSnow( float forecast, float time = 0, float minDuration = 0 )
+	{
+		JMWeatherSnow wBase = new JMWeatherSnow;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
+		if ( GetGame().IsServer() )
+		{
+			Exec_SetSnow( wBase, NULL );
+		} else
+		{
+			Send_SetSnow( wBase );
+		} 
+	}
+
+	void SetSnowThresholds( float tMin, float tMax, float tTime )
+	{
+		JMWeatherSnowThreshold wBase = new JMWeatherSnowThreshold;
+		wBase.OvercastMin = tMin;
+		wBase.OvercastMax = tMax;
+		wBase.Time = tTime;
+		
+		if ( GetGame().IsServer() )
+		{
+			Exec_SetSnowThresholds( wBase, NULL );
+		} else
+		{
+			Send_SetSnowThresholds( wBase );
+		} 
+	}
+
 	void SetOvercast( float forecast, float time = 0, float minDuration = 0 )
 	{
 		JMWeatherOvercast wBase = new JMWeatherOvercast;
@@ -351,6 +386,20 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.RainThresholds, true, NULL );
 	}
 	
+	private void Send_SetSnow( JMWeatherSnow wBase )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wBase );
+		rpc.Send( NULL, JMWeatherModuleRPC.Snow, true, NULL );
+	}
+	
+	private void Send_SetSnowThresholds( JMWeatherSnowThreshold wBase )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wBase );
+		rpc.Send( NULL, JMWeatherModuleRPC.SnowThresholds, true, NULL );
+	}
+	
 	private void Send_SetOvercast( JMWeatherOvercast wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
@@ -434,6 +483,18 @@ class JMWeatherModule: JMRenderableModuleBase
 	}
 
 	private void Exec_SetRainThresholds( JMWeatherRainThreshold wBase, PlayerIdentity ident )
+	{
+		wBase.Apply();
+		wBase.Log( ident );
+	}
+
+	private void Exec_SetSnow( JMWeatherSnow wBase, PlayerIdentity ident )
+	{
+		wBase.Apply();
+		wBase.Log( ident );
+	}
+
+	private void Exec_SetSnowThresholds( JMWeatherSnowThreshold wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
@@ -632,6 +693,36 @@ class JMWeatherModule: JMRenderableModuleBase
 		Exec_SetRainThresholds( p1, senderRPC );
 	}
 
+	private void RPC_SetSnow( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherSnow p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Snow", senderRPC ) )
+			return;
+
+		Exec_SetSnow( p1, senderRPC );
+	}
+
+	private void RPC_SetSnowThresholds( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherSnowThreshold p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Snow.Thresholds", senderRPC ) )
+			return;
+
+		Exec_SetSnowThresholds( p1, senderRPC );
+	}
+
 	private void RPC_SetOvercast( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMWeatherOvercast p1;
@@ -797,6 +888,12 @@ class JMWeatherModule: JMRenderableModuleBase
 			break;
 		case JMWeatherModuleRPC.RainThresholds:
 			RPC_SetRainThresholds( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.Snow:
+			RPC_SetSnow( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.SnowThresholds:
+			RPC_SetSnowThresholds( ctx, sender, target );
 			break;
 		case JMWeatherModuleRPC.Overcast:
 			RPC_SetOvercast( ctx, sender, target );

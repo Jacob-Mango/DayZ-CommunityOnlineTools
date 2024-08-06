@@ -28,7 +28,8 @@ class JMWeatherForm: JMFormBase
 	//! Quick Actions stuff !
 	private UIActionButton m_BtnQuickActionClear;
 	private UIActionButton m_BtnQuickActionCloudy;
-	private UIActionButton m_BtnQuickActionRainy;	
+	private UIActionButton m_BtnQuickActionRainy;
+	private UIActionButton m_BtnQuickActionSnowy;
 	private UIActionButton m_BtnQuickActionStorm;
 
 	private UIActionButton m_BtnQuickActionNight;
@@ -61,6 +62,15 @@ class JMWeatherForm: JMFormBase
 	private UIActionSlider m_SliderRainOvercastMin;
 	private UIActionSlider m_SliderRainOvercastMax;
 	private UIActionEditableText m_EditTextRainTransitionTime;
+
+	//! Snow stuff !
+	private UIActionSlider m_SliderSnowForecast;
+	private UIActionEditableText m_EditSnowInterpTime;
+	private UIActionEditableText m_EditSnowMinDuration;
+
+	private UIActionSlider m_SliderSnowOvercastMin;
+	private UIActionSlider m_SliderSnowOvercastMax;
+	private UIActionEditableText m_EditTextSnowTransitionTime;
 
 	//! Overcast stuff !
 	private UIActionSlider m_SliderOvercastForecast;
@@ -315,7 +325,10 @@ class JMWeatherForm: JMFormBase
 
 		UpdateActionState( m_BtnQuickActionClear, "Weather.QuickAction.Clear", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionCloudy, "Weather.QuickAction.Overcast", hasNotSelectedPreset );
-		UpdateActionState( m_BtnQuickActionRainy, "Weather.QuickAction.Rain", hasNotSelectedPreset );		
+		UpdateActionState( m_BtnQuickActionRainy, "Weather.QuickAction.Rain", hasNotSelectedPreset );
+		#ifndef DAYZ_1_25
+		UpdateActionState( m_BtnQuickActionSnowy, "Weather.QuickAction.Snow", hasNotSelectedPreset );
+		#endif
 		UpdateActionState( m_BtnQuickActionStorm, "Weather.QuickAction.Storm", hasNotSelectedPreset );
 
 		UpdateActionState( m_BtnQuickActionNight, "Weather.QuickAction.Date", hasNotSelectedPreset );
@@ -344,6 +357,16 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderRainOvercastMin, "Weather.Rain.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_SliderRainOvercastMax, "Weather.Rain.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset || easyModeEnabled );
+
+		#ifndef DAYZ_1_25
+		UpdateActionState( m_SliderSnowForecast, "Weather.Snow", hasNotSelectedPreset );
+		UpdateActionState( m_EditSnowInterpTime, "Weather.Snow", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditSnowMinDuration, "Weather.Snow", hasNotSelectedPreset || easyModeEnabled );
+
+		UpdateActionState( m_SliderSnowOvercastMin, "Weather.Snow.Thresholds", hasNotSelectedPreset );
+		UpdateActionState( m_SliderSnowOvercastMax, "Weather.Snow.Thresholds", hasNotSelectedPreset );
+		UpdateActionState( m_EditTextSnowTransitionTime, "Weather.Snow.Thresholds", hasNotSelectedPreset || easyModeEnabled );
+		#endif
 
 		UpdateActionState( m_SliderOvercastForecast, "Weather.Overcast", hasNotSelectedPreset );
 		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset || easyModeEnabled );
@@ -495,6 +518,26 @@ class JMWeatherForm: JMFormBase
 			m_EditTextRainTransitionTime.SetText( preset.RainThreshold.Time );
 
 		if (actual)
+			m_SliderSnowForecast.SetCurrent( preset.PSnow.Actual * 100.0 );
+		else if ( preset.PSnow.Forecast != -1 )
+			m_SliderSnowForecast.SetCurrent( preset.PSnow.Forecast * 100.0 );
+
+		if ( preset.PSnow.Time != -1 )
+			m_EditSnowInterpTime.SetText( preset.PSnow.Time );
+
+		if ( preset.PSnow.MinDuration != -1 )
+			m_EditSnowMinDuration.SetText( preset.PSnow.MinDuration );
+
+		if ( preset.SnowThreshold.OvercastMin != -1 )
+			m_SliderSnowOvercastMin.SetCurrent( preset.SnowThreshold.OvercastMin * 100.0 );
+
+		if ( preset.SnowThreshold.OvercastMax != -1 )
+			m_SliderSnowOvercastMax.SetCurrent( preset.SnowThreshold.OvercastMax * 100.0 );
+
+		if ( preset.SnowThreshold.Time != -1 )
+			m_EditTextSnowTransitionTime.SetText( preset.SnowThreshold.Time );
+
+		if (actual)
 			m_SliderOvercastForecast.SetCurrent( preset.POvercast.Actual * 100.0 );
 		else if ( preset.POvercast.Forecast != -1 )
 			m_SliderOvercastForecast.SetCurrent( preset.POvercast.Forecast * 100.0 );
@@ -553,9 +596,17 @@ class JMWeatherForm: JMFormBase
 		preset.PRain.Time = ToFloat( m_EditRainInterpTime.GetText() );
 		preset.PRain.MinDuration = ToFloat( m_EditRainMinDuration.GetText() );
 
-		preset.RainThreshold.OvercastMin = m_SliderRainOvercastMin.GetCurrent() * 0.01;			
+		preset.RainThreshold.OvercastMin = m_SliderRainOvercastMin.GetCurrent() * 0.01;
 		preset.RainThreshold.OvercastMax = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		preset.RainThreshold.Time = ToFloat( m_EditTextRainTransitionTime.GetText() );
+
+		preset.PSnow.Forecast = m_SliderSnowForecast.GetCurrent() * 0.01;
+		preset.PSnow.Time = ToFloat( m_EditSnowInterpTime.GetText() );
+		preset.PSnow.MinDuration = ToFloat( m_EditSnowMinDuration.GetText() );
+
+		preset.SnowThreshold.OvercastMin = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
+		preset.SnowThreshold.OvercastMax = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
+		preset.SnowThreshold.Time = ToFloat( m_EditTextSnowTransitionTime.GetText() );
 
 		preset.POvercast.Forecast = m_SliderOvercastForecast.GetCurrent() * 0.01;
 		preset.POvercast.Time = ToFloat( m_EditOvercastInterpTime.GetText() );
@@ -631,6 +682,11 @@ class JMWeatherForm: JMFormBase
 
 		InitRainWidgets( m_PanelWeatherActions );
 		InitRainThresholdWidgets( m_PanelWeatherActions );
+
+		#ifndef DAYZ_1_25
+		InitSnowWidgets( m_PanelWeatherActions );
+		InitSnowThresholdWidgets( m_PanelWeatherActions );
+		#endif
 
 		InitWindWidgets( m_PanelWeatherActions );
 		InitWindFuncWidgets( m_PanelWeatherActions );
@@ -741,6 +797,14 @@ class JMWeatherForm: JMFormBase
 		float maxRainThresh = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		float transitionRainThresh = m_EditTextRainTransitionTime.GetText().ToFloat();
 
+		float forecastSnow = m_SliderSnowForecast.GetCurrent() * 0.01;
+		float timeSnow = m_EditSnowInterpTime.GetText().ToFloat();
+		float minDurationSnow = m_EditSnowMinDuration.GetText().ToFloat();
+
+		float minSnowThresh = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
+		float maxSnowThresh = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
+		float transitionSnowThresh = m_EditTextSnowTransitionTime.GetText().ToFloat();
+
 		if ( m_Checkbox_EasyMode.IsChecked() )
 		{
 			m_Module.SetDate( year, month, day, hour, minute );
@@ -751,6 +815,8 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetStorm( densityStorm, 0.7, 25 );
 			m_Module.SetRain( forecastRain, 0, 240.0 );
 			m_Module.SetRainThresholds( 0.0, 1.0, 120.0 );
+			m_Module.SetSnow( forecastSnow, 0, 240.0 );
+			m_Module.SetSnowThresholds( 0.0, 1.0, 120.0 );
 		}
 		else
 		{
@@ -762,8 +828,9 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetStorm( densityStorm, thresholdStorm, minTimeBetweenLightning );
 			m_Module.SetRain( forecastRain, timeRain, minDurationRain );
 			m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
+			m_Module.SetSnow( forecastSnow, timeSnow, minDurationSnow );
+			m_Module.SetSnowThresholds( minSnowThresh, maxSnowThresh, transitionSnowThresh );
 		}
-
 	}
 
 	void OnClick_PresetUpdate( UIEvent eid, UIActionBase action )
@@ -849,10 +916,17 @@ class JMWeatherForm: JMFormBase
 
 		UIActionManager.CreateText( parent, "Quick Actions: ", "Instantly change the Weather" );
 	
+		#ifndef DAYZ_1_25
+		Widget actionsWeather 	= UIActionManager.CreateGridSpacer( parent, 1, 5 );
+		#else
 		Widget actionsWeather 	= UIActionManager.CreateGridSpacer( parent, 1, 4 );
+		#endif
 		m_BtnQuickActionClear 	= UIActionManager.CreateButton( actionsWeather, "Clear", this, "OnClick_PresetClear" );
 		m_BtnQuickActionCloudy 	= UIActionManager.CreateButton( actionsWeather, "Cloudy", this, "OnClick_PresetCloudy" );
 		m_BtnQuickActionRainy 	= UIActionManager.CreateButton( actionsWeather, "Rainy", this, "OnClick_PresetRainy" );
+		#ifndef DAYZ_1_25
+		m_BtnQuickActionSnowy 	= UIActionManager.CreateButton( actionsWeather, "Snowy", this, "OnClick_PresetSnowy" );
+		#endif
 		m_BtnQuickActionStorm 	= UIActionManager.CreateButton( actionsWeather, "Storm", this, "OnClick_PresetStorm" );
 
 		Widget actionsDate 		= UIActionManager.CreateGridSpacer( parent, 1, 4 );
@@ -879,6 +953,7 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetWindFunctionParams( 0, 1, 30 );
 		m_Module.SetOvercast( 0, transition, duration );
 		m_Module.SetRain( 0, transition, duration );
+		m_Module.SetSnow( 0, transition, duration );
 		m_Module.SetFog( 0, transition, duration );
 
 		RefreshValues();
@@ -903,6 +978,7 @@ class JMWeatherForm: JMFormBase
 		//! Set overcast to below storm threshold
 		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
 		m_Module.SetRain( 0, transition, duration );
+		m_Module.SetSnow( 0, transition, duration );
 		m_Module.SetFog( 0, transition, duration );
 		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
@@ -929,6 +1005,35 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
 		m_Module.SetRainThresholds( 0.5, 1.0, 120.0 );
 		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
+		m_Module.SetSnow( 0, transition, duration );
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
+		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
+
+		RefreshValues();
+	}
+
+	void OnClick_PresetSnowy( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_PresetsShown )
+			return;
+
+		float duration = 240;
+		float transition = 0;
+
+		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
+		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
+		float windMin = Math.RandomFloatInclusive(0,0.8);
+		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
+		float thresholdStorm = Math.Max(m_SliderStormThreshold.GetCurrent() * 0.01, 0.7);
+		//! Set overcast to below storm threshold
+		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
+		m_Module.SetSnowThresholds( 0.5, 1.0, 120.0 );
+		m_Module.SetRain( 0, transition, duration );
+		m_Module.SetSnow( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
+		m_Module.SetSnowThresholds( 0.5, 1.0, 120.0 );
 		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
@@ -953,6 +1058,7 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetOvercast( Math.RandomFloatInclusive(0.7,1.0), transition, duration );
 		float minRainThresh = m_SliderRainOvercastMin.GetCurrent() * 0.01;
 		m_Module.SetRain( Math.RandomFloatInclusive(minRainThresh,1.0), transition, duration );
+		m_Module.SetSnow( 0, transition, duration );
 		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 		m_Module.SetStorm( 1.0, 0.7, m_SliderMinTimeBetweenLightning.GetCurrent() );
 
@@ -1231,6 +1337,77 @@ class JMWeatherForm: JMFormBase
 		m_EditTextRainTransitionTime.SetText( "0" );
 		m_EditTextRainTransitionTime.SetWidgetWidth( m_EditTextRainTransitionTime.GetLabelWidget(), 0.6 );
 		m_EditTextRainTransitionTime.SetWidgetWidth( m_EditTextRainTransitionTime.GetEditBoxWidget(), 0.6 );
+
+		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+	}
+
+	private void InitSnowWidgets( Widget actionsParent )
+	{
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+
+		UIActionManager.CreateText( parent, "Snow: ", "Sets the weather Snow phenomenon" );
+	
+		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 35 );
+
+		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
+
+		m_SliderSnowForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this );
+		m_SliderSnowForecast.SetCurrent( 0 );
+		m_SliderSnowForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderSnowForecast.SetStepValue( 0.1 );
+		m_SliderSnowForecast.SetMin( 0 );
+		m_SliderSnowForecast.SetMax( 100 );
+		m_SliderSnowForecast.SetWidgetWidth( m_SliderSnowForecast.GetLabelWidget(), 0.6 );
+		m_SliderSnowForecast.SetWidgetWidth( m_SliderSnowForecast.GetSliderWidget(), 0.6 );
+
+		m_EditSnowMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Duration", this );
+		m_EditSnowMinDuration.SetOnlyNumbers( true );
+		m_EditSnowMinDuration.SetText( "0" );
+		m_EditSnowMinDuration.SetWidgetWidth( m_EditSnowMinDuration.GetLabelWidget(), 0.6 );
+		m_EditSnowMinDuration.SetWidgetWidth( m_EditSnowMinDuration.GetEditBoxWidget(), 0.6 );
+
+		m_EditSnowInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Transition", this );
+		m_EditSnowInterpTime.SetOnlyNumbers( true );
+		m_EditSnowInterpTime.SetText( "0" );
+		m_EditSnowInterpTime.SetWidgetWidth( m_EditSnowInterpTime.GetLabelWidget(), 0.6 );
+		m_EditSnowInterpTime.SetWidgetWidth( m_EditSnowInterpTime.GetEditBoxWidget(), 0.6 );
+
+		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+	}
+
+	private void InitSnowThresholdWidgets( Widget actionsParent )
+	{
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+
+		UIActionManager.CreateText( parent, "Snow Tresholds: ", "Sets the minimum, maximum overcast" );
+	
+		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 35 );
+
+		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
+
+		m_SliderSnowOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 1, this );
+		m_SliderSnowOvercastMin.SetCurrent( 0 );
+		m_SliderSnowOvercastMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderSnowOvercastMin.SetStepValue( 0.1 );
+		m_SliderSnowOvercastMin.SetMin( 0 );
+		m_SliderSnowOvercastMin.SetMax( 100 );
+		m_SliderSnowOvercastMin.SetWidgetWidth( m_SliderSnowOvercastMin.GetLabelWidget(), 0.6 );
+		m_SliderSnowOvercastMin.SetWidgetWidth( m_SliderSnowOvercastMin.GetSliderWidget(), 0.6 );
+
+		m_SliderSnowOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 1, this );
+		m_SliderSnowOvercastMax.SetCurrent( 0 );
+		m_SliderSnowOvercastMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
+		m_SliderSnowOvercastMax.SetStepValue( 0.1 );
+		m_SliderSnowOvercastMax.SetMin( 0 );
+		m_SliderSnowOvercastMax.SetMax( 100 );
+		m_SliderSnowOvercastMax.SetWidgetWidth( m_SliderSnowOvercastMax.GetLabelWidget(), 0.6 );
+		m_SliderSnowOvercastMax.SetWidgetWidth( m_SliderSnowOvercastMax.GetSliderWidget(), 0.6 );
+
+		m_EditTextSnowTransitionTime = UIActionManager.CreateEditableText( actionsGrid, "Transition", this );
+		m_EditTextSnowTransitionTime.SetOnlyNumbers( true );
+		m_EditTextSnowTransitionTime.SetText( "0" );
+		m_EditTextSnowTransitionTime.SetWidgetWidth( m_EditTextSnowTransitionTime.GetLabelWidget(), 0.6 );
+		m_EditTextSnowTransitionTime.SetWidgetWidth( m_EditTextSnowTransitionTime.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 	}

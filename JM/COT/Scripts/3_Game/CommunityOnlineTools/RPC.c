@@ -101,6 +101,8 @@ enum JMWeatherModuleRPC
 	Fog,
 	Rain,
 	RainThresholds,
+	Snow,
+	SnowThresholds,
 	Overcast,
 	Wind,
 	WindFunctionParams,
