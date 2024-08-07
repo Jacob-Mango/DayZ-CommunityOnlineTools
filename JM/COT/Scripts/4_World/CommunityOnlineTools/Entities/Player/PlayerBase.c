@@ -237,7 +237,8 @@ modded class PlayerBase
 
 	void COT_SimulationDisabled_OnFrame(float timeSlice)
 	{
-		//! Verbatim copy of vanilla PlayerBase::EOnFrame, this is a stand-in to update HUD etc in case of true invis mode which disables simulation
+		//! Verbatim copy of the client part of vanilla PlayerBase::EOnFrame,
+		//! this is a stand-in to update HUD etc in case of true invis mode which disables simulation
 		if (GetInstanceType() == DayZPlayerInstanceType.INSTANCETYPE_CLIENT)
 		{
 			#ifndef NO_GUI
@@ -254,6 +255,12 @@ modded class PlayerBase
 
 			if (m_UndergroundHandler)
 				m_UndergroundHandler.Tick(timeSlice);
+			
+			#ifndef DAYZ_1_25
+			//! DayZ 1.26+
+			if (m_UndergroundBunkerHandler)
+				m_UndergroundBunkerHandler.Tick(timeSlice);
+			#endif
 		}
 	}
 
