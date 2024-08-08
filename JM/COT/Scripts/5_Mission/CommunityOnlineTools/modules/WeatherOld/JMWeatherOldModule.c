@@ -5,7 +5,9 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetStorm", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetFog", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetRain", this, SingeplayerExecutionType.Client );
+	#ifndef DAYZ_1_25
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetSnow", this, SingeplayerExecutionType.Client );
+	#endif
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetOvercast", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetDate", this, SingeplayerExecutionType.Client );
@@ -189,6 +191,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		}
 	}
 
+#ifndef DAYZ_1_25
 	void Weather_SetSnow( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
 		Param3< float, float, float > data;
@@ -214,6 +217,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			SendWebhook( "Snow", instance, "Set snow to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
+#endif
 
 	void Weather_SetRain( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{
