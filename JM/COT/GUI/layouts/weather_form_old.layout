@@ -1,7 +1,7 @@
 PanelWidgetClass JMWeatherOldForm {
  color 0 0 0 0
  position 0 0
- size 570 270
+ size 570 295
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -306,7 +306,7 @@ PanelWidgetClass JMWeatherOldForm {
     }
     TextWidgetClass txt_ppp_st_temperature {
      visible 0
-     position 0 150
+     position 0 175
      size 1 20
      hexactpos 1
      vexactpos 1
