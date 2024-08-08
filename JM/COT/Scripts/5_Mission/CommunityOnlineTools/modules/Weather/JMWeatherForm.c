@@ -517,6 +517,7 @@ class JMWeatherForm: JMFormBase
 		if ( preset.RainThreshold.Time != -1 )
 			m_EditTextRainTransitionTime.SetText( preset.RainThreshold.Time );
 
+	#ifndef DAYZ_1_25
 		if (actual)
 			m_SliderSnowForecast.SetCurrent( preset.PSnow.Actual * 100.0 );
 		else if ( preset.PSnow.Forecast != -1 )
@@ -536,6 +537,7 @@ class JMWeatherForm: JMFormBase
 
 		if ( preset.SnowThreshold.Time != -1 )
 			m_EditTextSnowTransitionTime.SetText( preset.SnowThreshold.Time );
+	#endif
 
 		if (actual)
 			m_SliderOvercastForecast.SetCurrent( preset.POvercast.Actual * 100.0 );
@@ -600,6 +602,7 @@ class JMWeatherForm: JMFormBase
 		preset.RainThreshold.OvercastMax = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		preset.RainThreshold.Time = ToFloat( m_EditTextRainTransitionTime.GetText() );
 
+	#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = m_SliderSnowForecast.GetCurrent() * 0.01;
 		preset.PSnow.Time = ToFloat( m_EditSnowInterpTime.GetText() );
 		preset.PSnow.MinDuration = ToFloat( m_EditSnowMinDuration.GetText() );
@@ -607,6 +610,7 @@ class JMWeatherForm: JMFormBase
 		preset.SnowThreshold.OvercastMin = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
 		preset.SnowThreshold.OvercastMax = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
 		preset.SnowThreshold.Time = ToFloat( m_EditTextSnowTransitionTime.GetText() );
+	#endif
 
 		preset.POvercast.Forecast = m_SliderOvercastForecast.GetCurrent() * 0.01;
 		preset.POvercast.Time = ToFloat( m_EditOvercastInterpTime.GetText() );
@@ -797,6 +801,7 @@ class JMWeatherForm: JMFormBase
 		float maxRainThresh = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		float transitionRainThresh = m_EditTextRainTransitionTime.GetText().ToFloat();
 
+	#ifndef DAYZ_1_25
 		float forecastSnow = m_SliderSnowForecast.GetCurrent() * 0.01;
 		float timeSnow = m_EditSnowInterpTime.GetText().ToFloat();
 		float minDurationSnow = m_EditSnowMinDuration.GetText().ToFloat();
@@ -804,6 +809,7 @@ class JMWeatherForm: JMFormBase
 		float minSnowThresh = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
 		float maxSnowThresh = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
 		float transitionSnowThresh = m_EditTextSnowTransitionTime.GetText().ToFloat();
+	#endif
 
 		if ( m_Checkbox_EasyMode.IsChecked() )
 		{
@@ -815,8 +821,10 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetStorm( densityStorm, 0.7, 25 );
 			m_Module.SetRain( forecastRain, 0, 240.0 );
 			m_Module.SetRainThresholds( 0.0, 1.0, 120.0 );
+		#ifndef DAYZ_1_25
 			m_Module.SetSnow( forecastSnow, 0, 240.0 );
 			m_Module.SetSnowThresholds( 0.0, 1.0, 120.0 );
+		#endif
 		}
 		else
 		{
@@ -828,8 +836,10 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetStorm( densityStorm, thresholdStorm, minTimeBetweenLightning );
 			m_Module.SetRain( forecastRain, timeRain, minDurationRain );
 			m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
+		#ifndef DAYZ_1_25
 			m_Module.SetSnow( forecastSnow, timeSnow, minDurationSnow );
 			m_Module.SetSnowThresholds( minSnowThresh, maxSnowThresh, transitionSnowThresh );
+		#endif
 		}
 	}
 
