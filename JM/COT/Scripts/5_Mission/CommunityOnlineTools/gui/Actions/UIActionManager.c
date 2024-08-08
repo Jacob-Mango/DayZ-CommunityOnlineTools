@@ -15,7 +15,7 @@ class UIActionManager
 			return spacer;
 		}
 
-		Error("Could not cast " + widget + " to GridSpacerWidget");
+		Error(string.Format("Could not cast %1 (name=\"%2\" type=%3 layout=\"%4\") to GridSpacerWidget", widget, widget.GetName(), widget.GetTypeName(), layout));
 
 		return NULL;
 	}
@@ -33,7 +33,7 @@ class UIActionManager
 			return spacer;
 		}
 
-		Error("Could not cast " + widget + " to WrapSpacerWidget");
+		Error(string.Format("Could not cast %1 (name=\"%2\" type=%3) to WrapSpacerWidget", widget, widget.GetName(), widget.GetTypeName()));
 
 		return NULL;
 	}
