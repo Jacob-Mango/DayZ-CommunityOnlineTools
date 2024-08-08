@@ -299,8 +299,10 @@ class JMWeatherPreset
 		POvercast.Apply();
 		PRain.Apply();
 		RainThreshold.Apply();
+	#ifndef DAYZ_1_25
 		PSnow.Apply();
 		SnowThreshold.Apply();
+	#endif
 		Wind.Apply();
 		WindFunc.Apply();
 	}
@@ -313,8 +315,10 @@ class JMWeatherPreset
 		POvercast.SetFromWorld();
 		PRain.SetFromWorld();
 		RainThreshold.SetFromWorld();
+	#ifndef DAYZ_1_25
 		PSnow.SetFromWorld();
 		SnowThreshold.SetFromWorld();
+	#endif
 		Wind.SetFromWorld();
 		WindFunc.SetFromWorld();
 	}
@@ -331,8 +335,10 @@ class JMWeatherPreset
 			POvercast.Log( pidentLogPP );
 			PRain.Log( pidentLogPP );
 			RainThreshold.Log( pidentLogPP );
+		#ifndef DAYZ_1_25
 			PSnow.Log( pidentLogPP );
 			SnowThreshold.Log( pidentLogPP );
+		#endif
 			Wind.Log( pidentLogPP );
 			WindFunc.Log( pidentLogPP );
 		}

@@ -211,6 +211,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void SetSnow( float forecast, float time = 0, float minDuration = 0 )
 	{
+	#ifndef DAYZ_1_25
 		JMWeatherSnow wBase = new JMWeatherSnow;
 		wBase.Forecast = forecast;
 		wBase.Time = time;
@@ -223,10 +224,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetSnow( wBase );
 		} 
+	#endif
 	}
 
 	void SetSnowThresholds( float tMin, float tMax, float tTime )
 	{
+	#ifndef DAYZ_1_25
 		JMWeatherSnowThreshold wBase = new JMWeatherSnowThreshold;
 		wBase.OvercastMin = tMin;
 		wBase.OvercastMax = tMax;
@@ -239,6 +242,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetSnowThresholds( wBase );
 		} 
+	#endif
 	}
 
 	void SetOvercast( float forecast, float time = 0, float minDuration = 0 )
