@@ -9,13 +9,16 @@ class UIActionManager
 		if (!widget)
 			Error("No widgets created " + layout);
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent, layout);
+
 		GridSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
 		{
 			return spacer;
 		}
 
-		Error(string.Format("Could not cast %1 (name=\"%2\" type=%3 layout=\"%4\") to GridSpacerWidget", widget, widget.GetName(), widget.GetTypeName(), layout));
+		UIAMError("Could not cast to GridSpacerWidget", widget, parent, layout);
 
 		return NULL;
 	}
@@ -27,13 +30,16 @@ class UIActionManager
 		if (!widget)
 			Error("No widgets created");
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
+
 		WrapSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
 		{
 			return spacer;
 		}
 
-		Error(string.Format("Could not cast %1 (name=\"%2\" type=%3) to WrapSpacerWidget", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Could not cast to WrapSpacerWidget", widget, parent);
 
 		return NULL;
 	}
@@ -45,6 +51,9 @@ class UIActionManager
 		if (!widget)
 			Error("No widgets created");
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
+
 		return widget;
 	}
 	
@@ -55,12 +64,18 @@ class UIActionManager
 		if (!widget)
 			Error("No widgets created");
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
+
 		return widget;
 	}
 
 	static Widget CreatePanel( notnull Widget parent, int color = 0x00000000, float height = -1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		widget.SetColor( color );
 
@@ -75,6 +90,9 @@ class UIActionManager
 	static UIActionButton CreateButton( notnull Widget parent, string button, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionButton action;
 		widget.GetScript( action );
@@ -92,7 +110,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -100,6 +118,9 @@ class UIActionManager
 	static UIActionNavigateButton CreateNavButton( notnull Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionNavigateButton action;
 		widget.GetScript( action );
@@ -118,7 +139,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -139,6 +160,9 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent, layout);
+
 		UIActionEditableTextPreview action;
 		widget.GetScript( action );
 
@@ -155,7 +179,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent, layout);
 
 		return NULL;
 	}
@@ -176,6 +200,9 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent, layout);
+
 		UIActionEditableText action;
 		widget.GetScript( action );
 
@@ -192,7 +219,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent, layout);
 
 		return NULL;
 	}
@@ -200,6 +227,9 @@ class UIActionManager
 	static UIActionDropdownList CreateDropdownBox( notnull Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionDropdownList action;
 		widget.GetScript( action );
@@ -220,7 +250,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -241,6 +271,9 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent, layout);
+
 		UIActionEditableVector action;
 		widget.GetScript( action );
 
@@ -256,7 +289,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent, layout);
 
 		return NULL;
 	}
@@ -264,6 +297,9 @@ class UIActionManager
 	static UIActionCheckbox CreateCheckbox( notnull Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionCheckbox action;
 		widget.GetScript( action );
@@ -282,7 +318,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -290,6 +326,9 @@ class UIActionManager
 	static UIActionText CreateText( notnull Widget parent, string label, string text = "", Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionText action;
 		widget.GetScript( action );
@@ -309,7 +348,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -317,6 +356,9 @@ class UIActionManager
 	static UIActionSelectBox CreateSelectionBox( notnull Widget parent, string label, notnull array< string > options, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionSelectBox action;
 		widget.GetScript( action );
@@ -330,7 +372,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -338,6 +380,9 @@ class UIActionManager
 	static UIActionSlider CreateSlider( notnull Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionSlider action;
 		widget.GetScript( action );
@@ -354,7 +399,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -362,6 +407,9 @@ class UIActionManager
 	static UIActionScroller CreateScroller( notnull Widget parent )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionScroller action;
 		widget.GetScript( action );
@@ -371,7 +419,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -379,6 +427,9 @@ class UIActionManager
 	static UIActionImage CreateImage( notnull Widget parent, string image, Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImage.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
 
 		UIActionImage action;
 		widget.GetScript( action );
@@ -395,7 +446,7 @@ class UIActionManager
 			return action;
 		}
 
-		Error(string.Format("Couldn't get script for widget %1 (name=\"%2\" type=%3)", widget, widget.GetName(), widget.GetTypeName()));
+		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
 	}
@@ -426,5 +477,46 @@ class UIActionManager
 			scaleY= 1.0;
 
 		widget.SetSize( w, h * scaleY );
+	}
+
+	static void UIAMError(string err, Widget widget, Widget parent, string layout = string.Empty)
+	{
+		string widgetStr;
+		string widgetName;
+		string widgetTypeName;
+
+		string parentStr;
+		string parentName;
+		string parentTypeName;
+
+		if (widget)
+		{
+			widgetStr = widget.ToString();
+			if (widgetStr != "INVALID")
+			{
+				widgetName = widget.GetName();
+				widgetTypeName = widget.GetTypeName();
+			}
+		}
+		else
+		{
+			widgetStr = "NULL";
+		}
+
+		if (parent)
+		{
+			parentStr = parent.ToString();
+			if (parentStr != "INVALID")
+			{
+				parentName = parent.GetName();
+				parentTypeName = parent.GetTypeName();
+			}
+		}
+		else
+		{
+			parentStr = "NULL";
+		}
+
+		Error(string.Format("%1 %2 (name=\"%3\" type=%4 layout=\"%5\"), parent %6 (name=\"%7\" type=%8)", err, widgetStr, widgetName, widgetTypeName, layout, parentStr, parentName, parentTypeName));
 	}
 };
