@@ -1006,7 +1006,7 @@ class JMPlayerForm: JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
-		if (m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
+		if (GetGame().IsClient() && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
 			return;
 
 		RefreshTeleports(force);
@@ -1183,6 +1183,9 @@ class JMPlayerForm: JMFormBase
 	{
 		if ( !m_SelectedInstance )
 			return;
+
+		if ( IsMissionOffline() )
+			m_SelectedInstance.Update();
 
 		vector position = m_SelectedInstance.GetPosition();
 
