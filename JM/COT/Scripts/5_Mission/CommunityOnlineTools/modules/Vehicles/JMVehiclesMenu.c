@@ -301,7 +301,7 @@ class JMVehiclesMenu: JMFormBase
 		{
 			if ( m_CurrentVehicle )
 			{
-				TeleportToVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );	
+				TeleportToVehicle();	
 			}	
 		}
 		
@@ -310,7 +310,7 @@ class JMVehiclesMenu: JMFormBase
 
 	void DeleteVehicle(JMConfirmation confirmation)
 	{
-		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
+		m_Module.DeleteVehicle(m_CurrentVehicle);
 		BackToList();
 	}
 
@@ -336,6 +336,11 @@ class JMVehiclesMenu: JMFormBase
 		SyncAndRefreshVehicles();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+	}
+
+	void TeleportToVehicle()
+	{
+		m_Module.RequestTeleportToVehicle(m_CurrentVehicle);
 	}
 
 	void TeleportToVehicle(int netLow, int netHigh)
