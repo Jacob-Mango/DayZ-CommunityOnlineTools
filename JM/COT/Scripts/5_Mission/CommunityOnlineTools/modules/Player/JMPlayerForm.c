@@ -58,6 +58,7 @@ class JMPlayerForm: JMFormBase
 
     private UIActionButton m_CopyRotationPlayer;
     private UIActionButton m_CopyPositionPlayer;
+    private UIActionButton m_PastePositionPlayer;
 	private UIActionButton m_TeleportToMe;
 	private UIActionButton m_TeleportMeTo;
 	private UIActionButton m_TeleportPrevious;
@@ -306,9 +307,9 @@ class JMPlayerForm: JMFormBase
 
 		Widget positionHeader = UIActionManager.CreateGridSpacer( parent, 1, 3 );
 
-		UIActionManager.CreateText( positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_HEADER", "" );
 		m_CopyRotationPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_ORIENTATION_COPY", this, "Click_CopyPlayerRotation");
         m_CopyPositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_COPY", this, "Click_CopyPlayerPostion");
+        m_PastePositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_PASTE", this, "Click_PastePlayerPostion");
 
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
@@ -913,6 +914,26 @@ class JMPlayerForm: JMFormBase
 		vector rotation = m_SelectedInstance.GetOrientation();
 
 		GetGame().CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
+	}
+
+	void Click_PastePlayerPostion( UIEvent eid, ref UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		string clipboard;
+		GetGame().CopyFromClipboard(clipboard);
+
+		vector pos = clipboard.BeautifiedToVector();
+
+		if (pos != vector.Zero)
+		{
+			m_PositionX.SetText(pos[0].ToString());
+			m_PositionY.SetText(pos[1].ToString());
+			m_PositionZ.SetText(pos[2].ToString());
+
+			Click_SetPosition(eid, action);
+		}
 	}
 
 	void Click_TeleportMeTo( UIEvent eid, UIActionBase action )
