@@ -33,10 +33,15 @@ class JMVehicleMetaData
 
 	[NonSerialized()]
 	string m_DisplayName;
+
+	[NonSerialized()]
+	CarScript m_Vehicle;
 	
 	static JMVehicleMetaData CreateCarScript( CarScript car )
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
+
+		meta.m_Vehicle = car;
 
 		car.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
 		
@@ -354,6 +359,20 @@ class JMVehiclesModule: JMRenderableModuleBase
 		#endif
 	}
 
+	void UpdateVehiclesMetaData_SP()
+	{
+		UpdateVehiclesMetaData();
+
+		foreach (auto meta: m_Vehicles)
+		{
+			meta.SetDisplayName();
+		}
+
+		JMVehiclesMenu form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.LoadVehicles();
+	}
+
 	override int GetRPCMin()
 	{
 		return JMVehiclesModuleRPC.INVALID;
@@ -396,10 +415,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestServerVehicles()
 	{
-		if ( IsMissionClient() )
+		if (GetGame().IsClient())
 		{
 			auto rpc = new ScriptRPC();
  			rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
+		}
+		else
+		{
+			UpdateVehiclesMetaData_SP();
 		}
 	}
 
@@ -460,31 +483,61 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void DeleteVehicleUnclaimed( )
 	{
-		if ( IsMissionClient() )
+	#ifdef EXPANSIONMODVEHICLE
+		if (GetGame().IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
 			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleUnclaimed, true );
 		}
+		else
+		{
+			Exec_DeleteVehicleUnclaimed();
+			UpdateVehiclesMetaData_SP();
+		}
+	#endif
 	}
 
 	void DeleteVehicleDestroyed( )
 	{
-		if ( IsMissionClient() )
+		if (GetGame().IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
 			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleDestroyed, true );
 		}
+		else
+		{
+			Exec_DeleteVehicleDestroyed();
+			UpdateVehiclesMetaData_SP();
+		}
 	}
 
 	void DeleteVehicleAll( )
 	{
-		if ( IsMissionClient() )
+		if (GetGame().IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
 			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleAll, true );
+		}
+		else
+		{
+			Exec_DeleteVehicleAll();
+			UpdateVehiclesMetaData_SP();
+		}
+	}
+
+	void DeleteVehicle(JMVehicleMetaData meta)
+	{
+		if (GetGame().IsClient())
+		{
+			DeleteVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
+		}
+		else
+		{
+			GetGame().ObjectDelete(meta.m_Vehicle);
+			UpdateVehiclesMetaData_SP();
 		}
 	}
 
@@ -534,6 +587,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC ) )
 			return;
 		
+		Exec_DeleteVehicleUnclaimed();
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
+	}
+
+	void Exec_DeleteVehicleUnclaimed()
+	{
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
@@ -564,8 +624,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			cover = cover.m_Next;
 		}
-
-		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 	#endif
 
@@ -576,7 +634,14 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC ) )
 			return;
-		
+
+		Exec_DeleteVehicleDestroyed();
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
+	}
+
+	void Exec_DeleteVehicleDestroyed()
+	{
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
@@ -608,8 +673,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			cover = cover.m_Next;
 		}
 		#endif
-
-		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
 
 	private void RPC_DeleteVehicleAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -620,6 +683,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC ) )
 			return;
 		
+		Exec_DeleteVehicleAll();
+
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
+	}
+
+	void Exec_DeleteVehicleAll()
+	{
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
@@ -644,8 +714,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 			cover = cover.m_Next;
 		}
 		#endif
+	}
 
-		RPC_RequestServerVehicles( ctx, senderRPC, target );
+	void RequestTeleportToVehicle(JMVehicleMetaData meta)
+	{
+		if (GetGame().IsClient())
+		{
+			RequestTeleportToVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
+		}
+		else
+		{
+			Exec_TeleportToVehicle(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Vehicle);
+		}
 	}
 
 	void RequestTeleportToVehicle( int netLow, int netHigh )
@@ -684,6 +764,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !obj )
 			return;
 
+		Exec_TeleportToVehicle(player, obj);
+	}
+
+	void Exec_TeleportToVehicle(PlayerBase player, Object obj)
+	{
 		vector pos = obj.GetPosition();
 		vector minMax[2];
 		obj.ClippingInfo( minMax );
