@@ -774,7 +774,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 		obj.ClippingInfo( minMax );
 
 		player.SetLastPosition();
-		player.SetWorldPosition( pos + minMax[1] );
+		pos = pos + minMax[1];
+		pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
+		player.SetWorldPosition( pos );
 	}
 
 	array< ref JMVehicleMetaData > GetServerVehicles()
