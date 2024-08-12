@@ -430,6 +430,11 @@ class JMPlayerForm: JMFormBase
 		m_KickPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
 		m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
 
+		m_KillPlayer.SetColor(COLOR_RED);
+		m_StripPlayer.SetColor(COLOR_RED);
+		m_KickPlayer.SetColor(COLOR_RED);
+		m_BanPlayer.SetColor(COLOR_RED);
+
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
 		return parent;
