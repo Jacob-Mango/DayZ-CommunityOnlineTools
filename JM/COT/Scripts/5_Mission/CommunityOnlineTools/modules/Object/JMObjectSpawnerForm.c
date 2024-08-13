@@ -214,6 +214,9 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
+		if (m_ItemStateType == 0)
+			m_LiquidType = m_ItemDataList.GetSelection();
+		
 		UpdateQuantityItemColor();
 		UpdatePreviewItemState();
 	}
@@ -317,7 +320,6 @@ class JMObjectSpawnerForm: JMFormBase
 			case COT_BloodTypes.UNKNOWN:
 				m_QuantityItem.SetColor( ARGB( 255, 139, 0, 0 ) );
 				break;
-			case COT_LiquidTypes.UNKNOWN:
 			case COT_LiquidTypes.VODKA:
 			default:
 				m_QuantityItem.SetColor( ARGB( 255, 255, 255, 255 ) );
@@ -368,10 +370,14 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateTemperatureItemColor()
 	{
-		ObjectTemperatureState tempData;
-		tempData.GetStateData(m_TemperatureItem.GetCurrent());
+		int value = m_TemperatureItem.GetCurrent();
 
-		m_TemperatureItem.SetColor( tempData.m_Color );
+		m_TemperatureItem.SetColor( ObjectTemperatureState.GetStateData(value).m_Color );
+		if (ObjectTemperatureState.GetStateData(value).m_State != GameConstants.STATE_NEUTRAL_TEMP)
+			m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE " + ObjectTemperatureState.GetStateData(value).m_LocalizedName );
+		else
+			m_TemperatureItem.SetFormat("#STR_COT_FORMAT_DEGREE");
+
 		m_TemperatureItem.SetAlpha( 1.0 );
 	}
 
