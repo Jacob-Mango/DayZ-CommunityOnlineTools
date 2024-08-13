@@ -115,6 +115,34 @@ class UIActionManager
 		return NULL;
 	}
 
+	static UIActionButtonToggle CreateButtonToggle( notnull Widget parent, string buttonOff, string buttonOn, Class instance, string funcname, float width = 1 )
+	{
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButtonToggle.layout", parent );
+
+		if (widget == parent)
+			UIAMError("widget == parent", widget, parent);
+
+		UIActionButtonToggle action;
+		widget.GetScript( action );
+
+		if ( width != 1 )
+		{
+			SetSize(widget, width, -1);
+		}
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+			action.SetButtonToggle( buttonOff, buttonOn );
+
+			return action;
+		}
+
+		UIAMError("Couldn't get script", widget, parent);
+
+		return NULL;
+	}
+
 	static UIActionNavigateButton CreateNavButton( notnull Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );

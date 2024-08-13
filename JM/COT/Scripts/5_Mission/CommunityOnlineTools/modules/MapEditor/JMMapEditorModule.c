@@ -12,7 +12,6 @@ class JMMapEditorModule: JMModuleBase
 		
 		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_MapEditor", "LeaveEditor", this, SingeplayerExecutionType.Client );
-		GetRPCManager().AddRPC( "COT_MapEditor", "EnterEditor", this, SingeplayerExecutionType.Client );
 	}
 
 	override void EnableUpdate()
