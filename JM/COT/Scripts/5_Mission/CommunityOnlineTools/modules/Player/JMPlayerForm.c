@@ -11,8 +11,10 @@ class JMPlayerForm: JMFormBase
 
 	private UIActionText m_PlayerListCount;
 	private UIActionEditableText m_PlayerListFilter;
-	private UIActionCheckbox m_PlayerListSort; //TODO: make a new ui action type thing
-	private UIActionCheckbox m_PlayerListSelectAll;
+
+	private UIActionButtonToggle m_PlayerListSort;
+	private UIActionButton m_PlayerListSelectAll;
+	private UIActionButton m_PlayerListDeSelectAll;	
 	
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
@@ -195,8 +197,16 @@ class JMPlayerForm: JMFormBase
 
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
 		m_PlayerListFilter 		= UIActionManager.CreateEditableText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
-		m_PlayerListSort 		= UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SORT", this, "Event_UpdatePlayerList" );
-		//m_PlayerListSelectAll 	= UIActionManager.CreateCheckbox( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_SELECTALL", this, "Event_SelectAllPlayerList" );
+		
+		Widget navbarleftPanelGrid = UIActionManager.CreateWrapSpacer( leftPanelGrid );
+		m_PlayerListSort 		= UIActionManager.CreateButtonToggle( navbarleftPanelGrid, "A/Z", "Z/A", this, "Event_UpdatePlayerList" );
+		m_PlayerListSelectAll 	= UIActionManager.CreateButton( navbarleftPanelGrid, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Event_SelectAllPlayerList" );
+		m_PlayerListDeSelectAll = UIActionManager.CreateButton( navbarleftPanelGrid, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Event_DeSelectAllPlayerList" );
+		
+		m_PlayerListSort.SetWidth(0.14);
+		m_PlayerListSelectAll.SetWidth(0.36);
+		m_PlayerListDeSelectAll.SetWidth(0.469);
+		
 		m_PlayerListScroller 	= UIActionManager.CreateScroller( leftPanelGrid );
 		m_PlayerListRows 		= UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 		
@@ -445,9 +455,14 @@ class JMPlayerForm: JMFormBase
 		UpdatePlayerList();
 	}
 
+	void Event_DeSelectAllPlayerList( UIEvent eid, UIActionBase action )
+	{
+		SelectAllPlayerList(false);
+	}
+
 	void Event_SelectAllPlayerList( UIEvent eid, UIActionBase action )
 	{
-		SelectAllPlayerList();
+		SelectAllPlayerList(true);
 	}	
 
 	void HidePermissions()
@@ -1683,17 +1698,17 @@ class JMPlayerForm: JMFormBase
 		UpdatePlayerCount();
 	}
 
-	private void SortPlayersArray( out array< JMPlayerInstance > players )
+	private void SortPlayersArray( out array< JMPlayerInstance > players, bool isReversed )
 	{
-		string pNames[ 1000 ];
+		TStringArray pNames = new TStringArray;
 		int pIndices[ 1000 ];
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			pNames[ i ] = players[ i ].GetName();
 		}
-
-		Sort( pNames, players.Count() );
+		
+		pNames.Sort(isReversed);
 
 		for ( i = 0; i < players.Count(); i++ )
 		{
@@ -1727,10 +1742,8 @@ class JMPlayerForm: JMFormBase
 		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + JM_GetSelected().GetPlayers().Count() + ")" );
 	}
 
-	void SelectAllPlayerList()
+	void SelectAllPlayerList(bool state = true)
 	{
-		bool state = m_PlayerListSelectAll.IsChecked();
-
 		for ( int i = 0; i < m_PlayerList.Count(); i++ )
 		{
 			m_PlayerList[i].Checkbox.SetChecked( state );
@@ -1764,8 +1777,7 @@ class JMPlayerForm: JMFormBase
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
-		if ( m_PlayerListSort.IsChecked() )
-			SortPlayersArray( players );
+		SortPlayersArray( players, m_PlayerListSort.IsToggled() );
 
 		int idx = 0;
 		int pIdx = 0;
