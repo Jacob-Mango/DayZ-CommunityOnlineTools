@@ -10,7 +10,7 @@ class JMPlayerForm: JMFormBase
 	private Widget m_RightPanelDisable;
 
 	private UIActionText m_PlayerListCount;
-	private UIActionEditableText m_PlayerListFilter;
+	private UIActionEditableTextPreview m_PlayerListFilter;
 
 	private UIActionButtonToggle m_PlayerListSort;
 	private UIActionButton m_PlayerListSelectAll;
@@ -196,7 +196,7 @@ class JMPlayerForm: JMFormBase
 		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
 
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
-		m_PlayerListFilter 		= UIActionManager.CreateEditableText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
+		m_PlayerListFilter 		= UIActionManager.CreateEditableTextPreview( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
 		
 		Widget navbarleftPanelGrid = UIActionManager.CreateWrapSpacer( leftPanelGrid );
 		m_PlayerListSort 		= UIActionManager.CreateButtonToggle( navbarleftPanelGrid, "A/Z", "Z/A", this, "Event_UpdatePlayerList" );
@@ -1787,6 +1787,9 @@ class JMPlayerForm: JMFormBase
 		string filter = m_PlayerListFilter.GetText();
 		bool isFiltering = filter.Length() > 0;
 		filter.ToLower();
+		
+		TStringArray suggestions = new TStringArray;
+		string closestMatch;
 
 		JMPlayerInstance cPlayer;
 
@@ -1811,9 +1814,21 @@ class JMPlayerForm: JMFormBase
 				string pName = cPlayer.GetName();
 				pName.ToLower();
 
-				if ( isFiltering && !pName.Contains( filter ) )
+				if ( isFiltering )
 				{
-					continue;
+					if (!pName.Contains( filter ))
+						continue;
+
+					if ( pName == filter )
+					{
+						suggestions.Clear();
+						closestMatch = pName;
+					}
+					else if ( pName.IndexOf(filter) == 0 )
+					{
+						if (!closestMatch)
+							suggestions.Insert(pName);
+					}
 				}
 
 				m_PlayerList[idx].SetPlayer( cPlayer.GetGUID() );
@@ -1826,6 +1841,14 @@ class JMPlayerForm: JMFormBase
 
 			idx++;
 		}
+		
+		if (suggestions.Count())
+		{
+			suggestions.Sort();
+			closestMatch = suggestions[0];
+		}
+		
+		m_PlayerListFilter.SetTextPreview(closestMatch);
 
 		UpdatePlayerCount();
 

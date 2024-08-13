@@ -122,7 +122,15 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 			{
 				Show();
 
-				Name.SetText( player.GetName() );
+				array< string > roles = player.GetRoles();
+				
+				if (roles.Count() > 0)
+					roles.RemoveItem("everyone");
+
+				if (roles.Count() > 0)
+					Name.SetText( "[" + roles[0] + "] " + player.GetName() );
+				else
+					Name.SetText( player.GetName() );
 
 				if ( GetPermissionsManager().GetClientGUID() == m_GUID )
 				{
