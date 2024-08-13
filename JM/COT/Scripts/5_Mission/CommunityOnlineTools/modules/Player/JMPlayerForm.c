@@ -205,7 +205,7 @@ class JMPlayerForm: JMFormBase
 		
 		m_PlayerListSort.SetWidth(0.14);
 		m_PlayerListSelectAll.SetWidth(0.36);
-		m_PlayerListDeSelectAll.SetWidth(0.469);
+		m_PlayerListDeSelectAll.SetWidth(0.46);
 		
 		m_PlayerListScroller 	= UIActionManager.CreateScroller( leftPanelGrid );
 		m_PlayerListRows 		= UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
