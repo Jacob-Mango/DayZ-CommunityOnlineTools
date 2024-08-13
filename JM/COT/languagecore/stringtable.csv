@@ -64,6 +64,7 @@ STR_COT_FORMAT_NONE,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1
 STR_COT_FORMAT_PERCENTAGE,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%,%1%
 STR_COT_FORMAT_SECOND,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s,%1s
 STR_COT_FORMAT_SECOND_LONG,%1 second(s),%1 second(s),%1 second(s),%1 Sekunde(n),%1 сек.,%1 second(s),%1 second(s),%1 second(s),%1 second(s),%1 seconde(s),%1 second(s),%1 second(s),%1 second(s),%1 second(s)
+STR_COT_FORMAT_DEGREE,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°,%1°
 STR_COT_GENERIC_ALL,All,All,All,Alle,All,All,All,All,All,All,All,All,All,All
 STR_COT_GENERIC_CANCEL,Cancel,Cancel,Cancel,Abbrechen,Отменить,Cancel,Cancel,Cancel,Cancel,Annuler,Cancel,Cancel,Cancel,Cancel
 STR_COT_GENERIC_CONFIRM,Confirm,Confirm,Confirm,Bestätigen,Подтвердить,Confirm,Confirm,Confirm,Confirm,Confirmer,Confirm,Confirm,Confirm,Confirm
