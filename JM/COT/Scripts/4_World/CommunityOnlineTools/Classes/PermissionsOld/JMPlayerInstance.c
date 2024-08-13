@@ -215,6 +215,11 @@ class JMPlayerInstance : Managed
 		return m_Roles.Find( role ) >= 0;
 	}
 
+	array< string > GetRoles()
+	{
+		return m_Roles;
+	}
+
 	// doesn't check through roles.
 	JMPermissionType GetRawPermissionType( string permission )
 	{
