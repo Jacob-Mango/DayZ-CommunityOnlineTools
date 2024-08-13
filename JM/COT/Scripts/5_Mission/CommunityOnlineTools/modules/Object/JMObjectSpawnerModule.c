@@ -384,7 +384,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	void SpawnEntity_Position( string className, vector position, float quantity = -1, float health = -1, int itemState = -1, bool targetInventory = false )
+	void SpawnEntity_Position( string className, vector position, float quantity = -1, float health = -1, float temp = -1, int itemState = -1, bool targetInventory = false )
 	{
 		EntityAI targetEnt;
 
@@ -404,21 +404,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( position );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( temp );
 			rpc.Write( itemState );
 			rpc.Write( m_ObjSetupMode );
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
 		{
-			Server_SpawnEntity_Position( className, position, quantity, health, itemState, NULL );
+			Server_SpawnEntity_Position( className, position, quantity, health, temp, itemState, NULL );
 		}
 		else
 		{
-			Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, itemState, NULL );
+			Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, int itemState, PlayerIdentity ident )
+	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
@@ -438,9 +439,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
-		SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
+		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+itemState +") at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+itemState +") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
 	}
 
@@ -476,6 +477,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				return;
 			}
 
+			float temp;
+			if ( !ctx.Read( temp ) )
+			{
+				Error("Failed");
+				return;
+			}
+
 			int itemState;
 			if ( !ctx.Read( itemState ) )
 			{
@@ -488,13 +496,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			EntityAI targetEnt;
 			if (Class.CastTo(targetEnt, target))
-				Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, itemState, senderRPC );
+				Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, senderRPC );
 			else
-				Server_SpawnEntity_Position( className, position, quantity, health, itemState, senderRPC );
+				Server_SpawnEntity_Position( className, position, quantity, health, temp, itemState, senderRPC );
 		}
 	}
 
-	void SpawnEntity_Inventory( string className, array< string > players, float quantity = -1, float health = -1, int itemState = -1 )
+	void SpawnEntity_Inventory( string className, array< string > players, float quantity = -1, float health = -1, float temp = -1, int itemState = -1 )
 	{
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
@@ -503,17 +511,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Write( players );
 			rpc.Write( quantity );
 			rpc.Write( health );
+			rpc.Write( temp );
 			rpc.Write( itemState );
 			rpc.Write( m_ObjSetupMode );
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
 		{
-			Server_SpawnEntity_Inventory( className, players, quantity, health, itemState, NULL );
+			Server_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, NULL );
 		}
 	}
 
-	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, int itemState, PlayerIdentity ident )
+	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			return;
@@ -550,9 +559,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
+			SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
 		}
 	}
@@ -577,6 +586,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( health ) )
 				return;
 
+			float temp;
+			if ( !ctx.Read( temp ) )
+				return;
+
 			int itemState;
 			if ( !ctx.Read( itemState ) )
 				return;
@@ -584,11 +597,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( !ctx.Read( m_ObjSetupMode ) )
 				return;
 
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, itemState, senderRPC );
+			Server_SpawnEntity_Inventory( ent, players, quantity, health, temp, itemState, senderRPC );
 		}
 	}
 	
-	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, int itemState, PlayerIdentity ident )
+	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance callerInstance;
 
@@ -598,18 +611,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			string loggedSuffix = " at " + position.ToString();
 
-			SetupEntity( ent, quantity, health, itemState, callerInstance.PlayerObject );
+			SetupEntity( ent, quantity, health, temp, itemState, callerInstance.PlayerObject );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
+			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
 		}
 		else
 		{
-			Server_SpawnEntity_Position(className, position, quantity, health, itemState, ident);
+			Server_SpawnEntity_Position(className, position, quantity, health, temp, itemState, ident);
 		}
 	}
 
-	private void SetupEntity( EntityAI entity, float quantity, float health, int itemState, PlayerBase player )
+	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player )
 	{
 		switch (m_ObjSetupMode)
 		{
@@ -673,6 +686,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			if ( health >= 0 )
 				entity.SetHealth( "", "", health );
 		}
+
+		if ( temp != -1 )
+			entity.SetTemperatureEx(new TemperatureData(temp));
 	}
 
 	bool IsExcludedClassName( string className )
@@ -868,8 +884,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		float quantity = -1;
 		float health = -1;
+		float temp = -1;
 		int itemState = -1;
-		SetupEntity( ent, quantity, health, itemState, instance.PlayerObject );
+		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
 		
 		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );

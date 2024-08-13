@@ -6,6 +6,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
+	private UIActionSlider m_TemperatureItem;
 	private UIActionSlider m_HealthItem;
 	private UIActionDropdownList m_ItemDataList;
 	
@@ -162,7 +163,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ItemDataList.SetWidth( 0.3 );
 		m_ItemDataList.Disable();
 
-		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 2 );
+		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 2, 2 );
 
 		m_QuantityItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
 		m_QuantityItem.SetCurrent( 100 );
@@ -170,6 +171,11 @@ class JMObjectSpawnerForm: JMFormBase
 		m_HealthItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_HEALTH", 0, 100, this, "Click_SetHealth");
 		m_HealthItem.SetStepValue( 1 );
 		m_HealthItem.SetCurrent( 100 );
+
+		m_TemperatureItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
+		m_TemperatureItem.SetSliderWidth(0.6);
+		m_TemperatureItem.SetStepValue( 1 );
+		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
@@ -217,6 +223,14 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		UpdateHealthItemColor();
+	}
+
+	void Click_SetTemperature( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		UpdateTemperatureItemColor();
 	}
 
 	void UpdateItemStateType(int mode, int liquidType = 0)
@@ -349,6 +363,16 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
+	
+
+	void UpdateTemperatureItemColor()
+	{
+		ObjectTemperatureState tempData;
+		tempData.GetStateData(m_TemperatureItem.GetCurrent());
+
+		m_TemperatureItem.SetColor( tempData.m_Color );
+		m_TemperatureItem.SetAlpha( 1.0 );
+	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
 	{
@@ -423,6 +447,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
+		m_TemperatureItem.Disable();
 
 		int itemStateType = m_ItemStateType;
 
@@ -453,9 +478,14 @@ class JMObjectSpawnerForm: JMFormBase
 				if ( item.IsLiquidContainer() )
 				{
 					if ( item.IsBloodContainer() )
+					{
 						itemStateType = 1;
+					}
 					else
+					{
+						m_TemperatureItem.Enable();
 						itemStateType = 0;
+					}
 					int liquidType = item.GetLiquidTypeInit();
 					if ( m_ItemStateType != itemStateType || m_LiquidType != liquidType )
 						UpdateItemStateType(itemStateType, liquidType);
@@ -464,6 +494,8 @@ class JMObjectSpawnerForm: JMFormBase
 				{
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
+						m_TemperatureItem.Enable();
+						
 						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
 					}
@@ -655,25 +687,26 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		float health = m_HealthItem.GetCurrent();
+		float temp = m_TemperatureItem.GetCurrent();
 		float quantity = m_QuantityItem.GetCurrent();
 
 		switch (mode)
 		{
 			default:
 			case COT_ObjectSpawnerMode.PLAYER_POSITION:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, health, itemState);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.CURSOR:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, itemState);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, itemState, true);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, itemState, true);
 				break;
 
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
-				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, itemState);
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTRAW:
