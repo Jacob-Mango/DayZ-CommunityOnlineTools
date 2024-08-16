@@ -164,6 +164,7 @@ enum JMPlayerModuleRPC
 	SetRemoveCollision,
 	SetUnlimitedAmmo,
 	SetUnlimitedStamina,
+	SetAdminNVG,
 	SetBrokenLegs,
 	Heal,
 	Strip,

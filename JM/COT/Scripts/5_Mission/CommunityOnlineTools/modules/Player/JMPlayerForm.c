@@ -143,6 +143,9 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
+		#ifdef DIAG
+		UpdatePermission( m_AdminNVG, "Admin.Player.AdminNVG" );
+		#endif
 		UpdatePermission( m_UnlimitedStamina, "Admin.Player.UnlimitedStamina" );
 		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
@@ -372,18 +375,26 @@ class JMPlayerForm: JMFormBase
 		m_ApplyStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
 		m_RefreshStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
 
-		Widget actions2 = UIActionManager.CreateGridSpacer( parent, 4, 2 );
+		Widget actions2 = UIActionManager.CreateGridSpacer( parent, 5, 2 );
 
 		m_RemoveCollision = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REMOVE_COLLISION", this, "Click_RemoveCollision", false );
 		m_GodMode = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_GodMode", false );
+		
 		m_Freeze = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
 		m_Invisibility = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
+		
 		m_BloodyHands = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_BloodyHands", false );
 		m_CannotBeTargetedByAI = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI", this, "Click_CannotBeTargetedByAI", false );
+		
 		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
 		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
+		
 		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
+		
+		#ifdef DIAG
+		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "NVG TEST", this, "Click_AdminNVG", false );
+		#endif
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -1538,6 +1549,16 @@ class JMPlayerForm: JMFormBase
 		UpdateLastChangeTime();
 
 		m_Module.SetUnlimitedAmmo( m_UnlimitedAmmo.IsChecked(), JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_AdminNVG( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UpdateLastChangeTime();
+
+		m_Module.SetAdminNVG( m_AdminNVG.IsChecked(), JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_UnlimitedStamina( UIEvent eid, UIActionBase action )
