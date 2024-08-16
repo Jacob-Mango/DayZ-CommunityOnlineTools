@@ -16,6 +16,7 @@ modded class CF_Permission_PlayerBase
 	protected float m_Water;
 
 	protected float m_HeatComfort;
+	protected float m_HeatBuffer;	
 
 	protected float m_Wet;
 	protected float m_Tremor;
@@ -84,6 +85,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_Energy );
 		ctx.Write( m_Water );
 		ctx.Write( m_HeatComfort );
+		ctx.Write( m_HeatBuffer );
 		ctx.Write( m_Wet );
 		ctx.Write( m_Tremor );
 		ctx.Write( m_Stamina );
@@ -107,6 +109,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_Energy );
 		ctx.Read( m_Water );
 		ctx.Read( m_HeatComfort );
+		ctx.Read( m_HeatBuffer );
 		ctx.Read( m_Wet );
 		ctx.Read( m_Tremor );
 		ctx.Read( m_Stamina );
@@ -169,6 +172,11 @@ modded class CF_Permission_PlayerBase
 	float GetHeatComfort()
 	{
 		return m_HeatComfort;
+	}
+
+	float GetHeatBuffer()
+	{
+		return m_HeatBuffer;
 	}
 
 	float GetWet()

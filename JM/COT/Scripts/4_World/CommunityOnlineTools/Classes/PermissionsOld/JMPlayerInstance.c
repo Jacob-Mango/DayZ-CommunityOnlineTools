@@ -44,6 +44,7 @@ class JMPlayerInstance : Managed
 	private float m_Water;
 
 	private float m_HeatComfort;
+	private float m_HeatBuffer;
 
 	private float m_Wet;
 	private float m_Tremor;
@@ -117,6 +118,7 @@ class JMPlayerInstance : Managed
 				m_Energy = PlayerObject.GetStatEnergy().Get();
 				m_Water = PlayerObject.GetStatWater().Get();
 				m_HeatComfort = PlayerObject.GetStatHeatComfort().Get();
+				m_HeatBuffer = PlayerObject.GetStatHeatBuffer().Get();
 				m_Wet = PlayerObject.GetStatWet().Get();
 				m_Tremor = PlayerObject.GetStatTremor().Get();
 				m_Stamina = PlayerObject.GetStatStamina().Get();
@@ -377,6 +379,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Energy );
 		ctx.Write( m_Water );
 		ctx.Write( m_HeatComfort );
+		ctx.Write( m_HeatBuffer );		
 		ctx.Write( m_Wet );
 		ctx.Write( m_Tremor );
 		ctx.Write( m_Stamina );
@@ -401,6 +404,7 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_Energy );
 		ctx.Read( m_Water );
 		ctx.Read( m_HeatComfort );
+		ctx.Read( m_HeatBuffer );		
 		ctx.Read( m_Wet );
 		ctx.Read( m_Tremor );
 		ctx.Read( m_Stamina );
@@ -615,6 +619,11 @@ class JMPlayerInstance : Managed
 	float GetHeatComfort()
 	{
 		return m_HeatComfort;
+	}
+
+	float GetHeatBuffer()
+	{
+		return m_HeatBuffer;
 	}
 
 	float GetWet()
