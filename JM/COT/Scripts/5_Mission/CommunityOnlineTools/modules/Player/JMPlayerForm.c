@@ -377,17 +377,20 @@ class JMPlayerForm: JMFormBase
 		
 		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
 		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
-		
+
 		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( headerTemos, "Player Temperature:", "" );
 
 		#ifdef DIAG
 		Widget actionsTemps = UIActionManager.CreateGridSpacer( parent, 2, 2 );
-		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -1, 1, this );
-		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
-		m_HeatBuffer.SetStepValue(1);
-		
+		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -0.75, 0.75, this );
+		m_HeatComfort.SetFormat("");
 		m_HeatComfort.Disable(); // You cant force the game, so this slider is READ ONLY
+		m_HeatComfort.SetDisableAlpha(0.0);
+
+		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
+		m_HeatBuffer.SetStepValue(0.1);
+		
 		#endif
 
 		m_Health.SetSliderWidth(0.5);
@@ -1109,7 +1112,7 @@ class JMPlayerForm: JMFormBase
 		{
 			m_HeatBuffer.SetCurrent( m_SelectedInstance.GetHeatBuffer() / 10 );
 			int heatbufferState = m_HeatBuffer.GetCurrent();
-			m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " ("+ m_HeatBuffer.GetCurrent() + ")");
+			m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " "+ m_HeatBuffer.GetCurrent());
 		}
 		#endif
 
@@ -1252,8 +1255,26 @@ class JMPlayerForm: JMFormBase
 		}
 
 		#ifdef DIAG
+		// COLD
+		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_FOUR );
+		}
+		else if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_TWO );
+		}
+		else if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_ONE );
+		}
+		// NEUTRAL
+		else if ( m_HeatComfort.GetCurrent() > PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY && m_HeatComfort.GetCurrent() < PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_NEUTAL );
+		}
 		// HOT
-		if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_CRITICAL )
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_CRITICAL )
 		{
 			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_FOUR );
 		}
@@ -1265,26 +1286,25 @@ class JMPlayerForm: JMFormBase
 		{
 			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_ONE );
 		}
-		// COLD
-		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY )
+		m_HeatComfort.SetAlpha( 1.0 );
+
+		if ( m_HeatBuffer.GetCurrent() >= 3 )
 		{
-			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_ONE );
+			m_HeatBuffer.SetColor( Colors.COLOR_PRISTINE );
 		}
-		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_WARNING )
+		else if ( m_HeatBuffer.GetCurrent() >= 2 )
 		{
-			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_TWO );
+			m_HeatBuffer.SetColor( Colors.COLOR_WORN );
 		}
-		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
+		else if ( m_HeatBuffer.GetCurrent() >= 1 )
 		{
-			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_FOUR );
+			m_HeatBuffer.SetColor( Colors.COLOR_WORN );
 		}
-		// NEUTRAL
 		else
 		{
-			m_HeatComfort.SetColor( Colors.TEMPERATURE_NEUTAL );
+			m_HeatBuffer.SetColor(0x00FFFFFF);
 		}
-
-		m_HeatComfort.SetAlpha( 1.0 );
+		m_HeatBuffer.SetAlpha( 1.0 );
 		#endif
 	}
 
@@ -1572,10 +1592,43 @@ class JMPlayerForm: JMFormBase
 		}
 
 		int heatbufferState = m_HeatBuffer.GetCurrent();
-		m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " ("+ m_HeatBuffer.GetCurrent() + ")");
+		m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] +" "+ m_HeatBuffer.GetCurrent());
 
 		m_HeatBufferUpdated = true;
 		m_HeatBuffer.SetAlpha( 1.0 );
+		
+		// COLD
+		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_FOUR );
+		}
+		else if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_TWO );
+		}
+		else if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_ONE );
+		}
+		// NEUTRAL
+		else if ( m_HeatComfort.GetCurrent() > PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY && m_HeatComfort.GetCurrent() > PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_NEUTAL );
+		}
+		// HOT
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_EMPTY )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_ONE );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_TWO );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_CRITICAL )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_FOUR );
+		}
+		m_HeatComfort.SetAlpha( 1.0 );
 	}
 
 	void Click_BloodyHands( UIEvent eid, UIActionBase action )
