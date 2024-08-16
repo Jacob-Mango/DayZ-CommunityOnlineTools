@@ -29,6 +29,8 @@ modded class PlayerBase
 	private bool m_JMHasUnlimitedAmmo;
 
 	private bool m_JMHasUnlimitedStamina;
+	private bool m_JMHasAdminNVG;
+	private bool m_JMHasAdminNVGRemoteSynch;
 
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
@@ -86,6 +88,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
+		RegisterNetSyncVariableBool( "m_JMHasAdminNVG" );
 		RegisterNetSyncVariableBool( "m_COT_GodMode" );
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -192,6 +195,16 @@ modded class PlayerBase
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
+		}
+
+		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
+		{
+			m_JMHasAdminNVGRemoteSynch = m_JMHasAdminNVG;
+			
+			if (m_JMHasAdminNVG)
+				AddActiveNV(JMNVTypes.NV_COT_ON);
+			else
+				RemoveActiveNV(JMNVTypes.NV_COT_OFF);
 		}
 	}
 
@@ -432,6 +445,11 @@ modded class PlayerBase
 		return m_JMHasUnlimitedStamina;
 	}
 
+	bool COTHasAdminNVG()
+	{
+		return m_JMHasAdminNVG;
+	}
+
 	void COTSetGodMode( bool mode, bool preference = true )
 	{
 		if ( GetGame().IsServer() )
@@ -567,6 +585,18 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasUnlimitedStamina = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
+		}
+	}
+
+	void COTSetAdminNVG( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasAdminNVG = mode;
 
 			#ifdef SERVER
 			SetSynchDirty();

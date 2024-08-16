@@ -25,6 +25,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.AdminNVG" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
@@ -257,6 +258,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.VONStoppedTransmitting:
 			RPC_VONStoppedTransmitting( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetAdminNVG:
+			RPC_SetAdminNVG( ctx, sender, target );
 			break;
 		}
 	}
@@ -1755,6 +1759,65 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
+	}
+
+	void SetAdminNVG( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetAdminNVG( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetAdminNVG, true, NULL );
+		}
+	}
+
+	private void Exec_SetAdminNVG( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetAdminNVG( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set AdminNVG To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " admin NVG" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " admin NVG" );
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetAdminNVG( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.AdminNVG", senderRPC, instance ) )
+			return;
+
+		Exec_SetAdminNVG( value, guids, senderRPC, instance );
 	}
 
 	void SetUnlimitedStamina( bool value, array< string > guids )
