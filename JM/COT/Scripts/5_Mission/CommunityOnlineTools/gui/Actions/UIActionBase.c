@@ -212,6 +212,16 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		m_Disable.Show( false );
 	}
 
+	void SetDisableColor( int color )
+	{
+		m_Disable.SetColor(color);
+	}
+	
+	void SetDisableAlpha( float alpha )
+	{
+		m_Disable.SetAlpha(alpha);
+	}
+
 	void SetWidth( float width )
 	{
 		float w;
