@@ -1996,21 +1996,22 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_Heal( guids, senderRPC, instance );
 	}
 
-	void Ban( array< string > guids, string messageText = "" )
+	void Ban( array< string > guids, string messageText = "", int duration = -1 )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Ban( guids, NULL, NULL, messageText );
+			Exec_Ban( guids, NULL, NULL, messageText, int duration = -1 );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write(guids);
 			rpc.Write(messageText);
+			rpc.Write(duration);
 			rpc.Send( NULL, JMPlayerModuleRPC.Ban, true, NULL );
 		}
 	}
 
-	private void Exec_Ban( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
+	private void Exec_Ban( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = "", int duration = -1 )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -2030,7 +2031,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 				continue;
 			}
 
-			SendBanMessage(player.PlayerObject.GetIdentity(), messageText);
+			SendBanMessage(player.PlayerObject.GetIdentity(), messageText, duration);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
@@ -2080,11 +2081,17 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_Ban( guids, senderRPC, instance, messageText );
 	}
 	
-	private void SendBanMessage(PlayerIdentity identity, string messageText)
+	private void SendBanMessage(PlayerIdentity identity, string messageText, int duration = -1)
 	{
+		if (duration > 0)
+		{
+			CF_Date nowUTC = CF_Date.Now(true);
+			duration = nowUTC.GetTimestamp() + duration;
+		}
+
 		JMPlayerBan banData = new JMPlayerBan;
 		banData.Message = messageText;
-		banData.BanDuration = -1;
+		banData.BanDuration = duration;
 		banData.Save(banData, identity.GetId());
 
 		ScriptRPC rpc = new ScriptRPC();
