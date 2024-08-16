@@ -15,11 +15,6 @@ modded class MissionServer
 		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}
 
-	override void OnInit()
-	{
-		super.OnInit();
-	}
-
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
@@ -69,20 +64,20 @@ modded class MissionServer
 
     override void OnEvent(EventType eventTypeId, Param params)
     {
+		PlayerIdentity identity;
+		PlayerBase player;
+
         switch(eventTypeId)
         {
-			// This is late enough to kick the player safely
-			// but too early to send a message to the player
             case ClientNewEventTypeID:
             {
 				ClientNewEventParams newParams;
+				
 				Class.CastTo(newParams, params);
-				PlayerIdentity identity = newParams.param1;
+				Class.CastTo(identity, newParams.param1);
 
-				string banReason;
-                if (IsCOTBanned(identity.GetId(), banReason))
+                if (IsCOTBanned(identity))
                 {
-					Print("[COT] Player "+identity.GetId()+" was kicked. Reason(BAN): "+ banReason);
 					OnClientDisconnectedEvent(identity, NULL, 0, true);
 					return;
                 }
@@ -93,12 +88,27 @@ modded class MissionServer
         super.OnEvent(eventTypeId, params);
     }
 
-	bool IsCOTBanned(string id, out string message)
+	protected bool IsCOTBanned(PlayerIdentity identity)
 	{
-		JMPlayerBan banData = JMPlayerBan.Load(id);
+		string guid = identity.GetId();
+		string steamid = identity.GetPlainId();
+		JMPlayerBan banData = JMPlayerBan.Load(guid, steamid);
 		if ( banData )
 		{
-			banData.Message = message;
+			int banDuration = banData.BanDuration;
+			if (banDuration > 0)
+			{
+				CF_Date nowUTC = CF_Date.Now(true);
+				int currentTime = nowUTC.GetTimestamp();
+				if ( currentTime > banDuration )
+				{
+					Print("[COT] Player "+ guid +" Ban Duration Expired - Letting player Join. Reason(BAN): "+ banData.Message);
+					JMPlayerBan.DeleteBanFile(guid, steamid);
+					return false;
+				}
+			}
+
+			Print("[COT] Player "+ guid +" was kicked. Reason(BAN): "+ banData.Message);
 			return true;
 		}
 
