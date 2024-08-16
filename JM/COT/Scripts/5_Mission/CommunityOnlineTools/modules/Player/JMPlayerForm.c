@@ -142,7 +142,7 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Water, "Admin.Player.Set.Water" );
 		UpdatePermission( m_Stamina, "Admin.Player.Set.Stamina" );
 		
-		#ifdef DIAG
+		#ifndef DAYZ_1_25
 		UpdatePermission( m_HeatBuffer, "Admin.Player.Set.HeatBuffer" );
 		#endif
 
@@ -381,7 +381,7 @@ class JMPlayerForm: JMFormBase
 		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( headerTemos, "Player Temperature:", "" );
 
-		#ifdef DIAG
+		#ifndef DAYZ_1_25
 		Widget actionsTemps = UIActionManager.CreateGridSpacer( parent, 2, 2 );
 		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -0.75, 0.75, this );
 		m_HeatComfort.SetFormat("");
@@ -399,7 +399,7 @@ class JMPlayerForm: JMFormBase
 		m_Energy.SetSliderWidth(0.5);
 		m_Water.SetSliderWidth(0.5);
 		m_Stamina.SetSliderWidth(0.5);
-		#ifdef DIAG
+		#ifndef DAYZ_1_25
 		m_HeatComfort.SetSliderWidth(0.5);
 		m_HeatBuffer.SetSliderWidth(0.5);
 		#endif
@@ -1104,7 +1104,7 @@ class JMPlayerForm: JMFormBase
 		if ( m_Stamina && !m_StaminaUpdated )
 			m_Stamina.SetCurrent( m_SelectedInstance.GetStamina() );
 		
-		#ifdef DIAG
+		#ifndef DAYZ_1_25
 		if ( m_HeatComfort )
 			m_HeatComfort.SetCurrent( m_SelectedInstance.GetHeatComfort() );
 
@@ -1254,7 +1254,7 @@ class JMPlayerForm: JMFormBase
 			m_Stamina.SetColor( ARGB( 255, 220, 0, 0 ) );
 		}
 
-		#ifdef DIAG
+		#ifndef DAYZ_1_25
 		// COLD
 		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
 		{
