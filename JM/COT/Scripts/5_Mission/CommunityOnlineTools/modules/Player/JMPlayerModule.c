@@ -2063,7 +2063,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Ban( guids, NULL, NULL, messageText, int duration = -1 );
+			Exec_Ban( guids, NULL, NULL, messageText, duration );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
