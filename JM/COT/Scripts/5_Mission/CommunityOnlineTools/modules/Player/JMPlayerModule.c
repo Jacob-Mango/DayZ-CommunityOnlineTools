@@ -40,6 +40,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Energy" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Water" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Stamina" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.HeatBuffer" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Transport.Repair" );
@@ -165,6 +166,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.SetStamina:
 			RPC_SetStamina( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetHeatBuffer:
+			RPC_SetHeatBuffer( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.SetBloodyHands:
 			RPC_SetBloodyHands( ctx, sender, target );
@@ -677,6 +681,57 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_SetStamina( stamina, guids, senderRPC, instance );
+	}
+
+	void SetHeatBuffer( float HeatBuffer, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetHeatBuffer( HeatBuffer, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( HeatBuffer );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetHeatBuffer, true, NULL );
+		}
+	}
+
+	private void Exec_SetHeatBuffer( float HeatBuffer, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.GetStatHeatBuffer().Set( HeatBuffer );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set HeatBuffer To " + HeatBuffer + " [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " HeatBuffer to " + HeatBuffer );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetHeatBuffer( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float HeatBuffer;
+		if ( !ctx.Read( HeatBuffer ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatBuffer", senderRPC, instance ) )
+			return;
+
+		Exec_SetHeatBuffer( HeatBuffer, guids, senderRPC, instance );
 	}
 
 	void SetBloodyHands( bool bloodyhands, array< string > guids )

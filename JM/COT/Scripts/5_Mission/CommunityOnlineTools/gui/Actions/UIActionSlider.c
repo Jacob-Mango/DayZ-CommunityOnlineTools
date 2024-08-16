@@ -45,6 +45,11 @@ class UIActionSlider: UIActionBase
 		return m_Value;
 	}
 
+	void SetText( string text )
+	{
+		m_Value.SetText(text);
+	}
+
 	void SetFormat( string format )
 	{
 		m_Format = format;

@@ -142,12 +142,16 @@ enum JMESPModuleRPC
 enum JMPlayerModuleRPC
 {
 	INVALID = 10320,
+
+	// Player Vitals
 	SetHealth,
 	SetBlood,
 	SetShock,
 	SetEnergy,
 	SetWater,
 	SetStamina,
+	SetHeatBuffer,
+
 	SetBloodyHands,
 	RepairTransport,
 	TeleportTo,

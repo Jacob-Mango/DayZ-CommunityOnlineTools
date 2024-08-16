@@ -47,6 +47,9 @@ class JMPlayerForm: JMFormBase
 	private bool m_ShockUpdated;
 	private UIActionSlider m_Stamina;
 	private bool m_StaminaUpdated;
+	private UIActionSlider m_HeatComfort;
+	private UIActionSlider m_HeatBuffer;
+	private bool m_HeatBufferUpdated;
 	private UIActionCheckbox m_BloodyHands;
 	private UIActionCheckbox m_GodMode;
 	private UIActionCheckbox m_Freeze;
@@ -98,6 +101,8 @@ class JMPlayerForm: JMFormBase
 	private JMPlayerModule m_Module;
 
 	private int m_LastChangeTime;
+	
+	private autoptr TStringArray m_HeatBufferStates = {"", "+", "++", "+++"};
 
 	void JMPlayerForm()
 	{
@@ -136,6 +141,11 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Energy, "Admin.Player.Set.Energy" );
 		UpdatePermission( m_Water, "Admin.Player.Set.Water" );
 		UpdatePermission( m_Stamina, "Admin.Player.Set.Stamina" );
+		
+		#ifdef DIAG
+		UpdatePermission( m_HeatBuffer, "Admin.Player.Set.HeatBuffer" );
+		#endif
+
 		UpdatePermission( m_BloodyHands, "Admin.Player.Set.BloodyHands" );
 
 		UpdatePermission( m_ModifyPermissions, "Admin.Player.Permissions" );
@@ -357,14 +367,28 @@ class JMPlayerForm: JMFormBase
 		Widget header = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( header, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEADER", "" );
 
-		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 2 );
+		Widget actions = UIActionManager.CreateGridSpacer( parent, 5, 2 );
 
 		m_Health = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH", 0, 100, this, "Click_SetHealth" );
 		m_Shock = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", 0, 100, this, "Click_SetShock" );
+		
 		m_Blood = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", 0, 5000, this, "Click_SetBlood" );
 		m_Energy = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD", 0, PlayerConstants.SL_ENERGY_MAX, this, "Click_SetEnergy" );
+		
 		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
 		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
+		
+		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+		UIActionManager.CreateText( headerTemos, "Player Temperature:", "" );
+
+		#ifdef DIAG
+		Widget actionsTemps = UIActionManager.CreateGridSpacer( parent, 2, 2 );
+		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -1, 1, this );
+		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
+		m_HeatBuffer.SetStepValue(1);
+		
+		m_HeatComfort.Disable(); // You cant force the game, so this slider is READ ONLY
+		#endif
 
 		m_Health.SetSliderWidth(0.5);
 		m_Shock.SetSliderWidth(0.5);
@@ -372,9 +396,14 @@ class JMPlayerForm: JMFormBase
 		m_Energy.SetSliderWidth(0.5);
 		m_Water.SetSliderWidth(0.5);
 		m_Stamina.SetSliderWidth(0.5);
+		#ifdef DIAG
+		m_HeatComfort.SetSliderWidth(0.5);
+		m_HeatBuffer.SetSliderWidth(0.5);
+		#endif
 
-		m_ApplyStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
-		m_RefreshStats = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
+		Widget actionButtons = UIActionManager.CreateGridSpacer( parent, 1, 2 );
+		m_ApplyStats = UIActionManager.CreateButton( actionButtons, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
+		m_RefreshStats = UIActionManager.CreateButton( actionButtons, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
 
 		Widget actions2 = UIActionManager.CreateGridSpacer( parent, 5, 2 );
 
@@ -1051,6 +1080,7 @@ class JMPlayerForm: JMFormBase
 			m_WaterUpdated = false;
 			m_ShockUpdated = false;
 			m_StaminaUpdated = false;
+			m_HeatBufferUpdated = false;
 		}
 
 		if ( m_Health && !m_HealthUpdated )
@@ -1070,8 +1100,19 @@ class JMPlayerForm: JMFormBase
 		
 		if ( m_Stamina && !m_StaminaUpdated )
 			m_Stamina.SetCurrent( m_SelectedInstance.GetStamina() );
-
 		
+		#ifdef DIAG
+		if ( m_HeatComfort )
+			m_HeatComfort.SetCurrent( m_SelectedInstance.GetHeatComfort() );
+
+		if ( m_HeatBuffer && !m_HeatBufferUpdated )
+		{
+			m_HeatBuffer.SetCurrent( m_SelectedInstance.GetHeatBuffer() / 10 );
+			int heatbufferState = m_HeatBuffer.GetCurrent();
+			m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " ("+ m_HeatBuffer.GetCurrent() + ")");
+		}
+		#endif
+
 		if ( m_BloodyHands )
 			m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
 		
@@ -1209,6 +1250,42 @@ class JMPlayerForm: JMFormBase
 		{
 			m_Stamina.SetColor( ARGB( 255, 220, 0, 0 ) );
 		}
+
+		#ifdef DIAG
+		// HOT
+		if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_CRITICAL )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_FOUR );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_TWO );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_PLUS_EMPTY )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_ONE );
+		}
+		// COLD
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_EMPTY )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_ONE );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_WARNING )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_TWO );
+		}
+		else if ( m_HeatComfort.GetCurrent() >= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_COLD_LVL_FOUR );
+		}
+		// NEUTRAL
+		else
+		{
+			m_HeatComfort.SetColor( Colors.TEMPERATURE_NEUTAL );
+		}
+
+		m_HeatComfort.SetAlpha( 1.0 );
+		#endif
 	}
 
 	void RefreshTeleports(bool force = false)
@@ -1291,6 +1368,14 @@ class JMPlayerForm: JMFormBase
 
 			if ( m_Stamina )
 				m_Module.SetStamina( m_Stamina.GetCurrent(), JM_GetSelected().GetPlayers() );
+		}
+
+		if ( m_HeatBufferUpdated )
+		{
+			m_HeatBufferUpdated = false;
+
+			if ( m_HeatBuffer )
+				m_Module.SetHeatBuffer( m_HeatBuffer.GetCurrent() * 10, JM_GetSelected().GetPlayers() );
 		}
 	}
 
@@ -1460,6 +1545,37 @@ class JMPlayerForm: JMFormBase
 		}
 
 		m_StaminaUpdated = true;
+	}
+
+	void Click_SetHeatBuffer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		UpdateLastChangeTime();
+
+		if ( m_HeatBuffer.GetCurrent() >= 3 )
+		{
+			m_HeatBuffer.SetColor( Colors.COLOR_PRISTINE );
+		}
+		else if ( m_HeatBuffer.GetCurrent() >= 2 )
+		{
+			m_HeatBuffer.SetColor( Colors.COLOR_WORN );
+		}
+		else if ( m_HeatBuffer.GetCurrent() >= 1 )
+		{
+			m_HeatBuffer.SetColor( Colors.COLOR_WORN );
+		}
+		else
+		{
+			m_HeatBuffer.SetColor(0x00FFFFFF);
+		}
+
+		int heatbufferState = m_HeatBuffer.GetCurrent();
+		m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " ("+ m_HeatBuffer.GetCurrent() + ")");
+
+		m_HeatBufferUpdated = true;
+		m_HeatBuffer.SetAlpha( 1.0 );
 	}
 
 	void Click_BloodyHands( UIEvent eid, UIActionBase action )
