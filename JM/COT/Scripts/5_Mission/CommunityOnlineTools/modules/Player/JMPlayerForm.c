@@ -52,6 +52,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionCheckbox m_Freeze;
 	private UIActionCheckbox m_Invisibility;
 	private UIActionCheckbox m_UnlimitedAmmo;
+	private UIActionCheckbox m_AdminNVG;
 	private UIActionCheckbox m_UnlimitedStamina;
 	private UIActionCheckbox m_BrokenLegs;
 	private UIActionCheckbox m_ReceiveDmgDealt;
