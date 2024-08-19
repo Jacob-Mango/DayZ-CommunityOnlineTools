@@ -45,7 +45,7 @@ class UIActionSlider: UIActionBase
 		return m_Value;
 	}
 
-	void SetText( string text )
+	override void SetText( string text )
 	{
 		m_Value.SetText(text);
 	}
