@@ -1275,10 +1275,17 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_Vehicle_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		CarScript car;
+		#ifndef DAYZ_1_25
+		BoatScript boat;
+		#endif
 		if ( Class.CastTo( car, target ) )
 		{
 			car.COT_PlaceOnSurfaceAtPosition(car.GetPosition());
 		}
+		#ifndef DAYZ_1_25
+		else if ( Class.CastTo( boat, target ) )
+			boat.COT_PlaceOnSurfaceAtPosition(boat.GetPosition());
+		#endif
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
 		SendWebhook( "Vehicle_Unstuck", instance, "Unstuck " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );

@@ -36,6 +36,11 @@ class JMVehicleMetaData
 
 	[NonSerialized()]
 	CarScript m_Vehicle;
+
+#ifndef DAYZ_1_25
+	[NonSerialized()]
+	BoatScript m_Boat;
+#endif
 	
 	static JMVehicleMetaData CreateCarScript( CarScript car )
 	{
@@ -90,6 +95,31 @@ class JMVehicleMetaData
 
 		return meta;
 	}
+	
+	#ifndef DAYZ_1_25
+	static JMVehicleMetaData CreateBoatScript( BoatScript boat )
+	{
+		JMVehicleMetaData meta = new JMVehicleMetaData();
+
+		meta.m_Boat = boat;
+
+		boat.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+		
+		boat.GetPersistentID(meta.m_PersistentIDA, meta.m_PersistentIDB, meta.m_PersistentIDC, meta.m_PersistentIDD);
+
+		meta.m_ClassName = boat.ClassName();
+		meta.m_Position = boat.GetPosition();
+		meta.m_Orientation = boat.GetOrientation();
+
+		meta.m_VehicleType = JMVT_BOAT;
+		
+		meta.m_DestructionType = JMDT_NONE;
+		if ( boat.IsDamageDestroyed() )
+			meta.m_DestructionType |= JMDT_DESTROYED;
+
+		return meta;
+	}
+	#endif
 	
 	#ifdef EXPANSIONMODVEHICLE
 	static JMVehicleMetaData CreateVehicle( ExpansionVehicleBase vehicle )
@@ -146,8 +176,10 @@ class JMVehicleMetaData
 		meta.m_VehicleType = JMVT_NONE;
 		if ( GetGame().IsKindOf(type, "ExpansionHelicopterScript") )
 			meta.m_VehicleType |= JMVT_HELICOPTER;
+		#ifndef DAYZ_1_25
 		else if ( GetGame().IsKindOf(type, "ExpansionBoatScript") )
 			meta.m_VehicleType |= JMVT_BOAT;
+		#endif
 		else
 			meta.m_VehicleType |= JMVT_CAR;
 		
@@ -337,6 +369,16 @@ class JMVehiclesModule: JMRenderableModuleBase
 				m_Vehicles.Insert( JMVehicleMetaData.CreateCarScript( node.m_Value ) );
 			node = node.m_Next;
 		}
+		
+#ifndef DAYZ_1_25
+		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		while ( boats )
+		{
+			if ( !boats.m_Value.IsSetForDeletion() )
+				m_Vehicles.Insert( JMVehicleMetaData.CreateBoatScript( boats.m_Value ) );
+			boats = boats.m_Next;
+		}
+#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
@@ -603,6 +645,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 
+#ifndef DAYZ_1_25
+		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		while ( boats )
+		{
+			if ( !boats.m_Value.HasKey() )
+				boats.m_Value.Delete();
+
+			boats = boats.m_Next;
+		}
+#endif
+
 		auto vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
@@ -696,6 +749,15 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node.m_Value.Delete();
 			node = node.m_Next;
 		}
+
+#ifndef DAYZ_1_25
+		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		while ( boats )
+		{
+			boats.m_Value.Delete();
+			boats = boats.m_Next;
+		}
+#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
