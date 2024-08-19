@@ -410,6 +410,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 		case JMVehiclesModuleRPC.TeleportToVehicle:
 			RPC_TeleportToVehicle( ctx, sender, target );
 			break;
+		case JMVehiclesModuleRPC.TeleportVehicleToMe:
+			RPC_TeleportVehicleToMe( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -777,6 +780,69 @@ class JMVehiclesModule: JMRenderableModuleBase
 		pos = pos + minMax[1];
 		pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
 		player.SetWorldPosition( pos );
+	}
+
+
+	void RequestTeleportVehicleToMe(JMVehicleMetaData meta)
+	{
+		if (GetGame().IsClient())
+		{
+			RequestTeleportVehicleToMe(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
+		}
+		else
+		{
+			Exec_TeleportVehicleToMe(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Vehicle);
+		}
+	}
+
+	void RequestTeleportVehicleToMe( int netLow, int netHigh )
+	{
+		if ( IsMissionClient() )
+		{
+			auto rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+ 			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
+		}
+	}
+
+	private void RPC_TeleportVehicleToMe( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+		
+		PlayerBase player;
+		if ( !Class.CastTo( player, senderRPC.GetPlayer() ) )
+			return;
+
+		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		Exec_TeleportVehicleToMe(player, obj);
+	}
+
+	void Exec_TeleportVehicleToMe(PlayerBase player, Object obj)
+	{
+		vector pos = player.GetPosition();
+		vector minMax[2];
+		player.ClippingInfo( minMax );
+
+		pos = pos + minMax[1];
+		pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
+		obj.SetPosition( pos );
 	}
 
 	array< ref JMVehicleMetaData > GetServerVehicles()
