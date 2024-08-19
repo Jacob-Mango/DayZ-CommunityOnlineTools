@@ -265,6 +265,49 @@ class JMESPViewTypeCar: JMESPViewType
 	}
 };
 
+#ifndef DAYZ_1_25
+class JMESPViewTypeBoat: JMESPViewType
+{
+	void JMESPViewTypeBoat()
+	{
+		Permission = "Boat";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Boat";
+
+		MetaType = JMESPMetaBoat;
+
+		Colour = ARGB( 255, 255, 109, 237 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeBoat::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+		
+		if ( !obj.IsInherited(BoatScript) )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
+#endif
+
 class JMESPViewTypeWeapon: JMESPViewType
 {
 	void JMESPViewTypeWeapon()
