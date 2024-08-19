@@ -115,8 +115,7 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 		if ( m_GUID == "" ) 
 		{
 			Hide();
-		} else 
-		{
+		} else {
 			JMPlayerInstance player = GetPermissionsManager().GetPlayer( m_GUID );
 			if ( player )
 			{
@@ -124,13 +123,12 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 
 				array< string > roles = player.GetRoles();
 				
-				if (roles.Count() > 0)
-					roles.RemoveItem("everyone");
-
-				if (roles.Count() > 0)
-					Name.SetText( "[" + roles[0] + "] " + player.GetName() );
-				else
+				if (roles.Count() > 1)
+				{
+					Name.SetText( "[" + roles[1] + "] " + player.GetName() );
+				} else {
 					Name.SetText( player.GetName() );
+				}
 
 				if ( GetPermissionsManager().GetClientGUID() == m_GUID )
 				{
@@ -138,20 +136,17 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 				} else if ( player.HasPermission( "COT" ) )
 				{
 					Name.SetColor( 0xFFA85A32 );
-				} else 
-				{
+				} else  {
 					Name.SetColor( 0xFFFFFFFF );
 				}
 
 				if ( JM_GetSelected().IsSelected( m_GUID ) )
 				{
 					Checkbox.SetChecked( true );
-				} else
-				{
+				} else {
 					Checkbox.SetChecked( false );
 				}
-			} else
-			{
+			} else {
 				Hide();
 			}
 		}

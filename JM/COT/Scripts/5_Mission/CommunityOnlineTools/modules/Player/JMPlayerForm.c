@@ -1892,12 +1892,10 @@ class JMPlayerForm: JMFormBase
 	private void SortPlayersArray( out array< JMPlayerInstance > players, bool isReversed )
 	{
 		TStringArray pNames = new TStringArray;
-		int pIndices[ 1000 ];
+		TIntArray pIndices = new TIntArray;
 
 		for ( int i = 0; i < players.Count(); i++ )
-		{
-			pNames[ i ] = players[ i ].GetName();
-		}
+			pNames.Insert(players[ i ].GetName());
 		
 		pNames.Sort(isReversed);
 
@@ -1907,7 +1905,7 @@ class JMPlayerForm: JMFormBase
 			{
 				if ( pNames[ j ] == players[ i ].GetName() )
 				{
-					pIndices[ i ] = j;
+					pIndices.Insert(j);
 				}
 			}
 		}
@@ -1937,6 +1935,11 @@ class JMPlayerForm: JMFormBase
 	{
 		for ( int i = 0; i < m_PlayerList.Count(); i++ )
 		{
+			if (state)
+				JM_GetSelected().AddPlayer( m_PlayerList[i].GetGUID() );
+			else
+				JM_GetSelected().RemovePlayer( m_PlayerList[i].GetGUID() );
+			
 			m_PlayerList[i].Checkbox.SetChecked( state );
 		}
 
