@@ -643,3 +643,35 @@ class JMESPMetaCar : JMESPMeta
 		module.Vehicle_Refuel( target );
 	}
 };
+
+#ifndef DAYZ_1_25
+class JMESPMetaBoat : JMESPMeta
+{
+	UIActionButton m_UnstuckButton;
+	UIActionButton m_RefuelButton;
+
+	override void CreateActions( Widget parent )
+	{
+		super.CreateActions( parent );
+
+		m_UnstuckButton = UIActionManager.CreateButton( parent, "Unstuck", this, "Action_Unstuck" );
+		m_RefuelButton  = UIActionManager.CreateButton( parent, "Refuel",  this, "Action_Refuel" );
+	}
+
+	void Action_Unstuck( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Vehicle_Unstuck( target );
+	}
+
+	void Action_Refuel( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Vehicle_Refuel( target );
+	}
+};
+#endif

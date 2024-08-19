@@ -428,6 +428,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		#ifndef DAYZ_1_25
+		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
+		#endif
 		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
@@ -549,6 +553,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				int flags = ECE_CREATEPHYSICS;
 				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
+				#ifndef DAYZ_1_25
+				else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+					flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
+				#endif
 
 				if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
 					flags |= ECE_EQUIP;
@@ -715,13 +723,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	void OnDebugSpawn(EntityAI entity, PlayerBase player, int depth = 3) 
 	{
 		ItemBase item;
-		CarScript vehicle;
+		CarScript car;
+		#ifndef DAYZ_1_25
+		BoatScript boat;
+		#endif
 		BuildingBase building;
 
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn(player);
-		else if (Class.CastTo(vehicle, entity))
-			vehicle.COT_OnDebugSpawn(player);
+		else if (Class.CastTo(car, entity))
+			car.COT_OnDebugSpawn(player);
+		#ifndef DAYZ_1_25
+		else if (Class.CastTo(boat, entity))
+			boat.COT_OnDebugSpawn(player);
+		#endif
 		else if (Class.CastTo(building, entity))
 			building.COT_OnDebugSpawn(player);
 
@@ -871,6 +886,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		#ifndef DAYZ_1_25
+		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
+		#endif
 		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
