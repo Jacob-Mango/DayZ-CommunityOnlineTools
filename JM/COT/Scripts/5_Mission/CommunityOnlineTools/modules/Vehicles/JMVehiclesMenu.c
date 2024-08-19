@@ -88,23 +88,23 @@ class JMVehiclesMenu: JMFormBase
 		//! Vehicle Info
 		m_VehicleInfoPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_panel" ) );
 			Widget gridinfos = UIActionManager.CreateGridSpacer( m_VehicleInfoPanel, 12, 1 );
-				m_VehicleName = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehicleClassName = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleName = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleClassName = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
-				m_VehicleStatus = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehicleType = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleStatus = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleType = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
-				m_VehicleID = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehiclePersistentIDAB = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehiclePersistentIDCD = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleID = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehiclePersistentIDAB = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehiclePersistentIDCD = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
-				m_VehiclePosition = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehicleRotation = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehiclePosition = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleRotation = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
-				m_VehicleKeys = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
-				m_VehicleLastDriverUID = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleKeys = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleLastDriverUID = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 				
-				m_VehicleCovered = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleCovered = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
 		//! Vehicle Options
 		m_VehicleOptionsPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_buttons_panel" ) );
