@@ -703,6 +703,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			node = node.m_Next;
 		}
+
+#ifndef DAYZ_1_25
+		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		while ( boats )
+		{
+			if ( boats.m_Value.IsDamageDestroyed() )
+				boats.m_Value.Delete();
+
+			boats = boats.m_Next;
+		}
+#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
