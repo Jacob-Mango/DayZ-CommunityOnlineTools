@@ -2,44 +2,52 @@ class JMVehiclesMenu: JMFormBase
 {
 	private JMVehiclesModule m_Module;
 	
-	protected Widget m_VehicleMapPanel;	
+	protected Widget m_VehicleMapPanel;
 	protected Widget m_VehicleListPanel;
 	protected Widget m_VehiclesListContent;
-	protected ButtonWidget m_VehicleListRefreshButton;
-	protected TextWidget m_VehicleListRefreshButtonLabel;
+
+	protected UIActionButton m_RefreshButton;
+	protected UIActionButton m_DeleteAllButton;
+	protected UIActionButton m_DeleteDestroyedButton;
+	protected UIActionButton m_DeleteUnclaimedButton;
 	
 	protected Widget m_MapWidgetPanel;
 	protected MapWidget m_MapWidget;
 	
-	protected ButtonWidget m_DeleteUnclaimedButton;
-	protected TextWidget m_DeleteUnclaimedButtonLabel;
-	protected ButtonWidget m_DeleteDestroyedButton;
-	protected TextWidget m_DeleteDestroyedButtonLabel;
-	protected ButtonWidget m_DeleteAllButton;
-	protected TextWidget m_DeleteAllButtonLabel;
-	
 	protected Widget m_VehicleInfoPanel;
-	protected TextWidget m_VehicleInfoNetworkID;
-	protected TextWidget m_VehicleInfoPersistentABID;
-	protected TextWidget m_VehicleInfoPersistentCDID;
-	protected TextWidget m_VehicleInfoName;
-	protected TextWidget m_VehicleInfoClassName;
-	protected TextWidget m_VehicleInfoPos;
-	protected TextWidget m_VehicleInfoOri;
-	protected TextWidget m_VehicleInfoType;
-	protected TextWidget m_VehicleInfoExploded;
-	protected TextWidget m_VehicleInfoDestroyed;
-	protected TextWidget m_VehicleInfoKeys;
-	protected TextWidget m_VehicleInfoCover;
-	protected TextWidget m_VehicleInfoLastDriver;	
+	protected UIActionText m_VehicleName;
+	protected UIActionText m_VehicleClassName;
+
+	protected UIActionText m_VehicleStatus; // Exploded - Destroyed - Functional
+	protected UIActionText m_VehicleType;
+
+	protected UIActionText m_VehicleID;
+	protected UIActionText m_VehiclePersistentIDAB;
+	protected UIActionText m_VehiclePersistentIDCD;
+
+	protected UIActionText m_VehiclePosition;
+	protected UIActionText m_VehicleRotation;
+	
+	protected UIActionText m_VehicleKeys;
+	protected UIActionText m_VehicleLastDriverUID;
+
+	protected UIActionText m_VehicleCovered;
 	
 	protected Widget m_VehicleOptionsPanel;
-	protected ButtonWidget m_DeleteVehicleButton;
-	protected TextWidget m_DeleteVehicleButtonLabel;
-	protected ButtonWidget m_CancleVehicleEdit;
-	protected TextWidget m_CancleVehicleEditLabel;
-	protected ButtonWidget m_TeleportButton;
-	protected TextWidget m_TeleportButtonLabel;
+	
+	protected UIActionButton m_DeleteVehicleButton;
+	protected UIActionButton m_RepairVehicleButton;
+	protected UIActionButton m_UnstuckVehicleButton;
+	protected UIActionButton m_RefuelVehicleButton;
+	protected UIActionButton m_CoverVehicleButton;
+	protected UIActionButton m_LockVehicleButton;
+	protected UIActionButton m_UnPairVehicleButton;
+	protected UIActionButton m_CopyPositionButton;
+	protected UIActionButton m_CopyRotationButton;
+	protected UIActionButton m_CopyLastDriverUIDButton;
+	protected UIActionButton m_TeleportVehicleButton;
+	protected UIActionButton m_TeleportMeButton;
+	protected UIActionButton m_ReturnButton;
 	
 	protected ref array<ref JMVehiclesMapMarker> m_MapMarkers;
 	protected ref array<ref JMVehiclesListEntry> m_VehicleEntries;
@@ -65,61 +73,66 @@ class JMVehiclesMenu: JMFormBase
 		//! Vehicles List
 		m_VehicleListPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_panel" ) );
 		m_VehiclesListContent = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
+
+		Widget vehiclesListButtons = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_buttons" ) );
+			Widget gridlistbtns = UIActionManager.CreateGridSpacer( vehiclesListButtons, 4, 1 );
+				m_RefreshButton = UIActionManager.CreateButton( gridlistbtns, "Refresh", this, "OnClick_Refresh" );
+				m_DeleteAllButton = UIActionManager.CreateButton( gridlistbtns, "Delete All", this, "OnClick_DeleteAll" );
+				m_DeleteDestroyedButton = UIActionManager.CreateButton( gridlistbtns, "Delete Destroyed", this, "OnClick_DeleteDestroyed" );
+				m_DeleteUnclaimedButton = UIActionManager.CreateButton( gridlistbtns, "Delete Unclaimed", this, "OnClick_DeleteUnclaimed" );
 		
 		//! Vehicles Map
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_map" ) );
 		
-		//! Vehicles Options
-		m_VehicleListRefreshButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_refresh_button" ) );
-		m_VehicleListRefreshButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_refresh_button_label" ) );
-		m_DeleteUnclaimedButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_unclaimed_vehicle_button" ) );
-		m_DeleteUnclaimedButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_unclaimed_vehicle_button_label" ) );
-		#ifdef EXPANSIONMODVEHICLE
-		m_DeleteUnclaimedButton.Show(true);
-		#endif
-		m_DeleteDestroyedButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_destroyed_vehicle_button" ) );
-		m_DeleteDestroyedButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_destroyed_vehicle_button_label" ) );
-		m_DeleteAllButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_all_button" ) );
-		m_DeleteAllButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_all_button_label" ) );
-		
 		//! Vehicle Info
 		m_VehicleInfoPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_panel" ) );
-		m_VehicleInfoNetworkID = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_network_id_value" ) );
-		m_VehicleInfoPersistentABID = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_persistent_ab_id_value" ) );
-		m_VehicleInfoPersistentCDID = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_persistent_cd_id_value" ) );
-		m_VehicleInfoName = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_name_value" ) );
-		m_VehicleInfoClassName = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_classname_value" ) );
-		m_VehicleInfoPos = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_pos_value" ) );
-		m_VehicleInfoOri = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_ori_value" ) );
-		m_VehicleInfoType = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_type_value" ) );
-		m_VehicleInfoExploded = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_exploded_value" ) );
-		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
-		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
-		m_VehicleInfoCover = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_cover_value" ) );
-		m_VehicleInfoLastDriver = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_last_driver_value" ) );
-		#ifdef EXPANSIONMODVEHICLE
-		m_VehicleInfoType.GetParent().Show(true);
-		m_VehicleInfoExploded.GetParent().Show(true);
-		m_VehicleInfoKeys.GetParent().Show(true);
-		m_VehicleInfoCover.GetParent().Show(true);
-		#endif
-		#ifdef EXPANSIONMODCORE
-		m_VehicleInfoLastDriver.GetParent().Show(true);
-		#endif
-		
+			Widget gridinfos = UIActionManager.CreateGridSpacer( m_VehicleInfoPanel, 12, 1 );
+				m_VehicleName = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleClassName = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+
+				m_VehicleStatus = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleType = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+
+				m_VehicleID = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehiclePersistentIDAB = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehiclePersistentIDCD = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+
+				m_VehiclePosition = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleRotation = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+
+				m_VehicleKeys = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				m_VehicleLastDriverUID = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+				
+				m_VehicleCovered = UIActionManager.CreateText( m_VehicleInfoPanel, "MyText", "Value" );
+
 		//! Vehicle Options
 		m_VehicleOptionsPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_buttons_panel" ) );
-		m_DeleteVehicleButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "delete_vehicle_button" ) );
-		m_DeleteVehicleButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "delete_vehicle_button_label" ) );
-		m_TeleportButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "teleport_to_button" ) );
-		m_TeleportButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "teleport_to_button_label" ) );
-		m_CancleVehicleEdit = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "cancel_edit_button" ) );
-		m_CancleVehicleEditLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "cancel_edit_button_label" ) );
+			Widget gridoptions = UIActionManager.CreateGridSpacer( m_VehicleOptionsPanel, 13, 1 );
+				m_DeleteVehicleButton = UIActionManager.CreateButton( gridoptions, "Delete", this, "OnClick_DeleteVehicle" );
+
+				m_RepairVehicleButton = UIActionManager.CreateButton( gridoptions, "Repair", this, "OnClick_RepairVehicle" );
+				m_UnstuckVehicleButton = UIActionManager.CreateButton( gridoptions, "Unstuck", this, "OnClick_UnstuckVehicle" );
+				m_RefuelVehicleButton = UIActionManager.CreateButton( gridoptions, "Refuel", this, "OnClick_RefuelVehicle" );
+
+				m_CoverVehicleButton = UIActionManager.CreateButton( gridoptions, "Cover", this, "OnClick_CoverVehicle" );
+				m_LockVehicleButton = UIActionManager.CreateButton( gridoptions, "Lock", this, "OnClick_LockVehicle" );
+				m_UnPairVehicleButton = UIActionManager.CreateButton( gridoptions, "UnPair", this, "OnClick_UnPairVehicle" );
+
+				m_CopyPositionButton = UIActionManager.CreateButton( gridoptions, "Copy Position", this, "OnClick_CopyPosition" );
+				m_CopyRotationButton = UIActionManager.CreateButton( gridoptions, "Copy Rotation", this, "OnClick_CopyRotation" );
+				m_CopyLastDriverUIDButton = UIActionManager.CreateButton( gridoptions, "Copy UID", this, "OnClick_CopyLastDriverUID" );
+
+				m_TeleportVehicleButton = UIActionManager.CreateButton( gridoptions, "TeleportToVehicle", this, "OnClick_TeleportToVehicle" );
+				m_TeleportMeButton = UIActionManager.CreateButton( gridoptions, "TeleportToMe", this, "OnClick_TeleportVehicleToMe" );
+
+				m_ReturnButton = UIActionManager.CreateButton( gridoptions, "Return", this, "OnClick_Return" );
+		
+		BackToList();
 	}
 
 	void LoadVehicles()
-	{		
+	{
 		m_MapMarkers.Clear();
 		m_VehicleEntries.Clear();
 		
@@ -169,7 +182,30 @@ class JMVehiclesMenu: JMFormBase
 
 	private void GetVehicleTypeInfo( int type, out int color, out string marker )
 	{
-		color = ARGB( 255, 243, 156, 18 );
+		switch (type)
+		{
+			default:
+			case JMVT_CAR:
+				color = ARGB( 255, 243, 156, 18 );
+				marker = "Car";
+			break;
+			case JMVT_BOAT:
+				color = ARGB( 255, 243, 156, 18 );
+				marker = "Boat";
+			break;
+			case JMVT_HELICOPTER:
+				color = ARGB( 255, 243, 156, 18 );
+				marker = "Helicopter";
+			break;
+			case JMVT_PLANE:
+				color = ARGB( 255, 243, 156, 18 );
+				marker = "Plane";
+			break;
+			case JMVT_BIKE:
+				color = ARGB( 255, 243, 156, 18 );
+				marker = "Bike";
+			break;
+		}
 	}
 
 	void SetVehicleInfo(JMVehicleMetaData vehicle)
@@ -182,28 +218,6 @@ class JMVehiclesMenu: JMFormBase
 		
 		m_VehicleInfoPanel.Show( true );
 		m_VehicleOptionsPanel.Show( true );
-		
-		m_VehicleInfoNetworkID.SetText( vehicle.m_NetworkIDLow.ToString() + "    " + vehicle.m_NetworkIDHigh.ToString() );
-		m_VehicleInfoPersistentABID.SetText( vehicle.m_PersistentIDA.ToString() + "    " + vehicle.m_PersistentIDB.ToString() );
-		m_VehicleInfoPersistentCDID.SetText( vehicle.m_PersistentIDC.ToString() + "    " + vehicle.m_PersistentIDD.ToString() );
-
-		m_VehicleInfoName.SetText( vehicle.m_DisplayName );
-
-		m_VehicleInfoClassName.SetText( vehicle.m_ClassName );
-		m_VehicleInfoPos.SetText( "X: " + vehicle.m_Position[0] + " Z: " + vehicle.m_Position[1] + " Y: " + vehicle.m_Position[2] );
-		m_VehicleInfoOri.SetText( "Yaw: " + vehicle.m_Orientation[0] + " Pitch: " + vehicle.m_Orientation[1] + " Roll: " + vehicle.m_Orientation[2] );
-		#ifdef EXPANSIONMODVEHICLE
-		m_VehicleInfoType.SetText( vehicle.GetVehicleType() );
-		m_VehicleInfoExploded.SetText( vehicle.IsExploded().ToString() );
-		#endif
-		m_VehicleInfoDestroyed.SetText( vehicle.IsDestroyed().ToString() );
-		#ifdef EXPANSIONMODVEHICLE
-		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
-		m_VehicleInfoCover.SetText( vehicle.m_IsCover.ToString() );
-		#endif
-		#ifdef EXPANSIONMODCORE
-		m_VehicleInfoLastDriver.SetText( vehicle.m_LastDriverUID );
-		#endif
 		
 		m_CurrentVehicle = vehicle;
 
@@ -245,88 +259,216 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoPanel.Show( false );
 		m_VehicleOptionsPanel.Show( false );
 		
-		m_VehicleInfoNetworkID.SetText( "" );
-		m_VehicleInfoPersistentABID.SetText( "" );
-		m_VehicleInfoPersistentCDID.SetText( "" );
-		m_VehicleInfoName.SetText( "" );
-		m_VehicleInfoClassName.SetText( "" );
-		m_VehicleInfoPos.SetText( "" );
-		m_VehicleInfoOri.SetText( "" );
-		m_VehicleInfoType.SetText( "" );
-		m_VehicleInfoExploded.SetText( "" );
-		m_VehicleInfoDestroyed.SetText( "" );
-		m_VehicleInfoKeys.SetText( "" );
-		m_VehicleInfoCover.SetText( "" );
-		m_VehicleInfoLastDriver.SetText( "" );
-		
 		m_CurrentVehicle = NULL;
 	}
+
+	void OnClick_CopyPosition( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
 		
-	override bool OnClick( Widget w, int x, int y, int button )
-	{		
-		if ( w == m_VehicleListRefreshButton )
+		if ( m_CurrentVehicle )
 		{
-			SyncAndRefreshVehicles();
+			//! TODO:
 		}
-		
-		if ( w == m_CancleVehicleEdit )
-		{
-			BackToList();
-		}
-
-		if ( w == m_DeleteAllButton )
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_ALL", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleAll" );
-		}
-
-		if ( w == m_DeleteDestroyedButton )
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_DESTROYED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleDestroyed" );
-		}
-
-		if ( w == m_DeleteUnclaimedButton )
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_UNCLAIMED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicleUnclaimed" );
-		}
-
-		if ( w == m_DeleteVehicleButton )
-		{
-			if ( m_CurrentVehicle )
-			{
-				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_DELETE", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "DeleteVehicle" );
-			}
-		}
-
-		if ( w == m_TeleportButton )
-		{
-			if ( m_CurrentVehicle )
-			{
-				TeleportToVehicle();	
-			}	
-		}
-		
-		return false;
 	}
 
-	void DeleteVehicle(JMConfirmation confirmation)
+	void OnClick_CopyRotation( UIEvent eid, UIActionBase action )
 	{
-		m_Module.DeleteVehicle(m_CurrentVehicle);
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_PastePosition( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_PasteRotation( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_CopyDriverUID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_CoverVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_LockVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_UnpairVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_RepairVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_RefuelVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_UnstuckVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_Refresh( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		SyncAndRefreshVehicles();
+	}
+
+	void OnClick_Return( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
 		BackToList();
 	}
 
-	void DeleteVehicleUnclaimed(JMConfirmation confirmation)
+	void OnClick_TeleportToVehicle( UIEvent eid, UIActionBase action )
 	{
-		m_Module.DeleteVehicleUnclaimed();
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_CurrentVehicle )
+			m_Module.RequestTeleportToVehicle(m_CurrentVehicle);
 	}
 
-	void DeleteVehicleDestroyed(JMConfirmation confirmation)
+	void OnClick_TeleportVehicleToMe( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_CurrentVehicle )
+			m_Module.RequestTeleportVehicleToMe(m_CurrentVehicle);
+	}
+
+	void OnClick_DeleteVehicle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_CurrentVehicle )
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_DELETE", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "OnConfirmation_DeleteVehicle" );
+	}
+
+	void OnClick_DeleteVehicleAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_ALL", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "OnConfirmation_DeleteVehicleAll" );
+	}
+
+	void OnClick_DeleteVehicleDestroyed( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_DESTROYED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "OnConfirmation_DeleteVehicleDestroyed" );
+	}
+
+	void OnClick_DeleteVehicleUnclaimed( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_VEHICLE_LIST_DELETE_UNCLAIMED", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_OBJECT_MODULE_DELETE", "OnConfirmation_DeleteVehicleUnclaimed" );
+	}
+
+	void OnConfirmation_DeleteVehicle()
+	{
+		m_Module.DeleteVehicle( m_CurrentVehicle.m_NetworkIDLow, m_CurrentVehicle.m_NetworkIDHigh );
+		BackToList();
+	}
+
+	void OnConfirmation_DeleteVehicleAll()
+	{
+		m_Module.DeleteVehicleAll();
+	}
+
+	void OnConfirmation_DeleteVehicleDestroyed()
 	{
 		m_Module.DeleteVehicleDestroyed();
 	}
 
-	void DeleteVehicleAll(JMConfirmation confirmation)
+	void OnConfirmation_DeleteVehicleUnclaimed()
 	{
-		m_Module.DeleteVehicleAll();
+		m_Module.DeleteVehicleUnclaimed();
 	}
 
 	override void OnShow()
@@ -336,72 +478,6 @@ class JMVehiclesMenu: JMFormBase
 		SyncAndRefreshVehicles();
 
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
-	}
-
-	void TeleportToVehicle()
-	{
-		m_Module.RequestTeleportToVehicle(m_CurrentVehicle);
-	}
-
-	void TeleportToVehicle(int netLow, int netHigh)
-	{
-		m_Module.RequestTeleportToVehicle(netLow, netHigh);
-	}
-
-	override bool OnMouseEnter(Widget w, int x, int y)
-	{
-		if (w == m_DeleteUnclaimedButton)
-		{
-			m_DeleteUnclaimedButtonLabel.SetColor( ARGB( 255,0,0,0 ) );		
-		} else if (w == m_DeleteDestroyedButton)
-		{
-			m_DeleteDestroyedButtonLabel.SetColor( ARGB( 255,0,0,0 ) );
-		} else if (w == m_DeleteAllButton)
-		{
-			m_DeleteAllButtonLabel.SetColor( ARGB( 255,0,0,0 ) );
-		} else if (w == m_DeleteVehicleButton)
-		{
-			m_DeleteVehicleButtonLabel.SetColor( ARGB( 255,0,0,0 ) );
-		} else if (w == m_CancleVehicleEdit)
-		{
-			m_CancleVehicleEditLabel.SetColor( ARGB( 255,0,0,0 ) );
-		} else if (w == m_TeleportButton)
-		{
-			m_TeleportButtonLabel.SetColor( ARGB( 255,0,0,0 ) );
-		} else if (w == m_VehicleListRefreshButton)
-		{
-			m_VehicleListRefreshButtonLabel.SetColor( ARGB( 255,0,0,0 ) );
-		}
-		
-		return false;
-	}
-	
-	override bool OnMouseLeave(Widget w, Widget enterW, int x, int y)
-	{
-		if (w == m_DeleteUnclaimedButton)
-		{
-			m_DeleteUnclaimedButtonLabel.SetColor( ARGB( 255,255,255,255 ) );		
-		} else if (w == m_DeleteDestroyedButton)
-		{
-			m_DeleteDestroyedButtonLabel.SetColor( ARGB( 255,255,255,255 ) );
-		} else if (w == m_DeleteAllButton)
-		{
-			m_DeleteAllButtonLabel.SetColor( ARGB( 255,255,255,255 ) );
-		} else if (w == m_DeleteVehicleButton)
-		{
-			m_DeleteVehicleButtonLabel.SetColor( ARGB( 255,255,255,255 ) );
-		} else if (w == m_CancleVehicleEdit)
-		{
-			m_CancleVehicleEditLabel.SetColor( ARGB( 255,255,255,255 ) );
-		} else if (w == m_TeleportButton)
-		{
-			m_TeleportButtonLabel.SetColor( ARGB( 255,255,255,255 ) );
-		} else if (w == m_VehicleListRefreshButton)
-		{
-			m_VehicleListRefreshButtonLabel.SetColor( ARGB( 255,255,255,255 ) );
-		}
-		
-		return false;
 	}
 
 	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
