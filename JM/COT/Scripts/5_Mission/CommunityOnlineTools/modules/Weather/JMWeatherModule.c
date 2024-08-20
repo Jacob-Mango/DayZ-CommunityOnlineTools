@@ -26,7 +26,9 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Weather.Storm" );
 		GetPermissionsManager().RegisterPermission( "Weather.Overcast" );
+
 		GetPermissionsManager().RegisterPermission( "Weather.Fog" );
+		GetPermissionsManager().RegisterPermission( "Weather.Fog.Dynamic" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Rain" );
 		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
@@ -117,7 +119,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	bool IsLoaded()
 	{
-		return settings != null;
+		return settings != NULL;
 	}
 
 	private void Server_Load( PlayerIdentity ident )
@@ -175,6 +177,25 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 			Send_SetFog( wBase );
 		} 
+	}
+
+	void SetDynamicFog( float distance, float height = 0, float bias = 0, float time = 0 )
+	{
+		#ifndef DAYZ_1_25
+		JMWeatherDynamicFog wBase = new JMWeatherDynamicFog;
+		wBase.Distance = distance;
+		wBase.Height = height;
+		wBase.Bias = bias;
+		wBase.Time = time;
+
+		if ( GetGame().IsServer() )
+		{
+			Exec_SetDynamicFog( wBase, NULL );
+		} else
+		{
+			Send_SetDynamicFog( wBase );
+		} 
+		#endif
 	}
 
 	void SetRain( float forecast, float time = 0, float minDuration = 0 )
@@ -261,6 +282,39 @@ class JMWeatherModule: JMRenderableModuleBase
 		} 
 	}
 
+	void SetWindMagnitude( float forecast, float time = 0, float minDuration = 0 )
+	{
+		JMWeatherWindMagnitude wBase = new JMWeatherWindMagnitude;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
+		if ( GetGame().IsServer() )
+		{
+			Exec_SetWindMagnitude( wBase, NULL );
+		} else
+		{
+			Send_SetWindMagnitude( wBase );
+		}
+	}
+
+	void SetWindDirection( float forecast, float time = 0, float minDuration = 0 )
+	{
+		JMWeatherWindDirection wBase = new JMWeatherWindDirection;
+		wBase.Forecast = forecast;
+		wBase.Time = time;
+		wBase.MinDuration = minDuration;
+
+		if ( GetGame().IsServer() )
+		{
+			Exec_SetWindDirection( wBase, NULL );
+		} else
+		{
+			Send_SetWindDirection( wBase );
+		}
+	}
+
+	#ifdef DAYZ_1_25
 	void SetWind( vector dir, float speed, float maxSpeed = -1 )
 	{
 		JMWeatherWind wBase = new JMWeatherWind;
@@ -283,6 +337,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			Send_SetWind( wBase );
 		}
 	}
+	#endif
 
 	void SetWindFunctionParams( float fnMin, float fnMax, float fnSpeed )
 	{
@@ -376,6 +431,13 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.Fog, true, NULL );
 	}
 	
+	private void Send_SetDynamicFog( JMWeatherDynamicFog wBase )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wBase );
+		rpc.Send( NULL, JMWeatherModuleRPC.DynamicFog, true, NULL );
+	}
+	
 	private void Send_SetRain( JMWeatherRain wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
@@ -411,12 +473,28 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.Overcast, true, NULL );
 	}
 	
+	private void Send_SetWindMagnitude( JMWeatherWindMagnitude wBase )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wBase );
+		rpc.Send( NULL, JMWeatherModuleRPC.WindMagnitude, true, NULL );
+	}
+	
+	private void Send_SetWindDirection( JMWeatherWindDirection wBase )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( wBase );
+		rpc.Send( NULL, JMWeatherModuleRPC.WindDirection, true, NULL );
+	}
+	
+	#ifdef DAYZ_1_25
 	private void Send_SetWind( JMWeatherWind wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Wind, true, NULL );
 	}
+	#endif
 
 	private void Send_SetWindFunctionParams( JMWeatherWindFunction wBase )
 	{
@@ -480,6 +558,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Log( ident );
 	}
 
+	private void Exec_SetDynamicFog( JMWeatherDynamicFog wBase, PlayerIdentity ident )
+	{
+		wBase.Apply();
+		wBase.Log( ident );
+	}
+
 	private void Exec_SetRain( JMWeatherRain wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
@@ -510,11 +594,25 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Log( ident );
 	}
 
+	private void Exec_SetWindMagnitude( JMWeatherWindMagnitude wBase, PlayerIdentity ident )
+	{
+		wBase.Apply();
+		wBase.Log( ident );
+	}
+
+	private void Exec_SetWindDirection( JMWeatherWindDirection wBase, PlayerIdentity ident )
+	{
+		wBase.Apply();
+		wBase.Log( ident );
+	}
+
+	#ifdef DAYZ_1_25
 	private void Exec_SetWind( JMWeatherWind wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
 	}
+	#endif
 
 	private void Exec_SetWindFunctionParams( JMWeatherWindFunction wBase, PlayerIdentity ident )
 	{
@@ -667,6 +765,21 @@ class JMWeatherModule: JMRenderableModuleBase
 		Exec_SetFog( p1, senderRPC );
 	}
 
+	private void RPC_SetDynamicFog( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherDynamicFog p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Fog.Dynamic", senderRPC ) )
+			return;
+
+		Exec_SetDynamicFog( p1, senderRPC );
+	}
+
 	private void RPC_SetRain( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMWeatherRain p1;
@@ -742,6 +855,37 @@ class JMWeatherModule: JMRenderableModuleBase
 		Exec_SetOvercast( p1, senderRPC );
 	}
 
+	private void RPC_SetWindMagnitude( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherWindMagnitude p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
+			return
+
+		Exec_SetWindMagnitude( p1, senderRPC );
+	}
+
+	private void RPC_SetWindDirection( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMWeatherWindDirection p1;
+		if ( !ctx.Read( p1 ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
+			return
+
+		Exec_SetWindDirection( p1, senderRPC );
+	}
+
+	#ifdef DAYZ_1_25
 	private void RPC_SetWind( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMWeatherWind p1;
@@ -756,6 +900,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		Exec_SetWind( p1, senderRPC );
 	}
+	#endif
 
 	private void RPC_SetWindFunctionParams( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
@@ -887,6 +1032,9 @@ class JMWeatherModule: JMRenderableModuleBase
 		case JMWeatherModuleRPC.Fog:
 			RPC_SetFog( ctx, sender, target );
 			break;
+		case JMWeatherModuleRPC.DynamicFog:
+			RPC_SetDynamicFog( ctx, sender, target );
+			break;
 		case JMWeatherModuleRPC.Rain:
 			RPC_SetRain( ctx, sender, target );
 			break;
@@ -902,8 +1050,16 @@ class JMWeatherModule: JMRenderableModuleBase
 		case JMWeatherModuleRPC.Overcast:
 			RPC_SetOvercast( ctx, sender, target );
 			break;
+		#ifdef DAYZ_1_25
 		case JMWeatherModuleRPC.Wind:
 			RPC_SetWind( ctx, sender, target );
+			break;
+		#endif
+		case JMWeatherModuleRPC.WindMagnitude:
+			RPC_SetWindMagnitude( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.WindDirection:
+			RPC_SetWindDirection( ctx, sender, target );
 			break;
 		case JMWeatherModuleRPC.WindFunctionParams:
 			RPC_SetWindFunctionParams( ctx, sender, target );
