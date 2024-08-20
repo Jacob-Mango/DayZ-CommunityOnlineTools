@@ -1,17 +1,19 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
-CALL SetupLaunch.bat
+CALL "%~dp0SetupLaunch.bat"
 
 set mods=%ModName%
 
 if "%AdditionalMPMods%"=="" (
     echo AdditionalMPMods parameter was not set in the project.cfg, ignoring.
 ) else (
-    set mods=%AdditionalMPMods%;%mods%
+    set mods=%AdditionalMPMods%;%ModName%
 )
 
-CALL SetupModList.bat
+CALL "%~dp0SetupModList.bat"
+
+call "%~dp0ClearLogs.bat" "%ClientAProfileDirectory%"
 
 @echo on
 start /D "%gameDirectory%" %clientEXE% %clientLaunchParams% "-mod=%modList%" "-name=%playerName%"

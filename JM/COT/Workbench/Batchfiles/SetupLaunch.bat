@@ -58,6 +58,12 @@ if "%MPMission%"=="" (
     echo SPMission parameter was not set in the project.cfg
 )
 
+if "%ServerPassword%"=="" (
+    echo ServerPassword parameter was not set in the project.cfg, continuing.
+) else (
+    set password=-password=%ServerPassword%
+)
+
 echo GameDirectory is: "%gameDirectory%"
 if "%gameDirectory%"=="" (
     set /a failed=1
@@ -76,12 +82,10 @@ if "%serverProfileDirectory%"=="" (
     echo ServerProfileDirectory parameter was not set in the project.cfg
 )
 
+set mods=%requiredMods%
+
 echo AdditionalSPMods is: "%AdditionalSPMods%"
 
 echo AdditionalMPMods is: "%AdditionalMPMods%"
 
-echo PlayerName is: "%playerName%"
-
 if %failed%==1 exit /b 1
-
-CALL KillGame.bat
