@@ -53,22 +53,6 @@ class JMWeatherSerialize
 		preset.Storm.Threshold = -1;
 		preset.Storm.MinTimeBetweenLightning = -1;
 
-		preset.RainThreshold.OvercastMin = -1;
-		preset.RainThreshold.OvercastMax = -1;
-		preset.RainThreshold.Time = -1;
-
-		preset.SnowThreshold.OvercastMin = -1;
-		preset.SnowThreshold.OvercastMax = -1;
-		preset.SnowThreshold.Time = -1;
-
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-
-		preset.WindFunc.Min = -1;
-		preset.WindFunc.Max = -1;
-		preset.WindFunc.Speed = -1;
-
 		preset.POvercast.Forecast = 0.0;
 		preset.POvercast.Time = 120;
 		preset.POvercast.MinDuration = 21600;
@@ -77,9 +61,35 @@ class JMWeatherSerialize
 		preset.PRain.Time = 120;
 		preset.PRain.MinDuration = 21600;
 
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
+
+		preset.SnowThreshold.OvercastMin = -1;
+		preset.SnowThreshold.OvercastMax = -1;
+		preset.SnowThreshold.Time = -1;
+
+		preset.PWindMagnitude.Forecast = 0.0;
+		preset.PWindMagnitude.Time = 120;
+		preset.PWindMagnitude.MinDuration = 21600;
+
+		preset.PWindDirection.Forecast = 0.0;
+		preset.PWindDirection.Time = 120;
+		preset.PWindDirection.MinDuration = 21600;
+		#else
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+		#endif
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
 
 		Presets.Insert( preset );
 	}
@@ -100,22 +110,6 @@ class JMWeatherSerialize
 		preset.Storm.Threshold = -1;
 		preset.Storm.MinTimeBetweenLightning = -1;
 
-		preset.RainThreshold.OvercastMin = -1;
-		preset.RainThreshold.OvercastMax = -1;
-		preset.RainThreshold.Time = -1;
-
-		preset.SnowThreshold.OvercastMin = -1;
-		preset.SnowThreshold.OvercastMax = -1;
-		preset.SnowThreshold.Time = -1;
-
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-
-		preset.WindFunc.Min = -1;
-		preset.WindFunc.Max = -1;
-		preset.WindFunc.Speed = -1;
-
 		preset.POvercast.Forecast = 0.0;
 		preset.POvercast.Time = 120;
 		preset.POvercast.MinDuration = 21600;
@@ -124,9 +118,35 @@ class JMWeatherSerialize
 		preset.PRain.Time = -1;
 		preset.PRain.MinDuration = -1;
 
+		preset.RainThreshold.OvercastMin = -1;
+		preset.RainThreshold.OvercastMax = -1;
+		preset.RainThreshold.Time = -1;
+
+		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
+
+		preset.SnowThreshold.OvercastMin = -1;
+		preset.SnowThreshold.OvercastMax = -1;
+		preset.SnowThreshold.Time = -1;
+
+		preset.PWindMagnitude.Forecast = 0.0;
+		preset.PWindMagnitude.Time = 120;
+		preset.PWindMagnitude.MinDuration = 21600;
+
+		preset.PWindDirection.Forecast = 0.0;
+		preset.PWindDirection.Time = 120;
+		preset.PWindDirection.MinDuration = 21600;
+		#else
+		preset.Wind.Dir = "0 0 0";
+		preset.Wind.Speed = -1;
+		preset.Wind.MaxSpeed = -1;
+		#endif
+
+		preset.WindFunc.Min = -1;
+		preset.WindFunc.Max = -1;
+		preset.WindFunc.Speed = -1;
 
 		Presets.Insert( preset );
 	}
@@ -147,17 +167,39 @@ class JMWeatherSerialize
 		preset.Storm.Threshold = -1;
 		preset.Storm.MinTimeBetweenLightning = -1;
 
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 120.0;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = -1;
+		preset.PRain.Time = -1;
+		preset.PRain.MinDuration = -1;
+
 		preset.RainThreshold.OvercastMin = -1;
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
+
+		#ifndef DAYZ_1_25
+		preset.PSnow.Forecast = 0.0;
+		preset.PSnow.Time = 120;
+		preset.PSnow.MinDuration = 21600;
 
 		preset.SnowThreshold.OvercastMin = -1;
 		preset.SnowThreshold.OvercastMax = -1;
 		preset.SnowThreshold.Time = -1;
 
+		preset.PWindMagnitude.Forecast = 0.0;
+		preset.PWindMagnitude.Time = 120;
+		preset.PWindMagnitude.MinDuration = 21600;
+
+		preset.PWindDirection.Forecast = 0.0;
+		preset.PWindDirection.Time = 120;
+		preset.PWindDirection.MinDuration = 21600;
+		#else
 		preset.Wind.Dir = "0 0 0";
 		preset.Wind.Speed = -1;
 		preset.Wind.MaxSpeed = -1;
+		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;
@@ -167,17 +209,10 @@ class JMWeatherSerialize
 		preset.PFog.Time = 120.0;
 		preset.PFog.MinDuration = 21600;
 
-		preset.POvercast.Forecast = 0.0;
-		preset.POvercast.Time = 120.0;
-		preset.POvercast.MinDuration = 21600;
+		preset.PDynFog.Distance = 0;
+		preset.PDynFog.Height = 0;
+		preset.PDynFog.Bias = 0;
 
-		preset.PRain.Forecast = -1;
-		preset.PRain.Time = -1;
-		preset.PRain.MinDuration = -1;
-
-		preset.PSnow.Forecast = -1;
-		preset.PSnow.Time = -1;
-		preset.PSnow.MinDuration = -1;
 
 		Presets.Insert( preset );
 	}
@@ -198,17 +233,39 @@ class JMWeatherSerialize
 		preset.Storm.Threshold = -1;
 		preset.Storm.MinTimeBetweenLightning = -1;
 
+		preset.POvercast.Forecast = 0.0;
+		preset.POvercast.Time = 120.0;
+		preset.POvercast.MinDuration = 21600;
+
+		preset.PRain.Forecast = -1;
+		preset.PRain.Time = -1;
+		preset.PRain.MinDuration = -1;
+
 		preset.RainThreshold.OvercastMin = -1;
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
+
+		#ifndef DAYZ_1_25
+		preset.PSnow.Forecast = 0.0;
+		preset.PSnow.Time = 120;
+		preset.PSnow.MinDuration = 21600;
 
 		preset.SnowThreshold.OvercastMin = -1;
 		preset.SnowThreshold.OvercastMax = -1;
 		preset.SnowThreshold.Time = -1;
 
+		preset.PWindMagnitude.Forecast = 0.0;
+		preset.PWindMagnitude.Time = 120;
+		preset.PWindMagnitude.MinDuration = 21600;
+
+		preset.PWindDirection.Forecast = 0.0;
+		preset.PWindDirection.Time = 120;
+		preset.PWindDirection.MinDuration = 21600;
+		#else
 		preset.Wind.Dir = "0 0 0";
 		preset.Wind.Speed = -1;
 		preset.Wind.MaxSpeed = -1;
+		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;
@@ -218,17 +275,9 @@ class JMWeatherSerialize
 		preset.PFog.Time = 120;
 		preset.PFog.MinDuration = 21600;
 
-		preset.POvercast.Forecast = 0.0;
-		preset.POvercast.Time = 120;
-		preset.POvercast.MinDuration = 21600;
-
-		preset.PRain.Forecast = 0.0;
-		preset.PRain.Time = 120;
-		preset.PRain.MinDuration = 21600;
-
-		preset.PSnow.Forecast = 0.0;
-		preset.PSnow.Time = 120;
-		preset.PSnow.MinDuration = 21600;
+		preset.PDynFog.Distance = 0;
+		preset.PDynFog.Height = 0;
+		preset.PDynFog.Bias = 0;
 
 		Presets.Insert( preset );
 	}
