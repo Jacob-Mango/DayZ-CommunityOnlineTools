@@ -378,10 +378,10 @@ class JMPlayerForm: JMFormBase
 		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
 		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
 
+		#ifndef DAYZ_1_25
 		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( headerTemos, "Player Temperature:", "" );
 
-		#ifndef DAYZ_1_25
 		Widget actionsTemps = UIActionManager.CreateGridSpacer( parent, 2, 2 );
 		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -0.75, 0.75, this );
 		m_HeatComfort.SetFormat("");
@@ -390,7 +390,6 @@ class JMPlayerForm: JMFormBase
 
 		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
 		m_HeatBuffer.SetStepValue(0.1);
-		
 		#endif
 
 		m_Health.SetSliderWidth(0.5);
