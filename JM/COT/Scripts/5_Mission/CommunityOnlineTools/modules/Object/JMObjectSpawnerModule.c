@@ -695,8 +695,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				entity.SetHealth( "", "", health );
 		}
 
+		#ifndef DAYZ_1_25
 		if ( temp != -1 )
 			entity.SetTemperatureEx(new TemperatureData(temp));
+		#endif
 	}
 
 	bool IsExcludedClassName( string className )
