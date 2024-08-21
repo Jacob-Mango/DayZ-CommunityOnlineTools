@@ -1402,8 +1402,11 @@ class JMWeatherForm: JMFormBase
 		m_ToggleDate 		= UIActionManager.CreateButtonToggle( actions, "[N] Date", "[Y] Date", this, "OnClick_Toggle" );
 		m_ToggleStorm 		= UIActionManager.CreateButtonToggle( actions, "[N] Storm", "[Y] Storm", this, "OnClick_Toggle" );
 		m_ToggleOvercast 	= UIActionManager.CreateButtonToggle( actions, "[N] Overcast", "[Y] Overcast", this, "OnClick_Toggle" );
+		
 		m_ToggleRain 		= UIActionManager.CreateButtonToggle( actions, "[N] Rain", "[Y] Rain", this, "OnClick_Toggle" );
+		#ifndef DAYZ_1_25
 		m_ToggleSnow 		= UIActionManager.CreateButtonToggle( actions, "[N] Snow", "[Y] Snow", this, "OnClick_Toggle" );
+		#endif
 		m_ToggleFog 		= UIActionManager.CreateButtonToggle( actions, "[N] Fog", "[Y] Fog", this, "OnClick_Toggle" );
 		m_ToggleWind 		= UIActionManager.CreateButtonToggle( actions, "[N] Wind", "[Y] Wind", this, "OnClick_Toggle" );
 
