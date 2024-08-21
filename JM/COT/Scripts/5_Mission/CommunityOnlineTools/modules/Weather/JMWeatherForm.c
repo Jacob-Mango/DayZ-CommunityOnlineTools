@@ -110,7 +110,8 @@ class JMWeatherForm: JMFormBase
 
 	//! Wind stuff !
 	#ifdef DAYZ_1_25
-	private UIActionSlider m_SliderWindDirection;
+	private UIActionSlider m_SliderWindDirectionX;
+	private UIActionSlider m_SliderWindDirectionZ;
 	private UIActionSlider m_EditWindSpeed;
 	private UIActionEditableText m_EditWindMaxSpeed;
 	#else
@@ -431,7 +432,8 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_EditWindDirectionInterpTime, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
 		UpdateActionState( m_EditWindDirectionMinDuration, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
 		#else
-		UpdateActionState( m_SliderWindDirection, "Weather.Wind", hasNotSelectedPreset );
+		UpdateActionState( m_SliderWindDirectionX, "Weather.Wind", hasNotSelectedPreset );
+		UpdateActionState( m_SliderWindDirectionZ, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindSpeed, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindMaxSpeed, "Weather.Wind", hasNotSelectedPreset );
 		#endif
@@ -730,7 +732,8 @@ class JMWeatherForm: JMFormBase
 		preset.PWindDirection.Time = ToFloat( m_EditWindDirectionInterpTime.GetText() );
 		preset.PWindDirection.MinDuration = ToFloat( m_EditWindDirectionMinDuration.GetText() );
 	#else
-		preset.Wind.Dir = m_SliderWindDirection.GetCurrent();
+		preset.Wind.Dir[0] = m_SliderWindDirectionX.GetCurrent();
+		preset.Wind.Dir[2] = m_SliderWindDirectionZ.GetCurrent();
 		preset.Wind.Speed = m_EditWindSpeed.GetCurrent();
 		preset.Wind.MaxSpeed = ToFloat( m_EditWindMaxSpeed.GetText() );
 	#endif
@@ -918,7 +921,9 @@ class JMWeatherForm: JMFormBase
 #endif
 
 #ifdef DAYZ_1_25
-		float dirWind = m_SliderWindDirection.GetCurrent();
+		float dirX = m_SliderWindDirectionX.GetCurrent();
+		float dirZ = m_SliderWindDirectionZ.GetCurrent();
+		vector dirWind = Vector( dirX, 0.0, dirZ ).Normalized();
 		float speedWind = m_EditWindSpeed.GetCurrent();
 		float maxSpeedWind = m_EditWindMaxSpeed.GetText().ToFloat();
 #else
