@@ -382,55 +382,55 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_BtnQuickActionDay, "Weather.QuickAction.Date", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionDawn, "Weather.QuickAction.Date", hasNotSelectedPreset );
 
-		UpdateActionState( m_EditTextDateYear, "Weather.Date", hasNotSelectedPreset );
-		UpdateActionState( m_SliderDateMonth, "Weather.Date", hasNotSelectedPreset );
-		UpdateActionState( m_SliderDateDay, "Weather.Date", hasNotSelectedPreset );
+		UpdateActionState( m_EditTextDateYear, "Weather.Date", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_SliderDateMonth, "Weather.Date", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_SliderDateDay, "Weather.Date", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_SliderDateHour, "Weather.Date", hasNotSelectedPreset );
 		UpdateActionState( m_SliderDateMinute, "Weather.Date", hasNotSelectedPreset );
 		
 		UpdateActionState( m_SliderStormDensity, "Weather.Storm", hasNotSelectedPreset );
-		UpdateActionState( m_SliderStormThreshold, "Weather.Storm", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_SliderMinTimeBetweenLightning, "Weather.Storm", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_SliderStormThreshold, "Weather.Storm", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_SliderMinTimeBetweenLightning, "Weather.Storm", hasNotSelectedPreset, easyModeEnabled );
 
 		UpdateActionState( m_SliderFogForecast, "Weather.Fog", hasNotSelectedPreset );
-		UpdateActionState( m_EditFogInterpTime, "Weather.Fog", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditFogMinDuration, "Weather.Fog", hasNotSelectedPreset || easyModeEnabled);
+		UpdateActionState( m_EditFogInterpTime, "Weather.Fog", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditFogMinDuration, "Weather.Fog", hasNotSelectedPreset, easyModeEnabled);
 #ifndef DAYZ_1_25
 		UpdateActionState( m_SliderDyanmicFogBias, "Weather.Fog.Dynamic", hasNotSelectedPreset);
-		UpdateActionState( m_SliderDyanmicFogDistance, "Weather.Fog.Dynamic", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_SliderDyanmicFogHeight, "Weather.Fog.Dynamic", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditDynamicFogInterpTime, "Weather.Fog.Dynamic", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_SliderDyanmicFogDistance, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_SliderDyanmicFogHeight, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditDynamicFogInterpTime, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
 #endif
 		UpdateActionState( m_SliderRainForecast, "Weather.Rain", hasNotSelectedPreset );
-		UpdateActionState( m_EditRainInterpTime, "Weather.Rain", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditRainMinDuration, "Weather.Rain", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditRainInterpTime, "Weather.Rain", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditRainMinDuration, "Weather.Rain", hasNotSelectedPreset, easyModeEnabled );
 
 		UpdateActionState( m_SliderRainOvercastMin, "Weather.Rain.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_SliderRainOvercastMax, "Weather.Rain.Thresholds", hasNotSelectedPreset );
-		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset, easyModeEnabled );
 
 		#ifndef DAYZ_1_25
 		UpdateActionState( m_SliderSnowForecast, "Weather.Snow", hasNotSelectedPreset );
-		UpdateActionState( m_EditSnowInterpTime, "Weather.Snow", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditSnowMinDuration, "Weather.Snow", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditSnowInterpTime, "Weather.Snow", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditSnowMinDuration, "Weather.Snow", hasNotSelectedPreset, easyModeEnabled );
 
 		UpdateActionState( m_SliderSnowOvercastMin, "Weather.Snow.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_SliderSnowOvercastMax, "Weather.Snow.Thresholds", hasNotSelectedPreset );
-		UpdateActionState( m_EditTextSnowTransitionTime, "Weather.Snow.Thresholds", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditTextSnowTransitionTime, "Weather.Snow.Thresholds", hasNotSelectedPreset, easyModeEnabled );
 		#endif
 
 		UpdateActionState( m_SliderOvercastForecast, "Weather.Overcast", hasNotSelectedPreset );
-		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditOvercastMinDuration, "Weather.Overcast", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditOvercastMinDuration, "Weather.Overcast", hasNotSelectedPreset, easyModeEnabled );
 
 		#ifndef DAYZ_1_25
 		UpdateActionState( m_SliderWindMagnitudeForecast, "Weather.Wind", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindMagnitudeInterpTime, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditWindMagnitudeMinDuration, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindMagnitudeInterpTime, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditWindMagnitudeMinDuration, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
 		
 		UpdateActionState( m_SliderWindDirectionForecast, "Weather.Wind", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindDirectionInterpTime, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditWindDirectionMinDuration, "Weather.Wind", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindDirectionInterpTime, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditWindDirectionMinDuration, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
 		#else
 		UpdateActionState( m_SliderWindDirectionX, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_SliderWindDirectionZ, "Weather.Wind", hasNotSelectedPreset );
@@ -438,9 +438,9 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_EditWindMaxSpeed, "Weather.Wind", hasNotSelectedPreset );
 		#endif
 
-		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
-		UpdateActionState( m_EditWindFuncChangeFreq, "Weather.Wind.FunctionParams", hasNotSelectedPreset || easyModeEnabled );
+		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset, easyModeEnabled );
+		UpdateActionState( m_EditWindFuncChangeFreq, "Weather.Wind.FunctionParams", hasNotSelectedPreset, easyModeEnabled );
 
 		if ( hasNotSelectedPreset )
 		{
@@ -1428,6 +1428,8 @@ class JMWeatherForm: JMFormBase
 	
 	void ToggleMenus()
 	{
+		bool easyModeEnabled = m_Checkbox_EasyMode.IsChecked();
+
 		// This is aids, will redo this bit one day
 		if (m_ToggleQuickActions.IsToggled() && !m_PresetsShown)
 			m_PanelQuickActions.Show(true);
@@ -1494,7 +1496,9 @@ class JMWeatherForm: JMFormBase
 			#else
 			m_PanelWind.Show(true);
 			#endif
-			m_PanelWindFunc.Show(true);
+
+			if (!easyModeEnabled)
+				m_PanelWindFunc.Show(true);
 		}
 		else
 		{
