@@ -172,11 +172,13 @@ class JMObjectSpawnerForm: JMFormBase
 		m_HealthItem.SetStepValue( 1 );
 		m_HealthItem.SetCurrent( 100 );
 
+		#ifndef DAYZ_1_25
 		m_TemperatureItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
 		m_TemperatureItem.SetSliderWidth(0.6);
 		m_TemperatureItem.SetStepValue( 1 );
 		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
 		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
+		#endif
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
@@ -370,6 +372,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateTemperatureItemColor()
 	{
+		#ifndef DAYZ_1_25
 		int value = m_TemperatureItem.GetCurrent();
 
 		m_TemperatureItem.SetColor( ObjectTemperatureState.GetStateData(value).m_Color );
@@ -379,6 +382,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_TemperatureItem.SetFormat("#STR_COT_FORMAT_DEGREE");
 
 		m_TemperatureItem.SetAlpha( 1.0 );
+		#endif
 	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
