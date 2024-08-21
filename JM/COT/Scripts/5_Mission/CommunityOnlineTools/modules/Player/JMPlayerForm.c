@@ -1597,6 +1597,7 @@ class JMPlayerForm: JMFormBase
 		m_HeatBufferUpdated = true;
 		m_HeatBuffer.SetAlpha( 1.0 );
 		
+		#ifndef DAYZ_1_25
 		// COLD
 		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
 		{
@@ -1629,6 +1630,7 @@ class JMPlayerForm: JMFormBase
 			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_FOUR );
 		}
 		m_HeatComfort.SetAlpha( 1.0 );
+		#endif
 	}
 
 	void Click_BloodyHands( UIEvent eid, UIActionBase action )
