@@ -28,16 +28,9 @@ modded class JMModuleConstructor
 
 		modules.Insert( JMVehiclesModule );
 
-		//! TODO: make the territory module part of COT and make Expansion expand on it
-		//! 	  It will allow other Territory mods to do the same if they want 
-#ifdef EXPANSION_MODULES
-		modules.Insert( JMTerritoriesModule );
-#endif
-
 		//! TODO: Find a way to check of offline mode without being triggered while in main menu
 		//if ( IsMissionOffline() )
 		//	modules.Insert( JMMissionSelectorModule );
-
 		
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
