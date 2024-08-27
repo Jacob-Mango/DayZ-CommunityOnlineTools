@@ -35,17 +35,13 @@ class CommunityOnlineToolsBase
 	void CreateNewLog()
 	{
 		if ( !FileExist( JMConstants.DIR_LOGS ) )
-		{
 			MakeDirectory( JMConstants.DIR_LOGS );
-		}
 
 		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now( true ).ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
 		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
 
 		if ( fileLog != 0 )
-		{
 			CloseFile( fileLog );
-		}
 	}
 
 	void CloseLog()
@@ -151,14 +147,10 @@ class CommunityOnlineToolsBase
 		if ( open )
 		{
 			if ( GetGame().GetUIManager().GetMenu() )
-			{
 				return;
-			}
 
 			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-			{
 				return;
-			}
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
