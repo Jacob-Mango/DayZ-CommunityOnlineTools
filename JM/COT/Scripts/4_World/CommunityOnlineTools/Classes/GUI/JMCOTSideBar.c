@@ -2,11 +2,16 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 
-	private float m_WidthX;
-	private float m_PosX;
+	private float m_WidthFull;
+	private float m_WidthIcon;
+	private float m_CurrentWidth;
 
 	private bool m_IsAnimatingIn;
 	private bool m_IsAnimatingOut;
+	
+	private bool m_IsTargetCompact;
+	private bool m_IsCompact;
+	private bool m_WasCompact;
 
 	private float m_TotalAnimateTime;
 	private float m_AnimateTime;
@@ -67,7 +72,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		}
 
 		float h;
-		m_LayoutRoot.GetSize( m_WidthX, h );
+		m_LayoutRoot.GetSize( m_WidthFull, h );
+		m_WidthIcon = m_WidthFull * 0.8;
 
 		Hide();
 		m_LayoutRoot.Show( false );
@@ -119,15 +125,11 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		if ( !m_LayoutRoot )
 			return;
+		
+		ShowAllWidgets();
 
 		m_IsAnimatingIn = true;
 		m_AnimateTime = 0.0;
-		
-		#ifndef CF_WINDOWS
-		GetCOTWindowManager().ShowAllActive();
-		GetGame().GetInput().ChangeGameFocus( 1 );
-		GetGame().GetUIManager().ShowUICursor( true );
-		#endif
 	}
 
 	void Hide()
@@ -137,9 +139,28 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		SetFocus( NULL );
 
+		if ( !IsMissionClient() ) 
+			return;
+
 		m_IsAnimatingOut = true;
 		m_AnimateTime = 0.0;
-		
+
+		HideAllWidgets();
+	}
+
+	void ShowAllWidgets()
+	{
+		#ifndef CF_WINDOWS
+		GetCOTWindowManager().ShowAllActive();
+		GetGame().GetInput().ChangeGameFocus( 1 );
+		GetGame().GetUIManager().ShowUICursor( true );
+		#endif
+	}
+
+	void HideAllWidgets()
+	{
+		m_WasCompact = m_IsCompact;
+
 		#ifndef CF_WINDOWS
 		GetCOTWindowManager().HideAllActive();
 		if ( !GetCOTWindowManager().HasAnyActive() )
@@ -152,21 +173,45 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 	void OnUpdate( float timeslice )
 	{
-		if ( m_IsAnimatingIn || m_IsAnimatingOut )
+		CheckForVisibleModules();
+		
+		if (m_IsAnimatingIn || m_IsAnimatingOut || (m_IsTargetCompact != m_IsCompact))
 		{
 			m_AnimateTime += timeslice;
+			float percent = m_AnimateTime / m_TotalAnimateTime;
+			if (percent > 1.0)
+				percent = 1.0;
 
-			float scaledTime = m_TotalAnimateTime / m_AnimateTime;
-
-			if ( m_IsAnimatingIn )
+			if (m_IsAnimatingIn)
 			{
 				m_LayoutRoot.Show( true );
-				m_PosX = -m_WidthX + (m_WidthX / scaledTime);
-				if (m_PosX > 0)
-					m_PosX = 0;
+				if (m_IsTargetCompact)
+				{
+					m_CurrentWidth = EaseIn(percent, -m_WidthIcon, -m_WidthFull);
+				} else {
+					m_CurrentWidth = EaseIn(percent, 0, -m_WidthFull);
+				}
 			}
-			else if ( m_IsAnimatingOut )
-				m_PosX = -m_WidthX / scaledTime;
+			else if (m_IsAnimatingOut)
+			{
+				if (m_WasCompact)
+				{
+					m_CurrentWidth = EaseOut(percent, -m_WidthFull, -m_WidthIcon);
+				} else {
+					m_CurrentWidth = EaseOut(percent, -m_WidthFull, 0);
+				}
+			}
+			else
+			{
+				if (m_IsTargetCompact)
+				{
+					m_CurrentWidth = EaseOut(percent, -m_WidthIcon, 0);
+				} else {
+					m_CurrentWidth = EaseIn(percent, 0, -m_WidthIcon);
+				}
+			}
+
+			m_LayoutRoot.SetPos( m_CurrentWidth, 0 );
 
 			if ( m_AnimateTime > m_TotalAnimateTime )
 			{
@@ -175,11 +220,37 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 				m_IsAnimatingIn = false;
 				m_IsAnimatingOut = false;
+				m_IsCompact = m_IsTargetCompact;
+				m_AnimateTime = 0.0;
 			}
-			
-			m_LayoutRoot.SetPos( m_PosX, 0 );
-			return;
 		}
+	}
+
+	float EaseIn(float percent, float max, float min)
+	{
+    	float result = Math.Sin((percent * Math.PI) / 2);
+		return Math.Lerp(min, max, result);
+	}
+
+	float EaseOut(float percent, float max, float min)
+	{
+		float result = (1 - Math.Cos((percent * Math.PI) / 2));
+		return Math.Lerp(min, max, result);
+	}
+
+	void CheckForVisibleModules()
+	{
+		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
+		foreach(JMRenderableModuleBase module: modules)
+		{
+			if ( module.IsVisible() )
+			{
+				m_IsTargetCompact = true;
+				return;
+			}
+		}
+
+		m_IsTargetCompact = false;
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -188,20 +259,15 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			return false;
 		
 		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
-
-		for ( int i = 0; i < modules.Count(); i++ )
+		foreach(JMRenderableModuleBase module: modules)
 		{
-			JMRenderableModuleBase module = modules[i];
-
 			if ( w == module.GetMenuButton() )
 			{
 				module.ToggleShow();
-				break;
+				return false;
 			}
 		}
 
 		return false;
 	}
 };
-
-
