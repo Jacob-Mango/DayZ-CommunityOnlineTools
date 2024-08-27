@@ -1428,8 +1428,6 @@ class JMWeatherForm: JMFormBase
 	
 	void ToggleMenus()
 	{
-		bool easyModeEnabled = m_Checkbox_EasyMode.IsChecked();
-
 		// This is aids, will redo this bit one day
 		if (m_ToggleQuickActions.IsToggled() && !m_PresetsShown)
 			m_PanelQuickActions.Show(true);
@@ -1497,8 +1495,10 @@ class JMWeatherForm: JMFormBase
 			m_PanelWind.Show(true);
 			#endif
 
-			if (!easyModeEnabled)
+			if (m_PresetsShown)
 				m_PanelWindFunc.Show(true);
+			else
+				m_PanelWindFunc.Show(!m_Checkbox_EasyMode.IsChecked());
 		}
 		else
 		{
