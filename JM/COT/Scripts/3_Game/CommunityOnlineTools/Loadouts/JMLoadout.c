@@ -1,4 +1,4 @@
 class JMLoadout
 {
-	ref array< ref JMLoadoutItem > m_ItemData;
+	ref array< ref JMLoadoutItem > m_Items;
 };
