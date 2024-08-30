@@ -317,8 +317,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 	
-	void SpawnTarget( string Loadout, EntityAI ent )
+	void SpawnTarget( string Loadout, vector pos )
 	{
+		EntityAI ent;
 		if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();

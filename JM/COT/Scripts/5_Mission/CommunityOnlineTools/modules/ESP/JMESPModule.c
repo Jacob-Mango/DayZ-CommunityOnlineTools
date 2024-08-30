@@ -1748,7 +1748,7 @@ class JMESPModule: JMRenderableModuleBase
 			EntityAI parent;
 			if (Class.CastTo(parent, objects[i]))
 			{
-				if (count > 1)
+				if (count != 0)
 					avgPos = avgPos + parent.GetPosition();
 
 				parents.Insert(parent);
@@ -1756,9 +1756,9 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		count = parents.Count();
-		if (count > 0)
+		if (count > -1)
 		{
-			if (count != 1)
+			if (count != 0)
 			{
 				avgPos[0] = avgPos[0] / count;
 				avgPos[1] = avgPos[1] / count;

@@ -55,6 +55,13 @@ class JMLoadoutForm: JMFormBase
 
 		array< string > names = new array< string >;
 		names.Copy( m_Module.GetLoadouts() );
+
+		if (names.Count() < 1)
+		{
+			UIActionManager.CreateText( m_ActionsWrapper, "Use the ESP to create new Loadouts from the quick action tab (right side)" );
+			m_sclr_MainActions.UpdateScroller();
+			return;
+		}
 		
 		JMStatics.SortStringArray( names );
 
@@ -69,10 +76,12 @@ class JMLoadoutForm: JMFormBase
 			
 				Widget bttnwrapper = UIActionManager.CreateGridSpacer( wrapper, 1, 2 );
 
-					UIActionButton buttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
-					buttn.SetData( new JMLoadoutButtonData( name ) );
+					UIActionButton spwnbttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
+					spwnbttn.SetData( new JMLoadoutButtonData( name ) );
 				
-					UIActionManager.CreateButton( bttnwrapper, "#STR_COT_OBJECT_MODULE_DELETE", this, "OnClick_Delete" );
+					UIActionButton delbttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_OBJECT_MODULE_DELETE", this, "OnClick_Delete" );
+					delbttn.SetData( new JMLoadoutButtonData( name ) );
+					delbttn.SetColor(COLOR_RED);
 		}
 
 		m_sclr_MainActions.UpdateScroller();
@@ -119,7 +128,7 @@ class JMLoadoutForm: JMFormBase
 				m_Module.SpawnCursor( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.TARGET:
-				//m_Module.SpawnOnTarget( data.Filename, GetCursorPos() );
+				m_Module.SpawnTarget( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.PLAYER:
 				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayers() );
