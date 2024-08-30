@@ -22,7 +22,7 @@ modded class JMModuleConstructor
 		// LEGACY
 		//modules.Insert( JMVehicleSpawnerModule );
 		//modules.Insert( JMItemSetSpawnerModule );
-		//modules.Insert( JMLoadoutSpawnerModule );
+		modules.Insert( JMLoadoutModule );
 		
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );

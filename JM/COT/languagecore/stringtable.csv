@@ -112,6 +112,7 @@ STR_COT_ITEMSET_MODULE_SPAWN_SELECTED_PLAYERS,Selected Player(s),Selected Player
 STR_COT_OBJECT_MODULE_EXPORT_RAW,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw,Export Raw
 STR_COT_OBJECT_MODULE_EXPORT_TYPES,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types,Export Types
 STR_COT_OBJECT_MODULE_EXPORT_MARKET,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market,Export Market
+STR_COT_LOADOUT_MODULE_NAME,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout,Loadout
 STR_COT_MAP_MODULE_NAME,Map,Map,Map,Karte,Карта,Map,Map,Map,Map,Carte,Map,Map,Map,Map
 STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message,Admin Message
 STR_COT_NOTIFICATION_KICKED_BY_ADMIN,Kicked by Admin,Kicked by Admin,Kicked by Admin,Gekickt von Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin,Kicked by Admin
