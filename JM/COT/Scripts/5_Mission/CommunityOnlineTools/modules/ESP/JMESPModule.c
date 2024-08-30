@@ -1739,23 +1739,23 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_CreateLoadout( string name, set< Object > objects, JMPlayerInstance instance )
 	{
 		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< Object > props = new array< Object >;
 		array< EntityAI > parents = new array< EntityAI >;
 		vector avgPos;
 
 		int count = objects.Count();
 		for(int i=0; i < count; i++)
 		{
+			if (count != 0)
+				avgPos = avgPos + objects[i].GetPosition();
+
 			EntityAI parent;
 			if (Class.CastTo(parent, objects[i]))
-			{
-				if (count != 0)
-					avgPos = avgPos + parent.GetPosition();
-
 				parents.Insert(parent);
-			}
+			else
+				props.Insert(objects[i]);
 		}
 
-		count = parents.Count();
 		if (count > -1)
 		{
 			if (count != 0)
@@ -1765,10 +1765,11 @@ class JMESPModule: JMRenderableModuleBase
 				avgPos[2] = avgPos[2] / count;
 			}
 
-			for(i=0; i < count; i++)
-			{
-				loadouts.Insert(LoadoutProcessItem(parents[i], avgPos - parents[i].GetPosition(), parents[i].GetOrientation()));
-			}
+			foreach(EntityAI prnt: parents)
+				loadouts.Insert(LoadoutProcessItem(prnt, avgPos - prnt.GetPosition(), prnt.GetOrientation()));
+				
+			foreach(Object obj: props)
+				loadouts.Insert(LoadoutProcessObject(parent, avgPos - parent.GetPosition(), parent.GetOrientation()));
 
 			JMLoadout loadout = new JMLoadout;
 			loadout.m_Items = new array< ref JMLoadoutItem >;
@@ -1779,6 +1780,17 @@ class JMESPModule: JMRenderableModuleBase
 			GetCommunityOnlineToolsBase().Log( instance, "TODO" );
 			SendWebhook( "CreateLoadout", instance, "TODO" );
 		}
+	}
+
+	JMLoadoutItem LoadoutProcessObject(Object parent, vector pos = vector.Zero, vector rot = vector.Zero)
+	{
+		JMLoadoutItem item = new JMLoadoutItem;
+
+		item.m_Classname 	 = parent.GetType();
+		item.m_LocalPosition = pos;
+		item.m_LocalRotation = rot;
+
+		return item;
 	}
 
 	JMLoadoutItem LoadoutProcessItem(EntityAI parent, vector pos = vector.Zero, vector rot = vector.Zero)
