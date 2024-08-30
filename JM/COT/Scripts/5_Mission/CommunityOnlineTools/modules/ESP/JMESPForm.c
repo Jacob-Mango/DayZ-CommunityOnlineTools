@@ -160,13 +160,10 @@ class JMESPForm: JMFormBase
 		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
 
 		UIActionManager.CreateText(container,"Selected Items");
-	#ifdef COT_ENABLE_LOADOUTS
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
-	#endif
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market"}, this );
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "COT ItemSet"}, this );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
@@ -569,6 +566,28 @@ class JMESPForm: JMFormBase
 			case COT_ESPMode.COPYLISTEXPMARKET:
 				m_Module.CopyToClipboardMarket();
 			break;
+			case COT_ESPMode.CREATELOADOUT:
+				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "CreateLoadout_Cancel", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
+			break;
 		}
+	}
+
+	void CreateLoadout_Cancel(JMConfirmation confirmation)
+	{
+	}
+
+	void CreateLoadout_Confirm(JMConfirmation confirmation)
+	{
+		string name = confirmation.GetEditBoxValue();
+		if (name == string.Empty)
+			return;
+		
+		/*
+		//! TODO: Check if .json is in the name, if yes remove it
+		if (name == ".json")
+			return;
+		*/
+
+		m_Module.CreateLoadout(name);
 	}
 };
