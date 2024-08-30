@@ -289,12 +289,19 @@ class JMLoadoutModule: JMRenderableModuleBase
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 		foreach(JMPlayerInstance pData: players)
 		{
-			pData.Update();
+			pData.Update();			
 
 			int id = Math.RandomIntInclusive(0, count);
-			foreach(JMLoadoutSubItem itemData: file.m_Items[id].m_Attachments)
-				SpawnInItem( itemData, pData.PlayerObject );
-			
+			if (IsKindOfLoadout( file.m_Items[0].m_Classname, "SurvivorBase" ))
+			{
+				foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
+					SpawnInItem(itemSubData, pData.PlayerObject);
+			}
+			else
+			{
+				SpawnItem(file.m_Items[id], pData.PlayerObject);
+			}
+
 			//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
 			//SendWebhook( "Player", instance, "Spawned item set \"" + file.Name + "\" on " + players[i].FormatSteamWebhook() );
 		}
@@ -383,9 +390,27 @@ class JMLoadoutModule: JMRenderableModuleBase
 			return;
 
 		int id = Math.RandomIntInclusive(0, count);
+		if (IsKindOfLoadout( file.m_Items[0].m_Classname, ent.GetType() ))
+		{
+			foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
+				SpawnInItem(itemSubData, ent);
+		}
+		else
+		{
+			SpawnItem(file.m_Items[id], ent);
+		}
+	}
 
-		foreach(JMLoadoutSubItem itemData: file.m_Items[id].m_Attachments)
-			SpawnInItem(itemData, ent);
+	bool IsKindOfLoadout(string reciever, string giver)
+	{
+		if (GetGame().IsKindOf( reciever, giver ))
+			return true;
+		
+		if (GetGame().IsKindOf( reciever, "SurvivorBase" ))
+			if (GetGame().IsKindOf( giver, "SurvivorBase" ))
+				return true;
+
+		return false;
 	}
 
 	private void SpawnLoadout( JMLoadout file, vector position )
@@ -433,6 +458,20 @@ class JMLoadoutModule: JMRenderableModuleBase
 			SetupVehicle(ent);
 		else if (isBaseBuilding)
 			SetupBaseBuilding(ent, itemData.m_ConstructionParts);
+
+		SetupItem(ent, itemData.m_Data);
+
+		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
+			SpawnInItem(subItemData, ent);
+
+		return ent;
+	}
+
+	private EntityAI SpawnItem( JMLoadoutItem itemData, EntityAI parent )
+	{
+		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
+		if (!ent)
+			return NULL;
 
 		SetupItem(ent, itemData.m_Data);
 
