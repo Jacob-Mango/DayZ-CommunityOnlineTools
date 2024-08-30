@@ -1742,22 +1742,28 @@ class JMESPModule: JMRenderableModuleBase
 		array< EntityAI > parents = new array< EntityAI >;
 		vector avgPos;
 
-		for(int i=0; i < objects.Count(); i++)
+		int count = objects.Count();
+		for(int i=0; i < count; i++)
 		{
 			EntityAI parent;
 			if (Class.CastTo(parent, objects[i]))
 			{
-				avgPos = avgPos + parent.GetPosition();
+				if (count > 1)
+					avgPos = avgPos + parent.GetPosition();
+
 				parents.Insert(parent);
 			}
 		}
 
-		int count = parents.Count();
+		count = parents.Count();
 		if (count > 0)
 		{
-			avgPos[0] = avgPos[0] / count;
-			avgPos[1] = avgPos[1] / count;
-			avgPos[2] = avgPos[2] / count;
+			if (count != 1)
+			{
+				avgPos[0] = avgPos[0] / count;
+				avgPos[1] = avgPos[1] / count;
+				avgPos[2] = avgPos[2] / count;
+			}
 
 			for(i=0; i < count; i++)
 			{
