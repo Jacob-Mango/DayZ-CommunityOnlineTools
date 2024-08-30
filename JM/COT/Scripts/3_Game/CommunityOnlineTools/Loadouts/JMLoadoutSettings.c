@@ -66,7 +66,7 @@ class JMLoadoutSettings
 	static bool Delete(string filename)
 	{
 		if (!FileExist(JMConstants.DIR_LOADOUTS))
-			MakeDirectory(JMConstants.DIR_LOADOUTS);
+			return false;
 
         string filepath = JMConstants.DIR_LOADOUTS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
 		if (DeleteFile(filepath))

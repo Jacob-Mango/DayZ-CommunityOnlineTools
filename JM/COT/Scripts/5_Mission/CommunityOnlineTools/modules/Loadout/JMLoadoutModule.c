@@ -80,6 +80,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		case JMLoadoutModuleRPC.Load:
 			RPC_Load( ctx, sender, target );
 			break;
+		case JMLoadoutModuleRPC.Delete:
+			RPC_Delete( ctx, sender, target );
+			break;
 		case JMLoadoutModuleRPC.SpawnCursor:
 			RPC_SpawnCursor( ctx, sender, target );
 			break;
@@ -89,11 +92,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 		case JMLoadoutModuleRPC.SpawnPlayers:
 			RPC_SpawnPlayers( ctx, sender, target );
 			break;
-			/*
-		case JMLoadoutModuleRPC.Delete:
-			RPC_Delete( ctx, sender, target );
-			break;
-			*/
 		}
 	}
 	
@@ -101,9 +99,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		if ( GetGame().IsClient() )
 		{
-			if (meta)
-				return;
-
 			meta = JMLoadoutMeta.Create();
 
 			ScriptRPC rpc = new ScriptRPC();
@@ -166,6 +161,47 @@ class JMLoadoutModule: JMRenderableModuleBase
 			{
 				OnSettingsUpdated();
 			}
+		}
+	}
+
+	void Delete( string Loadout )
+	{
+		if ( IsMissionClient() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( Loadout );
+			rpc.Send( NULL, JMLoadoutModuleRPC.Delete, true, NULL );
+		}
+		else
+		{
+			Server_Delete( Loadout, NULL );
+		}
+	}
+
+	private void Server_Delete( string Loadout, PlayerIdentity ident )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Loadouts.Delete", ident, instance ) )
+			return;
+
+		JMLoadoutSettings.Delete(Loadout);
+
+		//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
+		//SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
+	}
+
+	private void RPC_Delete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			string Loadout;
+			if ( !ctx.Read( Loadout ) )
+			{
+				Error("Failed");
+				return;
+			}
+
+			Server_Delete( Loadout, senderRPC );
 		}
 	}
 

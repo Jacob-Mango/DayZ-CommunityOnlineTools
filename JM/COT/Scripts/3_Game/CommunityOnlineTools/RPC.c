@@ -226,6 +226,7 @@ enum JMLoadoutModuleRPC
 {
 	INVALID = 10460,
 	Load,
+	Delete,
 	SpawnCursor,
 	SpawnTarget,
 	SpawnPlayers,

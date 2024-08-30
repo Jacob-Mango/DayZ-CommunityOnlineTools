@@ -1,6 +1,7 @@
 class JMLoadoutForm: JMFormBase
 {
 	private UIActionScroller m_sclr_MainActions;
+	private Widget m_ContentWrapper;
 	private Widget m_ActionsWrapper;
 
 	protected UIActionSelectBox m_SpawnModeSelect;
@@ -21,9 +22,9 @@ class JMLoadoutForm: JMFormBase
 	override void OnInit()
 	{
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
-		m_ActionsWrapper = m_sclr_MainActions.GetContentWidget();
-		
-		Widget buttonswrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
+
+		Widget buttonswrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 2 );
 
 			UIActionManager.CreateButton( buttonswrapper, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "OnClick_Refresh" );
 			
@@ -46,6 +47,11 @@ class JMLoadoutForm: JMFormBase
 	{
 		if (!m_Module.IsLoaded())
 			return;
+		
+		if (m_ActionsWrapper)
+			delete m_ActionsWrapper;
+
+		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 1 );
 
 		array< string > names = new array< string >;
 		names.Copy( m_Module.GetLoadouts() );
@@ -64,7 +70,7 @@ class JMLoadoutForm: JMFormBase
 				Widget bttnwrapper = UIActionManager.CreateGridSpacer( wrapper, 1, 2 );
 
 					UIActionButton buttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
-					buttn.SetData( new JMItemSpawnerButtonData( name ) );
+					buttn.SetData( new JMLoadoutButtonData( name ) );
 				
 					UIActionManager.CreateButton( bttnwrapper, "#STR_COT_OBJECT_MODULE_DELETE", this, "OnClick_Delete" );
 		}
@@ -81,7 +87,11 @@ class JMLoadoutForm: JMFormBase
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		//m_Module.Delete( data.Filename );
+		m_Module.Delete( data.Filename );
+
+		m_Module.Load();
+
+		OnSettingsUpdated();
 	}
 	
 	void OnClick_Refresh( UIEvent eid, UIActionBase action ) 
@@ -89,7 +99,9 @@ class JMLoadoutForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		//m_Module.Refresh();
+		m_Module.Load();
+
+		OnSettingsUpdated();
 	}
 
 	void OnClick_Spawn( UIEvent eid, UIActionBase action ) 
@@ -107,7 +119,7 @@ class JMLoadoutForm: JMFormBase
 				m_Module.SpawnCursor( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.TARGET:
-				//m_Module.SpawnOnTarget( data.Filename, ent );
+				//m_Module.SpawnOnTarget( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.PLAYER:
 				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayers() );
