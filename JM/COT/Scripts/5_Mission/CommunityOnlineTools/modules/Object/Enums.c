@@ -19,6 +19,13 @@ enum COT_ESPMode
 	CREATELOADOUT
 };
 
+enum COT_LoadoutSpawnMode
+{
+	CURSOR,
+	TARGET,
+	PLAYER
+};
+
 enum COT_ObjectSetupMode
 {
 	DEBUGSPAWN,

@@ -1768,7 +1768,7 @@ class JMESPModule: JMRenderableModuleBase
 			loadout.m_ItemData = new array< ref JMLoadoutItem >;
 			loadout.m_ItemData = loadouts;
 			
-			JMLoadout.Save(loadout, name);
+			JMLoadoutSettings.Save(loadout, name);
 
 			GetCommunityOnlineToolsBase().Log( instance, "TODO" );
 			SendWebhook( "CreateLoadout", instance, "TODO" );
