@@ -254,6 +254,8 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Refuel" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Heal" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.CreateLoadout" );
 	}
 
 #ifdef SERVER
@@ -319,6 +321,7 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
 		types.Insert( "MoveToCursor" );
+		types.Insert( "CreateLoadout" );
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -381,6 +384,9 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
+		#ifndef DAYZ_1_25
+		types.Insert( JMESPViewTypeBoat );
+		#endif
 		
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
@@ -934,6 +940,10 @@ class JMESPModule: JMRenderableModuleBase
 			break;
 		case JMESPModuleRPC.MoveToCursor:
 			RPC_MoveToCursor( ctx, sender, target );
+			break;
+			
+		case JMESPModuleRPC.CreateLoadout:
+			RPC_CreateLoadout( ctx, sender, target );
 			break;
 		}
 	}
@@ -1699,5 +1709,112 @@ class JMESPModule: JMRenderableModuleBase
 
 		clipboardOutput += "</spawnabletypes>\n";
 		GetGame().CopyToClipboard(clipboardOutput);
+	}
+
+	void CreateLoadout(string name)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( name );
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMESPModuleRPC.CreateLoadout, true, NULL );
+	}
+
+	private void RPC_CreateLoadout( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.CreateLoadout", senderRPC, instance ) )
+			return;
+		
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_CreateLoadout( name, objects, instance );
+	}
+
+	private void Exec_CreateLoadout( string name, set< Object > objects, JMPlayerInstance instance )
+	{
+		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< EntityAI > parents = new array< EntityAI >;
+		vector avgPos;
+
+		for(int i=0; i < objects.Count(); i++)
+		{
+			EntityAI parent;
+			if (Class.CastTo(parent, objects[i]))
+			{
+				avgPos = avgPos + parent.GetPosition();
+				parents.Insert(parent);
+			}
+		}
+
+		int count = parents.Count();
+		if (count > 0)
+		{
+			avgPos[0] = avgPos[0] / count;
+			avgPos[1] = avgPos[1] / count;
+			avgPos[2] = avgPos[2] / count;
+
+			for(i=0; i < count; i++)
+			{
+				loadouts.Insert(LoadoutProcessItem(parents[i], true, avgPos - parents[i].GetPosition(), parents[i].GetOrientation()));
+			}
+
+			JMLoadout loadout = new JMLoadout;
+			loadout.m_ItemData = new array< ref JMLoadoutItem >;
+			loadout.m_ItemData = loadouts;
+			
+			JMLoadout.Save(loadout, name);
+
+			GetCommunityOnlineToolsBase().Log( instance, "TODO" );
+			SendWebhook( "CreateLoadout", instance, "TODO" );
+		}
+	}
+
+	JMLoadoutItem LoadoutProcessItem(EntityAI parent, bool IsHierarchyParent = false, vector pos = vector.Zero, vector rot = vector.Zero)
+	{
+		JMLoadoutItem dataItem = new JMLoadoutItem;
+
+		dataItem.m_Classname 		= parent.GetType();
+		if (IsHierarchyParent)
+		{
+			dataItem.m_LocalPosition = pos;
+			dataItem.m_LocalRotation = rot;
+		}
+
+		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
+			dataItem.m_Health 		= parent.GetHealth();
+
+		if (parent.HasQuantity())
+		{
+			dataItem.m_Quantity 	= parent.GetQuantity();
+			dataItem.m_LiquidType 	= parent.GetLiquidType();
+		}
+		
+		dataItem.m_Temperature 	= parent.GetTemperature();
+		dataItem.m_Attachments 	= new array< ref JMLoadoutItem >;
+
+		EntityAI child;
+		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
+		{
+			child = EntityAI.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
+			dataItem.m_Attachments.Insert(LoadoutProcessItem(child));
+		}
+
+		CargoBase cargo = parent.GetInventory().GetCargo();
+		if(cargo)
+		{
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				child = EntityAI.Cast(cargo.GetItem(j));
+				dataItem.m_Attachments.Insert(LoadoutProcessItem(child));
+			}
+		}
+
+		return dataItem;
 	}
 };

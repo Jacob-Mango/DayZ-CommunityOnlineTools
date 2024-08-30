@@ -139,6 +139,9 @@ enum JMESPModuleRPC
 	DuplicateAll,
 	DeleteAll,
 	MoveToCursor,
+
+	CreateLoadout,
+	
 	COUNT
 };
 
@@ -216,6 +219,16 @@ enum JMWebhookCOTModuleRPC
 	AddType,
 	RemoveType,
 	TypeState,
+	COUNT
+};
+
+enum JMLoadoutModuleRPC
+{
+	INVALID = 10460,
+	Load,
+	SpawnCursor,
+	SpawnTarget,
+	SpawnPlayers,
 	COUNT
 };
 
