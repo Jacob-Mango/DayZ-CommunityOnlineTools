@@ -1767,12 +1767,12 @@ class JMESPModule: JMRenderableModuleBase
 
 			for(i=0; i < count; i++)
 			{
-				loadouts.Insert(LoadoutProcessItem(parents[i], true, avgPos - parents[i].GetPosition(), parents[i].GetOrientation()));
+				loadouts.Insert(LoadoutProcessItem(parents[i], avgPos - parents[i].GetPosition(), parents[i].GetOrientation()));
 			}
 
 			JMLoadout loadout = new JMLoadout;
-			loadout.m_ItemData = new array< ref JMLoadoutItem >;
-			loadout.m_ItemData = loadouts;
+			loadout.m_Items = new array< ref JMLoadoutItem >;
+			loadout.m_Items = loadouts;
 			
 			JMLoadoutSettings.Save(loadout, name);
 
@@ -1781,16 +1781,14 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	JMLoadoutItem LoadoutProcessItem(EntityAI parent, bool IsHierarchyParent = false, vector pos = vector.Zero, vector rot = vector.Zero)
+	JMLoadoutItem LoadoutProcessItem(EntityAI parent, vector pos = vector.Zero, vector rot = vector.Zero)
 	{
-		JMLoadoutItem dataItem = new JMLoadoutItem;
+		JMLoadoutItem item = new JMLoadoutItem;
+		JMLoadoutItemData dataItem = new JMLoadoutItemData;
 
-		dataItem.m_Classname 		= parent.GetType();
-		if (IsHierarchyParent)
-		{
-			dataItem.m_LocalPosition = pos;
-			dataItem.m_LocalRotation = rot;
-		}
+		item.m_Classname 		= parent.GetType();
+		item.m_LocalPosition = pos;
+		item.m_LocalRotation = rot;
 
 		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
 			dataItem.m_Health 		= parent.GetHealth();
@@ -1802,13 +1800,32 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		
 		dataItem.m_Temperature 	= parent.GetTemperature();
-		dataItem.m_Attachments 	= new array< ref JMLoadoutItem >;
+
+		// We check the partname instead of the part ID for better readability for the users
+		// if its causing too much perf issues we might switch to the int ID instead
+		BaseBuildingBase bb;
+		if (Class.CastTo(bb, parent))
+		{
+			item.m_ConstructionParts = new TStringArray;
+			array<ConstructionPart> parts = bb.GetConstruction().GetConstructionParts().GetValueArray();
+			foreach (ConstructionPart part: parts)
+			{
+				if (part.m_IsBuilt)
+				{
+					item.m_ConstructionParts.Insert(part.GetPartName());
+				}
+			}
+		}
+
+		item.m_Data = dataItem;
+		
+		item.m_Attachments = new array< ref JMLoadoutSubItem >;
 
 		EntityAI child;
 		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
 		{
 			child = EntityAI.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
-			dataItem.m_Attachments.Insert(LoadoutProcessItem(child));
+			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
 		}
 
 		CargoBase cargo = parent.GetInventory().GetCargo();
@@ -1817,10 +1834,52 @@ class JMESPModule: JMRenderableModuleBase
 			for(int j=0; j < cargo.GetItemCount(); j++)
 			{
 				child = EntityAI.Cast(cargo.GetItem(j));
-				dataItem.m_Attachments.Insert(LoadoutProcessItem(child));
+				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
 			}
 		}
 
-		return dataItem;
+		return item;
+	}
+
+	JMLoadoutSubItem LoadoutProcessSubItem(EntityAI parent)
+	{
+		JMLoadoutSubItem item = new JMLoadoutSubItem;
+		JMLoadoutItemData dataItem = new JMLoadoutItemData;
+
+		item.m_Classname 		= parent.GetType();
+
+		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
+			dataItem.m_Health 		= parent.GetHealth();
+
+		if (parent.HasQuantity())
+		{
+			dataItem.m_Quantity 	= parent.GetQuantity();
+			dataItem.m_LiquidType 	= parent.GetLiquidType();
+		}
+		
+		dataItem.m_Temperature 	= parent.GetTemperature();
+
+		item.m_Data = dataItem;
+		
+		item.m_Attachments = new array< ref JMLoadoutSubItem >;
+
+		EntityAI child;
+		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
+		{
+			child = EntityAI.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
+			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+		}
+
+		CargoBase cargo = parent.GetInventory().GetCargo();
+		if(cargo)
+		{
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				child = EntityAI.Cast(cargo.GetItem(j));
+				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+			}
+		}
+
+		return item;
 	}
 };

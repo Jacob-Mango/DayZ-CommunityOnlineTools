@@ -278,6 +278,10 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( !file )
 			return;
 
+		int count = file.m_Items.Count();
+		if ( count == 0 )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers", ident, instance ) )
 			return;
@@ -286,8 +290,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		foreach(JMPlayerInstance pData: players)
 		{
 			pData.Update();
-			
-			foreach(JMLoadoutItem itemData: file.m_ItemData)
+
+			int id = Math.RandomIntInclusive(0, count);
+			foreach(JMLoadoutSubItem itemData: file.m_Items[id].m_Attachments)
 				SpawnInItem( itemData, pData.PlayerObject );
 			
 			//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
@@ -371,41 +376,52 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 	
-	private void SpawnLoadout( JMLoadout file, EntityAI ent )
+	private void SpawnLoadout(JMLoadout file, EntityAI ent)
 	{
-		if ( file.m_ItemData.Count() == 0 )
+		int count = file.m_Items.Count();
+		if ( count == 0 )
 			return;
 
-		foreach(JMLoadoutItem itemData: file.m_ItemData)
+		int id = Math.RandomIntInclusive(0, count);
+
+		foreach(JMLoadoutSubItem itemData: file.m_Items[id].m_Attachments)
 			SpawnInItem(itemData, ent);
 	}
 
 	private void SpawnLoadout( JMLoadout file, vector position )
 	{
-		if ( file.m_ItemData.Count() == 0 )
+		if ( file.m_Items.Count() == 0 )
 			return;
 
-		foreach(JMLoadoutItem itemData: file.m_ItemData)
+		foreach(JMLoadoutItem itemData: file.m_Items)
 			SpawnItem(itemData, position);
 	}
 
 	private EntityAI SpawnItem( JMLoadoutItem itemData, vector centerPos )
 	{
-		vector pos = itemData.m_LocalPosition + centerPos;
+		vector pos = centerPos - itemData.m_LocalPosition;
+
+		bool isTrans;
+		bool isBaseBuilding;
+
+		if (GetGame().IsKindOf( itemData.m_Classname, "CarScript" ))
+			isTrans = true;
+		else if (GetGame().IsKindOf( itemData.m_Classname, "BoatScript" ))
+			isTrans = true;
+		else if (GetGame().IsKindOf( itemData.m_Classname, "BaseBuildingBase" ))
+			isBaseBuilding = true;
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( pos ) )
+		if (isTrans)
 		{
-			if ( GetGame().IsKindOf( itemData.m_Classname, "CarScript" ) )
-				flags |= ECE_PLACE_ON_SURFACE;
-			#ifndef DAYZ_1_25
-			else if ( GetGame().IsKindOf( itemData.m_Classname, "BoatScript" ) )
-				flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
-			#endif
+			if ( !COT_SurfaceIsWater( pos ) )
+					flags |= ECE_PLACE_ON_SURFACE;
 		}
-		
-		if ( GetGame().IsKindOf( itemData.m_Classname, "DZ_LightAI" ) )
-			flags |= 0x800;
+		else
+		{
+			if ( GetGame().IsKindOf( itemData.m_Classname, "DZ_LightAI" ) )
+				flags |= 0x800;
+		}
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( itemData.m_Classname, pos, flags ) ) )
@@ -413,31 +429,34 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		ent.SetOrientation(itemData.m_LocalRotation);
 
-		SetupItem(ent, itemData);
+		if (isTrans)
+			SetupVehicle(ent);
+		else if (isBaseBuilding)
+			SetupBaseBuilding(ent, itemData.m_ConstructionParts);
 
-		SetupVehicle(ent);
+		SetupItem(ent, itemData.m_Data);
 
-		foreach(JMLoadoutItem subItemData: itemData.m_Attachments)
+		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
 			SpawnInItem(subItemData, ent);
 
 		return ent;
 	}
 
-	private EntityAI SpawnInItem( JMLoadoutItem itemData, EntityAI parent )
+	private EntityAI SpawnInItem( JMLoadoutSubItem itemData, EntityAI parent )
 	{
 		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
 		if (!ent)
 			return NULL;
 
-		SetupItem(ent, itemData);
+		SetupItem(ent, itemData.m_Data);
 
-		foreach(JMLoadoutItem subItemData: itemData.m_Attachments)
+		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
 			SpawnInItem(subItemData, ent);
 
 		return ent;
 	}
 
-	private void SetupItem(EntityAI item, JMLoadoutItem data)
+	private void SetupItem(EntityAI item, JMLoadoutItemData data)
 	{
 		if (data.m_Health != -1)
 			item.SetHealth(data.m_Health);
@@ -452,6 +471,39 @@ class JMLoadoutModule: JMRenderableModuleBase
 			item.SetTemperature(data.m_Temperature);
 	}
 	
+	private void SetupBaseBuilding(EntityAI entity, TStringArray builtParts)
+	{
+		if (!builtParts)
+			return;
+
+		BaseBuildingBase bb;
+		if (!Class.CastTo(bb, entity))
+			return;
+
+		Man p;
+		#ifdef SERVER
+		array<Man> players = new array<Man>;
+		GetGame().GetWorld().GetPlayerList(players);
+		if (players.Count())
+			p = players[0];
+		#endif
+		
+		array<ConstructionPart> parts = bb.GetConstruction().GetConstructionParts().GetValueArray();
+		foreach (ConstructionPart part: parts)
+		{
+			string partName = part.GetPartName();
+			foreach (string builtName: builtParts)
+			{
+				if (partName.Contains(builtName))
+				{
+					bb.OnPartBuiltServer(p, partName, AT_BUILD_PART);
+				}
+			}
+		}
+		
+		bb.GetConstruction().UpdateVisuals();
+	}
+	
 	private void SetupVehicle(EntityAI entity)
 	{
 		Car car;
@@ -464,7 +516,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 
-	private void FillCar( Car car, CarFluid fluid )
+	private void FillCar(Car car, CarFluid fluid)
 	{
 		float cap = car.GetFluidCapacity( fluid );
 		car.Fill( fluid, cap );
