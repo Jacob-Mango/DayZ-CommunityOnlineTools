@@ -20,6 +20,7 @@ class JMESPForm: JMFormBase
 
 	private UIActionCheckbox m_DisableSafetyCheckbox;
 
+	private UIActionButton m_ExportButton;
 	private UIActionSelectBox m_ExportTypeList;
 
 	private JMESPModule m_Module;
@@ -162,8 +163,8 @@ class JMESPForm: JMFormBase
 		UIActionManager.CreateText(container,"Selected Items");
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "COT ItemSet"}, this );
+		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "COT Loadout"}, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
@@ -452,6 +453,17 @@ class JMESPForm: JMFormBase
 		m_Module.DrawPlayerSkeletonsIncludingMyself = idx > 1;
 	}
 
+	void Click_ExportType( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		if (m_ExportTypeList.GetSelection() == COT_ESPMode.CREATELOADOUT)
+			m_ExportButton.SetButton("Save as");
+		else
+			m_ExportButton.SetButton("Copy to Clipboard");
+	}	
+
 	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
@@ -567,7 +579,7 @@ class JMESPForm: JMFormBase
 				m_Module.CopyToClipboardMarket();
 			break;
 			case COT_ESPMode.CREATELOADOUT:
-				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "CreateLoadout_Cancel", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
+				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "CreateLoadout_Cancel", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
 			break;
 		}
 	}
@@ -581,12 +593,6 @@ class JMESPForm: JMFormBase
 		string name = confirmation.GetEditBoxValue();
 		if (name == string.Empty)
 			return;
-		
-		/*
-		//! TODO: Check if .json is in the name, if yes remove it
-		if (name == ".json")
-			return;
-		*/
 
 		m_Module.CreateLoadout(name);
 	}
