@@ -388,6 +388,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		int count = file.m_Items.Count();
 		if ( count == 0 )
 			return;
+		
+		if ( !ent )
+			return;
 
 		int id = Math.RandomIntInclusive(0, count);
 		if (IsKindOfLoadout( file.m_Items[0].m_Classname, ent.GetType() ))
