@@ -345,7 +345,11 @@ modded class PlayerBase
 					else if (Class.CastTo(boat, transport))
 						boat.COT_PlaceOnSurfaceAtPosition(position);
 					#endif
-
+					else
+					{
+						transport.SetPosition(position);
+					}
+					
 					return;
 				}
 			}
