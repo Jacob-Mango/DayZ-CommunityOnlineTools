@@ -291,7 +291,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		{
 			pData.Update();			
 
-			int id = Math.RandomIntInclusive(0, count);
+			int id = Math.RandomInt(0, count);
 			if (IsKindOfLoadout( file.m_Items[0].m_Classname, "SurvivorBase" ))
 			{
 				foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
@@ -392,7 +392,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( !ent )
 			return;
 
-		int id = Math.RandomIntInclusive(0, count);
+		int id = Math.RandomInt(0, count);
 		if (IsKindOfLoadout( file.m_Items[0].m_Classname, ent.GetType() ))
 		{
 			foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
