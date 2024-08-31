@@ -7,8 +7,9 @@ class JMCameraForm: JMFormBase
 	private UIActionSlider m_SliderFocalLength;
 	private UIActionSlider m_SliderFocalNear;
 	private UIActionSlider m_SliderExposure;
-	private UIActionSlider m_SliderChromAbb
-	private UIActionSlider m_SliderVignette
+	private UIActionSlider m_SliderChromAbb;
+	private UIActionSlider m_SliderVignette;
+	private UIActionSlider m_SliderSpeed;
 	private UIActionCheckbox m_EnableFullmapCamera;
 	private UIActionCheckbox m_1stPersonADS_HideScope;
 	private UIActionCheckbox m_HideGrass;
@@ -21,7 +22,7 @@ class JMCameraForm: JMFormBase
 	private int m_PositionID;
 	private ref TFloatArray m_Times;
 	private ref TBoolArray m_IsSmooth;
-	private ref TVectorArray m_Positions;	
+	private ref TVectorArray m_Positions;
 
 	private JMCameraModule m_Module;
 
@@ -179,6 +180,16 @@ class JMCameraForm: JMFormBase
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.3 );
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.7 );
 
+		m_SliderSpeed = UIActionManager.CreateSlider( gridSliders, "Speed", 0, 1, this, "OnChange_Speed" );
+		m_SliderSpeed.SetCurrent( CAMERA_SPEED );
+		m_SliderSpeed.SetStepValue( 0.001 );
+		m_SliderSpeed.SetMin( 0.001 );
+		m_SliderSpeed.SetMax( 10.0 );
+		m_SliderSpeed.SetPosition( 0.0 );
+		m_SliderSpeed.SetWidth( 1.0 );
+		m_SliderSpeed.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.3 );
+		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.7 );
+
 		if ( m_Module )
 		{
 			m_Positions = m_Module.m_Positions;
@@ -208,6 +219,11 @@ class JMCameraForm: JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 
+	override void Update() 
+	{
+		OnSliderUpdate();
+	}
+
 	void OnSliderUpdate()
 	{
 		if ( CAMERA_BLUR == 0 )
@@ -226,6 +242,8 @@ class JMCameraForm: JMFormBase
 		{
 			CAMERA_AFOCUS = false;
 		}
+
+		m_SliderSpeed.SetCurrent(CAMERA_SPEED);
 	}
 
 	void OnChange_Blur( UIEvent eid, UIActionBase action )
@@ -294,6 +312,16 @@ class JMCameraForm: JMFormBase
 			return;
 
 		VIGNETTE = action.GetCurrent();
+
+		OnSliderUpdate();
+	}
+
+	void OnChange_Speed( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		CAMERA_SPEED = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
