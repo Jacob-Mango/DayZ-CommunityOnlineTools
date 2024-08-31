@@ -443,7 +443,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if (isTrans)
 		{
 			if ( !COT_SurfaceIsWater( pos ) )
-					flags |= ECE_PLACE_ON_SURFACE;
+				flags |= ECE_PLACE_ON_SURFACE;
 		}
 		else
 		{
@@ -488,12 +488,22 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
 		if (!ent)
+		{
+			Weapon_Base oWpn = Weapon_Base.Cast(parent);
+			if ( oWpn )
+			{
+				if (GetGame().IsKindOf(itemData.m_Classname, "Magazine_Base"))
+					oWpn.SpawnAmmo(itemData.m_Classname);
+			}
 			return NULL;
+		}
+		else
+		{
+			SetupItem(ent, itemData.m_Data);
 
-		SetupItem(ent, itemData.m_Data);
-
-		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
-			SpawnInItem(subItemData, ent);
+			foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
+				SpawnInItem(subItemData, ent);
+		}
 
 		return ent;
 	}
