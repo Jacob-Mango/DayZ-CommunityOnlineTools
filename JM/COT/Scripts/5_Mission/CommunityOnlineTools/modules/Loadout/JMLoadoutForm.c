@@ -128,7 +128,9 @@ class JMLoadoutForm: JMFormBase
 				m_Module.SpawnCursor( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.TARGET:
-				m_Module.SpawnTarget( data.Filename, GetCursorPos() );
+				EntityAI ent = m_Module.GetObjectAtCursor();
+				if (ent)
+					m_Module.SpawnTarget( data.Filename, ent );
 			break;
 			case COT_LoadoutSpawnMode.PLAYER:
 				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayers() );

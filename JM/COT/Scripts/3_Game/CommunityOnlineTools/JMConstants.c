@@ -27,6 +27,7 @@ class JMConstants
 	static const string FILE_TELEPORT 	= DIR_COT + "Teleports_";
 	static const string DIR_LOGS 		= DIR_COT + "Logs\\";
 	static const string DIR_LOADOUTS 	= DIR_COT + "Loadouts\\";
+	static const string DIR_DELETIONS 	= DIR_COT + "Deletions\\";
 
 	static const string EXT_LOG 		= ".log";
 	static const string EXT_TELEPORT 	= ".json";

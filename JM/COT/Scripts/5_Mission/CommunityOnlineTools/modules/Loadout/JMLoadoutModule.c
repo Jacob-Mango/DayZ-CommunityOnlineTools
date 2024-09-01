@@ -231,8 +231,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		SpawnLoadout( file, position );
 
-		//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
-		//SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
+		GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned at " + position);
+		SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" at " + position.ToString() );
 	}
 
 	private void RPC_SpawnCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -302,8 +302,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 				SpawnItem(file.m_Items[id], pData.PlayerObject);
 			}
 
-			//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + players[i].GetGUID() );
-			//SendWebhook( "Player", instance, "Spawned item set \"" + file.Name + "\" on " + players[i].FormatSteamWebhook() );
+			GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + pData.GetGUID() );
+			SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" on " + pData.FormatSteamWebhook() );
 		}
 	}
 
@@ -329,9 +329,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 	
-	void SpawnTarget( string Loadout, vector pos )
+	void SpawnTarget( string Loadout, EntityAI ent )
 	{
-		EntityAI ent;
 		if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -357,8 +356,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		SpawnLoadout( file, ent );
 		
-		//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + Target[i].GetGUID() );
-		//SendWebhook( "Player", instance, "Spawned item set \"" + file.Name + "\" on " + Target[i].FormatSteamWebhook() );
+		//GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + Target[i].GetGUID() );
+		//SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" on " + Target[i].FormatSteamWebhook() );
 	}
 
 	private void RPC_SpawnTarget( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -422,12 +421,16 @@ class JMLoadoutModule: JMRenderableModuleBase
 			return;
 
 		foreach(JMLoadoutItem itemData: file.m_Items)
-			SpawnItem(itemData, position);
+			SpawnItem(itemData, position, file.m_IsLocalPosition);
 	}
 
-	private EntityAI SpawnItem( JMLoadoutItem itemData, vector centerPos )
+	private EntityAI SpawnItem( JMLoadoutItem itemData, vector centerPos, bool isLocalPos = true )
 	{
-		vector pos = centerPos - itemData.m_LocalPosition;
+		vector pos;
+		if (isLocalPos)
+			pos = centerPos - itemData.m_LocalPosition;
+		else
+			pos = itemData.m_LocalPosition;
 
 		bool isTrans;
 		bool isBaseBuilding;
@@ -508,19 +511,23 @@ class JMLoadoutModule: JMRenderableModuleBase
 		return ent;
 	}
 
-	private void SetupItem(EntityAI item, JMLoadoutItemData data)
+	private void SetupItem(EntityAI ent, JMLoadoutItemData data)
 	{
-		if (data.m_Health != -1)
-			item.SetHealth(data.m_Health);
+		ItemBase item;
+		if ( Class.CastTo( item, ent ) )
+		{
+			if (data.m_Health != -1)
+				item.SetHealth(data.m_Health);
 
-		if (data.m_Quantity != -1)
-			item.SetQuantity(data.m_Quantity);
+			if (data.m_Quantity != -1)
+				item.SetQuantity(data.m_Quantity);
 
-		if (data.m_LiquidType != -1)
-			item.SetLiquidType(data.m_LiquidType, true);
+			if (data.m_LiquidType != -1)
+				item.SetLiquidType(data.m_LiquidType, true);
 
-		if (data.m_Temperature != 0)
-			item.SetTemperature(data.m_Temperature);
+			if (data.m_Temperature != 0)
+				item.SetTemperature(data.m_Temperature);
+		}
 	}
 	
 	private void SetupBaseBuilding(EntityAI entity, TStringArray builtParts)
@@ -572,5 +579,61 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		float cap = car.GetFluidCapacity( fluid );
 		car.Fill( fluid, cap );
+	}
+	
+	EntityAI GetObjectAtCursor()
+	{ 
+		vector rayStart = GetGame().GetCurrentCameraPosition();
+		DayZPlayer player = GetGame().GetPlayer();
+		DayZPlayerCamera3rdPerson camera3rdPerson;
+		float distance = 10;
+
+		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
+		{
+			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
+			distance += vector.Distance(rayStart, headPos);
+		}
+
+		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.1;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object resultObj;
+		TIntArray types = {ObjIntersectFire, ObjIntersectView};
+		foreach (int type: types)
+		{
+			rayInput.type = type;
+
+			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
+				continue;
+
+			foreach (RaycastRVResult result: results)
+			{
+				resultObj = result.obj;
+
+				if ( resultObj == NULL )
+					continue;
+
+				EntityAI entity;
+				if (!Class.CastTo(entity, resultObj))
+					continue;
+
+				resultObj = entity.GetHierarchyRoot();
+				string name = resultObj.GetType();
+
+				if ( name == "" )
+					continue;
+
+				if (resultObj.ConfigGetInt("scope") != 2)
+					continue;
+
+				return entity;
+			}
+		}
+
+		return NULL;
 	}
 };

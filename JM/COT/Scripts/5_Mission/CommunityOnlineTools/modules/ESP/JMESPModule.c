@@ -1488,6 +1488,8 @@ class JMESPModule: JMRenderableModuleBase
 		int removed = 0;
 		int count = objects.Count();
 
+		string delName = JMDate.Now( true ).ToString( "YYYY-MM-DD_hh-mm-ss" );
+		Exec_CreateDeletionBackup(delName, objects, instance);
 		
 		int i = objects.Count();
 		while ( i > 0 )
@@ -1514,6 +1516,42 @@ class JMESPModule: JMRenderableModuleBase
 		{
 			GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + removed + " attempted=" + count );
 			SendWebhook( "DeleteAll", instance, "Performed a delete on " + removed + " objects." );
+		}
+	}
+	
+	private void Exec_CreateDeletionBackup( string name, set< Object > objects, JMPlayerInstance instance)
+	{
+		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< Object > props = new array< Object >;
+		array< EntityAI > parents = new array< EntityAI >;
+
+		int count = objects.Count();
+		for(int i=0; i < count; i++)
+		{
+			EntityAI parent;
+			if (Class.CastTo(parent, objects[i]))
+				parents.Insert(parent);
+			else
+				props.Insert(objects[i]);
+		}
+
+		if (count > -1)
+		{
+			foreach(EntityAI prnt: parents)
+				loadouts.Insert(LoadoutProcessItem(prnt, prnt.GetPosition(), prnt.GetOrientation()));
+				
+			foreach(Object obj: props)
+				loadouts.Insert(LoadoutProcessObject(parent, parent.GetPosition(), parent.GetOrientation()));
+
+			JMLoadout loadout = new JMLoadout;
+			loadout.m_Items = new array< ref JMLoadoutItem >;
+			loadout.m_Items = loadouts;
+			loadout.m_IsLocalPosition = false;
+			
+			JMLoadoutSettings.SaveDeletion(loadout, name);
+
+			GetCommunityOnlineToolsBase().Log( instance, "Created Deletion Backup '"+name+"'" );
+			SendWebhook( "DeleteESP_Backup", instance, "Created Deletion Backup '"+name+"'" );
 		}
 	}
 
@@ -1774,11 +1812,12 @@ class JMESPModule: JMRenderableModuleBase
 			JMLoadout loadout = new JMLoadout;
 			loadout.m_Items = new array< ref JMLoadoutItem >;
 			loadout.m_Items = loadouts;
+			loadout.m_IsLocalPosition = true;			
 			
 			JMLoadoutSettings.Save(loadout, name);
 
-			GetCommunityOnlineToolsBase().Log( instance, "TODO" );
-			SendWebhook( "CreateLoadout", instance, "TODO" );
+			GetCommunityOnlineToolsBase().Log( instance, "Created Loadout '"+name+"'" );
+			SendWebhook( "CreateLoadout", instance, "Created Loadout '"+name+"'" );
 		}
 	}
 
@@ -1798,20 +1837,25 @@ class JMESPModule: JMRenderableModuleBase
 		JMLoadoutItem item = new JMLoadoutItem;
 		JMLoadoutItemData dataItem = new JMLoadoutItemData;
 
+		ItemBase itembs;
+		if ( Class.CastTo( itembs, parent ) )
+		{
+			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
+				dataItem.m_Health 		= itembs.GetHealth();
+
+			if (itembs.HasQuantity())
+			{
+				dataItem.m_Quantity 	= itembs.GetQuantity();
+				dataItem.m_LiquidType 	= itembs.GetLiquidType();
+			}
+			
+			dataItem.m_Temperature 	= itembs.GetTemperature();
+		}
+
 		item.m_Classname 		= parent.GetType();
 		item.m_LocalPosition = pos;
 		item.m_LocalRotation = rot;
 
-		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
-			dataItem.m_Health 		= parent.GetHealth();
-
-		if (parent.HasQuantity())
-		{
-			dataItem.m_Quantity 	= parent.GetQuantity();
-			dataItem.m_LiquidType 	= parent.GetLiquidType();
-		}
-		
-		dataItem.m_Temperature 	= parent.GetTemperature();
 
 		// We check the partname instead of the part ID for better readability for the users
 		// if its causing too much perf issues we might switch to the int ID instead
@@ -1860,16 +1904,20 @@ class JMESPModule: JMRenderableModuleBase
 
 		item.m_Classname 		= parent.GetType();
 
-		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
-			dataItem.m_Health 		= parent.GetHealth();
-
-		if (parent.HasQuantity())
+		ItemBase itembs;
+		if ( Class.CastTo( itembs, parent ) )
 		{
-			dataItem.m_Quantity 	= parent.GetQuantity();
-			dataItem.m_LiquidType 	= parent.GetLiquidType();
+			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
+				dataItem.m_Health 		= itembs.GetHealth();
+
+			if (itembs.HasQuantity())
+			{
+				dataItem.m_Quantity 	= itembs.GetQuantity();
+				dataItem.m_LiquidType 	= itembs.GetLiquidType();
+			}
+			
+			dataItem.m_Temperature 	= itembs.GetTemperature();
 		}
-		
-		dataItem.m_Temperature 	= parent.GetTemperature();
 
 		item.m_Data = dataItem;
 		
