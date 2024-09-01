@@ -63,6 +63,15 @@ class JMLoadoutSettings
         JsonFileLoader<JMLoadout>.JsonSaveFile(filepath, data);
 	}
 
+	static void SaveDeletion(JMLoadout data, string filename)
+	{
+		if (!FileExist(JMConstants.DIR_DELETIONS))
+			MakeDirectory(JMConstants.DIR_DELETIONS);
+
+        string filepath = JMConstants.DIR_DELETIONS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
+        JsonFileLoader<JMLoadout>.JsonSaveFile(filepath, data);
+	}
+
 	static bool Delete(string filename)
 	{
 		if (!FileExist(JMConstants.DIR_LOADOUTS))
