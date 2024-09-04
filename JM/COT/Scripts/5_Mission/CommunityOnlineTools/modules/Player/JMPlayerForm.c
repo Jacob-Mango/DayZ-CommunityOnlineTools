@@ -723,49 +723,76 @@ class JMPlayerForm: JMFormBase
 
 	void Click_StripPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("StripSelected","Strip"))
+			StripSelected(NULL);
+	}
+
+	void StripSelected(JMConfirmation confirmation)
+	{
+		m_Module.Strip( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Strip(JMConfirmation confirmation)
+	{
 		m_Module.Strip( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_DryPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("DrySelected", "Dry"))
+			DrySelected(NULL);
+	}
+
+	void DrySelected(JMConfirmation confirmation)
+	{
+		m_Module.Dry( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Dry(JMConfirmation confirmation)
+	{
 		m_Module.Dry( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_KillPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("KillPlayer","KillPlayers"))
+			KillPlayer(NULL);
+	}
+
+	void KillPlayer(JMConfirmation confirmation)
+	{
+		m_Module.SetHealth( 0, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void KillPlayers(JMConfirmation confirmation)
+	{
 		m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_SendMessage( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessage", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
+		if (!HasTooManyPlayers("SendMessage","SendMessages"))
+			SendMessageConfirm(NULL);
 	}
 
-	void SendMessage(JMConfirmation confirmation)
+	void SendMessages(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessages", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifs" );
+	}
+
+	void SendMessagesConfirm(JMConfirmation confirmation)
 	{
 		string text = confirmation.GetEditBoxValue();
 		if ( text == "" )
@@ -774,7 +801,7 @@ class JMPlayerForm: JMFormBase
 		m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
 	}
 
-	void SendNotif(JMConfirmation confirmation)
+	void SendNotifs(JMConfirmation confirmation)
 	{
 		string text = confirmation.GetEditBoxValue();
 		if ( text == "" )
@@ -783,65 +810,122 @@ class JMPlayerForm: JMFormBase
 		m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
 	}
 
-	void Click_KickPlayer( UIEvent eid, UIActionBase action )
+	void SendMessage(JMConfirmation confirmation)
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessage", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
+	}
+
+	void SendMessageConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
 			return;
 
+		m_Module.DoMessage( {JM_GetSelected().GetPlayers()[0]}, text);
+	}
+
+	void SendNotif(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		m_Module.DoNotif( {JM_GetSelected().GetPlayers()[0]}, text);
+	}
+
+	void Click_KickPlayer( UIEvent eid, UIActionBase action )
+	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "KickPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer" );
-	}
-
-	void KickPlayer_Cancel(JMConfirmation confirmation)
-	{
+		if (!HasTooManyPlayers("KickPlayer", "KickPlayers"))
+			KickPlayerConfirm(NULL);
 	}
 
 	void KickPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerConfirm" );
+	}
+
+	void KickPlayersConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
+	}
+
+	void KickPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayersConfirm" );
+	}
+
+	void KickPlayerConfirm(JMConfirmation confirmation)
 	{
 		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_BanPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "BanPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer" );
-	}
-
-	void BanPlayer_Cancel(JMConfirmation confirmation)
-	{
+		if (!HasTooManyPlayers("BanPlayer", "BanPlayers"))
+			BanPlayerConfirm(NULL);
 	}
 
 	void BanPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerConfirm" );
+	}
+
+	void BanPlayerConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
+	}
+
+	void BanPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayersConfirm" );
+	}
+
+	void BanPlayersConfirm(JMConfirmation confirmation)
 	{
 		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("StopSelectedBleeding","StopBleeding"))
+			StopBleeding(NULL);
+	}
+
+	void StopSelectedBleeding(JMConfirmation confirmation)
+	{
+		m_Module.StopBleeding( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void StopBleeding(JMConfirmation confirmation)
+	{
 		m_Module.StopBleeding( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_HealPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("HealSelected","Heal"))
+			Heal(NULL);
+	}
+
+	void HealSelected(JMConfirmation confirmation)
+	{
+		m_Module.Heal( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Heal(JMConfirmation confirmation)
+	{
 		m_Module.Heal( JM_GetSelected().GetPlayers() );
 	}
 
@@ -895,6 +979,24 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("SetPositionSelectedTeleport", "SetPositionTeleport"))
+			SetPositionTeleport(NULL);
+	}
+
+	void SetPositionSelectedTeleport(JMConfirmation confirmation)
+	{
+		UpdateLastChangeTime();
+
+		vector pos = vector.Zero;
+		pos[0] = m_PositionX.GetText().ToFloat();
+		pos[1] = m_PositionY.GetText().ToFloat();
+		pos[2] = m_PositionZ.GetText().ToFloat();
+
+		m_Module.TeleportTo( pos, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void SetPositionTeleport(JMConfirmation confirmation)
+	{
 		UpdateLastChangeTime();
 
 		vector pos = vector.Zero;
@@ -910,6 +1012,30 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("TeleportSelectedTo", "TeleportTo"))
+			TeleportTo(NULL);
+	}
+
+	void TeleportSelectedTo(JMConfirmation confirmation)
+	{
+		vector position = vector.Zero;
+
+		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
+		{
+			position = CurrentActiveCamera.GetPosition();
+		} else if ( GetPlayer() )
+		{
+			position = GetPlayer().GetPosition();
+		} else
+		{
+			return;
+		}
+
+		m_Module.TeleportTo( position, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportTo(JMConfirmation confirmation)
+	{
 		vector position = vector.Zero;
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
@@ -1015,6 +1141,17 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("TeleportSelectedToPrevious", "TeleportToPrevious"))
+			TeleportToPrevious(NULL);
+	}
+
+	void TeleportSelectedToPrevious(JMConfirmation confirmation)
+	{
+		m_Module.TeleportToPrevious( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportToPrevious(JMConfirmation confirmation)
+	{
 		m_Module.TeleportToPrevious( JM_GetSelected().GetPlayers() );
 	}
 
@@ -1797,19 +1934,15 @@ class JMPlayerForm: JMFormBase
 		
 		if ( JM_GetSelected().NumPlayers() == 1 )
 		{
-			ShowIdentityWidgets();
-
-			m_GUID.SetButton( instance.GetGUID() );
-			m_Name.SetButton( instance.GetName() );
-			m_Steam64ID.SetButton( instance.GetSteam64ID() );
-
 			UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
-		} else
-		{
-			HideIdentityWidgets();
-
+		} else {
 			m_TeleportMeTo.Disable();
 		}
+
+		ShowIdentityWidgets();
+		m_GUID.SetButton( instance.GetGUID() );
+		m_Name.SetButton( instance.GetName() );
+		m_Steam64ID.SetButton( instance.GetSteam64ID() );
 
 		if ( IsMissionOffline() )
 		{
@@ -2063,5 +2196,17 @@ class JMPlayerForm: JMFormBase
 	void UpdateLastChangeTime()
 	{
 		m_LastChangeTime = GetGame().GetTime();
+	}
+
+	bool HasTooManyPlayers(string funcOnlyName, string funcName)
+	{
+		int count = JM_GetSelected().GetPlayers().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_ONLYSELECTED", funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+
+		return false;
 	}
 };
