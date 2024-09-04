@@ -218,6 +218,12 @@ class JMTeleportForm: JMFormBase
 
 	void Teleport()
 	{
+		if (!HasTooManyPlayers("TeleportConfirm"))
+			TeleportConfirm(NULL);
+	}
+
+	void TeleportConfirm(JMConfirmation confirmation)
+	{
 		array< string > players = JM_GetSelected().GetPlayers();
 		if ( players.Count() == 0 )
 		{
@@ -380,5 +386,17 @@ class JMTeleportForm: JMFormBase
 		}
 
 		return "";
+	}
+
+	bool HasTooManyPlayers(string funcName)
+	{
+		int count = JM_GetSelected().GetPlayers().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+
+		return false;
 	}
 };

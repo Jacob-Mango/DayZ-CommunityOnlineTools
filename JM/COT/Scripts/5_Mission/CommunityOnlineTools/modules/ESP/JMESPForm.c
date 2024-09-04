@@ -516,6 +516,12 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyObjects("DeleteSelected"))
+			DeleteSelected(NULL);
+	}
+
+	void DeleteSelected(JMConfirmation confirmation)
+	{
 		m_Module.DeleteSelected();
 	}
 	
@@ -551,6 +557,12 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyObjects("MoveToCursor"))
+			MoveToCursor(NULL);
+	}
+
+	void MoveToCursor(JMConfirmation confirmation)
+	{
 		vector dir = GetGame().GetCurrentCameraDirection();
 		vector from = GetGame().GetCurrentCameraPosition(); 
 		vector to = from + ( dir * 1000 );   
@@ -579,13 +591,9 @@ class JMESPForm: JMFormBase
 				m_Module.CopyToClipboardMarket();
 			break;
 			case COT_ESPMode.CREATELOADOUT:
-				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "CreateLoadout_Cancel", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
+				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
 			break;
 		}
-	}
-
-	void CreateLoadout_Cancel(JMConfirmation confirmation)
-	{
 	}
 
 	void CreateLoadout_Confirm(JMConfirmation confirmation)
@@ -595,5 +603,17 @@ class JMESPForm: JMFormBase
 			return;
 
 		m_Module.CreateLoadout(name);
+	}
+
+	bool HasTooManyObjects(string funcName)
+	{
+		int count = JM_GetSelected().GetObjects().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+
+		return false;
 	}
 };
