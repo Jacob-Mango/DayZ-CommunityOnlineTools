@@ -14,8 +14,12 @@ class JMPlayerForm: JMFormBase
 
 	private UIActionButtonToggle m_PlayerListSort;
 	private UIActionButton m_PlayerListSelectAll;
-	private UIActionButton m_PlayerListDeSelectAll;	
-	
+	private UIActionButton m_PlayerListDeSelectAll;
+
+	private UIActionButtonToggle m_PlayerPrefMode;
+	private UIActionButton m_PlayerListPref1;
+	private UIActionButton m_PlayerListPref2;
+
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
 
@@ -89,6 +93,10 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
 	private UIActionButton m_DryPlayer;
+
+	private UIActionButton m_VomitPlayer;
+	private UIActionButton m_SetScalePlayer;
+
 	private UIActionButton m_KillPlayer;
 	private UIActionButton m_SendMessage;
 	private UIActionButton m_KickPlayer;
@@ -103,6 +111,8 @@ class JMPlayerForm: JMFormBase
 	private int m_LastChangeTime;
 	
 	private autoptr TStringArray m_HeatBufferStates = {"", "+", "++", "+++"};
+	private autoptr TStringArray m_PlayersPref1 = {};
+	private autoptr TStringArray m_PlayersPref2 = {};
 
 	void JMPlayerForm()
 	{
@@ -164,6 +174,8 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
 		UpdatePermission( m_ReceiveDmgDealt, "Admin.Player.ReceiveDamageDealt" );
 		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
+		UpdatePermission( m_VomitPlayer, "Admin.Player.Vomit" );
+		UpdatePermission( m_SetScalePlayer, "Admin.Player.Scale" );
 		UpdatePermission( m_CannotBeTargetedByAI, "Admin.Player.CannotBeTargetedByAI" );
 		UpdatePermission( m_RemoveCollision, "Admin.Player.RemoveCollision" );
 
@@ -205,11 +217,16 @@ class JMPlayerForm: JMFormBase
 
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
 
-		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
+		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 5, 1 );
 
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
 		m_PlayerListFilter 		= UIActionManager.CreateEditableTextPreview( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
 		
+		Widget leftGroupsPanelGrid 	= UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 3 );
+		m_PlayerPrefMode 	= UIActionManager.CreateButtonToggle( leftGroupsPanelGrid, "SAVE", "LOAD", this, "" );
+		m_PlayerListPref1 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "Sel 01", this, "OnClick_PlayerListPref01" );
+		m_PlayerListPref2 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "Sel 02", this, "OnClick_PlayerListPref02" );
+
 		Widget navbarleftPanelGrid = UIActionManager.CreateWrapSpacer( leftPanelGrid );
 		m_PlayerListSort 		= UIActionManager.CreateButtonToggle( navbarleftPanelGrid, "A/Z", "Z/A", this, "Event_UpdatePlayerList" );
 		m_PlayerListSelectAll 	= UIActionManager.CreateButton( navbarleftPanelGrid, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Event_SelectAllPlayerList" );
@@ -471,8 +488,10 @@ class JMPlayerForm: JMFormBase
 		
 		// Misc actions inbetween
 		m_SpectatePlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
-		m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-		
+		m_SendMessage 	 = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
+		m_VomitPlayer 	 = UIActionManager.CreateButton( actions, "Vomit", this, "Click_VomitPlayer" );
+		m_SetScalePlayer = UIActionManager.CreateButton( actions, "SetScale", this, "Click_ScalePlayer" );
+
 		// Destructive actions at the bottom
 		m_KillPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
@@ -487,6 +506,46 @@ class JMPlayerForm: JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
 		return parent;
+	}
+
+	void OnClick_PlayerListPref01( UIEvent eid, UIActionBase action )
+	{
+		ApplyPlayerListPref(m_PlayersPref1);
+	}	
+
+	void OnClick_PlayerListPref02( UIEvent eid, UIActionBase action )
+	{
+		ApplyPlayerListPref(m_PlayersPref2);
+	}
+
+	void ApplyPlayerListPref(out TStringArray playerArr)
+	{
+		bool mode = m_PlayerPrefMode.m_IsToggled;
+		if (!mode)
+			playerArr = new TStringArray;
+		
+		foreach(JMPlayerRowWidget player: m_PlayerList)
+		{
+			if (mode)
+			{
+				bool state = playerArr.Find(player.GetGUID()) != -1;
+				
+				if (state)
+					JM_GetSelected().AddPlayer(player.GetGUID());
+				else
+					JM_GetSelected().RemovePlayer(player.GetGUID());
+				
+				player.Checkbox.SetChecked(state);
+			}
+			else
+			{
+				if (player.Checkbox.IsChecked())
+					playerArr.Insert(player.GetGUID());
+			}
+		}
+		
+		UpdateUI();
+		UpdatePlayerCount();
 	}
 
 	void Event_UpdatePlayerList( UIEvent eid, UIActionBase action )
@@ -772,6 +831,96 @@ class JMPlayerForm: JMFormBase
 	void KillPlayers(JMConfirmation confirmation)
 	{
 		m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_VomitPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (!HasTooManyPlayers("VomitPlayer","VomitPlayers"))
+			VomitPlayer(NULL);
+	}
+
+	void VomitPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayersConfirm" );
+	}
+
+	void VomitPlayersConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 1 || value > 120)
+			return;
+
+		m_Module.Vomit(value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void VomitPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerConfirm" );
+	}
+
+	void VomitPlayerConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 1 || value > 120)
+			return;
+
+		m_Module.Vomit(value, JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_ScalePlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (!HasTooManyPlayers("ScalePlayer","ScalePlayers"))
+			ScalePlayer(NULL);
+	}
+
+	void ScalePlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayersConfim" );
+	}
+
+	void ScalePlayersConfim(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 0.1 || value > 10)
+			value = 1;
+
+		m_Module.SetScale( value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void ScalePlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerConfim" );
+	}
+
+	void ScalePlayerConfim(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 0.1 || value > 10)
+			value = 1;
+
+		m_Module.SetScale( value, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_SendMessage( UIEvent eid, UIActionBase action )

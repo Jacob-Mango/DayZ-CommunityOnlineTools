@@ -186,6 +186,8 @@ enum JMPlayerModuleRPC
 	Message,
 	Notif,
 	StopBleeding,
+	Vomit,
+	SetScale,
 	SetPermissions,
 	SetRoles,
 	VONStartedTransmitting,
