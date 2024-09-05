@@ -200,11 +200,21 @@ modded class PlayerBase
 		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
 		{
 			m_JMHasAdminNVGRemoteSynch = m_JMHasAdminNVG;
-			
+
+			// idk why or how it works.
+			// This makes no fucking sense.
+			// it just works. Kill me. -LT
 			if (m_JMHasAdminNVG)
+			{
 				AddActiveNV(JMNVTypes.NV_COT_ON);
-			else
 				RemoveActiveNV(JMNVTypes.NV_COT_OFF);
+			}
+			else
+			{
+				AddActiveNV(JMNVTypes.NV_COT_OFF);
+				RemoveActiveNV(JMNVTypes.NV_COT_ON);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
+			}
 		}
 	}
 

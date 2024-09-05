@@ -154,9 +154,7 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
-		#ifdef DIAG
 		UpdatePermission( m_AdminNVG, "Admin.Player.AdminNVG" );
-		#endif
 		UpdatePermission( m_UnlimitedStamina, "Admin.Player.UnlimitedStamina" );
 		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
@@ -230,7 +228,7 @@ class JMPlayerForm: JMFormBase
 			if ( !Class.CastTo( gsw, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
 				continue;
 
-			gsw.Show( false ); //todo: verify this is correct
+			gsw.Show( false );
 
 			for ( int j = 0; j < 100; j++ )
 			{
@@ -424,9 +422,7 @@ class JMPlayerForm: JMFormBase
 		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		
-		#ifdef DIAG
-		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "NVG TEST", this, "Click_AdminNVG", false );
-		#endif
+		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "NVG", this, "Click_AdminNVG", false );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -1270,6 +1266,9 @@ class JMPlayerForm: JMFormBase
 		if ( m_UnlimitedStamina )
 			m_UnlimitedStamina.SetChecked( m_SelectedInstance.HasUnlimitedStamina() );
 		
+		if ( m_AdminNVG )
+			m_AdminNVG.SetChecked( m_SelectedInstance.HasAdminNVG() );
+
 		if ( m_BrokenLegs )
 			m_BrokenLegs.SetChecked( m_SelectedInstance.HasBrokenLegs() );
 		
