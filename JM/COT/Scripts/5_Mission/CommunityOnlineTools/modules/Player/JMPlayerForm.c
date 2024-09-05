@@ -780,12 +780,12 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		if (!HasTooManyPlayers("SendMessage","SendMessages"))
-			SendMessageConfirm(NULL);
+			SendMessage(NULL);
 	}
 
 	void SendMessages(JMConfirmation confirmation)
 	{
-		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessages", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifs" );
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessagesConfirm", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifs" );
 	}
 
 	void SendMessagesConfirm(JMConfirmation confirmation)
@@ -808,7 +808,7 @@ class JMPlayerForm: JMFormBase
 
 	void SendMessage(JMConfirmation confirmation)
 	{
-		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessage", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessageConfirm", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
 	}
 
 	void SendMessageConfirm(JMConfirmation confirmation)
@@ -2066,18 +2066,17 @@ class JMPlayerForm: JMFormBase
 
 	void SelectAllPlayerList(bool state = true)
 	{
-		for ( int i = 0; i < m_PlayerList.Count(); i++ )
+		foreach(JMPlayerRowWidget player: m_PlayerList)
 		{
 			if (state)
-				JM_GetSelected().AddPlayer( m_PlayerList[i].GetGUID() );
+				JM_GetSelected().AddPlayer(player.GetGUID());
 			else
-				JM_GetSelected().RemovePlayer( m_PlayerList[i].GetGUID() );
+				JM_GetSelected().RemovePlayer(player.GetGUID());
 			
-			m_PlayerList[i].Checkbox.SetChecked( state );
+			player.Checkbox.SetChecked(state);
 		}
 
 		UpdateUI();
-
 		UpdatePlayerCount();
 	}
 
@@ -2202,7 +2201,8 @@ class JMPlayerForm: JMFormBase
 		int count = JM_GetSelected().GetPlayers().Count();
 		if (count > 1)
 		{
-			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_ONLYSELECTED", funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
+			JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
 			return true;
 		}
 
