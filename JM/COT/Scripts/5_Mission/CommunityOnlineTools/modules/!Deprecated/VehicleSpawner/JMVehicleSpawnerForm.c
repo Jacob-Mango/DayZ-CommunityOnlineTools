@@ -82,7 +82,7 @@ class JMVehicleSpawnerForm: JMFormBase
 
 			name.SetWidth(0.8);
 
-			UIActionButton button = UIActionManager.CreateButton( wrapper, "#STR_COT_VEHICLE_MODULE_CURSOR", this, "SpawnVehicle" );
+			UIActionButton button = UIActionManager.CreateButton( wrapper, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnVehicle" );
 			button.SetData( new JMVehicleSpawnerButtonData( vehicles[i] ) );
 			button.SetWidth(0.2);
 			button.SetPosition(0.8);
