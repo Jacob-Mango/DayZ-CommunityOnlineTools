@@ -139,8 +139,6 @@ enum JMESPModuleRPC
 	DuplicateAll,
 	DeleteAll,
 	MoveToCursor,
-
-	CreateLoadout,
 	
 	COUNT
 };
@@ -228,6 +226,7 @@ enum JMLoadoutModuleRPC
 {
 	INVALID = 10460,
 	Load,
+	Create,
 	Delete,
 	SpawnCursor,
 	SpawnTarget,

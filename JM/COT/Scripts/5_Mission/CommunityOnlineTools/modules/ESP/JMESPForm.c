@@ -24,6 +24,7 @@ class JMESPForm: JMFormBase
 	private UIActionSelectBox m_ExportTypeList;
 
 	private JMESPModule m_Module;
+	private JMLoadoutModule m_LoadoutModule;
 
 	private UIActionEditableTextPreview m_SearchBox;
 
@@ -191,6 +192,8 @@ class JMESPForm: JMFormBase
 
 		ESPFilters( left_bottom );
 		ESPSelectedObjects( right_bottom );
+		
+		Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
 	}
 
 	override void OnShow()
@@ -602,7 +605,10 @@ class JMESPForm: JMFormBase
 		if (name == string.Empty)
 			return;
 
-		m_Module.CreateLoadout(name);
+		if (!m_LoadoutModule)
+			Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+		
+		m_LoadoutModule.Create(name);
 	}
 
 	bool HasTooManyObjects(string funcName)
