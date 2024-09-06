@@ -36,11 +36,33 @@ modded class Construction
 		}
 	}
 
-	#ifndef DAYZ_1_09
+	void COT_BuildParts(TStringArray parts_name, PlayerBase player, bool checkMaterials = true)
+	{
+		foreach(string part_name: parts_name)
+			COT_BuildRequiredParts(part_name, player, checkMaterials);
+
+		UpdateVisuals();
+	}
+	
+	void COT_BuildRequiredParts(string part_name, PlayerBase player, bool checkMaterials = true)
+	{
+		string main_part_name = GetConstructionPart( part_name ).GetMainPartName();
+		string cfg_path = "cfgVehicles" + " " + GetParent().GetType() + " "+ "Construction" + " " + main_part_name + " " + part_name + " " + "required_parts";
+		
+		array<string> required_parts = new array<string>;
+		GetGame().ConfigGetTextArray( cfg_path, required_parts );
+		
+		for ( int i = 0; i < required_parts.Count(); ++i )
+		{
+			if ( !IsPartConstructed( required_parts.Get( i ) ) )
+				COT_BuildRequiredParts(required_parts.Get( i ), player, checkMaterials);
+		}
+
+		if ( !IsPartConstructed( part_name ) )
+			COT_BuildPart(part_name, player, checkMaterials);
+	}
+
 	void COT_BuildPart(string part_name, PlayerBase player, bool checkMaterials = true )
-	#else
-	void COT_BuildPart(string part_name, bool checkMaterials = true )
-	#endif
 	{
 		if ( !HasRequiredPart( part_name ) )
 			return;
@@ -60,12 +82,9 @@ modded class Construction
 		if ( m_ConstructionBoxTrigger )
 			DestroyCollisionTrigger();
 
-		#ifndef DAYZ_1_09
 		GetParent().OnPartBuiltServer( player, part_name, AT_BUILD_PART );
-		#else
-		GetParent().OnPartBuiltServer( part_name, AT_BUILD_PART );
-		#endif
 	}
+
 
 	void COT_DismantlePart( string part_name, PlayerBase player )
 	{

@@ -5,6 +5,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 	void JMLoadoutModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Loadouts.View" );
+		GetPermissionsManager().RegisterPermission( "Loadouts.Create" );
+		GetPermissionsManager().RegisterPermission( "Loadouts.Backup" );
 		GetPermissionsManager().RegisterPermission( "Loadouts.Load" );
 		GetPermissionsManager().RegisterPermission( "Loadouts.Delete" );
 
@@ -59,8 +61,10 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	override void GetWebhookTypes( out array< string > types )
 	{
-		types.Insert( "Vector" );
-		types.Insert( "Player" );
+		types.Insert( "Create" );
+		types.Insert( "Delete" );
+		types.Insert( "Backup" );
+		types.Insert( "Spawn" );
 	}
 
 	override int GetRPCMin()
@@ -79,6 +83,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		{
 		case JMLoadoutModuleRPC.Load:
 			RPC_Load( ctx, sender, target );
+			break;
+		case JMLoadoutModuleRPC.Create:
+			RPC_Create( ctx, sender, target );
 			break;
 		case JMLoadoutModuleRPC.Delete:
 			RPC_Delete( ctx, sender, target );
@@ -185,9 +192,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 			return;
 
 		JMLoadoutSettings.Delete(Loadout);
-
-		//GetCommunityOnlineToolsBase().Log( ident, "Item set " + file.Name + " spawned on " + position );
-		//SendWebhook( "Vector", instance, "Spawned item set \"" + file.Name + "\" at " + position.ToString() );
+		
+		GetCommunityOnlineToolsBase().Log( ident, "Deleted '" + Loadout + "'" );
+		SendWebhook( "Delete", instance, "Deleted '" + Loadout + "'" );
 	}
 
 	private void RPC_Delete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -232,7 +239,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		SpawnLoadout( file, position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned at " + position);
-		SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" at " + position.ToString() );
+		SendWebhook( "Spawn", instance, "Spawned Loadout set \"" + file + "\" at " + position.ToString() );
 	}
 
 	private void RPC_SpawnCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -303,7 +310,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + pData.GetGUID() );
-			SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" on " + pData.FormatSteamWebhook() );
+			SendWebhook( "Spawn", instance, "Spawned Loadout set \"" + file + "\" on " + pData.FormatSteamWebhook() );
 		}
 	}
 
@@ -356,8 +363,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 		SpawnLoadout( file, ent );
 		
-		//GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + Target[i].GetGUID() );
-		//SendWebhook( "Loadout", instance, "Spawned Loadout set \"" + file + "\" on " + Target[i].FormatSteamWebhook() );
+		GetCommunityOnlineToolsBase().Log( ident, "Loadout  " + Loadout + " spawned on " + ent.GetType() );
+		SendWebhook( "Spawn", instance, "Spawned Loadout  \"" + Loadout + "\" on " + ent.GetType() );
 	}
 
 	private void RPC_SpawnTarget( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -433,14 +440,10 @@ class JMLoadoutModule: JMRenderableModuleBase
 			pos = itemData.m_LocalPosition;
 
 		bool isTrans;
-		bool isBaseBuilding;
-
 		if (GetGame().IsKindOf( itemData.m_Classname, "CarScript" ))
 			isTrans = true;
 		else if (GetGame().IsKindOf( itemData.m_Classname, "BoatScript" ))
 			isTrans = true;
-		else if (GetGame().IsKindOf( itemData.m_Classname, "BaseBuildingBase" ))
-			isBaseBuilding = true;
 
 		int flags = ECE_CREATEPHYSICS;
 		if (isTrans)
@@ -457,13 +460,18 @@ class JMLoadoutModule: JMRenderableModuleBase
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( itemData.m_Classname, pos, flags ) ) )
 			return NULL;
+		
+		bool isBaseBuilding;
+		if (!isTrans)
+			isBaseBuilding = ent.IsInherited(BaseBuildingBase);
 
 		ent.SetOrientation(itemData.m_LocalRotation);
 
+		BaseBuildingBase bb;
 		if (isTrans)
 			SetupVehicle(ent);
-		else if (isBaseBuilding)
-			SetupBaseBuilding(ent, itemData.m_ConstructionParts);
+		else if (Class.CastTo(bb, ent))
+			SetupBaseBuilding(bb, itemData.m_ConstructionParts);
 
 		SetupItem(ent, itemData.m_Data);
 
@@ -530,13 +538,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 	
-	private void SetupBaseBuilding(EntityAI entity, TStringArray builtParts)
+	private void SetupBaseBuilding(BaseBuildingBase bb, TStringArray builtParts)
 	{
 		if (!builtParts)
-			return;
-
-		BaseBuildingBase bb;
-		if (!Class.CastTo(bb, entity))
 			return;
 
 		Man p;
@@ -547,20 +551,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			p = players[0];
 		#endif
 		
-		array<ConstructionPart> parts = bb.GetConstruction().GetConstructionParts().GetValueArray();
-		foreach (ConstructionPart part: parts)
-		{
-			string partName = part.GetPartName();
-			foreach (string builtName: builtParts)
-			{
-				if (partName.Contains(builtName))
-				{
-					bb.OnPartBuiltServer(p, partName, AT_BUILD_PART);
-				}
-			}
-		}
-		
-		bb.GetConstruction().UpdateVisuals();
+		bb.GetConstruction().COT_BuildParts(builtParts, PlayerBase.Cast(p), false);
 	}
 	
 	private void SetupVehicle(EntityAI entity)
@@ -635,5 +626,239 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 
 		return NULL;
+	}
+
+	void Create(string name)
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( name );
+		JM_GetSelected().SerializeObjects( rpc );
+		rpc.Send( NULL, JMLoadoutModuleRPC.Create, true, NULL );
+	}
+
+	private void RPC_Create( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Loadouts.Create", senderRPC, instance ) )
+			return;
+		
+		string name;
+		if ( !ctx.Read( name ) )
+			return;
+
+		set< Object > objects = new set< Object >;
+		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
+			return;
+		
+		Exec_Create( name, objects, instance );
+	}
+
+	private void Exec_Create( string name, set< Object > objects, JMPlayerInstance instance )
+	{
+		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< Object > props 				= new array< Object >;
+		array< EntityAI > parents 			= new array< EntityAI >;
+		vector avgPos;
+
+		int count = objects.Count();
+		for(int i=0; i < count; i++)
+		{
+			if (count != 0)
+			{
+				avgPos[0] = avgPos[0] + objects[i].GetPosition()[0];
+				avgPos[2] = avgPos[2] + objects[i].GetPosition()[2];
+
+				if (objects[i].GetPosition()[1] < avgPos[1] || avgPos[1] == 0)
+					avgPos[1] = objects[i].GetPosition()[1];
+			}
+
+			EntityAI parent;
+			if (Class.CastTo(parent, objects[i]))
+				parents.Insert(parent);
+			else
+				props.Insert(objects[i]);
+		}
+
+		if (count > -1)
+		{
+			if (count != 0)
+			{
+				avgPos[0] = avgPos[0] / count;
+				avgPos[2] = avgPos[2] / count;
+			}
+
+			foreach(EntityAI prnt: parents)
+				loadouts.Insert(LoadoutProcessItem(prnt, avgPos - prnt.GetPosition(), prnt.GetOrientation()));
+				
+			foreach(Object obj: props)
+				loadouts.Insert(LoadoutProcessObject(parent, avgPos - parent.GetPosition(), parent.GetOrientation()));
+
+			JMLoadout loadout = new JMLoadout;
+			loadout.m_Items = new array< ref JMLoadoutItem >;
+			loadout.m_Items = loadouts;
+			loadout.m_IsLocalPosition = true;			
+			
+			JMLoadoutSettings.Save(loadout, name);
+
+			GetCommunityOnlineToolsBase().Log( instance, "Created Loadout '"+name+"'" );
+			SendWebhook( "Create", instance, "Created Loadout '"+name+"'" );
+		}
+	}
+
+	JMLoadoutItem LoadoutProcessObject(Object parent, vector pos = vector.Zero, vector rot = vector.Zero)
+	{
+		JMLoadoutItem item = new JMLoadoutItem;
+
+		item.m_Classname 	 = parent.GetType();
+		item.m_LocalPosition = pos;
+		item.m_LocalRotation = rot;
+
+		return item;
+	}
+
+	JMLoadoutItem LoadoutProcessItem(EntityAI parent, vector pos = vector.Zero, vector rot = vector.Zero)
+	{
+		JMLoadoutItem item = new JMLoadoutItem;
+		JMLoadoutItemData dataItem = new JMLoadoutItemData;
+
+		item.m_Classname 		= parent.GetType();
+		item.m_LocalPosition = pos;
+		item.m_LocalRotation = rot;
+
+		item.m_Data = dataItem;
+		item.m_Attachments = new array< ref JMLoadoutSubItem >;
+
+		// We check the partname instead of the part ID for better readability for the users
+		// if its causing too much perf issues we might switch to the int ID instead
+		BaseBuildingBase bb;
+		if (Class.CastTo(bb, parent))
+		{
+			item.m_ConstructionParts = new TStringArray;
+			array<ConstructionPart> parts = bb.GetConstruction().GetConstructionParts().GetValueArray();
+			foreach (ConstructionPart part: parts)
+			{
+				if (part.m_IsBuilt)
+				{
+					item.m_ConstructionParts.Insert(part.GetPartName());
+				}
+			}
+		}
+
+		ItemBase itembs;
+		if ( Class.CastTo( itembs, parent ) )
+		{
+			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
+				dataItem.m_Health 		= itembs.GetHealth();
+
+			if (itembs.HasQuantity())
+			{
+				dataItem.m_Quantity 	= itembs.GetQuantity();
+				dataItem.m_LiquidType 	= itembs.GetLiquidType();
+			}
+			
+			dataItem.m_Temperature 	= itembs.GetTemperature();
+
+			ItemBase child;
+			for (int k=0; k < itembs.GetInventory().AttachmentCount(); k++)
+			{
+				child = ItemBase.Cast(itembs.GetInventory().GetAttachmentFromIndex( k ));
+				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+			}
+
+			CargoBase cargo = itembs.GetInventory().GetCargo();
+			if(cargo)
+			{
+				for(int j=0; j < cargo.GetItemCount(); j++)
+				{
+					child = ItemBase.Cast(cargo.GetItem(j));
+					item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+				}
+			}
+		}
+
+		return item;
+	}
+
+	JMLoadoutSubItem LoadoutProcessSubItem(EntityAI parent)
+	{
+		JMLoadoutSubItem item = new JMLoadoutSubItem;
+		JMLoadoutItemData dataItem = new JMLoadoutItemData;
+
+		item.m_Classname 		= parent.GetType();
+
+		ItemBase itembs;
+		if ( Class.CastTo( itembs, parent ) )
+		{
+			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
+				dataItem.m_Health 		= itembs.GetHealth();
+
+			if (itembs.HasQuantity())
+			{
+				dataItem.m_Quantity 	= itembs.GetQuantity();
+				dataItem.m_LiquidType 	= itembs.GetLiquidType();
+			}
+			
+			dataItem.m_Temperature 	= itembs.GetTemperature();
+		}
+
+		item.m_Data = dataItem;
+		
+		item.m_Attachments = new array< ref JMLoadoutSubItem >;
+
+		EntityAI child;
+		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
+		{
+			child = EntityAI.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
+			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+		}
+
+		CargoBase cargo = parent.GetInventory().GetCargo();
+		if(cargo)
+		{
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				child = EntityAI.Cast(cargo.GetItem(j));
+				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+			}
+		}
+
+		return item;
+	}
+	
+	void Exec_CreateDeletionBackup( set< Object > objects, JMPlayerInstance instance)
+	{
+		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< Object > props = new array< Object >;
+		array< EntityAI > parents = new array< EntityAI >;
+
+		int count = objects.Count();
+		for(int i=0; i < count; i++)
+		{
+			EntityAI parent;
+			if (Class.CastTo(parent, objects[i]))
+				parents.Insert(parent);
+			else
+				props.Insert(objects[i]);
+		}
+
+		if (count > -1)
+		{
+			foreach(EntityAI prnt: parents)
+				loadouts.Insert(LoadoutProcessItem(prnt, prnt.GetPosition(), prnt.GetOrientation()));
+				
+			foreach(Object obj: props)
+				loadouts.Insert(LoadoutProcessObject(parent, parent.GetPosition(), parent.GetOrientation()));
+
+			JMLoadout loadout = new JMLoadout;
+			loadout.m_Items = new array< ref JMLoadoutItem >;
+			loadout.m_Items = loadouts;
+			loadout.m_IsLocalPosition = false;
+			
+			string name = JMDate.Now( true ).ToString( "YYYY-MM-DD_hh-mm-ss" );
+			JMLoadoutSettings.SaveDeletion(loadout, name);
+
+			GetCommunityOnlineToolsBase().Log( instance, "Created Deletion Backup '"+name+"'" );
+			SendWebhook( "Backup", instance, "Created Deletion Backup '"+name+"'" );
+		}
 	}
 };
