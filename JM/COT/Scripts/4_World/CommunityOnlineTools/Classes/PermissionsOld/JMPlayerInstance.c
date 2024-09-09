@@ -9,7 +9,8 @@ enum JMPlayerVariables
 	BROKEN_LEGS = 64,
 	RECEIVE_DMG_DEALT = 128,
 	CANNOT_BE_TARGETED_BY_AI = 256,
-	REMOVE_COLLISION = 512
+	REMOVE_COLLISION = 512,
+	ADMIN_NVG = 1024
 }
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -130,6 +131,7 @@ class JMPlayerInstance : Managed
 				m_PlayerVars[JMPlayerVariables.INVISIBILITY] = PlayerObject.COTIsInvisible();
 				m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO] = PlayerObject.COTHasUnlimitedAmmo();
 				m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA] = PlayerObject.COTHasUnlimitedStamina();
+				m_PlayerVars[JMPlayerVariables.ADMIN_NVG] = PlayerObject.COTHasAdminNVG();				
 				m_PlayerVars[JMPlayerVariables.BROKEN_LEGS] = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
 				m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT] = PlayerObject.COTGetReceiveDamageDealt();
 				m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI] = PlayerObject.COTGetCannotBeTargetedByAI();
@@ -674,6 +676,11 @@ class JMPlayerInstance : Managed
 	bool HasUnlimitedStamina()
 	{
 		return m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA];
+	}
+
+	bool HasAdminNVG()
+	{
+		return m_PlayerVars[JMPlayerVariables.ADMIN_NVG];
 	}
 
 	bool HasBrokenLegs()

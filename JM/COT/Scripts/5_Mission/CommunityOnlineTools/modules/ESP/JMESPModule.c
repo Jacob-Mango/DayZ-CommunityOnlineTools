@@ -228,6 +228,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	ref JMESPCanvas m_ESPCanvas;
 
+	private JMLoadoutModule m_LoadoutModule;
+
 	void JMESPModule()
 	{
 		ESPRadius = 200;
@@ -381,6 +383,9 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
+		#ifndef DAYZ_1_25
+		types.Insert( JMESPViewTypeBoat );
+		#endif
 		
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
@@ -1163,7 +1168,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
+		target.GetConstruction().COT_BuildRequiredParts( part_name, player, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -1202,7 +1207,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_DismantlePart( part_name, player );
+		target.GetConstruction().COT_DismantleRequiredParts( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
 		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -1469,6 +1474,14 @@ class JMESPModule: JMRenderableModuleBase
 		set< Object > objects = new set< Object >;
 		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
 			return;
+
+		if ( GetPermissionsManager().HasPermission( "Loadouts.Backup", senderRPC, instance ) )
+		{
+			if (!m_LoadoutModule)
+				Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+			
+			m_LoadoutModule.Exec_CreateDeletionBackup(objects, instance);
+		}
 		
 		Exec_DeleteAll( objects, instance );
 	}
@@ -1477,7 +1490,6 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		int removed = 0;
 		int count = objects.Count();
-
 		
 		int i = objects.Count();
 		while ( i > 0 )

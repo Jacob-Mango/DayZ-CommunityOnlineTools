@@ -176,10 +176,8 @@ class JMVehicleMetaData
 		meta.m_VehicleType = JMVT_NONE;
 		if ( GetGame().IsKindOf(type, "ExpansionHelicopterScript") )
 			meta.m_VehicleType |= JMVT_HELICOPTER;
-		#ifndef DAYZ_1_25
-		else if ( GetGame().IsKindOf(type, "ExpansionBoatScript") )
+		else if ( GetGame().IsKindOf(type, "ExpansionBoatScript") || GetGame().IsKindOf(type, "BoatScript") )
 			meta.m_VehicleType |= JMVT_BOAT;
-		#endif
 		else
 			meta.m_VehicleType |= JMVT_CAR;
 		
@@ -649,6 +647,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 
 #ifndef DAYZ_1_25
+#ifdef EXPANSION_DAYZBOATS_ENABLE
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
@@ -657,6 +656,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			boats = boats.m_Next;
 		}
+#endif
 #endif
 
 		auto vehicles = ExpansionVehicleBase.GetAll();

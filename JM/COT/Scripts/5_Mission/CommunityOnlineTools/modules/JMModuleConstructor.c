@@ -14,30 +14,24 @@ modded class JMModuleConstructor
 		//modules.Insert( JMTestingModule );
 		//modules.Insert( JMMapEditorModule );
 		modules.Insert( JMExampleModule );
-		modules.Insert( JMWeatherOldModule );
 #endif
 
+		//modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMWeatherModule );
 
-		//! TODO: Merge with ItemSets once it will use prefabs
-		modules.Insert( JMVehicleSpawnerModule );
-		modules.Insert( JMItemSetSpawnerModule );
+		// LEGACY
+		//modules.Insert( JMVehicleSpawnerModule );
+		//modules.Insert( JMItemSetSpawnerModule );
+		modules.Insert( JMLoadoutModule );
 		
 		modules.Insert( JMMapModule );
 		modules.Insert( JMCommandModule );
 
 		modules.Insert( JMVehiclesModule );
 
-		//! TODO: make the territory module part of COT and make Expansion expand on it
-		//! 	  It will allow other Territory mods to do the same if they want 
-#ifdef EXPANSION_MODULES
-		modules.Insert( JMTerritoriesModule );
-#endif
-
 		//! TODO: Find a way to check of offline mode without being triggered while in main menu
 		//if ( IsMissionOffline() )
 		//	modules.Insert( JMMissionSelectorModule );
-
 		
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )

@@ -140,6 +140,7 @@ enum JMESPModuleRPC
 	DuplicateAll,
 	DeleteAll,
 	MoveToCursor,
+	
 	COUNT
 };
 
@@ -184,6 +185,8 @@ enum JMPlayerModuleRPC
 	Message,
 	Notif,
 	StopBleeding,
+	Vomit,
+	SetScale,
 	SetPermissions,
 	SetRoles,
 	VONStartedTransmitting,
@@ -217,6 +220,18 @@ enum JMWebhookCOTModuleRPC
 	AddType,
 	RemoveType,
 	TypeState,
+	COUNT
+};
+
+enum JMLoadoutModuleRPC
+{
+	INVALID = 10460,
+	Load,
+	Create,
+	Delete,
+	SpawnCursor,
+	SpawnTarget,
+	SpawnPlayers,
 	COUNT
 };
 

@@ -60,11 +60,11 @@ class JMItemSetForm: JMFormBase
 			
 			Widget buttonswrapper = UIActionManager.CreateGridSpacer( wrapper, 1, 2 );
 			
-			UIActionButton selButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_ITEMSET_MODULE_SPAWN_SELECTED_PLAYERS", this, "SpawnOnPlayers" );
+			UIActionButton selButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS", this, "SpawnOnPlayers" );
 			selButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( selButton );
 
-			UIActionButton curButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_ITEMSET_MODULE_SPAWN_CURSOR", this, "SpawnOnCursor" );
+			UIActionButton curButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnOnCursor" );
 			curButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( curButton );
 		}

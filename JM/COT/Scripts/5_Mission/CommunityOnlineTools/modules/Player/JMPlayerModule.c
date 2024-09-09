@@ -266,6 +266,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.SetAdminNVG:
 			RPC_SetAdminNVG( ctx, sender, target );
 			break;
+		case JMPlayerModuleRPC.Vomit:
+			RPC_Vomit( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetScale:
+			RPC_SetScale( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -1932,6 +1938,109 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetUnlimitedStamina( value, guids, senderRPC, instance );
+	}
+
+	void Vomit(float value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Vomit(value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Vomit, true, NULL );
+		}
+	}
+
+	private void Exec_Vomit(float value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+			
+			if(!player.GetCommand_Vehicle())
+			{
+				SymptomBase vomitSymptom = player.GetSymptomManager().QueueUpPrimarySymptom(SymptomIDs.SYMPTOM_VOMIT);
+				if(vomitSymptom != NULL)
+					vomitSymptom.SetDuration(value);
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_Vomit( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Vomit", senderRPC, instance ) )
+			return;
+
+		Exec_Vomit(value, guids, senderRPC, instance );
+	}
+
+	void SetScale( float value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetScale( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetScale, true, NULL );
+		}
+	}
+
+	private void Exec_SetScale( float value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetScale(value);
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetScale( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Scale", senderRPC, instance ) )
+			return;
+
+		Exec_SetScale( value, guids, senderRPC, instance );
 	}
 
 	void SetBrokenLegs( bool value, array< string > guids )
