@@ -13,7 +13,7 @@ class JMTeleportSerialize : Managed
 	 	Types = new TStringArray;
 		Locations = new array< ref JMTeleportLocation >;
 		m_WorldName = GetGame().GetWorldName();
-		m_FileName = JMConstants.FILE_TELEPORT + "_" + m_WorldName + ".json";
+		m_FileName = JMConstants.FILE_TELEPORT + m_WorldName + JMConstants.EXT_TELEPORT;
 	}
 
 	static JMTeleportSerialize Load()

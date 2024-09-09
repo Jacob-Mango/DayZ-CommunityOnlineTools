@@ -30,7 +30,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "#STR_COT_VEHICLE_MODULE_NAME";
+		return "#STR_COT_VEHICLE_MODULE_NAME (Legacy)";
 	}
 
 	override string GetIconName()

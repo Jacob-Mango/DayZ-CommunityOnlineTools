@@ -40,5 +40,10 @@ class UIActionButtonToggle: UIActionButton
 	void SetToggle(bool state)
 	{
 		m_IsToggled = state;
+
+		if (m_IsToggled)
+			SetButton(m_TextOn);
+		else
+			SetButton(m_TextOff);
 	}
 };

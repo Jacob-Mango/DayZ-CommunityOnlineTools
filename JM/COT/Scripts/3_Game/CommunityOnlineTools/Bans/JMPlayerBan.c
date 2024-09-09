@@ -10,14 +10,14 @@ class JMPlayerBan
 		
 		JMPlayerBan userFile = new JMPlayerBan();
 
-        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_PLAYER;
+        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_BAN;
 		if (FileExist(filepath))
         {
 			JsonFileLoader<JMPlayerBan>.JsonLoadFile(filepath, userFile);
 		    return userFile;
         }
 		
-        filepath = JMConstants.DIR_BANS + FileReadyStripName( steamid ) + JMConstants.EXT_PLAYER;
+        filepath = JMConstants.DIR_BANS + FileReadyStripName( steamid ) + JMConstants.EXT_BAN;
 		if (FileExist(filepath))
         {
 			JsonFileLoader<JMPlayerBan>.JsonLoadFile(filepath, userFile);
@@ -32,13 +32,13 @@ class JMPlayerBan
 		if (!FileExist(JMConstants.DIR_BANS))
 			MakeDirectory(JMConstants.DIR_BANS);
 
-        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_PLAYER;
+        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_BAN;
         JsonFileLoader<JMPlayerBan>.JsonSaveFile(filepath, data);
 	}
 
 	static bool DeleteBanFile(string guid, string steamid = string.Empty)
 	{
-        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_PLAYER;
+        string filepath = JMConstants.DIR_BANS + FileReadyStripName( guid ) + JMConstants.EXT_BAN;
 		if (DeleteFile(filepath))
 		    return true;
 		

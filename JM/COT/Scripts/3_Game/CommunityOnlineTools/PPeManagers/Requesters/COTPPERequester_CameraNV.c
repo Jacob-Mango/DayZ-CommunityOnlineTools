@@ -19,7 +19,7 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 				SetTargetValueFloat(PPEExceptions.NVLIGHTPARAMS,PPELightIntensityParamsNative.PARAM_NOISE_MULT,false,0.0,PPELightIntensityParamsNative.L_1_NVG,PPOperators.HIGHEST);
 			break;
 			case COT_ON:
-				SetTargetValueColor(PostProcessEffectType.Glow,PPEGlow.PARAM_COLORIZATIONCOLOR,{0.0,1.0,0.0,0.0},PPEGlow.L_23_NVG,PPOperators.MULTIPLICATIVE);
+				SetTargetValueColor(PostProcessEffectType.Glow,PPEGlow.PARAM_COLORIZATIONCOLOR,{1.0,1.0,1.0,1.0},PPEGlow.L_23_NVG,PPOperators.MULTIPLICATIVE);
 				SetTargetValueFloat(PPEExceptions.EXPOSURE,PPEExposureNative.PARAM_INTENSITY,false,7.0 * m_UGExposureCoef,PPEExposureNative.L_0_NVG_OPTIC,PPOperators.ADD);
 				SetTargetValueFloat(PostProcessEffectType.FilmGrain,PPEFilmGrain.PARAM_SHARPNESS,false,0.0,PPEFilmGrain.L_1_NVG,PPOperators.SET);
 				SetTargetValueFloat(PostProcessEffectType.FilmGrain,PPEFilmGrain.PARAM_GRAINSIZE,false,0.0,PPEFilmGrain.L_2_NVG,PPOperators.SET);

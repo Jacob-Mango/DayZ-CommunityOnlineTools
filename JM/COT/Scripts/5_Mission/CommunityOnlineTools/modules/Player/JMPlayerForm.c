@@ -14,8 +14,12 @@ class JMPlayerForm: JMFormBase
 
 	private UIActionButtonToggle m_PlayerListSort;
 	private UIActionButton m_PlayerListSelectAll;
-	private UIActionButton m_PlayerListDeSelectAll;	
-	
+	private UIActionButton m_PlayerListDeSelectAll;
+
+	private UIActionButtonToggle m_PlayerPrefMode;
+	private UIActionButton m_PlayerListPref1;
+	private UIActionButton m_PlayerListPref2;
+
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
 
@@ -89,6 +93,10 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_StopBleeding;
 	private UIActionButton m_StripPlayer;
 	private UIActionButton m_DryPlayer;
+
+	private UIActionButton m_VomitPlayer;
+	private UIActionButton m_SetScalePlayer;
+
 	private UIActionButton m_KillPlayer;
 	private UIActionButton m_SendMessage;
 	private UIActionButton m_KickPlayer;
@@ -103,6 +111,8 @@ class JMPlayerForm: JMFormBase
 	private int m_LastChangeTime;
 	
 	private autoptr TStringArray m_HeatBufferStates = {"", "+", "++", "+++"};
+	private autoptr TStringArray m_PlayersPref1 = {};
+	private autoptr TStringArray m_PlayersPref2 = {};
 
 	void JMPlayerForm()
 	{
@@ -154,9 +164,7 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
-		#ifdef DIAG
 		UpdatePermission( m_AdminNVG, "Admin.Player.AdminNVG" );
-		#endif
 		UpdatePermission( m_UnlimitedStamina, "Admin.Player.UnlimitedStamina" );
 		UpdatePermission( m_BrokenLegs, "Admin.Player.BrokenLegs" );
 		UpdatePermission( m_GodMode, "Admin.Player.Godmode" );
@@ -166,6 +174,8 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
 		UpdatePermission( m_ReceiveDmgDealt, "Admin.Player.ReceiveDamageDealt" );
 		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
+		UpdatePermission( m_VomitPlayer, "Admin.Player.Vomit" );
+		UpdatePermission( m_SetScalePlayer, "Admin.Player.Scale" );
 		UpdatePermission( m_CannotBeTargetedByAI, "Admin.Player.CannotBeTargetedByAI" );
 		UpdatePermission( m_RemoveCollision, "Admin.Player.RemoveCollision" );
 
@@ -207,11 +217,16 @@ class JMPlayerForm: JMFormBase
 
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
 
-		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 4, 1 );
+		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 5, 1 );
 
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT", "" );
 		m_PlayerListFilter 		= UIActionManager.CreateEditableTextPreview( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
 		
+		Widget leftGroupsPanelGrid 	= UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 3 );
+		m_PlayerPrefMode 	= UIActionManager.CreateButtonToggle( leftGroupsPanelGrid, "SAVE", "LOAD", this, "" );
+		m_PlayerListPref1 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "Sel 01", this, "OnClick_PlayerListPref01" );
+		m_PlayerListPref2 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "Sel 02", this, "OnClick_PlayerListPref02" );
+
 		Widget navbarleftPanelGrid = UIActionManager.CreateWrapSpacer( leftPanelGrid );
 		m_PlayerListSort 		= UIActionManager.CreateButtonToggle( navbarleftPanelGrid, "A/Z", "Z/A", this, "Event_UpdatePlayerList" );
 		m_PlayerListSelectAll 	= UIActionManager.CreateButton( navbarleftPanelGrid, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Event_SelectAllPlayerList" );
@@ -230,7 +245,7 @@ class JMPlayerForm: JMFormBase
 			if ( !Class.CastTo( gsw, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
 				continue;
 
-			gsw.Show( false ); //todo: verify this is correct
+			gsw.Show( false );
 
 			for ( int j = 0; j < 100; j++ )
 			{
@@ -370,18 +385,18 @@ class JMPlayerForm: JMFormBase
 		Widget actions = UIActionManager.CreateGridSpacer( parent, 5, 2 );
 
 		m_Health = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEALTH", 0, 100, this, "Click_SetHealth" );
-		m_Shock = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", 0, 100, this, "Click_SetShock" );
+		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
 		
-		m_Blood = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", 0, 5000, this, "Click_SetBlood" );
+		m_Shock = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_SHOCK", 0, 100, this, "Click_SetShock" );
 		m_Energy = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FOOD", 0, PlayerConstants.SL_ENERGY_MAX, this, "Click_SetEnergy" );
 		
-		m_Water = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_WATER", 0, PlayerConstants.SL_WATER_MAX, this, "Click_SetWater" );
+		m_Blood = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", 0, 5000, this, "Click_SetBlood" );
 		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
 
+		#ifndef DAYZ_1_25
 		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( headerTemos, "Player Temperature:", "" );
 
-		#ifndef DAYZ_1_25
 		Widget actionsTemps = UIActionManager.CreateGridSpacer( parent, 2, 2 );
 		m_HeatComfort = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATCOMFORT", -0.75, 0.75, this );
 		m_HeatComfort.SetFormat("");
@@ -390,7 +405,6 @@ class JMPlayerForm: JMFormBase
 
 		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
 		m_HeatBuffer.SetStepValue(0.1);
-		
 		#endif
 
 		m_Health.SetSliderWidth(0.5);
@@ -425,9 +439,7 @@ class JMPlayerForm: JMFormBase
 		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
 		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
 		
-		#ifdef DIAG
-		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "NVG TEST", this, "Click_AdminNVG", false );
-		#endif
+		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "NVG", this, "Click_AdminNVG", false );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -476,8 +488,10 @@ class JMPlayerForm: JMFormBase
 		
 		// Misc actions inbetween
 		m_SpectatePlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
-		m_SendMessage = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-		
+		m_SendMessage 	 = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
+		m_VomitPlayer 	 = UIActionManager.CreateButton( actions, "Vomit", this, "Click_VomitPlayer" );
+		m_SetScalePlayer = UIActionManager.CreateButton( actions, "SetScale", this, "Click_ScalePlayer" );
+
 		// Destructive actions at the bottom
 		m_KillPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
@@ -492,6 +506,46 @@ class JMPlayerForm: JMFormBase
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
 		return parent;
+	}
+
+	void OnClick_PlayerListPref01( UIEvent eid, UIActionBase action )
+	{
+		ApplyPlayerListPref(m_PlayersPref1);
+	}	
+
+	void OnClick_PlayerListPref02( UIEvent eid, UIActionBase action )
+	{
+		ApplyPlayerListPref(m_PlayersPref2);
+	}
+
+	void ApplyPlayerListPref(out TStringArray playerArr)
+	{
+		bool mode = m_PlayerPrefMode.m_IsToggled;
+		if (!mode)
+			playerArr = new TStringArray;
+		
+		foreach(JMPlayerRowWidget player: m_PlayerList)
+		{
+			if (mode)
+			{
+				bool state = playerArr.Find(player.GetGUID()) != -1;
+				
+				if (state)
+					JM_GetSelected().AddPlayer(player.GetGUID());
+				else
+					JM_GetSelected().RemovePlayer(player.GetGUID());
+				
+				player.Checkbox.SetChecked(state);
+			}
+			else
+			{
+				if (player.Checkbox.IsChecked())
+					playerArr.Insert(player.GetGUID());
+			}
+		}
+		
+		UpdateUI();
+		UpdatePlayerCount();
 	}
 
 	void Event_UpdatePlayerList( UIEvent eid, UIActionBase action )
@@ -724,49 +778,166 @@ class JMPlayerForm: JMFormBase
 
 	void Click_StripPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("StripSelected","Strip"))
+			StripSelected(NULL);
+	}
+
+	void StripSelected(JMConfirmation confirmation)
+	{
+		m_Module.Strip( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Strip(JMConfirmation confirmation)
+	{
 		m_Module.Strip( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_DryPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("DrySelected", "Dry"))
+			DrySelected(NULL);
+	}
+
+	void DrySelected(JMConfirmation confirmation)
+	{
+		m_Module.Dry( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Dry(JMConfirmation confirmation)
+	{
 		m_Module.Dry( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_KillPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("KillPlayer","KillPlayers"))
+			KillPlayer(NULL);
+	}
+
+	void KillPlayer(JMConfirmation confirmation)
+	{
+		m_Module.SetHealth( 0, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void KillPlayers(JMConfirmation confirmation)
+	{
 		m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_VomitPlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (!HasTooManyPlayers("VomitPlayer","VomitPlayers"))
+			VomitPlayer(NULL);
+	}
+
+	void VomitPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayersConfirm" );
+	}
+
+	void VomitPlayersConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 1 || value > 120)
+			return;
+
+		m_Module.Vomit(value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void VomitPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerConfirm" );
+	}
+
+	void VomitPlayerConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 1 || value > 120)
+			return;
+
+		m_Module.Vomit(value, JM_GetSelected().GetPlayers() );
+	}
+
+	void Click_ScalePlayer( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if (!HasTooManyPlayers("ScalePlayer","ScalePlayers"))
+			ScalePlayer(NULL);
+	}
+
+	void ScalePlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayersConfim" );
+	}
+
+	void ScalePlayersConfim(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 0.1 || value > 10)
+			value = 1;
+
+		m_Module.SetScale( value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void ScalePlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerConfim" );
+	}
+
+	void ScalePlayerConfim(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		float value = text.ToFloat();
+		if (value < 0.1 || value > 10)
+			value = 1;
+
+		m_Module.SetScale( value, JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_SendMessage( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessage", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
+		if (!HasTooManyPlayers("SendMessage","SendMessages"))
+			SendMessage(NULL);
 	}
 
-	void SendMessage(JMConfirmation confirmation)
+	void SendMessages(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessagesConfirm", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifs" );
+	}
+
+	void SendMessagesConfirm(JMConfirmation confirmation)
 	{
 		string text = confirmation.GetEditBoxValue();
 		if ( text == "" )
@@ -775,7 +946,7 @@ class JMPlayerForm: JMFormBase
 		m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
 	}
 
-	void SendNotif(JMConfirmation confirmation)
+	void SendNotifs(JMConfirmation confirmation)
 	{
 		string text = confirmation.GetEditBoxValue();
 		if ( text == "" )
@@ -784,65 +955,122 @@ class JMPlayerForm: JMFormBase
 		m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
 	}
 
-	void Click_KickPlayer( UIEvent eid, UIActionBase action )
+	void SendMessage(JMConfirmation confirmation)
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessageConfirm", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotif" );
+	}
+
+	void SendMessageConfirm(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
 			return;
 
+		m_Module.DoMessage( {JM_GetSelected().GetPlayers()[0]}, text);
+	}
+
+	void SendNotif(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text == "" )
+			return;
+
+		m_Module.DoNotif( {JM_GetSelected().GetPlayers()[0]}, text);
+	}
+
+	void Click_KickPlayer( UIEvent eid, UIActionBase action )
+	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "KickPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer" );
-	}
-
-	void KickPlayer_Cancel(JMConfirmation confirmation)
-	{
+		if (!HasTooManyPlayers("KickPlayer", "KickPlayers"))
+			KickPlayerConfirm(NULL);
 	}
 
 	void KickPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerConfirm" );
+	}
+
+	void KickPlayersConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
+	}
+
+	void KickPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayersConfirm" );
+	}
+
+	void KickPlayerConfirm(JMConfirmation confirmation)
 	{
 		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_BanPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "BanPlayer_Cancel", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer" );
-	}
-
-	void BanPlayer_Cancel(JMConfirmation confirmation)
-	{
+		if (!HasTooManyPlayers("BanPlayer", "BanPlayers"))
+			BanPlayerConfirm(NULL);
 	}
 
 	void BanPlayer(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerConfirm" );
+	}
+
+	void BanPlayerConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
+	}
+
+	void BanPlayers(JMConfirmation confirmation)
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayersConfirm" );
+	}
+
+	void BanPlayersConfirm(JMConfirmation confirmation)
 	{
 		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("StopSelectedBleeding","StopBleeding"))
+			StopBleeding(NULL);
+	}
+
+	void StopSelectedBleeding(JMConfirmation confirmation)
+	{
+		m_Module.StopBleeding( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void StopBleeding(JMConfirmation confirmation)
+	{
 		m_Module.StopBleeding( JM_GetSelected().GetPlayers() );
 	}
 
 	void Click_HealPlayer( UIEvent eid, UIActionBase action )
 	{
-		if ( JM_GetSelected().GetPlayers().Count() != 1 )
-			return;
-
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("HealSelected","Heal"))
+			Heal(NULL);
+	}
+
+	void HealSelected(JMConfirmation confirmation)
+	{
+		m_Module.Heal( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void Heal(JMConfirmation confirmation)
+	{
 		m_Module.Heal( JM_GetSelected().GetPlayers() );
 	}
 
@@ -896,6 +1124,24 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("SetPositionSelectedTeleport", "SetPositionTeleport"))
+			SetPositionTeleport(NULL);
+	}
+
+	void SetPositionSelectedTeleport(JMConfirmation confirmation)
+	{
+		UpdateLastChangeTime();
+
+		vector pos = vector.Zero;
+		pos[0] = m_PositionX.GetText().ToFloat();
+		pos[1] = m_PositionY.GetText().ToFloat();
+		pos[2] = m_PositionZ.GetText().ToFloat();
+
+		m_Module.TeleportTo( pos, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void SetPositionTeleport(JMConfirmation confirmation)
+	{
 		UpdateLastChangeTime();
 
 		vector pos = vector.Zero;
@@ -911,6 +1157,30 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("TeleportSelectedTo", "TeleportTo"))
+			TeleportTo(NULL);
+	}
+
+	void TeleportSelectedTo(JMConfirmation confirmation)
+	{
+		vector position = vector.Zero;
+
+		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
+		{
+			position = CurrentActiveCamera.GetPosition();
+		} else if ( GetPlayer() )
+		{
+			position = GetPlayer().GetPosition();
+		} else
+		{
+			return;
+		}
+
+		m_Module.TeleportTo( position, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportTo(JMConfirmation confirmation)
+	{
 		vector position = vector.Zero;
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
@@ -1016,6 +1286,17 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyPlayers("TeleportSelectedToPrevious", "TeleportToPrevious"))
+			TeleportToPrevious(NULL);
+	}
+
+	void TeleportSelectedToPrevious(JMConfirmation confirmation)
+	{
+		m_Module.TeleportToPrevious( {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportToPrevious(JMConfirmation confirmation)
+	{
 		m_Module.TeleportToPrevious( JM_GetSelected().GetPlayers() );
 	}
 
@@ -1134,6 +1415,9 @@ class JMPlayerForm: JMFormBase
 		if ( m_UnlimitedStamina )
 			m_UnlimitedStamina.SetChecked( m_SelectedInstance.HasUnlimitedStamina() );
 		
+		if ( m_AdminNVG )
+			m_AdminNVG.SetChecked( m_SelectedInstance.HasAdminNVG() );
+
 		if ( m_BrokenLegs )
 			m_BrokenLegs.SetChecked( m_SelectedInstance.HasBrokenLegs() );
 		
@@ -1798,19 +2082,15 @@ class JMPlayerForm: JMFormBase
 		
 		if ( JM_GetSelected().NumPlayers() == 1 )
 		{
-			ShowIdentityWidgets();
-
-			m_GUID.SetButton( instance.GetGUID() );
-			m_Name.SetButton( instance.GetName() );
-			m_Steam64ID.SetButton( instance.GetSteam64ID() );
-
 			UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
-		} else
-		{
-			HideIdentityWidgets();
-
+		} else {
 			m_TeleportMeTo.Disable();
 		}
+
+		ShowIdentityWidgets();
+		m_GUID.SetButton( instance.GetGUID() );
+		m_Name.SetButton( instance.GetName() );
+		m_Steam64ID.SetButton( instance.GetSteam64ID() );
 
 		if ( IsMissionOffline() )
 		{
@@ -1935,18 +2215,17 @@ class JMPlayerForm: JMFormBase
 
 	void SelectAllPlayerList(bool state = true)
 	{
-		for ( int i = 0; i < m_PlayerList.Count(); i++ )
+		foreach(JMPlayerRowWidget player: m_PlayerList)
 		{
 			if (state)
-				JM_GetSelected().AddPlayer( m_PlayerList[i].GetGUID() );
+				JM_GetSelected().AddPlayer(player.GetGUID());
 			else
-				JM_GetSelected().RemovePlayer( m_PlayerList[i].GetGUID() );
+				JM_GetSelected().RemovePlayer(player.GetGUID());
 			
-			m_PlayerList[i].Checkbox.SetChecked( state );
+			player.Checkbox.SetChecked(state);
 		}
 
 		UpdateUI();
-
 		UpdatePlayerCount();
 	}
 
@@ -2064,5 +2343,18 @@ class JMPlayerForm: JMFormBase
 	void UpdateLastChangeTime()
 	{
 		m_LastChangeTime = GetGame().GetTime();
+	}
+
+	bool HasTooManyPlayers(string funcOnlyName, string funcName)
+	{
+		int count = JM_GetSelected().GetPlayers().Count();
+		if (count > 1)
+		{
+			JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+
+		return false;
 	}
 };

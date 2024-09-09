@@ -551,31 +551,32 @@ class JMESPMetaBaseBuilding : JMESPMeta
 			JMConstructionPartData data;
 			Class.CastTo( data, m_StateHeaders[i].GetData() );
 
-			m_StateHeaders[i].SetText( StateToString( data.m_State ) );
+			m_StateHeaders[i].SetText("");
+
+			m_StateHeaders[i].Hide();
+			m_BuildButtons[i].Hide();
+			m_DismantleButtons[i].Hide();
+			m_RepairButtons[i].Hide();
 
 			if ( data.m_State == JMConstructionPartState.BUILT )
 			{
-				m_BuildButtons[i].Disable();
-				m_DismantleButtons[i].Enable();
+				m_StateHeaders[i].Enable();
+				m_StateHeaders[i].Show();
+
 				m_RepairButtons[i].Enable();
-			} else if ( data.m_State == JMConstructionPartState.CAN_BUILD )
-			{
-				m_BuildButtons[i].Enable();
-				m_DismantleButtons[i].Disable();
-				m_RepairButtons[i].Disable();
-			} else 
-			{
-				m_StateHeaders[i].Hide();
-				m_BuildButtons[i].Hide();
-				m_DismantleButtons[i].Hide();
-				m_RepairButtons[i].Hide();
+				m_RepairButtons[i].Show();
 
-				continue;
+				m_DismantleButtons[i].Enable();
+				m_DismantleButtons[i].Show();
 			}
-
-			m_BuildButtons[i].Show();
-			m_DismantleButtons[i].Show();
-			m_RepairButtons[i].Show();
+			else if ( data.m_State != JMConstructionPartState.CONFLICTING_PART )
+			{
+				m_StateHeaders[i].Enable();
+				m_StateHeaders[i].Show();
+				
+				m_BuildButtons[i].Enable();
+				m_BuildButtons[i].Show();
+			}
 		}
 	}
 

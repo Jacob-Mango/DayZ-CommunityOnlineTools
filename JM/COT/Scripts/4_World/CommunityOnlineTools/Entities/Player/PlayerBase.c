@@ -27,8 +27,11 @@ modded class PlayerBase
 	private bool m_JMHasLastPosition;
 
 	private bool m_JMHasUnlimitedAmmo;
-
 	private bool m_JMHasUnlimitedStamina;
+	
+	private bool m_JMHasCustomScale;
+	private float m_JMScaleValue;
+
 	private bool m_JMHasAdminNVG;
 	private bool m_JMHasAdminNVGRemoteSynch;
 
@@ -58,6 +61,20 @@ modded class PlayerBase
 			COTSetGodMode(true);
 			COTSetUnlimitedAmmo(true);
 			COTSetUnlimitedStamina(true);
+		}
+
+		if (GetGame() && GetGame().IsClient())
+		{
+			SetEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
+		}
+	}
+
+	
+	void ~PlayerBase()
+	{
+		if (GetGame() && GetGame().IsClient())
+		{
+			ClearEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
 		}
 	}
 
@@ -89,6 +106,8 @@ modded class PlayerBase
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
 		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
 		RegisterNetSyncVariableBool( "m_JMHasAdminNVG" );
+		RegisterNetSyncVariableBool("m_JMHasCustomScale");
+		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0, 0.1);
 		RegisterNetSyncVariableBool( "m_COT_GodMode" );
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -200,11 +219,21 @@ modded class PlayerBase
 		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
 		{
 			m_JMHasAdminNVGRemoteSynch = m_JMHasAdminNVG;
-			
+
+			// idk why or how it works.
+			// This makes no fucking sense.
+			// it just works. Kill me. -LT
 			if (m_JMHasAdminNVG)
+			{
 				AddActiveNV(JMNVTypes.NV_COT_ON);
-			else
 				RemoveActiveNV(JMNVTypes.NV_COT_OFF);
+			}
+			else
+			{
+				AddActiveNV(JMNVTypes.NV_COT_OFF);
+				RemoveActiveNV(JMNVTypes.NV_COT_ON);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
+			}
 		}
 	}
 
@@ -237,14 +266,19 @@ modded class PlayerBase
 		}
 	}
 
-#ifndef SERVER
 	//! @note after disabling simulation, this no longer gets called, just keep that in mind
+#ifndef SERVER
 	override void EOnPostFrame( IEntity other, int extra )
 	{
 		if ( !m_JMIsInvisible )
-			return;
-
-		SetInvisible( true );
+		{
+			if (m_JMHasCustomScale && m_JMScaleValue > 0.0)
+				SetScale(m_JMScaleValue);
+		}
+		else
+		{
+			SetInvisible( true );
+		}
 	}
 #endif
 
@@ -345,7 +379,11 @@ modded class PlayerBase
 					else if (Class.CastTo(boat, transport))
 						boat.COT_PlaceOnSurfaceAtPosition(position);
 					#endif
-
+					else
+					{
+						transport.SetPosition(position);
+					}
+					
 					return;
 				}
 			}
@@ -455,6 +493,11 @@ modded class PlayerBase
 	bool COTHasAdminNVG()
 	{
 		return m_JMHasAdminNVG;
+	}
+
+	bool COTHasCustomScale()
+	{
+		return m_JMHasCustomScale;
 	}
 
 	void COTSetGodMode( bool mode, bool preference = true )
@@ -604,6 +647,20 @@ modded class PlayerBase
 		if ( GetGame().IsServer() )
 		{
 			m_JMHasAdminNVG = mode;
+
+			#ifdef SERVER
+			SetSynchDirty();
+			#endif
+		}
+	}
+
+	void COTSetScale( float value )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasCustomScale = value != 1;
+			m_JMScaleValue = value;
+			SetScale(value);
 
 			#ifdef SERVER
 			SetSynchDirty();
