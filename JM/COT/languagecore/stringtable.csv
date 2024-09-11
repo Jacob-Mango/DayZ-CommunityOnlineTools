@@ -37,6 +37,7 @@ STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME,Show Class Name,Show Class Name,Show Class 
 STR_COT_ESP_MODULE_TOGGLE_SAFETY,Include all objects (slow),Include all objects (slow),Include all objects (slow),Inkludiere alle Objekte (langsam),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow)
 STR_COT_ESP_MODULE_VIEW_TYPE_AMMO,Ammo,Ammo,Ammo,Munition,Боезапас,Ammo,Ammo,Ammo,Ammo,Munitions,Ammo,Ammo,Ammo,Ammo
 STR_COT_ESP_MODULE_VIEW_TYPE_ANIMAL,Animal,Animal,Animal,Tier,Животное,Animal,Animal,Animal,Animal,Animaux,Animal,Animal,Animal,Animal
+STR_COT_ESP_MODULE_VIEW_TYPE_ARCHERY,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery
 STR_COT_ESP_MODULE_VIEW_TYPE_BASE_BUILDING,Base Building,Base Building,Base Building,Basis-Bau,Строительство Базы,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building,Base Building
 STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_ACTION_RIFLES,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Repetiergewehre,Болтовые Винтовки,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Carabines à verrou,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles,Bolt Action Rifles
 STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_RIFLES,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolzengewehre,Полуавтоматические Винтовки,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Fusils à verrou,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles
@@ -48,6 +49,7 @@ STR_COT_ESP_MODULE_VIEW_TYPE_EXPLOSIVES,Explosives,Explosives,Explosives,Sprengs
 STR_COT_ESP_MODULE_VIEW_TYPE_FOOD,Food,Food,Food,Nahrung,Еда,Food,Food,Food,Food,Nourriture,Food,Food,Food,Food
 STR_COT_ESP_MODULE_VIEW_TYPE_INFECTED,Infected,Infected,Infected,Infizierte,Инфицированные,Infected,Infected,Infected,Infected,Infectés,Infected,Infected,Infected,Infected
 STR_COT_ESP_MODULE_VIEW_TYPE_ITEMS,Items,Items,Items,Gegenstände,Предметы,Items,Items,Items,Items,Objets,Items,Items,Items,Items
+STR_COT_ESP_MODULE_VIEW_TYPE_LAUNCHERS,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers,Launchers
 STR_COT_ESP_MODULE_VIEW_TYPE_MAGAZINES,Magazines,Magazines,Magazines,Magazine,Магазины,Magazines,Magazines,Magazines,Magazines,Chargeurs,Magazines,Magazines,Magazines,Magazines
 STR_COT_ESP_MODULE_VIEW_TYPE_PISTOLS,Pistols,Pistols,Pistols,Handfeuerwaffen,Пистолеты,Pistols,Pistols,Pistols,Pistols,Pistolets,Pistols,Pistols,Pistols,Pistols
 STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER,Players,Players,Players,Spieler,Игроки,Players,Players,Players,Players,Joueurs,Players,Players,Players,Players
