@@ -71,11 +71,12 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleMapPanel = Widget.Cast( layoutRoot.FindAnyWidget( "map_window_panel" ) );
 		
 		//! Vehicles List
-		m_VehicleListPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_panel" ) );
-		m_VehiclesListContent = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
+		m_VehicleListPanel 		= Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_panel" ) );
+		m_VehiclesListContent 	= Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_content" ) );
 
 		Widget vehiclesListButtons = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_list_buttons" ) );
 			Widget gridlistbtns = UIActionManager.CreateGridSpacer( vehiclesListButtons, 4, 1 );
+				UIActionManager.CreateEditableTextPreview( gridlistbtns, "Search", this );
 				m_RefreshButton = UIActionManager.CreateButton( gridlistbtns, "Refresh", this, "OnClick_Refresh" );
 				m_DeleteAllButton = UIActionManager.CreateButton( gridlistbtns, "Delete All", this, "OnClick_DeleteAll" );
 				m_DeleteDestroyedButton = UIActionManager.CreateButton( gridlistbtns, "Delete Destroyed", this, "OnClick_DeleteDestroyed" );
@@ -88,21 +89,32 @@ class JMVehiclesMenu: JMFormBase
 		//! Vehicle Info
 		m_VehicleInfoPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_panel" ) );
 			Widget gridinfos = UIActionManager.CreateGridSpacer( m_VehicleInfoPanel, 12, 1 );
-				m_VehicleName = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehicleClassName = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleName = UIActionManager.CreateText( gridinfos, "Name:", "Value" );
+				m_VehicleClassName = UIActionManager.CreateText( gridinfos, "ClassName:", "Value" );
 
-				m_VehicleStatus = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehicleType = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleStatus = UIActionManager.CreateText( gridinfos, "Status:", "Value" );
+				m_VehicleType = UIActionManager.CreateText( gridinfos, "Type:", "Value" );
 
-				m_VehicleID = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehiclePersistentIDAB = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehiclePersistentIDCD = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleID = UIActionManager.CreateText( gridinfos, "ID:", "Value" );
+				m_VehiclePersistentIDAB = UIActionManager.CreateText( gridinfos, "ID AB:", "Value" );
+				m_VehiclePersistentIDCD = UIActionManager.CreateText( gridinfos, "ID CD:", "Value" );
 
-				m_VehiclePosition = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehicleRotation = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehiclePosition = UIActionManager.CreateText( gridinfos, "Position:", "Value" );
+					Widget positionGrid = UIActionManager.CreateGridSpacer( gridinfos, 1, 3 );
+						UIActionManager.CreateText( positionGrid, "Copy" );
+						UIActionManager.CreateText( positionGrid, "Paste" );
 
-				m_VehicleKeys = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
-				m_VehicleLastDriverUID = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
+				m_VehicleRotation = UIActionManager.CreateText( gridinfos, "Rotation:", "Value" );
+					Widget rotationGrid = UIActionManager.CreateGridSpacer( gridinfos, 1, 3 );
+						UIActionManager.CreateText( rotationGrid, "Copy" );
+						UIActionManager.CreateText( rotationGrid, "Paste" );
+
+				m_VehicleKeys = UIActionManager.CreateText( gridinfos, "Keys:", "Value" );
+				m_VehicleLastDriverUID = UIActionManager.CreateText( gridinfos, "Last Driver" );
+					Widget driverUIDGrid = UIActionManager.CreateGridSpacer( gridinfos, 1, 3 );
+						UIActionManager.CreateText( driverUIDGrid, "Name:", "Value" );
+						UIActionManager.CreateText( driverUIDGrid, "SteamID:", "Value" );
+						UIActionManager.CreateText( driverUIDGrid, "GUID:", "Value" );
 				
 				m_VehicleCovered = UIActionManager.CreateText( gridinfos, "MyText", "Value" );
 
@@ -118,10 +130,6 @@ class JMVehiclesMenu: JMFormBase
 				m_CoverVehicleButton = UIActionManager.CreateButton( gridoptions, "Cover", this, "OnClick_CoverVehicle" );
 				m_LockVehicleButton = UIActionManager.CreateButton( gridoptions, "Lock", this, "OnClick_LockVehicle" );
 				m_UnPairVehicleButton = UIActionManager.CreateButton( gridoptions, "UnPair", this, "OnClick_UnPairVehicle" );
-
-				m_CopyPositionButton = UIActionManager.CreateButton( gridoptions, "Copy Position", this, "OnClick_CopyPosition" );
-				m_CopyRotationButton = UIActionManager.CreateButton( gridoptions, "Copy Rotation", this, "OnClick_CopyRotation" );
-				m_CopyLastDriverUIDButton = UIActionManager.CreateButton( gridoptions, "Copy UID", this, "OnClick_CopyLastDriverUID" );
 
 				m_TeleportVehicleButton = UIActionManager.CreateButton( gridoptions, "TeleportToVehicle", this, "OnClick_TeleportToVehicle" );
 				m_TeleportMeButton = UIActionManager.CreateButton( gridoptions, "TeleportToMe", this, "OnClick_TeleportVehicleToMe" );
@@ -190,19 +198,19 @@ class JMVehiclesMenu: JMFormBase
 				marker = "Car";
 			break;
 			case JMVT_BOAT:
-				color = ARGB( 255, 243, 156, 18 );
+				color = ARGB( 255, 243, 18, 156 );
 				marker = "Boat";
 			break;
 			case JMVT_HELICOPTER:
-				color = ARGB( 255, 243, 156, 18 );
+				color = ARGB( 255, 18, 156, 243 );
 				marker = "Helicopter";
 			break;
 			case JMVT_PLANE:
-				color = ARGB( 255, 243, 156, 18 );
+				color = ARGB( 255, 18, 243, 156 );
 				marker = "Plane";
 			break;
 			case JMVT_BIKE:
-				color = ARGB( 255, 243, 156, 18 );
+				color = ARGB( 255, 243, 156, 100 );
 				marker = "Bike";
 			break;
 		}
@@ -306,7 +314,29 @@ class JMVehiclesMenu: JMFormBase
 		}
 	}
 
-	void OnClick_CopyDriverUID( UIEvent eid, UIActionBase action )
+	void OnClick_CopyDriverGUID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_CopyDriverSteamID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		if ( m_CurrentVehicle )
+		{
+			//! TODO:
+		}
+	}
+
+	void OnClick_CopyDriverName( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
