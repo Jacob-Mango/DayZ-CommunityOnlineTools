@@ -387,10 +387,12 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeBoat );
 		#endif
 		
+		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
+		types.Insert( JMESPViewTypeLauncher );
 
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
