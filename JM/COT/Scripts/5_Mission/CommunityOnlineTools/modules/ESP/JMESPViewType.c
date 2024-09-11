@@ -349,6 +349,46 @@ class JMESPViewTypeWeapon: JMESPViewType
 };
 
 
+class JMESPViewTypeArchery: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeArchery()
+	{
+		Permission = "Weapon.Archery";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Archery";
+
+		Colour = ARGB( 255, 100, 255, 218 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeArchery::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+		
+		Archery_Base wpn;
+		if ( !Class.CastTo( wpn, obj ) )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
+
 class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 {
 	void JMESPViewTypeBoltRifle()
@@ -488,6 +528,45 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		#endif
 		
 		if ( !obj.IsKindOf("Pistol_Base") )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
+
+class JMESPViewTypeLauncher: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeLauncher()
+	{
+		Permission = "Weapon.Launcher";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Launchers";
+
+		Colour = ARGB( 255, 150, 255, 218 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeLauncher::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+		
+		if ( !obj.ShootsExplosiveAmmo() )
 			return false;
 		
 		CreateMeta( meta );
