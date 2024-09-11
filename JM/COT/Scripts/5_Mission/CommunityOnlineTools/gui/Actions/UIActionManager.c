@@ -6,11 +6,7 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/Wrappers/%1/GridSpacer%2.layout", rows, columns);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
-		if (!widget)
-			Error("No widgets created " + layout);
-
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent, layout);
+		CheckWidget(widget, parent, layout);
 
 		GridSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
@@ -27,11 +23,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
 
-		if (!widget)
-			Error("No widgets created");
-
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		WrapSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
@@ -48,11 +40,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
 
-		if (!widget)
-			Error("No widgets created");
-
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		return widget;
 	}
@@ -61,11 +49,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UISpacer.layout", parent );
 
-		if (!widget)
-			Error("No widgets created");
-
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		return widget;
 	}
@@ -74,8 +58,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		widget.SetColor( color );
 
@@ -91,8 +74,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionButton action;
 		widget.GetScript( action );
@@ -119,8 +101,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButtonToggle.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionButtonToggle action;
 		widget.GetScript( action );
@@ -147,8 +128,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionNavigateButton action;
 		widget.GetScript( action );
@@ -188,8 +168,7 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent, layout);
+		CheckWidget(widget, parent, layout);
 
 		UIActionEditableTextPreview action;
 		widget.GetScript( action );
@@ -228,8 +207,7 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent, layout);
+		CheckWidget(widget, parent, layout);
 
 		UIActionEditableText action;
 		widget.GetScript( action );
@@ -256,8 +234,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionDropdownList action;
 		widget.GetScript( action );
@@ -299,8 +276,7 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent, layout);
+		CheckWidget(widget, parent, layout);
 
 		UIActionEditableVector action;
 		widget.GetScript( action );
@@ -326,8 +302,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionCheckbox action;
 		widget.GetScript( action );
@@ -355,8 +330,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionText action;
 		widget.GetScript( action );
@@ -385,8 +359,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionSelectBox action;
 		widget.GetScript( action );
@@ -409,8 +382,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionSlider action;
 		widget.GetScript( action );
@@ -436,8 +408,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionScroller action;
 		widget.GetScript( action );
@@ -456,8 +427,7 @@ class UIActionManager
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImage.layout", parent );
 
-		if (widget == parent)
-			UIAMError("widget == parent", widget, parent);
+		CheckWidget(widget, parent);
 
 		UIActionImage action;
 		widget.GetScript( action );
@@ -505,6 +475,14 @@ class UIActionManager
 			scaleY= 1.0;
 
 		widget.SetSize( w, h * scaleY );
+	}
+
+	static void CheckWidget(Widget widget, Widget parent, string layout = string.Empty)
+	{
+		if (!widget)
+			UIAMError("No widget created", widget, parent, layout);
+		else if (widget == parent)
+			UIAMError("widget == parent", widget, parent, layout);
 	}
 
 	static void UIAMError(string err, Widget widget, Widget parent, string layout = string.Empty)
