@@ -86,7 +86,7 @@ class JMVehicleMetaData
 			meta.m_DestructionType |= JMDT_DESTROYED;
 
 		#ifdef EXPANSIONMODVEHICLE
-		meta.m_HasKeys = car.HasKey();
+		meta.m_HasKeys = car.GetExpansionVehicle().HasKey();
 		#endif
 
 		#ifdef EXPANSIONMODCORE
@@ -153,7 +153,7 @@ class JMVehicleMetaData
 		if ( vehicle.IsDamageDestroyed() )
 			meta.m_DestructionType |= JMDT_DESTROYED;
 
-		meta.m_HasKeys = vehicle.HasKey();
+		meta.m_HasKeys = vehicle.GetExpansionVehicle().HasKey();
 		meta.m_LastDriverUID = vehicle.ExpansionGetLastDriverUID();
 		
 
@@ -637,23 +637,21 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			if ( !node.m_Value.HasKey() )
+			if ( !node.m_Value.GetExpansionVehicle().HasKey() )
 				node.m_Value.Delete();
 
 			node = node.m_Next;
 		}
 
 #ifndef DAYZ_1_25
-#ifdef EXPANSION_DAYZBOATS_ENABLE
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
-			if ( !boats.m_Value.HasKey() )
+			if ( !boats.m_Value.GetExpansionVehicle().HasKey() )
 				boats.m_Value.Delete();
 
 			boats = boats.m_Next;
 		}
-#endif
 #endif
 
 		auto vehicles = ExpansionVehicleBase.GetAll();
@@ -662,7 +660,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			if ( !vehicle )
 				continue;
 
-			if ( vehicle.HasKey() )
+			if ( vehicle.GetExpansionVehicle().HasKey() )
 				continue;
 			
 			GetGame().ObjectDelete( vehicle );

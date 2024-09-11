@@ -369,20 +369,7 @@ modded class PlayerBase
 			{
 				if (transport.CrewMemberIndex(this) != -1)
 				{
-					CarScript car;
-					#ifndef DAYZ_1_25
-					BoatScript boat;
-					#endif
-					if (Class.CastTo(car, transport))
-						car.COT_PlaceOnSurfaceAtPosition(position);
-					#ifndef DAYZ_1_25
-					else if (Class.CastTo(boat, transport))
-						boat.COT_PlaceOnSurfaceAtPosition(position);
-					#endif
-					else
-					{
-						transport.SetPosition(position);
-					}
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, position);
 					
 					return;
 				}
@@ -848,11 +835,7 @@ modded class PlayerBase
 		auto hcv = GetCommand_Vehicle();
 		if (hcv)
 		{
-			CarScript vehicle;
-			#ifndef DAYZ_1_25
-			BoatScript boat;
-			#endif
-			if (Class.CastTo(vehicle, hcv.GetTransport()))
+			if (hcv.GetTransport())
 			{
 				if (!hcv.IsGettingOut())
 				{
@@ -876,32 +859,6 @@ modded class PlayerBase
 
 				return true;
 			}
-			#ifndef DAYZ_1_25
-			else if (Class.CastTo(boat, hcv.GetTransport()))
-			{
-				if (!hcv.IsGettingOut())
-				{
-					if (!COT_StartActionObject(ActionGetOutTransport, null))
-					{
-						if (!COT_StartActionObject(ActionOpenCarDoors, null))
-						{
-							COTCreateLocalAdminNotification(new StringLocaliser("Couldn't get out of boat because a door is blocked. Please exit the boat first before leaving freecam."));
-
-							CurrentActiveCamera.SetPosition(GetPosition() + "0 1.5 0");
-							return true;
-						}
-					}
-
-					if (!m_COT_IsLeavingFreeCam)
-					{
-						m_COT_IsLeavingFreeCam = true;
-						COTCreateLocalAdminNotification(new StringLocaliser("Leaving freecam..."));
-					}
-				}
-
-				return true;
-			}
-			#endif
 		}
 
 		return false;
