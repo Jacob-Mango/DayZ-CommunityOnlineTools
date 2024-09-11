@@ -10,7 +10,9 @@ enum JMPlayerVariables
 	RECEIVE_DMG_DEALT = 128,
 	CANNOT_BE_TARGETED_BY_AI = 256,
 	REMOVE_COLLISION = 512,
-	ADMIN_NVG = 1024
+	ADMIN_NVG = 1024,
+	HAS_CUSTOM_SCALE = 2048,
+	INVISIBILITY_INTERACTIVE = 4096
 }
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -125,17 +127,7 @@ class JMPlayerInstance : Managed
 				m_Stamina = PlayerObject.GetStatStamina().Get();
 				m_LifeSpanState = PlayerObject.GetLifeSpanState();
 
-				m_PlayerVars[JMPlayerVariables.BLOODY_HANDS] = PlayerObject.HasBloodyHands();
-				m_PlayerVars[JMPlayerVariables.GODMODE] = PlayerObject.COTHasGodMode();
-				m_PlayerVars[JMPlayerVariables.FROZEN] = PlayerObject.COTIsFrozen();
-				m_PlayerVars[JMPlayerVariables.INVISIBILITY] = PlayerObject.COTIsInvisible();
-				m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO] = PlayerObject.COTHasUnlimitedAmmo();
-				m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA] = PlayerObject.COTHasUnlimitedStamina();
-				m_PlayerVars[JMPlayerVariables.ADMIN_NVG] = PlayerObject.COTHasAdminNVG();				
-				m_PlayerVars[JMPlayerVariables.BROKEN_LEGS] = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
-				m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT] = PlayerObject.COTGetReceiveDamageDealt();
-				m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI] = PlayerObject.COTGetCannotBeTargetedByAI();
-				m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION] = PlayerObject.COTGetRemoveCollision();
+				PlayerObject.COT_UpdatePlayerVars(m_PlayerVars);
 			}
 		}
 	}
