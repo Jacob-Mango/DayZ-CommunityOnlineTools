@@ -114,6 +114,8 @@ class JMPlayerForm: JMFormBase
 	private autoptr TStringArray m_PlayersPref1 = {};
 	private autoptr TStringArray m_PlayersPref2 = {};
 
+	private bool m_AutoSelect = true;  //! Auto-select player when first shown
+
 	void JMPlayerForm()
 	{
 		m_PlayerList = new array< JMPlayerRowWidget >;
@@ -2077,13 +2079,15 @@ class JMPlayerForm: JMFormBase
 
 	void UpdateUI()
 	{
-		if ( JM_GetSelected().NumPlayers() == 0 )
+		if ( JM_GetSelected().NumPlayers(m_AutoSelect) == 0 )
 		{
 			HideUI();
 			return;
 		}
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+		m_AutoSelect = false;
+
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers(false)[0] );
 		
 		if ( !instance )
 		{
@@ -2098,7 +2102,7 @@ class JMPlayerForm: JMFormBase
 
 		ShowUI();
 		
-		if ( JM_GetSelected().NumPlayers() == 1 )
+		if ( JM_GetSelected().NumPlayers(false) == 1 )
 		{
 			UpdatePermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
 		} else {
@@ -2228,7 +2232,7 @@ class JMPlayerForm: JMFormBase
 
 	void UpdatePlayerCount()
 	{
-		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + JM_GetSelected().GetPlayers().Count() + ")" );
+		m_PlayerListCount.SetText( "" + m_NumPlayerCount + " (" + JM_GetSelected().GetPlayers(false).Count() + ")" );
 	}
 
 	void SelectAllPlayerList(bool state = true)
@@ -2365,7 +2369,7 @@ class JMPlayerForm: JMFormBase
 
 	bool HasTooManyPlayers(string funcOnlyName, string funcName)
 	{
-		int count = JM_GetSelected().GetPlayers().Count();
+		int count = JM_GetSelected().GetPlayers(false).Count();
 		if (count > 1)
 		{
 			JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
