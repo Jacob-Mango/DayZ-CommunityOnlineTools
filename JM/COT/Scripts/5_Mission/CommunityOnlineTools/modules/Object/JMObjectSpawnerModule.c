@@ -184,6 +184,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Object obj;
 		Object resultObj;
 		TIntArray types = {ObjIntersectFire, ObjIntersectView};
+
+		// Because way too many modders are too lazy...
+		if (m_AllowRestrictedClassNames)
+			types.Insert(ObjIntersectGeom);
+
 		foreach (int type: types)
 		{
 			rayInput.type = type;

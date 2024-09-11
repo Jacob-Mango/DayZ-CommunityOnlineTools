@@ -474,19 +474,6 @@ class JMESPForm: JMFormBase
 		
 		m_Module.SkeletonLineThickness = action.GetSelection() + 1;
 	}
-
-	void Click_MakeLoadout( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CREATE", "MakeItemSet_Create" );
-	}
-
-	void MakeItemSet_Create( JMConfirmation confirmation )
-	{
-		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
-	}
 	
 	void Click_DuplicateSelected( UIEvent eid, UIActionBase action )
 	{
@@ -520,10 +507,10 @@ class JMESPForm: JMFormBase
 			return;
 
 		if (!HasTooManyObjects("DeleteSelected"))
-			DeleteSelected(NULL);
+			DeleteSelected();
 	}
 
-	void DeleteSelected(JMConfirmation confirmation)
+	void DeleteSelected()
 	{
 		m_Module.DeleteSelected();
 	}
@@ -561,10 +548,10 @@ class JMESPForm: JMFormBase
 			return;
 
 		if (!HasTooManyObjects("MoveToCursor"))
-			MoveToCursor(NULL);
+			MoveToCursor();
 	}
 
-	void MoveToCursor(JMConfirmation confirmation)
+	void MoveToCursor()
 	{
 		vector dir = GetGame().GetCurrentCameraDirection();
 		vector from = GetGame().GetCurrentCameraPosition(); 
