@@ -35,18 +35,13 @@ class JMVehicleMetaData
 	string m_DisplayName;
 
 	[NonSerialized()]
-	CarScript m_Vehicle;
-
-#ifndef DAYZ_1_25
-	[NonSerialized()]
-	BoatScript m_Boat;
-#endif
+	Object m_Object;
 	
 	static JMVehicleMetaData CreateCarScript( CarScript car )
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
 
-		meta.m_Vehicle = car;
+		meta.m_Object = car;
 
 		car.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
 		
@@ -101,7 +96,7 @@ class JMVehicleMetaData
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
 
-		meta.m_Boat = boat;
+		meta.m_Object = boat;
 
 		boat.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
 		
@@ -163,6 +158,8 @@ class JMVehicleMetaData
 	static JMVehicleMetaData CreateCover( ExpansionVehicleCover cover )
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
+
+		meta.m_Object = cover;
 
 		cover.GetNetworkID( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
 		
@@ -576,7 +573,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		else
 		{
-			GetGame().ObjectDelete(meta.m_Vehicle);
+			GetGame().ObjectDelete(meta.m_Object);
 			UpdateVehiclesMetaData_SP();
 		}
 	}
@@ -795,7 +792,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		else
 		{
-			Exec_TeleportToVehicle(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Vehicle);
+			Exec_TeleportToVehicle(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Object);
 		}
 	}
 
