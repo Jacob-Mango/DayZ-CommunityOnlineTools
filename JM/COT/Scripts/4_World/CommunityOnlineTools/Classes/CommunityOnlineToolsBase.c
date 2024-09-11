@@ -400,6 +400,123 @@ class CommunityOnlineToolsBase
 	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)
 	{
 	}
+
+	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
+	{
+		if (dBodyIsActive(transport))
+		{
+			vector velocity = GetVelocity(transport);
+			vector angularVelocity = dBodyGetAngularVelocity(transport);
+
+			dBodyActive(transport, ActiveState.INACTIVE);
+			dBodyDynamic(transport, false);
+
+			transport.SetPosition(position);
+			transport.SetOrientation(orientation);
+
+			SetVelocity(transport, velocity);
+			dBodySetAngularVelocity(transport, angularVelocity);
+
+			dBodyDynamic(transport, true);
+		}
+		else
+		{
+			//! Force position/orientation without setting vehicle active (avoids collision)
+			for (int i = 0; i < 2; i++)
+			{
+				transport.SetPosition(position);
+				orientation[2] = orientation[2] - 1;
+				transport.SetOrientation(orientation);
+				orientation[2] = orientation[2] + 1;
+				transport.SetOrientation(orientation);
+				transport.Synchronize();
+			}
+		}
+	}
+
+	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
+	{
+		vector surface = Vector(position[0], GetGame().SurfaceY(position[0], position[2]), position[2]);
+
+		vector entityMinMax[2];
+		if (!entity.GetCollisionBox(entityMinMax))
+			entity.ClippingInfo(entityMinMax);
+
+		float entityOffsetY = entityMinMax[0][1];
+		if (entityOffsetY > 0)
+			entityOffsetY = 0;
+
+		vector startPos = position;
+		startPos[1] = startPos[1] - entityOffsetY;
+		if (surface[1] > startPos[1])
+			startPos[1] = surface[1];
+
+		float waterDepth;
+		if (aboveWater)
+			waterDepth = GetGame().GetWaterDepth(surface);
+
+		if (waterDepth > 0)
+		{
+			surface[1] = surface[1] + waterDepth;
+			position = surface;
+		}
+		else
+		{
+			PhxInteractionLayers layerMask;
+			layerMask |= PhxInteractionLayers.BUILDING;
+			layerMask |= PhxInteractionLayers.DOOR;
+			layerMask |= PhxInteractionLayers.VEHICLE;
+			layerMask |= PhxInteractionLayers.ROADWAY;
+			layerMask |= PhxInteractionLayers.TERRAIN;
+			layerMask |= PhxInteractionLayers.ITEM_LARGE;
+			layerMask |= PhxInteractionLayers.FENCE;
+			vector hitPosition;
+			vector hitNormal;
+
+			if (DayZPhysics.RayCastBullet(startPos + "0 1 0", surface - "0 1 0", layerMask, entity, null, hitPosition, hitNormal, null))
+			{
+				position = hitPosition;
+			} else {
+				position = surface;
+				hitNormal = GetGame().SurfaceGetNormal(surface[0], surface[2]);
+			}
+		}
+
+		position[1] = position[1] - entityOffsetY;
+
+		bool isActive = dBodyIsActive(entity);
+		bool isDynamic = dBodyIsDynamic(entity);
+
+		vector velocity = GetVelocity(entity);
+		vector angularVelocity = dBodyGetAngularVelocity(entity);
+
+		if (isActive)
+		{
+			dBodyActive(entity, ActiveState.INACTIVE);
+			dBodyDynamic(entity, false);
+		}
+
+		vector orientation = entity.GetOrientation();
+		entity.SetOrientation(Vector(orientation[0], 0, 0));
+
+		vector transform[4];
+		entity.GetTransform(transform);
+		transform[3] = position;
+		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
+		entity.SetTransform(transform);
+
+		Transport transport;
+		if (isActive)
+		{
+			SetVelocity(entity, velocity);
+			dBodySetAngularVelocity(entity, angularVelocity);
+			dBodyDynamic(entity, true);
+		}
+		else if (Class.CastTo(transport, entity))
+		{
+			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
+		}
+	}
 };
 
 
