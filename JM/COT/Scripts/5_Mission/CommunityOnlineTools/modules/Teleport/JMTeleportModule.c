@@ -321,11 +321,15 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 		int count;
+		bool isSelfOnly = true;
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( !player )
 				continue;
+			
+			if (isSelfOnly && players[i].GetGUID() != ident.GetId())
+				isSelfOnly = false;
 
 			count++;
 			
@@ -338,7 +342,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			}
 		}
 
-		if (count > 0)
+		if (!isSelfOnly && count > 0)
 			COTCreateNotification( ident, new StringLocaliser( "Teleported "+count.ToString()+" Player(s)" ) );
 	}
 
