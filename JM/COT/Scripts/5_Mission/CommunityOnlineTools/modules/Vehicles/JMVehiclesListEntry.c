@@ -59,7 +59,8 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 			if ( m_Vehicle.m_DestructionType != JMDT_NONE )
 			{
 				m_VehicleStatusIcon.SetColor( ARGB( 255,255,0,0 ) );
-			} else
+			}
+			else
 			{
 				m_VehicleStatusIcon.SetColor( ARGB( 255,0,255,0 ) );
 			}
