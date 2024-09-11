@@ -35,7 +35,8 @@ PanelWidgetClass JMCOTSideBar {
      "exact text" 1
      "exact text size" 28
      "bold text" 1
-     "text halign" center
+     "text halign" left
+     "text offset" 6 0
     }
    }
   }
