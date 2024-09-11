@@ -99,7 +99,7 @@ class JMMapForm: JMFormBase
 		{
 			m_TeleportPosition = SnapToGround(m_MapWidget.ScreenToMap(Vector( x, y, 0 )));
 			if (!HasTooManyPlayers("TeleportSelected","TeleportPlayers"))
-				TeleportSelected(NULL);
+				TeleportSelected();
 			
 			return true;
 		}
@@ -107,14 +107,14 @@ class JMMapForm: JMFormBase
 		return false;
 	}
 
-	void TeleportPlayers(JMConfirmation confirmation)
+	void TeleportPlayers()
 	{
 		JMTeleportModule mod;
 		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
 			mod.Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
 	}
 
-	void TeleportSelected(JMConfirmation confirmation)
+	void TeleportSelected()
 	{
 		JMTeleportModule mod;
 		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
