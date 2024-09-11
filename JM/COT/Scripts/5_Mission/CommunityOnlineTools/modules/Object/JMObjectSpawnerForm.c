@@ -314,38 +314,44 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateHealthItemColor()
 	{
-		float percent = m_HealthItem.GetCurrent();
-		
-		if ( percent != 0)
-			percent = percent / m_HealthItem.GetMax();
+		if (!m_HealthItem.IsEnabled())
+		{
+			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );
+			return;
+		}
 
-		if ( percent >= 0.69999999 )
+		float health = m_HealthItem.GetCurrent();
+		float health01;
+		float sliderMax = m_HealthItem.GetMax();
+
+		if (sliderMax > 0)
+			health01 = health / sliderMax;
+
+		if ( health01 >= 0.7 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
 		}
-		else if ( percent >= 0.5 )
+		else if ( health01 >= 0.5 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_WORN );
 		}
-		else if ( percent >= 0.30000001 )
+		else if ( health01 >= 0.3 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
 		}
-		else if ( percent > 0.001 )
+		else if ( health01 > 0 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
-		}
-		else if ( percent == -1 )
-		{
-			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );			
 		}
 		else
 		{
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
 
-		if (m_PreviewItem && MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType()) > 0 )
-			m_PreviewItem.SetHealth01( "", "", percent );
+		if (m_PreviewItem && sliderMax > 0)
+		{
+			m_PreviewItem.SetHealth("", "", health);
+		}
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -434,14 +440,22 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
 
-			if (!m_PreviewItem.IsInherited(Building) && !m_PreviewItem.IsInherited(AdvancedCommunication))
+			float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType());
+			if (maxHealth > 0)
 			{
-				m_HealthItem.Enable();
-				m_HealthItem.SetMax(m_PreviewItem.GetMaxHealth());
+				if (!m_PreviewItem.IsTransport())
+					m_HealthItem.Enable();
+				m_HealthItem.SetMax(maxHealth);
 				if ( m_HealthItem.GetCurrent() == -1 )
-					m_HealthItem.SetCurrent(m_PreviewItem.GetMaxHealth());
+					m_HealthItem.SetCurrent(maxHealth);
 
 				m_HealthItem.SetMin(0);
+			}
+			else
+			{
+				m_HealthItem.SetMin(-1);
+				m_HealthItem.SetCurrent(-1);
+				m_HealthItem.SetMax(-1);
 			}
 
 			UpdateHealthItemColor();			
