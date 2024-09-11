@@ -122,7 +122,8 @@ class JMESPMeta: COT_WidgetHolder
 		if ( !(type.HasPermission && type.View) )
 			return false;
 
-		return type.IsValid( target, this );
+		JMESPMeta meta = this;
+		return type.IsValid( target, meta );
 	}
 
 	void CreateActions( Widget parent )
