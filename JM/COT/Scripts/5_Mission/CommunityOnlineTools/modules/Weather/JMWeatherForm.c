@@ -1460,6 +1460,7 @@ class JMWeatherForm: JMFormBase
 			m_PanelRainThreshold.Show(false);
 		}
 		
+	#ifndef DAYZ_1_25
 		if (m_ToggleSnow.IsToggled() || m_PresetsShown)
 		{
 			m_PanelSnow.Show(true);
@@ -1470,6 +1471,7 @@ class JMWeatherForm: JMFormBase
 			m_PanelSnow.Show(false);
 			m_PanelSnowThreshold.Show(false);
 		}
+	#endif
 		
 		if (m_ToggleFog.IsToggled() || m_PresetsShown)
 		{
