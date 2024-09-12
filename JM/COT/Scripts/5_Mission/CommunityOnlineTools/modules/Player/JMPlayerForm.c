@@ -2237,12 +2237,19 @@ class JMPlayerForm: JMFormBase
 
 	void SelectAllPlayerList(bool state = true)
 	{
+		string guid;
+
 		foreach(JMPlayerRowWidget player: m_PlayerList)
 		{
+			guid = player.GetGUID();
+
+			if (guid == string.Empty)
+				continue;
+
 			if (state)
-				JM_GetSelected().AddPlayer(player.GetGUID());
+				JM_GetSelected().AddPlayer(guid);
 			else
-				JM_GetSelected().RemovePlayer(player.GetGUID());
+				JM_GetSelected().RemovePlayer(guid);
 			
 			player.Checkbox.SetChecked(state);
 		}
