@@ -1030,12 +1030,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		target.SetOrientation( orientation );
-
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			transport.Synchronize();
+			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, transport.GetPosition(), orientation);
+		}
+		else
+		{
+			target.SetOrientation( orientation );
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
