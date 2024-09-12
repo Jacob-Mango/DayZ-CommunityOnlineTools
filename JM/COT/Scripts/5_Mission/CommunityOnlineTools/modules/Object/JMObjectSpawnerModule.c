@@ -448,7 +448,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
 			return;
 
-		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
+		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+itemState +") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
@@ -572,7 +572,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				loggedSuffix = " at " + position.ToString();
 			}
 
-			SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
+			SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
@@ -624,7 +624,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			string loggedSuffix = " at " + position.ToString();
 
-			SetupEntity( ent, quantity, health, temp, itemState, callerInstance.PlayerObject );
+			SetupEntity( ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
@@ -635,9 +635,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player )
+	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
 	{
-		switch (m_ObjSetupMode)
+		switch (mode)
 		{
 			case COT_ObjectSetupMode.DEBUGSPAWN:
 				int depth;
@@ -654,17 +654,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		ItemBase item;
 		if ( Class.CastTo( item, entity ) )
 		{
-			Magazine mag;
-			if (Class.CastTo(mag, item))
+			if (quantity != -1)
 			{
-				mag.ServerSetAmmoCount(quantity);
-			}
-			else if (item.HasQuantity())
-			{
-				item.SetQuantity(quantity);
+				Magazine mag;
+				if (Class.CastTo(mag, item))
+				{
+					mag.ServerSetAmmoCount(quantity);
+				}
+				else if (item.HasQuantity())
+				{
+					item.SetQuantity(quantity);
 
-				if (item.GetCompEM())
-					item.GetCompEM().SetEnergy0To1(quantity / item.GetQuantityMax());
+					if (item.GetCompEM())
+						item.GetCompEM().SetEnergy0To1(quantity / item.GetQuantityMax());
+				}
 			}
 
 			if ( itemState != 0 )
@@ -691,13 +694,35 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
-		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType()) > 0 )
+		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType());
+		if (maxHealth > 0)
 		{
 			if ( health == -1 )
-				health = entity.GetMaxHealth();
+				health = maxHealth;
 
 			if ( health >= 0 )
+			{
 				entity.SetHealth( "", "", health );
+
+				float health01 = health / maxHealth;
+
+				TStringArray dmgZones = {};
+				entity.GetDamageZones(dmgZones);
+				foreach (string dmgZone: dmgZones)
+				{
+					entity.SetHealth01(dmgZone, "Health", health01);
+				}
+
+				if (entity.GetInventory())
+				{
+					for (int i = 0; i < entity.GetInventory().AttachmentCount(); i++)
+					{
+						EntityAI attachment = entity.GetInventory().GetAttachmentFromIndex(i);
+						float attachmentHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(attachment.GetType()) * health01;
+						SetupEntity(attachment, -1, attachmentHealth, temp, 0, player, COT_ObjectSetupMode.NONE);
+					}
+				}
+			}
 		}
 
 		#ifndef DAYZ_1_25
@@ -912,7 +937,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		float health = -1;
 		float temp = -1;
 		int itemState = -1;
-		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject );
+		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
 		
 		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
 		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
