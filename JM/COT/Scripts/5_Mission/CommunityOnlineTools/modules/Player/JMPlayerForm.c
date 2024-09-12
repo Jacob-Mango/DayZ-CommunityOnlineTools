@@ -237,7 +237,7 @@ class JMPlayerForm: JMFormBase
 		m_PlayerListScroller 	= UIActionManager.CreateScroller( leftPanelGrid );
 		m_PlayerListRows 		= UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 		
-		for ( int i = 0; i < 10; i++ )
+		for ( int i = 0; i < 2; i++ )
 		{
 			GridSpacerWidget gsw;
 			if ( !Class.CastTo( gsw, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
