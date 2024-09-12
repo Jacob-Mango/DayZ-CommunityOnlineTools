@@ -29,6 +29,8 @@ class JMVehicleMetaData
 	bool m_HasKeys;
 	bool m_IsCover;
 
+	string m_OwnerName;
+	string m_OwnerUID;
 	string m_LastDriverUID;
 
 	[NonSerialized()]
@@ -84,6 +86,8 @@ class JMVehicleMetaData
 
 			m_HasKeys = vehicle.HasKey();
 
+			m_OwnerName = vehicle.GetOwnerName();
+			m_OwnerUID = vehicle.GetOwnerUID();
 			m_LastDriverUID = vehicle.GetLastDriverUID();
 		}
 	#else
@@ -127,7 +131,8 @@ class JMVehicleMetaData
 		{
 			meta.m_HasKeys = true;
 
-			meta.m_LastDriverUID = keychain.Expansion_GetOwnerUID();
+			meta.m_OwnerName = keychain.Expansion_GetOwnerName();
+			meta.m_OwnerUID = keychain.Expansion_GetOwnerUID();
 		}
 
 		meta.m_IsCover = true;
@@ -214,6 +219,9 @@ class JMVehicleMetaData
 	#ifdef EXPANSIONMODVEHICLE
 		ctx.Write(m_HasKeys);
 		ctx.Write(m_IsCover);
+
+		ctx.Write(m_OwnerName);
+		ctx.Write(m_OwnerUID);
 	#endif
 
 	#ifdef EXPANSIONMODCORE
@@ -241,6 +249,9 @@ class JMVehicleMetaData
 	#ifdef EXPANSIONMODVEHICLE
 		if (!ctx.Read(m_HasKeys)) return false;
 		if (!ctx.Read(m_IsCover)) return false;
+
+		if (!ctx.Read(m_OwnerName)) return false;
+		if (!ctx.Read(m_OwnerUID)) return false;
 	#endif
 
 	#ifdef EXPANSIONMODCORE

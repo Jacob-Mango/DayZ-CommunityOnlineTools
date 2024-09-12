@@ -31,6 +31,7 @@ class JMVehiclesMenu: JMFormBase
 	protected TextWidget m_VehicleInfoDestroyed;
 	protected TextWidget m_VehicleInfoKeys;
 	protected TextWidget m_VehicleInfoCover;
+	protected TextWidget m_VehicleInfoOwner;
 	protected TextWidget m_VehicleInfoLastDriver;	
 	
 	protected Widget m_VehicleOptionsPanel;
@@ -97,12 +98,14 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoDestroyed = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_destroyed_value" ) );
 		m_VehicleInfoKeys = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_keys_value" ) );
 		m_VehicleInfoCover = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_cover_value" ) );
+		m_VehicleInfoOwner = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_owner_value" ) );
 		m_VehicleInfoLastDriver = TextWidget.Cast( layoutRoot.FindAnyWidget( "info_last_driver_value" ) );
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoType.GetParent().Show(true);
 		m_VehicleInfoExploded.GetParent().Show(true);
 		m_VehicleInfoKeys.GetParent().Show(true);
 		m_VehicleInfoCover.GetParent().Show(true);
+		m_VehicleInfoOwner.GetParent().Show(true);
 		#endif
 		#ifdef EXPANSIONMODCORE
 		m_VehicleInfoLastDriver.GetParent().Show(true);
@@ -200,9 +203,24 @@ class JMVehiclesMenu: JMFormBase
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
 		m_VehicleInfoCover.SetText( vehicle.m_IsCover.ToString() );
+		m_VehicleInfoOwner.SetText( string.Format("%1 <%2>", vehicle.m_OwnerName, vehicle.m_OwnerUID) );
 		#endif
 		#ifdef EXPANSIONMODCORE
-		m_VehicleInfoLastDriver.SetText( vehicle.m_LastDriverUID );
+		string lastDriverName;
+		#ifdef EXPANSIONMODVEHICLE
+		if (vehicle.m_LastDriverUID == vehicle.m_OwnerUID)
+			lastDriverName = vehicle.m_OwnerName;
+		#endif
+		if (!lastDriverName)
+		{
+			PlayerBase player = PlayerBase.GetPlayerByUID(vehicle.m_LastDriverUID);
+			if (player)
+				lastDriverName = player.GetIdentityName();
+		}
+		if (lastDriverName)
+			m_VehicleInfoLastDriver.SetText( string.Format("%1 | %2", lastDriverName, vehicle.m_LastDriverUID) );
+		else
+			m_VehicleInfoLastDriver.SetText( vehicle.m_LastDriverUID );
 		#endif
 		
 		m_CurrentVehicle = vehicle;
