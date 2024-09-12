@@ -6,7 +6,9 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
+#ifndef DAYZ_1_25
 	private UIActionSlider m_TemperatureItem;
+#endif
 	private UIActionSlider m_HealthItem;
 	private UIActionDropdownList m_ItemDataList;
 	
@@ -464,7 +466,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
+	#ifndef DAYZ_1_25
 		m_TemperatureItem.Disable();
+	#endif
 
 		int itemStateType = m_ItemStateType;
 
@@ -508,7 +512,9 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 					else
 					{
+					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
+					#endif
 						itemStateType = 0;
 					}
 					int liquidType = item.GetLiquidTypeInit();
@@ -519,7 +525,9 @@ class JMObjectSpawnerForm: JMFormBase
 				{
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
+					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
+					#endif
 						
 						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
@@ -712,7 +720,11 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		float health = m_HealthItem.GetCurrent();
+	#ifndef DAYZ_1_25
 		float temp = m_TemperatureItem.GetCurrent();
+	#else
+		float temp;
+	#endif
 		float quantity = m_QuantityItem.GetCurrent();
 
 		switch (mode)
