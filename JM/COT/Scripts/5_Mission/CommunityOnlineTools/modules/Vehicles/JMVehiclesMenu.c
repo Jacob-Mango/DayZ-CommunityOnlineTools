@@ -203,7 +203,10 @@ class JMVehiclesMenu: JMFormBase
 		#ifdef EXPANSIONMODVEHICLE
 		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
 		m_VehicleInfoCover.SetText( vehicle.m_IsCover.ToString() );
-		m_VehicleInfoOwner.SetText( string.Format("%1 <%2>", vehicle.m_OwnerName, vehicle.m_OwnerUID) );
+		if (vehicle.m_OwnerName)
+			m_VehicleInfoOwner.SetText( string.Format("%1 <%2>", vehicle.m_OwnerName, vehicle.m_OwnerUID) );
+		else
+			m_VehicleInfoOwner.SetText( vehicle.m_OwnerUID );
 		#endif
 		#ifdef EXPANSIONMODCORE
 		string lastDriverName;
