@@ -73,7 +73,7 @@ modded class Construction
 	void COT_DismantleRequiredParts(string part_name, PlayerBase player)
 	{
 		array<string> required_parts = new array<string>;
-		required_parts = GetValidDepenentPartsArray(part_name)
+		required_parts = GetValidDepenentPartsArray(part_name);
 		
 		for ( int i = 0; i < required_parts.Count(); ++i )
 		{
