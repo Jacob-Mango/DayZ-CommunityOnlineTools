@@ -204,7 +204,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoKeys.SetText( vehicle.m_HasKeys.ToString() );
 		m_VehicleInfoCover.SetText( vehicle.m_IsCover.ToString() );
 		if (vehicle.m_OwnerName)
-			m_VehicleInfoOwner.SetText( string.Format("%1 <%2>", vehicle.m_OwnerName, vehicle.m_OwnerUID) );
+			m_VehicleInfoOwner.SetText( string.Format("%1 | %2", vehicle.m_OwnerName, vehicle.m_OwnerUID) );
 		else
 			m_VehicleInfoOwner.SetText( vehicle.m_OwnerUID );
 		#endif
