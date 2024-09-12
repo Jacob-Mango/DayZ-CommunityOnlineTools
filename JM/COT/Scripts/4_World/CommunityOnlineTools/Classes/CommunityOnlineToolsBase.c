@@ -253,6 +253,22 @@ class CommunityOnlineToolsBase
 
 	void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
+		switch (rpc_type)
+		{
+			case JMCOTBaseRPC.TransportSync:
+			#ifndef SERVER
+				vector position, orientation;
+				if (!ctx.Read(position) || !ctx.Read(orientation))
+					break;
+				Transport transport;
+				if (!Class.CastTo(transport, target))
+					break;
+				PrintFormat("OnRPC TransportSync %1 pos=%2 ori=%3", target, position.ToString(), orientation.ToString());
+				transport.SetPosition(position);
+				transport.SetOrientation(orientation);
+			#endif
+				break;
+		}
 	}
 
 	void UpdateRole( JMRole role, PlayerIdentity toSendTo )
@@ -403,35 +419,23 @@ class CommunityOnlineToolsBase
 
 	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
 	{
+		transport.SetPosition(position);
+		transport.SetOrientation(orientation);
+
+	#ifdef SERVER
 		if (dBodyIsActive(transport))
 		{
-			vector velocity = GetVelocity(transport);
-			vector angularVelocity = dBodyGetAngularVelocity(transport);
-
-			dBodyActive(transport, ActiveState.INACTIVE);
-			dBodyDynamic(transport, false);
-
-			transport.SetPosition(position);
-			transport.SetOrientation(orientation);
-
-			SetVelocity(transport, velocity);
-			dBodySetAngularVelocity(transport, angularVelocity);
-
-			dBodyDynamic(transport, true);
+			transport.Synchronize();
 		}
 		else
 		{
-			//! Force position/orientation without setting vehicle active (avoids collision)
-			for (int i = 0; i < 2; i++)
-			{
-				transport.SetPosition(position);
-				orientation[2] = orientation[2] - 1;
-				transport.SetOrientation(orientation);
-				orientation[2] = orientation[2] + 1;
-				transport.SetOrientation(orientation);
-				transport.Synchronize();
-			}
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(position);
+			rpc.Write(orientation);
+			PrintFormat("Send TransportSync %1 pos=%2 ori=%3", transport, position.ToString(), orientation.ToString());
+			rpc.Send(transport, JMCOTBaseRPC.TransportSync, true);
 		}
+	#endif
 	}
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)

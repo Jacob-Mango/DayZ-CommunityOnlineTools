@@ -25,6 +25,13 @@ enum JMPermissionRPC
 	COUNT
 };
 
+enum JMCOTBaseRPC
+{
+	INVALID = 10135,
+	TransportSync,
+	COUNT
+};
+
 enum JMCOTRPC
 {
 	INVALID = 10140,
