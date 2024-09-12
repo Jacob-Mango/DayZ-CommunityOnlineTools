@@ -369,7 +369,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
 
-		if (m_PreviewItem && sliderMax > 0)
+		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport())
 		{
 			m_PreviewItem.SetHealth("", "", health);
 		}
@@ -483,8 +483,7 @@ class JMObjectSpawnerForm: JMFormBase
 			float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType());
 			if (maxHealth > 0)
 			{
-				if (!m_PreviewItem.IsTransport())
-					m_HealthItem.Enable();
+				m_HealthItem.Enable();
 				m_HealthItem.SetMax(maxHealth);
 				if ( m_HealthItem.GetCurrent() == -1 )
 					m_HealthItem.SetCurrent(maxHealth);
