@@ -457,6 +457,30 @@ class JMLoadoutModule: JMRenderableModuleBase
 				flags |= 0x800;
 		}
 
+		PhxInteractionLayers layerMask;
+
+		layerMask |= PhxInteractionLayers.BUILDING;
+		layerMask |= PhxInteractionLayers.ROADWAY;
+		layerMask |= PhxInteractionLayers.TERRAIN;
+		layerMask |= PhxInteractionLayers.WATERLAYER;
+		layerMask |= PhxInteractionLayers.ITEM_LARGE;
+
+		Object hitObject;
+		vector hitPosition;
+		vector hitNormal;
+		float hitFraction;
+
+		// We get the terrain level pos
+		vector newPos = Vector(pos[0], g_Game.SurfaceY(pos[0], pos[2]), pos[2]);
+
+		// and now we check if there was something like a rock, building or whatever at this spot
+		// so we dont spawn the bodybag inside but rather on top of this object
+		if ( DayZPhysics.RayCastBullet( pos, newPos, layerMask, NULL, hitObject, hitPosition, hitNormal, hitFraction ) )
+			newPos[1] = hitPosition[1];
+
+		if (vector.Distance(pos, newPos) < 1)
+			pos = newPos;
+
 		EntityAI ent;
 		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( itemData.m_Classname, pos, flags ) ) )
 			return NULL;
@@ -472,11 +496,21 @@ class JMLoadoutModule: JMRenderableModuleBase
 			SetupVehicle(ent);
 		else if (Class.CastTo(bb, ent))
 			SetupBaseBuilding(bb, itemData.m_ConstructionParts);
-
+		
 		SetupItem(ent, itemData.m_Data);
 
-		foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
-			SpawnInItem(subItemData, ent);
+		ItemBase itembs;
+		if (Class.CastTo(itembs, ent))
+		{
+			bool wasOpen = itembs.IsOpen();
+			itembs.Open();
+
+			foreach(JMLoadoutSubItem subItemData: itemData.m_Attachments)
+				SpawnInItem(subItemData, ent);
+
+			if (!wasOpen)
+				itembs.Close();
+		}
 
 		return ent;
 	}
