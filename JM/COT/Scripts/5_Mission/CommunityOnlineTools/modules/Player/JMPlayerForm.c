@@ -16,9 +16,8 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_PlayerListSelectAll;
 	private UIActionButton m_PlayerListDeSelectAll;
 
-	private UIActionButtonToggle m_PlayerPrefMode;
-	private UIActionButton m_PlayerListPref1;
-	private UIActionButton m_PlayerListPref2;
+	private UIActionButton m_PlayerPrefSave;
+	private UIActionButton m_PlayerPrefLoad;
 
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
@@ -220,10 +219,9 @@ class JMPlayerForm: JMFormBase
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT" );
 		m_PlayerListFilter 		= UIActionManager.CreateEditableTextPreview( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
 		
-		Widget leftGroupsPanelGrid 	= UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 3 );
-		m_PlayerPrefMode 	= UIActionManager.CreateButtonToggle( leftGroupsPanelGrid, "#STR_COT_GENERIC_SAVE", "#STR_COT_GENERIC_LOAD", this, "OnClick_PlayerPrefMode" );
-		m_PlayerListPref1 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "GRP 01", this, "OnClick_PlayerListPref01" );
-		m_PlayerListPref2 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "GRP 02", this, "OnClick_PlayerListPref02" );
+		Widget leftGroupsPanelGrid 	= UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 2 );
+		m_PlayerPrefSave 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "#STR_COT_GENERIC_SAVE", this, "OnClick_PlayerPrefSave" );
+		m_PlayerPrefLoad 	= UIActionManager.CreateButton( leftGroupsPanelGrid, "#STR_COT_GENERIC_LOAD", this, "OnClick_PlayerPrefLoad" );
 
 		Widget navbarleftPanelGrid = UIActionManager.CreateWrapSpacer( leftPanelGrid );
 		m_PlayerListSort 		= UIActionManager.CreateButtonToggle( navbarleftPanelGrid, "A/Z", "Z/A", this, "Event_UpdatePlayerList" );
@@ -502,66 +500,75 @@ class JMPlayerForm: JMFormBase
 		return parent;
 	}
 
-	void OnClick_PlayerPrefMode( UIEvent eid, UIActionBase action )
+	void OnClick_PlayerPrefSave( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-		
-		if (m_PlayerPrefMode.m_IsToggled)
-		{
-			if (m_PlayersPref1.Count() == 0)
-				m_PlayerListPref1.Disable();
 
-			if (m_PlayersPref2.Count() == 0)
-				m_PlayerListPref2.Disable();
-		}
+		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_HEADER", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_SAVE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_GROUP 01", "OnClick_SavePlayerListPref01", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_GROUP 02", "OnClick_SavePlayerListPref02" );
+	}
+
+	void OnClick_SavePlayerListPref01()
+	{
+		m_PlayersPref1 = new TStringArray;
+		SavePlayerListPref(m_PlayersPref1);
+		
+		if (m_PlayersPref1.Count() == 0 && m_PlayersPref2.Count() == 0)
+			m_PlayerPrefLoad.Disable();
 		else
-		{
-			m_PlayerListPref1.Enable();
-			m_PlayerListPref2.Enable();
-		}
+			m_PlayerPrefLoad.Enable();
 	}
 
-	void OnClick_PlayerListPref01( UIEvent eid, UIActionBase action )
+	void OnClick_SavePlayerListPref02()
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		ApplyPlayerListPref(m_PlayersPref1);
-	}
-
-	void OnClick_PlayerListPref02( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		ApplyPlayerListPref(m_PlayersPref2);
-	}
-
-	void ApplyPlayerListPref(out TStringArray playerArr)
-	{
-		bool mode = m_PlayerPrefMode.m_IsToggled;
-		if (!mode)
-			playerArr = new TStringArray;
+		m_PlayersPref2 = new TStringArray;
+		SavePlayerListPref(m_PlayersPref2);
 		
+		if (m_PlayersPref1.Count() == 0 && m_PlayersPref2.Count() == 0)
+			m_PlayerPrefLoad.Disable();
+		else
+			m_PlayerPrefLoad.Enable();
+	}
+
+	void OnClick_PlayerPrefLoad( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_HEADER", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_LOAD_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_GROUP 01", "OnClick_LoadPlayerListPref01", "#STR_COT_PLAYER_MODULE_SET_PLAYERPREF_GROUP 02", "OnClick_LoadPlayerListPref02" );
+	}
+
+	void OnClick_LoadPlayerListPref01()
+	{
+		LoadPlayerListPref(m_PlayersPref1);
+	}
+
+	void OnClick_LoadPlayerListPref02()
+	{
+		LoadPlayerListPref(m_PlayersPref2);
+	}
+
+	void SavePlayerListPref(out TStringArray playerArr)
+	{
 		foreach(JMPlayerRowWidget player: m_PlayerList)
 		{
-			if (mode)
-			{
-				bool state = playerArr.Find(player.GetGUID()) != -1;
-				
-				if (state)
-					JM_GetSelected().AddPlayer(player.GetGUID());
-				else
-					JM_GetSelected().RemovePlayer(player.GetGUID());
-				
-				player.Checkbox.SetChecked(state);
-			}
+			if (player.Checkbox.IsChecked())
+				playerArr.Insert(player.GetGUID());
+		}
+	}
+
+	void LoadPlayerListPref(out TStringArray playerArr)
+	{
+		foreach(JMPlayerRowWidget player: m_PlayerList)
+		{
+			bool state = playerArr.Find(player.GetGUID()) != -1;
+			
+			if (state)
+				JM_GetSelected().AddPlayer(player.GetGUID());
 			else
-			{
-				if (player.Checkbox.IsChecked())
-					playerArr.Insert(player.GetGUID());
-			}
+				JM_GetSelected().RemovePlayer(player.GetGUID());
+			
+			player.Checkbox.SetChecked(state);
 		}
 		
 		UpdateUI();
