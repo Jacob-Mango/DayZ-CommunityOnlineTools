@@ -155,6 +155,8 @@ class JMObjectSpawnerForm: JMFormBase
 				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
 					translated = Widget.TranslateString("#inv_inspect_" + underscored);
 
+				translated.ToUpper();
+
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
 				{
