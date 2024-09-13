@@ -136,13 +136,14 @@ class JMObjectSpawnerForm: JMFormBase
 			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
 	#endif
 
+			string liquidClsName = nutritionProfile.GetLiquidClassname();
+			string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
+
 			//! Liquids (except blood)
 			if (nutritionProfile.IsLiquid() && liquidType > 255)
 			{
 				//!@note most of this joinked from ExpansionWorld::GetLiquidDisplayName
 
-				string liquidClsName = nutritionProfile.GetLiquidClassname();
-				string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
 				GetGame().ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
 				GetGame().FormatRawConfigStringKeys(displayName);
 
@@ -167,7 +168,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 				m_ObjItemStateLiquid.InsertAt(liquidType, idx);
 				m_ObjItemStateLiquidText.InsertAt(translated, idx);
+			}
 
+			//! Liquids (including blood)
+			if (nutritionProfile.IsLiquid())
+			{
 				string colorPath = "CfgLiquidDefinitions " + liquidClsName +  " color";
 
 				color = GetGame().ConfigGetInt(colorPath);
@@ -216,7 +221,11 @@ class JMObjectSpawnerForm: JMFormBase
 										color = Colors.GRAY;
 										break;
 									default:
-										color = Colors.COLOR_LIQUID;
+										if (liquidType > 255)
+											color = Colors.COLOR_LIQUID;
+										else
+											//! Blood
+											color = Colors.RED;
 										break;
 								}
 							}
@@ -231,7 +240,15 @@ class JMObjectSpawnerForm: JMFormBase
 	#ifdef DIAG
 		for (int k = 0; k < m_ObjItemStateLiquidText.Count(); k++)
 		{
-			PrintFormat("LIQUID %1 %2 %3 %4 %5", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname());
+			TIntArray argb = {};
+
+			for (int i = 0; i < 4; i++)
+			{
+				argb.Insert((m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]] >> (24 - i * 8)) & 255);
+			}
+
+			m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]];
+			PrintFormat("LIQUID %1 displayName='%2' type=%3 className='%4' color={%5, %6, %7, %8}", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname(), argb[0], argb[1], argb[2], argb[3]);
 		}
 	#endif
 
