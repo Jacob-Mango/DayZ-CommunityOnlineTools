@@ -67,6 +67,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
 	};
+	private ref map<int, int> m_ObjItemStateLiquidColors = new map<int, int>;
 
 	private int m_ItemStateType = -1;
 	private int m_LiquidType;
@@ -118,8 +119,11 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ObjItemStateFoodText.Insert(typename.EnumToString(FoodStageType, foodStage));
 		}
 
+		m_ObjItemStateLiquidColors[0] = COLOR_WHITE;
+
 		string displayName;
 		string translated;
+		int color;
 		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
 		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
 		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
@@ -127,7 +131,10 @@ class JMObjectSpawnerForm: JMFormBase
 			//! Liquids (except blood)
 			if (nutritionProfile.IsLiquid() && liquidType > 255)
 			{
+				//!@note most of this joinked from ExpansionWorld::GetLiquidDisplayName
+
 				string liquidClsName = nutritionProfile.GetLiquidClassname();
+				string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
 				GetGame().ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
 				GetGame().FormatRawConfigStringKeys(displayName);
 
@@ -138,7 +145,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 				//! Fix up vanilla liquid display name
 				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
-					translated = liquidClsName;  //! Use class name instead
+					translated = Widget.TranslateString("#inv_inspect_" + underscored);
 
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
@@ -150,6 +157,64 @@ class JMObjectSpawnerForm: JMFormBase
 
 				m_ObjItemStateLiquid.InsertAt(liquidType, idx);
 				m_ObjItemStateLiquidText.InsertAt(translated, idx);
+
+				string colorPath = "CfgLiquidDefinitions " + liquidClsName +  " color";
+
+				color = GetGame().ConfigGetInt(colorPath);
+
+				if (!color)
+				{
+					string colorConstantName;
+					GetGame().ConfigGetTextRaw(colorPath, colorConstantName);
+
+					if (!colorConstantName)
+					{
+						//! Fallback to liquid classname, all uppercase
+						colorConstantName = liquidClsName;
+						colorConstantName.ToUpper();
+					}
+
+					bool found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
+
+					if (!found)
+					{
+						if (!colorConstantName.Contains("LIQUID"))
+						{
+							colorConstantName += "LIQUID";  //! e.g. RaG_Liquid_Framework
+							found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
+						}
+
+						if (!found)
+						{
+							//! Fallback to liquid classname, all uppercase, words delimited by underscore
+							colorConstantName = underscored;
+							colorConstantName.ToUpper();
+
+							if (!JMStatics.StringToEnumEx(Colors, colorConstantName, color))
+							{
+								switch (liquidType)
+								{
+									case LIQUID_BEER:
+										color = Colors.ORANGE;
+										break;
+									case LIQUID_DIESEL:
+									case LIQUID_GASOLINE:
+										color = Colors.YELLOW;
+										break;
+									case LIQUID_DISINFECTANT:
+									case LIQUID_VODKA:
+										color = Colors.GRAY;
+										break;
+									default:
+										color = Colors.COLOR_LIQUID;
+										break;
+								}
+							}
+						}
+					}
+				}
+
+				m_ObjItemStateLiquidColors[liquidType] = color;
 			}
 		}
 		
@@ -307,36 +372,12 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateQuantityItemColor()
 	{
-		switch (m_LiquidType)
-		{
-			case COT_LiquidTypes.WATER:
-				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-				break;
-			case COT_LiquidTypes.RIVERWATER:
-				m_QuantityItem.SetColor( ARGB( 255, 0, 128, 128 ) );
-				break;
-			case COT_LiquidTypes.BEER:
-				m_QuantityItem.SetColor( ARGB( 255, 255, 215, 0 ) );
-				break;
-			case COT_LiquidTypes.GASOLINE:
-				m_QuantityItem.SetColor( ARGB( 255, 165, 123, 63 ) );
-				break;
-			case COT_LiquidTypes.DIESEL:
-				m_QuantityItem.SetColor( ARGB( 255, 0, 100, 0 ) );
-				break;
-			case COT_LiquidTypes.DISINFECTANT:
-			case COT_LiquidTypes.SOLUTION:
-				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-				break;
-			case COT_BloodTypes.UNKNOWN:
-				m_QuantityItem.SetColor( ARGB( 255, 139, 0, 0 ) );
-				break;
-			case COT_LiquidTypes.VODKA:
-			default:
-				m_QuantityItem.SetColor( ARGB( 255, 255, 255, 255 ) );
-				break;
-		}
+		int color;
 
+		if (!m_ObjItemStateLiquidColors.Find(m_LiquidType, color))
+			color = COLOR_WHITE;
+
+		m_QuantityItem.SetColor( color );
 		m_QuantityItem.SetAlpha( 1.0 );
 	}
 
