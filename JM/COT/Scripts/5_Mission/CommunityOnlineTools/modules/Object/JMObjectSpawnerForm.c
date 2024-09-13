@@ -219,7 +219,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 		
 		if (m_ItemStateType == 0)
-			m_LiquidType = m_ItemDataList.GetSelection();
+			m_LiquidType = m_ObjItemStateLiquid[m_ItemDataList.GetSelection()];
 		
 		UpdateQuantityItemColor();
 		UpdatePreviewItemState();
@@ -244,7 +244,6 @@ class JMObjectSpawnerForm: JMFormBase
 	void UpdateItemStateType(int mode, int liquidType = 0)
 	{
 		m_ItemStateType = mode;
-		m_LiquidType = liquidType;
 
 		int idx = -1;
 
@@ -252,13 +251,21 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				idx = m_ObjItemStateLiquid.Find(liquidType);
+				idx = m_ObjItemStateLiquid.Find(m_LiquidType);
 				if (idx == -1)
-					idx = m_ObjItemStateLiquid.Find(LIQUID_WATER);  //! Fallback
+				{
+					idx = m_ObjItemStateLiquid.Find(liquidType);  //! Fallback
+					m_LiquidType = liquidType;
+				}
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
-				idx = FindEnumValue(COT_BloodTypes, liquidType);
+				idx = FindEnumValue(COT_BloodTypes, m_LiquidType);
+				if (idx == -1)
+				{
+					idx = FindEnumValue(COT_BloodTypes, liquidType);  //! Fallback
+					m_LiquidType = liquidType;
+				}
 				break;
 			case 2: // Food
 				m_ItemDataList.SetItems(m_ObjItemStateFoodText);
