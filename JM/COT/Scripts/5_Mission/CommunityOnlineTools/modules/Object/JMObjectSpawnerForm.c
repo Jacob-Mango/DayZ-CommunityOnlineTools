@@ -124,10 +124,18 @@ class JMObjectSpawnerForm: JMFormBase
 		string displayName;
 		string translated;
 		int color;
+	#ifdef DAYZ_1_25
 		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
 		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
 		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
+	#else
+		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
+	#endif
 		{
+	#ifndef DAYZ_1_25
+			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
+	#endif
+
 			//! Liquids (except blood)
 			if (nutritionProfile.IsLiquid() && liquidType > 255)
 			{
