@@ -154,9 +154,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 				//! Fix up vanilla liquid display name
 				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
-					translated = Widget.TranslateString("#inv_inspect_" + underscored);
-
-				translated.ToUpper();
+					translated = liquidClsName;
 
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
