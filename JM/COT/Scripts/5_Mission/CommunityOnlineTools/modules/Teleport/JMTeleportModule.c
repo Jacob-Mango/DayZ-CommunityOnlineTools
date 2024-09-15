@@ -125,6 +125,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor( UAInput input )
 	{
+#ifdef DEVELOPER
+		return;
+#endif
+
 		if ( !(input.LocalPress()) )
 			return;
 
@@ -160,6 +164,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor_RaycastOnServer( UAInput input )
 	{
+#ifdef DEVELOPER
+		return;
+#endif
+
 		if ( !(input.LocalPress()) )
 			return;
 
