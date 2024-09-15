@@ -478,7 +478,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( DayZPhysics.RayCastBullet( pos, newPos, layerMask, NULL, hitObject, hitPosition, hitNormal, hitFraction ) )
 			newPos[1] = hitPosition[1];
 
-		if (vector.Distance(pos, newPos) < 1)
+		if (vector.Distance(pos, newPos) < 2.75)
 			pos = newPos;
 
 		EntityAI ent;
