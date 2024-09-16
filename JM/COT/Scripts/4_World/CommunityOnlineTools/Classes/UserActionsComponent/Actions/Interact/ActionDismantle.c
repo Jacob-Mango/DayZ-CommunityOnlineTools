@@ -24,6 +24,9 @@ class COT_QuickActionDismantle: ActionInteractBase
 	{
 		if (player.IsPlacingLocal() || player.IsPlacingServer())
 			return false;
+		
+		if (player.GetItemInHands())
+			return false;
         
 		BaseBuildingBase base_building = BaseBuildingBase.Cast(target.GetObject());
         if (!base_building)
