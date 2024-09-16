@@ -1,5 +1,46 @@
 modded class Construction
 {
+	string COT_GetFirstBuildablePart()
+	{
+		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
+		{
+			string part_name = m_ConstructionParts.GetKey( i );
+			ConstructionPart part = m_ConstructionParts.Get( part_name );
+
+			if ( part.IsBuilt() )
+				continue;
+
+			if ( !HasRequiredPart( part_name ) )
+				continue;
+
+			if ( HasConflictPart( part_name ) )
+				continue;
+
+			return part_name;
+		}
+
+		return string.Empty;
+	}
+
+	string COT_GetFirstDismantlePart()
+	{
+		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
+		{
+			string part_name = m_ConstructionParts.GetKey( i );
+			ConstructionPart part = m_ConstructionParts.Get( part_name );
+
+			if ( !part.IsBuilt() )
+				continue;
+
+			if ( HasDependentPart( part_name ) )
+				continue;
+
+			return part_name;
+		}
+
+		return string.Empty;
+	}
+
 	void COT_GetParts( out map< string, ref JMConstructionPartData > parts, bool checkMaterials = true )
 	{
 		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
