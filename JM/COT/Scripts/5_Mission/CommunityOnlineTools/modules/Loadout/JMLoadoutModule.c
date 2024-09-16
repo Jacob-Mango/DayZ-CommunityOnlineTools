@@ -439,69 +439,27 @@ class JMLoadoutModule: JMRenderableModuleBase
 		else
 			pos = itemData.m_LocalPosition;
 
-		bool isTrans;
-		if (GetGame().IsKindOf( itemData.m_Classname, "CarScript" ))
-			isTrans = true;
-		else if (GetGame().IsKindOf( itemData.m_Classname, "BoatScript" ))
-			isTrans = true;
-
-		int flags = ECE_CREATEPHYSICS;
-		if (isTrans)
-		{
-			if ( !COT_SurfaceIsWater( pos ) )
-				flags |= ECE_PLACE_ON_SURFACE;
-		}
-		else
-		{
-			if ( GetGame().IsKindOf( itemData.m_Classname, "DZ_LightAI" ) )
-				flags |= 0x800;
-		}
-
-		PhxInteractionLayers layerMask;
-
-		layerMask |= PhxInteractionLayers.BUILDING;
-		layerMask |= PhxInteractionLayers.ROADWAY;
-		layerMask |= PhxInteractionLayers.TERRAIN;
-		layerMask |= PhxInteractionLayers.WATERLAYER;
-		layerMask |= PhxInteractionLayers.ITEM_LARGE;
-
-		Object hitObject;
-		vector hitPosition;
-		vector hitNormal;
-		float hitFraction;
-
-		// We get the terrain level pos
-		vector newPos = Vector(pos[0], g_Game.SurfaceY(pos[0], pos[2]), pos[2]);
-
-		// and now we check if there was something like a rock, building or whatever at this spot
-		// so we dont spawn the bodybag inside but rather on top of this object
-		if ( DayZPhysics.RayCastBullet( pos, newPos, layerMask, NULL, hitObject, hitPosition, hitNormal, hitFraction ) )
-			newPos[1] = hitPosition[1];
-
-		if (vector.Distance(pos, newPos) < 2.75)
-			pos = newPos;
-
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( itemData.m_Classname, pos, flags ) ) )
+		if ( !Class.CastTo( ent, GetGame().CreateObject( itemData.m_Classname, pos ) ) )
 			return NULL;
-		
-		bool isBaseBuilding;
-		if (!isTrans)
-			isBaseBuilding = ent.IsInherited(BaseBuildingBase);
+
+		if (!ent.IsInherited(PlayerBase))
+			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, pos);
 
 		ent.SetOrientation(itemData.m_LocalRotation);
 
-		BaseBuildingBase bb;
-		if (isTrans)
+		if ((ent.IsInherited(Transport)))
 			SetupVehicle(ent);
-		else if (Class.CastTo(bb, ent))
-			SetupBaseBuilding(bb, itemData.m_ConstructionParts);
+		else if (ent.IsInherited(BaseBuildingBase))
+			SetupBaseBuilding(ent, itemData.m_ConstructionParts);
 		
 		SetupItem(ent, itemData.m_Data);
 
 		ItemBase itembs;
 		if (Class.CastTo(itembs, ent))
 		{
+			// I hate it, but at least it fix most spawning 
+			// issues from modded containers -LT
 			bool wasOpen = itembs.IsOpen();
 			itembs.Open();
 
@@ -510,6 +468,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 			if (!wasOpen)
 				itembs.Close();
+		}
+		else
+		{
+			foreach(JMLoadoutSubItem subItemData2: itemData.m_Attachments)
+				SpawnInItem(subItemData2, ent);
 		}
 
 		return ent;
@@ -572,10 +535,12 @@ class JMLoadoutModule: JMRenderableModuleBase
 		}
 	}
 	
-	private void SetupBaseBuilding(BaseBuildingBase bb, TStringArray builtParts)
+	private void SetupBaseBuilding(EntityAI ent, TStringArray builtParts)
 	{
 		if (!builtParts)
 			return;
+
+		BaseBuildingBase bb = BaseBuildingBase.Cast(ent);
 
 		Man p;
 		#ifdef SERVER
@@ -765,6 +730,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			}
 		}
 
+		#ifdef DAYZ_1_25
 		ItemBase itembs;
 		if ( Class.CastTo( itembs, parent ) )
 		{
@@ -796,6 +762,35 @@ class JMLoadoutModule: JMRenderableModuleBase
 				}
 			}
 		}
+		#else // 1.26+
+		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
+			dataItem.m_Health 		= parent.GetHealth();
+
+		if (parent.HasQuantity())
+		{
+			dataItem.m_Quantity 	= parent.GetQuantity();
+			dataItem.m_LiquidType 	= parent.GetLiquidType();
+		}
+		
+		dataItem.m_Temperature 	= parent.GetTemperature();
+
+		ItemBase child;
+		for (int k=0; k < parent.GetInventory().AttachmentCount(); k++)
+		{
+			child = ItemBase.Cast(parent.GetInventory().GetAttachmentFromIndex( k ));
+			item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+		}
+
+		CargoBase cargo = parent.GetInventory().GetCargo();
+		if(cargo)
+		{
+			for(int j=0; j < cargo.GetItemCount(); j++)
+			{
+				child = ItemBase.Cast(cargo.GetItem(j));
+				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
+			}
+		}
+		#endif
 
 		return item;
 	}
