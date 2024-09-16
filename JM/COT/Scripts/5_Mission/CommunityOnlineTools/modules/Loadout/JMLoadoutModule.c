@@ -590,20 +590,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	
 	private void SetupVehicle(EntityAI entity)
 	{
-		Car car;
-		if (Class.CastTo(car, entity))
-		{
-			FillCar(car, CarFluid.FUEL);
-			FillCar(car, CarFluid.OIL);
-			FillCar(car, CarFluid.BRAKE);
-			FillCar(car, CarFluid.COOLANT);
-		}
-	}
-
-	private void FillCar(Car car, CarFluid fluid)
-	{
-		float cap = car.GetFluidCapacity( fluid );
-		car.Fill( fluid, cap );
+		CommunityOnlineToolsBase.Refuel(entity);
 	}
 	
 	EntityAI GetObjectAtCursor()
