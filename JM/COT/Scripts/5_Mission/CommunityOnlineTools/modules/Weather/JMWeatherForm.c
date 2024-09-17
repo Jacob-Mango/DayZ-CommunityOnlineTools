@@ -1009,7 +1009,11 @@ class JMWeatherForm: JMFormBase
 			#endif
 		}
 		
-		if ( m_PanelWindFunc.IsVisible() )
+		#ifdef DAYZ_1_25
+		if ( m_PanelWind.IsVisible() )
+		#else
+		if ( m_PanelWindMagnitude.IsVisible() )
+		#endif
 		{
 			#ifndef DAYZ_1_25
 			m_Module.SetWindMagnitude( forecastWindMag, timeWindMag, minDurationWindMag );
