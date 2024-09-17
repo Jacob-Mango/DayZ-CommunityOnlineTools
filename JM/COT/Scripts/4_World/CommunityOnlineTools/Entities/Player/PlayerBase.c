@@ -897,8 +897,8 @@ modded class PlayerBase
 	{
 		super.SetActions(InputActionMap);
 
-		AddAction(COT_QuickActionBuild, InputActionMap);
-		AddAction(COT_QuickActionDismantle, InputActionMap);
+		//AddAction(COT_QuickActionBuild, InputActionMap);
+		//AddAction(COT_QuickActionDismantle, InputActionMap);
 	}
 
 	ActionBase COT_StartAction(typename actionType, ActionTarget target, ItemBase mainItem = null)
