@@ -30,7 +30,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "#STR_COT_VEHICLE_MODULE_NAME";
+		return "#STR_COT_VEHICLE_MODULE_NAME (Legacy)";
 	}
 
 	override string GetIconName()
@@ -227,12 +227,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void FillCar( Car car, CarFluid fluid )
-	{
-		float cap = car.GetFluidCapacity( fluid );
-		car.Fill( fluid, cap );
-	}
-
 	private EntityAI SpawnVehicle( JMVehicleSpawnerSerialize file, vector position, vector direction )
 	{
 		if ( file == NULL )
@@ -260,13 +254,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	
 	void OnSpawnVehicle(EntityAI entity)
 	{
-		Car car;
-		if (Class.CastTo(car, entity))
-		{
-			FillCar(car, CarFluid.FUEL);
-			FillCar(car, CarFluid.OIL);
-			FillCar(car, CarFluid.BRAKE);
-			FillCar(car, CarFluid.COOLANT);
-		}
+		CommunityOnlineToolsBase.Refuel(entity);
 	}
 };

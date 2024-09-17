@@ -25,6 +25,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.AdminNVG" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.SenderTo" );
@@ -39,6 +40,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Energy" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Water" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.Stamina" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.HeatBuffer" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
 
 		GetPermissionsManager().RegisterPermission( "Admin.Transport.Repair" );
@@ -165,6 +167,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.SetStamina:
 			RPC_SetStamina( ctx, sender, target );
 			break;
+		case JMPlayerModuleRPC.SetHeatBuffer:
+			RPC_SetHeatBuffer( ctx, sender, target );
+			break;
 		case JMPlayerModuleRPC.SetBloodyHands:
 			RPC_SetBloodyHands( ctx, sender, target );
 			break;
@@ -257,6 +262,15 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.VONStoppedTransmitting:
 			RPC_VONStoppedTransmitting( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetAdminNVG:
+			RPC_SetAdminNVG( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.Vomit:
+			RPC_Vomit( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SetScale:
+			RPC_SetScale( ctx, sender, target );
 			break;
 		}
 	}
@@ -673,6 +687,57 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_SetStamina( stamina, guids, senderRPC, instance );
+	}
+
+	void SetHeatBuffer( float HeatBuffer, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetHeatBuffer( HeatBuffer, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( HeatBuffer );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetHeatBuffer, true, NULL );
+		}
+	}
+
+	private void Exec_SetHeatBuffer( float HeatBuffer, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.GetStatHeatBuffer().Set( HeatBuffer );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set HeatBuffer To " + HeatBuffer + " [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " HeatBuffer to " + HeatBuffer );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_SetHeatBuffer( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float HeatBuffer;
+		if ( !ctx.Read( HeatBuffer ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatBuffer", senderRPC, instance ) )
+			return;
+
+		Exec_SetHeatBuffer( HeatBuffer, guids, senderRPC, instance );
 	}
 
 	void SetBloodyHands( bool bloodyhands, array< string > guids )
@@ -1757,6 +1822,65 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
 	}
 
+	void SetAdminNVG( bool value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetAdminNVG( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetAdminNVG, true, NULL );
+		}
+	}
+
+	private void Exec_SetAdminNVG( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetAdminNVG( value );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Set AdminNVG To " + value + " [guid=" + players[i].GetGUID() + "]" );
+
+			if ( value )
+			{
+				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " admin NVG" );
+			} else
+			{
+				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " admin NVG" );
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetAdminNVG( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.AdminNVG", senderRPC, instance ) )
+			return;
+
+		Exec_SetAdminNVG( value, guids, senderRPC, instance );
+	}
+
 	void SetUnlimitedStamina( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1814,6 +1938,109 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetUnlimitedStamina( value, guids, senderRPC, instance );
+	}
+
+	void Vomit(float value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_Vomit(value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.Vomit, true, NULL );
+		}
+	}
+
+	private void Exec_Vomit(float value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+			
+			if(!player.GetCommand_Vehicle())
+			{
+				SymptomBase vomitSymptom = player.GetSymptomManager().QueueUpPrimarySymptom(SymptomIDs.SYMPTOM_VOMIT);
+				if(vomitSymptom != NULL)
+					vomitSymptom.SetDuration(value);
+			}
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_Vomit( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Vomit", senderRPC, instance ) )
+			return;
+
+		Exec_Vomit(value, guids, senderRPC, instance );
+	}
+
+	void SetScale( float value, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_SetScale( value, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetScale, true, NULL );
+		}
+	}
+
+	private void Exec_SetScale( float value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTSetScale(value);
+
+			players[i].Update();
+
+			GetCommunityOnlineTools().SetClient( players[i] );
+		}
+	}
+
+	private void RPC_SetScale( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		float value;
+		if ( !ctx.Read( value ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Scale", senderRPC, instance ) )
+			return;
+
+		Exec_SetScale( value, guids, senderRPC, instance );
 	}
 
 	void SetBrokenLegs( bool value, array< string > guids )
@@ -1996,21 +2223,22 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_Heal( guids, senderRPC, instance );
 	}
 
-	void Ban( array< string > guids, string messageText = "" )
+	void Ban( array< string > guids, string messageText = "", int duration = -1 )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_Ban( guids, NULL, NULL, messageText );
+			Exec_Ban( guids, NULL, NULL, messageText, duration );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write(guids);
 			rpc.Write(messageText);
+			rpc.Write(duration);
 			rpc.Send( NULL, JMPlayerModuleRPC.Ban, true, NULL );
 		}
 	}
 
-	private void Exec_Ban( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = ""  )
+	private void Exec_Ban( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = "", int duration = -1 )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -2030,7 +2258,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 				continue;
 			}
 
-			SendBanMessage(player.PlayerObject.GetIdentity(), messageText);
+			SendBanMessage(player.PlayerObject.GetIdentity(), messageText, duration);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
@@ -2080,11 +2308,17 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		Exec_Ban( guids, senderRPC, instance, messageText );
 	}
 	
-	private void SendBanMessage(PlayerIdentity identity, string messageText)
+	private void SendBanMessage(PlayerIdentity identity, string messageText, int duration = -1)
 	{
+		if (duration > 0)
+		{
+			CF_Date nowUTC = CF_Date.Now(true);
+			duration = nowUTC.GetTimestamp() + duration;
+		}
+
 		JMPlayerBan banData = new JMPlayerBan;
 		banData.Message = messageText;
-		banData.BanDuration = -1;
+		banData.BanDuration = duration;
 		banData.Save(banData, identity.GetId());
 
 		ScriptRPC rpc = new ScriptRPC();

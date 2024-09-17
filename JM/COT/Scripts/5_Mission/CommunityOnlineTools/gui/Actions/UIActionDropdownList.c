@@ -227,10 +227,11 @@ class UIActionDropdownList: UIActionBase
 
 	private void OnSelected()
 	{
-		if ( m_List.GetNumItems() > 0 && m_List.GetSelectedRow() != -1 )
+		int selectedRow = m_List.GetSelectedRow();
+		if ( m_List.GetNumItems() > 0 && selectedRow != -1 && selectedRow != m_SelectedIndex)
 		{
 			string result;
-			m_SelectedIndex = m_List.GetSelectedRow();
+			m_SelectedIndex = selectedRow;
 			m_List.GetItemText( m_SelectedIndex, 0, result );
 			m_Text.SetText( result );
 

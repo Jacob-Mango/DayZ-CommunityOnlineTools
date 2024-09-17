@@ -178,9 +178,7 @@ class COTModule : JMModuleBase
 		m_ForceHUD = enable;
 		
 		if ( !m_ForceHUD )
-		{
 			GetGame().GetMission().GetHud().Show( true );
-		}
 	}
 
 	void SetMenuState( bool show )
@@ -191,15 +189,10 @@ class COTModule : JMModuleBase
 		if ( show )
 		{
 			if ( !m_COTMenu.IsVisible() )
-			{
 				m_COTMenu.Show();
-			}
-		} else
-		{
+		} else {
 			if ( m_COTMenu.IsVisible() )
-			{
 				m_COTMenu.Hide();
-			}
 		}
 	}
 
@@ -208,50 +201,16 @@ class COTModule : JMModuleBase
 		if (!GetGame())
 			return;
 
-		if ( !( input.LocalPress() ) )
+		if (!input.LocalPress())
 			return;
-
-		#ifdef COT_DEBUGLOGS
-		Print( "+COTModule::CloseCOT" );
-		#endif
-
-		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
-		for ( int i = 0; i < modules.Count(); ++i )
-		{
-			#ifdef COT_DEBUGLOGS
-			Print( "  +" + modules[i].Type().ToString() );
-			Print( "  visible=" + modules[i].IsVisible() );
-			#endif
-
-			if ( modules[i].IsVisible() )
-			{
-				modules[i].Hide();
-			}
-
-			#ifdef COT_DEBUGLOGS
-			Print( "  -" + modules[i].Type().ToString() );
-			#endif
-		}
-
-		#ifdef COT_DEBUGLOGS
-		Print( "  +SetOpen" );
-		#endif
 
 		if (GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen())
 			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
-
-		#ifdef COT_DEBUGLOGS
-		Print( "  -SetOpen" );
-		#endif
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-COTModule::CloseCOT" );
-		#endif
 	}
 
 	void ToggleMenu( UAInput input = NULL )
 	{
-		if ( input != NULL && !( input.LocalPress() ) )
+		if ( input != NULL && !input.LocalPress() )
 			return;
 
 		GetCommunityOnlineToolsBase().ToggleOpen();

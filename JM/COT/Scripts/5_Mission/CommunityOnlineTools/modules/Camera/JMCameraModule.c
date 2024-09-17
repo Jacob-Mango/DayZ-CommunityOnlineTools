@@ -235,6 +235,10 @@ class JMCameraModule: JMRenderableModuleBase
 
 	void Enter()
 	{
+#ifdef DEVELOPER
+		return;
+#endif
+
 		GetPlayer().COT_TempDisableOnSelectPlayer();
 
 		GetPlayer().COT_RememberVehicle();

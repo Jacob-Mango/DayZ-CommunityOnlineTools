@@ -5,37 +5,50 @@ class JMExampleForm: JMFormBase
 {
 	protected UIActionScroller 			m_Scroller;
 
-	protected UIActionText 				m_Text;
-	protected UIActionEditableText 		m_EditableText;
-	protected UIActionEditableVector 	m_EditableVector;
-
-	protected UIActionButton 			m_Button;
-	protected UIActionNavigateButton 	m_NavButton;
-
-	protected UIActionDropdownList 		m_Dropdown;
-	protected UIActionSlider 			m_Slider;
-	protected UIActionCheckbox 			m_Checkbox;
-
-	protected int m_NavButtonStateId;
-
-	protected ref array< string > m_NavButtonWordList =
+	protected UIActionSelectBox m_SelectBox; // SelectBox is a cleaner version of a NavigateButton
+	protected ref array< string > m_SelectBoxText =
 	{
-		"Mid",
-		"Extension",
-		"When Train ?"
+		"2023 Examples",
+		"2024 Examples"
 	};
 
-	protected ref array< string > m_DropdownWordList =
-	{
-		"Jacob Mango",
-		"Liquidrock",
-		"Arkensor",
-		"LieutenantMaster",
-		"DannyDog"
-	};
+	// Examples made in 2023
+	protected GridSpacerWidget m_PanelAlpha;
+		protected UIActionText 				m_Text;
+		protected UIActionEditableText 		m_EditableText;
+		protected UIActionEditableVector 	m_EditableVector;
 
-	private JMExampleModule m_Module;
-	private JMPlayerModule m_PlayerModule;
+		protected UIActionButton 			m_Button;
+
+		protected UIActionNavigateButton 	m_NavButton;
+		protected ref array< string > m_NavButtonWordList =
+		{
+			"Mid",
+			"Extension",
+			"When Train ?"
+		};
+		protected int m_NavButtonStateId;
+
+		protected UIActionDropdownList 		m_Dropdown;
+		protected ref array< string > m_DropdownWordList =
+		{
+			"Jacob Mango",
+			"Liquidrock",
+			"Arkensor",
+			"LieutenantMaster",
+			"DannyDog"
+		};
+
+		protected UIActionSlider 			m_Slider;
+		protected UIActionCheckbox 			m_Checkbox;
+
+	// Examples made in 2024
+	protected GridSpacerWidget m_PanelBeta;
+		protected UIActionEditableTextPreview m_EditableTextPreview;
+		protected UIActionButtonToggle m_ButtonToggle;
+
+	protected JMExampleModule m_Module;
+	protected JMPlayerModule m_PlayerModule;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
@@ -46,32 +59,43 @@ class JMExampleForm: JMFormBase
 	{
 		m_Scroller = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		Widget actions = m_Scroller.GetContentWidget();
+		
+		m_SelectBox = UIActionManager.CreateSelectionBox( actions, "", m_SelectBoxText, this, "OnClick_SelectBox" );
+		m_SelectBox.SetSelectorWidth(1.0);
+		m_SelectBox.SetSelection(0, false);
 
-		Widget gridActions = UIActionManager.CreateGridSpacer( actions, 8, 1 );
+		m_PanelAlpha = UIActionManager.CreateGridSpacer( actions, 8, 1 );
+			m_Text = UIActionManager.CreateText( m_PanelAlpha, "Left Texty", "Right Texto" );
+			m_EditableText = UIActionManager.CreateEditableText( m_PanelAlpha, "Wordy:", this, "OnChange_EditableText" );
+			m_EditableVector = UIActionManager.CreateEditableVector( m_PanelAlpha, "Position", this, "OnClick_EditableVector", "Set" );
 
-		m_Text = UIActionManager.CreateText( gridActions, "Left Texty", "Right Texto" );
-		m_EditableText = UIActionManager.CreateEditableText( gridActions, "Wordy:", this, "OnChange_EditableText" );
-		m_EditableVector = UIActionManager.CreateEditableVector( gridActions, "Position", this, "OnClick_EditableVector", "Set" );
+			// You can use GridSpacers to organize your UI in a much more easy way than giving manually by hand the size of each elements
+			// In this case we are assiging two buttons to this grid which will be spaced out evenly horizontaly
+			Widget gridButtons = UIActionManager.CreateGridSpacer( m_PanelAlpha, 1, 2 );
+			m_Button = UIActionManager.CreateButton( gridButtons, "Dont Press that button", this, "OnClick_Button" );
+			m_NavButton = UIActionManager.CreateNavButton( gridButtons, "Mid", JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "OnClick_NavButton" );
 
-		// You can use GridSpacers to organize your UI in a much more easy way than giving manually by hand the size of each elements
-		// In this case we are assiging two buttons to this grid which will be spaced out evenly horizontaly
-		Widget gridButtons = UIActionManager.CreateGridSpacer( gridActions, 1, 2 );
-		m_Button = UIActionManager.CreateButton( gridButtons, "Dont Press that button", this, "OnClick_Button" );
-		m_NavButton = UIActionManager.CreateNavButton( gridButtons, "Mid", JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "OnClick_NavButton" );
+			Widget root = layoutRoot.FindAnyWidget( "panel" );
+			m_Dropdown = UIActionManager.CreateDropdownBox( m_PanelAlpha, root, "Bestie:", m_DropdownWordList, this, "OnClick_Dropdown" );
+			m_Dropdown.SetPosition( 0.70 );
+			m_Dropdown.SetWidth( 0.3 );
 
-		m_Dropdown = UIActionManager.CreateDropdownBox( gridActions, actions, "Bestie:", m_DropdownWordList, this, "OnClick_Dropdown" );
-		m_Dropdown.SetPosition( 0.70 );
-		m_Dropdown.SetWidth( 0.3 );
+			m_Slider = UIActionManager.CreateSlider( m_PanelAlpha, "Slidy:", 0, 1, this, "OnChange_Slider" );
+			m_Slider.SetCurrent( 0 );
+			m_Slider.SetStepValue( 0.1 );
+			m_Slider.SetMin( 0.0 );
+			m_Slider.SetMax( 100.0 );
+			m_Slider.SetPosition( 0.5 );
+			m_Slider.SetWidth( 0.3 );
 
-		m_Slider = UIActionManager.CreateSlider( gridActions, "Slidy:", 0, 1, this, "OnChange_Slider" );
-		m_Slider.SetCurrent( 0 );
-		m_Slider.SetStepValue( 0.1 );
-		m_Slider.SetMin( 0.0 );
-		m_Slider.SetMax( 100.0 );
-		m_Slider.SetPosition( 0.5 );
-		m_Slider.SetWidth( 0.3 );
+			m_Checkbox =  UIActionManager.CreateCheckbox( m_PanelAlpha, "Did My Homework", this, "OnClick_Checkbox" );
 
-		m_Checkbox =  UIActionManager.CreateCheckbox( gridActions, "Did My Homework", this, "OnClick_Checkbox" );
+		m_PanelBeta = UIActionManager.CreateGridSpacer( actions, 2, 2 );
+			m_EditableTextPreview = UIActionManager.CreateEditableTextPreview( m_PanelBeta, "Your name is:", this, "OnChange_EditableTextPreview" );
+			m_EditableTextPreview.SetWidth( 0.3 );
+			m_ButtonToggle = UIActionManager.CreateButtonToggle( m_PanelBeta, "COT is obviously the best", "DaOne update VPP again please :c", this, "OnClick_Toggle" );
+
+		Exec_SelectBox();
 
 		Class.CastTo(m_PlayerModule, GetModuleManager().GetModule(JMPlayerModule));
 	}
@@ -89,6 +113,55 @@ class JMExampleForm: JMFormBase
 	override void OnSettingsUpdated()
 	{		
 		// Update everything settings related here
+	}
+
+	void OnClick_SelectBox( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+		
+		Exec_SelectBox();
+	}
+
+	void Exec_SelectBox()
+	{
+		int id = m_SelectBox.GetSelection();
+		switch(id)
+		{
+			case 0:
+				m_PanelAlpha.Show(true);
+				m_PanelBeta.Show(false);
+			break;
+			case 1:
+				m_PanelAlpha.Show(false);
+				m_PanelBeta.Show(true);
+			break;
+		}
+	}
+
+	void OnChange_EditableTextPreview( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		m_EditableTextPreview.SetTextPreview("");
+
+		string strSearch = m_EditableTextPreview.GetText();
+		if ( strSearch != "" )
+		{
+			strSearch.ToLower();
+			string keyword = "not bob";
+			if ( keyword.IndexOf(strSearch) == 0 )
+				m_EditableTextPreview.SetTextPreview(keyword);
+		}
+	}
+
+	void OnClick_Toggle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		// TODO
 	}
 
 	void OnClick_Checkbox( UIEvent eid, UIActionBase action )

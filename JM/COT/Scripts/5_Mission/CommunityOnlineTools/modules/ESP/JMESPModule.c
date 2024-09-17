@@ -228,6 +228,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	ref JMESPCanvas m_ESPCanvas;
 
+	private JMLoadoutModule m_LoadoutModule;
+
 	void JMESPModule()
 	{
 		ESPRadius = 200;
@@ -381,11 +383,16 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
+		#ifndef DAYZ_1_25
+		types.Insert( JMESPViewTypeBoat );
+		#endif
 		
+		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
+		types.Insert( JMESPViewTypeLauncher );
 
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
@@ -981,20 +988,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
 		Transport transport;
-		if ( Class.CastTo( car, target ) )
+		if ( Class.CastTo( transport, target ) )
 		{
-			car.COT_ForcePositionAndOrientation(position, car.GetOrientation());
+			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, position, transport.GetOrientation());
 		}
 		else
 		{
 			target.SetPosition( position );
-
-			if ( Class.CastTo( transport, target ) )
-			{
-				transport.Synchronize();
-			}
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
@@ -1029,12 +1030,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		target.SetOrientation( orientation );
-
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			transport.Synchronize();
+			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, transport.GetPosition(), orientation);
+		}
+		else
+		{
+			target.SetOrientation( orientation );
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
@@ -1163,7 +1166,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_BuildPart( part_name, player, requireMaterials );
+		target.GetConstruction().COT_BuildRequiredParts( part_name, player, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
 		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -1202,7 +1205,7 @@ class JMESPModule: JMRenderableModuleBase
 		PlayerBase player;
 		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
 
-		target.GetConstruction().COT_DismantlePart( part_name, player );
+		target.GetConstruction().COT_DismantleRequiredParts( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
 		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
@@ -1274,10 +1277,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_Vehicle_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
-		if ( Class.CastTo( car, target ) )
+		Transport transport;
+		if ( Class.CastTo( transport, target ) )
 		{
-			car.COT_PlaceOnSurfaceAtPosition(car.GetPosition());
+			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, transport.GetPosition());
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
@@ -1462,6 +1465,14 @@ class JMESPModule: JMRenderableModuleBase
 		set< Object > objects = new set< Object >;
 		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
 			return;
+
+		if ( GetPermissionsManager().HasPermission( "Loadouts.Backup", senderRPC, instance ) )
+		{
+			if (!m_LoadoutModule)
+				Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+			
+			m_LoadoutModule.Exec_CreateDeletionBackup(objects, instance);
+		}
 		
 		Exec_DeleteAll( objects, instance );
 	}
@@ -1470,7 +1481,6 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		int removed = 0;
 		int count = objects.Count();
-
 		
 		int i = objects.Count();
 		while ( i > 0 )

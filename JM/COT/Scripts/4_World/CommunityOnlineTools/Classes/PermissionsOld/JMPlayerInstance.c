@@ -9,7 +9,10 @@ enum JMPlayerVariables
 	BROKEN_LEGS = 64,
 	RECEIVE_DMG_DEALT = 128,
 	CANNOT_BE_TARGETED_BY_AI = 256,
-	REMOVE_COLLISION = 512
+	REMOVE_COLLISION = 512,
+	ADMIN_NVG = 1024,
+	HAS_CUSTOM_SCALE = 2048,
+	INVISIBILITY_INTERACTIVE = 4096
 }
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -44,6 +47,7 @@ class JMPlayerInstance : Managed
 	private float m_Water;
 
 	private float m_HeatComfort;
+	private float m_HeatBuffer;
 
 	private float m_Wet;
 	private float m_Tremor;
@@ -117,21 +121,13 @@ class JMPlayerInstance : Managed
 				m_Energy = PlayerObject.GetStatEnergy().Get();
 				m_Water = PlayerObject.GetStatWater().Get();
 				m_HeatComfort = PlayerObject.GetStatHeatComfort().Get();
+				m_HeatBuffer = PlayerObject.GetStatHeatBuffer().Get();
 				m_Wet = PlayerObject.GetStatWet().Get();
 				m_Tremor = PlayerObject.GetStatTremor().Get();
 				m_Stamina = PlayerObject.GetStatStamina().Get();
 				m_LifeSpanState = PlayerObject.GetLifeSpanState();
 
-				m_PlayerVars[JMPlayerVariables.BLOODY_HANDS] = PlayerObject.HasBloodyHands();
-				m_PlayerVars[JMPlayerVariables.GODMODE] = PlayerObject.COTHasGodMode();
-				m_PlayerVars[JMPlayerVariables.FROZEN] = PlayerObject.COTIsFrozen();
-				m_PlayerVars[JMPlayerVariables.INVISIBILITY] = PlayerObject.COTIsInvisible();
-				m_PlayerVars[JMPlayerVariables.UNLIMITED_AMMO] = PlayerObject.COTHasUnlimitedAmmo();
-				m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA] = PlayerObject.COTHasUnlimitedStamina();
-				m_PlayerVars[JMPlayerVariables.BROKEN_LEGS] = PlayerObject.m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
-				m_PlayerVars[JMPlayerVariables.RECEIVE_DMG_DEALT] = PlayerObject.COTGetReceiveDamageDealt();
-				m_PlayerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI] = PlayerObject.COTGetCannotBeTargetedByAI();
-				m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION] = PlayerObject.COTGetRemoveCollision();
+				PlayerObject.COT_UpdatePlayerVars(m_PlayerVars);
 			}
 		}
 	}
@@ -213,6 +209,11 @@ class JMPlayerInstance : Managed
 	bool HasRole( string role )
 	{
 		return m_Roles.Find( role ) >= 0;
+	}
+
+	array< string > GetRoles()
+	{
+		return m_Roles;
 	}
 
 	// doesn't check through roles.
@@ -372,6 +373,7 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Energy );
 		ctx.Write( m_Water );
 		ctx.Write( m_HeatComfort );
+		ctx.Write( m_HeatBuffer );		
 		ctx.Write( m_Wet );
 		ctx.Write( m_Tremor );
 		ctx.Write( m_Stamina );
@@ -396,6 +398,7 @@ class JMPlayerInstance : Managed
 		ctx.Read( m_Energy );
 		ctx.Read( m_Water );
 		ctx.Read( m_HeatComfort );
+		ctx.Read( m_HeatBuffer );		
 		ctx.Read( m_Wet );
 		ctx.Read( m_Tremor );
 		ctx.Read( m_Stamina );
@@ -612,6 +615,11 @@ class JMPlayerInstance : Managed
 		return m_HeatComfort;
 	}
 
+	float GetHeatBuffer()
+	{
+		return m_HeatBuffer;
+	}
+
 	float GetWet()
 	{
 		return m_Wet;
@@ -660,6 +668,11 @@ class JMPlayerInstance : Managed
 	bool HasUnlimitedStamina()
 	{
 		return m_PlayerVars[JMPlayerVariables.UNLIMITED_STAMINA];
+	}
+
+	bool HasAdminNVG()
+	{
+		return m_PlayerVars[JMPlayerVariables.ADMIN_NVG];
 	}
 
 	bool HasBrokenLegs()

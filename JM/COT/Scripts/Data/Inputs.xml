@@ -13,7 +13,7 @@
             <input name="UACOTToggleEntity" loc="STR_COT_INPUT_TOGGLE_MENU_ENTITY" />
             <input name="UACOTToggleSelected" loc="STR_COT_INPUT_TOGGLE_MENU_SELECTED" />
             <input name="UACOTToggleTeleport" loc="STR_COT_INPUT_TOGGLE_MENU_TELEPORT" />
-            <input name="UACOTToggleItem" loc="STR_COT_INPUT_TOGGLE_MENU_ITEMSET" />
+            <input name="UACOTToggleLoadout" loc="STR_COT_INPUT_TOGGLE_MENU_LOADOUT" />            
             <input name="UACOTToggleVehicle" loc="STR_COT_INPUT_TOGGLE_MENU_VEHICLE" />
             <input name="UACOTToggleWeather" loc="STR_COT_INPUT_TOGGLE_MENU_WEATHER" />
             <input name="UACOTToggleServerInfo" loc="STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO" />
@@ -50,7 +50,7 @@
 			<input name="UACOTToggleEntity" />
 			<input name="UACOTToggleSelected" />
 			<input name="UACOTToggleTeleport" />
-			<input name="UACOTToggleItem" />
+			<input name="UACOTToggleLoadout" />            
 			<input name="UACOTToggleVehicle" />
 			<input name="UACOTToggleWeather" />
 			<input name="UACOTToggleServerInfo" />
@@ -174,7 +174,7 @@
                 <btn name="kJ" />
             </btn>
         </input>
-        <input name="UACOTToggleItem">
+        <input name="UACOTToggleLoadout">
             <btn name="kRMenu">
                 <btn name="kK" />
             </btn>

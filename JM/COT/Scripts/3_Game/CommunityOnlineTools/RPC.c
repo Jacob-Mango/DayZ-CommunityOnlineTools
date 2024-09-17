@@ -25,6 +25,13 @@ enum JMPermissionRPC
 	COUNT
 };
 
+enum JMCOTBaseRPC
+{
+	INVALID = 10135,
+	TransportSync,
+	COUNT
+};
+
 enum JMCOTRPC
 {
 	INVALID = 10140,
@@ -99,11 +106,16 @@ enum JMWeatherModuleRPC
 	Load,
 	Storm,
 	Fog,
+	DynamicFog,
 	Rain,
 	RainThresholds,
+	Snow,
+	SnowThresholds,
 	Overcast,
-	Wind,
+	Wind, // LEGACY
 	WindFunctionParams,
+	WindMagnitude,
+	WindDirection,
 	Date,
 	UsePreset,
 	CreatePreset,
@@ -134,18 +146,23 @@ enum JMESPModuleRPC
 	DuplicateAll,
 	DeleteAll,
 	MoveToCursor,
+	
 	COUNT
 };
 
 enum JMPlayerModuleRPC
 {
 	INVALID = 10320,
+
+	// Player Vitals
 	SetHealth,
 	SetBlood,
 	SetShock,
 	SetEnergy,
 	SetWater,
 	SetStamina,
+	SetHeatBuffer,
+
 	SetBloodyHands,
 	RepairTransport,
 	TeleportTo,
@@ -162,6 +179,7 @@ enum JMPlayerModuleRPC
 	SetRemoveCollision,
 	SetUnlimitedAmmo,
 	SetUnlimitedStamina,
+	SetAdminNVG,
 	SetBrokenLegs,
 	Heal,
 	Strip,
@@ -173,6 +191,8 @@ enum JMPlayerModuleRPC
 	Message,
 	Notif,
 	StopBleeding,
+	Vomit,
+	SetScale,
 	SetPermissions,
 	SetRoles,
 	VONStartedTransmitting,
@@ -206,6 +226,18 @@ enum JMWebhookCOTModuleRPC
 	AddType,
 	RemoveType,
 	TypeState,
+	COUNT
+};
+
+enum JMLoadoutModuleRPC
+{
+	INVALID = 10460,
+	Load,
+	Create,
+	Delete,
+	SpawnCursor,
+	SpawnTarget,
+	SpawnPlayers,
 	COUNT
 };
 

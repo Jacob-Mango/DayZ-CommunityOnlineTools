@@ -18,6 +18,7 @@ modded class CF_Permission_Player
 		m_Energy = PBObject.GetStatEnergy().Get();
 		m_Water = PBObject.GetStatWater().Get();
 		m_HeatComfort = PBObject.GetStatHeatComfort().Get();
+		m_HeatBuffer = PBObject.GetStatHeatBuffer().Get();
 		m_Wet = PBObject.GetStatWet().Get();
 		m_Tremor = PBObject.GetStatTremor().Get();
 		m_Stamina = PBObject.GetStatStamina().Get();

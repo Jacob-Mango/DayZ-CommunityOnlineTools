@@ -222,7 +222,7 @@ PanelWidgetClass JMVehiclesMenu {
        hexactsize 0
        vexactsize 0
        Columns 1
-       Rows 13
+       Rows 14
        {
         PanelWidgetClass vehicle_info_network_id {
          ignorepointer 1
@@ -624,6 +624,41 @@ PanelWidgetClass JMVehiclesMenu {
            "text valign" center
           }
           TextWidgetClass info_cover_value {
+           ignorepointer 1
+           size 0.6 1
+           halign right_ref
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 0
+           "text offset" 5 0
+           "text valign" center
+          }
+         }
+        }
+        PanelWidgetClass vehicle_info_owner {
+         visible 0
+         ignorepointer 1
+         position 0.016 0.024
+         size 0.13 0.173
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         {
+          TextWidgetClass info_owner_label {
+           ignorepointer 1
+           size 0.4 1
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 0
+           style Bold
+           text "#STR_COT_VEHICLE_OWNER"
+           "text offset" 5 0
+           "text valign" center
+          }
+          TextWidgetClass info_owner_value {
            ignorepointer 1
            size 0.6 1
            halign right_ref

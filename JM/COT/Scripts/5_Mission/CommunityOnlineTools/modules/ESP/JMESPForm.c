@@ -20,9 +20,11 @@ class JMESPForm: JMFormBase
 
 	private UIActionCheckbox m_DisableSafetyCheckbox;
 
+	private UIActionButton m_ExportButton;
 	private UIActionSelectBox m_ExportTypeList;
 
 	private JMESPModule m_Module;
+	private JMLoadoutModule m_LoadoutModule;
 
 	private UIActionEditableTextPreview m_SearchBox;
 
@@ -160,13 +162,10 @@ class JMESPForm: JMFormBase
 		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
 
 		UIActionManager.CreateText(container,"Selected Items");
-	#ifdef COT_ENABLE_LOADOUTS
-		UIActionManager.CreateButton( container, "#STR_COT_ESP_MODULE_ACTION_MAKE_LOADOUT", this, "Click_MakeLoadout" );
-	#endif
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market"}, this );
+		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "COT Loadout"}, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
@@ -193,6 +192,8 @@ class JMESPForm: JMFormBase
 
 		ESPFilters( left_bottom );
 		ESPSelectedObjects( right_bottom );
+		
+		Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
 	}
 
 	override void OnShow()
@@ -455,25 +456,23 @@ class JMESPForm: JMFormBase
 		m_Module.DrawPlayerSkeletonsIncludingMyself = idx > 1;
 	}
 
+	void Click_ExportType( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		if (m_ExportTypeList.GetSelection() == COT_ESPMode.CREATELOADOUT)
+			m_ExportButton.SetButton("Save as");
+		else
+			m_ExportButton.SetButton("Copy to Clipboard");
+	}	
+
 	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
 		m_Module.SkeletonLineThickness = action.GetSelection() + 1;
-	}
-
-	void Click_MakeLoadout( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_HEADER", "#STR_COT_ESP_MODULE_ACTION_MAKE_ITEM_SET_CONFIRMATION_DESCRIPTION", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CREATE", "MakeItemSet_Create" );
-	}
-
-	void MakeItemSet_Create( JMConfirmation confirmation )
-	{
-		m_Module.MakeItemSet( confirmation.GetEditBoxValue() );
 	}
 	
 	void Click_DuplicateSelected( UIEvent eid, UIActionBase action )
@@ -507,6 +506,12 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyObjects("DeleteSelected"))
+			DeleteSelected();
+	}
+
+	void DeleteSelected()
+	{
 		m_Module.DeleteSelected();
 	}
 	
@@ -542,6 +547,12 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		if (!HasTooManyObjects("MoveToCursor"))
+			MoveToCursor();
+	}
+
+	void MoveToCursor()
+	{
 		vector dir = GetGame().GetCurrentCameraDirection();
 		vector from = GetGame().GetCurrentCameraPosition(); 
 		vector to = from + ( dir * 1000 );   
@@ -569,6 +580,33 @@ class JMESPForm: JMFormBase
 			case COT_ESPMode.COPYLISTEXPMARKET:
 				m_Module.CopyToClipboardMarket();
 			break;
+			case COT_ESPMode.CREATELOADOUT:
+				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
+			break;
 		}
+	}
+
+	void CreateLoadout_Confirm(JMConfirmation confirmation)
+	{
+		string name = confirmation.GetEditBoxValue();
+		if (name == string.Empty)
+			return;
+
+		if (!m_LoadoutModule)
+			Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+		
+		m_LoadoutModule.Create(name);
+	}
+
+	bool HasTooManyObjects(string funcName)
+	{
+		int count = JM_GetSelected().GetObjects().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+
+		return false;
 	}
 };

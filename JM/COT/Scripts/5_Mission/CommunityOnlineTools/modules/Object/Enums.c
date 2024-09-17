@@ -14,7 +14,16 @@ enum COT_ESPMode
 {
 	COPYLISTRAW,
 	COPYLISTSPAWNABLETYPES,
-	COPYLISTEXPMARKET
+	COPYLISTEXPMARKET,
+	
+	CREATELOADOUT
+};
+
+enum COT_LoadoutSpawnMode
+{
+	CURSOR,
+	TARGET,
+	PLAYER
 };
 
 enum COT_ObjectSetupMode
@@ -37,6 +46,7 @@ class COT_BloodTypes
 	static const int AB_N = LIQUID_BLOOD_AB_N;
 };
 
+//! LEGACY, not used
 class COT_LiquidTypes
 {
 	static const int UNKNOWN;
