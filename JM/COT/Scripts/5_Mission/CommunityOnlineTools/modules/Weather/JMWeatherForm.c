@@ -745,12 +745,12 @@ class JMWeatherForm: JMFormBase
 
 	static float PI2DEG(float value)
 	{
-		return (Math.PI + value) * Math.RAD2DEG;
+		return (value * Math.RAD2DEG) + 180;
 	}
 
 	static float DEG2PI(float value)
 	{
-		return (180 - value) * Math.DEG2RAD;
+		return (value * Math.DEG2RAD) - Math.PI;
 	}
 
 	void InitLeftPanel( Widget parent )
