@@ -125,6 +125,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor( UAInput input )
 	{
+#ifdef DEVELOPER
+		return;
+#endif
+
 		if ( !(input.LocalPress()) )
 			return;
 
@@ -151,7 +155,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( distance <= 1000 )
 		{
-			Position( hitPos, true );
+			Position( hitPos, {GetGame().GetPlayer().GetIdentity().GetId()}, true);
 		} else
 		{
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
@@ -160,6 +164,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Input_Cursor_RaycastOnServer( UAInput input )
 	{
+#ifdef DEVELOPER
+		return;
+#endif
+
 		if ( !(input.LocalPress()) )
 			return;
 
@@ -285,11 +293,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 	}
 
-	void Position( vector position, bool isCursor = false )
+	void Position( vector position, array< string > guids = NULL, bool isCursor = false )
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_Position( position, isCursor, PlayerBase.Cast( GetGame().GetPlayer() ) );
+			Server_Position( position, isCursor, guids, NULL );
 		} else if ( IsMissionClient() )
 		{
 			if ( !isCursor && !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
@@ -298,36 +306,52 @@ class JMTeleportModule: JMRenderableModuleBase
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
 			rpc.Write( isCursor );
+			rpc.Write( guids );
 			rpc.Send( NULL, JMTeleportModuleRPC.Position, true, NULL );
 		}
 	}
 
-	private void Server_Position( vector position, bool isCursor, PlayerBase player )
+	private void Server_Position( vector position, bool isCursor, array< string > guids, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
 		bool shouldLog = true;
 		if ( isCursor )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", ident, instance ) )
 				return;
 
-			shouldLog = !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", player.GetIdentity() );
+			shouldLog = !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", ident );
 		} else
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", player.GetIdentity(), instance ) )
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", ident, instance ) )
 				return;
 		}
 
-		SetPlayerPosition( player, position );
-
-		// COTCreateNotification( player.GetIdentity(), new StringLocaliser( "Teleported to position " + position.ToString() ) );
-
-		if ( shouldLog )
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		int count;
+		bool isSelfOnly = true;
+		for ( int i = 0; i < players.Count(); i++ )
 		{
-			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
-		
-			SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( !player )
+				continue;
+			
+			if (isSelfOnly && players[i].GetGUID() != ident.GetId())
+				isSelfOnly = false;
+
+			count++;
+			
+			SetPlayerPosition( player, position );
+
+			if ( shouldLog )
+			{
+				GetCommunityOnlineToolsBase().Log( ident, "Teleported "+ players[i].GetSteam64ID() +" to position " + position.ToString() );
+				SendWebhook( "Vector", instance, "Teleported "+players[i].GetSteam64ID()+" to position " + position.ToString() );
+			}
 		}
+
+		if (!isSelfOnly && count > 0)
+			COTCreateNotification( ident, new StringLocaliser( "Teleported "+count.ToString()+" Player(s)" ) );
 	}
 
 	private void RPC_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -342,11 +366,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( isCursor ) )
 				return;
 
-			PlayerBase player;
-			if ( !Class.CastTo(player, senderRPC.GetPlayer()) )
+			array< string > guids
+			if ( !ctx.Read( guids ) )
 				return;
 
-			Server_Position( pos, isCursor, player );
+			Server_Position( pos, isCursor, guids, senderRPC );
 		}
 	}
 

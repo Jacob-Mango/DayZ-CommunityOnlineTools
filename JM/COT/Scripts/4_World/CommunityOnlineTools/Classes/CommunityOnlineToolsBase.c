@@ -35,17 +35,13 @@ class CommunityOnlineToolsBase
 	void CreateNewLog()
 	{
 		if ( !FileExist( JMConstants.DIR_LOGS ) )
-		{
 			MakeDirectory( JMConstants.DIR_LOGS );
-		}
 
 		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now( true ).ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
 		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
 
 		if ( fileLog != 0 )
-		{
 			CloseFile( fileLog );
-		}
 	}
 
 	void CloseLog()
@@ -151,14 +147,10 @@ class CommunityOnlineToolsBase
 		if ( open )
 		{
 			if ( GetGame().GetUIManager().GetMenu() )
-			{
 				return;
-			}
 
 			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-			{
 				return;
-			}
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
@@ -261,6 +253,22 @@ class CommunityOnlineToolsBase
 
 	void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
 	{
+		switch (rpc_type)
+		{
+			case JMCOTBaseRPC.TransportSync:
+			#ifndef SERVER
+				vector position, orientation;
+				if (!ctx.Read(position) || !ctx.Read(orientation))
+					break;
+				Transport transport;
+				if (!Class.CastTo(transport, target))
+					break;
+				PrintFormat("OnRPC TransportSync %1 pos=%2 ori=%3", target, position.ToString(), orientation.ToString());
+				transport.SetPosition(position);
+				transport.SetOrientation(orientation);
+			#endif
+				break;
+		}
 	}
 
 	void UpdateRole( JMRole role, PlayerIdentity toSendTo )
@@ -384,10 +392,19 @@ class CommunityOnlineToolsBase
 	static void Refuel(Object obj)
 	{
 		CarScript car;
+		#ifndef DAYZ_1_25
+		BoatScript boat;
+		#endif
 		if (Class.CastTo(car, obj))
 		{
 			car.COT_Refuel();
 		}
+		#ifndef DAYZ_1_25
+		else if (Class.CastTo(boat, obj))
+		{
+			boat.COT_Refuel();
+		}
+		#endif
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
@@ -398,6 +415,111 @@ class CommunityOnlineToolsBase
 
 	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3)
 	{
+	}
+
+	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
+	{
+		transport.SetPosition(position);
+		transport.SetOrientation(orientation);
+
+	#ifdef SERVER
+		if (dBodyIsActive(transport))
+		{
+			transport.Synchronize();
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(position);
+			rpc.Write(orientation);
+			PrintFormat("Send TransportSync %1 pos=%2 ori=%3", transport, position.ToString(), orientation.ToString());
+			rpc.Send(transport, JMCOTBaseRPC.TransportSync, true);
+		}
+	#endif
+	}
+
+	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
+	{
+		vector surface = Vector(position[0], GetGame().SurfaceY(position[0], position[2]), position[2]);
+
+		vector entityMinMax[2];
+		if (!entity.GetCollisionBox(entityMinMax))
+			entity.ClippingInfo(entityMinMax);
+
+		float entityOffsetY = entityMinMax[0][1];
+		if (entityOffsetY > 0)
+			entityOffsetY = 0;
+
+		vector startPos = position;
+		startPos[1] = startPos[1] - entityOffsetY;
+		if (surface[1] > startPos[1])
+			startPos[1] = surface[1];
+
+		float waterDepth;
+		if (aboveWater)
+			waterDepth = GetGame().GetWaterDepth(surface);
+
+		if (waterDepth > 0)
+		{
+			surface[1] = surface[1] + waterDepth;
+			position = surface;
+		}
+		else
+		{
+			PhxInteractionLayers layerMask;
+			layerMask |= PhxInteractionLayers.BUILDING;
+			layerMask |= PhxInteractionLayers.DOOR;
+			layerMask |= PhxInteractionLayers.VEHICLE;
+			layerMask |= PhxInteractionLayers.ROADWAY;
+			layerMask |= PhxInteractionLayers.TERRAIN;
+			layerMask |= PhxInteractionLayers.ITEM_LARGE;
+			layerMask |= PhxInteractionLayers.FENCE;
+			vector hitPosition;
+			vector hitNormal;
+
+			if (DayZPhysics.RayCastBullet(startPos + "0 1 0", surface - "0 1 0", layerMask, entity, null, hitPosition, hitNormal, null))
+			{
+				position = hitPosition;
+			} else {
+				position = surface;
+				hitNormal = GetGame().SurfaceGetNormal(surface[0], surface[2]);
+			}
+		}
+
+		position[1] = position[1] - entityOffsetY;
+
+		bool isActive = dBodyIsActive(entity);
+		bool isDynamic = dBodyIsDynamic(entity);
+
+		vector velocity = GetVelocity(entity);
+		vector angularVelocity = dBodyGetAngularVelocity(entity);
+
+		if (isActive)
+		{
+			dBodyActive(entity, ActiveState.INACTIVE);
+			dBodyDynamic(entity, false);
+		}
+
+		vector orientation = entity.GetOrientation();
+		entity.SetOrientation(Vector(orientation[0], 0, 0));
+
+		vector transform[4];
+		entity.GetTransform(transform);
+		transform[3] = position;
+		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
+		entity.SetTransform(transform);
+
+		Transport transport;
+		if (isActive)
+		{
+			SetVelocity(entity, velocity);
+			dBodySetAngularVelocity(entity, angularVelocity);
+			dBodyDynamic(entity, true);
+		}
+		else if (Class.CastTo(transport, entity))
+		{
+			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
+		}
 	}
 };
 

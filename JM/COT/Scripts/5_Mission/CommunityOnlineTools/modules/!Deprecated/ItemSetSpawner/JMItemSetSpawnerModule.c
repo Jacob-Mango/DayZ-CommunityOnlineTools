@@ -31,7 +31,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "#STR_COT_ITEMSET_MODULE_NAME";
+		return "#STR_COT_ITEMSET_MODULE_NAME (Legacy)";
 	}
 
 	override string GetIconName()
@@ -317,6 +317,11 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		int flags = ECE_CREATEPHYSICS;
 		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
 			flags |= ECE_PLACE_ON_SURFACE;
+		#ifndef DAYZ_1_25
+		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( pos ) )
+			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
+		#endif
+		
 		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 

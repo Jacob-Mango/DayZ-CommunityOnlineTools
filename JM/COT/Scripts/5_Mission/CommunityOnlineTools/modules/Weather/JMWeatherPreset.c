@@ -59,6 +59,14 @@ class JMWeatherPhenomenon: JMWeatherBase
 				return GetGame().GetWeather().GetFog();
 			case JMWeatherRain:
 				return GetGame().GetWeather().GetRain();
+	#ifndef DAYZ_1_25
+			case JMWeatherSnow:
+				return GetGame().GetWeather().GetSnowfall();
+			case JMWeatherWindMagnitude:
+				return GetGame().GetWeather().GetWindMagnitude();
+			case JMWeatherWindDirection:
+				return GetGame().GetWeather().GetWindDirection();
+	#endif
 			case JMWeatherOvercast:
 				return GetGame().GetWeather().GetOvercast();
 		}
@@ -95,7 +103,48 @@ class JMWeatherFog: JMWeatherPhenomenon
 {
 };
 
+class JMWeatherDynamicFog: JMWeatherBase
+{
+	float Distance;
+	float Height;
+	float Bias;
+	float Time;
+
+	override void Apply()
+	{
+		#ifndef DAYZ_1_25
+		if (Distance != -1)
+		{
+			GetGame().GetWeather().SetDynVolFogDistanceDensity( Distance, Time );
+			GetGame().GetWeather().SetDynVolFogHeightDensity( Height, Time );
+			GetGame().GetWeather().SetDynVolFogHeightBias( Bias, Time );
+		}
+		#endif
+	}
+
+	override void SetFromWorld()
+	{
+		#ifndef DAYZ_1_25
+		Distance = GetGame().GetWeather().GetDynVolFogDistanceDensity();
+		Height = GetGame().GetWeather().GetDynVolFogHeightDensity();
+		Bias = GetGame().GetWeather().GetDynVolFogHeightBias();
+		#endif
+	}
+
+	override void Log( PlayerIdentity pidentLog )
+	{
+		if ( IsMissionHost() )
+		{
+			GetCommunityOnlineToolsBase().Log( pidentLog, "DynamicFog " + Distance + ", " + Height + ", " + Bias );
+		}
+	}
+};
+
 class JMWeatherRain: JMWeatherPhenomenon
+{
+};
+
+class JMWeatherSnow: JMWeatherPhenomenon
 {
 };
 
@@ -103,6 +152,15 @@ class JMWeatherOvercast: JMWeatherPhenomenon
 {
 };
 
+class JMWeatherWindMagnitude: JMWeatherPhenomenon
+{
+};
+
+class JMWeatherWindDirection: JMWeatherPhenomenon
+{
+};
+
+#ifdef DAYZ_1_25
 class JMWeatherWind: JMWeatherBase
 {
 	vector Dir;
@@ -134,6 +192,7 @@ class JMWeatherWind: JMWeatherBase
 		}
 	}
 };
+#endif
 
 class JMWeatherWindFunction: JMWeatherBase
 {
@@ -217,6 +276,36 @@ class JMWeatherRainThreshold: JMWeatherBase
 	}
 };
 
+class JMWeatherSnowThreshold: JMWeatherBase
+{
+	float OvercastMin;
+	float OvercastMax;
+	float Time;
+
+	override void Apply()
+	{
+	#ifndef DAYZ_1_25
+		if (Time != -1)
+			GetGame().GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
+	#endif
+	}
+
+	override void SetFromWorld()
+	{
+		OvercastMin = 0.5;
+		OvercastMax = 1.0;
+		Time = 120.0;
+	}
+
+	override void Log( PlayerIdentity pidentLog )
+	{
+		if ( IsMissionHost() )
+		{
+			GetCommunityOnlineToolsBase().Log( pidentLog, "SnowfallThreshold " + OvercastMin + ", " + OvercastMax + ", " + Time );
+		}
+	}
+};
+
 class JMWeatherPreset
 {
 	string Name;
@@ -226,49 +315,94 @@ class JMWeatherPreset
 	autoptr JMWeatherDate PDate;
 
 	autoptr JMWeatherStorm Storm;
+	autoptr JMWeatherOvercast POvercast;
 
 	autoptr JMWeatherFog PFog;
-	autoptr JMWeatherOvercast POvercast;
+	autoptr JMWeatherDynamicFog PDynFog;
+
 	autoptr JMWeatherRain PRain;
-
 	autoptr JMWeatherRainThreshold RainThreshold;
+	
+	autoptr JMWeatherSnow PSnow;
+	autoptr JMWeatherSnowThreshold SnowThreshold;
 
+	#ifndef DAYZ_1_25
+	autoptr JMWeatherWindMagnitude PWindMagnitude;
+	autoptr JMWeatherWindDirection PWindDirection;
+	#else
 	autoptr JMWeatherWind Wind;
+	#endif
 	autoptr JMWeatherWindFunction WindFunc;
 
 	void JMWeatherPreset()
 	{
 		PDate = new JMWeatherDate;
+
 		Storm = new JMWeatherStorm;
-		PFog = new JMWeatherFog;
 		POvercast = new JMWeatherOvercast;
+
+		PFog = new JMWeatherFog;
+		PDynFog = new JMWeatherDynamicFog;
+
 		PRain = new JMWeatherRain;
 		RainThreshold = new JMWeatherRainThreshold;
+
+	#ifndef DAYZ_1_25
+		PSnow = new JMWeatherSnow;
+		SnowThreshold = new JMWeatherSnowThreshold;
+		PWindMagnitude = new JMWeatherWindMagnitude;
+		PWindDirection = new JMWeatherWindDirection;
+	#else
 		Wind = new JMWeatherWind;
+	#endif
 		WindFunc = new JMWeatherWindFunction;
 	}
 
 	void Apply()
 	{
 		PDate.Apply();
+
 		Storm.Apply();
-		PFog.Apply();
 		POvercast.Apply();
+
+		PFog.Apply();
+		PDynFog.Apply();
+
 		PRain.Apply();
 		RainThreshold.Apply();
+
+	#ifndef DAYZ_1_25
+		PSnow.Apply();
+		SnowThreshold.Apply();
+		PWindMagnitude.Apply();
+		PWindDirection.Apply();
+	#else
 		Wind.Apply();
+	#endif
 		WindFunc.Apply();
 	}
 
 	void SetFromWorld()
 	{
 		PDate.SetFromWorld();
+
 		Storm.SetFromWorld();
-		PFog.SetFromWorld();
 		POvercast.SetFromWorld();
+
+		PFog.SetFromWorld();
+		PDynFog.SetFromWorld();
+
 		PRain.SetFromWorld();
 		RainThreshold.SetFromWorld();
+
+	#ifndef DAYZ_1_25
+		PSnow.SetFromWorld();
+		SnowThreshold.SetFromWorld();
+		PWindMagnitude.SetFromWorld();
+		PWindDirection.SetFromWorld();
+	#else
 		Wind.SetFromWorld();
+	#endif
 		WindFunc.SetFromWorld();
 	}
 
@@ -279,12 +413,24 @@ class JMWeatherPreset
 			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name );
 
 			PDate.Log( pidentLogPP );
+
 			Storm.Log( pidentLogPP );
-			PFog.Log( pidentLogPP );
 			POvercast.Log( pidentLogPP );
+
+			PFog.Log( pidentLogPP );
+			PDynFog.Log( pidentLogPP );
+
 			PRain.Log( pidentLogPP );
 			RainThreshold.Log( pidentLogPP );
+
+		#ifndef DAYZ_1_25
+			PSnow.Log( pidentLogPP );
+			SnowThreshold.Log( pidentLogPP );
+			PWindMagnitude.Log( pidentLogPP );
+			PWindDirection.Log( pidentLogPP );
+		#else
 			Wind.Log( pidentLogPP );
+		#endif
 			WindFunc.Log( pidentLogPP );
 		}
 	}

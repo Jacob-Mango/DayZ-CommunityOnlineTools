@@ -1,7 +1,7 @@
 PanelWidgetClass JMWeatherOldForm {
  color 0 0 0 0
  position 0 0
- size 570 270
+ size 570 295
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -181,8 +181,49 @@ PanelWidgetClass JMWeatherOldForm {
       }
      }
     }
-    TextWidgetClass txt_ppp_st_fog {
+    TextWidgetClass txt_ppp_st_snow {
      position 0 100
+     size 1 20
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "#STR_COT_WEATHER_MODULE_SNOW"
+     font "gui/fonts/Metron"
+     "exact text" 1
+     "text valign" center
+     {
+      SliderWidgetClass sld_ppp_st_snow {
+       position 0.3 0
+       size 0.7 1
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "fill in" 1
+       "listen to input" 1
+       style Editor
+       {
+        TextWidgetClass txt_ppp_st_snow_value {
+         size 1 1
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         text "50.5%"
+         font "gui/fonts/Metron"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    TextWidgetClass txt_ppp_st_fog {
+     position 0 125
      size 1 20
      hexactpos 1
      vexactpos 1
@@ -223,7 +264,7 @@ PanelWidgetClass JMWeatherOldForm {
      }
     }
     TextWidgetClass txt_ppp_st_wind_force {
-     position 0 125
+     position 0 150
      size 1 20
      hexactpos 1
      vexactpos 1
@@ -265,7 +306,7 @@ PanelWidgetClass JMWeatherOldForm {
     }
     TextWidgetClass txt_ppp_st_temperature {
      visible 0
-     position 0 148.455
+     position 0 175
      size 1 20
      hexactpos 1
      vexactpos 1

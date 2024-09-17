@@ -27,8 +27,16 @@ modded class PlayerBase
 	private bool m_JMHasLastPosition;
 
 	private bool m_JMHasUnlimitedAmmo;
-
 	private bool m_JMHasUnlimitedStamina;
+	
+	private bool m_JMHasCustomScale;
+	private float m_JMScaleValue;
+
+	private bool m_JMHasAdminNVG;
+	private bool m_JMHasAdminNVGRemoteSynch;
+
+	private ref map<int, bool> m_COT_PlayerVars;
+	private int m_COT_PlayerVarsBitmask;
 
 	PlayerBase m_JM_SpectatedPlayer;
 	vector m_JM_CameraPosition;
@@ -57,6 +65,22 @@ modded class PlayerBase
 			COTSetUnlimitedAmmo(true);
 			COTSetUnlimitedStamina(true);
 		}
+
+		if (GetGame() && GetGame().IsClient())
+		{
+			SetEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
+		}
+
+		m_COT_PlayerVars = new map<int, bool>;
+	}
+
+	
+	void ~PlayerBase()
+	{
+		if (GetGame() && GetGame().IsClient())
+		{
+			ClearEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
+		}
 	}
 
 	override void Init()
@@ -82,11 +106,10 @@ modded class PlayerBase
 		*/
 		super.Init();
 
-		RegisterNetSyncVariableInt( "m_JMIsInvisibleRemoteSynch" );
-		RegisterNetSyncVariableBool( "m_JMIsFrozenRemoteSynch" );
-		RegisterNetSyncVariableBool( "m_JMHasUnlimitedAmmo" );
-		RegisterNetSyncVariableBool( "m_JMHasUnlimitedStamina" );
-		RegisterNetSyncVariableBool( "m_COT_GodMode" );
+		int playerVarsBitmaskMaxValue = Math.Pow(2, EnumTools.GetEnumSize(JMPlayerVariables));
+		RegisterNetSyncVariableInt("m_COT_PlayerVarsBitmask", 0, playerVarsBitmaskMaxValue);
+
+		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0, 0.1);
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -94,6 +117,38 @@ modded class PlayerBase
 
 		m_JMHasLastPosition = false;
 		m_JMLastPosition = "0 0 0";
+	}
+
+	void COT_UpdatePlayerVars(map<int, bool> playerVars)
+	{
+		playerVars[JMPlayerVariables.BLOODY_HANDS] = HasBloodyHands();
+		playerVars[JMPlayerVariables.GODMODE] = COTHasGodMode();
+		playerVars[JMPlayerVariables.FROZEN] = COTIsFrozen();
+		playerVars[JMPlayerVariables.INVISIBILITY] = COTIsInvisible();
+		playerVars[JMPlayerVariables.UNLIMITED_AMMO] = COTHasUnlimitedAmmo();
+		playerVars[JMPlayerVariables.UNLIMITED_STAMINA] = COTHasUnlimitedStamina();
+		playerVars[JMPlayerVariables.BROKEN_LEGS] = m_BrokenLegState != eBrokenLegs.NO_BROKEN_LEGS;
+		playerVars[JMPlayerVariables.RECEIVE_DMG_DEALT] = COTGetReceiveDamageDealt();
+		playerVars[JMPlayerVariables.CANNOT_BE_TARGETED_BY_AI] = COTGetCannotBeTargetedByAI();
+		playerVars[JMPlayerVariables.REMOVE_COLLISION] = COTGetRemoveCollision();
+		playerVars[JMPlayerVariables.ADMIN_NVG] = COTHasAdminNVG();
+		playerVars[JMPlayerVariables.HAS_CUSTOM_SCALE] = COTHasCustomScale();
+		playerVars[JMPlayerVariables.INVISIBILITY_INTERACTIVE] = COTIsInvisible(JMInvisibilityType.Interactive);
+	}
+
+	void COT_SynchPlayerVars()
+	{
+		COT_UpdatePlayerVars(m_COT_PlayerVars);
+
+		m_COT_PlayerVarsBitmask = 0;
+
+		foreach (int value, bool enabled: m_COT_PlayerVars)
+		{
+			if (enabled)
+				m_COT_PlayerVarsBitmask |= value;
+		}
+
+		SetSynchDirty();
 	}
 
 	override void CommandHandler( float pDt, int pCurrentCommandID, bool pCurrentCommandFinished )	
@@ -161,15 +216,80 @@ modded class PlayerBase
 	void COTOnConnect()
 	{
 		m_COT_GodMode = !GetAllowDamage();
-		SetSynchDirty();
+		COT_SynchPlayerVars();
 	}
 
 	override void OnVariablesSynchronized()
 	{
 		super.OnVariablesSynchronized();
 
+		bool enabled;
+		for (int i = 0; i < EnumTools.GetEnumSize(JMPlayerVariables); i++)
+		{
+			int value = EnumTools.GetEnumValue(JMPlayerVariables, i);
+			enabled = (m_COT_PlayerVarsBitmask & value) == value;
+			switch (value)
+			{
+				case JMPlayerVariables.GODMODE:
+				#ifdef DIAG_DEVELOPER
+					if (m_COT_GodMode != enabled)
+						PrintFormat("%1 COT GodMode %2", this, enabled);
+				#endif
+					m_COT_GodMode = enabled;
+					break;
+
+				case JMPlayerVariables.FROZEN:
+					m_JMIsFrozenRemoteSynch = enabled;
+					break;
+
+				case JMPlayerVariables.INVISIBILITY:
+					if (enabled)
+						m_JMIsInvisibleRemoteSynch = JMInvisibilityType.DisableSimulation;
+					else
+						m_JMIsInvisibleRemoteSynch = JMInvisibilityType.None;
+					break;
+
+				case JMPlayerVariables.INVISIBILITY_INTERACTIVE:
+					if (enabled)
+						m_JMIsInvisibleRemoteSynch = JMInvisibilityType.Interactive;
+					break;
+
+				case JMPlayerVariables.UNLIMITED_AMMO:
+				#ifdef DIAG_DEVELOPER
+					if (m_JMHasUnlimitedAmmo != enabled)
+						PrintFormat("%1 COT Unlimited Ammo %2", this, enabled);
+				#endif
+					m_JMHasUnlimitedAmmo = enabled;
+					break;
+
+				case JMPlayerVariables.UNLIMITED_STAMINA:
+				#ifdef DIAG_DEVELOPER
+					if (m_JMHasUnlimitedStamina != enabled)
+						PrintFormat("%1 COT Unlimited Stamina %2", this, enabled);
+				#endif
+					m_JMHasUnlimitedStamina = enabled;
+					break;
+
+				case JMPlayerVariables.ADMIN_NVG:
+					m_JMHasAdminNVGRemoteSynch = enabled;
+					break;
+
+				case JMPlayerVariables.HAS_CUSTOM_SCALE:
+				#ifdef DIAG_DEVELOPER
+					if (m_JMHasCustomScale != enabled)
+						PrintFormat("%1 COT Custom Scale %2", this, enabled);
+				#endif
+					m_JMHasCustomScale = enabled;
+					break;
+			}
+		}
+
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
+		#ifdef DIAG_DEVELOPER
+			PrintFormat("%1 COT Invisibility %2", this, m_JMIsInvisibleRemoteSynch);
+		#endif
+
 			m_JMIsInvisible = m_JMIsInvisibleRemoteSynch;
 
 			COTUpdateInvisibility();
@@ -187,11 +307,39 @@ modded class PlayerBase
 
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
 		{
+		#ifdef DIAG_DEVELOPER
+			PrintFormat("%1 COT Frozen %2", this, m_JMIsInvisibleRemoteSynch);
+		#endif
+
 			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
 				hic.SetDisabled( m_JMIsFrozen );
+		}
+
+		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
+		{
+		#ifdef DIAG_DEVELOPER
+			PrintFormat("%1 COT Admin NVG %2", this, m_JMHasAdminNVGRemoteSynch);
+		#endif
+
+			m_JMHasAdminNVG = m_JMHasAdminNVGRemoteSynch;
+
+			// idk why or how it works.
+			// This makes no fucking sense.
+			// it just works. Kill me. -LT
+			if (m_JMHasAdminNVG)
+			{
+				AddActiveNV(JMNVTypes.NV_COT_ON);
+				RemoveActiveNV(JMNVTypes.NV_COT_OFF);
+			}
+			else
+			{
+				AddActiveNV(JMNVTypes.NV_COT_OFF);
+				RemoveActiveNV(JMNVTypes.NV_COT_ON);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
+			}
 		}
 	}
 
@@ -224,25 +372,33 @@ modded class PlayerBase
 		}
 	}
 
-#ifndef SERVER
 	//! @note after disabling simulation, this no longer gets called, just keep that in mind
+#ifndef SERVER
 	override void EOnPostFrame( IEntity other, int extra )
 	{
 		if ( !m_JMIsInvisible )
-			return;
-
-		SetInvisible( true );
+		{
+			if (m_JMHasCustomScale && m_JMScaleValue > 0.0)
+				SetScale(m_JMScaleValue);
+		}
+		else
+		{
+			SetInvisible( true );
+		}
 	}
 #endif
 
 	void COT_SimulationDisabled_OnFrame(float timeSlice)
 	{
-		//! Verbatim copy of vanilla PlayerBase::EOnFrame, this is a stand-in to update HUD etc in case of true invis mode which disables simulation
+		//! Verbatim copy of the client part of vanilla PlayerBase::EOnFrame,
+		//! this is a stand-in to update HUD etc in case of true invis mode which disables simulation
 		if (GetInstanceType() == DayZPlayerInstanceType.INSTANCETYPE_CLIENT)
 		{
 			#ifndef NO_GUI
 			m_Hud.Update(timeSlice);
+			#ifdef DAYZ_1_25
 			m_Hud.ToggleHeatBufferPlusSign(m_HasHeatBuffer);
+			#endif
 			
 			if (IsControlledPlayer() && m_EffectWidgets && m_EffectWidgets.IsAnyEffectRunning())
 			{
@@ -252,6 +408,12 @@ modded class PlayerBase
 
 			if (m_UndergroundHandler)
 				m_UndergroundHandler.Tick(timeSlice);
+			
+			#ifndef DAYZ_1_25
+			//! DayZ 1.26+
+			if (m_UndergroundBunkerHandler)
+				m_UndergroundBunkerHandler.Tick(timeSlice);
+			#endif
 		}
 	}
 
@@ -313,10 +475,8 @@ modded class PlayerBase
 			{
 				if (transport.CrewMemberIndex(this) != -1)
 				{
-					CarScript car;
-					if (Class.CastTo(car, transport))
-						car.COT_PlaceOnSurfaceAtPosition(position);
-
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, position);
+					
 					return;
 				}
 			}
@@ -423,6 +583,16 @@ modded class PlayerBase
 		return m_JMHasUnlimitedStamina;
 	}
 
+	bool COTHasAdminNVG()
+	{
+		return m_JMHasAdminNVG;
+	}
+
+	bool COTHasCustomScale()
+	{
+		return m_JMHasCustomScale;
+	}
+
 	void COTSetGodMode( bool mode, bool preference = true )
 	{
 		if ( GetGame().IsServer() )
@@ -436,7 +606,7 @@ modded class PlayerBase
 
 			m_COT_GodMode = mode;
 			#ifdef SERVER
-			SetSynchDirty();
+			COT_SynchPlayerVars();
 			#endif
 		}
 		else
@@ -465,7 +635,7 @@ modded class PlayerBase
 			m_JMIsFrozenRemoteSynch = mode;
 
 			#ifdef SERVER
-			SetSynchDirty();
+			COT_SynchPlayerVars();
 			#endif
 
 			HumanInputController hic = GetInputController();
@@ -499,7 +669,7 @@ modded class PlayerBase
 			m_JMIsInvisibleRemoteSynch = mode;
 
 			#ifdef SERVER
-			SetSynchDirty();
+			COT_SynchPlayerVars();
 			#endif
 		}
 	}
@@ -548,7 +718,7 @@ modded class PlayerBase
 			m_JMHasUnlimitedAmmo = mode;
 
 			#ifdef SERVER
-			SetSynchDirty();
+			COT_SynchPlayerVars();
 			#endif
 		}
 	}
@@ -560,7 +730,33 @@ modded class PlayerBase
 			m_JMHasUnlimitedStamina = mode;
 
 			#ifdef SERVER
-			SetSynchDirty();
+			COT_SynchPlayerVars();
+			#endif
+		}
+	}
+
+	void COTSetAdminNVG( bool mode )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasAdminNVG = mode;
+
+			#ifdef SERVER
+			COT_SynchPlayerVars();
+			#endif
+		}
+	}
+
+	void COTSetScale( float value )
+	{
+		if ( GetGame().IsServer() )
+		{
+			m_JMHasCustomScale = value != 1;
+			m_JMScaleValue = value;
+			SetScale(value);
+
+			#ifdef SERVER
+			COT_SynchPlayerVars();
 			#endif
 		}
 	}
@@ -696,6 +892,14 @@ modded class PlayerBase
 	{
 		return m_COT_IsLeavingFreeCam;
 	}
+	
+	override void SetActions(out TInputActionMap InputActionMap)
+	{
+		super.SetActions(InputActionMap);
+
+		//AddAction(COT_QuickActionBuild, InputActionMap);
+		//AddAction(COT_QuickActionDismantle, InputActionMap);
+	}
 
 	ActionBase COT_StartAction(typename actionType, ActionTarget target, ItemBase mainItem = null)
 	{
@@ -745,8 +949,7 @@ modded class PlayerBase
 		auto hcv = GetCommand_Vehicle();
 		if (hcv)
 		{
-			CarScript vehicle;
-			if (Class.CastTo(vehicle, hcv.GetTransport()))
+			if (hcv.GetTransport())
 			{
 				if (!hcv.IsGettingOut())
 				{

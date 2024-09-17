@@ -4,6 +4,8 @@ class JMMapForm: JMFormBase
 	private Widget m_BackgroundWidget;
 
 	private JMMapModule m_Module;
+
+	private vector m_TeleportPosition;
 	
 	override void OnInit()
 	{
@@ -72,35 +74,17 @@ class JMMapForm: JMFormBase
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
-
 		foreach (JMPlayerInstance player: players)
 		{
-			int colors = ARGB( 255, 230, 20, 20 );
-			string marker;
-
-			//if ( player.PlayerObject && player.PlayerObject.GetParent() && player.PlayerObject.GetParent().IsInherited(CarScript) )
-				//marker = JM_COT_ICON_CAR;
-			//else
-				marker = JM_COT_ICON_DOT;
-
-			if ( player.PlayerObject )
-			{
-				if ( !player.PlayerObject.IsAlive() )
-				{
-					colors = ARGB( 255, 50, 0, 0 );
-					//marker += "_dead";
-				}
-				else if ( player.PlayerObject.IsUnconscious() )
-				{
-					colors = ARGB( 255, 100, 0, 0 );
-					//marker += "_uncon";
-				}
-			}
-			
+			int colors;
 			if ( JM_GetSelected().IsSelected( player.GetGUID() ) )
-				marker += "_selected";
+				colors = ARGB( 255, 255, 255, 0 ); // Yellow
+			else if (player.HasPermission( "COT" ))
+				colors = ARGB( 255, 255, 0, 0 ); 	// Red
+			else
+				colors = ARGB( 255, 0, 255, 0 ); 	// Green
 
-			m_MapWidget.AddUserMark( player.GetPosition(), player.GetName(), colors, marker + ".paa" );
+			m_MapWidget.AddUserMark( player.GetPosition(), player.GetName(), colors, JM_COT_ICON_DOT + ".paa" );
 		}
 
 		GetCommunityOnlineTools().RefreshClientPositions();
@@ -109,18 +93,41 @@ class JMMapForm: JMFormBase
 	override bool OnDoubleClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
-		{
 			return false;
-		}
 
 		if ( w == m_MapWidget )
 		{
-			JMTeleportModule mod;
-			if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-			{
-				mod.Position( SnapToGround( m_MapWidget.ScreenToMap( Vector( x, y, 0 ) ) ) );
-			}
+			m_TeleportPosition = SnapToGround(m_MapWidget.ScreenToMap(Vector( x, y, 0 )));
+			if (!HasTooManyPlayers("TeleportSelected","TeleportPlayers"))
+				TeleportSelected();
 			
+			return true;
+		}
+
+		return false;
+	}
+
+	void TeleportPlayers()
+	{
+		JMTeleportModule mod;
+		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
+			mod.Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
+	}
+
+	void TeleportSelected()
+	{
+		JMTeleportModule mod;
+		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
+			mod.Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	bool HasTooManyPlayers(string funcOnlyName, string funcName)
+	{
+		int count = JM_GetSelected().GetPlayers().Count();
+		if (count > 1)
+		{
+			JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
 			return true;
 		}
 

@@ -174,9 +174,9 @@ class JMSelectedObjects
 		return idx;
 	}
 
-	int NumPlayers()
+	int NumPlayers(bool autoSelect = true)
 	{
-		return m_Players.Count();
+		return GetPlayers(autoSelect).Count();
 	}
 
 	array< string > GetPlayers(bool autoSelect = true)

@@ -5,6 +5,9 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetStorm", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetFog", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetRain", this, SingeplayerExecutionType.Client );
+	#ifndef DAYZ_1_25
+		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetSnow", this, SingeplayerExecutionType.Client );
+	#endif
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetOvercast", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetWindFunctionParams", this, SingeplayerExecutionType.Client );
 		GetRPCManager().AddRPC( "COT_Weather", "Weather_SetDate", this, SingeplayerExecutionType.Client );
@@ -20,6 +23,9 @@ class JMWeatherOldModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Weather.Rain" );
 		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
+
+		GetPermissionsManager().RegisterPermission( "Weather.Snow" );
+		GetPermissionsManager().RegisterPermission( "Weather.Snow.Thresholds" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Preset" );
 		GetPermissionsManager().RegisterPermission( "Weather.Preset.Create" );
@@ -77,6 +83,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		types.Insert( "Overcast" );
 		types.Insert( "Fog" );
 		types.Insert( "Rain" );
+		types.Insert( "Snow" );
 		types.Insert( "Storm" );
 	}
 	
@@ -183,6 +190,34 @@ class JMWeatherOldModule: JMRenderableModuleBase
 			SendWebhook( "Fog", instance, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
+
+#ifndef DAYZ_1_25
+	void Weather_SetSnow( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	{
+		Param3< float, float, float > data;
+		if ( !ctx.Read( data ) ) return;
+
+		if( type == CallType.Client )
+		{
+			GetGame().GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
+			return;
+		}
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Weather.Snow", sender, instance ) )
+			return;
+		
+		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		{
+			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
+
+			GetGame().GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
+
+			GetCommunityOnlineToolsBase().Log( sender, "Set snow to " + data.param1 + " " + data.param2 + " " + data.param3 );
+			SendWebhook( "Snow", instance, "Set snow to " + data.param1 + " " + data.param2 + " " + data.param3 );
+		}
+	}
+#endif
 
 	void Weather_SetRain( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target )
 	{

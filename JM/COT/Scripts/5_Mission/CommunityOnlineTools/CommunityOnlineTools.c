@@ -221,6 +221,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	{
 		if ( IsMissionHost() )
 		{
+			m_ActiveGUIDs.Remove(guid);
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
 			rpc.Send( NULL, JMClientRPC.RemoveClient, true, NULL );
