@@ -443,10 +443,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( !Class.CastTo( ent, GetGame().CreateObject( itemData.m_Classname, pos ) ) )
 			return NULL;
 
+		//! Orientation has to be set first, because it is used by PlaceOnSurfaceAtPosition
+		ent.SetOrientation(itemData.m_LocalRotation);
+
 		if (!ent.IsInherited(PlayerBase))
 			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, pos);
-
-		ent.SetOrientation(itemData.m_LocalRotation);
 
 		if ((ent.IsInherited(Transport)))
 			SetupVehicle(ent);
