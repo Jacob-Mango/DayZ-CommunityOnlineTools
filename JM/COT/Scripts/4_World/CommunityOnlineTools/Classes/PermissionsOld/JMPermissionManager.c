@@ -270,6 +270,19 @@ class JMPermissionManager
 		return true;
 	}
 
+	bool HasQuickActionAccess(PlayerBase player)
+	{
+	#ifdef SERVER
+		PlayerIdentity identity = player.GetIdentity();
+		if (identity && GetCommunityOnlineToolsBase().IsActive(identity) && HasPermission("Actions.QuickActions", identity))
+	#else
+		if (GetCommunityOnlineToolsBase().IsActive() && HasPermission("Actions.QuickActions"))
+	#endif
+			return true;
+
+		return false;
+	}
+
 	bool OnClientConnected( PlayerIdentity ident, out JMPlayerInstance inst )
 	{
 		Assert_Null( RootPermission );

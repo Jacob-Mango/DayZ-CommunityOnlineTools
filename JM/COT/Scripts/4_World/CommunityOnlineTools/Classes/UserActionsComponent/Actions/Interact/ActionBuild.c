@@ -32,14 +32,8 @@ class COT_QuickActionBuild: ActionInteractBase
         if (!base_building)
 			return false;
 
-	#ifdef SERVER
-		PlayerIdentity identity = player.GetIdentity();
-		if (!GetCommunityOnlineToolsBase().IsActive(identity) || !GetPermissionsManager().HasPermission("Actions.QuickActions", identity))
+		if (!GetPermissionsManager().HasQuickActionAccess(player))
 			return false;
-	#else
-		if (!GetCommunityOnlineToolsBase().IsActive() || !GetPermissionsManager().HasPermission("Actions.QuickActions"))
-			return false;
-	#endif
 	
 		Construction construction = base_building.GetConstruction();
 		
