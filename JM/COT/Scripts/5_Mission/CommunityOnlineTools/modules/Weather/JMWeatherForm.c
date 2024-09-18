@@ -1198,7 +1198,7 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetFog( 0, transition, duration );
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1233,7 +1233,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1269,7 +1269,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1302,7 +1302,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
