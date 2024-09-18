@@ -165,7 +165,7 @@ class JMESPForm: JMFormBase
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "COT Loadout"}, this, "Click_ExportType" );
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "#STR_COT_LOADOUT_MODULE_NAME"}, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
