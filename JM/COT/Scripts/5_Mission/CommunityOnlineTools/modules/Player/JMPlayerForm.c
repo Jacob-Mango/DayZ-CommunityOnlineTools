@@ -621,7 +621,7 @@ class JMPlayerForm: JMFormBase
 		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
 
 		m_RootPermission = pi.GetPermissions();
-		array< JMPermission > permissions = new array< JMPermission >();
+		array< JMPermission > permissions = {};
 		GetPermissionsManager().GetPermissionsAsList( m_RootPermission, permissions );
 
 		for ( int i = 0; i < 10; i++ )
@@ -650,8 +650,7 @@ class JMPlayerForm: JMFormBase
 				if ( !prScript )
 					continue;
 
-				prScript.InitPermission( permissions[permissionIdx - 1] );
-				prScript.Enable();
+				prScript.InitPermission( permissions[permissionIdx - 1], this );
 
 				m_PermissionList.Insert( prScript );
 			}
@@ -666,6 +665,15 @@ class JMPlayerForm: JMFormBase
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::ShowPermissions" );
 		#endif
+	}
+
+	void OnPermissionUpdated()
+	{
+		foreach(JMPermissionRowWidget permWidget: m_PermissionList)
+			permWidget.UpdatePermission();
+		
+		m_PermissionsListScroller.UpdateScroller();
+		m_ActionListScroller.UpdateScroller();
 	}
 
 	void HideRoles()
