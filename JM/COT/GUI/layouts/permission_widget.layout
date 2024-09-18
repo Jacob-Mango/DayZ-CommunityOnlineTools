@@ -22,6 +22,16 @@ PanelWidgetClass JMPermissionRowWidget {
    Columns 2
    Rows 1
    {
+    CheckBoxWidgetClass permission_setting {
+     ignorepointer 0
+     position 0 0
+     size 0.1 25
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 1
+     text ""
+    }
     WrapSpacerWidgetClass permission_label_wrapper
     {
      position 0 0
@@ -72,15 +82,6 @@ PanelWidgetClass JMPermissionRowWidget {
        Margin 0
       }
      }
-    }
-    FrameWidgetClass permission_setting {
-     ignorepointer 1
-     position 0 0
-     size 0.4 25 
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 1
     }
    }
   }
