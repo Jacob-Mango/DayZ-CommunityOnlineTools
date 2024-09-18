@@ -58,7 +58,7 @@ class JMLoadoutForm: JMFormBase
 
 		if (names.Count() < 1)
 		{
-			UIActionManager.CreateText( m_ActionsWrapper, "Use the ESP to create new Loadouts from the quick action tab (right side)" );
+			UIActionManager.CreateText( m_ActionsWrapper, "Use the ESP to create new Sets from the quick action tab (right side)" );
 			m_sclr_MainActions.UpdateScroller();
 			return;
 		}
