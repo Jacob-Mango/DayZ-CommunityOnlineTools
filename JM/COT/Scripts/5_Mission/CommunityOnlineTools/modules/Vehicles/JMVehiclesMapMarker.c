@@ -32,7 +32,7 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 		m_MapWidget			= mapwidget;
 		m_MarkerPos			= pos;
 		m_MarkerIcon		= icon;
-		m_MarkerColor		= ARGB( 255, 243, 156, 18 );//color;
+		m_MarkerColor		= color;
 		m_Vehicle 			= vehicle;
 		m_COTVehicleMenu 	= menu;
 		
