@@ -139,7 +139,7 @@ class JMLoadoutForm: JMFormBase
 					m_Module.SpawnTarget( data.Filename, ent );
 			break;
 			case COT_LoadoutSpawnMode.PLAYER:
-				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayers() );
+				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayersOrSelf() );
 			break;
 		}
 	}
