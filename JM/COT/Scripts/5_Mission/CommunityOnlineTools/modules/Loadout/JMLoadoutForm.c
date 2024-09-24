@@ -13,6 +13,8 @@ class JMLoadoutForm: JMFormBase
 	};
 
 	private JMLoadoutModule m_Module;
+	
+	JMLoadoutButtonData m_TempData;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
@@ -92,11 +94,15 @@ class JMLoadoutForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		JMLoadoutButtonData data;
-		if ( !Class.CastTo( data, action.GetData() ) )
+		if ( !Class.CastTo( m_TempData, action.GetData() ) )
 			return;
+	
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_LOADOUT_MODULE_LOADOUT_CONFIRMATION_BODY" ), m_TempData.Filename ), "#STR_COT_GENERIC_NO", "", "#STR_COT_GENERIC_YES", "OnClick_DeleteConfirm" );
+	}
 
-		m_Module.Delete( data.Filename );
+	void OnClick_DeleteConfirm(JMConfirmation confirmation) 
+	{
+		m_Module.Delete( m_TempData.Filename );
 
 		m_Module.Load();
 
