@@ -218,7 +218,7 @@ class JMTeleportForm: JMFormBase
 
 	void Teleport()
 	{
-		if (!HasTooManyPlayers("TeleportConfirm"))
+		if (!HasTooManyPlayers("TeleportConfirm", "TeleportSelfConfirm", "TeleportSelectedConfirm"))
 			TeleportConfirm(NULL);
 	}
 
@@ -233,6 +233,16 @@ class JMTeleportForm: JMFormBase
 		}
 
 		m_Module.Location( GetCurrentLocation(), players );
+	}
+
+	void TeleportSelectedConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Location( GetCurrentLocation(), {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportSelfConfirm(JMConfirmation confirmation)
+	{
+		m_Module.Location( GetCurrentLocation(), {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void InputCategory_OnChange( UIEvent eid, UIActionBase action )
@@ -388,13 +398,26 @@ class JMTeleportForm: JMFormBase
 		return "";
 	}
 
-	bool HasTooManyPlayers(string funcName)
+	//! TODO: Upgrade the JM Confirmation to return Result, this is a mess right now
+	//! 	  I dont have time right now so this is my reminder
+	bool HasTooManyPlayers(string funcName, string funcSelf, string funcOnlyName)
 	{
+		JMPlayerInstance inst;
 		int count = JM_GetSelected().GetPlayers().Count();
 		if (count > 1)
 		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+			inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
 			return true;
+		}
+		else
+		{
+			inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+			if (inst && inst != GetPermissionsManager().GetClientPlayer() )
+			{
+				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_SELF", funcSelf );
+				return true;
+			}
 		}
 
 		return false;
