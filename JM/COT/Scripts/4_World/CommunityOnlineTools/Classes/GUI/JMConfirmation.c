@@ -37,6 +37,9 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	private string m_EditBoxValue;
 
+	private int m_ButtonIdPressed;
+	private int m_ButtonIdOffset;
+
 	void JMConfirmation() 
 	{
 	#ifdef DIAG
@@ -113,6 +116,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button1 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
+			m_ButtonIdPressed = m_ButtonIdOffset + 1;
 
 			Close();
 
@@ -123,6 +127,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button2 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
+			m_ButtonIdPressed = m_ButtonIdOffset + 2;
 
 			Close();
 
@@ -134,6 +139,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button3 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
+			m_ButtonIdPressed = m_ButtonIdOffset + 3;
 
 			Close();
 
@@ -145,7 +151,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
+	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback, int btnIdOffset = -1 )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_One" );
@@ -170,13 +176,16 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
+		
+		if (btnIdOffset != -1)
+			m_ButtonIdOffset = btnIdOffset;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_One" );
 		#endif
 	}
 
-	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
+	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback, int btnIdOffset = -1 )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_Two" );
@@ -209,13 +218,16 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText2, m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2.SetText( button2Title );
 		}
+		
+		if (btnIdOffset != -1)
+			m_ButtonIdOffset = btnIdOffset;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_Two" );
 		#endif
 	}
 
-	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
+	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback, int btnIdOffset = -1 )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_Three" );
@@ -257,6 +269,9 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText3, m_Button3.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText3.SetText( button3Title );
 		}
+
+		if (btnIdOffset != -1)
+			m_ButtonIdOffset = btnIdOffset;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_Three" );
@@ -313,6 +328,11 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	string GetEditBoxValue()
 	{
 		return m_EditBoxValue;
+	}
+
+	int GetSelectedID()
+	{
+		return m_ButtonIdPressed;
 	}
 
 	Widget GetLayoutRoot() 

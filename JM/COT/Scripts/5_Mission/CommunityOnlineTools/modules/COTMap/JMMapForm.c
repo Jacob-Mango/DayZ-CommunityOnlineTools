@@ -98,8 +98,7 @@ class JMMapForm: JMFormBase
 		if ( w == m_MapWidget )
 		{
 			m_TeleportPosition = SnapToGround(m_MapWidget.ScreenToMap(Vector( x, y, 0 )));
-			if (!HasTooManyPlayers("TeleportSelected","TeleportSelf","TeleportPlayers"))
-				TeleportSelected();
+			CreateAdvancedPlayerConfirm("TeleportPlayer");
 			
 			return true;
 		}
@@ -107,49 +106,38 @@ class JMMapForm: JMFormBase
 		return false;
 	}
 
-	void TeleportPlayers()
+	void TeleportPlayer(JMConfirmation confirmation = NULL)
 	{
 		JMTeleportModule mod;
 		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-			mod.Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
-	}
-
-	void TeleportSelected()
-	{
-		JMTeleportModule mod;
-		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-			mod.Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
-	}
-
-	void TeleportSelf()
-	{
-		JMTeleportModule mod;
-		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-			mod.Position( m_TeleportPosition, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-	}
-
-	//! TODO: Upgrade the JM Confirmation to return Result, this is a mess right now
-	//! 	  I dont have time right now so this is my reminder
-	bool HasTooManyPlayers(string funcOnlyName, string funcSelf, string funcName)
-	{
-		JMPlayerInstance inst;
-		int count = JM_GetSelected().GetPlayers().Count();
-		if (count > 1)
 		{
-			inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
-			CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
-		}
-		else
-		{
-			inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
-			if (inst && inst != GetPermissionsManager().GetClientPlayer() )
+			int btnId = -1;
+			if (confirmation)
+				btnId = confirmation.GetSelectedID();
+
+			switch(btnId)
 			{
-				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), inst.GetName(), funcOnlyName, "#STR_COT_GENERIC_SELF", funcSelf );
-				return true;
+				// Abort
+				case 1:
+				case 4:
+					return;
+				break;
+				// Selected
+				case 2:
+				case 5:
+					mod.Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
+				break;
+				// Everyone
+				case 3:
+					mod.Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
+				break;
+				// Self
+				default:
+				case -1:
+				case 6:
+					mod.Position( m_TeleportPosition, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+				break;
 			}
 		}
-
-		return false;
 	}
 };
