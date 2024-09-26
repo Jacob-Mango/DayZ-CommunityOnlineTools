@@ -46,6 +46,7 @@ class COT_BloodTypes
 	static const int AB_N = LIQUID_BLOOD_AB_N;
 };
 
+//! LEGACY, not used
 class COT_LiquidTypes
 {
 	static const int UNKNOWN;

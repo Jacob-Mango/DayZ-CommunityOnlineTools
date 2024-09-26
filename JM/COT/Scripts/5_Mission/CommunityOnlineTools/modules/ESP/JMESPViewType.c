@@ -52,7 +52,7 @@ class JMESPViewTypePlayer: JMESPViewType
 		Permission = "Player";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER";
 
-		Colour = ARGB( 255, 80, 255, 240 );
+		Colour = ARGB( 255, 58, 220, 206 );
 
 		MetaType = JMESPMetaPlayer;
 	}
@@ -104,7 +104,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		Permission = "Player AI";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER_AI";
 
-		Colour = ARGB( 255, 80, 255, 240 );
+		Colour = ARGB( 255, 58, 220, 206 );
 
 		MetaType = JMESPMeta;
 	}
@@ -233,7 +233,7 @@ class JMESPViewTypeCar: JMESPViewType
 
 		MetaType = JMESPMetaCar;
 
-		Colour = ARGB( 255, 255, 109, 237 );
+		Colour = ARGB( 255, 255, 113, 237 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -275,7 +275,7 @@ class JMESPViewTypeBoat: JMESPViewType
 
 		MetaType = JMESPMetaBoat;
 
-		Colour = ARGB( 255, 255, 109, 237 );
+		Colour = ARGB( 255, 255, 113, 237 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -315,7 +315,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 		Permission = "Weapon";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Weapons";
 
-		Colour = ARGB( 255, 75, 255, 218 );
+		Colour = ARGB( 255, 55, 223, 189 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -349,6 +349,46 @@ class JMESPViewTypeWeapon: JMESPViewType
 };
 
 
+class JMESPViewTypeArchery: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeArchery()
+	{
+		Permission = "Weapon.Archery";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Archery";
+
+		Colour = ARGB( 255, 79, 221, 188 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeArchery::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+		
+		Archery_Base wpn;
+		if ( !Class.CastTo( wpn, obj ) )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
+
 class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 {
 	void JMESPViewTypeBoltRifle()
@@ -356,7 +396,7 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 		Permission = "Weapon.BoltRifle";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Bolt_Rifles";
 
-		Colour = ARGB( 255, 100, 255, 218 );
+		Colour = ARGB( 255, 79, 221, 188 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -396,7 +436,7 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 		Permission = "Weapon.BoltActionRifle";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Bolt_Action_Rifles";
 
-		Colour = ARGB( 255, 100, 255, 218 );
+		Colour = ARGB( 255, 79, 221, 188 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -436,7 +476,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 		Permission = "Weapon.Rifle";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Rifles";
 
-		Colour = ARGB( 255, 125, 255, 218 );
+		Colour = ARGB( 255, 102, 219, 186 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -476,7 +516,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 		Permission = "Weapon.Pistol";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Pistols";
 
-		Colour = ARGB( 255, 150, 255, 218 );
+		Colour = ARGB( 255, 123, 216, 183 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -508,6 +548,45 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 	}
 };
 
+class JMESPViewTypeLauncher: JMESPViewTypeWeapon
+{
+	void JMESPViewTypeLauncher()
+	{
+		Permission = "Weapon.Launcher";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Launchers";
+
+		Colour = ARGB( 255, 123, 216, 183 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		#ifdef JM_COT_ESP_DEBUG
+		#ifdef COT_DEBUGLOGS
+		Print( "+JMESPViewTypeLauncher::IsValid( obj = " + Object.GetDebugName( obj ) + ", out ) bool;" );
+		#endif
+		#endif
+		
+		if ( !obj.ShootsExplosiveAmmo() )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = obj.GetDisplayName();
+		if ( meta.name == "" )
+		{
+			meta.name = obj.GetType();
+		}
+
+		return true;
+	}
+};
+
 class JMESPViewTypeItemBase: JMESPViewType
 {
 	void JMESPViewTypeItemBase()
@@ -515,7 +594,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 		Permission = "Item";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Items";
 
-		Colour = ARGB( 255, 20, 112, 255 );
+		Colour = ARGB( 255, 70, 180, 255 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )
@@ -562,7 +641,7 @@ class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 		Permission = "Item.Unknown";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Unknown_Items";
 
-		Colour = ARGB( 255, 40, 112, 255 );
+		Colour = ARGB( 255, 87, 178, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -622,7 +701,7 @@ class JMESPViewTypeTent: JMESPViewTypeItemBase
 		Permission = "Item.Tent";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Tents";
 
-		Colour = ARGB( 255, 80, 112, 255 );
+		Colour = ARGB( 255, 130, 174, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -642,7 +721,7 @@ class JMESPViewTypeBaseBuilding: JMESPViewTypeItemBase
 		Permission = "Item.BaseBuilding";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Base_Building";
 
-		Colour = ARGB( 255, 120, 112, 255 );
+		Colour = ARGB( 255, 174, 166, 255 );
 
 		MetaType = JMESPMetaBaseBuilding;
 	}
@@ -664,7 +743,7 @@ class JMESPViewTypeFood: JMESPViewTypeItemBase
 		Permission = "Item.Food";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Food";
 
-		Colour = ARGB( 255, 140, 112, 255 );
+		Colour = ARGB( 255, 194, 161, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -684,7 +763,7 @@ class JMESPViewTypeExplosive: JMESPViewTypeItemBase
 		Permission = "Item.Explosive";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Explosives";
 
-		Colour = ARGB( 255, 160, 112, 255 );
+		Colour = ARGB( 255, 213, 156, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -710,7 +789,7 @@ class JMESPViewTypeBook: JMESPViewTypeItemBase
 		Permission = "Item.Book";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Books";
 
-		Colour = ARGB( 255, 180, 112, 255 );
+		Colour = ARGB( 255, 231, 150, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -730,7 +809,7 @@ class JMESPViewTypeContainer: JMESPViewTypeItemBase
 		Permission = "Item.Container";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Containers";
 
-		Colour = ARGB( 255, 200, 112, 255 );
+		Colour = ARGB( 255, 246, 144, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -750,7 +829,7 @@ class JMESPViewTypeTransmitter: JMESPViewTypeItemBase
 		Permission = "Item.Transmitter";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Transmitters";
 
-		Colour = ARGB( 255, 200, 112, 255 );
+		Colour = ARGB( 255, 246, 144, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -770,7 +849,7 @@ class JMESPViewTypeClothing: JMESPViewTypeItemBase
 		Permission = "Item.Clothing";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Clothing";
 
-		Colour = ARGB( 255, 220, 112, 255 );
+		Colour = ARGB( 255, 255, 138, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -790,7 +869,7 @@ class JMESPViewTypeMagazine: JMESPViewTypeItemBase
 		Permission = "Item.Magazine";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Magazines";
 
-		Colour = ARGB( 255, 240, 112, 255 );
+		Colour = ARGB( 255, 255, 132, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -810,7 +889,7 @@ class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 		Permission = "Item.Ammo";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Ammo";
 
-		Colour = ARGB( 255, 240, 112, 255 );
+		Colour = ARGB( 255, 255, 132, 255 );
 	}
 
 	override bool CheckLootCategory( Object obj )
@@ -830,7 +909,7 @@ class JMESPViewTypeImmovable: JMESPViewType
 		Permission = "Immovable";
 		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Immovable";
 
-		Colour = ARGB( 255, 250, 105, 218 );
+		Colour = ARGB( 255, 255, 124, 255 );
 	}
 
 	override bool IsValid( Object obj, out JMESPMeta meta )

@@ -1,10 +1,10 @@
-modded class CAContinuousTime
-{
+modded class CAContinuousFill
+{	
 	override void Setup(ActionData action_data)
 	{
 		super.Setup(action_data);
 
 		if (GetPermissionsManager().HasQuickActionAccess(action_data.m_Player))
-			m_AdjustedTimeToComplete = 0.1;
+			m_AdjustedQuantityFilledPerSecond *= 100;
 	}
 }

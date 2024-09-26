@@ -1,6 +1,7 @@
 class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
+	private TextWidget m_TitleBarText;
 
 	private float m_WidthFull;
 	private float m_WidthIcon;
@@ -55,6 +56,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	
 	void Init()
 	{
+		Class.CastTo(m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ));
+
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "CreditsText" ) ).SetText("");
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText("");
 
@@ -177,6 +180,12 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		
 		if (m_IsAnimatingIn || m_IsAnimatingOut || (m_IsTargetCompact != m_IsCompact))
 		{
+			if (m_AnimateTime == 0)
+			{
+				if (m_IsTargetCompact)
+					m_TitleBarText.SetText("COT");
+			}
+
 			m_AnimateTime += timeslice;
 			float percent = m_AnimateTime / m_TotalAnimateTime;
 			if (percent > 1.0)
@@ -217,6 +226,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			{
 				if ( m_IsAnimatingOut )
 					m_LayoutRoot.Show( false );
+				else if (!m_IsTargetCompact)
+					m_TitleBarText.SetText("Community Online Tools");
 
 				m_IsAnimatingIn = false;
 				m_IsAnimatingOut = false;

@@ -2,16 +2,30 @@ modded class PluginDeveloper
 {
 	override void TeleportAtCursor()
 	{
-		//super.TeleportAtCursor();
+#ifdef DEVELOPER
+		super.TeleportAtCursor();
+#endif
 	}
 	
 	override void ToggleFreeCameraBackPos()
 	{
-		//super.ToggleFreeCameraBackPos();
+#ifdef DEVELOPER
+		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		if (mission)
+			mission.COT_LeaveFreeCam();
+
+		super.ToggleFreeCameraBackPos();
+#endif
 	}
 	
 	override void ToggleFreeCamera()
 	{
-		//super.ToggleFreeCamera();
+#ifdef DEVELOPER
+		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		if (mission)
+			mission.COT_LeaveFreeCam();
+
+		super.ToggleFreeCamera();
+#endif
 	}
 };

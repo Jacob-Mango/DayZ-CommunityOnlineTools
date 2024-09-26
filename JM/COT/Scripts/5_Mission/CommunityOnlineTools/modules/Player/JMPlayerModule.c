@@ -1361,7 +1361,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
 		bool value = !player.COTHasGodMode();
-		array< string > guids = JM_GetSelected().GetPlayers();
+		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 		if (guids.Count() == 0)
 			guids.Insert(player.GetIdentity().GetId());
 
@@ -2122,7 +2122,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
-			array< string > guids = JM_GetSelected().GetPlayers();
+			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 			if (guids.Count() == 0)
 				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
 
