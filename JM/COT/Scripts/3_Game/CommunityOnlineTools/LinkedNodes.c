@@ -7,6 +7,9 @@ class CF_DoublyLinkedNodes_WeakRef<Class T>
 
 	void ~CF_DoublyLinkedNodes_WeakRef()
 	{
+		if (!g_Game)
+			return;
+
 		m_Head = null;
 	}
 
@@ -67,6 +70,9 @@ class CF_DoublyLinkedNode_WeakRef<Class T>
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "~CF_DoublyLinkedNode_WeakRef");
 #endif
+
+		if (!g_Game)
+			return;
 
 		Unlink();
 	}

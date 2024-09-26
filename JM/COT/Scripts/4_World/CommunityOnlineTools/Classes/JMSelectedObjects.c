@@ -192,6 +192,11 @@ class JMSelectedObjects
 		return m_Players;
 	}
 
+	array< string > GetPlayersOrSelf()
+	{
+		return GetPlayers(true);
+	}
+
 
 	set< ref JMSelectedObject > GetObjects()
 	{

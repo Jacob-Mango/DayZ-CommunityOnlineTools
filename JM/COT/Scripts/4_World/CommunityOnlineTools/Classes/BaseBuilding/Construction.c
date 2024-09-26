@@ -1,44 +1,28 @@
 modded class Construction
 {
-	string COT_GetFirstBuildablePart()
+	bool COT_CanBuildPart(string partName, bool checkMaterials = true)
 	{
-		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
-		{
-			string part_name = m_ConstructionParts.GetKey( i );
-			ConstructionPart part = m_ConstructionParts.Get( part_name );
+		if ( !HasRequiredPart( partName ) )
+			return false;
 
-			if ( part.IsBuilt() )
-				continue;
+		if ( HasConflictPart( partName ) )
+			return false;
 
-			if ( !HasRequiredPart( part_name ) )
-				continue;
+		if ( checkMaterials && !HasMaterials( partName ) )
+			return false;
 
-			if ( HasConflictPart( part_name ) )
-				continue;
-
-			return part_name;
-		}
-
-		return string.Empty;
+		return true;
 	}
 
-	string COT_GetFirstDismantlePart()
+	bool COT_CanDismantlePart(string partName)
 	{
-		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
-		{
-			string part_name = m_ConstructionParts.GetKey( i );
-			ConstructionPart part = m_ConstructionParts.Get( part_name );
+		if ( HasDependentPart( partName ) )
+			return false;
 
-			if ( !part.IsBuilt() )
-				continue;
+		if ( !IsPartConstructed( partName ) )
+			return false;
 
-			if ( HasDependentPart( part_name ) )
-				continue;
-
-			return part_name;
-		}
-
-		return string.Empty;
+		return true;
 	}
 
 	void COT_GetParts( out map< string, ref JMConstructionPartData > parts, bool checkMaterials = true )
@@ -130,13 +114,7 @@ modded class Construction
 
 	void COT_BuildPart(string part_name, PlayerBase player, bool checkMaterials = true )
 	{
-		if ( !HasRequiredPart( part_name ) )
-			return;
-
-		if ( HasConflictPart( part_name ) )
-			return;
-
-		if ( checkMaterials && !HasMaterials( part_name ) )
+		if ( !COT_CanBuildPart( part_name, checkMaterials ) )
 			return;
 
 		string damage_zone;
@@ -153,10 +131,7 @@ modded class Construction
 
 	void COT_DismantlePart( string part_name, PlayerBase player )
 	{
-		if ( HasDependentPart( part_name ) )
-			return;
-
-		if ( !IsPartConstructed( part_name ) )
+		if ( !COT_CanDismantlePart( part_name ) )
 			return;
 
 		GetParent().OnPartDismantledServer( player, part_name, AT_DISMANTLE_PART );

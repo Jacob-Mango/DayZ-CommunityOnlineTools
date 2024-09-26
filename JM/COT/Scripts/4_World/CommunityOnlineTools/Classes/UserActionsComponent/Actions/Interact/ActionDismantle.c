@@ -1,23 +1,31 @@
-class COT_QuickActionDismantle: ActionInteractBase
+class COT_QuickActionDismantle: ActionBuildPart // PLACEHOLDER
 {
 	void COT_QuickActionDismantle()
 	{
 		m_CommandUID	= DayZPlayerConstants.CMD_ACTIONMOD_INTERACTONCE;
 		m_StanceMask	= DayZPlayerConstants.STANCEMASK_ALL;
 		m_FullBody		= false;
-		m_Text = "[COT QuickAction] #dismantle";
+	}
+	
+	override void CreateConditionComponents()  
+	{
+		m_ConditionItem = new CCINone;
+		m_ConditionTarget = new CCTNone;
+	}
+	
+	override bool UseMainItem()
+	{
+		return false;
+	}
+	
+	override bool HasProgress()
+	{
+		return false;
 	}
 	
 	override void OnActionInfoUpdate(PlayerBase player, ActionTarget target, ItemBase item)
 	{
-		BaseBuildingBase base_building = BaseBuildingBase.Cast(target.GetObject());
-		Construction construction = base_building.GetConstruction();
-		string partname = construction.COT_GetFirstDismantlePart();
-
-		if (partname != string.Empty)
-		{
-			m_Text = "[COT QuickAction] #dismantle " + construction.GetConstructionPart( partname ).GetName();
-		}
+        m_Text = "[COT QuickAction]" + m_Text;
 	}
 	
 	override bool ActionCondition(PlayerBase player, ActionTarget target, ItemBase item)
@@ -36,22 +44,38 @@ class COT_QuickActionDismantle: ActionInteractBase
 			return false;
 	
 		Construction construction = base_building.GetConstruction();
+		if (!construction)
+			return false;
 		
-		string partname = construction.COT_GetFirstDismantlePart();
-		if (partname == string.Empty)
+		ConstructionActionData construction_action_data = player.GetConstructionActionData();
+		construction_action_data.SetTarget( target.GetObject() );
+
+		// Currently constrution_part is NULL, fixing it is probably the last Step
+		ConstructionPart constrution_part = construction_action_data.GetBuildPartAtIndex(m_VariantID);
+		if ( !constrution_part )
+			return false;
+
+		string partName = construction_action_data.GetBuildPartAtIndex(m_VariantID).GetPartName();
+
+		if (!construction.COT_CanDismantlePart(partName))
 			return false;
 
 		return true;
 	}
-	
-	override void OnStartServer( ActionData action_data )
-	{
-		super.OnStartServer(action_data);
 
+	override bool ActionConditionContinue(ActionData action_data)
+	{
+		return true;
+	}
+	
+	override void OnFinishProgressServer(ActionData action_data)
+	{
 		BaseBuildingBase base_building = BaseBuildingBase.Cast(action_data.m_Target.GetObject());
 		Construction construction = base_building.GetConstruction();
-		string partname = construction.COT_GetFirstDismantlePart();
+		
+		ConstructionActionData construction_action_data = action_data.m_Player.GetConstructionActionData();
+		ConstructionPart constrution_part = construction_action_data.GetBuildPartAtIndex(m_VariantID);
 
-		construction.COT_DismantleRequiredParts( partname, action_data.m_Player );		
+		construction.COT_DismantleRequiredParts( constrution_part.GetPartName(), action_data.m_Player );	
 	}
 };

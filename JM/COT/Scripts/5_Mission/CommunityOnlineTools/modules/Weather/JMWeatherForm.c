@@ -745,12 +745,12 @@ class JMWeatherForm: JMFormBase
 
 	static float PI2DEG(float value)
 	{
-		return (Math.PI + value) * Math.RAD2DEG;
+		return (value * Math.RAD2DEG) + 180;
 	}
 
 	static float DEG2PI(float value)
 	{
-		return (180 - value) * Math.DEG2RAD;
+		return (value * Math.DEG2RAD) - Math.PI;
 	}
 
 	void InitLeftPanel( Widget parent )
@@ -1198,7 +1198,7 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetFog( 0, transition, duration );
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1233,7 +1233,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1269,7 +1269,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1302,7 +1302,7 @@ class JMWeatherForm: JMFormBase
 
 		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
-		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(-1,1), transition, duration );
+		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
 		#else
@@ -1884,17 +1884,17 @@ class JMWeatherForm: JMFormBase
 		m_SliderWindMagnitudeForecast.SetWidgetWidth( m_SliderWindMagnitudeForecast.GetLabelWidget(), 0.6 );
 		m_SliderWindMagnitudeForecast.SetWidgetWidth( m_SliderWindMagnitudeForecast.GetSliderWidget(), 0.6 );
 
-		m_EditWindMagnitudeInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Duration", this);
-		m_EditWindMagnitudeInterpTime.SetOnlyNumbers( true );
-		m_EditWindMagnitudeInterpTime.SetText( "0" );
-		m_EditWindMagnitudeInterpTime.SetWidgetWidth( m_EditWindMagnitudeInterpTime.GetLabelWidget(), 0.6 );
-		m_EditWindMagnitudeInterpTime.SetWidgetWidth( m_EditWindMagnitudeInterpTime.GetEditBoxWidget(), 0.6 );
-
-		m_EditWindMagnitudeMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Transition", this);
+		m_EditWindMagnitudeMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Duration", this);
 		m_EditWindMagnitudeMinDuration.SetOnlyNumbers( true );
 		m_EditWindMagnitudeMinDuration.SetText( "0" );
 		m_EditWindMagnitudeMinDuration.SetWidgetWidth( m_EditWindMagnitudeMinDuration.GetLabelWidget(), 0.6 );
 		m_EditWindMagnitudeMinDuration.SetWidgetWidth( m_EditWindMagnitudeMinDuration.GetEditBoxWidget(), 0.6 );
+
+		m_EditWindMagnitudeInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Transition", this);
+		m_EditWindMagnitudeInterpTime.SetOnlyNumbers( true );
+		m_EditWindMagnitudeInterpTime.SetText( "0" );
+		m_EditWindMagnitudeInterpTime.SetWidgetWidth( m_EditWindMagnitudeInterpTime.GetLabelWidget(), 0.6 );
+		m_EditWindMagnitudeInterpTime.SetWidgetWidth( m_EditWindMagnitudeInterpTime.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( m_PanelWindMagnitude, 0xFF000000, 1 );
 	}
@@ -1918,17 +1918,17 @@ class JMWeatherForm: JMFormBase
 		m_SliderWindDirectionForecast.SetWidgetWidth( m_SliderWindDirectionForecast.GetLabelWidget(), 0.6 );
 		m_SliderWindDirectionForecast.SetWidgetWidth( m_SliderWindDirectionForecast.GetSliderWidget(), 0.6 );
 
-		m_EditWindDirectionInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Duration", this);
-		m_EditWindDirectionInterpTime.SetOnlyNumbers( true );
-		m_EditWindDirectionInterpTime.SetText( "0" );
-		m_EditWindDirectionInterpTime.SetWidgetWidth( m_EditWindDirectionInterpTime.GetLabelWidget(), 0.6 );
-		m_EditWindDirectionInterpTime.SetWidgetWidth( m_EditWindDirectionInterpTime.GetEditBoxWidget(), 0.6 );
-
-		m_EditWindDirectionMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Transition", this);
+		m_EditWindDirectionMinDuration = UIActionManager.CreateEditableText( actionsGrid, "Duration", this);
 		m_EditWindDirectionMinDuration.SetOnlyNumbers( true );
 		m_EditWindDirectionMinDuration.SetText( "0" );
 		m_EditWindDirectionMinDuration.SetWidgetWidth( m_EditWindDirectionMinDuration.GetLabelWidget(), 0.6 );
 		m_EditWindDirectionMinDuration.SetWidgetWidth( m_EditWindDirectionMinDuration.GetEditBoxWidget(), 0.6 );
+
+		m_EditWindDirectionInterpTime = UIActionManager.CreateEditableText( actionsGrid, "Transition", this);
+		m_EditWindDirectionInterpTime.SetOnlyNumbers( true );
+		m_EditWindDirectionInterpTime.SetText( "0" );
+		m_EditWindDirectionInterpTime.SetWidgetWidth( m_EditWindDirectionInterpTime.GetLabelWidget(), 0.6 );
+		m_EditWindDirectionInterpTime.SetWidgetWidth( m_EditWindDirectionInterpTime.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( m_PanelWindDirection, 0xFF000000, 1 );
 	}
