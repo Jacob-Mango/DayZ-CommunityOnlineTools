@@ -185,7 +185,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		#endif
 	}
 	
-	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSingle = true, bool callbackOnNoConfirmation = true)
+	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
 	{
 		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
 
@@ -198,14 +198,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_CONFIRM", funcName );
 			return true;
 		}
-		else if (confirmSingle)
+		else
 		{
 			if (inst != GetPermissionsManager().GetClientPlayer() )
 			{
 				CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_SELF", funcName, 3 );
 				return true;
 			}
-			else
+			else if (confirmSelf)
 			{
 				CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
 				return true;
