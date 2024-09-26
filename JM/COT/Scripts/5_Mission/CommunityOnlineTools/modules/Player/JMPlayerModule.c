@@ -355,7 +355,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if (!player.PlayerObject)
 				continue;
 
-			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED_A, 10, player.PlayerObject.GetIdentity() );
+			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
 		}
 	}
 
