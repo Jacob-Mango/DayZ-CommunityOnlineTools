@@ -811,7 +811,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Strip");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "Strip");
 	}
 
 	void Strip(JMConfirmation confirmation = NULL)
@@ -850,7 +850,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Dry");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", "Dry", false);
 	}
 
 	void Dry(JMConfirmation confirmation = NULL)
@@ -889,7 +889,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("KillPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", "KillPlayer");
 	}
 
 	void KillPlayer(JMConfirmation confirmation = NULL)
@@ -931,7 +931,7 @@ class JMPlayerForm: JMFormBase
 		VomitPlayer();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("VomitPlayer");
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", "VomitPlayer");
 	}
 
 	void VomitPlayer()
@@ -960,7 +960,7 @@ class JMPlayerForm: JMFormBase
 		ScalePlayer();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("ScalePlayer", false);
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", "ScalePlayer", false);
 	}
 
 	void ScalePlayer()
@@ -989,7 +989,7 @@ class JMPlayerForm: JMFormBase
 		SendMessages();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("SendMessage", false);
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", "SendMessage", false);
 	}
 
 	void SendMessages()
@@ -1020,7 +1020,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("KickPlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer");
 	}
 
 	void KickPlayer(JMConfirmation confirmation = NULL)
@@ -1065,7 +1065,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("BanPlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer");
 	}
 
 	void BanPlayer()
@@ -1106,7 +1106,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("StopBleeding");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", "StopBleeding", false);
 	}
 
 	void StopBleeding(JMConfirmation confirmation = NULL)
@@ -1145,7 +1145,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Heal");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", "Heal", false);
 	}
 
 	void Heal(JMConfirmation confirmation = NULL)
@@ -1229,7 +1229,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("SetPositionTeleport");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", "SetPositionTeleport", false);
 	}
 
 	void SetPositionTeleport(JMConfirmation confirmation = NULL)
@@ -1275,7 +1275,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("TeleportToMe");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", "TeleportToMe", false);
 	}
 
 	void TeleportToMe(JMConfirmation confirmation = NULL)
@@ -1411,7 +1411,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("TeleportToPrevious");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", "TeleportToPrevious", false);
 	}
 
 	void TeleportToPrevious(JMConfirmation confirmation = NULL)
