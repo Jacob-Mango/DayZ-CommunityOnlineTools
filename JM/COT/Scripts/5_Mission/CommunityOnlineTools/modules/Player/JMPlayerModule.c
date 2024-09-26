@@ -355,7 +355,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if (!player.PlayerObject)
 				continue;
 
-			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED_A, 10, player.PlayerObject.GetIdentity() );
+			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
 		}
 	}
 
@@ -1361,7 +1361,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
 		bool value = !player.COTHasGodMode();
-		array< string > guids = JM_GetSelected().GetPlayers();
+		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 		if (guids.Count() == 0)
 			guids.Insert(player.GetIdentity().GetId());
 
@@ -2122,7 +2122,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
-			array< string > guids = JM_GetSelected().GetPlayers();
+			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 			if (guids.Count() == 0)
 				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
 
@@ -2469,7 +2469,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			if ( player == NULL )
 				continue;
 
-			player.RemoveAllItems();
+			player.COT_RemoveAllItems();
 
 			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 

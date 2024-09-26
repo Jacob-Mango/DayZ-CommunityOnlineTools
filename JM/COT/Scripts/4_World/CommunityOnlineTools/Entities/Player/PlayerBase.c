@@ -787,6 +787,21 @@ modded class PlayerBase
 		}
 	}
 
+	void COT_RemoveAllItems()
+	{
+		array<EntityAI> entities = {};
+		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
+
+		ItemBase item;
+		foreach (EntityAI entity: entities)
+		{
+			if (entity != this && Class.CastTo(item, entity))
+			{
+				item.DeleteSafe();
+			}
+		}
+	}
+
 	void COTUpdateSpectatorPosition()
 	{
 #ifdef JM_COT_DIAG_LOGGING

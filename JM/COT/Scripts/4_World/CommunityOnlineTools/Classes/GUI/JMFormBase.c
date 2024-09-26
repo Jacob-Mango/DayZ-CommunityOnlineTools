@@ -131,57 +131,90 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return window.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne );
+		return window.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne, btnIdOffset );
 		#endif
 	}
 
-	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName )
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return CreateConfirmation_One( type, title, message, callBackOneName, "" );
+		return CreateConfirmation_One( type, title, message, callBackOneName, "", btnIdOffset );
 		#endif
 	}
 
-	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return window.CreateConfirmation_Two( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo );
+		return window.CreateConfirmation_Two( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, btnIdOffset );
 		#endif
 	}
 
-	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return CreateConfirmation_Two( type, title, message, callBackOneName, "", callBackTwoName, "" );
+		return CreateConfirmation_Two( type, title, message, callBackOneName, "", callBackTwoName, "", btnIdOffset );
 		#endif
 	}
 
-	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return window.CreateConfirmation_Three( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree );
+		return window.CreateConfirmation_Three( type, title, message, callBackOneName, callBackOne, callBackTwoName, callBackTwo, callBackThreeName, callBackThree, btnIdOffset );
 		#endif
 	}
 
-	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackTwoName, string callBackThreeName, int btnIdOffset = -1 )
 	{
 		#ifdef CF_WINDOWS
 		return null;
 		#else
-		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "" );
+		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "", btnIdOffset );
 		#endif
+	}
+	
+	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
+	{
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+
+		if (!inst)
+			return false;
+
+		int count = JM_GetSelected().GetPlayers().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+		else if (confirmSelf)
+		{
+			if (inst != GetPermissionsManager().GetClientPlayer() )
+			{
+				CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_SELF", funcName, 3 );
+				return true;
+			}
+			else
+			{
+				CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+				return true;
+			}
+		}
+		
+		if ( callbackOnNoConfirmation && funcName != string.Empty )
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+
+		return false;
 	}
 };

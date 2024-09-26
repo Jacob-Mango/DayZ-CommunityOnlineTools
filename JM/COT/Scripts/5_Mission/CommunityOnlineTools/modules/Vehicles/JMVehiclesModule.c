@@ -67,7 +67,7 @@ class JMVehicleMetaData
 
 	#ifdef EXPANSIONMODVEHICLE
 		ExpansionVehicle vehicle;
-		if (Class.CastTo(vehicle, entity))
+		if (ExpansionVehicle.Get(vehicle, entity))
 		{
 			if (vehicle.IsCar())
 				m_VehicleType |= JMVT_CAR;

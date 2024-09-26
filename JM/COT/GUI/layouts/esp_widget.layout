@@ -1,6 +1,6 @@
 GridSpacerWidgetClass JMESPWidgetHandler {
  ignorepointer 1
- color 0.0784 0.098 0.1294 0.702
+ color 0.0784 0.098 0.1294 0.985
  size 300 20
  hexactpos 1
  vexactpos 1
