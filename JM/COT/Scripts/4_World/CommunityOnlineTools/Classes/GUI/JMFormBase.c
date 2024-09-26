@@ -188,6 +188,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	bool CreateAdvancedPlayerConfirm(string funcName, bool canSelf = true, bool callbackOnFalse = true)
 	{
 		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+
+		if (!inst)
+			return false;
+
 		int count = JM_GetSelected().GetPlayers().Count();
 		if (count > 1)
 		{
@@ -196,9 +200,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 		else if (canSelf)
 		{
-			if (inst && inst != GetPermissionsManager().GetClientPlayer() )
+			if (inst != GetPermissionsManager().GetClientPlayer() )
 			{
 				CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_SELF", funcName, 3 );
+				return true;
+			}
+			else
+			{
+				CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", funcName );
 				return true;
 			}
 		}
