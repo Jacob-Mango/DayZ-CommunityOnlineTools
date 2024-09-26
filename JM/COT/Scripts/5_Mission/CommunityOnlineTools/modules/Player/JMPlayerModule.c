@@ -2469,7 +2469,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			if ( player == NULL )
 				continue;
 
-			player.RemoveAllItems();
+			player.COT_RemoveAllItems();
 
 			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 
