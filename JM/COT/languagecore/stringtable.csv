@@ -72,7 +72,7 @@ STR_COT_GENERIC_ALL,All,All,All,Alle,All,All,All,All,All,All,All,All,All,All
 STR_COT_GENERIC_CANCEL,Cancel,Cancel,Cancel,Abbrechen,Отменить,Cancel,Cancel,Cancel,Cancel,Annuler,Cancel,Cancel,Cancel,Cancel
 STR_COT_GENERIC_CONFIRM,Confirm,Confirm,Confirm,Bestätigen,Подтвердить,Confirm,Confirm,Confirm,Confirm,Confirmer,Confirm,Confirm,Confirm,Confirm
 STR_COT_GENERIC_ONLYSELECTED,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected,Selected
-STR_COT_GENERIC_SELF,Self,Self,Self,Mir selbst,Себя,Self,Self,Self,Self,Sois-même,Self,Self,Self,Self
+STR_COT_GENERIC_SELF,Self,Self,Self,Selbst,Себя,Self,Self,Self,Self,Sois-même,Self,Self,Self,Self
 STR_COT_GENERIC_CREATE,Create,Create,Create,Erstellen,Создать,Create,Create,Create,Create,Créer,Create,Create,Create,Create
 STR_COT_GENERIC_LINE_THICKNESS,Line thickness,Line thickness,Line thickness,Linienstärke,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness,Line thickness
 STR_COT_GENERIC_MAKE,Make,Make,Make,Herstellen,Создать,Make,Make,Make,Make,Faire,Make,Make,Make,Make
