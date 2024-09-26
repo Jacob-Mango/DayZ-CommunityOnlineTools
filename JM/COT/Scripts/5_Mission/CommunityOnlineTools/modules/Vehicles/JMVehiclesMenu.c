@@ -19,7 +19,7 @@ class JMVehiclesMenu: JMFormBase
 	protected UIActionText m_VehicleClassName;
 
 	protected UIActionText m_VehicleStatus; // Exploded - Destroyed - Functional
-	protected UIActionText m_VehicleType;
+	protected UIActionText m_VehicleType;	// Car - Boat - Heli - Plane - Bike
 
 	protected UIActionText m_VehicleID;
 	protected UIActionText m_VehiclePersistentIDAB;
@@ -357,6 +357,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestCoverVehicle(m_CurrentVehicle);
 		}
 	}
 
@@ -368,6 +369,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestLockVehicle(m_CurrentVehicle);
 		}
 	}
 
@@ -379,6 +381,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestUnpairVehicle(m_CurrentVehicle);
 		}
 	}
 
@@ -390,6 +393,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestRepairVehicle(m_CurrentVehicle);
 		}
 	}
 
@@ -401,6 +405,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestRefuelVehicle(m_CurrentVehicle);
 		}
 	}
 
@@ -412,6 +417,7 @@ class JMVehiclesMenu: JMFormBase
 		if ( m_CurrentVehicle )
 		{
 			//! TODO:
+			//m_Module.RequestUnstuckVehicle(m_CurrentVehicle);
 		}
 	}
 
