@@ -1,5 +1,30 @@
 modded class Construction
 {
+	bool COT_CanBuildPart(string partName, bool checkMaterials = true)
+	{
+		if ( !HasRequiredPart( partName ) )
+			return false;
+
+		if ( HasConflictPart( partName ) )
+			return false;
+
+		if ( checkMaterials && !HasMaterials( partName ) )
+			return false;
+
+		return true;
+	}
+
+	bool COT_CanDismantlePart(string partName)
+	{
+		if ( HasDependentPart( partName ) )
+			return false;
+
+		if ( !IsPartConstructed( partName ) )
+			return false;
+
+		return true;
+	}
+
 	void COT_GetParts( out map< string, ref JMConstructionPartData > parts, bool checkMaterials = true )
 	{
 		for ( int i = 0; i < m_ConstructionParts.Count(); ++i )
@@ -73,7 +98,7 @@ modded class Construction
 	void COT_DismantleRequiredParts(string part_name, PlayerBase player)
 	{
 		array<string> required_parts = new array<string>;
-		required_parts = GetValidDepenentPartsArray(part_name)
+		required_parts = GetValidDepenentPartsArray(part_name);
 		
 		for ( int i = 0; i < required_parts.Count(); ++i )
 		{
@@ -89,13 +114,7 @@ modded class Construction
 
 	void COT_BuildPart(string part_name, PlayerBase player, bool checkMaterials = true )
 	{
-		if ( !HasRequiredPart( part_name ) )
-			return;
-
-		if ( HasConflictPart( part_name ) )
-			return;
-
-		if ( checkMaterials && !HasMaterials( part_name ) )
+		if ( !COT_CanBuildPart( part_name, checkMaterials ) )
 			return;
 
 		string damage_zone;
@@ -112,10 +131,7 @@ modded class Construction
 
 	void COT_DismantlePart( string part_name, PlayerBase player )
 	{
-		if ( HasDependentPart( part_name ) )
-			return;
-
-		if ( !IsPartConstructed( part_name ) )
+		if ( !COT_CanDismantlePart( part_name ) )
 			return;
 
 		GetParent().OnPartDismantledServer( player, part_name, AT_DISMANTLE_PART );

@@ -192,6 +192,19 @@ class JMSelectedObjects
 		return m_Players;
 	}
 
+	array< string > GetPlayersOrSelf()
+	{
+		if (!m_Players.Count())
+		{
+			if (IsMissionOffline())
+				m_Players.Insert(JMConstants.OFFLINE_GUID);
+			else if (GetGame().GetPlayer())
+				m_Players.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+		}
+
+		return m_Players;
+	}
+
 
 	set< ref JMSelectedObject > GetObjects()
 	{

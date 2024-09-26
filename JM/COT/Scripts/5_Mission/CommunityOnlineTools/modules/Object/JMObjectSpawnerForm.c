@@ -6,7 +6,9 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
+#ifndef DAYZ_1_25
 	private UIActionSlider m_TemperatureItem;
+#endif
 	private UIActionSlider m_HealthItem;
 	private UIActionDropdownList m_ItemDataList;
 	
@@ -65,6 +67,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private ref array< string > m_ObjItemStateLiquidText =
 	{
 	};
+	private ref map<int, int> m_ObjItemStateLiquidColors = new map<int, int>;
 
 	private int m_ItemStateType = -1;
 	private int m_LiquidType;
@@ -116,16 +119,31 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ObjItemStateFoodText.Insert(typename.EnumToString(FoodStageType, foodStage));
 		}
 
+		m_ObjItemStateLiquidColors[0] = COLOR_WHITE;
+
 		string displayName;
 		string translated;
+		int color;
+	#ifdef DAYZ_1_25
 		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
 		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
 		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
+	#else
+		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
+	#endif
 		{
+	#ifndef DAYZ_1_25
+			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
+	#endif
+
+			string liquidClsName = nutritionProfile.GetLiquidClassname();
+			string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
+
 			//! Liquids (except blood)
 			if (nutritionProfile.IsLiquid() && liquidType > 255)
 			{
-				string liquidClsName = nutritionProfile.GetLiquidClassname();
+				//!@note most of this joinked from ExpansionWorld::GetLiquidDisplayName
+
 				GetGame().ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
 				GetGame().FormatRawConfigStringKeys(displayName);
 
@@ -136,7 +154,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 				//! Fix up vanilla liquid display name
 				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
-					translated = liquidClsName;  //! Use class name instead
+					translated = liquidClsName;
 
 				int idx = 0;
 				foreach (string liquidText: m_ObjItemStateLiquidText)
@@ -149,12 +167,86 @@ class JMObjectSpawnerForm: JMFormBase
 				m_ObjItemStateLiquid.InsertAt(liquidType, idx);
 				m_ObjItemStateLiquidText.InsertAt(translated, idx);
 			}
+
+			//! Liquids (including blood)
+			if (nutritionProfile.IsLiquid())
+			{
+				string colorPath = "CfgLiquidDefinitions " + liquidClsName +  " color";
+
+				color = GetGame().ConfigGetInt(colorPath);
+
+				if (!color)
+				{
+					string colorConstantName;
+					GetGame().ConfigGetTextRaw(colorPath, colorConstantName);
+
+					if (!colorConstantName)
+					{
+						//! Fallback to liquid classname, all uppercase
+						colorConstantName = liquidClsName;
+						colorConstantName.ToUpper();
+					}
+
+					bool found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
+
+					if (!found)
+					{
+						if (!colorConstantName.Contains("LIQUID"))
+						{
+							colorConstantName += "LIQUID";  //! e.g. RaG_Liquid_Framework
+							found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
+						}
+
+						if (!found)
+						{
+							//! Fallback to liquid classname, all uppercase, words delimited by underscore
+							colorConstantName = underscored;
+							colorConstantName.ToUpper();
+
+							if (!JMStatics.StringToEnumEx(Colors, colorConstantName, color))
+							{
+								switch (liquidType)
+								{
+									case LIQUID_BEER:
+										color = Colors.ORANGE;
+										break;
+									case LIQUID_DIESEL:
+									case LIQUID_GASOLINE:
+										color = Colors.YELLOW;
+										break;
+									case LIQUID_DISINFECTANT:
+									case LIQUID_VODKA:
+										color = Colors.GRAY;
+										break;
+									default:
+										if (liquidType > 255)
+											color = Colors.COLOR_LIQUID;
+										else
+											//! Blood
+											color = Colors.RED;
+										break;
+								}
+							}
+						}
+					}
+				}
+
+				m_ObjItemStateLiquidColors[liquidType] = color;
+			}
 		}
 		
 	#ifdef DIAG
 		for (int k = 0; k < m_ObjItemStateLiquidText.Count(); k++)
 		{
-			PrintFormat("LIQUID %1 %2 %3 %4 %5", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname());
+			TIntArray argb = {};
+
+			for (int i = 0; i < 4; i++)
+			{
+				argb.Insert((m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]] >> (24 - i * 8)) & 255);
+			}
+
+			m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]];
+			PrintFormat("LIQUID %1 displayName='%2' type=%3 className='%4' color={%5, %6, %7, %8}", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname(), argb[0], argb[1], argb[2], argb[3]);
 		}
 	#endif
 
@@ -217,7 +309,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 		
 		if (m_ItemStateType == 0)
-			m_LiquidType = m_ItemDataList.GetSelection();
+			m_LiquidType = m_ObjItemStateLiquid[m_ItemDataList.GetSelection()];
 		
 		UpdateQuantityItemColor();
 		UpdatePreviewItemState();
@@ -242,7 +334,6 @@ class JMObjectSpawnerForm: JMFormBase
 	void UpdateItemStateType(int mode, int liquidType = 0)
 	{
 		m_ItemStateType = mode;
-		m_LiquidType = liquidType;
 
 		int idx = -1;
 
@@ -250,13 +341,21 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			case 0: // Liquids
 				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				idx = m_ObjItemStateLiquid.Find(liquidType);
+				idx = m_ObjItemStateLiquid.Find(m_LiquidType);
 				if (idx == -1)
-					idx = m_ObjItemStateLiquid.Find(LIQUID_WATER);  //! Fallback
+				{
+					idx = m_ObjItemStateLiquid.Find(liquidType);  //! Fallback
+					m_LiquidType = liquidType;
+				}
 				break;
 			case 1: // Blood
 				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
-				idx = FindEnumValue(COT_BloodTypes, liquidType);
+				idx = FindEnumValue(COT_BloodTypes, m_LiquidType);
+				if (idx == -1)
+				{
+					idx = FindEnumValue(COT_BloodTypes, liquidType);  //! Fallback
+					m_LiquidType = liquidType;
+				}
 				break;
 			case 2: // Food
 				m_ItemDataList.SetItems(m_ObjItemStateFoodText);
@@ -298,73 +397,55 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateQuantityItemColor()
 	{
-		switch (m_LiquidType)
-		{
-			case COT_LiquidTypes.WATER:
-				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-				break;
-			case COT_LiquidTypes.RIVERWATER:
-				m_QuantityItem.SetColor( ARGB( 255, 0, 128, 128 ) );
-				break;
-			case COT_LiquidTypes.BEER:
-				m_QuantityItem.SetColor( ARGB( 255, 255, 215, 0 ) );
-				break;
-			case COT_LiquidTypes.GASOLINE:
-				m_QuantityItem.SetColor( ARGB( 255, 165, 123, 63 ) );
-				break;
-			case COT_LiquidTypes.DIESEL:
-				m_QuantityItem.SetColor( ARGB( 255, 0, 100, 0 ) );
-				break;
-			case COT_LiquidTypes.DISINFECTANT:
-			case COT_LiquidTypes.SOLUTION:
-				m_QuantityItem.SetColor( ARGB( 255, 173, 216, 230 ) );
-				break;
-			case COT_BloodTypes.UNKNOWN:
-				m_QuantityItem.SetColor( ARGB( 255, 139, 0, 0 ) );
-				break;
-			case COT_LiquidTypes.VODKA:
-			default:
-				m_QuantityItem.SetColor( ARGB( 255, 255, 255, 255 ) );
-				break;
-		}
+		int color;
 
+		if (!m_ObjItemStateLiquidColors.Find(m_LiquidType, color))
+			color = COLOR_WHITE;
+
+		m_QuantityItem.SetColor( color );
 		m_QuantityItem.SetAlpha( 1.0 );
 	}
 
 	void UpdateHealthItemColor()
 	{
-		float percent = m_HealthItem.GetCurrent();
-		
-		if ( percent != 0)
-			percent = percent / m_HealthItem.GetMax();
+		if (!m_HealthItem.IsEnabled())
+		{
+			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );
+			return;
+		}
 
-		if ( percent >= 0.69999999 )
+		float health = m_HealthItem.GetCurrent();
+		float health01;
+		float sliderMax = m_HealthItem.GetMax();
+
+		if (sliderMax > 0)
+			health01 = health / sliderMax;
+
+		if ( health01 >= 0.7 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
 		}
-		else if ( percent >= 0.5 )
+		else if ( health01 >= 0.5 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_WORN );
 		}
-		else if ( percent >= 0.30000001 )
+		else if ( health01 >= 0.3 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
 		}
-		else if ( percent > 0.001 )
+		else if ( health01 > 0 )
 		{
 			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
-		}
-		else if ( percent == -1 )
-		{
-			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );			
 		}
 		else
 		{
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
 
-		if (m_PreviewItem && MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType()) > 0 )
-			m_PreviewItem.SetHealth01( "", "", percent );
+		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport())
+		{
+			m_PreviewItem.SetHealth("", "", health);
+		}
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -458,7 +539,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
+	#ifndef DAYZ_1_25
 		m_TemperatureItem.Disable();
+	#endif
 
 		int itemStateType = m_ItemStateType;
 
@@ -470,14 +553,21 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
 
-			if (!m_PreviewItem.IsInherited(Building) && !m_PreviewItem.IsInherited(AdvancedCommunication))
+			float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType());
+			if (maxHealth > 0)
 			{
 				m_HealthItem.Enable();
-				m_HealthItem.SetMax(m_PreviewItem.GetMaxHealth());
+				m_HealthItem.SetMax(maxHealth);
 				if ( m_HealthItem.GetCurrent() == -1 )
-					m_HealthItem.SetCurrent(m_PreviewItem.GetMaxHealth());
+					m_HealthItem.SetCurrent(maxHealth);
 
 				m_HealthItem.SetMin(0);
+			}
+			else
+			{
+				m_HealthItem.SetMin(-1);
+				m_HealthItem.SetCurrent(-1);
+				m_HealthItem.SetMax(-1);
 			}
 
 			UpdateHealthItemColor();			
@@ -494,7 +584,9 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 					else
 					{
+					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
+					#endif
 						itemStateType = 0;
 					}
 					int liquidType = item.GetLiquidTypeInit();
@@ -505,7 +597,9 @@ class JMObjectSpawnerForm: JMFormBase
 				{
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
+					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
+					#endif
 						
 						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
@@ -698,7 +792,11 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		float health = m_HealthItem.GetCurrent();
+	#ifndef DAYZ_1_25
 		float temp = m_TemperatureItem.GetCurrent();
+	#else
+		float temp;
+	#endif
 		float quantity = m_QuantityItem.GetCurrent();
 
 		switch (mode)

@@ -212,6 +212,11 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		m_Disable.Show( false );
 	}
 
+	bool IsEnabled()
+	{
+		return !m_Disable.IsVisible();
+	}
+
 	void SetDisableColor( int color )
 	{
 		m_Disable.SetColor(color);

@@ -29,6 +29,7 @@ class JMVehiclesMenu: JMFormBase
 	protected UIActionText m_VehicleRotation;
 	
 	protected UIActionText m_VehicleKeys;
+	protected UIActionText m_VehicleInfoOwner;
 	protected UIActionText m_VehicleLastDriverUID;
 
 	protected UIActionText m_VehicleCovered;
@@ -110,6 +111,7 @@ class JMVehiclesMenu: JMFormBase
 						UIActionManager.CreateText( rotationGrid, "Paste" );
 
 				m_VehicleKeys = UIActionManager.CreateText( gridinfos, "Keys:", "Value" );
+				m_VehicleInfoOwner = UIActionManager.CreateText( gridinfos, "Owner:", "Value" );
 				m_VehicleLastDriverUID = UIActionManager.CreateText( gridinfos, "Last Driver" );
 					Widget driverUIDGrid = UIActionManager.CreateGridSpacer( gridinfos, 1, 3 );
 						UIActionManager.CreateText( driverUIDGrid, "Name:", "Value" );

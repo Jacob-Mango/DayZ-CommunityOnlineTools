@@ -1,5 +1,5 @@
-modded class CAContinuousTime
-{
+modded class CAContinuousCraft
+{		
 	override void Setup(ActionData action_data)
 	{
 		super.Setup(action_data);

@@ -387,10 +387,12 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeBoat );
 		#endif
 		
+		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
 		types.Insert( JMESPViewTypeBoltRifle );
 		types.Insert( JMESPViewTypeRifle );
 		types.Insert( JMESPViewTypePistol );
+		types.Insert( JMESPViewTypeLauncher );
 
 		types.Insert( JMESPViewTypeTent );
 		types.Insert( JMESPViewTypeBaseBuilding );
@@ -986,20 +988,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
 		Transport transport;
-		if ( Class.CastTo( car, target ) )
+		if ( Class.CastTo( transport, target ) )
 		{
-			car.COT_ForcePositionAndOrientation(position, car.GetOrientation());
+			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, position, transport.GetOrientation());
 		}
 		else
 		{
 			target.SetPosition( position );
-
-			if ( Class.CastTo( transport, target ) )
-			{
-				transport.Synchronize();
-			}
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
@@ -1034,12 +1030,14 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		target.SetOrientation( orientation );
-
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
-			transport.Synchronize();
+			CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(transport, transport.GetPosition(), orientation);
+		}
+		else
+		{
+			target.SetOrientation( orientation );
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
@@ -1279,18 +1277,11 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_Vehicle_Unstuck( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
-		CarScript car;
-		#ifndef DAYZ_1_25
-		BoatScript boat;
-		#endif
-		if ( Class.CastTo( car, target ) )
+		Transport transport;
+		if ( Class.CastTo( transport, target ) )
 		{
-			car.COT_PlaceOnSurfaceAtPosition(car.GetPosition());
+			CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(transport, transport.GetPosition());
 		}
-		#ifndef DAYZ_1_25
-		else if ( Class.CastTo( boat, target ) )
-			boat.COT_PlaceOnSurfaceAtPosition(boat.GetPosition());
-		#endif
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
 		SendWebhook( "Vehicle_Unstuck", instance, "Unstuck " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );

@@ -191,7 +191,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( w == m_LstPositionList && button == MouseState.LEFT )
 		{
-			Teleport();
+			TeleportPlayer();
 			
 			return true;
 		}
@@ -213,26 +213,38 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		Teleport();
+		CreateAdvancedPlayerConfirm("TeleportPlayer");
 	}
 
-	void Teleport()
+	void TeleportPlayer(JMConfirmation confirmation = NULL)
 	{
-		if (!HasTooManyPlayers("TeleportConfirm"))
-			TeleportConfirm(NULL);
-	}
-
-	void TeleportConfirm(JMConfirmation confirmation)
-	{
-		array< string > players = JM_GetSelected().GetPlayers();
-		if ( players.Count() == 0 )
+		int btnId = -1;
+		if (confirmation)
+			btnId = confirmation.GetSelectedID();
+		
+		switch(btnId)
 		{
-			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-			if ( player.GetIdentity() )
-				players.Insert(player.GetIdentity().GetId());
+			// Abort
+			case 1:
+			case 4:
+				return;
+			break;
+			// Selected
+			case 2:
+			case 5:
+				m_Module.Location( GetCurrentLocation(), {JM_GetSelected().GetPlayers()[0]} );
+			break;
+			// Everyone
+			case 3:
+				m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );
+			break;
+			// Self
+			default:
+			case -1:
+			case 6:
+				m_Module.Location( GetCurrentLocation(), {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+			break;
 		}
-
-		m_Module.Location( GetCurrentLocation(), players );
 	}
 
 	void InputCategory_OnChange( UIEvent eid, UIActionBase action )
@@ -386,17 +398,5 @@ class JMTeleportForm: JMFormBase
 		}
 
 		return "";
-	}
-
-	bool HasTooManyPlayers(string funcName)
-	{
-		int count = JM_GetSelected().GetPlayers().Count();
-		if (count > 1)
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_PLAYERS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
-		}
-
-		return false;
 	}
 };
