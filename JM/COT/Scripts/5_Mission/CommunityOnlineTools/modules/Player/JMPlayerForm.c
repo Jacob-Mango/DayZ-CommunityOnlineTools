@@ -127,6 +127,9 @@ class JMPlayerForm: JMFormBase
 
 	void ~JMPlayerForm()
 	{
+		if (!g_Game)
+			return;
+
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Remove( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
