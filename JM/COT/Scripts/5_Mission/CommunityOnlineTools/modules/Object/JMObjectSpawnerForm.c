@@ -527,6 +527,25 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			m_ItemPreview.Show( false );
 
+			float maxHealthAI = MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType());
+			if (maxHealthAI > 0)
+			{
+				m_HealthItem.Enable();
+				m_HealthItem.SetMax(maxHealthAI);
+				if ( m_HealthItem.GetCurrent() == -1 )
+					m_HealthItem.SetCurrent(maxHealthAI);
+
+				m_HealthItem.SetMin(0);
+			}
+			else
+			{
+				m_HealthItem.SetMin(-1);
+				m_HealthItem.SetCurrent(-1);
+				m_HealthItem.SetMax(-1);
+			}
+
+			UpdateHealthItemColor();
+
 			#ifdef COT_DEBUGLOGS
 			Print( "-" + this + "::UpdateItemPreview AI" );
 			#endif
@@ -535,7 +554,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_Orientation = vector.Zero;
 
-		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
+		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false, false ) );
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
@@ -570,7 +589,7 @@ class JMObjectSpawnerForm: JMFormBase
 				m_HealthItem.SetMax(-1);
 			}
 
-			UpdateHealthItemColor();			
+			UpdateHealthItemColor();
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
