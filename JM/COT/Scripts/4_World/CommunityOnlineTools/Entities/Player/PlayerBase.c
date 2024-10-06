@@ -109,7 +109,7 @@ modded class PlayerBase
 		int playerVarsBitmaskMaxValue = Math.Pow(2, EnumTools.GetEnumSize(JMPlayerVariables));
 		RegisterNetSyncVariableInt("m_COT_PlayerVarsBitmask", 0, playerVarsBitmaskMaxValue);
 
-		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0, 0.1);
+		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0);
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
