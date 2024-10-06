@@ -77,8 +77,12 @@ class UIActionEditableVector: UIActionBase
 
 	void IncrementValue(EditBoxWidget w, int wheel)
 	{
+		float multiplier = 0.1;
+		if (SHIFT())
+			multiplier = multiplier * 10;
+
 		float currValue = w.GetText().ToFloat();
-		currValue = currValue + (wheel * 0.1);
+		currValue = currValue + (wheel * multiplier);
 		w.SetText(currValue.ToString());
 		
 		CallEvent( UIEvent.CHANGE );

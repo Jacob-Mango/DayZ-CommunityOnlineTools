@@ -131,9 +131,9 @@ class JMESPMeta: COT_WidgetHolder
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
 
-		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:" );
-		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:" );
-		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:" );
+		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:", this, "Action_SetPosition" );
+		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:", this, "Action_SetPosition" );
+		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:", this, "Action_SetPosition" );
 
 		m_Action_PositionX.SetOnlyNumbers( true );
 		m_Action_PositionY.SetOnlyNumbers( true );
@@ -152,9 +152,9 @@ class JMESPMeta: COT_WidgetHolder
 		Widget orientationActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget orientationActionsVec = UIActionManager.CreateGridSpacer( orientationActions, 1, 3 );
 
-		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:" );
-		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:" );
-		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:" );
+		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:", this, "Action_SetOrientation" );
+		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:", this, "Action_SetOrientation" );
+		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:", this, "Action_SetOrientation" );
 
 		m_Action_OrientationX.SetOnlyNumbers( true );
 		m_Action_OrientationY.SetOnlyNumbers( true );
@@ -251,7 +251,13 @@ class JMESPMeta: COT_WidgetHolder
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
-			return;
+		{
+			if (!m_Action_AutoRefreshPosition.IsChecked())
+				return;
+
+			if ( eid != UIEvent.CHANGE )
+				return;
+		}
 
 		SetPosition();
 	}
@@ -315,7 +321,13 @@ class JMESPMeta: COT_WidgetHolder
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
-			return;
+		{
+			if (!m_Action_AutoRefreshOrientation.IsChecked())
+				return;
+
+			if ( eid != UIEvent.CHANGE )
+				return;
+		}
 
 		SetOrientation();
 	}

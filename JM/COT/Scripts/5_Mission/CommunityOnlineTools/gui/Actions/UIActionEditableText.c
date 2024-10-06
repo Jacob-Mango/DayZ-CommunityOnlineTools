@@ -106,6 +106,9 @@ class UIActionEditableText: UIActionBase
 		if ( m_OnlyIntegers )
 			multiplier = 1.0;
 
+		if (SHIFT())
+			multiplier = multiplier * 10;
+
 		float currValue = m_Text.GetText().ToFloat();
 		currValue = currValue + (wheel * multiplier);
 		m_Text.SetText(currValue.ToString());
