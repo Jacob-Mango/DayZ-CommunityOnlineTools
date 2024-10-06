@@ -217,4 +217,19 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		return false;
 	}
+
+	bool CreateAdvancedObjectConfirm(string funcName, bool callbackOnNoConfirmation = true)
+	{
+		int count = JM_GetSelected().GetObjects().Count();
+		if (count > 1)
+		{
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
+			return true;
+		}
+		
+		if ( callbackOnNoConfirmation && funcName != string.Empty )
+			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+
+		return false;
+	}
 };
