@@ -700,7 +700,23 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	void Toggle3rdPerson( UAInput input )
 	{
 		if ( input.LocalPress() && CurrentActiveCamera )
-			CurrentActiveCamera.m_JM_3rdPerson = !CurrentActiveCamera.m_JM_3rdPerson;
+		{
+			switch (CurrentActiveCamera.m_JM_3rdPerson)
+			{
+				case JMCamera3rdPersonMode.OFF:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DEFAULT;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Default", ""));
+					break;
+				case JMCamera3rdPersonMode.DEFAULT:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DOLLY;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
+					break;
+				case JMCamera3rdPersonMode.DOLLY:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
+					break;
+			}
+		}
 	}
 
 	void LeftShoulder( UAInput input )

@@ -20,6 +20,13 @@ static float CAMERA_SMOOTH_BLUR = 0.0;
 static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
 static JMCameraBase COT_PreviousActiveCamera;
 
+enum JMCamera3rdPersonMode
+{
+	OFF,
+	DEFAULT,
+	DOLLY
+}
+
 class JMCameraBase: Camera
 {
 	float SendUpdateAccumalator = 0.0;
