@@ -77,7 +77,7 @@ class JMCameraForm: JMFormBase
 		
 		m_EnableFullmapCamera = UIActionManager.CreateCheckbox( gridActions, "Enable fullmap freecam update", this, "OnClick_EnableFullmap", m_Module.m_EnableFullmapCamera );
 
-		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( gridActions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera3rdPerson() );
+		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( gridActions, "Hide scope in 1st person spectate ADS", this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera1stPersonADSHideScope() );
 		
 		m_HideGrass = UIActionManager.CreateCheckbox( gridActions, "Hide grass in freecam", this, "OnClick_HideGrass", m_Module.m_HideGrass );
 		
@@ -445,6 +445,14 @@ class JMCameraForm: JMFormBase
 	{
 		if (CurrentActiveCamera)
 			return CurrentActiveCamera.m_JM_3rdPerson;
+
+		return false;
+	}
+
+	bool GetCurrentCamera1stPersonADSHideScope()
+	{
+		if (CurrentActiveCamera)
+			return CurrentActiveCamera.m_JM_1stPersonADS_HideScope;
 
 		return false;
 	}
