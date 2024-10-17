@@ -22,6 +22,10 @@ class JMCinematicCamera: JMCameraBase
 
 	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
 
+	private float m_Strafe;
+	private float m_Altitude;
+	private float m_Forward;
+
 	void JMCinematicCamera()
 	{
 		//positionOffset = "0 1.5 0";
@@ -87,6 +91,10 @@ class JMCinematicCamera: JMCameraBase
 			}
 			
 			linearVelocity = linearVelocity * CAMERA_VELDRAG;
+
+			CalcAccelerationRate(m_Strafe, strafe, increaseSpeeds);
+			CalcAccelerationRate(m_Altitude, altitude, increaseSpeeds);
+			CalcAccelerationRate(m_Forward, forward, increaseSpeeds);
 
 			linearVelocity = linearVelocity + ( transform[0] * strafe * cam_speed );
 			linearVelocity = linearVelocity + ( transform[1] * altitude * cam_speed );
@@ -175,6 +183,26 @@ class JMCinematicCamera: JMCameraBase
 				LookAt(TargetPosition);
 			}
 		}
+	}
+
+	void CalcAccelerationRate(inout float velocity, inout float rate, bool increaseSpeeds = false)
+	{
+		float mult = 0.05;
+
+		//! Adjust for increased camera speed so that effective acceleration stays the same
+		if (increaseSpeeds)
+			mult *= 0.447214;  //! 0.05 * Math.Sqrt(0.2) == 0.05 / Math.Sqrt(CAMERA_BOOST_MULT)
+
+		//! Slow acceleration, instant deceleration
+		if (rate)
+			velocity = Math.Clamp(velocity + rate * mult, -1.0, 1.0);
+		else
+			velocity = 0;
+
+		if (rate < 0)
+			rate = velocity * -velocity;
+		else
+			rate = velocity * velocity;
 	}
 	
 	void SetupTraveling(TVectorArray positions, TFloatArray time, TBoolArray smooth)
