@@ -109,12 +109,6 @@ class JMWeatherForm: JMFormBase
 	private UIActionEditableText m_EditOvercastMinDuration;
 
 	//! Wind stuff !
-	#ifdef DAYZ_1_25
-	private UIActionSlider m_SliderWindDirectionX;
-	private UIActionSlider m_SliderWindDirectionZ;
-	private UIActionSlider m_EditWindSpeed;
-	private UIActionEditableText m_EditWindMaxSpeed;
-	#else
 	private UIActionSlider m_SliderWindMagnitudeForecast;
 	private UIActionEditableText m_EditWindMagnitudeInterpTime;
 	private UIActionEditableText m_EditWindMagnitudeMinDuration;
@@ -122,7 +116,6 @@ class JMWeatherForm: JMFormBase
 	private UIActionSlider m_SliderWindDirectionForecast;
 	private UIActionEditableText m_EditWindDirectionInterpTime;
 	private UIActionEditableText m_EditWindDirectionMinDuration;
-	#endif
 
 	private UIActionSlider m_EditWindFuncMin;
 	private UIActionSlider m_EditWindFuncMax;
@@ -372,9 +365,7 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_BtnQuickActionClear, "Weather.QuickAction.Clear", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionCloudy, "Weather.QuickAction.Overcast", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionRainy, "Weather.QuickAction.Rain", hasNotSelectedPreset );
-		#ifndef DAYZ_1_25
 		UpdateActionState( m_BtnQuickActionSnowy, "Weather.QuickAction.Snow", hasNotSelectedPreset );
-		#endif
 		UpdateActionState( m_BtnQuickActionStorm, "Weather.QuickAction.Storm", hasNotSelectedPreset );
 
 		UpdateActionState( m_BtnQuickActionNight, "Weather.QuickAction.Date", hasNotSelectedPreset );
@@ -395,12 +386,10 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderFogForecast, "Weather.Fog", hasNotSelectedPreset );
 		UpdateActionState( m_EditFogInterpTime, "Weather.Fog", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditFogMinDuration, "Weather.Fog", hasNotSelectedPreset, easyModeEnabled);
-#ifndef DAYZ_1_25
 		UpdateActionState( m_SliderDyanmicFogBias, "Weather.Fog.Dynamic", hasNotSelectedPreset);
 		UpdateActionState( m_SliderDyanmicFogDistance, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_SliderDyanmicFogHeight, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditDynamicFogInterpTime, "Weather.Fog.Dynamic", hasNotSelectedPreset, easyModeEnabled );
-#endif
 		UpdateActionState( m_SliderRainForecast, "Weather.Rain", hasNotSelectedPreset );
 		UpdateActionState( m_EditRainInterpTime, "Weather.Rain", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditRainMinDuration, "Weather.Rain", hasNotSelectedPreset, easyModeEnabled );
@@ -409,7 +398,6 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderRainOvercastMax, "Weather.Rain.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_EditTextRainTransitionTime, "Weather.Rain.Thresholds", hasNotSelectedPreset, easyModeEnabled );
 
-		#ifndef DAYZ_1_25
 		UpdateActionState( m_SliderSnowForecast, "Weather.Snow", hasNotSelectedPreset );
 		UpdateActionState( m_EditSnowInterpTime, "Weather.Snow", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditSnowMinDuration, "Weather.Snow", hasNotSelectedPreset, easyModeEnabled );
@@ -417,13 +405,11 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderSnowOvercastMin, "Weather.Snow.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_SliderSnowOvercastMax, "Weather.Snow.Thresholds", hasNotSelectedPreset );
 		UpdateActionState( m_EditTextSnowTransitionTime, "Weather.Snow.Thresholds", hasNotSelectedPreset, easyModeEnabled );
-		#endif
 
 		UpdateActionState( m_SliderOvercastForecast, "Weather.Overcast", hasNotSelectedPreset );
 		UpdateActionState( m_EditOvercastInterpTime, "Weather.Overcast", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditOvercastMinDuration, "Weather.Overcast", hasNotSelectedPreset, easyModeEnabled );
 
-		#ifndef DAYZ_1_25
 		UpdateActionState( m_SliderWindMagnitudeForecast, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindMagnitudeInterpTime, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditWindMagnitudeMinDuration, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
@@ -431,12 +417,6 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_SliderWindDirectionForecast, "Weather.Wind", hasNotSelectedPreset );
 		UpdateActionState( m_EditWindDirectionInterpTime, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditWindDirectionMinDuration, "Weather.Wind", hasNotSelectedPreset, easyModeEnabled );
-		#else
-		UpdateActionState( m_SliderWindDirectionX, "Weather.Wind", hasNotSelectedPreset );
-		UpdateActionState( m_SliderWindDirectionZ, "Weather.Wind", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindSpeed, "Weather.Wind", hasNotSelectedPreset );
-		UpdateActionState( m_EditWindMaxSpeed, "Weather.Wind", hasNotSelectedPreset );
-		#endif
 
 		UpdateActionState( m_EditWindFuncMin, "Weather.Wind.FunctionParams", hasNotSelectedPreset, easyModeEnabled );
 		UpdateActionState( m_EditWindFuncMax, "Weather.Wind.FunctionParams", hasNotSelectedPreset, easyModeEnabled );
@@ -558,7 +538,6 @@ class JMWeatherForm: JMFormBase
 		if ( preset.PFog.MinDuration != -1 )
 			m_EditFogMinDuration.SetText( preset.PFog.MinDuration );
 
-	#ifndef DAYZ_1_25
 		if ( preset.PDynFog.Distance != -1 )
 			m_SliderDyanmicFogDistance.SetCurrent( preset.PDynFog.Distance );
 		if ( preset.PDynFog.Height != -1 )
@@ -567,7 +546,6 @@ class JMWeatherForm: JMFormBase
 			m_SliderDyanmicFogBias.SetCurrent( preset.PDynFog.Bias );
 		if ( preset.PDynFog.Time != -1 )
 			m_EditDynamicFogInterpTime.SetText( preset.PDynFog.Time );
-	#endif
 
 		if (actual)
 			m_SliderRainForecast.SetCurrent( preset.PRain.Actual * 100.0 );
@@ -589,7 +567,6 @@ class JMWeatherForm: JMFormBase
 		if ( preset.RainThreshold.Time != -1 )
 			m_EditTextRainTransitionTime.SetText( preset.RainThreshold.Time );
 
-	#ifndef DAYZ_1_25
 		if (actual)
 			m_SliderSnowForecast.SetCurrent( preset.PSnow.Actual * 100.0 );
 		else if ( preset.PSnow.Forecast != -1 )
@@ -609,7 +586,6 @@ class JMWeatherForm: JMFormBase
 
 		if ( preset.SnowThreshold.Time != -1 )
 			m_EditTextSnowTransitionTime.SetText( preset.SnowThreshold.Time );
-	#endif
 
 		if (actual)
 			m_SliderOvercastForecast.SetCurrent( preset.POvercast.Actual * 100.0 );
@@ -622,23 +598,6 @@ class JMWeatherForm: JMFormBase
 		if ( preset.POvercast.MinDuration != -1 )
 			m_EditOvercastMinDuration.SetText( preset.POvercast.MinDuration );
 		
-		#ifdef DAYZ_1_25
-		if ( preset.Wind.Dir != "0 0 0" )
-		{
-			vector dirWind = preset.Wind.Dir.Normalized();
-			m_SliderWindDirectionX.SetCurrent( dirWind[0] );
-			m_SliderWindDirectionZ.SetCurrent( dirWind[2] );
-		}
-
-		if ( preset.Wind.MaxSpeed != -1 )
-		{
-			m_EditWindMaxSpeed.SetText( preset.Wind.MaxSpeed );
-			UpdateWindMaxSpeed();
-		}
-
-		if ( preset.Wind.Speed != -1 )
-			m_EditWindSpeed.SetCurrent( preset.Wind.Speed );
-		#else
 		if (actual)
 			m_SliderWindMagnitudeForecast.SetCurrent( preset.PWindMagnitude.Actual );
 		else if ( preset.PWindMagnitude.Forecast != -1 )
@@ -664,7 +623,6 @@ class JMWeatherForm: JMFormBase
 
 		if ( preset.PWindDirection.MinDuration != -1 )
 			m_EditWindDirectionMinDuration.SetText( preset.PWindDirection.MinDuration );
-		#endif
 
 		if ( preset.WindFunc.Min != -1 )
 			m_EditWindFuncMin.SetCurrent( preset.WindFunc.Min );
@@ -694,12 +652,10 @@ class JMWeatherForm: JMFormBase
 		preset.PFog.Time = ToFloat( m_EditFogInterpTime.GetText() );
 		preset.PFog.MinDuration = ToFloat( m_EditFogMinDuration.GetText() );
 
-#ifndef DAYZ_1_25
 		preset.PDynFog.Distance = m_SliderDyanmicFogDistance.GetCurrent();
 		preset.PDynFog.Height = m_SliderDyanmicFogHeight.GetCurrent();
 		preset.PDynFog.Bias = m_SliderDyanmicFogBias.GetCurrent();
 		preset.PDynFog.Time = ToFloat(  m_EditDynamicFogInterpTime.GetText() );
-#endif
 
 		preset.PRain.Forecast = m_SliderRainForecast.GetCurrent() * 0.01;
 		preset.PRain.Time = ToFloat( m_EditRainInterpTime.GetText() );
@@ -709,7 +665,6 @@ class JMWeatherForm: JMFormBase
 		preset.RainThreshold.OvercastMax = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		preset.RainThreshold.Time = ToFloat( m_EditTextRainTransitionTime.GetText() );
 
-	#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = m_SliderSnowForecast.GetCurrent() * 0.01;
 		preset.PSnow.Time = ToFloat( m_EditSnowInterpTime.GetText() );
 		preset.PSnow.MinDuration = ToFloat( m_EditSnowMinDuration.GetText() );
@@ -717,13 +672,11 @@ class JMWeatherForm: JMFormBase
 		preset.SnowThreshold.OvercastMin = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
 		preset.SnowThreshold.OvercastMax = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
 		preset.SnowThreshold.Time = ToFloat( m_EditTextSnowTransitionTime.GetText() );
-	#endif
 
 		preset.POvercast.Forecast = m_SliderOvercastForecast.GetCurrent() * 0.01;
 		preset.POvercast.Time = ToFloat( m_EditOvercastInterpTime.GetText() );
 		preset.POvercast.MinDuration = ToFloat( m_EditOvercastMinDuration.GetText() );
 
-	#ifndef DAYZ_1_25
 		preset.PWindMagnitude.Forecast = m_SliderWindMagnitudeForecast.GetCurrent();
 		preset.PWindMagnitude.Time = ToFloat( m_EditWindMagnitudeInterpTime.GetText() );
 		preset.PWindMagnitude.MinDuration = ToFloat( m_EditWindMagnitudeMinDuration.GetText() );
@@ -731,12 +684,6 @@ class JMWeatherForm: JMFormBase
 		preset.PWindDirection.Forecast = DEG2PI(m_SliderWindDirectionForecast.GetCurrent());
 		preset.PWindDirection.Time = ToFloat( m_EditWindDirectionInterpTime.GetText() );
 		preset.PWindDirection.MinDuration = ToFloat( m_EditWindDirectionMinDuration.GetText() );
-	#else
-		preset.Wind.Dir[0] = m_SliderWindDirectionX.GetCurrent();
-		preset.Wind.Dir[2] = m_SliderWindDirectionZ.GetCurrent();
-		preset.Wind.Speed = m_EditWindSpeed.GetCurrent();
-		preset.Wind.MaxSpeed = ToFloat( m_EditWindMaxSpeed.GetText() );
-	#endif
 
 		preset.WindFunc.Min = m_EditWindFuncMin.GetCurrent();
 		preset.WindFunc.Max = m_EditWindFuncMax.GetCurrent();
@@ -813,24 +760,16 @@ class JMWeatherForm: JMFormBase
 		InitStormWidgets( m_PanelWeatherActions );
 
 		InitFogWidgets( m_PanelWeatherActions );
-		#ifndef DAYZ_1_25
 		InitDynFogWidgets( m_PanelWeatherActions );
-		#endif
 
 		InitRainWidgets( m_PanelWeatherActions );
 		InitRainThresholdWidgets( m_PanelWeatherActions );
 
-		#ifndef DAYZ_1_25
 		InitSnowWidgets( m_PanelWeatherActions );
 		InitSnowThresholdWidgets( m_PanelWeatherActions );
-		#endif
 
-		#ifndef DAYZ_1_25
 		InitWindMagnitudeWidgets( m_PanelWeatherActions );
 		InitWindDirectionWidgets( m_PanelWeatherActions );
-		#else
-		InitWindWidgets( m_PanelWeatherActions );
-		#endif
 		InitWindFuncWidgets( m_PanelWeatherActions );
 		
 		ToggleMenus();
@@ -913,20 +852,11 @@ class JMWeatherForm: JMFormBase
 		float timeFog = m_EditFogInterpTime.GetText().ToFloat();
 		float minDurationFog = m_EditFogMinDuration.GetText().ToFloat();
 
-#ifndef DAYZ_1_25
 		float distance = m_SliderDyanmicFogDistance.GetCurrent();
 		float height = m_SliderDyanmicFogHeight.GetCurrent();
 		float bias = m_SliderDyanmicFogBias.GetCurrent();
 		float timeDynFog = m_EditDynamicFogInterpTime.GetText().ToFloat();
-#endif
 
-#ifdef DAYZ_1_25
-		float dirX = m_SliderWindDirectionX.GetCurrent();
-		float dirZ = m_SliderWindDirectionZ.GetCurrent();
-		vector dirWind = Vector( dirX, 0.0, dirZ ).Normalized();
-		float speedWind = m_EditWindSpeed.GetCurrent();
-		float maxSpeedWind = m_EditWindMaxSpeed.GetText().ToFloat();
-#else
 		float forecastWindMag = m_SliderWindMagnitudeForecast.GetCurrent();
 		float timeWindMag = m_EditWindMagnitudeInterpTime.GetText().ToFloat();
 		float minDurationWindMag = m_EditWindMagnitudeMinDuration.GetText().ToFloat();
@@ -934,7 +864,6 @@ class JMWeatherForm: JMFormBase
 		float forecastWindDir = DEG2PI(m_SliderWindDirectionForecast.GetCurrent());
 		float timeWindDir = m_EditWindDirectionInterpTime.GetText().ToFloat();
 		float minDurationWindDir = m_EditWindDirectionMinDuration.GetText().ToFloat();
-#endif
 
 		float minFunc = m_EditWindFuncMin.GetCurrent();
 		float maxFunc = m_EditWindFuncMax.GetCurrent();
@@ -957,7 +886,6 @@ class JMWeatherForm: JMFormBase
 		float maxRainThresh = m_SliderRainOvercastMax.GetCurrent() * 0.01;
 		float transitionRainThresh = m_EditTextRainTransitionTime.GetText().ToFloat();
 
-	#ifndef DAYZ_1_25
 		float forecastSnow = m_SliderSnowForecast.GetCurrent() * 0.01;
 		float timeSnow = m_EditSnowInterpTime.GetText().ToFloat();
 		float minDurationSnow = m_EditSnowMinDuration.GetText().ToFloat();
@@ -965,20 +893,19 @@ class JMWeatherForm: JMFormBase
 		float minSnowThresh = m_SliderSnowOvercastMin.GetCurrent() * 0.01;
 		float maxSnowThresh = m_SliderSnowOvercastMax.GetCurrent() * 0.01;
 		float transitionSnowThresh = m_EditTextSnowTransitionTime.GetText().ToFloat();
-	#endif
 
 		if ( m_Checkbox_EasyMode.IsChecked() )
 		{
 			timeFog = 0;
 			minDurationFog = 240;
-		#ifndef DAYZ_1_25
+
 			distance = 0.25;
 			height = 0.25;
 			timeWindMag = 0;
 			minDurationWindMag = 240;
 			timeWindDir = 0;
 			minDurationWindDir = 240;
-		#endif
+
 			timeOvercast = 0;
 			minDurationOvercast = 240;
 			thresholdStorm = 0.7;
@@ -989,13 +916,11 @@ class JMWeatherForm: JMFormBase
 			maxRainThresh = 1;
 			transitionRainThresh = 120;
 
-		#ifndef DAYZ_1_25
 			timeSnow = 0;
 			minDurationSnow = 240;
 			minSnowThresh = 0;
 			maxSnowThresh = 1;
 			transitionSnowThresh = 120;
-		#endif
 		}
 
 		if ( m_PanelDate.IsVisible() )
@@ -1004,23 +929,13 @@ class JMWeatherForm: JMFormBase
 		if ( m_PanelFog.IsVisible() )
 		{
 			m_Module.SetFog( forecastFog, timeFog, minDurationFog );
-			#ifndef DAYZ_1_25
 			m_Module.SetDynamicFog( distance, height, bias, timeDynFog );
-			#endif
 		}
 		
-		#ifdef DAYZ_1_25
-		if ( m_PanelWind.IsVisible() )
-		#else
 		if ( m_PanelWindMagnitude.IsVisible() )
-		#endif
 		{
-			#ifndef DAYZ_1_25
 			m_Module.SetWindMagnitude( forecastWindMag, timeWindMag, minDurationWindMag );
 			m_Module.SetWindDirection( forecastWindDir, timeWindDir, minDurationWindDir );
-			#else
-			m_Module.SetWind( dirWind, speedWind, maxSpeedWind );
-			#endif
 			m_Module.SetWindFunctionParams( minFunc, maxFunc, speedFunc );
 		}
 		
@@ -1036,13 +951,11 @@ class JMWeatherForm: JMFormBase
 			m_Module.SetRainThresholds( minRainThresh, maxRainThresh, transitionRainThresh );
 		}
 		
-		#ifndef DAYZ_1_25
 		if ( m_PanelSnow.IsVisible() )
 		{
 			m_Module.SetSnow( forecastSnow, timeSnow, minDurationSnow );
 			m_Module.SetSnowThresholds( minSnowThresh, maxSnowThresh, transitionSnowThresh );
 		}
-		#endif
 	}
 
 	void OnClick_PresetUpdate( UIEvent eid, UIActionBase action )
@@ -1128,17 +1041,12 @@ class JMWeatherForm: JMFormBase
 
 		UIActionManager.CreateText( m_PanelQuickActions, "Quick Actions: ", "Instantly change the Weather" );
 	
-		#ifndef DAYZ_1_25
 		Widget actionsWeather 	= UIActionManager.CreateGridSpacer( m_PanelQuickActions, 1, 5 );
-		#else
-		Widget actionsWeather 	= UIActionManager.CreateGridSpacer( m_PanelQuickActions, 1, 4 );
-		#endif
+
 		m_BtnQuickActionClear 	= UIActionManager.CreateButton( actionsWeather, "Clear", this, "OnClick_PresetClear" );
 		m_BtnQuickActionCloudy 	= UIActionManager.CreateButton( actionsWeather, "Cloudy", this, "OnClick_PresetCloudy" );
 		m_BtnQuickActionRainy 	= UIActionManager.CreateButton( actionsWeather, "Rainy", this, "OnClick_PresetRainy" );
-		#ifndef DAYZ_1_25
 		m_BtnQuickActionSnowy 	= UIActionManager.CreateButton( actionsWeather, "Snowy", this, "OnClick_PresetSnowy" );
-		#endif
 		m_BtnQuickActionStorm 	= UIActionManager.CreateButton( actionsWeather, "Storm", this, "OnClick_PresetStorm" );
 
 		Widget actionsDate 		= UIActionManager.CreateGridSpacer( m_PanelQuickActions, 1, 4 );
@@ -1164,14 +1072,12 @@ class JMWeatherForm: JMFormBase
 		m_Module.SetOvercast( 0, transition, duration );
 		m_Module.SetRain( 0, transition, duration );
 		m_Module.SetSnow( 0, transition, duration );
+
 		m_Module.SetFog( 0, transition, duration );
-		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
+
 		m_Module.SetWindMagnitude( 0, transition, duration );
 		m_Module.SetWindDirection( 0, transition, duration );
-		#else
-		m_Module.SetWind( Vector( 0, 0, 0 ), 0.1, 20 );
-		#endif
 		m_Module.SetWindFunctionParams( 0, 1, 30 );
 
 		RefreshValues();
@@ -1193,18 +1099,16 @@ class JMWeatherForm: JMFormBase
 		//! Set overcast to below storm threshold
 		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
+
 		m_Module.SetRain( 0, transition, duration );
 		m_Module.SetSnow( 0, transition, duration );
+
 		m_Module.SetFog( 0, transition, duration );
-		#ifndef DAYZ_1_25
 		m_Module.SetDynamicFog( 0, 0, 0 );
+
 		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
-		#else
-		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
-		#endif
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
 
 		RefreshValues();
@@ -1226,20 +1130,17 @@ class JMWeatherForm: JMFormBase
 		//! Set overcast to below storm threshold
 		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
+
 		m_Module.SetRainThresholds( 0.5, 1.0, 120.0 );
 		m_Module.SetRain( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
 		m_Module.SetSnow( 0, transition, duration );
-		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 
-		#ifndef DAYZ_1_25
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 		m_Module.SetDynamicFog( 0, 0, 0 );
+
 		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
-		#else
-		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
-		#endif
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
 
 		RefreshValues();
@@ -1261,21 +1162,18 @@ class JMWeatherForm: JMFormBase
 		//! Set overcast to below storm threshold
 		m_Module.SetStorm( m_SliderStormDensity.GetCurrent() * 0.01, thresholdStorm, m_SliderMinTimeBetweenLightning.GetCurrent() );
 		m_Module.SetOvercast( Math.RandomFloat(0.5, thresholdStorm), transition, duration );
+
 		m_Module.SetSnowThresholds( 0.5, 1.0, 120.0 );
 		m_Module.SetRain( 0, transition, duration );
 		m_Module.SetSnow( Math.RandomFloatInclusive(0.5,1.0), transition, duration );
 		m_Module.SetSnowThresholds( 0.5, 1.0, 120.0 );
-		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 
-		#ifndef DAYZ_1_25
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 		m_Module.SetDynamicFog( 0, 0, 0 );
+
 		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
-		#else
-		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
-		#endif
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
 
 		RefreshValues();
@@ -1296,19 +1194,16 @@ class JMWeatherForm: JMFormBase
 
 		m_Module.SetStorm( 1.0, 0.7, m_SliderMinTimeBetweenLightning.GetCurrent() );
 		m_Module.SetOvercast( Math.RandomFloatInclusive(0.7,1.0), transition, duration );
+
 		m_Module.SetRain( Math.RandomFloatInclusive(minRainThresh,1.0), transition, duration );
 		m_Module.SetSnow( 0, transition, duration );
-		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 
-		#ifndef DAYZ_1_25
+		m_Module.SetFog( Math.RandomFloatInclusive(0.0,1.0 - windMin), transition, duration );
 		m_Module.SetDynamicFog( 0, 0, 0 );
+
 		m_Module.SetWindMagnitude( Math.RandomFloatInclusive(0,20), transition, duration );
 		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
 		m_Module.SetWindDirection( Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), transition, duration );
-		#else
-		float windMaxSpeed = Math.RandomFloatInclusive(0.1,20);
-		m_Module.SetWind( Vector( Math.RandomFloatInclusive(-1,1), 0, Math.RandomFloatInclusive(-1,1) ), Math.RandomFloatInclusive(0.1,windMaxSpeed * 0.5), windMaxSpeed );
-		#endif
 		m_Module.SetWindFunctionParams( windMin, Math.RandomFloatInclusive(windMin,1), Math.RandomFloatInclusive(0,30) );
 
 		RefreshValues();
@@ -1408,9 +1303,7 @@ class JMWeatherForm: JMFormBase
 		m_ToggleOvercast 	= UIActionManager.CreateButtonToggle( actions, "[  ] Overcast", "[×] Overcast", this, "OnClick_Toggle" );
 		
 		m_ToggleRain 		= UIActionManager.CreateButtonToggle( actions, "[  ] Rain", "[×] Rain", this, "OnClick_Toggle" );
-		#ifndef DAYZ_1_25
 		m_ToggleSnow 		= UIActionManager.CreateButtonToggle( actions, "[  ] Snow", "[×] Snow", this, "OnClick_Toggle" );
-		#endif
 		m_ToggleFog 		= UIActionManager.CreateButtonToggle( actions, "[  ] Fog", "[×] Fog", this, "OnClick_Toggle" );
 		m_ToggleWind 		= UIActionManager.CreateButtonToggle( actions, "[  ] Wind", "[×] Wind", this, "OnClick_Toggle" );
 
@@ -1464,7 +1357,6 @@ class JMWeatherForm: JMFormBase
 			m_PanelRainThreshold.Show(false);
 		}
 		
-	#ifndef DAYZ_1_25
 		if (m_ToggleSnow.IsToggled() || m_PresetsShown)
 		{
 			m_PanelSnow.Show(true);
@@ -1475,31 +1367,22 @@ class JMWeatherForm: JMFormBase
 			m_PanelSnow.Show(false);
 			m_PanelSnowThreshold.Show(false);
 		}
-	#endif
 		
 		if (m_ToggleFog.IsToggled() || m_PresetsShown)
 		{
 			m_PanelFog.Show(true);
-			#ifndef DAYZ_1_25
 			m_PanelFogDynamic.Show(true);
-			#endif
 		}
 		else
 		{
 			m_PanelFog.Show(false);
-			#ifndef DAYZ_1_25
 			m_PanelFogDynamic.Show(false);
-			#endif
 		}
 		
 		if (m_ToggleWind.IsToggled() || m_PresetsShown)
 		{
-			#ifndef DAYZ_1_25
 			m_PanelWindMagnitude.Show(true);
 			m_PanelWindDirection.Show(true);
-			#else
-			m_PanelWind.Show(true);
-			#endif
 
 			if (m_PresetsShown)
 				m_PanelWindFunc.Show(true);
@@ -1508,12 +1391,8 @@ class JMWeatherForm: JMFormBase
 		}
 		else
 		{
-			#ifndef DAYZ_1_25
 			m_PanelWindMagnitude.Show(false);
 			m_PanelWindDirection.Show(false);
-			#else
-			m_PanelWind.Show(false);
-			#endif
 			m_PanelWindFunc.Show(false);
 		}
 	}
@@ -1643,7 +1522,6 @@ class JMWeatherForm: JMFormBase
 		UIActionManager.CreatePanel( m_PanelFog, 0xFF000000, 1 );
 	}
 
-#ifndef DAYZ_1_25
 	private void InitDynFogWidgets( Widget actionsParent )
 	{
 		m_PanelFogDynamic = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
@@ -1686,7 +1564,6 @@ class JMWeatherForm: JMFormBase
 
 		UIActionManager.CreatePanel( m_PanelFogDynamic, 0xFF000000, 1 );
 	}
-#endif
 
 	private void InitRainWidgets( Widget actionsParent )
 	{
@@ -1864,7 +1741,6 @@ class JMWeatherForm: JMFormBase
 		UIActionManager.CreatePanel( m_PanelOvercast, 0xFF000000, 1 );
 	}
 
-#ifndef DAYZ_1_25
 	private void InitWindMagnitudeWidgets( Widget actionsParent )
 	{
 		m_PanelWindMagnitude = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
@@ -1956,83 +1832,6 @@ class JMWeatherForm: JMFormBase
 		string cardinal = CARDINAL_DIRECTIONS[index];
 		m_SliderWindDirectionForecast.SetText( string.Format("%1 %2°", cardinal, direction) );
 	}
-
-#else
-
-	private void InitWindDirectionSlider( Widget parent, out UIActionSlider action, string label )
-	{
-		action = UIActionManager.CreateSlider( parent, label, 0, 1, this, "OnChange_Wind" );
-		action.SetCurrent( 0 );
-		action.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		action.SetStepValue( 0.01 );
-		action.SetMin( -1.0 );
-		action.SetMax( 1.0 );
-		action.SetWidgetWidth( action.GetLabelWidget(), 0.5 );
-		action.SetWidgetWidth( action.GetSliderWidget(), 0.5 );
-	}
-
-	private void InitWindWidgets( Widget actionsParent )
-	{
-		m_PanelWind = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
-
-		UIActionManager.CreateText( m_PanelWind, "Wind: ", "Sets the wind direction, speed and the maximum speed" );
-	
-		Widget sliders = UIActionManager.CreateGridSpacer( m_PanelWind, 1, 2 );
-		sliders.SetFlags( WidgetFlags.RALIGN );
-		SetWidthPos( sliders, 0.95, 0.05 );
-		InitWindDirectionSlider( sliders, m_SliderWindDirectionX, "Direction X" );
-		InitWindDirectionSlider( sliders, m_SliderWindDirectionZ, "Direction Z" );
-		sliders.Update();
-
-		Widget actions = UIActionManager.CreatePanel( m_PanelWind, 0x00000000, 35 );
-
-		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 2 );
-
-		m_EditWindSpeed = UIActionManager.CreateSlider( actionsGrid, "Speed", 0, 1, this );
-		m_EditWindSpeed.SetCurrent( 0 );
-		m_EditWindSpeed.SetStepValue( 0.05 );
-		m_EditWindSpeed.SetMin( 0 );
-		m_EditWindSpeed.SetMax( 1.0 );
-		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetLabelWidget(), 0.6 );
-		m_EditWindSpeed.SetWidgetWidth( m_EditWindSpeed.GetSliderWidget(), 0.6 );
-
-		m_EditWindMaxSpeed = UIActionManager.CreateEditableText( actionsGrid, "Max Speed", this, "OnChange_UpdateWindMaxSpeed");
-		m_EditWindMaxSpeed.SetOnlyNumbers( true );
-		m_EditWindMaxSpeed.SetText( "0" );
-		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetLabelWidget(), 0.6 );
-		m_EditWindMaxSpeed.SetWidgetWidth( m_EditWindMaxSpeed.GetEditBoxWidget(), 0.6 );
-
-		UIActionManager.CreatePanel( m_PanelWind, 0xFF000000, 1 );
-	}
-
-	void OnChange_UpdateWindMaxSpeed( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-		
-		UpdateWindMaxSpeed();
-	}
-
-	void UpdateWindMaxSpeed()
-	{
-		float max = ToFloat(m_EditWindMaxSpeed.GetText());
-
-		m_EditWindSpeed.SetMax( max );
-	}
-
-	void OnChange_Wind( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		float dirX = m_SliderWindDirectionX.GetCurrent();
-		float dirZ = m_SliderWindDirectionZ.GetCurrent();
-
-		vector dir = Vector( dirX, 0.0, dirZ ).Normalized();
-		m_SliderWindDirectionX.SetCurrent( dir[0] );
-		m_SliderWindDirectionZ.SetCurrent( dir[2] );
-	}
-#endif
 	
 	private void InitWindFuncWidgets( Widget actionsParent )
 	{

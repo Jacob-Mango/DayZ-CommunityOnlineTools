@@ -383,9 +383,7 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
-		#ifndef DAYZ_1_25
 		types.Insert( JMESPViewTypeBoat );
-		#endif
 		
 		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );

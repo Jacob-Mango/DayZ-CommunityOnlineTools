@@ -658,7 +658,6 @@ class JMESPMetaCar : JMESPMeta
 	}
 };
 
-#ifndef DAYZ_1_25
 class JMESPMetaBoat : JMESPMeta
 {
 	UIActionButton m_UnstuckButton;
@@ -688,4 +687,3 @@ class JMESPMetaBoat : JMESPMeta
 		module.Vehicle_Refuel( target );
 	}
 };
-#endif
