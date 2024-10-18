@@ -731,39 +731,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 			}
 		}
 
-		#ifdef DAYZ_1_25
-		ItemBase itembs;
-		if ( Class.CastTo( itembs, parent ) )
-		{
-			if (!itembs.IsInherited(Building) && !itembs.IsInherited(AdvancedCommunication))
-				dataItem.m_Health 		= itembs.GetHealth();
-
-			if (itembs.HasQuantity())
-			{
-				dataItem.m_Quantity 	= itembs.GetQuantity();
-				dataItem.m_LiquidType 	= itembs.GetLiquidType();
-			}
-			
-			dataItem.m_Temperature 	= itembs.GetTemperature();
-
-			ItemBase child;
-			for (int k=0; k < itembs.GetInventory().AttachmentCount(); k++)
-			{
-				child = ItemBase.Cast(itembs.GetInventory().GetAttachmentFromIndex( k ));
-				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-			}
-
-			CargoBase cargo = itembs.GetInventory().GetCargo();
-			if(cargo)
-			{
-				for(int j=0; j < cargo.GetItemCount(); j++)
-				{
-					child = ItemBase.Cast(cargo.GetItem(j));
-					item.m_Attachments.Insert(LoadoutProcessSubItem(child));
-				}
-			}
-		}
-		#else // 1.26+
 		if (!parent.IsInherited(Building) && !parent.IsInherited(AdvancedCommunication))
 			dataItem.m_Health 		= parent.GetHealth();
 
@@ -791,7 +758,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 				item.m_Attachments.Insert(LoadoutProcessSubItem(child));
 			}
 		}
-		#endif
 
 		return item;
 	}

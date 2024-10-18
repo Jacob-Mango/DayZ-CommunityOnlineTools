@@ -396,9 +396,6 @@ modded class PlayerBase
 		{
 			#ifndef NO_GUI
 			m_Hud.Update(timeSlice);
-			#ifdef DAYZ_1_25
-			m_Hud.ToggleHeatBufferPlusSign(m_HasHeatBuffer);
-			#endif
 			
 			if (IsControlledPlayer() && m_EffectWidgets && m_EffectWidgets.IsAnyEffectRunning())
 			{
@@ -409,11 +406,9 @@ modded class PlayerBase
 			if (m_UndergroundHandler)
 				m_UndergroundHandler.Tick(timeSlice);
 			
-			#ifndef DAYZ_1_25
 			//! DayZ 1.26+
 			if (m_UndergroundBunkerHandler)
 				m_UndergroundBunkerHandler.Tick(timeSlice);
-			#endif
 		}
 	}
 

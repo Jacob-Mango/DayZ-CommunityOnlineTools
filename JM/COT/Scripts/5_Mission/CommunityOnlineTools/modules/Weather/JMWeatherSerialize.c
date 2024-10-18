@@ -65,7 +65,6 @@ class JMWeatherSerialize
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
 
-		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
@@ -81,11 +80,6 @@ class JMWeatherSerialize
 		preset.PWindDirection.Forecast = 0.0;
 		preset.PWindDirection.Time = 120;
 		preset.PWindDirection.MinDuration = 21600;
-		#else
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;
@@ -122,7 +116,6 @@ class JMWeatherSerialize
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
 
-		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
@@ -138,11 +131,6 @@ class JMWeatherSerialize
 		preset.PWindDirection.Forecast = 0.0;
 		preset.PWindDirection.Time = 120;
 		preset.PWindDirection.MinDuration = 21600;
-		#else
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;
@@ -179,7 +167,6 @@ class JMWeatherSerialize
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
 
-		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
@@ -195,11 +182,6 @@ class JMWeatherSerialize
 		preset.PWindDirection.Forecast = 0.0;
 		preset.PWindDirection.Time = 120;
 		preset.PWindDirection.MinDuration = 21600;
-		#else
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;
@@ -245,7 +227,6 @@ class JMWeatherSerialize
 		preset.RainThreshold.OvercastMax = -1;
 		preset.RainThreshold.Time = -1;
 
-		#ifndef DAYZ_1_25
 		preset.PSnow.Forecast = 0.0;
 		preset.PSnow.Time = 120;
 		preset.PSnow.MinDuration = 21600;
@@ -261,11 +242,6 @@ class JMWeatherSerialize
 		preset.PWindDirection.Forecast = 0.0;
 		preset.PWindDirection.Time = 120;
 		preset.PWindDirection.MinDuration = 21600;
-		#else
-		preset.Wind.Dir = "0 0 0";
-		preset.Wind.Speed = -1;
-		preset.Wind.MaxSpeed = -1;
-		#endif
 
 		preset.WindFunc.Min = -1;
 		preset.WindFunc.Max = -1;

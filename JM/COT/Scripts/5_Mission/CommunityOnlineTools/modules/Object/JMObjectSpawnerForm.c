@@ -6,9 +6,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
-#ifndef DAYZ_1_25
 	private UIActionSlider m_TemperatureItem;
-#endif
 	private UIActionSlider m_HealthItem;
 	private UIActionDropdownList m_ItemDataList;
 	
@@ -130,17 +128,11 @@ class JMObjectSpawnerForm: JMFormBase
 		string displayName;
 		string translated;
 		int color;
-	#ifdef DAYZ_1_25
 		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
 		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
-		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
-	#else
 		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
-	#endif
 		{
-	#ifndef DAYZ_1_25
 			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
-	#endif
 
 			string liquidClsName = nutritionProfile.GetLiquidClassname();
 			string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
@@ -270,13 +262,11 @@ class JMObjectSpawnerForm: JMFormBase
 		m_HealthItem.SetStepValue( 1 );
 		m_HealthItem.SetCurrent( 100 );
 
-		#ifndef DAYZ_1_25
 		m_TemperatureItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
 		m_TemperatureItem.SetSliderWidth(0.6);
 		m_TemperatureItem.SetStepValue( 1 );
 		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
 		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
-		#endif
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
@@ -479,7 +469,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateTemperatureItemColor()
 	{
-		#ifndef DAYZ_1_25
 		int value = m_TemperatureItem.GetCurrent();
 
 		m_TemperatureItem.SetColor( ObjectTemperatureState.GetStateData(value).m_Color );
@@ -489,7 +478,6 @@ class JMObjectSpawnerForm: JMFormBase
 			m_TemperatureItem.SetFormat("#STR_COT_FORMAT_DEGREE");
 
 		m_TemperatureItem.SetAlpha( 1.0 );
-		#endif
 	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
@@ -569,9 +557,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
-	#ifndef DAYZ_1_25
 		m_TemperatureItem.Disable();
-	#endif
 
 		int itemStateType = m_ItemStateType;
 
@@ -603,9 +589,7 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 					else
 					{
-					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
-					#endif
 						itemStateType = 0;
 					}
 					int liquidType = item.GetLiquidTypeInit();
@@ -616,9 +600,7 @@ class JMObjectSpawnerForm: JMFormBase
 				{
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
-					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
-					#endif
 						
 						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
@@ -811,11 +793,7 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		float health = m_HealthItem.GetCurrent();
-	#ifndef DAYZ_1_25
 		float temp = m_TemperatureItem.GetCurrent();
-	#else
-		float temp;
-	#endif
 		float quantity = m_QuantityItem.GetCurrent();
 
 		switch (mode)

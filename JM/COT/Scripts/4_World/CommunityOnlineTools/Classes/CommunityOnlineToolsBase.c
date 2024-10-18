@@ -395,19 +395,15 @@ class CommunityOnlineToolsBase
 	static void Refuel(Object obj)
 	{
 		CarScript car;
-		#ifndef DAYZ_1_25
 		BoatScript boat;
-		#endif
 		if (Class.CastTo(car, obj))
 		{
 			car.COT_Refuel();
 		}
-		#ifndef DAYZ_1_25
 		else if (Class.CastTo(boat, obj))
 		{
 			boat.COT_Refuel();
 		}
-		#endif
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;

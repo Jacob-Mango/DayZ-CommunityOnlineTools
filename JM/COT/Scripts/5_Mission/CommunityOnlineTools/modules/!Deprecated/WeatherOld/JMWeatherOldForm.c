@@ -321,9 +321,7 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
-	#ifndef DAYZ_1_25
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
-	#endif
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -393,9 +391,7 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
-	#ifndef DAYZ_1_25
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
-	#endif
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -418,9 +414,7 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
-	#ifndef DAYZ_1_25
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
-	#endif
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -442,9 +436,7 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigFog = m_CurrFog;
 		m_OrigWindForce = m_CurrWindForce;
 		
-	#ifndef DAYZ_1_25
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( m_CurrSnow, 0, 0 ), true );
-	#endif
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( m_CurrRain, 0, 0 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( m_CurrRain * m_CurrRain, 0.8, 4000 ), true );
 		GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( m_CurrFog, 0, 0 ), true );
@@ -460,9 +452,7 @@ class JMWeatherOldForm: JMFormBase
 
 		m_OrigOvercast = weather.GetOvercast().GetActual();
 		m_OrigRain = weather.GetRain().GetActual();
-	#ifndef DAYZ_1_25
 		m_OrigSnow = weather.GetSnowfall().GetActual();
-	#endif
 		m_OrigFog = weather.GetFog().GetActual();
 		m_OrigWindForce = weather.GetWindSpeed();
 
@@ -516,10 +506,8 @@ class JMWeatherOldForm: JMFormBase
 		m_SldRain.SetCurrent(weather.GetRain().GetActual() * 100);
 		UpdateSliderRain();
 
-	#ifndef DAYZ_1_25
 		m_SldSnow.SetCurrent(weather.GetSnowfall().GetActual() * 100);
 		UpdateSliderSnow();
-	#endif
 
 		m_SldFog.SetCurrent(weather.GetFog().GetActual() * 100);
 		UpdateSliderFog();
