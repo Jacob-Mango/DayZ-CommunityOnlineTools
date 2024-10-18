@@ -92,9 +92,9 @@ class JMCinematicCamera: JMCameraBase
 			
 			linearVelocity = linearVelocity * CAMERA_VELDRAG;
 
-			CalcAccelerationRate(m_Strafe, strafe, increaseSpeeds);
-			CalcAccelerationRate(m_Altitude, altitude, increaseSpeeds);
-			CalcAccelerationRate(m_Forward, forward, increaseSpeeds);
+			CalcAccelerationRate(m_Strafe, strafe, timeslice, increaseSpeeds);
+			CalcAccelerationRate(m_Altitude, altitude, timeslice, increaseSpeeds);
+			CalcAccelerationRate(m_Forward, forward, timeslice, increaseSpeeds);
 
 			linearVelocity = linearVelocity + ( transform[0] * strafe * cam_speed );
 			linearVelocity = linearVelocity + ( transform[1] * altitude * cam_speed );
@@ -185,17 +185,17 @@ class JMCinematicCamera: JMCameraBase
 		}
 	}
 
-	void CalcAccelerationRate(inout float velocity, inout float rate, bool increaseSpeeds = false)
+	void CalcAccelerationRate(inout float velocity, inout float rate, float dt, bool increaseSpeeds = false)
 	{
-		float mult = 0.05;
+		float mult = 3.0;
 
 		//! Adjust for increased camera speed so that effective acceleration stays the same
 		if (increaseSpeeds)
-			mult *= 0.447214;  //! 0.05 * Math.Sqrt(0.2) == 0.05 / Math.Sqrt(CAMERA_BOOST_MULT)
+			mult *= 0.447214;  //! mult * Math.Sqrt(0.2) == mult / Math.Sqrt(CAMERA_BOOST_MULT)
 
 		//! Slow acceleration, instant deceleration
 		if (rate)
-			velocity = Math.Clamp(velocity + rate * mult, -1.0, 1.0);
+			velocity = Math.Clamp(velocity + Math.AbsFloat(rate) * mult * dt, 0.0, 1.0);
 		else
 			velocity = 0;
 
