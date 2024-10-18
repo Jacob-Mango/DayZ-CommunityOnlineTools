@@ -63,6 +63,7 @@ class JMCinematicCamera: JMCameraBase
 
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
+		bool decreaseSpeeds = input.LocalValue( "UAWalkRunTemp" );
 		// ================ Inputs ================
 
 		if ( !MoveFreeze && !shouldTravel )
@@ -84,9 +85,13 @@ class JMCinematicCamera: JMCameraBase
 				
 				cam_speed = CAMERA_SPEED;
 
-				if ( increaseSpeeds ) 
+				if ( decreaseSpeeds )
 				{
-					cam_speed = cam_speed * CAMERA_BOOST_MULT;
+					cam_speed *= 0.2;
+				}
+				else if ( increaseSpeeds ) 
+				{
+					cam_speed *= CAMERA_BOOST_MULT;
 				}
 			}
 			
