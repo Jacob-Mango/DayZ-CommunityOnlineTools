@@ -195,14 +195,20 @@ class JMCinematicCamera: JMCameraBase
 
 		//! Slow acceleration, instant deceleration
 		if (rate)
+		{
 			velocity = Math.Clamp(velocity + Math.AbsFloat(rate) * mult * dt, 0.0, 1.0);
-		else
-			velocity = 0;
 
-		if (rate < 0)
-			rate = velocity * -velocity;
+			if (rate < 0)
+				rate = velocity * -velocity;
+			else
+				rate = velocity * velocity;
+		}
 		else
-			rate = velocity * velocity;
+		{
+			velocity = Math.Clamp(velocity - mult * dt, 0.0, 1.0);
+
+			rate = 0;
+		}
 	}
 	
 	void SetupTraveling(TVectorArray positions, TFloatArray time, TBoolArray smooth)
