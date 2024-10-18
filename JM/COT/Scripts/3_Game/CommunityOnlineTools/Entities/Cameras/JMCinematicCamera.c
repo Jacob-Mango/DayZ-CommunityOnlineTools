@@ -185,27 +185,27 @@ class JMCinematicCamera: JMCameraBase
 		}
 	}
 
-	void CalcAccelerationRate(inout float velocity, inout float rate, float dt, bool increaseSpeeds = false)
+	void CalcAccelerationRate(inout float t, inout float rate, float dt, bool increaseSpeeds = false)
 	{
-		float mult = 3.0;
+		float step = 3.0 * dt;
 
 		//! Adjust for increased camera speed so that effective acceleration stays the same
 		if (increaseSpeeds)
-			mult *= 0.447214;  //! mult * Math.Sqrt(0.2) == mult / Math.Sqrt(CAMERA_BOOST_MULT)
+			step *= 0.447214;  //! step * Math.Sqrt(0.2) == step / Math.Sqrt(CAMERA_BOOST_MULT)
 
 		//! Slow acceleration, instant deceleration
 		if (rate)
 		{
-			velocity = Math.Clamp(velocity + Math.AbsFloat(rate) * mult * dt, 0.0, 1.0);
+			t = Math.Min(t + step, 1.0);
 
 			if (rate < 0)
-				rate = velocity * -velocity;
+				rate = -SmootherStep(t);
 			else
-				rate = velocity * velocity;
+				rate = SmootherStep(t);
 		}
 		else
 		{
-			velocity = Math.Clamp(velocity - mult * dt, 0.0, 1.0);
+			t = Math.Max(t - step, 0.0);
 
 			rate = 0;
 		}
@@ -230,6 +230,11 @@ class JMCinematicCamera: JMCameraBase
     {
         return t * t * (3 - 2 * t);
     }
+
+	private float SmootherStep(float t)
+	{
+		return t * t * t * (t * (6 * t - 15) + 10);
+	}
 
 	bool IsAnyInputExcludeActive()
 	{
