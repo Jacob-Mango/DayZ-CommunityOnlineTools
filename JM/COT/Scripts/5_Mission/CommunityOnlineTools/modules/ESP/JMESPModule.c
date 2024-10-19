@@ -1552,7 +1552,11 @@ class JMESPModule: JMRenderableModuleBase
 
 				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
 
-				obj.SetPosition(cursor);
+				EntityAI ent = EntityAI.Cast(obj);
+				if (ent)
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, cursor);
+				else
+					obj.SetPosition(cursor);
 				moved++;
 			}
 
