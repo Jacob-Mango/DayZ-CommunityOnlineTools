@@ -493,9 +493,13 @@ class CommunityOnlineToolsBase
 		vector velocity = GetVelocity(entity);
 		vector angularVelocity = dBodyGetAngularVelocity(entity);
 
+		Transport transport = Transport.Cast(entity);
+
 		if (isActive)
 		{
-			dBodyActive(entity, ActiveState.INACTIVE);
+			if (!transport)
+				dBodyActive(entity, ActiveState.INACTIVE);
+
 			dBodyDynamic(entity, false);
 		}
 
@@ -508,14 +512,13 @@ class CommunityOnlineToolsBase
 		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
 		entity.SetTransform(transform);
 
-		Transport transport;
 		if (isActive)
 		{
 			SetVelocity(entity, velocity);
 			dBodySetAngularVelocity(entity, angularVelocity);
 			dBodyDynamic(entity, true);
 		}
-		else if (Class.CastTo(transport, entity))
+		else if (transport)
 		{
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}
