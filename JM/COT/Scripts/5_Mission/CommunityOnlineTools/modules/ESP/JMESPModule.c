@@ -383,9 +383,7 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
-		#ifndef DAYZ_1_25
 		types.Insert( JMESPViewTypeBoat );
-		#endif
 		
 		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
@@ -1554,7 +1552,11 @@ class JMESPModule: JMRenderableModuleBase
 
 				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
 
-				obj.SetPosition(cursor);
+				EntityAI ent = EntityAI.Cast(obj);
+				if (ent)
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, cursor);
+				else
+					obj.SetPosition(cursor);
 				moved++;
 			}
 

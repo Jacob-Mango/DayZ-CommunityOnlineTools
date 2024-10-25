@@ -355,7 +355,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			if (!player.PlayerObject)
 				continue;
 
-			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED_A, 10, player.PlayerObject.GetIdentity() );
+			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
 		}
 	}
 
@@ -833,6 +833,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			CommunityOnlineToolsBase.HealEntityRecursive(vehicle);
 			CommunityOnlineToolsBase.Refuel(vehicle);
+			
+			JMObjectSpawnerModule objSpawnerModule;
+			if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
+				objSpawnerModule.SpawnCompatibleAttachments(vehicle, null, 0);
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
 			SendWebhook( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle" );
@@ -2469,7 +2473,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			if ( player == NULL )
 				continue;
 
-			player.RemoveAllItems();
+			player.COT_RemoveAllItems();
 
 			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 

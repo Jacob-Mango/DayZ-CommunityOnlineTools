@@ -23,6 +23,9 @@ class CommunityOnlineToolsBase
 
 	void ~CommunityOnlineToolsBase()
 	{
+		if (!g_Game)
+			return;
+
 		array< JMRenderableModuleBase > cotModules = GetModuleManager().GetCOTModules();
 		for ( int i = 0; i < cotModules.Count(); i++ )
 		{
@@ -392,19 +395,15 @@ class CommunityOnlineToolsBase
 	static void Refuel(Object obj)
 	{
 		CarScript car;
-		#ifndef DAYZ_1_25
 		BoatScript boat;
-		#endif
 		if (Class.CastTo(car, obj))
 		{
 			car.COT_Refuel();
 		}
-		#ifndef DAYZ_1_25
 		else if (Class.CastTo(boat, obj))
 		{
 			boat.COT_Refuel();
 		}
-		#endif
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
@@ -494,9 +493,13 @@ class CommunityOnlineToolsBase
 		vector velocity = GetVelocity(entity);
 		vector angularVelocity = dBodyGetAngularVelocity(entity);
 
+		Transport transport = Transport.Cast(entity);
+
 		if (isActive)
 		{
-			dBodyActive(entity, ActiveState.INACTIVE);
+			if (!transport)
+				dBodyActive(entity, ActiveState.INACTIVE);
+
 			dBodyDynamic(entity, false);
 		}
 
@@ -509,14 +512,13 @@ class CommunityOnlineToolsBase
 		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
 		entity.SetTransform(transform);
 
-		Transport transport;
 		if (isActive)
 		{
 			SetVelocity(entity, velocity);
 			dBodySetAngularVelocity(entity, angularVelocity);
 			dBodyDynamic(entity, true);
 		}
-		else if (Class.CastTo(transport, entity))
+		else if (transport)
 		{
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}

@@ -127,6 +127,9 @@ class JMPlayerForm: JMFormBase
 
 	void ~JMPlayerForm()
 	{
+		if (!g_Game)
+			return;
+
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Remove( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Remove( OnPlayer_Button );
 	}
@@ -153,9 +156,7 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_Water, "Admin.Player.Set.Water" );
 		UpdatePermission( m_Stamina, "Admin.Player.Set.Stamina" );
 		
-		#ifndef DAYZ_1_25
 		UpdatePermission( m_HeatBuffer, "Admin.Player.Set.HeatBuffer" );
-		#endif
 
 		UpdatePermission( m_BloodyHands, "Admin.Player.Set.BloodyHands" );
 
@@ -385,7 +386,6 @@ class JMPlayerForm: JMFormBase
 		m_Blood = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOOD", 0, 5000, this, "Click_SetBlood" );
 		m_Stamina = UIActionManager.CreateSlider( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_STAMINA", 0, CfgGameplayHandler.GetStaminaMax(), this, "Click_SetStamina" );
 
-		#ifndef DAYZ_1_25
 		Widget headerTemos = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		UIActionManager.CreateText( headerTemos, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_TEMPERATURES");
 
@@ -397,7 +397,6 @@ class JMPlayerForm: JMFormBase
 
 		m_HeatBuffer = UIActionManager.CreateSlider( actionsTemps, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_HEATBUFFER", 0, 3, this, "Click_SetHeatBuffer" );
 		m_HeatBuffer.SetStepValue(0.1);
-		#endif
 
 		m_Health.SetSliderWidth(0.5);
 		m_Shock.SetSliderWidth(0.5);
@@ -405,10 +404,8 @@ class JMPlayerForm: JMFormBase
 		m_Energy.SetSliderWidth(0.5);
 		m_Water.SetSliderWidth(0.5);
 		m_Stamina.SetSliderWidth(0.5);
-		#ifndef DAYZ_1_25
 		m_HeatComfort.SetSliderWidth(0.5);
 		m_HeatBuffer.SetSliderWidth(0.5);
-		#endif
 
 		Widget actionButtons = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 		m_ApplyStats = UIActionManager.CreateButton( actionButtons, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
@@ -808,7 +805,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Strip");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "Strip");
 	}
 
 	void Strip(JMConfirmation confirmation = NULL)
@@ -847,7 +844,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Dry");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", "Dry", false);
 	}
 
 	void Dry(JMConfirmation confirmation = NULL)
@@ -886,7 +883,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("KillPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", "KillPlayer");
 	}
 
 	void KillPlayer(JMConfirmation confirmation = NULL)
@@ -928,7 +925,7 @@ class JMPlayerForm: JMFormBase
 		VomitPlayer();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("VomitPlayer");
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", "VomitPlayer");
 	}
 
 	void VomitPlayer()
@@ -957,7 +954,7 @@ class JMPlayerForm: JMFormBase
 		ScalePlayer();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("ScalePlayer", false);
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", "ScalePlayer", false);
 	}
 
 	void ScalePlayer()
@@ -986,7 +983,7 @@ class JMPlayerForm: JMFormBase
 		SendMessages();
 
 		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("SendMessage", false);
+		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", "SendMessage", false);
 	}
 
 	void SendMessages()
@@ -1017,7 +1014,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("KickPlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer");
 	}
 
 	void KickPlayer(JMConfirmation confirmation = NULL)
@@ -1062,7 +1059,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("BanPlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer");
 	}
 
 	void BanPlayer()
@@ -1103,7 +1100,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("StopBleeding");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", "StopBleeding", false);
 	}
 
 	void StopBleeding(JMConfirmation confirmation = NULL)
@@ -1142,7 +1139,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("Heal");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", "Heal", false);
 	}
 
 	void Heal(JMConfirmation confirmation = NULL)
@@ -1226,7 +1223,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("SetPositionTeleport");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", "SetPositionTeleport", false);
 	}
 
 	void SetPositionTeleport(JMConfirmation confirmation = NULL)
@@ -1272,7 +1269,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("TeleportToMe");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", "TeleportToMe", false);
 	}
 
 	void TeleportToMe(JMConfirmation confirmation = NULL)
@@ -1408,7 +1405,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("TeleportToPrevious");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", "TeleportToPrevious", false);
 	}
 
 	void TeleportToPrevious(JMConfirmation confirmation = NULL)
@@ -1527,7 +1524,6 @@ class JMPlayerForm: JMFormBase
 		if ( m_Stamina && !m_StaminaUpdated )
 			m_Stamina.SetCurrent( m_SelectedInstance.GetStamina() );
 		
-		#ifndef DAYZ_1_25
 		if ( m_HeatComfort )
 			m_HeatComfort.SetCurrent( m_SelectedInstance.GetHeatComfort() );
 
@@ -1537,7 +1533,6 @@ class JMPlayerForm: JMFormBase
 			int heatbufferState = m_HeatBuffer.GetCurrent();
 			m_HeatBuffer.SetText(m_HeatBufferStates[heatbufferState] + " "+ m_HeatBuffer.GetCurrent());
 		}
-		#endif
 
 		if ( m_BloodyHands )
 			m_BloodyHands.SetChecked( m_SelectedInstance.HasBloodyHands() );
@@ -1680,7 +1675,6 @@ class JMPlayerForm: JMFormBase
 			m_Stamina.SetColor( ARGB( 255, 220, 0, 0 ) );
 		}
 
-		#ifndef DAYZ_1_25
 		// COLD
 		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
 		{
@@ -1731,7 +1725,6 @@ class JMPlayerForm: JMFormBase
 			m_HeatBuffer.SetColor(0x00FFFFFF);
 		}
 		m_HeatBuffer.SetAlpha( 1.0 );
-		#endif
 	}
 
 	void RefreshTeleports(bool force = false)
@@ -2023,7 +2016,6 @@ class JMPlayerForm: JMFormBase
 		m_HeatBufferUpdated = true;
 		m_HeatBuffer.SetAlpha( 1.0 );
 		
-		#ifndef DAYZ_1_25
 		// COLD
 		if ( m_HeatComfort.GetCurrent() <= PlayerConstants.THRESHOLD_HEAT_COMFORT_MINUS_CRITICAL )
 		{
@@ -2056,7 +2048,6 @@ class JMPlayerForm: JMFormBase
 			m_HeatComfort.SetColor( Colors.TEMPERATURE_HOT_LVL_FOUR );
 		}
 		m_HeatComfort.SetAlpha( 1.0 );
-		#endif
 	}
 
 	void Click_BloodyHands( UIEvent eid, UIActionBase action )
