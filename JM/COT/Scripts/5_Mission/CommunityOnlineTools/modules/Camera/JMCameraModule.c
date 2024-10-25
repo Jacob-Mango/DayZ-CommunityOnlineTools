@@ -1,8 +1,6 @@
 class JMCameraModule: JMRenderableModuleBase
 {
 	protected float m_CurrentSmoothBlur;
-	protected float m_CurrentFOV;
-	protected float m_TargetFOV;
 	protected float m_UpdateTime;
 
 	// UI stuff
@@ -32,8 +30,6 @@ class JMCameraModule: JMRenderableModuleBase
 		m_Positions = new TVectorArray;
 		
 		m_CurrentSmoothBlur = 0.0;
-		m_CurrentFOV = 1.0;
-		m_TargetFOV = 1.0;
 	}
 
 	override bool HasAccess()
@@ -86,11 +82,12 @@ class JMCameraModule: JMRenderableModuleBase
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-			m_CurrentFOV = CurrentActiveCamera.GetCurrentFOV();
-			if ( m_CurrentFOV != m_TargetFOV && (!CurrentActiveCamera.m_JM_IsADS || CurrentActiveCamera.m_JM_3rdPerson) ) 
+			float currentFOV = CurrentActiveCamera.GetCurrentFOV();
+			if ( currentFOV != CAMERA_TARGETFOV && (!CurrentActiveCamera.m_JM_IsADS || CurrentActiveCamera.m_JM_3rdPerson) ) 
 			{
-				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
-				CurrentActiveCamera.SetFOV( m_CurrentFOV );
+				currentFOV = Math.Lerp( currentFOV, CAMERA_TARGETFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
+				CurrentActiveCamera.SetFOV( currentFOV );
+				CAMERA_FOV = currentFOV;
 			}
 
 			if ( CAMERA_DOF )
@@ -114,7 +111,7 @@ class JMCameraModule: JMRenderableModuleBase
 				if ( dist > 0 )
 					CAMERA_FDIST = dist;
 				
-				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
+				CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
 				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
 				PPEffects.SetChromAbb( CHROMABERX );
 				PPEffects.SetVignette( VIGNETTE, 0, 0, 0, 0 );
@@ -583,7 +580,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		if ( input.LocalValue() != 0 )
 		{
-			m_TargetFOV += input.LocalValue() * 0.01;
+			CAMERA_TARGETFOV += input.LocalValue() * 0.01;
 		}
 	}
 
@@ -591,11 +588,11 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		if ( input.LocalValue() != 0 )
 		{
-			m_TargetFOV -= input.LocalValue() * 0.01;
+			CAMERA_TARGETFOV -= input.LocalValue() * 0.01;
 					
-			if ( m_TargetFOV < 0.01 ) 
+			if ( CAMERA_TARGETFOV < 0.01 ) 
 			{
-				m_TargetFOV = 0.01;
+				CAMERA_TARGETFOV = 0.01;
 			}
 		}
 	}
@@ -700,7 +697,23 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	void Toggle3rdPerson( UAInput input )
 	{
 		if ( input.LocalPress() && CurrentActiveCamera )
-			CurrentActiveCamera.m_JM_3rdPerson = !CurrentActiveCamera.m_JM_3rdPerson;
+		{
+			switch (CurrentActiveCamera.m_JM_3rdPerson)
+			{
+				case JMCamera3rdPersonMode.OFF:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DEFAULT;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Default", ""));
+					break;
+				case JMCamera3rdPersonMode.DEFAULT:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DOLLY;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
+					break;
+				case JMCamera3rdPersonMode.DOLLY:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
+					break;
+			}
+		}
 	}
 
 	void LeftShoulder( UAInput input )
@@ -717,6 +730,6 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void SetTargetFOV( float fov )
 	{
-		m_TargetFOV = fov;
+		CAMERA_TARGETFOV = fov;
 	}
 };

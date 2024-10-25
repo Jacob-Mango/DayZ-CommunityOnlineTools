@@ -336,7 +336,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !player )
 				continue;
 			
-			if (isSelfOnly && players[i].GetGUID() != ident.GetId())
+			if (isSelfOnly && GetGame().IsMultiplayer() && players[i].GetGUID() != ident.GetId())
 				isSelfOnly = false;
 
 			count++;

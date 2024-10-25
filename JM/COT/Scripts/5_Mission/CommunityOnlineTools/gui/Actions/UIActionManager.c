@@ -230,6 +230,45 @@ class UIActionManager
 		return NULL;
 	}
 
+	static UIActionEditableRichText CreateEditableRichText( notnull Widget parent, string label, Class instance = NULL, string funcname = "", string text = "", string button = "" )
+	{
+		bool hasButton;
+		if (button != "" && instance != NULL && funcname != "")
+			hasButton = true;
+
+		string layoutName;
+		if (hasButton)
+			layoutName = "UIActionEditableRichTextButton";
+		else
+			layoutName = "UIActionEditableRichText";
+
+		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		Widget widget = GetGame().GetWorkspace().CreateWidgets( layout, parent );
+
+		CheckWidget(widget, parent, layout);
+
+		UIActionEditableRichText action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			if ( hasButton )
+				action.SetButton( button );
+
+			action.SetCallback( instance, funcname );
+
+			action.SetLabel( label );
+			action.SetText( text );
+
+			return action;
+		}
+
+		UIAMError("Couldn't get script", widget, parent, layout);
+
+		return NULL;
+	}
+
 	static UIActionDropdownList CreateDropdownBox( notnull Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
 	{
 		Widget widget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );

@@ -57,8 +57,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
-		//if (GetGame().GetMission().IsInputExcludeActive("menu"))
-			//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
 		if (m_WasFocused)
 		{
 			CommunityOnlineTools.ForceDisableInputs(false);
@@ -139,14 +137,10 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		if (isFocused && !m_WasFocused)
 		{
-			//if (!GetGame().GetMission().IsInputExcludeActive("menu"))
-				//GetGame().GetMission().AddActiveInputExcludes({"menu"});
 			CommunityOnlineTools.ForceDisableInputs(true);
 		}
 		else if (!isFocused && m_WasFocused)
 		{
-			//if (GetGame().GetMission().IsInputExcludeActive("menu"))
-				//GetGame().GetMission().RemoveActiveInputExcludes({"menu"});
 			CommunityOnlineTools.ForceDisableInputs(false);
 		}
 
@@ -236,7 +230,6 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.Update();
 	}
 
-/*
 	void SetHeight( float height )
 	{
 		float w;
@@ -262,7 +255,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.SetPos( w, ypos );
 		layoutRoot.Update();
 	}
-*/
+
 	void SetFixedSize( float width, float height )
 	{
 		layoutRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );

@@ -506,8 +506,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (!HasTooManyObjects("DeleteSelected"))
-			DeleteSelected();
+		CreateAdvancedObjectConfirm("DeleteSelected");
 	}
 
 	void DeleteSelected()
@@ -525,6 +524,7 @@ class JMESPForm: JMFormBase
 		{
 			if ( node.m_Value.widgetRoot.IsVisible() )
 				node.m_Value.widgetHandler.Select();
+			
 			node = node.m_Next;
 		}
 	}
@@ -540,6 +540,9 @@ class JMESPForm: JMFormBase
 			node.m_Value.widgetHandler.Deselect();
 			node = node.m_Next;
 		}
+
+		// Some scenarios require this to prevent unexpected results for the end user
+		JM_GetSelected().ClearObjects();
 	}
 	
 	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
@@ -547,8 +550,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (!HasTooManyObjects("MoveToCursor"))
-			MoveToCursor();
+		CreateAdvancedObjectConfirm("MoveToCursor");
 	}
 
 	void MoveToCursor()
@@ -596,17 +598,5 @@ class JMESPForm: JMFormBase
 			Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
 		
 		m_LoadoutModule.Create(name);
-	}
-
-	bool HasTooManyObjects(string funcName)
-	{
-		int count = JM_GetSelected().GetObjects().Count();
-		if (count > 1)
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
-		}
-
-		return false;
 	}
 };

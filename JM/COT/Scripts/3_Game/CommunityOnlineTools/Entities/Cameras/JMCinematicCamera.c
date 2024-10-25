@@ -22,6 +22,10 @@ class JMCinematicCamera: JMCameraBase
 
 	autoptr TStringArray m_PossibleInputExcludes = {"menu", "inventory", "map"};
 
+	private float m_Strafe;
+	private float m_Altitude;
+	private float m_Forward;
+
 	void JMCinematicCamera()
 	{
 		//positionOffset = "0 1.5 0";
@@ -59,6 +63,7 @@ class JMCinematicCamera: JMCameraBase
 
 		bool shouldRoll = input.LocalValue( "UALookAround" );
 		bool increaseSpeeds = input.LocalValue( "UATurbo" );
+		bool decreaseSpeeds = input.LocalValue( "UAWalkRunTemp" );
 		// ================ Inputs ================
 
 		if ( !MoveFreeze && !shouldTravel )
@@ -80,13 +85,21 @@ class JMCinematicCamera: JMCameraBase
 				
 				cam_speed = CAMERA_SPEED;
 
-				if ( increaseSpeeds ) 
+				if ( decreaseSpeeds )
 				{
-					cam_speed = cam_speed * CAMERA_BOOST_MULT;
+					cam_speed *= 0.2;
+				}
+				else if ( increaseSpeeds ) 
+				{
+					cam_speed *= CAMERA_BOOST_MULT;
 				}
 			}
 			
 			linearVelocity = linearVelocity * CAMERA_VELDRAG;
+
+			CalcAccelerationRate(m_Strafe, strafe, timeslice, increaseSpeeds);
+			CalcAccelerationRate(m_Altitude, altitude, timeslice, increaseSpeeds);
+			CalcAccelerationRate(m_Forward, forward, timeslice, increaseSpeeds);
 
 			linearVelocity = linearVelocity + ( transform[0] * strafe * cam_speed );
 			linearVelocity = linearVelocity + ( transform[1] * altitude * cam_speed );
@@ -176,6 +189,32 @@ class JMCinematicCamera: JMCameraBase
 			}
 		}
 	}
+
+	void CalcAccelerationRate(inout float t, inout float rate, float dt, bool increaseSpeeds = false)
+	{
+		float step = 3.0 * dt;
+
+		//! Adjust for increased camera speed so that effective acceleration stays the same
+		if (increaseSpeeds)
+			step *= 0.447214;  //! step * Math.Sqrt(0.2) == step / Math.Sqrt(CAMERA_BOOST_MULT)
+
+		//! Slow acceleration, instant deceleration
+		if (rate)
+		{
+			t = Math.Min(t + step, 1.0);
+
+			if (rate < 0)
+				rate = -SmootherStep(t);
+			else
+				rate = SmootherStep(t);
+		}
+		else
+		{
+			t = Math.Max(t - step, 0.0);
+
+			rate = 0;
+		}
+	}
 	
 	void SetupTraveling(TVectorArray positions, TFloatArray time, TBoolArray smooth)
 	{
@@ -196,6 +235,11 @@ class JMCinematicCamera: JMCameraBase
     {
         return t * t * (3 - 2 * t);
     }
+
+	private float SmootherStep(float t)
+	{
+		return t * t * t * (t * (6 * t - 15) + 10);
+	}
 
 	bool IsAnyInputExcludeActive()
 	{

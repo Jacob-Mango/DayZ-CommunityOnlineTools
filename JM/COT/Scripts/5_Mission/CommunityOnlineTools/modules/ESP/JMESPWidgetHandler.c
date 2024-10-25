@@ -244,7 +244,10 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		ScreenPos = GetGame().GetScreenPos( m_LastPosition );
 
-		float distance = vector.Distance( GetCurrentPosition(), m_LastPosition );
+		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
+
+		//if (distance > 10)
+			distance = Math.Round(distance);
 
 		GetScreenSize( Width, Height );
 
@@ -285,6 +288,22 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 					text = Info.name + " (" + distance + "m)";
 				}
 			}
+
+			float w, w2, h;
+			layoutRoot.GetSize(w, h);
+			w = text.Length() * 11 + 40;
+
+			if (m_pnl_Actions.IsVisible())
+				w = 300;
+			else if (w < 100)
+				w = 100;
+
+			w2 = w - 44;
+			if (w2 < 60)
+				w2 = 60;
+
+			layoutRoot.SetSize(w, h);
+			m_txt_ObjectName.SetSize(w2, h);
 
 			m_txt_ObjectName.SetText( text );
 

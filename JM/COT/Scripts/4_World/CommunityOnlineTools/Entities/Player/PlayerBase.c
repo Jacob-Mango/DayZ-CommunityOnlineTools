@@ -109,7 +109,7 @@ modded class PlayerBase
 		int playerVarsBitmaskMaxValue = Math.Pow(2, EnumTools.GetEnumSize(JMPlayerVariables));
 		RegisterNetSyncVariableInt("m_COT_PlayerVarsBitmask", 0, playerVarsBitmaskMaxValue);
 
-		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0, 0.1);
+		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0);
 
 #ifndef CF_MODULE_PERMISSIONS
 		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
@@ -396,9 +396,6 @@ modded class PlayerBase
 		{
 			#ifndef NO_GUI
 			m_Hud.Update(timeSlice);
-			#ifdef DAYZ_1_25
-			m_Hud.ToggleHeatBufferPlusSign(m_HasHeatBuffer);
-			#endif
 			
 			if (IsControlledPlayer() && m_EffectWidgets && m_EffectWidgets.IsAnyEffectRunning())
 			{
@@ -409,11 +406,9 @@ modded class PlayerBase
 			if (m_UndergroundHandler)
 				m_UndergroundHandler.Tick(timeSlice);
 			
-			#ifndef DAYZ_1_25
 			//! DayZ 1.26+
 			if (m_UndergroundBunkerHandler)
 				m_UndergroundBunkerHandler.Tick(timeSlice);
-			#endif
 		}
 	}
 
@@ -784,6 +779,21 @@ modded class PlayerBase
 		{
 			if ( Class.CastTo( item, entity ) )
 				item.SetWet( 0 );
+		}
+	}
+
+	void COT_RemoveAllItems()
+	{
+		array<EntityAI> entities = {};
+		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
+
+		ItemBase item;
+		foreach (EntityAI entity: entities)
+		{
+			if (entity != this && Class.CastTo(item, entity))
+			{
+				item.DeleteSafe();
+			}
 		}
 	}
 

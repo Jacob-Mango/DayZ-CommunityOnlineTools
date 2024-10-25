@@ -213,7 +213,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("TeleportPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", "TeleportPlayer", false);
 	}
 
 	void TeleportPlayer(JMConfirmation confirmation = NULL)

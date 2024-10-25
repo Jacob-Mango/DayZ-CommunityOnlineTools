@@ -59,14 +59,12 @@ class JMWeatherPhenomenon: JMWeatherBase
 				return GetGame().GetWeather().GetFog();
 			case JMWeatherRain:
 				return GetGame().GetWeather().GetRain();
-	#ifndef DAYZ_1_25
 			case JMWeatherSnow:
 				return GetGame().GetWeather().GetSnowfall();
 			case JMWeatherWindMagnitude:
 				return GetGame().GetWeather().GetWindMagnitude();
 			case JMWeatherWindDirection:
 				return GetGame().GetWeather().GetWindDirection();
-	#endif
 			case JMWeatherOvercast:
 				return GetGame().GetWeather().GetOvercast();
 		}
@@ -112,23 +110,19 @@ class JMWeatherDynamicFog: JMWeatherBase
 
 	override void Apply()
 	{
-		#ifndef DAYZ_1_25
 		if (Distance != -1)
 		{
 			GetGame().GetWeather().SetDynVolFogDistanceDensity( Distance, Time );
 			GetGame().GetWeather().SetDynVolFogHeightDensity( Height, Time );
 			GetGame().GetWeather().SetDynVolFogHeightBias( Bias, Time );
 		}
-		#endif
 	}
 
 	override void SetFromWorld()
 	{
-		#ifndef DAYZ_1_25
 		Distance = GetGame().GetWeather().GetDynVolFogDistanceDensity();
 		Height = GetGame().GetWeather().GetDynVolFogHeightDensity();
 		Bias = GetGame().GetWeather().GetDynVolFogHeightBias();
-		#endif
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -159,40 +153,6 @@ class JMWeatherWindMagnitude: JMWeatherPhenomenon
 class JMWeatherWindDirection: JMWeatherPhenomenon
 {
 };
-
-#ifdef DAYZ_1_25
-class JMWeatherWind: JMWeatherBase
-{
-	vector Dir;
-	float Speed;
-	float MaxSpeed;
-
-	override void Apply()
-	{
-		if (Speed != -1)
-		{
-			GetGame().GetWeather().SetWind( Dir * Speed );
-			// GetGame().GetWeather().SetWindSpeed( Speed );
-			GetGame().GetWeather().SetWindMaximumSpeed( MaxSpeed );
-		}
-	}
-
-	override void SetFromWorld()
-	{
-		Dir = GetGame().GetWeather().GetWind();
-		Speed = Dir.Normalize();
-		MaxSpeed = GetGame().GetWeather().GetWindMaximumSpeed();
-	}
-
-	override void Log( PlayerIdentity pidentLog )
-	{
-		if ( IsMissionHost() )
-		{
-			GetCommunityOnlineToolsBase().Log( pidentLog, "Wind " + Dir + ", " + Speed + ", " + MaxSpeed );
-		}
-	}
-};
-#endif
 
 class JMWeatherWindFunction: JMWeatherBase
 {
@@ -284,10 +244,8 @@ class JMWeatherSnowThreshold: JMWeatherBase
 
 	override void Apply()
 	{
-	#ifndef DAYZ_1_25
 		if (Time != -1)
 			GetGame().GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
-	#endif
 	}
 
 	override void SetFromWorld()
@@ -326,12 +284,8 @@ class JMWeatherPreset
 	autoptr JMWeatherSnow PSnow;
 	autoptr JMWeatherSnowThreshold SnowThreshold;
 
-	#ifndef DAYZ_1_25
 	autoptr JMWeatherWindMagnitude PWindMagnitude;
 	autoptr JMWeatherWindDirection PWindDirection;
-	#else
-	autoptr JMWeatherWind Wind;
-	#endif
 	autoptr JMWeatherWindFunction WindFunc;
 
 	void JMWeatherPreset()
@@ -347,14 +301,11 @@ class JMWeatherPreset
 		PRain = new JMWeatherRain;
 		RainThreshold = new JMWeatherRainThreshold;
 
-	#ifndef DAYZ_1_25
 		PSnow = new JMWeatherSnow;
 		SnowThreshold = new JMWeatherSnowThreshold;
+
 		PWindMagnitude = new JMWeatherWindMagnitude;
 		PWindDirection = new JMWeatherWindDirection;
-	#else
-		Wind = new JMWeatherWind;
-	#endif
 		WindFunc = new JMWeatherWindFunction;
 	}
 
@@ -371,14 +322,11 @@ class JMWeatherPreset
 		PRain.Apply();
 		RainThreshold.Apply();
 
-	#ifndef DAYZ_1_25
 		PSnow.Apply();
 		SnowThreshold.Apply();
+
 		PWindMagnitude.Apply();
 		PWindDirection.Apply();
-	#else
-		Wind.Apply();
-	#endif
 		WindFunc.Apply();
 	}
 
@@ -395,14 +343,11 @@ class JMWeatherPreset
 		PRain.SetFromWorld();
 		RainThreshold.SetFromWorld();
 
-	#ifndef DAYZ_1_25
 		PSnow.SetFromWorld();
 		SnowThreshold.SetFromWorld();
+
 		PWindMagnitude.SetFromWorld();
 		PWindDirection.SetFromWorld();
-	#else
-		Wind.SetFromWorld();
-	#endif
 		WindFunc.SetFromWorld();
 	}
 
@@ -423,14 +368,11 @@ class JMWeatherPreset
 			PRain.Log( pidentLogPP );
 			RainThreshold.Log( pidentLogPP );
 
-		#ifndef DAYZ_1_25
 			PSnow.Log( pidentLogPP );
 			SnowThreshold.Log( pidentLogPP );
+
 			PWindMagnitude.Log( pidentLogPP );
 			PWindDirection.Log( pidentLogPP );
-		#else
-			Wind.Log( pidentLogPP );
-		#endif
 			WindFunc.Log( pidentLogPP );
 		}
 	}

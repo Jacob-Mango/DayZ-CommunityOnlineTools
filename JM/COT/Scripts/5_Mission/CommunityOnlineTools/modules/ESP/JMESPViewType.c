@@ -265,7 +265,6 @@ class JMESPViewTypeCar: JMESPViewType
 	}
 };
 
-#ifndef DAYZ_1_25
 class JMESPViewTypeBoat: JMESPViewType
 {
 	void JMESPViewTypeBoat()
@@ -306,7 +305,6 @@ class JMESPViewTypeBoat: JMESPViewType
 		return true;
 	}
 };
-#endif
 
 class JMESPViewTypeWeapon: JMESPViewType
 {

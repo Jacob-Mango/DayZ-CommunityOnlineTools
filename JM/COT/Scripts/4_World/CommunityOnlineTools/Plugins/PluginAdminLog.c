@@ -8,6 +8,44 @@ modded class PluginAdminLog
 	{
 		m_Webhook = webhook;
 	}
+	
+	override void OnPlacementComplete( Man player, ItemBase item )
+	{
+		super.OnPlacementComplete(player, item);
+
+		PlayerBase PBplayer = PlayerBase.Cast(player);
+		if (!PBplayer)
+			return;
+
+		TerritoryFlag territory;
+		if (Class.CastTo( territory, item ))
+		{
+			auto msg = m_Webhook.CreateDiscordMessage();
+
+			msg.GetEmbed().AddField( "Item Placement", "" + PBplayer.FormatSteamWebhook() + " Placed " + item.GetDisplayName() + " at "+ item.GetPosition(), false );
+
+			m_Webhook.Post( "TerritoryDeployed", msg );
+		}
+		else
+		{
+			auto msg1 = m_Webhook.CreateDiscordMessage();
+
+			msg1.GetEmbed().AddField( "Item Placement", "" + PBplayer.FormatSteamWebhook() + " Placed " + item.GetDisplayName() + " at "+ item.GetPosition(), false );
+
+			m_Webhook.Post( "ItemDeployed", msg1 );
+		}
+	}
+	
+	override void PlayerList()
+	{
+		super.PlayerList();
+
+		auto msg = m_Webhook.CreateDiscordMessage();
+
+		msg.GetEmbed().AddField( "Server Population", "" + m_PlayerArray.Count() + " Players are currently on the server.", false );
+
+		m_Webhook.Post( "PlayerCount", msg );
+	}
 
 	override void PlayerKilled( PlayerBase player, Object source )  
 	{
@@ -16,6 +54,12 @@ modded class PluginAdminLog
 		if ( !player || !source || !m_Webhook )
 			return;
 
+		COT_WebHookPlayerKilled(player, source);		// meant for admins mostly
+		COT_WebHookPlayerKilled(player, source, false); // for public killfeed stuff
+	}
+
+	void COT_WebHookPlayerKilled(PlayerBase player, Object source, bool showPos = true)
+	{
 		auto message = m_Webhook.CreateDiscordMessage();
 		auto embed = message.GetEmbed();
 		embed.SetColor( 16711680 ); // 0xFF0000
@@ -24,7 +68,8 @@ modded class PluginAdminLog
 
 		string deathBreakdown;
 
-		deathBreakdown += "Position: " + player.GetPosition() + "\n";
+		if (showPos)
+			deathBreakdown += "Position: " + player.GetPosition() + "\n";
 
 		if ( player == source )
 		{
@@ -58,8 +103,9 @@ modded class PluginAdminLog
 				string distanceWeapon = "";
 				if ( !source.IsMeleeWeapon() )
 					distanceWeapon = " from " + vector.Distance( player.GetPosition(), pbKiller.GetPosition() ) + " meters.";
-
-				deathBreakdown += "Killer Position: " + pbKiller.GetPosition() + "\n";
+				
+				if (showPos)
+					deathBreakdown += "Killer Position: " + pbKiller.GetPosition() + "\n";
 
 				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " was killed by " + pbKiller.FormatSteamWebhook() + " with " + source.GetDisplayName() + distanceWeapon );
 			}
@@ -70,7 +116,10 @@ modded class PluginAdminLog
 
 		embed.AddField( "Breakdown", deathBreakdown );
 
-		m_Webhook.Post( "PlayerDeath", message );
+		if (showPos)
+			m_Webhook.Post( "PlayerDeath", message );
+		else
+			m_Webhook.Post( "PlayerDeathNoPos", message );
 	}
 	
 	override void PlayerHitBy( TotalDamageResult damageResult, int damageType, PlayerBase player, EntityAI source, int component, string dmgZone, string ammo ) // PlayerBase.c 

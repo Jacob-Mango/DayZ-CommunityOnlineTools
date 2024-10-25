@@ -93,10 +93,8 @@ class JMVehicleMetaData
 	#else
 		if (entity.IsInherited(CarScript))
 			m_VehicleType = JMVT_CAR;
-	#ifndef DAYZ_1_25
 		else if (entity.IsInherited(BoatScript))
 			m_VehicleType = JMVT_BOAT;
-	#endif
 	#endif
 	}
 
@@ -324,7 +322,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 		
-#ifndef DAYZ_1_25
 		auto boat = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boat )
 		{
@@ -332,7 +329,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 				m_Vehicles.Insert( JMVehicleMetaData.Create( boat.m_Value ) );
 			boat = boat.m_Next;
 		}
-#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
@@ -602,7 +598,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 
-#ifndef DAYZ_1_25
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
@@ -611,7 +606,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			boats = boats.m_Next;
 		}
-#endif
 
 		auto vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
@@ -661,7 +655,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 
-#ifndef DAYZ_1_25
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
@@ -670,7 +663,6 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			boats = boats.m_Next;
 		}
-#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
@@ -718,14 +710,12 @@ class JMVehiclesModule: JMRenderableModuleBase
 			node = node.m_Next;
 		}
 
-#ifndef DAYZ_1_25
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
 			boats.m_Value.Delete();
 			boats = boats.m_Next;
 		}
-#endif
 		
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
