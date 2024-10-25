@@ -808,7 +808,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 		else
 		{
-			Exec_TeleportVehicleToMe(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Vehicle);
+			Exec_TeleportVehicleToMe(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Entity);
 		}
 	}
 
