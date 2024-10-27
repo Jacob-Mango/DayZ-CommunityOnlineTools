@@ -89,6 +89,7 @@ class JMVehiclesMenu: JMFormBase
 		
 		//! Vehicle Info
 		m_VehicleInfoPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_panel" ) );
+			UIActionManager.CreateText( m_VehicleInfoPanel, "#STR_COT_VEHICLE_INFORMATION_TITLE");
 			Widget gridinfos = UIActionManager.CreateGridSpacer( m_VehicleInfoPanel, 12, 1 );
 				m_VehicleName = UIActionManager.CreateText( gridinfos, "Name:", "Value" );
 				m_VehicleClassName = UIActionManager.CreateText( gridinfos, "ClassName:", "Value" );
@@ -122,7 +123,8 @@ class JMVehiclesMenu: JMFormBase
 
 		//! Vehicle Options
 		m_VehicleOptionsPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicle_info_buttons_panel" ) );
-			Widget gridoptions = UIActionManager.CreateGridSpacer( m_VehicleOptionsPanel, 13, 1 );
+		UIActionManager.CreateText( m_VehicleOptionsPanel, "#STR_COT_VEHICLE_OPTIONS");
+		Widget gridoptions = UIActionManager.CreateGridSpacer( m_VehicleOptionsPanel, 13, 1 );
 				m_DeleteVehicleButton = UIActionManager.CreateButton( gridoptions, "Delete", this, "OnClick_DeleteVehicle" );
 
 				m_RepairVehicleButton = UIActionManager.CreateButton( gridoptions, "Repair", this, "OnClick_RepairVehicle" );
@@ -197,7 +199,7 @@ class JMVehiclesMenu: JMFormBase
 			default:
 			case JMVT_CAR:
 				color = ARGB( 255, 243, 156, 18 );
-				marker = "Car";
+				marker = "set:dayz_gui image:stance_car";
 			break;
 			case JMVT_BOAT:
 				color = ARGB( 255, 243, 18, 156 );
@@ -222,12 +224,11 @@ class JMVehiclesMenu: JMFormBase
 	{		
 		m_IsInVehicleInfo = true;
 		
-		m_MapWidgetPanel.Show( false );
-		
 		HideMapMarkers();
 		
-		m_VehicleInfoPanel.Show( true );
-		m_VehicleOptionsPanel.Show( true );
+		m_MapWidgetPanel.Show( !m_IsInVehicleInfo );
+		m_VehicleInfoPanel.Show( m_IsInVehicleInfo );
+		m_VehicleOptionsPanel.Show( m_IsInVehicleInfo );
 		
 		m_CurrentVehicle = vehicle;
 
@@ -263,11 +264,9 @@ class JMVehiclesMenu: JMFormBase
 		
 		ShowMapMarkers();
 		
-		m_VehicleListPanel.Show( true );
-		m_MapWidgetPanel.Show( true );
-		
-		m_VehicleInfoPanel.Show( false );
-		m_VehicleOptionsPanel.Show( false );
+		m_MapWidgetPanel.Show( !m_IsInVehicleInfo );		
+		m_VehicleInfoPanel.Show( m_IsInVehicleInfo );
+		m_VehicleOptionsPanel.Show( m_IsInVehicleInfo );
 		
 		m_CurrentVehicle = NULL;
 	}
