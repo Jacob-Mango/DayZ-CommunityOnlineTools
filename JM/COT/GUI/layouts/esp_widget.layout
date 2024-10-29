@@ -51,7 +51,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
     }
     TextWidgetClass esp_object_name {
      ignorepointer 1
-     size 246 12
+     size 246 20
      halign center_ref
      valign center_ref
      hexactpos 1
