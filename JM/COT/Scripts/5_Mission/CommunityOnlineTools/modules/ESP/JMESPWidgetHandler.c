@@ -273,19 +273,19 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
-			string text = "";
+			string text = " ";
 
 			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 			{
-				text = Info.name + " (" + distance + "m)";
+				text += Info.name + " (" + distance + "m)";
 			} else
 			{
 				if ( UseClassName )
 				{
-					text = m_TargetType + " (" + distance + "m)";
+					text += m_TargetType + " (" + distance + "m)";
 				} else
 				{
-					text = Info.name + " (" + distance + "m)";
+					text += Info.name + " (" + distance + "m)";
 				}
 			}
 
@@ -303,7 +303,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				w2 = 60;
 
 			layoutRoot.SetSize(w, h);
-			m_txt_ObjectName.SetSize(w2, h);
+			m_txt_ObjectName.SetSize(w2, h * 0.91);
 
 			m_txt_ObjectName.SetText( text );
 
