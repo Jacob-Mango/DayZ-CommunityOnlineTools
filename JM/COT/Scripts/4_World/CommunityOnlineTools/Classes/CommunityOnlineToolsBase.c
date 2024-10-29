@@ -418,23 +418,22 @@ class CommunityOnlineToolsBase
 
 	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
 	{
+		vector velocity = GetVelocity(transport);
+		vector angularVelocity = dBodyGetAngularVelocity(transport);
+
+		if (!dBodyIsActive(transport))
+			dBodyActive(transport, ActiveState.ACTIVE);
+
+		dBodyDynamic(transport, false);
+
 		transport.SetPosition(position);
 		transport.SetOrientation(orientation);
+		transport.Synchronize();
 
-	#ifdef SERVER
-		if (dBodyIsActive(transport))
-		{
-			transport.Synchronize();
-		}
-		else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write(position);
-			rpc.Write(orientation);
-			PrintFormat("Send TransportSync %1 pos=%2 ori=%3", transport, position.ToString(), orientation.ToString());
-			rpc.Send(transport, JMCOTBaseRPC.TransportSync, true);
-		}
-	#endif
+		SetVelocity(transport, velocity);
+		dBodySetAngularVelocity(transport, angularVelocity);
+
+		dBodyDynamic(transport, true);
 	}
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
@@ -487,22 +486,6 @@ class CommunityOnlineToolsBase
 
 		position[1] = position[1] - entityOffsetY;
 
-		bool isActive = dBodyIsActive(entity);
-		bool isDynamic = dBodyIsDynamic(entity);
-
-		vector velocity = GetVelocity(entity);
-		vector angularVelocity = dBodyGetAngularVelocity(entity);
-
-		Transport transport = Transport.Cast(entity);
-
-		if (isActive)
-		{
-			if (!transport)
-				dBodyActive(entity, ActiveState.INACTIVE);
-
-			dBodyDynamic(entity, false);
-		}
-
 		vector orientation = entity.GetOrientation();
 		entity.SetOrientation(Vector(orientation[0], 0, 0));
 
@@ -512,13 +495,8 @@ class CommunityOnlineToolsBase
 		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
 		entity.SetTransform(transform);
 
-		if (isActive)
-		{
-			SetVelocity(entity, velocity);
-			dBodySetAngularVelocity(entity, angularVelocity);
-			dBodyDynamic(entity, true);
-		}
-		else if (transport)
+		Transport transport = Transport.Cast(entity);
+		if (transport)
 		{
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}
