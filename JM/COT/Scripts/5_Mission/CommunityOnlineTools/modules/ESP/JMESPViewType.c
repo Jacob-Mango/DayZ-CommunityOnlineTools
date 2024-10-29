@@ -66,10 +66,10 @@ class JMESPViewTypePlayer: JMESPViewType
 		#endif
 
 		PlayerBase player;
-		if ( !Class.CastTo( player, obj ) )
+		if ( !Class.CastTo( player, obj ) || obj.Type() != SurvivorBase )
 			return false;
 		
-		if ( !player.GetIdentity() ) 
+		if ( GetGame().IsMultiplayer() && !player.GetIdentity() ) 
 			return false;
 		
 		CreateMeta( meta );
@@ -118,7 +118,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		#endif
 
 		Man man;
-		if ( !Class.CastTo( man, obj ) )
+		if ( !Class.CastTo( man, obj ) || obj.Type() == SurvivorBase )
 			return false;
 		
 		if ( man.GetIdentity() ) 

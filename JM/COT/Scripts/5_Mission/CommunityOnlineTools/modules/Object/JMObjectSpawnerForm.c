@@ -128,8 +128,6 @@ class JMObjectSpawnerForm: JMFormBase
 		string displayName;
 		string translated;
 		int color;
-		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
-		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
 		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
 		{
 			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;

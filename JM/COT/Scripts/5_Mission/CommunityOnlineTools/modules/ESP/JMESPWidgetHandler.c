@@ -247,7 +247,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
 		//if (distance > 10)
-			distance = Math.Round(distance);
+			distance = Math.Round(distance * 100.0) / 100.0;
 
 		GetScreenSize( Width, Height );
 
@@ -273,39 +273,34 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
-			string text = "";
+			string text = " ";
 
 			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 			{
-				text = Info.name + " (" + distance + "m)";
+				text += Info.name + " (" + distance + "m)";
 			} else
 			{
 				if ( UseClassName )
 				{
-					text = m_TargetType + " (" + distance + "m)";
+					text += m_TargetType + " (" + distance + "m)";
 				} else
 				{
-					text = Info.name + " (" + distance + "m)";
+					text += Info.name + " (" + distance + "m)";
 				}
 			}
 
-			float w, w2, h;
-			layoutRoot.GetSize(w, h);
-			w = text.Length() * 11 + 40;
-
-			if (m_pnl_Actions.IsVisible())
-				w = 300;
-			else if (w < 100)
-				w = 100;
-
-			w2 = w - 44;
-			if (w2 < 60)
-				w2 = 60;
-
-			layoutRoot.SetSize(w, h);
-			m_txt_ObjectName.SetSize(w2, h);
+			text += " ";
 
 			m_txt_ObjectName.SetText( text );
+
+			float w, h;
+			layoutRoot.GetScreenSize(w, h);
+
+			float tw, th;
+			m_txt_ObjectName.GetScreenSize(tw, th);
+
+			w = Math.Max(tw + 44, 300);
+			layoutRoot.SetScreenSize(w, h);
 
 			Info.Update();
 
