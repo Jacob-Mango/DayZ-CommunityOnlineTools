@@ -289,23 +289,18 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				}
 			}
 
-			float w, w2, h;
-			layoutRoot.GetSize(w, h);
-			w = text.Length() * 11 + 40;
-
-			if (m_pnl_Actions.IsVisible())
-				w = 300;
-			else if (w < 100)
-				w = 100;
-
-			w2 = w - 44;
-			if (w2 < 60)
-				w2 = 60;
-
-			layoutRoot.SetSize(w, h);
-			m_txt_ObjectName.SetSize(w2, h * 0.91);
+			text += " ";
 
 			m_txt_ObjectName.SetText( text );
+
+			float w, h;
+			layoutRoot.GetScreenSize(w, h);
+
+			float tw, th;
+			m_txt_ObjectName.GetScreenSize(tw, th);
+
+			w = Math.Max(tw + 44, 300);
+			layoutRoot.SetScreenSize(w, h);
 
 			Info.Update();
 
