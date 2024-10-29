@@ -254,8 +254,10 @@ class JMESPMeta: COT_WidgetHolder
 		{
 			if (!m_Action_AutoRefreshPosition.IsChecked())
 				return;
+			else if (eid == UIEvent.CHANGE)
+				m_Action_AutoRefreshPosition.SetChecked(false);
 
-			if ( eid != UIEvent.CHANGE )
+			if ( eid != UIEvent.MOUSEWHEEL )
 				return;
 		}
 
@@ -324,8 +326,10 @@ class JMESPMeta: COT_WidgetHolder
 		{
 			if (!m_Action_AutoRefreshOrientation.IsChecked())
 				return;
+			else if (eid == UIEvent.CHANGE)
+				m_Action_AutoRefreshOrientation.SetChecked(false);
 
-			if ( eid != UIEvent.CHANGE )
+			if ( eid != UIEvent.MOUSEWHEEL )
 				return;
 		}
 

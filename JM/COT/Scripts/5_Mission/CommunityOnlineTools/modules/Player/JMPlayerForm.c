@@ -1457,7 +1457,7 @@ class JMPlayerForm: JMFormBase
 	
 	void Change_PositionX( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CHANGE && eid != UIEvent.MOUSEWHEEL )
 			return;
 
 		UpdateLastChangeTime();
@@ -1467,7 +1467,7 @@ class JMPlayerForm: JMFormBase
 	
 	void Change_PositionY( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CHANGE && eid != UIEvent.MOUSEWHEEL )
 			return;
 
 		UpdateLastChangeTime();
@@ -1477,7 +1477,7 @@ class JMPlayerForm: JMFormBase
 	
 	void Change_PositionZ( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CHANGE && eid != UIEvent.MOUSEWHEEL )
 			return;
 
 		UpdateLastChangeTime();

@@ -187,12 +187,19 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	
 	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
 	{
-		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
+		auto selected = JM_GetSelected();
+
+		if (!selected)
+			return false;
+
+		auto players = selected.GetPlayers();
+
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( players[0] );
 
 		if (!inst)
 			return false;
 
-		int count = JM_GetSelected().GetPlayers().Count();
+		int count = players.Count();
 		if (count > 1)
 		{
 			CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_CONFIRM", funcName );
@@ -220,7 +227,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	bool CreateAdvancedObjectConfirm(string funcName, bool callbackOnNoConfirmation = true)
 	{
-		int count = JM_GetSelected().GetObjects().Count();
+		auto selected = JM_GetSelected();
+
+		if (!selected)
+			return false;
+
+		auto objects = selected.GetObjects();
+
+		int count = objects.Count();
 		if (count > 1)
 		{
 			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
