@@ -115,7 +115,7 @@ class UIActionEditableText: UIActionBase
 		
 		UpdateText();
 		m_Edited = true;
-		CallEvent( UIEvent.CHANGE );
+		CallEvent( UIEvent.MOUSEWHEEL );
 	}
 
 	bool UpdateText()

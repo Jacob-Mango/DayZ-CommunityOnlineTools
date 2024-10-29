@@ -85,7 +85,7 @@ class UIActionEditableVector: UIActionBase
 		currValue = currValue + (wheel * multiplier);
 		w.SetText(currValue.ToString());
 		
-		CallEvent( UIEvent.CHANGE );
+		CallEvent( UIEvent.MOUSEWHEEL );
 	}
 
 	override void SetButton( string text )
