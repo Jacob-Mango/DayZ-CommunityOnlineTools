@@ -247,7 +247,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
 		//if (distance > 10)
-			distance = Math.Round(distance);
+			distance = Math.Round(distance * 100.0) / 100.0;
 
 		GetScreenSize( Width, Height );
 
