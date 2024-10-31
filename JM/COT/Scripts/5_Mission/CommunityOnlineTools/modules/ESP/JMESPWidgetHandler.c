@@ -299,7 +299,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 			float tw, th;
 			m_txt_ObjectName.GetScreenSize(tw, th);
 
-			w = Math.Max(tw + 44, 300);
+			w = Math.Max(tw + 44, w);
 			layoutRoot.SetScreenSize(w, h);
 
 			Info.Update();
