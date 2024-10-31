@@ -97,12 +97,17 @@ modded class DayZPlayerImplement
 
 		float fov;
 
+		bool weaponRaised;
+
 		if (Class.CastTo(weapon, hands))
 		{
 			//optic = weapon.GetAttachedOptics();
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
-			m_SpectatorCamera.m_JM_IsADS = m_SpectatorCamera.IsActive() && vector.DistanceSq(eyePos, headPos) < 0.04;
+			vector rHandPos = GetBonePositionWS(GetBoneIndexByName("RightHand"));
+			if (vector.DistanceSq(headPos, rHandPos) < 0.09)
+				weaponRaised = true;
+			m_SpectatorCamera.m_JM_IsADS = m_SpectatorCamera.IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
 		{
