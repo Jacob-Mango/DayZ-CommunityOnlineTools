@@ -424,16 +424,12 @@ class CommunityOnlineToolsBase
 		if (!dBodyIsActive(transport))
 			dBodyActive(transport, ActiveState.ACTIVE);
 
-		dBodyDynamic(transport, false);
-
 		transport.SetPosition(position);
 		transport.SetOrientation(orientation);
 		transport.Synchronize();
 
 		SetVelocity(transport, velocity);
 		dBodySetAngularVelocity(transport, angularVelocity);
-
-		dBodyDynamic(transport, true);
 	}
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
