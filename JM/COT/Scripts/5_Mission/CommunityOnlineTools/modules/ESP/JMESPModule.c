@@ -472,11 +472,15 @@ class JMESPModule: JMRenderableModuleBase
 			if (!Class.CastTo(human, player))
 				continue;
 
-			if (player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayer].View)
+			if (JMESPViewType.IsPlayer(human))
+			{
+				if (!m_ViewTypesByType[JMESPViewTypePlayer].View)
+					continue;
+			}
+			else if (!m_ViewTypesByType[JMESPViewTypePlayerAI].View)
+			{
 				continue;
-
-			if (!player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayerAI].View)
-				continue;
+			}
 
 			if (spectatorCamera && spectatorCamera.SelectedTarget == player && !spectatorCamera.m_JM_3rdPerson)
 				continue;

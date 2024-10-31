@@ -43,6 +43,16 @@ class JMESPViewType
 		Error( "Not implemented!" );
 		return false;
 	}
+
+	static bool IsPlayer( Object obj, out DayZPlayer player = null )
+	{
+		if ( !Class.CastTo( player, obj ) )
+			return false;
+
+		DayZPlayerInstanceType type = player.GetInstanceType();
+
+		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE;
+	}
 };
 
 class JMESPViewTypePlayer: JMESPViewType
@@ -65,11 +75,8 @@ class JMESPViewTypePlayer: JMESPViewType
 		#endif
 		#endif
 
-		PlayerBase player;
-		if ( !Class.CastTo( player, obj ) || obj.Type() != SurvivorBase )
-			return false;
-		
-		if ( GetGame().IsMultiplayer() && !player.GetIdentity() ) 
+		DayZPlayer player;
+		if ( !IsPlayer( obj, player ) )
 			return false;
 		
 		CreateMeta( meta );
@@ -117,11 +124,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 		#endif
 		#endif
 
-		Man man;
-		if ( !Class.CastTo( man, obj ) || obj.Type() == SurvivorBase )
-			return false;
-		
-		if ( man.GetIdentity() ) 
+		if ( !obj.IsMan() || IsPlayer( obj ) )
 			return false;
 
 		CreateMeta( meta );
