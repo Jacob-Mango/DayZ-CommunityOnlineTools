@@ -184,8 +184,24 @@ modded class DayZPlayerImplement
 				//}
 			//}
 
-			dir = headTransform[1];
-			pos = headPos + "0 0.1 0";
+			vector wl;
+			EWaterLevels waterLevel = DayZPlayerUtils.CheckWaterLevel(this, wl);
+
+			float waterDepth = wl[0];
+			float characterDepth = wl[1];
+
+			if (waterDepth > 1.5 && characterDepth > 0.0)
+			{
+				//! Swimming
+				dir = playerTransform[2];
+				pos = headPos + "0 0.5 0";
+			}
+			else
+			{
+				dir = headTransform[1];
+				pos = headPos + "0 0.1 0";
+			}
+
 
 			fov = GetDayZGame().GetUserFOV();
 		}
