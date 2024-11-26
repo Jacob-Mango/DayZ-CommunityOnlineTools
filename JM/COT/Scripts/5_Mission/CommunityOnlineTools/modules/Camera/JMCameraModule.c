@@ -93,9 +93,16 @@ class JMCameraModule: JMRenderableModuleBase
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
 			m_CurrentFOV = CurrentActiveCamera.GetCurrentFOV();
-			if ( m_CurrentFOV != m_TargetFOV && !CurrentActiveCamera.IsInherited(JMSpectatorCamera) ) 
+			if ( !CurrentActiveCamera.IsInherited(JMSpectatorCamera) ) 
 			{
-				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
+				float fov;
+
+				if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
+					fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
+				else
+					fov = m_TargetFOV;
+
+				m_CurrentFOV = Math.Lerp( m_CurrentFOV, fov, timeslice * CAMERA_FOV_SPEED_MODIFIER );
 				CurrentActiveCamera.SetFOV( m_CurrentFOV );
 			}
 
