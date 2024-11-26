@@ -210,7 +210,7 @@ class JMCameraForm: JMFormBase
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.7 );
 
 		m_SliderSpeed = UIActionManager.CreateSlider( gridRight, "Speed", 0, 1, this, "OnChange_Speed" );
-		m_SliderSpeed.SetCurrent( CAMERA_SPEED );
+		m_SliderSpeed.SetCurrent( JMCameraBase.s_CurrentSpeed );
 		m_SliderSpeed.SetStepValue( 0.001 );
 		m_SliderSpeed.SetMin( 0.001 );
 		m_SliderSpeed.SetMax( 10.0 );
@@ -220,7 +220,7 @@ class JMCameraForm: JMFormBase
 		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.7 );
 
 		m_SliderFOV = UIActionManager.CreateSlider( gridRight, "FOV", 0, 1, this, "OnChange_FOV" );
-		m_SliderFOV.SetCurrent( CAMERA_FOV );
+		m_SliderFOV.SetCurrent( m_Module.m_CurrentFOV );
 		m_SliderFOV.SetStepValue( 0.001 );
 		m_SliderFOV.SetMin( 0.001 );
 		m_SliderFOV.SetMax( 4 );
@@ -267,25 +267,25 @@ class JMCameraForm: JMFormBase
 
 	void OnSliderUpdate()
 	{
-		if ( CAMERA_BLUR == 0 )
+		if ( m_Module.m_Blur == 0 )
 		{
-			CAMERA_DOF = false;
+			m_Module.m_DOF = false;
 			PPEffects.ResetDOFOverride();
 		} else
 		{
-			CAMERA_DOF = true;
+			m_Module.m_DOF = true;
 		}
 
-		if ( CAMERA_FDIST == 0 )
+		if ( m_Module.m_FDist == 0 )
 		{
-			CAMERA_AFOCUS = true;
+			m_Module.m_AutoFocus = true;
 		} else
 		{
-			CAMERA_AFOCUS = false;
+			m_Module.m_AutoFocus = false;
 		}
 
-		m_SliderSpeed.SetCurrent(CAMERA_SPEED);
-		m_SliderFOV.SetCurrent(CAMERA_FOV);
+		m_SliderSpeed.SetCurrent(JMCameraBase.s_CurrentSpeed);
+		m_SliderFOV.SetCurrent(m_Module.m_CurrentFOV);
 	}
 
 	void OnClick_SelectBox( UIEvent eid, UIActionBase action )
@@ -317,7 +317,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_BLUR = action.GetCurrent();
+		m_Module.m_Blur = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
@@ -327,7 +327,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_FDIST = action.GetCurrent();
+		m_Module.m_FDist = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
@@ -337,7 +337,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_FLENGTH = action.GetCurrent();
+		m_Module.m_Flength = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
@@ -347,7 +347,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_FNEAR = action.GetCurrent();
+		m_Module.m_FNear = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
@@ -387,7 +387,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_SPEED = action.GetCurrent();
+		JMCameraBase.s_CurrentSpeed = action.GetCurrent();
 
 		OnSliderUpdate();
 	}
@@ -397,7 +397,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		CAMERA_TARGETFOV = action.GetCurrent();
+		m_Module.m_TargetFOV = action.GetCurrent();
 
 		OnSliderUpdate();
 	}

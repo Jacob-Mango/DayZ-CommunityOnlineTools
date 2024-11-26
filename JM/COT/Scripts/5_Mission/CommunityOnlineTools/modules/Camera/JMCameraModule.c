@@ -4,6 +4,14 @@ class JMCameraModule: JMRenderableModuleBase
 	protected float m_UpdateTime;
 
 	// UI stuff
+	float m_CurrentFOV;
+	float m_TargetFOV;
+	bool m_DOF;
+	bool m_AutoFocus = true;
+	float m_FDist = 0.2;
+	float m_Flength = 20.0;
+	float m_FNear = 185.0;
+	float m_Blur = 4.0;
 	float m_BlurStrength;
 	float m_FocusDistance;
 	float m_FocalLength;
@@ -30,6 +38,8 @@ class JMCameraModule: JMRenderableModuleBase
 		m_Positions = new TVectorArray;
 		
 		m_CurrentSmoothBlur = 0.0;
+		m_CurrentFOV = 1.0;
+		m_TargetFOV = 1.0;
 	}
 
 	override bool HasAccess()
@@ -82,15 +92,14 @@ class JMCameraModule: JMRenderableModuleBase
 			m_CurrentSmoothBlur = Math.Lerp( m_CurrentSmoothBlur, CAMERA_SMOOTH_BLUR, speed );
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
-			float currentFOV = CurrentActiveCamera.GetCurrentFOV();
-			if ( currentFOV != CAMERA_TARGETFOV && (!CurrentActiveCamera.m_JM_IsADS || CurrentActiveCamera.m_JM_3rdPerson) ) 
+			m_CurrentFOV = CurrentActiveCamera.GetCurrentFOV();
+			if ( m_CurrentFOV != m_TargetFOV && !CurrentActiveCamera.IsInherited(JMSpectatorCamera) ) 
 			{
-				currentFOV = Math.Lerp( currentFOV, CAMERA_TARGETFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
-				CurrentActiveCamera.SetFOV( currentFOV );
-				CAMERA_FOV = currentFOV;
+				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
+				CurrentActiveCamera.SetFOV( m_CurrentFOV );
 			}
 
-			if ( CAMERA_DOF )
+			if ( m_DOF )
 			{
 				vector from = GetGame().GetCurrentCameraPosition();
 
@@ -99,7 +108,7 @@ class JMCameraModule: JMRenderableModuleBase
 				if ( CurrentActiveCamera.SelectedTarget )
 				{
 					dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
-				} else if ( CAMERA_AFOCUS )
+				} else if ( m_AutoFocus )
 				{
 					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
 					vector contact_pos;
@@ -109,10 +118,10 @@ class JMCameraModule: JMRenderableModuleBase
 				}
 
 				if ( dist > 0 )
-					CAMERA_FDIST = dist;
+					m_FDist = dist;
 				
-				CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
-				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+				CurrentActiveCamera.SetFocus( m_FDist, m_Blur );
+				PPEffects.OverrideDOF( true, m_FDist, m_Flength, m_FNear, m_Blur, CAMERA_DOFFSET );
 				PPEffects.SetChromAbb( CHROMABERX );
 				PPEffects.SetVignette( VIGNETTE, 0, 0, 0, 0 );
 				PPEffects.SetBloom( EXPOSURE, EXPOSURE, EXPOSURE );
@@ -580,7 +589,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		if ( input.LocalValue() != 0 )
 		{
-			CAMERA_TARGETFOV += input.LocalValue() * 0.01;
+			m_TargetFOV += input.LocalValue() * 0.01;
 		}
 	}
 
@@ -588,11 +597,11 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		if ( input.LocalValue() != 0 )
 		{
-			CAMERA_TARGETFOV -= input.LocalValue() * 0.01;
+			m_TargetFOV -= input.LocalValue() * 0.01;
 					
-			if ( CAMERA_TARGETFOV < 0.01 ) 
+			if ( m_TargetFOV < 0.01 ) 
 			{
-				CAMERA_TARGETFOV = 0.01;
+				m_TargetFOV = 0.01;
 			}
 		}
 	}
@@ -730,6 +739,6 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void SetTargetFOV( float fov )
 	{
-		CAMERA_TARGETFOV = fov;
+		m_TargetFOV = fov;
 	}
 };
