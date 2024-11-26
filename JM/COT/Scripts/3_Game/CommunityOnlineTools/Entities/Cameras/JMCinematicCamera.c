@@ -68,22 +68,22 @@ class JMCinematicCamera: JMCameraBase
 
 		if ( !MoveFreeze && !shouldTravel )
 		{
-			float cam_speed = CAMERA_SPEED;
+			float cam_speed = s_CurrentSpeed;
 
 			if ( !shouldRoll && CAMERA_BOOST_MULT > 0 )
 			{
-				CAMERA_SPEED += Math.Clamp( timeslice * 40.0 * CAMERA_SPEED * speedInc / CAMERA_BOOST_MULT, -CAMERA_BOOST_MULT, CAMERA_BOOST_MULT );
+				s_CurrentSpeed += Math.Clamp( timeslice * 40.0 * s_CurrentSpeed * speedInc / CAMERA_BOOST_MULT, -CAMERA_BOOST_MULT, CAMERA_BOOST_MULT );
 				
-				if ( CAMERA_SPEED < 0.001 ) 
+				if ( s_CurrentSpeed < 0.001 ) 
 				{
-					CAMERA_SPEED = 0.001;
+					s_CurrentSpeed = 0.001;
 				}
-				else if ( CAMERA_SPEED > 10 ) 
+				else if ( s_CurrentSpeed > 10 ) 
 				{
-					CAMERA_SPEED = 10;
+					s_CurrentSpeed = 10;
 				}
 				
-				cam_speed = CAMERA_SPEED;
+				cam_speed = s_CurrentSpeed;
 
 				if ( decreaseSpeeds )
 				{
