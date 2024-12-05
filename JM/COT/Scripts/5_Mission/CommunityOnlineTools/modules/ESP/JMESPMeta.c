@@ -234,6 +234,14 @@ class JMESPMeta: COT_WidgetHolder
 
 			m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
 		}
+
+		if (networkLow || networkHigh)
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			UIActionManager.CreateText(parent, "ID:", networkHigh.ToString() + " " + networkLow.ToString());
+
+		}
 	}
 
 	bool CanDelete()
