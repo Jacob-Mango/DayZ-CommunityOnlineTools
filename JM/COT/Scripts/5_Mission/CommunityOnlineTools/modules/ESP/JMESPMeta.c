@@ -235,6 +235,71 @@ class JMESPMeta: COT_WidgetHolder
 			m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
 		}
 
+		//! Basic object type properties that are not covered by view types
+		TStringArray basicProperties = {};
+
+		if (target.IsBuilding())
+			basicProperties.Insert("Building");
+		if (target.IsBush())
+			basicProperties.Insert("Bush");
+		if (target.IsCorpse())
+			basicProperties.Insert("Corpse");
+		if (target.IsElectricAppliance())
+			basicProperties.Insert("Electric Appliance");
+		if (target.IsFireplace())
+			basicProperties.Insert("Fireplace");
+		if (target.IsFruit())
+			basicProperties.Insert("Fruit");
+		if (target.IsFuelStation())
+			basicProperties.Insert("Fuel Station");
+		if (target.IsHologram())
+			basicProperties.Insert("Hologram");
+		if (target.IsMeat())
+			basicProperties.Insert("Meat");
+		if (target.IsMeleeWeapon())
+			basicProperties.Insert("Melee Weapon");
+		if (target.IsMushroom())
+			basicProperties.Insert("Mushroom");
+		if (target.IsParticle())
+			basicProperties.Insert("Particle");
+		if (target.IsPeltBase())
+			basicProperties.Insert("Pelt");
+		if (target.IsPlainObject())
+			basicProperties.Insert("Plain Object");
+		if (target.IsRock())
+			basicProperties.Insert("Rock");
+		if (target.IsScenery())
+			basicProperties.Insert("Scenery");
+		if (target.IsScriptedLight())
+			basicProperties.Insert("Scripted Light");
+		if (target.IsStaticTransmitter())
+			basicProperties.Insert("Static Transmitter");
+		if (target.IsTree())
+			basicProperties.Insert("Tree");
+		if (target.IsWell())
+			basicProperties.Insert("Well");
+		if (target.IsWoodBase())
+			basicProperties.Insert("Wood");
+
+		if (basicProperties.Count())
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			//Widget propertyContainer = UIActionManager.CreateWrapSpacer(parent);
+
+			string basicPropertiesText;
+
+			foreach (int i, string property: basicProperties)
+			{
+				//UIActionManager.CreateText(propertyContainer, "", property, null, "", UIActionHAlign.LEFT, UIActionHAlign.CENTER, UIActionHAlign.LEFT);
+				if (i)
+					basicPropertiesText += ", ";
+				basicPropertiesText += property;
+			}
+
+			UIActionManager.CreateText(parent, "Is:", basicPropertiesText);
+		}
+
 		if (networkLow || networkHigh)
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
