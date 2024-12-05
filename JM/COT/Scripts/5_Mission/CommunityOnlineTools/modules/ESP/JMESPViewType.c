@@ -97,7 +97,7 @@ class JMESPViewTypePlayer: JMESPViewType
 			meta.name = meta.player.GetName();
 		} else
 		{
-			meta.name = obj.GetDisplayName();
+			meta.name = meta.GetName();
 		}
 
 		return true;
@@ -140,7 +140,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 			meta.name = meta.player.GetName();
 		} else
 		{
-			meta.name = obj.GetDisplayName();
+			meta.name = meta.GetName();
 		}
 
 		return true;
@@ -177,11 +177,7 @@ class JMESPViewTypeInfected: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -217,11 +213,7 @@ class JMESPViewTypeAnimal: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -258,11 +250,7 @@ class JMESPViewTypeCar: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -299,11 +287,7 @@ class JMESPViewTypeBoat: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -339,11 +323,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -380,11 +360,7 @@ class JMESPViewTypeArchery: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -420,11 +396,7 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -460,11 +432,7 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -500,11 +468,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -539,11 +503,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -578,11 +538,7 @@ class JMESPViewTypeLauncher: JMESPViewTypeWeapon
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -620,11 +576,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}
@@ -944,11 +896,7 @@ class JMESPViewTypeImmovable: JMESPViewType
 
 		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
 		
-		meta.name = obj.GetDisplayName();
-		if ( meta.name == "" )
-		{
-			meta.name = obj.GetType();
-		}
+		meta.name = meta.GetName();
 
 		return true;
 	}

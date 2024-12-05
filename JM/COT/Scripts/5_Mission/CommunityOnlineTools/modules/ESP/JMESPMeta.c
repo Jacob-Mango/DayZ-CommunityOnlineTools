@@ -100,6 +100,41 @@ class JMESPMeta: COT_WidgetHolder
 		widgetHandler.SetInfo( this, viewTypeActions );
 	}
 
+	string GetName()
+	{
+		string displayName = target.GetDisplayName();
+
+		if (displayName == "")
+			displayName = GetType();
+
+		return displayName;
+	}
+
+	string GetType()
+	{
+		return GetObjectType(target);
+	}
+
+	static string GetObjectType(Object obj)
+	{
+		string type = obj.GetType();
+
+		if (type == "")
+		{
+			string debugName = obj.GetDebugName();
+			int i = debugName.IndexOf(":");
+
+			if (i > -1)
+				type = debugName.Substring(i + 1, debugName.Length() - i - 1).Trim();
+			else if (obj.IsScenery())
+				type = "TERRAIN";
+			else
+				type = debugName;
+		}
+
+		return type;
+	}
+
 	void InitActions()
 	{
 		m_ActionsInitialized = true;
@@ -141,11 +176,17 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+		if (networkLow || networkHigh)
+			m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+
 		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.12 );
-		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
-		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
-		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
+
+		if (networkLow || networkHigh)
+		{
+			m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
+			m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
+			m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
+		}
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -162,13 +203,19 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
-		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
-		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
-		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
-		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
+		if (networkLow || networkHigh)
+			m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
 
-		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
+		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
+
+		if (networkLow || networkHigh)
+		{
+			m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
+			m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
+			m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
+		}
+
+		if ( (networkLow || networkHigh) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -181,7 +228,7 @@ class JMESPMeta: COT_WidgetHolder
 				m_HealButton  = UIActionManager.CreateButton( parent, "Heal",  this, "Action_Heal" );
 		}
 
-		if ( CanDelete() )
+		if ( (networkLow || networkHigh) && CanDelete() )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -275,7 +322,8 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_PositionY.SetEdited(false);
 		m_Action_PositionZ.SetEdited(false);
 
-		module.SetPosition( pos, target );
+		if (networkLow || networkHigh)
+			module.SetPosition( pos, target );
 	}
 
 	void Action_PastePosition( UIEvent eid, UIActionBase action )
@@ -347,7 +395,8 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_OrientationY.SetEdited(false);
 		m_Action_OrientationZ.SetEdited(false);
 
-		module.SetOrientation( ori, target );
+		if (networkLow || networkHigh)
+			module.SetOrientation( ori, target );
 	}
 
 	void Action_PasteOrientation( UIEvent eid, UIActionBase action )
