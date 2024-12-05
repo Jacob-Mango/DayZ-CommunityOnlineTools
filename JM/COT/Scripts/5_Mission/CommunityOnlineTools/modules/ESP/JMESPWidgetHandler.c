@@ -337,7 +337,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		m_chbx_SelectedObject.SetChecked( JM_GetSelected().IsObjectSelected( Info.target ) );
 
-		m_TargetType = Info.target.GetType();
+		m_TargetType = Info.GetType();
 
 		m_txt_ObjectName.SetColor( Info.colour );
 

@@ -740,26 +740,23 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj == NULL )
 							continue;
 
-						string type = obj.GetType();
+						string type = JMESPMeta.GetObjectType(obj);
 						type.ToLower();
-
-						if ( !IsMissionOffline() && !obj.HasNetworkID() )
-							continue;
-
-						if ( obj.GetType() == "" )
-							continue;
-
-						if ( obj.GetType() == "#particlesourceenf" )
-							continue;
-
-						if ( obj.IsInherited( Particle ) )
-							continue;
-
-						if ( obj.IsInherited( Camera ) )
-							continue;
 
 						if ( !m_IknowWhatIamDoing )
 						{
+							if ( !IsMissionOffline() && !obj.HasNetworkID() )
+								continue;
+
+							if ( type == "#particlesourceenf" )
+								continue;
+
+							if ( obj.IsInherited( Particle ) )
+								continue;
+
+							if ( obj.IsInherited( Camera ) )
+								continue;
+
 							if ( obj.IsRock() )
 								continue;
 
