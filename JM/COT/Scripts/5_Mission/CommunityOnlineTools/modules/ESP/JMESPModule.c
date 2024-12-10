@@ -708,9 +708,27 @@ class JMESPModule: JMRenderableModuleBase
 
 					array<EntityAI> entities = {};
 					if (includeImmovable)
+					{
 						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
+
+						if (includeCreatures)
+						{
+							//! PhysicsGetEntitiesInBox doesn't include creatures
+
+							array<EntityAI> creatures = {};
+							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, creatures);
+
+							foreach (auto creature : creatures)
+							{
+								if (creature.IsDayZCreature())
+									objects.Insert(creature);
+							}
+						}
+					}
 					else
+					{
 						DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
+					}
 
 					foreach (auto entity : entities)
 					{
