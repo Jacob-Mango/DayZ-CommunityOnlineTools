@@ -533,10 +533,6 @@ class JMESPModule: JMRenderableModuleBase
 		m_IsCreatingWidgets = true;
 
 		int count = m_ESPToCreate.Count();
-		if (count > 0)
-		{
-			GetCommunityOnlineTools().RefreshClients();
-		}
 
 		if (count > 100)
 			count = 100;
