@@ -117,22 +117,22 @@ class JMESPMeta: COT_WidgetHolder
 
 	static string GetObjectType(Object obj)
 	{
-		string type = obj.GetType();
+		string objType = obj.GetType();
 
-		if (type == "")
+		if (objType == "")
 		{
 			string debugName = obj.GetDebugName();
 			int i = debugName.IndexOf(":");
 
 			if (i > -1)
-				type = debugName.Substring(i + 1, debugName.Length() - i - 1).Trim();
+				objType = debugName.Substring(i + 1, debugName.Length() - i - 1).Trim();
 			else if (obj.IsScenery())
-				type = "TERRAIN";
+				objType = "TERRAIN";
 			else
-				type = debugName;
+				objType = debugName;
 		}
 
-		return type;
+		return objType;
 	}
 
 	void InitActions()
