@@ -538,16 +538,24 @@ class JMESPModule: JMRenderableModuleBase
 			GetCommunityOnlineTools().RefreshClients();
 		}
 
-		for ( int i = 0; i < count; ++i )
+		if (count > 100)
+			count = 100;
+
+		for ( int i = count - 1; i >= 0; i-- )
 		{
-			m_ESPToCreate[i].Create( this );
+			JMESPMeta meta = m_ESPToCreate[i];
 
-			m_ActiveESPObjects.Insert( m_ESPToCreate[i] );
+			meta.Create( this );
+
+			m_ActiveESPObjects.Insert( meta );
+
+			m_ESPToCreate.Remove(i);
 		}
-
-		m_ESPToCreate.Clear();
-
-		m_IsCreatingWidgets = false;
+		
+		if (m_ESPToCreate.Count() > 0)
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 100, false);
+		else
+			m_IsCreatingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -566,7 +574,12 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_IsDestroyingWidgets = true;
 
-		for ( int i = 0; i < m_ESPToDestroy.Count(); ++i )
+		int count = m_ESPToDestroy.Count();
+
+		if (count > 100)
+			count = 100;
+
+		for ( int i = count - 1; i >= 0; i-- )
 		{
 			JMESPMeta meta = m_ESPToDestroy[i];
 
@@ -590,15 +603,18 @@ class JMESPModule: JMRenderableModuleBase
 
 				meta.Destroy();
 			}
+
+			m_ESPToDestroy.Remove(i);
 		}
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "  Clearing m_ESPToDestroy" );
 		#endif
 
-		m_ESPToDestroy.Clear();
-
-		m_IsDestroyingWidgets = false;
+		if (m_ESPToDestroy.Count() > 0)
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 100, false);
+		else
+			m_IsDestroyingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -640,8 +656,26 @@ class JMESPModule: JMRenderableModuleBase
 		int sleepIdx = 0;
 
 		bool includeImmovable;
-		if ((m_IknowWhatIamDoing && m_ViewTypesByType[JMESPViewTypeCar].View) || m_ViewTypesByType[JMESPViewTypeImmovable].View)
+		bool includeAll;
+		bool includeCreatures;
+
+		if (m_IknowWhatIamDoing)
+		{
+			if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+				includeAll = true;
+			else if (m_ViewTypesByType[JMESPViewTypeCar].View)
+				includeImmovable = true;
+		}
+		else if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+		{
 			includeImmovable = true;
+		}
+
+		if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
+			includeCreatures = true;
+
+		array<Object> excluded = new array<Object>;
+		array<Object> collided = new array<Object>;
 
 		for (int x = -numIterations; x < numIterations; x++)
 		{
@@ -653,21 +687,38 @@ class JMESPModule: JMRenderableModuleBase
 				float xx1 = (x + 1) * sizePerBox;
 				float zz1 = (z + 1) * sizePerBox;
 
-				vector min = centerPosition + Vector(xx0, -1000, zz0);
-				vector max = centerPosition + Vector(xx1,  1000, zz1);
-
-				array<EntityAI> entities();
-				if (includeImmovable)
-					DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
-				else
-					DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
-
-				foreach (auto entity : entities)
+				if (includeAll)
 				{
-					objects.Insert(entity);
-				}
+					vector extents = Vector(sizePerBox, 2000, sizePerBox);
+					collided.Clear();
+					vector center = Vector(centerPosition[0] + xx0 + sizePerBox * 0.5, centerPosition[1], centerPosition[2] + zz0 + sizePerBox * 0.5);
+					GetGame().IsBoxColliding(center, vector.Zero, extents, excluded, collided);
 
-				_Sleep( 1, totalTimeTaken, sleepIdx );
+					foreach (auto obj : collided)
+					{
+						objects.Insert(obj);
+					}
+
+					Sleep(100);
+				}
+				else
+				{
+					vector min = centerPosition + Vector(xx0, -1000, zz0);
+					vector max = centerPosition + Vector(xx1,  1000, zz1);
+
+					array<EntityAI> entities = {};
+					if (includeImmovable)
+						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
+					else
+						DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
+
+					foreach (auto entity : entities)
+					{
+						objects.Insert(entity);
+					}
+
+					_Sleep( 1, totalTimeTaken, sleepIdx );
+				}
 			}
 		}
 	}
@@ -825,7 +876,10 @@ class JMESPModule: JMRenderableModuleBase
 						}
 					}
 
-					_Sleep( 1, totalTimeTaken );
+					if (m_IknowWhatIamDoing && m_ViewTypesByType[JMESPViewTypeImmovable].View)
+						Sleep(100);
+					else
+						_Sleep( 1, totalTimeTaken );
 
 					#ifdef JM_COT_ESP_DEBUG
 					#ifdef COT_DEBUGLOGS
