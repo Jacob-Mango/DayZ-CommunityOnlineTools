@@ -39,6 +39,13 @@ class JMCameraBase: Camera
 	{
 		SetEventMask( EntityEvent.FRAME );
 
+	#ifndef SERVER
+		if (COT_PreviousActiveCamera)
+			SetFOV(COT_PreviousActiveCamera.GetCurrentFOV());
+		else
+			SetFOV(GetDayZGame().GetUserFOV());
+	#endif
+
 		SelectedTarget( NULL );
 	}
 
