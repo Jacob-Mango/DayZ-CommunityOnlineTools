@@ -58,9 +58,14 @@ STR_COT_ESP_MODULE_VIEW_TYPE_PLAYER_AI,Player AI,Player AI,Player AI,NPCs,Игр
 STR_COT_ESP_MODULE_VIEW_TYPE_RIFLES,Rifles,Rifles,Rifles,Gewehre,Винтовки,Rifles,Rifles,Rifles,Rifles,Fusils,Rifles,Rifles,Rifles,Rifles
 STR_COT_ESP_MODULE_VIEW_TYPE_TENTS,Tents,Tents,Tents,Zelte,Палатки,Tents,Tents,Tents,Tents,Tentes,Tents,Tents,Tents,Tents
 STR_COT_ESP_MODULE_VIEW_TYPE_TRANSMITTERS,Transmitters,Transmitters,Transmitters,Sender,Передатчики,Transmitters,Transmitters,Transmitters,Transmitters,Transmetteurs,Transmitters,Transmitters,Transmitters,Transmitters
-STR_COT_ESP_MODULE_VIEW_TYPE_UNKNOWN_ITEMS,Unknown Items,Unknown Items,Unknown Items,Unbekannt,Неизвестные предметы,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Objets inconnus,Unknown Items,Unknown Items,Unknown Items,Unknown Items
+STR_COT_ESP_MODULE_VIEW_TYPE_UNKNOWN_ITEMS,Unknown Items,Unknown Items,Unknown Items,Unbekannte Gegenstände,Неизвестные предметы,Unknown Items,Unknown Items,Unknown Items,Unknown Items,Objets inconnus,Unknown Items,Unknown Items,Unknown Items,Unknown Items
 STR_COT_ESP_MODULE_VIEW_TYPE_WEAPONS,Weapons,Weapons,Weapons,Waffen,Оружие,Weapons,Weapons,Weapons,Weapons,Armes,Weapons,Weapons,Weapons,Weapons
-STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Immovable,Immovable,Immovable,Unbeweglich,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable,Immovable
+STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Unspecified,Unspecified,Unspecified,Unspezifiziert,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified
+STR_COT_ESP_MODULE_VIEW_TYPE_Plain_Objects,Plain Objects,Plain Objects,Plain Objects,Objekte,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects
+STR_COT_ESP_MODULE_VIEW_TYPE_Rocks,Rocks,Rocks,Rocks,Steine,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks
+STR_COT_ESP_MODULE_VIEW_TYPE_Bushes,Bushes,Bushes,Bushes,Busch,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes
+STR_COT_ESP_MODULE_VIEW_TYPE_Trees,Trees,Trees,Trees,Bäume,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees
+STR_COT_ESP_MODULE_VIEW_TYPE_Buildings,Buildings,Buildings,Buildings,Gebäude,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings
 STR_COT_FORMAT_METRE,%1m,%1m,%1m,%1m,%1м,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m
 STR_COT_FORMAT_METRE_LONG,%1 metre(s),%1 metre(s),%1 metre(s),%1 Meter,%1 метр(-ов),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s),%1 metre(s)
 STR_COT_FORMAT_NONE,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1,%1

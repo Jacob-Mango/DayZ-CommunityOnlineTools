@@ -61,7 +61,7 @@ class JMESPForm: JMFormBase
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
-		UpdateDisableSafetyCheckboxChecked();
+		UpdateDisableSafetyCheckbox();
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -226,16 +226,23 @@ class JMESPForm: JMFormBase
 	{
 		switch (viewType.Type())
 		{
+			case JMESPViewTypeBush:
+				UpdateDisableSafetyCheckbox();
+				if (m_DisableSafetyCheckbox.IsEnabled() && viewType.View)
+				{
+					m_DisableSafetyCheckbox.SetChecked(true);
+					Click_DisableSafety(UIEvent.CLICK, m_DisableSafetyCheckbox);
+				}
+				break;
 			case JMESPViewTypeCar:
-			case JMESPViewTypeImmovable:
-				UpdateDisableSafetyCheckboxChecked();
+				UpdateDisableSafetyCheckbox();
 				break;
 		}
 	}
 
-	void UpdateDisableSafetyCheckboxChecked()
+	void UpdateDisableSafetyCheckbox()
 	{
-		if (m_Module.GetViewType(JMESPViewTypeCar).View || (m_Module.GetViewType(JMESPViewTypeImmovable).View && m_Module.ESPRadius <= m_DisableSafety_MaxRadius))
+		if (m_Module.GetViewType(JMESPViewTypeCar).View || (m_Module.IncludeAll() && m_Module.ESPRadius <= m_DisableSafety_MaxRadius))
 			m_DisableSafetyCheckbox.Enable();
 		else
 			m_DisableSafetyCheckbox.Disable();
@@ -408,7 +415,7 @@ class JMESPForm: JMFormBase
 		
 		m_Module.ESPRadius = action.GetCurrent();
 
-		UpdateDisableSafetyCheckboxChecked();
+		UpdateDisableSafetyCheckbox();
 	}
 
 	void Click_DisableSafety( UIEvent eid, UIActionBase action )
@@ -418,6 +425,8 @@ class JMESPForm: JMFormBase
 		
 		UpdateMaxRange(action.IsChecked());
 		m_Module.SetFilterSafetyState(action.IsChecked());
+		if (!action.IsChecked() && m_ESPTypeWidgetsByType[JMESPViewTypeBush].IsChecked())
+			m_ESPTypeWidgetsByType[JMESPViewTypeBush].SetChecked(false);
 	}
 
 	void UpdateMaxRange(bool restrict)

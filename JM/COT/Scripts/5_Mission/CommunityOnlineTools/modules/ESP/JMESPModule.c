@@ -403,6 +403,12 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeMagazine );
 		types.Insert( JMESPViewTypeAmmo );
 		types.Insert( JMESPViewTypeUnknown );
+
+		types.Insert( JMESPViewTypePlainObject );
+		types.Insert( JMESPViewTypeRock );
+		types.Insert( JMESPViewTypeBush );
+		types.Insert( JMESPViewTypeTree );
+		types.Insert( JMESPViewTypeBuilding );
 		types.Insert( JMESPViewTypeImmovable );
 	}
 
@@ -414,6 +420,37 @@ class JMESPModule: JMRenderableModuleBase
 	JMESPViewType GetViewType(typename type)
 	{
 		return m_ViewTypesByType[type];
+	}
+
+	bool IncludeImmovable()
+	{
+		if (m_ViewTypesByType[JMESPViewTypePlainObject].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeRock].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeBush].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeTree].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+			return true;
+
+		return false;
+	}
+
+	bool IncludeAll()
+	{
+		if (m_ViewTypesByType[JMESPViewTypeBush].View)
+			return true;
+
+		return false;
 	}
 
 	override void OnMissionStart()
@@ -657,12 +694,12 @@ class JMESPModule: JMRenderableModuleBase
 
 		if (m_IknowWhatIamDoing)
 		{
-			if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+			if (IncludeAll())
 				includeAll = true;
-			else if (m_ViewTypesByType[JMESPViewTypeCar].View)
+			else if (m_ViewTypesByType[JMESPViewTypeCar].View || IncludeImmovable())
 				includeImmovable = true;
 		}
-		else if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+		else if (IncludeImmovable())
 		{
 			includeImmovable = true;
 		}
@@ -822,21 +859,6 @@ class JMESPModule: JMRenderableModuleBase
 
 							if ( obj.IsInherited( Camera ) )
 								continue;
-
-							if ( obj.IsRock() )
-								continue;
-
-							if ( obj.IsWoodBase() )
-								continue;
-
-							if ( obj.IsBush() )
-								continue;
-
-							if ( obj.IsTree() )
-								continue;
-
-							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) && !CommunityOnlineToolsBase.IsHypeTrain(obj) )
-								continue;
 						}
 
 						if ( isUsingFilter && !type.Contains( filter ) )
@@ -891,7 +913,7 @@ class JMESPModule: JMRenderableModuleBase
 						}
 					}
 
-					if (m_IknowWhatIamDoing && m_ViewTypesByType[JMESPViewTypeImmovable].View)
+					if (m_IknowWhatIamDoing && IncludeAll())
 						Sleep(100);
 					else
 						_Sleep( 1, totalTimeTaken );
