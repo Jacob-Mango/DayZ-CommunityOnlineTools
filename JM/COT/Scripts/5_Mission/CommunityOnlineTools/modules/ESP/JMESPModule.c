@@ -404,11 +404,11 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAmmo );
 		types.Insert( JMESPViewTypeUnknown );
 
-		types.Insert( JMESPViewTypePlainObject );
-		types.Insert( JMESPViewTypeRock );
-		types.Insert( JMESPViewTypeBush );
-		types.Insert( JMESPViewTypeTree );
 		types.Insert( JMESPViewTypeBuilding );
+		types.Insert( JMESPViewTypeRock );
+		types.Insert( JMESPViewTypePlainObject );
+		types.Insert( JMESPViewTypeTree );
+		types.Insert( JMESPViewTypeBush );
 		types.Insert( JMESPViewTypeImmovable );
 	}
 
@@ -434,9 +434,6 @@ class JMESPModule: JMRenderableModuleBase
 			return true;
 
 		if (m_ViewTypesByType[JMESPViewTypeTree].View)
-			return true;
-
-		if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
 			return true;
 
 		if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
@@ -491,6 +488,14 @@ class JMESPModule: JMRenderableModuleBase
 	void SetFilterSafetyState(bool state)
 	{
 		m_IknowWhatIamDoing = state;
+	}
+
+	float GetMaxRadius()
+	{
+		if (m_ViewTypesByType[JMESPViewTypeBush].View || m_ViewTypesByType[JMESPViewTypeTree].View)
+			return 300;
+
+		return 1000;
 	}
 
 	override void OnUpdate(float timeslice)
@@ -707,6 +712,11 @@ class JMESPModule: JMRenderableModuleBase
 		if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
 			includeCreatures = true;
 
+		int flags = QueryFlags.DYNAMIC;
+
+		if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
+			flags |= QueryFlags.STATIC;
+
 		array<Object> excluded = {};
 		array<Object> collided = {};
 		array<EntityAI> entities = {};
@@ -761,7 +771,7 @@ class JMESPModule: JMRenderableModuleBase
 					}
 					else
 					{
-						DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
+						DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities, flags);
 					}
 
 					foreach (auto entity : entities)
@@ -846,12 +856,16 @@ class JMESPModule: JMRenderableModuleBase
 						string type = JMESPMeta.GetObjectType(obj);
 						type.ToLower();
 
+						if ( type == "#particlesourceenf" )
+							continue;
+
+						//! @note SceneGetEntitiesInBox with QueryFlags.STATIC includes clutter cutters
+						if ( type.IndexOf("cluttercutter") > -1 )
+							continue;
+
 						if ( !m_IknowWhatIamDoing )
 						{
 							if ( !IsMissionOffline() && !obj.HasNetworkID() )
-								continue;
-
-							if ( type == "#particlesourceenf" )
 								continue;
 
 							if ( obj.IsInherited( Particle ) )
