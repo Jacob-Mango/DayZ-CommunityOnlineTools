@@ -19,7 +19,6 @@ class JMESPForm: JMFormBase
 	private UIActionSlider m_sldr_Radius;
 
 	private UIActionCheckbox m_DisableSafetyCheckbox;
-	private float m_DisableSafety_MaxRadius = 300;
 
 	private UIActionButton m_ExportButton;
 	private UIActionSelectBox m_ExportTypeList;
@@ -83,12 +82,7 @@ class JMESPForm: JMFormBase
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		float maxRange;
-		if (m_Module.GetFilterSafetyState())
-			maxRange = m_DisableSafety_MaxRadius;
-		else
-			maxRange = 1000;
-		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, maxRange, this, "Change_Range" );
+		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, m_Module.GetMaxRadius(), this, "Change_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
@@ -224,6 +218,8 @@ class JMESPForm: JMFormBase
 
 	void OnESPViewTypeChanged(JMESPViewType viewType)
 	{
+		UpdateMaxRange();
+
 		switch (viewType.Type())
 		{
 			case JMESPViewTypeBush:
@@ -242,7 +238,7 @@ class JMESPForm: JMFormBase
 
 	void UpdateDisableSafetyCheckbox()
 	{
-		if (m_Module.GetViewType(JMESPViewTypeCar).View || (m_Module.IncludeAll() && m_Module.ESPRadius <= m_DisableSafety_MaxRadius))
+		if (m_Module.GetViewType(JMESPViewTypeCar).View || (m_Module.IncludeAll() && m_Module.ESPRadius <= m_Module.GetMaxRadius()))
 			m_DisableSafetyCheckbox.Enable();
 		else
 			m_DisableSafetyCheckbox.Disable();
@@ -423,26 +419,17 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		UpdateMaxRange(action.IsChecked());
 		m_Module.SetFilterSafetyState(action.IsChecked());
 		if (!action.IsChecked() && m_ESPTypeWidgetsByType[JMESPViewTypeBush].IsChecked())
 			m_ESPTypeWidgetsByType[JMESPViewTypeBush].SetChecked(false);
 	}
 
-	void UpdateMaxRange(bool restrict)
+	void UpdateMaxRange()
 	{
-		if (restrict)
-		{
-			if (m_Module.ESPRadius > m_DisableSafety_MaxRadius)
-				m_Module.ESPRadius = m_DisableSafety_MaxRadius;
-
-			m_sldr_Radius.SetMax(m_DisableSafety_MaxRadius);
-		}
-		else
-		{
-			m_sldr_Radius.SetMax(1000);
-		}
-
+		float maxRadius = m_Module.GetMaxRadius();
+		if (m_Module.ESPRadius > maxRadius)
+			m_Module.ESPRadius = maxRadius;
+		m_sldr_Radius.SetMax(maxRadius);
 		m_sldr_Radius.SetCurrent(m_Module.ESPRadius);
 	}	
 

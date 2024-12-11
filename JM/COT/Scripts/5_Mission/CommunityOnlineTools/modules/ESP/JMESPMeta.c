@@ -256,8 +256,8 @@ class JMESPMeta: COT_WidgetHolder
 			basicProperties.Insert("Hologram");
 		if (target.IsMeat())
 			basicProperties.Insert("Meat");
-		if (target.IsMeleeWeapon())
-			basicProperties.Insert("Melee Weapon");
+		if (target.IsInherited(ToolBase))
+			basicProperties.Insert("Tool");
 		if (target.IsMushroom())
 			basicProperties.Insert("Mushroom");
 		if (target.IsParticle())
