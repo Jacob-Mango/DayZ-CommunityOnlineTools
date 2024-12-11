@@ -873,16 +873,16 @@ class JMESPViewTypeImmovable: JMESPViewType
 		#endif
 		#endif
 
-		ItemBase itm;
-		if ( Class.CastTo( itm, obj ) )
+		if ( obj.IsItemBase() )
 			return false;
 
-		DayZCreature ctr;
-		if ( Class.CastTo( ctr, obj ) )
+		if ( obj.IsDayZCreature() )
 			return false;
 
-		DayZPlayer plr;
-		if ( Class.CastTo( plr, obj ) )
+		if ( obj.IsMan() )
+			return false;
+
+		if ( obj.IsTransport() )
 			return false;
 
 		if ( CommunityOnlineToolsBase.IsHypeTrain( obj ) )
