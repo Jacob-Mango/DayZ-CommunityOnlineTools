@@ -885,7 +885,178 @@ class JMESPViewTypeImmovable: JMESPViewType
 		if ( obj.IsTransport() )
 			return false;
 
+		if ( obj.IsPlainObject() )
+			return false;
+
+		if ( obj.IsRock() )
+			return false;
+
+		if ( obj.IsBush() )
+			return false;
+
+		if ( obj.IsTree() )
+			return false;
+
+		if ( obj.IsBuilding() )
+			return false;
+
 		if ( CommunityOnlineToolsBase.IsHypeTrain( obj ) )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypePlainObject: JMESPViewTypeImmovable
+{
+	void JMESPViewTypePlainObject()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Plain_Objects";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsPlainObject() )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeRock: JMESPViewTypeImmovable
+{
+	void JMESPViewTypeRock()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Rocks";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsRock() )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeWoodSource: JMESPViewTypeImmovable
+{
+	void JMESPViewTypeWoodSource()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Wood_Sources";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsWoodBase() )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeBush: JMESPViewTypeWoodSource
+{
+	void JMESPViewTypeBush()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Bushes";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsBush() )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeTree: JMESPViewTypeWoodSource
+{
+	void JMESPViewTypeTree()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Trees";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsTree() )
+			return false;
+				
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeBuilding: JMESPViewTypeImmovable
+{
+	void JMESPViewTypeBuilding()
+	{
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Buildings";
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsBuilding() || CommunityOnlineToolsBase.IsHypeTrain(obj) )
 			return false;
 				
 		CreateMeta( meta );
