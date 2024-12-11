@@ -670,8 +670,9 @@ class JMESPModule: JMRenderableModuleBase
 		if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
 			includeCreatures = true;
 
-		array<Object> excluded = new array<Object>;
-		array<Object> collided = new array<Object>;
+		array<Object> excluded = {};
+		array<Object> collided = {};
+		array<EntityAI> entities = {};
 
 		for (int x = -numIterations; x < numIterations; x++)
 		{
@@ -688,7 +689,7 @@ class JMESPModule: JMRenderableModuleBase
 					vector extents = Vector(sizePerBox, 2000, sizePerBox);
 					collided.Clear();
 					vector center = Vector(centerPosition[0] + xx0 + sizePerBox * 0.5, centerPosition[1], centerPosition[2] + zz0 + sizePerBox * 0.5);
-					GetGame().IsBoxColliding(center, vector.Zero, extents, excluded, collided);
+					GetGame().IsBoxCollidingGeometry(center, vector.Zero, extents, ObjIntersectView, ObjIntersectFire, excluded, collided);
 
 					foreach (auto obj : collided)
 					{
@@ -702,7 +703,7 @@ class JMESPModule: JMRenderableModuleBase
 					vector min = centerPosition + Vector(xx0, -1000, zz0);
 					vector max = centerPosition + Vector(xx1,  1000, zz1);
 
-					array<EntityAI> entities = {};
+					entities.Clear();
 					if (includeImmovable)
 					{
 						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
