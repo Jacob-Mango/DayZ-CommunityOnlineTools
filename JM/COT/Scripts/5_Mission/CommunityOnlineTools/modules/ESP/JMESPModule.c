@@ -571,8 +571,8 @@ class JMESPModule: JMRenderableModuleBase
 
 		int count = m_ESPToCreate.Count();
 
-		if (count > 100)
-			count = 100;
+		if (count > 10)
+			count = 10;
 
 		for ( int i = count - 1; i >= 0; i-- )
 		{
@@ -586,7 +586,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		
 		if (m_ESPToCreate.Count() > 0)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 100, false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 10, false);
 		else
 			m_IsCreatingWidgets = false;
 
@@ -645,7 +645,7 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 
 		if (m_ESPToDestroy.Count() > 0)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 100, false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
 		else
 			m_IsDestroyingWidgets = false;
 
