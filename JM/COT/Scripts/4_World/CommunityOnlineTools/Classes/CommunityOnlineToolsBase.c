@@ -395,19 +395,15 @@ class CommunityOnlineToolsBase
 	static void Refuel(Object obj)
 	{
 		CarScript car;
-		#ifndef DAYZ_1_25
 		BoatScript boat;
-		#endif
 		if (Class.CastTo(car, obj))
 		{
 			car.COT_Refuel();
 		}
-		#ifndef DAYZ_1_25
 		else if (Class.CastTo(boat, obj))
 		{
 			boat.COT_Refuel();
 		}
-		#endif
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
@@ -422,23 +418,18 @@ class CommunityOnlineToolsBase
 
 	static void ForceTransportPositionAndOrientation(Transport transport, vector position, vector orientation)
 	{
+		vector velocity = GetVelocity(transport);
+		vector angularVelocity = dBodyGetAngularVelocity(transport);
+
+		if (!dBodyIsActive(transport))
+			dBodyActive(transport, ActiveState.ACTIVE);
+
 		transport.SetPosition(position);
 		transport.SetOrientation(orientation);
+		transport.Synchronize();
 
-	#ifdef SERVER
-		if (dBodyIsActive(transport))
-		{
-			transport.Synchronize();
-		}
-		else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write(position);
-			rpc.Write(orientation);
-			PrintFormat("Send TransportSync %1 pos=%2 ori=%3", transport, position.ToString(), orientation.ToString());
-			rpc.Send(transport, JMCOTBaseRPC.TransportSync, true);
-		}
-	#endif
+		SetVelocity(transport, velocity);
+		dBodySetAngularVelocity(transport, angularVelocity);
 	}
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
@@ -491,18 +482,6 @@ class CommunityOnlineToolsBase
 
 		position[1] = position[1] - entityOffsetY;
 
-		bool isActive = dBodyIsActive(entity);
-		bool isDynamic = dBodyIsDynamic(entity);
-
-		vector velocity = GetVelocity(entity);
-		vector angularVelocity = dBodyGetAngularVelocity(entity);
-
-		if (isActive)
-		{
-			dBodyActive(entity, ActiveState.INACTIVE);
-			dBodyDynamic(entity, false);
-		}
-
 		vector orientation = entity.GetOrientation();
 		entity.SetOrientation(Vector(orientation[0], 0, 0));
 
@@ -512,14 +491,8 @@ class CommunityOnlineToolsBase
 		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
 		entity.SetTransform(transform);
 
-		Transport transport;
-		if (isActive)
-		{
-			SetVelocity(entity, velocity);
-			dBodySetAngularVelocity(entity, angularVelocity);
-			dBodyDynamic(entity, true);
-		}
-		else if (Class.CastTo(transport, entity))
+		Transport transport = Transport.Cast(entity);
+		if (transport)
 		{
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}

@@ -1,4 +1,4 @@
-class UIActionEditableText: UIActionBase 
+class UIActionEditableRichText: UIActionBase 
 {
 	static ref TStringArray VALID_NUMBERS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -105,9 +105,6 @@ class UIActionEditableText: UIActionBase
 		float multiplier = 0.1;
 		if ( m_OnlyIntegers )
 			multiplier = 1.0;
-
-		if (SHIFT())
-			multiplier = multiplier * 10;
 
 		float currValue = m_Text.GetText().ToFloat();
 		currValue = currValue + (wheel * multiplier);
@@ -262,6 +259,16 @@ class UIActionEditableText: UIActionBase
 		
 		m_Text.GetSize( w, h );
 		m_Text.SetSize( width, h );
+		m_Text.Update();
+	}
+
+	void SetEditBoxHeight( float height )
+	{
+		float w;
+		float h;
+		
+		m_Text.GetSize( w, height );
+		m_Text.SetSize( w, height );
 		m_Text.Update();
 	}
 };

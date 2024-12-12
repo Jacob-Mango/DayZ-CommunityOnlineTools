@@ -1,11 +1,17 @@
 class JMCameraModule: JMRenderableModuleBase
 {
 	protected float m_CurrentSmoothBlur;
-	protected float m_CurrentFOV;
-	protected float m_TargetFOV;
 	protected float m_UpdateTime;
 
 	// UI stuff
+	float m_CurrentFOV;
+	float m_TargetFOV;
+	bool m_DOF;
+	bool m_AutoFocus = true;
+	float m_FDist = 0.2;
+	float m_Flength = 20.0;
+	float m_FNear = 185.0;
+	float m_Blur = 4.0;
 	float m_BlurStrength;
 	float m_FocusDistance;
 	float m_FocalLength;
@@ -87,13 +93,20 @@ class JMCameraModule: JMRenderableModuleBase
 			PPEffects.SetBlur( m_CurrentSmoothBlur );
 
 			m_CurrentFOV = CurrentActiveCamera.GetCurrentFOV();
-			if ( m_CurrentFOV != m_TargetFOV && (!CurrentActiveCamera.m_JM_IsADS || CurrentActiveCamera.m_JM_3rdPerson) ) 
+			if ( !CurrentActiveCamera.IsInherited(JMSpectatorCamera) ) 
 			{
-				m_CurrentFOV = Math.Lerp( m_CurrentFOV, m_TargetFOV, timeslice * CAMERA_FOV_SPEED_MODIFIER );
+				float fov;
+
+				if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
+					fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
+				else
+					fov = m_TargetFOV;
+
+				m_CurrentFOV = Math.Lerp( m_CurrentFOV, fov, timeslice * CAMERA_FOV_SPEED_MODIFIER );
 				CurrentActiveCamera.SetFOV( m_CurrentFOV );
 			}
 
-			if ( CAMERA_DOF )
+			if ( m_DOF )
 			{
 				vector from = GetGame().GetCurrentCameraPosition();
 
@@ -102,7 +115,7 @@ class JMCameraModule: JMRenderableModuleBase
 				if ( CurrentActiveCamera.SelectedTarget )
 				{
 					dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
-				} else if ( CAMERA_AFOCUS )
+				} else if ( m_AutoFocus )
 				{
 					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
 					vector contact_pos;
@@ -112,10 +125,10 @@ class JMCameraModule: JMRenderableModuleBase
 				}
 
 				if ( dist > 0 )
-					CAMERA_FDIST = dist;
+					m_FDist = dist;
 				
-				// CurrentActiveCamera.SetFocus( CAMERA_FDIST, CAMERA_BLUR );
-				PPEffects.OverrideDOF( true, CAMERA_FDIST, CAMERA_FLENGTH, CAMERA_FNEAR, CAMERA_BLUR, CAMERA_DOFFSET );
+				CurrentActiveCamera.SetFocus( m_FDist, m_Blur );
+				PPEffects.OverrideDOF( true, m_FDist, m_Flength, m_FNear, m_Blur, CAMERA_DOFFSET );
 				PPEffects.SetChromAbb( CHROMABERX );
 				PPEffects.SetVignette( VIGNETTE, 0, 0, 0, 0 );
 				PPEffects.SetBloom( EXPOSURE, EXPOSURE, EXPOSURE );
@@ -700,7 +713,23 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	void Toggle3rdPerson( UAInput input )
 	{
 		if ( input.LocalPress() && CurrentActiveCamera )
-			CurrentActiveCamera.m_JM_3rdPerson = !CurrentActiveCamera.m_JM_3rdPerson;
+		{
+			switch (CurrentActiveCamera.m_JM_3rdPerson)
+			{
+				case JMCamera3rdPersonMode.OFF:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DEFAULT;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Default", ""));
+					break;
+				case JMCamera3rdPersonMode.DEFAULT:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DOLLY;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
+					break;
+				case JMCamera3rdPersonMode.DOLLY:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
+					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
+					break;
+			}
+		}
 	}
 
 	void LeftShoulder( UAInput input )

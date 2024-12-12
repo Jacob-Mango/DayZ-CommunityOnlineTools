@@ -185,8 +185,8 @@ class JMSelectedObjects
 		{
 			if (IsMissionOffline())
 				m_Players.Insert(JMConstants.OFFLINE_GUID);
-			else if (GetGame().GetPlayer())
-				m_Players.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+			else if (GetPermissionsManager().GetClientGUID())
+				m_Players.Insert(GetPermissionsManager().GetClientGUID());
 		}
 
 		return m_Players;

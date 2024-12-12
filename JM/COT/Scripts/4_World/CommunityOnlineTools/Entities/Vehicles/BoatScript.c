@@ -1,4 +1,3 @@
-#ifndef DAYZ_1_25
 modded class BoatScript
 {
 	static ref CF_DoublyLinkedNodes_WeakRef<BoatScript> s_JM_AllBoats = new CF_DoublyLinkedNodes_WeakRef<BoatScript>();
@@ -62,4 +61,3 @@ modded class BoatScript
 		COT_FillBoatFluid( BoatFluid.FUEL );
 	}
 };
-#endif

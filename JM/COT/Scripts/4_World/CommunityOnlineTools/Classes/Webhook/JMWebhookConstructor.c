@@ -46,9 +46,15 @@ class JMWebhookConstructor : Managed
 		AddConnection( "PlayerJoin" );
 		AddConnection( "PlayerLeave" );
 		AddConnection( "PlayerDeath" );
+		AddConnection( "PlayerDeathNoPos" );
 		AddConnection( "PlayerDamage" );
 
 		AddConnection( "AdminActive" );
+
+		AddConnection( "TerritoryDeployed" );
+		AddConnection( "ItemDeployed" );
+
+		AddConnection( "PlayerCount" );
 	}
 
 	protected void AddConnection( string type )

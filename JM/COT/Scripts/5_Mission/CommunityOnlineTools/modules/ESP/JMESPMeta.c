@@ -100,6 +100,41 @@ class JMESPMeta: COT_WidgetHolder
 		widgetHandler.SetInfo( this, viewTypeActions );
 	}
 
+	string GetName()
+	{
+		string displayName = target.GetDisplayName();
+
+		if (displayName == "")
+			displayName = GetType();
+
+		return displayName;
+	}
+
+	string GetType()
+	{
+		return GetObjectType(target);
+	}
+
+	static string GetObjectType(Object obj)
+	{
+		string objType = obj.GetType();
+
+		if (objType == "")
+		{
+			string debugName = obj.GetDebugName();
+			int i = debugName.IndexOf(":");
+
+			if (i > -1)
+				objType = debugName.Substring(i + 1, debugName.Length() - i - 1).Trim();
+			else if (obj.IsScenery())
+				objType = "TERRAIN";
+			else
+				objType = debugName;
+		}
+
+		return objType;
+	}
+
 	void InitActions()
 	{
 		m_ActionsInitialized = true;
@@ -131,9 +166,9 @@ class JMESPMeta: COT_WidgetHolder
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
 
-		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:" );
-		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:" );
-		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:" );
+		m_Action_PositionX = UIActionManager.CreateEditableText( positionActionsVec, "X:", this, "Action_SetPosition" );
+		m_Action_PositionY = UIActionManager.CreateEditableText( positionActionsVec, "Y:", this, "Action_SetPosition" );
+		m_Action_PositionZ = UIActionManager.CreateEditableText( positionActionsVec, "Z:", this, "Action_SetPosition" );
 
 		m_Action_PositionX.SetOnlyNumbers( true );
 		m_Action_PositionY.SetOnlyNumbers( true );
@@ -141,20 +176,26 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+		if (networkLow || networkHigh)
+			m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+
 		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.12 );
-		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
-		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
-		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
+
+		if (networkLow || networkHigh)
+		{
+			m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
+			m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
+			m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
+		}
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
 		Widget orientationActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget orientationActionsVec = UIActionManager.CreateGridSpacer( orientationActions, 1, 3 );
 
-		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:" );
-		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:" );
-		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:" );
+		m_Action_OrientationX = UIActionManager.CreateEditableText( orientationActionsVec, "X:", this, "Action_SetOrientation" );
+		m_Action_OrientationY = UIActionManager.CreateEditableText( orientationActionsVec, "Y:", this, "Action_SetOrientation" );
+		m_Action_OrientationZ = UIActionManager.CreateEditableText( orientationActionsVec, "Z:", this, "Action_SetOrientation" );
 
 		m_Action_OrientationX.SetOnlyNumbers( true );
 		m_Action_OrientationY.SetOnlyNumbers( true );
@@ -162,13 +203,19 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
-		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
-		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
-		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
-		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
+		if (networkLow || networkHigh)
+			m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
 
-		if ( MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
+		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
+
+		if (networkLow || networkHigh)
+		{
+			m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
+			m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
+			m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
+		}
+
+		if ( (networkLow || networkHigh) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -181,11 +228,84 @@ class JMESPMeta: COT_WidgetHolder
 				m_HealButton  = UIActionManager.CreateButton( parent, "Heal",  this, "Action_Heal" );
 		}
 
-		if ( CanDelete() )
+		if ( (networkLow || networkHigh) && CanDelete() )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
 			m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
+		}
+
+		//! Basic object type properties that are not covered by view types
+		TStringArray basicProperties = {};
+
+		if (target.IsBuilding())
+			basicProperties.Insert("Building");
+		if (target.IsBush())
+			basicProperties.Insert("Bush");
+		if (target.IsCorpse())
+			basicProperties.Insert("Corpse");
+		if (target.IsElectricAppliance())
+			basicProperties.Insert("Electric Appliance");
+		if (target.IsFireplace())
+			basicProperties.Insert("Fireplace");
+		if (target.IsFruit())
+			basicProperties.Insert("Fruit");
+		if (target.IsFuelStation())
+			basicProperties.Insert("Fuel Station");
+		if (target.IsHologram())
+			basicProperties.Insert("Hologram");
+		if (target.IsMeat())
+			basicProperties.Insert("Meat");
+		if (target.IsInherited(ToolBase))
+			basicProperties.Insert("Tool");
+		if (target.IsMushroom())
+			basicProperties.Insert("Mushroom");
+		if (target.IsParticle())
+			basicProperties.Insert("Particle");
+		if (target.IsPeltBase())
+			basicProperties.Insert("Pelt");
+		if (target.IsPlainObject())
+			basicProperties.Insert("Plain Object");
+		if (target.IsRock())
+			basicProperties.Insert("Rock");
+		if (target.IsScenery())
+			basicProperties.Insert("Scenery");
+		if (target.IsScriptedLight())
+			basicProperties.Insert("Scripted Light");
+		if (target.IsStaticTransmitter())
+			basicProperties.Insert("Static Transmitter");
+		if (target.IsTree())
+			basicProperties.Insert("Tree");
+		if (target.IsWell())
+			basicProperties.Insert("Well");
+		if (target.IsWoodBase())
+			basicProperties.Insert("Wood");
+
+		if (basicProperties.Count())
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			//Widget propertyContainer = UIActionManager.CreateWrapSpacer(parent);
+
+			string basicPropertiesText;
+
+			foreach (int i, string property: basicProperties)
+			{
+				//UIActionManager.CreateText(propertyContainer, "", property, null, "", UIActionHAlign.LEFT, UIActionHAlign.CENTER, UIActionHAlign.LEFT);
+				if (i)
+					basicPropertiesText += ", ";
+				basicPropertiesText += property;
+			}
+
+			UIActionManager.CreateText(parent, "Is:", basicPropertiesText);
+		}
+
+		if (networkLow || networkHigh)
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			UIActionManager.CreateText(parent, "ID:", networkHigh.ToString() + " " + networkLow.ToString());
+
 		}
 	}
 
@@ -251,7 +371,15 @@ class JMESPMeta: COT_WidgetHolder
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
-			return;
+		{
+			if (!m_Action_AutoRefreshPosition.IsChecked())
+				return;
+			else if (eid == UIEvent.CHANGE)
+				m_Action_AutoRefreshPosition.SetChecked(false);
+
+			if ( eid != UIEvent.MOUSEWHEEL )
+				return;
+		}
 
 		SetPosition();
 	}
@@ -267,7 +395,8 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_PositionY.SetEdited(false);
 		m_Action_PositionZ.SetEdited(false);
 
-		module.SetPosition( pos, target );
+		if (networkLow || networkHigh)
+			module.SetPosition( pos, target );
 	}
 
 	void Action_PastePosition( UIEvent eid, UIActionBase action )
@@ -315,7 +444,15 @@ class JMESPMeta: COT_WidgetHolder
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
-			return;
+		{
+			if (!m_Action_AutoRefreshOrientation.IsChecked())
+				return;
+			else if (eid == UIEvent.CHANGE)
+				m_Action_AutoRefreshOrientation.SetChecked(false);
+
+			if ( eid != UIEvent.MOUSEWHEEL )
+				return;
+		}
 
 		SetOrientation();
 	}
@@ -331,7 +468,8 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_OrientationY.SetEdited(false);
 		m_Action_OrientationZ.SetEdited(false);
 
-		module.SetOrientation( ori, target );
+		if (networkLow || networkHigh)
+			module.SetOrientation( ori, target );
 	}
 
 	void Action_PasteOrientation( UIEvent eid, UIActionBase action )
@@ -646,7 +784,6 @@ class JMESPMetaCar : JMESPMeta
 	}
 };
 
-#ifndef DAYZ_1_25
 class JMESPMetaBoat : JMESPMeta
 {
 	UIActionButton m_UnstuckButton;
@@ -676,4 +813,23 @@ class JMESPMetaBoat : JMESPMeta
 		module.Vehicle_Refuel( target );
 	}
 };
-#endif
+
+class JMESPMetaTrain : JMESPMeta
+{
+	UIActionButton m_RefuelButton;
+
+	override void CreateActions( Widget parent )
+	{
+		super.CreateActions( parent );
+
+		m_RefuelButton  = UIActionManager.CreateButton( parent, "Refuel",  this, "Action_Refuel" );
+	}
+
+	void Action_Refuel( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Vehicle_Refuel( target );
+	}
+};

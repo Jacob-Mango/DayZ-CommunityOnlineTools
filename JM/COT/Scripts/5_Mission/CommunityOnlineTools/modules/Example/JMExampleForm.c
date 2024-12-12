@@ -46,6 +46,7 @@ class JMExampleForm: JMFormBase
 	protected GridSpacerWidget m_PanelBeta;
 		protected UIActionEditableTextPreview m_EditableTextPreview;
 		protected UIActionButtonToggle m_ButtonToggle;
+		protected UIActionEditableRichText m_RichText;
 
 	protected JMExampleModule m_Module;
 	protected JMPlayerModule m_PlayerModule;
@@ -92,8 +93,12 @@ class JMExampleForm: JMFormBase
 
 		m_PanelBeta = UIActionManager.CreateGridSpacer( actions, 2, 2 );
 			m_EditableTextPreview = UIActionManager.CreateEditableTextPreview( m_PanelBeta, "Your name is:", this, "OnChange_EditableTextPreview" );
-			m_EditableTextPreview.SetWidth( 0.3 );
+			m_EditableTextPreview.SetWidth( 0.5 );
+			m_EditableTextPreview.SetEditBoxWidth( 0.65 );
 			m_ButtonToggle = UIActionManager.CreateButtonToggle( m_PanelBeta, "COT is obviously the best", "DaOne update VPP again please :c", this, "OnClick_Toggle" );
+			m_RichText = UIActionManager.CreateEditableRichText( m_PanelBeta, "My RichText:", this);
+			m_RichText.SetWidth( 0.6 );
+			m_RichText.SetEditBoxWidth( 0.65 );
 
 		Exec_SelectBox();
 
