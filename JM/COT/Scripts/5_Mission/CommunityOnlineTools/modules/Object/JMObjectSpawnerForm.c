@@ -6,9 +6,7 @@ class JMObjectSpawnerForm: JMFormBase
 	private Widget m_SpawnerActionsWrapper;
 
 	private UIActionSlider m_QuantityItem;
-#ifndef DAYZ_1_25
 	private UIActionSlider m_TemperatureItem;
-#endif
 	private UIActionSlider m_HealthItem;
 	private UIActionDropdownList m_ItemDataList;
 	
@@ -77,6 +75,12 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ObjectTypes = new map< string, string >;
 	}
 
+	void ~JMObjectSpawnerForm()
+	{
+		if (m_PreviewItem)
+			GetGame().ObjectDelete(m_PreviewItem);
+	}
+
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
 		return Class.CastTo( m_Module, mdl );
@@ -124,17 +128,9 @@ class JMObjectSpawnerForm: JMFormBase
 		string displayName;
 		string translated;
 		int color;
-	#ifdef DAYZ_1_25
-		//! Vanilla creates TWO nutritional profiles for each liquid, one in type -> profile map,
-		//! the other in cls name -> profile map. Stupid... we use the one in type -> profile map
-		foreach (int liquidType, NutritionalProfile nutritionProfile: Liquid.m_AllLiquidsByType)
-	#else
 		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
-	#endif
 		{
-	#ifndef DAYZ_1_25
 			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
-	#endif
 
 			string liquidClsName = nutritionProfile.GetLiquidClassname();
 			string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
@@ -264,13 +260,11 @@ class JMObjectSpawnerForm: JMFormBase
 		m_HealthItem.SetStepValue( 1 );
 		m_HealthItem.SetCurrent( 100 );
 
-		#ifndef DAYZ_1_25
 		m_TemperatureItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
 		m_TemperatureItem.SetSliderWidth(0.6);
 		m_TemperatureItem.SetStepValue( 1 );
 		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
 		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
-		#endif
 
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
@@ -406,6 +400,26 @@ class JMObjectSpawnerForm: JMFormBase
 		m_QuantityItem.SetAlpha( 1.0 );
 	}
 
+	void UpdateHealthControls(string type)
+	{
+		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(type);
+		if (maxHealth > 0)
+		{
+			m_HealthItem.Enable();
+			m_HealthItem.SetMax(maxHealth);
+			if ( m_HealthItem.GetCurrent() == -1 )
+				m_HealthItem.SetCurrent(maxHealth);
+
+			m_HealthItem.SetMin(0);
+		}
+		else
+		{
+			m_HealthItem.SetMin(-1);
+			m_HealthItem.SetCurrent(-1);
+			m_HealthItem.SetMax(-1);
+		}
+	}
+
 	void UpdateHealthItemColor()
 	{
 		if (!m_HealthItem.IsEnabled())
@@ -453,7 +467,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateTemperatureItemColor()
 	{
-		#ifndef DAYZ_1_25
 		int value = m_TemperatureItem.GetCurrent();
 
 		m_TemperatureItem.SetColor( ObjectTemperatureState.GetStateData(value).m_Color );
@@ -463,7 +476,6 @@ class JMObjectSpawnerForm: JMFormBase
 			m_TemperatureItem.SetFormat("#STR_COT_FORMAT_DEGREE");
 
 		m_TemperatureItem.SetAlpha( 1.0 );
-		#endif
 	}
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
@@ -523,54 +535,45 @@ class JMObjectSpawnerForm: JMFormBase
 			GetGame().ObjectDelete( m_PreviewItem );
 		}
 
-		if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
-		{
-			m_ItemPreview.Show( false );
+		//if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
+		//{
+			//m_ItemPreview.Show( false );
 
-			#ifdef COT_DEBUGLOGS
-			Print( "-" + this + "::UpdateItemPreview AI" );
-			#endif
-			return;
-		}
+			//UpdateHealthControls(strSelection);
+
+			//UpdateHealthItemColor();
+
+			//#ifdef COT_DEBUGLOGS
+			//Print( "-" + this + "::UpdateItemPreview AI" );
+			//#endif
+			//return;
+		//}
 
 		m_Orientation = vector.Zero;
 
-		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false ) );
+		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false, false ) );
 
 		m_QuantityItem.Disable();
 		m_HealthItem.Disable();
-	#ifndef DAYZ_1_25
 		m_TemperatureItem.Disable();
-	#endif
 
 		int itemStateType = m_ItemStateType;
 
 		if ( m_PreviewItem )
 		{
+			dBodyActive(m_PreviewItem, ActiveState.INACTIVE);
+			//dBodyDynamic(m_PreviewItem, false);
+			m_PreviewItem.DisableSimulation(true);
+
 			m_ItemPreview.SetItem( m_PreviewItem );
 			m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
 			m_ItemPreview.SetModelOrientation( vector.Zero );
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
 
-			float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(m_PreviewItem.GetType());
-			if (maxHealth > 0)
-			{
-				m_HealthItem.Enable();
-				m_HealthItem.SetMax(maxHealth);
-				if ( m_HealthItem.GetCurrent() == -1 )
-					m_HealthItem.SetCurrent(maxHealth);
+			UpdateHealthControls(strSelection);
 
-				m_HealthItem.SetMin(0);
-			}
-			else
-			{
-				m_HealthItem.SetMin(-1);
-				m_HealthItem.SetCurrent(-1);
-				m_HealthItem.SetMax(-1);
-			}
-
-			UpdateHealthItemColor();			
+			UpdateHealthItemColor();
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
@@ -584,9 +587,7 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 					else
 					{
-					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
-					#endif
 						itemStateType = 0;
 					}
 					int liquidType = item.GetLiquidTypeInit();
@@ -597,9 +598,7 @@ class JMObjectSpawnerForm: JMFormBase
 				{
 					if ( item.HasFoodStage() && item.CanBeCooked() )
 					{
-					#ifndef DAYZ_1_25
 						m_TemperatureItem.Enable();
-					#endif
 						
 						if ( m_ItemStateType != 2 )
 							UpdateItemStateType(2);
@@ -792,11 +791,7 @@ class JMObjectSpawnerForm: JMFormBase
 		}
 
 		float health = m_HealthItem.GetCurrent();
-	#ifndef DAYZ_1_25
 		float temp = m_TemperatureItem.GetCurrent();
-	#else
-		float temp;
-	#endif
 		float quantity = m_QuantityItem.GetCurrent();
 
 		switch (mode)

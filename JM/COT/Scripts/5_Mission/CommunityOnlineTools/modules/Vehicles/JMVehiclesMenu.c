@@ -186,7 +186,7 @@ class JMVehiclesMenu: JMFormBase
 		m_VehicleInfoPanel.Show( true );
 		m_VehicleOptionsPanel.Show( true );
 		
-		m_VehicleInfoNetworkID.SetText( vehicle.m_NetworkIDLow.ToString() + "    " + vehicle.m_NetworkIDHigh.ToString() );
+		m_VehicleInfoNetworkID.SetText( vehicle.m_NetworkIDHigh.ToString() + "    " + vehicle.m_NetworkIDLow.ToString() );
 		m_VehicleInfoPersistentABID.SetText( vehicle.m_PersistentIDA.ToString() + "    " + vehicle.m_PersistentIDB.ToString() );
 		m_VehicleInfoPersistentCDID.SetText( vehicle.m_PersistentIDC.ToString() + "    " + vehicle.m_PersistentIDD.ToString() );
 

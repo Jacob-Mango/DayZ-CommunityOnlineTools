@@ -1,0 +1,147 @@
+PanelWidgetClass UIActionEditableRichTextButton {
+ size 1 30
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style rover_sim_colorable
+ scriptclass "UIActionEditableRichText"
+ {
+  PanelWidgetClass action_wrapper
+  {
+   position 0 0
+   size 1 1
+   valign center_ref
+   {
+    PanelWidgetClass action_wrapper_check
+    {
+     position 0 0
+     size 1 1
+     {
+      RichTextWidgetClass action_label {
+       size 1 20
+       vexactsize 1
+       halign left_ref
+       valign center_ref
+       text "{LABEL}"
+       font "gui/fonts/sdf_MetronLight24"
+       "text offset" 10 0
+       "bold text" 1
+       "exact text" 1
+       "exact text size" 16
+       "text valign" center
+      }
+      EditBoxWidgetClass action {
+       position 0.16 -1
+       size 0.40 22
+       vexactpos 1
+       vexactsize 1
+       halign right_ref
+       valign center_ref
+       text "{TEXT}"
+       "exact text" 1
+       "no focus" 0
+       font "gui/fonts/Metron"
+       style Editor
+      }
+      ButtonWidgetClass action_button {
+       size 0.15 1
+       halign right_ref
+       valign center_ref
+       {
+        PanelWidgetClass fill {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         halign left_ref
+         valign top_ref
+         color 0.04 0.04 0.12 0.4
+         style rover_sim_colorable
+        }
+        PanelWidgetClass border_top {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         halign left_ref
+         valign top_ref
+         color 0.042 0.056 0.077 0.5
+         style rover_sim_colorable
+        }
+        PanelWidgetClass border_left {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 0
+         halign left_ref
+         valign top_ref
+         color 0.042 0.056 0.077 0.5
+         style rover_sim_colorable
+        }
+        PanelWidgetClass border_bottom {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         halign left_ref
+         valign bottom_ref
+         color 0.042 0.056 0.077 0.5
+         style rover_sim_colorable
+        }
+        PanelWidgetClass border_right {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 0
+         halign right_ref
+         valign top_ref
+         color 0.042 0.056 0.077 0.5
+         style rover_sim_colorable
+        }
+        RichTextWidgetClass action_button_text {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         style Light
+         text "{BUTTON}"
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.1569 0.1569 0.1569 0.902
+   position 0 0
+   size 1 1
+   style rover_sim_colorable
+  }
+ }
+}

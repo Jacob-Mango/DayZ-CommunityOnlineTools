@@ -383,9 +383,10 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeAnimal );
 
 		types.Insert( JMESPViewTypeCar );
-		#ifndef DAYZ_1_25
 		types.Insert( JMESPViewTypeBoat );
-		#endif
+
+		if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type)
+			types.Insert( JMESPViewTypeTrain );
 		
 		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
@@ -405,6 +406,12 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( JMESPViewTypeMagazine );
 		types.Insert( JMESPViewTypeAmmo );
 		types.Insert( JMESPViewTypeUnknown );
+
+		types.Insert( JMESPViewTypeBuilding );
+		types.Insert( JMESPViewTypeRock );
+		types.Insert( JMESPViewTypePlainObject );
+		types.Insert( JMESPViewTypeTree );
+		types.Insert( JMESPViewTypeBush );
 		types.Insert( JMESPViewTypeImmovable );
 	}
 
@@ -416,6 +423,26 @@ class JMESPModule: JMRenderableModuleBase
 	JMESPViewType GetViewType(typename type)
 	{
 		return m_ViewTypesByType[type];
+	}
+
+	bool IncludeImmovable()
+	{
+		if (m_ViewTypesByType[JMESPViewTypePlainObject].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeRock].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeBush].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeTree].View)
+			return true;
+
+		if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
+			return true;
+
+		return false;
 	}
 
 	override void OnMissionStart()
@@ -458,6 +485,14 @@ class JMESPModule: JMRenderableModuleBase
 		m_IknowWhatIamDoing = state;
 	}
 
+	float GetMaxRadius()
+	{
+		if (m_ViewTypesByType[JMESPViewTypeBush].View || m_ViewTypesByType[JMESPViewTypeTree].View)
+			return 300;
+
+		return 1000;
+	}
+
 	override void OnUpdate(float timeslice)
 	{
 		if (!DrawPlayerSkeletonsEnabled || !m_ESPCanvas || !m_ESPCanvas.HasCanvas())
@@ -474,11 +509,15 @@ class JMESPModule: JMRenderableModuleBase
 			if (!Class.CastTo(human, player))
 				continue;
 
-			if (player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayer].View)
+			if (JMESPViewType.IsPlayer(human))
+			{
+				if (!m_ViewTypesByType[JMESPViewTypePlayer].View)
+					continue;
+			}
+			else if (!m_ViewTypesByType[JMESPViewTypePlayerAI].View)
+			{
 				continue;
-
-			if (!player.GetIdentity() && !m_ViewTypesByType[JMESPViewTypePlayerAI].View)
-				continue;
+			}
 
 			if (spectatorCamera && spectatorCamera.SelectedTarget == player && !spectatorCamera.m_JM_3rdPerson)
 				continue;
@@ -531,21 +570,25 @@ class JMESPModule: JMRenderableModuleBase
 		m_IsCreatingWidgets = true;
 
 		int count = m_ESPToCreate.Count();
-		if (count > 0)
+
+		if (count > 10)
+			count = 10;
+
+		for ( int i = count - 1; i >= 0; i-- )
 		{
-			GetCommunityOnlineTools().RefreshClients();
+			JMESPMeta meta = m_ESPToCreate[i];
+
+			meta.Create( this );
+
+			m_ActiveESPObjects.Insert( meta );
+
+			m_ESPToCreate.Remove(i);
 		}
-
-		for ( int i = 0; i < count; ++i )
-		{
-			m_ESPToCreate[i].Create( this );
-
-			m_ActiveESPObjects.Insert( m_ESPToCreate[i] );
-		}
-
-		m_ESPToCreate.Clear();
-
-		m_IsCreatingWidgets = false;
+		
+		if (m_ESPToCreate.Count() > 0)
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 10, false);
+		else
+			m_IsCreatingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -564,7 +607,12 @@ class JMESPModule: JMRenderableModuleBase
 
 		m_IsDestroyingWidgets = true;
 
-		for ( int i = 0; i < m_ESPToDestroy.Count(); ++i )
+		int count = m_ESPToDestroy.Count();
+
+		if (count > 100)
+			count = 100;
+
+		for ( int i = count - 1; i >= 0; i-- )
 		{
 			JMESPMeta meta = m_ESPToDestroy[i];
 
@@ -588,15 +636,18 @@ class JMESPModule: JMRenderableModuleBase
 
 				meta.Destroy();
 			}
+
+			m_ESPToDestroy.Remove(i);
 		}
 
 		#ifdef JM_COT_ESP_DEBUG
 		Print( "  Clearing m_ESPToDestroy" );
 		#endif
 
-		m_ESPToDestroy.Clear();
-
-		m_IsDestroyingWidgets = false;
+		if (m_ESPToDestroy.Count() > 0)
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
+		else
+			m_IsDestroyingWidgets = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -638,8 +689,34 @@ class JMESPModule: JMRenderableModuleBase
 		int sleepIdx = 0;
 
 		bool includeImmovable;
-		if ((m_IknowWhatIamDoing && m_ViewTypesByType[JMESPViewTypeCar].View) || m_ViewTypesByType[JMESPViewTypeImmovable].View)
+		bool includeBushes;
+		bool includeCreatures;
+
+		int flags = QueryFlags.DYNAMIC;
+
+		if (m_ViewTypesByType[JMESPViewTypeBush].View)
+		{
+			includeBushes = true;
+		}
+		else if (IncludeImmovable())
+		{
 			includeImmovable = true;
+
+			if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
+				includeCreatures = true;
+		}
+		else if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
+		{
+			flags |= QueryFlags.STATIC;
+		}
+		else if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type && m_ViewTypesByType[JMESPViewTypeTrain].View)
+		{
+			flags |= QueryFlags.STATIC;
+		}
+
+		array<Object> excluded = {};
+		array<Object> collided = {};
+		array<EntityAI> entities = {};
 
 		for (int x = -numIterations; x < numIterations; x++)
 		{
@@ -651,21 +728,56 @@ class JMESPModule: JMRenderableModuleBase
 				float xx1 = (x + 1) * sizePerBox;
 				float zz1 = (z + 1) * sizePerBox;
 
-				vector min = centerPosition + Vector(xx0, -1000, zz0);
-				vector max = centerPosition + Vector(xx1,  1000, zz1);
-
-				array<EntityAI> entities();
-				if (includeImmovable)
-					DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
-				else
-					DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities);
-
-				foreach (auto entity : entities)
+				if (includeBushes)
 				{
-					objects.Insert(entity);
-				}
+					vector extents = Vector(sizePerBox, 2000, sizePerBox);
+					collided.Clear();
+					vector center = Vector(centerPosition[0] + xx0 + sizePerBox * 0.5, centerPosition[1], centerPosition[2] + zz0 + sizePerBox * 0.5);
+					GetGame().IsBoxCollidingGeometry(center, vector.Zero, extents, ObjIntersectView, ObjIntersectFire, excluded, collided);
 
-				_Sleep( 1, totalTimeTaken, sleepIdx );
+					foreach (auto obj : collided)
+					{
+						objects.Insert(obj);
+					}
+
+					Sleep(100);
+				}
+				else
+				{
+					vector min = centerPosition + Vector(xx0, -1000, zz0);
+					vector max = centerPosition + Vector(xx1,  1000, zz1);
+
+					entities.Clear();
+					if (includeImmovable)
+					{
+						DayZPlayerUtils.PhysicsGetEntitiesInBox(min, max, entities);
+
+						if (includeCreatures)
+						{
+							//! PhysicsGetEntitiesInBox doesn't include creatures
+
+							array<EntityAI> creatures = {};
+							DayZPlayerUtils.SceneGetEntitiesInBox(min, max, creatures);
+
+							foreach (auto creature : creatures)
+							{
+								if (creature.IsDayZCreature())
+									objects.Insert(creature);
+							}
+						}
+					}
+					else
+					{
+						DayZPlayerUtils.SceneGetEntitiesInBox(min, max, entities, flags);
+					}
+
+					foreach (auto entity : entities)
+					{
+						objects.Insert(entity);
+					}
+
+					_Sleep( 1, totalTimeTaken, sleepIdx );
+				}
 			}
 		}
 	}
@@ -738,39 +850,27 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj == NULL )
 							continue;
 
-						string type = obj.GetType();
+						string type = JMESPMeta.GetObjectType(obj);
 						type.ToLower();
 
-						if ( !IsMissionOffline() && !obj.HasNetworkID() )
-							continue;
-
-						if ( obj.GetType() == "" )
-							continue;
-
-						if ( obj.GetType() == "#particlesourceenf" )
-							continue;
-
-						if ( obj.IsInherited( Particle ) )
-							continue;
-
-						if ( obj.IsInherited( Camera ) )
+						if ( type == "#particlesourceenf" )
 							continue;
 
 						if ( !m_IknowWhatIamDoing )
 						{
-							if ( obj.IsRock() )
+							if ( !IsMissionOffline() && !obj.HasNetworkID() )
 								continue;
 
-							if ( obj.IsWoodBase() )
+							if ( obj.IsInherited( Particle ) )
 								continue;
 
-							if ( obj.IsBush() )
+							if ( obj.IsInherited( Camera ) )
 								continue;
 
-							if ( obj.IsTree() )
-								continue;
-
-							if ( obj.IsBuilding() && !obj.IsInherited( GardenBase ) && !CommunityOnlineToolsBase.IsHypeTrain(obj) )
+							//! SceneGetEntitiesInBox with QueryFlags.STATIC includes buildings without physics body
+							//! (e.g. clutter cutters or Expansion dbg objs), unlike PhysicsGetEntitiesInBox,
+							//! so for consistency we filter those out unless including all objects
+							if ( obj.IsBuilding() && !dBodyIsSet(obj) )
 								continue;
 						}
 
@@ -826,7 +926,10 @@ class JMESPModule: JMRenderableModuleBase
 						}
 					}
 
-					_Sleep( 1, totalTimeTaken );
+					if (m_ViewTypesByType[JMESPViewTypeBush].View)
+						Sleep(100);
+					else
+						_Sleep( 1, totalTimeTaken );
 
 					#ifdef JM_COT_ESP_DEBUG
 					#ifdef COT_DEBUGLOGS
@@ -1554,7 +1657,11 @@ class JMESPModule: JMRenderableModuleBase
 
 				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=MoveToCursor" );
 
-				obj.SetPosition(cursor);
+				EntityAI ent = EntityAI.Cast(obj);
+				if (ent)
+					CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(ent, cursor);
+				else
+					obj.SetPosition(cursor);
 				moved++;
 			}
 

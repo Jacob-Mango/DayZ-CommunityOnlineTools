@@ -833,6 +833,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			CommunityOnlineToolsBase.HealEntityRecursive(vehicle);
 			CommunityOnlineToolsBase.Refuel(vehicle);
+			
+			JMObjectSpawnerModule objSpawnerModule;
+			if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
+				objSpawnerModule.SpawnCompatibleAttachments(vehicle, null, 0);
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
 			SendWebhook( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle" );

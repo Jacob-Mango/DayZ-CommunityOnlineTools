@@ -60,7 +60,7 @@ class JMESPForm: JMFormBase
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
-		UpdateDisableSafetyCheckboxChecked();
+		UpdateDisableSafetyCheckbox();
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -82,7 +82,7 @@ class JMESPForm: JMFormBase
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, 1000, this, "Change_Range" );
+		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, m_Module.GetMaxRadius(), this, "Change_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
@@ -203,8 +203,6 @@ class JMESPForm: JMFormBase
 		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateUI, 500, true );
 
 		UpdateUI();
-
-		GetCommunityOnlineTools().RefreshClients();
 	}
 
 	override void OnHide()
@@ -220,18 +218,19 @@ class JMESPForm: JMFormBase
 
 	void OnESPViewTypeChanged(JMESPViewType viewType)
 	{
+		UpdateMaxRange();
+
 		switch (viewType.Type())
 		{
-			case JMESPViewTypeCar:
-			case JMESPViewTypeImmovable:
-				UpdateDisableSafetyCheckboxChecked();
+			case JMESPViewTypeBuilding:
+				UpdateDisableSafetyCheckbox();
 				break;
 		}
 	}
 
-	void UpdateDisableSafetyCheckboxChecked()
+	void UpdateDisableSafetyCheckbox()
 	{
-		if (m_Module.GetViewType(JMESPViewTypeCar).View || m_Module.GetViewType(JMESPViewTypeImmovable).View)
+		if (m_Module.GetViewType(JMESPViewTypeBuilding).View)
 			m_DisableSafetyCheckbox.Enable();
 		else
 			m_DisableSafetyCheckbox.Disable();
@@ -411,6 +410,15 @@ class JMESPForm: JMFormBase
 			return;
 		
 		m_Module.SetFilterSafetyState(action.IsChecked());
+	}
+
+	void UpdateMaxRange()
+	{
+		float maxRadius = m_Module.GetMaxRadius();
+		if (m_Module.ESPRadius > maxRadius)
+			m_Module.ESPRadius = maxRadius;
+		m_sldr_Radius.SetMax(maxRadius);
+		m_sldr_Radius.SetCurrent(m_Module.ESPRadius);
 	}	
 
 	void Click_UseClassName( UIEvent eid, UIActionBase action )
@@ -506,8 +514,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (!HasTooManyObjects("DeleteSelected"))
-			DeleteSelected();
+		CreateAdvancedObjectConfirm("DeleteSelected");
 	}
 
 	void DeleteSelected()
@@ -525,6 +532,7 @@ class JMESPForm: JMFormBase
 		{
 			if ( node.m_Value.widgetRoot.IsVisible() )
 				node.m_Value.widgetHandler.Select();
+			
 			node = node.m_Next;
 		}
 	}
@@ -540,6 +548,9 @@ class JMESPForm: JMFormBase
 			node.m_Value.widgetHandler.Deselect();
 			node = node.m_Next;
 		}
+
+		// Some scenarios require this to prevent unexpected results for the end user
+		JM_GetSelected().ClearObjects();
 	}
 	
 	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
@@ -547,8 +558,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if (!HasTooManyObjects("MoveToCursor"))
-			MoveToCursor();
+		CreateAdvancedObjectConfirm("MoveToCursor");
 	}
 
 	void MoveToCursor()
@@ -596,17 +606,5 @@ class JMESPForm: JMFormBase
 			Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
 		
 		m_LoadoutModule.Create(name);
-	}
-
-	bool HasTooManyObjects(string funcName)
-	{
-		int count = JM_GetSelected().GetObjects().Count();
-		if (count > 1)
-		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
-		}
-
-		return false;
 	}
 };
