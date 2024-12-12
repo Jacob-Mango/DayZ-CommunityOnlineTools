@@ -222,15 +222,7 @@ class JMESPForm: JMFormBase
 
 		switch (viewType.Type())
 		{
-			case JMESPViewTypeBush:
-				UpdateDisableSafetyCheckbox();
-				if (m_DisableSafetyCheckbox.IsEnabled() && viewType.View)
-				{
-					m_DisableSafetyCheckbox.SetChecked(true);
-					Click_DisableSafety(UIEvent.CLICK, m_DisableSafetyCheckbox);
-				}
-				break;
-			case JMESPViewTypeCar:
+			case JMESPViewTypeBuilding:
 				UpdateDisableSafetyCheckbox();
 				break;
 		}
@@ -238,7 +230,7 @@ class JMESPForm: JMFormBase
 
 	void UpdateDisableSafetyCheckbox()
 	{
-		if (m_Module.GetViewType(JMESPViewTypeCar).View || (m_Module.IncludeAll() && m_Module.ESPRadius <= m_Module.GetMaxRadius()))
+		if (m_Module.GetViewType(JMESPViewTypeBuilding).View)
 			m_DisableSafetyCheckbox.Enable();
 		else
 			m_DisableSafetyCheckbox.Disable();
@@ -410,8 +402,6 @@ class JMESPForm: JMFormBase
 			return;
 		
 		m_Module.ESPRadius = action.GetCurrent();
-
-		UpdateDisableSafetyCheckbox();
 	}
 
 	void Click_DisableSafety( UIEvent eid, UIActionBase action )
@@ -420,8 +410,6 @@ class JMESPForm: JMFormBase
 			return;
 		
 		m_Module.SetFilterSafetyState(action.IsChecked());
-		if (!action.IsChecked() && m_ESPTypeWidgetsByType[JMESPViewTypeBush].IsChecked())
-			m_ESPTypeWidgetsByType[JMESPViewTypeBush].SetChecked(false);
 	}
 
 	void UpdateMaxRange()

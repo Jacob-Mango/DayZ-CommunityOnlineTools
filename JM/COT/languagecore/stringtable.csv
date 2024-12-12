@@ -34,7 +34,7 @@ STR_COT_ESP_MODULE_RADIUS,Radius:,Radius:,Radius:,Umkreis:,Радиус:,Radius:
 STR_COT_ESP_MODULE_TOGGLE,Toggle,Toggle,Toggle,Umschalten,Вкл/Выкл,Toggle,Toggle,Toggle,Toggle,Basculer,Toggle,Toggle,Toggle,Toggle
 STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH,Auto Refresh,Auto Refresh,Auto Refresh,Autom. Aktualisierung,Авто-обновление,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh,Mise à jour automatique,Auto Refresh,Auto Refresh,Auto Refresh,Auto Refresh
 STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME,Show Class Name,Show Class Name,Show Class Name,Klassenname zeigen,Использовать Класснейм,Show Class Name,Show Class Name,Show Class Name,Show Class Name,Afficher le nom des classes,Show Class Name,Show Class Name,Show Class Name,Show Class Name
-STR_COT_ESP_MODULE_TOGGLE_SAFETY,Include all objects (slow),Include all objects (slow),Include all objects (slow),Inkludiere alle Objekte (langsam),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow),Inclure tous les objets (lent),Include all objects (slow),Include all objects (slow),Include all objects (slow),Include all objects (slow)
+STR_COT_ESP_MODULE_TOGGLE_SAFETY,Include all objects,Include all objects,Include all objects,Inkludiere alle Objekte,Include all objects,Include all objects,Include all objects,Include all objects,Include all objects,Inclure tous les objets (lent),Include all objects,Include all objects,Include all objects,Include all objects
 STR_COT_ESP_MODULE_VIEW_TYPE_AMMO,Ammo,Ammo,Ammo,Munition,Боезапас,Ammo,Ammo,Ammo,Ammo,Munitions,Ammo,Ammo,Ammo,Ammo
 STR_COT_ESP_MODULE_VIEW_TYPE_ANIMAL,Animal,Animal,Animal,Tier,Животное,Animal,Animal,Animal,Animal,Animaux,Animal,Animal,Animal,Animal
 STR_COT_ESP_MODULE_VIEW_TYPE_ARCHERY,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery,Archery
@@ -43,7 +43,8 @@ STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_ACTION_RIFLES,Bolt Action Rifles,Bolt Action R
 STR_COT_ESP_MODULE_VIEW_TYPE_BOLT_RIFLES,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolzengewehre,Полуавтоматические Винтовки,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles,Fusils à verrou,Bolt Rifles,Bolt Rifles,Bolt Rifles,Bolt Rifles
 STR_COT_ESP_MODULE_VIEW_TYPE_BOOKS,Books,Books,Books,Bücher,Книги,Books,Books,Books,Books,Livres,Books,Books,Books,Books
 STR_COT_ESP_MODULE_VIEW_TYPE_CAR,Car,Car,Car,Fahrzeug,Машины,Car,Car,Car,Car,Voitures,Car,Car,Car,Car
-STR_COT_ESP_MODULE_VIEW_TYPE_BOAT,Boat,Boat,Boat,Boat,Boat,Boat,Boat,Boat,Boat,Bateaux,Boat,Boat,Boat,Boat
+STR_COT_ESP_MODULE_VIEW_TYPE_BOAT,Boat,Boat,Boat,Boot,Boat,Boat,Boat,Boat,Boat,Bateaux,Boat,Boat,Boat,Boat
+STR_COT_ESP_MODULE_VIEW_TYPE_Train,Train,Train,Zug,Train,Train,Train,Train,Train,Train,Train,Train,Train,Train,Train
 STR_COT_ESP_MODULE_VIEW_TYPE_CLOTHING,Clothing,Clothing,Clothing,Kleidung,Одежда,Clothing,Clothing,Clothing,Clothing,Vêtements,Clothing,Clothing,Clothing,Clothing
 STR_COT_ESP_MODULE_VIEW_TYPE_CONTAINERS,Containers,Containers,Containers,Behälter,Контейнеры,Containers,Containers,Containers,Containers,Conteneurs,Containers,Containers,Containers,Containers
 STR_COT_ESP_MODULE_VIEW_TYPE_EXPLOSIVES,Explosives,Explosives,Explosives,Sprengstoff,Взрыв. Вещества,Explosives,Explosives,Explosives,Explosives,Explosifs,Explosives,Explosives,Explosives,Explosives
@@ -63,7 +64,7 @@ STR_COT_ESP_MODULE_VIEW_TYPE_WEAPONS,Weapons,Weapons,Weapons,Waffen,Оружие
 STR_COT_ESP_MODULE_VIEW_TYPE_Immovable,Unspecified,Unspecified,Unspecified,Unspezifiziert,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified,Unspecified
 STR_COT_ESP_MODULE_VIEW_TYPE_Plain_Objects,Plain Objects,Plain Objects,Plain Objects,Objekte,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects,Plain Objects
 STR_COT_ESP_MODULE_VIEW_TYPE_Rocks,Rocks,Rocks,Rocks,Steine,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks,Rocks
-STR_COT_ESP_MODULE_VIEW_TYPE_Bushes,Bushes,Bushes,Bushes,Busch,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes,Bushes
+STR_COT_ESP_MODULE_VIEW_TYPE_Bushes,Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Büsche (SEHR LANGSAM),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW),Bushes (VERY SLOW)
 STR_COT_ESP_MODULE_VIEW_TYPE_Trees,Trees,Trees,Trees,Bäume,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees,Trees
 STR_COT_ESP_MODULE_VIEW_TYPE_Buildings,Buildings,Buildings,Buildings,Gebäude,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings,Buildings
 STR_COT_FORMAT_METRE,%1m,%1m,%1m,%1m,%1м,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m,%1m

@@ -384,6 +384,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		types.Insert( JMESPViewTypeCar );
 		types.Insert( JMESPViewTypeBoat );
+
+		if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type)
+			types.Insert( JMESPViewTypeTrain );
 		
 		types.Insert( JMESPViewTypeArchery );
 		types.Insert( JMESPViewTypeBoltActionRifle );
@@ -437,14 +440,6 @@ class JMESPModule: JMRenderableModuleBase
 			return true;
 
 		if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
-			return true;
-
-		return false;
-	}
-
-	bool IncludeAll()
-	{
-		if (m_ViewTypesByType[JMESPViewTypeBush].View)
 			return true;
 
 		return false;
@@ -694,28 +689,30 @@ class JMESPModule: JMRenderableModuleBase
 		int sleepIdx = 0;
 
 		bool includeImmovable;
-		bool includeAll;
+		bool includeBushes;
 		bool includeCreatures;
 
-		if (m_IknowWhatIamDoing)
+		int flags = QueryFlags.DYNAMIC;
+
+		if (m_ViewTypesByType[JMESPViewTypeBush].View)
 		{
-			if (IncludeAll())
-				includeAll = true;
-			else if (m_ViewTypesByType[JMESPViewTypeCar].View || IncludeImmovable())
-				includeImmovable = true;
+			includeBushes = true;
 		}
 		else if (IncludeImmovable())
 		{
 			includeImmovable = true;
+
+			if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
+				includeCreatures = true;
 		}
-
-		if (m_ViewTypesByType[JMESPViewTypeAnimal].View || m_ViewTypesByType[JMESPViewTypeInfected].View)
-			includeCreatures = true;
-
-		int flags = QueryFlags.DYNAMIC;
-
-		if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
+		else if (m_ViewTypesByType[JMESPViewTypeBuilding].View)
+		{
 			flags |= QueryFlags.STATIC;
+		}
+		else if (CommunityOnlineToolsBase.s_HypeTrain_Loco_Type && m_ViewTypesByType[JMESPViewTypeTrain].View)
+		{
+			flags |= QueryFlags.STATIC;
+		}
 
 		array<Object> excluded = {};
 		array<Object> collided = {};
@@ -731,7 +728,7 @@ class JMESPModule: JMRenderableModuleBase
 				float xx1 = (x + 1) * sizePerBox;
 				float zz1 = (z + 1) * sizePerBox;
 
-				if (includeAll)
+				if (includeBushes)
 				{
 					vector extents = Vector(sizePerBox, 2000, sizePerBox);
 					collided.Clear();
@@ -859,10 +856,6 @@ class JMESPModule: JMRenderableModuleBase
 						if ( type == "#particlesourceenf" )
 							continue;
 
-						//! @note SceneGetEntitiesInBox with QueryFlags.STATIC includes clutter cutters
-						if ( type.IndexOf("cluttercutter") > -1 )
-							continue;
-
 						if ( !m_IknowWhatIamDoing )
 						{
 							if ( !IsMissionOffline() && !obj.HasNetworkID() )
@@ -872,6 +865,12 @@ class JMESPModule: JMRenderableModuleBase
 								continue;
 
 							if ( obj.IsInherited( Camera ) )
+								continue;
+
+							//! SceneGetEntitiesInBox with QueryFlags.STATIC includes buildings without physics body
+							//! (e.g. clutter cutters or Expansion dbg objs), unlike PhysicsGetEntitiesInBox,
+							//! so for consistency we filter those out unless including all objects
+							if ( obj.IsBuilding() && !dBodyIsSet(obj) )
 								continue;
 						}
 
@@ -927,7 +926,7 @@ class JMESPModule: JMRenderableModuleBase
 						}
 					}
 
-					if (m_IknowWhatIamDoing && IncludeAll())
+					if (m_ViewTypesByType[JMESPViewTypeBush].View)
 						Sleep(100);
 					else
 						_Sleep( 1, totalTimeTaken );
