@@ -239,7 +239,7 @@ class JMESPViewTypeCar: JMESPViewType
 		#endif
 		#endif
 		
-		if ( !obj.IsInherited(CarScript) && !CommunityOnlineToolsBase.IsHypeTrain(obj) )
+		if ( !obj.IsInherited(CarScript) )
 			return false;
 		
 		CreateMeta( meta );
@@ -277,6 +277,37 @@ class JMESPViewTypeBoat: JMESPViewType
 		#endif
 		
 		if ( !obj.IsInherited(BoatScript) )
+			return false;
+		
+		CreateMeta( meta );
+		
+		meta.target = obj;
+		meta.colour = Colour;
+		meta.type = this;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+		
+		meta.name = meta.GetName();
+
+		return true;
+	}
+};
+
+class JMESPViewTypeTrain: JMESPViewType
+{
+	void JMESPViewTypeTrain()
+	{
+		Permission = "Train";
+		Localisation = "#STR_COT_ESP_MODULE_VIEW_TYPE_Train";
+
+		MetaType = JMESPMetaTrain;
+
+		Colour = ARGB( 255, 255, 113, 237 );
+	}
+
+	override bool IsValid( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj.IsBuilding() || !CommunityOnlineToolsBase.IsHypeTrain(obj) )
 			return false;
 		
 		CreateMeta( meta );
@@ -898,9 +929,6 @@ class JMESPViewTypeImmovable: JMESPViewType
 			return false;
 
 		if ( obj.IsBuilding() )
-			return false;
-
-		if ( CommunityOnlineToolsBase.IsHypeTrain( obj ) )
 			return false;
 				
 		CreateMeta( meta );

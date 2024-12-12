@@ -813,3 +813,23 @@ class JMESPMetaBoat : JMESPMeta
 		module.Vehicle_Refuel( target );
 	}
 };
+
+class JMESPMetaTrain : JMESPMeta
+{
+	UIActionButton m_RefuelButton;
+
+	override void CreateActions( Widget parent )
+	{
+		super.CreateActions( parent );
+
+		m_RefuelButton  = UIActionManager.CreateButton( parent, "Refuel",  this, "Action_Refuel" );
+	}
+
+	void Action_Refuel( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		module.Vehicle_Refuel( target );
+	}
+};
