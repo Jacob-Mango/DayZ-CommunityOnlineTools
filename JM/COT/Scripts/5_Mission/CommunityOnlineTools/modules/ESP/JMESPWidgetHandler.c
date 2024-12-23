@@ -22,6 +22,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	private vector m_LastPosition;
 	private string m_TargetType;
+	private bool m_UseClassName;
 
 	bool ShowOnScreen;
 
@@ -247,7 +248,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
 		//if (distance > 10)
-			distance = Math.Round(distance * 100.0) / 100.0;
+			distance = Math.Round(distance * 10.0) / 10.0;
 
 		GetScreenSize( Width, Height );
 
@@ -299,7 +300,14 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 			float tw, th;
 			m_txt_ObjectName.GetScreenSize(tw, th);
 
-			w = Math.Max(tw + 44, 300);
+			if (m_UseClassName != UseClassName)
+			{
+				w = 300;
+				layoutRoot.SetScreenSize(w, h);
+				m_UseClassName = UseClassName;
+			}
+
+			w = Math.Max(tw + 44, w);
 			layoutRoot.SetScreenSize(w, h);
 
 			Info.Update();
@@ -337,7 +345,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		m_chbx_SelectedObject.SetChecked( JM_GetSelected().IsObjectSelected( Info.target ) );
 
-		m_TargetType = Info.target.GetType();
+		m_TargetType = Info.GetType();
 
 		m_txt_ObjectName.SetColor( Info.colour );
 
