@@ -1,22 +1,13 @@
-static float CAMERA_FOV = 1.0;
-static float CAMERA_TARGETFOV = 1.0;
-static float CAMERA_FOV_SPEED_MODIFIER = 5.0;
-static float CAMERA_SPEED = 3.0;
-static float CAMERA_BOOST_MULT = 5.0;
-static float CAMERA_VELDRAG = 0.9;
-static float CAMERA_MSENS = 35.0;
-static float CAMERA_SMOOTH = 0.8;
-static bool  CAMERA_DOF = false;
-static bool  CAMERA_AFOCUS = true;
+//! These are consts. Treat them as such. If you need them mutable, change from const to JMCameraModule member vars and rename to CamelCase.
+static const float CAMERA_FOV_SPEED_MODIFIER = 5.0;
+static const float CAMERA_BOOST_MULT = 5.0;
+static const float CAMERA_VELDRAG = 0.9;
+static const float CAMERA_MSENS = 35.0;
+static const float CAMERA_SMOOTH = 0.8;
+static const float CAMERA_DOFFSET = 10.0;
+static const float CAMERA_SMOOTH_BLUR = 0.0;
 
-static float CAMERA_FDIST = 0.2;
-static float CAMERA_FLENGTH = 20.0;
-static float CAMERA_FNEAR = 185.0;
-static float CAMERA_BLUR = 4.0;
-static float CAMERA_DOFFSET = 10.0;
-
-static float CAMERA_SMOOTH_BLUR = 0.0;
-
+//! TODO: These really should be static members on JMCameraBase, but I can't be arsed to change this rn
 static JMCameraBase CurrentActiveCamera; // active static camera "staticcamera"
 static JMCameraBase COT_PreviousActiveCamera;
 
@@ -29,6 +20,8 @@ enum JMCamera3rdPersonMode
 
 class JMCameraBase: Camera
 {
+	static float s_CurrentSpeed = 3.0;
+
 	float SendUpdateAccumalator = 0.0;
 	
 	bool LookFreeze;
@@ -45,6 +38,13 @@ class JMCameraBase: Camera
 	void JMCameraBase()
 	{
 		SetEventMask( EntityEvent.FRAME );
+
+	#ifndef SERVER
+		if (COT_PreviousActiveCamera)
+			SetFOV(COT_PreviousActiveCamera.GetCurrentFOV());
+		else
+			SetFOV(GetDayZGame().GetUserFOV());
+	#endif
 
 		SelectedTarget( NULL );
 	}

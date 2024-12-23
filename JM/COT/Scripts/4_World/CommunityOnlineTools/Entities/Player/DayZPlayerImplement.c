@@ -97,12 +97,17 @@ modded class DayZPlayerImplement
 
 		float fov;
 
+		bool weaponRaised;
+
 		if (Class.CastTo(weapon, hands))
 		{
 			//optic = weapon.GetAttachedOptics();
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
-			m_SpectatorCamera.m_JM_IsADS = m_SpectatorCamera.IsActive() && vector.DistanceSq(eyePos, headPos) < 0.04;
+			vector rHandPos = GetBonePositionWS(GetBoneIndexByName("RightHand"));
+			if (vector.DistanceSq(headPos, rHandPos) < 0.09)
+				weaponRaised = true;
+			m_SpectatorCamera.m_JM_IsADS = m_SpectatorCamera.IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
 		{
@@ -166,7 +171,12 @@ modded class DayZPlayerImplement
 			dir = vector.Direction(barrel_start, barrel_end).Normalized();
 			pos = eyePos - dir * 0.06;
 
-			fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
+			if (!m_SpectatorCamera.m_JM_3rdPerson)
+				fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
+			else if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
+				fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
+			else
+				fov = GetDayZGame().GetUserFOV();
 		}
 		else
 		{
@@ -179,10 +189,31 @@ modded class DayZPlayerImplement
 				//}
 			//}
 
-			dir = headTransform[1];
-			pos = headPos + "0 0.1 0";
+			vector wl;
+			EWaterLevels waterLevel = DayZPlayerUtils.CheckWaterLevel(this, wl);
 
-			fov = GetDayZGame().GetUserFOV();
+			float waterDepth = wl[0];
+			float characterDepth = wl[1];
+
+			if (waterDepth > 1.5 && characterDepth > 0.0)
+			{
+				//! Swimming
+				dir = playerTransform[2];
+				if (m_SpectatorCamera.m_JM_3rdPerson)
+					pos = headPos + "0 0.5 0";
+				else
+					pos = headPos + "0 0.1 0";
+			}
+			else
+			{
+				dir = headTransform[1];
+				pos = headPos + "0 0.1 0";
+			}
+
+			if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
+				fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
+			else
+				fov = GetDayZGame().GetUserFOV();
 		}
 
 		vector fromDir = m_SpectatorCamera.GetDirection();
@@ -271,8 +302,7 @@ modded class DayZPlayerImplement
 		else if (m_SpectatorCamera.m_JM_3rdPerson && cameraDistanceToHeadSq >= 0.0625 && m_JM_IsHeadInvisible)
 			SetHeadInvisible(false);
 
-		if (m_SpectatorCamera.m_JM_IsADS && !m_SpectatorCamera.m_JM_3rdPerson)
-			m_SpectatorCamera.SetFOV( Math.Lerp(m_SpectatorCamera.GetCurrentFOV(), fov, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
+		m_SpectatorCamera.SetFOV( Math.Lerp(m_SpectatorCamera.GetCurrentFOV(), fov, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
 	}
 
 #ifndef SERVER
