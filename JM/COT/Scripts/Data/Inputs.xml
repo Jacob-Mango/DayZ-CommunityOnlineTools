@@ -34,6 +34,7 @@
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
             <input name="UAObjectModuleDeleteOnCursor" loc="STR_COT_INPUT_DELETE_CURSOR" />
             
+            <input name="UAPlayerModuleFreezePlayer" loc="STR_COT_INPUT_FREEZE_PLAYER" />
             <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
             <input name="UAPlayerModuleGodMode" loc="STR_COT_INPUT_GODMODE_SELF" />
         </actions>
@@ -71,6 +72,7 @@
 			<input name="UAObjectModuleSpawnWolf" />
 			<input name="UAObjectModuleDeleteOnCursor" />
 
+			<input name="UAPlayerModuleFreezePlayer" />
 			<input name="UAPlayerModuleHeal" />
 			<input name="UAPlayerModuleGodMode" />
 		</sorting>
@@ -121,7 +123,9 @@
         </input>
         <input name="UAObjectModuleSpawnWolf">
         </input>
-        
+
+        <input name="UAPlayerModuleFreezePlayer">
+        </input>
         <input name="UAPlayerModuleHeal">
         </input>
         <input name="UAPlayerModuleGodMode">
