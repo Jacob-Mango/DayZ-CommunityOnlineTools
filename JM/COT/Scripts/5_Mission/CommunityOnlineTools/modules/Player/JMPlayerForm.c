@@ -1316,7 +1316,7 @@ class JMPlayerForm: JMFormBase
 		}
 	}
 
-    void Click_CopyPlayerName( UIEvent eid, ref UIActionBase action )
+    void Click_CopyPlayerName( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1324,7 +1324,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().CopyToClipboard(m_Name.GetButton());
 	}
 
-    void Click_CopyPlayerGUID( UIEvent eid, ref UIActionBase action )
+    void Click_CopyPlayerGUID( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1332,7 +1332,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().CopyToClipboard(m_GUID.GetButton());
 	}
 
-    void Click_CopyPlayerSteam64ID( UIEvent eid, ref UIActionBase action )
+    void Click_CopyPlayerSteam64ID( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1340,7 +1340,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
 	}
 
-    void Click_OpenPlayerSteamProfile( UIEvent eid, ref UIActionBase action )
+    void Click_OpenPlayerSteamProfile( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1348,7 +1348,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
 	}
 
-    void Click_CopyPlayerPostion( UIEvent eid, ref UIActionBase action )
+    void Click_CopyPlayerPostion( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1356,7 +1356,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
 	}
 
-    void Click_CopyPlayerRotation( UIEvent eid, ref UIActionBase action )
+    void Click_CopyPlayerRotation( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -1369,7 +1369,7 @@ class JMPlayerForm: JMFormBase
 		GetGame().CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
 	}
 
-	void Click_PastePlayerPostion( UIEvent eid, ref UIActionBase action )
+	void Click_PastePlayerPostion( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
