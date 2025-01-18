@@ -34,6 +34,14 @@ modded class JMModuleManager
 		return m_ModuleList;
 	}
 
+#ifndef DAYZ_1_26
+	//! 1.27+
+	void RemoveCOTModule(JMModuleBase module)
+	{
+		m_COTModules.RemoveItem(module);
+	}
+#endif
+
 #ifndef CF_MODULE_PERMISSIONS
 	override void OnClientPermissionsUpdated()
 	{

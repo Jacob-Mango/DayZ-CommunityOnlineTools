@@ -2,6 +2,15 @@ modded class JMModuleBase
 {
 	protected JMWebhookModule m_Webhook;
 
+#ifndef DAYZ_1_26
+	//! 1.27+
+	void ~JMModuleBase()
+	{
+		if (g_JMModuleManager)
+			g_JMModuleManager.RemoveCOTModule(this);
+	}
+#endif
+
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();
