@@ -39,7 +39,6 @@ class JMWebhookModule: JMModuleBase
 
 	private JMWebhookSerialize m_Settings;
 
-	private ref ConfigFile m_ServerConfig;
 	private string m_ServerHostName;
 
 	void JMWebhookModule()
@@ -72,12 +71,14 @@ class JMWebhookModule: JMModuleBase
 			serverCfg = "serverdz.cfg";
 		}
 
-		m_ServerConfig = ConfigFile.Parse( serverCfg );
-		if ( m_ServerConfig )
+		ConfigFile cfg = ConfigFile.Parse( serverCfg );
+		if ( cfg )
 		{
-			ConfigEntry entry = m_ServerConfig.Get( "hostname" );
+			ConfigEntry entry = cfg.Get( "hostname" );
 			if ( entry && entry.GetText() != "" )
 				m_ServerHostName = entry.GetText();
+
+			delete cfg;
 		}
 
 		m_Settings = GetCOTWebhookSettings();
