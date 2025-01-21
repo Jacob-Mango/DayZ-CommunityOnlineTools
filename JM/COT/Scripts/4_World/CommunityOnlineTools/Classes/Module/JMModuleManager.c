@@ -36,7 +36,7 @@ modded class JMModuleManager
 
 #ifndef DAYZ_1_26
 	//! 1.27+
-	void RemoveCOTModule(JMModuleBase module)
+	void RemoveCOTModule(JMRenderableModuleBase module)
 	{
 		m_COTModules.RemoveItem(module);
 	}
