@@ -97,8 +97,8 @@ SET /P AREYOUSURE=[101;93m Are you sure you want to continue? (Y/[N]) [0m
 IF /I "%AREYOUSURE%" NEQ "Y" GOTO END
 
 echo.[101;93m Setting up workbench addons symlink [0m
-rmdir "%WorkbenchDirectory%\Addons\"
-mklink /J "%WorkbenchDirectory%\Addons\" "%ClientDirectory%\Addons\"
+rmdir "%WorkbenchDirectory%\addons\"
+mklink /J "%WorkbenchDirectory%\addons\" "%ClientDirectory%\addons\"
 
 echo.[101;93m Setting up the symbollic links for the server [0m
 for /l %%n in (0,1,%InclusiveLength%-1) do (
