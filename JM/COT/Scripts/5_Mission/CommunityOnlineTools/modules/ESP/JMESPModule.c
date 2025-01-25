@@ -23,7 +23,10 @@ class JMESPCanvas
 
 	bool HasCanvas()
 	{
-		return m_Canvas != null;
+		if (m_Canvas && m_Canvas.ToString() != "INVALID")
+			return true;
+
+		return false;
 	}
 
 	void DrawLine(vector from, vector to, int width = 1, int color = COLOR_WHITE)
