@@ -468,6 +468,9 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		m_ActiveESPObjects.Clear();
+
+		g_COT_ThreadESP = false;
+		g_COT_ThreadESP_Running = false;
 	}
 
 	override void OnLogout(Class sender, CF_EventArgs args)
