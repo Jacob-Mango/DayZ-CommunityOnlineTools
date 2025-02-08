@@ -456,7 +456,11 @@ class JMObjectSpawnerForm: JMFormBase
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
 		}
 
+	#ifdef COT_WORKAROUND_T188367
+		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport() && (!m_PreviewItem.IsInherited(Container_Base) || m_PreviewItem.GetInventory().GetAttachmentSlotsCount() == 0))
+	#else
 		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport())
+	#endif
 		{
 			m_PreviewItem.SetHealth("", "", health);
 		}

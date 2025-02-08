@@ -29,3 +29,12 @@
 #endif
 
 #define JM_COT_EXPTRANSITION_1
+
+#ifndef DAYZ_1_26
+//! 1.27+
+#ifdef BUILD_EXPERIMENTAL
+//! https://feedback.bistudio.com/T188367
+//! Entities with attachment slots can segfault the game when setting health (1.27 Experimental)
+#define COT_WORKAROUND_T188367
+#endif
+#endif
