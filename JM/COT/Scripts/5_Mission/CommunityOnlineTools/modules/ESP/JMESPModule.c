@@ -460,8 +460,43 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
+	override void OnMPSessionFail()
+	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMPSessionFail");
+	#endif
+
+		super.OnMPSessionFail();
+
+		g_COT_ThreadESP = false;
+	}
+
+	override void OnMPSessionEnd()
+	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMPSessionEnd");
+	#endif
+
+		super.OnMPSessionEnd();
+
+		g_COT_ThreadESP = false;
+	}
+
+	override void OnMPConnectionLost(int duration)
+	{
+	#ifdef DIAG_DEVELOPER
+		PrintFormat("JMESPModule::OnMPConnectionLost duration=%1", duration);
+	#endif
+
+		super.OnMPConnectionLost(duration);
+	}
+
 	override void OnMissionFinish()
 	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMissionFinish");
+	#endif
+
 		for (int j = 0; j < m_ActiveESPObjects.Count(); j++ )
 		{
 			m_ActiveESPObjects[j].Destroy();
@@ -475,6 +510,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnLogout(Class sender, CF_EventArgs args)
 	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnLogout");
+	#endif
+
 		g_COT_ThreadESP = false;
 		m_CurrentState = JMESPState.Remove;
 	}
@@ -666,6 +705,9 @@ class JMESPModule: JMRenderableModuleBase
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
 		else
 			m_IsDestroyingWidgets = false;
+
+		if (m_CurrentState == JMESPState.Remove)
+			g_COT_ThreadESP = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
