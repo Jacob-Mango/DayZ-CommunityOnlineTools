@@ -14,8 +14,10 @@ class JMRenderableModuleBase: JMModuleBase
 
 #ifndef DAYZ_1_26
 	//! 1.27+
-	void ~JMRenderableModuleBase()
+	override void UnloadModule()
 	{
+		super.UnloadModule();
+
 		if (g_JMModuleManager)
 			g_JMModuleManager.RemoveCOTModule(this);
 	}
