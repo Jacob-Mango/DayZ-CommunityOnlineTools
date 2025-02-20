@@ -20,12 +20,13 @@
 #define JM_COT_VEHICLEMANAGER
 #define JM_COT_INVISIBILITY
 
-#ifndef CF_DOUBLYLINKEDNODES
-#ifndef EXPANSION_DOUBLYLINKEDNODES
-#ifndef EXPANSION_DOUBLYLINKEDNODES_WEAKREF
-#define JM_COT_DOUBLYLINKEDNODES
-#endif
-#endif
-#endif
-
 #define JM_COT_EXPTRANSITION_1
+
+#ifndef DAYZ_1_26
+//! 1.27+
+#ifdef BUILD_EXPERIMENTAL
+//! https://feedback.bistudio.com/T188367
+//! Entities with attachment slots can segfault the game when setting health (1.27 Experimental)
+#define COT_WORKAROUND_T188367
+#endif
+#endif

@@ -15,6 +15,11 @@ modded class MissionServer
 		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}
 
+	void ~MissionServer()
+	{
+		g_cotBase = null;
+	}
+
 	override void OnMissionStart()
 	{
 		super.OnMissionStart();

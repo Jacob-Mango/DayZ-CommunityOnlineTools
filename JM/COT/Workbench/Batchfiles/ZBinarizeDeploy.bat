@@ -31,7 +31,7 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	goto:eof
+	exit /b 1
 )
 
 set githubDirectory=%~dp0\
@@ -90,6 +90,16 @@ if "%prefixLinkRoot%"=="" (
 	echo PrefixLinkRoot parameter was not set in the project.cfg
 )
 
+for /F "tokens=*" %%F in ('git rev-parse --abbrev-ref HEAD') do (
+	set branch=%%F
+)
+echo GIT branch: %branch%
+
+if not exist "%~dp0..\..\meta.%branch%.cpp" (
+	echo ERROR: %workDrive%%prefixLinkRoot%\meta.%branch%.cpp does not exist
+	exit /b 1
+)
+
 echo Searching for Mikero Tools...
 for /F "Tokens=2* skip=2" %%A In ('REG QUERY "HKCU\SOFTWARE\Mikero\depbo" /v "path" 2^>nul') do (set _MIKEDLL=%%B)
 if not defined _MIKEDLL (
@@ -117,7 +127,7 @@ if %failed%==1 (
 	endlocal
 
 	echo Failed to package the mod.
-	goto:eof
+	exit /b 1
 )
 
 set pboProject="%_MIKEDLL%\bin\pboProject.exe"
@@ -133,23 +143,18 @@ IF NOT exist "%modBuildDirectory%%modName%\" (
 	mkdir "%modBuildDirectory%%modName%\"
 )
 
-IF NOT exist "%modBuildDirectory%%modName%\Addons\" (
-	echo Creating folder "%modBuildDirectory%%modName%\Addons\"
-	mkdir "%modBuildDirectory%%modName%\Addons\"
+IF NOT exist "%modBuildDirectory%%modName%\addons\" (
+	echo Creating folder "%modBuildDirectory%%modName%\addons\"
+	mkdir "%modBuildDirectory%%modName%\addons\"
 )
 
-IF NOT exist "%modBuildDirectory%%modName%\Keys\" (
-	echo Creating folder "%modBuildDirectory%%modName%\Keys\"
-	mkdir "%modBuildDirectory%%modName%\Keys\"
+IF NOT exist "%modBuildDirectory%%modName%\keys\" (
+	echo Creating folder "%modBuildDirectory%%modName%\keys\"
+	mkdir "%modBuildDirectory%%modName%\keys\"
 )
 
 echo Copying over "%workDrive%%prefixLinkRoot%\mod.cpp" to "%modBuildDirectory%%modName%\"
 copy "%workDrive%%prefixLinkRoot%\mod.cpp" "%modBuildDirectory%%modName%\" > nul
-
-for /F "tokens=*" %%F in ('git rev-parse --abbrev-ref HEAD') do (
-	set branch=%%F
-)
-echo GIT branch: %branch%
 
 REM Base timestamp (in seconds)
 REM Add UNIX timestamp to this and multiply by 1e7 to match what DayZ publishing tools would produce
@@ -180,8 +185,8 @@ for /f "usebackq tokens=1,2 delims==;" %%a in ( "%~dp0..\..\meta.%branch%.cpp" )
 )
 type "%modBuildDirectory%%modName%\meta.cpp"
 
-echo Copying over "%keyDirectory%\%keyName%.bikey" to "%modBuildDirectory%%modName%\Keys\"
-echo Copying over "%keyDirectory%\%keyName%.biprivatekey" to "%modBuildDirectory%%modName%\Keys\"
+echo Copying over "%keyDirectory%\%keyName%.bikey" to "%modBuildDirectory%%modName%\keys\"
+echo Copying over "%keyDirectory%\%keyName%.biprivatekey" to "%modBuildDirectory%%modName%\keys\"
 
 echo Packaging %modName% PBO's
 

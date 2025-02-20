@@ -259,8 +259,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Hide");
 		#endif
 		
-		if (!layoutRoot)
-			return;
+		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		if (!m_Form)
 			return;
@@ -268,12 +267,13 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if (!this)
 			return;
 
-		layoutRoot.Show( false );
-
 		m_Form.OnHide();
 		m_Form.m_IsShown = false;
 
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		if (!layoutRoot || layoutRoot.ToString() == "INVALID")
+			return;
+
+		layoutRoot.Show( false );
 
 		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyActive() )
 		{
