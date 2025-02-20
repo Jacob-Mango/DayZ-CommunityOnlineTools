@@ -12,6 +12,17 @@ class JMRenderableModuleBase: JMModuleBase
 		SetMenuButtonColour( 1, 1, 0, 0 );
 	}
 
+#ifndef DAYZ_1_26
+	//! 1.27+
+	override void UnloadModule()
+	{
+		super.UnloadModule();
+
+		if (g_JMModuleManager)
+			g_JMModuleManager.RemoveCOTModule(this);
+	}
+#endif
+
 	bool InitButton( Widget button_bkg )
 	{
 		#ifdef COT_DEBUGLOGS

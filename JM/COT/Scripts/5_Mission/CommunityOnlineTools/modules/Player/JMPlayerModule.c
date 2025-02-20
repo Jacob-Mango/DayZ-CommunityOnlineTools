@@ -65,6 +65,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		
 		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
+		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
 	}
 
 	void OnPlayer_Checked( string guid, bool checked )
@@ -2117,6 +2118,24 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
+	}
+
+	void InputFreezePlayer( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+		{
+			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			bool value = !player.COTIsFrozen();
+
+			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
+			if (guids.Count() == 0)
+				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+
+			SetFreeze(value, guids);
+		}
 	}
 
 	void InputHeal( UAInput input )

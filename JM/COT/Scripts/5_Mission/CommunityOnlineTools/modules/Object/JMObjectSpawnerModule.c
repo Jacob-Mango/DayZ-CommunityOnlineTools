@@ -691,7 +691,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType());
+	#ifndef COT_WORKAROUND_T188367
+		if (maxHealth > 0 && (!entity.IsInherited(Container_Base) || entity.GetInventory().GetAttachmentSlotsCount() == 0))
+	#else
 		if (maxHealth > 0)
+	#endif
 		{
 			if ( health == -1 )
 				health = maxHealth;
@@ -752,6 +756,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		CarScript car;
 		BoatScript boat;
 		BuildingBase building;
+		DayZPlayerImplement npc;
 
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn(player);
@@ -761,6 +766,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			boat.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(building, entity))
 			building.COT_OnDebugSpawn(player);
+		else if (Class.CastTo(npc, entity))
+			npc.COT_OnDebugSpawn(player);
 
 		if (!entity.GetInventory())
 			return;

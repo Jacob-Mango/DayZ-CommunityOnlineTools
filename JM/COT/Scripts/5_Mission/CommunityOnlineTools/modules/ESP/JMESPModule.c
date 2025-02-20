@@ -23,7 +23,10 @@ class JMESPCanvas
 
 	bool HasCanvas()
 	{
-		return m_Canvas != null;
+		if (m_Canvas && m_Canvas.ToString() != "INVALID")
+			return true;
+
+		return false;
 	}
 
 	void DrawLine(vector from, vector to, int width = 1, int color = COLOR_WHITE)
@@ -345,6 +348,8 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnInit()
 	{
+		EnableLogout();
+		
 		m_SelectedObjects = new array< Object >;
 
 		m_ActiveESPObjects = new array< ref JMESPMeta >;
@@ -452,19 +457,65 @@ class JMESPModule: JMRenderableModuleBase
 		if ( IsMissionClient() )
 		{
 			JMESPWidgetHandler.espModule = this;
-
-			GetGame().GameScript.Call( this, "ThreadESP", NULL );
 		}
+	}
+
+	override void OnMPSessionFail()
+	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMPSessionFail");
+	#endif
+
+		super.OnMPSessionFail();
+
+		g_COT_ThreadESP = false;
+	}
+
+	override void OnMPSessionEnd()
+	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMPSessionEnd");
+	#endif
+
+		super.OnMPSessionEnd();
+
+		g_COT_ThreadESP = false;
+	}
+
+	override void OnMPConnectionLost(int duration)
+	{
+	#ifdef DIAG_DEVELOPER
+		PrintFormat("JMESPModule::OnMPConnectionLost duration=%1", duration);
+	#endif
+
+		super.OnMPConnectionLost(duration);
 	}
 
 	override void OnMissionFinish()
 	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnMissionFinish");
+	#endif
+
 		for (int j = 0; j < m_ActiveESPObjects.Count(); j++ )
 		{
 			m_ActiveESPObjects[j].Destroy();
 		}
 
 		m_ActiveESPObjects.Clear();
+
+		g_COT_ThreadESP = false;
+		g_COT_ThreadESP_Running = false;
+	}
+
+	override void OnLogout(Class sender, CF_EventArgs args)
+	{
+	#ifdef DIAG_DEVELOPER
+		Print("JMESPModule::OnLogout");
+	#endif
+
+		g_COT_ThreadESP = false;
+		m_CurrentState = JMESPState.Remove;
 	}
 
 	void CreateCanvas()
@@ -567,6 +618,12 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		#endif
 
+		if (!g_COT_ThreadESP_Running)
+		{
+			m_IsCreatingWidgets = false;
+			return;
+		}
+
 		m_IsCreatingWidgets = true;
 
 		int count = m_ESPToCreate.Count();
@@ -648,6 +705,9 @@ class JMESPModule: JMRenderableModuleBase
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
 		else
 			m_IsDestroyingWidgets = false;
+
+		if (m_CurrentState == JMESPState.Remove)
+			g_COT_ThreadESP = false;
 
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
@@ -741,6 +801,9 @@ class JMESPModule: JMRenderableModuleBase
 					}
 
 					Sleep(100);
+
+					if (!g_COT_ThreadESP)
+						return;
 				}
 				else
 				{
@@ -777,6 +840,9 @@ class JMESPModule: JMRenderableModuleBase
 					}
 
 					_Sleep( 1, totalTimeTaken, sleepIdx );
+
+					if (!g_COT_ThreadESP)
+						return;
 				}
 			}
 		}
@@ -808,11 +874,21 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		m_CurrentState = newState;
 		m_StateChanged = true;
+
+		if (!g_COT_ThreadESP && !g_COT_ThreadESP_Running)
+		{
+			g_COT_ThreadESP = true;
+			GetGame().GameScript.Call( this, "ThreadESP", NULL );
+		}
 	}
 
 	void ThreadESP()
 	{
-		while ( true )
+		g_COT_ThreadESP_Running = true;
+
+		Print("+ThreadESP");
+
+		while ( g_COT_ThreadESP )
 		{
 			int totalTimeTaken = 0;
 			bool didRun = false;
@@ -842,6 +918,9 @@ class JMESPModule: JMRenderableModuleBase
 				} else if ( m_CurrentState == JMESPState.View || m_CurrentState == JMESPState.Update )
 				{
 					ChunkGetObjects( objects, totalTimeTaken );
+
+					if (!g_COT_ThreadESP)
+						break;
 
 					for ( int i = 0; i < objects.Count(); ++i )
 					{
@@ -931,6 +1010,9 @@ class JMESPModule: JMRenderableModuleBase
 					else
 						_Sleep( 1, totalTimeTaken );
 
+					if (!g_COT_ThreadESP)
+						break;
+
 					#ifdef JM_COT_ESP_DEBUG
 					#ifdef COT_DEBUGLOGS
 					Print( "+JMESPModule::ThreadESP() - Verifying ESP Objects" );
@@ -979,6 +1061,10 @@ class JMESPModule: JMRenderableModuleBase
 				Sleep( 50 );
 			}
 		}
+
+		g_COT_ThreadESP_Running = false;
+
+		Print("-ThreadESP");
 	}
 
 	override int GetRPCMin()
