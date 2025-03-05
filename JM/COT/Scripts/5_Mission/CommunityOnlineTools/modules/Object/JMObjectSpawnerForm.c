@@ -519,9 +519,12 @@ class JMObjectSpawnerForm: JMFormBase
 		m_ItemPreview.SetModelOrientation( m_Orientation );
 	}
 
-	void UpdateDistance( float drag )
+	void UpdateDistance( float wheel )
 	{
-		m_Distance = m_Distance + (drag * 0.1);
+		vector minMax[2];
+		float radius = m_PreviewItem.ClippingInfo(minMax);
+
+		m_Distance = m_Distance - (wheel * radius / 10.0);
 		
 		m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
 	}
