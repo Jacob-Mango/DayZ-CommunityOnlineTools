@@ -60,7 +60,6 @@ class JMESPForm: JMFormBase
 
 		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
 		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
-		UpdateDisableSafetyCheckbox();
 
 		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
 		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
@@ -219,21 +218,6 @@ class JMESPForm: JMFormBase
 	void OnESPViewTypeChanged(JMESPViewType viewType)
 	{
 		UpdateMaxRange();
-
-		switch (viewType.Type())
-		{
-			case JMESPViewTypeBuilding:
-				UpdateDisableSafetyCheckbox();
-				break;
-		}
-	}
-
-	void UpdateDisableSafetyCheckbox()
-	{
-		if (m_Module.GetViewType(JMESPViewTypeBuilding).View)
-			m_DisableSafetyCheckbox.Enable();
-		else
-			m_DisableSafetyCheckbox.Disable();
 	}
 
 	void UpdateUI()
