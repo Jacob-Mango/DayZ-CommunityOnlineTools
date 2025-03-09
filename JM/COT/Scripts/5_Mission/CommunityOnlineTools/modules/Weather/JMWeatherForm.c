@@ -1241,7 +1241,7 @@ class JMWeatherForm: JMFormBase
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
-		int hour = 6;
+		int hour = 18;
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
@@ -1281,7 +1281,7 @@ class JMWeatherForm: JMFormBase
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
-		int hour = 18;
+		int hour = 6;
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
