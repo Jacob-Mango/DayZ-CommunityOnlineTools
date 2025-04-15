@@ -353,7 +353,7 @@ class JMObjectSpawnerForm: JMFormBase
 				break;
 			case 2: // Food
 				m_ItemDataList.SetItems(m_ObjItemStateFoodText);
-				break:
+				break;
 		}
 
 		// Reset to default since 0 is used for UNKNOWN
