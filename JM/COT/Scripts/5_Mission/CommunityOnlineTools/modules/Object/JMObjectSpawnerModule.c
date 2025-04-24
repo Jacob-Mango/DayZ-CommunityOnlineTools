@@ -22,7 +22,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"m249",
 		"undersluggrenadem4",
 		"groza",
+	#ifdef DAYZ_1_27
 		"pm73rak",
+	#endif
 		"trumpet",
 		"lawbase",
 		"law",
