@@ -573,6 +573,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_PreviewItem.DisableSimulation(true);
 
 			m_ItemPreview.SetItem( m_PreviewItem );
+			m_Distance = 0;
 			m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
 			m_ItemPreview.SetModelOrientation( vector.Zero );
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
