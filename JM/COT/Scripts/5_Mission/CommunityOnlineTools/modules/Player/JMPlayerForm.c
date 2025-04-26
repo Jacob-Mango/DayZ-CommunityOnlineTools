@@ -1026,8 +1026,9 @@ class JMPlayerForm: JMFormBase
 		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerConfirm" );
 	}
 
-	void KickPlayersConfirm(JMConfirmation confirmation)
+	void KickPlayerConfirm(JMConfirmation confirmation)
 	{
+		//! TODO: This is awful and confusing. The whole GetSelectedID stuff should be removed again, there's a reason the callbacks should be separate.
 		switch(confirmation.GetSelectedID())
 		{
 			// Abort
