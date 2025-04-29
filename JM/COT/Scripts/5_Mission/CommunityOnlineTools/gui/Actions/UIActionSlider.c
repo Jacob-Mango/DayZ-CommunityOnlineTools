@@ -73,6 +73,7 @@ class UIActionSlider: UIActionBase
 	void SetStepValue( float step )
 	{
 		m_StepValue = step;
+		m_Slider.SetStep(m_StepValue);
 
 		CalculateValue();
 	}
@@ -80,6 +81,7 @@ class UIActionSlider: UIActionBase
 	void SetMin( float min )
 	{
 		m_Min = min;
+		m_Slider.SetMinMax(m_Min, m_Max);
 
 		CalculateValue();
 	}
@@ -87,6 +89,7 @@ class UIActionSlider: UIActionBase
 	void SetMax( float max )
 	{
 		m_Max = max;
+		m_Slider.SetMinMax(m_Min, m_Max);
 
 		CalculateValue();
 	}

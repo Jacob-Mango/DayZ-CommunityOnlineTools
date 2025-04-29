@@ -636,7 +636,12 @@ class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 
 		ItemBase item;
 		if ( !Class.CastTo( item, obj ) )
+		{
+			if (obj.IsInventoryItem())
+				return true;
+
 			return false;
+		}
 
 		if ( Edible_Base.Cast( obj ) != NULL )
 			return false;

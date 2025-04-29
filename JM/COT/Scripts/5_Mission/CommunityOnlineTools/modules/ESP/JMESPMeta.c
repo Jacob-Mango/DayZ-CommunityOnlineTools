@@ -176,17 +176,13 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget positionActionsButtons = UIActionManager.CreateWrapSpacer( positionActions );
 
-		if (networkLow || networkHigh)
-			m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
+		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
 
 		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.12 );
 
-		if (networkLow || networkHigh)
-		{
-			m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
-			m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
-			m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
-		}
+		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
+		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
+		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -203,19 +199,15 @@ class JMESPMeta: COT_WidgetHolder
 		
 		Widget orientationActionsButtons = UIActionManager.CreateWrapSpacer( orientationActions );
 
-		if (networkLow || networkHigh)
-			m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
+		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
 
 		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
 
-		if (networkLow || networkHigh)
-		{
-			m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
-			m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
-			m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
-		}
+		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
+		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
+		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
-		if ( (networkLow || networkHigh) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
+		if ( (networkLow || networkHigh || !GetGame().IsMultiplayer()) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -228,7 +220,7 @@ class JMESPMeta: COT_WidgetHolder
 				m_HealButton  = UIActionManager.CreateButton( parent, "Heal",  this, "Action_Heal" );
 		}
 
-		if ( (networkLow || networkHigh) && CanDelete() )
+		if ( CanDelete() )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -397,6 +389,8 @@ class JMESPMeta: COT_WidgetHolder
 
 		if (networkLow || networkHigh)
 			module.SetPosition( pos, target );
+		else
+			target.SetPosition(pos);
 	}
 
 	void Action_PastePosition( UIEvent eid, UIActionBase action )
@@ -470,6 +464,8 @@ class JMESPMeta: COT_WidgetHolder
 
 		if (networkLow || networkHigh)
 			module.SetOrientation( ori, target );
+		else
+			target.SetOrientation(ori);
 	}
 
 	void Action_PasteOrientation( UIEvent eid, UIActionBase action )
@@ -523,7 +519,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( IsMissionOffline() )
+		if ( IsMissionOffline() || (!networkLow && !networkHigh) )
 			module.DeleteObject( target );
 		else
 			module.DeleteObject( networkLow, networkHigh );
