@@ -233,7 +233,7 @@ class CommunityOnlineToolsBase
 
 	void Log( PlayerIdentity logIdentPlyer, string text )
 	{
-		if ( GetGame().IsMultiplayer() )
+		if ( GetGame().IsMultiplayer() && logIdentPlyer )
 		{
 			text = "" + logIdentPlyer.GetPlainId() + ": " + text;
 		} else

@@ -1241,7 +1241,7 @@ class JMWeatherForm: JMFormBase
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
-		int hour = 6;
+		int hour = 18;
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
@@ -1281,7 +1281,7 @@ class JMWeatherForm: JMFormBase
 		int month = m_SliderDateMonth.GetCurrent();
 		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
-		int hour = 18;
+		int hour = 6;
 		int minute = 0;
 
 		m_Module.SetDate( year, month, day, hour, minute );
@@ -1534,7 +1534,7 @@ class JMWeatherForm: JMFormBase
 
 		m_SliderDyanmicFogBias = UIActionManager.CreateSlider( actionsGrid, "Bias", 0, 1, this);
 		m_SliderDyanmicFogBias.SetCurrent( 0 );
-		m_SliderDyanmicFogBias.SetStepValue( 10 );
+		m_SliderDyanmicFogBias.SetStepValue( 1 );
 		m_SliderDyanmicFogBias.SetMin( -500 );
 		m_SliderDyanmicFogBias.SetMax( 500 );
 		m_SliderDyanmicFogBias.SetWidgetWidth( m_SliderDyanmicFogBias.GetLabelWidget(), 0.6 );
@@ -1542,7 +1542,7 @@ class JMWeatherForm: JMFormBase
 
 		m_SliderDyanmicFogDistance = UIActionManager.CreateSlider( actionsGrid, "Distance", 0, 1, this);
 		m_SliderDyanmicFogDistance.SetCurrent( 0 );
-		m_SliderDyanmicFogDistance.SetStepValue( 0.1 );
+		m_SliderDyanmicFogDistance.SetStepValue( 0.01 );
 		m_SliderDyanmicFogDistance.SetMin( 0 );
 		m_SliderDyanmicFogDistance.SetMax( 1 );
 		m_SliderDyanmicFogDistance.SetWidgetWidth( m_SliderDyanmicFogDistance.GetLabelWidget(), 0.6 );
@@ -1550,7 +1550,7 @@ class JMWeatherForm: JMFormBase
 		
 		m_SliderDyanmicFogHeight = UIActionManager.CreateSlider( actionsGrid, "Height", 0, 1, this);
 		m_SliderDyanmicFogHeight.SetCurrent( 0 );
-		m_SliderDyanmicFogHeight.SetStepValue( 0.1 );
+		m_SliderDyanmicFogHeight.SetStepValue( 0.01 );
 		m_SliderDyanmicFogHeight.SetMin( 0 );
 		m_SliderDyanmicFogHeight.SetMax( 1 );
 		m_SliderDyanmicFogHeight.SetWidgetWidth( m_SliderDyanmicFogHeight.GetLabelWidget(), 0.6 );
