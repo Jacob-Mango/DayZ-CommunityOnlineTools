@@ -20,6 +20,10 @@ class UIActionSlider: UIActionBase
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Slider, layoutRoot.FindAnyWidget( "action" ) );
 		Class.CastTo( m_Value, layoutRoot.FindAnyWidget( "action_value" ) );
+
+		m_Min = m_Slider.GetMin();
+		m_Max = m_Slider.GetMax();
+		m_StepValue = m_Slider.GetStep();
 	}
 
 	override void OnShow()
