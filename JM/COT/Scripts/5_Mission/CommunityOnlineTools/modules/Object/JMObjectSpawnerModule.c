@@ -18,7 +18,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"m203_standalone",
 		"red9",
 		"pvcbow",
-		"crossbow",
 		"m249",
 		"undersluggrenadem4",
 		"groza",
