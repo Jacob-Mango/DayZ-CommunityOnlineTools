@@ -388,7 +388,7 @@ class JMESPForm: JMFormBase
 		float maxRadius = m_Module.GetMaxRadius();
 		if (m_Module.ESPRadius > maxRadius)
 			m_Module.ESPRadius = maxRadius;
-		m_sldr_Radius.SetMax(maxRadius);
+		m_sldr_Radius.SetMinMax(m_sldr_Radius.GetMin(), maxRadius);
 		m_sldr_Radius.SetCurrent(m_Module.ESPRadius);
 	}	
 

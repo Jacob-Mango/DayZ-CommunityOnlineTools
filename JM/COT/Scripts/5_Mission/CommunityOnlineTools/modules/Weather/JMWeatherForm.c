@@ -842,7 +842,7 @@ class JMWeatherForm: JMFormBase
 		
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 
 		int day = m_SliderDateDay.GetCurrent();
 		int hour = m_SliderDateHour.GetCurrent();
@@ -1219,7 +1219,7 @@ class JMWeatherForm: JMFormBase
 
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
 		int hour = 0;
 		int minute = 0;
@@ -1239,7 +1239,7 @@ class JMWeatherForm: JMFormBase
 
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
 		int hour = 18;
 		int minute = 0;
@@ -1259,7 +1259,7 @@ class JMWeatherForm: JMFormBase
 
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
 		int hour = 12;
 		int minute = 0;
@@ -1279,7 +1279,7 @@ class JMWeatherForm: JMFormBase
 
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 		int day = m_SliderDateDay.GetCurrent();
 		int hour = 6;
 		int minute = 0;
@@ -1409,29 +1409,21 @@ class JMWeatherForm: JMFormBase
 		m_EditTextDateYear.SetOnlyNumbers( true, true );
 		m_EditTextDateYear.SetText( "Year" );
 
-		m_SliderDateMonth = UIActionManager.CreateSlider( actions, "Month", 0, 1, this, "OnChange_Date" );
+		m_SliderDateMonth = UIActionManager.CreateSlider( actions, "Month", 1, 12, this, "OnChange_Date" );
 		m_SliderDateMonth.SetCurrent( 0 );
 		m_SliderDateMonth.SetStepValue( 1 );
-		m_SliderDateMonth.SetMin( 1 );
-		m_SliderDateMonth.SetMax( 12 );
 
-		m_SliderDateDay = UIActionManager.CreateSlider( actions, "Day", 0, 1, this );
+		m_SliderDateDay = UIActionManager.CreateSlider( actions, "Day", 1, 31, this );
 		m_SliderDateDay.SetCurrent( 0 );
 		m_SliderDateDay.SetStepValue( 1 );
-		m_SliderDateDay.SetMin( 1 );
-		m_SliderDateDay.SetMax( 31 );
 
-		m_SliderDateHour = UIActionManager.CreateSlider( actions, "Hour", 0, 1, this );
+		m_SliderDateHour = UIActionManager.CreateSlider( actions, "Hour", 0, 23, this );
 		m_SliderDateHour.SetCurrent( 0 );
 		m_SliderDateHour.SetStepValue( 1 );
-		m_SliderDateHour.SetMin( 0 );
-		m_SliderDateHour.SetMax( 23 );
 
-		m_SliderDateMinute = UIActionManager.CreateSlider( actions, "Minute", 0, 1, this );
+		m_SliderDateMinute = UIActionManager.CreateSlider( actions, "Minute", 0, 59, this );
 		m_SliderDateMinute.SetCurrent( 0 );
 		m_SliderDateMinute.SetStepValue( 1 );
-		m_SliderDateMinute.SetMin( 0 );
-		m_SliderDateMinute.SetMax( 59 );
 
 		UIActionManager.CreatePanel( m_PanelDate, 0xFF000000, 1 );
 	}
@@ -1446,7 +1438,7 @@ class JMWeatherForm: JMFormBase
 	
 		int year = m_EditTextDateYear.GetText().ToInt();
 		int month = m_SliderDateMonth.GetCurrent();
-		m_SliderDateDay.SetMax( m_DaysInMonth[month - 1] );
+		m_SliderDateDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 	}
 
 	private void InitStormWidgets( Widget actionsParent )
@@ -1459,29 +1451,23 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderStormDensity = UIActionManager.CreateSlider( actionsGrid, "Density", 0, 1, this );
+		m_SliderStormDensity = UIActionManager.CreateSlider( actionsGrid, "Density", 0, 100, this );
 		m_SliderStormDensity.SetCurrent( 0 );
 		m_SliderStormDensity.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormDensity.SetStepValue( 0.1 );
-		m_SliderStormDensity.SetMin( 0 );
-		m_SliderStormDensity.SetMax( 100 );
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetLabelWidget(), 0.6 );
 		m_SliderStormDensity.SetWidgetWidth( m_SliderStormDensity.GetSliderWidget(), 0.6 );
 
-		m_SliderStormThreshold = UIActionManager.CreateSlider( actionsGrid, "Threshold", 0, 1, this );
+		m_SliderStormThreshold = UIActionManager.CreateSlider( actionsGrid, "Threshold", 0, 100, this );
 		m_SliderStormThreshold.SetCurrent( 0 );
 		m_SliderStormThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderStormThreshold.SetStepValue( 0.1 );
-		m_SliderStormThreshold.SetMin( 0 );
-		m_SliderStormThreshold.SetMax( 100 );
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetLabelWidget(), 0.6 );
 		m_SliderStormThreshold.SetWidgetWidth( m_SliderStormThreshold.GetSliderWidget(), 0.6 );
 
-		m_SliderMinTimeBetweenLightning = UIActionManager.CreateSlider( actionsGrid, "Lightning", 0, 1, this );
+		m_SliderMinTimeBetweenLightning = UIActionManager.CreateSlider( actionsGrid, "Lightning", 0, 120, this );
 		m_SliderMinTimeBetweenLightning.SetCurrent( 0 );
 		m_SliderMinTimeBetweenLightning.SetStepValue( 1 );
-		m_SliderMinTimeBetweenLightning.SetMin( 0 );
-		m_SliderMinTimeBetweenLightning.SetMax( 120 );
 		m_SliderMinTimeBetweenLightning.SetWidgetWidth( m_SliderMinTimeBetweenLightning.GetLabelWidget(), 0.6 );
 		m_SliderMinTimeBetweenLightning.SetWidgetWidth( m_SliderMinTimeBetweenLightning.GetSliderWidget(), 0.6 );
 
@@ -1498,12 +1484,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderFogForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this);
+		m_SliderFogForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 100, this);
 		m_SliderFogForecast.SetCurrent( 0 );
 		m_SliderFogForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderFogForecast.SetStepValue( 0.1 );
-		m_SliderFogForecast.SetMin( 0 );
-		m_SliderFogForecast.SetMax( 100 );
 		m_SliderFogForecast.SetWidgetWidth( m_SliderFogForecast.GetLabelWidget(), 0.6 );
 		m_SliderFogForecast.SetWidgetWidth( m_SliderFogForecast.GetSliderWidget(), 0.6 );
 
@@ -1532,27 +1516,21 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 4 );
 
-		m_SliderDyanmicFogBias = UIActionManager.CreateSlider( actionsGrid, "Bias", 0, 1, this);
+		m_SliderDyanmicFogBias = UIActionManager.CreateSlider( actionsGrid, "Bias", -500, 500, this);
 		m_SliderDyanmicFogBias.SetCurrent( 0 );
 		m_SliderDyanmicFogBias.SetStepValue( 1 );
-		m_SliderDyanmicFogBias.SetMin( -500 );
-		m_SliderDyanmicFogBias.SetMax( 500 );
 		m_SliderDyanmicFogBias.SetWidgetWidth( m_SliderDyanmicFogBias.GetLabelWidget(), 0.6 );
 		m_SliderDyanmicFogBias.SetWidgetWidth( m_SliderDyanmicFogBias.GetSliderWidget(), 0.6 );
 
 		m_SliderDyanmicFogDistance = UIActionManager.CreateSlider( actionsGrid, "Distance", 0, 1, this);
 		m_SliderDyanmicFogDistance.SetCurrent( 0 );
 		m_SliderDyanmicFogDistance.SetStepValue( 0.01 );
-		m_SliderDyanmicFogDistance.SetMin( 0 );
-		m_SliderDyanmicFogDistance.SetMax( 1 );
 		m_SliderDyanmicFogDistance.SetWidgetWidth( m_SliderDyanmicFogDistance.GetLabelWidget(), 0.6 );
 		m_SliderDyanmicFogDistance.SetWidgetWidth( m_SliderDyanmicFogDistance.GetSliderWidget(), 0.6 );
 		
 		m_SliderDyanmicFogHeight = UIActionManager.CreateSlider( actionsGrid, "Height", 0, 1, this);
 		m_SliderDyanmicFogHeight.SetCurrent( 0 );
 		m_SliderDyanmicFogHeight.SetStepValue( 0.01 );
-		m_SliderDyanmicFogHeight.SetMin( 0 );
-		m_SliderDyanmicFogHeight.SetMax( 1 );
 		m_SliderDyanmicFogHeight.SetWidgetWidth( m_SliderDyanmicFogHeight.GetLabelWidget(), 0.6 );
 		m_SliderDyanmicFogHeight.SetWidgetWidth( m_SliderDyanmicFogHeight.GetSliderWidget(), 0.6 );
 
@@ -1575,12 +1553,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderRainForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this );
+		m_SliderRainForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 100, this );
 		m_SliderRainForecast.SetCurrent( 0 );
 		m_SliderRainForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainForecast.SetStepValue( 0.1 );
-		m_SliderRainForecast.SetMin( 0 );
-		m_SliderRainForecast.SetMax( 100 );
 		m_SliderRainForecast.SetWidgetWidth( m_SliderRainForecast.GetLabelWidget(), 0.6 );
 		m_SliderRainForecast.SetWidgetWidth( m_SliderRainForecast.GetSliderWidget(), 0.6 );
 
@@ -1609,21 +1585,17 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderRainOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 1, this );
+		m_SliderRainOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 100, this );
 		m_SliderRainOvercastMin.SetCurrent( 0 );
 		m_SliderRainOvercastMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMin.SetStepValue( 0.1 );
-		m_SliderRainOvercastMin.SetMin( 0 );
-		m_SliderRainOvercastMin.SetMax( 100 );
 		m_SliderRainOvercastMin.SetWidgetWidth( m_SliderRainOvercastMin.GetLabelWidget(), 0.6 );
 		m_SliderRainOvercastMin.SetWidgetWidth( m_SliderRainOvercastMin.GetSliderWidget(), 0.6 );
 
-		m_SliderRainOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 1, this );
+		m_SliderRainOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 100, this );
 		m_SliderRainOvercastMax.SetCurrent( 0 );
 		m_SliderRainOvercastMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderRainOvercastMax.SetStepValue( 0.1 );
-		m_SliderRainOvercastMax.SetMin( 0 );
-		m_SliderRainOvercastMax.SetMax( 100 );
 		m_SliderRainOvercastMax.SetWidgetWidth( m_SliderRainOvercastMax.GetLabelWidget(), 0.6 );
 		m_SliderRainOvercastMax.SetWidgetWidth( m_SliderRainOvercastMax.GetSliderWidget(), 0.6 );
 
@@ -1646,12 +1618,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderSnowForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this );
+		m_SliderSnowForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 100, this );
 		m_SliderSnowForecast.SetCurrent( 0 );
 		m_SliderSnowForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderSnowForecast.SetStepValue( 0.1 );
-		m_SliderSnowForecast.SetMin( 0 );
-		m_SliderSnowForecast.SetMax( 100 );
 		m_SliderSnowForecast.SetWidgetWidth( m_SliderSnowForecast.GetLabelWidget(), 0.6 );
 		m_SliderSnowForecast.SetWidgetWidth( m_SliderSnowForecast.GetSliderWidget(), 0.6 );
 
@@ -1680,21 +1650,17 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderSnowOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 1, this );
+		m_SliderSnowOvercastMin = UIActionManager.CreateSlider( actionsGrid, "Min", 0, 100, this );
 		m_SliderSnowOvercastMin.SetCurrent( 0 );
 		m_SliderSnowOvercastMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderSnowOvercastMin.SetStepValue( 0.1 );
-		m_SliderSnowOvercastMin.SetMin( 0 );
-		m_SliderSnowOvercastMin.SetMax( 100 );
 		m_SliderSnowOvercastMin.SetWidgetWidth( m_SliderSnowOvercastMin.GetLabelWidget(), 0.6 );
 		m_SliderSnowOvercastMin.SetWidgetWidth( m_SliderSnowOvercastMin.GetSliderWidget(), 0.6 );
 
-		m_SliderSnowOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 1, this );
+		m_SliderSnowOvercastMax = UIActionManager.CreateSlider( actionsGrid, "Max", 0, 100, this );
 		m_SliderSnowOvercastMax.SetCurrent( 0 );
 		m_SliderSnowOvercastMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderSnowOvercastMax.SetStepValue( 0.1 );
-		m_SliderSnowOvercastMax.SetMin( 0 );
-		m_SliderSnowOvercastMax.SetMax( 100 );
 		m_SliderSnowOvercastMax.SetWidgetWidth( m_SliderSnowOvercastMax.GetLabelWidget(), 0.6 );
 		m_SliderSnowOvercastMax.SetWidgetWidth( m_SliderSnowOvercastMax.GetSliderWidget(), 0.6 );
 
@@ -1717,12 +1683,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderOvercastForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this );
+		m_SliderOvercastForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 100, this );
 		m_SliderOvercastForecast.SetCurrent( 0 );
 		m_SliderOvercastForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderOvercastForecast.SetStepValue( 0.1 );
-		m_SliderOvercastForecast.SetMin( 0 );
-		m_SliderOvercastForecast.SetMax( 100 );
 		m_SliderOvercastForecast.SetWidgetWidth( m_SliderOvercastForecast.GetLabelWidget(), 0.6 );
 		m_SliderOvercastForecast.SetWidgetWidth( m_SliderOvercastForecast.GetSliderWidget(), 0.6 );
 
@@ -1751,12 +1715,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderWindMagnitudeForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 1, this);
+		m_SliderWindMagnitudeForecast = UIActionManager.CreateSlider( actionsGrid, "Amount", 0, 20, this);
 		m_SliderWindMagnitudeForecast.SetCurrent( 0 );
 		m_SliderWindMagnitudeForecast.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderWindMagnitudeForecast.SetStepValue( 0.1 );
-		m_SliderWindMagnitudeForecast.SetMin( 0 );
-		m_SliderWindMagnitudeForecast.SetMax( 20 );
 		m_SliderWindMagnitudeForecast.SetWidgetWidth( m_SliderWindMagnitudeForecast.GetLabelWidget(), 0.6 );
 		m_SliderWindMagnitudeForecast.SetWidgetWidth( m_SliderWindMagnitudeForecast.GetSliderWidget(), 0.6 );
 
@@ -1785,12 +1747,10 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_SliderWindDirectionForecast = UIActionManager.CreateSlider( actionsGrid, "Direction", 0, 1, this, "OnChange_Wind");
+		m_SliderWindDirectionForecast = UIActionManager.CreateSlider( actionsGrid, "Direction", 0, 360, this, "OnChange_Wind");
 		m_SliderWindDirectionForecast.SetCurrent( 0 );
 		m_SliderWindDirectionForecast.SetFormat("");
 		m_SliderWindDirectionForecast.SetStepValue( 1 );
-		m_SliderWindDirectionForecast.SetMin( 0 );
-		m_SliderWindDirectionForecast.SetMax( 360 );
 		m_SliderWindDirectionForecast.SetWidgetWidth( m_SliderWindDirectionForecast.GetLabelWidget(), 0.6 );
 		m_SliderWindDirectionForecast.SetWidgetWidth( m_SliderWindDirectionForecast.GetSliderWidget(), 0.6 );
 
@@ -1847,8 +1807,6 @@ class JMWeatherForm: JMFormBase
 		m_EditWindFuncMin.SetCurrent( 0 );
 		m_EditWindFuncMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_EditWindFuncMin.SetStepValue( 0.05 );
-		m_EditWindFuncMin.SetMin( 0 );
-		m_EditWindFuncMin.SetMax( 1.0 );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetLabelWidget(), 0.6 );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetSliderWidget(), 0.6 );
 
@@ -1856,8 +1814,6 @@ class JMWeatherForm: JMFormBase
 		m_EditWindFuncMax.SetCurrent( 0 );
 		m_EditWindFuncMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_EditWindFuncMax.SetStepValue( 0.05 );
-		m_EditWindFuncMax.SetMin( 0 );
-		m_EditWindFuncMax.SetMax( 1.0 );
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetLabelWidget(), 0.6 );
 		m_EditWindFuncMax.SetWidgetWidth( m_EditWindFuncMax.GetSliderWidget(), 0.6 );
 
@@ -1878,7 +1834,6 @@ class JMWeatherForm: JMFormBase
 		float min = m_EditWindFuncMin.GetCurrent();
 		float max = m_EditWindFuncMax.GetCurrent();
 
-		m_EditWindFuncMin.SetMax( max );
-		m_EditWindFuncMax.SetMin( min );
+		m_EditWindFuncMin.SetMinMax( min, max );
 	}
 };
