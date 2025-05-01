@@ -28,8 +28,6 @@ class JMESPForm: JMFormBase
 
 	private UIActionEditableTextPreview m_SearchBox;
 
-	private bool m_UseFilter;
-
 	void JMESPForm()
 	{
 		m_ESPTypeList = new array< ref JMESPViewTypeWidget >;
@@ -254,8 +252,6 @@ class JMESPForm: JMFormBase
 		string closestMatch;
 
 		string strSearch = m_SearchBox.GetText();
-		
-		m_UseFilter = false;
 
 		if ( strSearch != "" )
 		{
@@ -300,16 +296,11 @@ class JMESPForm: JMFormBase
 					{
 						suggestions.Clear();
 						closestMatch = strNameLower;
-						m_UseFilter = true;
 						break;  //! We can end the search here because we got a perfect match
 					}
 					else if ( strNameLower.IndexOf(strSearch) == 0 )
 					{
 						suggestions.Insert(strNameLower);
-					}
-					else if ( strNameLower.Contains(strSearch) )
-					{
-						m_UseFilter = true;
 					}
 				}
 			}
@@ -318,7 +309,6 @@ class JMESPForm: JMFormBase
 			{
 				suggestions.Sort();
 				closestMatch = suggestions[0];
-				m_UseFilter = true;
 			}
 		}
 
@@ -361,10 +351,7 @@ class JMESPForm: JMFormBase
 
 		UpdateList();
 
-		if ( m_UseFilter )
-			m_Module.Filter = action.GetText();
-		else
-			m_Module.Filter = "";
+		m_Module.Filter = action.GetText();
 	}
 
 	void Change_UpdateRate( UIEvent eid, UIActionBase action )
@@ -401,7 +388,7 @@ class JMESPForm: JMFormBase
 		float maxRadius = m_Module.GetMaxRadius();
 		if (m_Module.ESPRadius > maxRadius)
 			m_Module.ESPRadius = maxRadius;
-		m_sldr_Radius.SetMax(maxRadius);
+		m_sldr_Radius.SetMinMax(m_sldr_Radius.GetMin(), maxRadius);
 		m_sldr_Radius.SetCurrent(m_Module.ESPRadius);
 	}	
 

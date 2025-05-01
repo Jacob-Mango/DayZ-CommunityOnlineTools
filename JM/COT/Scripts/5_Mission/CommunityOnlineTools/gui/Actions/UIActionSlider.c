@@ -7,8 +7,6 @@ class UIActionSlider: UIActionBase
 	protected float m_Min;
 	protected float m_Max;
 
-	protected float m_StepValue;
-
 	protected float m_Current;
 
 	protected string m_Format;
@@ -20,6 +18,10 @@ class UIActionSlider: UIActionBase
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Slider, layoutRoot.FindAnyWidget( "action" ) );
 		Class.CastTo( m_Value, layoutRoot.FindAnyWidget( "action_value" ) );
+
+		m_Min = m_Slider.GetMin();
+		m_Max = m_Slider.GetMax();
+		m_Current = m_Slider.GetCurrent();
 	}
 
 	override void OnShow()
@@ -72,36 +74,65 @@ class UIActionSlider: UIActionBase
 
 	void SetStepValue( float step )
 	{
-		m_StepValue = step;
-		m_Slider.SetStep(m_StepValue);
+		if (step > 0)
+		{
+			m_Slider.SetStep(step);
 
-		CalculateValue();
+			SetCurrent(GetCurrent());
+		}
+		else
+		{
+			Error("Invalid step value " + step);
+		}
+	}
+
+	float GetStepValue()
+	{
+		return m_Slider.GetStep();
 	}
 
 	void SetMin( float min )
 	{
-		m_Min = min;
-		m_Slider.SetMinMax(m_Min, m_Max);
+		ErrorEx("DEPRECATED, use SetMinMax", ErrorExSeverity.WARNING);
 
-		CalculateValue();
+		SetMinMax(min, GetMax());
 	}
 
 	void SetMax( float max )
 	{
-		m_Max = max;
-		m_Slider.SetMinMax(m_Min, m_Max);
+		ErrorEx("DEPRECATED, use SetMinMax", ErrorExSeverity.WARNING);
 
-		CalculateValue();
+		SetMinMax(GetMin(), max);
+	}
+
+	void SetMinMax(float min, float max)
+	{
+		float range = max - min;
+
+		if (range > 0)
+		{
+			m_Slider.SetMinMax(min, max);
+			m_Slider.Update();
+
+			CalculateValue();
+
+			m_Min = min;
+			m_Max = max;
+		}
+		else
+		{
+			Error("Invalid slider range " + range);
+		}
 	}
 
 	float GetMin()
 	{
-		return m_Min;
+		return m_Slider.GetMin();
 	}
 
 	float GetMax()
 	{
-		return m_Max;
+		return m_Slider.GetMax();
 	}
 
 	override bool IsFocusWidget( Widget widget )
@@ -114,61 +145,40 @@ class UIActionSlider: UIActionBase
 
 	override float GetCurrent()
 	{
-		return m_Current;
+		return m_Slider.GetCurrent();
 	}
 
 	override void SetCurrent( float value )
 	{
-		if ( IsFocused() )
-			return;
-			
-		float x = value;
-		float a = m_Slider.GetMin();
-		float b = m_Slider.GetMax();
-		float min = m_Min;
-		float max = m_Max;
+		float stepValue = GetStepValue();
 
-		float top = ( b - a ) * ( x - min );
-		float bottom = ( max - min );
+		m_Current = Math.Round(Math.Clamp(value, GetMin(), GetMax()) / stepValue) * stepValue;
 
-		if ( bottom != 0 )
-		{
-			m_Slider.SetCurrent( ( top / bottom ) + a );
-			CalculateValue();
-		} else
-		{
-			m_Slider.SetCurrent( 0 );
-			m_Current = 0;
-		}
+		m_Slider.SetCurrent(m_Current);
+
+		UpdateValue();
 	}
 
-	void CalculateValue()
+	protected void CalculateValue()
 	{
-		float x = m_Slider.GetCurrent();
-		float a = m_Min;
-		float b = m_Max;
-		float min = m_Slider.GetMin();
-		float max = m_Slider.GetMax();
+		float oldRange = m_Max - m_Min;
+		float oldValue = m_Current - m_Min;
+		float newRange = GetMax() - GetMin();
+		float value = ((oldValue * newRange) / oldRange) + GetMin();
 
-		float top = ( b - a ) * ( x - min );
-		float bottom = ( max - min );
+		SetCurrent(value);
+	}
 
-		if ( bottom != 0 )
-		{
-			m_Current = ( top / bottom ) + a;
-
-			if ( m_StepValue != 0 )
-			{
-				m_Current = Math.Round( m_Current / m_StepValue ) * m_StepValue;
-			}
-		}
-
-		m_Value.SetText( string.Format( Widget.TranslateString( m_Format ), m_Current ) );
+	void UpdateValue()
+	{
+		m_Value.SetText( string.Format( Widget.TranslateString( m_Format ), m_Slider.GetCurrent() ) );
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
-		CalculateValue(); 
+		m_Current = GetCurrent();
+
+		UpdateValue(); 
 
 		if ( !m_HasCallback )
 			return false;
