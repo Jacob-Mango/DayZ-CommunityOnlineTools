@@ -692,11 +692,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 
 		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType());
-	#ifdef COT_WORKAROUND_T188367
-		if (maxHealth > 0 && (!entity.IsInherited(Container_Base) || entity.GetInventory().GetAttachmentSlotsCount() == 0))
-	#else
 		if (maxHealth > 0)
-	#endif
 		{
 			if ( health == -1 )
 				health = maxHealth;
