@@ -406,17 +406,11 @@ class JMObjectSpawnerForm: JMFormBase
 		if (maxHealth > 0)
 		{
 			m_HealthItem.Enable();
-			m_HealthItem.SetMax(maxHealth);
-			if ( m_HealthItem.GetCurrent() == -1 )
-				m_HealthItem.SetCurrent(maxHealth);
-
-			m_HealthItem.SetMin(0);
+			m_HealthItem.SetMinMax(0, maxHealth);
 		}
 		else
 		{
-			m_HealthItem.SetMin(-1);
-			m_HealthItem.SetCurrent(-1);
-			m_HealthItem.SetMax(-1);
+			m_HealthItem.Disable();
 		}
 	}
 
@@ -454,15 +448,6 @@ class JMObjectSpawnerForm: JMFormBase
 		else
 		{
 			m_HealthItem.SetColor( Colors.COLOR_RUINED );
-		}
-
-	#ifdef COT_WORKAROUND_T188367
-		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport() && (!m_PreviewItem.IsInherited(Container_Base) || m_PreviewItem.GetInventory().GetAttachmentSlotsCount() == 0))
-	#else
-		if (m_PreviewItem && sliderMax > 0 && !m_PreviewItem.IsTransport())
-	#endif
-		{
-			m_PreviewItem.SetHealth("", "", health);
 		}
 
 		m_HealthItem.SetAlpha( 1.0 );
@@ -561,7 +546,8 @@ class JMObjectSpawnerForm: JMFormBase
 		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false, false ) );
 
 		m_QuantityItem.Disable();
-		m_HealthItem.Disable();
+		UpdateHealthControls(strSelection);
+		UpdateHealthItemColor();
 		m_TemperatureItem.Disable();
 
 		int itemStateType = m_ItemStateType;
@@ -579,9 +565,10 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
 			m_ItemPreview.Show( true );
 
-			UpdateHealthControls(strSelection);
-
-			UpdateHealthItemColor();
+			if (m_HealthItem.IsEnabled() && !m_PreviewItem.IsTransport())
+			{
+				m_PreviewItem.SetHealth("", "", m_HealthItem.GetCurrent());
+			}
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
@@ -618,50 +605,41 @@ class JMObjectSpawnerForm: JMFormBase
 					}
 				}
 
-				if ( item.HasQuantity() )
+				Magazine mag;
+				if (Class.CastTo(mag, item))
 				{
-					m_QuantityItem.SetMin(item.GetQuantityMin());
-					m_QuantityItem.SetMax(item.GetQuantityMax());
+					if (mag.GetAmmoMax() > 0)
+					{
+						float min;
 
-					Magazine mag;
-					if ( item.IsLiquidContainer() )
+						if ( mag.IsAmmoPile() && mag.GetAmmoMax() > 1 )
+							min = 1.0;
+						else
+							min = 0.0;
+
+						m_QuantityItem.SetMinMax(min, mag.GetAmmoMax());
+						m_QuantityItem.SetStepValue(1);
+						m_QuantityItem.Enable();
+					}
+				}
+				else if (item.GetQuantityMax() - item.GetQuantityMin() > 0)
+				{
+					if ( item.IsSplitable() )
+					{
+						m_QuantityItem.SetStepValue(1);
+					}
+					else
 					{
 						m_QuantityItem.SetStepValue(0.1);
 					}
-					else
-					{
-						if (Class.CastTo(mag, item))
-						{
-							if ( mag.IsAmmoPile() )
-								m_QuantityItem.SetMin(1.0);
-							else
-								m_QuantityItem.SetMin(0.0);
-							m_QuantityItem.SetMax(mag.GetAmmoMax());
-						}
 
-						m_QuantityItem.SetStepValue(1);
-						int newCurrent = m_QuantityItem.GetCurrent();
-						m_QuantityItem.SetCurrent(newCurrent);
-					}
-
-					if ( m_QuantityItem.GetMin() == m_QuantityItem.GetMax() )
-					{
-						if (mag)
-							m_QuantityItem.SetMin(mag.GetAmmoMax() - 1);
-						m_QuantityItem.SetCurrent(m_QuantityItem.GetMax());
-					}
-					else
-					{
-						m_QuantityItem.Enable();
-					}
+					m_QuantityItem.SetMinMax(item.GetQuantityMin(), item.GetQuantityMax());
+					m_QuantityItem.Enable();
 				}
 			}
 		}
 		else
 		{
-			m_HealthItem.SetMin(-1);
-			m_HealthItem.SetCurrent(-1);
-			m_HealthItem.SetMax(-1);
 			m_ItemPreview.Show( false );
 		}
 

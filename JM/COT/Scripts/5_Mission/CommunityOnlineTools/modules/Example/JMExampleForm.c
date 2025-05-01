@@ -81,11 +81,9 @@ class JMExampleForm: JMFormBase
 			m_Dropdown.SetPosition( 0.70 );
 			m_Dropdown.SetWidth( 0.3 );
 
-			m_Slider = UIActionManager.CreateSlider( m_PanelAlpha, "Slidy:", 0, 1, this, "OnChange_Slider" );
+			m_Slider = UIActionManager.CreateSlider( m_PanelAlpha, "Slidy:", 0, 100, this, "OnChange_Slider" );
 			m_Slider.SetCurrent( 0 );
 			m_Slider.SetStepValue( 0.1 );
-			m_Slider.SetMin( 0.0 );
-			m_Slider.SetMax( 100.0 );
 			m_Slider.SetPosition( 0.5 );
 			m_Slider.SetWidth( 0.3 );
 
