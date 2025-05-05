@@ -889,7 +889,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			m_Module.Hide();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	private void DeleteEntity_No( JMConfirmation confirmation )
@@ -897,7 +897,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			m_Module.Hide();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
