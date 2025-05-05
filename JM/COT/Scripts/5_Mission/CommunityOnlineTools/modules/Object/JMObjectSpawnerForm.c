@@ -266,6 +266,8 @@ class JMObjectSpawnerForm: JMFormBase
 		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
 		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
 
+		UIActionManager.CreateCheckbox( itemData, "#STR_COT_OBJECT_MODULE_SPAWN_DISPLAYNAME", this, "Click_OnFilterDisplayName", m_Module.m_FilterWithDisplayName );
+
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
 		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
@@ -472,6 +474,14 @@ class JMObjectSpawnerForm: JMFormBase
 		if ( eid != UIEvent.CLICK ) return;
 
 		m_Module.m_AllowRestrictedClassNames = action.IsChecked();
+		UpdateList();
+	}
+
+	void Click_OnFilterDisplayName( UIEvent eid, UIActionBase action )	
+	{
+		if ( eid != UIEvent.CLICK ) return;
+
+		m_Module.m_FilterWithDisplayName = action.IsChecked();
 		UpdateList();
 	}
 
@@ -960,10 +970,19 @@ class JMObjectSpawnerForm: JMFormBase
 
 				strNameLower.ToLower();
 
-				if ( m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
-						continue; 
+						continue;
+					
+					if (m_Module.m_FilterWithDisplayName)
+					{
+						if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
+							continue;
+
+						strNameLower = Widget.TranslateString( strNameLower );
+						strNameLower.ToLower();
+					}
 
 					if ( strSearch != "" )
 					{

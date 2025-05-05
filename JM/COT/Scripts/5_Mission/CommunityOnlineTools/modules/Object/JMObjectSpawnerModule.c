@@ -54,6 +54,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	};
 
 	bool m_AllowRestrictedClassNames;
+	bool m_FilterWithDisplayName;
 
 	void JMObjectSpawnerModule()
 	{
