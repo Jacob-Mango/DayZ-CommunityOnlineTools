@@ -18,11 +18,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"m203_standalone",
 		"red9",
 		"pvcbow",
-		"crossbow",
 		"m249",
 		"undersluggrenadem4",
 		"groza",
+	#ifdef DAYZ_1_27
 		"pm73rak",
+	#endif
 		"trumpet",
 		"lawbase",
 		"law",
@@ -53,6 +54,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	};
 
 	bool m_AllowRestrictedClassNames;
+	bool m_FilterWithDisplayName;
 
 	void JMObjectSpawnerModule()
 	{
@@ -752,6 +754,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		CarScript car;
 		BoatScript boat;
 		BuildingBase building;
+		DayZPlayerImplement npc;
 
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn(player);
@@ -761,6 +764,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			boat.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(building, entity))
 			building.COT_OnDebugSpawn(player);
+		else if (Class.CastTo(npc, entity))
+			npc.COT_OnDebugSpawn(player);
 
 		if (!entity.GetInventory())
 			return;

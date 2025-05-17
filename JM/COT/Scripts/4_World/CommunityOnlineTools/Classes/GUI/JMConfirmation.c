@@ -59,6 +59,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 		DestroyWidget(layoutRoot);
 
+		OnHide();
+
 	#ifdef DIAG
 		s_JMConfirmationCount--;
 		if (s_JMConfirmationCount <= 0)
@@ -180,6 +182,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if (btnIdOffset != -1)
 			m_ButtonIdOffset = btnIdOffset;
 
+		OnShow();
+
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_One" );
 		#endif
@@ -221,6 +225,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		
 		if (btnIdOffset != -1)
 			m_ButtonIdOffset = btnIdOffset;
+
+		OnShow();
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_Two" );
@@ -273,6 +279,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if (btnIdOffset != -1)
 			m_ButtonIdOffset = btnIdOffset;
 
+		OnShow();
+
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::CreateConfirmation_Three" );
 		#endif
@@ -312,6 +320,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		m_EditBox.Show( false );
 		layoutRoot.Show( false );
 
+		OnHide();
+
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Close" );
 		#endif
@@ -319,10 +329,12 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	void OnShow()
 	{
+		CommunityOnlineToolsBase.ForceDisableInputs(true);
 	}
 
 	void OnHide() 
 	{
+		CommunityOnlineToolsBase.ForceDisableInputs(false);
 	}
 
 	string GetEditBoxValue()

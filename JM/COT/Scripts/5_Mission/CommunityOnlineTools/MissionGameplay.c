@@ -97,6 +97,8 @@ modded class MissionGameplay
 
 	override void OnMissionFinish()
 	{
+		GetCOTWindowManager().DestroyAllWindows();
+
 		GetCommunityOnlineTools().OnFinish();
 
 		super.OnMissionFinish();

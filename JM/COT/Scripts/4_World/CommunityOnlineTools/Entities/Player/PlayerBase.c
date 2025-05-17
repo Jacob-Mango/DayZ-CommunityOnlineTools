@@ -315,7 +315,10 @@ modded class PlayerBase
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
+			{
 				hic.SetDisabled( m_JMIsFrozen );
+				DisableSimulation(m_JMIsFrozen);
+			}
 		}
 
 		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
@@ -635,7 +638,10 @@ modded class PlayerBase
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
-				hic.SetDisabled( m_JMIsFrozen );
+			{
+				hic.SetDisabled(m_JMIsFrozen);
+				DisableSimulation(m_JMIsFrozen);
+			}
 		}
 	}
 

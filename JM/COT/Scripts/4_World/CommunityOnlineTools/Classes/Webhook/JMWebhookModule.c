@@ -31,6 +31,8 @@ class JMWebhookQueueItem : Managed
 
 class JMWebhookModule: JMModuleBase
 {
+	static ref JsonSerializer s_Serializer = new JsonSerializer();
+
 	private RestApi m_Core;
 
 	private ref map< string, ref set< JMWebhookConnection > > m_ConnectionMap;
@@ -39,7 +41,6 @@ class JMWebhookModule: JMModuleBase
 
 	private JMWebhookSerialize m_Settings;
 
-	private ref ConfigFile m_ServerConfig;
 	private string m_ServerHostName;
 
 	void JMWebhookModule()
@@ -72,12 +73,14 @@ class JMWebhookModule: JMModuleBase
 			serverCfg = "serverdz.cfg";
 		}
 
-		m_ServerConfig = ConfigFile.Parse( serverCfg );
-		if ( m_ServerConfig )
+		ConfigFile cfg = ConfigFile.Parse( serverCfg );
+		if ( cfg )
 		{
-			ConfigEntry entry = m_ServerConfig.Get( "hostname" );
+			ConfigEntry entry = cfg.Get( "hostname" );
 			if ( entry && entry.GetText() != "" )
 				m_ServerHostName = entry.GetText();
+
+			delete cfg;
 		}
 
 		m_Settings = GetCOTWebhookSettings();
@@ -326,8 +329,6 @@ class JMWebhookModule: JMModuleBase
 		auto trace = CF_Trace_0(this, "Thread_ProcessQueue");
 		#endif
 
-		JsonSerializer serializer = new JsonSerializer();
-
 		int num = 0;
 		int startTime = GetGame().GetTickTime();
 		int lastSendTime = GetGame().GetTickTime();
@@ -349,7 +350,7 @@ class JMWebhookModule: JMModuleBase
 						#endif
 						for ( int i = 0; i < connections.Count(); i++ )
 							if ( connections[i] != NULL )
-								connections[i].Post( m_Core, serializer, item.GetMessage() );
+								connections[i].Post( m_Core, s_Serializer, item.GetMessage() );
 					}
 					else
 					{

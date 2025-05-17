@@ -158,6 +158,7 @@ STR_COT_PLAYER_MODULE_SET_SCALE_BODY,Enter a value from 0.1 to 10 (1 = no scalin
 STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_HEADER,Vomit,Vomit,Vomit,Erbrechen,Vomit,Vomit,Vomit,Vomit,Vomit,Vomit,Vomit,Vomit,Vomit,Vomit
 STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_BODY,Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Zeit in Sekunden (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120),Enter a time in seconds (1-120)
 STR_COT_OBJECT_MODULE_SPAWN_ON,Spawn on:,Spawn on:,Spawn on:,Spawnen bei:,Заспавнить на:,Spawn on:,Spawn on:,Spawn on:,Spawn on:,Apparaître sur :,Spawn on:,Spawn on:,Spawn on:,Spawn on:
+STR_COT_OBJECT_MODULE_SPAWN_DISPLAYNAME,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filter by Name,Filtrer par nom,Filter by Name,Filter by Name,Filter by Name,Filter by Name
 STR_COT_OBJECT_MODULE_TARGET,Target,Target,Target,Ziel,Target,Target,Target,Target,Target,Target,Target,Target,Target,Target
 STR_COT_PERMISSION_ALLOW_C,ALLOW,ALLOW,ALLOW,ERLAUBEN,РАЗРЕШИТЬ,ALLOW,ALLOW,ALLOW,ALLOW,AUTORISER,ALLOW,ALLOW,ALLOW,ALLOW
 STR_COT_PERMISSION_DISALLOW_C,DISALLOW,DISALLOW,DISALLOW,VERBIETEN,ЗАПРЕТИТЬ,DISALLOW,DISALLOW,DISALLOW,DISALLOW,INTERDIRE,DISALLOW,DISALLOW,DISALLOW,DISALLOW
