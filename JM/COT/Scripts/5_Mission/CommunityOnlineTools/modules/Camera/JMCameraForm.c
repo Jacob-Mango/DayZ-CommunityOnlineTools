@@ -132,45 +132,37 @@ class JMCameraForm: JMFormBase
 		Widget gridLeft  = UIActionManager.CreateGridSpacer( m_PanelEffects, 7, 1 );
 		Widget gridRight = UIActionManager.CreateGridSpacer( m_PanelEffects, 7, 1 );
 
-		m_SliderBlurStrength = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_BLUR", 0, 1, this, "OnChange_Blur" );
+		m_SliderBlurStrength = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_BLUR", 0, 100, this, "OnChange_Blur" );
 		m_SliderBlurStrength.SetCurrent( 0 );
 		m_SliderBlurStrength.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderBlurStrength.SetStepValue( 0.1 );
-		m_SliderBlurStrength.SetMin( 0.0 );
-		m_SliderBlurStrength.SetMax( 100.0 );
 		m_SliderBlurStrength.SetPosition( 0.0 );
 		m_SliderBlurStrength.SetWidth( 1.0 );
 		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetLabelWidget(), 0.3 );
 		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetSliderWidget(), 0.7 );
 
-		m_SliderFocusDistance = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCUS", 0, 1, this, "OnChange_Focus" );
+		m_SliderFocusDistance = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCUS", 0, 1000, this, "OnChange_Focus" );
 		m_SliderFocusDistance.SetCurrent( 0 );
 		m_SliderFocusDistance.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocusDistance.SetStepValue( 0.1 );
-		m_SliderFocusDistance.SetMin( 0.0 );
-		m_SliderFocusDistance.SetMax( 1000.0 );
 		m_SliderFocusDistance.SetPosition( 0.0 );
 		m_SliderFocusDistance.SetWidth( 1.0 );
 		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetLabelWidget(), 0.3 );
 		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetSliderWidget(), 0.7 );
 
-		m_SliderFocalLength = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCAL_LENGTH", 0, 1, this, "OnChange_FocalLength" );
+		m_SliderFocalLength = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCAL_LENGTH", 0, 1000, this, "OnChange_FocalLength" );
 		m_SliderFocalLength.SetCurrent( 0 );
 		m_SliderFocalLength.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocalLength.SetStepValue( 0.1 );
-		m_SliderFocalLength.SetMin( 0.0 );
-		m_SliderFocalLength.SetMax( 1000.0 );
 		m_SliderFocalLength.SetPosition( 0.0 );
 		m_SliderFocalLength.SetWidth( 1.0 );
 		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetLabelWidget(), 0.3 );
 		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetSliderWidget(), 0.7 );
 
-		m_SliderFocalNear = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCAL_NEAR", 0, 1, this, "OnChange_FocalNear" );
+		m_SliderFocalNear = UIActionManager.CreateSlider( gridLeft, "#STR_COT_CAMERA_MODULE_FOCAL_NEAR", 0, 1000, this, "OnChange_FocalNear" );
 		m_SliderFocalNear.SetCurrent( 0 );
 		m_SliderFocalNear.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocalNear.SetStepValue( 0.1 );
-		m_SliderFocalNear.SetMin( 0.0 );
-		m_SliderFocalNear.SetMax( 1000.0 );
 		m_SliderFocalNear.SetPosition( 0.0 );
 		m_SliderFocalNear.SetWidth( 1.0 );
 		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetLabelWidget(), 0.3 );
@@ -180,8 +172,6 @@ class JMCameraForm: JMFormBase
 		m_SliderExposure.SetCurrent( 0 );
 		m_SliderExposure.SetFormat( "#STR_COT_FORMAT_NONE" );
 		m_SliderExposure.SetStepValue( 0.01 );
-		m_SliderExposure.SetMin( 0.0 );
-		m_SliderExposure.SetMax( 1.0 );
 		m_SliderExposure.SetPosition( 0.0 );
 		m_SliderExposure.SetWidth( 1.0 );
 		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
@@ -191,8 +181,6 @@ class JMCameraForm: JMFormBase
 		m_SliderChromAbb.SetCurrent( 0 );
 		m_SliderChromAbb.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderChromAbb.SetStepValue( 0.01 );
-		m_SliderChromAbb.SetMin( 0.0 );
-		m_SliderChromAbb.SetMax( 1.0 );
 		m_SliderChromAbb.SetPosition( 0.0 );
 		m_SliderChromAbb.SetWidth( 1.0 );
 		m_SliderChromAbb.SetWidgetWidth( m_SliderChromAbb.GetLabelWidget(), 0.3 );
@@ -202,28 +190,22 @@ class JMCameraForm: JMFormBase
 		m_SliderVignette.SetCurrent( 0 );
 		m_SliderVignette.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderVignette.SetStepValue( 0.01 );
-		m_SliderVignette.SetMin( 0.0 );
-		m_SliderVignette.SetMax( 1.0 );
 		m_SliderVignette.SetPosition( 0.0 );
 		m_SliderVignette.SetWidth( 1.0 );
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.3 );
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.7 );
 
-		m_SliderSpeed = UIActionManager.CreateSlider( gridRight, "Speed", 0, 1, this, "OnChange_Speed" );
+		m_SliderSpeed = UIActionManager.CreateSlider( gridRight, "Speed", 0.001, 10, this, "OnChange_Speed" );
 		m_SliderSpeed.SetCurrent( JMCameraBase.s_CurrentSpeed );
 		m_SliderSpeed.SetStepValue( 0.001 );
-		m_SliderSpeed.SetMin( 0.001 );
-		m_SliderSpeed.SetMax( 10.0 );
 		m_SliderSpeed.SetPosition( 0.0 );
 		m_SliderSpeed.SetWidth( 1.0 );
 		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetLabelWidget(), 0.3 );
 		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.7 );
 
-		m_SliderFOV = UIActionManager.CreateSlider( gridRight, "FOV", 0, 1, this, "OnChange_FOV" );
+		m_SliderFOV = UIActionManager.CreateSlider( gridRight, "FOV", 0.001, 4, this, "OnChange_FOV" );
 		m_SliderFOV.SetCurrent( m_Module.m_CurrentFOV );
 		m_SliderFOV.SetStepValue( 0.001 );
-		m_SliderFOV.SetMin( 0.001 );
-		m_SliderFOV.SetMax( 4 );
 		m_SliderFOV.SetPosition( 0.0 );
 		m_SliderFOV.SetWidth( 1.0 );
 		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetLabelWidget(), 0.3 );

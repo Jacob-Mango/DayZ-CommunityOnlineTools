@@ -430,9 +430,7 @@ class UIActionManager
 		{
 			action.SetCallback( instance, funcname );
 			action.SetLabel( label );
-			action.SetMin( min );
-			action.SetMax( max );
-			action.SetStepValue( 0 );
+			action.SetMinMax( min, max );
 			action.SetFormat( "#STR_COT_FORMAT_NONE" );
 
 			return action;

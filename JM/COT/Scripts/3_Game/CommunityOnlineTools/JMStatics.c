@@ -149,3 +149,6 @@ class JMStatics
 		return false;
 	}
 };
+
+static bool g_COT_ThreadESP;
+static bool g_COT_ThreadESP_Running;

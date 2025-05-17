@@ -346,7 +346,7 @@ class JMWeatherOldForm: JMFormBase
 
 	void PresetDusk()
 	{
-		m_CurrHour = 6;
+		m_CurrHour = 18;
 		m_CurrMinute = 0;
 			
 		m_OrigHour = m_CurrHour;
@@ -368,7 +368,7 @@ class JMWeatherOldForm: JMFormBase
 
 	void PresetDawn()
 	{
-		m_CurrHour = 18;
+		m_CurrHour = 6;
 		m_CurrMinute = 0;
 			
 		m_OrigHour = m_CurrHour;

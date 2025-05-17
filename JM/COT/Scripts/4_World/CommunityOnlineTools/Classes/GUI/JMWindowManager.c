@@ -147,6 +147,14 @@ class JMWindowManager
 
 		return NULL;
 	}
+
+	void DestroyAllWindows()
+	{
+		for (int i = m_Windows.Count() - 1; i >= 0; i--)
+		{
+			m_Windows[i].Destroy();
+		}
+	}
 };
 
 
