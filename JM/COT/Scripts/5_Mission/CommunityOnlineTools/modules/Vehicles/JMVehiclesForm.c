@@ -1,4 +1,4 @@
-class JMVehiclesMenu: JMFormBase
+class JMVehiclesForm: JMFormBase
 {
 	private JMVehiclesModule m_Module;
 	
@@ -56,7 +56,7 @@ class JMVehiclesMenu: JMFormBase
 	protected JMVehicleMetaData m_CurrentVehicle;
 	protected bool m_IsInVehicleInfo = false;
 
-	void JMVehiclesMenu()
+	void JMVehiclesForm()
 	{
 		m_MapMarkers = new array<ref JMVehiclesMapMarker>;
 		m_VehicleEntries = new array<ref JMVehiclesListEntry>;
@@ -82,6 +82,10 @@ class JMVehiclesMenu: JMFormBase
 				m_DeleteAllButton = UIActionManager.CreateButton( gridlistbtns, "Delete All", this, "OnClick_DeleteAll" );
 				m_DeleteDestroyedButton = UIActionManager.CreateButton( gridlistbtns, "Delete Destroyed", this, "OnClick_DeleteDestroyed" );
 				m_DeleteUnclaimedButton = UIActionManager.CreateButton( gridlistbtns, "Delete Unclaimed", this, "OnClick_DeleteUnclaimed" );
+				
+				m_DeleteAllButton.SetColor(COLOR_RED);
+				m_DeleteDestroyedButton.SetColor(COLOR_RED);
+				m_DeleteUnclaimedButton.SetColor(COLOR_RED);
 		
 		//! Vehicles Map
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );

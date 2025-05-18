@@ -16,11 +16,11 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 	protected float m_OffsetY;
 
 	protected ref JMVehicleMetaData m_Vehicle;
-	protected ref JMVehiclesMenu m_COTVehicleMenu;
+	protected ref JMVehiclesForm m_COTVehicleMenu;
 	
 	protected ref Timer m_MarkerUpdateTimer;
 
-	void JMVehiclesMapMarker(Widget parent, MapWidget mapwidget, vector pos, int color, string icon, JMVehicleMetaData vehicle, JMVehiclesMenu menu)
+	void JMVehiclesMapMarker(Widget parent, MapWidget mapwidget, vector pos, int color, string icon, JMVehicleMetaData vehicle, JMVehiclesForm menu)
 	{
 		m_Root 				= GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent);
 

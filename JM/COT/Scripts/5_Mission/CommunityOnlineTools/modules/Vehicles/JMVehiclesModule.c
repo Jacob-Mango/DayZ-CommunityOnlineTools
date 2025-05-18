@@ -360,7 +360,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			meta.SetDisplayName();
 		}
 
-		JMVehiclesMenu form;
+		JMVehiclesForm form;
 		if ( Class.CastTo( form, GetForm() ) )
 			form.LoadVehicles();
 	}
@@ -471,7 +471,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			count--;
 		}
 
-		JMVehiclesMenu form;
+		JMVehiclesForm form;
 		if ( Class.CastTo( form, GetForm() ) )
 			form.LoadVehicles();
 	}

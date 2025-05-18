@@ -9,9 +9,9 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 	protected ImageWidget m_VehicleStatusIcon;
 	
 	protected ref JMVehicleMetaData m_Vehicle;
-	protected ref JMVehiclesMenu m_COTVehicleMenu;
+	protected ref JMVehiclesForm m_COTVehicleMenu;
 
-	void JMVehiclesListEntry(Widget parent, JMVehiclesMenu menu, JMVehicleMetaData vehicle)
+	void JMVehiclesListEntry(Widget parent, JMVehiclesForm menu, JMVehicleMetaData vehicle)
 	{
 		m_Root					= GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
 		m_VehicleName			= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_name" ) );
