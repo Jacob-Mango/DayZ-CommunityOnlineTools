@@ -53,20 +53,16 @@ class JMTeleportForm: JMFormBase
 		m_PositionZ = UIActionManager.CreateText( rows, "Z: " );
 
 		if ( GetGame().IsServer() )
-		{
 			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
-		}
 		else
-		{
 			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
-		}
 
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
 		Widget inputRows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
 
-		m_InputTextLocation = UIActionManager.CreateText( inputRows, "Name" );
-		m_InputTextCategory = UIActionManager.CreateText( inputRows, "Category" );
+		m_InputTextLocation = UIActionManager.CreateText( inputRows, "#STR_COT_GENERIC_NAME" );
+		m_InputTextCategory = UIActionManager.CreateText( inputRows, "#STR_COT_GENERIC_CATEGORY" );
 
 		m_InputLocation = UIActionManager.CreateEditableText( inputRows, "", this );
 		m_InputLocation.SetWidgetWidth( m_InputLocation.GetLabelWidget(), 0.0 );
@@ -79,9 +75,9 @@ class JMTeleportForm: JMFormBase
 		
 		Widget inputBtnRows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
 
-		m_InputAdd = UIActionManager.CreateButton( inputBtnRows, "Add", this, "Click_AddLocation" );
-		m_InputRefresh = UIActionManager.CreateButton( inputBtnRows, "Refresh", this, "Click_Refresh" );
-		m_InputRemove = UIActionManager.CreateButton( inputBtnRows, "Delete", this, "Click_RemoveLocation" );
+		m_InputAdd = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_GENERIC_ADD", this, "Click_AddLocation" );
+		m_InputRefresh = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_Refresh" );
+		m_InputRemove = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_OBJECT_MODULE_DELETE", this, "Click_RemoveLocation" );
 		m_InputAdd.SetColor(COLOR_GREEN);
 		m_InputRemove.SetColor(COLOR_RED);
 
@@ -120,7 +116,7 @@ class JMTeleportForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "Delete "+ GetCurrentPositionName(), "#STR_COT_GENERIC_YES", "RemoveLocation_Confirmed", "#STR_COT_GENERIC_NO", "" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "#STR_COT_OBJECT_MODULE_DELETE "+ GetCurrentPositionName(), "#STR_COT_GENERIC_YES", "RemoveLocation_Confirmed", "#STR_COT_GENERIC_NO", "" );
 	}
 
 	void RemoveLocation_Confirmed()
@@ -145,7 +141,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( !m_InputLocation.GetText() )
 		{
-			COTCreateLocalAdminNotification(new StringLocaliser("No name given!"));
+			COTCreateLocalAdminNotification(new StringLocaliser("#STR_COT_TELEPORT_MODULE_TELEPORT_ERROR_NONAME"));
 			return;
 		}
 
