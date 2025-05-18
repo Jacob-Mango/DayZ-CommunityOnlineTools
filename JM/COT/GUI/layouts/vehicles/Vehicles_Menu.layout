@@ -1,4 +1,4 @@
-PanelWidgetClass JMVehiclesMenu {
+PanelWidgetClass JMVehiclesForm {
  ignorepointer 1
  color 0 0 0 0
  position 0 0
@@ -8,7 +8,7 @@ PanelWidgetClass JMVehiclesMenu {
  hexactsize 1
  vexactsize 1
  draggable 1
- scriptclass "JMVehiclesMenu"
+ scriptclass "JMVehiclesForm"
  style DayZDefaultPanel
  {
   PanelWidgetClass vehicles_window_panel {
