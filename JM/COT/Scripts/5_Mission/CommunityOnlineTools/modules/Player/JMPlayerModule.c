@@ -65,6 +65,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		
 		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleInvisibility",	"UAPlayerModuleInvisibility",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
 	}
 
@@ -1626,6 +1627,26 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
+	}
+
+	void InputToggleInvisibility( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+			ToggleInvisibility();
+	}
+	
+	void ToggleInvisibility()
+	{
+		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		bool value = !player.COTHasGodMode();
+		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
+		if (guids.Count() == 0)
+			guids.Insert(player.GetIdentity().GetId());
+
+		SetInvisible(value, guids);
 	}
 
 	void SetInvisible( int value, array< string > guids )
