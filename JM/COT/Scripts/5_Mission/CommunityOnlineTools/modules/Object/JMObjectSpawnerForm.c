@@ -378,9 +378,7 @@ class JMObjectSpawnerForm: JMFormBase
 		for (int i = 0; i < cnt; i++)
 		{
 			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val) && val == enumValue)
-			{
 				return i;
-			}
 		}
 
 		return -1;
@@ -473,7 +471,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		m_Module.m_AllowRestrictedClassNames = action.IsChecked();
 		UpdateList();
@@ -481,7 +480,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void Click_OnFilterDisplayName( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		m_Module.m_FilterWithDisplayName = action.IsChecked();
 		UpdateList();
@@ -489,14 +489,16 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void Click_ObjSetupMode( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CHANGE ) return;
+		if ( eid != UIEvent.CHANGE )
+			return;
 
 		m_Module.m_ObjSetupMode = action.GetSelection();
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		SpawnObject(s_ObjSpawnMode);
 	}
@@ -578,9 +580,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.Show( true );
 
 			if (m_HealthItem.IsEnabled() && !m_PreviewItem.IsTransport())
-			{
 				m_PreviewItem.SetHealth("", "", m_HealthItem.GetCurrent());
-			}
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
@@ -637,13 +637,9 @@ class JMObjectSpawnerForm: JMFormBase
 				else if (item.GetQuantityMax() - item.GetQuantityMin() > 0)
 				{
 					if ( item.IsSplitable() )
-					{
 						m_QuantityItem.SetStepValue(1);
-					}
 					else
-					{
 						m_QuantityItem.SetStepValue(0.1);
-					}
 
 					m_QuantityItem.SetMinMax(item.GetQuantityMin(), item.GetQuantityMax());
 					m_QuantityItem.Enable();
@@ -658,7 +654,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if (m_ItemStateType > -1)
 		{
 			m_ItemDataList.Enable();
-		}
+		}		
 		else if (m_ItemStateType != itemStateType)
 		{
 			m_ItemDataList.SetItems({""});
@@ -734,7 +730,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void SetListType( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		m_Module.m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
 
