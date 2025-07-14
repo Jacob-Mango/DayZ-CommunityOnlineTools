@@ -994,6 +994,7 @@ class JMObjectSpawnerForm: JMFormBase
 						{
 							bestMatch = strNameLower;
 							closestMatch = strNameLower;
+							m_ClassList.AddItem( strName, NULL, 0 );
 							break;
 						}
 						else
