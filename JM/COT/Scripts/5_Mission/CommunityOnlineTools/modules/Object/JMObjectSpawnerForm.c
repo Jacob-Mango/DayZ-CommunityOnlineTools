@@ -936,8 +936,13 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_MAGAZINESPATH );
 
 		string strSearch = m_SearchBox.GetText();
-
 		strSearch.ToLower();
+
+		TStringArray strSearches = new TStringArray;
+		strSearch.Split(" ", strSearches);
+
+        string bestMatch;
+        int highestScore;
 
 		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
 		{
@@ -988,29 +993,42 @@ class JMObjectSpawnerForm: JMFormBase
 					{
 						if ( strNameLower == strSearch )
 						{
-							suggestions.Clear();
+							bestMatch = strNameLower;
 							closestMatch = strNameLower;
+							break;
 						}
-						else if ( strNameLower.IndexOf(strSearch) == 0 )
+						else
 						{
-							if (!closestMatch)
-								suggestions.Insert(strNameLower);
+							if ( strNameLower.IndexOf(strSearch) == 0 )
+								closestMatch = strNameLower;
+
+							int score = 0;
+							foreach(string searchEntry: strSearches)
+							{
+								if ( strNameLower.IndexOf(searchEntry) == -1 )
+								{
+									score = 0;
+									break;
+								}
+
+								score++;
+							}
 						}
-						else if ( !strNameLower.Contains(strSearch) )
-						{
+
+						if (score == 0)
 							continue;
+
+						if (score > highestScore)
+						{
+							highestScore = score;
+							bestMatch = strName;
+							suggestions.Insert(strName);
 						}
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
 				}
 			}
-		}
-
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
 		}
 
 		m_SearchBox.SetTextPreview(closestMatch);
