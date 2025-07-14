@@ -317,6 +317,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		UpdateHealthItemColor();
+		UpdateItemPreview();
 	}
 
 	void Click_SetTemperature( UIEvent eid, UIActionBase action )
@@ -325,6 +326,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		UpdateTemperatureItemColor();
+		UpdateItemPreview();
 	}
 
 	void UpdateItemStateType(int mode, int liquidType = 0)
