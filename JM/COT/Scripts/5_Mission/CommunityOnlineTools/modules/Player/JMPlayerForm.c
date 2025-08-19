@@ -35,6 +35,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_Name;
 	private UIActionButton m_Steam64ID;
 	private UIActionButton m_SteamProfile;
+	private m_CFProfile m_SteamProfile;
 
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
@@ -310,6 +311,12 @@ class JMPlayerForm: JMFormBase
 		m_SteamProfile.SetWidth( 0.4 );
 		m_SteamProfile.SetPosition( 0.6 );
 
+		#ifdef GAMELABS
+		m_CFProfile = UIActionManager.CreateButton( actions, "Profile", this, "Click_OpenPlayerCFProfile" );
+		m_CFProfile.SetWidth( 0.4 );
+		m_CFProfile.SetPosition( 0.6 );
+		#endif
+
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
 		ShowIdentityWidgets();
@@ -323,6 +330,9 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Show();
 		m_Steam64ID.Show();
 		m_SteamProfile.Show();
+		#ifdef GAMELABS
+		m_CFProfile.Show();
+		#endif
 	}
 
 	private void HideIdentityWidgets()
@@ -331,6 +341,9 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
 		m_SteamProfile.Hide();
+		#ifdef GAMELABS
+		m_CFProfile.Hide();
+		#endif
 	}
 
 	private Widget InitActionWidgetsPosition( Widget actionsParent )
@@ -1347,6 +1360,15 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
+	}
+
+    void Click_OpenPlayerCFProfile( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		#ifdef GAMELABS
+		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_SelectedInstance.PlayerObject.GetUpstreamIdentity());
+		#endif
 	}
 
     void Click_CopyPlayerPostion( UIEvent eid, UIActionBase action )
