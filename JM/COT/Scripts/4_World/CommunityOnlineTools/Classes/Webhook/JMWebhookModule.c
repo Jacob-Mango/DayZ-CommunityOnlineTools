@@ -58,29 +58,35 @@ class JMWebhookModule: JMModuleBase
 		auto trace = CF_Trace_0(this, "OnInit");
 		#endif
 
-		string serverCfg;
-		GetGame().CommandlineGetParam( "config", serverCfg );
-
-		// attempt to fallback to defaults since otherwise it would fail regardless
-		if ( serverCfg == "" )
+		if (IsMissionHost())
 		{
-			CF_Log.Warn("No server config file set, using default serverdz.cfg");
-			serverCfg = "serverdz.cfg";
-		}
-		else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
-		{
-			CF_Log.Warn("Cannot resolve absolute path '%1', using default serverdz.cfg", serverCfg);
-			serverCfg = "serverdz.cfg";
-		}
+			string serverCfg;
+			GetGame().CommandlineGetParam( "config", serverCfg );
 
-		ConfigFile cfg = ConfigFile.Parse( serverCfg );
-		if ( cfg )
-		{
-			ConfigEntry entry = cfg.Get( "hostname" );
-			if ( entry && entry.GetText() != "" )
-				m_ServerHostName = entry.GetText();
+			// attempt to fallback to defaults since otherwise it would fail regardless
+			if ( serverCfg == "" )
+			{
+				CF_Log.Warn("No server config file set, using default serverdz.cfg");
+				serverCfg = "serverdz.cfg";
+			}
+			else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
+			{
+				CF_Log.Warn("Cannot resolve absolute path '%1', using default serverdz.cfg", serverCfg);
+				serverCfg = "serverdz.cfg";
+			}
 
-			delete cfg;
+			ConfigFile cfg = ConfigFile.Parse( serverCfg );
+			if ( cfg )
+			{
+				ConfigEntry entry = cfg.Get( "hostname" );
+				if ( entry && entry.GetText() != "" )
+					m_ServerHostName = entry.GetText();
+
+				delete cfg;
+			}
+		} else
+		{
+			m_ServerHostName = GetGame().GetHostName();
 		}
 
 		m_Settings = GetCOTWebhookSettings();
@@ -136,7 +142,7 @@ class JMWebhookModule: JMModuleBase
 		super.OnMissionLoaded();
 
 		auto message = CreateDiscordMessage();
-				
+
 		message.GetEmbed().AddField( "Server Status", "Server is starting up." );
 
 		Post( "ServerStartup", message );
@@ -149,7 +155,7 @@ class JMWebhookModule: JMModuleBase
 		message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
 
 		Post( "ServerShutdown", message );
-		
+
 		m_Settings.Save();
 	}
 
@@ -226,7 +232,7 @@ class JMWebhookModule: JMModuleBase
 		JMWebhookConnectionGroup group = m_Settings.Get( grpName );
 		if ( Assert_Null( group ) )
 			return false;
-			
+
 		group.Remove( name );
 
 		FixConnectionMap();
@@ -392,7 +398,7 @@ class JMWebhookModule: JMModuleBase
 		embed.SetColor( 16766720 );
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-		
+
 		if ( m_ServerHostName != "" )
 			embed.AddField( "Server:", m_ServerHostName, false );
 
