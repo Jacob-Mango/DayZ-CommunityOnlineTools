@@ -253,18 +253,14 @@ class JMCameraForm: JMFormBase
 		{
 			m_Module.m_DOF = false;
 			PPEffects.ResetDOFOverride();
-		} else
-		{
-			m_Module.m_DOF = true;
 		}
+		else
+			m_Module.m_DOF = true;
 
 		if ( m_Module.m_FDist == 0 )
-		{
 			m_Module.m_AutoFocus = true;
-		} else
-		{
+		else
 			m_Module.m_AutoFocus = false;
-		}
 
 		m_SliderSpeed.SetCurrent(JMCameraBase.s_CurrentSpeed);
 		m_SliderFOV.SetCurrent(m_Module.m_CurrentFOV);
@@ -443,9 +439,7 @@ class JMCameraForm: JMFormBase
 			m_PositionID--;
 		}
 		else
-		{
 			return;
-		}
 
 		UpdateUIPosition();
 	}
