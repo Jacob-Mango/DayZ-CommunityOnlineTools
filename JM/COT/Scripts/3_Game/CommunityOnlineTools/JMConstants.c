@@ -20,6 +20,7 @@ class JMConstants
 	static const string EXT_PLAYER 		= ".json";
 	static const string EXT_BAN 		= ".json";
 	static const string EXT_NOTE 		= ".json";
+	static const string EXT_CSV 		= ".csv";
 	static const string EXT_WINDOWS_DEFAULT = ".txt";
 
 	static const string FILE_WEBHOOK 	= DIR_COT + "Webhooks.json";
@@ -28,6 +29,7 @@ class JMConstants
 	static const string DIR_LOGS 		= DIR_COT + "Logs\\";
 	static const string DIR_LOADOUTS 	= DIR_COT + "Loadouts\\";
 	static const string DIR_DELETIONS 	= DIR_COT + "Deletions\\";
+	static const string DIR_EXPORTS 	= DIR_COT + "Exports\\";
 
 	static const string EXT_LOG 		= ".log";
 	static const string EXT_TELEPORT 	= ".json";
