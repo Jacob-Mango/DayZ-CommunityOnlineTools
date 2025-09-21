@@ -35,7 +35,11 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_Name;
 	private UIActionButton m_Steam64ID;
 	private UIActionButton m_SteamProfile;
+
+	#ifdef GAMELABS
+	private UIActionButton m_CFToolsID;
 	private UIActionButton m_CFProfile;
+	#endif
 
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
@@ -296,31 +300,34 @@ class JMPlayerForm: JMFormBase
 	
 		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
-		m_Name = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", this, "Click_CopyPlayerName" );
+		m_Name = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerName" );
 		m_Name.SetWidth( 0.8 );
 		m_Name.SetPosition( 0.2 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
-		m_GUID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", this, "Click_CopyPlayerGUID" );
+		m_GUID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerGUID" );
 		m_GUID.SetWidth( 0.8 );
 		m_GUID.SetPosition( 0.2 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
-		m_Steam64ID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", this, "Click_CopyPlayerSteam64ID" );
+		m_Steam64ID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerSteam64ID" );
 		m_Steam64ID.SetWidth( 0.4 );
 		m_Steam64ID.SetPosition( 0.2 );
 
-		m_SteamProfile = UIActionManager.CreateButton( actions, "Profile", this, "Click_OpenPlayerSteamProfile" );
+		m_SteamProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerSteamProfile" );
 		m_SteamProfile.SetWidth( 0.4 );
 		m_SteamProfile.SetPosition( 0.6 );
 
 		#ifdef GAMELABS
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		UIActionManager.CreateText( actions, "CFTools:", "" );
+		m_CFToolsID = UIActionManager.CreateButton( actions, "", this, "Click_CopyCFToolsID" );
+		m_CFToolsID.SetWidth( 0.4 );
+		m_CFToolsID.SetPosition( 0.2 );
 		
-		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
-		m_CFProfile = UIActionManager.CreateButton( actions, "CFTools", this, "Click_OpenPlayerCFProfile" );
+		m_CFProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerCFProfile" );
 		m_CFProfile.SetWidth( 0.4 );
 		m_CFProfile.SetPosition( 0.6 );
 		#endif
@@ -338,7 +345,9 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Show();
 		m_Steam64ID.Show();
 		m_SteamProfile.Show();
+
 		#ifdef GAMELABS
+		m_CFToolsID.Show();
 		m_CFProfile.Show();
 		#endif
 	}
@@ -349,7 +358,9 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
 		m_SteamProfile.Hide();
+
 		#ifdef GAMELABS
+		m_CFToolsID.Hide();
 		m_CFProfile.Hide();
 		#endif
 	}
@@ -1367,15 +1378,25 @@ class JMPlayerForm: JMFormBase
 		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
 	}
 
+	#ifdef GAMELABS
+	void Click_CopyCFToolsID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard(m_CFToolsID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
+	}
+
     void Click_OpenPlayerCFProfile( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		#ifdef GAMELABS
-		GetGame().OpenURL("https://app.cftools.cloud/profile/" + m_SelectedInstance.PlayerObject.GetUpstreamIdentity());
-		#endif
+		GetGame().OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
 	}
+	#endif
 
     void Click_CopyPlayerPostion( UIEvent eid, UIActionBase action )
 	{
@@ -2255,6 +2276,10 @@ class JMPlayerForm: JMFormBase
 		m_GUID.SetButton( instance.GetGUID() );
 		m_Name.SetButton( instance.GetName() );
 		m_Steam64ID.SetButton( instance.GetSteam64ID() );
+
+		#ifdef GAMELABS
+		m_CFToolsID.SetButton(instance.PlayerObject.GetUpstreamIdentity());
+		#endif
 
 		if ( IsMissionOffline() )
 		{
