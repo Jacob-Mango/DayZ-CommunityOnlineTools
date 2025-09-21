@@ -1641,7 +1641,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	void ToggleInvisibility()
 	{
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-		bool value = !player.COTHasGodMode();
+		bool value = !player.COTIsInvisible();
 		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 		if (guids.Count() == 0)
 			guids.Insert(player.GetIdentity().GetId());
