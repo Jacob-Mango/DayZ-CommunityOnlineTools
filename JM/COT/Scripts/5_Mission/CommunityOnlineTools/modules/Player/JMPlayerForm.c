@@ -35,7 +35,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_Name;
 	private UIActionButton m_Steam64ID;
 	private UIActionButton m_SteamProfile;
-	private m_CFProfile m_SteamProfile;
+	private UIActionButton m_CFProfile;
 
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
