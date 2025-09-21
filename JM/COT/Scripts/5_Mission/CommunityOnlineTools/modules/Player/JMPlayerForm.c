@@ -1335,6 +1335,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_Name.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_CopyPlayerGUID( UIEvent eid, UIActionBase action )
@@ -1343,6 +1345,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_GUID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_CopyPlayerSteam64ID( UIEvent eid, UIActionBase action )
@@ -1351,6 +1355,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_OpenPlayerSteamProfile( UIEvent eid, UIActionBase action )
