@@ -287,7 +287,12 @@ class JMPlayerForm: JMFormBase
 
 	private Widget InitActionWidgetsIdentity( Widget actionsParent )
 	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		Widget parent;
+		#ifdef GAMELABS
+		parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
+		#else
+		parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		#endif
 	
 		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
@@ -312,7 +317,10 @@ class JMPlayerForm: JMFormBase
 		m_SteamProfile.SetPosition( 0.6 );
 
 		#ifdef GAMELABS
-		m_CFProfile = UIActionManager.CreateButton( actions, "Profile", this, "Click_OpenPlayerCFProfile" );
+		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		
+		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
+		m_CFProfile = UIActionManager.CreateButton( actions, "CFTools", this, "Click_OpenPlayerCFProfile" );
 		m_CFProfile.SetWidth( 0.4 );
 		m_CFProfile.SetPosition( 0.6 );
 		#endif
@@ -767,23 +775,17 @@ class JMPlayerForm: JMFormBase
 	void Click_ModifyPermissions( UIEvent eid, UIActionBase action )
 	{
 		if ( m_PermissionsListScroller.IsVisible() )
-		{
 			HidePermissions();
-		} else
-		{
+		else
 			ShowPermissions();
-		}
 	}
 	
 	void Click_ModifyRoles( UIEvent eid, UIActionBase action )
 	{
 		if ( m_RolesListScroller.IsVisible() )
-		{
 			HideRoles();
-		} else
-		{
+		else
 			ShowRoles();
-		}
 	}
 
 	void Click_SavePermissions( UIEvent eid, UIActionBase action )
@@ -1197,13 +1199,9 @@ class JMPlayerForm: JMFormBase
 		if ( CurrentActiveCamera )
 		{
 			if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
-			{
 				shouldSpectate = false;
-			}
 			else if ( COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera) )
-			{
 				shouldSpectate = false;
-			}
 		}
 
 		if ( shouldSpectate )
@@ -1215,7 +1213,8 @@ class JMPlayerForm: JMFormBase
 			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
 
 			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
-		} else
+		}
+		else
 		{
 			action.Disable();
 			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
@@ -1366,8 +1365,9 @@ class JMPlayerForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+		
 		#ifdef GAMELABS
-		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_SelectedInstance.PlayerObject.GetUpstreamIdentity());
+		GetGame().OpenURL("https://app.cftools.cloud/profile/" + m_SelectedInstance.PlayerObject.GetUpstreamIdentity());
 		#endif
 	}
 
