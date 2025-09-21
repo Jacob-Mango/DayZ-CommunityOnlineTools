@@ -301,20 +301,20 @@ class JMPlayerForm: JMFormBase
 		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
 		m_Name = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerName" );
-		m_Name.SetWidth( 0.8 );
-		m_Name.SetPosition( 0.2 );
+		m_Name.SetWidth( 0.85 );
+		m_Name.SetPosition( 0.15 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
 		m_GUID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerGUID" );
-		m_GUID.SetWidth( 0.8 );
-		m_GUID.SetPosition( 0.2 );
+		m_GUID.SetWidth( 0.85 );
+		m_GUID.SetPosition( 0.15 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
 		m_Steam64ID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerSteam64ID" );
-		m_Steam64ID.SetWidth( 0.4 );
-		m_Steam64ID.SetPosition( 0.2 );
+		m_Steam64ID.SetWidth( 0.45 );
+		m_Steam64ID.SetPosition( 0.15 );
 
 		m_SteamProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerSteamProfile" );
 		m_SteamProfile.SetWidth( 0.4 );
@@ -324,8 +324,8 @@ class JMPlayerForm: JMFormBase
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "CFTools:", "" );
 		m_CFToolsID = UIActionManager.CreateButton( actions, "", this, "Click_CopyCFToolsID" );
-		m_CFToolsID.SetWidth( 0.4 );
-		m_CFToolsID.SetPosition( 0.2 );
+		m_CFToolsID.SetWidth( 0.45 );
+		m_CFToolsID.SetPosition( 0.15 );
 		
 		m_CFProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerCFProfile" );
 		m_CFProfile.SetWidth( 0.4 );
