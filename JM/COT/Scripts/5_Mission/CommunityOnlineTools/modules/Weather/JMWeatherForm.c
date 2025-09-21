@@ -1787,14 +1787,14 @@ class JMWeatherForm: JMFormBase
 
 		Widget actionsGrid = UIActionManager.CreateGridSpacer( actions, 1, 3 );
 
-		m_EditWindFuncMin = UIActionManager.CreateSlider( actionsGrid, "#STR_COT_GENERIC_MIN", 0, 1, this, "OnClick_UpdateWindMinMax");
+		m_EditWindFuncMin = UIActionManager.CreateSlider( actionsGrid, "#STR_COT_GENERIC_MIN", 0, 1, this);
 		m_EditWindFuncMin.SetCurrent( 0 );
 		m_EditWindFuncMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_EditWindFuncMin.SetStepValue( 0.05 );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetLabelWidget(), 0.6 );
 		m_EditWindFuncMin.SetWidgetWidth( m_EditWindFuncMin.GetSliderWidget(), 0.6 );
 
-		m_EditWindFuncMax = UIActionManager.CreateSlider( actionsGrid, "#STR_COT_GENERIC_MAX", 0, 1, this, "OnClick_UpdateWindMinMax");
+		m_EditWindFuncMax = UIActionManager.CreateSlider( actionsGrid, "#STR_COT_GENERIC_MAX", 0, 1, this);
 		m_EditWindFuncMax.SetCurrent( 0 );
 		m_EditWindFuncMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_EditWindFuncMax.SetStepValue( 0.05 );
@@ -1808,16 +1808,5 @@ class JMWeatherForm: JMFormBase
 		m_EditWindFuncChangeFreq.SetWidgetWidth( m_EditWindFuncChangeFreq.GetEditBoxWidget(), 0.6 );
 
 		UIActionManager.CreatePanel( m_PanelWindFunc, 0xFF000000, 1 );
-	}
-
-	void OnClick_UpdateWindMinMax( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-		
-		float min = m_EditWindFuncMin.GetCurrent();
-		float max = m_EditWindFuncMax.GetCurrent();
-
-		m_EditWindFuncMin.SetMinMax( min, max );
 	}
 };
