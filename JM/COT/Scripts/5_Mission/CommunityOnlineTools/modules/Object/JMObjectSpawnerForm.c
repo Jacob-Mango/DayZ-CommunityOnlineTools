@@ -939,9 +939,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 		TStringArray strSearches = new TStringArray;
 		strSearch.Split(" ", strSearches);
+		int count = strSearches.Count();
 
-        string bestMatch;
-        int highestScore;
+		int index;
+		int score;
+		int highestScore;
 
 		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
 		{
@@ -992,17 +994,24 @@ class JMObjectSpawnerForm: JMFormBase
 					{
 						if ( strNameLower == strSearch )
 						{
-							bestMatch = strNameLower;
+							suggestions.Clear();
 							closestMatch = strNameLower;
-							m_ClassList.AddItem( strName, NULL, 0 );
-							break;
 						}
 						else
 						{
-							if ( strNameLower.IndexOf(strSearch) == 0 )
-								closestMatch = strNameLower;
+							index = strNameLower.IndexOf(strSearch);
 
-							int score = 0;
+							if (index == 0)
+							{
+								if (!closestMatch)
+									suggestions.Insert(strNameLower);
+							}
+							else if (index == -1 && count == 1)
+							{
+								continue;
+							}
+
+							score = 0;
 							foreach(string searchEntry: strSearches)
 							{
 								if ( strNameLower.IndexOf(searchEntry) == -1 )
@@ -1013,22 +1022,28 @@ class JMObjectSpawnerForm: JMFormBase
 
 								score++;
 							}
-						}
 
-						if (score == 0)
-							continue;
+							if (score == 0)
+								continue;
 
-						if (score > highestScore)
-						{
-							highestScore = score;
-							bestMatch = strName;
-							suggestions.Insert(strName);
+							if (score > highestScore)
+							{
+								highestScore = score;
+								if (!closestMatch)
+									suggestions.Insert(strNameLower);
+							}
 						}
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
 				}
 			}
+		}
+
+		if (suggestions.Count())
+		{
+			suggestions.Sort();
+			closestMatch = suggestions[0];
 		}
 
 		m_SearchBox.SetTextPreview(closestMatch);
