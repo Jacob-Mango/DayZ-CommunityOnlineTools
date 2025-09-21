@@ -308,6 +308,9 @@ class CommunityOnlineToolsBase
 			skipIDs = new TIntArray;
 
 		skipIDs.Insert(UAUIBack);
+		skipIDs.Insert(UAUISelect);
+		skipIDs.Insert(UAUITabLeft);
+		skipIDs.Insert(UAUITabRight);
 
 		TIntArray inputIDs = new TIntArray;
 
