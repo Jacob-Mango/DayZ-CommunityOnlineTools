@@ -120,7 +120,9 @@ modded class Construction
 		string damage_zone;
 		if ( DamageSystem.GetDamageZoneFromComponentName( GetParent(), part_name, damage_zone ) )
 		{
+			GetParent().SetAllowDamage(true);
 			GetParent().SetHealthMax( damage_zone, "Health" );
+			GetParent().ProcessInvulnerabilityCheck(GetParent().GetInvulnerabilityTypeString());
 		}
 
 		if ( m_ConstructionBoxTrigger )
