@@ -158,8 +158,10 @@ STR_COT_OBJECT_MODULE_DELETE,Delete,Delete,Smazat,Löschen,Удалить,Usuń,
 STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY,Do you wish to remove the object %1,Do you wish to remove the object %1,Přejete si odstranit objekt %1,Das Objekt %1 wirklich löschen?,Вы действительно хотите удалить %1?,Czy na pewno chcesz usunąć obiekt %1?,Biztosan el akarod távolítani a %1 objektumot?,Vuoi davvero rimuovere l'oggetto %1?,¿Deseas eliminar el objeto %1?,Veux-tu vraiment supprimer l'objet %1,您確定要移除物件 %1 嗎？,オブジェクト %1 を削除しますか？,Você deseja remover o objeto %1?,您确定要移除对象 %1 吗？
 STR_COT_OBJECT_MODULE_FILTER_TYPE_AI,AI,AI,AI,KI,ИИ,SI,AI,IA,IA,IA,AI,AI,IA,AI
 STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL,All,All,Vše,Alle,Всё,Wszystkie,Összes,Tutti,Todo,Tous,所有,すべて,Todos,所有
+STR_COT_OBJECT_MODULE_FILTER_TYPE_AMMO_MAGAZINES,Ammo/Mags,Ammo/Mags,Munice/Zásobníky,Ammo/Mags,Боеприпасы/Журналы,Amunicja/Magazyny,Lőszer/Tárak,Munizioni/Caricatori,Municiones/Cargadores,Munitions/Magazines,彈藥/彈匣,弾薬/マガジン,Munições/Cartuchos,弹药/弹匣
 STR_COT_OBJECT_MODULE_FILTER_TYPE_BUILDINGS,Buildings,Buildings,Budovy,Gebäude,Здания,Budynki,Épületek,Edifici,Edificios,Bâtiments,建築物,建物,Construções,建筑物
 STR_COT_OBJECT_MODULE_FILTER_TYPE_CLOTHING,Clothing,Clothing,Oblečení,Kleidung,Одежда,Ubrania,Ruházat,Vestiti,Ropa,Vêtements,服裝,衣類,Roupas,服装
+STR_COT_OBJECT_MODULE_FILTER_TYPE_CONTAINERS,Containers,Containers,Kontejnery,Behälter,Контейнеры,Kontenery,Konténerek,Contenitori,Contenedores,Conteneurs,容器,コンテナ,Recipientes,容器
 STR_COT_OBJECT_MODULE_FILTER_TYPE_FIREARMS,Firearms,Firearms,Střelné zbraně,Waffen,Оружие,Broń Palna,Lőfegyverek,Armi da Fuoco,Armas de Fuego,Armes à feux,槍械,銃器,Armas de Fogo,枪械
 STR_COT_OBJECT_MODULE_FILTER_TYPE_FOOD,Food,Food,Jídlo,Nahrung,Еда,Jedzenie,Étel,Cibo,Comida,Nourriture,食物,食料,Comida,食物
 STR_COT_OBJECT_MODULE_FILTER_TYPE_ITEMS,Items,Items,Předměty,Gegenstände,Предметы,Przedmioty,Tárgyak,Oggetti,Objetos,Objets,物品,アイテム,Itens,物品
