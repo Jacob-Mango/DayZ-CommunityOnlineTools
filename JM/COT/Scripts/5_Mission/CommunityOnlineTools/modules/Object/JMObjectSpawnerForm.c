@@ -698,7 +698,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
 	{
-		if ( w == m_ItemPreview )
+		if ( w == m_ItemPreview && m_PreviewItem )
 		{
 			UpdateDistance(wheel);
 
