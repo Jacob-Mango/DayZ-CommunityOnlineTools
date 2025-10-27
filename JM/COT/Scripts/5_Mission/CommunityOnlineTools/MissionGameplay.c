@@ -1,6 +1,6 @@
 modded class MissionGameplay
 {
-	protected ref JMDebugMonitor m_CDebugMonitor;
+	protected ref JMDebugMonitor m_CDebugMonitor;  //! Legacy, not used, only kept for compatibility with 3rd party mods
 
 	protected JMPlayerInstance m_OfflineInstance;
 
@@ -102,9 +102,6 @@ modded class MissionGameplay
 		GetCommunityOnlineTools().OnFinish();
 
 		super.OnMissionFinish();
-
-		if ( m_CDebugMonitor )
-			m_CDebugMonitor.Hide();
 		
 		if ( IsMissionOffline() )
 		{
@@ -123,16 +120,12 @@ modded class MissionGameplay
 
 			GetCommunityOnlineTools().OnUpdate( timeslice );
 
-			// Force the custom debug monitor to show instead
-			if ( m_CDebugMonitor )
+			if ( m_DebugMonitor )
 			{
 				if ( GetCommunityOnlineToolsBase().IsOpen() )
-				{
-					m_CDebugMonitor.Hide();
-				} else 
-				{
-					m_CDebugMonitor.Show();
-				}
+					m_DebugMonitor.Hide();
+				else 
+					m_DebugMonitor.Show();
 			}
 
 			PlayerBase player;
@@ -141,41 +134,6 @@ modded class MissionGameplay
 				//! Since PlayerBase::EOnFrame will no longer be called by the engine if simulation is disabled,
 				//! call stand-in from here so HUD gets updated
 				player.COT_SimulationDisabled_OnFrame(timeslice);
-			}
-		}
-	}
-
-	override void CreateDebugMonitor()
-	{
-		super.CreateDebugMonitor();
-
-		if ( m_DebugMonitor )
-		{
-			m_DebugMonitor.Hide();
-		}
-
-		if (!m_CDebugMonitor)
-		{
-			m_CDebugMonitor = new JMDebugMonitor();
-			m_CDebugMonitor.Init();
-			m_CDebugMonitor.Show();
-		}
-	}
-
-	override void UpdateDebugMonitor()
-	{
-		if (!m_CDebugMonitor) return;
-		
-		PlayerBase player = PlayerBase.Cast( GetGame().GetPlayer() );
-		if (player)
-		{
-			DebugMonitorValues values = player.GetDebugMonitorValues();
-			if (values)
-			{
-				m_CDebugMonitor.SetHealth(values.GetHealth());
-				m_CDebugMonitor.SetBlood(values.GetBlood());
-				m_CDebugMonitor.SetLastDamage(values.GetLastDamage());
-				m_CDebugMonitor.SetPosition(player.GetPosition());
 			}
 		}
 	}
