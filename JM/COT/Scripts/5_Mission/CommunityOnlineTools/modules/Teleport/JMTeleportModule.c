@@ -129,7 +129,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		return;
 #endif
 
-		if ( input.LocalPress() )
+		if ( !input.LocalPress() && !input.LocalHoldBegin() && !input.LocalHold() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -137,7 +137,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			if (input.LocalPress())
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -163,7 +164,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		return;
 #endif
 
-		if ( input.LocalPress() )
+		if ( !input.LocalPress() && !input.LocalHoldBegin() && !input.LocalHold() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -171,7 +172,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			if (input.LocalPress())
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
