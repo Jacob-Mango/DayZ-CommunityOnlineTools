@@ -46,6 +46,23 @@ class CfgMods
 			"World",
 			"Mission"
 		};
+
+		defines[] =
+		{
+			"JM_COT",
+			//"JM_COT_LOGGING",
+			//"JM_COT_ESP_DEBUG",
+			//"JM_COT_WEBHOOK_DEBUG",
+			"JM_COT_VEHICLE_ONSPAWNVEHICLE",
+			"COT_BUGFIX_REF",
+			"COT_BUGFIX_REF_UIACTIONS",
+			"COT_UIACTIONS_SETWIDTH",
+			"COT_REFRESHSTATS_NEW",
+			"JM_COT_VEHICLEMANAGER",
+			"JM_COT_INVISIBILITY",
+			"JM_COT_EXPTRANSITION_1",
+			"JM_COT_DEBUGMONITOR_REMOVED"
+		};
 		
 		class defs
 		{

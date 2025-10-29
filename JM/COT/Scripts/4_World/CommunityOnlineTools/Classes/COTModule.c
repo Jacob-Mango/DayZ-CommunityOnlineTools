@@ -204,8 +204,14 @@ class COTModule : JMModuleBase
 		if (!input.LocalPress())
 			return;
 
-		if (GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen())
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+		if (GetCommunityOnlineToolsBase())
+		{
+			if (GetCommunityOnlineToolsBase().IsOpen())
+				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+
+			if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
+				CommunityOnlineToolsBase.ForceDisableInputs(false);
+		}
 	}
 
 	void ToggleMenu( UAInput input = NULL )

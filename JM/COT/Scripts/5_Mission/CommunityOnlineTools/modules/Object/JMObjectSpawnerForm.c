@@ -99,7 +99,9 @@ class JMObjectSpawnerForm: JMFormBase
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Food", "edible_base" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Vehicles", "transport" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Firearms", "weapon_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Ammo_Magazines", "magazine_base" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Clothing", "clothing_base" );
+		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Containers", "container_base" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Items", "inventory_base" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Buildings", "house" );
 		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_AI", "dz_lightai" );
@@ -266,6 +268,8 @@ class JMObjectSpawnerForm: JMFormBase
 		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
 		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
 
+		UIActionManager.CreateCheckbox( itemData, "#STR_COT_OBJECT_MODULE_SPAWN_DISPLAYNAME", this, "Click_OnFilterDisplayName", m_Module.m_FilterWithDisplayName );
+
 		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
 
 		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
@@ -315,6 +319,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		UpdateHealthItemColor();
+		UpdateItemPreview();
 	}
 
 	void Click_SetTemperature( UIEvent eid, UIActionBase action )
@@ -323,6 +328,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		UpdateTemperatureItemColor();
+		UpdateItemPreview();
 	}
 
 	void UpdateItemStateType(int mode, int liquidType = 0)
@@ -374,9 +380,7 @@ class JMObjectSpawnerForm: JMFormBase
 		for (int i = 0; i < cnt; i++)
 		{
 			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val) && val == enumValue)
-			{
 				return i;
-			}
 		}
 
 		return -1;
@@ -469,22 +473,34 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void Click_OnSafetyToogle( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		m_Module.m_AllowRestrictedClassNames = action.IsChecked();
 		UpdateList();
 	}
 
+	void Click_OnFilterDisplayName( UIEvent eid, UIActionBase action )	
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.m_FilterWithDisplayName = action.IsChecked();
+		UpdateList();
+	}
+
 	void Click_ObjSetupMode( UIEvent eid, UIActionBase action )	
 	{
-		if ( eid != UIEvent.CHANGE ) return;
+		if ( eid != UIEvent.CHANGE )
+			return;
 
 		m_Module.m_ObjSetupMode = action.GetSelection();
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		SpawnObject(s_ObjSpawnMode);
 	}
@@ -566,9 +582,7 @@ class JMObjectSpawnerForm: JMFormBase
 			m_ItemPreview.Show( true );
 
 			if (m_HealthItem.IsEnabled() && !m_PreviewItem.IsTransport())
-			{
 				m_PreviewItem.SetHealth("", "", m_HealthItem.GetCurrent());
-			}
 
 			if (m_PreviewItem.IsInherited(ItemBase)) 
 			{
@@ -625,13 +639,9 @@ class JMObjectSpawnerForm: JMFormBase
 				else if (item.GetQuantityMax() - item.GetQuantityMin() > 0)
 				{
 					if ( item.IsSplitable() )
-					{
 						m_QuantityItem.SetStepValue(1);
-					}
 					else
-					{
 						m_QuantityItem.SetStepValue(0.1);
-					}
 
 					m_QuantityItem.SetMinMax(item.GetQuantityMin(), item.GetQuantityMax());
 					m_QuantityItem.Enable();
@@ -646,7 +656,7 @@ class JMObjectSpawnerForm: JMFormBase
 		if (m_ItemStateType > -1)
 		{
 			m_ItemDataList.Enable();
-		}
+		}		
 		else if (m_ItemStateType != itemStateType)
 		{
 			m_ItemDataList.SetItems({""});
@@ -688,7 +698,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	override bool OnMouseWheel(Widget  w, int  x, int  y, int wheel)
 	{
-		if ( w == m_ItemPreview )
+		if ( w == m_ItemPreview && m_PreviewItem )
 		{
 			UpdateDistance(wheel);
 
@@ -722,7 +732,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void SetListType( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CLICK )
+			return;
 
 		m_Module.m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
 
@@ -889,7 +900,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			m_Module.Hide();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	private void DeleteEntity_No( JMConfirmation confirmation )
@@ -897,7 +908,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			m_Module.Hide();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
@@ -926,8 +937,15 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_MAGAZINESPATH );
 
 		string strSearch = m_SearchBox.GetText();
-
 		strSearch.ToLower();
+
+		TStringArray strSearches = new TStringArray;
+		strSearch.Split(" ", strSearches);
+		int count = strSearches.Count();
+
+		int index;
+		int score;
+		int highestScore;
 
 		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
 		{
@@ -960,10 +978,19 @@ class JMObjectSpawnerForm: JMFormBase
 
 				strNameLower.ToLower();
 
-				if ( m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
-						continue; 
+						continue;
+					
+					if (m_Module.m_FilterWithDisplayName)
+					{
+						if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
+							continue;
+
+						strNameLower = Widget.TranslateString( strNameLower );
+						strNameLower.ToLower();
+					}
 
 					if ( strSearch != "" )
 					{
@@ -972,14 +999,41 @@ class JMObjectSpawnerForm: JMFormBase
 							suggestions.Clear();
 							closestMatch = strNameLower;
 						}
-						else if ( strNameLower.IndexOf(strSearch) == 0 )
+						else
 						{
-							if (!closestMatch)
-								suggestions.Insert(strNameLower);
-						}
-						else if ( !strNameLower.Contains(strSearch) )
-						{
-							continue;
+							index = strNameLower.IndexOf(strSearch);
+
+							if (index == 0)
+							{
+								if (!closestMatch)
+									suggestions.Insert(strNameLower);
+							}
+							else if (index == -1 && count == 1)
+							{
+								continue;
+							}
+
+							score = 0;
+							foreach(string searchEntry: strSearches)
+							{
+								if ( strNameLower.IndexOf(searchEntry) == -1 )
+								{
+									score = 0;
+									break;
+								}
+
+								score++;
+							}
+
+							if (score == 0)
+								continue;
+
+							if (score > highestScore)
+							{
+								highestScore = score;
+								if (!closestMatch)
+									suggestions.Insert(strNameLower);
+							}
 						}
 					}
 

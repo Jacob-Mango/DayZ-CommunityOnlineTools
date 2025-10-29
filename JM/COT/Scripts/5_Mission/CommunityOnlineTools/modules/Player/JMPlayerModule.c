@@ -65,18 +65,16 @@ class JMPlayerModule: JMRenderableModuleBase
 		
 		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleInvisibility",	"UAPlayerModuleInvisibility",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
 	}
 
 	void OnPlayer_Checked( string guid, bool checked )
 	{
 		if ( checked )
-		{
 			JM_GetSelected().AddPlayer( guid );
-		} else
-		{
+		else
 			JM_GetSelected().RemovePlayer( guid );
-		}
 	}
 
 	void OnPlayer_Button( string guid, bool check )
@@ -84,9 +82,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JM_GetSelected().ClearPlayers();
 
 		if ( check )
-		{
 			JM_GetSelected().AddPlayer( guid );
-		}
 	}
 
 	override string GetInputToggle()
@@ -864,7 +860,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			Exec_TeleportTo( position, guids, NULL );
-		} else
+		}
+		else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( position );
@@ -1152,6 +1149,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			int networkLow, networkHigh;
 			if ( !ctx.Read( networkLow ) )
 				return;
+				
 			if ( !ctx.Read( networkHigh ) )
 				return;
 
@@ -1192,9 +1190,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
-			{
 				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
-			}
+
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -1406,12 +1403,9 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
 
 			if ( value )
-			{
 				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " god mode" );
-			} else
-			{
+			else
 				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " god mode" );
-			}
 
 			players[i].Update();
 		}
@@ -1626,6 +1620,26 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			return;
 
 		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
+	}
+
+	void InputToggleInvisibility( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( GetCommunityOnlineToolsBase().IsActive() )
+			ToggleInvisibility();
+	}
+	
+	void ToggleInvisibility()
+	{
+		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		bool value = !player.COTIsInvisible();
+		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
+		if (guids.Count() == 0)
+			guids.Insert(player.GetIdentity().GetId());
+
+		SetInvisible(value, guids);
 	}
 
 	void SetInvisible( int value, array< string > guids )

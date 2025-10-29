@@ -29,7 +29,7 @@ class JMPlayerInstance : Managed
 	private string m_Name;
 	private string m_GUID;
 	private string m_Steam64ID;
-
+	
 	private int m_PingMax;
 	private int m_PingMin;
 	private int m_PingAvg;
@@ -68,7 +68,8 @@ class JMPlayerInstance : Managed
 			m_GUID = identity.GetId();
 			m_Steam64ID = identity.GetPlainId();
 			m_Name = identity.GetName();
-		} else
+		}
+		else
 		{
 			m_GUID = guid;
 			m_Steam64ID = JMConstants.OFFLINE_STEAM;
@@ -101,9 +102,7 @@ class JMPlayerInstance : Managed
 		if ( GetGame().IsServer() && ( GetGame().GetTime() - m_DataLastUpdated ) >= 100 )
 		{
 			if ( !GetGame().IsMultiplayer() )
-			{
 				Class.CastTo( PlayerObject, GetGame().GetPlayer() );
-			}
 
 			if ( PlayerObject )
 			{
@@ -199,9 +198,7 @@ class JMPlayerInstance : Managed
 			return;
 
 		if ( m_Roles.Find( role ) < 0 )
-		{
 			m_Roles.Insert( role );
-		}
 
 		m_SyncedToClient.Clear();
 	}
@@ -242,15 +239,11 @@ class JMPlayerInstance : Managed
 		
 		// Print( "JMPlayerInstance::HasPermission - hasPermission=" + hasPermission );
 		if ( hasPermission )
-		{
 			return true;
-		}
 
 		// Print( "JMPlayerInstance::HasPermission - permType=" + permType );
 		if ( permType == JMPermissionType.DISALLOW )
-		{
 			return false;
-		}
 
 		for ( int j = 0; j < m_Roles.Count(); j++ )
 		{
@@ -504,10 +497,12 @@ class JMPlayerInstance : Managed
 			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
-			} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION ) )
+			}
+			else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION );
-			} else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
+			}
+			else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
 			}

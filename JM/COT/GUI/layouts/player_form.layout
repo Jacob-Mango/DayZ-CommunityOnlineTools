@@ -1,7 +1,7 @@
 PanelWidgetClass JMPlayerForm {
  color 0 0 0 0
  position 0 0
- size 700 600
+ size 800 600
  hexactpos 0
  vexactpos 0
  hexactsize 1

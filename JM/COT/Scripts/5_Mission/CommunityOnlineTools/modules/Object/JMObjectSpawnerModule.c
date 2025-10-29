@@ -21,9 +21,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		"m249",
 		"undersluggrenadem4",
 		"groza",
-	#ifdef DAYZ_1_27
-		"pm73rak",
-	#endif
 		"trumpet",
 		"lawbase",
 		"law",
@@ -54,6 +51,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	};
 
 	bool m_AllowRestrictedClassNames;
+	bool m_FilterWithDisplayName;
 
 	void JMObjectSpawnerModule()
 	{
@@ -202,32 +200,24 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				resultObj = result.obj;
 
 				if ( resultObj == NULL )
-				{
 					continue;
-				}
 
 				EntityAI entity;
 				if (Class.CastTo(entity, resultObj))
 					resultObj = entity.GetHierarchyRoot();
 
 				if ( PlayerBase.Cast( resultObj ) && ignorePlayer )
-				{
 					continue;
-				}
 
 				string name = resultObj.GetType();
 
 				if ( name == "" )
-				{
 					continue;
-				}
 
 				name.ToLower();
 
 				if ( name == "#particlesourceenf" )
-				{
 					continue;
-				}
 
 				if ( !m_AllowRestrictedClassNames )
 				{
@@ -352,10 +342,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( obj, JMObjectSpawnerModuleRPC.Delete, true, NULL );
-		} else
-		{
-			Server_DeleteEntity( obj, NULL );
 		}
+		else
+			Server_DeleteEntity( obj, NULL );
 	}
 
 	private void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )
@@ -416,13 +405,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
-		{
 			Server_SpawnEntity_Position( className, position, quantity, health, temp, itemState, NULL );
-		}
 		else
-		{
 			Server_SpawnEntity_TargetInventory( className, targetEnt, position, quantity, health, temp, itemState, NULL );
-		}
 	}
 
 	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
@@ -525,9 +510,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
-		{
 			Server_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, NULL );
-		}
 	}
 
 	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
@@ -627,9 +610,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
 		}
 		else
-		{
 			Server_SpawnEntity_Position(className, position, quantity, health, temp, itemState, ident);
-		}
 	}
 
 	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
@@ -655,9 +636,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			{
 				Magazine mag;
 				if (Class.CastTo(mag, item))
-				{
 					mag.ServerSetAmmoCount(quantity);
-				}
 				else if (item.HasQuantity())
 				{
 					item.SetQuantity(quantity);
@@ -729,18 +708,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	bool IsExcludedClassName( string className )
 	{
 		if ( m_UnfinishedItems.Find( className ) > -1 )
-		{
 			return true;
-		}
 
 		if ( !m_AllowRestrictedClassNames )
 		{
 			foreach ( string restrictedClassName: m_RestrictedClassNames )
 			{
 				if ( className.Contains( restrictedClassName ) )
-				{
 					return true;
-				}
 			}
 		}
 
@@ -839,9 +814,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 							idx = slot_ids.Find(slot_id);
 							if (idx > -1)
 							{
-								//if (!IsInventoryBase(path))
-									//break;
-
 								child_name.ToLower();
 								if (IsExcludedClassName(child_name))
 									break;
@@ -855,8 +827,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 								{
 									CF_Log.Info("Successfully spawned %1 in slot %2 on %3", child_name, inv_slot, entity.GetType());
 									slot_ids.Remove(idx);
+
 									if (depth > 0)
 										OnDebugSpawn(child, player, depth - 1);
+
 									if (slot_ids.Count() == 0)
 										return;
 								}
@@ -879,9 +853,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		{
 			tmp.ToLower();
 			if (tmp == cfg_parent_name)
-			{
 				return true;
-			}
 		}
 	
 		return false;
@@ -890,16 +862,22 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	void Command_Spawn(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
 		string className;
-		if (!params.Next(className)) return;
+		if (!params.Next(className))
+			return;
 
 		vector position;
 		if (params.HasNext())
 		{
 			float x, y, z;
 
-			if (!params.Next(x)) return;
-			if (!params.Next(y)) return;
-			if (!params.Next(z)) return;
+			if (!params.Next(x))
+				return;
+
+			if (!params.Next(y))
+				return;
+
+			if (!params.Next(z))
+				return;
 
 			position = Vector(x, y, z);
 		}

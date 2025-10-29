@@ -129,6 +129,19 @@ modded class Weapon_Base
 		// Decide random quantity when enabled
 		if (flags & WeaponWithAmmoFlags.QUANTITY_RNG)
 			mag.ServerSetAmmoCount(Math.RandomIntInclusive(0, mag.GetAmmoMax()));
+			
+	#ifndef DAYZ_1_27
+		//! 1.28+
+		if(MustBeChambered(0))
+		{
+			string bulletType;
+			float dmg;
+			if(mag.ServerAcquireCartridge(dmg,bulletType))
+			{
+				FillChamber(bulletType, flags);
+			}
+		}
+	#endif
 		
 		// Fill chamber when flagged
 		if ((flags & WeaponWithAmmoFlags.CHAMBER) || (flags & WeaponWithAmmoFlags.CHAMBER_RNG))
@@ -168,6 +181,10 @@ modded class Weapon_Base
 		
 		
 		bool didSomething = false;		
+	#ifndef DAYZ_1_27
+		//! 1.28+
+		bool needUpdateStateMachine = false;
+	#endif
 		int muzzCount = GetMuzzleCount();
 		
 		bool ammoRng = ammoType == "";
@@ -184,6 +201,10 @@ modded class Weapon_Base
 		// Fill the internal magazine
 		for (int i = 0; i < muzzCount; ++i)
 		{
+		#ifndef DAYZ_1_27
+			//! 1.28+
+			bool loadAnyBullet = false;
+		#endif
 			int ammoCount = GetInternalMagazineMaxCartridgeCount(i);
 			
 			// Decide random quantity when enabled
@@ -208,8 +229,24 @@ modded class Weapon_Base
 						continue;
 
 					PushCartridgeToInternalMagazine(i, 0, ammoType);
+				#ifndef DAYZ_1_27
+					//! 1.28+
+					loadAnyBullet = true;
+				#endif
 					didSomething = true;
 				}
+
+			#ifndef DAYZ_1_27
+				//! 1.28+
+				if (loadAnyBullet && MustBeChambered(i))
+				{
+					if ( ammoFullRng )
+						ammoType = COTGetRandomChamberableAmmoTypeName(i);
+						
+					if (ammoType && FillSpecificChamber(i, 0, ammoType))
+						needUpdateStateMachine = true;
+				}
+			#endif
 			}
 		}
 		
@@ -221,10 +258,22 @@ modded class Weapon_Base
 		}
 
 		CF_Log.Info("%1::FillInnerMagazine - did something? %2", ToString(), didSomething.ToString());
+			
+		// Only fix the FSM and Synchronize when absolutely needed
+		if (!didSomething)
+			return false;
 		
-		// Does not need any FSM fixing, FSM does not care about inner magazines
+	#ifndef DAYZ_1_27
+		//! 1.28+	
+		if( needUpdateStateMachine )
+		{
+			// FSM cares about chamber state
+			RandomizeFSMState();		
+			Synchronize();
+		}
+	#endif
 		
-		return didSomething;
+		return true;
 	}
 
 	//! @note this is a verbatim copy of the vanilla FillChamber EXCEPT it doesn't use the vanilla GetRandomChamberableAmmoTypeName
