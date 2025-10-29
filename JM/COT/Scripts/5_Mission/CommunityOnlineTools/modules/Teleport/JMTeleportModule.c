@@ -129,7 +129,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		return;
 #endif
 
-		if ( !(input.LocalPress()) )
+		if ( !input.LocalPress() && !input.LocalHoldBegin() && !input.LocalHold() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -137,7 +137,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			if (input.LocalPress())
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -145,21 +146,16 @@ class JMTeleportModule: JMRenderableModuleBase
 		vector hitPos = GetCursorPos( Object.Cast( GetGame().GetPlayer().GetParent() ) );
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
-		{
 			currentPosition = CurrentActiveCamera.GetPosition();
-		} else {
+		else
 			currentPosition = GetPlayer().GetPosition();
-		}
 
 		float distance = vector.Distance( currentPosition, hitPos );
 
 		if ( distance <= 1000 )
-		{
 			Position( hitPos, {GetGame().GetPlayer().GetIdentity().GetId()}, true);
-		} else
-		{
+		else
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
-		}
 	}
 
 	void Input_Cursor_RaycastOnServer( UAInput input )
@@ -168,7 +164,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		return;
 #endif
 
-		if ( !(input.LocalPress()) )
+		if ( !input.LocalPress() && !input.LocalHoldBegin() && !input.LocalHold() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
@@ -176,7 +172,8 @@ class JMTeleportModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			if (input.LocalPress())
+				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
 			return;
 		}
 
@@ -186,7 +183,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			rayStart = CurrentActiveCamera.GetPosition();
 			direction = CurrentActiveCamera.GetDirection();
-		} else 
+		}
+		else 
 		{
 			rayStart = GetGame().GetCurrentCameraPosition();
 			direction = GetGame().GetCurrentCameraDirection();
@@ -281,16 +279,9 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( GetGame().IsDedicatedServer() )
-		{
 			Server_Load( senderRPC );
-		}
-		else
-		{
-			if ( m_Settings.Read( ctx ) )
-			{
+		else if ( m_Settings.Read( ctx ) )
 				OnSettingsUpdated();
-			}
-		}
 	}
 
 	void Position( vector position, array< string > guids = NULL, bool isCursor = false )
@@ -379,7 +370,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( IsMissionOffline() )
 		{
 			Server_PositionRaycast( rayStart, direction, PlayerBase.Cast( GetGame().GetPlayer() ) );
-		} else if ( IsMissionClient() )
+		}
+		else if ( IsMissionClient() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor" ) )
 				return;
@@ -522,15 +514,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			string loc;
 			if ( !ctx.Read( loc ) )
-			{
 				return;
-			}
 
 			array< string > guids;
 			if ( !ctx.Read( guids ) )
-			{
 				return;
-			}
 
 			Server_Location( loc, guids, senderRPC );
 		}
@@ -676,14 +664,22 @@ class JMTeleportModule: JMRenderableModuleBase
 		vector position;
 		if (params.HasNext())
 		{
-			float x, y, z;
+			float x;
+			if (!params.Next(x))
+				return;
 
-			if (!params.Next(x)) return;
-			if (!params.Next(y)) return;
-			if (!params.Next(z)) return;
+			float y;
+			if (!params.Next(y))
+				return;
+
+			float z;
+			if (!params.Next(z))
+				return;
 
 			position = Vector(x, y, z);
-		} else return;
+		}
+		else
+			return;
 
 		SetPlayerPosition( player, position );
 
@@ -694,7 +690,8 @@ class JMTeleportModule: JMRenderableModuleBase
 	void Command_Get(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
 		PlayerBase player = GetPlayerObjectByIdentity(sender);
-		if (!player) return;
+		if (!player)
+			return;
 
 		Message(player, "Your position is: " + player.GetPosition());
 	}

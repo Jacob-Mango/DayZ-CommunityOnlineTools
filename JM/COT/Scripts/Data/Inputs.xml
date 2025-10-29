@@ -37,6 +37,7 @@
             <input name="UAPlayerModuleFreezePlayer" loc="STR_COT_INPUT_FREEZE_PLAYER" />
             <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
             <input name="UAPlayerModuleGodMode" loc="STR_COT_INPUT_GODMODE_SELF" />
+            <input name="UAPlayerModuleInvisibility" loc="STR_COT_INPUT_INVISIBILITY_SELF" />
         </actions>
 
         <sorting name="JM_COT" loc="COT">
@@ -75,6 +76,7 @@
 			<input name="UAPlayerModuleFreezePlayer" />
 			<input name="UAPlayerModuleHeal" />
 			<input name="UAPlayerModuleGodMode" />
+			<input name="UAPlayerModuleInvisibility" />
 		</sorting>
     </inputs>
 
@@ -131,6 +133,8 @@
         <input name="UAPlayerModuleGodMode">
             <btn name="kU">
             </btn>
+        </input>
+        <input name="UAPlayerModuleInvisibility">
         </input>
 
         <input name="UACOTToggleButtons">

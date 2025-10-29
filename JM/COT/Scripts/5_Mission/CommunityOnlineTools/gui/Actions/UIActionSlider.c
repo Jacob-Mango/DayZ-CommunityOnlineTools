@@ -4,11 +4,6 @@ class UIActionSlider: UIActionBase
 	protected SliderWidget m_Slider;
 	protected TextWidget m_Value;
 
-	protected float m_Min;
-	protected float m_Max;
-
-	protected float m_Current;
-
 	protected string m_Format;
 
 	override void OnInit() 
@@ -18,10 +13,6 @@ class UIActionSlider: UIActionBase
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Slider, layoutRoot.FindAnyWidget( "action" ) );
 		Class.CastTo( m_Value, layoutRoot.FindAnyWidget( "action_value" ) );
-
-		m_Min = m_Slider.GetMin();
-		m_Max = m_Slider.GetMax();
-		m_Current = m_Slider.GetCurrent();
 	}
 
 	override void OnShow()
@@ -107,21 +98,22 @@ class UIActionSlider: UIActionBase
 
 	void SetMinMax(float min, float max)
 	{
-		float range = max - min;
+		float newRange = max - min;
 
-		if (range > 0)
+		if (newRange > 0)
 		{
+			float oldRange = GetMax() - GetMin();
+			float oldValue = GetCurrent() - GetMin();
+
 			m_Slider.SetMinMax(min, max);
 			m_Slider.Update();
 
-			CalculateValue();
-
-			m_Min = min;
-			m_Max = max;
+			float value = min + (oldValue / oldRange) * newRange;
+			SetCurrent(value);
 		}
 		else
 		{
-			Error("Invalid slider range " + range);
+			Error("Invalid slider range " + newRange);
 		}
 	}
 
@@ -152,21 +144,9 @@ class UIActionSlider: UIActionBase
 	{
 		float stepValue = GetStepValue();
 
-		m_Current = Math.Round(Math.Clamp(value, GetMin(), GetMax()) / stepValue) * stepValue;
-
-		m_Slider.SetCurrent(m_Current);
+		m_Slider.SetCurrent(Math.Round(Math.Clamp(value, GetMin(), GetMax()) / stepValue) * stepValue);
 
 		UpdateValue();
-	}
-
-	protected void CalculateValue()
-	{
-		float oldRange = m_Max - m_Min;
-		float oldValue = m_Current - m_Min;
-		float newRange = GetMax() - GetMin();
-		float value = ((oldValue * newRange) / oldRange) + GetMin();
-
-		SetCurrent(value);
 	}
 
 	void UpdateValue()
@@ -176,8 +156,6 @@ class UIActionSlider: UIActionBase
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
 	{
-		m_Current = GetCurrent();
-
 		UpdateValue(); 
 
 		if ( !m_HasCallback )

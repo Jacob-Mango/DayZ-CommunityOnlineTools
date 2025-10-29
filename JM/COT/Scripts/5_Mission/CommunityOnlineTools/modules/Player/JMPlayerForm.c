@@ -36,6 +36,11 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_Steam64ID;
 	private UIActionButton m_SteamProfile;
 
+	#ifdef GAMELABS
+	private UIActionButton m_CFToolsID;
+	private UIActionButton m_CFProfile;
+	#endif
+
 	private UIActionButton m_RefreshStats;
 	private UIActionButton m_ApplyStats;
 	private UIActionSlider m_Health;
@@ -286,29 +291,46 @@ class JMPlayerForm: JMFormBase
 
 	private Widget InitActionWidgetsIdentity( Widget actionsParent )
 	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		Widget parent;
+		#ifdef GAMELABS
+		parent = UIActionManager.CreateGridSpacer( actionsParent, 4, 1 );
+		#else
+		parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		#endif
 	
 		Widget actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", "" );
-		m_Name = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_NAME", this, "Click_CopyPlayerName" );
-		m_Name.SetWidth( 0.8 );
-		m_Name.SetPosition( 0.2 );
+		m_Name = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerName" );
+		m_Name.SetWidth( 0.85 );
+		m_Name.SetPosition( 0.15 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", "" );
-		m_GUID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_GUID", this, "Click_CopyPlayerGUID" );
-		m_GUID.SetWidth( 0.8 );
-		m_GUID.SetPosition( 0.2 );
+		m_GUID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerGUID" );
+		m_GUID.SetWidth( 0.85 );
+		m_GUID.SetPosition( 0.15 );
 
 		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
 		UIActionManager.CreateText( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", "" );
-		m_Steam64ID = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_IDENTITY_STEAMID", this, "Click_CopyPlayerSteam64ID" );
-		m_Steam64ID.SetWidth( 0.4 );
-		m_Steam64ID.SetPosition( 0.2 );
+		m_Steam64ID = UIActionManager.CreateButton( actions, "", this, "Click_CopyPlayerSteam64ID" );
+		m_Steam64ID.SetWidth( 0.45 );
+		m_Steam64ID.SetPosition( 0.15 );
 
-		m_SteamProfile = UIActionManager.CreateButton( actions, "Profile", this, "Click_OpenPlayerSteamProfile" );
+		m_SteamProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerSteamProfile" );
 		m_SteamProfile.SetWidth( 0.4 );
 		m_SteamProfile.SetPosition( 0.6 );
+
+		#ifdef GAMELABS
+		actions = UIActionManager.CreatePanel( parent, 0x00000000, 32 );
+		UIActionManager.CreateText( actions, "CFTools:", "" );
+		m_CFToolsID = UIActionManager.CreateButton( actions, "", this, "Click_CopyCFToolsID" );
+		m_CFToolsID.SetWidth( 0.45 );
+		m_CFToolsID.SetPosition( 0.15 );
+		
+		m_CFProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerCFProfile" );
+		m_CFProfile.SetWidth( 0.4 );
+		m_CFProfile.SetPosition( 0.6 );
+		#endif
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -323,6 +345,11 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Show();
 		m_Steam64ID.Show();
 		m_SteamProfile.Show();
+
+		#ifdef GAMELABS
+		m_CFToolsID.Show();
+		m_CFProfile.Show();
+		#endif
 	}
 
 	private void HideIdentityWidgets()
@@ -331,6 +358,11 @@ class JMPlayerForm: JMFormBase
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
 		m_SteamProfile.Hide();
+
+		#ifdef GAMELABS
+		m_CFToolsID.Hide();
+		m_CFProfile.Hide();
+		#endif
 	}
 
 	private Widget InitActionWidgetsPosition( Widget actionsParent )
@@ -754,23 +786,17 @@ class JMPlayerForm: JMFormBase
 	void Click_ModifyPermissions( UIEvent eid, UIActionBase action )
 	{
 		if ( m_PermissionsListScroller.IsVisible() )
-		{
 			HidePermissions();
-		} else
-		{
+		else
 			ShowPermissions();
-		}
 	}
 	
 	void Click_ModifyRoles( UIEvent eid, UIActionBase action )
 	{
 		if ( m_RolesListScroller.IsVisible() )
-		{
 			HideRoles();
-		} else
-		{
+		else
 			ShowRoles();
-		}
 	}
 
 	void Click_SavePermissions( UIEvent eid, UIActionBase action )
@@ -1184,13 +1210,9 @@ class JMPlayerForm: JMFormBase
 		if ( CurrentActiveCamera )
 		{
 			if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
-			{
 				shouldSpectate = false;
-			}
 			else if ( COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera) )
-			{
 				shouldSpectate = false;
-			}
 		}
 
 		if ( shouldSpectate )
@@ -1202,7 +1224,8 @@ class JMPlayerForm: JMFormBase
 			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
 
 			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
-		} else
+		}
+		else
 		{
 			action.Disable();
 			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
@@ -1323,6 +1346,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_Name.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_CopyPlayerGUID( UIEvent eid, UIActionBase action )
@@ -1331,6 +1356,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_GUID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_CopyPlayerSteam64ID( UIEvent eid, UIActionBase action )
@@ -1339,6 +1366,8 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
 
     void Click_OpenPlayerSteamProfile( UIEvent eid, UIActionBase action )
@@ -1348,6 +1377,26 @@ class JMPlayerForm: JMFormBase
 
 		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
 	}
+
+	#ifdef GAMELABS
+	void Click_CopyCFToolsID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		GetGame().CopyToClipboard(m_CFToolsID.GetButton());
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
+	}
+
+    void Click_OpenPlayerCFProfile( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+		
+		GetGame().OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
+	}
+	#endif
 
     void Click_CopyPlayerPostion( UIEvent eid, UIActionBase action )
 	{
@@ -2227,6 +2276,10 @@ class JMPlayerForm: JMFormBase
 		m_GUID.SetButton( instance.GetGUID() );
 		m_Name.SetButton( instance.GetName() );
 		m_Steam64ID.SetButton( instance.GetSteam64ID() );
+
+		#ifdef GAMELABS
+		m_CFToolsID.SetButton(instance.PlayerObject.GetUpstreamIdentity());
+		#endif
 
 		if ( IsMissionOffline() )
 		{

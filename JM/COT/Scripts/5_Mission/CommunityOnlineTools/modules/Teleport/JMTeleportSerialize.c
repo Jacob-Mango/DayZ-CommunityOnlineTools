@@ -105,13 +105,9 @@ class JMTeleportSerialize : Managed
 			foreach(string slice: output)
 			{
 				if ( slice == "AF" )
-				{
 					location_type = "Airfield";
-				}
 				else if ( slice == "MB" )
-				{
 					location_type = "Military Base";
-				}
 			}
 
 			if ( Types.Find(location_type) == -1 )

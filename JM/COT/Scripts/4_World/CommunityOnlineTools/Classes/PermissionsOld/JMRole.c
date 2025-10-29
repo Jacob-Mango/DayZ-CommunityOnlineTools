@@ -96,10 +96,9 @@ class JMRole : Managed
 			CloseFile(file);
 			
 			return true;
-		} else
-		{
-			return false;
 		}
+
+		return false;
 	}
 
 	bool Load()
@@ -119,12 +118,10 @@ class JMRole : Managed
 			}
 
 			CloseFile( file );
-		} else
-		{
-			return false;
+			return true;
 		}
-		
-		return true;
+
+		return false;		
 	}
 
 	void DebugPrint()

@@ -308,6 +308,9 @@ class CommunityOnlineToolsBase
 			skipIDs = new TIntArray;
 
 		skipIDs.Insert(UAUIBack);
+		skipIDs.Insert(UAUISelect);
+		skipIDs.Insert(UAUITabLeft);
+		skipIDs.Insert(UAUITabRight);
 
 		TIntArray inputIDs = new TIntArray;
 
@@ -368,6 +371,14 @@ class CommunityOnlineToolsBase
 				{
 					HealEntityRecursive(attachment, true, includeCargo);
 				}
+			}
+
+			Man player;
+			if (Class.CastTo(player, obj))
+			{
+				EntityAI entityInHands = player.GetHumanInventory().GetEntityInHands();
+				if (entityInHands)
+					HealEntityRecursive(entityInHands, true, includeCargo);
 			}
 		}
 
