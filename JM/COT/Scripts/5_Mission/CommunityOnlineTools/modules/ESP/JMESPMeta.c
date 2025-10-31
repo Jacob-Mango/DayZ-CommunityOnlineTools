@@ -72,7 +72,7 @@ class JMESPMeta: COT_WidgetHolder
 		#endif
 
 	#ifdef DAYZ_1_28
-		DestroyWidget(layoutRoot);
+		DestroyWidget(widgetRoot);
 	#endif
 
 		if (s_JM_All)
