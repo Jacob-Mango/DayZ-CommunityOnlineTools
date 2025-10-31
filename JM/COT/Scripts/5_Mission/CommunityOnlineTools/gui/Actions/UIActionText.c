@@ -119,11 +119,4 @@ class UIActionText: UIActionBase
 
 		return ret;
 	}
-
-	override bool CallEvent( UIEvent eid )
-	{
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
-
-		return false;
-	}
 };

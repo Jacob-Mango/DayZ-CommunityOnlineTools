@@ -330,6 +330,12 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	bool CallEvent( UIEvent eid )
 	{
+		if ( !m_HasCallback )
+			return false;
+
+		auto params = new Param2< UIEvent, UIActionBase >( eid, this );
+		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, params );
+
 		return false;
 	}
 
