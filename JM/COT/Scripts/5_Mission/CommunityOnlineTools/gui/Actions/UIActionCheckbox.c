@@ -47,13 +47,4 @@ class UIActionCheckbox: UIActionBase
 
 		return ret;
 	}
-
-	override bool CallEvent( UIEvent eid )
-	{
-		if ( !m_HasCallback ) return false;
-
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
-
-		return false;
-	}
 };
