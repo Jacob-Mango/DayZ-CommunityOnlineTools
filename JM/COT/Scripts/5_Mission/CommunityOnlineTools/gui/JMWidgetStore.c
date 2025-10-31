@@ -60,12 +60,14 @@ class JMWidgetStore: COT_WidgetHolder
 		}
 	*/
 
+	#ifdef DAYZ_1_28
 		foreach (auto w: allWidgets)
 		{
 			DestroyWidget(w);
 		}
 
 		DestroyWidget(layoutRoot);
+	#endif
 	}
 
 	void Init() 

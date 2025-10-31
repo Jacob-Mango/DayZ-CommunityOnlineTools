@@ -57,7 +57,9 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 			child.Destroy();
 		}
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMPermissionsRowWidgetCount--;

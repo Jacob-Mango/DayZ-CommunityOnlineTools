@@ -44,7 +44,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		//! @note this should not be necessary since if the JMWindowBase handling this UIAction is destroyed,
 		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_UIActionBaseCount--;
