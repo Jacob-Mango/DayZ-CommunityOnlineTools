@@ -9,36 +9,25 @@ modded class JMModuleConstructor
 		modules.Insert( JMESPModule );
 		modules.Insert( JMTeleportModule );
 		modules.Insert( JMCameraModule );
-
-#ifdef DIAG
-		//modules.Insert( JMTestingModule );
-		//modules.Insert( JMMapEditorModule );
-		modules.Insert( JMExampleModule );
-#endif
-
-		//modules.Insert( JMWeatherOldModule );
 		modules.Insert( JMWeatherModule );
-
-		// LEGACY
-		//modules.Insert( JMVehicleSpawnerModule );
-		//modules.Insert( JMItemSetSpawnerModule );
 		modules.Insert( JMLoadoutModule );
-		
 		modules.Insert( JMMapModule );
+		modules.Insert( JMVehiclesModule );
 		modules.Insert( JMCommandModule );
 
-		modules.Insert( JMVehiclesModule );
+#ifdef DIAG
+		modules.Insert( JMExampleModule );
+		modules.Insert( JMtemStatsModule );
+#endif
 
-		//! TODO: Find a way to check of offline mode without being triggered while in main menu
-		//if ( IsMissionOffline() )
-		//	modules.Insert( JMMissionSelectorModule );
+		if ( IsMissionOffline() )
+			modules.Insert( JMMissionSelectorModule );
+		else if (modules.Find(JMMissionSelectorModule) != -1)
+			modules.RemoveItem(JMMissionSelectorModule);
 		
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
-		{
 			modules.Insert( JMNamalskEventManagerModule );
-		}
-		//modules.Insert( JMWebhookCOTModule );
 	}
 };
 
