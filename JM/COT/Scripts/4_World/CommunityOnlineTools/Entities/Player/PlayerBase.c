@@ -519,22 +519,13 @@ modded class PlayerBase
 
 	private void Safe_SetAuthenticatedPlayer()
 	{
-		if ( m_AuthenticatedPlayer )
+		if ( m_AuthenticatedPlayer || !GetIdentity() )
 			return;
 
-		if ( !GetIdentity() ) // Could be AI
-			return;
-
-		if ( !m_AuthenticatedPlayer )
-		{
-			if ( IsMissionOffline() )
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
-			} else
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-			}
-		}
+		if ( IsMissionOffline() )
+			m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+		else
+			m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
 
 		if ( m_AuthenticatedPlayer )		
 			m_AuthenticatedPlayer.PlayerObject = this;
@@ -545,9 +536,7 @@ modded class PlayerBase
 	override string FormatSteamWebhook()
 	{
 		if ( !GetAuthenticatedPlayer() )
-		{
 			return super.FormatSteamWebhook() + " (WARNING)";
-		}
 
 		return GetAuthenticatedPlayer().FormatSteamWebhook();
 	}
@@ -801,6 +790,11 @@ modded class PlayerBase
 				item.DeleteSafe();
 			}
 		}
+	}
+
+	override bool IsRestrained()
+	{
+		return super.IsRestrained() || m_JMIsFrozen;
 	}
 
 	void COTUpdateSpectatorPosition()
