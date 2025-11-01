@@ -121,6 +121,7 @@ enum JMWeatherModuleRPC
 	CreatePreset,
 	UpdatePreset,
 	RemovePreset,
+	FreezeTime,
 	COUNT
 };
 

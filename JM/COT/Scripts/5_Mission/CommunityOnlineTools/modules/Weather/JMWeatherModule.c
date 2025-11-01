@@ -10,6 +10,9 @@ enum JMWeatherTypes
 class JMWeatherModule: JMRenderableModuleBase
 {
 	private ref JMWeatherSerialize settings;
+	protected ref JMWeatherPreset m_CachedWeatherPreset;
+
+	protected bool m_bFreezeTime;
 
 	void JMWeatherModule()
 	{
@@ -18,6 +21,8 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Cloudy" );
 		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Storm" );
 		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Date" );
+
+		GetPermissionsManager().RegisterPermission( "Weather.FreezeTime" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Date" );
 
@@ -121,6 +126,11 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		return settings != NULL;
 	}
+	
+	bool IsTimeFrozen()
+	{
+		return m_bFreezeTime;
+	}
 
 	private void Server_Load( PlayerIdentity ident )
 	{
@@ -145,6 +155,16 @@ class JMWeatherModule: JMRenderableModuleBase
 				OnSettingsUpdated();
 			}
 		}
+	}
+
+	void SetFreezeTime(bool state)
+	{
+		m_bFreezeTime = state;
+		
+		if ( GetGame().IsServer() )
+			Exec_FreezeTime( m_bFreezeTime, NULL );
+		else
+			Send_FreezeTime( m_bFreezeTime );
 	}
 
 	void SetStorm( float density, float threshold, float minTimeBetweenLightning )
@@ -393,6 +413,13 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.Storm, true, NULL );
 	}
 	
+	private void Send_FreezeTime( bool state )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( state );
+		rpc.Send( NULL, JMWeatherModuleRPC.FreezeTime, true, NULL );
+	}
+	
 	private void Send_SetFog( JMWeatherFog wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
@@ -504,6 +531,23 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Write( name );
 
 		rpc.Send( NULL, JMWeatherModuleRPC.RemovePreset, true, NULL );
+	}
+	
+	private void Exec_FreezeTime( bool state, PlayerIdentity ident )
+	{
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(Repeat_FreezeTime);
+
+		if (state)
+		{
+			m_CachedWeatherPreset = new JMWeatherPreset;
+			m_CachedWeatherPreset.SetFromWorld();
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
+		}
+	}
+
+	protected void Repeat_FreezeTime()
+	{
+		m_CachedWeatherPreset.Apply();
 	}
 	
 	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident )
@@ -685,6 +729,21 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Name: " + name + ")" );
 
 		settings.Save();
+	}
+	
+	private void RPC_FreezeTime( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		bool state;
+		if ( !ctx.Read( state ) )
+			return;
+
+		if (!GetGame().IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.FreezeTime", senderRPC ) )
+			return;
+
+		Exec_FreezeTime( state, senderRPC );
 	}
 	
 	private void RPC_SetStorm( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -961,6 +1020,9 @@ class JMWeatherModule: JMRenderableModuleBase
 		case JMWeatherModuleRPC.Load:
 			RPC_Load( ctx, sender, target );
 			break
+		case JMWeatherModuleRPC.FreezeTime:
+			RPC_FreezeTime( ctx, sender, target );
+			break;
 		case JMWeatherModuleRPC.Storm:
 			RPC_SetStorm( ctx, sender, target );
 			break;
