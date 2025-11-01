@@ -40,7 +40,7 @@ class CommunityOnlineToolsBase
 		if ( !FileExist( JMConstants.DIR_LOGS ) )
 			MakeDirectory( JMConstants.DIR_LOGS );
 
-		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now( true ).ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
+		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now().ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
 		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
 
 		if ( fileLog != 0 )
@@ -203,7 +203,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
@@ -226,7 +226,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
@@ -249,7 +249,7 @@ class CommunityOnlineToolsBase
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}

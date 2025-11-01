@@ -837,7 +837,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			loadout.m_Items = loadouts;
 			loadout.m_IsLocalPosition = false;
 			
-			string name = JMDate.Now( true ).ToString( "YYYY-MM-DD_hh-mm-ss" );
+			string name = JMDate.Now().ToString( "YYYY-MM-DD_hh-mm-ss" );
 			JMLoadoutSettings.SaveDeletion(loadout, name);
 
 			GetCommunityOnlineToolsBase().Log( instance, "Created Deletion Backup '"+name+"'" );
