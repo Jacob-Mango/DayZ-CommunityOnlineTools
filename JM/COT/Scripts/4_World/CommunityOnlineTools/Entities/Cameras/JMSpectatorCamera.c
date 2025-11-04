@@ -1,6 +1,6 @@
 class JMSpectatorCamera: JMCameraBase
 {
-	static const int DOLLY_CAM_PATH_COUNT = 100;
+	static const int DOLLY_CAM_PATH_LIMIT = 200;
 
 	vector linearVelocity;
 	vector angularVelocity;
@@ -20,12 +20,14 @@ class JMSpectatorCamera: JMCameraBase
 
 	protected vector m_COT_LastPlayerPos;
 
-	vector m_COT_DollyCamPath[100];
-	vector m_COT_DollyCamOri[100];
+	vector m_COT_DollyCamPath[200];
+	int m_COT_DollyCamPathNextIdx;
 	int m_COT_DollyCamPathIdx;
 	float m_COT_DollyCamPathUpdateDT;
 	float m_COT_DollyCamSpeedMult = 0.433333;
 	float m_COT_DollyCamSpeedMultTgt = 0.433333;
+	float m_COT_PlayerSpeed;
+	bool m_COT_DollyCamReversing;
 	
 	override void OnTargetSelected( Object target )
 	{
@@ -34,6 +36,9 @@ class JMSpectatorCamera: JMCameraBase
 			return;
 
 		impl.OnSpectateStart( this );
+
+		//m_COT_CrosshairEnabled = g_Game.GetProfileOptionBool(EDayZProfilesOptions.CROSSHAIR);
+		//g_Game.SetProfileOptionBool(EDayZProfilesOptions.CROSSHAIR, false);
 	}
 
 	override void OnTargetDeselected( Object target )
@@ -43,6 +48,8 @@ class JMSpectatorCamera: JMCameraBase
 			return;
 
 		impl.OnSpectateEnd();
+
+		//g_Game.SetProfileOptionBool(EDayZProfilesOptions.CROSSHAIR, m_COT_CrosshairEnabled);
 	}
 
 	override void OnUpdate( float timeslice )
@@ -117,6 +124,9 @@ class JMSpectatorCamera: JMCameraBase
 		float fov;
 
 		bool weaponRaised;
+		bool isSwimming;
+
+		int i;
 
 		if (Class.CastTo(weapon, hands))
 		{
@@ -149,7 +159,7 @@ class JMSpectatorCamera: JMCameraBase
 				if (!m_COT_IsInFreeLook)
 				{
 					dollyCam = true;
-					speed = 0.9;  //! Slow interpolation, resulting in movement like camera on a dolly
+					speed = 0.45;  //! Slow interpolation, resulting in movement like camera on a dolly
 					break;
 				}
 			default:
@@ -157,7 +167,7 @@ class JMSpectatorCamera: JMCameraBase
 				break;
 		}
 
-		if (m_JM_IsADS)
+		if (m_JM_IsADS || weaponRaised)
 		{
 			//if (optic)
 			//{
@@ -188,7 +198,11 @@ class JMSpectatorCamera: JMCameraBase
 			vector barrel_start = weapon.GetSelectionPositionLS("konec hlavne").Multiply4(weaponTransform);
 			vector barrel_end = weapon.GetSelectionPositionLS("usti hlavne").Multiply4(weaponTransform);
 			dir = vector.Direction(barrel_start, barrel_end).Normalized();
-			pos = eyePos - dir * 0.06;
+
+			if (!dollyCam)
+				pos = eyePos - dir * 0.06;
+			else
+				pos = headPos + "0 0.1 0";
 
 			if (!m_JM_3rdPerson)
 				fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
@@ -211,13 +225,14 @@ class JMSpectatorCamera: JMCameraBase
 			vector wl;
 			EWaterLevels waterLevel = DayZPlayerUtils.CheckWaterLevel(spectatedPlayer, wl);
 
-			//float waterDepth = wl[0];
-			//float characterDepth = wl[1];
+			float waterDepth = wl[0];
+			float characterDepth = wl[1];
 
-			//if (waterDepth > 1.5 && characterDepth > 0.0)
-			if (waterLevel == EWaterLevels.LEVEL_SWIM_START)
+			if ((waterDepth > 1.5 && characterDepth > 0) || waterLevel == EWaterLevels.LEVEL_SWIM_START)
 			{
 				//! Swimming
+				isSwimming = true;
+
 				dir = playerTransform[2];
 				if (m_JM_3rdPerson)
 					pos = headPos + "0 0.5 0";
@@ -236,7 +251,36 @@ class JMSpectatorCamera: JMCameraBase
 				fov = GetDayZGame().GetUserFOV();
 		}
 
-		vector targetPos = pos;
+		vector cameraPos = GetPosition();
+		vector camPos2D = cameraPos;
+		camPos2D[1] = pos[1];
+
+		float cameraDistToTargetSq = vector.DistanceSq(camPos2D, pos);
+
+		if (dollyCam)
+		{
+			if (!isSwimming)
+			{
+				//! Eliminate head bob
+				float stanceHeight = pos[1] - playerPos[1];
+
+				if (stanceHeight < 0.6)
+					stanceHeight = 0.5;  //! Prone
+				else if (stanceHeight < 1.3)
+					stanceHeight = 1.2;  //! Crouched
+				else
+					stanceHeight = 1.6;  //! Standing
+
+				pos = playerPos;
+				pos[1] = pos[1] + stanceHeight;
+			}
+
+			//if (cameraDistToTargetSq > 1.0)
+			{
+				dir = vector.Direction(cameraPos, pos);
+				dir.Normalize();
+			}
+		}
 
 		vector fromOri = GetOrientation();
 		vector targetOri = Math.COT_DirToOri(dir);
@@ -244,24 +288,42 @@ class JMSpectatorCamera: JMCameraBase
 		float yawDiff;
 		float pitchDiff;
 
-		float dollyCamSpeedMultMin = 0.333333;  //! Fastest
-		float dollyCamSpeedMultMax = 1.0;  //! Slowest
+		float dollyCamSpeedMultMin = 0.3;  //! Fastest
+		float dollyCamSpeedMultMax = 0.5;  //! Slowest
+		float dollyCamSpeedMult;
 
 		bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
 
+		vector playerMovementDir = playerPos - m_COT_LastPlayerPos;
+		playerMovementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
+		vector playerVelocity = playerMovementDir * (1.0 / timeSlice);  //! GetVelocity(spectatedPlayer) returns 0 on client
+		playerMovementDir.Normalize();
+		m_COT_PlayerSpeed = Math.Lerp(m_COT_PlayerSpeed, playerVelocity.Length(), timeSlice * 2);
+		float playerSpeedInverse01 = Math.Max(1 - m_COT_PlayerSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
+
+	/*
 		if (isUnderRoofBuilding)
 		{
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, Math.Min(m_COT_DollyCamSpeedMultTgt, 0.666666), timeSlice);
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, Math.Min(m_COT_DollyCamSpeedMultTgt, 0.4), timeSlice);
+			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
 		}
 		else
+	*/
 		{
 			if (GetUApi().GetInputByID(UACameraToolSpeedIncrease).LocalValue())
-				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt - 0.1, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
+				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt - 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
 			else if (GetUApi().GetInputByID(UACameraToolSpeedDecrease).LocalValue())
-				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt + 0.1, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
+				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt + 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
 
 			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, m_COT_DollyCamSpeedMultTgt, timeSlice * 4);
+
+			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
+
+			float speedAdjustment = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, playerSpeedInverse01);
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, speedAdjustment, timeSlice * 4);
 		}
+
+		float distSqThresh = 1.0 * m_COT_DollyCamSpeedMult;
 
 		vector ori;
 
@@ -283,68 +345,153 @@ class JMSpectatorCamera: JMCameraBase
 
 		m_COT_DollyCamPathUpdateDT += timeSlice;
 
-		if (m_COT_DollyCamPathUpdateDT > 0.1 * m_COT_DollyCamSpeedMult)
+		if (m_COT_DollyCamPathUpdateDT > 0.0333333)
 		{
-			m_COT_DollyCamPathUpdateDT = 0;
-
-			if (m_COT_DollyCamPathIdx < Math.Clamp(9 * m_COT_DollyCamSpeedMult, 1, DOLLY_CAM_PATH_COUNT - 1))
+			if (dollyCam && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
 			{
-				m_COT_DollyCamPath[m_COT_DollyCamPathIdx] = pos;
-				m_COT_DollyCamOri[m_COT_DollyCamPathIdx] = targetOri;
+				vector prevPoint = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 2];
+				vector lastSegDir = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 1] - prevPoint;
+				lastSegDir[1] = 0;
 
-				++m_COT_DollyCamPathIdx;
+				if (lastSegDir.LengthSq() > 0.0001)
+				{
+					lastSegDir.Normalize();
+
+					float dot = vector.Dot(playerMovementDir, lastSegDir);
+
+					bool reversing = (dot < 0.0);
+
+					if (reversing)
+					{
+						--m_COT_DollyCamPathNextIdx;
+
+						g_Game.Chat("Reversing " + m_COT_DollyCamPathIdx, "colorAction");
+					}
+
+					m_COT_DollyCamReversing = reversing;
+				}
+			}
+			else if (m_COT_DollyCamReversing)
+			{
+				float smallestDistSq = float.MAX;
+				float distSq;
+				int smallestDistIdx;
+				vector point;
+
+				//! Find closest point on path to current player pos
+				for (i = m_COT_DollyCamPathNextIdx; i >= 0; --i)
+				{
+					point = m_COT_DollyCamPath[i];
+					distSq = vector.DistanceSq(pos, point);
+					if (distSq < smallestDistSq)
+					{
+						smallestDistSq = distSq;
+						smallestDistIdx = i;
+					}
+				}
+
+				m_COT_DollyCamPathNextIdx = smallestDistIdx;
+
+				bool tooFar = smallestDistSq > 1.0;
+				bool depleted = m_COT_DollyCamPathNextIdx < 2;
+
+				if (tooFar || depleted)
+				{
+					m_COT_DollyCamReversing = false;
+
+					if (tooFar)
+						m_COT_DollyCamSpeedMult *= 2;  //! Slow down to bridge the gap
+
+					string reason;
+					if (tooFar)
+						reason = "too far";
+					else
+						reason = "depleted";
+					g_Game.Chat("No longer reversing " + m_COT_DollyCamPathIdx + " " + m_COT_DollyCamPathNextIdx + ": " + reason, "colorAction");
+				}
+			}
+
+			if (vector.DistanceSq(playerPos, m_COT_LastPlayerPos) > 0.000001)
+			{
+				if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
+				{
+					if (m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
+					{
+						g_Game.Chat("ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
+						m_COT_DollyCamPathNextIdx = DOLLY_CAM_PATH_LIMIT - 1;
+					}
+
+					m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx] = pos;
+
+					if (m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
+						++m_COT_DollyCamPathNextIdx;
+				}
 			}
 		}
 
 		if (dollyCam)
 		{
-			if (m_COT_DollyCamPathIdx > 0)
+			if (m_COT_DollyCamPathNextIdx > 0)
 			{
-				pos = m_COT_DollyCamPath[0];
+				float stepDistSq;
+				float accumulatedDistSq;
+				vector lastPos = pos;
 
-				targetOri = m_COT_DollyCamOri[0];
-			}
+				for (i = m_COT_DollyCamPathNextIdx - 1; i >= 0; --i)
+				{
+					pos = m_COT_DollyCamPath[i];
+					//lastPos[1] = pos[1];
+					stepDistSq = vector.DistanceSq(pos, lastPos);
+					accumulatedDistSq += stepDistSq;
 
-			if (m_COT_DollyCamSpeedMult > dollyCamSpeedMultMin)
-			{
-				yawDiff = Math.COT_AngleDiff2(fromOri[0], targetOri[0]);
-				pitchDiff = Math.COT_AngleDiff2(fromOri[1], targetOri[1]);
+					if (accumulatedDistSq >= distSqThresh)
+					{
+						m_COT_DollyCamPathIdx = i;
+						break;
+					}
 
-				targetOri[0] = fromOri[0] + yawDiff;
-				targetOri[1] = fromOri[1] + pitchDiff;
+					lastPos = pos;
+				}
 
-				targetOri[0] = Math.SmoothCD(fromOri[0], targetOri[0], m_COT_SmoothVelDir0, speed, 1000, timeSlice);
-				targetOri[1] = Math.SmoothCD(fromOri[1], targetOri[1], m_COT_SmoothVelDir1, speed, 1000, timeSlice);
-
-				float t = Math.InverseLerp(dollyCamSpeedMultMin, dollyCamSpeedMultMax, m_COT_DollyCamSpeedMult);
-				ori[0] = Math.Lerp(ori[0], targetOri[0], t);
-				ori[1] = Math.Lerp(ori[1], targetOri[1], t);
+				if (accumulatedDistSq < distSqThresh)
+				{
+					m_COT_DollyCamPathIdx = 0;
+				}
 			}
 		}
+
+		if (m_COT_DollyCamPathUpdateDT > 0.033333)
+			m_COT_DollyCamPathUpdateDT = 0;
 
 		ori = ori.GetRelAngles();
 		dir = ori.AnglesToVector();
 
-		vector cameraPos = GetPosition();
-		float cameraDistToTargetSq = vector.DistanceSq(cameraPos, targetPos);
-
 		float targetDist;
 		if (m_JM_3rdPerson)
 		{
-			float offsetFactor = 1.0;
+			float offsetFactor;
 
 			targetDist = 1.33;
 
 			if (dollyCam)
 			{
-				vector vel = (playerPos - m_COT_LastPlayerPos) * (1.0 / timeSlice);  //! GetVelocity(spectatedPlayer) returns 0 on client
-				targetDist *= Math.Max(1.0 - vel.Length() / 6.756, 0.0);
+			/*
+				if (weaponRaised)
+				{
+					targetDist *= playerSpeedInverse01;
 
-				if (cameraDistToTargetSq > targetDist)
-					offsetFactor = targetDist / cameraDistToTargetSq;
+					float targetDistSq = targetDist * targetDist;
+
+					if (cameraDistToTargetSq > targetDistSq)
+						offsetFactor = targetDistSq / cameraDistToTargetSq;
+					else
+						offsetFactor = 1.0;
+				}
+			*/
 			}
 			else
 			{
+				offsetFactor = 1.0;
 				pos = pos - dir * targetDist;
 			}
 
@@ -365,15 +512,14 @@ class JMSpectatorCamera: JMCameraBase
 
 		SetOrientation(ori);
 
-		if (m_COT_DollyCamPathIdx > 1 && m_COT_DollyCamPathUpdateDT == 0 && cameraDistToTargetSq > 0.25)
+		if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT /*&& cameraDistToTargetSq > distSqThresh*/)
 		{
-			for (int i = 0; i < m_COT_DollyCamPathIdx - 1; ++i)
+			for (i = 0; i < m_COT_DollyCamPathNextIdx - 1; ++i)
 			{
 				m_COT_DollyCamPath[i] = m_COT_DollyCamPath[i + 1];
-				m_COT_DollyCamOri[i] = m_COT_DollyCamOri[i + 1];
 			}
 
-			m_COT_DollyCamPathIdx -= 1;
+			--m_COT_DollyCamPathNextIdx;
 		}
 
 		if (m_JM_CameraPosMS == vector.Zero)
@@ -387,9 +533,9 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				//! Interpolate in world space to give cinematic look
 
-				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * m_COT_DollyCamSpeedMult, 1000, timeSlice);
-				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * m_COT_DollyCamSpeedMult, 1000, timeSlice);
-				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * m_COT_DollyCamSpeedMult, 1000, timeSlice);
+				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
+				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
+				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
 
 				m_JM_CameraPosMS = cameraPos.InvMultiply4(playerTransform);
 			}
@@ -428,6 +574,10 @@ class JMSpectatorCamera: JMCameraBase
 		//! if inside vehicle return immediately
 		if (player.IsInVehicle())
 			return false;
+
+		IEntity floorEntity = player.PhysicsGetFloorEntity();
+		if (floorEntity && floorEntity.IsInherited(House))
+			return true;
 		
 		float hitFraction;
 		vector hitPosition, hitNormal;
