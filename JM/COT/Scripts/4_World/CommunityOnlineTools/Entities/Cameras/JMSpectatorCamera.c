@@ -27,6 +27,7 @@ class JMSpectatorCamera: JMCameraBase
 	float m_COT_DollyCamSpeedMult = 0.433333;
 	float m_COT_DollyCamSpeedMultTgt = 0.433333;
 	float m_COT_PlayerSpeed;
+	float m_COT_DollyCamJumpClimbTimeout;
 	bool m_COT_DollyCamReversing;
 	
 	override void OnTargetSelected( Object target )
@@ -127,6 +128,11 @@ class JMSpectatorCamera: JMCameraBase
 		bool isSwimming;
 
 		int i;
+		int j;
+
+	#ifdef DIAG_DEVELOPER
+		DebugTextWorldSpace dbgTxt;
+	#endif
 
 		if (Class.CastTo(weapon, hands))
 		{
@@ -275,7 +281,7 @@ class JMSpectatorCamera: JMCameraBase
 				pos[1] = pos[1] + stanceHeight;
 			}
 
-			//if (cameraDistToTargetSq > 1.0)
+			if (cameraDistToTargetSq > 0.04)
 			{
 				dir = vector.Direction(cameraPos, pos);
 				dir.Normalize();
@@ -347,13 +353,58 @@ class JMSpectatorCamera: JMCameraBase
 
 		if (m_COT_DollyCamPathUpdateDT > 0.0333333)
 		{
-			if (dollyCam && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
+			if (m_COT_DollyCamPathNextIdx < 0)
+			{
+				g_Game.Chat("COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
+				m_COT_DollyCamPathNextIdx = 0;
+			}
+			else if (m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
+			{
+				g_Game.Chat("COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
+				m_COT_DollyCamPathNextIdx = DOLLY_CAM_PATH_LIMIT - 1;
+			}
+
+			if (m_COT_DollyCamJumpClimbTimeout > 0.0)
+			{
+				if (m_COT_DollyCamReversing)
+				{
+					m_COT_DollyCamReversing = false;
+
+				#ifdef DIAG_DEVELOPER
+					g_Game.Chat("COT dollycam: No longer reversing " + m_COT_DollyCamPathIdx + " " + m_COT_DollyCamPathNextIdx + ": Jump/climb detected", "colorAction");
+				#endif
+				}
+
+				m_COT_DollyCamJumpClimbTimeout = Math.Max(m_COT_DollyCamJumpClimbTimeout - m_COT_DollyCamPathUpdateDT, 0);
+
+			#ifdef DIAG_DEVELOPER
+				if (m_COT_DollyCamJumpClimbTimeout == 0)
+					g_Game.Chat("COT dollycam: Depleted jump/climb timeout", "colorAction");
+			#endif
+			}
+			else if (dollyCam && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
 			{
 				vector prevPoint = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 2];
 				vector lastSegDir = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 1] - prevPoint;
+				float yDiffSeg = Math.Max(lastSegDir[1], 0.0);
 				lastSegDir[1] = 0;
 
-				if (lastSegDir.LengthSq() > 0.0001)
+				float segDist2DSq = lastSegDir.LengthSq();
+				float segPitch = Math.Atan2(yDiffSeg, segDist2DSq) * Math.RAD2DEG;
+				if (yDiffSeg > 0.3 && Math.AbsFloat(segPitch) > 70)
+				{
+					if (m_COT_DollyCamJumpClimbTimeout == 0)
+					{
+						m_COT_DollyCamJumpClimbTimeout = 5;
+
+					#ifdef DIAG_DEVELOPER
+						g_Game.Chat("COT dollycam: Jump/climb detected, not reversing", "colorAction");
+						dbgTxt = Debug.DrawTextWS(segPitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
+						g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
+					#endif
+					}
+				}
+				else if (segDist2DSq > 0.0001)
 				{
 					lastSegDir.Normalize();
 
@@ -365,7 +416,9 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						--m_COT_DollyCamPathNextIdx;
 
-						g_Game.Chat("Reversing " + m_COT_DollyCamPathIdx, "colorAction");
+					#ifdef DIAG_DEVELOPER
+						g_Game.Chat("COT dollycam: Reversing " + m_COT_DollyCamPathIdx, "colorAction");
+					#endif
 					}
 
 					m_COT_DollyCamReversing = reversing;
@@ -402,12 +455,14 @@ class JMSpectatorCamera: JMCameraBase
 					if (tooFar)
 						m_COT_DollyCamSpeedMult *= 2;  //! Slow down to bridge the gap
 
+				#ifdef DIAG_DEVELOPER
 					string reason;
 					if (tooFar)
 						reason = "too far";
 					else
 						reason = "depleted";
-					g_Game.Chat("No longer reversing " + m_COT_DollyCamPathIdx + " " + m_COT_DollyCamPathNextIdx + ": " + reason, "colorAction");
+					g_Game.Chat("COT dollycam: No longer reversing " + m_COT_DollyCamPathIdx + " " + m_COT_DollyCamPathNextIdx + ": " + reason, "colorAction");
+				#endif
 				}
 			}
 
@@ -415,12 +470,6 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
 				{
-					if (m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
-					{
-						g_Game.Chat("ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
-						m_COT_DollyCamPathNextIdx = DOLLY_CAM_PATH_LIMIT - 1;
-					}
-
 					m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx] = pos;
 
 					if (m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
@@ -440,9 +489,60 @@ class JMSpectatorCamera: JMCameraBase
 				for (i = m_COT_DollyCamPathNextIdx - 1; i >= 0; --i)
 				{
 					pos = m_COT_DollyCamPath[i];
-					//lastPos[1] = pos[1];
+
+				//#ifdef DIAG_DEVELOPER
+					//Debug.DrawSphere(pos, 0.01, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER);
+					//Debug.DrawLine(lastPos, pos, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+				//#endif
+
+					float yDiff = Math.Max(pos[1] - lastPos[1], 0);
+					lastPos[1] = pos[1];
 					stepDistSq = vector.DistanceSq(pos, lastPos);
 					accumulatedDistSq += stepDistSq;
+					float pitch = Math.Atan2(yDiff, Math.Sqrt(stepDistSq)) * Math.RAD2DEG;
+
+					if (yDiff > 0.3 && Math.AbsFloat(pitch) > 70)
+					{
+					#ifdef DIAG_DEVELOPER
+						if (m_COT_DollyCamJumpClimbTimeout == 0)
+						{
+							g_Game.Chat("COT dollycam: Jump/climb detected", "colorAction");
+							dbgTxt = Debug.DrawTextWS(pitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
+							g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
+						}
+					#endif
+
+						m_COT_DollyCamJumpClimbTimeout = 5.0;
+
+						//! Move all previous values down by one (duplicating the current value so that interpolation doesn't iron over it)
+						for (j = 0; j < i; ++j)
+						{
+							m_COT_DollyCamPath[j] = m_COT_DollyCamPath[j + 1];
+						}
+
+						//! Interpolate
+						//if (i > 1)
+						//{
+							//vector p = m_COT_DollyCamPath[i - 2];
+							//m_COT_DollyCamPath[i - 1] = p + (pos - p) * 0.5;
+						//}
+						if (m_COT_DollyCamPathNextIdx - i > 2)
+						{
+							TVectorArray points = {};
+
+							for (j = i; j < m_COT_DollyCamPathNextIdx - 1; ++j)
+							{
+								points.Insert(m_COT_DollyCamPath[j]);
+							}
+
+							float t = 1.0 / points.Count();
+
+							for (j = i; j < m_COT_DollyCamPathNextIdx - 1; ++j)
+							{
+								m_COT_DollyCamPath[j] = Math3D.Curve(ECurveType.CatmullRom, j * t, points);
+							}
+						}
+					}
 
 					if (accumulatedDistSq >= distSqThresh)
 					{
@@ -560,7 +660,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		SetPosition( cameraPos );
 
-		float cameraDistanceToHeadSq = vector.DistanceSq(GetPosition(), headPos);
+		float cameraDistanceToHeadSq = vector.DistanceSq(cameraPos, headPos);
 		if (cameraDistanceToHeadSq < 0.0625 && !spectatedPlayer.m_JM_IsHeadInvisible)
 			spectatedPlayer.SetHeadInvisible(true);
 		else if (m_JM_3rdPerson && cameraDistanceToHeadSq >= 0.0625 && spectatedPlayer.m_JM_IsHeadInvisible)
