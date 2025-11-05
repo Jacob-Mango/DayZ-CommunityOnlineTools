@@ -38,7 +38,10 @@ class JMCinematicCamera: JMCameraBase
 	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
-		
+
+		if ( !IsActive() )
+			return;
+
 		vector transform[4];
 		GetTransform( transform );
 
