@@ -402,6 +402,9 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void SetSelected( bool selected )
 	{
+		if (!Info)
+			return;
+
 		if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 		{
 			if (Info.player)
