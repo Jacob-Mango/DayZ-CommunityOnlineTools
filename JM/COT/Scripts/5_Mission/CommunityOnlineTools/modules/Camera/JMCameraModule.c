@@ -594,7 +594,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void ZoomForwards( UAInput input )
 	{
-		if ( input.LocalValue() != 0 )
+		if (input.LocalValue() != 0 && CurrentActiveCamera && CurrentActiveCamera.m_JM_3rdPerson != JMCamera3rdPersonMode.DOLLY)
 		{
 			m_TargetFOV += input.LocalValue() * 0.01;
 		}
@@ -602,7 +602,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void ZoomBackwards( UAInput input )
 	{
-		if ( input.LocalValue() != 0 )
+		if (input.LocalValue() != 0 && CurrentActiveCamera && CurrentActiveCamera.m_JM_3rdPerson != JMCamera3rdPersonMode.DOLLY)
 		{
 			m_TargetFOV -= input.LocalValue() * 0.01;
 					
