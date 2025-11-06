@@ -318,9 +318,9 @@ class JMSpectatorCamera: JMCameraBase
 		else
 	*/
 		{
-			if (GetUApi().GetInputByID(UACameraToolSpeedIncrease).LocalValue())
+			if (GetUApi().GetInputByName("UACameraToolSpeedIncrease").LocalValue())
 				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt - 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
-			else if (GetUApi().GetInputByID(UACameraToolSpeedDecrease).LocalValue())
+			else if (GetUApi().GetInputByName("UACameraToolSpeedDecrease").LocalValue())
 				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt + 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
 
 			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, m_COT_DollyCamSpeedMultTgt, timeSlice * 4);
