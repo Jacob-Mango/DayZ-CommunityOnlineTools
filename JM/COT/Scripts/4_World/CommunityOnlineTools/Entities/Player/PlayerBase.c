@@ -57,15 +57,6 @@ modded class PlayerBase
 
 	void PlayerBase()
 	{
-		if ( IsMissionOffline() )
-		{
-			GetStatEnergy().Set( GetStatEnergy().GetMax() );
-			GetStatWater().Set( GetStatWater().GetMax() );
-			COTSetGodMode(true);
-			COTSetUnlimitedAmmo(true);
-			COTSetUnlimitedStamina(true);
-		}
-
 		if (GetGame() && GetGame().IsClient())
 		{
 			SetEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
