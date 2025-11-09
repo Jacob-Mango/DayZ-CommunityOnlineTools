@@ -124,4 +124,4 @@ class UIActionEditableVector: UIActionBase
 
 		return ret;
 	}
-};
+}

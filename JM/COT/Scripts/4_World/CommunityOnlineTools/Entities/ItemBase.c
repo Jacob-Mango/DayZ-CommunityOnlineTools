@@ -47,5 +47,5 @@ modded class ItemBase
 	{
 		OnDebugSpawnEx(DebugSpawnParams.WithPlayer(player));
 	}
-};
+}
 

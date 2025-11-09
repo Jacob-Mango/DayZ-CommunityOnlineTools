@@ -43,4 +43,4 @@ modded class BaseBuildingBase
 		if ( IsMissionClient() )
 			m_COT_ConstructionUpdate.Invoke();
 	}
-};
+}

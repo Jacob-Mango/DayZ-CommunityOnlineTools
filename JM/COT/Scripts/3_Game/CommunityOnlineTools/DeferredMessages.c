@@ -20,5 +20,5 @@ class JMDeferredMessage
 	{
 		QueuedMessages.Insert(new JMDeferredMessage(title, message));
 	}
-};
+}
 

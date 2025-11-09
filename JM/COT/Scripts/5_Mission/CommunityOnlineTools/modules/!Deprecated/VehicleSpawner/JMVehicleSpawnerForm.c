@@ -57,7 +57,7 @@ class JMVehicleSpawnerForm: JMFormBase
 			else
 			{
 				string displayName;
-				GetGame().ConfigGetText( "cfgVehicles " + vehicles[i] + " displayName", displayName );
+				g_Game.ConfigGetText( "cfgVehicles " + vehicles[i] + " displayName", displayName );
 				string text = Widget.TranslateString( "#" + displayName );
 				if ( text == "" || text.Get( 0 ) == " " )
 				{
@@ -108,4 +108,4 @@ class JMVehicleSpawnerForm: JMFormBase
 
 		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
-};
+}

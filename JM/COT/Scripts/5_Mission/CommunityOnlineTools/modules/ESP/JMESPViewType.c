@@ -53,7 +53,7 @@ class JMESPViewType
 
 		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE;
 	}
-};
+}
 
 class JMESPViewTypePlayer: JMESPViewType
 {
@@ -102,7 +102,7 @@ class JMESPViewTypePlayer: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypePlayerAI: JMESPViewType
 {
@@ -145,7 +145,7 @@ class JMESPViewTypePlayerAI: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeInfected: JMESPViewType
 {
@@ -181,7 +181,7 @@ class JMESPViewTypeInfected: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeAnimal: JMESPViewType
 {
@@ -217,7 +217,7 @@ class JMESPViewTypeAnimal: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeCar: JMESPViewType
 {
@@ -254,7 +254,7 @@ class JMESPViewTypeCar: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeBoat: JMESPViewType
 {
@@ -291,7 +291,7 @@ class JMESPViewTypeBoat: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeTrain: JMESPViewType
 {
@@ -322,7 +322,7 @@ class JMESPViewTypeTrain: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeWeapon: JMESPViewType
 {
@@ -358,7 +358,7 @@ class JMESPViewTypeWeapon: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 
 class JMESPViewTypeArchery: JMESPViewTypeWeapon
@@ -395,7 +395,7 @@ class JMESPViewTypeArchery: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 {
@@ -431,7 +431,7 @@ class JMESPViewTypeBoltRifle: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 {
@@ -467,7 +467,7 @@ class JMESPViewTypeBoltActionRifle: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeRifle: JMESPViewTypeWeapon
 {
@@ -503,7 +503,7 @@ class JMESPViewTypeRifle: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypePistol: JMESPViewTypeWeapon
 {
@@ -538,7 +538,7 @@ class JMESPViewTypePistol: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeLauncher: JMESPViewTypeWeapon
 {
@@ -573,7 +573,7 @@ class JMESPViewTypeLauncher: JMESPViewTypeWeapon
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeItemBase: JMESPViewType
 {
@@ -616,7 +616,7 @@ class JMESPViewTypeItemBase: JMESPViewType
 	{
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 {
@@ -681,7 +681,7 @@ class JMESPViewTypeUnknown: JMESPViewTypeItemBase
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeTent: JMESPViewTypeItemBase
 {
@@ -701,7 +701,7 @@ class JMESPViewTypeTent: JMESPViewTypeItemBase
 
 		return obj.IsItemTent();
 	}
-};
+}
 
 class JMESPViewTypeBaseBuilding: JMESPViewTypeItemBase
 {
@@ -723,7 +723,7 @@ class JMESPViewTypeBaseBuilding: JMESPViewTypeItemBase
 
 		return BaseBuildingBase.Cast( obj ) != NULL;
 	}
-};
+}
 
 class JMESPViewTypeFood: JMESPViewTypeItemBase
 {
@@ -743,7 +743,7 @@ class JMESPViewTypeFood: JMESPViewTypeItemBase
 
 		return obj.IsFood() || Edible_Base.Cast( obj ) != NULL;
 	}
-};
+}
 
 class JMESPViewTypeExplosive: JMESPViewTypeItemBase
 {
@@ -769,7 +769,7 @@ class JMESPViewTypeExplosive: JMESPViewTypeItemBase
 
 		return false;
 	}
-};
+}
 
 class JMESPViewTypeBook: JMESPViewTypeItemBase
 {
@@ -789,7 +789,7 @@ class JMESPViewTypeBook: JMESPViewTypeItemBase
 
 		return ItemBook.Cast( obj ) != NULL;
 	}
-};
+}
 
 class JMESPViewTypeContainer: JMESPViewTypeItemBase
 {
@@ -809,7 +809,7 @@ class JMESPViewTypeContainer: JMESPViewTypeItemBase
 
 		return obj.IsContainer() && !obj.IsItemTent();
 	}
-};
+}
 
 class JMESPViewTypeTransmitter: JMESPViewTypeItemBase
 {
@@ -829,7 +829,7 @@ class JMESPViewTypeTransmitter: JMESPViewTypeItemBase
 		
 		return obj.IsTransmitter();
 	}
-};
+}
 
 class JMESPViewTypeClothing: JMESPViewTypeItemBase
 {
@@ -849,7 +849,7 @@ class JMESPViewTypeClothing: JMESPViewTypeItemBase
 		
 		return obj.IsClothing();
 	}
-};
+}
 
 class JMESPViewTypeMagazine: JMESPViewTypeItemBase
 {
@@ -869,7 +869,7 @@ class JMESPViewTypeMagazine: JMESPViewTypeItemBase
 
 		return obj.IsMagazine() && !obj.IsAmmoPile();
 	}
-};
+}
 
 class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 {
@@ -889,7 +889,7 @@ class JMESPViewTypeAmmo: JMESPViewTypeItemBase
 
 		return obj.IsAmmoPile();
 	}
-};
+}
 
 class JMESPViewTypeImmovable: JMESPViewType
 {
@@ -948,7 +948,7 @@ class JMESPViewTypeImmovable: JMESPViewType
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypePlainObject: JMESPViewTypeImmovable
 {
@@ -974,7 +974,7 @@ class JMESPViewTypePlainObject: JMESPViewTypeImmovable
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeRock: JMESPViewTypeImmovable
 {
@@ -1000,7 +1000,7 @@ class JMESPViewTypeRock: JMESPViewTypeImmovable
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeWoodSource: JMESPViewTypeImmovable
 {
@@ -1026,7 +1026,7 @@ class JMESPViewTypeWoodSource: JMESPViewTypeImmovable
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeBush: JMESPViewTypeWoodSource
 {
@@ -1052,7 +1052,7 @@ class JMESPViewTypeBush: JMESPViewTypeWoodSource
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeTree: JMESPViewTypeWoodSource
 {
@@ -1078,7 +1078,7 @@ class JMESPViewTypeTree: JMESPViewTypeWoodSource
 
 		return true;
 	}
-};
+}
 
 class JMESPViewTypeBuilding: JMESPViewTypeImmovable
 {
@@ -1104,4 +1104,4 @@ class JMESPViewTypeBuilding: JMESPViewTypeImmovable
 
 		return true;
 	}
-};
+}

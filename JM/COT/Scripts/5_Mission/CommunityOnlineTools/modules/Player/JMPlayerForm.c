@@ -251,7 +251,7 @@ class JMPlayerForm: JMFormBase
 
 			for ( int j = 0; j < 100; j++ )
 			{
-				Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
+				Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
 				
 				if ( !prWidget )
 					continue;
@@ -668,7 +668,7 @@ class JMPlayerForm: JMFormBase
 
 				permissionIdx++;
 
-				Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", gsw );
+				Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", gsw );
 				
 				if ( !prWidget )
 					continue;
@@ -752,7 +752,7 @@ class JMPlayerForm: JMFormBase
 				spacerIndex++;
 			}
 
-			Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/role_widget.layout", parentSpacer );
+			Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/role_widget.layout", parentSpacer );
 
 			if ( !prWidget )
 				continue;
@@ -1221,14 +1221,14 @@ class JMPlayerForm: JMFormBase
 				return;
 
 			action.Disable();
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
 
 			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
 		}
 		else
 		{
 			action.Disable();
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
 
 			m_Module.EndSpectating();
 		}
@@ -1345,7 +1345,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_Name.GetButton());
+		g_Game.CopyToClipboard(m_Name.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1355,7 +1355,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_GUID.GetButton());
+		g_Game.CopyToClipboard(m_GUID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1365,7 +1365,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
+		g_Game.CopyToClipboard(m_Steam64ID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1375,7 +1375,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
+		g_Game.OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
 	}
 
 	#ifdef GAMELABS
@@ -1384,7 +1384,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_CFToolsID.GetButton());
+		g_Game.CopyToClipboard(m_CFToolsID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1394,7 +1394,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		GetGame().OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
+		g_Game.OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
 	}
 	#endif
 
@@ -1403,7 +1403,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
+		g_Game.CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
 	}
 
     void Click_CopyPlayerRotation( UIEvent eid, UIActionBase action )
@@ -1416,7 +1416,7 @@ class JMPlayerForm: JMFormBase
 
 		vector rotation = m_SelectedInstance.GetOrientation();
 
-		GetGame().CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
+		g_Game.CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
 	}
 
 	void Click_PastePlayerPostion( UIEvent eid, UIActionBase action )
@@ -1425,7 +1425,7 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		string clipboard;
-		GetGame().CopyFromClipboard(clipboard);
+		g_Game.CopyFromClipboard(clipboard);
 
 		vector pos = clipboard.BeautifiedToVector();
 
@@ -1540,7 +1540,7 @@ class JMPlayerForm: JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
-		if (GetGame().IsClient() && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
+		if (g_Game.IsClient() && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
 			return;
 
 		RefreshTeleports(force);
@@ -2301,8 +2301,8 @@ class JMPlayerForm: JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
+		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
 
 		UpdateUI();
 
@@ -2313,8 +2313,8 @@ class JMPlayerForm: JMFormBase
 	{
 		super.OnHide();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( RefreshStats );
+		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( RefreshStats );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -2432,9 +2432,7 @@ class JMPlayerForm: JMFormBase
 		#endif
 
 		if ( !IsMissionOffline() )
-		{
 			GetCommunityOnlineTools().RefreshClients();
-		}
 
 		GridSpacerWidget parentSpacer;
 		int spacerIndex = 0;
@@ -2538,6 +2536,6 @@ class JMPlayerForm: JMFormBase
 
 	void UpdateLastChangeTime()
 	{
-		m_LastChangeTime = GetGame().GetTime();
+		m_LastChangeTime = g_Game.GetTime();
 	}
-};
+}

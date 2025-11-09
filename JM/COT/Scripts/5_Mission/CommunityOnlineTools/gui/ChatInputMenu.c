@@ -24,4 +24,4 @@ modded class ChatInputMenu
 		
 		return super.OnChange(w, x, y, finished);
 	}
-};
+}

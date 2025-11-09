@@ -46,4 +46,4 @@ class UIActionButtonToggle: UIActionButton
 		else
 			SetButton(m_TextOff);
 	}
-};
+}

@@ -4,7 +4,7 @@ enum JMESPState
 	Update,
 	View,
 	Remove
-};
+}
 
 class JMESPCanvas
 {
@@ -18,7 +18,7 @@ class JMESPCanvas
 	void CreateCanvas()
 	{
 		if (!m_Canvas)
-			m_Canvas = CanvasWidget.Cast(GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/esp_canvas.layout"));
+			m_Canvas = CanvasWidget.Cast(g_Game.GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/esp_canvas.layout"));
 	}
 
 	bool HasCanvas()
@@ -77,7 +77,7 @@ class JMESPCanvas
 		vector screen_pos;
 		
 		//! get relative pos for screen from world pos vector
-		screen_pos = GetGame().GetScreenPosRelative(pWorldPos);
+		screen_pos = g_Game.GetScreenPosRelative(pWorldPos);
 		isInBounds = screen_pos[0] >= 0 && screen_pos[0] <= 1 && screen_pos[1] >= 0 && screen_pos[1] <= 1 && screen_pos[2] >= 0;
 		//! get size of parent widget
 		m_Canvas.GetScreenSize(parent_width, parent_height);
@@ -88,7 +88,7 @@ class JMESPCanvas
 		
 		return screen_pos;
 	}
-};
+}
 
 class JMESPLimb
 {
@@ -100,7 +100,7 @@ class JMESPLimb
 		Bone1 = bone1;
 		Bone2 = bone2;
 	}
-};
+}
 
 class JMESPSkeleton
 {
@@ -176,7 +176,7 @@ class JMESPSkeleton
 		vector p1 = canvas.TransformToScreenPos(headPos, isInBounds);
 		if (isInBounds && p1[0] > 0 && p1[1] > 0 && p1[2] > radius)
 		{
-			vector ori = GetGame().GetCurrentCameraDirection().VectorToAngles();
+			vector ori = g_Game.GetCurrentCameraDirection().VectorToAngles();
 			ori[1] = 0;
 			ori[2] = 0;
 			vector p2 = canvas.TransformToScreenPos(headPos + ori.AnglesToVector().Perpend() * radius);
@@ -198,7 +198,7 @@ class JMESPSkeleton
 #endif
 		}
 	}
-};
+}
 
 class JMESPModule: JMRenderableModuleBase
 {
@@ -550,7 +550,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		auto spectatorCamera = JMSpectatorCamera.Cast(CurrentActiveCamera);
-		Man gamePlayer = GetGame().GetPlayer();
+		Man gamePlayer = g_Game.GetPlayer();
 
 		m_ESPCanvas.Clear();
 
@@ -576,12 +576,12 @@ class JMESPModule: JMRenderableModuleBase
 			if (player == gamePlayer && !DrawPlayerSkeletonsIncludingMyself)
 				continue;
 
-			vector btm = GetGame().GetScreenPosRelative(human.GetPosition());
+			vector btm = g_Game.GetScreenPosRelative(human.GetPosition());
 			if (btm[2] < 0 || btm[2] > ESPRadius)
 				continue;
 
 			vector headPos = human.GetBonePositionWS(human.GetBoneIndexByName("head"));
-			vector top = GetGame().GetScreenPosRelative(headPos);
+			vector top = g_Game.GetScreenPosRelative(headPos);
 			if (top[2] < 0.18)
 				continue;
 
@@ -643,7 +643,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		
 		if (m_ESPToCreate.Count() > 0)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 10, false);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(CreateNewWidgets, 10, false);
 		else
 			m_IsCreatingWidgets = false;
 
@@ -702,7 +702,7 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 
 		if (m_ESPToDestroy.Count() > 0)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(DestroyOldWidgets, 10, false);
 		else
 			m_IsDestroyingWidgets = false;
 
@@ -793,7 +793,7 @@ class JMESPModule: JMRenderableModuleBase
 					vector extents = Vector(sizePerBox, 2000, sizePerBox);
 					collided.Clear();
 					vector center = Vector(centerPosition[0] + xx0 + sizePerBox * 0.5, centerPosition[1], centerPosition[2] + zz0 + sizePerBox * 0.5);
-					GetGame().IsBoxCollidingGeometry(center, vector.Zero, extents, ObjIntersectView, ObjIntersectFire, excluded, collided);
+					g_Game.IsBoxCollidingGeometry(center, vector.Zero, extents, ObjIntersectView, ObjIntersectFire, excluded, collided);
 
 					foreach (auto obj : collided)
 					{
@@ -878,7 +878,7 @@ class JMESPModule: JMRenderableModuleBase
 		if (!g_COT_ThreadESP && !g_COT_ThreadESP_Running)
 		{
 			g_COT_ThreadESP = true;
-			GetGame().GameScript.Call( this, "ThreadESP", NULL );
+			g_Game.GameScript.Call( this, "ThreadESP", NULL );
 		}
 	}
 
@@ -1042,10 +1042,10 @@ class JMESPModule: JMRenderableModuleBase
 					#endif
 					#endif
 
-					GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );
+					g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( CreateNewWidgets );
 				}
 			
-				GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
+				g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
 				
 				if ( m_CurrentState == JMESPState.Update )
 				{
@@ -1311,7 +1311,7 @@ class JMESPModule: JMRenderableModuleBase
 		vector transform[4];
 		target.GetTransform( transform );
 
-		GetGame().ObjectDelete( target );
+		g_Game.ObjectDelete( target );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
 		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
@@ -1324,7 +1324,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 			return;
 
-		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC, instance ) )
@@ -1685,7 +1685,7 @@ class JMESPModule: JMRenderableModuleBase
 
 				GetCommunityOnlineToolsBase().Log( instance, "ESP index=" + ( count - i ) + " target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
 
-				GetGame().ObjectDelete( obj );
+				g_Game.ObjectDelete( obj );
 				removed++;
 			}
 
@@ -1794,7 +1794,7 @@ class JMESPModule: JMRenderableModuleBase
 			}
 		}
 
-		GetGame().CopyToClipboard(clipboardOutput);
+		g_Game.CopyToClipboard(clipboardOutput);
 	}
 
 	void CopyToClipboardMarket()
@@ -1852,8 +1852,8 @@ class JMESPModule: JMRenderableModuleBase
 			clipboardOutput += "\n";
 		}
 		clipboardOutput += "    ]\n";
-		clipboardOutput += "}";
-		GetGame().CopyToClipboard(clipboardOutput);
+		clipboardOutput += "};";
+		g_Game.CopyToClipboard(clipboardOutput);
 	}
 
 	void CopyToClipboardSpawnableTypes()
@@ -1894,6 +1894,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		clipboardOutput += "</spawnabletypes>\n";
-		GetGame().CopyToClipboard(clipboardOutput);
+		g_Game.CopyToClipboard(clipboardOutput);
 	}
-};
+}

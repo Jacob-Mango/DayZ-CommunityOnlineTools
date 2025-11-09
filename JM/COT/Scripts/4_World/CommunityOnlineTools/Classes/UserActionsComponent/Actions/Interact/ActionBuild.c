@@ -82,4 +82,4 @@ class COT_QuickActionBuild: ActionBuildPart
 
 		construction.COT_BuildRequiredParts( constrution_part.GetPartName(), action_data.m_Player, false );		
 	}
-};
+}

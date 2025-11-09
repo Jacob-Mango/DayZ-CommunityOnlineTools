@@ -61,4 +61,4 @@ class JMWebhookConstructor : Managed
 	{
 		m_Types.Insert( type );
 	}
-};
+}

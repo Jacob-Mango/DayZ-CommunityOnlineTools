@@ -8,7 +8,7 @@ enum JMClientRPC
 	UpdateClientPosition,
 	SetClient,
 	COUNT
-};
+}
 
 enum JMRoleRPC
 {
@@ -17,27 +17,27 @@ enum JMRoleRPC
 	UpdateRole,
 	RemoveRole,
 	COUNT
-};
+}
 
 enum JMPermissionRPC
 {
 	INVALID = 10130,
 	COUNT
-};
+}
 
 enum JMCOTBaseRPC
 {
 	INVALID = 10135,
 	TransportSync,
 	COUNT
-};
+}
 
 enum JMCOTRPC
 {
 	INVALID = 10140,
 	Active,
 	COUNT
-};
+}
 
 enum JMCameraModuleRPC
 {
@@ -47,7 +47,7 @@ enum JMCameraModuleRPC
 	Leave_Finish,
 	UpdatePosition,
 	COUNT
-};
+}
 
 enum JMVehiclesModuleRPC
 {
@@ -60,7 +60,7 @@ enum JMVehiclesModuleRPC
 	DeleteVehicleDestroyed,
 	TeleportToVehicle,
 	COUNT
-};
+}
 
 enum JMItemSetSpawnerModuleRPC
 {
@@ -69,7 +69,7 @@ enum JMItemSetSpawnerModuleRPC
 	SpawnPosition,
 	SpawnPlayers,
 	COUNT
-};
+}
 
 enum JMObjectSpawnerModuleRPC
 {
@@ -78,7 +78,7 @@ enum JMObjectSpawnerModuleRPC
 	Inventory,
 	Delete,
 	COUNT
-};
+}
 
 enum JMTeleportModuleRPC
 {
@@ -90,7 +90,7 @@ enum JMTeleportModuleRPC
 	AddLocation,
 	RemoveLocation,
 	COUNT
-};
+}
 
 enum JMVehicleSpawnerModuleRPC
 {
@@ -98,7 +98,7 @@ enum JMVehicleSpawnerModuleRPC
 	Load,
 	SpawnPosition,
 	COUNT
-};
+}
 
 enum JMWeatherModuleRPC
 {
@@ -123,7 +123,7 @@ enum JMWeatherModuleRPC
 	RemovePreset,
 	FreezeTime,
 	COUNT
-};
+}
 
 enum JMESPModuleRPC
 {
@@ -149,7 +149,7 @@ enum JMESPModuleRPC
 	MoveToCursor,
 	
 	COUNT
-};
+}
 
 enum JMPlayerModuleRPC
 {
@@ -199,7 +199,7 @@ enum JMPlayerModuleRPC
 	VONStartedTransmitting,
 	VONStoppedTransmitting,
 	COUNT
-};
+}
 
 enum JMNamalskEventManagerRPC
 {
@@ -209,14 +209,14 @@ enum JMNamalskEventManagerRPC
 	StartEvent,
 	CancelEvent,
 	COUNT
-};
+}
 
 enum JMCommandModuleRPC
 {
 	INVALID = 10420,
 	PerformCommand,
 	COUNT
-};
+}
 
 enum JMWebhookCOTModuleRPC
 {
@@ -228,7 +228,7 @@ enum JMWebhookCOTModuleRPC
 	RemoveType,
 	TypeState,
 	COUNT
-};
+}
 
 enum JMLoadoutModuleRPC
 {
@@ -240,5 +240,5 @@ enum JMLoadoutModuleRPC
 	SpawnTarget,
 	SpawnPlayers,
 	COUNT
-};
+}
 

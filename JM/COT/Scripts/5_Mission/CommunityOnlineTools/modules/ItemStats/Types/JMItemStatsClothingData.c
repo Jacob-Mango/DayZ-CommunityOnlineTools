@@ -46,4 +46,4 @@ class JMItemStatsClothingData: JMItemStatsBaseData
 
 		return result;
 	}
-};
+}

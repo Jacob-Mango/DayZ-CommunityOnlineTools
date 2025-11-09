@@ -6,4 +6,4 @@ class JMLoadoutItem
 	ref JMLoadoutItemData m_Data
 	autoptr TStringArray m_ConstructionParts;
 	ref array< ref JMLoadoutSubItem > m_Attachments;
-};
+}

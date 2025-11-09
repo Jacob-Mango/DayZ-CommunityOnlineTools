@@ -74,4 +74,4 @@ modded class JMModuleBase
 	{
 		return new array<string>();
 	}
-};
+}

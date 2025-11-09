@@ -26,7 +26,7 @@ class JMWidgetStore: COT_WidgetHolder
 
 	void ~JMWidgetStore()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -221,4 +221,4 @@ class JMWidgetStore: COT_WidgetHolder
 		}
 		return null;
 	}
-};
+}

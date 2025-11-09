@@ -9,7 +9,7 @@ modded class ImprovisedExplosive
 
 		Object triggerObj = player.GetHumanInventory().CreateInHands("RemoteDetonatorTrigger");
 		if (!triggerObj)
-			triggerObj = GetGame().CreateObject("RemoteDetonatorTrigger", player.GetPosition());
+			triggerObj = g_Game.CreateObject("RemoteDetonatorTrigger", player.GetPosition());
 
 		RemoteDetonatorTrigger trigger = RemoteDetonatorTrigger.Cast(triggerObj);
 		RemoteDetonatorReceiver receiver = RemoteDetonatorReceiver.Cast(GetInventory().CreateAttachment("RemoteDetonatorReceiver"));
@@ -22,4 +22,4 @@ modded class ImprovisedExplosive
 		PairWithDevice(trigger);
 		Arm();
 	}
-};
+}

@@ -38,16 +38,16 @@ class COTModule : JMModuleBase
 		if ( IsMissionClient() )
 		{
 			if ( !JMStatics.ESP_CONTAINER )
-				JMStatics.ESP_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
+				JMStatics.ESP_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
 			
 			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
-				JMStatics.WINDOWS_CONTAINER = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
+				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
 			#endif
 
 			if ( m_COTMenu == NULL )
 			{
-				GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
+				g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
 			}
 		}
 
@@ -147,7 +147,7 @@ class COTModule : JMModuleBase
 
 		if ( m_ForceHUD )
 		{
-			GetGame().GetMission().GetHud().Show( false );
+			g_Game.GetMission().GetHud().Show( false );
 		}
 	}
 	#endif
@@ -163,12 +163,12 @@ class COTModule : JMModuleBase
 
 		if ( m_GameActive )
 		{
-			GetGame().GetInput().ResetGameFocus();
-			GetGame().GetUIManager().ShowUICursor( false );
+			g_Game.GetInput().ResetGameFocus();
+			g_Game.GetUIManager().ShowUICursor( false );
 		} else
 		{
-			GetGame().GetInput().ChangeGameFocus( 1 );
-			GetGame().GetUIManager().ShowUICursor( true );
+			g_Game.GetInput().ChangeGameFocus( 1 );
+			g_Game.GetUIManager().ShowUICursor( true );
 		}
 	}
 	#endif
@@ -178,7 +178,7 @@ class COTModule : JMModuleBase
 		m_ForceHUD = enable;
 		
 		if ( !m_ForceHUD )
-			GetGame().GetMission().GetHud().Show( true );
+			g_Game.GetMission().GetHud().Show( true );
 	}
 
 	void SetMenuState( bool show )
@@ -198,7 +198,7 @@ class COTModule : JMModuleBase
 
 	void CloseCOT( UAInput input )
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 		if (!input.LocalPress())
@@ -207,7 +207,7 @@ class COTModule : JMModuleBase
 		if (GetCommunityOnlineToolsBase())
 		{
 			if (GetCommunityOnlineToolsBase().IsOpen())
-				GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
+				g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
 
 			if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
 				CommunityOnlineToolsBase.ForceDisableInputs(false);
@@ -235,7 +235,7 @@ class COTModule : JMModuleBase
 
 	void OnMouseDown()
 	{
-		if ( GetGame().GetUIManager().GetMenu() )
+		if ( g_Game.GetUIManager().GetMenu() )
 			return;
 
 		if ( m_COTMenu.IsVisible() || GetCOTWindowManager().HasAnyActive() )
@@ -445,4 +445,4 @@ class COTModule : JMModuleBase
 		Print( "-COTModule::OnClientLogoutCancelled" );
 		#endif
 	}
-};
+}

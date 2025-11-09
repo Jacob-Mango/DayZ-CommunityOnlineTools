@@ -1079,10 +1079,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		playerSpectator.COT_TempDisableOnSelectPlayer();
 
-		GetGame().SelectPlayer( ident, NULL );
+		g_Game.SelectPlayer( ident, NULL );
 
 		vector position = spectatePlayer.GetBonePositionWS( spectatePlayer.GetBoneIndexByName( "Head" ) );
-		GetGame().SelectSpectator( ident, "JMSpectatorCamera", position );
+		g_Game.SelectSpectator( ident, "JMSpectatorCamera", position );
 
 		playerSpectator.COTSetGodMode( true, false );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
@@ -1103,7 +1103,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "Client_StartSpectating").Add(player.ToString());
 #endif
 
-		Print("Starting spectate, timestamp " + GetGame().GetTickTime());
+		Print("Starting spectate, timestamp " + g_Game.GetTickTime());
 		
 		if (COT_PreviousActiveCamera)
 			COT_PreviousActiveCamera.SetActive( false );
@@ -1115,7 +1115,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			m_SpectatorCamera = CurrentActiveCamera;
 			
 #ifdef JM_COT_DIAG_LOGGING
-			Print(GetGame().GetPlayer());
+			Print(g_Game.GetPlayer());
 #endif
 			if ( GetPlayer() )
 			{
@@ -1155,7 +1155,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			COT_PreviousActiveCamera = CurrentActiveCamera;
 
-			Print("Starting spectate, waiting for player object, timestamp " + GetGame().GetTickTime());
+			Print("Starting spectate, waiting for player object, timestamp " + g_Game.GetTickTime());
 			Client_Check_StartSpectating(networkLow, networkHigh);
 		}
 	}
@@ -1163,8 +1163,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	void Client_Check_StartSpectating(int networkLow, int networkHigh)
 	{
 		PlayerBase player;
-		if (!Class.CastTo(CurrentActiveCamera, Camera.GetCurrentCamera()) || !Class.CastTo(player, GetGame().GetObjectByNetworkId(networkLow, networkHigh)))
-			GetGame().GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Client_Check_StartSpectating, 34, false, networkLow, networkHigh);
+		if (!Class.CastTo(CurrentActiveCamera, Camera.GetCurrentCamera()) || !Class.CastTo(player, g_Game.GetObjectByNetworkId(networkLow, networkHigh)))
+			g_Game.GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Client_Check_StartSpectating, 34, false, networkLow, networkHigh);
 		else if (CurrentActiveCamera.IsInherited(JMSpectatorCamera))
 			Client_StartSpectating(player);
 	}
@@ -1238,7 +1238,7 @@ Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectat
 			}
 
 			if (!waitForPlayerIdleTimeout)
-				GetGame().SelectPlayer(ident, playerSpectator);
+				g_Game.SelectPlayer(ident, playerSpectator);
 		}
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -1275,7 +1275,7 @@ Print("JMPlayerModule::Client_EndSpectating - leaving current cam " + CurrentAct
 				PPEffects.ResetDOFOverride();
 
 Print("JMPlayerModule::Client_EndSpectating - player " + m_SpectatorClient);
-Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_SpectatorClient == GetGame().GetPlayer()));
+Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_SpectatorClient == g_Game.GetPlayer()));
 				if ( m_SpectatorClient )
 				{
 					m_SpectatorClient.GetInputController().SetDisabled( false );
@@ -1293,7 +1293,7 @@ Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_Spec
 
 		if (waitForPlayerIdleTimeout)
 		{
-Print("JMPlayerModule::Client_EndSpectating - waiting for player to be idle, timestamp " + GetGame().GetTickTime());
+Print("JMPlayerModule::Client_EndSpectating - waiting for player to be idle, timestamp " + g_Game.GetTickTime());
 			m_SpectatorClient.COT_EnableBonePositionUpdate(true);
 			Client_Check_EndSpectating(m_SpectatorClient, waitForPlayerIdleTimeout);
 			if (waitForPlayerIdleTimeout > 1000)
@@ -1306,11 +1306,11 @@ Print("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	{
 		if (!playerSpectator.COT_IsAnimationIdle() && waitForPlayerIdleTimeout > 0)
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_EndSpectating, 250, false, playerSpectator, waitForPlayerIdleTimeout - 250 );
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_EndSpectating, 250, false, playerSpectator, waitForPlayerIdleTimeout - 250 );
 		}
 		else
 		{
-Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + GetGame().GetTickTime());
+Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + g_Game.GetTickTime());
 			playerSpectator.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
@@ -1324,7 +1324,7 @@ Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + G
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
 #endif
-Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime());
+Print("JMPlayerModule::RPC_EndSpectating - timestamp " + g_Game.GetTickTime());
 		if ( IsMissionHost() )
 		{
 			JMPlayerInstance instance;
@@ -1351,17 +1351,17 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating_Finish").Add(senderRPC).Add(target);
 #endif
-		Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + GetGame().GetTickTime());
+		Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + g_Game.GetTickTime());
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 			return;
 
-		GetGame().SelectPlayer(senderRPC, senderRPC.GetPlayer());
+		g_Game.SelectPlayer(senderRPC, senderRPC.GetPlayer());
 	}
 
 	void ToggleGodMode()
 	{
-		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 		bool value = !player.COTHasGodMode();
 		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 		if (guids.Count() == 0)
@@ -1633,7 +1633,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	
 	void ToggleInvisibility()
 	{
-		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 		bool value = !player.COTIsInvisible();
 		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 		if (guids.Count() == 0)
@@ -1701,7 +1701,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 	private void RPC_VONStartedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		CF_Log.Info("%1::RPC_VONStartedTransmitting target %2", ToString(), target.ToString());
@@ -1714,7 +1714,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 	private void RPC_VONStoppedTransmitting( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		CF_Log.Info("%1::RPC_VONStoppedTransmitting target %2", ToString(), target.ToString());
@@ -2141,12 +2141,12 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		if ( GetCommunityOnlineToolsBase().IsActive() )
 		{
-			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 			bool value = !player.COTIsFrozen();
 
 			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 			if (guids.Count() == 0)
-				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+				guids.Insert(g_Game.GetPlayer().GetIdentity().GetId());
 
 			SetFreeze(value, guids);
 		}
@@ -2161,7 +2161,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 		{
 			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
 			if (guids.Count() == 0)
-				guids.Insert(GetGame().GetPlayer().GetIdentity().GetId());
+				guids.Insert(g_Game.GetPlayer().GetIdentity().GetId());
 
 			Heal(guids);
 		}
@@ -2298,28 +2298,28 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			SendBanMessage(player.PlayerObject.GetIdentity(), messageText, duration);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
 		}
 
 		if (cantBanAdmin)
 			COTCreateNotification(ident, new StringLocaliser("You cant ban admins"));
 
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}
 
 	private void Exec_Ban_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
 	{
-		if (!GetGame() || !player.PlayerObject)
+		if (!g_Game || !player.PlayerObject)
 			return;
 
-		auto missionServer = MissionServer.Cast(GetGame().GetMission());
+		auto missionServer = MissionServer.Cast(g_Game.GetMission());
 
 		if (!missionServer)
 			return;
 
 		player.PlayerObject.COTSetIsBeingKicked(true);
 
-		GetGame().SendLogoutTime(player.PlayerObject, 0);
+		g_Game.SendLogoutTime(player.PlayerObject, 0);
 
 		missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
 
@@ -2389,25 +2389,25 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 			SendKickMessage(player.PlayerObject.GetIdentity(), messageText);
 
 			//! Kick player after delay so client can still receive kickmessage RPC
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Kick_Single, 500, false, player, ident, instance);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Kick_Single, 500, false, player, ident, instance);
 		}
 
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}
 
 	private void Exec_Kick_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
 	{
-		if (!GetGame() || !player.PlayerObject)
+		if (!g_Game || !player.PlayerObject)
 			return;
 
-		auto missionServer = MissionServer.Cast(GetGame().GetMission());
+		auto missionServer = MissionServer.Cast(g_Game.GetMission());
 
 		if (!missionServer)
 			return;
 
 		player.PlayerObject.COTSetIsBeingKicked(true);
 
-		GetGame().SendLogoutTime(player.PlayerObject, 0);
+		g_Game.SendLogoutTime(player.PlayerObject, 0);
 
 		missionServer.PlayerDisconnected(player.PlayerObject, player.PlayerObject.GetIdentity(), player.PlayerObject.GetIdentity().GetId());
 
@@ -2447,7 +2447,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		auto trace = CF_Trace_0(this, "RPC_KickMessage");
 
-		if (GetGame().IsDedicatedServer())
+		if (g_Game.IsDedicatedServer())
 			return;
 
 		string messageText;
@@ -2467,7 +2467,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 	{
 		auto trace = CF_Trace_0(this, "RPC_BanMessage");
 
-		if (GetGame().IsDedicatedServer())
+		if (g_Game.IsDedicatedServer())
 			return;
 
 		string messageText;
@@ -2726,5 +2726,5 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + GetGame().GetTickTime()
 
 		Exec_SetRoles( roles, guids, senderRPC, instance );
 	}
-};
+}
 

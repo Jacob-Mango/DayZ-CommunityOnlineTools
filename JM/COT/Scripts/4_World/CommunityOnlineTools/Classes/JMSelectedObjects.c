@@ -40,7 +40,7 @@ class JMSelectedObject : Managed
 
 		return obj == object;
 	}
-};
+}
 
 
 class JMSelectedObjects
@@ -134,7 +134,7 @@ class JMSelectedObjects
 			if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 				return false;
 
-			Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+			Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 			if ( obj )
 				objects.Insert( obj );
 		}
@@ -218,8 +218,8 @@ class JMSelectedObjects
 	
 	EntityAI GetObjectAtCursor()
 	{ 
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		DayZPlayer player = GetGame().GetPlayer();
+		vector rayStart = g_Game.GetCurrentCameraPosition();
+		DayZPlayer player = g_Game.GetPlayer();
 		DayZPlayerCamera3rdPerson camera3rdPerson;
 		float distance = 10;
 
@@ -229,9 +229,9 @@ class JMSelectedObjects
 			distance += vector.Distance(rayStart, headPos);
 		}
 
-		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
+		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -271,7 +271,7 @@ class JMSelectedObjects
 
 		return NULL;
 	}
-};
+}
 
 static ref JMSelectedObjects g_cot_selected;
 

@@ -15,6 +15,7 @@ class JMItemStatsForm: JMFormBase
 		"Optic",
 		"All Items"
 	};
+	
 	protected ref array< string > m_ItemTypeList =
 	{
 		"clothing_base",
@@ -116,7 +117,7 @@ class JMItemStatsForm: JMFormBase
 
 				strNameLower.ToLower();
 
-				if (m_ItemTypeList[m_ItemMode] == "" || GetGame().IsKindOf( strNameLower, m_ItemTypeList[m_ItemMode] ))
+				if (m_ItemTypeList[m_ItemMode] == "" || g_Game.IsKindOf( strNameLower, m_ItemTypeList[m_ItemMode] ))
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
 						continue;
@@ -255,7 +256,7 @@ class JMItemStatsForm: JMFormBase
 		
 		return "";
 	}
-};
+}
 
 enum JMItemStatsEnum
 {
@@ -266,4 +267,4 @@ enum JMItemStatsEnum
 	MAGAZINE,
 	OPTIC,
 	ITEMS
-};
+}

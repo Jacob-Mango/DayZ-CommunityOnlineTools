@@ -52,7 +52,7 @@ class JMTeleportForm: JMFormBase
 		m_PositionX = UIActionManager.CreateText( rows, "X: " );
 		m_PositionZ = UIActionManager.CreateText( rows, "Z: " );
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
 		else
 			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
@@ -145,7 +145,7 @@ class JMTeleportForm: JMFormBase
 			return;
 		}
 
-		m_Module.AddLocation(m_InputLocation.GetText(),  m_InputCategory.GetText(), GetGame().GetPlayer().GetPosition() );
+		m_Module.AddLocation(m_InputLocation.GetText(),  m_InputCategory.GetText(), g_Game.GetPlayer().GetPosition() );
 
 		COTCreateLocalAdminNotification(new StringLocaliser("Added "+ m_InputLocation.GetText()+" to Category "+ m_InputCategory.GetText()));
 
@@ -395,4 +395,4 @@ class JMTeleportForm: JMFormBase
 
 		return "";
 	}
-};
+}

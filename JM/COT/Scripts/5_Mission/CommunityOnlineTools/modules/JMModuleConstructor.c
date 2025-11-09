@@ -29,9 +29,9 @@ modded class JMModuleConstructor
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
 			modules.Insert( JMNamalskEventManagerModule );
 	}
-};
+}
 
 static bool IsModLoaded(string type_name_from_mod)
 {
 	return (type_name_from_mod.ToType().ToString().Length() > 0);
-};
+}

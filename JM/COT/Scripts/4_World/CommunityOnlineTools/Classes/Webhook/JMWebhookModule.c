@@ -10,7 +10,7 @@ class JMWebhookQueueItem : Managed
 	{
 		m_Type = type;
 		m_Message = message;
-		m_Time = GetGame().GetTickTime();
+		m_Time = g_Game.GetTickTime();
 	}
 
 	string GetType()
@@ -27,7 +27,7 @@ class JMWebhookQueueItem : Managed
 	{
 		return m_Message;
 	}
-};
+}
 
 class JMWebhookModule: JMModuleBase
 {
@@ -59,7 +59,7 @@ class JMWebhookModule: JMModuleBase
 		#endif
 
 		string serverCfg;
-		GetGame().CommandlineGetParam( "config", serverCfg );
+		g_Game.CommandlineGetParam( "config", serverCfg );
 
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
@@ -128,7 +128,7 @@ class JMWebhookModule: JMModuleBase
 
 		m_Settings.Save();
 
-		GetGame().GameScript.Call( this, "Thread_ProcessQueue", NULL );
+		g_Game.GameScript.Call( this, "Thread_ProcessQueue", NULL );
 	}
 
 	override void OnMissionLoaded()
@@ -330,8 +330,8 @@ class JMWebhookModule: JMModuleBase
 		#endif
 
 		int num = 0;
-		int startTime = GetGame().GetTickTime();
-		int lastSendTime = GetGame().GetTickTime();
+		int startTime = g_Game.GetTickTime();
+		int lastSendTime = g_Game.GetTickTime();
 		int qps = 1;
 
 		while ( true )
@@ -361,7 +361,7 @@ class JMWebhookModule: JMModuleBase
 				m_Queue.RemoveOrdered( 0 );
 
 				num++;
-				lastSendTime = GetGame().GetTickTime();
+				lastSendTime = g_Game.GetTickTime();
 
 				int defer = (int) Math.Clamp( num * 0.1, 1, 2 );
 				Sleep( 250 * Math.Clamp( num, 1, 4 ) * defer );
@@ -369,7 +369,7 @@ class JMWebhookModule: JMModuleBase
 			{
 				if ( startTime - lastSendTime > 1000 )
 				{
-					startTime = GetGame().GetTickTime();
+					startTime = g_Game.GetTickTime();
 					lastSendTime = startTime;
 					num = 0;
 				}
@@ -418,4 +418,4 @@ class JMWebhookModule: JMModuleBase
 
 		return message;
 	}
-};
+}

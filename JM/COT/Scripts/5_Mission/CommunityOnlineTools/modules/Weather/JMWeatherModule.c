@@ -5,7 +5,7 @@ enum JMWeatherTypes
 	Mission,
 	Preset,
 	COUNT
-};
+}
 
 class JMWeatherModule: JMRenderableModuleBase
 {
@@ -93,7 +93,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 			Load();
 	}
 
@@ -109,7 +109,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void Load()
 	{
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMWeatherModuleRPC.Load, true, NULL );
@@ -144,7 +144,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
@@ -161,7 +161,7 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		m_bFreezeTime = state;
 		
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 			Exec_FreezeTime( m_bFreezeTime, NULL );
 		else
 			Send_FreezeTime( m_bFreezeTime );
@@ -174,7 +174,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Threshold = threshold;
 		wBase.MinTimeBetweenLightning = minTimeBetweenLightning;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetStorm( wBase, NULL );
 		} else
@@ -190,7 +190,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetFog( wBase, NULL );
 		} else
@@ -207,7 +207,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Bias = bias;
 		wBase.Time = time;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetDynamicFog( wBase, NULL );
 		} else
@@ -223,7 +223,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetRain( wBase, NULL );
 		} else
@@ -239,7 +239,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.OvercastMax = tMax;
 		wBase.Time = tTime;
 		
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetRainThresholds( wBase, NULL );
 		} else
@@ -255,7 +255,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetSnow( wBase, NULL );
 		} else
@@ -271,7 +271,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.OvercastMax = tMax;
 		wBase.Time = tTime;
 		
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetSnowThresholds( wBase, NULL );
 		} else
@@ -287,7 +287,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetOvercast( wBase, NULL );
 		} else
@@ -303,7 +303,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetWindMagnitude( wBase, NULL );
 		} else
@@ -319,7 +319,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Time = time;
 		wBase.MinDuration = minDuration;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetWindDirection( wBase, NULL );
 		} else
@@ -335,7 +335,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Max = fnMax;
 		wBase.Speed = fnSpeed;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetWindFunctionParams( wBase, NULL );
 		} else
@@ -353,7 +353,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		wBase.Hour = hour;
 		wBase.Minute = minute;
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_SetDate( wBase, NULL );
 		} else
@@ -364,7 +364,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void UsePreset( string name )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_UsePreset( name, NULL );
 		} else
@@ -375,7 +375,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void CreatePreset( JMWeatherPreset preset )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_CreatePreset( preset, NULL );
 		} else
@@ -386,7 +386,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void UpdatePreset( JMWeatherPreset preset )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_UpdatePreset( preset, NULL );
 		} else
@@ -397,7 +397,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void RemovePreset( string name )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			Exec_RemovePreset( name, NULL );
 		} else
@@ -535,13 +535,13 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	private void Exec_FreezeTime( bool state, PlayerIdentity ident )
 	{
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(Repeat_FreezeTime);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(Repeat_FreezeTime);
 
 		if (state)
 		{
 			m_CachedWeatherPreset = new JMWeatherPreset;
 			m_CachedWeatherPreset.SetFromWorld();
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
 		}
 	}
 
@@ -661,7 +661,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		OnSettingsUpdated();
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name );
@@ -694,7 +694,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		OnSettingsUpdated();
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name );
@@ -723,7 +723,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		OnSettingsUpdated();
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Name: " + name + ")" );
@@ -737,7 +737,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( state ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.FreezeTime", senderRPC ) )
@@ -752,7 +752,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Storm", senderRPC ) )
@@ -767,7 +767,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Fog", senderRPC ) )
@@ -782,7 +782,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Fog.Dynamic", senderRPC ) )
@@ -797,7 +797,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Rain", senderRPC ) )
@@ -812,7 +812,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Rain.Thresholds", senderRPC ) )
@@ -827,7 +827,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Snow", senderRPC ) )
@@ -842,7 +842,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Snow.Thresholds", senderRPC ) )
@@ -857,7 +857,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", senderRPC ) )
@@ -872,7 +872,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
@@ -887,7 +887,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
@@ -902,7 +902,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", senderRPC ) )
@@ -920,7 +920,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Date", senderRPC ) )
 			return;
 
-		if (GetGame().IsDedicatedServer())
+		if (g_Game.IsDedicatedServer())
 		{
 			//! Send date to client so it changes instantly, else game may take a few secs to sync to client. Not needed for weather!
 			Send_SetDate(p1);
@@ -935,7 +935,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ctx.Read( p1 ) )
 			return;
 
-		if (!GetGame().IsServer())
+		if (!g_Game.IsServer())
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Use", senderRPC ) )
@@ -957,7 +957,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Create", senderRPC ) )
 			return;
 
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Send_CreatePreset( p1 );
 		}
@@ -974,7 +974,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Update", senderRPC ) )
 			return;
 
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Send_UpdatePreset( p1 );
 		}
@@ -991,7 +991,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Remove", senderRPC ) )
 			return;
 
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Send_RemovePreset( p1 );
 		}
@@ -1073,4 +1073,4 @@ class JMWeatherModule: JMRenderableModuleBase
 			break;
 		}
 	}
-};
+}

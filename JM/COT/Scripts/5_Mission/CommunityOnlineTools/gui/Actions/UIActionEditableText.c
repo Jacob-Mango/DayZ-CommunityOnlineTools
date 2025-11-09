@@ -254,4 +254,4 @@ class UIActionEditableText: UIActionBase
 		m_Text.SetSize( width, h );
 		m_Text.Update();
 	}
-};
+}

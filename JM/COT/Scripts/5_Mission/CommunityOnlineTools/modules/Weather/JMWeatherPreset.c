@@ -12,7 +12,7 @@ class JMWeatherBase
 	void Log( PlayerIdentity pidentLog )
 	{
 	}
-};
+}
 
 class JMWeatherStorm: JMWeatherBase
 {
@@ -23,7 +23,7 @@ class JMWeatherStorm: JMWeatherBase
 	override void Apply()
 	{
 		if (Density != -1)
-			GetGame().GetWeather().SetStorm( Density, Threshold, MinTimeBetweenLightning );
+			g_Game.GetWeather().SetStorm( Density, Threshold, MinTimeBetweenLightning );
 	}
 
 	override void SetFromWorld()
@@ -40,7 +40,7 @@ class JMWeatherStorm: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "Storm " + Density + ", " + Threshold + ", " + MinTimeBetweenLightning );
 		}
 	}
-};
+}
 
 class JMWeatherPhenomenon: JMWeatherBase
 {
@@ -56,17 +56,17 @@ class JMWeatherPhenomenon: JMWeatherBase
 		switch (Type())
 		{
 			case JMWeatherFog:
-				return GetGame().GetWeather().GetFog();
+				return g_Game.GetWeather().GetFog();
 			case JMWeatherRain:
-				return GetGame().GetWeather().GetRain();
+				return g_Game.GetWeather().GetRain();
 			case JMWeatherSnow:
-				return GetGame().GetWeather().GetSnowfall();
+				return g_Game.GetWeather().GetSnowfall();
 			case JMWeatherWindMagnitude:
-				return GetGame().GetWeather().GetWindMagnitude();
+				return g_Game.GetWeather().GetWindMagnitude();
 			case JMWeatherWindDirection:
-				return GetGame().GetWeather().GetWindDirection();
+				return g_Game.GetWeather().GetWindDirection();
 			case JMWeatherOvercast:
-				return GetGame().GetWeather().GetOvercast();
+				return g_Game.GetWeather().GetOvercast();
 		}
 
 		return null;
@@ -95,11 +95,11 @@ class JMWeatherPhenomenon: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, type + " " + Forecast + ", " + Time + ", " + MinDuration );
 		}
 	}
-};
+}
 
 class JMWeatherFog: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherDynamicFog: JMWeatherBase
 {
@@ -112,17 +112,17 @@ class JMWeatherDynamicFog: JMWeatherBase
 	{
 		if (Distance != -1)
 		{
-			GetGame().GetWeather().SetDynVolFogDistanceDensity( Distance, Time );
-			GetGame().GetWeather().SetDynVolFogHeightDensity( Height, Time );
-			GetGame().GetWeather().SetDynVolFogHeightBias( Bias, Time );
+			g_Game.GetWeather().SetDynVolFogDistanceDensity( Distance, Time );
+			g_Game.GetWeather().SetDynVolFogHeightDensity( Height, Time );
+			g_Game.GetWeather().SetDynVolFogHeightBias( Bias, Time );
 		}
 	}
 
 	override void SetFromWorld()
 	{
-		Distance = GetGame().GetWeather().GetDynVolFogDistanceDensity();
-		Height = GetGame().GetWeather().GetDynVolFogHeightDensity();
-		Bias = GetGame().GetWeather().GetDynVolFogHeightBias();
+		Distance = g_Game.GetWeather().GetDynVolFogDistanceDensity();
+		Height = g_Game.GetWeather().GetDynVolFogHeightDensity();
+		Bias = g_Game.GetWeather().GetDynVolFogHeightBias();
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -132,27 +132,27 @@ class JMWeatherDynamicFog: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "DynamicFog " + Distance + ", " + Height + ", " + Bias );
 		}
 	}
-};
+}
 
 class JMWeatherRain: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherSnow: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherOvercast: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherWindMagnitude: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherWindDirection: JMWeatherPhenomenon
 {
-};
+}
 
 class JMWeatherWindFunction: JMWeatherBase
 {
@@ -163,12 +163,12 @@ class JMWeatherWindFunction: JMWeatherBase
 	override void Apply()
 	{
 		if (Speed != -1)
-			GetGame().GetWeather().SetWindFunctionParams( Min, Max, Speed );
+			g_Game.GetWeather().SetWindFunctionParams( Min, Max, Speed );
 	}
 
 	override void SetFromWorld()
 	{
-		GetGame().GetWeather().GetWindFunctionParams( Min, Max, Speed );
+		g_Game.GetWeather().GetWindFunctionParams( Min, Max, Speed );
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -178,7 +178,7 @@ class JMWeatherWindFunction: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "WindFunction " + Min + ", " + Max + ", " + Speed );
 		}
 	}
-};
+}
 
 class JMWeatherDate: JMWeatherBase
 {
@@ -191,12 +191,12 @@ class JMWeatherDate: JMWeatherBase
 	override void Apply()
 	{
 		if (Year != -1)
-			GetGame().GetWorld().SetDate( Year, Month, Day, Hour, Minute );
+			g_Game.GetWorld().SetDate( Year, Month, Day, Hour, Minute );
 	}
 
 	override void SetFromWorld()
 	{
-		GetGame().GetWorld().GetDate( Year, Month, Day, Hour, Minute );
+		g_Game.GetWorld().GetDate( Year, Month, Day, Hour, Minute );
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -206,7 +206,7 @@ class JMWeatherDate: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "Date " + Year + "/" + Month + "/" + Day + " " + Hour + ":" + Minute );
 		}
 	}
-};
+}
 
 class JMWeatherRainThreshold: JMWeatherBase
 {
@@ -217,7 +217,7 @@ class JMWeatherRainThreshold: JMWeatherBase
 	override void Apply()
 	{
 		if (Time != -1)
-			GetGame().GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
+			g_Game.GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
 	}
 
 	override void SetFromWorld()
@@ -234,7 +234,7 @@ class JMWeatherRainThreshold: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "RainThreshold " + OvercastMin + ", " + OvercastMax + ", " + Time );
 		}
 	}
-};
+}
 
 class JMWeatherSnowThreshold: JMWeatherBase
 {
@@ -245,7 +245,7 @@ class JMWeatherSnowThreshold: JMWeatherBase
 	override void Apply()
 	{
 		if (Time != -1)
-			GetGame().GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
+			g_Game.GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
 	}
 
 	override void SetFromWorld()
@@ -262,7 +262,7 @@ class JMWeatherSnowThreshold: JMWeatherBase
 			GetCommunityOnlineToolsBase().Log( pidentLog, "SnowfallThreshold " + OvercastMin + ", " + OvercastMax + ", " + Time );
 		}
 	}
-};
+}
 
 class JMWeatherPreset
 {
@@ -376,4 +376,4 @@ class JMWeatherPreset
 			WindFunc.Log( pidentLogPP );
 		}
 	}
-};
+}

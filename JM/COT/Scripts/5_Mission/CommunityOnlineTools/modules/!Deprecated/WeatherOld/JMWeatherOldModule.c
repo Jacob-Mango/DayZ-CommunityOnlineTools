@@ -92,7 +92,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		
 		if( type == CallType.Client )
 		{
-			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
+			g_Game.GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 			return;
 		}
 
@@ -100,11 +100,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Date", sender, instance ) )
 			return;
 
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetDate", new Param5< int, int, int, int, int >( data.param1, data.param2, data.param3, data.param4, data.param5 ), true );
 
-			GetGame().GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
+			g_Game.GetWorld().SetDate( data.param1, data.param2, data.param3, data.param4, data.param5 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
 			SendWebhook( "Date", instance, "Set the date to " + data.param1 + "/" + data.param2 + "/" + data.param3 + " " + data.param4 + ":" + data.param5 );
@@ -118,7 +118,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -126,11 +126,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", sender, instance ) )
 			return;
 
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetWindFunctionParams", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().SetWindFunctionParams( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Wind", instance, "Set wind to " + data.param1 + " " + data.param2 + " " + data.param3 );
@@ -144,7 +144,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -152,11 +152,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", sender, instance ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetOvercast", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetOvercast().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Overcast", instance, "Set overcast to " + data.param1 + " " + data.param2 + " " + data.param3 );
@@ -170,7 +170,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -178,11 +178,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Fog", sender, instance ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetFog", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetFog().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Fog", instance, "Set fog to " + data.param1 + " " + data.param2 + " " + data.param3 );
@@ -196,7 +196,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -204,11 +204,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Snow", sender, instance ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetSnow", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetSnowfall().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set snow to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Snow", instance, "Set snow to " + data.param1 + " " + data.param2 + " " + data.param3 );
@@ -222,7 +222,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -230,11 +230,11 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Rain", sender, instance ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetRain", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().GetRain().Set( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Rain", instance, "Set rain to " + data.param1 + " " + data.param2 + " " + data.param3 );
@@ -248,7 +248,7 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		
 		if( type == CallType.Client )
 		{
-			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 			return;
 		}
 
@@ -256,14 +256,14 @@ class JMWeatherOldModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Weather.Storm", sender, instance ) )
 			return;
 		
-		if( type == CallType.Server && GetGame().IsMultiplayer() )
+		if( type == CallType.Server && g_Game.IsMultiplayer() )
 		{
 			GetRPCManager().SendRPC( "COT_Weather", "Weather_SetStorm", new Param3< float, float, float >( data.param1, data.param2, data.param3 ), true );
 
-			GetGame().GetWeather().SetStorm( data.param1, data.param2, data.param3 );
+			g_Game.GetWeather().SetStorm( data.param1, data.param2, data.param3 );
 
 			GetCommunityOnlineToolsBase().Log( sender, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 			SendWebhook( "Storm", instance, "Set storm to " + data.param1 + " " + data.param2 + " " + data.param3 );
 		}
 	}
-};
+}

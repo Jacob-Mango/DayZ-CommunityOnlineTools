@@ -67,4 +67,4 @@ class JMItemStatsBaseData
 
 		return result;
 	}
-};
+}

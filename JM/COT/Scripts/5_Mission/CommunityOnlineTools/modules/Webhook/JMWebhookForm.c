@@ -136,4 +136,4 @@ class JMWebhookForm: JMFormBase
 
 		string name = data.Name;
 	}
-};
+}

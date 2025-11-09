@@ -22,7 +22,7 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 
 	void JMVehiclesMapMarker(Widget parent, MapWidget mapwidget, vector pos, int color, string icon, JMVehicleMetaData vehicle, JMVehiclesMenu menu)
 	{
-		m_Root 				= GetGame().GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent);
+		m_Root 				= g_Game.GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent);
 
 		m_Name				= TextWidget.Cast( m_Root.FindAnyWidget("marker_name") );
 		m_Icon				= ImageWidget.Cast( m_Root.FindAnyWidget("marker_icon") );
@@ -175,4 +175,4 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 			}
 		}
 	}
-};
+}

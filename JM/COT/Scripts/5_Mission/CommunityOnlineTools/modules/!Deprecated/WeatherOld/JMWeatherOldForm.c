@@ -64,7 +64,7 @@ class JMWeatherOldForm: JMFormBase
 	void ~JMWeatherOldForm()
 	{
 		if ( m_AutoRefresh && m_AutoRefresh.IsChecked() )
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -100,7 +100,7 @@ class JMWeatherOldForm: JMFormBase
 		m_TxtWindForceValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_wind_force_value" ) );
 
 		m_PnlTemperature		= layoutRoot.FindAnyWidget( "txt_ppp_st_temperature" );
-		if ( !GetGame().IsMultiplayer() )
+		if ( !g_Game.IsMultiplayer() )
 			m_PnlTemperature.Show(true);
 		m_SldTemperature		= SliderWidget.Cast( layoutRoot.FindAnyWidget( "sld_ppp_st_temperature" ) );
 		m_TxtTemperatureValue	= TextWidget.Cast( layoutRoot.FindAnyWidget( "txt_ppp_st_temperature_value" ) );
@@ -302,9 +302,9 @@ class JMWeatherOldForm: JMFormBase
 	{
 		if ( !m_AutoRefresh.IsChecked() )
 		{
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).Remove(RefreshFields);
 		} else {
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(RefreshFields, 1000, true);
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(RefreshFields, 1000, true);
 		}
 	}
 
@@ -446,9 +446,9 @@ class JMWeatherOldForm: JMFormBase
 
 	void RefreshFields()
 	{
-		GetGame().GetWorld().GetDate( m_OrigYear, m_OrigMonth, m_OrigDay, m_OrigHour, m_OrigMinute );
+		g_Game.GetWorld().GetDate( m_OrigYear, m_OrigMonth, m_OrigDay, m_OrigHour, m_OrigMinute );
 
-		Weather weather = GetGame().GetWeather();
+		Weather weather = g_Game.GetWeather();
 
 		m_OrigOvercast = weather.GetOvercast().GetActual();
 		m_OrigRain = weather.GetRain().GetActual();
@@ -456,8 +456,8 @@ class JMWeatherOldForm: JMFormBase
 		m_OrigFog = weather.GetFog().GetActual();
 		m_OrigWindForce = weather.GetWindSpeed();
 
-		if ( GetGame().GetMission().GetWorldData() )
-			m_OrigTemperature = GetGame().GetMission().GetWorldData().GetBaseEnvTemperature();
+		if ( g_Game.GetMission().GetWorldData() )
+			m_OrigTemperature = g_Game.GetMission().GetWorldData().GetBaseEnvTemperature();
 
 		m_CurrYear = m_OrigYear;
 		m_CurrMonth = m_OrigMonth;
@@ -478,7 +478,7 @@ class JMWeatherOldForm: JMFormBase
 	{
 		int year, month, day, hour, minute;
 
-		GetGame().GetWorld().GetDate( year, month, day, hour, minute );
+		g_Game.GetWorld().GetDate( year, month, day, hour, minute );
 
 		m_SldStartTime.SetCurrent( ((hour * 60) + minute) / 14.39 );
 
@@ -498,7 +498,7 @@ class JMWeatherOldForm: JMFormBase
 
 		UpdateSliderStartDay( month, day );
 
-		Weather weather = GetGame().GetWeather();
+		Weather weather = g_Game.GetWeather();
 
 		m_SldOvercast.SetCurrent(weather.GetOvercast().GetActual() * 100);
 		UpdateSliderOvercast();
@@ -575,4 +575,4 @@ class JMWeatherOldForm: JMFormBase
 		string label_text = m_CurrTemperature.ToString() + "°C";
 		m_TxtTemperatureValue.SetText( label_text );
 	}
-};
+}

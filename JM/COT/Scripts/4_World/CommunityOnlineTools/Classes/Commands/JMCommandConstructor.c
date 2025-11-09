@@ -29,4 +29,4 @@ class JMCommandConstructor : Managed
 			}
 		}
 	}
-};
+}

@@ -64,7 +64,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 			Load();
 	}
 
@@ -83,7 +83,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		super.OnMissionFinish();
 
 		//! TODO: Only save if changed
-		if ( !GetGame().IsClient() && settings )
+		if ( !g_Game.IsClient() && settings )
 			settings.Save();
 	}
 
@@ -120,7 +120,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	
 	void Load()
 	{
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			if (meta)
 				return;
@@ -157,7 +157,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
@@ -283,7 +283,7 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 	private bool DetermineWillFit( EntityAI fittingCargo, string ClassName )
 	{
 		TIntArray values = new TIntArray;
-		GetGame().ConfigGetIntArray( "CfgVehicles " + ClassName + " itemSize", values );
+		g_Game.ConfigGetIntArray( "CfgVehicles " + ClassName + " itemSize", values );
 
 		if ( values.Count() != 2 ) return false;
 
@@ -311,20 +311,20 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		position[0] = position[0] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
 		position[2] = position[2] + ( Math.RandomFloatInclusive( -0.5, 0.5 ) * 10.0 );
 
-		position[1] = GetGame().SurfaceY( position[0], position[2] );
+		position[1] = g_Game.SurfaceY( position[0], position[2] );
 		*/
 
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
+		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
 			flags |= ECE_PLACE_ON_SURFACE;
-		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( pos ) )
+		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( pos ) )
 			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
 		
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
+		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, pos, flags ) ) )
+		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, pos, flags ) ) )
 			return NULL;
 
 		return ent;
@@ -381,4 +381,4 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 			chest = SpawnItemInContainer( file.ContainerClassName, position, chest, file.Items[j].ItemName, file.Items[j].NumberOfStacks, file.Items[j].StackSize );
 		}
 	}
-};
+}

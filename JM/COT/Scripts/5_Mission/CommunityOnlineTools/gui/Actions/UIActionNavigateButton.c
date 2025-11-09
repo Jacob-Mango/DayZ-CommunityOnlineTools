@@ -66,4 +66,4 @@ class UIActionNavigateButton: UIActionBase
 
 		return ret;
 	}
-};
+}

@@ -28,7 +28,7 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMWeatherPresetWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
@@ -161,4 +161,4 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 		
 		return false;
 	}
-};
+}

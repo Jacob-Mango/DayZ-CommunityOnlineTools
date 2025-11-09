@@ -41,4 +41,4 @@ class JMItemStatsEdibleData: JMItemStatsBaseData
 
 		return result;
 	}
-};
+}

@@ -112,4 +112,4 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 
 		return false;
 	}
-};
+}

@@ -60,4 +60,4 @@ modded class BoatScript
 	{
 		COT_FillBoatFluid( BoatFluid.FUEL );
 	}
-};
+}

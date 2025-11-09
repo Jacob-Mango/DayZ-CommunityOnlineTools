@@ -211,7 +211,7 @@ class JMRenderableModuleBase: JMModuleBase
 			Close();
 		} else
 		{
-			if ( GetGame().GetUIManager().GetMenu() )
+			if ( g_Game.GetUIManager().GetMenu() )
 			{
 				return;
 			}
@@ -278,4 +278,4 @@ class JMRenderableModuleBase: JMModuleBase
 		
 		ToggleShow();
 	}
-};
+}

@@ -706,7 +706,7 @@ class JMWeatherForm: JMFormBase
 
 			for ( int j = 0; j < 100; j++ )
 			{
-				rwWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
+				rwWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
 				
 				if ( rwWidget == NULL )
 				{
@@ -1822,4 +1822,4 @@ class JMWeatherForm: JMFormBase
 
 		UIActionManager.CreatePanel( m_PanelWindFunc, 0xFF000000, 1 );
 	}
-};
+}

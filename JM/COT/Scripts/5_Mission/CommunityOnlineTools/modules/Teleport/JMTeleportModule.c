@@ -89,7 +89,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 			Load();
 	}
 	
@@ -102,7 +102,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		super.OnMissionFinish();
 
-		if ( GetGame().IsServer() && m_Settings )
+		if ( g_Game.IsServer() && m_Settings )
 			m_Settings.Save();
 	}
 
@@ -143,7 +143,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 
 		vector currentPosition = "0 0 0";
-		vector hitPos = GetCursorPos( Object.Cast( GetGame().GetPlayer().GetParent() ) );
+		vector hitPos = GetCursorPos( Object.Cast( g_Game.GetPlayer().GetParent() ) );
 
 		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
 			currentPosition = CurrentActiveCamera.GetPosition();
@@ -153,7 +153,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		float distance = vector.Distance( currentPosition, hitPos );
 
 		if ( distance <= 1000 )
-			Position( hitPos, {GetGame().GetPlayer().GetIdentity().GetId()}, true);
+			Position( hitPos, {g_Game.GetPlayer().GetIdentity().GetId()}, true);
 		else
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_TELEPORT_MODULE_NOTIFICATION_TOO_FAR" ) );
 	}
@@ -186,8 +186,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 		else 
 		{
-			rayStart = GetGame().GetCurrentCameraPosition();
-			direction = GetGame().GetCurrentCameraDirection();
+			rayStart = g_Game.GetCurrentCameraPosition();
+			direction = g_Game.GetCurrentCameraDirection();
 		}
 
 		PositionRaycast( rayStart, direction );
@@ -243,7 +243,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void Load()
 	{
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			if (m_Settings)
 				return;
@@ -278,7 +278,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 			Server_Load( senderRPC );
 		else if ( m_Settings.Read( ctx ) )
 				OnSettingsUpdated();
@@ -327,7 +327,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !player )
 				continue;
 			
-			if (isSelfOnly && GetGame().IsMultiplayer() && players[i].GetGUID() != ident.GetId())
+			if (isSelfOnly && g_Game.IsMultiplayer() && players[i].GetGUID() != ident.GetId())
 				isSelfOnly = false;
 
 			count++;
@@ -369,7 +369,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	{
 		if ( IsMissionOffline() )
 		{
-			Server_PositionRaycast( rayStart, direction, PlayerBase.Cast( GetGame().GetPlayer() ) );
+			Server_PositionRaycast( rayStart, direction, PlayerBase.Cast( g_Game.GetPlayer() ) );
 		}
 		else if ( IsMissionClient() )
 		{
@@ -395,7 +395,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if (!Class.CastTo(ignore, player.GetParent()))
 			ignore = player;
 
-		float distance = GetGame().ServerConfigGetInt("defaultVisibility");
+		float distance = g_Game.ServerConfigGetInt("defaultVisibility");
 		if (distance < 1375)
 			distance = 1375;
 
@@ -710,4 +710,4 @@ class JMTeleportModule: JMRenderableModuleBase
 		names.Insert("tp");
 		return names;
 	}
-};
+}

@@ -57,7 +57,7 @@ class JMSpectatorCamera: JMCameraBase
 	{
 		super.OnUpdate( timeslice );
 
-		Input input = GetGame().GetInput();
+		Input input = g_Game.GetInput();
 		bool freelook = input.LocalValue( "UALookAround" );
 
 		if (m_COT_IsInFreeLook != freelook)

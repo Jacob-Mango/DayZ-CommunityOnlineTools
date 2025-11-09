@@ -142,7 +142,7 @@ class JMItemStatsFirearmData: JMItemStatsBaseData
 
 		return result;
 	}
-};
+}
 
 class JMItemStatsFireModeData
 {
@@ -182,7 +182,7 @@ class JMItemStatsFireModeData
 
 		return result;
 	}
-};
+}
 
 class JMItemStatsOpticsInfoData
 {
@@ -229,7 +229,7 @@ class JMItemStatsOpticsInfoData
 
 		return result;
 	}
-};
+}
 
 class JMItemStatsNoiseShootData
 {
@@ -257,4 +257,4 @@ class JMItemStatsNoiseShootData
 
 		return result;
 	}
-};
+}

@@ -44,4 +44,4 @@ class JMExampleModule: JMRenderableModuleBase
 	{
 		return "Example Module";
 	}
-};
+}

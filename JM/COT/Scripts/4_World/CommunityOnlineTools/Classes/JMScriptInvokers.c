@@ -11,4 +11,4 @@ class JMScriptInvokers
 	static ref ScriptInvoker ON_DELETE_ALL = new ScriptInvoker;
 
 	static ref ScriptInvoker ESP_VIEWTYPE_CHANGED = new ScriptInvoker;
-};
+}

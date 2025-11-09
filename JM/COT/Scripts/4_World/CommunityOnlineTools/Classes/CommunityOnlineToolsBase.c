@@ -59,7 +59,7 @@ class CommunityOnlineToolsBase
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 		
 		#ifndef CF_MODULE_PERMISSIONS
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
+		if ( g_Game.IsServer() && g_Game.IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
 		}
@@ -149,7 +149,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( open )
 		{
-			if ( GetGame().GetUIManager().GetMenu() )
+			if ( g_Game.GetUIManager().GetMenu() )
 				return;
 
 			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
@@ -171,7 +171,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( !m_IsOpen )
 		{
-			if ( GetGame().GetUIManager().GetMenu() )
+			if ( g_Game.GetUIManager().GetMenu() )
 			{
 				return;
 			}
@@ -195,9 +195,9 @@ class CommunityOnlineToolsBase
 
 	void LogServer( string text )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
@@ -210,7 +210,7 @@ class CommunityOnlineToolsBase
 
 	void Log( JMPlayerInstance logInstacPlyer, string text )
 	{
-		if ( GetGame().IsMultiplayer() )
+		if ( g_Game.IsMultiplayer() )
 		{
 			text = "" + logInstacPlyer.GetSteam64ID() + ": " + text;
 		} else
@@ -218,9 +218,9 @@ class CommunityOnlineToolsBase
 			text = "Offline: " + text;
 		}
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
@@ -233,7 +233,7 @@ class CommunityOnlineToolsBase
 
 	void Log( PlayerIdentity logIdentPlyer, string text )
 	{
-		if ( GetGame().IsMultiplayer() && logIdentPlyer )
+		if ( g_Game.IsMultiplayer() && logIdentPlyer )
 		{
 			text = "" + logIdentPlyer.GetPlainId() + ": " + text;
 		} else
@@ -241,9 +241,9 @@ class CommunityOnlineToolsBase
 			text = "Offline: " + text;
 		}
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
@@ -348,7 +348,7 @@ class CommunityOnlineToolsBase
 					string ruinedWheelType = ruinedWheel.GetType();
 					string newWheelType = ruinedWheelType.Substring(0, ruinedWheelType.Length() - 7);
 
-					if (GetGame().IsKindOf(newWheelType, "CarWheel"))
+					if (g_Game.IsKindOf(newWheelType, "CarWheel"))
 					{
 						bool isLockedInSlot = false;
 						InventoryLocation wheelLocation = new InventoryLocation();
@@ -360,7 +360,7 @@ class CommunityOnlineToolsBase
 							entity.GetInventory().SetSlotLock(slotId, false);
 						}
 
-						GetGame().ObjectDelete(ruinedWheel);
+						g_Game.ObjectDelete(ruinedWheel);
 						entity.GetInventory().CreateAttachmentEx(newWheelType, slotId);
 
 						if (isLockedInSlot)
@@ -418,8 +418,8 @@ class CommunityOnlineToolsBase
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
-			GetGame().GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
-			GetGame().GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
+			g_Game.GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
+			g_Game.GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
 		}
 	}
 
@@ -445,7 +445,7 @@ class CommunityOnlineToolsBase
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
 	{
-		vector surface = Vector(position[0], GetGame().SurfaceY(position[0], position[2]), position[2]);
+		vector surface = Vector(position[0], g_Game.SurfaceY(position[0], position[2]), position[2]);
 
 		vector entityMinMax[2];
 		if (!entity.GetCollisionBox(entityMinMax))
@@ -462,7 +462,7 @@ class CommunityOnlineToolsBase
 
 		float waterDepth;
 		if (aboveWater)
-			waterDepth = GetGame().GetWaterDepth(surface);
+			waterDepth = g_Game.GetWaterDepth(surface);
 
 		if (waterDepth > 0)
 		{
@@ -487,7 +487,7 @@ class CommunityOnlineToolsBase
 				position = hitPosition;
 			} else {
 				position = surface;
-				hitNormal = GetGame().SurfaceGetNormal(surface[0], surface[2]);
+				hitNormal = g_Game.SurfaceGetNormal(surface[0], surface[2]);
 			}
 		}
 
@@ -508,7 +508,7 @@ class CommunityOnlineToolsBase
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}
 	}
-};
+}
 
 
 static ref CommunityOnlineToolsBase g_cotBase;
