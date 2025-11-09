@@ -53,4 +53,4 @@ class UIActionImage: UIActionBase
 			break;
 		}
 	}
-};
+}

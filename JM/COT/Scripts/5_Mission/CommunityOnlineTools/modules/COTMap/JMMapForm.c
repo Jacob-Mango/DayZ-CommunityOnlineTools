@@ -33,9 +33,9 @@ class JMMapForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
 			return;
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapMarkers, 1000, true );
 	}
 
 	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )
@@ -44,7 +44,7 @@ class JMMapForm: JMFormBase
 		{
 			PlayerBase player;
 			float scale;
-			if ( Class.CastTo( player, GetGame().GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
+			if ( Class.CastTo( player, g_Game.GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
 			{
 				scale = 0.33;
 				mapPosition = player.GetWorldPosition();
@@ -58,7 +58,7 @@ class JMMapForm: JMFormBase
 
 	override void OnHide() 
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateMapMarkers );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateMapMarkers );
 	}
 
 	void UpdateMapMarkers()
@@ -140,4 +140,4 @@ class JMMapForm: JMFormBase
 			}
 		}
 	}
-};
+}

@@ -55,4 +55,4 @@ class JMItemStatsMagazineData: JMItemStatsBaseData
 
 		return result;
 	}
-};
+}

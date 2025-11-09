@@ -28,4 +28,4 @@ class JMVehicleSpawnerMeta
 
 		return meta;
 	}
-};
+}

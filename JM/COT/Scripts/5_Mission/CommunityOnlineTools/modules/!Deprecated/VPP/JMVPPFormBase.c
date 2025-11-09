@@ -23,5 +23,5 @@ class JMVPPFormBase : JMFormBase
 		layoutRoot = m_VPPMenu.InitializeCOT( this, wdw );
 		layoutRoot.SetHandler( this );
 	}
-};
+}
 #endif*/

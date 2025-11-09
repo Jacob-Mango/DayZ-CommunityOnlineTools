@@ -14,5 +14,5 @@ modded class AnimalBase
 
 		return true;
 	}
-};
+}
 

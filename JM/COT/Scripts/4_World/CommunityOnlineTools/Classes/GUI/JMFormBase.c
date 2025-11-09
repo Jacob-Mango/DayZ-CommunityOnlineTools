@@ -24,7 +24,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	void ~JMFormBase()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -222,7 +222,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 		
 		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
 
 		return false;
 	}
@@ -244,8 +244,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 		
 		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
 
 		return false;
 	}
-};
+}

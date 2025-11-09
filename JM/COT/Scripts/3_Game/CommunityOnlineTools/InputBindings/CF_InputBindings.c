@@ -12,5 +12,5 @@ modded class CF_InputBindings
 
 		super.Update( dt );
 	}
-};
+}
 #endif

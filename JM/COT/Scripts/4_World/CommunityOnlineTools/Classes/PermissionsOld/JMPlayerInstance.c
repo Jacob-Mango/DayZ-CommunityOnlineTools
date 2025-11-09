@@ -63,7 +63,7 @@ class JMPlayerInstance : Managed
 	{
 		PlayerObject = NULL;
 
-		if ( identity && GetGame().IsServer() )
+		if ( identity && g_Game.IsServer() )
 		{
 			m_GUID = identity.GetId();
 			m_Steam64ID = identity.GetPlainId();
@@ -99,14 +99,14 @@ class JMPlayerInstance : Managed
 
 	void Update()
 	{
-		if ( GetGame().IsServer() && ( GetGame().GetTime() - m_DataLastUpdated ) >= 100 )
+		if ( g_Game.IsServer() && ( g_Game.GetTime() - m_DataLastUpdated ) >= 100 )
 		{
-			if ( !GetGame().IsMultiplayer() )
-				Class.CastTo( PlayerObject, GetGame().GetPlayer() );
+			if ( !g_Game.IsMultiplayer() )
+				Class.CastTo( PlayerObject, g_Game.GetPlayer() );
 
 			if ( PlayerObject )
 			{
-				m_DataLastUpdated = GetGame().GetTime();
+				m_DataLastUpdated = g_Game.GetTime();
 
 				m_Position = PlayerObject.GetPosition();
 				m_Orientation = PlayerObject.GetOrientation();
@@ -283,7 +283,7 @@ class JMPlayerInstance : Managed
 		OnRecieveOrientation( ctx );
 		OnRecieveHealth( ctx );
 
-		m_DataLastUpdated = GetGame().GetTime();
+		m_DataLastUpdated = g_Game.GetTime();
 	}
 
 	void OnSendPermissions( ParamsWriteContext ctx, string sendToGUID )
@@ -415,7 +415,7 @@ class JMPlayerInstance : Managed
 		if ( !Assert_Null( m_PlayerFile ) )
 			Assert_Null( m_PlayerFile.Roles );
 
-		if ( !GetGame().IsServer() )
+		if ( !g_Game.IsServer() )
 			return;
 
 		array< string > permissions = new array< string >;
@@ -689,5 +689,5 @@ class JMPlayerInstance : Managed
 	{
 		return m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION];
 	}
-};
+}
 #endif

@@ -238,4 +238,4 @@ modded class DayZPlayerImplement
 	{
 		OnDebugSpawnEx(DebugSpawnParams.WithPlayer(player));
 	}
-};
+}

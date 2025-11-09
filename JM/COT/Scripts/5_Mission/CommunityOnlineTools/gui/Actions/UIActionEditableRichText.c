@@ -261,4 +261,4 @@ class UIActionEditableRichText: UIActionBase
 		m_Text.SetSize( w, height );
 		m_Text.Update();
 	}
-};
+}

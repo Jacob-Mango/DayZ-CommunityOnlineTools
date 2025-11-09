@@ -6,4 +6,4 @@ class JMNamalskEventManagerButtonData: UIActionData
 	{
 		ClassName = clsName;
 	}
-};
+}

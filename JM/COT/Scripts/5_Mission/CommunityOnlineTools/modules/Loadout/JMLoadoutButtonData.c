@@ -6,4 +6,4 @@ class JMLoadoutButtonData: UIActionData
 	{
 		Filename = name;
 	}
-};
+}

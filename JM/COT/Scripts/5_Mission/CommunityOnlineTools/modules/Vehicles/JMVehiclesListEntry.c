@@ -13,7 +13,7 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 
 	void JMVehiclesListEntry(Widget parent, JMVehiclesMenu menu, JMVehicleMetaData vehicle)
 	{
-		m_Root					= GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
+		m_Root					= g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
 		m_VehicleName			= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_name" ) );
 		m_VehicleID				= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_id" ) );
 		m_EditButton			= ButtonWidget.Cast( m_Root.FindAnyWidget( "edit_button" ) );
@@ -101,4 +101,4 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 
 		return false;
 	}
-};
+}

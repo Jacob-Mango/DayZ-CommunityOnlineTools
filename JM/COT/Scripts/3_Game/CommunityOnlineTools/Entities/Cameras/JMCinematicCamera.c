@@ -46,7 +46,7 @@ class JMCinematicCamera: JMCameraBase
 		GetTransform( transform );
 
 		// ================ Inputs ================
-		Input input = GetGame().GetInput();
+		Input input = g_Game.GetInput();
 
 		float forward = input.LocalValue( "UAMoveForward" ) - input.LocalValue( "UAMoveBack" );
 		float strafe = input.LocalValue( "UAMoveRight" ) - input.LocalValue( "UAMoveLeft" );
@@ -248,7 +248,7 @@ class JMCinematicCamera: JMCameraBase
 	{
 		foreach (string exclude: m_PossibleInputExcludes)
 		{
-			if (GetGame().GetMission().IsInputExcludeActive(exclude))
+			if (g_Game.GetMission().IsInputExcludeActive(exclude))
 				return true;
 		}
 
@@ -265,4 +265,4 @@ class JMCinematicCamera: JMCameraBase
 		d[1] = dir[1] * sin;
 		d[0] = dir[0] * sin;
 	}
-};
+}

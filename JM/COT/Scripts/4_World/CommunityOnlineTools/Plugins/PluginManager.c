@@ -4,4 +4,4 @@ modded class PluginManager
 	{
 		super.Init();
 	}
-};
+}

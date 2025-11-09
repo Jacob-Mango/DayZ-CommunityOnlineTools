@@ -25,4 +25,4 @@ class JMWebhookCallback: RestCallback
 		Print( "OnTimeout" );
 		#endif
 	}
-};
+}

@@ -6,7 +6,7 @@ class JMVPPMenuPlayerManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_PLAYERMANAGER";
-};
+}
 
 class JMVPPMenuItemManager: JMVPPModuleBase
 {
@@ -15,7 +15,7 @@ class JMVPPMenuItemManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_ITEMMANAGER";
-};
+}
 
 class JMVPPMenuTeleportManager: JMVPPModuleBase
 {
@@ -24,7 +24,7 @@ class JMVPPMenuTeleportManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_TELEPORTMANAGER";
-};
+}
 
 class JMVPPEspToolsMenu: JMVPPModuleBase
 {
@@ -33,7 +33,7 @@ class JMVPPEspToolsMenu: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "ESP/XRay";
-};
+}
 
 class JMVPPMenuCommandsConsole: JMVPPModuleBase
 {
@@ -42,7 +42,7 @@ class JMVPPMenuCommandsConsole: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_COMMANDSMENU";
-};
+}
 
 class JMVPPMenuServerManager: JMVPPModuleBase
 {
@@ -51,7 +51,7 @@ class JMVPPMenuServerManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_SERVERMANAGER";
-};
+}
 
 class JMVPPMenuWeatherManager: JMVPPModuleBase
 {
@@ -60,7 +60,7 @@ class JMVPPMenuWeatherManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_WEATHERMANAGER";
-};
+}
 
 class JMVPPMenuObjectManager: JMVPPModuleBase
 {
@@ -69,7 +69,7 @@ class JMVPPMenuObjectManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_OBJMANAGER";
-};
+}
 
 class JMVPPMenuBansManager: JMVPPModuleBase
 {
@@ -78,7 +78,7 @@ class JMVPPMenuBansManager: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_BANSMANAGER";
-};
+}
 
 class JMVPPMenuPermissionsEditor: JMVPPModuleBase
 {
@@ -87,7 +87,7 @@ class JMVPPMenuPermissionsEditor: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_PERMSEDITOR";
-};
+}
 
 class JMVPPMenuWebHooks: JMVPPModuleBase
 {
@@ -96,7 +96,7 @@ class JMVPPMenuWebHooks: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_WEBHOOKS";
-};
+}
 
 class JMVPPMenuXMLEditor: JMVPPModuleBase
 {
@@ -105,5 +105,5 @@ class JMVPPMenuXMLEditor: JMVPPModuleBase
 
 	override string GetModifiedTitle()
 		return "#VSTR_TOOLTIP_XMLEDITOR";
-};
+}
 #endif*/

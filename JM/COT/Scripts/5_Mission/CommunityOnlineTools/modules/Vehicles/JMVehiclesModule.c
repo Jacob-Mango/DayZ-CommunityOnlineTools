@@ -117,9 +117,9 @@ class JMVehicleMetaData
 
 		JMVehicleMetaData meta = Create(cover, type);
 
-		if ( GetGame().IsKindOf(type, "ExpansionHelicopterScript") )
+		if ( g_Game.IsKindOf(type, "ExpansionHelicopterScript") )
 			meta.m_VehicleType |= JMVT_HELICOPTER;
-		else if ( GetGame().IsKindOf(type, "ExpansionBoatScript") || GetGame().IsKindOf(type, "BoatScript") )
+		else if ( g_Game.IsKindOf(type, "ExpansionBoatScript") || g_Game.IsKindOf(type, "BoatScript") )
 			meta.m_VehicleType |= JMVT_BOAT;
 		else
 			meta.m_VehicleType |= JMVT_CAR;
@@ -191,8 +191,8 @@ class JMVehicleMetaData
 
 	void SetDisplayName()
 	{
-		if (GetGame().ConfigIsExisting("cfgVehicles " + m_ClassName + " displayName"))
-			GetGame().ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
+		if (g_Game.ConfigIsExisting("cfgVehicles " + m_ClassName + " displayName"))
+			g_Game.ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
 		else
 			m_DisplayName = m_ClassName;
 	}
@@ -258,7 +258,7 @@ class JMVehicleMetaData
 
 		return true;
 	}
-};
+}
 
 class JMVehiclesModule: JMRenderableModuleBase
 {
@@ -407,7 +407,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestServerVehicles()
 	{
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			auto rpc = new ScriptRPC();
  			rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
@@ -476,7 +476,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	void DeleteVehicleUnclaimed( )
 	{
 	#ifdef EXPANSIONMODVEHICLE
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
@@ -492,7 +492,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void DeleteVehicleDestroyed( )
 	{
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
@@ -507,7 +507,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void DeleteVehicleAll( )
 	{
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			auto rpc = new ScriptRPC();
 			
@@ -522,13 +522,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void DeleteVehicle(JMVehicleMetaData meta)
 	{
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			DeleteVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
 		}
 		else
 		{
-			GetGame().ObjectDelete(meta.m_Entity);
+			g_Game.ObjectDelete(meta.m_Entity);
 			UpdateVehiclesMetaData_SP();
 		}
 	}
@@ -560,12 +560,12 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !ctx.Read( netHigh ) )
 			return;
 		
-		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 
 		if ( !obj )
 			return;
 
-		GetGame().ObjectDelete( obj );
+		g_Game.ObjectDelete( obj );
 
 		RPC_RequestServerVehicles( ctx, senderRPC, target );
 	}
@@ -613,7 +613,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			if ( vehicle.GetExpansionVehicle().HasKey() )
 				continue;
 			
-			GetGame().ObjectDelete( vehicle );
+			g_Game.ObjectDelete( vehicle );
 		}
 
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
@@ -671,7 +671,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			if ( !vehicle.IsDamageDestroyed() )
 				continue;
 
-			GetGame().ObjectDelete( vehicle );
+			g_Game.ObjectDelete( vehicle );
 		}
 
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
@@ -721,7 +721,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			if ( !vehicle )
 				return;
 
-			GetGame().ObjectDelete( vehicle );
+			g_Game.ObjectDelete( vehicle );
 		}
 
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
@@ -735,13 +735,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestTeleportToVehicle(JMVehicleMetaData meta)
 	{
-		if (GetGame().IsClient())
+		if (g_Game.IsClient())
 		{
 			RequestTeleportToVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
 		}
 		else
 		{
-			Exec_TeleportToVehicle(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Entity);
+			Exec_TeleportToVehicle(PlayerBase.Cast(g_Game.GetPlayer()), meta.m_Entity);
 		}
 	}
 
@@ -777,7 +777,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !Class.CastTo( player, senderRPC.GetPlayer() ) )
 			return;
 
-		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
@@ -792,7 +792,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		player.SetLastPosition();
 		pos = pos + minMax[1];
-		pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
+		pos[1] = g_Game.SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
 		player.SetWorldPosition( pos );
 	}
 
@@ -800,4 +800,4 @@ class JMVehiclesModule: JMRenderableModuleBase
 	{
 		return m_Vehicles;
 	}
-};
+}

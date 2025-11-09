@@ -5,4 +5,4 @@ enum UIEvent
 	CLICK_LEFTSIDE,
 	CHANGE,
 	MOUSEWHEEL
-};
+}

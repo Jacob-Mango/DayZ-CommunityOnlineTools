@@ -128,5 +128,5 @@ class JMRole : Managed
 	{
 		RootPermission.DebugPrint( 0 );
 	}
-};
+}
 #endif

@@ -356,7 +356,7 @@ class JMVehiclesMenu: JMFormBase
 		
 		SyncAndRefreshVehicles();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );
 	}
 
 	void TeleportToVehicle()
@@ -431,7 +431,7 @@ class JMVehiclesMenu: JMFormBase
 		{
 			PlayerBase player;
 			float scale;
-			if ( Class.CastTo( player, GetGame().GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
+			if ( Class.CastTo( player, g_Game.GetPlayer() ) && !player.GetLastMapInfo( scale, mapPosition ) )
 			{
 				scale = 0.33;
 				mapPosition = player.GetWorldPosition();
@@ -442,4 +442,4 @@ class JMVehiclesMenu: JMFormBase
 
 		m_MapWidget.SetMapPos( mapPosition );
 	}
-};
+}

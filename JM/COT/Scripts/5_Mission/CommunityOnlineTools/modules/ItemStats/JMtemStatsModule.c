@@ -83,4 +83,4 @@ class JMtemStatsModule: JMRenderableModuleBase
 
 		return false;
 	}
-};
+}

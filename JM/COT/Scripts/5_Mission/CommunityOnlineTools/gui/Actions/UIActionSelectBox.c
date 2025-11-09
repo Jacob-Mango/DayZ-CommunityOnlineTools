@@ -7,7 +7,7 @@ class UIActionSelectBox: UIActionBase
 
 	void ~UIActionSelectBox()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 		delete m_Selection;
@@ -94,5 +94,5 @@ class UIActionSelectBox: UIActionBase
 		m_Frame.SetSize( width, h );
 		m_Frame.Update();
 	}
-};
+}
 

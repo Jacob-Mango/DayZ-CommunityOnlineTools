@@ -34,5 +34,5 @@ modded class CF_Permission_Player
 
 		return true;
 	}
-};
+}
 #endif

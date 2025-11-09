@@ -24,7 +24,7 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMRoleRowWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
@@ -135,4 +135,4 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 		Checkbox.Enable( false );
 		Checkbox.Show( false );
 	}
-};
+}

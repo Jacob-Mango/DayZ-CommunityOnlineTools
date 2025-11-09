@@ -48,4 +48,4 @@ class UIActionButton: UIActionBase
 	{
 		m_Button.SetColor(color);
 	}
-};
+}

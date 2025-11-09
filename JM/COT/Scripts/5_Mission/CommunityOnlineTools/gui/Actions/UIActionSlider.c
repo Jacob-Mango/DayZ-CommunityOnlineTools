@@ -188,4 +188,4 @@ class UIActionSlider: UIActionBase
 	{
 		m_Slider.SetAlpha(alpha);
 	}
-};
+}

@@ -39,8 +39,8 @@ class JMCommand
 	{
 		return m_Function;
 	}
-};
+}
 
 class JMSubCommand: JMCommand
 {
-};
+}

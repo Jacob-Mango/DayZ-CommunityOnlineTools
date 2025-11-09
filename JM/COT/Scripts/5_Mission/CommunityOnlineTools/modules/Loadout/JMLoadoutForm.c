@@ -143,4 +143,4 @@ class JMLoadoutForm: JMFormBase
 			break;
 		}
 	}
-};
+}

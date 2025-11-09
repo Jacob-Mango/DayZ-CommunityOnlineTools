@@ -42,7 +42,7 @@ class JMItemStatsArmorData
 
 		return result;
 	}
-};
+}
 
 // NBC
 class JMItemStatsProtectionData
@@ -77,7 +77,7 @@ class JMItemStatsProtectionData
 
 		return result;
 	}
-};
+}
 
 class JMItemStatsHealthData
 {
@@ -117,7 +117,7 @@ class JMItemStatsHealthData
 
 		return result;
 	}
-};
+}
 
 class JMItemStatsNutritionData
 {
@@ -169,4 +169,4 @@ class JMItemStatsNutritionData
 
 		return result;
 	}
-};
+}

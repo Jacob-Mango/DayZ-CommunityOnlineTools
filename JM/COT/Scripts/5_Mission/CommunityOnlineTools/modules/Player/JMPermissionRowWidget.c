@@ -45,7 +45,7 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMPermissionRowWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
@@ -283,4 +283,4 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 	{
 		m_state_Permission.SetValue( type, true );
 	}
-};
+}

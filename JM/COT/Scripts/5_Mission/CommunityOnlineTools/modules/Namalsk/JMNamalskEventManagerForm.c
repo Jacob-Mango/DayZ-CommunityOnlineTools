@@ -81,4 +81,4 @@ class JMNamalskEventManagerForm: JMFormBase
 		rpc.Write(data.ClassName);
 		rpc.Send(null, JMNamalskEventManagerRPC.CancelEvent, true, null);
 	}
-};
+}

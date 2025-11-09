@@ -42,4 +42,4 @@ class JMItemStatsOpticData: JMItemStatsBaseData
 
 		return result;
 	}
-};
+}

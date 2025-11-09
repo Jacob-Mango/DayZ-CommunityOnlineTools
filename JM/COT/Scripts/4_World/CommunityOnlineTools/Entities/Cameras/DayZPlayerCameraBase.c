@@ -28,4 +28,4 @@ modded class DayZPlayerCameraBase
 		if (!m_JMHasAdminNVG)
 			super.SetNVPostprocess(NVtype);
 	}
-};
+}

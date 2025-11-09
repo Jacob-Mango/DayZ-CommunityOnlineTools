@@ -78,4 +78,4 @@ class COT_QuickActionDismantle: ActionBuildPart // PLACEHOLDER
 
 		construction.COT_DismantleRequiredParts( constrution_part.GetPartName(), action_data.m_Player );	
 	}
-};
+}

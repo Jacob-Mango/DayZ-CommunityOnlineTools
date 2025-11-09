@@ -9,4 +9,4 @@ class JMWebhookMessage : Managed
 	{
 		return "Base";
 	}
-};
+}

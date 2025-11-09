@@ -87,7 +87,7 @@ class JMCameraBase: Camera
 	{
 		if ( SendUpdateAccumalator > 0.5 )
 		{
-			GetGame().UpdateSpectatorPosition( GetPosition() );
+			g_Game.UpdateSpectatorPosition( GetPosition() );
 
 			SendUpdateAccumalator = 0;
 		}
@@ -100,4 +100,4 @@ class JMCameraBase: Camera
 	void OnUpdate( float timeslice )
 	{
 	}
-};
+}

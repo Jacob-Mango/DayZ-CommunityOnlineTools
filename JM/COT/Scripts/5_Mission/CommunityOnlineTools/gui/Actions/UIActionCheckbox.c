@@ -47,4 +47,4 @@ class UIActionCheckbox: UIActionBase
 
 		return ret;
 	}
-};
+}
