@@ -865,7 +865,7 @@ class JMObjectSpawnerForm: JMFormBase
 						clipboardOutput += "        }\n";
 				}
 				clipboardOutput += "    ]\n";
-				clipboardOutput += "};";
+				clipboardOutput += "}";
 				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 		}
