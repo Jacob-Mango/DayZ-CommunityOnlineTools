@@ -53,7 +53,7 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 		if (username != "") prepend += "\"username\": " + username + ",";
 		if (avatar_url != "") prepend += "\"avatar_url\": " + avatar_url + ",";
 		if (content != "") prepend += "\"content\": " + content + ",";
-		return prepend + "\"embeds\": " + result + "};";
+		return prepend + "\"embeds\": " + result + "}";
 	}
 
 	override string GetType()
