@@ -24,6 +24,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.AccessInventory" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.AdminNVG" );
 
