@@ -418,12 +418,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		
 		int flags = ECE_CREATEPHYSICS;
 		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE;
+			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
 		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
-		
-		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
+			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
+		else if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+		else if ( g_Game.IsKindOf( className, "HouseNoDestruct" ) )
+			flags |= ECE_UPDATEPATHGRAPH;
 
 		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
 			flags |= ECE_EQUIP;
