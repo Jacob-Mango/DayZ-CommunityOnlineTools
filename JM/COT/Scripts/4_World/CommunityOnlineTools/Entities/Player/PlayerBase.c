@@ -756,9 +756,10 @@ modded class PlayerBase
 
 	void COTResetItemWetness()
 	{
+		ItemBase item;
 		array< EntityAI > items = new array< EntityAI >;
 		GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, items );
-		ItemBase item;
+
 		foreach ( EntityAI entity: items )
 		{
 			if ( Class.CastTo( item, entity ) )
@@ -768,22 +769,24 @@ modded class PlayerBase
 
 	void COT_RemoveAllItems()
 	{
+		ItemBase item;
 		array<EntityAI> entities = {};
 		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
 
-		ItemBase item;
 		foreach (EntityAI entity: entities)
 		{
 			if (entity != this && Class.CastTo(item, entity))
-			{
 				item.DeleteSafe();
-			}
 		}
 	}
 
 	override bool IsRestrained()
 	{
-		return super.IsRestrained() || m_JMIsFrozen;
+		if (g_Game.GetPlayer() != this && GetCommunityOnlineToolsBase().IsActive())
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory" ) || m_JMIsFrozen)
+				return true;
+
+		return super.IsRestrained();
 	}
 
 	void COTUpdateSpectatorPosition()
