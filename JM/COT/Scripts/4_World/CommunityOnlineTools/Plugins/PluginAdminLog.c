@@ -217,7 +217,6 @@ modded class PluginAdminLog
 		}
 
 		hitMessage += "Zone: " + dmgZone + "\n";
-		hitMessage += "Component: " + component + "\n";
 
 		if (!isFallDamage)
 			hitMessage += "Ammo: " + ammo + "\n";
