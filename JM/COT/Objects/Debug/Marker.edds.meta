@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{AE89E2F437931456}JM/COT/Objects/Debug/Marker.edds"
+ Author "monolith"
+ ChangeDate -668617879
+ Configurations {
+  PNGResourceClass PC {
+   SourceFile "Marker.png"
+  }
+  PNGResourceClass XBOX_ONE : PC {
+  }
+  PNGResourceClass PS4 : PC {
+  }
+  PNGResourceClass LINUX : PC {
+  }
+ }
+}

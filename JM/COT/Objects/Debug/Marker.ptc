@@ -1,0 +1,44 @@
+EffectDef {
+ Emitors {
+  EmitorDef exclamationmark {
+   ShapeType Point
+   ConeAngle 0 0 0
+   MaxNum 1
+   BirthRate 1
+   BirthRateRND 0
+   BirthRateVel 1
+   Offset 0 0 0
+   LocalTransform 0
+   Material "{C8324C11C80B855B}JM/COT/Objects/Debug/Marker.emat"
+   SizeMultiplier 0.5
+   SizeRND 0
+   RandomRotDir 0
+   RotMultiplier 0
+   RandomAngle 0
+   BillboardingType Full
+   Velocity 0
+   VelocityRND 0
+   VelAffect 0
+   AirResistance 0
+   AirResistanceRND 0
+   GravityMultiply 0
+   Wind 0
+   AnimOnce 0
+   LifetimeByAnim 1
+   RandomFrame 0
+   LifeTime 1
+   LifeTimeRND 0
+   Color {
+    0 0.949 0.612 0.071 1 0.949 0.612 0.071
+   }
+   Alpha {
+    0 1 1 1
+   }
+   Size {
+    0 0.5 1 0.5
+   }
+   EffectTime 1
+   Repeat 1
+  }
+ }
+}

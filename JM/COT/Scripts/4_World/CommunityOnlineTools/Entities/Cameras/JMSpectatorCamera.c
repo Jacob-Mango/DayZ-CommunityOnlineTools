@@ -1,3 +1,19 @@
+class JMDollyCamLight: ScriptedLightBase
+{
+	void JMDollyCamLight()
+	{
+		SetLightType(LightSourceType.SpotLight);
+		SetVisibleDuringDaylight(true);
+		SetRadiusTo(3);
+		SetBrightnessTo(1000);
+		SetCastShadow(false);
+		SetDiffuseColor(1.0, 0.75, 0.25);
+		SetFlareVisible(false);
+		SetSpotLightAngle(45);
+		SetFadeOutTime(3);
+	}
+}
+
 class JMSpectatorCamera: JMCameraBase
 {
 	static const int DOLLY_CAM_PATH_LIMIT = 200;
@@ -29,6 +45,11 @@ class JMSpectatorCamera: JMCameraBase
 	float m_COT_PlayerSpeed;
 	float m_COT_DollyCamJumpClimbTimeout;
 	bool m_COT_DollyCamReversing;
+	Object m_COT_LookAtTarget;
+	float m_COT_LookAtTarget_Time;
+	ParticleSource m_COT_TargetMarker;
+	Object m_COT_TargetMarker_Object;
+	ScriptedLightBase m_COT_TargetLight;
 	
 	override void OnTargetSelected( Object target )
 	{
@@ -119,6 +140,8 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector eyePos;
 
+		vector begPos;
+
 		vector dir;
 		vector pos;
 
@@ -129,10 +152,6 @@ class JMSpectatorCamera: JMCameraBase
 
 		int i;
 		int j;
-
-	#ifdef DIAG_DEVELOPER
-		DebugTextWorldSpace dbgTxt;
-	#endif
 
 		if (Class.CastTo(weapon, hands))
 		{
@@ -203,6 +222,7 @@ class JMSpectatorCamera: JMCameraBase
 
 			vector barrel_start = weapon.GetSelectionPositionLS("konec hlavne").Multiply4(weaponTransform);
 			vector barrel_end = weapon.GetSelectionPositionLS("usti hlavne").Multiply4(weaponTransform);
+			begPos = barrel_end;
 			dir = vector.Direction(barrel_start, barrel_end).Normalized();
 
 			if (!dollyCam)
@@ -234,6 +254,8 @@ class JMSpectatorCamera: JMCameraBase
 			float waterDepth = wl[0];
 			float characterDepth = wl[1];
 
+			begPos = headPos;
+
 			if ((waterDepth > 1.5 && characterDepth > 0) || waterLevel == EWaterLevels.LEVEL_SWIM_START)
 			{
 				//! Swimming
@@ -258,10 +280,8 @@ class JMSpectatorCamera: JMCameraBase
 		}
 
 		vector cameraPos = GetPosition();
-		vector camPos2D = cameraPos;
-		camPos2D[1] = pos[1];
 
-		float cameraDistToTargetSq = vector.DistanceSq(camPos2D, pos);
+		float cameraDist2DToTargetSq = vector.DistanceSq(Vector(cameraPos[0], pos[1], cameraPos[2]), pos);
 
 		if (dollyCam)
 		{
@@ -281,9 +301,165 @@ class JMSpectatorCamera: JMCameraBase
 				pos[1] = pos[1] + stanceHeight;
 			}
 
-			if (cameraDistToTargetSq > 0.04)
+			if (cameraDist2DToTargetSq > 0.04)
 			{
-				dir = vector.Direction(cameraPos, pos);
+				Object target;
+				vector cameraToTargetDir;
+
+				vector hitPos;
+				vector hitDir;
+				int component;
+				set<Object> results = new set<Object>;
+
+				//! Raycast in spectated entity look direction to check for a suitable target to look at
+				if (DayZPhysics.RaycastRV(begPos, begPos + dir * 1000, hitPos, hitDir, component, results,
+										  null, spectatedPlayer, false, false, ObjIntersectView, 0.2))
+				{
+					foreach (Object result: results)
+					{
+						if ((result.IsMan() || result.IsDayZCreature()) && !result.IsDamageDestroyed())
+						{
+							target = result;
+							if (target != m_COT_LookAtTarget)
+								m_COT_LookAtTarget_Time = 0;
+							break;
+						}
+					}
+				}
+
+				if (!target)
+					target = m_COT_LookAtTarget;
+
+				if (target)
+				{
+					bool checkTarget = true;
+
+					vector targetPos = target.GetPosition();
+					targetPos[1] = targetPos[1] + 1.6;
+					cameraToTargetDir = vector.Direction(cameraPos, targetPos);
+
+					float cameraDistToTargetSq = cameraToTargetDir.LengthSq();
+
+					vector toTargetDir = vector.Direction(begPos, targetPos);
+					toTargetDir.Normalize();
+
+					float angle1 = dir.VectorToAngles()[0];
+					float angle2 = toTargetDir.VectorToAngles()[0];
+					float angleDiff = Math.AbsFloat(angle2 - angle1);
+
+					//! Raycast from camera to target to check whether view is obstructed or not
+					if (DayZPhysics.RaycastRV(cameraPos, targetPos, hitPos, hitDir, component, results,
+											  null, spectatedPlayer, false, false, ObjIntersectView))
+					{
+						if (vector.DistanceSq(cameraPos, hitPos) < cameraDistToTargetSq - 0.04)
+						{
+							//! View to target currently obstructed
+							if (target == m_COT_LookAtTarget)
+							{
+								//! View to target wasn't obstructed before, tick up time before we discard target
+								m_COT_LookAtTarget_Time += timeSlice;
+								if (m_COT_LookAtTarget_Time > Math.Lerp(1.5, 3, angleDiff / 360))
+									target = null;
+							}
+							else
+							{
+								//! View to target was always obstructed
+								target = null;
+							}
+
+							checkTarget = false;
+						}
+					}
+
+					if (checkTarget)
+					{
+						DayZCreatureAI creature;
+						//vector.Dot(dir, toTargetDir) < -0.9239
+						if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
+						{
+							m_COT_LookAtTarget_Time += timeSlice;
+							if (m_COT_LookAtTarget_Time > Math.Lerp(3, 5, angleDiff / 360))
+								target = null;
+						}
+					}
+
+					m_COT_LookAtTarget = target;
+
+					speed = 0.9;
+				}
+
+				if (target)
+				{
+					dir = cameraToTargetDir;  //! Look at what spectated entity is looking at
+
+					if (!m_COT_TargetMarker)
+					{
+						g_Game.Chat("Creating particle", "colorFriendly");
+
+						ParticleSource particle = ParticleManager.GetInstance().PlayOnObject(ParticleList.COT_TARGET_MARKER, target, "0 0 0", "0 0 0", true);
+
+						float scale = 3.0;
+
+						float size;
+						particle.GetParameter(0, EmitorParam.SIZE, size);
+						particle.SetParameter(-1, EmitorParam.SIZE, size * scale * target.GetScale());
+
+						float velocity;
+						particle.GetParameter(0, EmitorParam.VELOCITY, velocity);
+						particle.SetParameter(-1, EmitorParam.VELOCITY, velocity / target.GetScale());
+
+						particle.SetParameter(0, EmitorParam.BIRTH_RATE, 1.0);
+
+						SetParticleParm(particle, -1, EmitorParam.EMITOFFSET, Vector(0.0, 2.2 / target.GetScale(), 0.0));
+
+						m_COT_TargetMarker = particle;
+					}
+					else
+					{
+						if (m_COT_TargetMarker.GetParent() != target)
+						{
+							g_Game.Chat("Reparenting particle", "colorFriendly");
+							m_COT_TargetMarker.AddAsChild(null);
+							m_COT_TargetMarker.AddAsChild(target, "0 0 0", "0 0 0", true);
+						}
+
+						if (!m_COT_TargetMarker.IsParticlePlaying())
+						{
+							g_Game.Chat("Playing particle", "colorFriendly");
+							m_COT_TargetMarker.PlayParticle();
+						}
+					}
+
+					if (!m_COT_TargetLight)
+					{
+						m_COT_TargetLight = ScriptedLightBase.CreateLight(JMDollyCamLight, vector.Zero);
+						m_COT_TargetLight.AttachOnObject(target, "0 2.2 0", "0 -90 0");
+					}
+					else
+					{
+						if (m_COT_TargetLight.GetAttachmentParent() != target)
+							m_COT_TargetLight.AttachOnObject(target, "0 2.2 0", "0 -90 0");
+					}
+				}
+				else
+				{
+					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
+
+					if (m_COT_TargetMarker)
+					{
+						g_Game.Chat("Stopping particle", "colorFriendly");
+						if (m_COT_TargetMarker.IsParticlePlaying())
+							m_COT_TargetMarker.StopParticle();
+						m_COT_TargetMarker = null;
+					}
+
+					if (m_COT_TargetLight)
+					{
+						m_COT_TargetLight.FadeOut();
+						m_COT_TargetLight = null;
+					}
+				}
+
 				dir.Normalize();
 			}
 		}
@@ -353,14 +529,20 @@ class JMSpectatorCamera: JMCameraBase
 
 		if (m_COT_DollyCamPathUpdateDT > 0.0333333)
 		{
+			string errorMsg;
+
 			if (m_COT_DollyCamPathNextIdx < 0)
 			{
-				g_Game.Chat("COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
+				errorMsg = "COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx;
+				g_Game.Chat(errorMsg, "colorImportant");
+				Error(errorMsg);
 				m_COT_DollyCamPathNextIdx = 0;
 			}
 			else if (m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
 			{
-				g_Game.Chat("COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx, "colorImportant");
+				errorMsg = "COT dollycam: ERROR: " + m_COT_DollyCamPathNextIdx;
+				g_Game.Chat(errorMsg, "colorImportant");
+				Error(errorMsg);
 				m_COT_DollyCamPathNextIdx = DOLLY_CAM_PATH_LIMIT - 1;
 			}
 
@@ -382,7 +564,7 @@ class JMSpectatorCamera: JMCameraBase
 					g_Game.Chat("COT dollycam: Depleted jump/climb timeout", "colorAction");
 			#endif
 			}
-			else if (dollyCam && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
+			else if (dollyCam && !isSwimming && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
 			{
 				vector prevPoint = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 2];
 				vector lastSegDir = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 1] - prevPoint;
@@ -398,9 +580,7 @@ class JMSpectatorCamera: JMCameraBase
 						m_COT_DollyCamJumpClimbTimeout = 5;
 
 					#ifdef DIAG_DEVELOPER
-						g_Game.Chat("COT dollycam: Jump/climb detected, not reversing", "colorAction");
-						dbgTxt = Debug.DrawTextWS(segPitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
-						g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
+						g_Game.Chat("COT dollycam: Jump/climb detected (pitch " + segPitch.ToString() + "°), not reversing", "colorAction");
 					#endif
 					}
 				}
@@ -466,14 +646,13 @@ class JMSpectatorCamera: JMCameraBase
 				}
 			}
 
-			if (vector.DistanceSq(playerPos, m_COT_LastPlayerPos) > 0.000001)
+			if (cameraDist2DToTargetSq > 0.04)
 			{
-				if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
+				if (!m_COT_DollyCamReversing)
 				{
 					m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx] = pos;
 
-					if (m_COT_DollyCamPathNextIdx < DOLLY_CAM_PATH_LIMIT)
-						++m_COT_DollyCamPathNextIdx;
+					++m_COT_DollyCamPathNextIdx;
 				}
 			}
 		}
@@ -501,14 +680,12 @@ class JMSpectatorCamera: JMCameraBase
 					accumulatedDistSq += stepDistSq;
 					float pitch = Math.Atan2(yDiff, Math.Sqrt(stepDistSq)) * Math.RAD2DEG;
 
-					if (yDiff > 0.3 && Math.AbsFloat(pitch) > 70)
+					if (!isSwimming && yDiff > 0.3 && Math.AbsFloat(pitch) > 70)
 					{
 					#ifdef DIAG_DEVELOPER
 						if (m_COT_DollyCamJumpClimbTimeout == 0)
 						{
-							g_Game.Chat("COT dollycam: Jump/climb detected", "colorAction");
-							dbgTxt = Debug.DrawTextWS(pitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
-							g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
+							g_Game.Chat("COT dollycam: Jump/climb detected (pitch " + pitch.ToString() + "°)", "colorAction");
 						}
 					#endif
 
@@ -539,7 +716,7 @@ class JMSpectatorCamera: JMCameraBase
 
 							for (j = i; j < m_COT_DollyCamPathNextIdx - 1; ++j)
 							{
-								m_COT_DollyCamPath[j] = Math3D.Curve(ECurveType.CatmullRom, j * t, points);
+								m_COT_DollyCamPath[j] = Math3D.Curve(ECurveType.CatmullRom, (j - i) * t, points);
 							}
 						}
 					}
@@ -582,8 +759,8 @@ class JMSpectatorCamera: JMCameraBase
 
 					float targetDistSq = targetDist * targetDist;
 
-					if (cameraDistToTargetSq > targetDistSq)
-						offsetFactor = targetDistSq / cameraDistToTargetSq;
+					if (cameraDist2DToTargetSq > targetDistSq)
+						offsetFactor = targetDistSq / cameraDist2DToTargetSq;
 					else
 						offsetFactor = 1.0;
 				}
@@ -612,14 +789,14 @@ class JMSpectatorCamera: JMCameraBase
 
 		SetOrientation(ori);
 
-		if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT /*&& cameraDistToTargetSq > distSqThresh*/)
+		if (!m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx >= DOLLY_CAM_PATH_LIMIT)
 		{
-			for (i = 0; i < m_COT_DollyCamPathNextIdx - 1; ++i)
+			for (i = 0; i < DOLLY_CAM_PATH_LIMIT; ++i)
 			{
 				m_COT_DollyCamPath[i] = m_COT_DollyCamPath[i + 1];
 			}
 
-			--m_COT_DollyCamPathNextIdx;
+			m_COT_DollyCamPathNextIdx = DOLLY_CAM_PATH_LIMIT - 1;
 		}
 
 		if (m_JM_CameraPosMS == vector.Zero)
