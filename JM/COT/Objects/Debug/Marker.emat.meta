@@ -1,0 +1,15 @@
+MetaFileClass {
+ Name "{C8324C11C80B855B}JM/COT/Objects/Debug/Marker.emat"
+ Author "monolith"
+ ChangeDate 2004726633
+ Configurations {
+  EMATResourceClass PC {
+  }
+  EMATResourceClass XBOX_ONE : PC {
+  }
+  EMATResourceClass PS4 : PC {
+  }
+  EMATResourceClass LINUX : PC {
+  }
+ }
+}
