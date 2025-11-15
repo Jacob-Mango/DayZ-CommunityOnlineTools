@@ -129,6 +129,18 @@ modded class PluginAdminLog
 		if ( !player || !source || !m_Webhook )
 			return;
 
+
+		float healthDmg;
+		float shockDmg;
+		float bloodDmg;
+
+		if (damageResult)
+		{
+			healthDmg = damageResult.GetHighestDamage("Health");
+			shockDmg = damageResult.GetHighestDamage("Shock");
+			bloodDmg = damageResult.GetHighestDamage("Blood");
+		}
+
 		auto message = m_Webhook.CreateDiscordMessage();
 		auto embed = message.GetEmbed();
 		embed.SetColor( 16711680 ); // 0xFF0000
@@ -193,7 +205,12 @@ modded class PluginAdminLog
 		string hitMessage = "";
 		if ( damageResult )
 		{
-			hitMessage += "Damage: " + damageResult.GetHighestDamage( "Health" ) + "\n";
+			if (healthDmg > 0)
+				hitMessage += "Damage: " + healthDmg + "\n";
+			if (bloodDmg > 0)
+				hitMessage += "Blood loss: " + bloodDmg + "\n";
+			if (shockDmg > 0)
+				hitMessage += "Shock: " + shockDmg + "\n";
 		}
 
 		hitMessage += "Zone: " + dmgZone + "\n";
