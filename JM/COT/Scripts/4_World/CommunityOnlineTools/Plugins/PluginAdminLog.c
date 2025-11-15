@@ -141,6 +141,8 @@ modded class PluginAdminLog
 			bloodDmg = damageResult.GetHighestDamage("Blood");
 		}
 
+		bool isFallDamage;
+
 		auto message = m_Webhook.CreateDiscordMessage();
 		auto embed = message.GetEmbed();
 		embed.SetColor( 16711680 ); // 0xFF0000
@@ -185,8 +187,9 @@ modded class PluginAdminLog
 			embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was stunned." );
 			break;
 		case DT_CUSTOM:
-			if ( ammo == "FallDamage" )
+			if (ammo.IndexOf("FallDamage") == 0)
 			{
+				isFallDamage = true;
 				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " fell." );
 			} else
 			{
@@ -215,7 +218,9 @@ modded class PluginAdminLog
 
 		hitMessage += "Zone: " + dmgZone + "\n";
 		hitMessage += "Component: " + component + "\n";
-		hitMessage += "Ammo: " + ammo + "\n";
+
+		if (!isFallDamage)
+			hitMessage += "Ammo: " + ammo + "\n";
 
 		embed.AddField( "Damage Breakdown", hitMessage );
 
