@@ -535,7 +535,7 @@ modded class PlayerBase
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_SERVER:
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_REMOTE:
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_SINGLEPLAYER:
-				return name;
+				return "AI " + name;
 		}
 
 		if (!name)
