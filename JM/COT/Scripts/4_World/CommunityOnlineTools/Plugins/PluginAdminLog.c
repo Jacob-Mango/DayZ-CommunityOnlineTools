@@ -189,6 +189,9 @@ modded class PluginAdminLog
 		case DT_CUSTOM:
 			if (ammo.IndexOf("FallDamage") == 0)
 			{
+				if (healthDmg == 0 && bloodDmg == 0 && shockDmg == 0)
+					return;
+
 				isFallDamage = true;
 				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " fell." );
 			} else
