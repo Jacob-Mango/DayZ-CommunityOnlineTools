@@ -524,10 +524,19 @@ modded class PlayerBase
 
 	override string FormatSteamWebhook()
 	{
-		if ( !GetAuthenticatedPlayer() )
-			return super.FormatSteamWebhook() + " (WARNING)";
+		string name = GetCachedName();
 
-		return GetAuthenticatedPlayer().FormatSteamWebhook();
+		if (!name)
+		{
+			JMPlayerInstance instance = GetAuthenticatedPlayer();
+
+			if (!instance)
+				return super.FormatSteamWebhook() + " (WARNING)";
+
+			return instance.FormatSteamWebhook();
+		}
+
+		return name;
 	}
 #endif
 
