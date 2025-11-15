@@ -131,9 +131,7 @@ class JMSpectatorCamera: JMCameraBase
 		int j;
 
 	#ifdef DIAG_DEVELOPER
-	#ifndef DAYZ_1_28
 		DebugTextWorldSpace dbgTxt;
-	#endif
 	#endif
 
 		if (Class.CastTo(weapon, hands))
@@ -401,10 +399,8 @@ class JMSpectatorCamera: JMCameraBase
 
 					#ifdef DIAG_DEVELOPER
 						g_Game.Chat("COT dollycam: Jump/climb detected, not reversing", "colorAction");
-					#ifndef DAYZ_1_28
 						dbgTxt = Debug.DrawTextWS(segPitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
 						g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
-					#endif
 					#endif
 					}
 				}
@@ -511,10 +507,8 @@ class JMSpectatorCamera: JMCameraBase
 						if (m_COT_DollyCamJumpClimbTimeout == 0)
 						{
 							g_Game.Chat("COT dollycam: Jump/climb detected", "colorAction");
-					#ifndef DAYZ_1_28
 							dbgTxt = Debug.DrawTextWS(pitch.ToString(), pos, 20.0, COLOR_GREEN, 0);
 							g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Debug.RemoveTextWS, 3000, false, dbgTxt);
-					#endif
 						}
 					#endif
 
