@@ -532,9 +532,9 @@ modded class PlayerBase
 
 		switch (GetInstanceType())
 		{
-			case INSTANCETYPE_AI_SERVER:
-			case INSTANCETYPE_AI_REMOTE:
-			case INSTANCETYPE_AI_SINGLEPLAYER:
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_SERVER:
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_REMOTE:
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_SINGLEPLAYER:
 				return name;
 		}
 
