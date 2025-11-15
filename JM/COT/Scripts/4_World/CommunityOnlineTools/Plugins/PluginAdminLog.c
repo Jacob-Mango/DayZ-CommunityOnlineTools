@@ -219,12 +219,14 @@ modded class PluginAdminLog
 				hitMessage += "Shock: " + shockDmg + "\n";
 		}
 
-		hitMessage += "Zone: " + dmgZone + "\n";
+		if (dmgZone)
+			hitMessage += "Zone: " + dmgZone + "\n";
 
 		if (!isFallDamage)
-			hitMessage += "Ammo: " + ammo + "\n";
+			hitMessage += "Type: " + ammo + "\n";
 
-		embed.AddField( "Damage Breakdown", hitMessage );
+		if (hitMessage)
+			embed.AddField( "Damage Breakdown", hitMessage );
 
 		m_Webhook.Post( "PlayerDamage", message );
 	}
