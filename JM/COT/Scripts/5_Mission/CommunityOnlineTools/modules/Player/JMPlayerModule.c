@@ -1089,14 +1089,16 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		playerSpectator.COT_RememberVehicle();
+		if (m_Spectators[ident.GetId()] != playerSpectator)
+		{
+			playerSpectator.COT_RememberVehicle();
+			playerSpectator.SetLastPosition();
 
-		playerSpectator.SetLastPosition();
+			m_Spectators[ident.GetId()] = playerSpectator;
+		}
 
 		playerSpectator.m_JM_SpectatedObject = spectateObject;
 		playerSpectator.m_JM_CameraPosition = vector.Zero;
-
-		m_Spectators[ident.GetId()] = playerSpectator;
 
 		playerSpectator.COT_TempDisableOnSelectPlayer();
 
