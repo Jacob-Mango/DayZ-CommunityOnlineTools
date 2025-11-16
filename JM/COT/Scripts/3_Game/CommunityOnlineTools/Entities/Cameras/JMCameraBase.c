@@ -37,7 +37,7 @@ class JMCameraBase: Camera
 
 	void JMCameraBase()
 	{
-		SetEventMask( EntityEvent.FRAME );
+		SetEventMask(EntityEvent.FRAME | EntityEvent.POSTFRAME);
 
 	#ifndef SERVER
 		if (COT_PreviousActiveCamera)
@@ -83,8 +83,16 @@ class JMCameraBase: Camera
 		SelectedTarget = target;
 	}
 
+	float m_COT_OnFrame_TimeSlice;
 	override void EOnFrame( IEntity other, float timeSlice )
 	{
+		m_COT_OnFrame_TimeSlice = timeSlice;
+	}
+
+	override void EOnPostFrame( IEntity other, int extra )
+	{
+		float timeSlice = m_COT_OnFrame_TimeSlice;
+
 		if ( SendUpdateAccumalator > 0.5 )
 		{
 			g_Game.UpdateSpectatorPosition( GetPosition() );
