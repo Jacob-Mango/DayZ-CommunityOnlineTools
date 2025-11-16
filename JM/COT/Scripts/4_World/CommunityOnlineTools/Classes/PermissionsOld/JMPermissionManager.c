@@ -247,10 +247,15 @@ class JMPermissionManager
 	{
 		foreach (string permission: permissions)
 		{
-			if (!requireAll)
-				return HasPermission(permission, identity, instance);
-			else
+			if (HasPermission(permission, identity, instance))
+			{
+				if (!requireAll)
+					return true;
+			}
+			else if (requireAll)
+			{
 				return false;
+			}
 		}
 
 		return true;
