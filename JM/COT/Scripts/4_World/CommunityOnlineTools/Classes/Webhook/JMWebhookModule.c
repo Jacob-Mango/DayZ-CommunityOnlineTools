@@ -58,6 +58,8 @@ class JMWebhookModule: JMModuleBase
 		auto trace = CF_Trace_0(this, "OnInit");
 		#endif
 
+	#ifdef SERVER
+		//! Dedicated server
 		string serverCfg;
 		g_Game.CommandlineGetParam( "config", serverCfg );
 
@@ -82,6 +84,10 @@ class JMWebhookModule: JMModuleBase
 
 			delete cfg;
 		}
+	#else
+		//! Client or singleplayer/offline mode
+		m_ServerHostName = GetGame().GetHostName();
+	#endif
 
 		m_Settings = GetCOTWebhookSettings();
 
