@@ -33,6 +33,8 @@ modded class DayZPlayerImplement
 
 	void OnSpectateStart( JMSpectatorCamera camera )
 	{
+		CF_Log.Debug("OnSpectateStart " + camera);
+
 		m_SpectatorCamera = camera;
 
 		if (m_SpectatorCamera && !m_SpectatorCamera.m_JM_3rdPerson)
@@ -41,6 +43,8 @@ modded class DayZPlayerImplement
 
 	void OnSpectateEnd()
 	{
+		CF_Log.Debug("OnSpectateEnd " + m_SpectatorCamera);
+
 		m_SpectatorCamera = NULL;
 
 		if (m_JM_IsHeadInvisible)
@@ -94,6 +98,8 @@ modded class DayZPlayerImplement
 
 	void SetHeadInvisible( bool invisible )
 	{
+		CF_Log.Debug("SetHeadInvisible " + invisible);
+
 		if ( !m_PlayerHead )
 		{
 			int slot_id = InventorySlots.GetSlotIdFromString( "Head" );
