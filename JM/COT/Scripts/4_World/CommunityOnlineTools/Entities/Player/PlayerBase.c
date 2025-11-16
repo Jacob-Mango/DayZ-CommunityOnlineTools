@@ -806,9 +806,11 @@ modded class PlayerBase
 
 	override bool IsRestrained()
 	{
-		if (g_Game.GetPlayer() != this && GetCommunityOnlineToolsBase().IsActive())
+		if (!g_Game.IsDedicatedServer() && g_Game.GetPlayer() != this && g_cotBase && g_cotBase.IsActive())
+		{
 			if ( GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory" ) || m_JMIsFrozen)
 				return true;
+		}
 
 		return super.IsRestrained();
 	}
