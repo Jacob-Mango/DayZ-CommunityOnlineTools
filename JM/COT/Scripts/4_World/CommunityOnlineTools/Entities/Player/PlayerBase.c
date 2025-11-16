@@ -535,6 +535,15 @@ modded class PlayerBase
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_SERVER:
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_REMOTE:
 			case DayZPlayerInstanceType.INSTANCETYPE_AI_SINGLEPLAYER:
+			#ifdef EXPANSIONMODAI
+				eAIGroup group = GetGroup();
+				if (group)
+				{
+					string groupName = group.GetName();
+					if (groupName)
+						name += string.Format(" (%1)", groupName);
+				}
+			#endif
 				return "AI " + name;
 		}
 
