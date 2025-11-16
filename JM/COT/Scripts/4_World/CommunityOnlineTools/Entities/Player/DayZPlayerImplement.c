@@ -58,13 +58,17 @@ modded class DayZPlayerImplement
 	}
 
 #ifndef SERVER
+	float m_COT_OnFrame_TimeSlice;
 	override void EOnFrame( IEntity other, float timeSlice )
 	{
-		UpdateSpecatorCamera(timeSlice);
+		m_COT_OnFrame_TimeSlice = timeSlice;
 	}
 
 	override void EOnPostFrame( IEntity other, int extra )
 	{
+		//! IMPORTANT: This NEEDS to be in EOnPostFrame, not EOnFrame, else 1st and 3rd person jitter like crazy under 1.29
+		UpdateSpecatorCamera(m_COT_OnFrame_TimeSlice);  
+
 		if (m_SpectatorCamera)
 		{
 			EntityAI hands = GetHumanInventory().GetEntityInHands();
