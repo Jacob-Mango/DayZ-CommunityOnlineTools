@@ -154,7 +154,7 @@ class JMCameraModule: JMRenderableModuleBase
 						rpc.Write(CurrentActiveCamera.GetPosition());
 						rpc.Send(player, JMCameraModuleRPC.UpdatePosition, true, NULL);
 					}
-					else if (!player.m_JM_SpectatedPlayer)
+					else if (!player.m_JM_SpectatedObject)
 					{
 						EnterFullmap(player);
 						player.m_JM_CameraPosition = CurrentActiveCamera.GetPosition();
@@ -304,6 +304,7 @@ class JMCameraModule: JMRenderableModuleBase
 		auto trace = CF_Trace_2(this, "Server_Enter").Add(sender).Add(target.ToString());
 		#endif
 
+		vector transform[4];
 		vector position = Vector( 0, 0, 0 );
 
 		PlayerBase player;
@@ -311,16 +312,19 @@ class JMCameraModule: JMRenderableModuleBase
 		{
 			player.COT_RememberVehicle();
 
-			if (player.m_JM_SpectatedPlayer)
-				player = player.m_JM_SpectatedPlayer;
+			PlayerBase spectatedPlayer;
+			if (Class.CastTo(spectatedPlayer, player.m_JM_SpectatedObject))
+				player = spectatedPlayer;
 
-			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) ) + player.GetDirection() * 0.12;
+			GetCommunityOnlineToolsBase().GetHeadTransform(player, transform, true);
 			//player.GetInputController().SetDisabled( true );
 		}
 		else if ( target )
 		{
-			position = target.GetPosition();
+			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
 		}
+
+		position = transform[3];
 
 		if ( IsMissionOffline() )
 		{
@@ -456,7 +460,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 		{
 			vector spectatorPosition = player.GetPosition();
 			int waitForPlayerIdleTimeout;
-			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+			if (!player.m_JM_SpectatedObject && player.m_JM_CameraPosition != vector.Zero)
 			{
 				player.COTResetSpectator();
 
@@ -482,8 +486,8 @@ Print("JMCameraModule::Server_Leave - target " + target);
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
-Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_SpectatedPlayer);
-			if (player.m_JM_SpectatedPlayer)
+Print("JMCameraModule::Server_Leave - spectated object " + player.m_JM_SpectatedObject);
+			if (player.m_JM_SpectatedObject)
 				return;
 
 			if (!waitForPlayerIdleTimeout)
@@ -525,7 +529,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 			return;
 
 		PlayerBase player;
-		if (!Class.CastTo(player, senderRPC.GetPlayer()) || player.m_JM_SpectatedPlayer)
+		if (!Class.CastTo(player, senderRPC.GetPlayer()) || player.m_JM_SpectatedObject)
 			return;
 
 		g_Game.SelectPlayer(senderRPC, player);
@@ -549,10 +553,10 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 			PlayerBase player;
 			if (Class.CastTo(player, target))
 			{
-				if (!player.m_JM_SpectatedPlayer)
+				if (!player.m_JM_SpectatedObject)
 					EnterFullmap(player);
 				player.m_JM_CameraPosition = position;
-				if (!player.m_JM_SpectatedPlayer)
+				if (!player.m_JM_SpectatedObject)
 					player.COTUpdateSpectatorPosition();
 			}
 		}

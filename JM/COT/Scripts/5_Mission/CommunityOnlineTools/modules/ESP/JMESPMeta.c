@@ -44,6 +44,7 @@ class JMESPMeta: COT_WidgetHolder
 
 	UIActionButton m_Action_Delete;
 	UIActionButton m_HealButton;
+	UIActionButton m_SpectateButton;
 
 	bool m_ActionsInitialized;
 
@@ -208,6 +209,13 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
+
+		if ( (networkLow || networkHigh) )
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			m_SpectateButton  = UIActionManager.CreateButton( parent, "Spectate",  this, "Action_Spectate" );
+		}
 
 		if ( (networkLow || networkHigh || !g_Game.IsMultiplayer()) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
 		{
@@ -536,6 +544,20 @@ class JMESPMeta: COT_WidgetHolder
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_ERROR_CANNOT_HEAL_DEAD_CREATURE" ) );
 		else
 			module.Heal( target );
+	}
+
+	void Action_Spectate( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMPlayerModule playerModule = CF_Modules<JMPlayerModule>.Get();
+
+		JMSpectatorCamera spectatorCamera;
+		if (Class.CastTo(spectatorCamera, CurrentActiveCamera) && spectatorCamera.SelectedTarget == target)
+			playerModule.EndSpectating();
+		else
+			playerModule.StartSpectating(target);
 	}
 }
 
