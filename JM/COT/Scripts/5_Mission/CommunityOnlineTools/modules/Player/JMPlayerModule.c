@@ -1139,7 +1139,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "Client_StartSpectating").Add(spectateObject.ToString());
 #endif
 
-		Print("Starting spectate, timestamp " + g_Game.GetTickTime());
+		CF_Log.Debug("JMPlayerModule::Client_StartSpectating " + spectateObject);
 		
 		if (COT_PreviousActiveCamera)
 			COT_PreviousActiveCamera.SetActive( false );
@@ -1203,7 +1203,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			COT_PreviousActiveCamera = CurrentActiveCamera;
 
-			Print("Starting spectate, waiting for spectate object, timestamp " + g_Game.GetTickTime());
+			CF_Log.Debug("Starting spectate, waiting for spectate object");
 			Client_Check_StartSpectating(networkLow, networkHigh);
 		}
 	}
@@ -1254,7 +1254,7 @@ class JMPlayerModule: JMRenderableModuleBase
 #endif
 
 		PlayerBase playerSpectator = m_Spectators[ident.GetId()];
-Print("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
+		CF_Log.Debug("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
 		if (!playerSpectator)
 			return;
 
@@ -1269,7 +1269,7 @@ Print("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
 
 		bool switchToPreviousCamera = true;
 		int waitForPlayerIdleTimeout;
-Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectator.m_JM_CameraPosition);
+		CF_Log.Debug("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectator.m_JM_CameraPosition);
 		if (playerSpectator.m_JM_CameraPosition == vector.Zero)
 		{
 			switchToPreviousCamera = false;
@@ -1300,9 +1300,9 @@ Print("JMPlayerModule::Server_EndSpectating - freecam position " + playerSpectat
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Client_EndSpectating");
 #endif
-Print("JMPlayerModule::Client_EndSpectating - switch to prev cam requested? " + switchToPreviousCamera);
-Print("JMPlayerModule::Client_EndSpectating - current cam " + CurrentActiveCamera);
-Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCamera);
+		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - switch to prev cam requested? " + switchToPreviousCamera);
+		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - current cam " + CurrentActiveCamera);
+		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCamera);
 		m_SpectatorCamera.SelectedTarget( NULL );
 
 		if ( CurrentActiveCamera == m_SpectatorCamera )
@@ -1312,18 +1312,18 @@ Print("JMPlayerModule::Client_EndSpectating - prev cam " + COT_PreviousActiveCam
 
 			if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMCinematicCamera) && switchToPreviousCamera)
 			{
-Print("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_PreviousActiveCamera);
+				CF_Log.Debug("JMPlayerModule::Client_EndSpectating - switching to prev cam " + COT_PreviousActiveCamera);
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
 				waitForPlayerIdleTimeout = 0;
 			}
 			else
 			{
-Print("JMPlayerModule::Client_EndSpectating - leaving current cam " + CurrentActiveCamera);
+				CF_Log.Debug("JMPlayerModule::Client_EndSpectating - leaving current cam " + CurrentActiveCamera);
 				PPEffects.ResetDOFOverride();
 
-Print("JMPlayerModule::Client_EndSpectating - player " + m_SpectatorClient);
-Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_SpectatorClient == g_Game.GetPlayer()));
+				CF_Log.Debug("JMPlayerModule::Client_EndSpectating - player " + m_SpectatorClient);
+				CF_Log.Debug("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_SpectatorClient == g_Game.GetPlayer()));
 				if ( m_SpectatorClient )
 				{
 					m_SpectatorClient.GetInputController().SetDisabled( false );
@@ -1341,13 +1341,13 @@ Print("JMPlayerModule::Client_EndSpectating - player is game player? " + (m_Spec
 
 		if (waitForPlayerIdleTimeout)
 		{
-Print("JMPlayerModule::Client_EndSpectating - waiting for player to be idle, timestamp " + g_Game.GetTickTime());
+			CF_Log.Debug("JMPlayerModule::Client_EndSpectating - waiting for player to be idle");
 			m_SpectatorClient.COT_EnableBonePositionUpdate(true);
 			Client_Check_EndSpectating(m_SpectatorClient, waitForPlayerIdleTimeout);
 			if (waitForPlayerIdleTimeout > 1000)
 				COTCreateLocalAdminNotification(new StringLocaliser("Stopping spectating..."));
 		}
-Print("JMPlayerModule::Client_EndSpectating - stopped spectating");
+		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	}
 
 	void Client_Check_EndSpectating(PlayerBase playerSpectator, int waitForPlayerIdleTimeout)
@@ -1358,7 +1358,7 @@ Print("JMPlayerModule::Client_EndSpectating - stopped spectating");
 		}
 		else
 		{
-Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + g_Game.GetTickTime());
+			CF_Log.Debug("JMPlayerModule::Client_Check_EndSpectating - player idle");
 			playerSpectator.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
@@ -1372,7 +1372,7 @@ Print("JMPlayerModule::Client_Check_EndSpectating - player idle, timestamp " + g
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating").Add(senderRPC).Add(target);
 #endif
-Print("JMPlayerModule::RPC_EndSpectating - timestamp " + g_Game.GetTickTime());
+		CF_Log.Debug("JMPlayerModule::RPC_EndSpectating");
 		if ( IsMissionHost() )
 		{
 			JMPlayerInstance instance;
@@ -1399,7 +1399,7 @@ Print("JMPlayerModule::RPC_EndSpectating - timestamp " + g_Game.GetTickTime());
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_EndSpectating_Finish").Add(senderRPC).Add(target);
 #endif
-		Print("JMPlayerModule::RPC_EndSpectating_Finish - timestamp " + g_Game.GetTickTime());
+		CF_Log.Debug("JMPlayerModule::RPC_EndSpectating_Finish");
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 			return;
