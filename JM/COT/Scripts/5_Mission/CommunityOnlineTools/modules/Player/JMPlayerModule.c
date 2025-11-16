@@ -1012,6 +1012,23 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
+		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer(guid);
+		if (!spectateInstance)
+			return;
+
+		PlayerBase spectatePlayer = spectateInstance.PlayerObject;
+		if (!spectatePlayer)
+			return;
+	
+		StartSpectating(spectatePlayer);
+	}
+
+	void StartSpectating(Object spectateObject)
+	{
+#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "StartSpectating").Add(spectateObject);
+#endif
+
 		if (GetPlayer().GetCommand_Vehicle())
 		{
 			COTCreateLocalAdminNotification(new StringLocaliser("Cannot spectate while in a vehicle. Please leave the vehicle first."));
@@ -1032,8 +1049,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			m_SpectatorClient = GetPlayer();
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( guid );
-			rpc.Send( NULL, JMPlayerModuleRPC.StartSpectating, true, NULL );
+			rpc.Send( spectateObject, JMPlayerModuleRPC.StartSpectating, true, NULL );
 		}
 	}
 
@@ -1047,14 +1063,18 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !spectateInstance )
 			return;
 
-		PlayerBase spectatePlayer = PlayerBase.Cast( spectateInstance.PlayerObject );
+		PlayerBase spectatePlayer = spectateInstance.PlayerObject;
 		if ( !spectatePlayer )
 			return;
 
-#ifdef JM_COT_DIAG_LOGGING
-		Print(spectatePlayer);
-#endif
+		Server_StartSpectating(spectatePlayer, ident);
+	}
 
+	private void Server_StartSpectating(Object spectateObject, PlayerIdentity ident)
+	{
+#ifdef JM_COT_DIAG_LOGGING
+		Print(spectateObject);
+#endif
 		PlayerBase playerSpectator = GetPlayerObjectByIdentity( ident );
 		if ( !playerSpectator )
 			return;
@@ -1063,7 +1083,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		Print(playerSpectator);
 #endif
 
-		if ( playerSpectator == spectatePlayer )
+		if ( playerSpectator == spectateObject )
 		{
 			COTCreateNotification(ident, new StringLocaliser("You can't spectate yourself"));
 			return;
@@ -1073,7 +1093,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		playerSpectator.SetLastPosition();
 
-		playerSpectator.m_JM_SpectatedPlayer = spectatePlayer;
+		playerSpectator.m_JM_SpectatedObject = spectateObject;
 		playerSpectator.m_JM_CameraPosition = vector.Zero;
 
 		m_Spectators[ident.GetId()] = playerSpectator;
@@ -1082,26 +1102,39 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		g_Game.SelectPlayer( ident, NULL );
 
-		vector position = spectatePlayer.GetBonePositionWS( spectatePlayer.GetBoneIndexByName( "Head" ) );
+		vector transform[4];
+		GetCommunityOnlineToolsBase().GetHeadTransform(spectateObject, transform);
+		vector position = transform[3];
+
 		g_Game.SelectSpectator( ident, "JMSpectatorCamera", position );
 
 		playerSpectator.COTSetGodMode( true, false );  //! Enable godmode and remember previous state of GetAllowDamage
 		playerSpectator.COTUpdateSpectatorPosition();
 
+		Server_OnStartSpectating(spectateObject, ident);
+
 		ScriptRPC rpc = new ScriptRPC();
 		int networkLow, networkHigh;
-		spectatePlayer.GetNetworkID(networkLow, networkHigh);
+		spectateObject.GetNetworkID(networkLow, networkHigh);
 		rpc.Write(networkLow);
 		rpc.Write(networkHigh);
 		rpc.Send( NULL, JMPlayerModuleRPC.StartSpectating, true, ident );
 
-		GetCommunityOnlineToolsBase().Log( ident, "Spectating [guid=" + guid + "]" );
+		PlayerBase spectatePlayer;
+		if (Class.CastTo(spectatePlayer, spectateObject) && spectatePlayer.GetAuthenticatedPlayer())
+			GetCommunityOnlineToolsBase().Log( ident, "Spectating [guid=" + spectatePlayer.GetAuthenticatedPlayer().GetGUID() + "]" );
+		else
+			GetCommunityOnlineToolsBase().Log( ident, "Spectating " + spectateObject );
 	}
 
-	private void Client_StartSpectating( PlayerBase player )
+	void Server_OnStartSpectating(Object spectateObject, PlayerIdentity ident)
+	{
+	}
+
+	private void Client_StartSpectating(Object spectateObject)
 	{
 #ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_1(this, "Client_StartSpectating").Add(player.ToString());
+		auto trace = CF_Trace_1(this, "Client_StartSpectating").Add(spectateObject.ToString());
 #endif
 
 		Print("Starting spectate, timestamp " + g_Game.GetTickTime());
@@ -1111,7 +1144,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( CurrentActiveCamera )
 		{
-			CurrentActiveCamera.SelectedTarget( player );
+			CurrentActiveCamera.SelectedTarget( spectateObject );
 			CurrentActiveCamera.SetActive( true );
 			m_SpectatorCamera = CurrentActiveCamera;
 			
@@ -1126,6 +1159,12 @@ class JMPlayerModule: JMRenderableModuleBase
 				GetPlayer().GetInputController().SetDisabled( true );
 			}
 		}
+
+		Client_OnStartSpectating(spectateObject);
+	}
+
+	void Client_OnStartSpectating(Object spectateObject)
+	{
 	}
 
 	private void RPC_StartSpectating( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1136,15 +1175,21 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
-			string guid;
-			if ( !ctx.Read( guid ) )
-				return;
+			if (!target)
+			{
+				string guid;
+				if (!ctx.Read(guid))
+					return;
+			}
 
 			JMPlayerInstance instance;
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
 				return;
 
-			Server_StartSpectating( guid, senderRPC );
+			if (!target)
+				Server_StartSpectating(guid, senderRPC);
+			else
+				Server_StartSpectating(target, senderRPC);
 		} else
 		{
 			int networkLow, networkHigh;
@@ -1156,18 +1201,18 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			COT_PreviousActiveCamera = CurrentActiveCamera;
 
-			Print("Starting spectate, waiting for player object, timestamp " + g_Game.GetTickTime());
+			Print("Starting spectate, waiting for spectate object, timestamp " + g_Game.GetTickTime());
 			Client_Check_StartSpectating(networkLow, networkHigh);
 		}
 	}
 
 	void Client_Check_StartSpectating(int networkLow, int networkHigh)
 	{
-		PlayerBase player;
-		if (!Class.CastTo(CurrentActiveCamera, Camera.GetCurrentCamera()) || !Class.CastTo(player, g_Game.GetObjectByNetworkId(networkLow, networkHigh)))
+		Object spectateObject = g_Game.GetObjectByNetworkId(networkLow, networkHigh);
+		if (!Class.CastTo(CurrentActiveCamera, Camera.GetCurrentCamera()) || !spectateObject)
 			g_Game.GetCallQueue(CALL_CATEGORY_GAMEPLAY).CallLater(Client_Check_StartSpectating, 34, false, networkLow, networkHigh);
 		else if (CurrentActiveCamera.IsInherited(JMSpectatorCamera))
-			Client_StartSpectating(player);
+			Client_StartSpectating(spectateObject);
 	}
 
 	void UpdateSpectatorPositions()
@@ -1177,7 +1222,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		foreach ( PlayerBase playerSpectator: m_Spectators )
 		{
-			if ( playerSpectator && playerSpectator.m_JM_SpectatedPlayer)
+			if ( playerSpectator && playerSpectator.m_JM_SpectatedObject)
 				playerSpectator.COTUpdateSpectatorPosition();
 		}
 	}
@@ -1211,7 +1256,7 @@ Print("JMPlayerModule::Server_EndSpectating - spectator " + playerSpectator);
 		if (!playerSpectator)
 			return;
 
-		playerSpectator.m_JM_SpectatedPlayer = null;
+		playerSpectator.m_JM_SpectatedObject = null;
 		m_Spectators.Remove( ident.GetId() );
 
 #ifdef JM_COT_DIAG_LOGGING

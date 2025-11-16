@@ -34,7 +34,7 @@ class JMSpectatorCamera: JMCameraBase
 	private float m_COT_SmoothVelPos1[1];
 	private float m_COT_SmoothVelPos2[1];
 
-	protected vector m_COT_LastPlayerPos;
+	protected vector m_COT_LastObjectPos;
 
 	vector m_COT_DollyCamPath[200];
 	int m_COT_DollyCamPathNextIdx;
@@ -42,7 +42,7 @@ class JMSpectatorCamera: JMCameraBase
 	float m_COT_DollyCamPathUpdateDT;
 	float m_COT_DollyCamSpeedMult = 0.433333;
 	float m_COT_DollyCamSpeedMultTgt = 0.433333;
-	float m_COT_PlayerSpeed;
+	float m_COT_SpectatedObjectSpeed;
 	float m_COT_DollyCamJumpClimbTimeout;
 	bool m_COT_DollyCamReversing;
 	Object m_COT_LookAtTarget;
@@ -50,9 +50,26 @@ class JMSpectatorCamera: JMCameraBase
 	ParticleSource m_COT_TargetMarker;
 	Object m_COT_TargetMarker_Object;
 	ScriptedLightBase m_COT_TargetLight;
+
+#ifdef DIAG_DEVELOPER
+	float m_COT_TempFloat01;
+	float m_COT_TempFloat02;
+	float m_COT_TempFloat03;
+	int m_COT_TempInt01;
+	int m_COT_TempInt02;
+	int m_COT_TempInt03;
+	bool m_COT_TempBool01;
+	bool m_COT_TempBool02;
+	bool m_COT_TempBool03;
+	vector m_COT_TempVec01;
+	vector m_COT_TempVec02;
+	vector m_COT_TempVec03;
+#endif
 	
 	override void OnTargetSelected( Object target )
 	{
+		m_JM_CameraPosMS = vector.Zero;
+
 		DayZPlayerImplement impl;
 		if ( !Class.CastTo( impl, target ) )
 			return;
@@ -74,6 +91,7 @@ class JMSpectatorCamera: JMCameraBase
 		//g_Game.SetProfileOptionBool(EDayZProfilesOptions.CROSSHAIR, m_COT_CrosshairEnabled);
 	}
 
+	//! IMPORTANT: This NEEDS to be called from EOnPostFrame, not EOnFrame, else 1st and 3rd person jitter like crazy under 1.29
 	override void OnUpdate( float timeslice )
 	{
 		super.OnUpdate( timeslice );
@@ -88,10 +106,14 @@ class JMSpectatorCamera: JMCameraBase
 				orientation = GetOrientation();
 		}
 		
+		float yawDiff;
+		float pitchDiff;
+		vector dir;
+
 		if ( !LookFreeze || freelook )
 		{
-			float yawDiff = input.LocalValue( "UAAimLeft" ) - input.LocalValue( "UAAimRight" );
-			float pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
+			yawDiff = input.LocalValue( "UAAimLeft" ) - input.LocalValue( "UAAimRight" );
+			pitchDiff = input.LocalValue( "UAAimDown" ) - input.LocalValue( "UAAimUp" );
 		
 			angularVelocity = angularVelocity * CAMERA_SMOOTH;
 
@@ -114,24 +136,28 @@ class JMSpectatorCamera: JMCameraBase
 
 			orientation[0] = Math.NormalizeAngle( orientation[0] );
 			orientation[2] = Math.NormalizeAngle( orientation[2] );
-
-			SetOrientation( orientation );
 		}
-	}
 
-	void OnUpdateEx(DayZPlayerImplement spectatedPlayer, float timeSlice)
-	{
-		vector playerTransform[4];
-		spectatedPlayer.GetTransform(playerTransform);
-		vector playerPos = playerTransform[3];
+		if (!SelectedTarget)
+		{
+			SetOrientation( orientation );
+			return;
+		}
+
+		vector objectTransform[4];
+		SelectedTarget.GetTransform(objectTransform);
+		vector objectPos = objectTransform[3];
 
 		vector headTransform[4];
-		spectatedPlayer.GetBoneTransformWS(spectatedPlayer.GetBoneIndexByName( "Head" ), headTransform);
+		GetCommunityOnlineToolsBase().GetHeadTransform(SelectedTarget, headTransform);
 		vector headPos = headTransform[3];
 
-		float offsetY = headPos[1] - playerPos[1];
+		float offsetY = headPos[1] - objectPos[1];
 
-		EntityAI hands = spectatedPlayer.GetHumanInventory().GetEntityInHands();
+		DayZPlayerImplement spectatedPlayer;
+		EntityAI hands;
+		if (Class.CastTo(spectatedPlayer, SelectedTarget))
+			hands = spectatedPlayer.GetHumanInventory().GetEntityInHands();
 
 		Weapon_Base weapon;
 		vector weaponTransform[4];
@@ -142,8 +168,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector begPos;
 
-		vector dir;
-		vector pos;
+		vector pos = headPos + "0 0.1 0";
 
 		float fov;
 
@@ -170,7 +195,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		if ( !IsActive() )
 		{
-			if (spectatedPlayer.m_JM_IsHeadInvisible)
+			if (spectatedPlayer && spectatedPlayer.m_JM_IsHeadInvisible)
 				spectatedPlayer.SetHeadInvisible(false);
 
 			return;
@@ -192,7 +217,16 @@ class JMSpectatorCamera: JMCameraBase
 				break;
 		}
 
-		if (m_JM_IsADS || weaponRaised)
+		if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
+			fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
+		else
+			fov = GetDayZGame().GetUserFOV();
+
+		if (m_COT_IsInFreeLook)
+		{
+			dir = orientation.AnglesToVector();
+		}
+		else if (m_JM_IsADS || weaponRaised)
 		{
 			//if (optic)
 			//{
@@ -227,17 +261,11 @@ class JMSpectatorCamera: JMCameraBase
 
 			if (!dollyCam)
 				pos = eyePos - dir * 0.06;
-			else
-				pos = headPos + "0 0.1 0";
 
 			if (!m_JM_3rdPerson)
 				fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
-			else if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
-				fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
-			else
-				fov = GetDayZGame().GetUserFOV();
 		}
-		else
+		else if (spectatedPlayer)
 		{
 			//if (optic)
 			//{
@@ -261,22 +289,18 @@ class JMSpectatorCamera: JMCameraBase
 				//! Swimming
 				isSwimming = true;
 
-				dir = playerTransform[2];
+				dir = objectTransform[2];
 				if (m_JM_3rdPerson)
 					pos = headPos + "0 0.5 0";
-				else
-					pos = headPos + "0 0.1 0";
 			}
 			else
 			{
 				dir = headTransform[1];
-				pos = headPos + "0 0.1 0";
 			}
-
-			if (GetUApi().GetInputByID(UAZoomIn).LocalValue())
-				fov = GameConstants.DZPLAYER_CAMERA_FOV_EYEZOOM;
-			else
-				fov = GetDayZGame().GetUserFOV();
+		}
+		else
+		{
+			dir = objectTransform[2];
 		}
 
 		vector cameraPos = GetPosition();
@@ -288,7 +312,7 @@ class JMSpectatorCamera: JMCameraBase
 			if (!isSwimming)
 			{
 				//! Eliminate head bob
-				float stanceHeight = pos[1] - playerPos[1];
+				float stanceHeight = pos[1] - objectPos[1];
 
 				if (stanceHeight < 0.6)
 					stanceHeight = 0.5;  //! Prone
@@ -297,7 +321,7 @@ class JMSpectatorCamera: JMCameraBase
 				else
 					stanceHeight = 1.6;  //! Standing
 
-				pos = playerPos;
+				pos = objectPos;
 				pos[1] = pos[1] + stanceHeight;
 			}
 
@@ -313,7 +337,7 @@ class JMSpectatorCamera: JMCameraBase
 
 				//! Raycast in spectated entity look direction to check for a suitable target to look at
 				if (DayZPhysics.RaycastRV(begPos, begPos + dir * 1000, hitPos, hitDir, component, results,
-										  null, spectatedPlayer, false, false, ObjIntersectView, 0.2))
+										  null, SelectedTarget, false, false, ObjIntersectView, 0.2))
 				{
 					foreach (Object result: results)
 					{
@@ -349,7 +373,7 @@ class JMSpectatorCamera: JMCameraBase
 
 					//! Raycast from camera to target to check whether view is obstructed or not
 					if (DayZPhysics.RaycastRV(cameraPos, targetPos, hitPos, hitDir, component, results,
-											  null, spectatedPlayer, false, false, ObjIntersectView))
+											  null, SelectedTarget, false, false, ObjIntersectView))
 					{
 						if (vector.DistanceSq(cameraPos, hitPos) < cameraDistToTargetSq - 0.04)
 						{
@@ -357,7 +381,7 @@ class JMSpectatorCamera: JMCameraBase
 							if (target == m_COT_LookAtTarget)
 							{
 								//! View to target wasn't obstructed before, tick up time before we discard target
-								m_COT_LookAtTarget_Time += timeSlice;
+								m_COT_LookAtTarget_Time += timeslice;
 								if (m_COT_LookAtTarget_Time > Math.Lerp(1.5, 3, angleDiff / 360))
 									target = null;
 							}
@@ -377,7 +401,7 @@ class JMSpectatorCamera: JMCameraBase
 						//vector.Dot(dir, toTargetDir) < -0.9239
 						if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
 						{
-							m_COT_LookAtTarget_Time += timeSlice;
+							m_COT_LookAtTarget_Time += timeslice;
 							if (m_COT_LookAtTarget_Time > Math.Lerp(3, 5, angleDiff / 360))
 								target = null;
 						}
@@ -467,26 +491,23 @@ class JMSpectatorCamera: JMCameraBase
 		vector fromOri = GetOrientation();
 		vector targetOri = Math.COT_DirToOri(dir);
 
-		float yawDiff;
-		float pitchDiff;
-
 		float dollyCamSpeedMultMin = 0.3;  //! Fastest
 		float dollyCamSpeedMultMax = 0.5;  //! Slowest
 		float dollyCamSpeedMult;
 
-		bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
+		//bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
 
-		vector playerMovementDir = playerPos - m_COT_LastPlayerPos;
-		playerMovementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
-		vector playerVelocity = playerMovementDir * (1.0 / timeSlice);  //! GetVelocity(spectatedPlayer) returns 0 on client
-		playerMovementDir.Normalize();
-		m_COT_PlayerSpeed = Math.Lerp(m_COT_PlayerSpeed, playerVelocity.Length(), timeSlice * 2);
-		float playerSpeedInverse01 = Math.Max(1 - m_COT_PlayerSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
+		vector movementDir = objectPos - m_COT_LastObjectPos;
+		movementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
+		vector spectatedObjectVelocity = movementDir * (1.0 / timeslice);  //! GetVelocity(spectatedPlayer) returns 0 on client
+		movementDir.Normalize();
+		m_COT_SpectatedObjectSpeed = Math.Lerp(m_COT_SpectatedObjectSpeed, spectatedObjectVelocity.Length(), timeslice * 2);
+		float spectatedObjectSpeedInverse01 = Math.Max(1 - m_COT_SpectatedObjectSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
 
 	/*
 		if (isUnderRoofBuilding)
 		{
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, Math.Min(m_COT_DollyCamSpeedMultTgt, 0.4), timeSlice);
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, Math.Min(m_COT_DollyCamSpeedMultTgt, 0.4), timeslice);
 			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
 		}
 		else
@@ -497,12 +518,12 @@ class JMSpectatorCamera: JMCameraBase
 			else if (GetUApi().GetInputByName("UACameraToolSpeedDecrease").LocalValue())
 				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt + 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
 
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, m_COT_DollyCamSpeedMultTgt, timeSlice * 4);
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, m_COT_DollyCamSpeedMultTgt, timeslice * 4);
 
 			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
 
-			float speedAdjustment = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, playerSpeedInverse01);
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, speedAdjustment, timeSlice * 4);
+			float speedAdjustment = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, spectatedObjectSpeedInverse01);
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, speedAdjustment, timeslice * 4);
 		}
 
 		float distSqThresh = 1.0 * m_COT_DollyCamSpeedMult;
@@ -515,17 +536,21 @@ class JMSpectatorCamera: JMCameraBase
 		targetOri[0] = fromOri[0] + yawDiff;
 		targetOri[1] = fromOri[1] + pitchDiff;
 
-		if (m_JM_3rdPerson)
+		if (m_COT_IsInFreeLook)
 		{
-			ori[0] = Math.SmoothCD(fromOri[0], targetOri[0], m_COT_SmoothVelDir0, speed, 1000, timeSlice);
-			ori[1] = Math.SmoothCD(fromOri[1], targetOri[1], m_COT_SmoothVelDir1, speed, 1000, timeSlice);
+			ori = orientation;
+		}
+		else if (m_JM_3rdPerson)
+		{
+			ori[0] = Math.SmoothCD(fromOri[0], targetOri[0], m_COT_SmoothVelDir0, speed, 1000, timeslice);
+			ori[1] = Math.SmoothCD(fromOri[1], targetOri[1], m_COT_SmoothVelDir1, speed, 1000, timeslice);
 		}
 		else
 		{
-			ori = vector.Lerp(fromOri, targetOri, timeSlice * CAMERA_FOV_SPEED_MODIFIER);
+			ori = vector.Lerp(fromOri, targetOri, timeslice * CAMERA_FOV_SPEED_MODIFIER);
 		}
 
-		m_COT_DollyCamPathUpdateDT += timeSlice;
+		m_COT_DollyCamPathUpdateDT += timeslice;
 
 		if (m_COT_DollyCamPathUpdateDT > 0.0333333)
 		{
@@ -564,7 +589,7 @@ class JMSpectatorCamera: JMCameraBase
 					g_Game.Chat("COT dollycam: Depleted jump/climb timeout", "colorAction");
 			#endif
 			}
-			else if (dollyCam && !isSwimming && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && playerMovementDir.LengthSq() > 0.0001)
+			else if (dollyCam && !isSwimming && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && movementDir.LengthSq() > 0.0001)
 			{
 				vector prevPoint = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 2];
 				vector lastSegDir = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 1] - prevPoint;
@@ -588,7 +613,7 @@ class JMSpectatorCamera: JMCameraBase
 				{
 					lastSegDir.Normalize();
 
-					float dot = vector.Dot(playerMovementDir, lastSegDir);
+					float dot = vector.Dot(movementDir, lastSegDir);
 
 					bool reversing = (dot < 0.0);
 
@@ -611,7 +636,7 @@ class JMSpectatorCamera: JMCameraBase
 				int smallestDistIdx;
 				vector point;
 
-				//! Find closest point on path to current player pos
+				//! Find closest point on path to spectated object current pos
 				for (i = m_COT_DollyCamPathNextIdx; i >= 0; --i)
 				{
 					point = m_COT_DollyCamPath[i];
@@ -755,7 +780,7 @@ class JMSpectatorCamera: JMCameraBase
 			/*
 				if (weaponRaised)
 				{
-					targetDist *= playerSpeedInverse01;
+					targetDist *= spectatedObjectSpeedInverse01;
 
 					float targetDistSq = targetDist * targetDist;
 
@@ -782,10 +807,10 @@ class JMSpectatorCamera: JMCameraBase
 		else if (!m_JM_IsADS)
 		{
 			targetDist = 0.06;
-			pos = pos + playerTransform[2] * targetDist;
+			pos = pos + objectTransform[2] * targetDist;
 		}
 
-		m_COT_LastPlayerPos = playerPos;
+		m_COT_LastObjectPos = objectPos;
 
 		SetOrientation(ori);
 
@@ -802,7 +827,7 @@ class JMSpectatorCamera: JMCameraBase
 		if (m_JM_CameraPosMS == vector.Zero)
 		{
 			cameraPos = pos;
-			m_JM_CameraPosMS = pos.InvMultiply4(playerTransform);
+			m_JM_CameraPosMS = pos.InvMultiply4(objectTransform);
 		}
 		else
 		{
@@ -810,24 +835,24 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				//! Interpolate in world space to give cinematic look
 
-				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
-				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
-				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeSlice);
+				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeslice);
+				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * m_COT_DollyCamSpeedMult, 10000, timeslice);
+				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeslice);
 
-				m_JM_CameraPosMS = cameraPos.InvMultiply4(playerTransform);
+				m_JM_CameraPosMS = cameraPos.InvMultiply4(objectTransform);
 			}
 			else
 			{
 				//! Interpolate in model space so camera sticks to character
-				pos = pos.InvMultiply4(playerTransform);
+				pos = pos.InvMultiply4(objectTransform);
 
-				m_JM_CameraPosMS = vector.Lerp(m_JM_CameraPosMS, pos, timeSlice * CAMERA_FOV_SPEED_MODIFIER);
+				m_JM_CameraPosMS = vector.Lerp(m_JM_CameraPosMS, pos, timeslice * CAMERA_FOV_SPEED_MODIFIER);
 
-				//m_JM_CameraPosMS[0] = Math.SmoothCD(m_JM_CameraPosMS[0], pos[0], m_COT_SmoothVelPos0, 0.3, 1000, timeSlice);
-				//m_JM_CameraPosMS[1] = Math.SmoothCD(m_JM_CameraPosMS[1], pos[1], m_COT_SmoothVelPos1, 0.3, 1000, timeSlice);
-				//m_JM_CameraPosMS[2] = Math.SmoothCD(m_JM_CameraPosMS[2], pos[2], m_COT_SmoothVelPos2, 0.3, 1000, timeSlice);
+				//m_JM_CameraPosMS[0] = Math.SmoothCD(m_JM_CameraPosMS[0], pos[0], m_COT_SmoothVelPos0, 0.3, 1000, timeslice);
+				//m_JM_CameraPosMS[1] = Math.SmoothCD(m_JM_CameraPosMS[1], pos[1], m_COT_SmoothVelPos1, 0.3, 1000, timeslice);
+				//m_JM_CameraPosMS[2] = Math.SmoothCD(m_JM_CameraPosMS[2], pos[2], m_COT_SmoothVelPos2, 0.3, 1000, timeslice);
 
-				cameraPos = m_JM_CameraPosMS.Multiply4(playerTransform);
+				cameraPos = m_JM_CameraPosMS.Multiply4(objectTransform);
 			}
 		}
 
@@ -837,13 +862,16 @@ class JMSpectatorCamera: JMCameraBase
 
 		SetPosition( cameraPos );
 
-		float cameraDistanceToHeadSq = vector.DistanceSq(cameraPos, headPos);
-		if (cameraDistanceToHeadSq < 0.0625 && !spectatedPlayer.m_JM_IsHeadInvisible)
-			spectatedPlayer.SetHeadInvisible(true);
-		else if (m_JM_3rdPerson && cameraDistanceToHeadSq >= 0.0625 && spectatedPlayer.m_JM_IsHeadInvisible)
-			spectatedPlayer.SetHeadInvisible(false);
+		if (spectatedPlayer)
+		{
+			float cameraDistanceToHeadSq = vector.DistanceSq(cameraPos, headPos);
+			if (cameraDistanceToHeadSq < 0.0625 && !spectatedPlayer.m_JM_IsHeadInvisible)
+				spectatedPlayer.SetHeadInvisible(true);
+			else if (m_JM_3rdPerson && cameraDistanceToHeadSq >= 0.0625 && spectatedPlayer.m_JM_IsHeadInvisible)
+				spectatedPlayer.SetHeadInvisible(false);
+		}
 
-		SetFOV( Math.Lerp(GetCurrentFOV(), fov, timeSlice * CAMERA_FOV_SPEED_MODIFIER) );
+		SetFOV( Math.Lerp(GetCurrentFOV(), fov, timeslice * CAMERA_FOV_SPEED_MODIFIER) );
 	}
 
 	bool IsUnderRoofBuilding(DayZPlayerImplement player)

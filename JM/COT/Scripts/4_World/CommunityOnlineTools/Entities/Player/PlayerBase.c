@@ -38,7 +38,8 @@ modded class PlayerBase
 	private ref map<int, bool> m_COT_PlayerVars;
 	private int m_COT_PlayerVarsBitmask;
 
-	PlayerBase m_JM_SpectatedPlayer;
+	PlayerBase m_JM_SpectatedPlayer;  //! Obsolete, unused, kept for compat with 3rd party mods
+	Object m_JM_SpectatedObject;
 	vector m_JM_CameraPosition;
 	private bool m_COT_EdgeTick;
 
@@ -146,7 +147,7 @@ modded class PlayerBase
 
 		if (g_Game.IsServer())
 		{
-			if ((m_JM_SpectatedPlayer || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible)
+			if ((m_JM_SpectatedObject || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible)
 				skip = true;
 		}
 		else if (CurrentActiveCamera && m_JMIsInvisible)
@@ -442,7 +443,7 @@ modded class PlayerBase
 
 	void SetLastPosition(bool force = false)
 	{
-		if ( g_Game.IsServer() && (force || (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)))
+		if ( g_Game.IsServer() && (force || (!m_JM_SpectatedObject && m_JM_CameraPosition == vector.Zero)))
 		{
 			vector trans[4];
 			GetTransform( trans );
@@ -475,7 +476,7 @@ modded class PlayerBase
 			SetPosition(position);
 		}
 
-		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedPlayer)
+		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedObject)
 			SetLastPosition(true);
 	}
 
@@ -827,9 +828,9 @@ modded class PlayerBase
 			position = m_JM_CameraPosition;
 			freeCam = true;
 		}
-		else if (m_JM_SpectatedPlayer)
+		else if (m_JM_SpectatedObject)
 		{
-			position = m_JM_SpectatedPlayer.GetPosition();
+			position = m_JM_SpectatedObject.GetPosition();
 			spectate = true;
 		}
 		else

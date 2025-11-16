@@ -302,6 +302,55 @@ class CommunityOnlineToolsBase
 	{
 	}
 
+	void GetHeadTransform(Object obj, out vector transform[4], bool includeOffset = false)
+	{
+		vector transform[4];
+		vector position;
+		float offset;
+
+		Human human;
+		DayZCreature creature;
+
+		if (Class.CastTo(human, obj))
+		{
+			human.GetBoneTransformWS(human.GetBoneIndexByName("Head"), transform);
+			position = transform[3];
+			offset = 0.12;
+		}
+		else if (Class.CastTo(creature, obj))
+		{
+			creature.GetBoneTransformWS(creature.GetBoneIndexByName("Head"), transform);
+			position = transform[3];
+			offset = 0.12;
+		}
+		else
+		{
+			obj.GetTransform(transform);
+			position = transform[3];
+
+			vector minMax[2];
+
+			if (obj.GetCollisionBox(minMax))
+			{
+				offset = -vector.Distance(minMax[0], minMax[1]) * 0.5;
+			}
+			else
+			{
+				offset = -obj.ClippingInfo(minMax);
+			}
+
+			float height = minMax[1][1];
+			position[1] = position[1] + height;
+
+			includeOffset = true;
+		}
+
+		if (includeOffset)
+			position = position + obj.GetDirection() * offset;
+
+		transform[3] = position;
+	}
+
 	static void ForceDisableInputs(bool state, inout TIntArray skipIDs = null)
 	{
 		if (!skipIDs)
