@@ -312,11 +312,10 @@ class JMCameraModule: JMRenderableModuleBase
 		{
 			player.COT_RememberVehicle();
 
-			PlayerBase spectatedPlayer;
-			if (Class.CastTo(spectatedPlayer, player.m_JM_SpectatedObject))
-				player = spectatedPlayer;
+			if (player.m_JM_SpectatedObject)
+				target = player.m_JM_SpectatedObject;
 
-			GetCommunityOnlineToolsBase().GetHeadTransform(player, transform, true);
+			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
 			//player.GetInputController().SetDisabled( true );
 		}
 		else if ( target )
