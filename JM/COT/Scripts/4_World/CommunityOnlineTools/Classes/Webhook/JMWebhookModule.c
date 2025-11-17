@@ -63,16 +63,41 @@ class JMWebhookModule: JMModuleBase
 		string serverCfg;
 		g_Game.CommandlineGetParam( "config", serverCfg );
 
+		string profile;
+		g_Game.CommandlineGetParam( "profiles", profile );
+
+		serverCfg.ToLower();
+		profile.ToLower();
+
+		string serverCfgAbs = serverCfg;
+
+		if (profile && serverCfg.IndexOf(profile) == 0)
+		{
+			int len = profile.Length();
+			serverCfg = serverCfg.Substring(len, serverCfg.Length() - len);
+
+			while (serverCfg[0] == "\\" || serverCfg[0] == "/")
+			{
+				serverCfg = serverCfg.Substring(1, serverCfg.Length() - 1);
+			}
+
+			serverCfg = "$profile:" + serverCfg;
+		}
+
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
 		{
-			CF_Log.Warn("No server config file set, using default serverdz.cfg");
+			CF.FormatErrorEx("No server config file set, using default serverdz.cfg", ErrorExSeverity.WARNING);
 			serverCfg = "serverdz.cfg";
 		}
-		else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
+		else if (serverCfg.IndexOf("$profile:") != 0 && (serverCfg.Contains(":\\") || serverCfg.Contains(":/")))
 		{
-			CF_Log.Warn("Cannot resolve absolute path '%1', using default serverdz.cfg", serverCfg);
+			CF.FormatErrorEx("Cannot resolve absolute path '%1', using default serverdz.cfg", ErrorExSeverity.WARNING, serverCfg);
 			serverCfg = "serverdz.cfg";
+		}
+		else if (serverCfg != serverCfgAbs)
+		{
+			CF.FormatErrorEx("Resolved absolute path '%1' to '%2'", ErrorExSeverity.INFO, serverCfgAbs, serverCfg);
 		}
 
 		ConfigFile cfg = ConfigFile.Parse( serverCfg );
@@ -80,7 +105,10 @@ class JMWebhookModule: JMModuleBase
 		{
 			ConfigEntry entry = cfg.Get( "hostname" );
 			if ( entry && entry.GetText() != "" )
+			{
 				m_ServerHostName = entry.GetText();
+				CF.FormatErrorEx("Got hostname '%1' from '%2'", ErrorExSeverity.INFO, m_ServerHostName, serverCfg);
+			}
 
 			delete cfg;
 		}
