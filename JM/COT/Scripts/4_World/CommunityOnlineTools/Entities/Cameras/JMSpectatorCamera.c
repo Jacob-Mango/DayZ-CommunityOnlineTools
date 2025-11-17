@@ -168,8 +168,6 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector begPos;
 
-		vector pos = headPos + "0 0.1 0";
-
 		float fov;
 
 		bool weaponRaised;
@@ -200,6 +198,13 @@ class JMSpectatorCamera: JMCameraBase
 
 			return;
 		}
+
+		vector pos = headPos;
+
+		if (spectatedPlayer || SelectedTarget.IsInherited(ZombieBase))
+			pos = pos + "0 0.1 0";
+		else
+			pos = pos + "0 0.3 0";
 
 		bool dollyCam;
 		float speed;
@@ -300,7 +305,21 @@ class JMSpectatorCamera: JMCameraBase
 		}
 		else
 		{
-			dir = objectTransform[2];
+			if (SelectedTarget.IsInherited(ZombieBase))
+			{
+				dir = headTransform[1];
+			}
+			else if (SelectedTarget.IsDayZCreature())
+			{
+				dir = headTransform[0];
+
+				if (vector.Dot(dir, objectTransform[2]) < 0.0)
+					dir = objectTransform[2];
+			}
+			else
+			{
+				dir = objectTransform[2];
+			}
 		}
 
 		vector cameraPos = GetPosition();
@@ -490,6 +509,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector fromOri = GetOrientation();
 		vector targetOri = Math.COT_DirToOri(dir);
+		targetOri[1] = Math.Clamp(targetOri[1], -85, 85);
 
 		float dollyCamSpeedMultMin = 0.3;  //! Fastest
 		float dollyCamSpeedMultMax = 0.5;  //! Slowest
