@@ -58,7 +58,7 @@ modded class PlayerBase
 
 	void PlayerBase()
 	{
-		if (GetGame() && GetGame().IsClient())
+		if (g_Game && g_Game.IsClient())
 			SetEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
 
 		m_COT_PlayerVars = new map<int, bool>;

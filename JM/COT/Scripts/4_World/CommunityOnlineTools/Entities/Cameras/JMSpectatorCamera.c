@@ -888,7 +888,7 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
-		float surfaceY = GetGame().SurfaceRoadY3D(cameraPos[0], cameraPos[1] - offsetY, cameraPos[2], RoadSurfaceDetection.LEGACY) + 0.1;
+		float surfaceY = g_Game.SurfaceRoadY3D(cameraPos[0], cameraPos[1] - offsetY, cameraPos[2], RoadSurfaceDetection.LEGACY) + 0.1;
 		if (surfaceY > cameraPos[1])
 			cameraPos[1] = surfaceY;
 

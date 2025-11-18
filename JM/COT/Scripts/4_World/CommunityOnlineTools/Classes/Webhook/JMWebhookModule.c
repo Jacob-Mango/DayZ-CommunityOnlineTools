@@ -114,7 +114,7 @@ class JMWebhookModule: JMModuleBase
 		}
 	#else
 		//! Client or singleplayer/offline mode
-		m_ServerHostName = GetGame().GetHostName();
+		m_ServerHostName = g_Game.GetHostName();
 	#endif
 
 		m_Settings = GetCOTWebhookSettings();
