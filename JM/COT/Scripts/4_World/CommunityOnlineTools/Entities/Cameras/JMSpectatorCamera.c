@@ -172,6 +172,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		bool weaponRaised;
 		bool isSwimming;
+		bool isOnLadder;
 
 		int i;
 		int j;
@@ -302,6 +303,11 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				dir = headTransform[1];
 			}
+
+			//! This is a bit of a dodgy way to detect if spectated player is climbing a ladder, but I see no better way
+			IEntity parent = spectatedPlayer.GetParent();
+			if (parent && parent.IsInherited(BuildingBase))
+				isOnLadder = true;
 		}
 		else
 		{
@@ -330,7 +336,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector cameraPos = GetPosition();
 
-		float cameraDist2DToTargetSq = vector.DistanceSq(Vector(cameraPos[0], pos[1], cameraPos[2]), pos);
+		float cameraDistToSpectatedObjSq = vector.DistanceSq(cameraPos, pos);
 
 		if (dollyCam)
 		{
@@ -350,7 +356,7 @@ class JMSpectatorCamera: JMCameraBase
 				pos[1] = pos[1] + stanceHeight;
 			}
 
-			if (cameraDist2DToTargetSq > 0.04)
+			if (cameraDistToSpectatedObjSq > 0.04)
 			{
 				Object target;
 				vector cameraToTargetDir;
@@ -524,8 +530,8 @@ class JMSpectatorCamera: JMCameraBase
 		//bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
 
 		vector movementDir = objectPos - m_COT_LastObjectPos;
-		movementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
 		vector spectatedObjectVelocity = movementDir * (1.0 / timeslice);  //! GetVelocity(spectatedPlayer) returns 0 on client
+		movementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
 		movementDir.Normalize();
 		m_COT_SpectatedObjectSpeed = Math.Lerp(m_COT_SpectatedObjectSpeed, spectatedObjectVelocity.Length(), timeslice * 2);
 		float spectatedObjectSpeedInverse01 = Math.Max(1 - m_COT_SpectatedObjectSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
@@ -615,7 +621,7 @@ class JMSpectatorCamera: JMCameraBase
 					g_Game.Chat("COT dollycam: Depleted jump/climb timeout", "colorAction");
 			#endif
 			}
-			else if (dollyCam && !isSwimming && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && movementDir.LengthSq() > 0.0001)
+			else if (dollyCam && !isSwimming && !isOnLadder && !m_COT_DollyCamReversing && m_COT_DollyCamPathNextIdx > 1 && movementDir.LengthSq() > 0.0001)
 			{
 				vector prevPoint = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 2];
 				vector lastSegDir = m_COT_DollyCamPath[m_COT_DollyCamPathNextIdx - 1] - prevPoint;
@@ -697,7 +703,7 @@ class JMSpectatorCamera: JMCameraBase
 				}
 			}
 
-			if (cameraDist2DToTargetSq > 0.04 && m_COT_SpectatedObjectSpeed > 0.2)
+			if (cameraDistToSpectatedObjSq > 0.04 && m_COT_SpectatedObjectSpeed > 0.2)
 			{
 				if (!m_COT_DollyCamReversing)
 				{
@@ -731,7 +737,7 @@ class JMSpectatorCamera: JMCameraBase
 					accumulatedDistSq += stepDistSq;
 					float pitch = Math.Atan2(yDiff, Math.Sqrt(stepDistSq)) * Math.RAD2DEG;
 
-					if (!isSwimming && yDiff > 0.3 && Math.AbsFloat(pitch) > 70)
+					if (!isSwimming && !isOnLadder && yDiff > 0.3 && Math.AbsFloat(pitch) > 70)
 					{
 					#ifdef DIAG_DEVELOPER
 						if (m_COT_DollyCamJumpClimbTimeout == 0)
@@ -810,8 +816,8 @@ class JMSpectatorCamera: JMCameraBase
 
 					float targetDistSq = targetDist * targetDist;
 
-					if (cameraDist2DToTargetSq > targetDistSq)
-						offsetFactor = targetDistSq / cameraDist2DToTargetSq;
+					if (cameraDistToSpectatedObjSq > targetDistSq)
+						offsetFactor = targetDistSq / cameraDistToSpectatedObjSq;
 					else
 						offsetFactor = 1.0;
 				}
