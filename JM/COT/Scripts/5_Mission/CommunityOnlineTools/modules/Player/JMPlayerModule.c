@@ -1006,6 +1006,41 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_TeleportToPrevious( guids, senderRPC, instance );
 	}
 
+	//! Client
+	void Click_Spectate(UIActionBase action, Object target, string guid = "")
+	{
+		if (!target && guid == "")
+			return;
+
+		bool shouldSpectate = true;
+
+		if (CurrentActiveCamera)
+		{
+			if (CurrentActiveCamera.IsInherited(JMSpectatorCamera))
+				shouldSpectate = !target || CurrentActiveCamera.SelectedTarget != target;
+			else if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
+				shouldSpectate = !target || COT_PreviousActiveCamera.SelectedTarget != target;
+		}
+
+		action.Disable();
+
+		if (shouldSpectate)
+		{
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
+
+			if (!target)
+				StartSpectating(guid);
+			else
+				StartSpectating(target);
+		}
+		else
+		{
+			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
+
+			EndSpectating();
+		}
+	}
+
 	//! @note this allows to start spectating players that are not in netbubble
 	void StartSpectating( string guid )
 	{
