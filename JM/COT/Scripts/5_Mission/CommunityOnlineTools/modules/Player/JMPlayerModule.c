@@ -1006,21 +1006,35 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_TeleportToPrevious( guids, senderRPC, instance );
 	}
 
+	//! @note this allows to start spectating players that are not in netbubble
 	void StartSpectating( string guid )
 	{
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "StartSpectating").Add(guid);
 #endif
 
-		JMPlayerInstance spectateInstance = GetPermissionsManager().GetPlayer(guid);
-		if (!spectateInstance)
+		if (GetPlayer().GetCommand_Vehicle())
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser("Cannot spectate while in a vehicle. Please leave the vehicle first."));
 			return;
+		}
 
-		PlayerBase spectatePlayer = spectateInstance.PlayerObject;
-		if (!spectatePlayer)
-			return;
-	
-		StartSpectating(spectatePlayer);
+		GetPlayer().COT_TempDisableOnSelectPlayer();
+		GetPlayer().COT_RememberVehicle();
+
+		if ( IsMissionHost() )
+		{
+			if ( IsMissionOffline() )
+			{
+				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
+			}
+		} else
+		{
+			m_SpectatorClient = GetPlayer();
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Send( null, JMPlayerModuleRPC.StartSpectating, true, NULL );
+		}
 	}
 
 	void StartSpectating(Object spectateObject)
@@ -1036,7 +1050,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		GetPlayer().COT_TempDisableOnSelectPlayer();
-
 		GetPlayer().COT_RememberVehicle();
 
 		if ( IsMissionHost() )
