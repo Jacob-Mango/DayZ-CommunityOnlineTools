@@ -1392,9 +1392,13 @@ class JMPlayerModule: JMRenderableModuleBase
 			CF_Log.Debug("JMPlayerModule::Client_EndSpectating - waiting for player to be idle");
 			m_SpectatorClient.COT_EnableBonePositionUpdate(true);
 			Client_Check_EndSpectating(m_SpectatorClient, waitForPlayerIdleTimeout);
-			if (waitForPlayerIdleTimeout > 1000)
-				COTCreateLocalAdminNotification(new StringLocaliser("Stopping spectating..."));
 		}
+
+		if (waitForPlayerIdleTimeout > 1000)
+			COTCreateLocalAdminNotification(new StringLocaliser("Stopping spectating..."));
+		else
+			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating"));
+
 		CF_Log.Debug("JMPlayerModule::Client_EndSpectating - stopped spectating");
 	}
 
