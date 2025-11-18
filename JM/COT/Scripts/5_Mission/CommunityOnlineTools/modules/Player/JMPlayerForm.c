@@ -1205,33 +1205,14 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		bool shouldSpectate = true;
+		TStringArray players = JM_GetSelected().GetPlayers();
+		string guid = players[0];
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer(guid);
+		PlayerBase player;
+		if (instance)
+			player = instance.PlayerObject;
 
-		if ( CurrentActiveCamera )
-		{
-			if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
-				shouldSpectate = false;
-			else if ( COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera) )
-				shouldSpectate = false;
-		}
-
-		if ( shouldSpectate )
-		{
-			if ( JM_GetSelected().GetPlayers().Count() != 1 )
-				return;
-
-			action.Disable();
-			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
-
-			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
-		}
-		else
-		{
-			action.Disable();
-			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
-
-			m_Module.EndSpectating();
-		}
+		m_Module.Click_Spectate(action, player, guid);
 	}
 
 	void Click_RepairTransport( UIEvent eid, UIActionBase action )

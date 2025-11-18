@@ -214,7 +214,7 @@ class JMESPMeta: COT_WidgetHolder
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
-			m_SpectateButton  = UIActionManager.CreateButton( parent, "Spectate",  this, "Action_Spectate" );
+			m_SpectateButton  = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE",  this, "Action_Spectate" );
 		}
 
 		if ( (networkLow || networkHigh || !g_Game.IsMultiplayer()) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
@@ -553,11 +553,7 @@ class JMESPMeta: COT_WidgetHolder
 
 		JMPlayerModule playerModule = CF_Modules<JMPlayerModule>.Get();
 
-		JMSpectatorCamera spectatorCamera;
-		if (Class.CastTo(spectatorCamera, CurrentActiveCamera) && spectatorCamera.SelectedTarget == target)
-			playerModule.EndSpectating();
-		else
-			playerModule.StartSpectating(target);
+		playerModule.Click_Spectate(action, target);
 	}
 }
 
