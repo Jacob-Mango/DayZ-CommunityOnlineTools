@@ -1009,17 +1009,19 @@ class JMPlayerModule: JMRenderableModuleBase
 	//! Client
 	void Click_Spectate(UIActionBase action, Object target, string guid = "")
 	{
-		if (!target && guid == "")
-			return;
+		bool shouldSpectate;
 
-		bool shouldSpectate = true;
-
-		if (CurrentActiveCamera)
+		if (target || guid != "")
 		{
-			if (CurrentActiveCamera.IsInherited(JMSpectatorCamera))
-				shouldSpectate = !target || CurrentActiveCamera.SelectedTarget != target;
-			else if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
-				shouldSpectate = !target || COT_PreviousActiveCamera.SelectedTarget != target;
+			shouldSpectate = true;
+
+			if (CurrentActiveCamera)
+			{
+				if (CurrentActiveCamera.IsInherited(JMSpectatorCamera))
+					shouldSpectate = !target || CurrentActiveCamera.SelectedTarget != target;
+				else if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
+					shouldSpectate = !target || COT_PreviousActiveCamera.SelectedTarget != target;
+			}
 		}
 
 		action.Disable();
