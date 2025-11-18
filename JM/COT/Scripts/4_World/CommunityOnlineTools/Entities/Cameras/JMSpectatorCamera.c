@@ -316,6 +316,7 @@ class JMSpectatorCamera: JMCameraBase
 				//dir = headTransform[0];
 
 				vector chestPos = spectatedCreature.GetBonePositionWS(spectatedCreature.GetBoneIndexByName("Chest"));
+				chestPos[1] = chestPos[1] + 0.1;
 				dir = (headPos - chestPos).Normalized();
 
 				if (m_JM_3rdPerson)
