@@ -305,16 +305,21 @@ class JMSpectatorCamera: JMCameraBase
 		}
 		else
 		{
+			DayZCreature spectatedCreature;
+
 			if (SelectedTarget.IsInherited(ZombieBase))
 			{
 				dir = headTransform[1];
 			}
-			else if (SelectedTarget.IsDayZCreature())
+			else if (Class.CastTo(spectatedCreature, SelectedTarget))
 			{
-				dir = headTransform[0];
+				//dir = headTransform[0];
 
-				if (vector.Dot(dir, objectTransform[2]) < 0.0)
-					dir = objectTransform[2];
+				vector chestPos = spectatedCreature.GetBonePositionWS(spectatedCreature.GetBoneIndexByName("Chest"));
+				dir = (headPos - chestPos).Normalized();
+
+				if (m_JM_3rdPerson)
+					pos = headPos + "0 0.5 0";
 			}
 			else
 			{
@@ -691,7 +696,7 @@ class JMSpectatorCamera: JMCameraBase
 				}
 			}
 
-			if (cameraDist2DToTargetSq > 0.04)
+			if (cameraDist2DToTargetSq > 0.04 && m_COT_SpectatedObjectSpeed > 0.2)
 			{
 				if (!m_COT_DollyCamReversing)
 				{
