@@ -6,7 +6,7 @@ class JMWebhookTypeData : UIActionData
 	{
 		Name = name;
 	}
-};
+}
 
 class JMWebhookSection : Managed
 {
@@ -93,4 +93,4 @@ class JMWebhookSection : Managed
 
 		m_DropDownList.SetItems( showTypes );
 	}
-};
+}

@@ -60,37 +60,37 @@ class JMWebhookDiscordMessage : JMWebhookMessage
 	{
 		return "Discord";
 	}
-};
+}
 
 class JMWebhookDiscordEmbedAuthor : Managed
 {
 	string name;
 	string url;
 	string icon_url;
-};
+}
 
 class JMWebhookDiscordEmbedField : Managed
 {
 	string name;
 	string value;
 	bool inline;
-};
+}
 
 class JMWebhookDiscordEmbedThumbnail : Managed
 {
 	string url;
-};
+}
 
 class JMWebhookDiscordEmbedImage : Managed
 {
 	string url;
-};
+}
 
 class JMWebhookDiscordEmbedFooter : Managed
 {
 	string text;
 	string icon_url;
-};
+}
 
 class JMWebhookDiscordEmbed : Managed
 {
@@ -179,4 +179,4 @@ class JMWebhookDiscordEmbed : Managed
 		footer.text = text;
 		footer.icon_url = icon_url;
 	}
-};
+}

@@ -46,9 +46,12 @@ class UIActionScroller: UIActionBase
 
 	void UpdateScroller()
 	{
+		if (m_IsUpdating)
+			return;
+
 		m_IsUpdating = true;
 		
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(_UpdateScroller, 34);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(_UpdateScroller, 34);
 	}
 
 	void _UpdateScroller()
@@ -56,6 +59,8 @@ class UIActionScroller: UIActionBase
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::UpdateScroller" );
 		#endif
+
+		m_IsUpdating = false;
 
 		m_Content.Update();
 		m_ScrollerContainer.Update();
@@ -114,8 +119,6 @@ class UIActionScroller: UIActionBase
 
 		m_Scroller.SetPos( 0, scrollerPos );
 		m_Content.SetPos( 0, contentPos );
-
-		m_IsUpdating = false;
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::UpdateScroller" );
@@ -218,7 +221,7 @@ class UIActionScroller: UIActionBase
 			m_ScrollStartPos = m_Position;
 			int mouse_x;
 			GetMousePos( mouse_x, m_MouseStartPos );
-			GetGame().GetDragQueue().Call( this, "UpdateDragScroll" );
+			g_Game.GetDragQueue().Call( this, "UpdateDragScroll" );
 			return true;
 		}
 	

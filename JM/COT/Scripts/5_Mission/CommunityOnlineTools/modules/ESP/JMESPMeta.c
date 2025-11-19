@@ -44,6 +44,7 @@ class JMESPMeta: COT_WidgetHolder
 
 	UIActionButton m_Action_Delete;
 	UIActionButton m_HealButton;
+	UIActionButton m_SpectateButton;
 
 	bool m_ActionsInitialized;
 
@@ -58,7 +59,7 @@ class JMESPMeta: COT_WidgetHolder
 
 	void ~JMESPMeta()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 		#ifdef JM_COT_ESP_DEBUG
@@ -71,7 +72,9 @@ class JMESPMeta: COT_WidgetHolder
 		Print( "  widgetHandler = " + widgetHandler );
 		#endif
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(widgetRoot);
+	#endif
 
 		if (s_JM_All)
 			s_JM_All.Remove(s_JM_Node);
@@ -90,7 +93,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( widgetRoot )
 			return;
 
-		if ( !Class.CastTo( widgetRoot, GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER ) ) )
+		if ( !Class.CastTo( widgetRoot, g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_widget.layout", JMStatics.ESP_CONTAINER ) ) )
 			return;
 
 		widgetRoot.GetScript( widgetHandler );
@@ -207,7 +210,14 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
-		if ( (networkLow || networkHigh || !GetGame().IsMultiplayer()) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
+		if ( (networkLow || networkHigh) )
+		{
+			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
+
+			m_SpectateButton  = UIActionManager.CreateButton( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE",  this, "Action_Spectate" );
+		}
+
+		if ( (networkLow || networkHigh || !g_Game.IsMultiplayer()) && MiscGameplayFunctions.GetTypeMaxGlobalHealth(target.GetType()) > 0 )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
@@ -357,7 +367,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard("<" + m_Action_PositionX.GetText() + ", " + m_Action_PositionY.GetText() + ", " + m_Action_PositionZ.GetText() + ">");
+		g_Game.CopyToClipboard("<" + m_Action_PositionX.GetText() + ", " + m_Action_PositionY.GetText() + ", " + m_Action_PositionZ.GetText() + ">");
 	}
 
 	void Action_SetPosition( UIEvent eid, UIActionBase action )
@@ -399,7 +409,7 @@ class JMESPMeta: COT_WidgetHolder
 			return;
 
 		string clipboard;
-		GetGame().CopyFromClipboard(clipboard);
+		g_Game.CopyFromClipboard(clipboard);
 
 		vector pos = clipboard.BeautifiedToVector();
 
@@ -432,7 +442,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard("<" + m_Action_OrientationX.GetText() + ", " + m_Action_OrientationY.GetText() + ", " + m_Action_OrientationZ.GetText() + ">");
+		g_Game.CopyToClipboard("<" + m_Action_OrientationX.GetText() + ", " + m_Action_OrientationY.GetText() + ", " + m_Action_OrientationZ.GetText() + ">");
 	}
 
 	void Action_SetOrientation( UIEvent eid, UIActionBase action )
@@ -474,7 +484,7 @@ class JMESPMeta: COT_WidgetHolder
 			return;
 
 		string clipboard;
-		GetGame().CopyFromClipboard(clipboard);
+		g_Game.CopyFromClipboard(clipboard);
 
 		vector ori = clipboard.BeautifiedToVector();
 
@@ -535,7 +545,17 @@ class JMESPMeta: COT_WidgetHolder
 		else
 			module.Heal( target );
 	}
-};
+
+	void Action_Spectate( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMPlayerModule playerModule = CF_Modules<JMPlayerModule>.Get();
+
+		playerModule.Click_Spectate(action, target);
+	}
+}
 
 
 class JMESPMetaPlayer : JMESPMeta
@@ -578,7 +598,7 @@ class JMESPMetaPlayer : JMESPMeta
 	{
 		return !target.IsAlive();
 	}
-};
+}
 
 
 class JMESPMetaBaseBuilding : JMESPMeta
@@ -604,7 +624,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 
 	void ~JMESPMetaBaseBuilding()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 		if ( m_BaseBuilding )
@@ -747,7 +767,7 @@ class JMESPMetaBaseBuilding : JMESPMeta
 
 		module.BaseBuilding_Repair( m_BaseBuilding, data.m_Name );
 	}
-};
+}
 
 class JMESPMetaCar : JMESPMeta
 {
@@ -778,7 +798,7 @@ class JMESPMetaCar : JMESPMeta
 
 		module.Vehicle_Refuel( target );
 	}
-};
+}
 
 class JMESPMetaBoat : JMESPMeta
 {
@@ -808,7 +828,7 @@ class JMESPMetaBoat : JMESPMeta
 
 		module.Vehicle_Refuel( target );
 	}
-};
+}
 
 class JMESPMetaTrain : JMESPMeta
 {
@@ -828,4 +848,4 @@ class JMESPMetaTrain : JMESPMeta
 
 		module.Vehicle_Refuel( target );
 	}
-};
+}

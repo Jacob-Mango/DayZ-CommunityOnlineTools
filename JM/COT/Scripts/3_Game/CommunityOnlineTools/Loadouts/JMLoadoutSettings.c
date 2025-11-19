@@ -108,4 +108,4 @@ class JMLoadoutSettings
 
 		return name;
 	}
-};
+}

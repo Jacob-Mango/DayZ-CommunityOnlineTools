@@ -12,7 +12,7 @@ class JMTeleportSerialize : Managed
 	{
 	 	Types = new TStringArray;
 		Locations = new array< ref JMTeleportLocation >;
-		m_WorldName = GetGame().GetWorldName();
+		m_WorldName = g_Game.GetWorldName();
 		m_FileName = JMConstants.FILE_TELEPORT + m_WorldName + JMConstants.EXT_TELEPORT;
 	}
 
@@ -61,12 +61,12 @@ class JMTeleportSerialize : Managed
 	void Defaults()
 	{
 		string location_config_path = "CfgWorlds " + m_WorldName + " Names";
-		int classNamesCount = GetGame().ConfigGetChildrenCount( location_config_path );
+		int classNamesCount = g_Game.ConfigGetChildrenCount( location_config_path );
 		
 		for ( int i = 0; i < classNamesCount; ++i ) 
 		{
 			string location_class_name;
-			GetGame().ConfigGetChildName( location_config_path, i, location_class_name );
+			g_Game.ConfigGetChildName( location_config_path, i, location_class_name );
 
 			string location_class_name_path = location_config_path + " " + location_class_name;
 
@@ -76,11 +76,11 @@ class JMTeleportSerialize : Managed
 
 			string location_name;
 			string location_type;
-			GetGame().ConfigGetText( location_name_path, location_name );
-			GetGame().ConfigGetText( location_type_path, location_type );
+			g_Game.ConfigGetText( location_name_path, location_name );
+			g_Game.ConfigGetText( location_type_path, location_type );
 
 			TFloatArray location_position = new TFloatArray;
-			GetGame().ConfigGetFloatArray( location_position_path, location_position );
+			g_Game.ConfigGetFloatArray( location_position_path, location_position );
 			
 			if (location_position == null || location_position.Count() != 2)
 				continue;
@@ -191,4 +191,4 @@ class JMTeleportSerialize : Managed
 
 		return true;
 	}
-};
+}

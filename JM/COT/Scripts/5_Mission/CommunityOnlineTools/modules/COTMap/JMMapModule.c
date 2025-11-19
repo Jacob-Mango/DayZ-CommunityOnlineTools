@@ -52,4 +52,4 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		return true;
 	}
-};
+}

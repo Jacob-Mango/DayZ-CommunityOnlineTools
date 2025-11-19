@@ -24,14 +24,16 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMRoleRowWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMRoleRowWidgetCount--;
@@ -133,4 +135,4 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 		Checkbox.Enable( false );
 		Checkbox.Show( false );
 	}
-};
+}

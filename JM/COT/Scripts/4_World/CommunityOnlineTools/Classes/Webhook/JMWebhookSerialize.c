@@ -65,7 +65,7 @@ class JMWebhookSerialize : Managed
 
 		return group;
 	}
-};
+}
 
 static ref JMWebhookSerialize g_cot_Webhook;
 

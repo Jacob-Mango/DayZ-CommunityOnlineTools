@@ -9,13 +9,13 @@ modded class VONManagerImplementation
 		{
 			case VONUserStartedTransmittingAudioEventTypeID:
 				rpc = new ScriptRPC();
-				rpc.Send(GetGame().GetPlayer(), JMPlayerModuleRPC.VONStartedTransmitting, true, null);
+				rpc.Send(g_Game.GetPlayer(), JMPlayerModuleRPC.VONStartedTransmitting, true, null);
 				break;
 			case VONUserStoppedTransmittingAudioEventTypeID:
 				rpc = new ScriptRPC();
-				rpc.Send(GetGame().GetPlayer(), JMPlayerModuleRPC.VONStoppedTransmitting, true, null);
+				rpc.Send(g_Game.GetPlayer(), JMPlayerModuleRPC.VONStoppedTransmitting, true, null);
 				break;
 		}
 	}
-};
+}
 

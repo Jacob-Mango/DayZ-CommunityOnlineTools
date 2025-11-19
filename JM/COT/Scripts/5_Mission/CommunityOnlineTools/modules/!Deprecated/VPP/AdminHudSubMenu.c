@@ -26,7 +26,7 @@ modded class AdminHudSubMenu
 	{
 		if ( m_COTForm )
 		{
-			m_VPPRoot = GetGame().GetWorkspace().CreateWidgets( path, m_COTForm.GetLayoutRoot() );
+			m_VPPRoot = g_Game.GetWorkspace().CreateWidgets( path, m_COTForm.GetLayoutRoot() );
 		} else
 		{
 			m_VPPRoot = super.CreateWidgets( path );
@@ -60,5 +60,5 @@ modded class AdminHudSubMenu
 
 		return m_VPPRoot;
 	}
-};
+}
 #endif*/

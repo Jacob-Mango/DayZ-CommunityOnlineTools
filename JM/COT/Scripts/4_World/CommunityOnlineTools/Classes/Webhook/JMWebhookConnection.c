@@ -21,7 +21,7 @@ class JMWebhookConnection : Managed
 
 	void Remove()
 	{
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Group.Remove, Name );
+		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Group.Remove, Name );
 	}
 
 	void Post( RestApi core, notnull JsonSerializer serializer, notnull JMWebhookMessage message )
@@ -80,4 +80,4 @@ class JMWebhookConnection : Managed
 
 		return str;
 	}
-};
+}

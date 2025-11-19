@@ -26,14 +26,16 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMPlayerRowWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMPlayerRowWidgetCount--;
@@ -100,7 +102,6 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 
 	void Update() 
 	{
-		
 	}
 
 	Widget GetLayoutRoot() 
@@ -115,7 +116,9 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 		if ( m_GUID == "" ) 
 		{
 			Hide();
-		} else {
+		}
+		else
+		{
 			JMPlayerInstance player = GetPermissionsManager().GetPlayer( m_GUID );
 			if ( player )
 			{
@@ -124,29 +127,24 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 				array< string > roles = player.GetRoles();
 				
 				if (roles.Count() > 1)
-				{
 					Name.SetText( "[" + roles[1] + "] " + player.GetName() );
-				} else {
+				else
 					Name.SetText( player.GetName() );
-				}
 
 				if ( GetPermissionsManager().GetClientGUID() == m_GUID )
-				{
 					Name.SetColor( 0xFF2ECC71 );
-				} else if ( player.HasPermission( "COT" ) )
-				{
+				else if ( player.HasPermission( "COT" ) )
 					Name.SetColor( 0xFFA85A32 );
-				} else  {
+				else
 					Name.SetColor( 0xFFFFFFFF );
-				}
 
 				if ( JM_GetSelected().IsSelected( m_GUID ) )
-				{
 					Checkbox.SetChecked( true );
-				} else {
+				else
 					Checkbox.SetChecked( false );
-				}
-			} else {
+			}
+			else
+			{
 				Hide();
 			}
 		}
@@ -160,24 +158,20 @@ class JMPlayerRowWidget: COT_ScriptedWidgetEventHandler
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
-		{
 			return false;
-		}
 
 		if ( w == Checkbox )
 		{
 			JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( m_GUID, Checkbox.IsChecked() );
-
 			return true;
 		}
 
 		if ( w == Button )
 		{
 			JMScriptInvokers.MENU_PLAYER_BUTTON.Invoke( m_GUID, !Checkbox.IsChecked() );
-
 			return true;
 		}
 
 		return false;
 	}
-};
+}

@@ -24,7 +24,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	void ~JMFormBase()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -35,7 +35,9 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		//! @note this should not be necessary since if the JMWindow handling this JMForm is destroyed,
 		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMFormBaseCount--;
@@ -220,7 +222,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 		
 		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
 
 		return false;
 	}
@@ -242,8 +244,8 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 		
 		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
 
 		return false;
 	}
-};
+}

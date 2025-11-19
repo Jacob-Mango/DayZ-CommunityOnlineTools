@@ -2,7 +2,7 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 {
 	void DestroyLater()
 	{
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(Destroy);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Destroy);
 	}
 
 	void Destroy()
@@ -26,7 +26,7 @@ class COT_WidgetHolder
 {
 	void DestroyLater()
 	{
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(Destroy);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(Destroy);
 	}
 
 	void Destroy()

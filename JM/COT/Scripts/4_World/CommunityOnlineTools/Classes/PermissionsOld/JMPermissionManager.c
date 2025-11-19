@@ -124,7 +124,7 @@ class JMPermissionManager
 
 	void CreateFakePlayers()
 	{
-		for ( int i = 0; i < 200; i++ )
+		for ( int i = 0; i < 30; i++ )
 		{
 			CreateFakePlayer( i );
 		}
@@ -144,10 +144,8 @@ class JMPermissionManager
 	{
 		Assert_Null( Players );
 		
-		if ( guidsGetPlayers == NULL || !GetGame().IsMultiplayer() )
-		{
+		if ( guidsGetPlayers == NULL || !g_Game.IsMultiplayer() )
 			return Players.GetValueArray();
-		}
 
 		array< JMPlayerInstance > players = new array< JMPlayerInstance >;
 
@@ -215,9 +213,7 @@ class JMPermissionManager
 	bool HasPermission( string permission, PlayerIdentity ihp )
 	{
 		if ( IsMissionOffline() )
-		{
 			return true;
-		}
 
 		JMPlayerInstance instance;
 		return HasPermission( permission, ihp, instance );
@@ -230,14 +226,9 @@ class JMPermissionManager
 			instance = GetClientPlayer();
 
 			if ( IsMissionHost() )
-			{
 				return true;
-			}
-			
-			if ( Assert_Null( instance ) )
-			{
+			else if ( Assert_Null( instance ) )
 				return false;
-			}
 
 			return instance.HasPermission( permission );
 		}
@@ -292,16 +283,14 @@ class JMPermissionManager
 		
 		if ( ident == NULL )
 		{
-			if ( GetGame().IsMultiplayer() )
-			{
+			if ( g_Game.IsMultiplayer() )
 				return false;
-			}
 
 			guid = JMConstants.OFFLINE_GUID;
-		} else
+		}
+		else
 		{
 			guid = ident.GetId();
-		
 			SteamToGUID.Insert( ident.GetPlainId(), guid );
 		}
 
@@ -309,9 +298,7 @@ class JMPermissionManager
 
 		inst = Players.Get( guid );
 		if ( inst )
-		{
 			return true;
-		}
 
 		inst = new JMPlayerInstance( ident );
 
@@ -339,7 +326,8 @@ class JMPermissionManager
 			RemoveSyncedToClient(guid);
 
 			return true;
-		} else
+		}
+		else
 		{
 			return false;
 		}
@@ -389,9 +377,7 @@ class JMPermissionManager
 		if ( !instance )
 		{
 			if ( !IsMissionClient() )
-			{
 				return NULL;
-			}
 
 			instance = new JMPlayerInstance( NULL, guid );
 			Players.Insert( guid, instance );
@@ -402,9 +388,7 @@ class JMPermissionManager
 		if ( IsMissionClient() )
 		{
 			if ( m_ClientGUID == guid )
-			{
 				GetModuleManager().OnClientPermissionsUpdated();
-			}
 
 			instance.PlayerObject = playerUpdatePlayer;
 		}
@@ -438,7 +422,6 @@ class JMPermissionManager
 		if ( !role )
 		{
 			role = new JMRole( name );
-
 			Roles.Insert( name, role );
 		}
 
@@ -474,9 +457,7 @@ class JMPermissionManager
 		JMRole role = new JMRole( name );
 		
 		if ( role.Load() )
-		{
 			Roles.Insert( name, role );
-		}
 	}
 
 	void LoadRoles()
@@ -488,16 +469,12 @@ class JMPermissionManager
 		if ( sName != "" )
 		{
 			if ( IsValidFolderForRoles( sName, oFileAttr ) )
-			{
 				LoadRoleFromFile( sName.Substring( 0, sName.Length() - 4 ) );
-			}
 
 			while ( FindNextFile( oFileHandle, sName, oFileAttr) )
 			{
 				if ( IsValidFolderForRoles( sName, oFileAttr ) )
-				{
 					LoadRoleFromFile( sName.Substring( 0, sName.Length() - 4 ) );
-				}
 			}
 		}
 	}
@@ -523,7 +500,7 @@ class JMPermissionManager
 	{
 		m_MissionLoaded = true;
 	}
-};
+}
 
 
 ref JMPermissionManager g_cot_PermissionsManager;
@@ -531,9 +508,7 @@ ref JMPermissionManager g_cot_PermissionsManager;
 JMPermissionManager GetPermissionsManager()
 {
 	if ( !g_cot_PermissionsManager )
-	{
 		g_cot_PermissionsManager = new JMPermissionManager();
-	}
 
 	Assert_Null( g_cot_PermissionsManager );
 

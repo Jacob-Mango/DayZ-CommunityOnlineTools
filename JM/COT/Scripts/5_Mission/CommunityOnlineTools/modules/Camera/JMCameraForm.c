@@ -393,7 +393,7 @@ class JMCameraForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_Positon.GetValue().ToString());
+		g_Game.CopyToClipboard(m_Positon.GetValue().ToString());
 	}
 
 	void OnClick_PastePos( UIEvent eid, UIActionBase action )
@@ -402,7 +402,7 @@ class JMCameraForm: JMFormBase
 			return;
 
 		string clipboard;
-		GetGame().CopyFromClipboard(clipboard);
+		g_Game.CopyFromClipboard(clipboard);
 
 		vector pos = clipboard.BeautifiedToVector();
 
@@ -502,7 +502,7 @@ class JMCameraForm: JMFormBase
 	{
 		vector pos = m_Positon.GetValue();
 		if ( pos == "0 0 0" )
-			pos = GetGame().GetCurrentCameraPosition();
+			pos = g_Game.GetCurrentCameraPosition();
 		
 		float time = m_TravelTime.GetText().ToFloat();
 		if ( time == 0.0 )
@@ -539,4 +539,4 @@ class JMCameraForm: JMFormBase
 		m_Positon.SetValue(m_Positions[m_PositionID]);
 		m_PositionList.SetButton(m_PositionID.ToString());
 	}
-};
+}

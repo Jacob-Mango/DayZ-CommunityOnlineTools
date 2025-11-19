@@ -37,4 +37,4 @@ class JMTeleportLocation
 
 		return true;
 	}
-};
+}

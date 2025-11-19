@@ -9,7 +9,7 @@ modded class Weapon_Base
 		PlayerBase player;
 		if ( Class.CastTo( player, GetHierarchyRootPlayer() ) )
 		{
-			if (GetGame().IsServer() && player.COTHasGodMode())
+			if (g_Game.IsServer() && player.COTHasGodMode())
 			{
 				CommunityOnlineToolsBase.HealEntityRecursive(this, true, false);
 			}
@@ -19,7 +19,7 @@ modded class Weapon_Base
 				Magazine magazine = GetMagazine( GetCurrentMuzzle() );
 				if ( magazine )
 				{
-					if ( GetGame().IsServer() )
+					if ( g_Game.IsServer() )
 					{
 						magazine.ServerSetAmmoMax();
 					}
@@ -41,11 +41,11 @@ modded class Weapon_Base
 			name = muzzles[muzzleIndex] + " " + name;
 
 		auto magazines = new TStringArray;
-		GetGame().ConfigGetTextArray(CFG_WEAPONSPATH + " " + GetType() + " " + name, magazines);
+		g_Game.ConfigGetTextArray(CFG_WEAPONSPATH + " " + GetType() + " " + name, magazines);
 		auto magazinesValidated = new TStringArray;
 		foreach (string magazine: magazines)
 		{
-			if (GetGame().ConfigIsExisting("CfgMagazines " + magazine))
+			if (g_Game.ConfigIsExisting("CfgMagazines " + magazine))
 				magazinesValidated.Insert(magazine);
 		}
 		return magazinesValidated;
@@ -58,7 +58,7 @@ modded class Weapon_Base
 		string magazineType;
 		foreach (string magazine: magazines)
 		{
-			int count = GetGame().ConfigGetInt("CfgMagazines " + magazine + " count");
+			int count = g_Game.ConfigGetInt("CfgMagazines " + magazine + " count");
 			if (count > max)
 			{
 				max = count;
@@ -395,4 +395,4 @@ modded class Weapon_Base
 		if (!m_COT_AmmoSpawned)
 			SpawnAmmo("", SAMF_DEFAULT);
 	}
-};
+}

@@ -11,4 +11,4 @@ modded class ModifiersManager
         if ( !m_Player.COTHasGodMode() )
 			super.OnScheduledTick(delta_time);
 	}
-};
+}

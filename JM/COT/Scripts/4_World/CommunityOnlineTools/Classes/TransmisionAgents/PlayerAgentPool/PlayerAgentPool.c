@@ -5,4 +5,4 @@ modded class PlayerAgentPool
         if ( !m_Player.COTHasGodMode() )
             super.AddAgent(agent_id, count);
     }
-};
+}

@@ -10,7 +10,7 @@ modded class PluginDeveloper
 	override void ToggleFreeCameraBackPos()
 	{
 #ifdef DEVELOPER
-		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		auto mission = MissionBaseWorld.Cast(g_Game.GetMission());
 		if (mission)
 			mission.COT_LeaveFreeCam();
 
@@ -21,11 +21,11 @@ modded class PluginDeveloper
 	override void ToggleFreeCamera()
 	{
 #ifdef DEVELOPER
-		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		auto mission = MissionBaseWorld.Cast(g_Game.GetMission());
 		if (mission)
 			mission.COT_LeaveFreeCam();
 
 		super.ToggleFreeCamera();
 #endif
 	}
-};
+}

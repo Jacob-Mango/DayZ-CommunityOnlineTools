@@ -54,7 +54,7 @@ class JMMapEditorModule: JMModuleBase
 				position = target.GetPosition();
 			}
 
-			GetGame().SelectPlayer( senderRPC, NULL );
+			g_Game.SelectPlayer( senderRPC, NULL );
 
 			PlayerBase human = PlayerBase.Cast( target );
 
@@ -66,7 +66,7 @@ class JMMapEditorModule: JMModuleBase
 				position = human.GetBonePositionWS( human.GetBoneIndexByName("Head") );
 			}
 
-			GetGame().SelectSpectator( senderRPC, "JMCinematicCamera", position );
+			g_Game.SelectSpectator( senderRPC, "JMCinematicCamera", position );
 
 			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, true, senderRPC );
 
@@ -77,12 +77,12 @@ class JMMapEditorModule: JMModuleBase
 		{
 			GetPlayer().COT_TempDisableOnSelectPlayer();
 
-			if ( GetGame().IsMultiplayer() )
+			if ( g_Game.IsMultiplayer() )
 			{
 				CurrentActiveCamera = JMCameraBase.Cast( Camera.GetCurrentCamera() );
 			} else 
 			{
-				CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", target.GetPosition(), false ) );
+				CurrentActiveCamera = JMCameraBase.Cast( g_Game.CreateObject( "JMCinematicCamera", target.GetPosition(), false ) );
 			}
 
 			if ( CurrentActiveCamera )
@@ -110,9 +110,9 @@ class JMMapEditorModule: JMModuleBase
 
 		if ( type == CallType.Server )
 		{
-			GetGame().SelectPlayer( senderRPC, target );
+			g_Game.SelectPlayer( senderRPC, target );
 
-			if ( GetGame().IsMultiplayer() )
+			if ( g_Game.IsMultiplayer() )
 			{
 				GetRPCManager().SendRPC( "COT_MapEditor", "LeaveEditor", new Param, true, senderRPC );
 			} 
@@ -122,9 +122,9 @@ class JMMapEditorModule: JMModuleBase
 
 		if ( type == CallType.Client )
 		{
-			if ( !GetGame().IsMultiplayer() )
+			if ( !g_Game.IsMultiplayer() )
 			{
-				GetGame().SelectPlayer( senderRPC, target );
+				g_Game.SelectPlayer( senderRPC, target );
 			}
 
 			CurrentActiveCamera.SetActive( false );
@@ -154,7 +154,7 @@ class JMMapEditorModule: JMModuleBase
 	{
 		super.OnMissionLoaded();
 		
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			if ( m_Menu == NULL )
 			{
@@ -177,4 +177,4 @@ class JMMapEditorModule: JMModuleBase
 			GetRPCManager().SendRPC( "COT_MapEditor", "EnterEditor", new Param, false, NULL, GetPlayer() );
 		}
 	}
-};
+}

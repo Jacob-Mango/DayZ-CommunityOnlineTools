@@ -7,4 +7,4 @@ modded class Environment
 
 		super.ProcessItemsWetness(pSlotIds);
 	}
-};
+}

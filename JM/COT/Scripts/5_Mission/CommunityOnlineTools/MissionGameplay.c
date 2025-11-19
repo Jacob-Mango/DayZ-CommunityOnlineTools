@@ -7,9 +7,7 @@ modded class MissionGameplay
 	void MissionGameplay()
 	{
 		if ( !g_cotBase )
-		{
 			g_cotBase = new CommunityOnlineTools;
-		}
 	}
 
 	void ~MissionGameplay()
@@ -34,8 +32,8 @@ modded class MissionGameplay
 	{
 		vector position = GetSpawnPoints().GetRandomElement();
 		// position = "13931.9 0 13231.4";
-		PlayerBase player = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), position, 0, "NONE" ) );
-		GetGame().SelectPlayer( NULL, player );
+		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), position, 0, "NONE" ) );
+		g_Game.SelectPlayer( NULL, player );
 
 		if ( player )
 		{
@@ -104,9 +102,7 @@ modded class MissionGameplay
 		super.OnMissionFinish();
 		
 		if ( IsMissionOffline() )
-		{
 			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
-		}
 	}
 
 	override void OnUpdate( float timeslice )
@@ -116,7 +112,7 @@ modded class MissionGameplay
 		if ( m_bLoaded )
 		{
 			UIScriptedMenu menu = m_UIManager.GetMenu();
-			Input input = GetGame().GetInput();
+			Input input = g_Game.GetInput();
 
 			GetCommunityOnlineTools().OnUpdate( timeslice );
 
@@ -129,7 +125,7 @@ modded class MissionGameplay
 			}
 
 			PlayerBase player;
-			if (Class.CastTo(player, GetGame().GetPlayer()) && player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
+			if (Class.CastTo(player, g_Game.GetPlayer()) && player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
 			{
 				//! Since PlayerBase::EOnFrame will no longer be called by the engine if simulation is disabled,
 				//! call stand-in from here so HUD gets updated
@@ -168,4 +164,4 @@ modded class MissionGameplay
 		CF_Modules<JMCameraModule>.Get(module);
 		module.Leave();
 	}
-};
+}

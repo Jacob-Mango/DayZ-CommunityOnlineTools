@@ -1,3 +1,4 @@
+// staticfunctions
 #define JM_COT_LOADED
 
 static const int COT_ZERO_PAD_SIZE = 8;
@@ -110,14 +111,14 @@ static string VectorToString( vector vec, int decimals = -1 )
 static TStringArray GetChildrenFromBaseClass( string strConfigName, string strBaseClass )
 {
 	string child_name = "";
-	int count = GetGame().ConfigGetChildrenCount ( strConfigName );
+	int count = g_Game.ConfigGetChildrenCount ( strConfigName );
 	TStringArray class_names = new TStringArray;
 
 	for (int p = 0; p < count; p++)
 	{
-		GetGame().ConfigGetChildName ( strConfigName, p, child_name );
+		g_Game.ConfigGetChildName ( strConfigName, p, child_name );
 
-		if ( GetGame().IsKindOf(child_name, strBaseClass ) && ( child_name != strBaseClass ) )
+		if ( g_Game.IsKindOf(child_name, strBaseClass ) && ( child_name != strBaseClass ) )
 		{
 			class_names.Insert(child_name);
 		}
@@ -227,9 +228,9 @@ static set< Object > GetObjectsAt( vector from, vector to, Object ignore = NULL,
 
 static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
-	vector dir = GetGame().GetPointerDirection();
+	vector dir = g_Game.GetPointerDirection();
 
-	vector from = GetGame().GetCurrentCameraPosition();
+	vector from = g_Game.GetCurrentCameraPosition();
 
 	vector to = from + ( dir * distance );
 
@@ -245,8 +246,8 @@ static Object GetPointerObject( float distance = 100.0, Object ignore = NULL, fl
 
 static Object GetCursorObject( float distance = 100.0, Object ignore = NULL, float radius = 0.5, Object with = NULL )
 {
-	vector rayStart = GetGame().GetCurrentCameraPosition();
-	vector rayEnd = rayStart + GetGame().GetCurrentCameraDirection() * distance;
+	vector rayStart = g_Game.GetCurrentCameraPosition();
+	vector rayEnd = rayStart + g_Game.GetCurrentCameraDirection() * distance;
 
 	auto objs = GetObjectsAt( rayStart, rayEnd, ignore, radius, with );
 
@@ -307,15 +308,15 @@ static vector SnapToGround(vector pos, bool aboveWater = true)
 	float pos_y;
 
 	if (pos[1] == 0.0)
-		pos_y = GetGame().SurfaceRoadY3D( pos_x, 1000.0, pos_z, RoadSurfaceDetection.UNDER );
+		pos_y = g_Game.SurfaceRoadY3D( pos_x, 1000.0, pos_z, RoadSurfaceDetection.UNDER );
 	else
-		pos_y = GetGame().SurfaceRoadY3D( pos_x, pos[1], pos_z, RoadSurfaceDetection.CLOSEST );
+		pos_y = g_Game.SurfaceRoadY3D( pos_x, pos[1], pos_z, RoadSurfaceDetection.CLOSEST );
 
 	vector tmp_pos = Vector( pos_x, pos_y, pos_z );
 
 	if (aboveWater)
 	{
-		float waterDepth = GetGame().GetWaterDepth(tmp_pos);
+		float waterDepth = g_Game.GetWaterDepth(tmp_pos);
 
 		if (waterDepth > 0)
 			tmp_pos[1] = tmp_pos[1] + waterDepth;
@@ -327,7 +328,7 @@ static vector SnapToGround(vector pos, bool aboveWater = true)
 static void SnapToGroundNew( Object object ) 
 {
 	vector pos = object.GetPosition();
-	pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.CLOSEST);
+	pos[1] = g_Game.SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.CLOSEST);
 	
 	vector clippingInfo[2];
 	vector objectBBOX[2];
@@ -384,7 +385,7 @@ static bool CheckStringType( string str, int type )
 string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, int minScope = -1, string strIgnoreClass = "" )
 {
 	string child_name = "";
-	int count = GetGame().ConfigGetChildrenCount ( strConfigName );
+	int count = g_Game.ConfigGetChildrenCount ( strConfigName );
 
 	if ( count == 0 )
 		return strBaseClass;
@@ -393,15 +394,15 @@ string GetRandomChildFromBaseClass( string strConfigName, string strBaseClass, i
 
 	for ( int p = 0; p < count; p++ )
 	{
-		GetGame().ConfigGetChildName ( strConfigName, p, child_name );
+		g_Game.ConfigGetChildName ( strConfigName, p, child_name );
 
 		if ( child_name.Contains( strIgnoreClass ) )
 			continue;
 
-		if ( ( minScope != -1 ) && ( GetGame().ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
+		if ( ( minScope != -1 ) && ( g_Game.ConfigGetInt( strConfigName + " " + child_name + " scope" ) < minScope ) ) 
 			continue;
 
-		if ( GetGame().IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )
+		if ( g_Game.IsKindOf( child_name, strBaseClass ) && ( child_name != strBaseClass ) )
 		{
 			class_names.Insert( child_name );
 		}
@@ -441,7 +442,7 @@ static void DeleteFiles( string folder, array< string > files )
 	{
 		DeleteFile( folder + files[i] );
 	}
-};
+}
 
 
 static bool ArrayContains( array< string > arr, string match )

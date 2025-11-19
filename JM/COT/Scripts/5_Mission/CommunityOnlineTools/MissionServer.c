@@ -8,9 +8,7 @@ modded class MissionServer
 		m_bLoaded = false;
 		
 		if ( !g_cotBase )
-		{
 			g_cotBase = new CommunityOnlineTools;
-		}
 
 		CF_Modules<JMPlayerModule>.Get(m_JM_PlayerModule);
 	}
@@ -119,4 +117,4 @@ modded class MissionServer
 
 		return false;
 	}
-};
+}

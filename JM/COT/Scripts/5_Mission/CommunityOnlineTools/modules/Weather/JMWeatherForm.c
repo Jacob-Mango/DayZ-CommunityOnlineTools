@@ -12,7 +12,8 @@ class JMWeatherForm: JMFormBase
 	private UIActionButton m_ButtonRefresh;
 	private UIActionButton m_ButtonApply;
 	private UIActionCheckbox m_Checkbox_AutoRefresh;
-	private UIActionCheckbox m_Checkbox_EasyMode;	
+	private UIActionCheckbox m_Checkbox_EasyMode;
+	private UIActionCheckbox m_Checkbox_FreezeTime;
 
 	private Widget m_PanelPresetManageActions;
 
@@ -161,6 +162,9 @@ class JMWeatherForm: JMFormBase
 
 		spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
 		m_Checkbox_EasyMode = UIActionManager.CreateCheckbox( spacer, "#STR_COT_WEATHER_MODULE_EASYMODE", this, "OnClick_EasyMode" );
+		m_Checkbox_FreezeTime = UIActionManager.CreateCheckbox( spacer, "Freeze Time", this, "OnClick_FreezeTime" );
+		m_Checkbox_FreezeTime.SetChecked(m_Module.IsTimeFrozen());
+		
 		m_Checkbox_AutoRefresh = UIActionManager.CreateCheckbox( spacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH" );
 
 		InitLeftPanel( m_PanelLeft );
@@ -345,6 +349,7 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_ButtonRefresh, "Weather", hasNotSelectedPreset );
 		UpdateActionState( m_Checkbox_EasyMode, "Weather", hasNotSelectedPreset );
 		UpdateActionState( m_Checkbox_AutoRefresh, "Weather", hasNotSelectedPreset );
+		UpdateActionState( m_Checkbox_FreezeTime, "Weather.FreezeTine", hasNotSelectedPreset );
 
 		UpdateActionState( m_BtnQuickActionClear, "Weather.QuickAction.Clear", hasNotSelectedPreset );
 		UpdateActionState( m_BtnQuickActionCloudy, "Weather.QuickAction.Overcast", hasNotSelectedPreset );
@@ -701,7 +706,7 @@ class JMWeatherForm: JMFormBase
 
 			for ( int j = 0; j < 100; j++ )
 			{
-				rwWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
+				rwWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
 				
 				if ( rwWidget == NULL )
 				{
@@ -806,6 +811,14 @@ class JMWeatherForm: JMFormBase
 			return;
 		
 		UpdateStates();
+	}
+	
+	void OnClick_FreezeTime( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_Module.SetFreezeTime(m_Checkbox_FreezeTime.IsChecked());
 	}
 
 	void OnClick_Refresh( UIEvent eid, UIActionBase action )
@@ -1809,4 +1822,4 @@ class JMWeatherForm: JMFormBase
 
 		UIActionManager.CreatePanel( m_PanelWindFunc, 0xFF000000, 1 );
 	}
-};
+}

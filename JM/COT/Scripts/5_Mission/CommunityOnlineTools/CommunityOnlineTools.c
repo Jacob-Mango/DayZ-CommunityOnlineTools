@@ -25,10 +25,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		//if ( IsMissionOffline() )
-		//{
-			// GetPermissionsManager().CreateFakePlayers();
-		//}
+		//#ifdef DIAG
+		//GetPermissionsManager().CreateFakePlayers();
+		//#endif
 
 		super.OnLoaded();
 	}
@@ -94,7 +93,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_TOGGLE", "STR_COT_GENERIC_OFF" ) );
 		}
 
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( active );
@@ -301,7 +300,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "RPC_UpdateClient").Add(senderRPC);
 		#endif
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 				return;
@@ -311,7 +310,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				return;
 
 			Server_UpdateClient( guid, senderRPC );
-		} else if ( GetGame().IsClient() )
+		} else if ( g_Game.IsClient() )
 		{
 			PlayerBase po;
 			if ( !ctx.Read( po ) )
@@ -331,7 +330,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "RPC_UpdateClientPosition").Add(senderRPC);
 		#endif
 
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			string guid;
 			if ( !ctx.Read( guid ) )
@@ -391,7 +390,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		GetPermissionsManager().SetClientGUID( guid );
 
-		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( GetGame().GetPlayer() ) );
+		GetPermissionsManager().UpdatePlayer( guid, ctx, PlayerBase.Cast( g_Game.GetPlayer() ) );
 
 		GetModuleManager().OnClientPermissionsUpdated();
 	}
@@ -470,7 +469,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_2(this, "Server_UpdateRole").Add(role.Name).Add(toSendTo.GetId());
 		#endif
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( role.Name );
@@ -501,7 +500,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
 			objSpawnerModule.SpawnCompatibleAttachments(entity, player, depth);
 	}
-};
+}
 
 
 CommunityOnlineTools GetCommunityOnlineTools()

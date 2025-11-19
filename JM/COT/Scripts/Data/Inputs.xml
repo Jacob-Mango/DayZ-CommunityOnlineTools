@@ -38,6 +38,8 @@
             <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
             <input name="UAPlayerModuleGodMode" loc="STR_COT_INPUT_GODMODE_SELF" />
             <input name="UAPlayerModuleInvisibility" loc="STR_COT_INPUT_INVISIBILITY_SELF" />
+
+            <input name="UAPlayerModuleStopSpectating" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE" />
         </actions>
 
         <sorting name="JM_COT" loc="COT">
@@ -135,6 +137,12 @@
             </btn>
         </input>
         <input name="UAPlayerModuleInvisibility">
+        </input>
+
+        <input name="UAPlayerModuleStopSpectating">
+            <btn name="kLControl">
+                <btn name="kInsert" />
+            </btn>
         </input>
 
         <input name="UACOTToggleButtons">

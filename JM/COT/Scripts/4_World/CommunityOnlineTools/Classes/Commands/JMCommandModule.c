@@ -69,4 +69,4 @@ class JMCommandModule: JMModuleBase
 		rpc.Write(input);
 		rpc.Send(null, JMCommandModuleRPC.PerformCommand, true, null);
 	}
-};
+}

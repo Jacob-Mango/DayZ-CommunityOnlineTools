@@ -8,7 +8,7 @@ enum COT_ObjectSpawnerMode
 	PLAYER_POSITION,
 	TARGET_INVENTORY,
 	PLAYER_INVENTORY
-};
+}
 
 enum COT_ESPMode
 {
@@ -17,14 +17,14 @@ enum COT_ESPMode
 	COPYLISTEXPMARKET,
 	
 	CREATELOADOUT
-};
+}
 
 enum COT_LoadoutSpawnMode
 {
 	CURSOR,
 	TARGET,
 	PLAYER
-};
+}
 
 enum COT_ObjectSetupMode
 {
@@ -44,7 +44,7 @@ class COT_BloodTypes
 	static const int B_N = LIQUID_BLOOD_B_N;
 	static const int AB_P = LIQUID_BLOOD_AB_P;
 	static const int AB_N = LIQUID_BLOOD_AB_N;
-};
+}
 
 //! LEGACY, not used
 class COT_LiquidTypes
@@ -58,4 +58,4 @@ class COT_LiquidTypes
 	static const int DIESEL = LIQUID_DIESEL;
 	static const int DISINFECTANT = LIQUID_DISINFECTANT;
 	static const int SOLUTION = LIQUID_SOLUTION;
-};
+}

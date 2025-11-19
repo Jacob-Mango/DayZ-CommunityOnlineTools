@@ -38,7 +38,7 @@ class UIActionDropdownList: UIActionBase
 	{
 		m_ListParent = parent;
 
-		Class.CastTo( m_List, GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList_List.layout", m_ListParent ) );
+		Class.CastTo( m_List, g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList_List.layout", m_ListParent ) );
 		m_List.SetFlags( m_List.GetFlags() | WidgetFlags.EXACTPOS );
 		
 		ToggleList( false );
@@ -333,16 +333,6 @@ class UIActionDropdownList: UIActionBase
 		return false;
 	}
 
-	override bool CallEvent( UIEvent eid )
-	{
-		if ( !m_HasCallback )
-			return false;
-
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
-
-		return false;
-	}
-
 	void SetEditBoxWidth( float width )
 	{
 		float w;
@@ -351,4 +341,4 @@ class UIActionDropdownList: UIActionBase
 		m_Text.SetSize( width, h );
 		m_Text.Update();
 	}
-};
+}

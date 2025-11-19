@@ -105,7 +105,7 @@ class UIActionText: UIActionBase
 		{
 			if ( w == m_Text )
 			{
-				GetGame().CopyToClipboard( m_ActualText );
+				g_Game.CopyToClipboard( m_ActualText );
 			}
 			return false;
 		}
@@ -119,11 +119,4 @@ class UIActionText: UIActionBase
 
 		return ret;
 	}
-
-	override bool CallEvent( UIEvent eid )
-	{
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
-
-		return false;
-	}
-};
+}

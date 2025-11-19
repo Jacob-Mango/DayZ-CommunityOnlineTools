@@ -1,0 +1,15 @@
+MetaFileClass {
+ Name "{E8BF3732052789C1}JM/COT/Objects/Debug/Marker.ptc"
+ Author "monolith"
+ ChangeDate 364753769
+ Configurations {
+  PTCResourceClass PC {
+  }
+  PTCResourceClass XBOX_ONE : PC {
+  }
+  PTCResourceClass PS4 : PC {
+  }
+  PTCResourceClass LINUX : PC {
+  }
+ }
+}

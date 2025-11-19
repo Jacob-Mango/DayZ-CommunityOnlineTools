@@ -8,4 +8,4 @@ modded class DayZGame
 		CF_Log.Level = CF_LogLevel.TRACE;
 #endif
 	}
-};
+}

@@ -20,4 +20,4 @@ class JMDebugMonitor
 	void Hide();
 
 	void Show();
-};
+}

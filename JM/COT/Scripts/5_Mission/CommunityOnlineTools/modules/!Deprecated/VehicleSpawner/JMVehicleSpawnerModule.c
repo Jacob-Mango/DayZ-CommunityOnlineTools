@@ -61,7 +61,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 			Load();
 	}
 
@@ -122,7 +122,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	//! TODO: doesnt update between server restarts for clients
 	void Load()
 	{
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			if (meta)
 				return;
@@ -159,7 +159,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
@@ -239,7 +239,7 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 			flags |= ECE_PLACE_ON_SURFACE;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( file.VehicleName, position, flags ) ) )
+		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( file.VehicleName, position, flags ) ) )
 			return NULL;
 
 		for ( int j = 0; j < attachments.Count(); j++ )
@@ -256,4 +256,4 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 	{
 		CommunityOnlineToolsBase.Refuel(entity);
 	}
-};
+}

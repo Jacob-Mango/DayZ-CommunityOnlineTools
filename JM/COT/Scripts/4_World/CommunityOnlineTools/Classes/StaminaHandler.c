@@ -14,4 +14,4 @@ modded class StaminaHandler
 
         super.Update(deltaT, pCurrentCommandID);
     }
-};
+}

@@ -55,4 +55,4 @@ modded class JMModuleManager
 		}
 	}
 #endif
-};
+}
