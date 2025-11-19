@@ -68,6 +68,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
 		Bind( new JMModuleBinding( "InputToggleInvisibility",	"UAPlayerModuleInvisibility",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
+		Bind( new JMModuleBinding( "EndSpectating",		"UAPlayerModuleStopSpectating",		true 	) );
 	}
 
 	void OnPlayer_Checked( string guid, bool checked )
@@ -1034,12 +1035,16 @@ class JMPlayerModule: JMRenderableModuleBase
 				StartSpectating(guid);
 			else
 				StartSpectating(target);
+
+			action.SetButton("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE");
 		}
 		else
 		{
 			g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
 
 			EndSpectating();
+
+			action.SetButton("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE");
 		}
 	}
 
