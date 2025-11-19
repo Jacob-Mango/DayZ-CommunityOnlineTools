@@ -1207,6 +1207,19 @@ class JMPlayerForm: JMFormBase
 
 		TStringArray players = JM_GetSelected().GetPlayers();
 		string guid = players[0];
+
+		if (guid == GetPermissionsManager().GetClientGUID() && CurrentActiveCamera)
+		{
+			//! Selected player is ourself and we are in spectator cam, or we are in freecam and previous camera was spectator cam
+
+			if (CurrentActiveCamera.IsInherited(JMSpectatorCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
+			{
+				//! We are spectating something else. Stop spectating.
+				m_Module.EndSpectating();
+				return;
+			}
+		}
+
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer(guid);
 		PlayerBase player;
 		if (instance)
