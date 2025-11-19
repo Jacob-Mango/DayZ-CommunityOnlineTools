@@ -19,5 +19,5 @@ modded class CF_Windows
 
 		return false;
 	}
-};
+}
 #endif

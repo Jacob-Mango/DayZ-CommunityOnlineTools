@@ -124,7 +124,7 @@ class JMESPForm: JMFormBase
 				totalInContentRow = 0;
 			}
 
-			Widget rWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_type_widget.layout", gsw );
+			Widget rWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/esp_type_widget.layout", gsw );
 			
 			if ( !rWidget )
 				continue;
@@ -179,8 +179,8 @@ class JMESPForm: JMFormBase
 
 		ESPControls( layoutRoot.FindAnyWidget( "panel_top" ) );
 
-		Widget left_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
-		Widget right_bottom = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
+		Widget left_bottom = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
+		Widget right_bottom = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
 
 		left_bottom.SetSize( 0.5, 1.0 );
 		right_bottom.SetSize( 0.5, 1.0 );
@@ -197,7 +197,7 @@ class JMESPForm: JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateUI, 500, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateUI, 500, true );
 
 		UpdateUI();
 	}
@@ -206,7 +206,7 @@ class JMESPForm: JMFormBase
 	{
 		super.OnHide();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateUI );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( UpdateUI );
 	}
 
 	void DisableToggleableOptions()
@@ -278,14 +278,14 @@ class JMESPForm: JMFormBase
 				{
 					string strName;
 
-					GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
+					g_Game.ConfigGetChildName( strConfigPath, nClass, strName );
 
-					int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
+					int scope = g_Game.ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
 					if ( scope == 0 )
 						continue;
 
-					if ( !GetGame().ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
+					if ( !g_Game.ConfigIsExisting( strConfigPath + " " + strName + " model" ) )
 						continue;
 
 					string strNameLower = strName;
@@ -534,8 +534,8 @@ class JMESPForm: JMFormBase
 
 	void MoveToCursor()
 	{
-		vector dir = GetGame().GetCurrentCameraDirection();
-		vector from = GetGame().GetCurrentCameraPosition(); 
+		vector dir = g_Game.GetCurrentCameraDirection();
+		vector from = g_Game.GetCurrentCameraPosition(); 
 		vector to = from + ( dir * 1000 );   
 		vector contact_pos;
 		vector contact_dir;
@@ -578,4 +578,4 @@ class JMESPForm: JMFormBase
 		
 		m_LoadoutModule.Create(name);
 	}
-};
+}

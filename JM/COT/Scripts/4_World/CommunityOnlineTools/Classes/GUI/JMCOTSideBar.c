@@ -24,7 +24,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	
 	void ~JMCOTSideBar()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -33,7 +33,9 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		Hide();
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(m_LayoutRoot);
+	#endif
 	}
 
 	Widget GetLayoutRoot()
@@ -70,7 +72,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 			if ( modules[i] && modules[i].HasButton() )
 			{
-				modules[i].InitButton( GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget( "Buttons" ) ) );
+				modules[i].InitButton( g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget( "Buttons" ) ) );
 			}
 		}
 
@@ -155,8 +157,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	{
 		#ifndef CF_WINDOWS
 		GetCOTWindowManager().ShowAllActive();
-		GetGame().GetInput().ChangeGameFocus( 1 );
-		GetGame().GetUIManager().ShowUICursor( true );
+		g_Game.GetInput().ChangeGameFocus( 1 );
+		g_Game.GetUIManager().ShowUICursor( true );
 		#endif
 	}
 
@@ -168,8 +170,8 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		GetCOTWindowManager().HideAllActive();
 		if ( !GetCOTWindowManager().HasAnyActive() )
 		{
-			GetGame().GetInput().ResetGameFocus();
-			GetGame().GetUIManager().ShowUICursor( false );
+			g_Game.GetInput().ResetGameFocus();
+			g_Game.GetUIManager().ShowUICursor( false );
 		}
 		#endif
 	}
@@ -281,4 +283,4 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		return false;
 	}
-};
+}

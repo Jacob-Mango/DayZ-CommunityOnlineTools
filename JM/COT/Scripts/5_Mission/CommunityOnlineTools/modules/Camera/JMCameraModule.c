@@ -108,7 +108,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 			if ( m_DOF )
 			{
-				vector from = GetGame().GetCurrentCameraPosition();
+				vector from = g_Game.GetCurrentCameraPosition();
 
 				float dist = 0.0;
 
@@ -117,7 +117,7 @@ class JMCameraModule: JMRenderableModuleBase
 					dist = vector.Distance( from, CurrentActiveCamera.SelectedTarget.GetPosition() );
 				} else if ( m_AutoFocus )
 				{
-					vector to = from + (GetGame().GetCurrentCameraDirection() * 9999);
+					vector to = from + (g_Game.GetCurrentCameraDirection() * 9999);
 					vector contact_pos;
 					
 					DayZPhysics.RaycastRV( from, to, contact_pos, NULL, NULL, NULL , NULL, NULL, false, false, ObjIntersectIFire);
@@ -141,20 +141,20 @@ class JMCameraModule: JMRenderableModuleBase
 
 				if ((CurrentActiveCamera.IsInherited(JMCinematicCamera) && m_EnableFullmapCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
 				{
-					auto player = PlayerBase.Cast(GetGame().GetPlayer());
+					auto player = PlayerBase.Cast(g_Game.GetPlayer());
 					if (m_EnableFullmapCamera && player.GetCommand_Vehicle())
 					{
 						COTCreateLocalAdminNotification(new StringLocaliser("Disabled fullmap freecam update because you are in a vehicle. Please leave the vehicle first if you want to use fullmap freecam update."));
 						m_EnableFullmapCamera = false;
 						JMCameraForm.Cast(GetForm()).SetEnableFullmapCamera(false);
 					}
-					else if (GetGame().IsClient())
+					else if (g_Game.IsClient())
 					{
 						ScriptRPC rpc = new ScriptRPC();
 						rpc.Write(CurrentActiveCamera.GetPosition());
 						rpc.Send(player, JMCameraModuleRPC.UpdatePosition, true, NULL);
 					}
-					else if (!player.m_JM_SpectatedPlayer)
+					else if (!player.m_JM_SpectatedObject)
 					{
 						EnterFullmap(player);
 						player.m_JM_CameraPosition = CurrentActiveCamera.GetPosition();
@@ -183,7 +183,7 @@ class JMCameraModule: JMRenderableModuleBase
 				int col = m_GrassPatchY;
 
 				if ((row > 0 && row < 4) || (col > 0 && col < 4))
-					GetGame().GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
+					g_Game.GetWorld().FlattenGrassBox(x + side * row, z + side * col, side * 1.2, 0, 0, 0.1, 1.0);
 
 				m_GrassPatchY++;
 				if (m_GrassPatchY == 5)
@@ -258,11 +258,11 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Server_Enter( NULL, GetGame().GetPlayer() );
+			Server_Enter( NULL, g_Game.GetPlayer() );
 		} else if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( GetGame().GetPlayer(), JMCameraModuleRPC.Enter, true, NULL );
+			rpc.Send( g_Game.GetPlayer(), JMCameraModuleRPC.Enter, true, NULL );
 		}
 	}
 
@@ -283,7 +283,7 @@ class JMCameraModule: JMRenderableModuleBase
 			if (COT_PreviousActiveCamera)
 				CurrentActiveCamera.SetDirection(COT_PreviousActiveCamera.GetDirection());
 			
-			Human player = GetGame().GetPlayer();
+			Human player = g_Game.GetPlayer();
 			if ( player )
 			{
 				if (!COT_PreviousActiveCamera)
@@ -304,6 +304,7 @@ class JMCameraModule: JMRenderableModuleBase
 		auto trace = CF_Trace_2(this, "Server_Enter").Add(sender).Add(target.ToString());
 		#endif
 
+		vector transform[4];
 		vector position = Vector( 0, 0, 0 );
 
 		PlayerBase player;
@@ -311,33 +312,35 @@ class JMCameraModule: JMRenderableModuleBase
 		{
 			player.COT_RememberVehicle();
 
-			if (player.m_JM_SpectatedPlayer)
-				player = player.m_JM_SpectatedPlayer;
+			if (player.m_JM_SpectatedObject)
+				target = player.m_JM_SpectatedObject;
 
-			position = player.GetBonePositionWS( player.GetBoneIndexByName( "Head" ) ) + player.GetDirection() * 0.12;
+			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
 			//player.GetInputController().SetDisabled( true );
 		}
 		else if ( target )
 		{
-			position = target.GetPosition();
+			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
 		}
+
+		position = transform[3];
 
 		if ( IsMissionOffline() )
 		{
-			CurrentActiveCamera = JMCameraBase.Cast( GetGame().CreateObject( "JMCinematicCamera", position, false ) );
+			CurrentActiveCamera = JMCameraBase.Cast( g_Game.CreateObject( "JMCinematicCamera", position, false ) );
 
 			CurrentActiveCamera.SetActive( true );
 			
-			if ( GetGame().GetPlayer() )
-				GetGame().GetPlayer().GetInputController().SetDisabled( true );
+			if ( g_Game.GetPlayer() )
+				g_Game.GetPlayer().GetInputController().SetDisabled( true );
 		}
 		else 
 		{
 			PlayerBase.Cast(sender.GetPlayer()).COT_TempDisableOnSelectPlayer();
 
-			GetGame().SelectPlayer( sender, NULL );
+			g_Game.SelectPlayer( sender, NULL );
 
-			GetGame().SelectSpectator( sender, "JMCinematicCamera", position );
+			g_Game.SelectSpectator( sender, "JMCinematicCamera", position );
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( NULL, JMCameraModuleRPC.Enter, true, sender );
@@ -373,13 +376,13 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Server_Leave( NULL, GetGame().GetPlayer() );
+			Server_Leave( NULL, g_Game.GetPlayer() );
 		} else if ( IsMissionClient() )
 		{
 			SetFreezeMouse( false );
 
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( GetGame().GetPlayer(), JMCameraModuleRPC.Leave, true, NULL );
+			rpc.Send( g_Game.GetPlayer(), JMCameraModuleRPC.Leave, true, NULL );
 		}
 	}
 
@@ -410,16 +413,16 @@ Print("JMCameraModule::Client_Leave - switching to prev cam " + COT_PreviousActi
 		
 		PPEffects.ResetDOFOverride();
 
-Print("JMCameraModule::Client_Leave - player " + GetGame().GetPlayer());
-		if ( GetGame().GetPlayer() )
+Print("JMCameraModule::Client_Leave - player " + g_Game.GetPlayer());
+		if ( g_Game.GetPlayer() )
 		{
-			GetGame().GetPlayer().GetInputController().SetDisabled( false );
+			g_Game.GetPlayer().GetInputController().SetDisabled( false );
 		}
 
 		PlayerBase player;
-		if (waitForPlayerIdleTimeout && Class.CastTo(player, GetGame().GetPlayer()))
+		if (waitForPlayerIdleTimeout && Class.CastTo(player, g_Game.GetPlayer()))
 		{
-Print("JMCameraModule::Client_Leave - waiting for player to be idle, timestamp " + GetGame().GetTickTime());
+Print("JMCameraModule::Client_Leave - waiting for player to be idle, timestamp " + g_Game.GetTickTime());
 			player.COT_EnableBonePositionUpdate(true);
 			Client_Check_Leave(player, waitForPlayerIdleTimeout);
 			if (waitForPlayerIdleTimeout > 1000)
@@ -432,11 +435,11 @@ Print("JMCameraModule::Client_Leave - left cam");
 	{
 		if (!player.COT_IsAnimationIdle() && waitForPlayerIdleTimeout > 0)
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_Leave, 250, false, player, waitForPlayerIdleTimeout - 250 );
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Client_Check_Leave, 250, false, player, waitForPlayerIdleTimeout - 250 );
 		}
 		else
 		{
-Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + GetGame().GetTickTime());
+Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + g_Game.GetTickTime());
 			player.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
@@ -456,7 +459,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 		{
 			vector spectatorPosition = player.GetPosition();
 			int waitForPlayerIdleTimeout;
-			if (!player.m_JM_SpectatedPlayer && player.m_JM_CameraPosition != vector.Zero)
+			if (!player.m_JM_SpectatedObject && player.m_JM_CameraPosition != vector.Zero)
 			{
 				player.COTResetSpectator();
 
@@ -471,7 +474,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 
 			player.m_JM_CameraPosition = vector.Zero;
 
-			if ( GetGame().IsMultiplayer() )
+			if ( g_Game.IsMultiplayer() )
 			{
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(waitForPlayerIdleTimeout);
@@ -482,12 +485,12 @@ Print("JMCameraModule::Server_Leave - target " + target);
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
-Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_SpectatedPlayer);
-			if (player.m_JM_SpectatedPlayer)
+Print("JMCameraModule::Server_Leave - spectated object " + player.m_JM_SpectatedObject);
+			if (player.m_JM_SpectatedObject)
 				return;
 
 			if (!waitForPlayerIdleTimeout)
-				GetGame().SelectPlayer(sender, player);
+				g_Game.SelectPlayer(sender, player);
 		}
 	}
 
@@ -496,7 +499,7 @@ Print("JMCameraModule::Server_Leave - spectated player " + player.m_JM_Spectated
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave").Add(senderRPC).Add(target.ToString());
 		#endif
-Print("JMCameraModule::RPC_Leave - timestamp " + GetGame().GetTickTime());
+Print("JMCameraModule::RPC_Leave - timestamp " + g_Game.GetTickTime());
 		if ( IsMissionHost() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
@@ -520,15 +523,15 @@ Print("JMCameraModule::RPC_Leave - timestamp " + GetGame().GetTickTime());
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave_Finish").Add(senderRPC).Add(target);
 #endif
-Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime());
+Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 			return;
 
 		PlayerBase player;
-		if (!Class.CastTo(player, senderRPC.GetPlayer()) || player.m_JM_SpectatedPlayer)
+		if (!Class.CastTo(player, senderRPC.GetPlayer()) || player.m_JM_SpectatedObject)
 			return;
 
-		GetGame().SelectPlayer(senderRPC, player);
+		g_Game.SelectPlayer(senderRPC, player);
 	}
 
 	private void RPC_UpdatePosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -537,7 +540,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 		auto trace = CF_Trace_1(this, "RPC_UpdatePosition").Add(senderRPC);
 		#endif
 
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 				return;
@@ -549,10 +552,10 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 			PlayerBase player;
 			if (Class.CastTo(player, target))
 			{
-				if (!player.m_JM_SpectatedPlayer)
+				if (!player.m_JM_SpectatedObject)
 					EnterFullmap(player);
 				player.m_JM_CameraPosition = position;
-				if (!player.m_JM_SpectatedPlayer)
+				if (!player.m_JM_SpectatedObject)
 					player.COTUpdateSpectatorPosition();
 			}
 		}
@@ -594,7 +597,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void ZoomForwards( UAInput input )
 	{
-		if ( input.LocalValue() != 0 )
+		if (input.LocalValue() != 0 && CurrentActiveCamera && CurrentActiveCamera.m_JM_3rdPerson != JMCamera3rdPersonMode.DOLLY)
 		{
 			m_TargetFOV += input.LocalValue() * 0.01;
 		}
@@ -602,7 +605,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 
 	void ZoomBackwards( UAInput input )
 	{
-		if ( input.LocalValue() != 0 )
+		if (input.LocalValue() != 0 && CurrentActiveCamera && CurrentActiveCamera.m_JM_3rdPerson != JMCamera3rdPersonMode.DOLLY)
 		{
 			m_TargetFOV -= input.LocalValue() * 0.01;
 					
@@ -616,10 +619,10 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	void LookAtSelection()
 	{
 		float distance = 100.0;
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		vector rayEnd = rayStart + ( GetGame().GetCurrentCameraDirection() * distance );
+		vector rayStart = g_Game.GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( g_Game.GetCurrentCameraDirection() * distance );
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
 		rayInput.flags = CollisionFlags.NEARESTCONTACT;
 		rayInput.radius = 1.0;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -718,15 +721,15 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 			{
 				case JMCamera3rdPersonMode.OFF:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DEFAULT;
-					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Default", ""));
+					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Default", ""));
 					break;
 				case JMCamera3rdPersonMode.DEFAULT:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.DOLLY;
-					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
+					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
 					break;
 				case JMCamera3rdPersonMode.DOLLY:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
-					GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
+					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
 					break;
 			}
 		}
@@ -748,4 +751,4 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + GetGame().GetTickTime())
 	{
 		m_TargetFOV = fov;
 	}
-};
+}

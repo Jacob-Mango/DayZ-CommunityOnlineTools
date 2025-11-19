@@ -81,5 +81,5 @@ class JMPlayerSerialize : Managed
 	{
 		JsonFileLoader<JMPlayerSerialize>.JsonSaveFile( m_FileName, this );
 	}
-};
+}
 #endif

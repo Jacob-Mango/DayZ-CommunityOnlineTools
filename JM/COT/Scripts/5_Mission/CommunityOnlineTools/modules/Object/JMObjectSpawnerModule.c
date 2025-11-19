@@ -134,7 +134,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( GetGame().GetUIManager().GetMenu() )
+		if ( g_Game.GetUIManager().GetMenu() )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Entity.Delete" ) )
@@ -163,9 +163,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
 	Object GetObjectAtCursor(bool ignorePlayer = true, float distance = 3.0)
 	{ 
-		vector rayStart = GetGame().GetCurrentCameraPosition();
+		vector rayStart = g_Game.GetCurrentCameraPosition();
 
-		DayZPlayer player = GetGame().GetPlayer();
+		DayZPlayer player = g_Game.GetPlayer();
 		DayZPlayerCamera3rdPerson camera3rdPerson;
 		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
 		{
@@ -173,9 +173,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			distance += vector.Distance(rayStart, headPos);
 		}
 
-		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
+		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -362,7 +362,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		vector transform[4];
 		obj.GetTransform( transform );
 
-		GetGame().ObjectDelete( obj );
+		g_Game.ObjectDelete( obj );
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted Entity " + obtype + " at " + transform[3].ToString() );
 		SendWebhook( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString() );
@@ -385,7 +385,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( IsMissionClient() )
 		{
-			if (targetInventory && !GetGame().IsKindOf(className, "DZ_LightAI"))
+			if (targetInventory && !g_Game.IsKindOf(className, "DZ_LightAI"))
 			{
 				if (Class.CastTo(targetEnt, GetObjectAtCursor(false, 1000.0)) && !targetEnt.GetInventory())
 					targetEnt = null;
@@ -417,19 +417,20 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE;
-		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
-		
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
+		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
+		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
+		else if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
+		else if ( g_Game.IsKindOf( className, "HouseNoDestruct" ) )
+			flags |= ECE_UPDATEPATHGRAPH;
 
 		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
 			flags |= ECE_EQUIP;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
 			return;
 
 		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
@@ -515,7 +516,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	private void Server_SpawnEntity_Inventory( string className, array< string > players, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
+		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			return;
 
 		JMPlayerInstance callerInstance;
@@ -538,15 +539,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				vector position = instance.PlayerObject.GetPosition();
 
 				int flags = ECE_CREATEPHYSICS;
-				if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
+				if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE;
-				else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+				else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
 					flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
 
 				if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
 					flags |= ECE_EQUIP;
 		
-				if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+				if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
 					continue;
 
 				loggedSuffix = " at " + position.ToString();
@@ -600,7 +601,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		EntityAI ent;
 
-		if ( GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) && !GetGame().IsKindOf( className, "DZ_LightAI" ) && targetEnt.GetInventory() && Class.CastTo( ent, targetEnt.GetInventory().CreateInInventory( className ) ) )
+		if ( GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) && !g_Game.IsKindOf( className, "DZ_LightAI" ) && targetEnt.GetInventory() && Class.CastTo( ent, targetEnt.GetInventory().CreateInInventory( className ) ) )
 		{
 			string loggedSuffix = " at " + position.ToString();
 
@@ -790,21 +791,21 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		foreach (string config_path: all_paths)
 		{
-			int children_count = GetGame().ConfigGetChildrenCount(config_path);
+			int children_count = g_Game.ConfigGetChildrenCount(config_path);
 
 			for (int i = 0; i < children_count; i++)
 			{
-				GetGame().ConfigGetChildName(config_path, i, child_name);
+				g_Game.ConfigGetChildName(config_path, i, child_name);
 				path = config_path + " " + child_name;
-				scope = GetGame().ConfigGetInt(path + " scope");
+				scope = g_Game.ConfigGetInt(path + " scope");
 
 				if (scope == 2)
 				{
-					if (!GetGame().ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
+					if (!g_Game.ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
 						continue;
 
 					TStringArray inv_slots = {};
-					GetGame().ConfigGetTextArray(path + " inventorySlot", inv_slots);
+					g_Game.ConfigGetTextArray(path + " inventorySlot", inv_slots);
 
 					foreach (string inv_slot: inv_slots)
 					{
@@ -819,7 +820,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 									break;
 
 								//! Limit character attachments to clothing
-								if (entity.IsMan() && !GetGame().IsKindOf(child_name, "Clothing_Base"))
+								if (entity.IsMan() && !g_Game.IsKindOf(child_name, "Clothing_Base"))
 									break;
 
 								child = entity.GetInventory().CreateAttachmentEx(child_name, slot_id);
@@ -846,7 +847,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		TStringArray full_path = new TStringArray;
 		
-		GetGame().ConfigGetFullPath(path, full_path);
+		g_Game.ConfigGetFullPath(path, full_path);
 		
 		string cfg_parent_name = "inventory_base";
 		foreach (string tmp: full_path)
@@ -888,19 +889,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		
 		int flags = ECE_CREATEPHYSICS;
-		if ( GetGame().IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
+		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE;
-		else if ( GetGame().IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
+		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
 			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
 		
-		if ( GetGame().IsKindOf( className, "DZ_LightAI" ) )
+		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
 			flags |= 0x800;
 
 		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
 			flags |= ECE_EQUIP;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObjectEx( className, position, flags ) ) )
+		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
 			return;
 
 		float quantity = -1;
@@ -924,4 +925,4 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		names.Insert("object");
 		return names;
 	}
-};
+}

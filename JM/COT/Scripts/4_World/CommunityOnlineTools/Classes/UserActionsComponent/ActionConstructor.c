@@ -12,4 +12,4 @@ modded class ActionConstructor
 		actions.Insert(COT_QuickActionBuild);
 		actions.Insert(COT_QuickActionDismantle);
 	}
-};
+}

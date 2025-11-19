@@ -15,7 +15,6 @@ class CfgPatches
 
 class CfgVehicles
 {
-
 	class ZombieMaleBase;
 	class COT_Zombie: ZombieMaleBase
 	{

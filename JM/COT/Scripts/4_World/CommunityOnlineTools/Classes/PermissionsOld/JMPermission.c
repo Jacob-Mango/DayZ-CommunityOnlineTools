@@ -459,5 +459,5 @@ class JMPermission : Managed
 		//#endif
 		}
 	}
-};
+}
 #endif

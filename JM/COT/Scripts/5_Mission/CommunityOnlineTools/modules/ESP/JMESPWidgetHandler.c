@@ -164,14 +164,14 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		if (m_IsShown)
 			return;
 
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( this.Update );
 
 		m_IsShown = true;
 	}
 
 	void OnHide() 
 	{
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( this.Update );
 
 		Deselect();
 
@@ -243,7 +243,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		m_LastPosition = GetPosition();
 
-		ScreenPos = GetGame().GetScreenPos( m_LastPosition );
+		ScreenPos = g_Game.GetScreenPos( m_LastPosition );
 
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
@@ -402,6 +402,9 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void SetSelected( bool selected )
 	{
+		if (!Info)
+			return;
+
 		if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
 		{
 			if (Info.player)
@@ -417,4 +420,4 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 			}
 		}
 	}
-};
+}

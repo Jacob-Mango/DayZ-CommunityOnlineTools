@@ -146,7 +146,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		auto trace = CF_Trace_1(this, "RPC_Load").Add(senderRPC);
 		#endif
 
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
@@ -376,4 +376,4 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		Exec_TypeState( name, group, enabled, instance );
 	}
-};
+}

@@ -1,7 +1,7 @@
 class JMTestingModulePlayerIdentityC : Managed
 {
 	PlayerIdentity identity;
-};
+}
 
 class JMTestingModule : JMModuleBase
 {
@@ -21,7 +21,7 @@ class JMTestingModule : JMModuleBase
 		Print("Command_ViewA");
 
 		array<PlayerIdentity> identities();
-		GetGame().GetPlayerIndentities(identities);
+		g_Game.GetPlayerIndentities(identities);
 
 		int index = 0;
 		foreach (auto identity : identities)
@@ -45,7 +45,7 @@ class JMTestingModule : JMModuleBase
 		Print("Command_ViewB");
 
 		array<PlayerIdentity> identities();
-		GetGame().GetPlayerIndentities(identities);
+		g_Game.GetPlayerIndentities(identities);
 
 		PlayerIdentity identity = null;
 		for (int index = 0; index < identities.Count(); index++)
@@ -69,7 +69,7 @@ class JMTestingModule : JMModuleBase
 		Print("Command_ViewC");
 
 		array<PlayerIdentity> identities();
-		GetGame().GetPlayerIndentities(identities);
+		g_Game.GetPlayerIndentities(identities);
 
 		JMTestingModulePlayerIdentityC identity = null;
 		for (int index = 0; index < identities.Count(); index++)
@@ -102,4 +102,4 @@ class JMTestingModule : JMModuleBase
 		names.Insert("test");
 		return names;
 	}
-};
+}

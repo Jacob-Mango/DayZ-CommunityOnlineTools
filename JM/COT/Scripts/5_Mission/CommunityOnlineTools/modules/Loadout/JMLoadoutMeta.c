@@ -20,4 +20,4 @@ class JMLoadoutMeta
 
 		return meta;
 	}
-};
+}

@@ -43,9 +43,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_TARGET"
 	};
 
-	private ref array< string > m_ObjItemStateFoodText =
-	{
-	};
+	private ref array< string > m_ObjItemStateFoodText = {};
 
 	private ref array< string > m_ObjItemStateBloodText =
 	{
@@ -62,9 +60,7 @@ class JMObjectSpawnerForm: JMFormBase
 	};
 
 	private ref array< int > m_ObjItemStateLiquid = {};
-	private ref array< string > m_ObjItemStateLiquidText =
-	{
-	};
+	private ref array< string > m_ObjItemStateLiquidText = {};
 	private ref map<int, int> m_ObjItemStateLiquidColors = new map<int, int>;
 
 	private int m_ItemStateType = -1;
@@ -78,7 +74,7 @@ class JMObjectSpawnerForm: JMFormBase
 	void ~JMObjectSpawnerForm()
 	{
 		if (m_PreviewItem)
-			GetGame().ObjectDelete(m_PreviewItem);
+			g_Game.ObjectDelete(m_PreviewItem);
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -142,8 +138,8 @@ class JMObjectSpawnerForm: JMFormBase
 			{
 				//!@note most of this joinked from ExpansionWorld::GetLiquidDisplayName
 
-				GetGame().ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
-				GetGame().FormatRawConfigStringKeys(displayName);
+				g_Game.ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
+				g_Game.FormatRawConfigStringKeys(displayName);
 
 				if (displayName.IndexOf("#") == 0)
 					translated = Widget.TranslateString(displayName);
@@ -171,12 +167,12 @@ class JMObjectSpawnerForm: JMFormBase
 			{
 				string colorPath = "CfgLiquidDefinitions " + liquidClsName +  " color";
 
-				color = GetGame().ConfigGetInt(colorPath);
+				color = g_Game.ConfigGetInt(colorPath);
 
 				if (!color)
 				{
 					string colorConstantName;
-					GetGame().ConfigGetTextRaw(colorPath, colorConstantName);
+					g_Game.ConfigGetTextRaw(colorPath, colorConstantName);
 
 					if (!colorConstantName)
 					{
@@ -274,7 +270,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
 		
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
 		else
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
@@ -540,10 +536,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( m_PreviewItem ) 
 		{
-			GetGame().ObjectDelete( m_PreviewItem );
+			g_Game.ObjectDelete( m_PreviewItem );
 		}
 
-		//if ( GetGame().IsKindOf( strSelection, "DZ_LightAI" ) ) 
+		//if ( g_Game.IsKindOf( strSelection, "DZ_LightAI" ) ) 
 		//{
 			//m_ItemPreview.Show( false );
 
@@ -559,7 +555,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_Orientation = vector.Zero;
 
-		m_PreviewItem = EntityAI.Cast( GetGame().CreateObject( strSelection, vector.Zero, true, false, false ) );
+		m_PreviewItem = EntityAI.Cast( g_Game.CreateObject( strSelection, vector.Zero, true, false, false ) );
 
 		m_QuantityItem.Disable();
 		UpdateHealthControls(strSelection);
@@ -687,7 +683,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( w == m_ItemPreview && button == MouseState.LEFT )
 		{
-			GetGame().GetDragQueue().Call( this, "UpdateRotation" );
+			g_Game.GetDragQueue().Call( this, "UpdateRotation" );
 			GetMousePos( m_MouseX, m_MouseY );
 
 			return true;
@@ -795,7 +791,7 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			default:
 			case COT_ObjectSpawnerMode.PLAYER_POSITION:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetGame().GetPlayer().GetPosition(), quantity, health, temp, itemState);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), g_Game.GetPlayer().GetPosition(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.CURSOR:
@@ -816,7 +812,7 @@ class JMObjectSpawnerForm: JMFormBase
 					m_ClassList.GetItemText(i, 0, result);
 					clipboardOutput += result + "\n";
 				}
-				GetGame().CopyToClipboard(clipboardOutput);
+				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
@@ -837,7 +833,7 @@ class JMObjectSpawnerForm: JMFormBase
 					clipboardOutput += "	</type>\n";
 				}
 				clipboardOutput += "</types>";
-				GetGame().CopyToClipboard(clipboardOutput);
+				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
@@ -870,7 +866,7 @@ class JMObjectSpawnerForm: JMFormBase
 				}
 				clipboardOutput += "    ]\n";
 				clipboardOutput += "}";
-				GetGame().CopyToClipboard(clipboardOutput);
+				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 		}
 	}
@@ -900,7 +896,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	private void DeleteEntity_No( JMConfirmation confirmation )
@@ -908,7 +904,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeletingObject = NULL;
 
 		if (m_Module.m_AutoShow)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
 	}
 
 	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
@@ -947,45 +943,43 @@ class JMObjectSpawnerForm: JMFormBase
 		int score;
 		int highestScore;
 
-		for ( int nConfig = 0; nConfig < configs.Count(); nConfig++ )
+		for ( int nConfig; nConfig < configs.Count(); nConfig++ )
 		{
 			string strConfigPath = configs.Get( nConfig );
 
 			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
 
-			int nClassStart = 0;
-			if (nConfig == 0) nClassStart = 20;
+			int nClassStart;
+			if (nConfig == 0)
+				nClassStart = 20;
 
 			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
 			{
 				string strName;
 
-				GetGame().ConfigGetChildName( strConfigPath, nClass, strName );
+				g_Game.ConfigGetChildName( strConfigPath, nClass, strName );
 
-				int scope = GetGame().ConfigGetInt( strConfigPath + " " + strName + " scope" );
+				int scope = g_Game.ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
-				if ( scope == 0 )
-					continue;
-
-				if ( scope == 1 && !m_Module.m_AllowRestrictedClassNames )
+				if ( scope == 0 || (scope == 1 && !m_Module.m_AllowRestrictedClassNames) )
 					continue;
 
 				string model;
-				if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
+				if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
 				string strNameLower = strName;
 
 				strNameLower.ToLower();
 
-				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || GetGame().IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
 						continue;
 					
 					if (m_Module.m_FilterWithDisplayName)
 					{
-						if (!GetGame().ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
+						if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
 							continue;
 
 						strNameLower = Widget.TranslateString( strNameLower );
@@ -1003,15 +997,10 @@ class JMObjectSpawnerForm: JMFormBase
 						{
 							index = strNameLower.IndexOf(strSearch);
 
-							if (index == 0)
-							{
-								if (!closestMatch)
-									suggestions.Insert(strNameLower);
-							}
+							if (index == 0 && !closestMatch)
+								suggestions.Insert(strNameLower);
 							else if (index == -1 && count == 1)
-							{
 								continue;
-							}
 
 							score = 0;
 							foreach(string searchEntry: strSearches)
@@ -1062,4 +1051,4 @@ class JMObjectSpawnerForm: JMFormBase
 
 		return "";
 	}
-};
+}

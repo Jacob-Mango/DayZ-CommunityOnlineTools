@@ -57,7 +57,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 		{
 			RetrievePossibleEvents();
 		}
@@ -127,7 +127,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				auto trace1 = CF_Trace_0(this, "OnRPC - LoadEvents");
 
-				if (!GetGame().IsClient()) return;
+				if (!g_Game.IsClient()) return;
 
 				array<string> evts;
 				if (!ctx.Read(evts)) return;
@@ -169,7 +169,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	{
 		auto trace = CF_Trace_0(this, "RetrievePossibleEvents");
 
-		g_Script.CallFunction(GetGame().GetMission(), "GetNamEventManager", m_EventManager, null);
+		g_Script.CallFunction(g_Game.GetMission(), "GetNamEventManager", m_EventManager, null);
 		Print("m_EventManager " + m_EventManager);
 		if (!m_EventManager) return;
 		
@@ -218,4 +218,4 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			OnSettingsUpdated();
 		}
 	}
-};
+}

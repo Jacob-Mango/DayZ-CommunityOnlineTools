@@ -15,7 +15,7 @@ class JMWindowManager
 	JMWindowBase Create()
 	{
 		JMWindowBase window;
-		GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", JMStatics.WINDOWS_CONTAINER ).GetScript( window );
+		g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/windowbase.layout", JMStatics.WINDOWS_CONTAINER ).GetScript( window );
 		return window;
 	}
 
@@ -82,7 +82,7 @@ class JMWindowManager
 		m_WindowsPendingDeletion.Insert( window );
 
 		//! Purge after a delay so we can still block certain actions while closing a window
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(PurgeDeletedWindows, 250);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(PurgeDeletedWindows, 250);
 	}
 
 	void PurgeDeletedWindows()
@@ -155,7 +155,7 @@ class JMWindowManager
 			m_Windows[i].Destroy();
 		}
 	}
-};
+}
 
 
 ref JMWindowManager g_cot_WindowManager;

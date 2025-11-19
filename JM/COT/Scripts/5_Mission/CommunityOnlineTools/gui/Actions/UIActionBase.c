@@ -33,7 +33,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	void ~UIActionBase()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -44,7 +44,9 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		//! @note this should not be necessary since if the JMWindowBase handling this UIAction is destroyed,
 		//! it'll unlink its own layoutRoot and all its children with it. This is just here as a safety.
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_UIActionBaseCount--;
@@ -55,7 +57,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	void Deactivate()
 	{
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		if (m_WasFocused)
 		{
@@ -102,7 +104,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.Show( true );
 		OnShow();
 
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
 		m_IsShown = true;
 
@@ -328,6 +330,12 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	bool CallEvent( UIEvent eid )
 	{
+		if ( !m_HasCallback )
+			return false;
+
+		auto params = new Param2< UIEvent, UIActionBase >( eid, this );
+		g_Game.GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, params );
+
 		return false;
 	}
 
@@ -399,4 +407,4 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 		return -1;
 	}
-};
+}

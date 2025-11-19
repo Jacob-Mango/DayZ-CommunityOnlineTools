@@ -75,7 +75,7 @@ modded class Construction
 		string cfg_path = "cfgVehicles" + " " + GetParent().GetType() + " "+ "Construction" + " " + main_part_name + " " + part_name + " " + "required_parts";
 		
 		array<string> required_parts = new array<string>;
-		GetGame().ConfigGetTextArray( cfg_path, required_parts );
+		g_Game.ConfigGetTextArray( cfg_path, required_parts );
 		
 		for ( int i = 0; i < required_parts.Count(); ++i )
 		{
@@ -156,4 +156,4 @@ modded class Construction
 			GetParent().SetHealthMax( damage_zone, "Health" );
 		}
 	}
-};
+}

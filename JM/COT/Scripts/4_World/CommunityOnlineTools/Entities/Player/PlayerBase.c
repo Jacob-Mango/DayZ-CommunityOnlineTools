@@ -38,7 +38,8 @@ modded class PlayerBase
 	private ref map<int, bool> m_COT_PlayerVars;
 	private int m_COT_PlayerVarsBitmask;
 
-	PlayerBase m_JM_SpectatedPlayer;
+	PlayerBase m_JM_SpectatedPlayer;  //! Obsolete, unused, kept for compat with 3rd party mods
+	Object m_JM_SpectatedObject;
 	vector m_JM_CameraPosition;
 	private bool m_COT_EdgeTick;
 
@@ -57,19 +58,8 @@ modded class PlayerBase
 
 	void PlayerBase()
 	{
-		if ( IsMissionOffline() )
-		{
-			GetStatEnergy().Set( GetStatEnergy().GetMax() );
-			GetStatWater().Set( GetStatWater().GetMax() );
-			COTSetGodMode(true);
-			COTSetUnlimitedAmmo(true);
-			COTSetUnlimitedStamina(true);
-		}
-
-		if (GetGame() && GetGame().IsClient())
-		{
+		if (g_Game && g_Game.IsClient())
 			SetEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
-		}
 
 		m_COT_PlayerVars = new map<int, bool>;
 	}
@@ -77,7 +67,7 @@ modded class PlayerBase
 	
 	void ~PlayerBase()
 	{
-		if (GetGame() && GetGame().IsClient())
+		if (g_Game && g_Game.IsClient())
 		{
 			ClearEventMask(EntityEvent.POSTFRAME|EntityEvent.INIT);
 		}
@@ -112,7 +102,7 @@ modded class PlayerBase
 		RegisterNetSyncVariableFloat("m_JMScaleValue", 0.1, 10.0);
 
 #ifndef CF_MODULE_PERMISSIONS
-		GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
+		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
 #endif
 
 		m_JMHasLastPosition = false;
@@ -155,9 +145,9 @@ modded class PlayerBase
 	{
 		bool skip;
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 		{
-			if ((m_JM_SpectatedPlayer || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible)
+			if ((m_JM_SpectatedObject || m_JM_CameraPosition != vector.Zero) && m_JMIsInvisible)
 				skip = true;
 		}
 		else if (CurrentActiveCamera && m_JMIsInvisible)
@@ -176,7 +166,7 @@ modded class PlayerBase
 		m_COT_TempDisableOnSelectPlayer = disable;
 
 	#ifndef SERVER
-		auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+		auto mission = MissionBaseWorld.Cast(g_Game.GetMission());
 		if (mission)
 			mission.COT_TempDisableOnSelectPlayer(disable);
 	#endif
@@ -201,8 +191,8 @@ modded class PlayerBase
 		//COT_ResumeVehicleCommand();
 
 #ifndef SERVER
-		if (GetGame().GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive()))
-			GetGame().GetUIManager().ShowUICursor(true);
+		if (g_Game.GetPlayer() == this && (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive()))
+			g_Game.GetUIManager().ShowUICursor(true);
 #endif
 	}
 
@@ -210,7 +200,7 @@ modded class PlayerBase
 	{
 		super.OnConnect();
 
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(COTOnConnect);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(COTOnConnect);
 	}
 
 	void COTOnConnect()
@@ -341,7 +331,7 @@ modded class PlayerBase
 			{
 				AddActiveNV(JMNVTypes.NV_COT_OFF);
 				RemoveActiveNV(JMNVTypes.NV_COT_ON);
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
+				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
 			}
 		}
 	}
@@ -453,7 +443,7 @@ modded class PlayerBase
 
 	void SetLastPosition(bool force = false)
 	{
-		if ( GetGame().IsServer() && (force || (!m_JM_SpectatedPlayer && m_JM_CameraPosition == vector.Zero)))
+		if ( g_Game.IsServer() && (force || (!m_JM_SpectatedObject && m_JM_CameraPosition == vector.Zero)))
 		{
 			vector trans[4];
 			GetTransform( trans );
@@ -486,7 +476,7 @@ modded class PlayerBase
 			SetPosition(position);
 		}
 
-		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedPlayer)
+		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedObject)
 			SetLastPosition(true);
 	}
 
@@ -519,37 +509,49 @@ modded class PlayerBase
 
 	private void Safe_SetAuthenticatedPlayer()
 	{
-		if ( m_AuthenticatedPlayer )
+		if ( m_AuthenticatedPlayer || !GetIdentity() )
 			return;
 
-		if ( !GetIdentity() ) // Could be AI
-			return;
-
-		if ( !m_AuthenticatedPlayer )
-		{
-			if ( IsMissionOffline() )
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
-			} else
-			{
-				m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
-			}
-		}
+		if ( IsMissionOffline() )
+			m_AuthenticatedPlayer = GetPermissionsManager().GetClientPlayer();
+		else
+			m_AuthenticatedPlayer = GetPermissionsManager().GetPlayer( GetIdentity().GetId() );
 
 		if ( m_AuthenticatedPlayer )		
 			m_AuthenticatedPlayer.PlayerObject = this;
 		else
-			GetGame().GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( Safe_SetAuthenticatedPlayer, 2000, false );
 	}
 
 	override string FormatSteamWebhook()
 	{
-		if ( !GetAuthenticatedPlayer() )
+		JMPlayerInstance instance = GetAuthenticatedPlayer();
+		if (instance)
+			return instance.FormatSteamWebhook();
+
+		string name = GetCachedName();
+
+		switch (GetInstanceType())
 		{
-			return super.FormatSteamWebhook() + " (WARNING)";
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_SERVER:
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_REMOTE:
+			case DayZPlayerInstanceType.INSTANCETYPE_AI_SINGLEPLAYER:
+			#ifdef EXPANSIONMODAI
+				eAIGroup group = GetGroup();
+				if (group)
+				{
+					string groupName = group.GetName();
+					if (groupName)
+						name += string.Format(" (%1)", groupName);
+				}
+			#endif
+				return "AI " + name;
 		}
 
-		return GetAuthenticatedPlayer().FormatSteamWebhook();
+		if (!name)
+			name = super.FormatSteamWebhook();
+
+		return name + " (WARNING)";
 	}
 #endif
 
@@ -593,7 +595,7 @@ modded class PlayerBase
 
 	void COTSetGodMode( bool mode, bool preference = true )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			if (preference)
 				m_COT_GodMode_Preference = mode;
@@ -627,7 +629,7 @@ modded class PlayerBase
 
 	void COTSetFreeze( bool mode )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			m_JMIsFrozen = mode;
 			m_JMIsFrozenRemoteSynch = mode;
@@ -647,7 +649,7 @@ modded class PlayerBase
 
 	void COTSetInvisibility( int mode, bool preference = true )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			if (preference)
 				m_COT_Invisibility_Preference = mode;
@@ -714,7 +716,7 @@ modded class PlayerBase
 
 	void COTSetUnlimitedAmmo( bool mode )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			m_JMHasUnlimitedAmmo = mode;
 
@@ -726,7 +728,7 @@ modded class PlayerBase
 
 	void COTSetUnlimitedStamina( bool mode )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			m_JMHasUnlimitedStamina = mode;
 
@@ -738,7 +740,7 @@ modded class PlayerBase
 
 	void COTSetAdminNVG( bool mode )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			m_JMHasAdminNVG = mode;
 
@@ -750,7 +752,7 @@ modded class PlayerBase
 
 	void COTSetScale( float value )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			m_JMHasCustomScale = value != 1;
 			m_JMScaleValue = value;
@@ -764,7 +766,7 @@ modded class PlayerBase
 
 	void COTRemoveAllDiseases()
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
 			GetModifiersManager().DeactivateAllModifiers();
 			
@@ -778,9 +780,10 @@ modded class PlayerBase
 
 	void COTResetItemWetness()
 	{
+		ItemBase item;
 		array< EntityAI > items = new array< EntityAI >;
 		GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, items );
-		ItemBase item;
+
 		foreach ( EntityAI entity: items )
 		{
 			if ( Class.CastTo( item, entity ) )
@@ -790,17 +793,26 @@ modded class PlayerBase
 
 	void COT_RemoveAllItems()
 	{
+		ItemBase item;
 		array<EntityAI> entities = {};
 		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
 
-		ItemBase item;
 		foreach (EntityAI entity: entities)
 		{
 			if (entity != this && Class.CastTo(item, entity))
-			{
 				item.DeleteSafe();
-			}
 		}
+	}
+
+	override bool IsRestrained()
+	{
+		if (!g_Game.IsDedicatedServer() && g_Game.GetPlayer() != this && g_cotBase && g_cotBase.IsActive())
+		{
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory" ) || m_JMIsFrozen)
+				return true;
+		}
+
+		return super.IsRestrained();
 	}
 
 	void COTUpdateSpectatorPosition()
@@ -818,9 +830,9 @@ modded class PlayerBase
 			position = m_JM_CameraPosition;
 			freeCam = true;
 		}
-		else if (m_JM_SpectatedPlayer)
+		else if (m_JM_SpectatedObject)
 		{
-			position = m_JM_SpectatedPlayer.GetPosition();
+			position = m_JM_SpectatedObject.GetPosition();
 			spectate = true;
 		}
 		else
@@ -835,7 +847,7 @@ modded class PlayerBase
 			if (COTIsInvisible() && !m_COT_Invisibility_Preference)
 				COTSetInvisibility( JMInvisibilityType.None, false );
 
-			if (GetPosition()[1] < GetGame().SurfaceY(position[0], position[2]))
+			if (GetPosition()[1] < g_Game.SurfaceY(position[0], position[2]))
 			{
 				PhysicsEnableGravity( true );
 				SetPosition(m_JMLastPosition);
@@ -851,7 +863,7 @@ modded class PlayerBase
 				//! frozen in time) before moving directly under target.
 				//! Randomize the distance a bit to not make it too obvious.
 				position = position - dir.Normalized() * Math.RandomFloat(981, 990);
-				position[1] = GetGame().SurfaceY(position[0], position[2]);
+				position[1] = g_Game.SurfaceY(position[0], position[2]);
 
 				if (m_COT_EdgeTick)
 					m_COT_EdgeTick--;
@@ -860,7 +872,7 @@ modded class PlayerBase
 			}
 			else
 			{
-				position[1] = GetGame().SurfaceRoadY3D(position[0], position[1], position[2], RoadSurfaceDetection.CLOSEST) - 3.0;
+				position[1] = g_Game.SurfaceRoadY3D(position[0], position[1], position[2], RoadSurfaceDetection.CLOSEST) - 3.0;
 			}
 
 			if (!COTHasGodMode())
@@ -891,7 +903,7 @@ modded class PlayerBase
 			SetPosition( GetLastPosition() );
 
 		if (!m_COT_GodMode_Preference)
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
 	}
 
 	void COTSetIsBeingKicked(bool state)
@@ -1000,7 +1012,7 @@ modded class PlayerBase
 
 		if (CurrentActiveCamera && m_COT_IsLeavingFreeCam)
 		{
-			auto mission = MissionBaseWorld.Cast(GetGame().GetMission());
+			auto mission = MissionBaseWorld.Cast(g_Game.GetMission());
 			if (mission)
 				mission.COT_LeaveFreeCam();
 			m_COT_IsLeavingFreeCam = false;
@@ -1028,7 +1040,7 @@ modded class PlayerBase
 			if (Class.CastTo(car, trans))
 			{
 				GetDayZGame().GetBacklit().OnLeaveCar();
-				if (GetGame().IsServer())
+				if (g_Game.IsServer())
 				{
 					car.ForceUpdateLightsStart();
 					car.ForceUpdateLightsEnd();
@@ -1041,4 +1053,4 @@ modded class PlayerBase
 			//m_COT_TransportCache = null;
 		//}
 	}
-};
+}

@@ -6,7 +6,7 @@ class JMVehicleSpawnerSettings
 	{
 		JMVehicleSpawnerSettings settings = new JMVehicleSpawnerSettings();
 
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			settings.Defaults();
 			return settings;
@@ -36,7 +36,7 @@ class JMVehicleSpawnerSettings
 				
 				JMVehicleSpawnerSerialize serialize = JMVehicleSpawnerSerialize.Load(fileName);
 				
-				if (!GetGame().ConfigIsExisting("cfgVehicles " + serialize.VehicleName))
+				if (!g_Game.ConfigIsExisting("cfgVehicles " + serialize.VehicleName))
 				{
 					Print("[Community Online Tools] Vehicle Spawner Module - Couldnt find any classnames called <<"+ serialize.VehicleName +">> from the file "+ files[i]);
 					continue;
@@ -265,4 +265,4 @@ class JMVehicleSpawnerSettings
 			Vehicles.Insert( file.VehicleName, file );
 		}
 	}
-};
+}

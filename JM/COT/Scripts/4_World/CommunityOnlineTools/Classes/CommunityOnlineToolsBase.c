@@ -40,7 +40,7 @@ class CommunityOnlineToolsBase
 		if ( !FileExist( JMConstants.DIR_LOGS ) )
 			MakeDirectory( JMConstants.DIR_LOGS );
 
-		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now( true ).ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
+		m_FileLogName = JMConstants.DIR_LOGS + "cot-" + JMDate.Now().ToString( "YYYY-MM-DD-hh-mm-ss" ) + JMConstants.EXT_LOG;
 		int fileLog = OpenFile( m_FileLogName, FileMode.WRITE );
 
 		if ( fileLog != 0 )
@@ -59,7 +59,7 @@ class CommunityOnlineToolsBase
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 		
 		#ifndef CF_MODULE_PERMISSIONS
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() )
+		if ( g_Game.IsServer() && g_Game.IsMultiplayer() )
 		{
 			GetPermissionsManager().LoadRoles();
 		}
@@ -149,7 +149,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( open )
 		{
-			if ( GetGame().GetUIManager().GetMenu() )
+			if ( g_Game.GetUIManager().GetMenu() )
 				return;
 
 			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
@@ -171,7 +171,7 @@ class CommunityOnlineToolsBase
 	{
 		if ( !m_IsOpen )
 		{
-			if ( GetGame().GetUIManager().GetMenu() )
+			if ( g_Game.GetUIManager().GetMenu() )
 			{
 				return;
 			}
@@ -195,22 +195,22 @@ class CommunityOnlineToolsBase
 
 	void LogServer( string text )
 	{
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
 
 	void Log( JMPlayerInstance logInstacPlyer, string text )
 	{
-		if ( GetGame().IsMultiplayer() )
+		if ( g_Game.IsMultiplayer() )
 		{
 			text = "" + logInstacPlyer.GetSteam64ID() + ": " + text;
 		} else
@@ -218,22 +218,22 @@ class CommunityOnlineToolsBase
 			text = "Offline: " + text;
 		}
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
 
 	void Log( PlayerIdentity logIdentPlyer, string text )
 	{
-		if ( GetGame().IsMultiplayer() && logIdentPlyer )
+		if ( g_Game.IsMultiplayer() && logIdentPlyer )
 		{
 			text = "" + logIdentPlyer.GetPlainId() + ": " + text;
 		} else
@@ -241,15 +241,15 @@ class CommunityOnlineToolsBase
 			text = "Offline: " + text;
 		}
 
-		if ( GetGame().IsServer() )
+		if ( g_Game.IsServer() )
 		{
-			GetGame().AdminLog( "[COT] " + text );
+			g_Game.AdminLog( "[COT] " + text );
 		}
 
 		int fileLog = OpenFile( m_FileLogName, FileMode.APPEND );
 		if ( fileLog != 0 )
 		{
-			FPrintln( fileLog, "[COT " + JMDate.Now( true ).ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
+			FPrintln( fileLog, "[COT " + JMDate.Now().ToString( "YYYY-MM-DD hh:mm:ss" ) + "] " + text );
 			CloseFile( fileLog );
 		}
 	}
@@ -302,6 +302,49 @@ class CommunityOnlineToolsBase
 	{
 	}
 
+	void GetHeadTransform(Object obj, out vector transform[4], bool includeOffset = false)
+	{
+		vector transform[4];
+		vector position;
+		float offset;
+
+		Human human;
+		DayZCreature creature;
+
+		if (Class.CastTo(human, obj))
+			human.GetBoneTransformWS(human.GetBoneIndexByName("Head"), transform);
+		else if (Class.CastTo(creature, obj))
+			creature.GetBoneTransformWS(creature.GetBoneIndexByName("Head"), transform);
+		else
+			obj.GetTransform(transform);
+
+		position = transform[3];
+
+		if (human || creature)
+		{
+			offset = 0.12;
+		}
+		else
+		{
+			vector minMax[2];
+
+			if (obj.GetCollisionBox(minMax))
+				offset = -vector.Distance(minMax[0], minMax[1]) * 0.5;
+			else
+				offset = -obj.ClippingInfo(minMax);
+
+			float height = minMax[1][1];
+			position[1] = position[1] + height;
+
+			includeOffset = true;
+		}
+
+		if (includeOffset)
+			position = position + obj.GetDirection() * offset;
+
+		transform[3] = position;
+	}
+
 	static void ForceDisableInputs(bool state, inout TIntArray skipIDs = null)
 	{
 		if (!skipIDs)
@@ -348,7 +391,7 @@ class CommunityOnlineToolsBase
 					string ruinedWheelType = ruinedWheel.GetType();
 					string newWheelType = ruinedWheelType.Substring(0, ruinedWheelType.Length() - 7);
 
-					if (GetGame().IsKindOf(newWheelType, "CarWheel"))
+					if (g_Game.IsKindOf(newWheelType, "CarWheel"))
 					{
 						bool isLockedInSlot = false;
 						InventoryLocation wheelLocation = new InventoryLocation();
@@ -360,7 +403,7 @@ class CommunityOnlineToolsBase
 							entity.GetInventory().SetSlotLock(slotId, false);
 						}
 
-						GetGame().ObjectDelete(ruinedWheel);
+						g_Game.ObjectDelete(ruinedWheel);
 						entity.GetInventory().CreateAttachmentEx(newWheelType, slotId);
 
 						if (isLockedInSlot)
@@ -418,8 +461,8 @@ class CommunityOnlineToolsBase
 		else if (IsHypeTrain(obj))
 		{
 			int fuelQuantityMax;
-			GetGame().GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
-			GetGame().GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
+			g_Game.GameScript.CallFunction(obj, "GetLiquidQuantityMax", fuelQuantityMax, null);
+			g_Game.GameScript.CallFunction(obj, "SetLiquidQuantity", null, (float) fuelQuantityMax);
 		}
 	}
 
@@ -445,7 +488,7 @@ class CommunityOnlineToolsBase
 
 	static void PlaceOnSurfaceAtPosition(EntityAI entity, vector position, bool aboveWater = true)
 	{
-		vector surface = Vector(position[0], GetGame().SurfaceY(position[0], position[2]), position[2]);
+		vector surface = Vector(position[0], g_Game.SurfaceY(position[0], position[2]), position[2]);
 
 		vector entityMinMax[2];
 		if (!entity.GetCollisionBox(entityMinMax))
@@ -462,7 +505,7 @@ class CommunityOnlineToolsBase
 
 		float waterDepth;
 		if (aboveWater)
-			waterDepth = GetGame().GetWaterDepth(surface);
+			waterDepth = g_Game.GetWaterDepth(surface);
 
 		if (waterDepth > 0)
 		{
@@ -487,7 +530,7 @@ class CommunityOnlineToolsBase
 				position = hitPosition;
 			} else {
 				position = surface;
-				hitNormal = GetGame().SurfaceGetNormal(surface[0], surface[2]);
+				hitNormal = g_Game.SurfaceGetNormal(surface[0], surface[2]);
 			}
 		}
 
@@ -508,7 +551,7 @@ class CommunityOnlineToolsBase
 			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
 		}
 	}
-};
+}
 
 
 static ref CommunityOnlineToolsBase g_cotBase;

@@ -238,7 +238,7 @@ class JMExampleForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 		if ( !player || !player.GetIdentity() )
 			return;
 
@@ -290,11 +290,11 @@ class JMExampleForm: JMFormBase
 		array< string > players = JM_GetSelected().GetPlayers();
 		if ( players.Count() == 0 )
 		{
-			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 			if ( player.GetIdentity() )
 				players.Insert(player.GetIdentity().GetId());
 		}
 
 		m_PlayerModule.Kick( players, "I am so sorry :c" );
 	}
-};
+}

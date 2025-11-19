@@ -20,7 +20,9 @@ class JMCommand
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission(m_Permission, sender, instance)) return;
 
-		g_Script.CallFunctionParams(m_Instance, m_Function, null, new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(new JMCommandParameterList(arguments), sender, instance));
+		auto cmdParamList = new JMCommandParameterList(arguments);
+		auto params = new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(cmdParamList, sender, instance);
+		g_Script.CallFunctionParams(m_Instance, m_Function, null, params);
 	}
 
 	string GetCommand()
@@ -37,8 +39,8 @@ class JMCommand
 	{
 		return m_Function;
 	}
-};
+}
 
 class JMSubCommand: JMCommand
 {
-};
+}

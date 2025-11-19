@@ -99,4 +99,4 @@ class JMWebhookConnectionGroup : Managed
 	{
 		return Types.Count();
 	}
-};
+}

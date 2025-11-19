@@ -26,7 +26,7 @@ class JMWidgetStore: COT_WidgetHolder
 
 	void ~JMWidgetStore()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -60,12 +60,14 @@ class JMWidgetStore: COT_WidgetHolder
 		}
 	*/
 
+	#ifdef DAYZ_1_28
 		foreach (auto w: allWidgets)
 		{
 			DestroyWidget(w);
 		}
 
 		DestroyWidget(layoutRoot);
+	#endif
 	}
 
 	void Init() 
@@ -219,4 +221,4 @@ class JMWidgetStore: COT_WidgetHolder
 		}
 		return null;
 	}
-};
+}

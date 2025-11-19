@@ -104,7 +104,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	
 	void Load()
 	{
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			meta = JMLoadoutMeta.Create();
 
@@ -123,7 +123,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		super.OnMissionLoaded();
 
-		if (GetGame().IsServer())
+		if (g_Game.IsServer())
 			Load();
 	}
 
@@ -158,7 +158,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		if ( GetGame().IsDedicatedServer() )
+		if ( g_Game.IsDedicatedServer() )
 		{
 			Server_Load( senderRPC );
 		}
@@ -412,11 +412,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	bool IsKindOfLoadout(string reciever, string giver)
 	{
-		if (GetGame().IsKindOf( reciever, giver ))
+		if (g_Game.IsKindOf( reciever, giver ))
 			return true;
 		
-		if (GetGame().IsKindOf( reciever, "SurvivorBase" ))
-			if (GetGame().IsKindOf( giver, "SurvivorBase" ))
+		if (g_Game.IsKindOf( reciever, "SurvivorBase" ))
+			if (g_Game.IsKindOf( giver, "SurvivorBase" ))
 				return true;
 
 		return false;
@@ -440,7 +440,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			pos = itemData.m_LocalPosition;
 
 		EntityAI ent;
-		if ( !Class.CastTo( ent, GetGame().CreateObject( itemData.m_Classname, pos ) ) )
+		if ( !Class.CastTo( ent, g_Game.CreateObject( itemData.m_Classname, pos ) ) )
 			return NULL;
 
 		//! Orientation has to be set first, because it is used by PlaceOnSurfaceAtPosition
@@ -501,7 +501,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			Weapon_Base oWpn = Weapon_Base.Cast(parent);
 			if ( oWpn )
 			{
-				if (GetGame().IsKindOf(itemData.m_Classname, "Magazine_Base"))
+				if (g_Game.IsKindOf(itemData.m_Classname, "Magazine_Base"))
 					oWpn.SpawnAmmo(itemData.m_Classname);
 			}
 			return NULL;
@@ -546,7 +546,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		Man p;
 		#ifdef SERVER
 		array<Man> players = new array<Man>;
-		GetGame().GetWorld().GetPlayerList(players);
+		g_Game.GetWorld().GetPlayerList(players);
 		if (players.Count())
 			p = players[0];
 		#endif
@@ -561,8 +561,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 	
 	EntityAI GetObjectAtCursor()
 	{ 
-		vector rayStart = GetGame().GetCurrentCameraPosition();
-		DayZPlayer player = GetGame().GetPlayer();
+		vector rayStart = g_Game.GetCurrentCameraPosition();
+		DayZPlayer player = g_Game.GetPlayer();
 		DayZPlayerCamera3rdPerson camera3rdPerson;
 		float distance = 10;
 
@@ -572,9 +572,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 			distance += vector.Distance(rayStart, headPos);
 		}
 
-		vector rayEnd = rayStart + (GetGame().GetCurrentCameraDirection() * distance);
+		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, GetGame().GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -837,11 +837,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 			loadout.m_Items = loadouts;
 			loadout.m_IsLocalPosition = false;
 			
-			string name = JMDate.Now( true ).ToString( "YYYY-MM-DD_hh-mm-ss" );
+			string name = JMDate.Now().ToString( "YYYY-MM-DD_hh-mm-ss" );
 			JMLoadoutSettings.SaveDeletion(loadout, name);
 
 			GetCommunityOnlineToolsBase().Log( instance, "Created Deletion Backup '"+name+"'" );
 			SendWebhook( "Backup", instance, "Created Deletion Backup '"+name+"'" );
 		}
 	}
-};
+}

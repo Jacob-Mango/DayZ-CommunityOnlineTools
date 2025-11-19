@@ -89,4 +89,4 @@ class JMItemSetForm: JMFormBase
 
 		m_Module.SpawnPosition( data.ClassName, GetCursorPos() );
 	}
-};
+}

@@ -6,8 +6,8 @@ static bool COT_ESP_Toggled = false;
 
 static PlayerBase GetPlayerObjectByIdentity( PlayerIdentity identityGetPlayerObjectByIdentity )
 {
-	if ( !GetGame().IsMultiplayer() )
-		return PlayerBase.Cast( GetGame().GetPlayer() );
+	if ( !g_Game.IsMultiplayer() )
+		return PlayerBase.Cast( g_Game.GetPlayer() );
 
 	return PlayerBase.Cast( identityGetPlayerObjectByIdentity.GetPlayer() );
 }
@@ -29,9 +29,9 @@ static vector GetCurrentPosition()
 		return CurrentActiveCamera.GetPosition();
 	}
 
-	if ( GetGame().GetPlayer() != NULL )
+	if ( g_Game.GetPlayer() != NULL )
 	{
-		return GetGame().GetPlayer().GetPosition();
+		return g_Game.GetPlayer().GetPosition();
 	}
 
 	return "0 0 0";
@@ -77,11 +77,11 @@ static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore, 
 static bool COT_SurfaceIsWater( vector position )
 {
 	string type;
-	GetGame().SurfaceGetType3D(position[0], position[1] + 0.1, position[2], type);
+	g_Game.SurfaceGetType3D(position[0], position[1] + 0.1, position[2], type);
 	if (type.Contains("water"))
 		return true;
 
-	return GetGame().SurfaceIsSea(position[0], position[2]) || GetGame().SurfaceIsPond(position[0], position[2]);
+	return g_Game.SurfaceIsSea(position[0], position[2]) || g_Game.SurfaceIsPond(position[0], position[2]);
 }
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
@@ -91,9 +91,9 @@ static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 		ignore = GetPlayer();
 	}
 
-	vector dir = GetGame().GetPointerDirection();
+	vector dir = g_Game.GetPointerDirection();
 
-	vector from = GetGame().GetCurrentCameraPosition();
+	vector from = g_Game.GetCurrentCameraPosition();
 	vector to = from + (dir * distance);
 
 	return COT_PerformRayCast(from, to, ignore);
@@ -101,8 +101,8 @@ static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
 
 static vector GetCursorPos( Object ignore = NULL )
 {
-	vector rayStart = GetGame().GetCurrentCameraPosition();
-	vector rayDirection = GetGame().GetCurrentCameraDirection();
+	vector rayStart = g_Game.GetCurrentCameraPosition();
+	vector rayDirection = g_Game.GetCurrentCameraDirection();
 
 	if (!ignore)
 	{
@@ -116,11 +116,11 @@ static vector GetCursorPos( Object ignore = NULL )
 
 static void Message(PlayerBase player, string txt, string style = "colorImportant") 
 {
-	if (GetGame().IsServer() && GetGame().IsMultiplayer())
+	if (g_Game.IsServer() && g_Game.IsMultiplayer())
 		player.Message(txt, style);
 	else
-		GetGame().GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCSystem, "", txt, style));
-};
+		g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCSystem, "", txt, style));
+}
 
 
 static Weapon GetWeaponInHands()
@@ -133,12 +133,12 @@ static Weapon GetWeaponInHands()
 
 static PlayerBase GetPlayer()
 {
-	return PlayerBase.Cast( GetGame().GetPlayer() );
+	return PlayerBase.Cast( g_Game.GetPlayer() );
 }
 
 static ZombieBase SpawnInfected(vector pos)
 {
-	return ZombieBase.Cast(GetGame().CreateObject( WorkingZombieClasses().GetRandomElement(), pos, false, true ));
+	return ZombieBase.Cast(g_Game.CreateObject( WorkingZombieClasses().GetRandomElement(), pos, false, true ));
 }
 
 /*
@@ -174,7 +174,7 @@ static Magazine LoadMag( PlayerBase oPlayer, Weapon_Base oWpn )
 
 static PlayerBase CreateCustomDefaultCharacter()
 {
-	PlayerBase oPlayer = PlayerBase.Cast( GetGame().CreatePlayer( NULL, GetGame().CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE") );
+	PlayerBase oPlayer = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), GetSpawnPoints().GetRandomElement(), 0, "NONE") );
 
 	EntityAI item = NULL;
 

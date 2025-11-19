@@ -53,7 +53,7 @@ modded class CF_Permission_PlayerBase
 		OnRecieveOrientation( ctx );
 		OnRecieveHealth( ctx );
 
-		m_DataLastUpdated = GetGame().GetTime();
+		m_DataLastUpdated = g_Game.GetTime();
 	}
 	
 	void OnSendPosition( ParamsWriteContext ctx )
@@ -238,5 +238,5 @@ modded class CF_Permission_PlayerBase
 	{
 		return m_RemoveCollision;
 	}
-};
+}
 #endif

@@ -7,7 +7,7 @@ class UIActionSelectBox: UIActionBase
 
 	void ~UIActionSelectBox()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 		delete m_Selection;
@@ -86,15 +86,6 @@ class UIActionSelectBox: UIActionBase
 		return ret;
 	}
 
-	override bool CallEvent( UIEvent eid )
-	{
-		if ( !m_HasCallback ) return false;
-
-		GetGame().GameScript.CallFunctionParams( m_Instance, m_FuncName, NULL, new Param2< UIEvent, ref UIActionBase >( eid, this ) );
-
-		return false;
-	}
-
 	void SetSelectorWidth( float width )
 	{
 		float w;
@@ -103,5 +94,5 @@ class UIActionSelectBox: UIActionBase
 		m_Frame.SetSize( width, h );
 		m_Frame.Update();
 	}
-};
+}
 

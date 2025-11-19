@@ -33,4 +33,4 @@ class JMMissionSelectorModule: JMRenderableModuleBase
 	{
 		return false;
 	}
-};
+}

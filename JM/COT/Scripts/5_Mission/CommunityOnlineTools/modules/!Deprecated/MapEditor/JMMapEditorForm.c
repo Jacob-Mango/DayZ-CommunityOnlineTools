@@ -38,7 +38,7 @@ class JMMapEditorForm
 		Print( "+" + this + "::Init" );
 		#endif
 
-		layoutRoot = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/mapeditor_form.layout" );
+		layoutRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/mapeditor_form.layout" );
 		layoutRoot.Show( false );
 
 		Widget objectInfoWrapper = layoutRoot.FindAnyWidget( "object_info_wrapper" );
@@ -67,16 +67,16 @@ class JMMapEditorForm
 		Print( "+" + this + "::Show" );
 		#endif
 
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
+		if ( g_Game.IsServer() && g_Game.IsMultiplayer() ) return;
 
 		if (m_IsShown)
 			return;
 
 		layoutRoot.Show( true );
 
-		m_PreviousTime = GetGame().GetTime();
+		m_PreviousTime = g_Game.GetTime();
 
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
+		g_Game.GetUpdateQueue(CALL_CATEGORY_GUI).Insert( this.Update );
 
 		OnShow();
 
@@ -93,11 +93,11 @@ class JMMapEditorForm
 		Print( "+" + this + "::Hide" );
 		#endif
 
-		if ( GetGame().IsServer() && GetGame().IsMultiplayer() ) return;
+		if ( g_Game.IsServer() && g_Game.IsMultiplayer() ) return;
 
 		layoutRoot.Show( false );
 
-		GetGame().GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
+		g_Game.GetUpdateQueue(CALL_CATEGORY_GUI).Remove( this.Update );
 
 		OnHide();
 
@@ -110,7 +110,7 @@ class JMMapEditorForm
 
 	void Update()
 	{
-		int currentTime = GetGame().GetTime();
+		int currentTime = g_Game.GetTime();
 		OnUpdate( ( m_PreviousTime - currentTime ) / 1000.0);
 		m_PreviousTime = currentTime;
 	}
@@ -132,7 +132,7 @@ class JMMapEditorForm
 		if ( !CurrentActiveCamera )
 			return;
 
-		Input input = GetGame().GetInput();
+		Input input = g_Game.GetInput();
 
 		if ( GetWidgetUnderCursor() == NULL || GetWidgetUnderCursor().GetName() != "Windows_Container" && GetWidgetUnderCursor().GetName() != "map_editor_menu" )
 			return;
@@ -146,7 +146,7 @@ class JMMapEditorForm
 		{
 			m_SelectedObject = EntityAI.Cast( GetPointerObject( m_Distance ) );
 
-			if ( GetGame().GetPlayer() && vector.Distance( m_SelectedObject.GetPosition(), GetGame().GetPlayer().GetPosition() ) > 900.0 )
+			if ( g_Game.GetPlayer() && vector.Distance( m_SelectedObject.GetPosition(), g_Game.GetPlayer().GetPosition() ) > 900.0 )
 				m_SelectedObject = NULL;
 
 			if ( m_SelectedObject && !m_SelectedObject.HasNetworkID() )
@@ -212,7 +212,7 @@ class JMMapEditorForm
 
 			CurrentActiveCamera.LookAt( position );
 
-			if ( !GetGame().GetPlayer() || vector.Distance( position, GetGame().GetPlayer().GetPosition() ) < 900.0 )
+			if ( !g_Game.GetPlayer() || vector.Distance( position, g_Game.GetPlayer().GetPosition() ) < 900.0 )
 			{
 				m_SelectedObject.SetPosition( position );
 				m_SelectedObject.SetOrientation( orientation );	
@@ -223,4 +223,4 @@ class JMMapEditorForm
 			CurrentActiveCamera.LookFreeze = false;
 		}
 	}
-};
+}

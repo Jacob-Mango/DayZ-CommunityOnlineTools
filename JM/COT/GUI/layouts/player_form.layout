@@ -9,7 +9,8 @@ PanelWidgetClass JMPlayerForm {
  scriptclass "JMPlayerForm"
  style DayZDefaultPanel
  {
-  FrameWidgetClass panel_left {
+  PanelWidgetClass panel_left {
+   color 0 0 0 0
    position 0 0
    size 0.3 1
    halign left_ref
@@ -17,8 +18,29 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
+   {
+    FrameWidgetClass panel_left_top {
+     ignorepointer 1
+     position 0 0
+     size 1 0.225
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+    FrameWidgetClass panel_left_bottom {
+     ignorepointer 1
+     position 0 0.225
+     size 1 0.775
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+   }
   }
   PanelWidgetClass panel_split {
+   color 0 0 0 1
    position 0.305 0
    size 3 0.98
    halign left_ref
@@ -28,7 +50,6 @@ PanelWidgetClass JMPlayerForm {
    hexactsize 1
    vexactsize 0
    style DayZDefaultPanel
-   color 0 0 0 1
   }
   PanelWidgetClass panel_right {
    color 0 0 0 0
@@ -42,7 +63,7 @@ PanelWidgetClass JMPlayerForm {
   }
   PanelWidgetClass panel_right_disable {
    visible 0
-   color 0 0 0 0
+   color 0.06 0.08 0.11 0.985
    position 0.305 0
    size 0.695 1
    halign left_ref
@@ -51,9 +72,9 @@ PanelWidgetClass JMPlayerForm {
    hexactsize 0
    vexactsize 0
    style DayZDefaultPanel
-   color 0.06 0.08 0.11 0.985
-   { 
+   {
     PanelWidgetClass panel_split {
+     color 0 0 0 1
      position 0 0
      size 3 1
      halign left_ref
@@ -63,7 +84,6 @@ PanelWidgetClass JMPlayerForm {
      hexactsize 1
      vexactsize 0
      style DayZDefaultPanel
-     color 0 0 0 1
     }
    }
   }

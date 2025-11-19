@@ -55,4 +55,4 @@ class UIActionEditableTextPreview: UIActionEditableText
 		m_TextPreview.SetSize( width, h );
 		m_TextPreview.Update();
 	}
-};
+}

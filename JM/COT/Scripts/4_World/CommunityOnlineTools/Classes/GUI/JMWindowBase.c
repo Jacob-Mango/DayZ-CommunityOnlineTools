@@ -55,7 +55,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void ~JMWindowBase()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef DIAG
@@ -73,7 +73,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_Form.Destroy();
 
 		//! @note unlinking the layout root is ABSOLUTELY necessary since destroying the widget handler will NOT do that automatically!
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMWindowBaseCount--;
@@ -123,7 +125,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( m_Module.GetLayoutRoot() != "" )
 		{
-			menu = GetGame().GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), content_ctr );
+			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), content_ctr );
 			if ( Assert_Null( menu, "No valid widget supplied." ) )
 				return; 
 
@@ -245,10 +247,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if (m_IsShown)
 			return;
 
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
-		GetGame().GetInput().ChangeGameFocus( 1 );
-		GetGame().GetUIManager().ShowUICursor( true );
+		g_Game.GetInput().ChangeGameFocus( 1 );
+		g_Game.GetUIManager().ShowUICursor( true );
 
 		m_IsShown = true;
 	}
@@ -259,7 +261,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Hide");
 		#endif
 		
-		GetGame().GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		if (!m_Form)
 			return;
@@ -277,8 +279,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyActive() )
 		{
-			GetGame().GetInput().ResetGameFocus();
-			GetGame().GetUIManager().ShowUICursor( false );
+			g_Game.GetInput().ResetGameFocus();
+			g_Game.GetUIManager().ShowUICursor( false );
 		}
 
 		m_IsShown = false;
@@ -524,5 +526,5 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		// layoutRoot.SetSize( newWidth, newHeight );
 	}
-};
+}
 #endif

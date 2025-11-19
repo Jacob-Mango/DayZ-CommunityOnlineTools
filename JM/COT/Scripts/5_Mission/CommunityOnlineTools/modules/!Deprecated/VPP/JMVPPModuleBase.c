@@ -39,5 +39,5 @@ class JMVPPModuleBase : JMRenderableModuleBase
 		name.Replace( "JMVPP", "" );
 		return name;
 	}
-};
+}
 #endif*/

@@ -40,7 +40,7 @@ class JMSelectedObject : Managed
 
 		return obj == object;
 	}
-};
+}
 
 
 class JMSelectedObjects
@@ -68,9 +68,7 @@ class JMSelectedObjects
 		for ( int i = 0; i < m_Objects.Count(); ++i )
 		{
 			if ( m_Objects[i].Equals( obj ) )
-			{
 				return true;
-			}
 		}
 
 		return false;
@@ -106,6 +104,13 @@ class JMSelectedObjects
 
 	void SerializeObjects( ParamsWriteContext ctx )
 	{
+		if (!GetObjects())
+		{
+			Object obj = GetObjectAtCursor();
+			if (obj)
+				AddObject(obj);
+		}
+
 		int count = m_Objects.Count();
 		ctx.Write( count );
 
@@ -124,20 +129,12 @@ class JMSelectedObjects
 
 		for ( int i = 0; i < count; ++i )
 		{
-			/*
-			Object obj;
-			if ( !ctx.Read( obj ) )
-				return false;
-
-			objects.Insert( obj );
-			*/
-
 			int netLow;
 			int netHigh;
 			if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
 				return false;
 
-			Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+			Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 			if ( obj )
 				objects.Insert( obj );
 		}
@@ -197,25 +194,89 @@ class JMSelectedObjects
 		return GetPlayers(true);
 	}
 
-
 	set< ref JMSelectedObject > GetObjects()
 	{
 		return m_Objects;
+	}
+
+	set< ref JMSelectedObject > GetAnyObjects()
+	{
+		if (!GetObjects())
+		{
+			Object obj = GetObjectAtCursor();
+			if (obj)
+				AddObject(obj);
+		}
+
+		return GetObjects();
 	}
 
 	void ClearPlayers()
 	{
 		m_Players.Clear();
 	}
-};
+	
+	EntityAI GetObjectAtCursor()
+	{ 
+		vector rayStart = g_Game.GetCurrentCameraPosition();
+		DayZPlayer player = g_Game.GetPlayer();
+		DayZPlayerCamera3rdPerson camera3rdPerson;
+		float distance = 10;
+
+		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
+		{
+			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
+			distance += vector.Distance(rayStart, headPos);
+		}
+
+		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
+
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.1;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		Object resultObj;
+		TIntArray types = {ObjIntersectFire, ObjIntersectView};
+		foreach (int type: types)
+		{
+			rayInput.type = type;
+
+			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
+				continue;
+
+			foreach (RaycastRVResult result: results)
+			{
+				resultObj = result.obj;
+
+				if ( resultObj == NULL )
+					continue;
+
+				EntityAI entity;
+				if (!Class.CastTo(entity, resultObj))
+					continue;
+
+				resultObj = entity.GetHierarchyRoot();
+				string name = resultObj.GetType();
+
+				if ( name == "" )
+					continue;
+
+				if (resultObj.ConfigGetInt("scope") != 2)
+					continue;
+
+				return entity;
+			}
+		}
+
+		return NULL;
+	}
+}
 
 static ref JMSelectedObjects g_cot_selected;
 
 static JMSelectedObjects JM_GetSelected()
 {
-	//if ( !IsMissionClient() )
-	//	return NULL;
-
 	if ( g_cot_selected == NULL )
 		g_cot_selected = new JMSelectedObjects;
 		

@@ -10,7 +10,7 @@ class JMWebhookQueueItem : Managed
 	{
 		m_Type = type;
 		m_Message = message;
-		m_Time = GetGame().GetTickTime();
+		m_Time = g_Game.GetTickTime();
 	}
 
 	string GetType()
@@ -27,7 +27,7 @@ class JMWebhookQueueItem : Managed
 	{
 		return m_Message;
 	}
-};
+}
 
 class JMWebhookModule: JMModuleBase
 {
@@ -58,19 +58,46 @@ class JMWebhookModule: JMModuleBase
 		auto trace = CF_Trace_0(this, "OnInit");
 		#endif
 
+	#ifdef SERVER
+		//! Dedicated server
 		string serverCfg;
-		GetGame().CommandlineGetParam( "config", serverCfg );
+		g_Game.CommandlineGetParam( "config", serverCfg );
+
+		string profile;
+		g_Game.CommandlineGetParam( "profiles", profile );
+
+		serverCfg.ToLower();
+		profile.ToLower();
+
+		string serverCfgAbs = serverCfg;
+
+		if (profile && serverCfg.IndexOf(profile) == 0)
+		{
+			int len = profile.Length();
+			serverCfg = serverCfg.Substring(len, serverCfg.Length() - len);
+
+			while (serverCfg[0] == "\\" || serverCfg[0] == "/")
+			{
+				serverCfg = serverCfg.Substring(1, serverCfg.Length() - 1);
+			}
+
+			serverCfg = "$profile:" + serverCfg;
+		}
 
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
 		{
-			CF_Log.Warn("No server config file set, using default serverdz.cfg");
+			CF.FormatErrorEx("No server config file set, using default serverdz.cfg", ErrorExSeverity.WARNING);
 			serverCfg = "serverdz.cfg";
 		}
-		else if ( serverCfg.Contains( ":\\" ) || serverCfg.Contains( ":/" ) )
+		else if (serverCfg.IndexOf("$profile:") != 0 && (serverCfg.Contains(":\\") || serverCfg.Contains(":/")))
 		{
-			CF_Log.Warn("Cannot resolve absolute path '%1', using default serverdz.cfg", serverCfg);
+			CF.FormatErrorEx("Cannot resolve absolute path '%1', using default serverdz.cfg", ErrorExSeverity.WARNING, serverCfg);
 			serverCfg = "serverdz.cfg";
+		}
+		else if (serverCfg != serverCfgAbs)
+		{
+			CF.FormatErrorEx("Resolved absolute path '%1' to '%2'", ErrorExSeverity.INFO, serverCfgAbs, serverCfg);
 		}
 
 		ConfigFile cfg = ConfigFile.Parse( serverCfg );
@@ -78,10 +105,17 @@ class JMWebhookModule: JMModuleBase
 		{
 			ConfigEntry entry = cfg.Get( "hostname" );
 			if ( entry && entry.GetText() != "" )
+			{
 				m_ServerHostName = entry.GetText();
+				CF.FormatErrorEx("Got hostname '%1' from '%2'", ErrorExSeverity.INFO, m_ServerHostName, serverCfg);
+			}
 
 			delete cfg;
 		}
+	#else
+		//! Client or singleplayer/offline mode
+		m_ServerHostName = g_Game.GetHostName();
+	#endif
 
 		m_Settings = GetCOTWebhookSettings();
 
@@ -128,7 +162,7 @@ class JMWebhookModule: JMModuleBase
 
 		m_Settings.Save();
 
-		GetGame().GameScript.Call( this, "Thread_ProcessQueue", NULL );
+		g_Game.GameScript.Call( this, "Thread_ProcessQueue", NULL );
 	}
 
 	override void OnMissionLoaded()
@@ -330,8 +364,8 @@ class JMWebhookModule: JMModuleBase
 		#endif
 
 		int num = 0;
-		int startTime = GetGame().GetTickTime();
-		int lastSendTime = GetGame().GetTickTime();
+		int startTime = g_Game.GetTickTime();
+		int lastSendTime = g_Game.GetTickTime();
 		int qps = 1;
 
 		while ( true )
@@ -361,7 +395,7 @@ class JMWebhookModule: JMModuleBase
 				m_Queue.RemoveOrdered( 0 );
 
 				num++;
-				lastSendTime = GetGame().GetTickTime();
+				lastSendTime = g_Game.GetTickTime();
 
 				int defer = (int) Math.Clamp( num * 0.1, 1, 2 );
 				Sleep( 250 * Math.Clamp( num, 1, 4 ) * defer );
@@ -369,7 +403,7 @@ class JMWebhookModule: JMModuleBase
 			{
 				if ( startTime - lastSendTime > 1000 )
 				{
-					startTime = GetGame().GetTickTime();
+					startTime = g_Game.GetTickTime();
 					lastSendTime = startTime;
 					num = 0;
 				}
@@ -418,4 +452,4 @@ class JMWebhookModule: JMModuleBase
 
 		return message;
 	}
-};
+}

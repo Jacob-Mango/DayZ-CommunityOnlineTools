@@ -81,5 +81,5 @@ modded class CarScript
 		COT_FillCarFluid( CarFluid.BRAKE );
 		COT_FillCarFluid( CarFluid.COOLANT );
 	}
-};
+}
 

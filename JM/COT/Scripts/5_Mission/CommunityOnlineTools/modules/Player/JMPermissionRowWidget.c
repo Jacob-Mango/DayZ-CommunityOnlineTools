@@ -45,7 +45,7 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 
 	void ~JMPermissionRowWidget()
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
@@ -57,7 +57,9 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 			child.Destroy();
 		}
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 	#ifdef DIAG
 		s_JMPermissionsRowWidgetCount--;
@@ -281,4 +283,4 @@ class JMPermissionRowWidget: COT_ScriptedWidgetEventHandler
 	{
 		m_state_Permission.SetValue( type, true );
 	}
-};
+}

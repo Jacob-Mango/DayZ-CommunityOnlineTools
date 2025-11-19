@@ -68,4 +68,4 @@ class JMCommandParameterList
 		param = instance.PlayerObject;
 		return param != null;
 	}
-};
+}

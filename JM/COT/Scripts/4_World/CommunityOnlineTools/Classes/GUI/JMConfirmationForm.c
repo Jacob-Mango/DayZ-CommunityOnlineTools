@@ -14,7 +14,7 @@ class JMConfirmationForm: JMConfirmation
 	{
 		if ( callback != "" )
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<JMConfirmation>( this ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Window.GetForm(), callback, new Param1<JMConfirmation>( this ) );
 		}
 	}
 	#endif

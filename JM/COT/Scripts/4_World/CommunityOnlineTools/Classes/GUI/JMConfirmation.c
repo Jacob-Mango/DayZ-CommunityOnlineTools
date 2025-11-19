@@ -3,7 +3,7 @@ enum JMConfirmationType
 	INFO = 0,
 	EDIT,
 	SELECTION
-};
+}
 
 class JMConfirmation: COT_ScriptedWidgetEventHandler 
 {
@@ -50,14 +50,16 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	void ~JMConfirmation() 
 	{
-		if (!GetGame())
+		if (!g_Game)
 			return;
 
 	#ifdef COT_DEBUGLOGS
 		auto trace = CF_Trace_0(this);
 	#endif
 
+	#ifdef DAYZ_1_28
 		DestroyWidget(layoutRoot);
+	#endif
 
 		OnHide();
 
@@ -83,7 +85,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	void OnInit()
 	{
-		GetGame().GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/confirmation.layout", layoutRoot );
+		g_Game.GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/confirmation.layout", layoutRoot );
 		layoutRoot.SetSort(65536);
 
 		Class.CastTo( m_TextTitle, layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
@@ -104,7 +106,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	{
 		if ( callback != "" )
 		{
-			GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
 		}
 	}
 
@@ -351,4 +353,4 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	{
 		return layoutRoot;
 	}
-};
+}

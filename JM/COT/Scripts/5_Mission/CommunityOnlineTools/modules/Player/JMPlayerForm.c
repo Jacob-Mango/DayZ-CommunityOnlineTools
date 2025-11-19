@@ -220,7 +220,7 @@ class JMPlayerForm: JMFormBase
 	{
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );
 
-		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( m_LeftPanel, 5, 1 );
+		Widget leftPanelGrid = UIActionManager.CreateGridSpacer( layoutRoot.FindAnyWidget( "panel_left_top" ), 4, 1 );
 
 		m_PlayerListCount 		= UIActionManager.CreateText( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_PLAYER_COUNT" );
 		m_PlayerListFilter 		= UIActionManager.CreateEditableTextPreview( leftPanelGrid, "#STR_COT_PLAYER_MODULE_LEFT_FILTER", this, "Event_UpdatePlayerList" );
@@ -238,7 +238,7 @@ class JMPlayerForm: JMFormBase
 		m_PlayerListSelectAll.SetWidth(0.36);
 		m_PlayerListDeSelectAll.SetWidth(0.46);
 		
-		m_PlayerListScroller 	= UIActionManager.CreateScroller( leftPanelGrid );
+		m_PlayerListScroller 	= UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel_left_bottom" ) );
 		m_PlayerListRows 		= UIActionManager.CreateActionRows( m_PlayerListScroller.GetContentWidget() );
 		
 		for ( int i = 0; i < 2; i++ )
@@ -251,7 +251,7 @@ class JMPlayerForm: JMFormBase
 
 			for ( int j = 0; j < 100; j++ )
 			{
-				Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
+				Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_widget.layout", gsw );
 				
 				if ( !prWidget )
 					continue;
@@ -668,7 +668,7 @@ class JMPlayerForm: JMFormBase
 
 				permissionIdx++;
 
-				Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", gsw );
+				Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", gsw );
 				
 				if ( !prWidget )
 					continue;
@@ -752,7 +752,7 @@ class JMPlayerForm: JMFormBase
 				spacerIndex++;
 			}
 
-			Widget prWidget = GetGame().GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/role_widget.layout", parentSpacer );
+			Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/role_widget.layout", parentSpacer );
 
 			if ( !prWidget )
 				continue;
@@ -1205,33 +1205,27 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		bool shouldSpectate = true;
+		TStringArray players = JM_GetSelected().GetPlayers();
+		string guid = players[0];
 
-		if ( CurrentActiveCamera )
+		if (guid == GetPermissionsManager().GetClientGUID() && CurrentActiveCamera)
 		{
-			if ( CurrentActiveCamera.IsInherited(JMSpectatorCamera) )
-				shouldSpectate = false;
-			else if ( COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera) )
-				shouldSpectate = false;
-		}
+			//! Selected player is ourself and we are in spectator cam, or we are in freecam and previous camera was spectator cam
 
-		if ( shouldSpectate )
-		{
-			if ( JM_GetSelected().GetPlayers().Count() != 1 )
+			if (CurrentActiveCamera.IsInherited(JMSpectatorCamera) || (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera)))
+			{
+				//! We are spectating something else. Stop spectating.
+				m_Module.EndSpectating();
 				return;
-
-			action.Disable();
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 1000);
-
-			m_Module.StartSpectating( JM_GetSelected().GetPlayers()[0] );
+			}
 		}
-		else
-		{
-			action.Disable();
-			GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(action.Enable, 3000);
 
-			m_Module.EndSpectating();
-		}
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer(guid);
+		PlayerBase player;
+		if (instance)
+			player = instance.PlayerObject;
+
+		m_Module.Click_Spectate(action, player, guid);
 	}
 
 	void Click_RepairTransport( UIEvent eid, UIActionBase action )
@@ -1345,7 +1339,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_Name.GetButton());
+		g_Game.CopyToClipboard(m_Name.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1355,7 +1349,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_GUID.GetButton());
+		g_Game.CopyToClipboard(m_GUID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1365,7 +1359,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_Steam64ID.GetButton());
+		g_Game.CopyToClipboard(m_Steam64ID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1375,7 +1369,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
+		g_Game.OpenURL("https://steamcommunity.com/profiles/" + m_Steam64ID.GetButton());
 	}
 
 	#ifdef GAMELABS
@@ -1384,7 +1378,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard(m_CFToolsID.GetButton());
+		g_Game.CopyToClipboard(m_CFToolsID.GetButton());
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
 	}
@@ -1394,7 +1388,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		GetGame().OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
+		g_Game.OpenURL(m_SelectedInstance.PlayerObject.GetUpstreamIdentityHotlink());
 	}
 	#endif
 
@@ -1403,7 +1397,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		GetGame().CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
+		g_Game.CopyToClipboard("<" + m_PositionX.GetText() + ", " + m_PositionY.GetText() + ", " + m_PositionZ.GetText() + ">");
 	}
 
     void Click_CopyPlayerRotation( UIEvent eid, UIActionBase action )
@@ -1416,7 +1410,7 @@ class JMPlayerForm: JMFormBase
 
 		vector rotation = m_SelectedInstance.GetOrientation();
 
-		GetGame().CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
+		g_Game.CopyToClipboard("<" + rotation[0] + ", " + rotation[1] + ", " + rotation[2] + ">");
 	}
 
 	void Click_PastePlayerPostion( UIEvent eid, UIActionBase action )
@@ -1425,7 +1419,7 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		string clipboard;
-		GetGame().CopyFromClipboard(clipboard);
+		g_Game.CopyFromClipboard(clipboard);
 
 		vector pos = clipboard.BeautifiedToVector();
 
@@ -1540,7 +1534,7 @@ class JMPlayerForm: JMFormBase
 		if ( !m_SelectedInstance )
 			return;
 		
-		if (GetGame().IsClient() && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
+		if (g_Game.IsClient() && m_SelectedInstance.GetDataLastUpdatedTime() < m_LastChangeTime)
 			return;
 
 		RefreshTeleports(force);
@@ -2301,8 +2295,8 @@ class JMPlayerForm: JMFormBase
 	{
 		super.OnShow();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
+		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).CallLater( UpdatePlayerList, 1500, true );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RefreshStats, 100, true, false );
 
 		UpdateUI();
 
@@ -2313,8 +2307,8 @@ class JMPlayerForm: JMFormBase
 	{
 		super.OnHide();
 
-		GetGame().GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
-		GetGame().GetCallQueue( CALL_CATEGORY_GUI ).Remove( RefreshStats );
+		g_Game.GetCallQueue( CALL_CATEGORY_GAMEPLAY ).Remove( UpdatePlayerList );
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( RefreshStats );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -2432,85 +2426,112 @@ class JMPlayerForm: JMFormBase
 		#endif
 
 		if ( !IsMissionOffline() )
-		{
 			GetCommunityOnlineTools().RefreshClients();
-		}
 
+		int contentID;
 		GridSpacerWidget parentSpacer;
-		int spacerIndex = 0;
-		for ( int i = 0; i < 10; i++ )
+		while ( Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + contentID ) ) )
 		{
-			if ( !Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + i ) ) )
-				continue;
-
+			contentID++;
 			parentSpacer.Show( false );
 		}
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
-
 		SortPlayersArray( players, m_PlayerListSort.IsToggled() );
 
-		int idx = 0;
-		int pIdx = 0;
+		int index;
+		int score;
+		int highestScore;
+		int count;
 
-		m_NumPlayerCount = 0;
-
-		string filter = m_PlayerListFilter.GetText();
-		bool isFiltering = filter.Length() > 0;
-		filter.ToLower();
-		
+		TStringArray strSearches = new TStringArray;
 		TStringArray suggestions = new TStringArray;
 		string closestMatch;
 
-		JMPlayerInstance cPlayer;
+		m_NumPlayerCount = 0;
 
-		while ( idx < m_PlayerList.Count() )
+		bool isFiltering;
+		string strSearch = m_PlayerListFilter.GetText();
+		if (strSearch != string.Empty)
 		{
-			if ( pIdx < players.Count() )
+			strSearches = new TStringArray;
+			strSearch.ToLower();
+			strSearch.Split(" ", strSearches);
+			count = strSearches.Count();
+			isFiltering = true;
+		}
+
+		int entryId;
+		int maxThesdhold = m_PlayerList.Count();
+		
+		while (entryId < maxThesdhold)
+		{
+			m_PlayerList[entryId].SetPlayer("");
+			entryId++;
+		}
+
+		entryId = -1;
+		contentID = 0;
+		foreach(JMPlayerInstance cPlayer: players)
+		{
+			entryId++;
+			if (entryId > maxThesdhold)
+				break;
+
+			if ( entryId % 100 == 0 )
 			{
-				if ( idx % 100 == 0 )
+				if ( !Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + contentID ) ) )
+					return;
+
+				parentSpacer.Show( true );
+				contentID++;
+			}
+
+			string pName = cPlayer.GetName();
+			pName.ToLower();
+
+			if ( isFiltering )
+			{
+				if ( pName == strSearch )
 				{
-					if ( !Class.CastTo( parentSpacer, m_PlayerListRows.FindAnyWidget( "Content_Row_0" + spacerIndex ) ) )
-						return;
-
-					parentSpacer.Show( true );
-
-					spacerIndex++;
+					suggestions.Clear();
+					closestMatch = pName;
 				}
-
-				cPlayer = players[pIdx];
-
-				pIdx++;
-
-				string pName = cPlayer.GetName();
-				pName.ToLower();
-
-				if ( isFiltering )
+				else
 				{
-					if (!pName.Contains( filter ))
+					index = pName.IndexOf(strSearch);
+					
+					if (index == 0 && !closestMatch)
+						suggestions.Insert(pName);
+					else if (index == -1 && count == 1)
 						continue;
 
-					if ( pName == filter )
+					score = 0;
+					foreach(string searchEntry: strSearches)
 					{
-						suggestions.Clear();
-						closestMatch = pName;
+						if ( pName.IndexOf(searchEntry) == -1 )
+						{
+							score = 0;
+							break;
+						}
+
+						score++;
 					}
-					else if ( pName.IndexOf(filter) == 0 )
+
+					if (score == 0)
+						continue;
+
+					if (score > highestScore)
 					{
+						highestScore = score;
 						if (!closestMatch)
 							suggestions.Insert(pName);
 					}
 				}
-
-				m_PlayerList[idx].SetPlayer( cPlayer.GetGUID() );
-
-				m_NumPlayerCount++;
-			} else
-			{
-				m_PlayerList[idx].SetPlayer( "" );
 			}
 
-			idx++;
+			m_PlayerList[entryId].SetPlayer( cPlayer.GetGUID() );
+			m_NumPlayerCount++;
 		}
 		
 		if (suggestions.Count())
@@ -2538,6 +2559,6 @@ class JMPlayerForm: JMFormBase
 
 	void UpdateLastChangeTime()
 	{
-		m_LastChangeTime = GetGame().GetTime();
+		m_LastChangeTime = g_Game.GetTime();
 	}
-};
+}

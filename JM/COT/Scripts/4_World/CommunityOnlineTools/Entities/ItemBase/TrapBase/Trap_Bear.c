@@ -6,4 +6,4 @@ modded class BearTrap
 		
 		AddAction(COT_ActionTriggerBearTrap);
 	}
-};
+}

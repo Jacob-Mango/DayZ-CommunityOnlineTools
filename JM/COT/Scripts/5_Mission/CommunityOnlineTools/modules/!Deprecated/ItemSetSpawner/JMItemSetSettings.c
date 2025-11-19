@@ -11,7 +11,7 @@ class JMItemSetSettings
 	{
 		JMItemSetSettings settings = new JMItemSetSettings();
 
-		if ( GetGame().IsClient() )
+		if ( g_Game.IsClient() )
 		{
 			settings.Defaults();
 			return settings;
@@ -292,4 +292,4 @@ class JMItemSetSettings
 
 		ItemSets.Insert( file.Name, file );
 	}
-};
+}
