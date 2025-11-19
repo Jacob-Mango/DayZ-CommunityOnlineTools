@@ -449,7 +449,9 @@ class JMSpectatorCamera: JMCameraBase
 
 					if (!m_COT_TargetMarker)
 					{
+					#ifdef DIAG_DEVELOPER
 						g_Game.Chat("Creating particle", "colorFriendly");
+					#endif
 
 						ParticleSource particle = ParticleManager.GetInstance().PlayOnObject(ParticleList.COT_TARGET_MARKER, target, "0 0 0", "0 0 0", true);
 
@@ -473,14 +475,18 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						if (m_COT_TargetMarker.GetParent() != target)
 						{
+						#ifdef DIAG_DEVELOPER
 							g_Game.Chat("Reparenting particle", "colorFriendly");
+						#endif
 							m_COT_TargetMarker.AddAsChild(null);
 							m_COT_TargetMarker.AddAsChild(target, "0 0 0", "0 0 0", true);
 						}
 
 						if (!m_COT_TargetMarker.IsParticlePlaying())
 						{
+						#ifdef DIAG_DEVELOPER
 							g_Game.Chat("Playing particle", "colorFriendly");
+						#endif
 							m_COT_TargetMarker.PlayParticle();
 						}
 					}
@@ -502,7 +508,9 @@ class JMSpectatorCamera: JMCameraBase
 
 					if (m_COT_TargetMarker)
 					{
+					#ifdef DIAG_DEVELOPER
 						g_Game.Chat("Stopping particle", "colorFriendly");
+					#endif
 						if (m_COT_TargetMarker.IsParticlePlaying())
 							m_COT_TargetMarker.StopParticle();
 						m_COT_TargetMarker = null;
