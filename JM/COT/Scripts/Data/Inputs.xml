@@ -70,6 +70,8 @@
 			<input name="UACameraToolSpeedIncrease" />
 			<input name="UACameraToolSpeedDecrease" />
 
+            <input name="UAPlayerModuleStopSpectating" />
+
 			<input name="UAObjectModuleSpawnInfected" />
 			<input name="UAObjectModuleSpawnAnimal" />
 			<input name="UAObjectModuleSpawnWolf" />
@@ -140,9 +142,7 @@
         </input>
 
         <input name="UAPlayerModuleStopSpectating">
-            <btn name="kLControl">
-                <btn name="kInsert" />
-            </btn>
+            <btn name="kNumpad1" />
         </input>
 
         <input name="UACOTToggleButtons">
