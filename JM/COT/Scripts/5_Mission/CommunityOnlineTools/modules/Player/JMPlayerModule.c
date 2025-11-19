@@ -1036,7 +1036,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			else
 				StartSpectating(target);
 
-			action.SetButton("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE");
+			action.SetButton("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE");
 		}
 		else
 		{
@@ -1044,7 +1044,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			EndSpectating();
 
-			action.SetButton("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE");
+			action.SetButton("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE");
 		}
 	}
 
