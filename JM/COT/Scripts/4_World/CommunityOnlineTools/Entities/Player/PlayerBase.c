@@ -7,6 +7,8 @@ enum JMInvisibilityType
 
 modded class PlayerBase
 {
+	static bool COT_BACKUP_DEBUG_INVENTORY_ACCESS;
+
 #ifndef CF_MODULE_PERMISSIONS
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
@@ -302,6 +304,8 @@ modded class PlayerBase
 		#endif
 
 			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
+
+			COT_SetInventoryAccess(m_JMIsFrozen);
 
 			HumanInputController hic = GetInputController();
 			if ( hic )
@@ -634,6 +638,8 @@ modded class PlayerBase
 			m_JMIsFrozen = mode;
 			m_JMIsFrozenRemoteSynch = mode;
 
+			COT_SetInventoryAccess(mode);
+
 			#ifdef SERVER
 			COT_SynchPlayerVars();
 			#endif
@@ -804,15 +810,17 @@ modded class PlayerBase
 		}
 	}
 
-	override bool IsRestrained()
+	static void COT_SetInventoryAccess(bool access)
 	{
-		if (!g_Game.IsDedicatedServer() && g_Game.GetPlayer() != this && g_cotBase && g_cotBase.IsActive())
+		if (access)
 		{
-			if ( GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory" ) || m_JMIsFrozen)
-				return true;
+			COT_BACKUP_DEBUG_INVENTORY_ACCESS = DEBUG_INVENTORY_ACCESS;
+			DEBUG_INVENTORY_ACCESS = true;
 		}
-
-		return super.IsRestrained();
+		else if (!COT_BACKUP_DEBUG_INVENTORY_ACCESS)
+		{
+			DEBUG_INVENTORY_ACCESS = false;
+		}
 	}
 
 	void COTUpdateSpectatorPosition()
