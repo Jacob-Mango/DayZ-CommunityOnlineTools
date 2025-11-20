@@ -98,6 +98,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( active );
 			rpc.Send( NULL, JMCOTRPC.Active, true, NULL );
+
+			if (GetPermissionsManager().HasPermission("Admin.Player.AccessInventory"))
+				PlayerBase.COT_SetInventoryAccess(active);
 		}
 	}
 
@@ -112,6 +115,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			return;
 
 		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( senderRPC.GetId() );
+
+		if (!instance)
+			return;
+
+		if (instance.HasPermission("Admin.Player.AccessInventory"))
+			PlayerBase.COT_SetInventoryAccess(active);
 
 		auto message = m_Webhook.CreateDiscordMessage();
 		
