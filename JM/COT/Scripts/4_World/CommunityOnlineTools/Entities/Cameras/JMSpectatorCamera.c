@@ -198,7 +198,7 @@ class JMSpectatorCamera: JMCameraBase
 			if (spectatedPlayer && spectatedPlayer.m_JM_IsHeadInvisible)
 				spectatedPlayer.SetHeadInvisible(false);
 
-			return;
+			//return;
 		}
 
 		vector pos = headPos;
