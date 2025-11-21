@@ -50,6 +50,7 @@ class JMSpectatorCamera: JMCameraBase
 	ParticleSource m_COT_TargetMarker;
 	Object m_COT_TargetMarker_Object;
 	ScriptedLightBase m_COT_TargetLight;
+	bool m_COT_RemoveMarker;
 
 #ifdef DIAG_DEVELOPER
 	float m_COT_TempFloat01;
@@ -501,30 +502,43 @@ class JMSpectatorCamera: JMCameraBase
 						if (m_COT_TargetLight.GetAttachmentParent() != target)
 							m_COT_TargetLight.AttachOnObject(target, "0 2.2 0", "0 -90 0");
 					}
+
+					m_COT_RemoveMarker = false;
 				}
 				else
 				{
 					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
 
-					if (m_COT_TargetMarker)
-					{
-					#ifdef DIAG_DEVELOPER
-						g_Game.Chat("Stopping particle", "colorFriendly");
-					#endif
-						if (m_COT_TargetMarker.IsParticlePlaying())
-							m_COT_TargetMarker.StopParticle();
-						m_COT_TargetMarker = null;
-					}
-
-					if (m_COT_TargetLight)
-					{
-						m_COT_TargetLight.FadeOut();
-						m_COT_TargetLight = null;
-					}
+					m_COT_RemoveMarker = true;
 				}
 
 				dir.Normalize();
 			}
+		}
+		else
+		{
+			m_COT_RemoveMarker = true;
+		}
+
+		if (m_COT_RemoveMarker)
+		{
+			if (m_COT_TargetMarker)
+			{
+			#ifdef DIAG_DEVELOPER
+				g_Game.Chat("Stopping particle", "colorFriendly");
+			#endif
+				if (m_COT_TargetMarker.IsParticlePlaying())
+					m_COT_TargetMarker.StopParticle();
+				m_COT_TargetMarker = null;
+			}
+
+			if (m_COT_TargetLight)
+			{
+				m_COT_TargetLight.FadeOut();
+				m_COT_TargetLight = null;
+			}
+
+			m_COT_RemoveMarker = false;
 		}
 
 		vector fromOri = GetOrientation();
