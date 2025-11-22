@@ -1256,6 +1256,23 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( !ctx.Read( networkHigh ) )
 				return;
 
+			if (CurrentActiveCamera && CurrentActiveCamera.IsInherited(JMSpectatorCamera))
+			{
+			#ifdef DIAG_DEVELOPER
+				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
+			#endif
+				g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
+				CurrentActiveCamera = null;
+			}
+			else if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
+			{
+			#ifdef DIAG_DEVELOPER
+				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
+			#endif
+				g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
+				COT_PreviousActiveCamera = null;
+			}
+
 			COT_PreviousActiveCamera = CurrentActiveCamera;
 
 			CF_Log.Debug("Starting spectate, waiting for spectate object");
@@ -1363,6 +1380,12 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( CurrentActiveCamera == m_SpectatorCamera )
 		{
 			CurrentActiveCamera.SetActive( false );
+
+		#ifdef DIAG_DEVELOPER
+			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
+		#endif
+			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
+
 			CurrentActiveCamera = NULL;
 
 			if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMCinematicCamera) && switchToPreviousCamera)

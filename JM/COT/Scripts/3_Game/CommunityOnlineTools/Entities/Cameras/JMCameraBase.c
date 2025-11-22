@@ -37,6 +37,10 @@ class JMCameraBase: Camera
 
 	void JMCameraBase()
 	{
+	#ifdef DIAG_DEVELOPER
+		ErrorEx("JMCameraBase()", ErrorExSeverity.INFO);
+	#endif
+
 		SetEventMask(EntityEvent.FRAME | EntityEvent.POSTFRAME);
 
 	#ifndef SERVER
@@ -51,6 +55,10 @@ class JMCameraBase: Camera
 
 	void ~JMCameraBase()
 	{
+	#ifdef DIAG_DEVELOPER
+		ErrorEx("~JMCameraBase()", ErrorExSeverity.INFO);
+	#endif
+
 		SelectedTarget( NULL );
 	}
 
