@@ -393,6 +393,15 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 Print("JMCameraModule::Client_Leave - current cam " + CurrentActiveCamera);
 		CurrentActiveCamera.SetActive( false );
+
+		if (CurrentActiveCamera.IsInherited(JMCinematicCamera))
+		{
+		#ifdef DIAG_DEVELOPER
+			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
+		#endif
+			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
+		}
+
 		CurrentActiveCamera = null;
 
 Print("JMCameraModule::Client_Leave - previous cam " + COT_PreviousActiveCamera);
@@ -403,6 +412,13 @@ Print("JMCameraModule::Client_Leave - previous cam " + COT_PreviousActiveCamera)
 Print("JMCameraModule::Client_Leave - switching to prev cam " + COT_PreviousActiveCamera);
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
+			}
+			else
+			{
+			#ifdef DIAG_DEVELOPER
+				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
+			#endif
+				g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
 			}
 
 			COT_PreviousActiveCamera = NULL;
