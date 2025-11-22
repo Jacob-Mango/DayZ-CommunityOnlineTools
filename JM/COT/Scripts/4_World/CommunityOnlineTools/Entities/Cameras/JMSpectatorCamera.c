@@ -5,7 +5,10 @@ class JMDollyCamLight: ScriptedLightBase
 		SetLightType(LightSourceType.SpotLight);
 		SetVisibleDuringDaylight(true);
 		SetRadiusTo(3);
-		SetBrightnessTo(1000);
+		if (g_Game.GetMission().GetWorldData().GetDaytime() == WorldDataDaytime.DAY)
+			SetBrightnessTo(1000);
+		else
+			SetBrightnessTo(10);
 		SetCastShadow(false);
 		SetDiffuseColor(1.0, 0.75, 0.25);
 		SetFlareVisible(false);
