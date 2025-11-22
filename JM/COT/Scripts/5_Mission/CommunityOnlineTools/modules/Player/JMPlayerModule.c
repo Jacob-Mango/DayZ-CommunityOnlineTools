@@ -1197,7 +1197,16 @@ class JMPlayerModule: JMRenderableModuleBase
 		CF_Log.Debug("JMPlayerModule::Client_StartSpectating " + spectateObject);
 		
 		if (COT_PreviousActiveCamera)
+		{
 			COT_PreviousActiveCamera.SetActive( false );
+
+		#ifdef DIAG_DEVELOPER
+			ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
+		#endif
+			g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
+
+			COT_PreviousActiveCamera = null;
+		}
 
 		if ( CurrentActiveCamera )
 		{
@@ -1255,23 +1264,6 @@ class JMPlayerModule: JMRenderableModuleBase
 				
 			if ( !ctx.Read( networkHigh ) )
 				return;
-
-			if (CurrentActiveCamera && CurrentActiveCamera.IsInherited(JMSpectatorCamera))
-			{
-			#ifdef DIAG_DEVELOPER
-				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
-			#endif
-				g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
-				CurrentActiveCamera = null;
-			}
-			else if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
-			{
-			#ifdef DIAG_DEVELOPER
-				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
-			#endif
-				g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
-				COT_PreviousActiveCamera = null;
-			}
 
 			COT_PreviousActiveCamera = CurrentActiveCamera;
 
@@ -1411,6 +1403,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		else if (CurrentActiveCamera)
 		{
 			waitForPlayerIdleTimeout = 0;
+		}
+
+		if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
+		{
+		#ifdef DIAG_DEVELOPER
+			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
+		#endif
+			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
 		}
 
 		COT_PreviousActiveCamera = NULL;
