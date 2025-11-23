@@ -1408,9 +1408,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
 		{
 		#ifdef DIAG_DEVELOPER
-			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
+			ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
 		#endif
-			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
+			g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
 		}
 
 		COT_PreviousActiveCamera = NULL;
