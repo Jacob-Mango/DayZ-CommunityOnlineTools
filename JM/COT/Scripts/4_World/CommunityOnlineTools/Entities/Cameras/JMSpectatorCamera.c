@@ -21,6 +21,8 @@ class JMSpectatorCamera: JMCameraBase
 {
 	static const int DOLLY_CAM_PATH_LIMIT = 200;
 
+	static JMSpectatorCamera s_COT_SpectatorCamera;
+
 	vector linearVelocity;
 	vector angularVelocity;
 
@@ -69,6 +71,20 @@ class JMSpectatorCamera: JMCameraBase
 	vector m_COT_TempVec02;
 	vector m_COT_TempVec03;
 #endif
+
+	void JMSpectatorCamera()
+	{
+		if (s_COT_SpectatorCamera)
+			g_Game.ObjectDeleteOnClient(s_COT_SpectatorCamera);
+
+		s_COT_SpectatorCamera = this;
+	}
+
+	void ~JMSpectatorCamera()
+	{
+		if (g_Game)
+			COT_RemoveMarker();
+	}
 	
 	override void OnTargetSelected( Object target )
 	{
@@ -434,7 +450,11 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						DayZCreatureAI creature;
 						//vector.Dot(dir, toTargetDir) < -0.9239
-						if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
+						if (target.IsDamageDestroyed() && vector.Dot(dir, toTargetDir) > 0.5)
+						{
+							target = null;
+						}
+						else if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
 						{
 							m_COT_LookAtTarget_Time += timeslice;
 							if (m_COT_LookAtTarget_Time > Math.Lerp(3, 5, angleDiff / 360))
@@ -525,21 +545,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		if (m_COT_RemoveMarker)
 		{
-			if (m_COT_TargetMarker)
-			{
-			#ifdef DIAG_DEVELOPER
-				g_Game.Chat("Stopping particle", "colorFriendly");
-			#endif
-				if (m_COT_TargetMarker.IsParticlePlaying())
-					m_COT_TargetMarker.StopParticle();
-				m_COT_TargetMarker = null;
-			}
-
-			if (m_COT_TargetLight)
-			{
-				m_COT_TargetLight.FadeOut();
-				m_COT_TargetLight = null;
-			}
+			COT_RemoveMarker();
 
 			m_COT_RemoveMarker = false;
 		}
@@ -951,5 +957,24 @@ class JMSpectatorCamera: JMCameraBase
 		DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
 
 		return hitObject && hitObject.IsInherited(House);
+	}
+
+	void COT_RemoveMarker()
+	{
+		if (m_COT_TargetMarker)
+		{
+		#ifdef DIAG_DEVELOPER
+			g_Game.Chat("Stopping particle", "colorFriendly");
+		#endif
+			if (m_COT_TargetMarker.IsParticlePlaying())
+				m_COT_TargetMarker.StopParticle();
+			m_COT_TargetMarker = null;
+		}
+
+		if (m_COT_TargetLight)
+		{
+			m_COT_TargetLight.FadeOut();
+			m_COT_TargetLight = null;
+		}
 	}
 };

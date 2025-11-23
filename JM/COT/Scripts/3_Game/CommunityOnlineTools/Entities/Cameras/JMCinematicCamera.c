@@ -1,5 +1,7 @@
 class JMCinematicCamera: JMCameraBase
 {
+	static JMCinematicCamera s_COT_CinematicCamera;
+
 	vector linearVelocity;
 	vector angularVelocity;
 
@@ -32,7 +34,11 @@ class JMCinematicCamera: JMCameraBase
 		travelPositions = new TVectorArray;
 		travelTimes = new TFloatArray;
 		travelSmooth = new TBoolArray;
-		SetEventMask( EntityEvent.FRAME );
+
+		if (s_COT_CinematicCamera)
+			g_Game.ObjectDeleteOnClient(s_COT_CinematicCamera);
+
+		s_COT_CinematicCamera = this;
 	}
 
 	override void OnUpdate( float timeslice )
