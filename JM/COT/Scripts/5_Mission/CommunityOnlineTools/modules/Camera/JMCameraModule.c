@@ -413,13 +413,6 @@ Print("JMCameraModule::Client_Leave - switching to prev cam " + COT_PreviousActi
 				CurrentActiveCamera = COT_PreviousActiveCamera;
 				CurrentActiveCamera.SetActive(true);
 			}
-			else
-			{
-			#ifdef DIAG_DEVELOPER
-				ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
-			#endif
-				g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
-			}
 
 			COT_PreviousActiveCamera = NULL;
 
