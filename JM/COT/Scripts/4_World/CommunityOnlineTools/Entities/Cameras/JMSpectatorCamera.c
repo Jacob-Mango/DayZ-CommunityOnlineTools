@@ -936,7 +936,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		SetPosition( cameraPos );
 
-		if (spectatedPlayer)
+		if (spectatedPlayer && IsActive())
 		{
 			float cameraDistanceToHeadSq = vector.DistanceSq(cameraPos, headPos);
 			if (cameraDistanceToHeadSq < 0.0625 && !spectatedPlayer.m_JM_IsHeadInvisible)
