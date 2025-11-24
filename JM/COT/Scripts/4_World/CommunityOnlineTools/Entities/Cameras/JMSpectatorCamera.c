@@ -394,6 +394,15 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						if ((result.IsMan() || result.IsDayZCreature()) && !result.IsDamageDestroyed())
 						{
+						#ifdef DZ_Expansion_AI
+							if (spectatedPlayer)
+							{
+								DayZPlayerImplement targetPlayer;
+								if (Class.CastTo(targetPlayer, result) && targetPlayer.GetGroup() == spectatedPlayer.GetGroup())
+									continue;
+							}
+						#endif
+
 							target = result;
 							if (target != m_COT_LookAtTarget)
 								m_COT_LookAtTarget_Time = 0;
@@ -450,9 +459,11 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						DayZCreatureAI creature;
 						//vector.Dot(dir, toTargetDir) < -0.9239
-						if (target.IsDamageDestroyed() && vector.Dot(dir, toTargetDir) > 0.5)
+						if (target.IsDamageDestroyed() && vector.Dot(dir, toTargetDir) > 0.866)
 						{
-							target = null;
+							m_COT_LookAtTarget_Time += timeslice;
+							if (m_COT_LookAtTarget_Time > Math.RandomFloat(1, 1.5))
+								target = null;
 						}
 						else if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
 						{
