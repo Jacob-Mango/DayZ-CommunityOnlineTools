@@ -130,6 +130,7 @@ modded class PlayerBase
 
 	void COT_SynchPlayerVars()
 	{
+	#ifdef SERVER
 		COT_UpdatePlayerVars(m_COT_PlayerVars);
 
 		m_COT_PlayerVarsBitmask = 0;
@@ -139,6 +140,7 @@ modded class PlayerBase
 			if (enabled)
 				m_COT_PlayerVarsBitmask |= value;
 		}
+	#endif
 
 		SetSynchDirty();
 	}
@@ -211,10 +213,8 @@ modded class PlayerBase
 		COT_SynchPlayerVars();
 	}
 
-	override void OnVariablesSynchronized()
+	void COT_DecodePlayerVars()
 	{
-		super.OnVariablesSynchronized();
-
 		bool enabled;
 		for (int i = 0; i < EnumTools.GetEnumSize(JMPlayerVariables); i++)
 		{
@@ -275,6 +275,14 @@ modded class PlayerBase
 					break;
 			}
 		}
+	}
+
+	override void OnVariablesSynchronized()
+	{
+		super.OnVariablesSynchronized();
+
+		if (g_Game.IsMultiplayer())
+			COT_DecodePlayerVars();
 
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
@@ -300,7 +308,7 @@ modded class PlayerBase
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
 		{
 		#ifdef DIAG_DEVELOPER
-			PrintFormat("%1 COT Frozen %2", this, m_JMIsInvisibleRemoteSynch);
+			PrintFormat("%1 COT Frozen %2", this, m_JMIsFrozenRemoteSynch);
 		#endif
 
 			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
@@ -674,12 +682,12 @@ modded class PlayerBase
 	{
 		if (m_JMIsInvisible != mode)
 		{
+		#ifdef SERVER
 			m_JMIsInvisible = mode;
+		#endif
 			m_JMIsInvisibleRemoteSynch = mode;
 
-			#ifdef SERVER
 			COT_SynchPlayerVars();
-			#endif
 		}
 	}
 
@@ -748,11 +756,12 @@ modded class PlayerBase
 	{
 		if ( g_Game.IsServer() )
 		{
+		#ifdef SERVER
 			m_JMHasAdminNVG = mode;
+		#endif
+			m_JMHasAdminNVGRemoteSynch = mode;
 
-			#ifdef SERVER
 			COT_SynchPlayerVars();
-			#endif
 		}
 	}
 
