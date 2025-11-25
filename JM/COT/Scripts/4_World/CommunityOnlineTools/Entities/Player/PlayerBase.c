@@ -160,7 +160,18 @@ modded class PlayerBase
 		}
 
 		if (!skip)
+		{
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
+		}
+		else
+		{
+			//! Only handle inventory
+
+			GetDayZPlayerInventory().HandleInventory(pDt);
+			GetHumanInventory().Update(pDt);
+
+			UpdateDelete();
+		}
 	}
 
 	protected bool m_COT_TempDisableOnSelectPlayer;
