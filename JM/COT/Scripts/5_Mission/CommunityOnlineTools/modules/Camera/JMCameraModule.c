@@ -452,8 +452,16 @@ Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + g_Game.Ge
 			player.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
+			if (g_Game.IsMultiplayer())
+			{
+				ScriptRPC rpc = new ScriptRPC();
+				rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
+			}
+			else
+			{
+				//! offline/SP
+				g_Game.SelectPlayer(null, player);
+			}
 		}
 	}
 
@@ -490,7 +498,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
 			} else
 			{
-				Client_Leave();
+				Client_Leave(waitForPlayerIdleTimeout);
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
