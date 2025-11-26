@@ -1034,6 +1034,56 @@ modded class PlayerBase
 		return false;
 	}
 
+	override void OnCommandSwimStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandSwimStart();
+	}
+	
+	override void OnCommandLadderStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandLadderStart();
+	}
+	
+	override void OnCommandFallStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandFallStart();
+	}
+	
+	override void OnCommandClimbStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandClimbStart();
+	}
+	
+	override void OnCommandVehicleStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandVehicleStart();
+	}
+
 	override void OnCommandVehicleFinish()
 	{
 		super.OnCommandVehicleFinish();
