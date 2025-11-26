@@ -316,7 +316,10 @@ class JMSpectatorCamera: JMCameraBase
 				isSwimming = true;
 
 				dir = objectTransform[2];
-				if (m_JM_3rdPerson)
+
+				if (dollyCam)
+					pos = objectPos + "0 2.0 0";
+				else if (m_JM_3rdPerson)
 					pos = headPos + "0 0.5 0";
 			}
 			else
