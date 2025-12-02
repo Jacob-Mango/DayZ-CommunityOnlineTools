@@ -949,11 +949,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
 
-			int nClassStart;
-			if (nConfig == 0)
-				nClassStart = 20;
-
-			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+			for ( int nClass = 0; nClass < nClasses; nClass++ )
 			{
 				string strName;
 
