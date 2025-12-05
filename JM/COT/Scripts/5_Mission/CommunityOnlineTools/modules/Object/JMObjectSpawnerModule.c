@@ -4,6 +4,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
+	int m_OverrideDebugSpawnDepth;
 
 	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
 	private ref array< string > m_UnfinishedItems =
@@ -731,6 +732,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		BuildingBase building;
 		DayZPlayerImplement npc;
 
+		if (depth > 0)
+			m_OverrideDebugSpawnDepth = depth;
+
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(car, entity))
@@ -742,10 +746,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		else if (Class.CastTo(npc, entity))
 			npc.COT_OnDebugSpawn(player);
 
-		if (!entity.GetInventory())
-			return;
+		if (m_OverrideDebugSpawnDepth > 0)
+			m_OverrideDebugSpawnDepth = 0;
 
-		if (!entity.GetInventory().GetAttachmentSlotsCount())
+		if (!entity.GetInventory())
 			return;
 
 		if (entity.GetInventory().AttachmentCount())
@@ -761,21 +765,38 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, use slot IDs instead of case-sensitive match of slot names, filter bad items)
 	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3) 
 	{
+		if (m_OverrideDebugSpawnDepth > 0)
+		{
+			depth = m_OverrideDebugSpawnDepth;
+			m_OverrideDebugSpawnDepth = 0;
+		}
+
+		CF_Log.Debug("JMObjectSpawnerModule::SpawnCompatibleAttachments %1 %2 %3", entity.ToString(), player.ToString(), depth.ToString());
+
+		GameInventory inventory = entity.GetInventory();
+		int count = inventory.GetAttachmentSlotsCount();
+
+		if (count == 0)
+			return;
+
+		int i;
+
 		TIntArray slot_ids = {};
 		int slot_id;
 
-		TStringArray atts = {};
-		entity.ConfigGetTextArray("attachments", atts);
-
-		foreach (string att: atts)
+		for (i = 0; i < count; ++i)
 		{
-			slot_id = InventorySlots.GetSlotIdFromString(att);
+			slot_id = inventory.GetAttachmentSlotId(i);
 			if (slot_id != InventorySlots.INVALID && InventorySlots.GetShowForSlotId(slot_id))
 			{
+				string att = InventorySlots.GetSlotName(slot_id);
 				CF_Log.Info("Entity %1 has visible attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
 				slot_ids.Insert(slot_id);
 			}
 		}
+
+		if (slot_ids.Count() == 0)
+			return; 
 
 		TStringArray all_paths = new TStringArray;
 
@@ -788,12 +809,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		string model;
 		int idx;
 		EntityAI child;
+		TStringSet seen = new TStringSet;
 
 		foreach (string config_path: all_paths)
 		{
 			int children_count = g_Game.ConfigGetChildrenCount(config_path);
 
-			for (int i = 0; i < children_count; i++)
+			for (i = 0; i < children_count; i++)
 			{
 				g_Game.ConfigGetChildName(config_path, i, child_name);
 				path = config_path + " " + child_name;
@@ -802,6 +824,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if (scope == 2)
 				{
 					if (!g_Game.ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
+						continue;
+
+					//! Don't spawn food items as attachments, that's silly, even more so since it would likely be candycanes
+					//! We don't check for Edible_Base because we still want liquid containers like bottles/canteens
+					//! (they inherit from Bottle_Base which inherits from Edible_Base).
+					//! Checking nutrition is faster than traversing parent hierarchy anyway and only food/drink items will have it
+					if (g_Game.ConfigIsExisting(path + " Nutrition"))
 						continue;
 
 					TStringArray inv_slots = {};
@@ -819,6 +848,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 								if (IsExcludedClassName(child_name))
 									break;
 
+								if (seen.Find(child_name) > -1)
+									break;
+
 								//! Limit character attachments to clothing
 								if (entity.IsMan() && !g_Game.IsKindOf(child_name, "Clothing_Base"))
 									break;
@@ -831,6 +863,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 									if (depth > 0)
 										OnDebugSpawn(child, player, depth - 1);
+
+									if (!entity.IsTransport())
+										seen.Insert(child_name);
+
+									if (child_name == "compass")
+										seen.Insert("orienteeringcompass");
 
 									if (slot_ids.Count() == 0)
 										return;
