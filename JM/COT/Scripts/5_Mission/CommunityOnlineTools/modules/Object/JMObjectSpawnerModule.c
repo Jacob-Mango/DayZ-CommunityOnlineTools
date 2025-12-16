@@ -514,7 +514,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			EntityAI ent = instance.PlayerObject;
 			vector position = instance.PlayerObject.GetPosition();
-			Server_SpawnEntity_TargetInventory(className, ent, position, quantity, health, temp, itemState, ident);
+			SpawnEntity(className, ent, position, quantity, health, temp, itemState, callerInstance);
 		}
 	}
 
