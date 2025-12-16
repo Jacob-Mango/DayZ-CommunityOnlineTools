@@ -234,9 +234,12 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 
 		array< string > attachments = file.Parts;
 
-		int flags = ECE_CREATEPHYSICS;
-		if ( !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE;
+		int flags;
+
+		if ( COT_SurfaceIsWater( position ) )
+			flags = ECE_OBJECT_SWAP;  //! Keep height, no surface align
+		else
+			flags = ECE_PLACE_ON_SURFACE;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( file.VehicleName, position, flags ) ) )

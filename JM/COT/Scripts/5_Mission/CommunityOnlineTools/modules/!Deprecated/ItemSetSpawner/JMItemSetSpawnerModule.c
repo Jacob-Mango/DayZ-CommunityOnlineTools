@@ -314,14 +314,15 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		position[1] = g_Game.SurfaceY( position[0], position[2] );
 		*/
 
-		int flags = ECE_CREATEPHYSICS;
-		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( pos ) )
-			flags |= ECE_PLACE_ON_SURFACE;
-		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( pos ) )
-			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
+		int flags;
+
+		if ( COT_SurfaceIsWater( pos ) )
+			flags = ECE_OBJECT_SWAP;  //! Keep height, no surface align
+		else
+			flags = ECE_PLACE_ON_SURFACE;
 		
 		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
-			flags |= 0x800;
+			flags |= ECE_INITAI;
 
 		EntityAI ent;
 		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, pos, flags ) ) )
