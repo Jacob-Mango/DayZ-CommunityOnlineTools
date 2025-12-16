@@ -642,7 +642,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		SetupEntity(ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode);
 
 		if ((flags & ECE_LOCAL) == ECE_LOCAL)
+		{
+			g_Game.RemoteObjectTreeDelete(obj);  //! Needed since SetupEntity might have spawned atts, and those wouldn't be created by RemoteObjectTreeCreate if they weren't spawned only locally...
 			g_Game.RemoteObjectTreeCreate(obj);
+		}
 
 		string loggedSuffix;
 
