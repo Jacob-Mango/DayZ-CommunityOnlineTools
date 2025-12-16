@@ -581,9 +581,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		int flags;
 
+		bool inInventory;
+
 		if (parent && IsInventoryType(type))
 		{
 			flags = ECE_LOCAL | ECE_IN_INVENTORY;
+			inInventory = true;
 		}
 		else
 		{
@@ -612,7 +615,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return null;
 		}
 
-		if ((flags & ECE_IN_INVENTORY) == ECE_IN_INVENTORY)
+		if (inInventory)
 		{
 			//! Move to parent inventory
 			InventoryLocation src = new InventoryLocation();
