@@ -548,11 +548,19 @@ modded class PlayerBase
 
 	override string FormatSteamWebhook()
 	{
+		//! Only ALIVE actual players will be authenticated
 		JMPlayerInstance instance = GetAuthenticatedPlayer();
 		if (instance)
 			return instance.FormatSteamWebhook();
 
+		//! Could be dead player or AI
+
 		string name = GetCachedName();
+
+		//! Only actual players will have a cached ID so we can early return here
+		string id = GetCachedID();
+		if (id)
+			return string.Format("%1 (id=%2)", name, id);
 
 		switch (GetInstanceType())
 		{
@@ -570,6 +578,8 @@ modded class PlayerBase
 			#endif
 				return "AI " + name;
 		}
+
+		//! Something wrong with vanilla ID cache? Shouldn't happen
 
 		if (!name)
 			name = super.FormatSteamWebhook();
