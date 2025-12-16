@@ -76,12 +76,13 @@ static vector COT_PerformRayCast(vector rayStart, vector rayEnd, Object ignore, 
 
 static bool COT_SurfaceIsWater( vector position )
 {
-	string type;
-	g_Game.SurfaceGetType3D(position[0], position[1] + 0.1, position[2], type);
-	if (type.Contains("water"))
+	float surfaceY = g_Game.SurfaceRoadY3D(position[0], position[1], position[2], RoadSurfaceDetection.LEGACY);
+	vector surface = Vector(position[0], surfaceY, position[2]);
+
+	if (g_Game.GetWaterDepth(surface) > 0)
 		return true;
 
-	return g_Game.SurfaceIsSea(position[0], position[2]) || g_Game.SurfaceIsPond(position[0], position[2]);
+	return false;
 }
 
 static vector GetPointerPos( float distance = 100.0, Object ignore = NULL )
