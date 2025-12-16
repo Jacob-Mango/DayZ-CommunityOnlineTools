@@ -657,7 +657,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		string msg = string.Format(tmp, ent.GetDisplayName(), ent.GetType(), quantity, health, temp, itemState, loggedSuffix);
 
 		GetCommunityOnlineToolsBase().Log(callerInstance.PlayerObject.GetIdentity(), msg);
-		SendWebhook("Player", callerInstance, msg);
+		if (parent)
+			SendWebhook("Player", callerInstance, msg);
+		else
+			SendWebhook("Vector", callerInstance, msg);
 
 		return ent;
 	}
