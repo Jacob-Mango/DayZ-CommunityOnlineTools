@@ -134,7 +134,8 @@ class JMLoadoutForm: JMFormBase
 				m_Module.SpawnCursor( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.TARGET:
-				EntityAI ent = m_Module.GetObjectAtCursor();
+				//! TODO: Implement getting tgt entity properly. Not functional for now, I don't care.
+				EntityAI ent;
 				if (ent)
 					m_Module.SpawnTarget( data.Filename, ent );
 			break;
