@@ -655,7 +655,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		loggedSuffix += " at " + position.ToString();
 
 		string tmp = "Spawned Entity \"%1\" (%2, q=%3, h=%4, t=%5, s=%6)%7";
-		string msg = string.Format(tmp, ent.GetDisplayName(), ent.GetType(), quantity, health, temp, itemState, loggedSuffix);
+		string msg = string.Format(tmp, ent.GetDisplayName(), ent.GetDebugName(), quantity, health, temp, itemState, loggedSuffix);
 
 		GetCommunityOnlineToolsBase().Log(callerInstance.PlayerObject.GetIdentity(), msg);
 		if (parent)
