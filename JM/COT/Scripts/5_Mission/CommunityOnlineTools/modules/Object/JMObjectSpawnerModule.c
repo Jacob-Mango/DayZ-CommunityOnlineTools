@@ -675,6 +675,30 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			case COT_ObjectSetupMode.CE:
 				entity.EEOnCECreate();
+				Weapon_Base weapon;
+				if (Class.CastTo(weapon, entity))
+				{
+					int muzzleIndex = weapon.GetCurrentMuzzle();
+					if (!weapon.IsChamberFull(muzzleIndex))
+					{
+						string ammoTypeName;
+						float ammoDamage;
+						if (weapon.HasInternalMagazine(muzzleIndex) && weapon.GetInternalMagazineCartridgeCount(muzzleIndex) > 0)
+						{
+							if (weapon.GetInternalMagazineCartridgeInfo(muzzleIndex, 0, ammoDamage, ammoTypeName))
+								weapon.FillChamber(ammoTypeName);
+						}
+						else
+						{
+							Magazine attachedMag = weapon.GetMagazine(muzzleIndex);
+							if (attachedMag && attachedMag.GetAmmoCount() > 0)
+							{
+								if (attachedMag.GetCartridgeAtIndex(0, ammoDamage, ammoTypeName))
+									weapon.FillChamber(ammoTypeName);
+							}
+						}
+					}
+				}
 				break;
 		}
 
