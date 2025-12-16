@@ -579,18 +579,18 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! @note LocationCreateEntity ignores ECE_EQUIP so we always use ObjectCreateEx and move entity to parent (if given) afterwards
 	EntityAI SpawnEntity(string type, EntityAI parent, vector position, float quantity, float health, float temp, int itemState, JMPlayerInstance callerInstance)
 	{
-		int flags = ECE_LOCAL;
+		int flags;
 
 		if (parent && IsInventoryType(type))
 		{
-			flags |= ECE_IN_INVENTORY;
+			flags = ECE_LOCAL | ECE_IN_INVENTORY;
 		}
 		else
 		{
 			if (COT_SurfaceIsWater(position))
-				flags |= ECE_OBJECT_SWAP;  //! Keep height, no surface align
+				flags = ECE_OBJECT_SWAP;  //! Keep height, no surface align
 			else
-				flags |= ECE_PLACE_ON_SURFACE;
+				flags = ECE_PLACE_ON_SURFACE;
 
 			if (g_Game.IsKindOf(type, "DZ_LightAI"))
 				flags |= ECE_INITAI;
@@ -638,7 +638,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		SetupEntity(ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode);
 
-		g_Game.RemoteObjectTreeCreate(obj);
+		if ((flags & ECE_LOCAL) == ECE_LOCAL)
+			g_Game.RemoteObjectTreeCreate(obj);
 
 		string loggedSuffix;
 
