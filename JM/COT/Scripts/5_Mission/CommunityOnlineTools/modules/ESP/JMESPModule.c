@@ -1764,7 +1764,7 @@ class JMESPModule: JMRenderableModuleBase
 	void CopyToClipboardRaw()
 	{
 		string clipboardOutput= "";
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
 		for(int i=0; i < JMobjects.Count(); i++)
 		{
 			if (i > 0)
@@ -1800,7 +1800,7 @@ class JMESPModule: JMRenderableModuleBase
 	void CopyToClipboardMarket()
 	{
 		string clipboardOutput= "";
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
 		
 		clipboardOutput = "{\n";
 		clipboardOutput += "    \"m_Version\": 12,\n";
@@ -1863,7 +1863,7 @@ class JMESPModule: JMRenderableModuleBase
 		clipboardOutput += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
 		clipboardOutput += "<spawnabletypes>\n";
 
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
 		for(int i=0; i < JMobjects.Count(); i++)
 		{
 			clipboardOutput += "	<type name=\""+JMobjects[i].obj.GetType()+"\">\n";
