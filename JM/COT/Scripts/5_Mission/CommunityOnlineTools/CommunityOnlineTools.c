@@ -25,9 +25,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 	override void OnLoaded()
 	{
-		//#ifdef DIAG
-		//GetPermissionsManager().CreateFakePlayers();
-		//#endif
+		#ifdef DIAG
+		GetPermissionsManager().CreateFakePlayers();
+		#endif
 
 		super.OnLoaded();
 	}
