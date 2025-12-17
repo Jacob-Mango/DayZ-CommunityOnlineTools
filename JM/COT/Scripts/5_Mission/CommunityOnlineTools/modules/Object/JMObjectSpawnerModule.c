@@ -162,7 +162,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	}
 	
 	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
-	Object GetObjectAtCursor(bool ignorePlayer = true, float distance = 3.0)
+	Object GetObjectAtCursor(bool ignorePlayers = true, float distance = 3.0)
 	{ 
 		vector rayStart = g_Game.GetCurrentCameraPosition();
 
@@ -176,7 +176,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams(rayStart, rayEnd);
+
+		//! Only ignore client player if not in freecam/spectator cam
+		if (!CurrentActiveCamera || !CurrentActiveCamera.IsActive())
+			rayInput.ignore = player;
+
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -207,7 +212,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if (Class.CastTo(entity, resultObj))
 					resultObj = entity.GetHierarchyRoot();
 
-				if ( PlayerBase.Cast( resultObj ) && ignorePlayer )
+				if ( PlayerBase.Cast( resultObj ) && ignorePlayers )
 					continue;
 
 				string name = resultObj.GetType();
