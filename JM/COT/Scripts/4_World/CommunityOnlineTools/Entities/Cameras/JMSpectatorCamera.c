@@ -461,8 +461,9 @@ class JMSpectatorCamera: JMCameraBase
 					if (checkTarget)
 					{
 						DayZCreatureAI creature;
-						//vector.Dot(dir, toTargetDir) < -0.9239
-						if (target.IsDamageDestroyed() && vector.Dot(dir, toTargetDir) > 0.866)
+						vector cameraDir = GetDirection();
+						vector cameraToTargetDirNorm = cameraToTargetDir.Normalized();
+						if (target.IsDamageDestroyed() && vector.Dot(cameraDir, cameraToTargetDirNorm) > 0.866)
 						{
 							m_COT_LookAtTarget_Time += timeslice;
 							if (m_COT_LookAtTarget_Time > Math.RandomFloat(1, 1.5))
