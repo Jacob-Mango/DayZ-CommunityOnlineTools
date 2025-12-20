@@ -466,7 +466,7 @@ class JMSpectatorCamera: JMCameraBase
 						if (target.IsDamageDestroyed() && vector.Dot(cameraDir, cameraToTargetDirNorm) > 0.866)
 						{
 							m_COT_LookAtTarget_Time += timeslice;
-							if (m_COT_LookAtTarget_Time > Math.RandomFloat(1, 1.5))
+							if (m_COT_LookAtTarget_Time > Math.RandomFloat(0.5, 0.8))
 								target = null;
 						}
 						else if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
