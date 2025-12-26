@@ -28,4 +28,13 @@ modded class DayZPlayerCameraBase
 		if (!m_JMHasAdminNVG)
 			super.SetNVPostprocess(NVtype);
 	}
+
+	override void UpdateCameraNV(PlayerBase player)
+	{
+		super.UpdateCameraNV(player);
+
+		COTPPERequester_CameraNV cameraNV;
+		if (Class.CastTo(cameraNV, PPERequesterBank.GetRequester(PPERequesterBank.COTREQ_CAMERANV)) && cameraNV.IsRequesterRunning())
+			cameraNV.COT_UpdateExposure();
+	}
 }
