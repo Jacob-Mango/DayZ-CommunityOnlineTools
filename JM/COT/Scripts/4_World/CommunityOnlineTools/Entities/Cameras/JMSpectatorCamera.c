@@ -873,6 +873,8 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				offsetFactor = 1.0;
 				pos = pos - dir * targetDist;
+
+				ResolveCollision(headPos, cameraPos, pos, offsetFactor);
 			}
 
 			vector offsetX = dir.Perpend() * 0.33 * offsetFactor;
@@ -934,10 +936,6 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
-		float surfaceY = g_Game.SurfaceRoadY3D(cameraPos[0], cameraPos[1] - offsetY, cameraPos[2], RoadSurfaceDetection.LEGACY) + 0.1;
-		if (surfaceY > cameraPos[1])
-			cameraPos[1] = surfaceY;
-
 		SetPosition( cameraPos );
 
 		if (spectatedPlayer && IsActive())
@@ -950,6 +948,42 @@ class JMSpectatorCamera: JMCameraBase
 		}
 
 		SetFOV( Math.Lerp(GetCurrentFOV(), fov, timeslice * CAMERA_FOV_SPEED_MODIFIER) );
+	}
+
+	void ResolveCollision(vector headPos, vector cameraPos, inout vector pos, inout float offsetFactor)
+	{
+		vector toCameraDir = (cameraPos - headPos).Normalized();
+		float r = toCameraDir.Length();
+		float minDist = float.MAX;
+		int segments = 8;
+
+		for (int i = 0; i < segments; ++i)
+		{
+			float theta = ((float)i / (float)segments) * Math.PI2;
+			vector endPos = Vector(headPos[0] + r * Math.Cos(theta), headPos[1], headPos[2] + r * Math.Sin(theta));
+			vector hitPosition;
+			vector hitNormal;
+			int hitComponent;
+			set<Object> hitObjs = new set<Object>;
+
+			if (DayZPhysics.RaycastRV(headPos, endPos, hitPosition, hitNormal, hitComponent, hitObjs,
+									  null, SelectedTarget, false, false, ObjIntersectGeom))
+			{
+				if (!hitObjs.Count() || !hitObjs[0].IsBush())
+				{
+					vector hitDirection = (hitPosition - headPos);
+					float dist = hitDirection.Length();
+
+					if (dist < minDist)
+					{
+						minDist = dist;
+						//! Pull camera toward player to avoid clipping
+						pos = headPos + toCameraDir * (dist - 0.15);
+						offsetFactor = (dist / r) * 0.54;
+					}
+				}
+			}
+		}
 	}
 
 	bool IsUnderRoofBuilding(DayZPlayerImplement player)
