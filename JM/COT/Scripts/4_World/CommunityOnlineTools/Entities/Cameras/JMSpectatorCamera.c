@@ -203,7 +203,7 @@ class JMSpectatorCamera: JMCameraBase
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
 			vector rHandPos = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightHand"));
-			if (vector.DistanceSq(headPos, rHandPos) < 0.1225)
+			if (!spectatedPlayer.GetItemAccessor().IsItemInHandsHidden() && vector.DistanceSq(headPos, rHandPos) < 0.1225)
 				weaponRaised = true;
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
@@ -955,20 +955,28 @@ class JMSpectatorCamera: JMCameraBase
 	{
 		vector toCameraDir = (cameraPos - headPos).Normalized();
 		float r = toCameraDir.Length();
-		float minDist = float.MAX;
+
+		if (r <= 0)
+			return;
+
+		float rayRadius = r * 0.2;
+		float rayLength = r - rayRadius;
+		float minDist = r;
 		int segments = 8;
 
 		for (int i = 0; i < segments; ++i)
 		{
 			float theta = ((float)i / (float)segments) * Math.PI2;
-			vector endPos = Vector(headPos[0] + r * Math.Cos(theta), headPos[1], headPos[2] + r * Math.Sin(theta));
+			vector endPos = Vector(headPos[0] + rayLength * Math.Cos(theta), headPos[1], headPos[2] + rayLength * Math.Sin(theta));
+			vector rayDir = (endPos - headPos).Normalized();
+			vector begPos = headPos + rayDir * rayRadius;
 			vector hitPosition;
 			vector hitNormal;
 			int hitComponent;
 			set<Object> hitObjs = new set<Object>;
 
-			if (DayZPhysics.RaycastRV(headPos, endPos, hitPosition, hitNormal, hitComponent, hitObjs,
-									  null, SelectedTarget, false, false, ObjIntersectGeom))
+			if (DayZPhysics.RaycastRV(begPos, endPos, hitPosition, hitNormal, hitComponent, hitObjs,
+									  null, SelectedTarget, false, false, ObjIntersectGeom, rayRadius))
 			{
 				if (!hitObjs.Count() || !hitObjs[0].IsBush())
 				{
@@ -979,7 +987,7 @@ class JMSpectatorCamera: JMCameraBase
 					{
 						minDist = dist;
 						//! Pull camera toward player to avoid clipping
-						pos = headPos + toCameraDir * (dist - 0.15);
+						pos = headPos + toCameraDir * Math.Max(dist - 0.05, 0);
 						offsetFactor = (dist / r) * 0.54;
 					}
 				}
