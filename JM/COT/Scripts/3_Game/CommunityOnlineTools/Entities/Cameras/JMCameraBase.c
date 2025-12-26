@@ -15,7 +15,8 @@ enum JMCamera3rdPersonMode
 {
 	OFF,
 	DEFAULT,
-	DOLLY
+	DOLLY,
+	AUTO
 }
 
 class JMCameraBase: Camera

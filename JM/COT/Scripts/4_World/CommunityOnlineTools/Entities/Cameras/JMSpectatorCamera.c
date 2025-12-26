@@ -232,7 +232,8 @@ class JMSpectatorCamera: JMCameraBase
 		switch (m_JM_3rdPerson)
 		{
 			case JMCamera3rdPersonMode.DOLLY:
-				if (!m_COT_IsInFreeLook)
+			case JMCamera3rdPersonMode.AUTO:
+				if (!m_COT_IsInFreeLook && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
 				{
 					dollyCam = true;
 					speed = 0.45;  //! Slow interpolation, resulting in movement like camera on a dolly

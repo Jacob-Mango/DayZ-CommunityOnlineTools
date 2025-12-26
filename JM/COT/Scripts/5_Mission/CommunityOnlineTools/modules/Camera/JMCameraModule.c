@@ -745,6 +745,10 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
 					break;
 				case JMCamera3rdPersonMode.DOLLY:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.AUTO;
+					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd person - Automatic", ""));
+					break;
+				case JMCamera3rdPersonMode.AUTO:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
 					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
 					break;
