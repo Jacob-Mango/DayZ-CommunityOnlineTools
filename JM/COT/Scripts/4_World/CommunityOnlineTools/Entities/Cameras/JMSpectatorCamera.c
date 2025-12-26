@@ -203,7 +203,7 @@ class JMSpectatorCamera: JMCameraBase
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
 			vector rHandPos = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightHand"));
-			if (vector.DistanceSq(headPos, rHandPos) < 0.09)
+			if (vector.DistanceSq(headPos, rHandPos) < 0.1225)
 				weaponRaised = true;
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
