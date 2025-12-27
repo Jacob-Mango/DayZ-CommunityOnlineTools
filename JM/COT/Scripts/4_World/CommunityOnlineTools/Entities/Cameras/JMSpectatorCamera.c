@@ -556,6 +556,8 @@ class JMSpectatorCamera: JMCameraBase
 		}
 		else
 		{
+			m_COT_LookAtTarget = null;
+
 			m_COT_RemoveMarker = true;
 		}
 
