@@ -286,11 +286,11 @@ class JMSpectatorCamera: JMCameraBase
 			begPos = barrel_end;
 			dir = vector.Direction(barrel_start, barrel_end).Normalized();
 
-			if (!dollyCam)
-				pos = eyePos - dir * 0.06;
-
 			if (!m_JM_3rdPerson)
+			{
+				pos = eyePos - dir * 0.06;
 				fov = GameConstants.DZPLAYER_CAMERA_FOV_IRONSIGHTS;
+			}
 		}
 		else if (spectatedPlayer)
 		{
