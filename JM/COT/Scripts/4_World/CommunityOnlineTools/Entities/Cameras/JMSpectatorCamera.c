@@ -197,14 +197,35 @@ class JMSpectatorCamera: JMCameraBase
 		int i;
 		int j;
 
+		vector barrel_start;
+		vector barrel_end;
+		vector aimDir;
+
 		if (Class.CastTo(weapon, hands))
 		{
 			//optic = weapon.GetAttachedOptics();
 			weapon.GetTransform(weaponTransform);
 			eyePos = weapon.GetSelectionPositionLS("eye").Multiply4(weaponTransform);
-			vector rHandPos = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightHand"));
-			if (!spectatedPlayer.GetItemAccessor().IsItemInHandsHidden() && vector.DistanceSq(headPos, rHandPos) < 0.1225)
-				weaponRaised = true;
+			barrel_start = weapon.GetSelectionPositionLS("konec hlavne").Multiply4(weaponTransform);
+			barrel_end = weapon.GetSelectionPositionLS("usti hlavne").Multiply4(weaponTransform);
+			aimDir = (barrel_end - barrel_start).Normalized();
+			//! Can't use spectatedPlayer::IsRaised() since it won't work for player-based AI
+			//! (GetMovementState doesn't work on client for INSTANCETYPE_AI_REMOTE).
+			//! Use look and aim direction in relation to head and shoulder to determine if raised.
+			if (!spectatedPlayer.GetItemAccessor().IsItemInHandsHidden())
+			{
+				vector lookDir = headTransform[1];
+				vector headToBarrelEnd = (barrel_end - headPos).Normalized();
+				float lookDot = vector.Dot(lookDir, headToBarrelEnd);
+				if (lookDot > 0.9)
+				{
+					vector rightShoulder = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightArm"));
+					vector rightShoulderToBarrelEnd = (barrel_end - rightShoulder).Normalized();
+					float aimDot = vector.Dot(aimDir, rightShoulderToBarrelEnd);
+					if (aimDot > 0.98)
+						weaponRaised = true;
+				}
+			}
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
@@ -222,7 +243,7 @@ class JMSpectatorCamera: JMCameraBase
 
 		vector pos = headPos;
 
-		if (spectatedPlayer || SelectedTarget.IsInherited(ZombieBase))
+		if (spectatedPlayer || SelectedTarget.IsInherited(DayZInfected))
 			pos = pos + "0 0.1 0";
 		else
 			pos = pos + "0 0.3 0";
@@ -249,11 +270,7 @@ class JMSpectatorCamera: JMCameraBase
 		else
 			fov = GetDayZGame().GetUserFOV();
 
-		if (m_COT_IsInFreeLook)
-		{
-			dir = orientation.AnglesToVector();
-		}
-		else if (m_JM_IsADS || weaponRaised)
+		if (m_JM_IsADS || weaponRaised)
 		{
 			//if (optic)
 			//{
@@ -281,10 +298,8 @@ class JMSpectatorCamera: JMCameraBase
 				//pos = pos.Multiply4(weaponTransform);
 			//}
 
-			vector barrel_start = weapon.GetSelectionPositionLS("konec hlavne").Multiply4(weaponTransform);
-			vector barrel_end = weapon.GetSelectionPositionLS("usti hlavne").Multiply4(weaponTransform);
 			begPos = barrel_end;
-			dir = vector.Direction(barrel_start, barrel_end).Normalized();
+			dir = aimDir;
 
 			if (!m_JM_3rdPerson)
 			{
@@ -319,7 +334,7 @@ class JMSpectatorCamera: JMCameraBase
 				dir = objectTransform[2];
 
 				if (dollyCam)
-					pos = objectPos + "0 2.0 0";
+					pos = objectPos + "0 2.1 0";
 				else if (m_JM_3rdPerson)
 					pos = headPos + "0 0.5 0";
 			}
@@ -337,7 +352,7 @@ class JMSpectatorCamera: JMCameraBase
 		{
 			DayZCreature spectatedCreature;
 
-			if (SelectedTarget.IsInherited(ZombieBase))
+			if (SelectedTarget.IsInherited(DayZInfected))
 			{
 				dir = headTransform[1];
 			}
@@ -356,6 +371,11 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				dir = objectTransform[2];
 			}
+		}
+
+		if (m_COT_IsInFreeLook)
+		{
+			dir = orientation.AnglesToVector();
 		}
 
 		vector cameraPos = GetPosition();
@@ -547,6 +567,10 @@ class JMSpectatorCamera: JMCameraBase
 				else
 				{
 					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
+
+					//! Remove the vertical offset used for camera pos while swimming (point camera at spectated entity's head)
+					if (isSwimming)
+						dir[1] = dir[1] - 0.5;
 
 					m_COT_RemoveMarker = true;
 				}
@@ -854,7 +878,7 @@ class JMSpectatorCamera: JMCameraBase
 		{
 			float offsetFactor;
 
-			targetDist = 1.33;
+			targetDist = 1.6;
 
 			if (dollyCam)
 			{
@@ -875,9 +899,10 @@ class JMSpectatorCamera: JMCameraBase
 			else
 			{
 				offsetFactor = 1.0;
+				begPos = pos;
 				pos = pos - dir * targetDist;
 
-				ResolveCollision(headPos, cameraPos, pos, offsetFactor);
+				ResolveCollision(begPos, cameraPos, pos, offsetFactor);
 			}
 
 			vector offsetX = dir.Perpend() * 0.33 * offsetFactor;
@@ -924,6 +949,16 @@ class JMSpectatorCamera: JMCameraBase
 
 				m_JM_CameraPosMS = cameraPos.InvMultiply4(objectTransform);
 			}
+			else if (!m_COT_IsInFreeLook && m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO)
+			{
+				//! Interpolate in world space to give cinematic look
+
+				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, speed, 10000, timeslice);
+				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, speed, 10000, timeslice);
+				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, speed, 10000, timeslice);
+
+				m_JM_CameraPosMS = cameraPos.InvMultiply4(objectTransform);
+			}
 			else
 			{
 				//! Interpolate in model space so camera sticks to character
@@ -939,6 +974,10 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
+		float surfaceY = g_Game.SurfaceRoadY3D(cameraPos[0], cameraPos[1] - offsetY, cameraPos[2], RoadSurfaceDetection.LEGACY) + 0.1;
+		if (surfaceY > cameraPos[1])
+			cameraPos[1] = surfaceY;
+
 		SetPosition( cameraPos );
 
 		if (spectatedPlayer && IsActive())
@@ -953,9 +992,9 @@ class JMSpectatorCamera: JMCameraBase
 		SetFOV( Math.Lerp(GetCurrentFOV(), fov, timeslice * CAMERA_FOV_SPEED_MODIFIER) );
 	}
 
-	void ResolveCollision(vector headPos, vector cameraPos, inout vector pos, inout float offsetFactor)
+	void ResolveCollision(vector origin, vector cameraPos, inout vector pos, inout float offsetFactor)
 	{
-		vector toCameraDir = (cameraPos - headPos).Normalized();
+		vector toCameraDir = (cameraPos - origin).Normalized();
 		float r = toCameraDir.Length();
 
 		if (r <= 0)
@@ -966,12 +1005,12 @@ class JMSpectatorCamera: JMCameraBase
 		float minDist = r;
 		int segments = 8;
 
-		for (int i = 0; i < segments; ++i)
+		for (int i = 1; i < segments; ++i)
 		{
 			float theta = ((float)i / (float)segments) * Math.PI2;
-			vector endPos = Vector(headPos[0] + rayLength * Math.Cos(theta), headPos[1], headPos[2] + rayLength * Math.Sin(theta));
-			vector rayDir = (endPos - headPos).Normalized();
-			vector begPos = headPos + rayDir * rayRadius;
+			vector endPos = Vector(origin[0] + rayLength * Math.Cos(theta), origin[1], origin[2] + rayLength * Math.Sin(theta));
+			vector rayDir = (endPos - origin).Normalized();
+			vector begPos = origin + rayDir * rayRadius;
 			vector hitPosition;
 			vector hitNormal;
 			int hitComponent;
@@ -982,14 +1021,14 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				if (!hitObjs.Count() || !hitObjs[0].IsBush())
 				{
-					vector hitDirection = (hitPosition - headPos);
+					vector hitDirection = (hitPosition - origin);
 					float dist = hitDirection.Length();
 
 					if (dist < minDist)
 					{
 						minDist = dist;
 						//! Pull camera toward player to avoid clipping
-						pos = headPos + toCameraDir * Math.Max(dist - 0.05, 0);
+						pos = origin + toCameraDir * Math.Max(dist - 0.05, 0);
 						offsetFactor = (dist / r) * 0.54;
 					}
 				}
