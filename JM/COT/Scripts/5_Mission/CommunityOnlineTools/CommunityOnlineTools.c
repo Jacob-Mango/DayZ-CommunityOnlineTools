@@ -26,7 +26,8 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	override void OnLoaded()
 	{
 		#ifdef DIAG
-		GetPermissionsManager().CreateFakePlayers();
+		if (g_Game.IsMultiplayer())
+			GetPermissionsManager().CreateFakePlayers();
 		#endif
 
 		super.OnLoaded();
