@@ -22,6 +22,7 @@ class JMSpectatorCamera: JMCameraBase
 	static const int DOLLY_CAM_PATH_LIMIT = 200;
 
 	static JMSpectatorCamera s_COT_SpectatorCamera;
+	static bool s_DbgDraw;
 
 	vector linearVelocity;
 	vector angularVelocity;
@@ -215,16 +216,84 @@ class JMSpectatorCamera: JMCameraBase
 			if (!spectatedPlayer.GetItemAccessor().IsItemInHandsHidden())
 			{
 				vector lookDir = headTransform[1];
-				vector headToBarrelEnd = (barrel_end - headPos).Normalized();
-				float lookDot = vector.Dot(lookDir, headToBarrelEnd);
-				if (lookDot > 0.9)
+				vector rHandPos = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightHandIndex4"));
+				vector headToRHand = (rHandPos - headPos);
+				vector rightShoulder = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightArm"));
+				vector rightShoulderToBarrelEnd = (barrel_end - rightShoulder);
+				vector lHandPos = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("LeftHandIndex4"));
+				vector rightShoulderToLHand = (lHandPos - rightShoulder);
+				vector rightShoulderToRHand = (rHandPos - rightShoulder);
+
+			#ifdef DIAG_DEVELOPER
+				int lookDirColor = COLOR_RED;
+				int headToRHandColor = COLOR_RED;
+				int aimDirColor = COLOR_RED;
+				int rightShoulderToBarrelEndColor = COLOR_RED;
+				int rightShoulderToRHandColor = COLOR_RED;
+				int rightShoulderToLHandColor = COLOR_BLUE;
+			#endif
+
+				float lookDot = vector.Dot(lookDir, headToRHand.Normalized());
+				if (lookDot > 0.866)
 				{
-					vector rightShoulder = spectatedPlayer.GetBonePositionWS(spectatedPlayer.GetBoneIndexByName("RightArm"));
-					vector rightShoulderToBarrelEnd = (barrel_end - rightShoulder).Normalized();
-					float aimDot = vector.Dot(aimDir, rightShoulderToBarrelEnd);
+					lookDirColor = Colors.ORANGE | 0xFF000000;
+					headToRHandColor = Colors.ORANGE | 0xFF000000;
+					float aimDot = vector.Dot(aimDir, rightShoulderToBarrelEnd.Normalized());
 					if (aimDot > 0.98)
-						weaponRaised = true;
+					{
+						aimDirColor = Colors.ORANGE | 0xFF000000;
+						rightShoulderToBarrelEndColor = Colors.ORANGE | 0xFF000000;
+						if (vector.Dot(aimDir, rightShoulderToRHand.Normalized()) > 0.9)
+						{
+							lookDirColor = COLOR_GREEN;
+							headToRHandColor = COLOR_GREEN;
+							aimDirColor = COLOR_GREEN;
+							rightShoulderToBarrelEndColor = COLOR_GREEN;
+							rightShoulderToRHandColor = COLOR_GREEN;
+							//if (vector.Dot(aimDir, rightShoulderToLHand.Normalized()) > 0.9)
+								weaponRaised = true;
+						}
+					}
 				}
+
+			#ifdef DIAG_DEVELOPER
+				if (s_DbgDraw)
+				{
+					Debug.DrawArrow(headPos, headPos + lookDir * 0.5, 0.1, lookDirColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+					Debug.DrawArrow(headPos, headPos + headToRHand, 0.1, headToRHandColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+				/*
+					vector neckTransform[4];
+					spectatedPlayer.GetBoneTransformWS(spectatedPlayer.GetBoneIndexByName("Neck"), neckTransform);
+					vector neckPos = neckTransform[3];
+					vector neckDir = neckTransform[1];
+					Debug.DrawArrow(neckPos, neckPos + neckDir * 0.5, 0.1, COLOR_WHITE, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+					vector spineTransform[4];
+					spectatedPlayer.GetBoneTransformWS(spectatedPlayer.GetBoneIndexByName("Spine3"), spineTransform);
+					vector spinePos = spineTransform[3];
+					vector spineDir = spineTransform[1];
+					Debug.DrawArrow(spinePos, spinePos + spineDir * 0.5, 0.1, COLOR_WHITE, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+					vector pelvisTransform[4];
+					spectatedPlayer.GetBoneTransformWS(spectatedPlayer.GetBoneIndexByName("Pelvis"), pelvisTransform);
+					vector pelvisPos = pelvisTransform[3];
+					vector pelvisDir = pelvisTransform[1];
+					Debug.DrawArrow(pelvisPos, pelvisPos + pelvisDir * 0.5, 0.1, COLOR_WHITE, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+					vector objectDir = objectTransform[2];
+
+					Debug.DrawArrow(objectPos, objectPos + objectDir * 0.5, 0.1, COLOR_WHITE, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+				*/
+
+					Debug.DrawArrow(barrel_start, barrel_end + aimDir * 0.5, 0.1, aimDirColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+					Debug.DrawArrow(rightShoulder, rightShoulder + rightShoulderToBarrelEnd, 0.1, rightShoulderToBarrelEndColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+					Debug.DrawArrow(rightShoulder, rightShoulder + rightShoulderToRHand, 0.1, rightShoulderToRHandColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+
+					//Debug.DrawArrow(rightShoulder, rightShoulder + rightShoulderToLHand, 0.1, rightShoulderToLHandColor, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+				}
+			#endif
 			}
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
@@ -399,7 +468,10 @@ class JMSpectatorCamera: JMCameraBase
 				pos = objectPos;
 				pos[1] = pos[1] + stanceHeight;
 			}
+		}
 
+		if (dollyCam || (!m_COT_IsInFreeLook && m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO))
+		{
 			if (cameraDistToSpectatedObjSq > 0.04)
 			{
 				Object target;
@@ -505,7 +577,7 @@ class JMSpectatorCamera: JMCameraBase
 
 				if (target)
 				{
-					dir = cameraToTargetDir;  //! Look at what spectated entity is looking at
+					dir = cameraToTargetDir.Normalized();  //! Look at what spectated entity is looking at
 
 					if (!m_COT_TargetMarker)
 					{
@@ -564,7 +636,7 @@ class JMSpectatorCamera: JMCameraBase
 
 					m_COT_RemoveMarker = false;
 				}
-				else
+				else if (dollyCam)
 				{
 					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
 
@@ -573,9 +645,9 @@ class JMSpectatorCamera: JMCameraBase
 						dir[1] = dir[1] - 0.5;
 
 					m_COT_RemoveMarker = true;
-				}
 
-				dir.Normalize();
+					dir.Normalize();
+				}
 			}
 		}
 		else
@@ -799,10 +871,13 @@ class JMSpectatorCamera: JMCameraBase
 				{
 					pos = m_COT_DollyCamPath[i];
 
-				//#ifdef DIAG_DEVELOPER
-					//Debug.DrawSphere(pos, 0.01, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER);
-					//Debug.DrawLine(lastPos, pos, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
-				//#endif
+				#ifdef DIAG_DEVELOPER
+					if (s_DbgDraw)
+					{
+						Debug.DrawSphere(pos, 0.01, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER);
+						Debug.DrawLine(lastPos, pos, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+					}
+				#endif
 
 					float yDiff = Math.Max(pos[1] - lastPos[1], 0);
 					lastPos[1] = pos[1];
