@@ -8,6 +8,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 	private Widget layoutRoot;
 
 	private CheckBoxWidget m_chbx_SelectedObject;
+	private ImageWidget m_img_HealthLevel;
 	private TextWidget m_txt_ObjectName;
 	private ButtonWidget m_btn_ToggleActions;
 	private ImageWidget m_img_ToggleActions;
@@ -66,6 +67,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		Class.CastTo( header, layoutRoot.FindAnyWidget( "esp_object_header" ) );
 
 		Class.CastTo( m_chbx_SelectedObject, header.FindAnyWidget( "esp_select_checkbox" ) );
+		Class.CastTo( m_img_HealthLevel, header.FindAnyWidget( "esp_health_level_icon" ) );
 		Class.CastTo( m_txt_ObjectName, header.FindAnyWidget( "esp_object_name" ) );
 		Class.CastTo( m_btn_ToggleActions, header.FindAnyWidget( "esp_toggle_button" ) );
 
@@ -274,28 +276,44 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
-			string text = " ";
+			if (Info.target)
+			{
+				switch (Info.target.GetHealthLevel())
+				{
+					case GameConstants.STATE_WORN:
+						m_img_HealthLevel.SetColor(Colors.COLOR_WORN | 0x7F000000);
+						break;
 
-			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
-			{
-				text += Info.name + " (" + distance + "m)";
-			} else
-			{
-				if ( UseClassName )
-				{
-					text += m_TargetType + " (" + distance + "m)";
-				} else
-				{
-					text += Info.name + " (" + distance + "m)";
+					case GameConstants.STATE_DAMAGED:
+						m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0x7F000000);
+						break;
+
+					case GameConstants.STATE_RUINED:
+						m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0x7F000000);
+						break;
+
+					default:
+						m_img_HealthLevel.SetColor(Colors.COLOR_PRISTINE | 0x7F000000);
+						break;
 				}
 			}
 
-			text += " ";
+			string text;
+
+			if ( Info.type.IsInherited( JMESPViewTypePlayer ) || !UseClassName )
+				text += Info.name;
+			else
+				text += m_TargetType;
+
+			text += " (" + distance + " m) ";
 
 			m_txt_ObjectName.SetText( text );
 
 			float w, h;
 			layoutRoot.GetScreenSize(w, h);
+
+			float iw, ih;
+			m_img_HealthLevel.GetScreenSize(iw, ih);
 
 			float tw, th;
 			m_txt_ObjectName.GetScreenSize(tw, th);
@@ -307,7 +325,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				m_UseClassName = UseClassName;
 			}
 
-			w = Math.Max(tw + 44, w);
+			w = Math.Max(iw + tw + 48, w);
 			layoutRoot.SetScreenSize(w, h);
 
 			Info.Update();
