@@ -208,6 +208,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if ( resultObj == NULL )
 					continue;
 
+				if ((resultObj.IsBush() || resultObj.IsTree()) && type != ObjIntersectView)
+					continue;
+
 				EntityAI entity;
 				if (Class.CastTo(entity, resultObj))
 					resultObj = entity.GetHierarchyRoot();
