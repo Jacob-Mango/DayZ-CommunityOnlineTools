@@ -48,6 +48,7 @@ class JMSpectatorCamera: JMCameraBase
 	float m_COT_DollyCamPathUpdateDT;
 	float m_COT_DollyCamSpeedMult = 0.433333;
 	float m_COT_DollyCamSpeedMultTgt = 0.433333;
+	float m_COT_DollyCamDistThreshMult = 0.433333;
 	float m_COT_SpectatedObjectSpeed;
 	float m_COT_DollyCamJumpClimbTimeout;
 	bool m_COT_DollyCamReversing;
@@ -234,22 +235,31 @@ class JMSpectatorCamera: JMCameraBase
 			#endif
 
 				float lookDot = vector.Dot(lookDir, headToRHand.Normalized());
-				if (lookDot > 0.866)
+				if (lookDot > 0.82)
 				{
+				#ifdef DIAG_DEVELOPER
 					lookDirColor = Colors.ORANGE | 0xFF000000;
 					headToRHandColor = Colors.ORANGE | 0xFF000000;
+				#endif
+
 					float aimDot = vector.Dot(aimDir, rightShoulderToBarrelEnd.Normalized());
 					if (aimDot > 0.98)
 					{
+					#ifdef DIAG_DEVELOPER
 						aimDirColor = Colors.ORANGE | 0xFF000000;
 						rightShoulderToBarrelEndColor = Colors.ORANGE | 0xFF000000;
+					#endif
+
 						if (vector.Dot(aimDir, rightShoulderToRHand.Normalized()) > 0.9)
 						{
+						#ifdef DIAG_DEVELOPER
 							lookDirColor = COLOR_GREEN;
 							headToRHandColor = COLOR_GREEN;
 							aimDirColor = COLOR_GREEN;
 							rightShoulderToBarrelEndColor = COLOR_GREEN;
 							rightShoulderToRHandColor = COLOR_GREEN;
+						#endif
+
 							//if (vector.Dot(aimDir, rightShoulderToLHand.Normalized()) > 0.9)
 								weaponRaised = true;
 						}
@@ -323,12 +333,12 @@ class JMSpectatorCamera: JMCameraBase
 		{
 			case JMCamera3rdPersonMode.DOLLY:
 			case JMCamera3rdPersonMode.AUTO:
-				if (!m_COT_IsInFreeLook && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
-				{
-					dollyCam = true;
+				dollyCam = true;
+				//if (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised)
+				//{
 					speed = 0.45;  //! Slow interpolation, resulting in movement like camera on a dolly
 					break;
-				}
+				//}
 			default:
 				speed = 0.3;
 				break;
@@ -419,6 +429,8 @@ class JMSpectatorCamera: JMCameraBase
 		}
 		else
 		{
+			begPos = headPos;
+
 			DayZCreature spectatedCreature;
 
 			if (SelectedTarget.IsInherited(DayZInfected))
@@ -442,12 +454,12 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
-		if (m_COT_IsInFreeLook)
-		{
-			dir = orientation.AnglesToVector();
-		}
-
 		vector cameraPos = GetPosition();
+
+	#ifdef DIAG_DEVELOPER
+		if (s_DbgDraw && !IsActive())
+			DrawCube(cameraPos, 0.1);
+	#endif
 
 		float cameraDistToSpectatedObjSq = vector.DistanceSq(cameraPos, pos);
 
@@ -468,10 +480,7 @@ class JMSpectatorCamera: JMCameraBase
 				pos = objectPos;
 				pos[1] = pos[1] + stanceHeight;
 			}
-		}
 
-		if (dollyCam || (!m_COT_IsInFreeLook && m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO))
-		{
 			if (cameraDistToSpectatedObjSq > 0.04)
 			{
 				Object target;
@@ -553,16 +562,22 @@ class JMSpectatorCamera: JMCameraBase
 
 					if (checkTarget)
 					{
+						float angleThresh;
+						if (weaponRaised)
+							angleThresh = 30;
+						else
+							angleThresh = 180;
+
 						DayZCreatureAI creature;
 						vector cameraDir = GetDirection();
 						vector cameraToTargetDirNorm = cameraToTargetDir.Normalized();
-						if (target.IsDamageDestroyed() && vector.Dot(cameraDir, cameraToTargetDirNorm) > 0.866)
+						if (target.IsDamageDestroyed() && (vector.Dot(cameraDir, cameraToTargetDirNorm) > 0.866 || angleDiff > angleThresh))
 						{
 							m_COT_LookAtTarget_Time += timeslice;
 							if (m_COT_LookAtTarget_Time > Math.RandomFloat(0.5, 0.8))
 								target = null;
 						}
-						else if (angleDiff > 180 || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
+						else if (angleDiff > angleThresh || target.IsDamageDestroyed() || (Class.CastTo(creature, target) && (!creature.IsDanger() || cameraDistToTargetSq > 900)))
 						{
 							m_COT_LookAtTarget_Time += timeslice;
 							if (m_COT_LookAtTarget_Time > Math.Lerp(3, 5, angleDiff / 360))
@@ -636,7 +651,7 @@ class JMSpectatorCamera: JMCameraBase
 
 					m_COT_RemoveMarker = false;
 				}
-				else if (dollyCam)
+				else if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
 				{
 					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
 
@@ -647,6 +662,10 @@ class JMSpectatorCamera: JMCameraBase
 					m_COT_RemoveMarker = true;
 
 					dir.Normalize();
+				}
+				else
+				{
+					m_COT_RemoveMarker = true;
 				}
 			}
 		}
@@ -671,24 +690,35 @@ class JMSpectatorCamera: JMCameraBase
 		float dollyCamSpeedMultMin = 0.3;  //! Fastest
 		float dollyCamSpeedMultMax = 0.5;  //! Slowest
 		float dollyCamSpeedMult;
+		float distSqThreshMult = m_COT_DollyCamDistThreshMult;
 
-		//bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
+		bool isUnderRoofBuilding = IsUnderRoofBuilding(spectatedPlayer);
 
 		vector movementDir = objectPos - m_COT_LastObjectPos;
 		vector spectatedObjectVelocity = movementDir * (1.0 / timeslice);  //! GetVelocity(spectatedPlayer) returns 0 on client
-		movementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
+		if (!isOnLadder)
+			movementDir[1] = 0;  //! ignore vertical velocity so we don't speed up during climbing
 		movementDir.Normalize();
 		m_COT_SpectatedObjectSpeed = Math.Lerp(m_COT_SpectatedObjectSpeed, spectatedObjectVelocity.Length(), timeslice * 2);
 		float spectatedObjectSpeedInverse01 = Math.Max(1 - m_COT_SpectatedObjectSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
 
-	/*
-		if (isUnderRoofBuilding)
+		if (m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO && weaponRaised)
 		{
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, Math.Min(m_COT_DollyCamSpeedMultTgt, 0.4), timeslice);
+			m_COT_DollyCamSpeedMult = 0.433333;
 			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
+			distSqThreshMult =  Math.Lerp(distSqThreshMult, 0, timeslice);
+		}
+		else if (isUnderRoofBuilding)
+		{
+		#ifdef DIAG_DEVELOPER
+			Debug.DrawBoxEx(pos + "-0.25 0.5 -0.25", pos + "0.25 0.5 0.25", COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+		#endif
+
+			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, timeslice);
+			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
+			distSqThreshMult =  Math.Lerp(distSqThreshMult, dollyCamSpeedMult, timeslice);
 		}
 		else
-	*/
 		{
 			if (GetUApi().GetInputByName("UACameraToolSpeedIncrease").LocalValue())
 				m_COT_DollyCamSpeedMultTgt = Math.Clamp(m_COT_DollyCamSpeedMultTgt - 0.01, dollyCamSpeedMultMin, dollyCamSpeedMultMax);
@@ -698,12 +728,15 @@ class JMSpectatorCamera: JMCameraBase
 			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, m_COT_DollyCamSpeedMultTgt, timeslice * 4);
 
 			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
+			distSqThreshMult =  Math.Lerp(distSqThreshMult, dollyCamSpeedMult, timeslice);
 
-			float speedAdjustment = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, spectatedObjectSpeedInverse01);
-			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, speedAdjustment, timeslice * 4);
+			float speedAdjustment = Math.Lerp(distSqThreshMult, dollyCamSpeedMultMin, spectatedObjectSpeedInverse01);
+			distSqThreshMult = Math.Lerp(distSqThreshMult, speedAdjustment, timeslice * 4);
 		}
 
-		float distSqThresh = 1.0 * m_COT_DollyCamSpeedMult;
+		m_COT_DollyCamDistThreshMult = distSqThreshMult;
+
+		float distSqThresh = 1.0 * distSqThreshMult;
 
 		vector ori;
 
@@ -729,7 +762,9 @@ class JMSpectatorCamera: JMCameraBase
 
 		m_COT_DollyCamPathUpdateDT += timeslice;
 
-		if (m_COT_DollyCamPathUpdateDT > 0.0333333)
+		float dollyCamPathUpdateDTThresh = 0.033333;
+
+		if (m_COT_DollyCamPathUpdateDT > dollyCamPathUpdateDTThresh)
 		{
 			string errorMsg;
 
@@ -835,7 +870,7 @@ class JMSpectatorCamera: JMCameraBase
 					m_COT_DollyCamReversing = false;
 
 					if (tooFar)
-						m_COT_DollyCamSpeedMult *= 2;  //! Slow down to bridge the gap
+						dollyCamSpeedMult *= 2;  //! Slow down to bridge the gap
 
 				#ifdef DIAG_DEVELOPER
 					string reason;
@@ -859,12 +894,13 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
+		float accumulatedDistSq;
+
 		if (dollyCam)
 		{
 			if (m_COT_DollyCamPathNextIdx > 0)
 			{
 				float stepDistSq;
-				float accumulatedDistSq;
 				vector lastPos = pos;
 
 				for (i = m_COT_DollyCamPathNextIdx - 1; i >= 0; --i)
@@ -942,7 +978,7 @@ class JMSpectatorCamera: JMCameraBase
 			}
 		}
 
-		if (m_COT_DollyCamPathUpdateDT > 0.033333)
+		if (m_COT_DollyCamPathUpdateDT > dollyCamPathUpdateDTThresh)
 			m_COT_DollyCamPathUpdateDT = 0;
 
 		ori = ori.GetRelAngles();
@@ -955,7 +991,7 @@ class JMSpectatorCamera: JMCameraBase
 
 			targetDist = 1.6;
 
-			if (dollyCam)
+			if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
 			{
 			/*
 				if (weaponRaised)
@@ -971,7 +1007,7 @@ class JMSpectatorCamera: JMCameraBase
 				}
 			*/
 			}
-			else
+			else if (!dollyCam || accumulatedDistSq < Math.Pow(targetDist * 1.875, 2.0))
 			{
 				offsetFactor = 1.0;
 				begPos = pos;
@@ -1018,19 +1054,13 @@ class JMSpectatorCamera: JMCameraBase
 			{
 				//! Interpolate in world space to give cinematic look
 
-				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeslice);
-				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * m_COT_DollyCamSpeedMult, 10000, timeslice);
-				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * m_COT_DollyCamSpeedMult, 10000, timeslice);
+				//float camToTargetPosDist = vector.Distance(cameraPos, pos);
+				//if (camToTargetPosDist > 0)
+					//dollyCamSpeedMult /= camToTargetPosDist;
 
-				m_JM_CameraPosMS = cameraPos.InvMultiply4(objectTransform);
-			}
-			else if (!m_COT_IsInFreeLook && m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO)
-			{
-				//! Interpolate in world space to give cinematic look
-
-				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, speed, 10000, timeslice);
-				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, speed, 10000, timeslice);
-				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, speed, 10000, timeslice);
+				cameraPos[0] = Math.SmoothCD(cameraPos[0], pos[0], m_COT_SmoothVelPos0, 0.9 * dollyCamSpeedMult, 10000, timeslice);
+				cameraPos[1] = Math.SmoothCD(cameraPos[1], pos[1], m_COT_SmoothVelPos1, 0.8 * dollyCamSpeedMult, 10000, timeslice);
+				cameraPos[2] = Math.SmoothCD(cameraPos[2], pos[2], m_COT_SmoothVelPos2, 0.9 * dollyCamSpeedMult, 10000, timeslice);
 
 				m_JM_CameraPosMS = cameraPos.InvMultiply4(objectTransform);
 			}
@@ -1113,20 +1143,37 @@ class JMSpectatorCamera: JMCameraBase
 
 	bool IsUnderRoofBuilding(DayZPlayerImplement player)
 	{
-		//! if inside vehicle return immediately
-		if (player.IsInVehicle())
-			return false;
-
-		IEntity floorEntity = player.PhysicsGetFloorEntity();
-		if (floorEntity && floorEntity.IsInherited(House))
-			return true;
-		
 		float hitFraction;
 		vector hitPosition, hitNormal;
-		vector from = player.GetPosition();
-		vector to = from + "0 25 0";
+		vector from;
+		vector to;
 		Object hitObject;
 		PhxInteractionLayers collisionLayerMask = PhxInteractionLayers.ITEM_LARGE|PhxInteractionLayers.BUILDING|PhxInteractionLayers.VEHICLE;
+		
+		if (player)
+		{
+			//! if inside vehicle return immediately
+			if (player.IsInVehicle())
+				return false;
+
+			//! XXX: Somehow this doesn't work reliably?
+			IEntity floorEntity = player.PhysicsGetFloorEntity();
+			if (floorEntity && floorEntity.IsInherited(House))
+				return true;
+
+			//! Player position raycast
+			from = player.GetPosition();
+			to = from + "0 25 0";
+
+			DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
+
+			if (hitObject && hitObject.IsInherited(House))
+				return true;
+		}
+
+		//! Camera position raycast
+		from = GetPosition();
+		to = from + "0 25 0";
 		
 		DayZPhysics.RayCastBullet(from, to, collisionLayerMask, null, hitObject, hitPosition, hitNormal, hitFraction);
 
@@ -1150,5 +1197,24 @@ class JMSpectatorCamera: JMCameraBase
 			m_COT_TargetLight.FadeOut();
 			m_COT_TargetLight = null;
 		}
+	}
+	
+	static Shape DrawCube(vector pos, float size = 1, int color = 0x1fff7f7f)
+	{
+		vector min = pos;
+		vector max = pos;
+		
+		float size_h = size * 0.5;
+	
+		min[0] = min[0] - size_h;
+		min[1] = min[1] - size_h;
+		min[2] = min[2] - size_h;
+		
+		max[0] = max[0] + size_h;
+		max[1] = max[1] + size_h;
+		max[2] = max[2] + size_h;
+		
+		Shape shape = Shape.Create(ShapeType.DIAMOND, color, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER, min, max);
+		return shape;
 	}
 };
