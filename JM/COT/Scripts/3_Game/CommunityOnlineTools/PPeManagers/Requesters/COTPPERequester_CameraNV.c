@@ -89,9 +89,9 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 			Math.Max(sunriseTimeStart - 1.5, 0.0),
 			sunriseTimeStart,
 			sunriseTimeStart + 1.0,
-			sunsetTimeStart - 1.0,
+			sunsetTimeStart - 1.5,
 			sunsetTimeStart,
-			Math.Min(sunsetTimeStart + 1.5, 23.9833333)
+			Math.Min(sunsetTimeStart + 1.0, 23.9833333)
 		};
 
 		return Math.COT_LookUp(hour + minute / 60.0, 6, time, m_COT_TimeVisibility_Out);
