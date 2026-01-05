@@ -288,6 +288,10 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 						m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0x7F000000);
 						break;
 
+					case GameConstants.STATE_BADLY_DAMAGED:
+						m_img_HealthLevel.SetColor(Colors.COLOR_BADLY_DAMAGED | 0x7F000000);
+						break;
+
 					case GameConstants.STATE_RUINED:
 						m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0x7F000000);
 						break;
