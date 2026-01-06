@@ -276,29 +276,41 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		{
 			layoutRoot.SetPos( ScreenPos[0], ScreenPos[1], true );
 
+			bool isHealthVisible = m_img_HealthLevel.IsVisible();
+
 			if (Info.target)
 			{
-				switch (Info.target.GetHealthLevel())
+				if (Info.target.GetNumberOfHealthLevels() > 0)
 				{
-					case GameConstants.STATE_WORN:
-						m_img_HealthLevel.SetColor(Colors.COLOR_WORN | 0x7F000000);
-						break;
+					switch (Info.target.GetHealthLevel())
+					{
+						case GameConstants.STATE_WORN:
+							m_img_HealthLevel.SetColor(Colors.COLOR_WORN | 0x7F000000);
+							break;
 
-					case GameConstants.STATE_DAMAGED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0x7F000000);
-						break;
+						case GameConstants.STATE_DAMAGED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_DAMAGED | 0x7F000000);
+							break;
 
-					case GameConstants.STATE_BADLY_DAMAGED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_BADLY_DAMAGED | 0x7F000000);
-						break;
+						case GameConstants.STATE_BADLY_DAMAGED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_BADLY_DAMAGED | 0x7F000000);
+							break;
 
-					case GameConstants.STATE_RUINED:
-						m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0x7F000000);
-						break;
+						case GameConstants.STATE_RUINED:
+							m_img_HealthLevel.SetColor(Colors.COLOR_RUINED | 0x7F000000);
+							break;
 
-					default:
-						m_img_HealthLevel.SetColor(Colors.COLOR_PRISTINE | 0x7F000000);
-						break;
+						default:
+							m_img_HealthLevel.SetColor(Colors.COLOR_PRISTINE | 0x7F000000);
+							break;
+					}
+				}
+				else if (isHealthVisible)
+				{
+					m_img_HealthLevel.Show(false);
+					float x, y;
+					m_img_HealthLevel.GetPos(x, y);
+					m_txt_ObjectName.SetPos(x, y);
 				}
 			}
 
@@ -318,6 +330,11 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 			float iw, ih;
 			m_img_HealthLevel.GetScreenSize(iw, ih);
+			if (!isHealthVisible)
+			{
+				w -= iw + 2;
+				iw = 0;
+			}
 
 			float tw, th;
 			m_txt_ObjectName.GetScreenSize(tw, th);
