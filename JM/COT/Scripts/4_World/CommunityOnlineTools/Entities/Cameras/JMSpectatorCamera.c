@@ -711,7 +711,8 @@ class JMSpectatorCamera: JMCameraBase
 		else if (isUnderRoofBuilding)
 		{
 		#ifdef DIAG_DEVELOPER
-			Debug.DrawBoxEx(pos + "-0.25 0.5 -0.25", pos + "0.25 0.5 0.25", COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+			if (s_DbgDraw)
+				Debug.DrawBoxEx(pos + "-0.25 0.5 -0.25", pos + "0.25 0.5 0.25", COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
 		#endif
 
 			m_COT_DollyCamSpeedMult = Math.Lerp(m_COT_DollyCamSpeedMult, dollyCamSpeedMultMin, timeslice);
