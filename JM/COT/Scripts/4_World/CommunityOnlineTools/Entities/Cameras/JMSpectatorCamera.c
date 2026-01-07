@@ -917,7 +917,8 @@ class JMSpectatorCamera: JMCameraBase
 				#endif
 
 					float yDiff = Math.Max(pos[1] - lastPos[1], 0);
-					lastPos[1] = pos[1];
+					if (!isOnLadder)
+						lastPos[1] = pos[1];
 					stepDistSq = vector.DistanceSq(pos, lastPos);
 					accumulatedDistSq += stepDistSq;
 					float pitch = Math.Atan2(yDiff, Math.Sqrt(stepDistSq)) * Math.RAD2DEG;
@@ -933,35 +934,23 @@ class JMSpectatorCamera: JMCameraBase
 
 						m_COT_DollyCamJumpClimbTimeout = 5.0;
 
-						//! Move all previous values down by one (duplicating the current value so that interpolation doesn't iron over it)
+						//! Set all previous values Y to current value Y if previous Y lower than current Y
 						for (j = 0; j < i; ++j)
 						{
-							m_COT_DollyCamPath[j] = m_COT_DollyCamPath[j + 1];
-						}
-
-						//! Interpolate
-						//if (i > 1)
-						//{
-							//vector p = m_COT_DollyCamPath[i - 2];
-							//m_COT_DollyCamPath[i - 1] = p + (pos - p) * 0.5;
-						//}
-						if (m_COT_DollyCamPathNextIdx - i > 2)
-						{
-							TVectorArray points = {};
-
-							for (j = i; j < m_COT_DollyCamPathNextIdx - 1; ++j)
-							{
-								points.Insert(m_COT_DollyCamPath[j]);
-							}
-
-							float t = 1.0 / points.Count();
-
-							for (j = i; j < m_COT_DollyCamPathNextIdx - 1; ++j)
-							{
-								m_COT_DollyCamPath[j] = Math3D.Curve(ECurveType.CatmullRom, (j - i) * t, points);
-							}
+							float vj = m_COT_DollyCamPath[j][1];
+							float vi = pos[1]
+							if (vj < vi)
+								m_COT_DollyCamPath[j][1] = vi;
 						}
 					}
+
+				#ifdef DIAG_DEVELOPER
+					if (s_DbgDraw && i > 0)
+					{
+						//Debug.DrawSphere(pos, 0.01, COLOR_GREEN, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.WIREFRAME | ShapeFlags.NOZBUFFER);
+						Debug.DrawArrow(m_COT_DollyCamPath[i - 1], m_COT_DollyCamPath[i], 0.02, COLOR_RED, ShapeFlags.ONCE | ShapeFlags.TRANSP | ShapeFlags.ADDITIVE | ShapeFlags.NOZBUFFER);
+					}
+				#endif
 
 					if (accumulatedDistSq >= distSqThresh)
 					{
