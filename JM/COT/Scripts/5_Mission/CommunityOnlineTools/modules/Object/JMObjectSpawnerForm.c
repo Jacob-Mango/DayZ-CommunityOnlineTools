@@ -718,14 +718,6 @@ class JMObjectSpawnerForm: JMFormBase
 		return false;
 	}
 
-	override void OnHide() 
-	{
-		if (m_SearchBox)
-			m_Module.m_SearchText = m_SearchBox.GetText();
-
-		super.OnHide();
-	}
-
 	void SetListType( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -913,16 +905,20 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		m_SearchBox.SetText("");
+		m_Module.m_SearchText = ""
 		UpdateList();
 	}
 
 	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
-	{		
+	{
+		m_Module.m_SearchText = m_SearchBox.GetText();
 		UpdateList();
 	}
 
 	void UpdateList()
 	{
+		int ticks = TickCount(0);
+
 		m_ClassList.ClearItems();
 		TStringArray suggestions = new TStringArray;
 		string closestMatch;
@@ -932,7 +928,7 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
 
-		string strSearch = m_SearchBox.GetText();
+		string strSearch = m_Module.m_SearchText;
 		strSearch.ToLower();
 
 		TStringArray strSearches = new TStringArray;
@@ -1026,6 +1022,11 @@ class JMObjectSpawnerForm: JMFormBase
 				}
 			}
 		}
+
+	#ifdef DIAG_DEVELOPER
+		float elapsed = TickCount(ticks) * 0.0001;
+		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
+	#endif
 
 		if (suggestions.Count())
 		{
