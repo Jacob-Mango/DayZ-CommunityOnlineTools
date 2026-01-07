@@ -218,7 +218,8 @@ class UIActionEditableText: UIActionBase
 		{
 			if ( UpdateText() )
 			{
-				CallEvent( UIEvent.CHANGE );
+				g_Game.GetCallQueue(CALL_CATEGORY_GUI).Remove(CallEvent);
+				g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(CallEvent, 100, false, UIEvent.CHANGE);
 			}
 
 			return true;
