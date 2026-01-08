@@ -101,6 +101,8 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_VomitPlayer;
 	private UIActionButton m_SetScalePlayer;
 
+	private UIActionButton m_CopyExpLoadout;
+
 	private UIActionButton m_KillPlayer;
 	private UIActionButton m_SendMessage;
 	private UIActionButton m_KickPlayer;
@@ -495,29 +497,35 @@ class JMPlayerForm: JMFormBase
 
 	private Widget InitActionWidgetsQuick( Widget actionsParent )
 	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 7, 1 );
 
 		UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEADER", "" );
 
-		Widget actions = UIActionManager.CreateGridSpacer( parent, 3, 2 );
-
 		// Friendly actions at the top
-		m_HealPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "Click_HealPlayer" );
-		m_RepairTransport = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_REPAIR_TRANSPORT", this, "Click_RepairTransport" );
-		m_StopBleeding = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
-		m_DryPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
+		Widget actionsFriendly = UIActionManager.CreateGridSpacer( parent, 3, 2 );
+		m_HealPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "Click_HealPlayer" );
+		m_RepairTransport = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_REPAIR_TRANSPORT", this, "Click_RepairTransport" );
+		m_StopBleeding = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
+		m_DryPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
 		
 		// Misc actions inbetween
-		m_SpectatePlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
-		m_SendMessage 	 = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-		m_VomitPlayer 	 = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", this, "Click_VomitPlayer" );
-		m_SetScalePlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", this, "Click_ScalePlayer" );
+		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
+		Widget actionsMisc = UIActionManager.CreateGridSpacer( parent, 3, 2 );
+		m_SpectatePlayer = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
+		m_SendMessage 	 = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
+		m_VomitPlayer 	 = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", this, "Click_VomitPlayer" );
+		m_SetScalePlayer = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", this, "Click_ScalePlayer" );
+	#ifdef DZ_Expansion_Core
+		m_CopyExpLoadout = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_EXPLOADOUT", this, "Click_CopyExpLoadout" );
+	#endif
 
 		// Destructive actions at the bottom
-		m_KillPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
-		m_StripPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
-		m_KickPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
-		m_BanPlayer = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
+		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
+		Widget actionsDestructive = UIActionManager.CreateGridSpacer( parent, 3, 2 );
+		m_KillPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
+		m_StripPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
+		m_KickPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
+		m_BanPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
 
 		m_KillPlayer.SetColor(COLOR_RED);
 		m_StripPlayer.SetColor(COLOR_RED);
@@ -1033,6 +1041,18 @@ class JMPlayerForm: JMFormBase
 			return;
 
 		m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
+	}
+
+	void Click_CopyExpLoadout( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+	#ifdef DZ_Expansion_Core
+		JMESPModule module = CF_Modules<JMESPModule>.Get();
+		if (module.CopyToClipboardExpLoadout(JMPlayerInstance))
+			COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_COPIED_CLIPBOARD" ) );
+	#endif
 	}
 
 	void Click_KickPlayer( UIEvent eid, UIActionBase action )
