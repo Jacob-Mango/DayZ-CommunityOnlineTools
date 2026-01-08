@@ -2,7 +2,9 @@ enum COT_ObjectSpawnerMode
 {
 	COPYLISTRAW,
 	COPYLISTTYPES,
+#ifdef DZ_Expansion_Market
 	COPYLISTEXPMARKET,
+#endif
 	
 	CURSOR,
 	PLAYER_POSITION,
@@ -14,7 +16,9 @@ enum COT_ESPMode
 {
 	COPYLISTRAW,
 	COPYLISTSPAWNABLETYPES,
+#ifdef DZ_Expansion_Market
 	COPYLISTEXPMARKET,
+#endif
 #ifdef DZ_Expansion_Core
 	COPYLISTEXPLOADOUT,
 #endif

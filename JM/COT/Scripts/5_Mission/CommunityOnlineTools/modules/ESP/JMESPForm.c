@@ -165,7 +165,9 @@ class JMESPForm: JMFormBase
 		TStringArray exportChoices = {
 			"Raw",
 			"SpawnableTypes",
+		#ifdef DZ_Expansion_Market
 			"Exp Market",
+		#endif
 		#ifdef DZ_Expansion_Core
 			"Exp Loadout",
 		#endif
@@ -567,9 +569,11 @@ class JMESPForm: JMFormBase
 			case COT_ESPMode.COPYLISTSPAWNABLETYPES:
 				m_Module.CopyToClipboardSpawnableTypes();
 			break;
+		#ifdef DZ_Expansion_Market
 			case COT_ESPMode.COPYLISTEXPMARKET:
 				m_Module.CopyToClipboardMarket();
 			break;
+		#endif
 		#ifdef DZ_Expansion_Core
 			case COT_ESPMode.COPYLISTEXPLOADOUT:
 				m_Module.CopyToClipboardExpLoadout(JMSelectedObject);
