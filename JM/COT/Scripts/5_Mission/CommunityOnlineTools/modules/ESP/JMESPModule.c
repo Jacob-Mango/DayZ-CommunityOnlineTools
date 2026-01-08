@@ -1896,4 +1896,110 @@ class JMESPModule: JMRenderableModuleBase
 		clipboardOutput += "</spawnabletypes>\n";
 		g_Game.CopyToClipboard(clipboardOutput);
 	}
+
+#ifdef DZ_Expansion_Core
+	bool CopyToClipboardExpLoadout(typename type)
+	{
+		auto selected = JM_GetSelected();
+		set<ref JMSelectedObject> selectedObjs = {};
+
+		switch (type)
+		{
+			case JMPlayerInstance:
+				selectedObjs = new set<ref JMSelectedObject>();
+				auto uids = selected.GetPlayers();
+				foreach (string uid: uids)
+				{
+					auto inst = GetPermissionsManager().GetPlayer(uid);
+					selectedObjs.Insert(new JMSelectedObject(inst.PlayerObject));
+				}
+				break;
+
+			case JMSelectedObject:
+			default:
+				selectedObjs = selected.GetObjects();
+				break;
+		}
+
+		string loadoutsJSON;
+		string errorMsg;
+
+		foreach (JMSelectedObject selectedObj: selectedObjs)
+		{
+			ExpansionPrefab loadout = new ExpansionPrefab();
+
+			EntityAI entity;
+			if (Class.CastTo(entity, selectedObj.obj))
+				AddChildrenToExpLoadoutRecursive(loadout, entity);
+
+			string loadoutJSON;
+			if (JsonFileLoader<ExpansionPrefab>.MakeData(loadout, loadoutJSON, errorMsg))
+			{
+				if (loadoutsJSON)
+					loadoutsJSON += ",\n";
+
+				loadoutsJSON += loadoutJSON;
+			}
+			else
+			{
+				//! Abort
+				break;
+			}
+		}
+
+		if (errorMsg)
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
+		}
+		else
+		{
+			g_Game.CopyToClipboard(loadoutsJSON);
+		}
+
+		return errorMsg == string.Empty;
+	}
+
+	void AddChildrenToExpLoadoutRecursive(ExpansionPrefab loadout, EntityAI entity)
+	{
+		auto inventory = entity.GetInventory();
+		int i;
+		EntityAI item;
+		auto il = new InventoryLocation();
+
+		for (i = 0; i < inventory.AttachmentCount(); ++i)
+		{
+			item = inventory.GetAttachmentFromIndex(i);
+			item.GetInventory().GetCurrentInventoryLocation(il);
+			string slotName = InventorySlots.GetSlotName(il.GetSlot());
+			loadout = loadout.BeginAttachment(item.GetType(), slotName);
+			AddToExpLoadoutRecursive(loadout, item);
+		}
+
+		auto cargo = inventory.GetCargo();
+		if (cargo)
+		{
+			for (i = 0; i < cargo.GetItemCount(); ++i)
+			{
+				item = cargo.GetItem(i);
+				loadout = loadout.BeginCargo(item.GetType());
+				AddToExpLoadoutRecursive(loadout, item);
+			}
+		}
+	}
+
+	void AddToExpLoadoutRecursive(inout ExpansionPrefab loadout, EntityAI item)
+	{
+		Print(item.GetType());
+		loadout.Chance = 1.0;
+
+		if (item.HasQuantity())
+		{
+			float quantity01 = item.GetQuantityNormalized();
+			loadout.SetQuantity(quantity01, quantity01);
+		}
+
+		AddChildrenToExpLoadoutRecursive(loadout, item);
+		loadout = loadout.End();
+	}
+#endif
 }

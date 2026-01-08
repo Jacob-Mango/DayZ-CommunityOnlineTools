@@ -162,7 +162,16 @@ class JMESPForm: JMFormBase
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
 		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", {"Raw", "SpawnableTypes", "Exp Market", "#STR_COT_LOADOUT_MODULE_NAME"}, this, "Click_ExportType" );
+		TStringArray exportChoices = {
+			"Raw",
+			"SpawnableTypes",
+			"Exp Market",
+		#ifdef DZ_Expansion_Core
+			"Exp Loadout",
+		#endif
+			"#STR_COT_LOADOUT_MODULE_NAME"
+		};
+		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", exportChoices, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
@@ -561,6 +570,11 @@ class JMESPForm: JMFormBase
 			case COT_ESPMode.COPYLISTEXPMARKET:
 				m_Module.CopyToClipboardMarket();
 			break;
+		#ifdef DZ_Expansion_Core
+			case COT_ESPMode.COPYLISTEXPLOADOUT:
+				m_Module.CopyToClipboardExpLoadout(JMSelectedObject);
+			break;
+		#endif
 			case COT_ESPMode.CREATELOADOUT:
 				CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_HEADER", "#STR_COT_ESP_MODULE_LOADOUT_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CREATE", "CreateLoadout_Confirm" );
 			break;
