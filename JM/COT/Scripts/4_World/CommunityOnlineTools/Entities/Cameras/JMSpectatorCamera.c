@@ -938,7 +938,7 @@ class JMSpectatorCamera: JMCameraBase
 						for (j = 0; j < i; ++j)
 						{
 							float vj = m_COT_DollyCamPath[j][1];
-							float vi = pos[1]
+							float vi = pos[1];
 							if (vj < vi)
 								m_COT_DollyCamPath[j][1] = vi;
 						}
