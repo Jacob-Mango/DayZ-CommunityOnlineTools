@@ -1901,7 +1901,7 @@ class JMESPModule: JMRenderableModuleBase
 	bool CopyToClipboardExpLoadout(typename type)
 	{
 		auto selected = JM_GetSelected();
-		set<ref JMSelectedObject> selectedObjs = {};
+		set<ref JMSelectedObject> selectedObjs = new set<ref JMSelectedObject>;
 
 		switch (type)
 		{
