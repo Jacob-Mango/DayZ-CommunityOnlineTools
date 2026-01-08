@@ -258,10 +258,11 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionOffline() )
 		{
-			Server_Enter( NULL, g_Game.GetPlayer() );
+			Server_Enter(NULL, g_Game.GetPlayer(), g_Game.GetCurrentCameraPosition());
 		} else if ( IsMissionClient() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(g_Game.GetCurrentCameraPosition());
 			rpc.Send( g_Game.GetPlayer(), JMCameraModuleRPC.Enter, true, NULL );
 		}
 	}
@@ -298,6 +299,7 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 	}
 
+	[Obsolete("Use Server_Enter(sender, target, position)")]
 	private void Server_Enter( PlayerIdentity sender, Object target )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -310,20 +312,27 @@ class JMCameraModule: JMRenderableModuleBase
 		PlayerBase player;
 		if ( Class.CastTo( player, target ) )
 		{
-			player.COT_RememberVehicle();
-
 			if (player.m_JM_SpectatedObject)
 				target = player.m_JM_SpectatedObject;
-
-			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
-			//player.GetInputController().SetDisabled( true );
 		}
-		else if ( target )
+
+		if ( target )
 		{
 			GetCommunityOnlineToolsBase().GetHeadTransform(target, transform, true);
 		}
 
 		position = transform[3];
+
+		Server_Enter(sender, target, position);
+	}
+
+	private void Server_Enter(PlayerIdentity sender, Object target, vector position)
+	{
+		PlayerBase player;
+		if ( Class.CastTo( player, target ) )
+		{
+			player.COT_RememberVehicle();
+		}
 
 		if ( IsMissionOffline() )
 		{
@@ -360,7 +369,11 @@ class JMCameraModule: JMRenderableModuleBase
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 				return;
 
-			Server_Enter( senderRPC, target );
+			vector position;
+			if (!ctx.Read(position))
+				return;
+
+			Server_Enter( senderRPC, target, position );
 		} else
 		{
 			// RPC was sent from the server, permission would've been verified there.
@@ -393,6 +406,15 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 Print("JMCameraModule::Client_Leave - current cam " + CurrentActiveCamera);
 		CurrentActiveCamera.SetActive( false );
+
+		if (CurrentActiveCamera.IsInherited(JMCinematicCamera))
+		{
+		#ifdef DIAG_DEVELOPER
+			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
+		#endif
+			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
+		}
+
 		CurrentActiveCamera = null;
 
 Print("JMCameraModule::Client_Leave - previous cam " + COT_PreviousActiveCamera);
@@ -443,8 +465,16 @@ Print("JMCameraModule::Client_Check_Leave - player idle, timestamp " + g_Game.Ge
 			player.COT_EnableBonePositionUpdate(false);
 			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
+			if (g_Game.IsMultiplayer())
+			{
+				ScriptRPC rpc = new ScriptRPC();
+				rpc.Send(NULL, JMCameraModuleRPC.Leave_Finish, true, NULL);
+			}
+			else
+			{
+				//! offline/SP
+				g_Game.SelectPlayer(null, player);
+			}
 		}
 	}
 
@@ -481,7 +511,7 @@ Print("JMCameraModule::Server_Leave - target " + target);
 				rpc.Send( NULL, JMCameraModuleRPC.Leave, true, sender );
 			} else
 			{
-				Client_Leave();
+				Client_Leave(waitForPlayerIdleTimeout);
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
@@ -728,6 +758,10 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd Person - Dolly", ""));
 					break;
 				case JMCamera3rdPersonMode.DOLLY:
+					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.AUTO;
+					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 3rd person - Automatic", ""));
+					break;
+				case JMCamera3rdPersonMode.AUTO:
 					CurrentActiveCamera.m_JM_3rdPerson = JMCamera3rdPersonMode.OFF;
 					g_Game.GetMission().OnEvent(ChatMessageEventTypeID, new ChatMessageEventParams(CCDirect, "", "Spectator camera mode: 1st person", ""));
 					break;

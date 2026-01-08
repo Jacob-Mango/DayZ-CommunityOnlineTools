@@ -1764,7 +1764,7 @@ class JMESPModule: JMRenderableModuleBase
 	void CopyToClipboardRaw()
 	{
 		string clipboardOutput= "";
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
 		for(int i=0; i < JMobjects.Count(); i++)
 		{
 			if (i > 0)
@@ -1799,61 +1799,38 @@ class JMESPModule: JMRenderableModuleBase
 
 	void CopyToClipboardMarket()
 	{
-		string clipboardOutput= "";
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
-		
-		clipboardOutput = "{\n";
-		clipboardOutput += "    \"m_Version\": 12,\n";
-		clipboardOutput += "    \"DisplayName\": \"My Category Name\",\n";
-		clipboardOutput += "    \"Icon\": \"Deliver\",\n";
-		clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
-		clipboardOutput += "    \"IsExchange\": 0,\n";
-		clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
-		clipboardOutput += "    \"Items\": [\n";
-		for(int i=0; i < JMobjects.Count(); i++)
+#ifdef DZ_Expansion_Market
+		string categoryJSON;
+		set<ref JMSelectedObject> selectedObjects = JM_GetSelected().GetObjects();
+
+		auto category = new ExpansionMarketCategory();
+		category.Defaults();
+		category.DisplayName = "My Category Name";
+
+		foreach (JMSelectedObject selectedObj: selectedObjects)
 		{
-			clipboardOutput += "        {\n";
-			clipboardOutput += "            \"ClassName\": \"" + JMobjects[i].obj.GetType() + "\",\n";
-			clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
-			clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
-			clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
-			clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
-			clipboardOutput += "            \"MinStockThreshold\": 1,\n";
-			clipboardOutput += "            \"QuantityPercent\": -1,\n";
+			TStringArray atts = {};
 
 			EntityAI ent;
-			if (Class.CastTo(ent, JMobjects[i].obj))
+			if (Class.CastTo(ent, selectedObj.obj))
 			{
-				if (ent.IsEmpty())
+				for (int i = 0; i < ent.GetInventory().AttachmentCount(); ++i)
 				{
-					clipboardOutput += "            \"SpawnAttachments\": [],\n";
-				}
-				else
-				{
-					clipboardOutput += "            \"SpawnAttachments\": [\n";
-					for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
-					{
-						clipboardOutput += "                \""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\"";
-						if ( k+1 < ent.GetInventory().AttachmentCount() )
-							clipboardOutput += ",";
-						
-						clipboardOutput += "\n";
-					}
-					clipboardOutput += "            ],\n";
+					EntityAI att = ent.GetInventory().GetAttachmentFromIndex(i);
+					atts.Insert(att.GetType());
 				}
 			}			
 
-			clipboardOutput += "            \"Variants\": []\n";
-
-			clipboardOutput += "        }";
-			if ( i + 1 < JMobjects.Count() )
-				clipboardOutput += ",";
-
-			clipboardOutput += "\n";
+			auto item = new ExpansionMarketItem(-1, selectedObj.obj.GetType(), 100, 100, 1, 1, atts);
+			category.Items.Insert(item);
 		}
-		clipboardOutput += "    ]\n";
-		clipboardOutput += "}";
-		g_Game.CopyToClipboard(clipboardOutput);
+
+		string errorMsg;
+		if (JsonFileLoader<ExpansionMarketCategory>.MakeData(category, categoryJSON, errorMsg))
+			g_Game.CopyToClipboard(categoryJSON);
+		else
+			COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
+#endif
 	}
 
 	void CopyToClipboardSpawnableTypes()
@@ -1863,7 +1840,7 @@ class JMESPModule: JMRenderableModuleBase
 		clipboardOutput += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>\n";
 		clipboardOutput += "<spawnabletypes>\n";
 
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetAnyObjects();
+		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
 		for(int i=0; i < JMobjects.Count(); i++)
 		{
 			clipboardOutput += "	<type name=\""+JMobjects[i].obj.GetType()+"\">\n";
@@ -1896,4 +1873,120 @@ class JMESPModule: JMRenderableModuleBase
 		clipboardOutput += "</spawnabletypes>\n";
 		g_Game.CopyToClipboard(clipboardOutput);
 	}
+
+#ifdef DZ_Expansion_Core
+	bool CopyToClipboardExpLoadout(typename type)
+	{
+		auto selected = JM_GetSelected();
+		set<ref JMSelectedObject> selectedObjs = new set<ref JMSelectedObject>;
+
+		switch (type)
+		{
+			case JMPlayerInstance:
+				selectedObjs = new set<ref JMSelectedObject>();
+				auto uids = selected.GetPlayers();
+				foreach (string uid: uids)
+				{
+					auto inst = GetPermissionsManager().GetPlayer(uid);
+					selectedObjs.Insert(new JMSelectedObject(inst.PlayerObject));
+				}
+				break;
+
+			case JMSelectedObject:
+			default:
+				selectedObjs = selected.GetObjects();
+				break;
+		}
+
+		string loadoutsJSON;
+		string errorMsg;
+
+		foreach (JMSelectedObject selectedObj: selectedObjs)
+		{
+			ExpansionPrefabObject loadout = new ExpansionPrefabObject();
+
+			EntityAI entity;
+			if (Class.CastTo(entity, selectedObj.obj))
+			{
+				if (entity.IsMan())
+				{
+					AddChildrenToExpLoadoutRecursive(loadout, entity);
+				}
+				else
+				{
+					loadout.ClassName = entity.GetType();
+					AddToExpLoadoutRecursive(loadout, entity);
+				}
+			}
+
+			string loadoutJSON;
+			if (JsonFileLoader<ExpansionPrefabObject>.MakeData(loadout, loadoutJSON, errorMsg))
+			{
+				if (loadoutsJSON)
+					loadoutsJSON += "\n\n";
+
+				loadoutsJSON += loadoutJSON;
+			}
+			else
+			{
+				//! Abort
+				break;
+			}
+		}
+
+		if (errorMsg)
+		{
+			COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
+		}
+		else
+		{
+			g_Game.CopyToClipboard(loadoutsJSON);
+		}
+
+		return errorMsg == string.Empty;
+	}
+
+	void AddChildrenToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI entity)
+	{
+		auto inventory = entity.GetInventory();
+		int i;
+		EntityAI item;
+		auto il = new InventoryLocation();
+
+		for (i = 0; i < inventory.AttachmentCount(); ++i)
+		{
+			item = inventory.GetAttachmentFromIndex(i);
+			item.GetInventory().GetCurrentInventoryLocation(il);
+			string slotName = InventorySlots.GetSlotName(il.GetSlot());
+			loadout = loadout.BeginAttachment(item.GetType(), slotName);
+			AddToExpLoadoutRecursive(loadout, item);
+			loadout = loadout.End();
+		}
+
+		auto cargo = inventory.GetCargo();
+		if (cargo)
+		{
+			for (i = 0; i < cargo.GetItemCount(); ++i)
+			{
+				item = cargo.GetItem(i);
+				loadout = loadout.BeginCargo(item.GetType());
+				AddToExpLoadoutRecursive(loadout, item);
+				loadout = loadout.End();
+			}
+		}
+	}
+
+	void AddToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI item)
+	{
+		loadout.Chance = 1.0;
+
+		if (item.HasQuantity())
+		{
+			float quantity01 = item.GetQuantityNormalized();
+			loadout.SetQuantity(quantity01, quantity01);
+		}
+
+		AddChildrenToExpLoadoutRecursive(loadout, item);
+	}
+#endif
 }

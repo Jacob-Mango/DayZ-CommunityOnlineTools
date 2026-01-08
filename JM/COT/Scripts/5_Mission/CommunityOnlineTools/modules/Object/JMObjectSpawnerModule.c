@@ -4,6 +4,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	bool m_AutoShow;
 	string m_CurrentType;
 	string m_SearchText;
+	int m_OverrideDebugSpawnDepth;
 
 	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
 	private ref array< string > m_UnfinishedItems =
@@ -161,7 +162,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	}
 	
 	//! Default distance is chosen such that if you can see the item hint on HUD, raycast should also hit
-	Object GetObjectAtCursor(bool ignorePlayer = true, float distance = 3.0)
+	Object GetObjectAtCursor(bool ignorePlayers = true, float distance = 3.0)
 	{ 
 		vector rayStart = g_Game.GetCurrentCameraPosition();
 
@@ -175,7 +176,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
 
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
+		RaycastRVParams rayInput = new RaycastRVParams(rayStart, rayEnd);
+
+		//! Only ignore client player if not in freecam/spectator cam
+		if (!CurrentActiveCamera || !CurrentActiveCamera.IsActive())
+			rayInput.ignore = player;
+
 		rayInput.flags = CollisionFlags.ALLOBJECTS;
 		rayInput.radius = 0.1;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
@@ -202,11 +208,14 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if ( resultObj == NULL )
 					continue;
 
+				if ((resultObj.IsBush() || resultObj.IsTree()) && type != ObjIntersectView)
+					continue;
+
 				EntityAI entity;
 				if (Class.CastTo(entity, resultObj))
 					resultObj = entity.GetHierarchyRoot();
 
-				if ( PlayerBase.Cast( resultObj ) && ignorePlayer )
+				if ( PlayerBase.Cast( resultObj ) && ignorePlayers )
 					continue;
 
 				string name = resultObj.GetType();
@@ -415,28 +424,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
 			return;
-		
-		int flags = ECE_CREATEPHYSICS;
-		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
-		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE | ECE_DYNAMIC_PERSISTENCY;
-		else if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
-			flags |= 0x800;
-		else if ( g_Game.IsKindOf( className, "HouseNoDestruct" ) )
-			flags |= ECE_UPDATEPATHGRAPH;
 
-		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
-			flags |= ECE_EQUIP;
-
-		EntityAI ent;
-		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
-			return;
-
-		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
-
-		GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+itemState +") at " + position.ToString() );
-		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
+		SpawnEntity(className, null, position, quantity, health, temp, itemState, instance);
 	}
 
 	private void RPC_SpawnEntity_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -531,32 +520,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			instance.Update();
 
-			string loggedSuffix = "";
-
-			EntityAI ent;
-			if ( !Class.CastTo( ent, instance.PlayerObject.GetInventory().CreateInInventory( className ) ) )
-			{
-				vector position = instance.PlayerObject.GetPosition();
-
-				int flags = ECE_CREATEPHYSICS;
-				if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-					flags |= ECE_PLACE_ON_SURFACE;
-				else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
-					flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
-
-				if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
-					flags |= ECE_EQUIP;
-		
-				if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
-					continue;
-
-				loggedSuffix = " at " + position.ToString();
-			}
-
-			SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState+") on " + instance.GetSteam64ID() + loggedSuffix );
-			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + instance.FormatSteamWebhook() + loggedSuffix );
+			EntityAI ent = instance.PlayerObject;
+			vector position = instance.PlayerObject.GetPosition();
+			SpawnEntity(className, ent, position, quantity, health, temp, itemState, callerInstance);
 		}
 	}
 
@@ -598,20 +564,120 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance callerInstance;
+		if (!GetPermissionsManager().HasPermission("Entity.Spawn.Inventory", ident, callerInstance))
+			return;
+
+		SpawnEntity(className, targetEnt, position, quantity, health, temp, itemState, callerInstance);
+	}
+
+	bool IsInventoryType(string type)
+	{
+		if (g_Game.IsKindOf(type, "Inventory_Base"))
+			return true;
+
+		if (g_Game.ConfigIsExisting(CFG_WEAPONSPATH + " " + type))
+			return true;
+
+		if (g_Game.ConfigIsExisting(CFG_MAGAZINESPATH + " " + type))
+			return true;
+
+		return false;
+	}
+
+	//! @note LocationCreateEntity ignores ECE_EQUIP so we always use ObjectCreateEx and move entity to parent (if given) afterwards
+	EntityAI SpawnEntity(string type, EntityAI parent, vector position, float quantity, float health, float temp, int itemState, JMPlayerInstance callerInstance)
+	{
+		int flags;
+
+		bool inInventory;
+
+		if (parent && IsInventoryType(type))
+		{
+			flags = ECE_LOCAL | ECE_IN_INVENTORY;
+			inInventory = true;
+		}
+		else
+		{
+			if (COT_SurfaceIsWater(position))
+				flags = ECE_OBJECT_SWAP;  //! Keep height, no surface align
+			else
+				flags = ECE_PLACE_ON_SURFACE;
+
+			if (g_Game.IsKindOf(type, "DZ_LightAI"))
+				flags |= ECE_INITAI;
+		}
+
+		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
+			flags |= ECE_EQUIP;
+
+		Object obj = g_Game.CreateObjectEx(type, position, flags);
+
+		if (!obj)
+			return null;
 
 		EntityAI ent;
 
-		if ( GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) && !g_Game.IsKindOf( className, "DZ_LightAI" ) && targetEnt.GetInventory() && Class.CastTo( ent, targetEnt.GetInventory().CreateInInventory( className ) ) )
+		if (!Class.CastTo(ent, obj))
 		{
-			string loggedSuffix = " at " + position.ToString();
-
-			SetupEntity( ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", " + temp + ", "+ itemState +") on " + targetEnt.ToString() + loggedSuffix );
-			SendWebhook( "Player", callerInstance, "Spawned object \"" + ent.GetDisplayName() + "\" (" + ent.GetType() + ") on " + targetEnt.ToString() + loggedSuffix );
+			g_Game.ObjectDelete(obj);
+			return null;
 		}
+
+		if (inInventory)
+		{
+			//! Move to parent inventory
+			InventoryLocation src = new InventoryLocation();
+			InventoryLocation dst = new InventoryLocation();
+
+			int locationType = FindInventoryLocationType.CARGO | FindInventoryLocationType.ATTACHMENT | FindInventoryLocationType.HANDS;
+
+			bool srcValid = ent.GetInventory().GetCurrentInventoryLocation(src);
+			bool dstValid = parent.GetInventory().FindFreeLocationFor(ent, locationType, dst);
+
+			if (srcValid && dstValid && !GameInventory.LocationSyncMoveEntity(src, dst))
+				CF.FormatErrorEx("Couldn't move %1 to %2", ErrorExSeverity.WARNING, ent.ToString(), parent.ToString());
+		}
+
+		parent = ent.GetHierarchyParent();
+
+		if (!parent)
+		{
+			//! If no parent or move to parent inventory failed, update pathgraph (navmesh) if neccessary
+			if (obj.CanAffectPathgraph() && (flags & ECE_UPDATEPATHGRAPH) == 0)
+				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(g_Game.UpdatePathgraphRegionByObject, 100, false, obj);
+		}
+
+		SetupEntity(ent, quantity, health, temp, itemState, callerInstance.PlayerObject, m_ObjSetupMode);
+
+		if ((flags & ECE_LOCAL) == ECE_LOCAL)
+		{
+			g_Game.RemoteObjectTreeDelete(obj);  //! Needed since SetupEntity might have spawned atts, and those wouldn't be created by RemoteObjectTreeCreate if they weren't spawned only locally...
+			g_Game.RemoteObjectTreeCreate(obj);
+		}
+
+		string loggedSuffix;
+
+		if (parent)
+		{
+			PlayerBase owner;
+			if (Class.CastTo(owner, parent))
+				loggedSuffix = " on " + owner.FormatSteamWebhook();
+			else
+				loggedSuffix = " on " + parent.ToString();
+		}
+
+		loggedSuffix += " at " + position.ToString();
+
+		string tmp = "Spawned Entity \"%1\" (%2, q=%3, h=%4, t=%5, s=%6)%7";
+		string msg = string.Format(tmp, ent.GetDisplayName(), ent.GetDebugName(), quantity, health, temp, itemState, loggedSuffix);
+
+		GetCommunityOnlineToolsBase().Log(callerInstance.PlayerObject.GetIdentity(), msg);
+		if (parent)
+			SendWebhook("Player", callerInstance, msg);
 		else
-			Server_SpawnEntity_Position(className, position, quantity, health, temp, itemState, ident);
+			SendWebhook("Vector", callerInstance, msg);
+
+		return ent;
 	}
 
 	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
@@ -627,6 +693,30 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			case COT_ObjectSetupMode.CE:
 				entity.EEOnCECreate();
+				Weapon_Base weapon;
+				if (Class.CastTo(weapon, entity))
+				{
+					int muzzleIndex = weapon.GetCurrentMuzzle();
+					if (!weapon.IsChamberFull(muzzleIndex))
+					{
+						string ammoTypeName;
+						float ammoDamage;
+						if (weapon.HasInternalMagazine(muzzleIndex) && weapon.GetInternalMagazineCartridgeCount(muzzleIndex) > 0)
+						{
+							if (weapon.GetInternalMagazineCartridgeInfo(muzzleIndex, 0, ammoDamage, ammoTypeName))
+								weapon.FillChamber(ammoTypeName);
+						}
+						else
+						{
+							Magazine attachedMag = weapon.GetMagazine(muzzleIndex);
+							if (attachedMag && attachedMag.GetAmmoCount() > 0)
+							{
+								if (attachedMag.GetCartridgeAtIndex(0, ammoDamage, ammoTypeName))
+									weapon.FillChamber(ammoTypeName);
+							}
+						}
+					}
+				}
 				break;
 		}
 
@@ -731,6 +821,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		BuildingBase building;
 		DayZPlayerImplement npc;
 
+		if (depth > 0)
+			m_OverrideDebugSpawnDepth = depth;
+
 		if (Class.CastTo(item, entity))
 			item.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(car, entity))
@@ -742,10 +835,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		else if (Class.CastTo(npc, entity))
 			npc.COT_OnDebugSpawn(player);
 
-		if (!entity.GetInventory())
-			return;
+		if (m_OverrideDebugSpawnDepth > 0)
+			m_OverrideDebugSpawnDepth = 0;
 
-		if (!entity.GetInventory().GetAttachmentSlotsCount())
+		if (!entity.GetInventory())
 			return;
 
 		if (entity.GetInventory().AttachmentCount())
@@ -761,21 +854,38 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	//! @note this does what vanilla EntityAI::OnDebugSpawn *should* be doing (get inventorySlot as array, use slot IDs instead of case-sensitive match of slot names, filter bad items)
 	void SpawnCompatibleAttachments(EntityAI entity, PlayerBase player, int depth = 3) 
 	{
+		if (m_OverrideDebugSpawnDepth > 0)
+		{
+			depth = m_OverrideDebugSpawnDepth;
+			m_OverrideDebugSpawnDepth = 0;
+		}
+
+		CF_Log.Debug("JMObjectSpawnerModule::SpawnCompatibleAttachments %1 %2 %3", entity.ToString(), player.ToString(), depth.ToString());
+
+		GameInventory inventory = entity.GetInventory();
+		int count = inventory.GetAttachmentSlotsCount();
+
+		if (count == 0)
+			return;
+
+		int i;
+
 		TIntArray slot_ids = {};
 		int slot_id;
 
-		TStringArray atts = {};
-		entity.ConfigGetTextArray("attachments", atts);
-
-		foreach (string att: atts)
+		for (i = 0; i < count; ++i)
 		{
-			slot_id = InventorySlots.GetSlotIdFromString(att);
+			slot_id = inventory.GetAttachmentSlotId(i);
 			if (slot_id != InventorySlots.INVALID && InventorySlots.GetShowForSlotId(slot_id))
 			{
+				string att = InventorySlots.GetSlotName(slot_id);
 				CF_Log.Info("Entity %1 has visible attachment slot %2 (ID %3)", entity.GetType(), att, slot_id.ToString());
 				slot_ids.Insert(slot_id);
 			}
 		}
+
+		if (slot_ids.Count() == 0)
+			return; 
 
 		TStringArray all_paths = new TStringArray;
 
@@ -788,12 +898,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		string model;
 		int idx;
 		EntityAI child;
+		TStringSet seen = new TStringSet;
 
 		foreach (string config_path: all_paths)
 		{
 			int children_count = g_Game.ConfigGetChildrenCount(config_path);
 
-			for (int i = 0; i < children_count; i++)
+			for (i = 0; i < children_count; i++)
 			{
 				g_Game.ConfigGetChildName(config_path, i, child_name);
 				path = config_path + " " + child_name;
@@ -802,6 +913,13 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				if (scope == 2)
 				{
 					if (!g_Game.ConfigGetText(path + " model", model) || model == string.Empty || model == "bmp")
+						continue;
+
+					//! Don't spawn food items as attachments, that's silly, even more so since it would likely be candycanes
+					//! We don't check for Edible_Base because we still want liquid containers like bottles/canteens
+					//! (they inherit from Bottle_Base which inherits from Edible_Base).
+					//! Checking nutrition is faster than traversing parent hierarchy anyway and only food/drink items will have it
+					if (g_Game.ConfigIsExisting(path + " Nutrition"))
 						continue;
 
 					TStringArray inv_slots = {};
@@ -819,6 +937,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 								if (IsExcludedClassName(child_name))
 									break;
 
+								if (seen.Find(child_name) > -1)
+									break;
+
 								//! Limit character attachments to clothing
 								if (entity.IsMan() && !g_Game.IsKindOf(child_name, "Clothing_Base"))
 									break;
@@ -831,6 +952,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 									if (depth > 0)
 										OnDebugSpawn(child, player, depth - 1);
+
+									if (!entity.IsTransport())
+										seen.Insert(child_name);
+
+									if (child_name == "compass")
+										seen.Insert("orienteeringcompass");
 
 									if (slot_ids.Count() == 0)
 										return;
@@ -887,31 +1014,12 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			PlayerBase player = GetPlayerObjectByIdentity(sender);
 			if (player) position = player.GetPosition();
 		}
-		
-		int flags = ECE_CREATEPHYSICS;
-		if ( g_Game.IsKindOf( className, "CarScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE;
-		else if ( g_Game.IsKindOf( className, "BoatScript" ) && !COT_SurfaceIsWater( position ) )
-			flags |= ECE_PLACE_ON_SURFACE; //! TODO: Check if its even needed
-		
-		if ( g_Game.IsKindOf( className, "DZ_LightAI" ) )
-			flags |= 0x800;
-
-		if (m_ObjSetupMode == COT_ObjectSetupMode.CE)
-			flags |= ECE_EQUIP;
-
-		EntityAI ent;
-		if ( !Class.CastTo( ent, g_Game.CreateObjectEx( className, position, flags ) ) )
-			return;
 
 		float quantity = -1;
 		float health = -1;
 		float temp = -1;
 		int itemState = -1;
-		SetupEntity( ent, quantity, health, temp, itemState, instance.PlayerObject, m_ObjSetupMode );
-		
-		GetCommunityOnlineToolsBase().Log( sender, "Spawned Entity " + ent.GetDisplayName() + " (" + ent + ", " + quantity + ", " + health + ", "+ itemState+") at " + position.ToString() );
-		SendWebhook( "Vector", instance, "Spawned object \"" + className + "\" (" + ent.GetType() + ") at " + position );
+		SpawnEntity(className, null, position, quantity, health, temp, itemState, instance);
 	}
 
 	override void GetSubCommands(inout array<ref JMCommand> commands)

@@ -24,15 +24,15 @@ EffectDef {
    GravityMultiply 0
    Wind 0
    AnimOnce 0
-   LifetimeByAnim 1
+   LifetimeByAnim 0
    RandomFrame 0
-   LifeTime 1
+   LifeTime 0.5
    LifeTimeRND 0
    Color {
     0 0.949 0.612 0.071 1 0.949 0.612 0.071
    }
    Alpha {
-    0 1 1 1
+    0 0 0.5 1 1 0
    }
    Size {
     0 0.5 1 0.5

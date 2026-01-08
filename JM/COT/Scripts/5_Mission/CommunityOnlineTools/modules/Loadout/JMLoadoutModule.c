@@ -558,62 +558,6 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		CommunityOnlineToolsBase.Refuel(entity);
 	}
-	
-	EntityAI GetObjectAtCursor()
-	{ 
-		vector rayStart = g_Game.GetCurrentCameraPosition();
-		DayZPlayer player = g_Game.GetPlayer();
-		DayZPlayerCamera3rdPerson camera3rdPerson;
-		float distance = 10;
-
-		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
-		{
-			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
-			distance += vector.Distance(rayStart, headPos);
-		}
-
-		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
-
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
-		rayInput.flags = CollisionFlags.ALLOBJECTS;
-		rayInput.radius = 0.1;
-		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-
-		Object resultObj;
-		TIntArray types = {ObjIntersectFire, ObjIntersectView};
-		foreach (int type: types)
-		{
-			rayInput.type = type;
-
-			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
-				continue;
-
-			foreach (RaycastRVResult result: results)
-			{
-				resultObj = result.obj;
-
-				if ( resultObj == NULL )
-					continue;
-
-				EntityAI entity;
-				if (!Class.CastTo(entity, resultObj))
-					continue;
-
-				resultObj = entity.GetHierarchyRoot();
-				string name = resultObj.GetType();
-
-				if ( name == "" )
-					continue;
-
-				if (resultObj.ConfigGetInt("scope") != 2)
-					continue;
-
-				return entity;
-			}
-		}
-
-		return NULL;
-	}
 
 	void Create(string name)
 	{

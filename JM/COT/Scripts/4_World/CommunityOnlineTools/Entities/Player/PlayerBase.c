@@ -130,6 +130,7 @@ modded class PlayerBase
 
 	void COT_SynchPlayerVars()
 	{
+	#ifdef SERVER
 		COT_UpdatePlayerVars(m_COT_PlayerVars);
 
 		m_COT_PlayerVarsBitmask = 0;
@@ -139,6 +140,7 @@ modded class PlayerBase
 			if (enabled)
 				m_COT_PlayerVarsBitmask |= value;
 		}
+	#endif
 
 		SetSynchDirty();
 	}
@@ -158,7 +160,18 @@ modded class PlayerBase
 		}
 
 		if (!skip)
+		{
 			super.CommandHandler( pDt, pCurrentCommandID, pCurrentCommandFinished );
+		}
+		else
+		{
+			//! Only handle inventory
+
+			GetDayZPlayerInventory().HandleInventory(pDt);
+			GetHumanInventory().Update(pDt);
+
+			UpdateDelete();
+		}
 	}
 
 	protected bool m_COT_TempDisableOnSelectPlayer;
@@ -211,10 +224,8 @@ modded class PlayerBase
 		COT_SynchPlayerVars();
 	}
 
-	override void OnVariablesSynchronized()
+	void COT_DecodePlayerVars()
 	{
-		super.OnVariablesSynchronized();
-
 		bool enabled;
 		for (int i = 0; i < EnumTools.GetEnumSize(JMPlayerVariables); i++)
 		{
@@ -275,6 +286,14 @@ modded class PlayerBase
 					break;
 			}
 		}
+	}
+
+	override void OnVariablesSynchronized()
+	{
+		super.OnVariablesSynchronized();
+
+		if (g_Game.IsMultiplayer())
+			COT_DecodePlayerVars();
 
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
@@ -300,7 +319,7 @@ modded class PlayerBase
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
 		{
 		#ifdef DIAG_DEVELOPER
-			PrintFormat("%1 COT Frozen %2", this, m_JMIsInvisibleRemoteSynch);
+			PrintFormat("%1 COT Frozen %2", this, m_JMIsFrozenRemoteSynch);
 		#endif
 
 			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
@@ -529,11 +548,19 @@ modded class PlayerBase
 
 	override string FormatSteamWebhook()
 	{
+		//! Only ALIVE actual players will be authenticated
 		JMPlayerInstance instance = GetAuthenticatedPlayer();
 		if (instance)
 			return instance.FormatSteamWebhook();
 
+		//! Could be dead player or AI
+
 		string name = GetCachedName();
+
+		//! Only actual players will have a cached ID so we can early return here
+		string id = GetCachedID();
+		if (id)
+			return string.Format("%1 (id=%2)", name, id);
 
 		switch (GetInstanceType())
 		{
@@ -551,6 +578,8 @@ modded class PlayerBase
 			#endif
 				return "AI " + name;
 		}
+
+		//! Something wrong with vanilla ID cache? Shouldn't happen
 
 		if (!name)
 			name = super.FormatSteamWebhook();
@@ -674,12 +703,12 @@ modded class PlayerBase
 	{
 		if (m_JMIsInvisible != mode)
 		{
+		#ifdef SERVER
 			m_JMIsInvisible = mode;
+		#endif
 			m_JMIsInvisibleRemoteSynch = mode;
 
-			#ifdef SERVER
 			COT_SynchPlayerVars();
-			#endif
 		}
 	}
 
@@ -748,11 +777,12 @@ modded class PlayerBase
 	{
 		if ( g_Game.IsServer() )
 		{
+		#ifdef SERVER
 			m_JMHasAdminNVG = mode;
+		#endif
+			m_JMHasAdminNVGRemoteSynch = mode;
 
-			#ifdef SERVER
 			COT_SynchPlayerVars();
-			#endif
 		}
 	}
 
@@ -1012,6 +1042,56 @@ modded class PlayerBase
 		}
 
 		return false;
+	}
+
+	override void OnCommandSwimStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandSwimStart();
+	}
+	
+	override void OnCommandLadderStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandLadderStart();
+	}
+	
+	override void OnCommandFallStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandFallStart();
+	}
+	
+	override void OnCommandClimbStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandClimbStart();
+	}
+	
+	override void OnCommandVehicleStart()
+	{
+		//! super will lock inventory again, but since locks stack, make sure we're not currently locked
+		GameInventory inventory = GetInventory();
+		if (inventory && inventory.IsInventoryLocked())
+			inventory.UnlockInventory(LOCK_FROM_SCRIPT);
+
+		super.OnCommandVehicleStart();
 	}
 
 	override void OnCommandVehicleFinish()

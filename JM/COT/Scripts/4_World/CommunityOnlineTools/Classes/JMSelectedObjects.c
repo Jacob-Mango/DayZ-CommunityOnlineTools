@@ -104,20 +104,22 @@ class JMSelectedObjects
 
 	void SerializeObjects( ParamsWriteContext ctx )
 	{
-		if (!GetObjects())
+		set<ref JMSelectedObject> objects = new set<ref JMSelectedObject>;
+
+		PlayerBase player;
+		foreach (JMSelectedObject selectedObj: m_Objects)
 		{
-			Object obj = GetObjectAtCursor();
-			if (obj)
-				AddObject(obj);
+			if (!Class.CastTo(player, selectedObj) || !player.GetIdentity())
+				objects.Insert(selectedObj);
 		}
+		
+		int count = objects.Count();
+		ctx.Write(count);
 
-		int count = m_Objects.Count();
-		ctx.Write( count );
-
-		for ( int i = 0; i < count; ++i )
+		foreach (JMSelectedObject obj: objects)
 		{
-			ctx.Write( m_Objects[i].networkLow );
-			ctx.Write( m_Objects[i].networkHigh );
+			ctx.Write(obj.networkLow);
+			ctx.Write(obj.networkHigh);
 		}
 	}
 
@@ -199,77 +201,9 @@ class JMSelectedObjects
 		return m_Objects;
 	}
 
-	set< ref JMSelectedObject > GetAnyObjects()
-	{
-		if (!GetObjects())
-		{
-			Object obj = GetObjectAtCursor();
-			if (obj)
-				AddObject(obj);
-		}
-
-		return GetObjects();
-	}
-
 	void ClearPlayers()
 	{
 		m_Players.Clear();
-	}
-	
-	EntityAI GetObjectAtCursor()
-	{ 
-		vector rayStart = g_Game.GetCurrentCameraPosition();
-		DayZPlayer player = g_Game.GetPlayer();
-		DayZPlayerCamera3rdPerson camera3rdPerson;
-		float distance = 10;
-
-		if (player && !CurrentActiveCamera && Class.CastTo(camera3rdPerson, player.GetCurrentCamera()))
-		{
-			vector headPos = player.GetBonePositionWS(player.GetBoneIndexByName("Head"));
-			distance += vector.Distance(rayStart, headPos);
-		}
-
-		vector rayEnd = rayStart + (g_Game.GetCurrentCameraDirection() * distance);
-
-		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd, g_Game.GetPlayer() );
-		rayInput.flags = CollisionFlags.ALLOBJECTS;
-		rayInput.radius = 0.1;
-		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
-
-		Object resultObj;
-		TIntArray types = {ObjIntersectFire, ObjIntersectView};
-		foreach (int type: types)
-		{
-			rayInput.type = type;
-
-			if (!DayZPhysics.RaycastRVProxy(rayInput, results))
-				continue;
-
-			foreach (RaycastRVResult result: results)
-			{
-				resultObj = result.obj;
-
-				if ( resultObj == NULL )
-					continue;
-
-				EntityAI entity;
-				if (!Class.CastTo(entity, resultObj))
-					continue;
-
-				resultObj = entity.GetHierarchyRoot();
-				string name = resultObj.GetType();
-
-				if ( name == "" )
-					continue;
-
-				if (resultObj.ConfigGetInt("scope") != 2)
-					continue;
-
-				return entity;
-			}
-		}
-
-		return NULL;
 	}
 }
 

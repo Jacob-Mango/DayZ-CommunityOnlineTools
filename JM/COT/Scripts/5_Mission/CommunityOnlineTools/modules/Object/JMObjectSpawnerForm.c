@@ -36,7 +36,9 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		"#STR_COT_OBJECT_MODULE_EXPORT_RAW",
 		"#STR_COT_OBJECT_MODULE_EXPORT_TYPES",
+	#ifdef DZ_Expansion_Market
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
+	#endif
 
 		"#STR_COT_OBJECT_MODULE_CURSOR",
 		"#STR_COT_OBJECT_MODULE_SELF",
@@ -718,14 +720,6 @@ class JMObjectSpawnerForm: JMFormBase
 		return false;
 	}
 
-	override void OnHide() 
-	{
-		if (m_SearchBox)
-			m_Module.m_SearchText = m_SearchBox.GetText();
-
-		super.OnHide();
-	}
-
 	void SetListType( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
@@ -756,7 +750,9 @@ class JMObjectSpawnerForm: JMFormBase
 			break;
 			case COT_ObjectSpawnerMode.COPYLISTRAW:
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
+		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
+		#endif
 				m_SpawnButton.SetButton("Copy to Clipboard:");
 				m_AttachmentsButton.Disable();
 				m_ObjSetupMode.Disable();
@@ -836,38 +832,28 @@ class JMObjectSpawnerForm: JMFormBase
 				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 
+		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
-				clipboardOutput = "{\n";
-				clipboardOutput += "    \"m_Version\": 12,\n";
-				clipboardOutput += "    \"DisplayName\": \"" + m_SearchBox.GetText() + "\",\n";
-				clipboardOutput += "    \"Icon\": \"Deliver\",\n";
-				clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
-				clipboardOutput += "    \"IsExchange\": 0,\n";
-				clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
-				clipboardOutput += "    \"Items\": [\n";
+				string categoryJSON;
+
+				auto category = new ExpansionMarketCategory();
+				category.Defaults();
+				category.DisplayName = m_SearchBox.GetText();
+
 				for (int k = 0; k < m_ClassList.GetNumItems(); k++)
 				{
 					m_ClassList.GetItemText(k, 0, result);
-					clipboardOutput += "        {\n";
-					clipboardOutput += "            \"ClassName\": \"" + result + "\",\n";
-					clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
-					clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
-					clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
-					clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
-					clipboardOutput += "            \"MinStockThreshold\": 1,\n";
-					clipboardOutput += "            \"QuantityPercent\": -1,\n";
-					clipboardOutput += "            \"SpawnAttachments\": [],\n";
-					clipboardOutput += "            \"Variants\": []\n";
-
-					if (k + 1 < m_ClassList.GetNumItems())
-						clipboardOutput += "        },\n";
-					else
-						clipboardOutput += "        }\n";
+					auto item = new ExpansionMarketItem(-1, result, 100, 100, 1, 1);
+					category.Items.Insert(item);
 				}
-				clipboardOutput += "    ]\n";
-				clipboardOutput += "}";
-				g_Game.CopyToClipboard(clipboardOutput);
+
+				string errorMsg;
+				if (JsonFileLoader<ExpansionMarketCategory>.MakeData(category, categoryJSON, errorMsg))
+					g_Game.CopyToClipboard(categoryJSON);
+				else
+					COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
 				break;
+		#endif
 		}
 	}
 
@@ -913,16 +899,20 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		m_SearchBox.SetText("");
+		m_Module.m_SearchText = "";
 		UpdateList();
 	}
 
 	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
-	{		
+	{
+		m_Module.m_SearchText = m_SearchBox.GetText();
 		UpdateList();
 	}
 
 	void UpdateList()
 	{
+		int ticks = TickCount(0);
+
 		m_ClassList.ClearItems();
 		TStringArray suggestions = new TStringArray;
 		string closestMatch;
@@ -932,7 +922,7 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
 
-		string strSearch = m_SearchBox.GetText();
+		string strSearch = m_Module.m_SearchText;
 		strSearch.ToLower();
 
 		TStringArray strSearches = new TStringArray;
@@ -949,11 +939,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 			int nClasses = g_Game.ConfigGetChildrenCount( strConfigPath );
 
-			int nClassStart;
-			if (nConfig == 0)
-				nClassStart = 20;
-
-			for ( int nClass = nClassStart; nClass < nClasses; nClass++ )
+			for ( int nClass = 0; nClass < nClasses; nClass++ )
 			{
 				string strName;
 
@@ -1030,6 +1016,11 @@ class JMObjectSpawnerForm: JMFormBase
 				}
 			}
 		}
+
+	#ifdef DIAG_DEVELOPER
+		float elapsed = TickCount(ticks) * 0.0001;
+		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
+	#endif
 
 		if (suggestions.Count())
 		{
