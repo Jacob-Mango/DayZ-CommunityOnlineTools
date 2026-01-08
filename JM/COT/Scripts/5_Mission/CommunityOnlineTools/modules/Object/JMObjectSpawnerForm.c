@@ -36,7 +36,9 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		"#STR_COT_OBJECT_MODULE_EXPORT_RAW",
 		"#STR_COT_OBJECT_MODULE_EXPORT_TYPES",
+	#ifdef DZ_Expansion_Market
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
+	#endif
 
 		"#STR_COT_OBJECT_MODULE_CURSOR",
 		"#STR_COT_OBJECT_MODULE_SELF",
@@ -748,7 +750,9 @@ class JMObjectSpawnerForm: JMFormBase
 			break;
 			case COT_ObjectSpawnerMode.COPYLISTRAW:
 			case COT_ObjectSpawnerMode.COPYLISTTYPES:
+		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
+		#endif
 				m_SpawnButton.SetButton("Copy to Clipboard:");
 				m_AttachmentsButton.Disable();
 				m_ObjSetupMode.Disable();
@@ -828,38 +832,28 @@ class JMObjectSpawnerForm: JMFormBase
 				g_Game.CopyToClipboard(clipboardOutput);
 				break;
 
+		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
-				clipboardOutput = "{\n";
-				clipboardOutput += "    \"m_Version\": 12,\n";
-				clipboardOutput += "    \"DisplayName\": \"" + m_SearchBox.GetText() + "\",\n";
-				clipboardOutput += "    \"Icon\": \"Deliver\",\n";
-				clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
-				clipboardOutput += "    \"IsExchange\": 0,\n";
-				clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
-				clipboardOutput += "    \"Items\": [\n";
+				string categoryJSON;
+
+				auto category = new ExpansionMarketCategory();
+				category.Defaults();
+				category.DisplayName = m_SearchBox.GetText();
+
 				for (int k = 0; k < m_ClassList.GetNumItems(); k++)
 				{
 					m_ClassList.GetItemText(k, 0, result);
-					clipboardOutput += "        {\n";
-					clipboardOutput += "            \"ClassName\": \"" + result + "\",\n";
-					clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
-					clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
-					clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
-					clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
-					clipboardOutput += "            \"MinStockThreshold\": 1,\n";
-					clipboardOutput += "            \"QuantityPercent\": -1,\n";
-					clipboardOutput += "            \"SpawnAttachments\": [],\n";
-					clipboardOutput += "            \"Variants\": []\n";
-
-					if (k + 1 < m_ClassList.GetNumItems())
-						clipboardOutput += "        },\n";
-					else
-						clipboardOutput += "        }\n";
+					auto item = new ExpansionMarketItem(-1, result, 100, 100, 1, 1);
+					category.Items.Insert(item);
 				}
-				clipboardOutput += "    ]\n";
-				clipboardOutput += "}";
-				g_Game.CopyToClipboard(clipboardOutput);
+
+				string errorMsg;
+				if (JsonFileLoader<ExpansionMarketCategory>.MakeData(category, categoryJSON, errorMsg))
+					g_Game.CopyToClipboard(categoryJSON);
+				else
+					COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
 				break;
+		#endif
 		}
 	}
 

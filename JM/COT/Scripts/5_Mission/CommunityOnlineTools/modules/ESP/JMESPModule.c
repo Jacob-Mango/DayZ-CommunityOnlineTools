@@ -1799,61 +1799,38 @@ class JMESPModule: JMRenderableModuleBase
 
 	void CopyToClipboardMarket()
 	{
-		string clipboardOutput= "";
-		set< ref JMSelectedObject > JMobjects = JM_GetSelected().GetObjects();
-		
-		clipboardOutput = "{\n";
-		clipboardOutput += "    \"m_Version\": 12,\n";
-		clipboardOutput += "    \"DisplayName\": \"My Category Name\",\n";
-		clipboardOutput += "    \"Icon\": \"Deliver\",\n";
-		clipboardOutput += "    \"Color\": \"FBFCFEFF\",\n";
-		clipboardOutput += "    \"IsExchange\": 0,\n";
-		clipboardOutput += "    \"InitStockPercent\": 75.0,\n";
-		clipboardOutput += "    \"Items\": [\n";
-		for(int i=0; i < JMobjects.Count(); i++)
+#ifdef DZ_Expansion_Market
+		string categoryJSON;
+		set<ref JMSelectedObject> selectedObjects = JM_GetSelected().GetObjects();
+
+		auto category = new ExpansionMarketCategory();
+		category.Defaults();
+		category.DisplayName = "My Category Name";
+
+		foreach (JMSelectedObject selectedObj: selectedObjects)
 		{
-			clipboardOutput += "        {\n";
-			clipboardOutput += "            \"ClassName\": \"" + JMobjects[i].obj.GetType() + "\",\n";
-			clipboardOutput += "            \"MaxPriceThreshold\": 100,\n";
-			clipboardOutput += "            \"MinPriceThreshold\": 100,\n";
-			clipboardOutput += "            \"SellPricePercent\": -1.0,\n";
-			clipboardOutput += "            \"MaxStockThreshold\": 1,\n";
-			clipboardOutput += "            \"MinStockThreshold\": 1,\n";
-			clipboardOutput += "            \"QuantityPercent\": -1,\n";
+			TStringArray atts = {};
 
 			EntityAI ent;
-			if (Class.CastTo(ent, JMobjects[i].obj))
+			if (Class.CastTo(ent, selectedObj.obj))
 			{
-				if (ent.IsEmpty())
+				for (int i = 0; i < ent.GetInventory().AttachmentCount(); ++i)
 				{
-					clipboardOutput += "            \"SpawnAttachments\": [],\n";
-				}
-				else
-				{
-					clipboardOutput += "            \"SpawnAttachments\": [\n";
-					for (int k=0; k < ent.GetInventory().AttachmentCount(); k++)
-					{
-						clipboardOutput += "                \""+ent.GetInventory().GetAttachmentFromIndex( k ).GetType() + "\"";
-						if ( k+1 < ent.GetInventory().AttachmentCount() )
-							clipboardOutput += ",";
-						
-						clipboardOutput += "\n";
-					}
-					clipboardOutput += "            ],\n";
+					EntityAI att = ent.GetInventory().GetAttachmentFromIndex(i);
+					atts.Insert(att.GetType());
 				}
 			}			
 
-			clipboardOutput += "            \"Variants\": []\n";
-
-			clipboardOutput += "        }";
-			if ( i + 1 < JMobjects.Count() )
-				clipboardOutput += ",";
-
-			clipboardOutput += "\n";
+			auto item = new ExpansionMarketItem(-1, selectedObj.obj.GetType(), 100, 100, 1, 1, atts);
+			category.Items.Insert(item);
 		}
-		clipboardOutput += "    ]\n";
-		clipboardOutput += "}";
-		g_Game.CopyToClipboard(clipboardOutput);
+
+		string errorMsg;
+		if (JsonFileLoader<ExpansionMarketCategory>.MakeData(category, categoryJSON, errorMsg))
+			g_Game.CopyToClipboard(categoryJSON);
+		else
+			COTCreateLocalAdminNotification(new StringLocaliser(errorMsg));
+#endif
 	}
 
 	void CopyToClipboardSpawnableTypes()
