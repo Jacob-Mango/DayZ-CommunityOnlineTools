@@ -1936,7 +1936,7 @@ class JMESPModule: JMRenderableModuleBase
 		return errorMsg == string.Empty;
 	}
 
-	void AddChildrenToExpLoadoutRecursive(ExpansionPrefab loadout, EntityAI entity)
+	void AddChildrenToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI entity)
 	{
 		auto inventory = entity.GetInventory();
 		int i;
@@ -1964,7 +1964,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 	}
 
-	void AddToExpLoadoutRecursive(inout ExpansionPrefab loadout, EntityAI item)
+	void AddToExpLoadoutRecursive(inout ExpansionPrefabObject loadout, EntityAI item)
 	{
 		Print(item.GetType());
 		loadout.Chance = 1.0;
