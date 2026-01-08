@@ -104,13 +104,22 @@ class JMSelectedObjects
 
 	void SerializeObjects( ParamsWriteContext ctx )
 	{
-		int count = m_Objects.Count();
-		ctx.Write( count );
+		set<ref JMSelectedObject> objects = new set<ref JMSelectedObject>;
 
-		for ( int i = 0; i < count; ++i )
+		PlayerBase player;
+		foreach (JMSelectedObject selectedObj: m_Objects)
 		{
-			ctx.Write( m_Objects[i].networkLow );
-			ctx.Write( m_Objects[i].networkHigh );
+			if (!Class.CastTo(player, selectedObj) || !player.GetIdentity())
+				objects.Insert(selectedObj);
+		}
+		
+		int count = objects.Count();
+		ctx.Write(count);
+
+		foreach (JMSelectedObject obj: objects)
+		{
+			ctx.Write(obj.networkLow);
+			ctx.Write(obj.networkHigh);
 		}
 	}
 
