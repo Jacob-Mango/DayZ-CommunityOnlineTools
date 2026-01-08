@@ -431,26 +431,11 @@ class JMObjectSpawnerForm: JMFormBase
 		if (sliderMax > 0)
 			health01 = health / sliderMax;
 
-		if ( health01 >= 0.7 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
-		}
-		else if ( health01 >= 0.5 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_WORN );
-		}
-		else if ( health01 >= 0.3 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
-		}
-		else if ( health01 > 0 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
-		}
-		else
-		{
-			m_HealthItem.SetColor( Colors.COLOR_RUINED );
-		}
+		if ( health01 >= 0.7 )			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
+		else if ( health01 >= 0.5 )		m_HealthItem.SetColor( Colors.COLOR_WORN );
+		else if ( health01 >= 0.3 )		m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
+		else if ( health01 > 0 )		m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
+		else							m_HealthItem.SetColor( Colors.COLOR_RUINED );
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -540,20 +525,6 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			g_Game.ObjectDelete( m_PreviewItem );
 		}
-
-		//if ( g_Game.IsKindOf( strSelection, "DZ_LightAI" ) ) 
-		//{
-			//m_ItemPreview.Show( false );
-
-			//UpdateHealthControls(strSelection);
-
-			//UpdateHealthItemColor();
-
-			//#ifdef COT_DEBUGLOGS
-			//Print( "-" + this + "::UpdateItemPreview AI" );
-			//#endif
-			//return;
-		//}
 
 		m_Orientation = vector.Zero;
 
