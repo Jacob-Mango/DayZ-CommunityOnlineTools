@@ -1903,17 +1903,27 @@ class JMESPModule: JMRenderableModuleBase
 
 		foreach (JMSelectedObject selectedObj: selectedObjs)
 		{
-			ExpansionPrefab loadout = new ExpansionPrefab();
+			ExpansionPrefabObject loadout = new ExpansionPrefabObject();
 
 			EntityAI entity;
 			if (Class.CastTo(entity, selectedObj.obj))
-				AddChildrenToExpLoadoutRecursive(loadout, entity);
+			{
+				if (entity.IsMan())
+				{
+					AddChildrenToExpLoadoutRecursive(loadout, entity);
+				}
+				else
+				{
+					loadout.ClassName = entity.GetType();
+					AddToExpLoadoutRecursive(loadout, entity);
+				}
+			}
 
 			string loadoutJSON;
-			if (JsonFileLoader<ExpansionPrefab>.MakeData(loadout, loadoutJSON, errorMsg))
+			if (JsonFileLoader<ExpansionPrefabObject>.MakeData(loadout, loadoutJSON, errorMsg))
 			{
 				if (loadoutsJSON)
-					loadoutsJSON += ",\n";
+					loadoutsJSON += "\n\n";
 
 				loadoutsJSON += loadoutJSON;
 			}
@@ -1950,6 +1960,7 @@ class JMESPModule: JMRenderableModuleBase
 			string slotName = InventorySlots.GetSlotName(il.GetSlot());
 			loadout = loadout.BeginAttachment(item.GetType(), slotName);
 			AddToExpLoadoutRecursive(loadout, item);
+			loadout = loadout.End();
 		}
 
 		auto cargo = inventory.GetCargo();
@@ -1960,13 +1971,13 @@ class JMESPModule: JMRenderableModuleBase
 				item = cargo.GetItem(i);
 				loadout = loadout.BeginCargo(item.GetType());
 				AddToExpLoadoutRecursive(loadout, item);
+				loadout = loadout.End();
 			}
 		}
 	}
 
-	void AddToExpLoadoutRecursive(inout ExpansionPrefabObject loadout, EntityAI item)
+	void AddToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI item)
 	{
-		Print(item.GetType());
 		loadout.Chance = 1.0;
 
 		if (item.HasQuantity())
@@ -1976,7 +1987,6 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		AddChildrenToExpLoadoutRecursive(loadout, item);
-		loadout = loadout.End();
 	}
 #endif
 }
