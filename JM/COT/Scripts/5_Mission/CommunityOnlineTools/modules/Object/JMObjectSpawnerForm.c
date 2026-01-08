@@ -899,7 +899,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		m_SearchBox.SetText("");
-		m_Module.m_SearchText = ""
+		m_Module.m_SearchText = "";
 		UpdateList();
 	}
 
