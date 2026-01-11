@@ -1,6 +1,9 @@
 #ifndef CF_WINDOWS
 class JMWindowManager
 {
+	//! @note 999999 is the max zIndex, larger and widgets won't render
+	static const int MAX_ZSORT = 999999;
+
 	private ref array< JMWindowBase > m_Windows;
 	private ref array< JMWindowBase > m_WindowsPendingDeletion;
 
@@ -127,7 +130,7 @@ class JMWindowManager
 
 		for ( int i = 0; i < m_Windows.Count(); i++ )
 		{
-			m_Windows[i].GetLayoutRoot().SetSort( m_Windows.Count() - i );
+			m_Windows[i].GetLayoutRoot().SetSort( MAX_ZSORT - m_Windows.Count() - i );
 
 			m_Windows[i].Unfocus();
 		}
