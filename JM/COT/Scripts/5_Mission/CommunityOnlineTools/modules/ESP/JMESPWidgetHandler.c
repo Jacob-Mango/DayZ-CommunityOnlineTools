@@ -261,22 +261,23 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		GetScreenSize( Width, Height );
 
-		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
+		if (ScreenPos[0] <= 0 || ScreenPos[1] <= 0 || ScreenPos[0] >= Width || ScreenPos[1] >= Height || ScreenPos[2] < 0)
 		{
 			ShowOnScreen = false;
-		} else 
+		}
+		else if (g_Game.GetUIManager().GetMenu())
+		{
+			ShowOnScreen = false;
+		}
+	#ifdef DZ_Expansion_Core
+		else if (GetDayZExpansion().GetExpansionUIManager().GetMenu())
+		{
+			ShowOnScreen = false;
+		}
+	#endif
+		else
 		{
 			ShowOnScreen = true;
-		}
-
-		if ( ShowOnScreen && ( ScreenPos[0] >= Width || ScreenPos[1] >= Height ) )
-		{
-			ShowOnScreen = false;
-		}
-
-		if ( ShowOnScreen && ScreenPos[2] < 0 )
-		{
-			ShowOnScreen = false;
 		}
 
 		if ( ShowOnScreen && Info )
