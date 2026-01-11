@@ -249,6 +249,14 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
+		//! @note 999999 is the max zIndex, larger and widgets won't render
+		int zIndex = 999999 - distance * distance;
+
+		if (zIndex < 0)
+			zIndex = 0;
+
+		layoutRoot.SetSort(zIndex);
+
 		//if (distance > 10)
 			distance = Math.Round(distance * 10.0) / 10.0;
 
