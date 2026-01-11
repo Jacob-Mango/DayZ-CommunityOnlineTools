@@ -280,7 +280,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 			if (Info.target)
 			{
-				if (Info.target.GetNumberOfHealthLevels() > 0)
+				if (!Info.target.IsPlainObject() && Info.target.GetNumberOfHealthLevels() > 0)
 				{
 					switch (Info.target.GetHealthLevel())
 					{
