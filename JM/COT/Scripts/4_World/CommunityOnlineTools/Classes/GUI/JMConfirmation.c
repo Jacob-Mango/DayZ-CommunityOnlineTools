@@ -86,7 +86,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	void OnInit()
 	{
 		g_Game.GetWorkspace().CreateWidgets( "JM/COT/gui/layouts/confirmation.layout", layoutRoot );
-		layoutRoot.SetSort(65536);
+		layoutRoot.SetSort(JMWindowManager.MAX_ZSORT);
 
 		Class.CastTo( m_TextTitle, layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
 		Class.CastTo( m_TextMessage, layoutRoot.FindAnyWidget( "confirmation_message_text" ) );
