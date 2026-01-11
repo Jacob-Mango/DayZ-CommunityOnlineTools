@@ -638,6 +638,20 @@ class JMObjectSpawnerForm: JMFormBase
 		#endif
 	}
 
+	override void OnFocus()
+	{
+		super.OnFocus();
+
+		m_ItemPreview.SetSort(JMStatics.WINDOWS_CONTAINER.GetSort());  //! @note 299 is max zIndex for ItemPreviewWidget, larger and widget won't render
+	}
+
+	override void OnUnfocus()
+	{
+		super.OnUnfocus();
+
+		m_ItemPreview.SetSort(0);
+	}
+
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
 	{
 		if ( w == m_ClassList ) 
