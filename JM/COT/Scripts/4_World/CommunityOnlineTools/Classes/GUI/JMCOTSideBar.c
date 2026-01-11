@@ -58,7 +58,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	
 	void Init()
 	{
-		m_LayoutRoot.SetSort(JMWindowManager.MAX_ZSORT);  //! Always in front of everything else
+		m_LayoutRoot.SetSort(JMStatics.WINDOWS_CONTAINER.GetSort());
 
 		Class.CastTo(m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ));
 

@@ -249,7 +249,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
-		int zIndex = JMWindowManager.MAX_ZSORT - 100 - distance * 100;
+		//! @note 999999 is the max zIndex, larger and widgets won't render. We use 100 less to have some headroom for child widgets
+		int zIndex = 999899 - distance * 100;
 
 		if (zIndex < 0)
 			zIndex = 0;
