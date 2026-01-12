@@ -642,14 +642,14 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		super.OnFocus();
 
-		m_ItemPreview.SetSort(200);  //! @note 200 is min and 299 is max zIndex for ItemPreviewWidget and MapWidget, smaller/larger and widget won't render
+		m_ItemPreview.Show(true);
 	}
 
 	override void OnUnfocus()
 	{
 		super.OnUnfocus();
 
-		m_ItemPreview.SetSort(0);
+		m_ItemPreview.Show(false);
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
