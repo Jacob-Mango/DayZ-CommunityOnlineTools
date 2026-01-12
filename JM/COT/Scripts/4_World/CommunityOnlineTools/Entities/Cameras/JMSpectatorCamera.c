@@ -20,6 +20,8 @@ class JMDollyCamLight: ScriptedLightBase
 class JMSpectatorCamera: JMCameraBase
 {
 	static const int DOLLY_CAM_PATH_LIMIT = 200;
+	static const float RAISED_TIME_THRESHOLD = 1.0;
+	static const float RAISED_TIMEOUT = 5.0;
 
 	static JMSpectatorCamera s_COT_SpectatorCamera;
 	static bool s_DbgDraw;
@@ -58,6 +60,8 @@ class JMSpectatorCamera: JMCameraBase
 	Object m_COT_TargetMarker_Object;
 	ScriptedLightBase m_COT_TargetLight;
 	bool m_COT_RemoveMarker;
+	bool m_COT_WasRaised;
+	float m_COT_RaisedTimeout;
 
 #ifdef DIAG_DEVELOPER
 	float m_COT_TempFloat01;
@@ -261,7 +265,22 @@ class JMSpectatorCamera: JMCameraBase
 						#endif
 
 							//if (vector.Dot(aimDir, rightShoulderToLHand.Normalized()) > 0.9)
+							{
+							#ifdef DIAG_DEVELOPER
+								if (!weaponRaised && !m_COT_WasRaised)
+								{
+									if (m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD)
+										g_Game.Chat("COT dollycam: Still raised", "colorFriendly");
+									else
+										g_Game.Chat("COT dollycam: Raised", "colorFriendly");
+								}
+							#endif
+
 								weaponRaised = true;
+
+								if (m_COT_RaisedTimeout < RAISED_TIMEOUT)
+									m_COT_RaisedTimeout += timeslice;
+							}
 						}
 					}
 				}
@@ -305,12 +324,31 @@ class JMSpectatorCamera: JMCameraBase
 				}
 			#endif
 			}
+
+			if (!weaponRaised && m_COT_RaisedTimeout > 0.0)
+			{
+			#ifdef DIAG_DEVELOPER
+				bool wasRaised;
+				if (m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD)
+					wasRaised = true;
+			#endif
+
+				m_COT_RaisedTimeout -= timeslice;
+
+			#ifdef DIAG_DEVELOPER
+				if (wasRaised && m_COT_RaisedTimeout <= RAISED_TIME_THRESHOLD)
+					g_Game.Chat("COT dollycam: Raised timeout", "colorFriendly");
+			#endif
+			}
+
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
 		{
 			m_JM_IsADS = false;
 		}
+
+		m_COT_WasRaised = weaponRaised;
 
 		if ( !IsActive() )
 		{
@@ -563,7 +601,7 @@ class JMSpectatorCamera: JMCameraBase
 					if (checkTarget)
 					{
 						float angleThresh;
-						if (weaponRaised)
+						if (weaponRaised || m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD)
 							angleThresh = 30;
 						else
 							angleThresh = 180;
@@ -651,7 +689,7 @@ class JMSpectatorCamera: JMCameraBase
 
 					m_COT_RemoveMarker = false;
 				}
-				else if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
+				else if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || (!weaponRaised && m_COT_RaisedTimeout <= RAISED_TIME_THRESHOLD)))
 				{
 					dir = vector.Direction(cameraPos, pos);  //! Look at spectated entity
 
@@ -702,7 +740,7 @@ class JMSpectatorCamera: JMCameraBase
 		m_COT_SpectatedObjectSpeed = Math.Lerp(m_COT_SpectatedObjectSpeed, spectatedObjectVelocity.Length(), timeslice * 2);
 		float spectatedObjectSpeedInverse01 = Math.Max(1 - m_COT_SpectatedObjectSpeed / 6.565, 0.0);  //! 0 = sprint, 1 = not moving
 
-		if (m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO && weaponRaised)
+		if (m_JM_3rdPerson == JMCamera3rdPersonMode.AUTO && (weaponRaised || m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD))
 		{
 			m_COT_DollyCamSpeedMult = 0.433333;
 			dollyCamSpeedMult = m_COT_DollyCamSpeedMult;
@@ -981,7 +1019,7 @@ class JMSpectatorCamera: JMCameraBase
 
 			targetDist = 1.6;
 
-			if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || !weaponRaised))
+			if (dollyCam && (m_JM_3rdPerson != JMCamera3rdPersonMode.AUTO || (!weaponRaised && m_COT_RaisedTimeout <= RAISED_TIME_THRESHOLD)))
 			{
 			/*
 				if (weaponRaised)
