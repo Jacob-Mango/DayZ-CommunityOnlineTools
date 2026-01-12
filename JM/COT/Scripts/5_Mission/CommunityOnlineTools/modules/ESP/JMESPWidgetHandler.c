@@ -249,27 +249,43 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
+		int priority;
+
+		if (m_pnl_Actions.IsVisible())
+			priority = 0;
+		else
+			priority = distance * 100;
+
+		//! @note 999999 is the max zIndex, larger and widgets won't render. We use 100 less to have some headroom for child widgets
+		int zIndex = 999899 - priority;
+
+		if (zIndex < 0)
+			zIndex = 0;
+
+		layoutRoot.SetSort(zIndex);
+
 		//if (distance > 10)
 			distance = Math.Round(distance * 10.0) / 10.0;
 
 		GetScreenSize( Width, Height );
 
-		if ( ScreenPos[0] <= 0 || ScreenPos[1] <= 0 )
+		if (ScreenPos[0] <= 0 || ScreenPos[1] <= 0 || ScreenPos[0] >= Width || ScreenPos[1] >= Height || ScreenPos[2] < 0)
 		{
 			ShowOnScreen = false;
-		} else 
+		}
+		else if (g_Game.GetUIManager().GetMenu())
+		{
+			ShowOnScreen = false;
+		}
+	#ifdef DZ_Expansion_Core
+		else if (GetDayZExpansion().GetExpansionUIManager().GetMenu())
+		{
+			ShowOnScreen = false;
+		}
+	#endif
+		else
 		{
 			ShowOnScreen = true;
-		}
-
-		if ( ShowOnScreen && ( ScreenPos[0] >= Width || ScreenPos[1] >= Height ) )
-		{
-			ShowOnScreen = false;
-		}
-
-		if ( ShowOnScreen && ScreenPos[2] < 0 )
-		{
-			ShowOnScreen = false;
 		}
 
 		if ( ShowOnScreen && Info )
@@ -280,7 +296,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 			if (Info.target)
 			{
-				if (Info.target.GetNumberOfHealthLevels() > 0)
+				if (!Info.target.IsPlainObject() && Info.target.GetNumberOfHealthLevels() > 0)
 				{
 					switch (Info.target.GetHealthLevel())
 					{

@@ -431,26 +431,11 @@ class JMObjectSpawnerForm: JMFormBase
 		if (sliderMax > 0)
 			health01 = health / sliderMax;
 
-		if ( health01 >= 0.7 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
-		}
-		else if ( health01 >= 0.5 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_WORN );
-		}
-		else if ( health01 >= 0.3 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
-		}
-		else if ( health01 > 0 )
-		{
-			m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
-		}
-		else
-		{
-			m_HealthItem.SetColor( Colors.COLOR_RUINED );
-		}
+		if ( health01 >= 0.7 )			m_HealthItem.SetColor( Colors.COLOR_PRISTINE );
+		else if ( health01 >= 0.5 )		m_HealthItem.SetColor( Colors.COLOR_WORN );
+		else if ( health01 >= 0.3 )		m_HealthItem.SetColor( Colors.COLOR_DAMAGED );
+		else if ( health01 > 0 )		m_HealthItem.SetColor( Colors.COLOR_BADLY_DAMAGED );
+		else							m_HealthItem.SetColor( Colors.COLOR_RUINED );
 
 		m_HealthItem.SetAlpha( 1.0 );
 	}
@@ -540,20 +525,6 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			g_Game.ObjectDelete( m_PreviewItem );
 		}
-
-		//if ( g_Game.IsKindOf( strSelection, "DZ_LightAI" ) ) 
-		//{
-			//m_ItemPreview.Show( false );
-
-			//UpdateHealthControls(strSelection);
-
-			//UpdateHealthItemColor();
-
-			//#ifdef COT_DEBUGLOGS
-			//Print( "-" + this + "::UpdateItemPreview AI" );
-			//#endif
-			//return;
-		//}
 
 		m_Orientation = vector.Zero;
 
@@ -665,6 +636,20 @@ class JMObjectSpawnerForm: JMFormBase
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::UpdateItemPreview" );
 		#endif
+	}
+
+	override void OnFocus()
+	{
+		super.OnFocus();
+
+		m_ItemPreview.SetSort(JMStatics.WINDOWS_CONTAINER.GetSort());  //! @note 299 is max zIndex for ItemPreviewWidget, larger and widget won't render
+	}
+
+	override void OnUnfocus()
+	{
+		super.OnUnfocus();
+
+		m_ItemPreview.SetSort(0);
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
@@ -911,10 +896,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateList()
 	{
+	#ifdef DIAG_DEVELOPER
 		int ticks = TickCount(0);
+	#endif
 
 		m_ClassList.ClearItems();
-		TStringArray suggestions = new TStringArray;
 		string closestMatch;
 		
 		TStringArray configs = new TStringArray;
@@ -922,16 +908,9 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
 
-		string strSearch = m_Module.m_SearchText;
-		strSearch.ToLower();
-
-		TStringArray strSearches = new TStringArray;
-		strSearch.Split(" ", strSearches);
-		int count = strSearches.Count();
-
-		int index;
-		int score;
-		int highestScore;
+		COT_String strSearch = m_Module.m_SearchText;
+		bool requireAllKeywords;
+		TStringArray keywords = strSearch.KeywordSearch_Prepare(requireAllKeywords);
 
 		for ( int nConfig; nConfig < configs.Count(); nConfig++ )
 		{
@@ -954,7 +933,7 @@ class JMObjectSpawnerForm: JMFormBase
 				if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
-				string strNameLower = strName;
+				COT_String strNameLower = strName;
 
 				strNameLower.ToLower();
 
@@ -968,48 +947,13 @@ class JMObjectSpawnerForm: JMFormBase
 						if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
 							continue;
 
-						strNameLower = Widget.TranslateString( strNameLower );
 						strNameLower.ToLower();
 					}
 
 					if ( strSearch != "" )
 					{
-						if ( strNameLower == strSearch )
-						{
-							suggestions.Clear();
-							closestMatch = strNameLower;
-						}
-						else
-						{
-							index = strNameLower.IndexOf(strSearch);
-
-							if (index == 0 && !closestMatch)
-								suggestions.Insert(strNameLower);
-							else if (index == -1 && count == 1)
-								continue;
-
-							score = 0;
-							foreach(string searchEntry: strSearches)
-							{
-								if ( strNameLower.IndexOf(searchEntry) == -1 )
-								{
-									score = 0;
-									break;
-								}
-
-								score++;
-							}
-
-							if (score == 0)
-								continue;
-
-							if (score > highestScore)
-							{
-								highestScore = score;
-								if (!closestMatch)
-									suggestions.Insert(strNameLower);
-							}
-						}
+						if (!strNameLower.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch))
+							continue;
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
@@ -1021,12 +965,6 @@ class JMObjectSpawnerForm: JMFormBase
 		float elapsed = TickCount(ticks) * 0.0001;
 		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
 	#endif
-
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
-		}
 
 		m_SearchBox.SetTextPreview(closestMatch);
 	}

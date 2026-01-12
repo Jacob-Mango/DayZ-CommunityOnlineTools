@@ -248,35 +248,27 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		m_InputCategory.SetTextPreview("");
+		string closestMatch;
 		
 		string strSearch = m_InputCategory.GetText();
 		if ( strSearch != "" )
 		{
-			string closestMatch;
-			TStringArray suggestions = new TStringArray;
 			foreach(string category: m_Categories)
 			{
 				if ( category == strSearch )
 				{
-					suggestions.Clear();
 					closestMatch = category;
+					break;  //! We can end the search here because we got a perfect match
 				}
 				else if ( category.IndexOf(strSearch) == 0 )
 				{
-					if (!closestMatch)
-						suggestions.Insert(category);
+					if (!closestMatch || category.Length() < closestMatch.Length())
+						closestMatch = category;
 				}
 			}
-
-			if (suggestions.Count())
-			{
-				suggestions.Sort();
-				closestMatch = suggestions[0];
-			}
-
-			m_InputCategory.SetTextPreview(closestMatch);
 		}
+
+		m_InputCategory.SetTextPreview(closestMatch);
 	}
 
 	void Type_UpdateList( UIEvent eid, UIActionBase action )
@@ -306,8 +298,9 @@ class JMTeleportForm: JMFormBase
 		m_Filter.SetTextPreview("");
 		m_LstPositionList.ClearItems();
 
-		string filter = m_Filter.GetText();
-		filter.ToLower();
+		COT_String filter = m_Filter.GetText();
+		bool requireAllKeywords;
+		TStringArray keywords = filter.KeywordSearch_Prepare(requireAllKeywords);
 
 		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
@@ -322,33 +315,16 @@ class JMTeleportForm: JMFormBase
 			if (  m_CurrentCategory != "ALL" && type != m_CurrentCategory ) 
 				continue;
 
-			string name = locations[i].Name;
+			COT_String name = locations[i].Name;
 			name.ToLower();
 
 			if (filter != "")
 			{
-				if (!name.Contains( filter ))
+				if (!name.KeywordSearchImplEx(filter, keywords, requireAllKeywords, closestMatch))
 					continue;
-
-				if ( name == filter )
-				{
-					suggestions.Clear();
-					closestMatch = name;
-				}
-				else if ( name.IndexOf(filter) == 0 )
-				{
-					if (!closestMatch)
-						suggestions.Insert(name);
-				}
 			}
 
 			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );
-		}
-
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
 		}
 
 		m_Filter.SetTextPreview(closestMatch);

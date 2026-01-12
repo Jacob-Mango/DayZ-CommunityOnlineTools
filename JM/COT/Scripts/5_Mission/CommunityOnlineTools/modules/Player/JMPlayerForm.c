@@ -2459,27 +2459,16 @@ class JMPlayerForm: JMFormBase
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 		SortPlayersArray( players, m_PlayerListSort.IsToggled() );
 
-		int index;
-		int score;
-		int highestScore;
-		int count;
-
-		TStringArray strSearches = new TStringArray;
-		TStringArray suggestions = new TStringArray;
 		string closestMatch;
 
 		m_NumPlayerCount = 0;
 
 		bool isFiltering;
-		string strSearch = m_PlayerListFilter.GetText();
+		COT_String strSearch = m_PlayerListFilter.GetText();
+		bool requireAllKeywords;
+		TStringArray keywords = strSearch.KeywordSearch_Prepare(requireAllKeywords);
 		if (strSearch != string.Empty)
-		{
-			strSearches = new TStringArray;
-			strSearch.ToLower();
-			strSearch.Split(" ", strSearches);
-			count = strSearches.Count();
 			isFiltering = true;
-		}
 
 		int entryId;
 		int maxThesdhold = m_PlayerList.Count();
@@ -2507,57 +2496,17 @@ class JMPlayerForm: JMFormBase
 				contentID++;
 			}
 
-			string pName = cPlayer.GetName();
+			COT_String pName = cPlayer.GetName();
 			pName.ToLower();
 
 			if ( isFiltering )
 			{
-				if ( pName == strSearch )
-				{
-					suggestions.Clear();
-					closestMatch = pName;
-				}
-				else
-				{
-					index = pName.IndexOf(strSearch);
-					
-					if (index == 0 && !closestMatch)
-						suggestions.Insert(pName);
-					else if (index == -1 && count == 1)
-						continue;
-
-					score = 0;
-					foreach(string searchEntry: strSearches)
-					{
-						if ( pName.IndexOf(searchEntry) == -1 )
-						{
-							score = 0;
-							break;
-						}
-
-						score++;
-					}
-
-					if (score == 0)
-						continue;
-
-					if (score > highestScore)
-					{
-						highestScore = score;
-						if (!closestMatch)
-							suggestions.Insert(pName);
-					}
-				}
+				if (!pName.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch))
+					continue;
 			}
 
 			m_PlayerList[entryId].SetPlayer( cPlayer.GetGUID() );
 			m_NumPlayerCount++;
-		}
-		
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
 		}
 		
 		m_PlayerListFilter.SetTextPreview(closestMatch);

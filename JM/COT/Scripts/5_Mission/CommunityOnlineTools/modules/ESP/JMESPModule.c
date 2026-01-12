@@ -902,11 +902,6 @@ class JMESPModule: JMRenderableModuleBase
 				set<Object> objects = new set<Object>;
 				set<Object> addedObjects = new set<Object>;
 
-				bool isUsingFilter = Filter.Length() > 0;
-
-				string filter = Filter + "";
-				filter.ToLower();
-
 				int k;
 
 				if ( m_CurrentState == JMESPState.Remove )
@@ -922,6 +917,10 @@ class JMESPModule: JMRenderableModuleBase
 					if (!g_COT_ThreadESP)
 						break;
 
+					COT_String filter = Filter;
+					bool requireAllKeywords;
+					TStringArray keywords = filter.KeywordSearch_Prepare(requireAllKeywords);
+
 					for ( int i = 0; i < objects.Count(); ++i )
 					{
 						Object obj = objects[i];
@@ -929,7 +928,7 @@ class JMESPModule: JMRenderableModuleBase
 						if ( obj == NULL )
 							continue;
 
-						string type = JMESPMeta.GetObjectType(obj);
+						COT_String type = JMESPMeta.GetObjectType(obj);
 						type.ToLower();
 
 						if ( type == "#particlesourceenf" )
@@ -953,8 +952,11 @@ class JMESPModule: JMRenderableModuleBase
 								continue;
 						}
 
-						if ( isUsingFilter && !type.Contains( filter ) )
-							continue;
+						if (filter != "")
+						{
+							if (!type.KeywordSearchImpl(filter, keywords, requireAllKeywords))
+								continue;
+						}
 
 						JMESPMeta meta = m_MappedESPObjects.Get( obj );
 						if ( meta != NULL )
