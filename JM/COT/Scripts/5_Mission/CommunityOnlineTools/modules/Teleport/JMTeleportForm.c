@@ -248,35 +248,27 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		m_InputCategory.SetTextPreview("");
+		string closestMatch;
 		
 		string strSearch = m_InputCategory.GetText();
 		if ( strSearch != "" )
 		{
-			string closestMatch;
-			TStringArray suggestions = new TStringArray;
 			foreach(string category: m_Categories)
 			{
 				if ( category == strSearch )
 				{
-					suggestions.Clear();
 					closestMatch = category;
+					break;  //! We can end the search here because we got a perfect match
 				}
 				else if ( category.IndexOf(strSearch) == 0 )
 				{
-					if (!closestMatch)
-						suggestions.Insert(category);
+					if (!closestMatch || category.Length() < closestMatch.Length())
+						closestMatch = category;
 				}
 			}
-
-			if (suggestions.Count())
-			{
-				suggestions.Sort();
-				closestMatch = suggestions[0];
-			}
-
-			m_InputCategory.SetTextPreview(closestMatch);
 		}
+
+		m_InputCategory.SetTextPreview(closestMatch);
 	}
 
 	void Type_UpdateList( UIEvent eid, UIActionBase action )
