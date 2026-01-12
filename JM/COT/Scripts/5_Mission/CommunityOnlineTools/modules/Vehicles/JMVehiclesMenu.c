@@ -70,6 +70,7 @@ class JMVehiclesMenu: JMFormBase
 		//! Vehicles Map
 		m_MapWidgetPanel = Widget.Cast( layoutRoot.FindAnyWidget( "vehicles_map_panel" ) );
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_map" ) );
+		m_MapWidget.SetSort(200);  //! @note 200 is min and 299 is max zIndex for ItemPreviewWidget and MapWidget, smaller/larger and widget won't render
 		
 		//! Vehicles Options
 		m_VehicleListRefreshButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "vehicles_refresh_button" ) );
