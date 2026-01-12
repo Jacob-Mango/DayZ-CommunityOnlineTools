@@ -43,6 +43,8 @@ class COTModule : JMModuleBase
 			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
 				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
+
+			JMStatics.WINDOWS_CONTAINER.SetSort(299);  //! @note 299 is max zIndex for ItemPreviewWidget, larger and widget won't render
 			#endif
 
 			if ( m_COTMenu == NULL )
