@@ -58,8 +58,6 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	
 	void Init()
 	{
-		m_LayoutRoot.SetSort(JMStatics.WINDOWS_CONTAINER.GetSort());
-
 		Class.CastTo(m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ));
 
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "CreditsText" ) ).SetText("");
