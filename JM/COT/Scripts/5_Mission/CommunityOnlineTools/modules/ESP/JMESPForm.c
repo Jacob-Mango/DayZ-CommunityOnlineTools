@@ -266,8 +266,6 @@ class JMESPForm: JMFormBase
 
 		if ( strSearch != "" )
 		{
-			TStringArray suggestions = new TStringArray;
-
 			TStringArray configs = new TStringArray;
 			configs.Insert( CFG_VEHICLESPATH );
 			configs.Insert( CFG_WEAPONSPATH );
@@ -305,21 +303,15 @@ class JMESPForm: JMFormBase
 
 					if ( strNameLower == strSearch )
 					{
-						suggestions.Clear();
 						closestMatch = strNameLower;
 						break;  //! We can end the search here because we got a perfect match
 					}
 					else if ( strNameLower.IndexOf(strSearch) == 0 )
 					{
-						suggestions.Insert(strNameLower);
+						if (!closestMatch || strNameLower.Length() < closestMatch.Length())
+							closestMatch = strNameLower;
 					}
 				}
-			}
-
-			if (suggestions.Count())
-			{
-				suggestions.Sort();
-				closestMatch = suggestions[0];
 			}
 		}
 
