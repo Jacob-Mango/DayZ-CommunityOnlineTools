@@ -896,10 +896,11 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void UpdateList()
 	{
+	#ifdef DIAG_DEVELOPER
 		int ticks = TickCount(0);
+	#endif
 
 		m_ClassList.ClearItems();
-		TStringArray suggestions = new TStringArray;
 		string closestMatch;
 		
 		TStringArray configs = new TStringArray;
@@ -907,16 +908,9 @@ class JMObjectSpawnerForm: JMFormBase
 		configs.Insert( CFG_WEAPONSPATH );
 		configs.Insert( CFG_MAGAZINESPATH );
 
-		string strSearch = m_Module.m_SearchText;
-		strSearch.ToLower();
-
-		TStringArray strSearches = new TStringArray;
-		strSearch.Split(" ", strSearches);
-		int count = strSearches.Count();
-
-		int index;
-		int score;
-		int highestScore;
+		COT_String strSearch = m_Module.m_SearchText;
+		bool requireAllKeywords;
+		TStringArray keywords = strSearch.KeywordSearch_Prepare(requireAllKeywords);
 
 		for ( int nConfig; nConfig < configs.Count(); nConfig++ )
 		{
@@ -939,7 +933,7 @@ class JMObjectSpawnerForm: JMFormBase
 				if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
-				string strNameLower = strName;
+				COT_String strNameLower = strName;
 
 				strNameLower.ToLower();
 
@@ -953,48 +947,13 @@ class JMObjectSpawnerForm: JMFormBase
 						if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
 							continue;
 
-						strNameLower = Widget.TranslateString( strNameLower );
 						strNameLower.ToLower();
 					}
 
 					if ( strSearch != "" )
 					{
-						if ( strNameLower == strSearch )
-						{
-							suggestions.Clear();
-							closestMatch = strNameLower;
-						}
-						else
-						{
-							index = strNameLower.IndexOf(strSearch);
-
-							if (index == 0 && !closestMatch)
-								suggestions.Insert(strNameLower);
-							else if (index == -1 && count == 1)
-								continue;
-
-							score = 0;
-							foreach(string searchEntry: strSearches)
-							{
-								if ( strNameLower.IndexOf(searchEntry) == -1 )
-								{
-									score = 0;
-									break;
-								}
-
-								score++;
-							}
-
-							if (score == 0)
-								continue;
-
-							if (score > highestScore)
-							{
-								highestScore = score;
-								if (!closestMatch)
-									suggestions.Insert(strNameLower);
-							}
-						}
+						if (!strNameLower.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch))
+							continue;
 					}
 
 					m_ClassList.AddItem( strName, NULL, 0 );
@@ -1006,12 +965,6 @@ class JMObjectSpawnerForm: JMFormBase
 		float elapsed = TickCount(ticks) * 0.0001;
 		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
 	#endif
-
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
-		}
 
 		m_SearchBox.SetTextPreview(closestMatch);
 	}
