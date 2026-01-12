@@ -306,8 +306,9 @@ class JMTeleportForm: JMFormBase
 		m_Filter.SetTextPreview("");
 		m_LstPositionList.ClearItems();
 
-		string filter = m_Filter.GetText();
-		filter.ToLower();
+		COT_String filter = m_Filter.GetText();
+		bool requireAllKeywords;
+		TStringArray keywords = filter.KeywordSearch_Prepare(requireAllKeywords);
 
 		array< ref JMTeleportLocation > locations = m_Module.GetLocations();
 		if ( !locations )
@@ -322,33 +323,16 @@ class JMTeleportForm: JMFormBase
 			if (  m_CurrentCategory != "ALL" && type != m_CurrentCategory ) 
 				continue;
 
-			string name = locations[i].Name;
+			COT_String name = locations[i].Name;
 			name.ToLower();
 
 			if (filter != "")
 			{
-				if (!name.Contains( filter ))
+				if (!name.KeywordSearchImplEx(filter, keywords, requireAllKeywords, closestMatch))
 					continue;
-
-				if ( name == filter )
-				{
-					suggestions.Clear();
-					closestMatch = name;
-				}
-				else if ( name.IndexOf(filter) == 0 )
-				{
-					if (!closestMatch)
-						suggestions.Insert(name);
-				}
 			}
 
 			m_LstPositionList.AddItem( locations[i].Name, locations[i], 0 );
-		}
-
-		if (suggestions.Count())
-		{
-			suggestions.Sort();
-			closestMatch = suggestions[0];
 		}
 
 		m_Filter.SetTextPreview(closestMatch);
