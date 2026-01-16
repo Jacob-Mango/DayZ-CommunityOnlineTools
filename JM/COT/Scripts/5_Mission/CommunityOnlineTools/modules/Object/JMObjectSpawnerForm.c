@@ -273,10 +273,12 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
 		
-		if ( g_Game.IsServer() )
+		if ( !g_Game.IsMultiplayer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
 		else
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
+
+		m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_OBJECTS");
 
 		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
 		m_SpawnMode.SetSelectorWidth(1.0);
@@ -730,6 +732,7 @@ class JMObjectSpawnerForm: JMFormBase
 			case COT_ObjectSpawnerMode.CURSOR:
 			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
+			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
 				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
 				m_AttachmentsButton.Enable();
 				m_ObjSetupMode.Enable();
@@ -786,6 +789,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
 				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, temp, itemState);
+				break;
+
+			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetObjects(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTRAW:

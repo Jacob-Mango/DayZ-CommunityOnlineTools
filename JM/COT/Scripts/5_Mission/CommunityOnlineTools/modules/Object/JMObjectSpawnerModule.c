@@ -388,6 +388,39 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
+	private void SpawnEntity_WriteTo(ParamsWriteContext ctx, string className, float quantity, float health, float temp, int itemState)
+	{
+		ctx.Write( className );
+		ctx.Write( quantity );
+		ctx.Write( health );
+		ctx.Write( temp );
+		ctx.Write( itemState );
+		ctx.Write( m_ObjSetupMode );
+	}
+
+	private bool SpawnEntity_ReadFrom(ParamsReadContext ctx, out string className, out float quantity, out float health, out float temp, out int itemState)
+	{
+		if ( !ctx.Read( className ) )
+			return false;
+	
+		if ( !ctx.Read( quantity ) )
+			return false;
+
+		if ( !ctx.Read( health ) )
+			return false;
+
+		if ( !ctx.Read( temp ) )
+			return false;
+
+		if ( !ctx.Read( itemState ) )
+			return false;
+
+		if ( !ctx.Read( m_ObjSetupMode ) )
+			return false;
+
+		return true;
+	}
+
 	void SpawnEntity_Position( string className, vector position, float quantity = -1, float health = -1, float temp = -1, int itemState = -1, bool targetInventory = false )
 	{
 		EntityAI targetEnt;
@@ -404,13 +437,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( className );
 			rpc.Write( position );
-			rpc.Write( quantity );
-			rpc.Write( health );
-			rpc.Write( temp );
-			rpc.Write( itemState );
-			rpc.Write( m_ObjSetupMode );
+			SpawnEntity_WriteTo(rpc, className, quantity, health, temp, itemState);
 			rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
 		}
 		else if (!targetEnt)
@@ -432,50 +460,25 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			string className;
-			if ( !ctx.Read( className ) )
-			{
-				Error("Failed");
-				return;
-			}
-
 			vector position;
+
 			if ( !ctx.Read( position ) )
 			{
 				Error("Failed");
 				return;
 			}
-		
+
+			string className;
 			float quantity;
-			if ( !ctx.Read( quantity ) )
-			{
-				Error("Failed");
-				return;
-			}
-
 			float health;
-			if ( !ctx.Read( health ) )
-			{
-				Error("Failed");
-				return;
-			}
-
 			float temp;
-			if ( !ctx.Read( temp ) )
-			{
-				Error("Failed");
-				return;
-			}
-
 			int itemState;
-			if ( !ctx.Read( itemState ) )
+
+			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState) )
 			{
 				Error("Failed");
 				return;
 			}
-
-			if ( !ctx.Read( m_ObjSetupMode ) )
-				return;
 
 			EntityAI targetEnt;
 			if (Class.CastTo(targetEnt, target))
@@ -490,13 +493,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( className );
 			rpc.Write( players );
-			rpc.Write( quantity );
-			rpc.Write( health );
-			rpc.Write( temp );
-			rpc.Write( itemState );
-			rpc.Write( m_ObjSetupMode );
+			SpawnEntity_WriteTo(rpc, className, quantity, health, temp, itemState);
 			rpc.Send( NULL, JMObjectSpawnerModuleRPC.Inventory, true, NULL );
 		}
 		else
@@ -520,9 +518,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 			instance.Update();
 
-			EntityAI ent = instance.PlayerObject;
+			EntityAI parent = instance.PlayerObject;
 			vector position = instance.PlayerObject.GetPosition();
-			SpawnEntity(className, ent, position, quantity, health, temp, itemState, callerInstance);
+			SpawnEntity(className, parent, position, quantity, health, temp, itemState, callerInstance);
 		}
 	}
 
@@ -530,37 +528,56 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	{
 		if ( IsMissionHost() )
 		{
-			string ent;
-			if ( !ctx.Read( ent ) )
-				return;
-
 			array< string > players;
 			if ( !ctx.Read( players ) )
+			{
+				Error("Failed");
 				return;
-		
+			}
+
+			string className;
 			float quantity;
-			if ( !ctx.Read( quantity ) )
-				return;
-
 			float health;
-			if ( !ctx.Read( health ) )
-				return;
-
 			float temp;
-			if ( !ctx.Read( temp ) )
-				return;
-
 			int itemState;
-			if ( !ctx.Read( itemState ) )
-				return;
 
-			if ( !ctx.Read( m_ObjSetupMode ) )
+			if ( !SpawnEntity_ReadFrom(ctx, className, quantity, health, temp, itemState) )
+			{
+				Error("Failed");
 				return;
+			}
 
-			Server_SpawnEntity_Inventory( ent, players, quantity, health, temp, itemState, senderRPC );
+			Server_SpawnEntity_Inventory( className, players, quantity, health, temp, itemState, senderRPC );
 		}
 	}
 	
+	void SpawnEntity_Inventory(string className, set<ref JMSelectedObject> targetObjects, float quantity = -1, float health = -1, float temp = -1, int itemState = -1)
+	{
+		if (!GetPermissionsManager().HasPermission("Entity.Spawn.Inventory"))
+			return;
+
+		foreach (JMSelectedObject targetObject: targetObjects)
+		{
+			EntityAI targetEnt;
+			if (Class.CastTo(targetEnt, targetObject.obj) && targetEnt.GetInventory())
+			{
+				vector position = targetEnt.GetPosition();
+
+				if (g_Game.IsClient())
+				{
+					ScriptRPC rpc = new ScriptRPC();
+					rpc.Write( position );
+					SpawnEntity_WriteTo(rpc, className, quantity, health, temp, itemState);
+					rpc.Send( targetEnt, JMObjectSpawnerModuleRPC.Position, true, NULL );
+				}
+				else
+				{
+					Server_SpawnEntity_TargetInventory(className, targetEnt, position, quantity, health, temp, itemState, null);
+				}
+			}
+		}
+	}
+
 	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance callerInstance;
