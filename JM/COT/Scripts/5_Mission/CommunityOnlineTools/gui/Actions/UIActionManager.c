@@ -19,7 +19,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static WrapSpacerWidget CreateWrapSpacer( notnull Widget parent )
+	static WrapSpacerWidget CreateWrapSpacer( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
 	{
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
 
@@ -28,6 +28,27 @@ class UIActionManager
 		WrapSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
 		{
+			spacer.SetContentAlignmentH(halign);
+			spacer.SetContentAlignmentV(valign);
+			return spacer;
+		}
+
+		UIAMError("Could not cast to WrapSpacerWidget", widget, parent);
+
+		return NULL;
+	}
+
+	static WrapSpacerWidget CreateWrapSpacerCompact( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
+	{
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacerCompact.layout", parent );
+
+		CheckWidget(widget, parent);
+
+		WrapSpacerWidget spacer;
+		if (Class.CastTo(spacer, widget))
+		{
+			spacer.SetContentAlignmentH(halign);
+			spacer.SetContentAlignmentV(valign);
 			return spacer;
 		}
 
@@ -475,6 +496,33 @@ class UIActionManager
 
 			action.SetLabelHAlign( lha );
 			action.SetLabelVAlign( lva );
+
+			return action;
+		}
+
+		UIAMError("Couldn't get script", widget, parent);
+
+		return NULL;
+	}
+
+	static UIActionButton CreateImageButton( notnull Widget parent, string image, Class instance, string funcname, float width = 1 )
+	{
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImageButton.layout", parent );
+
+		CheckWidget(widget, parent);
+
+		UIActionImageButton action;
+		widget.GetScript( action );
+
+		if ( width != 1 )
+		{
+			SetSize(widget, width, -1);
+		}
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+			//action.SetImage( image );
 
 			return action;
 		}
