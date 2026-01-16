@@ -505,7 +505,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionButton CreateImageButton( notnull Widget parent, string image, Class instance, string funcname, float width = 1 )
+	static UIActionImageButton CreateImageButton( notnull Widget parent, string image, Class instance, string funcname, float width = 1 )
 	{
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImageButton.layout", parent );
 
