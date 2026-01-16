@@ -47,6 +47,7 @@ class JMESPMeta: COT_WidgetHolder
 	UIActionButton m_SpectateButton;
 
 	bool m_ActionsInitialized;
+	bool m_TargetDeleted;
 
 	void JMESPMeta()
 	{
@@ -539,6 +540,8 @@ class JMESPMeta: COT_WidgetHolder
 			module.DeleteObject( target );
 		else
 			module.DeleteObject( networkLow, networkHigh );
+
+		m_TargetDeleted = true;
 	}
 
 	void Action_Heal( UIEvent eid, UIActionBase action )

@@ -182,6 +182,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void OnDeleteAll()
 	{
+		if (Info)
+			Info.m_TargetDeleted = true;
 	}
 
 	float ATan( float a )

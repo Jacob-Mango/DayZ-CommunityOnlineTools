@@ -894,6 +894,8 @@ class JMESPModule: JMRenderableModuleBase
 			int totalTimeTaken = 0;
 			bool didRun = false;
 
+			JMESPMeta meta;
+
 			if ( m_StateChanged && !m_IsDestroyingWidgets && !m_IsCreatingWidgets )
 			{
 				m_StateChanged = false;
@@ -959,7 +961,7 @@ class JMESPModule: JMRenderableModuleBase
 								continue;
 						}
 
-						JMESPMeta meta = m_MappedESPObjects.Get( obj );
+						meta = m_MappedESPObjects.Get( obj );
 						if ( meta != NULL )
 						{
 							#ifdef JM_COT_ESP_DEBUG
@@ -1059,9 +1061,13 @@ class JMESPModule: JMRenderableModuleBase
 			{
 				for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
 				{
-					Object target = m_ActiveESPObjects[k].target;
-					if ( !target || target.ToDelete() )
-						m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+					meta = m_ActiveESPObjects[k];
+					Object target = meta.target;
+
+					//! In SP client, target will be null instantly when deleted, but in MP client,
+					//! only after object has been deleted on server, so we need to check m_TargetDeleted
+					if ( !target || target.ToDelete() || meta.m_TargetDeleted )
+						m_ESPToDestroy.Insert( meta );
 				}
 			
 				g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
