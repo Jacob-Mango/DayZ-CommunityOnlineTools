@@ -84,7 +84,11 @@ class JMESPForm: JMFormBase
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( filterSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+		m_SearchBox.SetWidth( 0.91 );
+		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "Reset_Filter" );
+		button.SetFixedSize( 28, 28 );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
@@ -352,9 +356,18 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		UpdateList();
-
 		m_Module.Filter = action.GetText();
+		UpdateList();
+	}
+
+	void Reset_Filter( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		action.SetText("");
+		m_Module.Filter = "";
+		UpdateList();
 	}
 
 	void Change_UpdateRate( UIEvent eid, UIActionBase action )
