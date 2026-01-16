@@ -54,6 +54,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		OnHide();
 
+		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
+
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
@@ -109,8 +111,6 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		OnHide();
 		layoutRoot.Show( false );
-
-		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Hide" );
@@ -182,10 +182,6 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void OnDeleteAll()
 	{
-		if ( !Info.type.IsInherited( JMESPViewTypePlayer ) && m_chbx_SelectedObject.IsChecked() )
-		{
-			Hide();
-		}
 	}
 
 	float ATan( float a )
@@ -467,7 +463,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
 			} else
 			{
-				JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target );
+				JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target, Info.networkLow, Info.networkHigh );
 			}
 		}
 	}
