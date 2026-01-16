@@ -180,7 +180,7 @@ class JMESPForm: JMFormBase
 		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", exportChoices, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
-		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
+		Widget rowMisc = UIActionManager.CreateWrapSpacerFit( container );
 		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CROSSHAIR", this, "Click_MoveToCursor" );
 		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
 		delbtn.SetColor(COLOR_RED);
