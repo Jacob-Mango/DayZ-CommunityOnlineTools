@@ -456,15 +456,14 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), selected );
 		}
 
-		if ( Info.target )
+		if ( selected )
 		{
-			if ( selected )
-			{
+			if ( Info.target )
 				JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
-			} else
-			{
-				JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target, Info.networkLow, Info.networkHigh );
-			}
+		}
+		else
+		{
+			JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target, Info.networkLow, Info.networkHigh );
 		}
 	}
 }

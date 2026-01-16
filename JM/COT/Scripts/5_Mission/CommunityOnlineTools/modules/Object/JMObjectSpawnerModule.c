@@ -347,10 +347,6 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void DeleteEntity( Object obj )
 	{
-		int netLow, netHigh;
-		obj.GetNetworkID(netLow, netHigh);
-		JMScriptInvokers.REMOVE_OBJECT.Invoke(obj, netLow, netHigh);
-
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
