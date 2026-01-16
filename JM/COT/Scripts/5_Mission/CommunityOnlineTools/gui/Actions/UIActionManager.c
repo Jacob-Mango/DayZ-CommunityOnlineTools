@@ -19,9 +19,9 @@ class UIActionManager
 		return NULL;
 	}
 
-	static WrapSpacerWidget CreateWrapSpacer( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
+	static WrapSpacerWidget CreateWrapSpacer( string layout, notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent );
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
 		CheckWidget(widget, parent);
 
@@ -38,23 +38,19 @@ class UIActionManager
 		return NULL;
 	}
 
+	static WrapSpacerWidget CreateWrapSpacer( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
+	{
+		return CreateWrapSpacer("JM/COT/GUI/layouts/uiactions/UIWrapSpacer.layout", parent, halign, valign);
+	}
+
 	static WrapSpacerWidget CreateWrapSpacerCompact( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIWrapSpacerCompact.layout", parent );
+		return CreateWrapSpacer("JM/COT/GUI/layouts/uiactions/UIWrapSpacerCompact.layout", parent, halign, valign);
+	}
 
-		CheckWidget(widget, parent);
-
-		WrapSpacerWidget spacer;
-		if (Class.CastTo(spacer, widget))
-		{
-			spacer.SetContentAlignmentH(halign);
-			spacer.SetContentAlignmentV(valign);
-			return spacer;
-		}
-
-		UIAMError("Could not cast to WrapSpacerWidget", widget, parent);
-
-		return NULL;
+	static WrapSpacerWidget CreateWrapSpacerFit( notnull Widget parent, WidgetAlignment halign = WidgetAlignment.WA_LEFT, WidgetAlignment valign = WidgetAlignment.WA_TOP)
+	{
+		return CreateWrapSpacer("JM/COT/GUI/layouts/uiactions/UIWrapSpacerFit.layout", parent, halign, valign);
 	}
 
 	static Widget CreateActionRows( notnull Widget parent )
