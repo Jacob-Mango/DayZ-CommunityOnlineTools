@@ -210,6 +210,12 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
+		if (target)
+			CreateTargetActions(parent);
+	}
+
+	void CreateTargetActions(Widget parent)
+	{
 		if ( (networkLow || networkHigh) )
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
