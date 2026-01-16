@@ -59,7 +59,8 @@ class COT_String: string
 					return true;
 			}
 
-			return false;
+			if (!requireAllKeywords)
+				return false;
 		}
 
 		return true;
@@ -79,39 +80,30 @@ class COT_String: string
 	{
 		if (value != search)
 		{
-			//! @note `string search = "test|"; search.Split("|", keywords);` will create a keywords array with *one* entry {"test"}
-			//! but we only want to set closestMatch if search string matches the keyword
-			if (search == keywords[0])
+			foreach (string keyword: keywords)
 			{
-				int index = value.IndexOf(search);
+				int index = value.IndexOf(keyword);
 
 				if (index == -1)
-					return false;
+				{
+					if (requireAllKeywords)
+						return false;
+					else
+						continue;
+				}
 
-				if (index == 0)
+				if (index == 0 && search == keyword)
 				{
 					if (!closestMatch || value.Length() < closestMatch.Length())
 						closestMatch = value;
 				}
+
+				if (!requireAllKeywords)
+					return true;
 			}
-			else
-			{
-				foreach (string keyword: keywords)
-				{
-					if (value.IndexOf(keyword) == -1)
-					{
-						if (requireAllKeywords)
-							return false;
-						else
-							continue;
-					}
 
-					if (!requireAllKeywords)
-						return true;
-				}
-
+			if (!requireAllKeywords)
 				return false;
-			}
 		}
 		else
 		{
