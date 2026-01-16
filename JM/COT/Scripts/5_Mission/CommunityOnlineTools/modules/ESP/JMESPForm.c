@@ -365,7 +365,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		action.SetText("");
+		m_SearchBox.SetText("");
 		m_Module.Filter = "";
 		UpdateList();
 	}
