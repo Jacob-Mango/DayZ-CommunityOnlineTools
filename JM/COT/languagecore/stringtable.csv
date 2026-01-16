@@ -26,7 +26,7 @@ STR_COT_ESP_MODULE_ACTION_COPY_TO_CLIPBOARD_SPAWNABLETYPES,Copy to Clipboard Spa
 STR_COT_ESP_MODULE_ACTION_SHOW_ESP,Show ESP,Show ESP,Zobrazit ESP,ESP anzeigen,Показать ESP,Pokaż ESP,ESP Mutatása,Mostra ESP,Mostrar ESP,Afficher l'ESP,顯示 ESP,ESPを表示,Mostrar ESP,显示 ESP,
 STR_COT_ESP_MODULE_ACTION_VIEWING_ESP,Viewing ESP,Viewing ESP,Prohlížení ESP,Betrachte ESP,Включён ESP,Podgląd ESP,ESP Megtekintése,Visualizzazione ESP,Viendo ESP,Affichage de l'ESP,正在檢視 ESP,ESPを表示中,Visualizando ESP,正在查看 ESP,
 STR_COT_ESP_MODULE_ACTIONS_HEADER,Actions:,Actions:,Akce:,Aktionen:,Действия:,Akcje:,Műveletek:,Azioni:,Acciones:,Actions:,動作：,アクション:,Ações:,动作：,
-STR_COT_ESP_MODULE_CLASS_FILTER,Class Filter:,Class Filter:,Filtr třídy:,Klassen-Filter:,Фильтр Классов:,Filtr Klas:,Osztályszűrő:,Filtro Classe:,Filtro de Clase:,Filtre sur la Classe:,類別篩選器：,クラスフィルター:,Filtro de Classe:,类别过滤器：,
+STR_COT_ESP_MODULE_CLASS_FILTER,Filter:,Filter:,Filtr:,Filter:,Фильтр:,Filtr:,Szűrő:,Filtro:,Filtro:,Filtre:,類別篩選器：,フィルター:,Filtro:,类别过滤器：,
 STR_COT_ESP_MODULE_DRAW_PLAYER_SKELETONS,Draw player skeletons,Draw player skeletons,Vykreslit kostry hráčů,Spieler-Skelett,Отображать скелеты игроков,Rysuj szkielety graczy,Játékosváz rajzolása,Disegna scheletri dei giocatori,Dibujar esqueletos de jugadores,Affichier Squelette joueurs,繪製玩家骨骼,プレイヤーのスケルトンを描画,Desenhar esqueletos de jogadores,绘制玩家骨骼,
 STR_COT_ESP_MODULE_FILTERS_HEADER,Filters:,Filters:,Filtry:,Filter:,Фильтры:,Filtry:,Szűrők:,Filtri:,Filtros:,Filtres:,篩選器：,フィルター:,Filtros:,过滤器：,
 STR_COT_ESP_MODULE_NAME,ESP Tools,ESP Tools,Nástroje ESP,ESP-Werkzeuge,ESP,Narzędzia ESP,ESP Eszközök,Strumenti ESP,Herramientas ESP,Outils ESP,ESP 工具,ESPツール,Ferramentas ESP,ESP 工具,
