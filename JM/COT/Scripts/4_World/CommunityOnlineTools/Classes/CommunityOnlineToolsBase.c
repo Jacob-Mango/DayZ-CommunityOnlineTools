@@ -539,17 +539,34 @@ class CommunityOnlineToolsBase
 		vector orientation = entity.GetOrientation();
 		entity.SetOrientation(Vector(orientation[0], 0, 0));
 
-		vector transform[4];
-		entity.GetTransform(transform);
-		transform[3] = position;
-		entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
-		entity.SetTransform(transform);
-
-		Transport transport = Transport.Cast(entity);
-		if (transport)
+		if (entity.IsMan())
 		{
-			ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
+			PlayerBase player;
+			if (Class.CastTo(player, entity))
+			{
+				player.SetLastPosition();
+				player.SetWorldPosition(position);
+			}
+			else
+			{
+				entity.SetPosition(position);
+			}
 		}
+		else
+		{
+			vector transform[4];
+			entity.GetTransform(transform);
+			transform[3] = position;
+			entity.PlaceOnSurfaceRotated(transform, position, hitNormal[0] * -1, hitNormal[2] * -1, 0, true);
+			entity.SetTransform(transform);
+
+			Transport transport;
+			if (Class.CastTo(transport, entity))
+			{
+				ForceTransportPositionAndOrientation(transport, position, entity.GetOrientation());
+			}
+		}
+
 	}
 }
 
