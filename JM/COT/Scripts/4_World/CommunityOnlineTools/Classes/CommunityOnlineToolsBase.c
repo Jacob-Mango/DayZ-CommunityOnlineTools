@@ -539,7 +539,7 @@ class CommunityOnlineToolsBase
 		vector orientation = entity.GetOrientation();
 		entity.SetOrientation(Vector(orientation[0], 0, 0));
 
-		if (entity.IsMan())
+		if (entity.IsMan() || entity.IsDayZCreature())
 		{
 			PlayerBase player;
 			if (Class.CastTo(player, entity))
