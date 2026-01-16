@@ -165,7 +165,7 @@ class JMESPForm: JMFormBase
 		UIActionManager.CreateText(container,"Selected Items");
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
+		m_ExportButton = UIActionManager.CreateButton( rowExports, "#STR_COT_TO_CLIPBOARD", this, "Click_CopyToClipboard" );
 		TStringArray exportChoices = {
 			"Raw",
 			"SpawnableTypes",
@@ -181,7 +181,7 @@ class JMESPForm: JMFormBase
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CROSSHAIR", this, "Click_MoveToCursor" );
 		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
 		delbtn.SetColor(COLOR_RED);
 
@@ -457,9 +457,9 @@ class JMESPForm: JMFormBase
 			return;
 
 		if (m_ExportTypeList.GetSelection() == COT_ESPMode.CREATELOADOUT)
-			m_ExportButton.SetButton("Save as");
+			m_ExportButton.SetButton("#STR_COT_SAVE_AS");
 		else
-			m_ExportButton.SetButton("Copy to Clipboard");
+			m_ExportButton.SetButton("#STR_COT_TO_CLIPBOARD");
 	}	
 
 	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )

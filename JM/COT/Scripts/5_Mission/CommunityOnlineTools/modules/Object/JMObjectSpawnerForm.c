@@ -40,7 +40,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
 	#endif
 
-		"#STR_COT_OBJECT_MODULE_CURSOR",
+		"#STR_COT_OBJECT_MODULE_CROSSHAIR",
 		"#STR_COT_OBJECT_MODULE_SELF",
 		"#STR_COT_OBJECT_MODULE_TARGET"
 	};
@@ -742,7 +742,7 @@ class JMObjectSpawnerForm: JMFormBase
 		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
 		#endif
-				m_SpawnButton.SetButton("Copy to Clipboard:");
+				m_SpawnButton.SetButton("#STR_COT_TO_CLIPBOARD:");
 				m_AttachmentsButton.Disable();
 				m_ObjSetupMode.Disable();
 			break;
