@@ -1061,9 +1061,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetPlayer().COT_TempDisableOnSelectPlayer();
-		GetPlayer().COT_RememberVehicle();
-
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -1072,7 +1069,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 		} else
 		{
+			if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+				return;
+
 			m_SpectatorClient = GetPlayer();
+
+			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
+			m_SpectatorClient.COT_RememberVehicle();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
 			rpc.Send( null, JMPlayerModuleRPC.StartSpectating, true, NULL );
@@ -1091,9 +1095,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetPlayer().COT_TempDisableOnSelectPlayer();
-		GetPlayer().COT_RememberVehicle();
-
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -1102,7 +1103,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 		} else
 		{
+			if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+				return;
+
 			m_SpectatorClient = GetPlayer();
+
+			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
+			m_SpectatorClient.COT_RememberVehicle();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( spectateObject, JMPlayerModuleRPC.StartSpectating, true, NULL );
 		}
@@ -1299,16 +1307,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_0(this, "EndSpectating");
 #endif
 
-		if ( IsMissionHost() )
-		{
-			if ( IsMissionOffline() )
-				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
+		if (!g_Game.IsMultiplayer())
+			return;
 
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
-		}
+		if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+			return;
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
 	}
 
 	private void Server_EndSpectating( PlayerIdentity ident )
