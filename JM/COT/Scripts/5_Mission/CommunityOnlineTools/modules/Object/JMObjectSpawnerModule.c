@@ -347,6 +347,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	void DeleteEntity( Object obj )
 	{
+		int netLow, netHigh;
+		obj.GetNetworkID(netLow, netHigh);
+		JMScriptInvokers.REMOVE_OBJECT.Invoke(obj, netLow, netHigh);
+
 		if ( IsMissionClient() && !IsMissionOffline() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
@@ -354,6 +358,8 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		}
 		else
 			Server_DeleteEntity( obj, NULL );
+
+		CF_Modules<JMESPModule>.Get().m_RemoveDeleted = true;
 	}
 
 	private void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )

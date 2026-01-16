@@ -79,9 +79,12 @@ class JMSelectedObjects
 		m_Objects.Insert( new JMSelectedObject( obj ) );
 	}
 
-	private void _RemoveObject( Object obj )
+	private void _RemoveObject( Object obj, int netLow, int netHigh )
 	{
-		RemoveObject( obj );
+		if (obj)
+			RemoveObject( obj );
+		else
+			RemoveObjectEx( netLow, netHigh );
 	}
 
 	void ClearObjects()
@@ -91,9 +94,22 @@ class JMSelectedObjects
 
 	bool RemoveObject( notnull Object obj )
 	{
-		for ( int i = 0; i < m_Objects.Count(); ++i )
+		foreach ( int i, JMSelectedObject selectedObj: m_Objects )
 		{
-			if ( m_Objects[i].Equals( obj ) )
+			if ( selectedObj.Equals( obj ) )
+			{
+				m_Objects.Remove( i );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool RemoveObjectEx( int netLow, int netHigh )
+	{
+		foreach ( int i, JMSelectedObject selectedObj: m_Objects )
+		{
+			if ( selectedObj.Equals( netLow, netHigh ) )
 			{
 				m_Objects.Remove( i );
 				return true;

@@ -228,6 +228,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	private JMESPState m_CurrentState = JMESPState.Remove;
 	private bool m_StateChanged = false;
+	bool m_RemoveDeleted;
 
 	ref JMESPCanvas m_ESPCanvas;
 
@@ -1054,6 +1055,19 @@ class JMESPModule: JMRenderableModuleBase
 					m_StateChanged = true;
 				}
 			}
+			else if (m_RemoveDeleted)
+			{
+				for ( k = m_ActiveESPObjects.Count() - 1; k >= 0; --k )
+				{
+					Object target = m_ActiveESPObjects[k].target;
+					if ( !target || target.ToDelete() )
+						m_ESPToDestroy.Insert( m_ActiveESPObjects[k] );
+				}
+			
+				g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( DestroyOldWidgets );
+			}
+
+			m_RemoveDeleted = false;
 
 			if ( didRun && m_StateChanged && m_CurrentState == JMESPState.Update )
 			{				
@@ -1292,15 +1306,25 @@ class JMESPModule: JMRenderableModuleBase
 
 	void DeleteObject( int networkLow, int networkHigh )
 	{
+		JMScriptInvokers.REMOVE_OBJECT.Invoke(null, networkLow, networkHigh);
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( networkLow );
 		rpc.Write( networkHigh );
 		rpc.Send( NULL, JMESPModuleRPC.DeleteObject, true, NULL );
+
+		m_RemoveDeleted = true;
 	}
 
 	void DeleteObject( Object target )
 	{
+		int netLow, netHigh;
+		target.GetNetworkID(netLow, netHigh);
+		JMScriptInvokers.REMOVE_OBJECT.Invoke(target, netLow, netHigh);
+
 		Exec_DeleteObject( target, NULL );
+
+		m_RemoveDeleted = true;
 	}
 
 	private void Exec_DeleteObject( Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
@@ -1638,13 +1662,25 @@ class JMESPModule: JMRenderableModuleBase
 
 	void DeleteSelected()
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.DeleteAll, true, NULL );
+		if (!g_Game.IsMultiplayer())
+		{
+			auto objects = new set<Object>;
+			auto selectedObjs = JM_GetSelected().GetObjects();
+			foreach (auto selectedObj: selectedObjs) objects.Insert(selectedObj.obj);
+			Exec_DeleteAll(objects, GetPermissionsManager().GetClientPlayer());
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			JM_GetSelected().SerializeObjects( rpc );
+			rpc.Send( NULL, JMESPModuleRPC.DeleteAll, true, NULL );
+		}
 
 		JMScriptInvokers.ON_DELETE_ALL.Invoke();
 
 		JM_GetSelected().ClearObjects();
+
+		m_RemoveDeleted = true;
 	}
 
 	private void RPC_DeleteAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1703,10 +1739,20 @@ class JMESPModule: JMRenderableModuleBase
 
 	void MoveToCursor( vector cursor )
 	{
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( cursor );
-		JM_GetSelected().SerializeObjects( rpc );
-		rpc.Send( NULL, JMESPModuleRPC.MoveToCursor, true, NULL );
+		if (!g_Game.IsMultiplayer())
+		{
+			auto objects = new set<Object>;
+			auto selectedObjs = JM_GetSelected().GetObjects();
+			foreach (auto selectedObj: selectedObjs) objects.Insert(selectedObj.obj);
+			Exec_MoveToCursor(cursor, objects, GetPermissionsManager().GetClientPlayer());
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( cursor );
+			JM_GetSelected().SerializeObjects( rpc );
+			rpc.Send( NULL, JMESPModuleRPC.MoveToCursor, true, NULL );
+		}
 	}
 
 	private void RPC_MoveToCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
