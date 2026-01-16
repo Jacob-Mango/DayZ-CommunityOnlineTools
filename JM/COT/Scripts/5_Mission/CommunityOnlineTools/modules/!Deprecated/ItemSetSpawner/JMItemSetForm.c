@@ -64,7 +64,7 @@ class JMItemSetForm: JMFormBase
 			selButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( selButton );
 
-			UIActionButton curButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_OBJECT_MODULE_CURSOR", this, "SpawnOnCursor" );
+			UIActionButton curButton = UIActionManager.CreateButton( buttonswrapper, "#STR_COT_OBJECT_MODULE_CROSSHAIR", this, "SpawnOnCursor" );
 			curButton.SetData( new JMItemSpawnerButtonData( name ) );
 			m_ItemSetButtons.Insert( curButton );
 		}
