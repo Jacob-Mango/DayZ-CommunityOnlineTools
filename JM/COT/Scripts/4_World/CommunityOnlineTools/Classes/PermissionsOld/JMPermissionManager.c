@@ -191,14 +191,15 @@ class JMPermissionManager
 		return RootPermission;
 	}
 
-	bool HasPermission( string permission )
+	bool HasPermission( string permission, out JMPlayerInstance instance = null )
 	{
 		if ( IsMissionClient() ) 
 		{
+			instance = GetClientPlayer();
+
 			if ( IsMissionHost() )
 				return true;
 			
-			JMPlayerInstance instance = GetClientPlayer();
 			if ( !instance /*Assert_Null( instance )*/ )
 				return false;
 
