@@ -110,12 +110,13 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
 
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
+		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( actions, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
 		m_SearchBox.SetWidth( 0.65 );
 
-		UIActionButton button = UIActionManager.CreateButton( actions, "X", this, "SearchInput_OnClickReset" );
-		button.SetWidth( 0.05 );
-		button.SetPosition( 0.65 );
+		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "SearchInput_OnClickReset" );
+		button.SetFixedSize( 28, 28 );
 
 		int foodStageCount = FoodStageType.COUNT;
 		for (int foodStage = 0; foodStage < FoodStageType.COUNT; foodStage++)
