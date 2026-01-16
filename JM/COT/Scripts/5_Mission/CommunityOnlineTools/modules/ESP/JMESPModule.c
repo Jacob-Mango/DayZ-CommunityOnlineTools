@@ -1306,8 +1306,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	void DeleteObject( int networkLow, int networkHigh )
 	{
-		JMScriptInvokers.REMOVE_OBJECT.Invoke(null, networkLow, networkHigh);
-
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( networkLow );
 		rpc.Write( networkHigh );
@@ -1318,10 +1316,6 @@ class JMESPModule: JMRenderableModuleBase
 
 	void DeleteObject( Object target )
 	{
-		int netLow, netHigh;
-		target.GetNetworkID(netLow, netHigh);
-		JMScriptInvokers.REMOVE_OBJECT.Invoke(target, netLow, netHigh);
-
 		Exec_DeleteObject( target, NULL );
 
 		m_RemoveDeleted = true;
