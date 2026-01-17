@@ -40,7 +40,7 @@ class JMObjectSpawnerForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_EXPORT_MARKET",
 	#endif
 
-		"#STR_COT_OBJECT_MODULE_CURSOR",
+		"#STR_COT_OBJECT_MODULE_CROSSHAIR",
 		"#STR_COT_OBJECT_MODULE_SELF",
 		"#STR_COT_OBJECT_MODULE_TARGET"
 	};
@@ -110,12 +110,13 @@ class JMObjectSpawnerForm: JMFormBase
 
 		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
 
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( actions, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
+		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( actions, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
 		m_SearchBox.SetWidth( 0.65 );
 
-		UIActionButton button = UIActionManager.CreateButton( actions, "X", this, "SearchInput_OnClickReset" );
-		button.SetWidth( 0.05 );
-		button.SetPosition( 0.65 );
+		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "SearchInput_OnClickReset" );
+		button.SetFixedSize( 28, 28 );
 
 		int foodStageCount = FoodStageType.COUNT;
 		for (int foodStage = 0; foodStage < FoodStageType.COUNT; foodStage++)
@@ -272,10 +273,12 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
 		
-		if ( g_Game.IsServer() )
+		if ( !g_Game.IsMultiplayer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
 		else
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS");
+
+		m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_OBJECTS");
 
 		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
 		m_SpawnMode.SetSelectorWidth(1.0);
@@ -642,14 +645,14 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		super.OnFocus();
 
-		m_ItemPreview.SetSort(200);  //! @note 200 is min and 299 is max zIndex for ItemPreviewWidget and MapWidget, smaller/larger and widget won't render
+		m_ItemPreview.Show(true);
 	}
 
 	override void OnUnfocus()
 	{
 		super.OnUnfocus();
 
-		m_ItemPreview.SetSort(0);
+		m_ItemPreview.Show(false);
 	}
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
@@ -729,6 +732,7 @@ class JMObjectSpawnerForm: JMFormBase
 			case COT_ObjectSpawnerMode.CURSOR:
 			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
+			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
 				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
 				m_AttachmentsButton.Enable();
 				m_ObjSetupMode.Enable();
@@ -738,7 +742,7 @@ class JMObjectSpawnerForm: JMFormBase
 		#ifdef DZ_Expansion_Market
 			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
 		#endif
-				m_SpawnButton.SetButton("Copy to Clipboard:");
+				m_SpawnButton.SetButton("#STR_COT_TO_CLIPBOARD:");
 				m_AttachmentsButton.Disable();
 				m_ObjSetupMode.Disable();
 			break;
@@ -785,6 +789,10 @@ class JMObjectSpawnerForm: JMFormBase
 
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
 				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, temp, itemState);
+				break;
+
+			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetObjects(), quantity, health, temp, itemState);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTRAW:

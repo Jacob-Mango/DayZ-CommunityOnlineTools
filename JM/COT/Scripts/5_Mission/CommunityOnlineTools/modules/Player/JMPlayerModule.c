@@ -1061,9 +1061,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetPlayer().COT_TempDisableOnSelectPlayer();
-		GetPlayer().COT_RememberVehicle();
-
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -1072,7 +1069,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 		} else
 		{
+			if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+				return;
+
 			m_SpectatorClient = GetPlayer();
+
+			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
+			m_SpectatorClient.COT_RememberVehicle();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
 			rpc.Send( null, JMPlayerModuleRPC.StartSpectating, true, NULL );
@@ -1091,9 +1095,6 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 		}
 
-		GetPlayer().COT_TempDisableOnSelectPlayer();
-		GetPlayer().COT_RememberVehicle();
-
 		if ( IsMissionHost() )
 		{
 			if ( IsMissionOffline() )
@@ -1102,7 +1103,14 @@ class JMPlayerModule: JMRenderableModuleBase
 			}
 		} else
 		{
+			if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+				return;
+
 			m_SpectatorClient = GetPlayer();
+
+			m_SpectatorClient.COT_TempDisableOnSelectPlayer();
+			m_SpectatorClient.COT_RememberVehicle();
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send( spectateObject, JMPlayerModuleRPC.StartSpectating, true, NULL );
 		}
@@ -1299,16 +1307,14 @@ class JMPlayerModule: JMRenderableModuleBase
 		auto trace = CF_Trace_0(this, "EndSpectating");
 #endif
 
-		if ( IsMissionHost() )
-		{
-			if ( IsMissionOffline() )
-				Message( GetPlayer(), "Spectating a player is not possible in offline mode!" );
+		if (!g_Game.IsMultiplayer())
+			return;
 
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
-		}
+		if (!GetPermissionsManager().HasPermission("Admin.Player.Spectate"))
+			return;
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMPlayerModuleRPC.EndSpectating, true, NULL );
 	}
 
 	private void Server_EndSpectating( PlayerIdentity ident )
@@ -1491,12 +1497,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	void ToggleGodMode()
 	{
-		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
-		bool value = !player.COTHasGodMode();
-		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
-		if (guids.Count() == 0)
-			guids.Insert(player.GetIdentity().GetId());
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.GodMode", instance))
+			return;
 
+		bool value = !instance.HasGodMode();
+		array< string > guids = {instance.GetGUID()};
 		SetGodMode(value, guids);
 	}
 
@@ -1757,18 +1763,23 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( GetCommunityOnlineToolsBase().IsActive() )
-			ToggleInvisibility();
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		ToggleInvisibility();
 	}
 	
 	void ToggleInvisibility()
 	{
-		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
-		bool value = !player.COTIsInvisible();
-		array< string > guids = JM_GetSelected().GetPlayersOrSelf();
-		if (guids.Count() == 0)
-			guids.Insert(player.GetIdentity().GetId());
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.Invisibility", instance))
+			return;
 
+		bool value = !instance.HasInvisibility();
+		array< string > guids = {instance.GetGUID()};
 		SetInvisible(value, guids);
 	}
 
@@ -2269,17 +2280,20 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( GetCommunityOnlineToolsBase().IsActive() )
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
-			bool value = !player.COTIsFrozen();
-
-			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
-			if (guids.Count() == 0)
-				guids.Insert(g_Game.GetPlayer().GetIdentity().GetId());
-
-			SetFreeze(value, guids);
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
 		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.Freeze", instance))
+			return;
+
+		bool value = !instance.IsFrozen();
+		array< string > guids = {instance.GetGUID()};
+
+		SetFreeze(value, guids);
 	}
 
 	void InputHeal( UAInput input )
@@ -2287,14 +2301,19 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( GetCommunityOnlineToolsBase().IsActive() )
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			array< string > guids = JM_GetSelected().GetPlayersOrSelf();
-			if (guids.Count() == 0)
-				guids.Insert(g_Game.GetPlayer().GetIdentity().GetId());
-
-			Heal(guids);
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
 		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.Heal", instance))
+			return;
+
+		array< string > guids = {instance.GetGUID()};
+
+		Heal(guids);
 	}
 
 	void InputToggleGodMode( UAInput input )
@@ -2302,8 +2321,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( GetCommunityOnlineToolsBase().IsActive() )
-			ToggleGodMode();
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		ToggleGodMode();
 	}
 
 	void Heal( array< string > guids )

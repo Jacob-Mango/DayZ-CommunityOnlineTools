@@ -14,7 +14,6 @@ class JMMapForm: JMFormBase
 		#endif
 
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
-		m_MapWidget.SetSort(200);  //! @note 200 is min and 299 is max zIndex for ItemPreviewWidget and MapWidget, smaller/larger and widget won't render
 
 		m_BackgroundWidget = m_Window.GetWidgetRoot().FindAnyWidget( "background" );
 		m_BackgroundWidget.Show( false );

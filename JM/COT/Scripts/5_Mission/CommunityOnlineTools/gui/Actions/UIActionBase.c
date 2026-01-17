@@ -223,6 +223,12 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		m_Disable.SetAlpha(alpha);
 	}
 
+	void SetSize( float width, float height )
+	{
+		layoutRoot.SetSize( width, height );
+		layoutRoot.Update();
+	}
+
 	void SetWidth( float width )
 	{
 		float w;
@@ -282,6 +288,12 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		float h;
 		layoutRoot.GetPos( w, h );
 		layoutRoot.SetPos( xpos, h );
+		layoutRoot.Update();
+	}
+
+	void SetPosition( float xpos, float ypos )
+	{
+		layoutRoot.SetPos( xpos, ypos );
 		layoutRoot.Update();
 	}
 

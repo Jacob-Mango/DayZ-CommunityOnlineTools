@@ -6,10 +6,11 @@ enum COT_ObjectSpawnerMode
 	COPYLISTEXPMARKET,
 #endif
 	
-	CURSOR,
+	CURSOR,  //! At crosshair
 	PLAYER_POSITION,
-	TARGET_INVENTORY,
-	PLAYER_INVENTORY
+	TARGET_INVENTORY,  //! Object under crosshair
+	PLAYER_INVENTORY,  //! Selected player(s) e.g. via player management or ESP
+	OBJECT_INVENTORY  //! Selected objects(s) e.g. via ESP
 }
 
 enum COT_ESPMode
