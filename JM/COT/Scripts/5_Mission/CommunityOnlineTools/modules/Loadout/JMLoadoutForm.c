@@ -7,7 +7,7 @@ class JMLoadoutForm: JMFormBase
 	protected UIActionSelectBox m_SpawnModeSelect;
 	protected ref array< string > m_SpawnModeText =
 	{
-		"#STR_COT_OBJECT_MODULE_CURSOR",
+		"#STR_COT_OBJECT_MODULE_CROSSHAIR",
 		"#STR_COT_OBJECT_MODULE_TARGET",
 		"#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS"
 	};

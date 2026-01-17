@@ -84,7 +84,11 @@ class JMESPForm: JMFormBase
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( filterSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( filterSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
+		m_SearchBox.SetWidth( 0.91 );
+		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "Reset_Filter" );
+		button.SetFixedSize( 28, 28 );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
@@ -161,7 +165,7 @@ class JMESPForm: JMFormBase
 		UIActionManager.CreateText(container,"Selected Items");
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		m_ExportButton = UIActionManager.CreateButton( rowExports, "Copy to Clipboard", this, "Click_CopyToClipboard" );
+		m_ExportButton = UIActionManager.CreateButton( rowExports, "#STR_COT_TO_CLIPBOARD", this, "Click_CopyToClipboard" );
 		TStringArray exportChoices = {
 			"Raw",
 			"SpawnableTypes",
@@ -176,8 +180,8 @@ class JMESPForm: JMFormBase
 		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", exportChoices, this, "Click_ExportType" );
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
-		Widget rowMisc = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "Click_MoveToCursor" );
+		Widget rowMisc = UIActionManager.CreateWrapSpacerFit( container );
+		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CROSSHAIR", this, "Click_MoveToCursor" );
 		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
 		delbtn.SetColor(COLOR_RED);
 
@@ -352,9 +356,18 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CHANGE )
 			return;
 
-		UpdateList();
-
 		m_Module.Filter = action.GetText();
+		UpdateList();
+	}
+
+	void Reset_Filter( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		m_SearchBox.SetText("");
+		m_Module.Filter = "";
+		UpdateList();
 	}
 
 	void Change_UpdateRate( UIEvent eid, UIActionBase action )
@@ -444,9 +457,9 @@ class JMESPForm: JMFormBase
 			return;
 
 		if (m_ExportTypeList.GetSelection() == COT_ESPMode.CREATELOADOUT)
-			m_ExportButton.SetButton("Save as");
+			m_ExportButton.SetButton("#STR_COT_SAVE_AS");
 		else
-			m_ExportButton.SetButton("Copy to Clipboard");
+			m_ExportButton.SetButton("#STR_COT_TO_CLIPBOARD");
 	}	
 
 	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )

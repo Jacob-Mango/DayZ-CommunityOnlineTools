@@ -54,6 +54,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		OnHide();
 
+		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
+
 		#ifdef JM_COT_ESP_DEBUG
 		#ifdef COT_DEBUGLOGS
 		Print( "-JMESPWidgetHandler::~JMESPWidgetHandler();" );
@@ -109,8 +111,6 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		OnHide();
 		layoutRoot.Show( false );
-
-		JMScriptInvokers.ON_DELETE_ALL.Remove( OnDeleteAll );
 
 		#ifdef COT_DEBUGLOGS
 		Print( "-" + this + "::Hide" );
@@ -182,10 +182,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 	void OnDeleteAll()
 	{
-		if ( !Info.type.IsInherited( JMESPViewTypePlayer ) && m_chbx_SelectedObject.IsChecked() )
-		{
-			Hide();
-		}
+		if (Info)
+			Info.m_TargetDeleted = true;
 	}
 
 	float ATan( float a )
@@ -249,18 +247,12 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		float distance = vector.Distance(GetCurrentPosition(), m_LastPosition);
 
-		int priority;
+		int zIndex;
 
 		if (m_pnl_Actions.IsVisible())
-			priority = 0;
-		else
-			priority = distance * 100;
-
-		//! @note 999999 is the max zIndex, larger and widgets won't render. We use 100 less to have some headroom for child widgets
-		int zIndex = 999899 - priority;
-
-		if (zIndex < 0)
 			zIndex = 0;
+		else
+			zIndex = -distance * 100;
 
 		layoutRoot.SetSort(zIndex);
 
@@ -466,15 +458,14 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 				JMScriptInvokers.MENU_PLAYER_CHECKBOX.Invoke( Info.player.GetGUID(), selected );
 		}
 
-		if ( Info.target )
+		if ( selected )
 		{
-			if ( selected )
-			{
+			if ( Info.target )
 				JMScriptInvokers.ADD_OBJECT.Invoke( Info.target );
-			} else
-			{
-				JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target );
-			}
+		}
+		else
+		{
+			JMScriptInvokers.REMOVE_OBJECT.Invoke( Info.target, Info.networkLow, Info.networkHigh );
 		}
 	}
 }

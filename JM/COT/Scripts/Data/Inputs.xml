@@ -32,7 +32,7 @@
             <input name="UAObjectModuleSpawnInfected" loc="STR_COT_INPUT_SPAWN_INFECTED" />
             <input name="UAObjectModuleSpawnAnimal" loc="STR_COT_INPUT_SPAWN_ANIMAL" />
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
-            <input name="UAObjectModuleDeleteOnCursor" loc="STR_COT_INPUT_DELETE_CURSOR" />
+            <input name="UAObjectModuleDeleteOnCursor" loc="STR_COT_INPUT_DELETE_CROSSHAIR" />
             
             <input name="UAPlayerModuleFreezePlayer" loc="STR_COT_INPUT_FREEZE_PLAYER" />
             <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
