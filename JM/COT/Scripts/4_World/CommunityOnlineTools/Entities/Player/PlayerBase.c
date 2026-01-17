@@ -7,8 +7,6 @@ enum JMInvisibilityType
 
 modded class PlayerBase
 {
-	static bool COT_BACKUP_DEBUG_INVENTORY_ACCESS;
-
 #ifndef CF_MODULE_PERMISSIONS
 	private JMPlayerInstance m_AuthenticatedPlayer;
 #endif
@@ -324,8 +322,6 @@ modded class PlayerBase
 
 			m_JMIsFrozen = m_JMIsFrozenRemoteSynch;
 
-			COT_SetInventoryAccess(m_JMIsFrozen);
-
 			HumanInputController hic = GetInputController();
 			if ( hic )
 			{
@@ -437,6 +433,42 @@ modded class PlayerBase
 			return false;
 
 		return true;
+	}
+
+	override bool IsRestrained()
+	{
+		if (super.IsRestrained())
+			return true;
+
+		if (m_JMIsFrozen)
+		{
+			//! Cannot check whether COT is active or accessing player has permission on MP server, since that info is not available
+			//! inside IsRestrained in that case (accessing player is not necessarily controlling this character, so we would need a GUID).
+			//! Necessary checks for admin functionality are done on client only.
+			//! Just always return true on MP server if frozen, will pretend the character is restrained and enable correct functionality
+			//! together with the client checks (client is not able to fake it even if client checks were tampered with or removed).
+			if (g_Game.IsDedicatedServer())
+				return true;
+
+			if (IsControlledPlayer())
+			{
+				//! If this instance of a character *is* controlled by the client player (ie. *not* a remote player),
+				//! pretend restrained if COT is *not* active _or_ the client player *doesn't* have AccessInventory permission
+				//! (thus preventing access for this character to their own inventory)
+				if (!GetCommunityOnlineToolsBase().IsActive() || !GetPermissionsManager().HasPermission("Admin.Player.AccessInventory"))
+					return true;
+			}
+			else
+			{
+				//! If this instance of a character is *not* controlled by the client player (ie. a remote player),
+				//! pretend restrained if COT *is* active _and_ the client player *does* have AccessInventory permission
+				//! (thus allowing access to this character's inventory for an admin with appropriate permissions)
+				if (GetCommunityOnlineToolsBase().IsActive() && GetPermissionsManager().HasPermission("Admin.Player.AccessInventory"))
+					return true;
+			}
+		}
+
+		return false;
 	}
 
 	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
@@ -667,8 +699,6 @@ modded class PlayerBase
 			m_JMIsFrozen = mode;
 			m_JMIsFrozenRemoteSynch = mode;
 
-			COT_SetInventoryAccess(mode);
-
 			#ifdef SERVER
 			COT_SynchPlayerVars();
 			#endif
@@ -837,19 +867,6 @@ modded class PlayerBase
 		{
 			if (entity != this && Class.CastTo(item, entity))
 				item.DeleteSafe();
-		}
-	}
-
-	static void COT_SetInventoryAccess(bool access)
-	{
-		if (access)
-		{
-			COT_BACKUP_DEBUG_INVENTORY_ACCESS = DEBUG_INVENTORY_ACCESS;
-			DEBUG_INVENTORY_ACCESS = true;
-		}
-		else if (!COT_BACKUP_DEBUG_INVENTORY_ACCESS)
-		{
-			DEBUG_INVENTORY_ACCESS = false;
 		}
 	}
 
