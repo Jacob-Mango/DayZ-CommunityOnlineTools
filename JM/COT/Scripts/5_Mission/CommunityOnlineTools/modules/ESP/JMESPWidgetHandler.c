@@ -136,6 +136,8 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 
 		if (!Info.m_ActionsInitialized)
 			Info.InitActions();
+		else
+			Info.UpdateActions();
 
 		m_pnl_Actions.Show( true );
 
