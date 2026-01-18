@@ -16,6 +16,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedStamina" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.StripInventory" );		
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
@@ -222,6 +223,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.Strip:
 			RPC_Strip( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.StripInventory:
+			RPC_StripInventory( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Dry:
 			RPC_Dry( ctx, sender, target );
@@ -2681,6 +2685,52 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_Strip( guids, senderRPC, instance );
+	}
+
+	void StripInventory( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_StripInventory( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.StripInventory, true, NULL );
+		}
+	}
+
+	private void Exec_StripInventory( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COT_WipeInventory();
+
+			GetCommunityOnlineToolsBase().Log( ident, "Stripped Inventory [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Inventory", instance, "Stripped Inventory " + players[i].FormatSteamWebhook() );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_StripInventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.StripInventory", senderRPC, instance ) )
+			return;
+
+		Exec_StripInventory( guids, senderRPC, instance );
 	}
 	
 	void Dry( array< string > guids )

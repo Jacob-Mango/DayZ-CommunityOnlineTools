@@ -839,10 +839,15 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "Strip");
+		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_EVERYTHING", "Strip", "#STR_COT_OBJECT_MODULE_INVENTORY", "StripInventory" );
 	}
 
 	void Strip(JMConfirmation confirmation = NULL)
+	{
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "StripConfirm");
+	}
+
+	void StripConfirm(JMConfirmation confirmation = NULL)
 	{
 		int btnId = -1;
 		if (confirmation)
@@ -869,6 +874,42 @@ class JMPlayerForm: JMFormBase
 			case -1:
 			case 6:
 				m_Module.Strip( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+			break;
+		}		
+	}
+
+	void StripInventory(JMConfirmation confirmation = NULL)
+	{
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "StripInventoryConfirm");
+	}
+
+	void StripInventoryConfirm(JMConfirmation confirmation = NULL)
+	{
+		int btnId = -1;
+		if (confirmation)
+			btnId = confirmation.GetSelectedID();
+		
+		switch(btnId)
+		{
+			// Abort
+			case 1:
+			case 4:
+				return;
+			break;
+			// Selected
+			case 2:
+			case 5:
+				m_Module.StripInventory( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+			break;
+			// Everyone
+			case 3:
+				m_Module.StripInventory( JM_GetSelected().GetPlayers() );
+			break;
+			// Self
+			default:
+			case -1:
+			case 6:
+				m_Module.StripInventory( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 			break;
 		}		
 	}
