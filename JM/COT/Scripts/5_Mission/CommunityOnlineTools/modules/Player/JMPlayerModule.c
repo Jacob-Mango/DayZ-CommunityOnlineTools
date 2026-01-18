@@ -1501,7 +1501,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.GodMode", instance))
 			return;
 
-		bool value = !instance.HasGodMode();
+		bool value = !instance.PlayerObject.COTHasGodMode();
 		array< string > guids = {instance.GetGUID()};
 		SetGodMode(value, guids);
 	}
@@ -1778,7 +1778,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Invisibility", instance))
 			return;
 
-		bool value = !instance.HasInvisibility();
+		bool value = !instance.PlayerObject.COTIsInvisible();
 		array< string > guids = {instance.GetGUID()};
 		SetInvisible(value, guids);
 	}
@@ -2290,7 +2290,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Freeze", instance))
 			return;
 
-		bool value = !instance.IsFrozen();
+		bool value = !instance.PlayerObject.COTIsFrozen();
 		array< string > guids = {instance.GetGUID()};
 
 		SetFreeze(value, guids);
