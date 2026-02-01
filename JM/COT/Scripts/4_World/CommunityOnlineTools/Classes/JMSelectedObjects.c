@@ -46,11 +46,13 @@ class JMSelectedObject : Managed
 class JMSelectedObjects
 {
 	private ref set< ref JMSelectedObject > m_Objects;
+	private ref set< Object > m_Objs;
 	private ref array< string > m_Players;
 
 	void JMSelectedObjects()
 	{
 		m_Objects = new set< ref JMSelectedObject >;
+		m_Objs = new set< Object >;
 		m_Players = new array< string >;
 
 		JMScriptInvokers.ADD_OBJECT.Insert( AddObject );
@@ -65,18 +67,19 @@ class JMSelectedObjects
 
 	bool IsObjectSelected( notnull Object obj )
 	{
-		for ( int i = 0; i < m_Objects.Count(); ++i )
-		{
-			if ( m_Objects[i].Equals( obj ) )
-				return true;
-		}
+		if (m_Objs.Find( obj ) > -1)
+			return true;
 
 		return false;
 	}
 
 	void AddObject( Object obj )
 	{
-		m_Objects.Insert( new JMSelectedObject( obj ) );
+		if (m_Objs.Find( obj ) == -1)
+		{
+			m_Objects.Insert( new JMSelectedObject( obj ) );
+			m_Objs.Insert( obj );
+		}
 	}
 
 	private void _RemoveObject( Object obj, int netLow, int netHigh )
@@ -90,18 +93,20 @@ class JMSelectedObjects
 	void ClearObjects()
 	{
 		m_Objects.Clear();
+		m_Objs.Clear();
 	}
 
 	bool RemoveObject( notnull Object obj )
 	{
-		foreach ( int i, JMSelectedObject selectedObj: m_Objects )
+		int index = m_Objs.Find( obj );
+		
+		if (index > -1)
 		{
-			if ( selectedObj.Equals( obj ) )
-			{
-				m_Objects.Remove( i );
-				return true;
-			}
+			m_Objects.Remove( index );
+			m_Objs.Remove( index );
+			return true;
 		}
+
 		return false;
 	}
 
@@ -112,6 +117,7 @@ class JMSelectedObjects
 			if ( selectedObj.Equals( netLow, netHigh ) )
 			{
 				m_Objects.Remove( i );
+				m_Objs.Remove( i );
 				return true;
 			}
 		}
