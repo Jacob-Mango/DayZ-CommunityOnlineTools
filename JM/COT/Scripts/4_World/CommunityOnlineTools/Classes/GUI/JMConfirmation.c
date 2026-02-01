@@ -37,8 +37,10 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	private string m_EditBoxValue;
 
-	private int m_ButtonIdPressed;
-	private int m_ButtonIdOffset;
+	private int m_ButtonIdPressed;  //! DEPRECATED
+	private int m_ButtonIdOffset;  //! DEPRECATED
+
+	string m_SelectedCallback;
 
 	void JMConfirmation() 
 	{
@@ -104,6 +106,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 	protected void CallCallback( string callback )
 	{
+		m_SelectedCallback = callback;
+
 		if ( callback != "" )
 		{
 			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
@@ -182,7 +186,10 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		}
 		
 		if (btnIdOffset != -1)
+		{
+			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
 			m_ButtonIdOffset = btnIdOffset;
+		}
 
 		OnShow();
 
@@ -226,7 +233,10 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		}
 		
 		if (btnIdOffset != -1)
+		{
+			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
 			m_ButtonIdOffset = btnIdOffset;
+		}
 
 		OnShow();
 
@@ -279,7 +289,10 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		}
 
 		if (btnIdOffset != -1)
+		{
+			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
 			m_ButtonIdOffset = btnIdOffset;
+		}
 
 		OnShow();
 
@@ -344,9 +357,41 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		return m_EditBoxValue;
 	}
 
+	//bool GetEditBoxValueFloat(out float value, float min = -float.MAX, float max = float.MAX)
+	bool GetEditBoxValueFloat(out float value, float min = -3.40282e+38, float max = 3.40282e+38)
+	{
+		if ( m_EditBoxValue == "" )
+			return false;
+
+		value = m_EditBoxValue.ToFloat();
+		if (value < min || value > max)
+			return false;
+
+		return true;
+	}
+
+	//bool GetEditBoxValueInt(out int value, int min = int.MIN, int max = int.MAX)
+	bool GetEditBoxValueInt(out int value, int min = -2147483648, int max = 2147483647)
+	{
+		if ( m_EditBoxValue == "" )
+			return false;
+
+		value = m_EditBoxValue.ToFloat();
+		if (value < min || value > max)
+			return false;
+
+		return true;
+	}
+
 	int GetSelectedID()
 	{
+		ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
 		return m_ButtonIdPressed;
+	}
+
+	string GetSelectedCallback()
+	{
+		return m_SelectedCallback;
 	}
 
 	Widget GetLayoutRoot() 
