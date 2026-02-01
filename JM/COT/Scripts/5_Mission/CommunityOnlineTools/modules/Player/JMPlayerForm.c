@@ -839,7 +839,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_EVERYTHING", "Strip", "#STR_COT_OBJECT_MODULE_INVENTORY", "StripInventory" );
+		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_EVERYTHING", "Strip", "#STR_COT_CARGO_ONLY", "ClearCargo" );
 	}
 
 	void Strip(JMConfirmation confirmation = NULL)
@@ -878,12 +878,12 @@ class JMPlayerForm: JMFormBase
 		}		
 	}
 
-	void StripInventory(JMConfirmation confirmation = NULL)
+	void ClearCargo(JMConfirmation confirmation = NULL)
 	{
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "StripInventoryConfirm");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "ClearCargoConfirm");
 	}
 
-	void StripInventoryConfirm(JMConfirmation confirmation = NULL)
+	void ClearCargoConfirm(JMConfirmation confirmation = NULL)
 	{
 		int btnId = -1;
 		if (confirmation)
@@ -899,17 +899,17 @@ class JMPlayerForm: JMFormBase
 			// Selected
 			case 2:
 			case 5:
-				m_Module.StripInventory( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+				m_Module.ClearCargo( {JM_GetSelected().GetPlayersOrSelf()[0]} );
 			break;
 			// Everyone
 			case 3:
-				m_Module.StripInventory( JM_GetSelected().GetPlayers() );
+				m_Module.ClearCargo( JM_GetSelected().GetPlayers() );
 			break;
 			// Self
 			default:
 			case -1:
 			case 6:
-				m_Module.StripInventory( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+				m_Module.ClearCargo( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 			break;
 		}		
 	}

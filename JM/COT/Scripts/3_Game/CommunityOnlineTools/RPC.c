@@ -184,7 +184,7 @@ enum JMPlayerModuleRPC
 	SetBrokenLegs,
 	Heal,
 	Strip,
-	StripInventory,
+	ClearCargo,
 	Dry,
 	Kick,
 	KickMessage,
