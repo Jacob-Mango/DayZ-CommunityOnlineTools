@@ -193,7 +193,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 		return Math.Asin( a ) / Math.Acos( a );
 	}
 
-	private vector Player_GetPosition()
+	vector Player_GetTopOfHeadPosition()
 	{
 		Human man;
 		if ( !Class.CastTo( man, Info.target ) )
@@ -206,7 +206,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 			return man.GetPosition() + "0 1.1 0";
 		}
 
-		vector position = man.GetPosition() + "0 1.85 0";
+		vector position = man.GetPosition() + "0 1.8 0";
 
 		int bone = man.GetBoneIndexByName( "Head" );
 
@@ -222,13 +222,7 @@ class JMESPWidgetHandler: ScriptedWidgetEventHandler
 	{
 		if ( Info.target )
 		{
-			if ( Info.type.IsInherited( JMESPViewTypePlayer ) )
-			{
-				return Player_GetPosition();
-			} else
-			{
-				return Info.target.GetPosition();
-			}
+			return Info.target.GetPosition();
 		}
 
 		return m_LastPosition;
