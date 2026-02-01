@@ -131,7 +131,7 @@ class JMSelectedObjects
 		PlayerBase player;
 		foreach (JMSelectedObject selectedObj: m_Objects)
 		{
-			if (!Class.CastTo(player, selectedObj) || !player.GetIdentity())
+			if (!Class.CastTo(player, selectedObj.obj) || !player.GetIdentity())
 				objects.Insert(selectedObj);
 		}
 		
