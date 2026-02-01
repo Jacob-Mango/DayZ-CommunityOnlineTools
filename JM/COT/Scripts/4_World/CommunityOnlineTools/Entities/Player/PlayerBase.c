@@ -860,31 +860,22 @@ modded class PlayerBase
 	void COT_RemoveAllItems()
 	{
 		ItemBase item;
-		array<EntityAI> entities = {};
-		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
-
-		foreach (EntityAI entity: entities)
+		for (int i = GetInventory().AttachmentCount() - 1; i >= 0; --i)
 		{
-			if (entity != this && Class.CastTo(item, entity))
+			if (Class.CastTo(item, GetInventory().GetAttachmentFromIndex(i)))
 				item.DeleteSafe();
 		}
 	}
 
-	void COT_WipeInventory()
+	void COT_ClearCargo()
 	{
-		ItemBase item;
 		array<EntityAI> entities = {};
 		GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, entities);
 
 		foreach (EntityAI entity: entities)
 		{
-			if (entity != this && Class.CastTo(item, entity))
-			{
-				if (item.GetInventory().IsAttachment())
-					continue;
-
-				item.DeleteSafe();
-			}
+			if (entity && entity.GetInventory().IsInCargo())
+				entity.DeleteSafe();
 		}
 	}
 

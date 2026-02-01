@@ -16,7 +16,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedStamina" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.StripInventory" );		
+		GetPermissionsManager().RegisterPermission( "Admin.Player.ClearCargo" );		
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
@@ -224,8 +224,8 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.Strip:
 			RPC_Strip( ctx, sender, target );
 			break;
-		case JMPlayerModuleRPC.StripInventory:
-			RPC_StripInventory( ctx, sender, target );
+		case JMPlayerModuleRPC.ClearCargo:
+			RPC_ClearCargo( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Dry:
 			RPC_Dry( ctx, sender, target );
@@ -2687,20 +2687,20 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_Strip( guids, senderRPC, instance );
 	}
 
-	void StripInventory( array< string > guids )
+	void ClearCargo( array< string > guids )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_StripInventory( guids, NULL );
+			Exec_ClearCargo( guids, NULL );
 		} else
 		{
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.StripInventory, true, NULL );
+			rpc.Send( NULL, JMPlayerModuleRPC.ClearCargo, true, NULL );
 		}
 	}
 
-	private void Exec_StripInventory( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_ClearCargo( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
@@ -2710,27 +2710,27 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.COT_WipeInventory();
+			player.COT_ClearCargo();
 
-			GetCommunityOnlineToolsBase().Log( ident, "Stripped Inventory [guid=" + players[i].GetGUID() + "]" );
+			GetCommunityOnlineToolsBase().Log( ident, "Cleared Cargo [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Inventory", instance, "Stripped Inventory " + players[i].FormatSteamWebhook() );
+			SendWebhook( "Inventory", instance, "Cleared Cargo " + players[i].FormatSteamWebhook() );
 
 			players[i].Update();
 		}
 	}
 
-	private void RPC_StripInventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_ClearCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.StripInventory", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.ClearCargo", senderRPC, instance ) )
 			return;
 
-		Exec_StripInventory( guids, senderRPC, instance );
+		Exec_ClearCargo( guids, senderRPC, instance );
 	}
 	
 	void Dry( array< string > guids )
