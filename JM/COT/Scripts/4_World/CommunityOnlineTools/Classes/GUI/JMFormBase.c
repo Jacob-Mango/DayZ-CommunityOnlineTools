@@ -270,10 +270,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return null;
 	}
 	
-	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool callbackOnNoConfirmation = true)
+	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
 	{
 		ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
-		if (CreateAdvancedPlayerConfirm(title, funcName, funcName, funcName, callbackOnNoConfirmation))
+		if (CreateAdvancedPlayerConfirm(title, funcName, funcName, funcName, confirmSelf, callbackOnNoConfirmation))
 			return true;
 		return false;
 	}
