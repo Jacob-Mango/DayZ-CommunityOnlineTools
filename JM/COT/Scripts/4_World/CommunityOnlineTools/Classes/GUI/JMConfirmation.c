@@ -376,7 +376,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( m_EditBoxValue == "" )
 			return false;
 
-		value = m_EditBoxValue.ToFloat();
+		value = m_EditBoxValue.ToInt();
 		if (value < min || value > max)
 			return false;
 
