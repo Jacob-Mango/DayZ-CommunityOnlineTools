@@ -597,20 +597,20 @@ class UIActionManager
 			UIAMError("No widget created", widget, parent, layout);
 			return false;
 		}
+		else if (widget.ToString() == "INVALID")
+		{
+			UIAMError("MEMORY CORRUPTION widget == INVALID", widget, parent, layout);
+			return false;
+		}
 		else if (widget == parent)
 		{
 			UIAMError("MEMORY CORRUPTION widget == parent", widget, parent, layout);
 			return false;
 		}
-		else if (widgetName)
+		else if (widgetName && widget.GetName() != widgetName)
 		{
-			if (widget.ToString() != "INVALID")
-			{
-				if (widget.GetName() != widgetName)
-				{
-					UIAMError(string.Format("MEMORY CORRUPTION unexpected widget name \"%1\" != \"%2\"", widget.GetName(), widgetName), widget, parent, layout);
-				}
-			}
+			UIAMError(string.Format("MEMORY CORRUPTION unexpected widget name \"%1\" != \"%2\"", widget.GetName(), widgetName), widget, parent, layout);
+			return false;
 		}
 
 		return true;
