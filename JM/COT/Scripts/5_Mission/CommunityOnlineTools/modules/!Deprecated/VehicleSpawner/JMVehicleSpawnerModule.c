@@ -78,14 +78,6 @@ class JMVehicleSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	override void OnMissionFinish()
-	{
-		super.OnMissionFinish();
-
-		if ( IsMissionHost() && settings )
-			settings.Save();
-	}
-
 	array< string > GetVehicles()
 	{
 		return meta.Vehicles;
