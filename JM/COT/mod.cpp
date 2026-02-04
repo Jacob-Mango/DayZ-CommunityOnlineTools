@@ -8,4 +8,4 @@ overview = "This is the first set of GUI based admin tools created by the develo
 action = "https://github.com/Jacob-Mango/DayZ-CommunityOnlineTools";
 author = "COT Mod Team";
 authorID = "76561198103677868";
-version = "2026.1.171039";
+version = "2026.2.041508";
