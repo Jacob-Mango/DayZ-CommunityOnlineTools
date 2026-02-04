@@ -194,8 +194,6 @@ class JMWebhookModule: JMModuleBase
 		message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
 
 		Post( "ServerShutdown", message );
-		
-		m_Settings.Save();
 	}
 
 	void SaveConnections()

@@ -320,8 +320,6 @@ class JMPermissionManager
 		inst = Players.Get( guid );
 		if ( inst )
 		{
-			inst.Save();
-
 			Players.Remove( guid );
 
 			RemoveSyncedToClient(guid);

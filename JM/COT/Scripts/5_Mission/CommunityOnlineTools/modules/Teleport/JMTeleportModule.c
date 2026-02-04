@@ -98,14 +98,6 @@ class JMTeleportModule: JMRenderableModuleBase
 		super.OnSettingsUpdated();
 	}
 
-	override void OnMissionFinish()
-	{
-		super.OnMissionFinish();
-
-		if ( g_Game.IsServer() && m_Settings )
-			m_Settings.Save();
-	}
-
 	override void RegisterKeyMouseBindings() 
 	{
 		super.RegisterKeyMouseBindings();

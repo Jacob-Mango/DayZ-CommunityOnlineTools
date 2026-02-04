@@ -78,15 +78,6 @@ class JMItemSetSpawnerModule: JMRenderableModuleBase
 		}
 	}
 
-	override void OnMissionFinish()
-	{
-		super.OnMissionFinish();
-
-		//! TODO: Only save if changed
-		if ( !g_Game.IsClient() && settings )
-			settings.Save();
-	}
-
 	override int GetRPCMin()
 	{
 		return JMItemSetSpawnerModuleRPC.INVALID;
