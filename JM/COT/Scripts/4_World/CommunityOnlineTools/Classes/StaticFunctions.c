@@ -24,6 +24,11 @@ static void COTCreateLocalAdminNotification( StringLocaliser message, string ico
 
 static vector GetCurrentPosition()
 {
+	if ( FreeDebugCamera.GetInstance() && FreeDebugCamera.GetInstance().IsActive() ) 
+	{
+		return FreeDebugCamera.GetInstance().GetPosition();
+	}
+	
 	if ( CurrentActiveCamera != NULL )
 	{
 		return CurrentActiveCamera.GetPosition();

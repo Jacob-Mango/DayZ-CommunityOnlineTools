@@ -6,7 +6,8 @@ class UIActionManager
 		string layout = string.Format("JM/COT/GUI/layouts/uiactions/Wrappers/%1/GridSpacer%2.layout", rows, columns);
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent, layout);
+		if (!CheckWidget(widget, parent, layout, "spacer"))
+			return null;
 
 		GridSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
@@ -23,7 +24,8 @@ class UIActionManager
 	{
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIWrapSpacer"))
+			return null;
 
 		WrapSpacerWidget spacer;
 		if (Class.CastTo(spacer, widget))
@@ -55,27 +57,33 @@ class UIActionManager
 
 	static Widget CreateActionRows( notnull Widget parent )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionContentRows.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionContentRows"))
+			return null;
 
 		return widget;
 	}
 	
 	static Widget CreateSpacer( notnull Widget parent )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UISpacer.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UISpacer.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UISpacer"))
+			return null;
 
 		return widget;
 	}
 
 	static Widget CreatePanel( notnull Widget parent, int color = 0x00000000, float height = -1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIPanel.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIPanel"))
+			return null;
 
 		widget.SetColor( color );
 
@@ -89,9 +97,11 @@ class UIActionManager
 
 	static UIActionButton CreateButton( notnull Widget parent, string button, Class instance, string funcname, float width = 1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionButton.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionButton"))
+			return null;
 
 		UIActionButton action;
 		widget.GetScript( action );
@@ -116,9 +126,11 @@ class UIActionManager
 
 	static UIActionButtonToggle CreateButtonToggle( notnull Widget parent, string buttonOff, string buttonOn, Class instance, string funcname, float width = 1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButtonToggle.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionButtonToggle.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionButtonToggle"))
+			return null;
 
 		UIActionButtonToggle action;
 		widget.GetScript( action );
@@ -143,9 +155,11 @@ class UIActionManager
 
 	static UIActionNavigateButton CreateNavButton( notnull Widget parent, string button, string imageR, string imageL, Class instance, string funcname, float width = 1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionNavigateButton.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionNavigateButton"))
+			return null;
 
 		UIActionNavigateButton action;
 		widget.GetScript( action );
@@ -175,17 +189,18 @@ class UIActionManager
 		if (button != "" && instance != NULL && funcname != "")
 			hasButton = true;
 
-		string layoutName;
+		string widgetName;
 		if (hasButton)
-			layoutName = "UIActionEditableTextPreviewButton";
+			widgetName = "UIActionEditableTextPreviewButton";
 		else
-			layoutName = "UIActionEditableTextPreview";
+			widgetName = "UIActionEditableTextPreview";
 
 		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
-		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", widgetName);
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent, layout);
+		if (!CheckWidget(widget, parent, layout, widgetName))
+			return null;
 
 		UIActionEditableTextPreview action;
 		widget.GetScript( action );
@@ -214,17 +229,18 @@ class UIActionManager
 		if (button != "" && instance != NULL && funcname != "")
 			hasButton = true;
 
-		string layoutName;
+		string widgetName;
 		if (hasButton)
-			layoutName = "UIActionEditableTextButton";
+			widgetName = "UIActionEditableTextButton";
 		else
-			layoutName = "UIActionEditableText";
+			widgetName = "UIActionEditableText";
 
 		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
-		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", widgetName);
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent, layout);
+		if (!CheckWidget(widget, parent, layout, widgetName))
+			return null;
 
 		UIActionEditableText action;
 		widget.GetScript( action );
@@ -253,17 +269,18 @@ class UIActionManager
 		if (button != "" && instance != NULL && funcname != "")
 			hasButton = true;
 
-		string layoutName;
+		string widgetName;
 		if (hasButton)
-			layoutName = "UIActionEditableRichTextButton";
+			widgetName = "UIActionEditableRichTextButton";
 		else
-			layoutName = "UIActionEditableRichText";
+			widgetName = "UIActionEditableRichText";
 
 		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
-		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", widgetName);
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent, layout);
+		if (!CheckWidget(widget, parent, layout, widgetName))
+			return null;
 
 		UIActionEditableRichText action;
 		widget.GetScript( action );
@@ -288,9 +305,11 @@ class UIActionManager
 
 	static UIActionDropdownList CreateDropdownBox( notnull Widget parent, Widget dropDownParent, string label, array< string > values, Class instance = NULL, string funcname = "" )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionDropdownList.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionDropdownList"))
+			return null;
 
 		UIActionDropdownList action;
 		widget.GetScript( action );
@@ -322,17 +341,18 @@ class UIActionManager
 		if (button != "" && instance != NULL && funcname != "")
 			hasButton = true;
 
-		string layoutName;
+		string widgetName;
 		if (hasButton)
-			layoutName = "UIActionEditableVectorButton";
+			widgetName = "UIActionEditableVectorButton";
 		else
-			layoutName = "UIActionEditableVector";
+			widgetName = "UIActionEditableVector";
 
 		//! Assemble path outside of call to CreateWidgets to work-around https://feedback.bistudio.com/T183345
-		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", layoutName);
+		string layout = string.Format("JM/COT/GUI/layouts/uiactions/%1.layout", widgetName);
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent, layout);
+		if (!CheckWidget(widget, parent, layout, widgetName))
+			return null;
 
 		UIActionEditableVector action;
 		widget.GetScript( action );
@@ -356,9 +376,11 @@ class UIActionManager
 
 	static UIActionCheckbox CreateCheckbox( notnull Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionCheckbox"))
+			return null;
 
 		UIActionCheckbox action;
 		widget.GetScript( action );
@@ -384,9 +406,11 @@ class UIActionManager
 
 	static UIActionText CreateText( notnull Widget parent, string label, string text = "", Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionText.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionText"))
+			return null;
 
 		UIActionText action;
 		widget.GetScript( action );
@@ -413,9 +437,11 @@ class UIActionManager
 
 	static UIActionSelectBox CreateSelectionBox( notnull Widget parent, string label, notnull array< string > options, Class instance = NULL, string funcname = "" )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionSelectBox.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionSelectBox"))
+			return null;
 
 		UIActionSelectBox action;
 		widget.GetScript( action );
@@ -436,9 +462,11 @@ class UIActionManager
 
 	static UIActionSlider CreateSlider( notnull Widget parent, string label, float min, float max, Class instance = NULL, string funcname = "" )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionSlider.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionSlider"))
+			return null;
 
 		UIActionSlider action;
 		widget.GetScript( action );
@@ -460,9 +488,11 @@ class UIActionManager
 
 	static UIActionScroller CreateScroller( notnull Widget parent )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionScroller.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionScroller"))
+			return null;
 
 		UIActionScroller action;
 		widget.GetScript( action );
@@ -477,9 +507,11 @@ class UIActionManager
 
 	static UIActionImage CreateImage( notnull Widget parent, string image, Class instance = NULL, string funcname = "", UIActionHAlign lha = UIActionHAlign.LEFT, UIActionHAlign lva = UIActionHAlign.CENTER, UIActionHAlign tha = UIActionHAlign.RIGHT, UIActionHAlign tva = UIActionHAlign.CENTER )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImage.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionImage.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionImage"))
+			return null;
 
 		UIActionImage action;
 		widget.GetScript( action );
@@ -503,9 +535,11 @@ class UIActionManager
 
 	static UIActionImageButton CreateImageButton( notnull Widget parent, string image, Class instance, string funcname, float width = 1 )
 	{
-		Widget widget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionImageButton.layout", parent );
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionImageButton.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
 
-		CheckWidget(widget, parent);
+		if (!CheckWidget(widget, parent, layout, "UIActionImageButton"))
+			return null;
 
 		UIActionImageButton action;
 		widget.GetScript( action );
@@ -556,12 +590,30 @@ class UIActionManager
 		widget.SetSize( w, h * scaleY );
 	}
 
-	static void CheckWidget(Widget widget, Widget parent, string layout = string.Empty)
+	static bool CheckWidget(Widget widget, Widget parent, string layout = string.Empty, string widgetName = string.Empty)
 	{
 		if (!widget)
+		{
 			UIAMError("No widget created", widget, parent, layout);
+			return false;
+		}
+		else if (widget.ToString() == "INVALID")
+		{
+			UIAMError("MEMORY CORRUPTION widget == INVALID", widget, parent, layout);
+			return false;
+		}
 		else if (widget == parent)
-			UIAMError("widget == parent", widget, parent, layout);
+		{
+			UIAMError("MEMORY CORRUPTION widget == parent", widget, parent, layout);
+			return false;
+		}
+		else if (widgetName && widget.GetName() != widgetName)
+		{
+			UIAMError(string.Format("MEMORY CORRUPTION unexpected widget name \"%1\" != \"%2\"", widget.GetName(), widgetName), widget, parent, layout);
+			return false;
+		}
+
+		return true;
 	}
 
 	static void UIAMError(string err, Widget widget, Widget parent, string layout = string.Empty)

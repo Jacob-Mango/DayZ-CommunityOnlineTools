@@ -325,27 +325,27 @@ class JMSpectatorCamera: JMCameraBase
 			#endif
 			}
 
-			if (!weaponRaised && m_COT_RaisedTimeout > 0.0)
-			{
-			#ifdef DIAG_DEVELOPER
-				bool wasRaised;
-				if (m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD)
-					wasRaised = true;
-			#endif
-
-				m_COT_RaisedTimeout -= timeslice;
-
-			#ifdef DIAG_DEVELOPER
-				if (wasRaised && m_COT_RaisedTimeout <= RAISED_TIME_THRESHOLD)
-					g_Game.Chat("COT dollycam: Raised timeout", "colorFriendly");
-			#endif
-			}
-
 			m_JM_IsADS = IsActive() && weaponRaised && vector.DistanceSq(eyePos, headPos) < 0.04;
 		}
 		else
 		{
 			m_JM_IsADS = false;
+		}
+
+		if (!weaponRaised && m_COT_RaisedTimeout > 0.0)
+		{
+		#ifdef DIAG_DEVELOPER
+			bool wasRaised;
+			if (m_COT_RaisedTimeout > RAISED_TIME_THRESHOLD)
+				wasRaised = true;
+		#endif
+
+			m_COT_RaisedTimeout -= timeslice;
+
+		#ifdef DIAG_DEVELOPER
+			if (wasRaised && m_COT_RaisedTimeout <= RAISED_TIME_THRESHOLD)
+				g_Game.Chat("COT dollycam: Raised timeout", "colorFriendly");
+		#endif
 		}
 
 		m_COT_WasRaised = weaponRaised;

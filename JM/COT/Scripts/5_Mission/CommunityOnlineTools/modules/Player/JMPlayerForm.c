@@ -839,38 +839,47 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "Strip");
+		CreateConfirmation_Three( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_EVERYTHING", "StripConfirm", "#STR_COT_CARGO_ONLY", "ClearCargoConfirm" );
 	}
 
-	void Strip(JMConfirmation confirmation = NULL)
+	void StripConfirm(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Strip( {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Strip( JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.Strip( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}		
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "StripMulti", "StripSingle", "StripSelf");
+	}
+
+	void StripMulti(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Strip( JM_GetSelected().GetPlayers() );
+	}
+
+	void StripSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Strip( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void StripSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Strip( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
+	}
+
+	void ClearCargoConfirm(JMConfirmation confirmation = NULL)
+	{
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", "ClearCargoMulti", "ClearCargoSingle", "ClearCargoSelf");
+	}
+
+	void ClearCargoMulti(JMConfirmation confirmation = NULL)
+	{
+		m_Module.ClearCargo( JM_GetSelected().GetPlayers() );
+	}
+
+	void ClearCargoSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.ClearCargo( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void ClearCargoSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.ClearCargo( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_DryPlayer( UIEvent eid, UIActionBase action )
@@ -878,38 +887,22 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", "Dry", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", "DryMulti", "DrySingle", "DrySelf", false);
 	}
 
-	void Dry(JMConfirmation confirmation = NULL)
+	void DryMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Dry( {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Dry( JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.Dry( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.Dry( JM_GetSelected().GetPlayers() );
+	}
+
+	void DrySingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Dry( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void DrySelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Dry( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_KillPlayer( UIEvent eid, UIActionBase action )
@@ -917,38 +910,22 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", "KillPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", "KillPlayerMulti", "KillPlayerSingle", "KillPlayerSelf");
 	}
 
-	void KillPlayer(JMConfirmation confirmation = NULL)
+	void KillPlayerMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.SetHealth( 0, {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.SetHealth( 0, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.SetHealth( 0, JM_GetSelected().GetPlayers() );
+	}
+
+	void KillPlayerSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.SetHealth( 0, {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void KillPlayerSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.SetHealth( 0, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_VomitPlayer( UIEvent eid, UIActionBase action )
@@ -956,28 +933,43 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 		
-		VomitPlayer();
-
-		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", "VomitPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", "VomitPlayerMultiConfirm", "VomitPlayerSingleConfirm", "VomitPlayerSelfConfirm");
 	}
 
-	void VomitPlayer()
+	void VomitPlayerMultiConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_HEADER", "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerConfirm" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_HEADER", "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerMulti" );
 	}
 
-	void VomitPlayerConfirm(JMConfirmation confirmation)
+	void VomitPlayerSingleConfirm()
 	{
-		string text = confirmation.GetEditBoxValue();
-		if ( text == "" )
-			return;
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_HEADER", "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerSingle" );
+	}
 
-		float value = text.ToFloat();
-		if (value < 1 || value > 120)
-			return;
+	void VomitPlayerSelfConfirm()
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_HEADER", "#STR_COT_PLAYER_MODULE_SET_VOMIT_DURATION_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "VomitPlayerSelf" );
+	}
 
-		m_Module.Vomit(value, JM_GetSelected().GetPlayers() );
+	void VomitPlayerMulti(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 1, 120))
+			m_Module.Vomit(value, JM_GetSelected().GetPlayers() );
+	}
+
+	void VomitPlayerSingle(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 1, 120))
+			m_Module.Vomit(value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void VomitPlayerSelf(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 1, 120))
+			m_Module.Vomit(value, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_ScalePlayer( UIEvent eid, UIActionBase action )
@@ -985,28 +977,43 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		ScalePlayer();
-
-		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", "ScalePlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", "ScalePlayerMultiConfirm", "ScalePlayerSingleConfirm", "ScalePlayerSelfConfirm", false);
 	}
 
-	void ScalePlayer()
+	void ScalePlayerMultiConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerConfim" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerMulti" );
 	}
 
-	void ScalePlayerConfim(JMConfirmation confirmation)
+	void ScalePlayerSingleConfirm()
 	{
-		string text = confirmation.GetEditBoxValue();
-		if ( text == "" )
-			return;
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerSingle" );
+	}
 
-		float value = text.ToFloat();
-		if (value < 0.1 || value > 10)
-			value = 1;
+	void ScalePlayerSelfConfirm()
+	{
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerSelf" );
+	}
 
-		m_Module.SetScale( value, JM_GetSelected().GetPlayers() );
+	void ScalePlayerMulti(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+			m_Module.SetScale( value, JM_GetSelected().GetPlayers() );
+	}
+
+	void ScalePlayerSingle(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+			m_Module.SetScale( value, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void ScalePlayerSelf(JMConfirmation confirmation)
+	{
+		float value;
+		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+			m_Module.SetScale( value, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_SendMessage( UIEvent eid, UIActionBase action )
@@ -1014,33 +1021,64 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		SendMessages();
-
-		//! TODO: Figure this one out - Multi Options Options wasnt part of my plan x)
-		//CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", "SendMessage", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", "SendMessageMultiConfirm", "SendMessageSingleConfirm", "SendMessageSelfConfirm", false);
 	}
 
-	void SendMessages()
+	void SendMessageMultiConfirm()
 	{
-		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessagesConfirm", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifs" );
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessageMulti", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifMulti" );
 	}
 
-	void SendMessagesConfirm(JMConfirmation confirmation)
+	void SendMessageSingleConfirm()
 	{
-		string text = confirmation.GetEditBoxValue();
-		if ( text == "" )
-			return;
-
-		m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessageSingle", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifSingle" );
 	}
 
-	void SendNotifs(JMConfirmation confirmation)
+	void SendMessageSelfConfirm()
+	{
+		CreateConfirmation_Three( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_CONFIRM_MESSAGE", "SendMessageSelf", "#STR_COT_CONFIRM_NOTIFICATION", "SendNotifSelf" );
+	}
+
+	void SendMessageMulti(JMConfirmation confirmation)
 	{
 		string text = confirmation.GetEditBoxValue();
-		if ( text == "" )
-			return;
+		if ( text != "" )
+			m_Module.DoMessage( JM_GetSelected().GetPlayers(), text);
+	}
 
-		m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
+	void SendMessageSingle(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text != "" )
+			m_Module.DoMessage( {JM_GetSelected().GetPlayers(true)[0]}, text);
+	}
+
+	void SendMessageSelf(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text != "" )
+			m_Module.DoMessage( {GetPermissionsManager().GetClientPlayer().GetGUID()}, text);
+	}
+
+	void SendNotifMulti(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text != "" )
+			m_Module.DoNotif( JM_GetSelected().GetPlayers(), text);
+	}
+
+	void SendNotifSingle(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text != "" )
+			m_Module.DoNotif( {JM_GetSelected().GetPlayers(true)[0]}, text);
+	}
+
+	void SendNotifSelf(JMConfirmation confirmation)
+	{
+		string text = confirmation.GetEditBoxValue();
+		if ( text != "" )
+			m_Module.DoNotif( {GetPermissionsManager().GetClientPlayer().GetGUID()}, text);
 	}
 
 	void Click_CopyExpLoadout( UIEvent eid, UIActionBase action )
@@ -1060,45 +1098,32 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerMultiConfirm", "KickPlayerSingleConfirm", "KickPlayerSelfConfirm", false);
 	}
 
-	void KickPlayer(JMConfirmation confirmation = NULL)
+	void KickPlayerMultiConfirm(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerConfirm" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerMulti" );
 	}
 
-	void KickPlayerConfirm(JMConfirmation confirmation)
+	void KickPlayerSingleConfirm(JMConfirmation confirmation = NULL)
 	{
-		//! TODO: This is awful and confusing. The whole GetSelectedID stuff should be removed again, there's a reason the callbacks should be separate.
-		switch(confirmation.GetSelectedID())
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Kick( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				//! TODO: Add a error notification here !
-				// You cant kick yourself
-			break;
-		}
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_KICK_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", "KickPlayerSingle" );
+	}
+
+	void KickPlayerSelfConfirm(JMConfirmation confirmation = NULL)
+	{
+		COTCreateLocalAdminNotification( new StringLocaliser( "You can't kick yourself" ) );
+	}
+
+	void KickPlayerMulti(JMConfirmation confirmation)
+	{
+		m_Module.Kick( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
+	}
+
+	void KickPlayerSingle(JMConfirmation confirmation)
+	{
+		m_Module.Kick( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
 	}
 
 	void Click_BanPlayer( UIEvent eid, UIActionBase action )
@@ -1106,40 +1131,32 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayer");
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerMultiConfirm", "BanPlayerSingleConfirm", "BanPlayerSelfConfirm", false);
 	}
 
-	void BanPlayer()
+	void BanPlayerMultiConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerConfirm" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerMulti" );
 	}
 
-	void BanPlayerConfirm(JMConfirmation confirmation)
+	void BanPlayerSingleConfirm()
 	{
-		switch(confirmation.GetSelectedID())
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				//! TODO: Add a error notification here !
-				// You cant kick yourself
-			break;
-		}
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_HEADER", "#STR_COT_PLAYER_MODULE_BAN_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", "BanPlayerSingle" );
+	}
+
+	void BanPlayerSelfConfirm(JMConfirmation confirmation)
+	{
+		COTCreateLocalAdminNotification( new StringLocaliser( "You can't ban yourself" ) );
+	}
+
+	void BanPlayerMulti(JMConfirmation confirmation)
+	{
+		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
+	}
+
+	void BanPlayerSingle(JMConfirmation confirmation)
+	{
+		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )
@@ -1147,38 +1164,22 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", "StopBleeding", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", "StopBleedingMulti", "StopBleedingSingle", "StopBleedingSelf", false);
 	}
 
-	void StopBleeding(JMConfirmation confirmation = NULL)
+	void StopBleedingMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.StopBleeding( {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.StopBleeding( JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.StopBleeding( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.StopBleeding( JM_GetSelected().GetPlayers() );
+	}
+
+	void StopBleedingSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.StopBleeding( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void StopBleedingSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.StopBleeding( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_HealPlayer( UIEvent eid, UIActionBase action )
@@ -1186,38 +1187,22 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", "Heal", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", "HealMulti", "HealSingle", "HealSelf", false);
 	}
 
-	void Heal(JMConfirmation confirmation = NULL)
+	void HealMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Heal( {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Heal( JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.Heal( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.Heal( JM_GetSelected().GetPlayers() );
+	}
+
+	void HealSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Heal( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void HealSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Heal( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_SpectatePlayer( UIEvent eid, UIActionBase action )
@@ -1261,45 +1246,34 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", "SetPositionTeleport", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", "SetPositionMulti", "SetPositionSingle", "SetPositionSelf", false);
 	}
 
-	void SetPositionTeleport(JMConfirmation confirmation = NULL)
+	vector GetPosition()
 	{
-		UpdateLastChangeTime();
-
 		vector pos = vector.Zero;
 		pos[0] = m_PositionX.GetText().ToFloat();
 		pos[1] = m_PositionY.GetText().ToFloat();
 		pos[2] = m_PositionZ.GetText().ToFloat();
+		return pos;
+	}
 
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.TeleportTo(pos, {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.TeleportTo(pos, JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.TeleportTo(pos, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+	void SetPositionMulti(JMConfirmation confirmation = NULL)
+	{
+		UpdateLastChangeTime();
+		m_Module.TeleportTo(GetPosition(), JM_GetSelected().GetPlayers() );
+	}
+
+	void SetPositionSingle(JMConfirmation confirmation = NULL)
+	{
+		UpdateLastChangeTime();
+		m_Module.TeleportTo(GetPosition(), {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void SetPositionSelf(JMConfirmation confirmation = NULL)
+	{
+		UpdateLastChangeTime();
+		m_Module.TeleportTo(GetPosition(), {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_TeleportToMe( UIEvent eid, UIActionBase action )
@@ -1307,51 +1281,28 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", "TeleportToMe", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", "TeleportToMeMulti", "TeleportToMeSingle", "TeleportToMeSelf", false);
 	}
 
-	void TeleportToMe(JMConfirmation confirmation = NULL)
+	void TeleportToMeMulti(JMConfirmation confirmation = NULL)
 	{
-		vector pos = vector.Zero;
+		vector pos = GetCurrentPosition();
+		if (pos != vector.Zero)
+			m_Module.TeleportTo(pos, JM_GetSelected().GetPlayers() );
+	}
 
-		if ( CurrentActiveCamera && CurrentActiveCamera.IsActive() )
-		{
-			pos = CurrentActiveCamera.GetPosition();
-		} else if ( GetPlayer() )
-		{
-			pos = GetPlayer().GetPosition();
-		} else
-		{
-			return;
-		}
+	void TeleportToMeSingle(JMConfirmation confirmation = NULL)
+	{
+		vector pos = GetCurrentPosition();
+		if (pos != vector.Zero)
+			m_Module.TeleportTo(pos, {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
 
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.TeleportTo(pos, {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.TeleportTo(pos, JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.TeleportTo(pos, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+	void TeleportToMeSelf(JMConfirmation confirmation = NULL)
+	{
+		vector pos = GetCurrentPosition();
+		if (pos != vector.Zero)
+			m_Module.TeleportTo(pos, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
     void Click_CopyPlayerName( UIEvent eid, UIActionBase action )
@@ -1469,38 +1420,22 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", "TeleportToPrevious", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", "TeleportPreviousMulti", "TeleportPreviousSingle", "TeleportPreviousSelf", false);
 	}
 
-	void TeleportToPrevious(JMConfirmation confirmation = NULL)
+	void TeleportPreviousMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.TeleportToPrevious( {JM_GetSelected().GetPlayersOrSelf()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.TeleportToPrevious( JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.TeleportToPrevious( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.TeleportToPrevious( JM_GetSelected().GetPlayers() );
+	}
+
+	void TeleportPreviousSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.TeleportToPrevious( {JM_GetSelected().GetPlayersOrSelf()[0]} );
+	}
+
+	void TeleportPreviousSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.TeleportToPrevious( {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void Click_RefreshStats( UIEvent eid, UIActionBase action )
