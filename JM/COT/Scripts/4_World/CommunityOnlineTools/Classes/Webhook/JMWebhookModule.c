@@ -87,13 +87,16 @@ class JMWebhookModule: JMModuleBase
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
 		{
-			CF.FormatErrorEx("No server config file set, using default serverdz.cfg", ErrorExSeverity.WARNING);
+			CF.FormatErrorEx("No server config file set, using default serverdz.cfg", ErrorExSeverity.INFO);
 			serverCfg = "serverdz.cfg";
 		}
 		else if (serverCfg.IndexOf("$profile:") != 0 && (serverCfg.Contains(":\\") || serverCfg.Contains(":/")))
 		{
-			CF.FormatErrorEx("Cannot resolve absolute path '%1', using default serverdz.cfg", ErrorExSeverity.WARNING, serverCfg);
-			serverCfg = "serverdz.cfg";
+			serverCfg.Replace("\\", "/");
+			TStringArray serverCfgFullPath = {};
+			serverCfg.Split("/", serverCfgFullPath);
+			serverCfg = serverCfgFullPath[serverCfgFullPath.Count() - 1];
+			CF.FormatErrorEx("Cannot resolve absolute path '%1', treating filename '%2' as relative to $currentdir", ErrorExSeverity.WARNING, serverCfgAbs, serverCfg);
 		}
 		else if (serverCfg != serverCfgAbs)
 		{
@@ -109,8 +112,16 @@ class JMWebhookModule: JMModuleBase
 				m_ServerHostName = entry.GetText();
 				CF.FormatErrorEx("Got hostname '%1' from '%2'", ErrorExSeverity.INFO, m_ServerHostName, serverCfg);
 			}
+			else
+			{
+				CF.FormatErrorEx("No hostname set in '%1', server name in Discord webhook messages will be empty", ErrorExSeverity.WARNING, serverCfg);
+			}
 
 			delete cfg;
+		}
+		else
+		{
+			CF.FormatErrorEx("Couldn't read '%1', server name in Discord webhook messages will be empty", ErrorExSeverity.WARNING, serverCfg);
 		}
 	#else
 		//! Client or singleplayer/offline mode
