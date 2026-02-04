@@ -16,6 +16,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.UnlimitedStamina" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Spectate" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Strip" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.ClearCargo" );		
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Dry" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.StopBleeding" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.BrokenLegs" );
@@ -222,6 +223,9 @@ class JMPlayerModule: JMRenderableModuleBase
 			break;
 		case JMPlayerModuleRPC.Strip:
 			RPC_Strip( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.ClearCargo:
+			RPC_ClearCargo( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.Dry:
 			RPC_Dry( ctx, sender, target );
@@ -1501,7 +1505,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.GodMode", instance))
 			return;
 
-		bool value = !instance.HasGodMode();
+		bool value = !instance.PlayerObject.COTHasGodMode();
 		array< string > guids = {instance.GetGUID()};
 		SetGodMode(value, guids);
 	}
@@ -1778,7 +1782,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Invisibility", instance))
 			return;
 
-		bool value = !instance.HasInvisibility();
+		bool value = !instance.PlayerObject.COTIsInvisible();
 		array< string > guids = {instance.GetGUID()};
 		SetInvisible(value, guids);
 	}
@@ -2290,7 +2294,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Freeze", instance))
 			return;
 
-		bool value = !instance.IsFrozen();
+		bool value = !instance.PlayerObject.COTIsFrozen();
 		array< string > guids = {instance.GetGUID()};
 
 		SetFreeze(value, guids);
@@ -2681,6 +2685,52 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_Strip( guids, senderRPC, instance );
+	}
+
+	void ClearCargo( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_ClearCargo( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.ClearCargo, true, NULL );
+		}
+	}
+
+	private void Exec_ClearCargo( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COT_ClearCargo();
+
+			GetCommunityOnlineToolsBase().Log( ident, "Cleared Cargo [guid=" + players[i].GetGUID() + "]" );
+
+			SendWebhook( "Inventory", instance, "Cleared Cargo " + players[i].FormatSteamWebhook() );
+
+			players[i].Update();
+		}
+	}
+
+	private void RPC_ClearCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.ClearCargo", senderRPC, instance ) )
+			return;
+
+		Exec_ClearCargo( guids, senderRPC, instance );
 	}
 	
 	void Dry( array< string > guids )

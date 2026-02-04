@@ -186,66 +186,103 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		return CreateConfirmation_Three( type, title, message, callBackOneName, "", callBackTwoName, "", callBackThreeName, "", btnIdOffset );
 		#endif
 	}
-	
-	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
+
+	/**
+	 * @brief Create confirmation asking whether to act on multiple selected players, single (first) selected player or self
+	 *
+	 * @param callbackSelectedPlayersMulti
+	 * @param callbackSelectedPlayerSingle
+	 * @param callbackSelf
+	 * @param confirmSelf  If the selected player is the client player (aka self), whether to show confirmation or not
+	 * @param executeCallbackOnNoConfirmation  If the selected player is the client player (aka self) and confirmSelf is false, whether to execute the respective callback w/o confirmation
+	 * 
+	 * @return confirmation if created, else null
+	 */
+	JMConfirmation CreateAdvancedPlayerConfirm(string title, string callbackSelectedPlayersMulti, string callbackSelectedPlayerSingle, string callbackSelf, bool confirmSelf = true, bool executeCallbackOnNoConfirmation = true)
 	{
 		auto selected = JM_GetSelected();
 
 		if (!selected)
-			return false;
+			return null;
 
 		auto players = selected.GetPlayers();
 
 		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( players[0] );
 
 		if (!inst)
-			return false;
+			return null;
 
 		int count = players.Count();
 		if (count > 1)
 		{
-			CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
+			if (inst != GetPermissionsManager().GetClientPlayer() && callbackSelectedPlayerSingle)
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
+			else if (callbackSelf)
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_PLAYERS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", callbackSelf, "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
+			else
+				return CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_PLAYERS_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", callbackSelectedPlayersMulti );
 		}
 		else
 		{
-			if (inst != GetPermissionsManager().GetClientPlayer() )
+			if (inst != GetPermissionsManager().GetClientPlayer() && callbackSelectedPlayerSingle)
 			{
-				CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), funcName, "#STR_COT_GENERIC_SELF", funcName, 3 );
-				return true;
+				return CreateConfirmation_Three( JMConfirmationType.INFO, title, string.Format(Widget.TranslateString("#STR_COT_WARNING_SELECTEDPLAYER_MESSAGE_BODY"), inst.GetName()), "#STR_COT_GENERIC_CANCEL", "", inst.GetName(), callbackSelectedPlayerSingle, "#STR_COT_GENERIC_SELF", callbackSelf );
 			}
-			else if (confirmSelf)
+			else if (callbackSelf)
 			{
-				CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
-				return true;
+				if (confirmSelf)
+					return CreateConfirmation_Two( JMConfirmationType.INFO, title, "#STR_COT_WARNING_SELECTEDSELF_MESSAGE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_SELF", callbackSelf );
+				else if (executeCallbackOnNoConfirmation)
+					g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, callbackSelf, new Param1<JMConfirmation>( NULL ) );
 			}
 		}
-		
-		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
 
-		return false;
+		return null;
 	}
 
-	bool CreateAdvancedObjectConfirm(string funcName, bool callbackOnNoConfirmation = true)
+	/**
+	 * @brief Create confirmation if acting on multiple selected objects or no confirmation if single selected object
+	 *
+	 * @param callbackSelectedObjectsMulti
+	 * @param callbackSelectedObjectSingle
+	 * @param executeCallbackOnNoConfirmation  If single selected object, whether to execute the respective callback w/o confirmation
+	 * 
+	 * @return confirmation if created, else null
+	 */
+	JMConfirmation CreateAdvancedObjectConfirm(string callbackSelectedObjectsMulti, string callbackSelectedObjectSingle, bool executeCallbackOnNoConfirmation = true)
 	{
 		auto selected = JM_GetSelected();
 
 		if (!selected)
-			return false;
+			return null;
 
 		auto objects = selected.GetObjects();
 
 		int count = objects.Count();
 		if (count > 1)
 		{
-			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", funcName );
-			return true;
+			return CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_WARNING_OBJECTS_MESSAGE_HEADER", string.Format(Widget.TranslateString("#STR_COT_WARNING_OBJECTS_MESSAGE_BODY"), count.ToString()), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", callbackSelectedObjectsMulti );
 		}
 		
-		if ( callbackOnNoConfirmation && funcName != string.Empty )
-			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, funcName, new Param1<JMConfirmation>( NULL ) );
+		if ( executeCallbackOnNoConfirmation && callbackSelectedObjectSingle != string.Empty )
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( this, callbackSelectedObjectSingle, new Param1<JMConfirmation>( NULL ) );
 
+		return null;
+	}
+	
+	bool CreateAdvancedPlayerConfirm(string title, string funcName, bool confirmSelf = true, bool callbackOnNoConfirmation = true)
+	{
+		ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
+		if (CreateAdvancedPlayerConfirm(title, funcName, funcName, funcName, confirmSelf, callbackOnNoConfirmation))
+			return true;
+		return false;
+	}
+	
+	bool CreateAdvancedObjectConfirm(string funcName, bool callbackOnNoConfirmation = true)
+	{
+		ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
+		if (CreateAdvancedObjectConfirm(funcName, funcName, callbackOnNoConfirmation))
+			return true;
 		return false;
 	}
 }

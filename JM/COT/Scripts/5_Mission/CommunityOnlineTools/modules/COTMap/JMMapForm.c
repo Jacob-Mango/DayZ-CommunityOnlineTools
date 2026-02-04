@@ -98,7 +98,7 @@ class JMMapForm: JMFormBase
 		if ( w == m_MapWidget )
 		{
 			m_TeleportPosition = SnapToGround(m_MapWidget.ScreenToMap(Vector( x, y, 0 )));
-			CreateAdvancedPlayerConfirm("#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", "TeleportPlayer", false);
+			CreateAdvancedPlayerConfirm("#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", "TeleportPlayerMulti", "TeleportPlayerSingle", "TeleportPlayerSelf", false);
 			
 			return true;
 		}
@@ -106,38 +106,18 @@ class JMMapForm: JMFormBase
 		return false;
 	}
 
-	void TeleportPlayer(JMConfirmation confirmation = NULL)
+	void TeleportPlayerMulti(JMConfirmation confirmation = NULL)
 	{
-		JMTeleportModule mod;
-		if ( Class.CastTo( mod, GetModuleManager().GetModule( JMTeleportModule ) ) )
-		{
-			int btnId = -1;
-			if (confirmation)
-				btnId = confirmation.GetSelectedID();
+		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
+	}
 
-			switch(btnId)
-			{
-				// Abort
-				case 1:
-				case 4:
-					return;
-				break;
-				// Selected
-				case 2:
-				case 5:
-					mod.Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
-				break;
-				// Everyone
-				case 3:
-					mod.Position( m_TeleportPosition, JM_GetSelected().GetPlayers() );
-				break;
-				// Self
-				default:
-				case -1:
-				case 6:
-					mod.Position( m_TeleportPosition, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-				break;
-			}
-		}
+	void TeleportPlayerSingle(JMConfirmation confirmation = NULL)
+	{
+		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportPlayerSelf(JMConfirmation confirmation = NULL)
+	{
+		CF_Modules<JMTeleportModule>.Get().Position( m_TeleportPosition, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 }

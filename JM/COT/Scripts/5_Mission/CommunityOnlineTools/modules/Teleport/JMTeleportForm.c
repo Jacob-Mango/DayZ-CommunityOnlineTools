@@ -187,7 +187,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( w == m_LstPositionList && button == MouseState.LEFT )
 		{
-			TeleportPlayer();
+			TeleportSelf();
 			
 			return true;
 		}
@@ -209,38 +209,22 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", "TeleportPlayer", false);
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", "TeleportMulti", "TeleportSingle", "TeleportSelf", false);
 	}
 
-	void TeleportPlayer(JMConfirmation confirmation = NULL)
+	void TeleportMulti(JMConfirmation confirmation = NULL)
 	{
-		int btnId = -1;
-		if (confirmation)
-			btnId = confirmation.GetSelectedID();
-		
-		switch(btnId)
-		{
-			// Abort
-			case 1:
-			case 4:
-				return;
-			break;
-			// Selected
-			case 2:
-			case 5:
-				m_Module.Location( GetCurrentLocation(), {JM_GetSelected().GetPlayers()[0]} );
-			break;
-			// Everyone
-			case 3:
-				m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );
-			break;
-			// Self
-			default:
-			case -1:
-			case 6:
-				m_Module.Location( GetCurrentLocation(), {GetPermissionsManager().GetClientPlayer().GetGUID()} );
-			break;
-		}
+		m_Module.Location( GetCurrentLocation(), JM_GetSelected().GetPlayers() );
+	}
+
+	void TeleportSingle(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Location( GetCurrentLocation(), {JM_GetSelected().GetPlayers()[0]} );
+	}
+
+	void TeleportSelf(JMConfirmation confirmation = NULL)
+	{
+		m_Module.Location( GetCurrentLocation(), {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
 	void InputCategory_OnChange( UIEvent eid, UIActionBase action )

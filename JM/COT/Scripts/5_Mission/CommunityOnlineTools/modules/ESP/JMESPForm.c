@@ -501,7 +501,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedObjectConfirm("DeleteSelected");
+		CreateAdvancedObjectConfirm("DeleteSelected", "DeleteSelected");
 	}
 
 	void DeleteSelected()
@@ -545,7 +545,7 @@ class JMESPForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedObjectConfirm("MoveToCursor");
+		CreateAdvancedObjectConfirm("MoveToCursor", "MoveToCursor");
 	}
 
 	void MoveToCursor()
