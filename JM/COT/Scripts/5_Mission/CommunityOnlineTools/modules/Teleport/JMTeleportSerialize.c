@@ -91,8 +91,8 @@ class JMTeleportSerialize : Managed
 			if ( location_type == "" )
 				continue;
 
-			if ( location_type.IndexOf("Name") == 0 && location_name.Length() > 4 )
-				location_type = location_type.Substring(4, location_name.Length());
+			if ( location_type.IndexOf("Name") == 0 && location_type.Length() > 4 )
+				location_type = location_type.Substring(4, location_type.Length() - 4);
 				
 			if ( location_class_name.IndexOf("AF") == 0 )
 				location_type = "Airfield";
