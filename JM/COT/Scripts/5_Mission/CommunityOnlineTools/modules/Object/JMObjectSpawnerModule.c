@@ -654,7 +654,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			bool dstValid = parent.GetInventory().FindFreeLocationFor(ent, locationType, dst);
 
 			if (srcValid && dstValid && !GameInventory.LocationSyncMoveEntity(src, dst))
-				CF.FormatErrorEx("Couldn't move %1 to %2", ErrorExSeverity.WARNING, ent.ToString(), parent.ToString());
+				CF_Log.Warn("Couldn't move %1 to %2", ErrorExSeverity.WARNING, ent.ToString(), parent.ToString());
 		}
 
 		parent = ent.GetHierarchyParent();

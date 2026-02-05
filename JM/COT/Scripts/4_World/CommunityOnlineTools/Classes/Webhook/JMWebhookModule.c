@@ -87,7 +87,7 @@ class JMWebhookModule: JMModuleBase
 		// attempt to fallback to defaults since otherwise it would fail regardless
 		if ( serverCfg == "" )
 		{
-			CF.FormatErrorEx("No server config file set, using default serverdz.cfg", ErrorExSeverity.INFO);
+			CF_Log.Info("No server config file set, using default serverdz.cfg");
 			serverCfg = "serverdz.cfg";
 		}
 		else if (serverCfg.IndexOf("$profile:") != 0 && (serverCfg.Contains(":\\") || serverCfg.Contains(":/")))
@@ -96,11 +96,11 @@ class JMWebhookModule: JMModuleBase
 			TStringArray serverCfgFullPath = {};
 			serverCfg.Split("/", serverCfgFullPath);
 			serverCfg = serverCfgFullPath[serverCfgFullPath.Count() - 1];
-			CF.FormatErrorEx("Cannot resolve absolute path '%1', treating filename '%2' as relative to $currentdir", ErrorExSeverity.WARNING, serverCfgAbs, serverCfg);
+			CF_Log.Warn("Cannot resolve absolute path '%1', treating filename '%2' as relative to $currentdir", serverCfgAbs, serverCfg);
 		}
 		else if (serverCfg != serverCfgAbs)
 		{
-			CF.FormatErrorEx("Resolved absolute path '%1' to '%2'", ErrorExSeverity.INFO, serverCfgAbs, serverCfg);
+			CF_Log.Info("Resolved absolute path '%1' to '%2'", serverCfgAbs, serverCfg);
 		}
 
 		ConfigFile cfg = ConfigFile.Parse( serverCfg );
@@ -110,18 +110,18 @@ class JMWebhookModule: JMModuleBase
 			if ( entry && entry.GetText() != "" )
 			{
 				m_ServerHostName = entry.GetText();
-				CF.FormatErrorEx("Got hostname '%1' from '%2'", ErrorExSeverity.INFO, m_ServerHostName, serverCfg);
+				CF_Log.Info("Got hostname '%1' from '%2'", m_ServerHostName, serverCfg);
 			}
 			else
 			{
-				CF.FormatErrorEx("No hostname set in '%1', server name in Discord webhook messages will be empty", ErrorExSeverity.WARNING, serverCfg);
+				CF_Log.Warn("No hostname set in '%1', server name in Discord webhook messages will be empty", serverCfg);
 			}
 
 			delete cfg;
 		}
 		else
 		{
-			CF.FormatErrorEx("Couldn't read '%1', server name in Discord webhook messages will be empty", ErrorExSeverity.WARNING, serverCfg);
+			CF_Log.Warn("Couldn't read '%1', server name in Discord webhook messages will be empty", serverCfg);
 		}
 	#else
 		//! Client or singleplayer/offline mode
