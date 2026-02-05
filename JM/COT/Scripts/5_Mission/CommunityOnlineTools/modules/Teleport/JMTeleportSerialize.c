@@ -119,24 +119,24 @@ class JMTeleportSerialize : Managed
 		Types.Sort();
 		Types.InsertAt("ALL", 0);
 	
-		ref array< ref string > AfterSorting = new array< ref string >;
-		ref array< ref string > BeforeSorting = new array< ref string >;
+		ref array< ref string > afterSorting = new array< ref string >;
+		ref array< ref string > beforeSorting = new array< ref string >;
 
 		int loc_count = Locations.Count();
 		
 		for ( int l = 0; l < loc_count; ++l ) 
 		{
-			BeforeSorting.Insert(Locations[l].Name);
-			AfterSorting.Insert(Locations[l].Name);
+			beforeSorting.Insert(Locations[l].Name);
+			afterSorting.Insert(Locations[l].Name);
 		}
 
-		AfterSorting.Sort();
+		afterSorting.Sort();
 
 		ref array< ref JMTeleportLocation > tmp_locations = new array< ref JMTeleportLocation >;
 		
 		for ( int j = 0; j < loc_count; ++j ) 
 		{
-			int key = BeforeSorting.Find(AfterSorting[j]);
+			int key = beforeSorting.Find(afterSorting[j]);
 			tmp_locations.Insert(Locations[key]);	
 		}
 
