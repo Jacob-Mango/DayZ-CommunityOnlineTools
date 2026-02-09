@@ -355,6 +355,28 @@ modded class PlayerBase
 		}
 	}
 
+	//! @note only way to prevent drawing occluding effects when admin NV is enabled and wearing NVGoggles that are NOT active at the same time
+	//! is to not include the latter in the list of optics to draw. It's far simpler to remove them from the list after they've been added than
+	//! trying to deal with overriding CachedEquipmentStorage in 1.29
+	protected override array<InventoryItem> OnDrawOptics2D()
+	{
+		array<InventoryItem> optics = super.OnDrawOptics2D();
+
+		if (optics && (m_ActiveNVTypes.Find(JMNVTypes.NV_COT_ON) > -1 || m_ActiveNVTypes.Find(JMNVTypes.NV_COT_OFF) > -1))
+		{
+			foreach (int i, InventoryItem optic: optics)
+			{
+				if (optic.IsInherited(NVGoggles))
+				{
+					optics.Remove(i);  //! Prevent drawing NVG occluding effects
+					break;
+				}
+			}
+		}
+
+		return optics;
+	}
+
 	protected void COTUpdateInvisibility()
 	{
 		//! @note Not a controlled player = this player object on other clients
