@@ -130,7 +130,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			if (input.LocalPress())
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+				ShowInactiveNotification();
 			return;
 		}
 
@@ -165,7 +165,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			if (input.LocalPress())
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+				ShowInactiveNotification();
 			return;
 		}
 
