@@ -761,9 +761,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 	}
 
-	private void Exec_SetBloodyHands( bool bloodyhands, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetBloodyHands( bool value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		array<JMPlayerInstance> affectedPlayers = {};
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
@@ -771,20 +773,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			if ( player == NULL )
 				continue;
 
-			player.SetBloodyHands( bloodyhands );
+			player.SetBloodyHands( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set BloodyHands To " + bloodyhands + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( bloodyhands )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " bloody hands" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " bloody hands" );
-			}
-
-			players[i].Update();
+			ProcessToggle("bloody hands", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("bloody hands", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetBloodyHands( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1532,7 +1526,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
-		int godModePlayers;
+		array<JMPlayerInstance> affectedPlayers = {};
 
 		for ( int i = 0; i < players.Count(); i++ )
 		{
@@ -1542,35 +1536,45 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetGodMode( value );
 
-			godModePlayers++;
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set GodMode To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " god mode" );
-			else
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " god mode" );
-
-			players[i].Update();
+			ProcessToggle("god mode", value, players[i], affectedPlayers, ident, instance);
 		}
 
+		ShowToggleNotification("god mode", value, affectedPlayers, ident);
+	}
+
+	void ProcessToggle(string toggle, bool value, JMPlayerInstance player, array<JMPlayerInstance> affectedPlayers, PlayerIdentity ident, JMPlayerInstance instance)
+	{
+		affectedPlayers.Insert(player);
+
+		GetCommunityOnlineToolsBase().Log( ident, "Set " + toggle + " to " + value + " [guid=" + player.GetGUID() + "]" );
+
+		if ( value )
+			SendWebhook( "Set", instance, "Gave " + player.FormatSteamWebhook() + " " + toggle );
+		else
+			SendWebhook( "Set", instance, "Removed " + player.FormatSteamWebhook() + " " + toggle );
+
+		player.Update();
+	}
+
+	void ShowToggleNotification(string toggle, bool value, array<JMPlayerInstance> players, PlayerIdentity ident)
+	{
 		//! TODO localization
 		string message;
-		if ( godModePlayers > 0 )
+		if ( players.Count() > 0 )
 		{
 			if ( value )
-				message = "Enabled Godmode";
+				message = "Enabled " + toggle;
 			else
-				message = "Disabled Godmode";
+				message = "Disabled " + toggle;
 		}
 		else
 		{
-			message = "Failed to toggle godmode";
+			message = "Failed to toggle " + toggle;
 		}
 
 		if ( players.Count() > 1 )
 			message += " for " + players.Count() + " players";
-		else if ( ident && ident.GetId() != guids[0] )
+		else if ( ident && ident.GetId() != players[0].GetGUID() )
 			message += " for player " + players[0].GetName();
 		else
 			message += " for yourself";
@@ -1613,6 +1617,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1621,18 +1627,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetFreeze( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Freeze To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " frozen" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " unfrozen" );
-			}
-
-			players[i].Update();
+			ProcessToggle("freeze", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("freeze", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetFreeze( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1670,6 +1668,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1678,18 +1678,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetReceiveDamageDealt( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Receive Damage Dealt To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " receive damage dealt" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " receive damage dealt" );
-			}
-
-			players[i].Update();
+			ProcessToggle("receive damage dealt", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("receive damage dealt", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetReceiveDamageDealt( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1748,6 +1740,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1756,18 +1750,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetCannotBeTargetedByAI( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set cannot be targeted by AI to " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " cannot be targeted by AI" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " cannot be targeted by AI" );
-			}
-
-			players[i].Update();
+			ProcessToggle("cannot be targeted by AI", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("cannot be targeted by AI", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetCannotBeTargetedByAI( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1830,6 +1816,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1838,18 +1826,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetInvisibility( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Invisibility To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " invisibility" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " invisibility" );
-			}
-
-			players[i].Update();
+			ProcessToggle("invisibility", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("invisibility", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetInvisible( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1913,6 +1893,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1921,18 +1903,10 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetRemoveCollision( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set remove collision to " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " remove collision" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " remove collision" );
-			}
-
-			players[i].Update();
+			ProcessToggle("remove collision", value, players[i], affectedPlayers, ident, instance);
 		}
+
+		ShowToggleNotification("remove collision", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetRemoveCollision( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1991,6 +1965,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -1999,20 +1975,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetUnlimitedAmmo( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set UnlimitedAmmo To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited ammo" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited ammo" );
-			}
-
-			players[i].Update();
+			ProcessToggle("unlimited ammo", value, players[i], affectedPlayers, ident, instance);
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 		}
+
+		ShowToggleNotification("unlimited ammo", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetUnlimitedAmmo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2071,6 +2039,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -2079,20 +2049,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetAdminNVG( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set AdminNVG To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " admin NVG" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " admin NVG" );
-			}
-
-			players[i].Update();
+			ProcessToggle("admin night vision", value, players[i], affectedPlayers, ident, instance);
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 		}
+
+		ShowToggleNotification("admin night vision", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetAdminNVG( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2151,6 +2113,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -2159,20 +2123,12 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			player.COTSetUnlimitedStamina( value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set UnlimitedStamina To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " unlimited stamina" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Removed " + players[i].FormatSteamWebhook() + " unlimited stamina" );
-			}
-
-			players[i].Update();
+			ProcessToggle("unlimited stamina", value, players[i], affectedPlayers, ident, instance);
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 		}
+
+		ShowToggleNotification("unlimited stamina", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetUnlimitedStamina( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2313,6 +2269,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
+		array<JMPlayerInstance> affectedPlayers = {};
+
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
@@ -2334,20 +2292,12 @@ class JMPlayerModule: JMRenderableModuleBase
 				player.SetBrokenLegs(eBrokenLegs.NO_BROKEN_LEGS);
 			}
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Broken Legs To " + value + " [guid=" + players[i].GetGUID() + "]" );
-
-			if ( value )
-			{
-				SendWebhook( "Set", instance, "Gave " + players[i].FormatSteamWebhook() + " broken legs" );
-			} else
-			{
-				SendWebhook( "Set", instance, "Fixed " + players[i].FormatSteamWebhook() + " broken legs" );
-			}
-
-			players[i].Update();
+			ProcessToggle("broken legs", value, players[i], affectedPlayers, ident, instance);
 
 			GetCommunityOnlineTools().SetClient( players[i] );
 		}
+
+		ShowToggleNotification("broken legs", value, affectedPlayers, ident);
 	}
 
 	private void RPC_SetBrokenLegs( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -2548,7 +2498,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		}
 
 		if (cantBanAdmin)
-			COTCreateNotification(ident, new StringLocaliser("You cant ban admins"));
+			COTCreateNotification(ident, new StringLocaliser("You can't ban admins"));
 
 		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}
