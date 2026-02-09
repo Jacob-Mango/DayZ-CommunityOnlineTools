@@ -1566,18 +1566,18 @@ class JMPlayerModule: JMRenderableModuleBase
 				message = "Enabled " + toggle;
 			else
 				message = "Disabled " + toggle;
+
+			if ( players.Count() > 1 )
+				message += " for " + players.Count() + " players";
+			else if ( ident && ident.GetId() != players[0].GetGUID() )
+				message += " for player " + players[0].GetName();
+			else
+				message += " for yourself";
 		}
 		else
 		{
-			message = "Failed to toggle " + toggle;
+			message = "Failed to toggle " + toggle + " - no player(s) affected";
 		}
-
-		if ( players.Count() > 1 )
-			message += " for " + players.Count() + " players";
-		else if ( ident && ident.GetId() != players[0].GetGUID() )
-			message += " for player " + players[0].GetName();
-		else
-			message += " for yourself";
 
 		COTCreateNotification( ident, new StringLocaliser( message ) );
 	}
