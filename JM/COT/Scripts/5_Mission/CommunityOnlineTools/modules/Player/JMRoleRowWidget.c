@@ -7,6 +7,7 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 	string Name;
 	int Type;
 
+	private ButtonWidget m_Button;
 	protected TextWidget Text;
 	protected CheckBoxWidget  Checkbox;
 
@@ -53,6 +54,7 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 	void Init() 
 	{
 		Text = TextWidget.Cast(layoutRoot.FindAnyWidget("role_name"));
+		Class.CastTo( m_Button, layoutRoot.FindAnyWidget( "button" ) );
 		Checkbox = CheckBoxWidget.Cast(layoutRoot.FindAnyWidget("role_setting"));
 	}
 
@@ -134,5 +136,13 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 	{
 		Checkbox.Enable( false );
 		Checkbox.Show( false );
+	}
+
+	override bool OnClick(Widget w, int x, int y, int button)
+	{
+		if (w == m_Button)
+			SetChecked(!IsChecked());
+
+		return super.OnClick(w, x, y, button);
 	}
 }
