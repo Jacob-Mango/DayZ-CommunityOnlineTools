@@ -1758,6 +1758,26 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		CreateAdvancedPlayerConfirm("#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", "ApplyStatsMulti", "ApplyStatsSingle", "ApplyStatsSelf", false);
+	}
+
+	void ApplyStatsMulti(JMConfirmation confirmation = NULL)
+	{
+		ApplyStats(JM_GetSelected().GetPlayers());
+	}
+
+	void ApplyStatsSingle(JMConfirmation confirmation = NULL)
+	{
+		ApplyStats({JM_GetSelected().GetPlayers()[0]});
+	}
+
+	void ApplyStatsSelf(JMConfirmation confirmation = NULL)
+	{
+		ApplyStats({GetPermissionsManager().GetClientPlayer().GetGUID()});
+	}
+
+	void ApplyStats(TStringArray guids)
+	{
 		UpdateLastChangeTime();
 
 		if ( m_HealthUpdated )
@@ -1765,7 +1785,7 @@ class JMPlayerForm: JMFormBase
 			m_HealthUpdated = false;
 
 			if ( m_Health )
-				m_Module.SetHealth( m_Health.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetHealth( m_Health.GetCurrent(), guids );
 		}
 
 		if ( m_BloodUpdated )
@@ -1773,7 +1793,7 @@ class JMPlayerForm: JMFormBase
 			m_BloodUpdated = false;
 
 			if ( m_Blood )
-				m_Module.SetBlood( m_Blood.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetBlood( m_Blood.GetCurrent(), guids );
 		}
 
 		if ( m_EnergyUpdated )
@@ -1781,7 +1801,7 @@ class JMPlayerForm: JMFormBase
 			m_EnergyUpdated = false;
 
 			if ( m_Energy )
-				m_Module.SetEnergy( m_Energy.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetEnergy( m_Energy.GetCurrent(), guids );
 		}
 
 		if ( m_WaterUpdated )
@@ -1789,7 +1809,7 @@ class JMPlayerForm: JMFormBase
 			m_WaterUpdated = false;
 
 			if ( m_Water )
-				m_Module.SetWater( m_Water.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetWater( m_Water.GetCurrent(), guids );
 		}
 
 		if ( m_ShockUpdated )
@@ -1797,7 +1817,7 @@ class JMPlayerForm: JMFormBase
 			m_ShockUpdated = false;
 
 			if ( m_Shock )
-				m_Module.SetShock( m_Shock.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetShock( m_Shock.GetCurrent(), guids );
 		}
 
 		if ( m_StaminaUpdated )
@@ -1805,7 +1825,7 @@ class JMPlayerForm: JMFormBase
 			m_StaminaUpdated = false;
 
 			if ( m_Stamina )
-				m_Module.SetStamina( m_Stamina.GetCurrent(), JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetStamina( m_Stamina.GetCurrent(), guids );
 		}
 
 		if ( m_HeatBufferUpdated )
@@ -1813,7 +1833,7 @@ class JMPlayerForm: JMFormBase
 			m_HeatBufferUpdated = false;
 
 			if ( m_HeatBuffer )
-				m_Module.SetHeatBuffer( m_HeatBuffer.GetCurrent() * 10, JM_GetSelected().GetPlayersOrSelf() );
+				m_Module.SetHeatBuffer( m_HeatBuffer.GetCurrent() * 10, guids );
 		}
 	}
 
