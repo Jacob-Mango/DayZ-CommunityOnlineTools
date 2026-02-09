@@ -167,7 +167,7 @@ class CommunityOnlineToolsBase
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 	}
 
-	void ShowInactiveNotification(string moduleTitle)
+	void ShowInactiveNotification(string inputLoc)
 	{
 		StringLocaliser title = new StringLocaliser("STR_COT_NOTIFICATION_TITLE_ADMIN");
 
@@ -191,7 +191,7 @@ class CommunityOnlineToolsBase
 			}
 		}
 
-		StringLocaliser message = new StringLocaliser("STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", moduleTitle, combo);
+		StringLocaliser message = new StringLocaliser("STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", inputLoc, combo);
 		string icon = "set:ccgui_enforce image:HudBuild";
 		float time = 1.5;
 

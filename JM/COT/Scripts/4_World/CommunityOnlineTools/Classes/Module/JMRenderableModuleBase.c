@@ -221,7 +221,7 @@ class JMRenderableModuleBase: JMModuleBase
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				ShowInactiveNotification();
+				ShowInactiveNotification(GetTitle());
 				return;
 			}
 			
@@ -229,9 +229,9 @@ class JMRenderableModuleBase: JMModuleBase
 		}
 	}
 
-	void ShowInactiveNotification()
+	void ShowInactiveNotification(string inputLoc)
 	{
-		GetCommunityOnlineToolsBase().ShowInactiveNotification(GetTitle());
+		GetCommunityOnlineToolsBase().ShowInactiveNotification(inputLoc);
 	}
 
 	override void OnSettingsUpdated()

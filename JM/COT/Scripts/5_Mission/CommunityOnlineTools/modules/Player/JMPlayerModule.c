@@ -1701,7 +1701,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI");
 			return;
 		}
 
@@ -1773,7 +1773,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_INVISIBILITY_SELF");
 			return;
 		}
 
@@ -1921,7 +1921,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO");
 			return;
 		}
 
@@ -1995,7 +1995,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_NVG");
 			return;
 		}
 
@@ -2069,7 +2069,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA");
 			return;
 		}
 
@@ -2312,7 +2312,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_FREEZE_PLAYER");
 			return;
 		}
 
@@ -2333,7 +2333,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_HEAL_SELF");
 			return;
 		}
 
@@ -2353,7 +2353,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_GODMODE_SELF");
 			return;
 		}
 
