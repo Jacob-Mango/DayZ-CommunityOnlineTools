@@ -68,6 +68,10 @@ class JMPlayerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "InputHeal",			"UAPlayerModuleHeal",		true 	) );
 		Bind( new JMModuleBinding( "InputToggleGodMode",	"UAPlayerModuleGodMode",	true 	) );
 		Bind( new JMModuleBinding( "InputToggleInvisibility",	"UAPlayerModuleInvisibility",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleCannotBeTargetedByAI",	"UAPlayerModuleCannotBeTargetedByAI",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleUnlimitedStamina",	"UAPlayerModuleUnlimitedStamina",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleUnlimitedAmmo",	"UAPlayerModuleUnlimitedAmmo",	true 	) );
+		Bind( new JMModuleBinding( "InputToggleAdminNV",	"UAPlayerModuleAdminNV",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
 		Bind( new JMModuleBinding( "EndSpectating",		"UAPlayerModuleStopSpectating",		true 	) );
 	}
@@ -1705,6 +1709,27 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetReceiveDamageDealt( value, guids, senderRPC, instance );
 	}
 
+	void InputToggleCannotBeTargetedByAI( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.CannotBeTargetedByAI", instance))
+			return;
+
+		bool value = !instance.PlayerObject.COTGetCannotBeTargetedByAI();
+		array< string > guids = {instance.GetGUID()};
+
+		SetCannotBeTargetedByAI(value, guids);
+	}
+
 	void SetCannotBeTargetedByAI( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1927,6 +1952,27 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetRemoveCollision( value, guids, senderRPC, instance );
 	}
 
+	void InputToggleUnlimitedAmmo( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.UnlimitedAmmo", instance))
+			return;
+
+		bool value = !instance.PlayerObject.COTHasUnlimitedAmmo();
+		array< string > guids = {instance.GetGUID()};
+
+		SetUnlimitedAmmo(value, guids);
+	}
+
 	void SetUnlimitedAmmo( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1986,6 +2032,27 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
 	}
 
+	void InputToggleAdminNV( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.AdminNVG", instance))
+			return;
+
+		bool value = !instance.PlayerObject.COTHasAdminNVG();
+		array< string > guids = {instance.GetGUID()};
+
+		SetAdminNVG(value, guids);
+	}
+
 	void SetAdminNVG( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -2043,6 +2110,27 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		Exec_SetAdminNVG( value, guids, senderRPC, instance );
+	}
+
+	void InputToggleUnlimitedStamina( UAInput input )
+	{
+		if ( !input.LocalPress() )
+			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			return;
+		}
+
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.UnlimitedStamina", instance))
+			return;
+
+		bool value = !instance.PlayerObject.COTHasUnlimitedStamina();
+		array< string > guids = {instance.GetGUID()};
+
+		SetUnlimitedStamina(value, guids);
 	}
 
 	void SetUnlimitedStamina( bool value, array< string > guids )
