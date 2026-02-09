@@ -3,6 +3,10 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 	static const int COT_OFF = 0;
 	static const int COT_ON  = 1;
 
+	float m_COT_UndergroundPresenceFactorTarget;
+	float m_COT_UndergroundPresenceFactor;
+	float m_COT_UndergroundPresenceFactorVel[1];
+
 	float m_COT_TimeVisibility_Out[6] = {
 		0,
 		0.5,  //! sunrise start
@@ -48,14 +52,17 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 		{
 			case COT_ON:
 				float daylightVisibility = COT_GetDaylightVisibility();
+				float targetFactor = Math.Pow(m_COT_UndergroundPresenceFactorTarget, 8);
 
-				if (daylightVisibility != m_COT_LastDaylightVisibility)
+				if (daylightVisibility != m_COT_LastDaylightVisibility || m_COT_UndergroundPresenceFactor != targetFactor)
 				{
 					m_COT_LastDaylightVisibility = daylightVisibility;
 
-					float exposure = 7.0 * m_UGExposureCoef * (1.0 - daylightVisibility);
+					m_COT_UndergroundPresenceFactor = Math.SmoothCD(m_COT_UndergroundPresenceFactor, targetFactor, m_COT_UndergroundPresenceFactorVel, 0.1, 1000, 0.016667);
 
-					SetTargetValueFloat(PPEExceptions.EXPOSURE,PPEExposureNative.PARAM_INTENSITY,false,exposure,PPEExposureNative.L_0_NVG_OPTIC,PPOperators.ADD);
+					float exposure = 7.0 * m_UGExposureCoef * (1.0 - (daylightVisibility * (1.0 - m_COT_UndergroundPresenceFactor)));
+
+					SetTargetValueFloat(PPEExceptions.EXPOSURE,PPEExposureNative.PARAM_INTENSITY,false,exposure,PPEExposureNative.L_0_NVG_GOGGLES,PPOperators.ADD);
 				}
 
 				break;
