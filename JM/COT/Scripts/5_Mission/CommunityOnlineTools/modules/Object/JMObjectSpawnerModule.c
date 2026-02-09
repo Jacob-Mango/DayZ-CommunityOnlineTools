@@ -143,7 +143,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_DELETE_CROSSHAIR");
 			return;
 		}
 
@@ -269,7 +269,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_INFECTED");
 			return;
 		}
 
@@ -289,7 +289,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_ANIMAL");
 			return;
 		}
 
@@ -309,7 +309,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_WOLF");
 			return;
 		}
 

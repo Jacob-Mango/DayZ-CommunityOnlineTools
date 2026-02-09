@@ -612,7 +612,7 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			ShowInactiveNotification();
+			ShowInactiveNotification("STR_COT_INPUT_TOGGLE_FREECAM");
 			return;
 		}
 

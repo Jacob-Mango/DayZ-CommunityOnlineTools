@@ -130,7 +130,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			if (input.LocalPress())
-				ShowInactiveNotification();
+				ShowInactiveNotification("STR_COT_INPUT_TELEPORT_CROSSHAIR");
 			return;
 		}
 
@@ -165,7 +165,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
 			if (input.LocalPress())
-				ShowInactiveNotification();
+				ShowInactiveNotification("STR_COT_INPUT_TELEPORT_CROSSHAIR");
 			return;
 		}
 
