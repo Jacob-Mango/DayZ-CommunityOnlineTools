@@ -143,7 +143,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 
@@ -269,7 +269,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 
@@ -289,7 +289,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 
@@ -309,7 +309,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 

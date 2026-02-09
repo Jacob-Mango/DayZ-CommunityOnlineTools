@@ -607,9 +607,12 @@ Print("JMCameraModule::RPC_Leave_Finish - timestamp " + g_Game.GetTickTime());
 			return;
 		}
 
+		if ( !HasAccess() )
+			return;
+
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 

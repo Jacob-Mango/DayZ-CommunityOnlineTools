@@ -1497,17 +1497,6 @@ class JMPlayerModule: JMRenderableModuleBase
 		g_Game.SelectPlayer(senderRPC, senderRPC.GetPlayer());
 	}
 
-	void ToggleGodMode()
-	{
-		JMPlayerInstance instance;
-		if (!GetPermissionsManager().HasPermission("Admin.Player.GodMode", instance))
-			return;
-
-		bool value = !instance.PlayerObject.COTHasGodMode();
-		array< string > guids = {instance.GetGUID()};
-		SetGodMode(value, guids);
-	}
-
 	void SetGodMode( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )
@@ -1706,15 +1695,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.CannotBeTargetedByAI", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTGetCannotBeTargetedByAI();
 		array< string > guids = {instance.GetGUID()};
@@ -1778,20 +1767,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
-		ToggleInvisibility();
-	}
-	
-	void ToggleInvisibility()
-	{
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Invisibility", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTIsInvisible();
 		array< string > guids = {instance.GetGUID()};
@@ -1931,15 +1915,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.UnlimitedAmmo", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTHasUnlimitedAmmo();
 		array< string > guids = {instance.GetGUID()};
@@ -2005,15 +1989,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.AdminNVG", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTHasAdminNVG();
 		array< string > guids = {instance.GetGUID()};
@@ -2079,15 +2063,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.UnlimitedStamina", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTHasUnlimitedStamina();
 		array< string > guids = {instance.GetGUID()};
@@ -2322,15 +2306,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Freeze", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		bool value = !instance.PlayerObject.COTIsFrozen();
 		array< string > guids = {instance.GetGUID()};
@@ -2343,15 +2327,15 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
-		if ( !GetCommunityOnlineToolsBase().IsActive() )
-		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-			return;
-		}
-
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission("Admin.Player.Heal", instance))
 			return;
+
+		if ( !GetCommunityOnlineToolsBase().IsActive() )
+		{
+			ShowInactiveNotification();
+			return;
+		}
 
 		array< string > guids = {instance.GetGUID()};
 
@@ -2363,13 +2347,19 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !input.LocalPress() )
 			return;
 
+		JMPlayerInstance instance;
+		if (!GetPermissionsManager().HasPermission("Admin.Player.GodMode", instance))
+			return;
+
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification();
 			return;
 		}
 
-		ToggleGodMode();
+		bool value = !instance.PlayerObject.COTHasGodMode();
+		array< string > guids = {instance.GetGUID()};
+		SetGodMode(value, guids);
 	}
 
 	void Heal( array< string > guids )
