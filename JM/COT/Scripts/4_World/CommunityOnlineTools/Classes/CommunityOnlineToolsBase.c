@@ -157,7 +157,7 @@ class CommunityOnlineToolsBase
 
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+				ShowInactiveNotification( "STR_COT_INPUT_TOGGLE_SIDEBAR" );
 				return;
 			}
 		}
@@ -167,30 +167,40 @@ class CommunityOnlineToolsBase
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
 	}
 
-	void ToggleOpen()
+	void ShowInactiveNotification(string inputLoc)
 	{
-		if ( !m_IsOpen )
+		StringLocaliser title = new StringLocaliser("STR_COT_NOTIFICATION_TITLE_ADMIN");
+
+		string inputName = "UACOTModuleToggleCOT";
+		int deviceType = EInputDeviceType.MOUSE_AND_KEYBOARD;
+		map<int, ref TStringArray> buttonMap = InputUtils.GetComboButtonNamesFromInput(inputName, deviceType);
+		string combo;
+		if (buttonMap)
 		{
-			if ( g_Game.GetUIManager().GetMenu() )
+			foreach (int altIdx, TStringArray buttons: buttonMap)
 			{
-				return;
-			}
+				foreach (int btnIdx, string button: buttons)
+				{
+					if (btnIdx > 0)
+						combo += " + ";
 
-			if ( !GetPermissionsManager().HasPermission( "COT.View" ) )
-			{
-				return;
-			}
+					combo += button;
+				}
 
-			if ( !GetCommunityOnlineToolsBase().IsActive() )
-			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
-				return;
+				break;  //! We are only interested in the 1st combo
 			}
 		}
 
-		m_IsOpen = !m_IsOpen;
+		StringLocaliser message = new StringLocaliser("STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF", inputLoc, combo);
+		string icon = "set:ccgui_enforce image:HudBuild";
+		float time = 1.5;
 
-		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+		NotificationSystem.Create(title, message, icon, ARGB( 255, 221, 38, 38 ), time, null);
+	}
+
+	void ToggleOpen()
+	{
+		SetOpen(!m_IsOpen);
 	}
 
 	void LogServer( string text )

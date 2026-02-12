@@ -16,7 +16,6 @@ PanelWidgetClass JMRoleRowWidget
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   Padding 0
    Margin 0
    "Size To Content H" 1
    "Size To Content V" 1
@@ -53,21 +52,34 @@ PanelWidgetClass JMRoleRowWidget
       }
      }
     }
-    TextWidgetClass role_name {
-     ignorepointer 1
+    ButtonWidgetClass button {
+     ignorepointer 0
      position 0 0
-     size 0.6 30
-     halign left_ref
-     valign center_ref
+     size 1 1
      hexactpos 1
      vexactpos 1
      hexactsize 0
-     vexactsize 1
-     text ""
-     "exact text" 1
-     "exact text size" 16
-     "text halign" left
-     "text valign" center
+     vexactsize 0
+     style Empty
+     {
+      TextWidgetClass role_name {
+       ignorepointer 1
+       position 0 0
+       size 0.6 30
+       halign left_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       text ""
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 16
+       "text halign" left
+       "text valign" center
+      }
+     }
     }
    }
   }

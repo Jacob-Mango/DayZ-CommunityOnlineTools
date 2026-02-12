@@ -1207,6 +1207,12 @@ class JMESPModule: JMRenderableModuleBase
 		else
 		{
 			target.SetPosition( position );
+
+		#ifdef SERVER
+			//! Need to update position for dead players on clients via RPC
+			if (target.IsMan() && !target.IsAlive())
+				SetPosition(position, target);
+		#endif
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
@@ -1219,11 +1225,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( position ) )
 			return;
 
+	#ifdef SERVER
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
 			return;
 
 		Exec_SetPosition( position, target, senderRPC, instance );
+	#else
+		target.SetPosition( position );
+	#endif
 	}
 
 	void SetOrientation( vector orientation, Object target )
@@ -1249,6 +1259,12 @@ class JMESPModule: JMRenderableModuleBase
 		else
 		{
 			target.SetOrientation( orientation );
+
+		#ifdef SERVER
+			//! Need to update orientation for dead players on clients via RPC
+			if (target.IsMan() && !target.IsAlive())
+				SetOrientation(orientation, target);
+		#endif
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
@@ -1261,11 +1277,15 @@ class JMESPModule: JMRenderableModuleBase
 		if ( !ctx.Read( orientation ) )
 			return;
 
+	#ifdef SERVER
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetOrientation", senderRPC ) )
 			return;
 
 		Exec_SetOrientation( orientation, target, senderRPC, instance );
+	#else
+		target.SetOrientation( orientation );
+	#endif
 	}
 
 	void SetHealth( float health, string zone, Object target )

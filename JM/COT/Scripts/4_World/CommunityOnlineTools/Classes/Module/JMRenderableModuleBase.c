@@ -216,14 +216,22 @@ class JMRenderableModuleBase: JMModuleBase
 				return;
 			}
 
+			if ( !HasAccess() )
+				return;
+
 			if ( !GetCommunityOnlineToolsBase().IsActive() )
 			{
-				COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+				ShowInactiveNotification(GetTitle());
 				return;
 			}
 			
 			Show();
 		}
+	}
+
+	void ShowInactiveNotification(string inputLoc)
+	{
+		GetCommunityOnlineToolsBase().ShowInactiveNotification(inputLoc);
 	}
 
 	override void OnSettingsUpdated()

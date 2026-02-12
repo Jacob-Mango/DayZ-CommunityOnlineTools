@@ -2,6 +2,7 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 {
 	private Widget m_LayoutRoot;
 	private CheckBoxWidget m_Checkbox;
+	private ButtonWidget m_Button;
 	private TextWidget m_Name;
 
 	private JMESPViewType m_Type;
@@ -16,6 +17,7 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 	void Init() 
 	{
 		Class.CastTo( m_Checkbox, m_LayoutRoot.FindAnyWidget( "checkbox" ) );
+		Class.CastTo( m_Button, m_LayoutRoot.FindAnyWidget( "button" ) );
 		Class.CastTo( m_Name, m_LayoutRoot.FindAnyWidget( "text_name" ) );
 	}
 
@@ -101,8 +103,11 @@ class JMESPViewTypeWidget: ScriptedWidgetEventHandler
 			return false;
 		}
 
-		if ( w == m_Checkbox )
+		if ( w == m_Checkbox || w == m_Button )
 		{
+			if (w == m_Button)
+				SetChecked(!IsChecked());
+
 			m_Type.View = m_Checkbox.IsChecked();
 
 			JMScriptInvokers.ESP_VIEWTYPE_CHANGED.Invoke(m_Type);
