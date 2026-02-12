@@ -143,7 +143,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification("STR_COT_INPUT_DELETE_CROSSHAIR");
 			return;
 		}
 
@@ -269,7 +269,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_INFECTED");
 			return;
 		}
 
@@ -289,7 +289,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_ANIMAL");
 			return;
 		}
 
@@ -309,7 +309,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		if ( !GetCommunityOnlineToolsBase().IsActive() )
 		{
-			COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_NOTIFICATION_WARNING_TOGGLED_OFF" ) );
+			ShowInactiveNotification("STR_COT_INPUT_SPAWN_WOLF");
 			return;
 		}
 
@@ -654,7 +654,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			bool dstValid = parent.GetInventory().FindFreeLocationFor(ent, locationType, dst);
 
 			if (srcValid && dstValid && !GameInventory.LocationSyncMoveEntity(src, dst))
-				CF.FormatErrorEx("Couldn't move %1 to %2", ErrorExSeverity.WARNING, ent.ToString(), parent.ToString());
+				CF_Log.Warn("Couldn't move %1 to %2", ent.ToString(), parent.ToString());
 		}
 
 		parent = ent.GetHierarchyParent();

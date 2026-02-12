@@ -1,5 +1,6 @@
 class UIActionCheckbox: UIActionBase 
 {
+	protected ButtonWidget m_Button;
 	protected TextWidget m_Label;
 	protected CheckBoxWidget m_Checkbox;
 	
@@ -7,6 +8,7 @@ class UIActionCheckbox: UIActionBase
 	{
 		super.OnInit();
 		
+		Class.CastTo( m_Button, layoutRoot.FindAnyWidget( "action_button" ) );
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Checkbox, layoutRoot.FindAnyWidget( "action" ) );
 	}
@@ -40,8 +42,11 @@ class UIActionCheckbox: UIActionBase
 	{
 		bool ret = false;
 
-		if ( w == m_Checkbox )
+		if ( w == m_Checkbox || w == m_Button )
 		{
+			if (w == m_Button)
+				SetChecked(!IsChecked());
+
 			ret = CallEvent( UIEvent.CLICK );
 		}
 

@@ -38,6 +38,10 @@
             <input name="UAPlayerModuleHeal" loc="STR_COT_INPUT_HEAL_SELF" />
             <input name="UAPlayerModuleGodMode" loc="STR_COT_INPUT_GODMODE_SELF" />
             <input name="UAPlayerModuleInvisibility" loc="STR_COT_INPUT_INVISIBILITY_SELF" />
+            <input name="UAPlayerModuleCanBeTargetedByAI" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI" />
+            <input name="UAPlayerModuleUnlimitedStamina" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA" />
+            <input name="UAPlayerModuleUnlimitedAmmo" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO" />
+            <input name="UAPlayerModuleAdminNV" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_NVG" />
 
             <input name="UAPlayerModuleStopSpectating" loc="STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_SPECTATE" />
         </actions>
@@ -81,6 +85,10 @@
 			<input name="UAPlayerModuleHeal" />
 			<input name="UAPlayerModuleGodMode" />
 			<input name="UAPlayerModuleInvisibility" />
+			<input name="UAPlayerModuleCanBeTargetedByAI" />
+			<input name="UAPlayerModuleUnlimitedStamina" />
+			<input name="UAPlayerModuleUnlimitedAmmo" />
+			<input name="UAPlayerModuleAdminNV" />
 		</sorting>
     </inputs>
 
@@ -139,6 +147,14 @@
             </btn>
         </input>
         <input name="UAPlayerModuleInvisibility">
+        </input>
+        <input name="UAPlayerModuleCanBeTargetedByAI">
+        </input>
+        <input name="UAPlayerModuleUnlimitedStamina">
+        </input>
+        <input name="UAPlayerModuleUnlimitedAmmo">
+        </input>
+        <input name="UAPlayerModuleAdminNV">
         </input>
 
         <input name="UAPlayerModuleStopSpectating">

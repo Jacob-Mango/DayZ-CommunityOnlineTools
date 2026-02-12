@@ -22,6 +22,7 @@ PanelWidgetClass UIActionCheckbox {
    Rows 1
    content_halign left
    "Size To Content H" 1
+   Padding 0
    {
     PanelWidgetClass checkbox_wrapper {
      ignorepointer 0
@@ -52,21 +53,34 @@ PanelWidgetClass UIActionCheckbox {
       }
      }
     }
-    TextWidgetClass action_label {
-     size 1 20
-     halign left_ref
-     valign center_ref
-     hexactpos 0
-     vexactpos 0
+    ButtonWidgetClass action_button {
+     ignorepointer 0
+     position 0 0
+     size 1 1
+     hexactpos 1
+     vexactpos 1
      hexactsize 0
-     vexactsize 1
-     text "{LABEL}"
-     font "gui/fonts/sdf_MetronLight24"
-     "text offset" 0 0
-     "bold text" 1
-     "exact text" 1
-     "exact text size" 16
-     "text valign" center
+     vexactsize 0
+     style Empty
+     {
+      TextWidgetClass action_label {
+       ignorepointer 1
+       size 1 20
+       halign left_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 1
+       text "{LABEL}"
+       font "gui/fonts/sdf_MetronLight24"
+       "text offset" 0 0
+       "bold text" 1
+       "exact text" 1
+       "exact text size" 16
+       "text valign" center
+      }
+     }
     }
    }
   }
