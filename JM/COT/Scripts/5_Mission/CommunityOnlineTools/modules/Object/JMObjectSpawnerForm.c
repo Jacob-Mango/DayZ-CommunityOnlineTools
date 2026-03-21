@@ -945,7 +945,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 				strNameLower.ToLower();
 
-				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
 						continue;
