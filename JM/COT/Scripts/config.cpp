@@ -2,12 +2,6 @@ class CfgPatches
 {
 	class JM_COT_Scripts
 	{
-		units[] =
-		{
-		};
-		weapons[] =
-		{
-		};
 		requiredVersion = 0.1;
 		requiredAddons[] =
 		{
@@ -30,7 +24,7 @@ class CfgMods
 		hideName = 1;
 		hidePicture = 1;
 		name = "Community Online Tools";
-		credits = "Jacob_Mango, DannyDog, Arkensor";
+		credits = "Jacob_Mango, DannyDog, Arkensor, LiquidRock, LieutenantMaster";
 		creditsJson = "JM/COT/Scripts/Data/Credits.json";
 		author = "Jacob_Mango";
 		authorID = "0";
@@ -62,6 +56,7 @@ class CfgMods
 			"JM_COT_INVISIBILITY",
 			"JM_COT_EXPTRANSITION_1",
 			"JM_COT_DEBUGMONITOR_REMOVED",
+			"JM_COT_ENABLE_INDIVIDUAL_PERMS",
 			"COT_ANYSPECTATE"
 		};
 		
