@@ -536,7 +536,8 @@ class JMObjectSpawnerForm: JMFormBase
 
 			if (m_PreviewItem)
 			{
-				dBodyDestroy(m_PreviewItem);
+				dBodyActive(m_PreviewItem, ActiveState.INACTIVE);
+				//dBodyDynamic(m_PreviewItem, false);
 				m_PreviewItem.DisableSimulation(true);
 				m_ItemPreview.SetItem( m_PreviewItem );
 
