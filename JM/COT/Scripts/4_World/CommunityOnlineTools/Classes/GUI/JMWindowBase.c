@@ -19,6 +19,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private ButtonWidget m_CloseButton;
 	private ButtonWidget m_MinimizeButton;
+	private TextWidget m_MinimizeButtonLabel;
 	private Widget m_TitleWrapper;
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
@@ -118,8 +119,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
 
-		m_CloseButton       = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-		m_MinimizeButton    = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
+		m_CloseButton        = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
+		m_MinimizeButton     = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
+		m_MinimizeButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button_label" ) );
 		m_TitleWrapper      = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 		m_TitlePanel        = layoutRoot.FindAnyWidget( "title_wrapper" );
 		m_TitleText         = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
@@ -349,7 +351,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( false );
 		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( false );
 
-		if ( m_MinimizeButton )   m_MinimizeButton.SetLabel( "^" );
+		if ( m_MinimizeButtonLabel )   m_MinimizeButtonLabel.SetText( "^" );
 
 		m_IsMinimized = true;
 	}
@@ -369,7 +371,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( true );
 		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( true );
 
-		if ( m_MinimizeButton )   m_MinimizeButton.SetLabel( "_" );
+		if ( m_MinimizeButtonLabel )   m_MinimizeButtonLabel.SetText( "_" );
 
 		m_IsMinimized = false;
 	}
