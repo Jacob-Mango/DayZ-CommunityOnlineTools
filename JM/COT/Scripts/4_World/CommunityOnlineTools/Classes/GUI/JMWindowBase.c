@@ -693,9 +693,17 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		float eased = 1.0 - Math.Cos( percent * Math.PI * 0.5 );
 
 		float curH = Math.Lerp( m_AnimateFromH, m_AnimateToH, eased );
-		float curW;
-		layoutRoot.GetSize( curW, curW );
+		float curW, existingH;
+		layoutRoot.GetSize( curW, existingH );
 		layoutRoot.SetSize( curW, curH );
+
+		float contentH = Math.Max( 0, curH - m_TitleBarHeight );
+
+		if ( m_ContentWidget )
+			m_ContentWidget.SetSize( curW, contentH );
+
+		if ( m_ConfirmationPanel )
+			m_ConfirmationPanel.SetSize( curW, contentH );
 
 		if ( percent >= 1.0 )
 		{
@@ -740,10 +748,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private bool IsResizeHandle( Widget w )
 	{
-		return w == m_ResizeDragUp      || w == m_ResizeDragDown    ||
-		       w == m_ResizeDragLeft    || w == m_ResizeDragRight    ||
-		       w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight ||
-		       w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
+		return w == m_ResizeDragUp      || w == m_ResizeDragDown    || w == m_ResizeDragLeft    || w == m_ResizeDragRight    || w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight || w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
 	}
 
 	private EResizeDirection GetResizeDirection( Widget w )
