@@ -4,8 +4,8 @@ PanelWidgetClass JMDebugForm {
  size 250 420
  hexactpos 0
  vexactpos 0
- hexactsize 1
- vexactsize 1
+ hexactsize 0
+ vexactsize 0
  scriptclass "JMDebugForm"
  {
   ScrollWidgetClass actions_scroller {
