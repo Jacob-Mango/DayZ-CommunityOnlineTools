@@ -676,10 +676,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private bool IsResizeHandle( Widget w )
 	{
-		return w == m_ResizeDragUp      || w == m_ResizeDragDown    ||
-		       w == m_ResizeDragLeft    || w == m_ResizeDragRight    ||
-		       w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight ||
-		       w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
+		return w == m_ResizeDragUp      || w == m_ResizeDragDown    || w == m_ResizeDragLeft    || w == m_ResizeDragRight    || w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight || w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
 	}
 
 	private EResizeDirection GetResizeDirection( Widget w )
