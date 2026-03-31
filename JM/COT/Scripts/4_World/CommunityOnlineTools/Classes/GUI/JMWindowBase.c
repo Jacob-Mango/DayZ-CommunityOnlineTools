@@ -3,10 +3,14 @@ typedef JMWindowBase CF_Window;
 
 enum EResizeDirection
 {
-	UP    = 0,
-	DOWN  = 1,
-	LEFT  = 2,
-	RIGHT = 3
+	UP         = 0,
+	DOWN       = 1,
+	LEFT       = 2,
+	RIGHT      = 3,
+	TOP_LEFT   = 4,
+	TOP_RIGHT  = 5,
+	BOT_LEFT   = 6,
+	BOT_RIGHT  = 7
 };
 
 class JMWindowBase: COT_ScriptedWidgetEventHandler
@@ -19,7 +23,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private ButtonWidget m_CloseButton;
 	private ButtonWidget m_MinimizeButton;
-	private TextWidget m_MinimizeButtonLabel;
+	private TextWidget   m_MinimizeButtonLabel;
 	private Widget m_TitleWrapper;
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
@@ -27,10 +31,29 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	private Widget m_ContentWidget;
 	private Widget m_ConfirmationPanel;
 
+	// Edge drag handles
 	private Widget m_ResizeDragUp;
 	private Widget m_ResizeDragDown;
 	private Widget m_ResizeDragLeft;
 	private Widget m_ResizeDragRight;
+
+	// Corner drag handles
+	private Widget m_ResizeDragTopLeft;
+	private Widget m_ResizeDragTopRight;
+	private Widget m_ResizeDragBotLeft;
+	private Widget m_ResizeDragBotRight;
+
+	// Edge hover highlights
+	private Widget m_HighlightUp;
+	private Widget m_HighlightDown;
+	private Widget m_HighlightLeft;
+	private Widget m_HighlightRight;
+
+	// Corner hover highlights
+	private Widget m_HighlightTopLeft;
+	private Widget m_HighlightTopRight;
+	private Widget m_HighlightBotLeft;
+	private Widget m_HighlightBotRight;
 
 	private ref JMFormBase m_Form;
 	private JMRenderableModuleBase m_Module;
@@ -51,10 +74,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	static const float RESIZE_MIN_CONTENT_HEIGHT = 55;
 	static const float RESIZE_MIN_WIDTH          = 200;
 
-	//! Cached title bar height read once after Init() — avoids GetSize() every frame
+	//! Cached title bar height — read once in Init()
 	private float m_TitleBarHeight;
 
 	private bool m_IsShown;
+	private bool m_HasBeenCentered;
 
 	//! Minimize state
 	private bool m_IsMinimized;
@@ -119,22 +143,41 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
 
-		m_CloseButton        = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-		m_MinimizeButton     = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
-		m_MinimizeButtonLabel = TextWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button_label" ) );
-		m_TitleWrapper      = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
-		m_TitlePanel        = layoutRoot.FindAnyWidget( "title_wrapper" );
-		m_TitleText         = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
-		m_Background        = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
-		m_ContentWidget     = Widget.Cast( layoutRoot.FindAnyWidget( "content" ) );
-		m_ConfirmationPanel = Widget.Cast( layoutRoot.FindAnyWidget( "confirmation_panel" ) );
+		m_CloseButton         = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
+		m_MinimizeButton      = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
+		m_MinimizeButtonLabel = TextWidget.Cast(   layoutRoot.FindAnyWidget( "minimize_button_label" ) );
+		m_TitleWrapper        = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
+		m_TitlePanel          = layoutRoot.FindAnyWidget( "title_wrapper" );
+		m_TitleText           = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
+		m_Background          = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
+		m_ContentWidget       = Widget.Cast( layoutRoot.FindAnyWidget( "content" ) );
+		m_ConfirmationPanel   = Widget.Cast( layoutRoot.FindAnyWidget( "confirmation_panel" ) );
 
+		// Edge drag handles
 		m_ResizeDragUp    = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
 		m_ResizeDragDown  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_down" ) );
 		m_ResizeDragLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_left" ) );
 		m_ResizeDragRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_right" ) );
 
-		// Cache title bar height once — used for content offset and resize minimum
+		// Corner drag handles
+		m_ResizeDragTopLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_top_left" ) );
+		m_ResizeDragTopRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_top_right" ) );
+		m_ResizeDragBotLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_bot_left" ) );
+		m_ResizeDragBotRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_bot_right" ) );
+
+		// Edge highlights
+		m_HighlightUp    = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_up" ) );
+		m_HighlightDown  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_down" ) );
+		m_HighlightLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_left" ) );
+		m_HighlightRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_right" ) );
+
+		// Corner highlights
+		m_HighlightTopLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_top_left" ) );
+		m_HighlightTopRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_top_right" ) );
+		m_HighlightBotLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_bot_left" ) );
+		m_HighlightBotRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_bot_right" ) );
+
+		// Cache title bar height — used everywhere instead of repeated GetSize() calls
 		float tw, th;
 		m_TitleWrapper.GetSize( tw, th );
 		m_TitleBarHeight = th;
@@ -145,6 +188,15 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( m_ConfirmationPanel )
 			m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
+
+		// Offset top edge/corner handles and their highlights below the title bar.
+		// Done here so the layout stays free of the hardcoded title bar height.
+		if ( m_ResizeDragUp )       m_ResizeDragUp.SetPos( 10, m_TitleBarHeight, true );
+		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.SetPos( 0, m_TitleBarHeight, true );
+		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.SetPos( 0, m_TitleBarHeight, true );
+		if ( m_HighlightUp )        m_HighlightUp.SetPos( 0, m_TitleBarHeight, true );
+		if ( m_HighlightTopLeft )   m_HighlightTopLeft.SetPos( 0, m_TitleBarHeight, true );
+		if ( m_HighlightTopRight )  m_HighlightTopRight.SetPos( 0, m_TitleBarHeight, true );
 	}
 
 	void SetModule( JMRenderableModuleBase module )
@@ -188,9 +240,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_ConfirmationPanel.GetScript( m_Confirmation );
 
 		if ( m_Confirmation )
-		{
 			m_Confirmation.Init( this );
-		}
 	}
 
 	JMRenderableModuleBase GetModule()
@@ -281,6 +331,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		layoutRoot.Show( true );
 
+		if ( !m_HasBeenCentered )
+		{
+			CenterOnScreen();
+			m_HasBeenCentered = true;
+		}
+
 		if (!m_Form.m_IsShown)
 		{
 			m_Form.OnShow();
@@ -345,13 +401,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		layoutRoot.SetSize( w, m_TitleBarHeight );
 
-		if ( m_ContentWidget )    m_ContentWidget.Show( false );
-		if ( m_ResizeDragUp )     m_ResizeDragUp.Show( false );
-		if ( m_ResizeDragDown )   m_ResizeDragDown.Show( false );
-		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( false );
-		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( false );
+		if ( m_ContentWidget )       m_ContentWidget.Show( false );
+		SetResizeHandlesVisible( false );
 
-		if ( m_MinimizeButtonLabel )   m_MinimizeButtonLabel.SetText( "^" );
+		if ( m_MinimizeButtonLabel ) m_MinimizeButtonLabel.SetText( "^" );
 
 		m_IsMinimized = true;
 	}
@@ -365,13 +418,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_RestoreWidth > 0 && m_RestoreHeight > 0 )
 			layoutRoot.SetSize( m_RestoreWidth, m_RestoreHeight );
 
-		if ( m_ContentWidget )    m_ContentWidget.Show( true );
-		if ( m_ResizeDragUp )     m_ResizeDragUp.Show( true );
-		if ( m_ResizeDragDown )   m_ResizeDragDown.Show( true );
-		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( true );
-		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( true );
+		if ( m_ContentWidget )       m_ContentWidget.Show( true );
+		SetResizeHandlesVisible( true );
 
-		if ( m_MinimizeButtonLabel )   m_MinimizeButtonLabel.SetText( "_" );
+		if ( m_MinimizeButtonLabel ) m_MinimizeButtonLabel.SetText( "_" );
 
 		m_IsMinimized = false;
 	}
@@ -399,12 +449,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
 
 		if ( m_Form ) m_Form.OnUnfocus();
-	}
-
-	void OnFormLoaded()
-	{
-		if ( !m_Form || !m_Form.GetLayoutRoot() )
-			return;
 	}
 
 	void Update( float timeSlice )
@@ -451,6 +495,33 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
+	override bool OnMouseEnter( Widget w, int x, int y )
+	{
+		if ( m_IsMinimized )
+			return false;
+
+		Widget highlight = GetHandleHighlight( w );
+		if ( highlight )
+		{
+			highlight.Show( true );
+			return true;
+		}
+
+		return false;
+	}
+
+	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
+	{
+		Widget highlight = GetHandleHighlight( w );
+		if ( highlight )
+		{
+			highlight.Show( false );
+			return true;
+		}
+
+		return false;
+	}
+
 	override bool OnDrag( Widget w, int x, int y )
 	{
 		if ( w == m_TitleWrapper )
@@ -471,20 +542,17 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			w.SetPos( 0, 0, true );
 			w.SetPos( 0, 0, false );
 
-			if ( w == m_ResizeDragUp )
-				m_ResizeDirection = EResizeDirection.UP;
-			else if ( w == m_ResizeDragDown )
-				m_ResizeDirection = EResizeDirection.DOWN;
-			else if ( w == m_ResizeDragLeft )
-				m_ResizeDirection = EResizeDirection.LEFT;
-			else
-				m_ResizeDirection = EResizeDirection.RIGHT;
+			m_ResizeDirection = GetResizeDirection( w );
 
 			m_StartResizePositionX = x;
 			m_StartResizePositionY = y;
 
 			layoutRoot.GetSize( m_StartResizeSizeW, m_StartResizeSizeH );
 			layoutRoot.GetPos( m_StartWindowPosX, m_StartWindowPosY );
+
+			// Hide highlight while dragging
+			Widget highlight = GetHandleHighlight( w );
+			if ( highlight ) highlight.Show( false );
 
 			return true;
 		}
@@ -562,9 +630,82 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 
+	// ─── Private helpers ────────────────────────────────────────────────────────
+
+	//! Centre the window on screen, with a small cascade offset per open window
+	//! so that multiple windows opened in sequence are not perfectly stacked.
+	private void CenterOnScreen()
+	{
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+		float winW, winH;
+		layoutRoot.GetSize( winW, winH );
+
+		//! Cascade: shift each extra open window by 20px so they are all visible
+		int openCount = GetCOTWindowManager().Count() - 1;
+		float cascade = Math.Clamp( openCount * 20, 0, 200 );
+
+		SetPosition( ( screenW - winW ) * 0.5 + cascade, ( screenH - winH ) * 0.5 + cascade );
+	}
+
+	private void SetResizeHandlesVisible( bool show )
+	{
+		if ( m_ResizeDragUp )       m_ResizeDragUp.Show( show );
+		if ( m_ResizeDragDown )     m_ResizeDragDown.Show( show );
+		if ( m_ResizeDragLeft )     m_ResizeDragLeft.Show( show );
+		if ( m_ResizeDragRight )    m_ResizeDragRight.Show( show );
+		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.Show( show );
+		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.Show( show );
+		if ( m_ResizeDragBotLeft )  m_ResizeDragBotLeft.Show( show );
+		if ( m_ResizeDragBotRight ) m_ResizeDragBotRight.Show( show );
+
+		// Always hide highlights when hiding handles
+		if ( !show )
+		{
+			if ( m_HighlightUp )       m_HighlightUp.Show( false );
+			if ( m_HighlightDown )     m_HighlightDown.Show( false );
+			if ( m_HighlightLeft )     m_HighlightLeft.Show( false );
+			if ( m_HighlightRight )    m_HighlightRight.Show( false );
+			if ( m_HighlightTopLeft )  m_HighlightTopLeft.Show( false );
+			if ( m_HighlightTopRight ) m_HighlightTopRight.Show( false );
+			if ( m_HighlightBotLeft )  m_HighlightBotLeft.Show( false );
+			if ( m_HighlightBotRight ) m_HighlightBotRight.Show( false );
+		}
+	}
+
 	private bool IsResizeHandle( Widget w )
 	{
-		return w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight;
+		return w == m_ResizeDragUp      || w == m_ResizeDragDown    ||
+		       w == m_ResizeDragLeft    || w == m_ResizeDragRight    ||
+		       w == m_ResizeDragTopLeft || w == m_ResizeDragTopRight ||
+		       w == m_ResizeDragBotLeft || w == m_ResizeDragBotRight;
+	}
+
+	private EResizeDirection GetResizeDirection( Widget w )
+	{
+		if ( w == m_ResizeDragUp )       return EResizeDirection.UP;
+		if ( w == m_ResizeDragDown )     return EResizeDirection.DOWN;
+		if ( w == m_ResizeDragLeft )     return EResizeDirection.LEFT;
+		if ( w == m_ResizeDragRight )    return EResizeDirection.RIGHT;
+		if ( w == m_ResizeDragTopLeft )  return EResizeDirection.TOP_LEFT;
+		if ( w == m_ResizeDragTopRight ) return EResizeDirection.TOP_RIGHT;
+		if ( w == m_ResizeDragBotLeft )  return EResizeDirection.BOT_LEFT;
+		return EResizeDirection.BOT_RIGHT;
+	}
+
+	//! Returns the highlight widget paired with the given drag handle, or NULL.
+	private Widget GetHandleHighlight( Widget w )
+	{
+		if ( w == m_ResizeDragUp )       return m_HighlightUp;
+		if ( w == m_ResizeDragDown )     return m_HighlightDown;
+		if ( w == m_ResizeDragLeft )     return m_HighlightLeft;
+		if ( w == m_ResizeDragRight )    return m_HighlightRight;
+		if ( w == m_ResizeDragTopLeft )  return m_HighlightTopLeft;
+		if ( w == m_ResizeDragTopRight ) return m_HighlightTopRight;
+		if ( w == m_ResizeDragBotLeft )  return m_HighlightBotLeft;
+		if ( w == m_ResizeDragBotRight ) return m_HighlightBotRight;
+		return NULL;
 	}
 
 	private void Resize( float x, float y )
@@ -581,23 +722,39 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		switch ( m_ResizeDirection )
 		{
-			// Top edge: shrinks/grows from the top, window origin moves to compensate
 			case EResizeDirection.UP:
 				newHeight = Math.Max( m_StartResizeSizeH - deltaY, minHeight );
 				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
 				break;
-			// Bottom edge: grows/shrinks downward
 			case EResizeDirection.DOWN:
 				newHeight = Math.Max( m_StartResizeSizeH + deltaY, minHeight );
 				break;
-			// Left edge: grows/shrinks leftward, window origin moves to compensate
 			case EResizeDirection.LEFT:
 				newWidth = Math.Max( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH );
 				newPosX  = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
 				break;
-			// Right edge: grows/shrinks rightward
 			case EResizeDirection.RIGHT:
 				newWidth = Math.Max( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH );
+				break;
+			case EResizeDirection.TOP_LEFT:
+				newWidth  = Math.Max( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH );
+				newPosX   = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
+				newHeight = Math.Max( m_StartResizeSizeH - deltaY, minHeight );
+				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
+				break;
+			case EResizeDirection.TOP_RIGHT:
+				newWidth  = Math.Max( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH );
+				newHeight = Math.Max( m_StartResizeSizeH - deltaY, minHeight );
+				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
+				break;
+			case EResizeDirection.BOT_LEFT:
+				newWidth  = Math.Max( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH );
+				newPosX   = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
+				newHeight = Math.Max( m_StartResizeSizeH + deltaY, minHeight );
+				break;
+			case EResizeDirection.BOT_RIGHT:
+				newWidth  = Math.Max( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH );
+				newHeight = Math.Max( m_StartResizeSizeH + deltaY, minHeight );
 				break;
 		}
 
@@ -605,6 +762,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.SetPos( newPosX, newPosY, true );
 
 		float contentH = newHeight - m_TitleBarHeight;
+
 		if ( m_ContentWidget )
 			m_ContentWidget.SetSize( newWidth, contentH );
 
@@ -612,6 +770,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_ConfirmationPanel.SetSize( newWidth, contentH );
 
 		m_TitleWrapper.SetPos( 0, 0, true );
+
+		if ( m_Form )
+			m_Form.OnResize( newWidth, contentH );
 	}
 }
 #endif

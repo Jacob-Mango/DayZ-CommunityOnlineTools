@@ -123,9 +123,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	{
 	}
 	
-	void Update() 
+	void Update()
 	{
-		
+
+	}
+
+	//! Called whenever the window is resized. w/h are the new content dimensions (excluding title bar).
+	void OnResize( float w, float h )
+	{
 	}
 	
 	Widget GetLayoutRoot() 
