@@ -548,8 +548,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	void SetPosition( float x, float y )
 	{
 		// Clamp so at least the title bar stays on-screen
-		float screenW = g_Game.GetWorkspace().GetWidth();
-		float screenH = g_Game.GetWorkspace().GetHeight();
+		float screenW, screenH;
+		g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
 
 		float winW, winH;
 		layoutRoot.GetSize( winW, winH );
