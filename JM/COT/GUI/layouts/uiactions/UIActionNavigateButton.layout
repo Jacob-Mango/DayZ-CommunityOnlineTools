@@ -118,13 +118,13 @@ PanelWidgetClass UIActionNavigateButton {
          disabled 0
          ignorepointer 1
          position 0 0
-         size 20 20
+         size 0.8 0.8
          halign center_ref
          valign center_ref
-         hexactpos 1
-         vexactpos 1
-         hexactsize 1
-         vexactsize 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
          image0 "set:dayz_gui image:icon_expand"
          mode blend
          "src alpha" 1
@@ -149,13 +149,13 @@ PanelWidgetClass UIActionNavigateButton {
         ImageWidgetClass image_right {
          ignorepointer 1
          position 0 0
-         size 20 20
+         size 0.8 0.8
          halign center_ref
          valign center_ref
-         hexactpos 1
-         vexactpos 1
-         hexactsize 1
-         vexactsize 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
          image0 "set:dayz_gui image:icon_expand"
          mode blend
          "src alpha" 1
