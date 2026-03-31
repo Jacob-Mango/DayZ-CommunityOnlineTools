@@ -1,23 +1,30 @@
 #ifndef CF_WINDOWS
 typedef JMWindowBase CF_Window;
-class JMWindowBase: COT_ScriptedWidgetEventHandler  
+
+enum EResizeDirection
+{
+	UP    = 0,
+	DOWN  = 1,
+	LEFT  = 2,
+	RIGHT = 3
+};
+
+class JMWindowBase: COT_ScriptedWidgetEventHandler
 {
 #ifdef DIAG
 	static int s_JMWindowBaseCount;
 #endif
 
-	reference float m_DragXN;
-	reference float m_DragYN;
-	reference float m_DragXP;
-	reference float m_DragYP;
-
 	private Widget layoutRoot;
 
 	private ButtonWidget m_CloseButton;
+	private ButtonWidget m_MinimizeButton;
 	private Widget m_TitleWrapper;
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
 	private Widget m_Background;
+	private Widget m_ContentWidget;
+	private Widget m_ConfirmationPanel;
 
 	private Widget m_ResizeDragUp;
 	private Widget m_ResizeDragDown;
@@ -28,24 +35,37 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	private JMRenderableModuleBase m_Module;
 	private JMConfirmationForm m_Confirmation;
 
-	private autoptr array< Widget > m_BrokenWidgets;
-
 	private float m_OffsetX;
 	private float m_OffsetY;
 
-	private int m_ResizeDirection;
+	private EResizeDirection m_ResizeDirection;
 	private float m_StartResizeSizeW;
 	private float m_StartResizeSizeH;
-	private int m_StartResizePositionX;
-	private int m_StartResizePositionY;
+	private float m_StartResizePositionX;
+	private float m_StartResizePositionY;
+	private float m_StartWindowPosX;
+	private float m_StartWindowPosY;
+
+	//! Minimum content height below the title bar (px)
+	static const float RESIZE_MIN_CONTENT_HEIGHT = 55;
+	static const float RESIZE_MIN_WIDTH          = 200;
+
+	//! Cached title bar height read once after Init() — avoids GetSize() every frame
+	private float m_TitleBarHeight;
 
 	private bool m_IsShown;
 
-	void JMWindowBase() 
+	//! Minimize state
+	private bool m_IsMinimized;
+	private float m_RestoreWidth;
+	private float m_RestoreHeight;
+
+	void JMWindowBase()
 	{
 		GetCOTWindowManager().AddWindow( this );
 
-		m_BrokenWidgets = new array< Widget >;
+		m_RestoreWidth  = -1;
+		m_RestoreHeight = -1;
 
 	#ifdef DIAG
 		s_JMWindowBaseCount++;
@@ -98,16 +118,31 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
 
-		m_CloseButton = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-		m_TitleWrapper = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
-		m_TitlePanel = layoutRoot.FindAnyWidget( "title_wrapper" );
-		m_TitleText = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
-		m_Background = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
+		m_CloseButton       = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
+		m_MinimizeButton    = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
+		m_TitleWrapper      = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
+		m_TitlePanel        = layoutRoot.FindAnyWidget( "title_wrapper" );
+		m_TitleText         = TextWidget.Cast( layoutRoot.FindAnyWidget( "title_text" ) );
+		m_Background        = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
+		m_ContentWidget     = Widget.Cast( layoutRoot.FindAnyWidget( "content" ) );
+		m_ConfirmationPanel = Widget.Cast( layoutRoot.FindAnyWidget( "confirmation_panel" ) );
 
-		m_ResizeDragUp = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
-		m_ResizeDragDown = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_down" ) );
-		m_ResizeDragLeft = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_left" ) );
+		m_ResizeDragUp    = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
+		m_ResizeDragDown  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_down" ) );
+		m_ResizeDragLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_left" ) );
 		m_ResizeDragRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_right" ) );
+
+		// Cache title bar height once — used for content offset and resize minimum
+		float tw, th;
+		m_TitleWrapper.GetSize( tw, th );
+		m_TitleBarHeight = th;
+
+		// Position content and confirmation panel below the title bar
+		if ( m_ContentWidget )
+			m_ContentWidget.SetPos( 0, m_TitleBarHeight, true );
+
+		if ( m_ConfirmationPanel )
+			m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
 	}
 
 	void SetModule( JMRenderableModuleBase module )
@@ -118,22 +153,21 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		m_Module = module;
 		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
-			return; 
+			return;
 
-		Widget content_ctr = layoutRoot.FindAnyWidget( "content" );
-		Widget menu = content_ctr;
+		Widget menu = m_ContentWidget;
 
 		if ( m_Module.GetLayoutRoot() != "" )
 		{
-			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), content_ctr );
+			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), m_ContentWidget );
 			if ( Assert_Null( menu, "No valid widget supplied." ) )
-				return; 
+				return;
 
 			float width = -1;
 			float height = -1;
 			menu.GetSize( width, height );
 
-			content_ctr.SetSize( width, height );
+			m_ContentWidget.SetSize( width, height );
 			SetSize( width, height );
 
 			menu.GetScript( m_Form );
@@ -141,15 +175,15 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( !m_Form )
 			m_Form = m_Module.InitForm( menu );
-		
+
 		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
-			return; 
+			return;
 
 		m_Form.Init( this, m_Module );
 		m_TitleText.SetText( m_Module.GetTitle() );
 		GetCOTWindowManager().BringFront( this );
 
-		layoutRoot.FindAnyWidget( "confirmation_panel" ).GetScript( m_Confirmation );
+		m_ConfirmationPanel.GetScript( m_Confirmation );
 
 		if ( m_Confirmation )
 		{
@@ -172,6 +206,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
+	//! @note kept for callers that use GetWidgetRoot() (e.g. JMMapForm)
 	Widget GetWidgetRoot()
 	{
 		return layoutRoot;
@@ -225,6 +260,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
+	bool IsMinimized()
+	{
+		return m_IsMinimized;
+	}
+
 	void Show()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -232,6 +272,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		#endif
 
 		if ( !layoutRoot )
+			return;
+
+		if ( !m_Form )
 			return;
 
 		layoutRoot.Show( true );
@@ -260,13 +303,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Hide");
 		#endif
-		
+
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 
 		if (!m_Form)
-			return;
-
-		if (!this)
 			return;
 
 		m_Form.OnHide();
@@ -286,17 +326,69 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_IsShown = false;
 	}
 
+	//! Collapse the window to title-bar only, hiding content and resize handles.
+	//! Does nothing if a confirmation dialog is currently open.
+	void Minimize()
+	{
+		if ( m_IsMinimized )
+			return;
+
+		if ( m_ConfirmationPanel && m_ConfirmationPanel.IsVisible() )
+			return;
+
+		float w, h;
+		layoutRoot.GetSize( w, h );
+		m_RestoreWidth  = w;
+		m_RestoreHeight = h;
+
+		layoutRoot.SetSize( w, m_TitleBarHeight );
+
+		if ( m_ContentWidget )    m_ContentWidget.Show( false );
+		if ( m_ResizeDragUp )     m_ResizeDragUp.Show( false );
+		if ( m_ResizeDragDown )   m_ResizeDragDown.Show( false );
+		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( false );
+		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( false );
+
+		if ( m_MinimizeButton )   m_MinimizeButton.SetLabel( "^" );
+
+		m_IsMinimized = true;
+	}
+
+	//! Restore the window to its pre-minimized size.
+	void Restore()
+	{
+		if ( !m_IsMinimized )
+			return;
+
+		if ( m_RestoreWidth > 0 && m_RestoreHeight > 0 )
+			layoutRoot.SetSize( m_RestoreWidth, m_RestoreHeight );
+
+		if ( m_ContentWidget )    m_ContentWidget.Show( true );
+		if ( m_ResizeDragUp )     m_ResizeDragUp.Show( true );
+		if ( m_ResizeDragDown )   m_ResizeDragDown.Show( true );
+		if ( m_ResizeDragLeft )   m_ResizeDragLeft.Show( true );
+		if ( m_ResizeDragRight )  m_ResizeDragRight.Show( true );
+
+		if ( m_MinimizeButton )   m_MinimizeButton.SetLabel( "_" );
+
+		m_IsMinimized = false;
+	}
+
+	//! Toggle between minimized and restored states.
+	void ToggleMinimize()
+	{
+		if ( m_IsMinimized )
+			Restore();
+		else
+			Minimize();
+	}
+
 	void Focus()
 	{
 		SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
 		SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
 
-		//foreach ( Widget widget : m_BrokenWidgets )
-		//{
-		//	widget.Show( true );
-		//}
-
-		m_Form.OnFocus();
+		if ( m_Form ) m_Form.OnFocus();
 	}
 
 	void Unfocus()
@@ -304,65 +396,13 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
 		SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
 
-		//foreach ( Widget widget : m_BrokenWidgets )
-		//{
-		//	widget.Show( false );
-		//	if ( widget.GetChildren() )
-		//	{
-		//		widget.GetChildren().Show( true );
-		//	}
-		//}
-
-		m_Form.OnUnfocus();
+		if ( m_Form ) m_Form.OnUnfocus();
 	}
 
 	void OnFormLoaded()
 	{
 		if ( !m_Form || !m_Form.GetLayoutRoot() )
 			return;
-/*
-		Widget w = m_Form.GetLayoutRoot();
-		while ( w != NULL )
-		{
-			Widget c = NULL;
-			if ( w.GetTypeName() == "ScrollWidget" )
-			{
-				m_BrokenWidgets.Insert( w ); 
-			} else if ( w.GetTypeName() == "ItemPreviewWidget" )
-			{
-				m_BrokenWidgets.Insert( w );
-			} else if ( w.GetTypeName() == "PlayerPreviewWidget" )
-			{
-				m_BrokenWidgets.Insert( w );
-			} else if ( w.GetTypeName() == "HtmlWidget" )
-			{
-				m_BrokenWidgets.Insert( w );
-			} else if ( w.GetTypeName() == "MapWidget" )
-			{
-				m_BrokenWidgets.Insert( w );
-			} else
-			{
-				c = w.GetChildren();
-				if ( c != NULL )
-				{
-					w = c;
-					continue;
-				}
-			}
-
-			c = w.GetSibling();
-			while ( c == NULL )
-			{
-				c = w.GetParent();
-				c = c.GetSibling();
-			}
-			
-			if ( w == m_Form.GetLayoutRoot() )
-				return;
-
-			w = c;
-		}
-*/
 	}
 
 	void Update( float timeSlice )
@@ -400,6 +440,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			return true;
 		}
 
+		if ( w == m_MinimizeButton )
+		{
+			ToggleMinimize();
+			return true;
+		}
+
 		return false;
 	}
 
@@ -414,37 +460,33 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 			m_TitleWrapper.SetPos( 0, 0, true );
 			m_TitleWrapper.SetPos( 0, 0, false );
-			
+
 			return true;
 		}
 
-		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		if ( !m_IsMinimized && IsResizeHandle( w ) )
 		{
 			w.SetPos( 0, 0, true );
 			w.SetPos( 0, 0, false );
 
-			if ( w == m_ResizeDragUp ) 
-			{
-				m_ResizeDirection = 0;
-			} else if ( w == m_ResizeDragDown ) 
-			{
-				m_ResizeDirection = 1;
-			} else if ( w == m_ResizeDragLeft ) 
-			{
-				m_ResizeDirection = 2;
-			} else if ( w == m_ResizeDragRight )
-			{
-				m_ResizeDirection = 3;
-			}
+			if ( w == m_ResizeDragUp )
+				m_ResizeDirection = EResizeDirection.UP;
+			else if ( w == m_ResizeDragDown )
+				m_ResizeDirection = EResizeDirection.DOWN;
+			else if ( w == m_ResizeDragLeft )
+				m_ResizeDirection = EResizeDirection.LEFT;
+			else
+				m_ResizeDirection = EResizeDirection.RIGHT;
 
 			m_StartResizePositionX = x;
 			m_StartResizePositionY = y;
 
 			layoutRoot.GetSize( m_StartResizeSizeW, m_StartResizeSizeH );
+			layoutRoot.GetPos( m_StartWindowPosX, m_StartWindowPosY );
 
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -457,9 +499,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			return true;
 		}
 
-		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		if ( !m_IsMinimized && IsResizeHandle( w ) )
 		{
-			Resize( w, x, y );
+			Resize( x, y );
 
 			return true;
 		}
@@ -472,59 +514,102 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( w == m_TitleWrapper )
 		{
 			SetPosition( x - m_OffsetX, y - m_OffsetY );
-			
+
 			return true;
 		}
 
-		if ( w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight )
+		if ( !m_IsMinimized && IsResizeHandle( w ) )
 		{
-			Resize( w, x, y );
-			
+			// Final position already applied by OnDragging; just reset the handle widget
+			w.SetPos( 0, 0, true );
+
 			return true;
 		}
 
 		return false;
 	}
 
+	//! Set the window size from content dimensions (content height excludes the title bar).
+	//! Keeps m_RestoreWidth/Height in sync when not minimized.
 	void SetSize( float w, float h )
 	{
-		float tw, th;
-		m_TitleWrapper.GetSize( tw, th );
+		float totalH = h + m_TitleBarHeight;
+		layoutRoot.SetSize( w, totalH );
 
-		layoutRoot.SetSize( w, h + th );
+		if ( !m_IsMinimized )
+		{
+			m_RestoreWidth  = w;
+			m_RestoreHeight = totalH;
+		}
 	}
 
-	void SetPosition( int x, int y )
+	void SetPosition( float x, float y )
 	{
+		// Clamp so at least the title bar stays on-screen
+		float screenW = g_Game.GetWorkspace().GetWidth();
+		float screenH = g_Game.GetWorkspace().GetHeight();
+
+		float winW, winH;
+		layoutRoot.GetSize( winW, winH );
+
+		x = Math.Clamp( x, 0, Math.Max( 0, screenW - winW ) );
+		y = Math.Clamp( y, 0, Math.Max( 0, screenH - m_TitleBarHeight ) );
+
 		layoutRoot.SetPos( x, y, true );
-		
+
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 
-	private void Resize( Widget w, int x, int y )
+	private bool IsResizeHandle( Widget w )
 	{
-		w.SetPos( 0, 0, true );
+		return w == m_ResizeDragUp || w == m_ResizeDragDown || w == m_ResizeDragLeft || w == m_ResizeDragRight;
+	}
 
-		float newWidth = m_StartResizeSizeW;
+	private void Resize( float x, float y )
+	{
+		float deltaX = x - m_StartResizePositionX;
+		float deltaY = y - m_StartResizePositionY;
+
+		float minHeight = m_TitleBarHeight + RESIZE_MIN_CONTENT_HEIGHT;
+
+		float newWidth  = m_StartResizeSizeW;
 		float newHeight = m_StartResizeSizeH;
+		float newPosX   = m_StartWindowPosX;
+		float newPosY   = m_StartWindowPosY;
 
 		switch ( m_ResizeDirection )
 		{
-			case 0:
-				newHeight += m_StartResizePositionX - x;
+			// Top edge: shrinks/grows from the top, window origin moves to compensate
+			case EResizeDirection.UP:
+				newHeight = Math.Max( m_StartResizeSizeH - deltaY, minHeight );
+				newPosY   = m_StartWindowPosY + ( m_StartResizeSizeH - newHeight );
 				break;
-			case 1:
-				newHeight += m_StartResizePositionX - x;
+			// Bottom edge: grows/shrinks downward
+			case EResizeDirection.DOWN:
+				newHeight = Math.Max( m_StartResizeSizeH + deltaY, minHeight );
 				break;
-			case 2:
-				newWidth += m_StartResizePositionY - y;
+			// Left edge: grows/shrinks leftward, window origin moves to compensate
+			case EResizeDirection.LEFT:
+				newWidth = Math.Max( m_StartResizeSizeW - deltaX, RESIZE_MIN_WIDTH );
+				newPosX  = m_StartWindowPosX + ( m_StartResizeSizeW - newWidth );
 				break;
-			case 3:
-				newWidth += m_StartResizePositionY - y;
+			// Right edge: grows/shrinks rightward
+			case EResizeDirection.RIGHT:
+				newWidth = Math.Max( m_StartResizeSizeW + deltaX, RESIZE_MIN_WIDTH );
 				break;
 		}
 
-		// layoutRoot.SetSize( newWidth, newHeight );
+		layoutRoot.SetSize( newWidth, newHeight );
+		layoutRoot.SetPos( newPosX, newPosY, true );
+
+		float contentH = newHeight - m_TitleBarHeight;
+		if ( m_ContentWidget )
+			m_ContentWidget.SetSize( newWidth, contentH );
+
+		if ( m_ConfirmationPanel )
+			m_ConfirmationPanel.SetSize( newWidth, contentH );
+
+		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 }
 #endif
