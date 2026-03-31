@@ -9,23 +9,23 @@ FrameWidgetClass map_editor_menu {
  {
   PanelWidgetClass object_info_wrapper {
    color 0 0 0 0.95
-   position 0.025 80
-   size 0.95 40
+   position 20 80
+   size 800 40
    valign bottom_ref
-   hexactpos 0
+   hexactpos 1
    vexactpos 1
-   hexactsize 0
+   hexactsize 1
    vexactsize 1
    style DayZDefaultPanel
   }
   PanelWidgetClass object_controls {
    color 0 0 0 0.95
-   position 0.025 20
-   size 0.95 40
+   position 20 20
+   size 800 40
    valign bottom_ref
-   hexactpos 0
+   hexactpos 1
    vexactpos 1
-   hexactsize 0
+   hexactsize 1
    vexactsize 1
    style DayZDefaultPanel
   }
