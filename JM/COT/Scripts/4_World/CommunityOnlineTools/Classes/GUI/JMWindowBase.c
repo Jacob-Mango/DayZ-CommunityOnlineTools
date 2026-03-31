@@ -57,6 +57,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	private Widget m_HighlightBotRight;
 
 	private ref JMFormBase m_Form;
+	private Widget m_FormRoot;
 	private JMRenderableModuleBase m_Module;
 	private JMConfirmationForm m_Confirmation;
 
@@ -243,6 +244,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 			menu.GetScript( m_Form );
 		}
+
+		m_FormRoot = menu;
 
 		if ( !m_Form )
 			m_Form = m_Module.InitForm( menu );
@@ -702,6 +705,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_ContentWidget )
 			m_ContentWidget.SetSize( curW, contentH );
 
+		if ( m_FormRoot )
+			m_FormRoot.SetSize( curW, contentH );
+
 		if ( m_ConfirmationPanel )
 			m_ConfirmationPanel.SetSize( curW, contentH );
 
@@ -838,6 +844,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( m_ContentWidget )
 			m_ContentWidget.SetSize( newWidth, contentH );
+
+		if ( m_FormRoot )
+			m_FormRoot.SetSize( newWidth, contentH );
 
 		if ( m_ConfirmationPanel )
 			m_ConfirmationPanel.SetSize( newWidth, contentH );
