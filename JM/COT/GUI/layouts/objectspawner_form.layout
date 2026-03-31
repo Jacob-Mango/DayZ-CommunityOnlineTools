@@ -5,8 +5,8 @@ PanelWidgetClass JMObjectSpawnerForm {
  size 650 510
  hexactpos 0
  vexactpos 0
- hexactsize 1
- vexactsize 1
+ hexactsize 0
+ vexactsize 0
  scriptclass "JMObjectSpawnerForm"
  style DayZDefaultPanel
  {
@@ -23,12 +23,12 @@ PanelWidgetClass JMObjectSpawnerForm {
    Rows 2
    {
     PanelWidgetClass object_spawn_wrapper_cont {
-     size 1 320
+     size 1 0.627
      halign center_ref
-     hexactpos 1
-     vexactpos 1
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
+     vexactsize 0
      {
       PanelWidgetClass object_types_actions_wrapper {
        position 0 0
@@ -65,10 +65,10 @@ PanelWidgetClass JMObjectSpawnerForm {
     }
     PanelWidgetClass object_spawn_actions_wrapper {
      position 0 0
-     size 1 1
+     size 1 0.373
      halign center_ref
-     hexactpos 1
-     vexactpos 1
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
      vexactsize 0
     }

@@ -4,8 +4,8 @@ PanelWidgetClass JMWeatherForm {
  size 700 600
  hexactpos 0
  vexactpos 0
- hexactsize 1
- vexactsize 1
+ hexactsize 0
+ vexactsize 0
  scriptclass "JMWeatherForm"
  style DayZDefaultPanel
  {
@@ -21,14 +21,14 @@ PanelWidgetClass JMWeatherForm {
    style DayZDefaultPanel
    {
     ScrollWidgetClass list_scroller {
-     position 0 5
-     size 1 560
+     position 0 0.04
+     size 1 0.96
      halign center_ref
      valign bottom_ref
-     hexactpos 1
-     vexactpos 1
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
-     vexactsize 1
+     vexactsize 0
      style blank
      "Scrollbar V" 1
      {
