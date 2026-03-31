@@ -23,8 +23,8 @@ PanelWidgetClass UIActionImage {
      size 1 1
      halign right_ref
      valign center_ref
-     hexactsize 1
-     vexactsize 1
+     hexactsize 0
+     vexactsize 0
      mode blend
      "src alpha" 1
      "no wrap" 1
