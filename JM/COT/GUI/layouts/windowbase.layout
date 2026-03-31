@@ -99,7 +99,25 @@ PanelWidgetClass base_window {
      hexactsize 1
      vexactsize 1
      style Default
-     label "_"
+     {
+      TextWidgetClass minimize_button_label {
+       ignorepointer 1
+       color 1 1 1 1
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Normal
+       text "_"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 16
+       "text halign" center
+       "text valign" center
+      }
+     }
     }
     ButtonWidgetClass close_button {
      ignorepointer 0
