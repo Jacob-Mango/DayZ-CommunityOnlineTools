@@ -333,6 +333,7 @@ class JMVehiclesMenu: JMFormBase
 	{
 		m_Module.DeleteVehicle(m_CurrentVehicle);
 		BackToList();
+		SyncAndRefreshVehicles();
 	}
 
 	void DeleteVehicleUnclaimed(JMConfirmation confirmation)
@@ -423,6 +424,12 @@ class JMVehiclesMenu: JMFormBase
 		}
 		
 		return false;
+	}
+
+	override void OnResize( float w, float h )
+	{
+		if ( m_VehicleMapPanel )
+			m_VehicleMapPanel.Update();
 	}
 
 	void UpdateMapPosition( bool usePlayerPosition, vector mapPosition = vector.Zero )

@@ -38,8 +38,14 @@ class JMCommandModule: JMModuleBase
 				string input;
 				if (!ctx.Read(input)) return;
 
+				if ( input.Length() > 512 )
+					return;
+
 				array<string> tokens = new array<string>();
 				input.Split(" ", tokens);
+
+				if ( tokens.Count() < 2 )
+					return;
 
 				string strCommand = tokens[0];
 				strCommand.ToLower();

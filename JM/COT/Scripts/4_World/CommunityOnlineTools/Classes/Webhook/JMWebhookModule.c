@@ -155,7 +155,7 @@ class JMWebhookModule: JMModuleBase
 
 		#ifdef JM_COT_WEBHOOK_DEBUG
 			group.ContextURL = "https://discordapp.com/api/webhooks/";
-			group.Address = "729943333564317726/_K1zSZcKi5qL2_qqJnUvgeH1cieGNxqkNtsxV640Yya-zaKcfMPN5yOTxQEoEAjk3TAS";
+			group.Address = "YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN";
 		#else
 			group.ContextURL = "";
 			group.Address = "";
@@ -180,18 +180,18 @@ class JMWebhookModule: JMModuleBase
 	{
 		super.OnMissionLoaded();
 
-		auto message = CreateDiscordMessage();
-				
-		message.GetEmbed().AddField( "Server Status", "Server is starting up." );
+		auto message = CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_SUCCESS );
+		message.GetEmbed().SetTitle( "Server Online" );
+		message.GetEmbed().SetDescription( "The server has started up and is accepting connections." );
 
 		Post( "ServerStartup", message );
 	}
 
 	override void OnMissionFinish()
 	{
-		auto message = CreateDiscordMessage();
-
-		message.GetEmbed().AddField( "Server Status", "Server has shutdown safely." );
+		auto message = CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_NEUTRAL );
+		message.GetEmbed().SetTitle( "Server Offline" );
+		message.GetEmbed().SetDescription( "The server has shut down safely." );
 
 		Post( "ServerShutdown", message );
 	}
@@ -432,10 +432,25 @@ class JMWebhookModule: JMModuleBase
 
 		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
-		embed.SetColor( 16766720 );
+		embed.SetColor( JMConstants.WEBHOOK_COLOR_DEFAULT );
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
-		
+
+		if ( m_ServerHostName != "" )
+			embed.AddField( "Server:", m_ServerHostName, false );
+
+		return message;
+	}
+
+	// Creates a message with a custom embed color.
+	JMWebhookDiscordMessage CreateDiscordMessageColored( int color )
+	{
+		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
+		auto embed = message.CreateEmbed();
+		embed.SetColor( color );
+
+		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
+
 		if ( m_ServerHostName != "" )
 			embed.AddField( "Server:", m_ServerHostName, false );
 
@@ -445,12 +460,12 @@ class JMWebhookModule: JMModuleBase
 	JMWebhookDiscordMessage CreateDiscordMessage( JMPlayerInstance player, string title )
 	{
 		#ifdef JM_COT_DIAG_LOGGING
-		auto trace = CF_Trace_2(this, "SetConnection").Add(player).Add(title);
+		auto trace = CF_Trace_2(this, "CreateDiscordMessage").Add(player).Add(title);
 		#endif
 
 		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
 		auto embed = message.CreateEmbed();
-		embed.SetColor( 16766720 );
+		embed.SetColor( JMConstants.WEBHOOK_COLOR_DEFAULT );
 
 		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
 
@@ -458,6 +473,23 @@ class JMWebhookModule: JMModuleBase
 			embed.AddField( "Server:", m_ServerHostName, true );
 
 		embed.AddField( title, player.FormatSteamWebhook(), m_ServerHostName != "" );
+
+		return message;
+	}
+
+	// Creates an admin-action message with a custom embed color and optional target player.
+	JMWebhookDiscordMessage CreateDiscordMessageAdmin( JMPlayerInstance admin, string title, int color )
+	{
+		JMWebhookDiscordMessage message = new JMWebhookDiscordMessage;
+		auto embed = message.CreateEmbed();
+		embed.SetColor( color );
+
+		embed.SetAuthor( "Community Online Tools", "https://steamcommunity.com/sharedfiles/filedetails/?id=1564026768", "https://steamuserimages-a.akamaihd.net/ugc/960854969917124348/1A32B80495D9F205E4D91C61AE309D19A44A8B92/" );
+
+		if ( m_ServerHostName != "" )
+			embed.AddField( "Server:", m_ServerHostName, true );
+
+		embed.AddField( title, admin.FormatSteamWebhook(), m_ServerHostName != "" );
 
 		return message;
 	}

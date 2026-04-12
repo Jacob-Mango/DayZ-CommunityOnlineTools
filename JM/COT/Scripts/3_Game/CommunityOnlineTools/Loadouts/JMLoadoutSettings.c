@@ -59,8 +59,8 @@ class JMLoadoutSettings
 		if (!FileExist(JMConstants.DIR_LOADOUTS))
 			MakeDirectory(JMConstants.DIR_LOADOUTS);
 
-        string filepath = JMConstants.DIR_LOADOUTS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
-        JsonFileLoader<JMLoadout>.JsonSaveFile(filepath, data);
+		string filepath = JMConstants.DIR_LOADOUTS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
+		AtomicSave(filepath, data);
 	}
 
 	static void SaveDeletion(JMLoadout data, string filename)
@@ -68,8 +68,28 @@ class JMLoadoutSettings
 		if (!FileExist(JMConstants.DIR_DELETIONS))
 			MakeDirectory(JMConstants.DIR_DELETIONS);
 
-        string filepath = JMConstants.DIR_DELETIONS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
-        JsonFileLoader<JMLoadout>.JsonSaveFile(filepath, data);
+		string filepath = JMConstants.DIR_DELETIONS + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
+		AtomicSave(filepath, data);
+	}
+
+	// Writes to a .tmp file first, then renames over the target so a crash
+	// mid-write never leaves a corrupted JSON file behind.
+	private static void AtomicSave(string filepath, JMLoadout data)
+	{
+		string tmpPath = filepath + ".tmp";
+
+		JsonFileLoader<JMLoadout>.JsonSaveFile(tmpPath, data);
+
+		// Only promote the temp file if it was successfully written
+		if (FileExist(tmpPath))
+		{
+			// Remove old file first (CopyFile won't overwrite on all platforms)
+			if (FileExist(filepath))
+				DeleteFile(filepath);
+
+			CopyFile(tmpPath, filepath);
+			DeleteFile(tmpPath);
+		}
 	}
 
 	static bool Delete(string filename)

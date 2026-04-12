@@ -324,9 +324,10 @@ class COTModule : JMModuleBase
 
 			if ( m_Webhook )
 			{
-				auto msg = m_Webhook.CreateDiscordMessage();
+				auto msg = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_INFO );
 
-				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has joined the server.", false );
+				msg.GetEmbed().SetTitle( "Player Joined" );
+				msg.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has joined the server." );
 
 				m_Webhook.Post( "PlayerJoin", msg );
 			}
@@ -401,9 +402,10 @@ class COTModule : JMModuleBase
 		{
 			if ( m_Webhook )
 			{
-				auto msg = m_Webhook.CreateDiscordMessage();
+				auto msg = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_NEUTRAL );
 
-				msg.GetEmbed().AddField( "Players", "" + instance.FormatSteamWebhook() + " has left the server.", false );
+				msg.GetEmbed().SetTitle( "Player Left" );
+				msg.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has left the server." );
 
 				m_Webhook.Post( "PlayerLeave", msg );
 			}

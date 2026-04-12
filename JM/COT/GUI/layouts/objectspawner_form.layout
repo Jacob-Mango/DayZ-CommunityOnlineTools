@@ -10,69 +10,58 @@ PanelWidgetClass JMObjectSpawnerForm {
  scriptclass "JMObjectSpawnerForm"
  style DayZDefaultPanel
  {
-  GridSpacerWidgetClass object_spawn_wrapper {
+  PanelWidgetClass object_spawn_wrapper_cont {
    position 0 0
-   size 1 1
+   size 1 0.65
+   halign center_ref
+   valign top_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   "Size To Content H" 1
-   "Size To Content V" 1
-   Columns 1
-   Rows 2
    {
-    PanelWidgetClass object_spawn_wrapper_cont {
-     size 1 320
-     halign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     {
-      PanelWidgetClass object_types_actions_wrapper {
-       position 0 0
-       size 0.2 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-      }
-      TextListboxWidgetClass object_spawn_list {
-       position 0.2 0
-       size 0.5 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       style Editor
-       lines 20
-       font "gui/fonts/MetronLight14"
-      }
-      ItemPreviewWidgetClass object_preview {
-       visible 0
-       clipchildren 1
-       ignorepointer 0
-       position 0.7 0
-       size 0.3 1
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 0
-       scaled 0
-      }
-     }
-    }
-    PanelWidgetClass object_spawn_actions_wrapper {
+    PanelWidgetClass object_types_actions_wrapper {
      position 0 0
-     size 1 1
-     halign center_ref
-     hexactpos 1
-     vexactpos 1
+     size 0.2 1
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
      vexactsize 0
     }
+    TextListboxWidgetClass object_spawn_list {
+     position 0.2 0
+     size 0.5 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Editor
+     lines 20
+     font "gui/fonts/MetronLight14"
+    }
+    ItemPreviewWidgetClass object_preview {
+     visible 0
+     clipchildren 1
+     ignorepointer 0
+     position 0.7 0
+     size 0.3 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     scaled 0
+    }
    }
+  }
+  PanelWidgetClass object_spawn_actions_wrapper {
+   position 0 0
+   size 1 0.35
+   halign center_ref
+   valign bottom_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
   }
  }
 }

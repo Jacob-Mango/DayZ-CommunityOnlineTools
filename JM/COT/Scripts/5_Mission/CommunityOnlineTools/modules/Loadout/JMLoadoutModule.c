@@ -194,7 +194,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		JMLoadoutSettings.Delete(Loadout);
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted '" + Loadout + "'" );
-		SendWebhook( "Delete", instance, "Deleted '" + Loadout + "'" );
+		SendWebhookColored( "Delete", instance, "Deleted '" + Loadout + "'", JMConstants.WEBHOOK_COLOR_DANGER );
 	}
 
 	private void RPC_Delete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -239,7 +239,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		SpawnLoadout( file, position );
 
 		GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned at " + position);
-		SendWebhook( "Spawn", instance, "Spawned Loadout set \"" + file + "\" at " + position.ToString() );
+		SendWebhookColored( "Spawn", instance, "Spawned Loadout set \"" + file + "\" at " + position.ToString(), JMConstants.WEBHOOK_COLOR_SPAWN );
 	}
 
 	private void RPC_SpawnCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -310,7 +310,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + pData.GetGUID() );
-			SendWebhook( "Spawn", instance, "Spawned Loadout set \"" + file + "\" on " + pData.FormatSteamWebhook() );
+			SendWebhookColored( "Spawn", instance, "Spawned Loadout set \"" + file + "\" on " + pData.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SPAWN );
 		}
 	}
 
@@ -331,6 +331,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 				Error("Failed");
 				return;
 			}
+
+			if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+				return;
 
 			Server_SpawnPlayers( Loadout, guids, senderRPC );
 		}
@@ -364,7 +367,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		SpawnLoadout( file, ent );
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Loadout  " + Loadout + " spawned on " + ent.GetType() );
-		SendWebhook( "Spawn", instance, "Spawned Loadout  \"" + Loadout + "\" on " + ent.GetType() );
+		SendWebhookColored( "Spawn", instance, "Spawned Loadout  \"" + Loadout + "\" on " + ent.GetType(), JMConstants.WEBHOOK_COLOR_SPAWN );
 	}
 
 	private void RPC_SpawnTarget( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -610,7 +613,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 				props.Insert(objects[i]);
 		}
 
-		if (count > -1)
+		if (count > 0)
 		{
 			if (count != 0)
 			{
@@ -622,7 +625,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 				loadouts.Insert(LoadoutProcessItem(prnt, avgPos - prnt.GetPosition(), prnt.GetOrientation()));
 				
 			foreach(Object obj: props)
-				loadouts.Insert(LoadoutProcessObject(parent, avgPos - parent.GetPosition(), parent.GetOrientation()));
+				loadouts.Insert(LoadoutProcessObject(obj, avgPos - obj.GetPosition(), obj.GetOrientation()));
 
 			JMLoadout loadout = new JMLoadout;
 			loadout.m_Items = new array< ref JMLoadoutItem >;
@@ -632,7 +635,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			JMLoadoutSettings.Save(loadout, name);
 
 			GetCommunityOnlineToolsBase().Log( instance, "Created Loadout '"+name+"'" );
-			SendWebhook( "Create", instance, "Created Loadout '"+name+"'" );
+			SendWebhookColored( "Create", instance, "Created Loadout '"+name+"'", JMConstants.WEBHOOK_COLOR_SUCCESS );
 		}
 	}
 
@@ -768,13 +771,13 @@ class JMLoadoutModule: JMRenderableModuleBase
 				props.Insert(objects[i]);
 		}
 
-		if (count > -1)
+		if (count > 0)
 		{
 			foreach(EntityAI prnt: parents)
 				loadouts.Insert(LoadoutProcessItem(prnt, prnt.GetPosition(), prnt.GetOrientation()));
 				
 			foreach(Object obj: props)
-				loadouts.Insert(LoadoutProcessObject(parent, parent.GetPosition(), parent.GetOrientation()));
+				loadouts.Insert(LoadoutProcessObject(obj, obj.GetPosition(), obj.GetOrientation()));
 
 			JMLoadout loadout = new JMLoadout;
 			loadout.m_Items = new array< ref JMLoadoutItem >;
@@ -785,7 +788,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			JMLoadoutSettings.SaveDeletion(loadout, name);
 
 			GetCommunityOnlineToolsBase().Log( instance, "Created Deletion Backup '"+name+"'" );
-			SendWebhook( "Backup", instance, "Created Deletion Backup '"+name+"'" );
+			SendWebhookColored( "Backup", instance, "Created Deletion Backup '"+name+"'", JMConstants.WEBHOOK_COLOR_INFO );
 		}
 	}
 }

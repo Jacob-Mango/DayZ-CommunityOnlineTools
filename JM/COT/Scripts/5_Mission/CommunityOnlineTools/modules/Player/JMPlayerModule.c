@@ -24,6 +24,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Kick" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Ban" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Message" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Notif" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.AccessInventory" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
@@ -153,26 +154,8 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		switch ( rpc_type )
 		{
-		case JMPlayerModuleRPC.SetHealth:
-			RPC_SetHealth( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetBlood:
-			RPC_SetBlood( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetShock:
-			RPC_SetShock( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetEnergy:
-			RPC_SetEnergy( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetWater:
-			RPC_SetWater( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetStamina:
-			RPC_SetStamina( ctx, sender, target );
-			break;
-		case JMPlayerModuleRPC.SetHeatBuffer:
-			RPC_SetHeatBuffer( ctx, sender, target );
+		case JMPlayerModuleRPC.SetStat:
+			RPC_SetStat( ctx, sender, target );
 			break;
 		case JMPlayerModuleRPC.SetBloodyHands:
 			RPC_SetBloodyHands( ctx, sender, target );
@@ -321,6 +304,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		string messageText;
 		if (!ctx.Read(messageText))
 			return;
@@ -368,16 +354,19 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	private void RPC_Notif( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Notif", senderRPC, instance ) )
+			return;
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
-		string NotifText;
-		if (!ctx.Read(NotifText))
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Notif", senderRPC, instance ) )
+		string NotifText;
+		if (!ctx.Read(NotifText))
 			return;
 
 		Exec_Notif( guids, senderRPC, instance, NotifText );
@@ -390,362 +379,145 @@ class JMPlayerModule: JMRenderableModuleBase
 		rpc.Send(NULL, JMPlayerModuleRPC.Notif, true, identity);
 	}
 
-	void SetHealth( float health, array< string > guids )
+	// -----------------------------------------------------------------------
+	// Batched stat setter — single RPC replaces 7 individual SetX methods.
+	// Public entry points below are kept as thin wrappers so call sites and
+	// form code don't need to change.
+	// -----------------------------------------------------------------------
+
+	private string StatPermission( JMStatType type )
 	{
-		if ( IsMissionHost() )
+		switch ( type )
 		{
-			Exec_SetHealth( health, guids, NULL );
-		} else
+		case JMStatType.Health:      return "Admin.Player.Set.Health";
+		case JMStatType.Blood:       return "Admin.Player.Set.Blood";
+		case JMStatType.Shock:       return "Admin.Player.Set.Shock";
+		case JMStatType.Energy:      return "Admin.Player.Set.Energy";
+		case JMStatType.Water:       return "Admin.Player.Set.Water";
+		case JMStatType.Stamina:     return "Admin.Player.Set.Stamina";
+		case JMStatType.HeatBuffer:  return "Admin.Player.Set.HeatBuffer";
+		}
+		return "";
+	}
+
+	private string StatName( JMStatType type )
+	{
+		switch ( type )
 		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( health );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetHealth, true, NULL );
+		case JMStatType.Health:      return "Health";
+		case JMStatType.Blood:       return "Blood";
+		case JMStatType.Shock:       return "Shock";
+		case JMStatType.Energy:      return "Energy";
+		case JMStatType.Water:       return "Water";
+		case JMStatType.Stamina:     return "Stamina";
+		case JMStatType.HeatBuffer:  return "HeatBuffer";
+		}
+		return "Unknown";
+	}
+
+	private float ClampStat( JMStatType type, float value )
+	{
+		switch ( type )
+		{
+		case JMStatType.Health:      return Math.Clamp( value, JMConstants.STAT_HEALTH_MIN,     JMConstants.STAT_HEALTH_MAX );
+		case JMStatType.Blood:       return Math.Clamp( value, JMConstants.STAT_BLOOD_MIN,      JMConstants.STAT_BLOOD_MAX );
+		case JMStatType.Shock:       return Math.Clamp( value, JMConstants.STAT_SHOCK_MIN,      JMConstants.STAT_SHOCK_MAX );
+		case JMStatType.Energy:      return Math.Clamp( value, JMConstants.STAT_ENERGY_MIN,     JMConstants.STAT_ENERGY_MAX );
+		case JMStatType.Water:       return Math.Clamp( value, JMConstants.STAT_WATER_MIN,      JMConstants.STAT_WATER_MAX );
+		case JMStatType.Stamina:     return Math.Clamp( value, JMConstants.STAT_STAMINA_MIN,    JMConstants.STAT_STAMINA_MAX );
+		case JMStatType.HeatBuffer:  return Math.Clamp( value, JMConstants.STAT_HEATBUFFER_MIN, JMConstants.STAT_HEATBUFFER_MAX );
+		}
+		return value;
+	}
+
+	private void ApplyStatToPlayer( PlayerBase player, JMStatType type, float value )
+	{
+		switch ( type )
+		{
+		case JMStatType.Health:     player.SetHealth( "GlobalHealth", "Health", value ); break;
+		case JMStatType.Blood:      player.SetHealth( "GlobalHealth", "Blood",  value ); break;
+		case JMStatType.Shock:      player.SetHealth( "GlobalHealth", "Shock",  value ); break;
+		case JMStatType.Energy:     player.GetStatEnergy().Set( value );                 break;
+		case JMStatType.Water:      player.GetStatWater().Set( value );                  break;
+		case JMStatType.Stamina:    player.GetStatStamina().Set( value );                break;
+		case JMStatType.HeatBuffer: player.GetStatHeatBuffer().Set( value );             break;
 		}
 	}
 
-	private void Exec_SetHealth( float health, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	void SetStat( JMStatType type, float value, array< string > guids )
 	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		if ( IsMissionHost() )
+		{
+			Exec_SetStat( type, value, guids, NULL );
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( type );
+			rpc.Write( value );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.SetStat, true, NULL );
+		}
+	}
 
+	private void Exec_SetStat( JMStatType type, float value, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		value = ClampStat( type, value );
+		string statName = StatName( type );
+
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 		for ( int i = 0; i < players.Count(); i++ )
 		{
 			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
 			if ( player == NULL )
 				continue;
 
-			player.SetHealth( "GlobalHealth", "Health", health );
+			ApplyStatToPlayer( player, type, value );
 
-			GetCommunityOnlineToolsBase().Log( ident, "Set Health To " + health + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " health to " + health );
+			GetCommunityOnlineToolsBase().Log( ident, "Set " + statName + " To " + value + " [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " " + statName + " to " + value, JMConstants.WEBHOOK_COLOR_WARNING );
 
 			players[i].Update();
 		}
 	}
 
-	private void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	private void RPC_SetStat( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
-		float health;
-		if ( !ctx.Read( health ) )
+		int typeInt;
+		if ( !ctx.Read( typeInt ) )
+			return;
+
+		if ( typeInt < 0 || typeInt >= JMStatType.COUNT )
+			return;
+
+		float value;
+		if ( !ctx.Read( value ) )
 			return;
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
 			return;
 
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Health", senderRPC, instance ) )
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
-		Exec_SetHealth( health, guids, senderRPC, instance );
-	}
-
-	void SetBlood( float blood, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetBlood( blood, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( blood );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetBlood, true, NULL );
-		}
-	}
-
-	private void Exec_SetBlood( float blood, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.SetHealth( "GlobalHealth", "Blood", blood );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set Blood To " + blood + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " blood to " + blood );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetBlood( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float blood;
-		if ( !ctx.Read( blood ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
+		JMStatType type = typeInt;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Blood", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( StatPermission( type ), senderRPC, instance ) )
 			return;
 
-		Exec_SetBlood( blood, guids, senderRPC, instance );
+		Exec_SetStat( type, value, guids, senderRPC, instance );
 	}
 
-	void SetShock( float shock, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetShock( shock, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( shock );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetShock, true, NULL );
-		}
-	}
-
-	private void Exec_SetShock( float shock, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.SetHealth( "GlobalHealth", "Shock", shock );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set Shock To " + shock + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " shock to " + shock );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetShock( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float shock;
-		if ( !ctx.Read( shock ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock", senderRPC, instance ) )
-			return;
-
-		Exec_SetShock( shock, guids, senderRPC, instance );
-	}
-
-	void SetEnergy( float energy, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetEnergy( energy, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( energy );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetEnergy, true, NULL );
-		}
-	}
-
-	private void Exec_SetEnergy( float energy, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.GetStatEnergy().Set( energy );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set Energy To " + energy + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " energy to " + energy );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetEnergy( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float energy;
-		if ( !ctx.Read( energy ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Energy", senderRPC, instance ) )
-			return;
-
-		Exec_SetEnergy( energy, guids, senderRPC, instance );
-	}
-
-	void SetWater( float water, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetWater( water, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( water );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetWater, true, NULL );
-		}
-	}
-
-	private void Exec_SetWater( float water, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.GetStatWater().Set( water );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set Water To " + water + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " water to " + water );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetWater( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float water;
-		if ( !ctx.Read( water ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Water", senderRPC, instance ) )
-			return;
-
-		Exec_SetWater( water, guids, senderRPC, instance );
-	}
-
-	void SetStamina( float stamina, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetStamina( stamina, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( stamina );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetStamina, true, NULL );
-		}
-	}
-
-	private void Exec_SetStamina( float stamina, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.GetStatStamina().Set( stamina );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set Stamina To " + stamina + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " stamina to " + stamina );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetStamina( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float stamina;
-		if ( !ctx.Read( stamina ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Stamina", senderRPC, instance ) )
-			return;
-
-		Exec_SetStamina( stamina, guids, senderRPC, instance );
-	}
-
-	void SetHeatBuffer( float HeatBuffer, array< string > guids )
-	{
-		if ( IsMissionHost() )
-		{
-			Exec_SetHeatBuffer( HeatBuffer, guids, NULL );
-		} else
-		{
-			ScriptRPC rpc = new ScriptRPC();
-			rpc.Write( HeatBuffer );
-			rpc.Write( guids );
-			rpc.Send( NULL, JMPlayerModuleRPC.SetHeatBuffer, true, NULL );
-		}
-	}
-
-	private void Exec_SetHeatBuffer( float HeatBuffer, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
-	{
-		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-
-		for ( int i = 0; i < players.Count(); i++ )
-		{
-			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
-			if ( player == NULL )
-				continue;
-
-			player.GetStatHeatBuffer().Set( HeatBuffer );
-
-			GetCommunityOnlineToolsBase().Log( ident, "Set HeatBuffer To " + HeatBuffer + " [guid=" + players[i].GetGUID() + "]" );
-
-			SendWebhook( "Set", instance, "Set " + players[i].FormatSteamWebhook() + " HeatBuffer to " + HeatBuffer );
-
-			players[i].Update();
-		}
-	}
-
-	private void RPC_SetHeatBuffer( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
-	{
-		float HeatBuffer;
-		if ( !ctx.Read( HeatBuffer ) )
-			return;
-
-		array< string > guids;
-		if ( !ctx.Read( guids ) )
-			return;
-
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.HeatBuffer", senderRPC, instance ) )
-			return;
-
-		Exec_SetHeatBuffer( HeatBuffer, guids, senderRPC, instance );
-	}
+	// Public wrappers — keep existing call sites working without changes
+	void SetHealth(     float v, array< string > guids ) { SetStat( JMStatType.Health,     v, guids ); }
+	void SetBlood(      float v, array< string > guids ) { SetStat( JMStatType.Blood,      v, guids ); }
+	void SetShock(      float v, array< string > guids ) { SetStat( JMStatType.Shock,      v, guids ); }
+	void SetEnergy(     float v, array< string > guids ) { SetStat( JMStatType.Energy,     v, guids ); }
+	void SetWater(      float v, array< string > guids ) { SetStat( JMStatType.Water,      v, guids ); }
+	void SetStamina(    float v, array< string > guids ) { SetStat( JMStatType.Stamina,    v, guids ); }
+	void SetHeatBuffer( float v, array< string > guids ) { SetStat( JMStatType.HeatBuffer, v, guids ); }
 
 	void SetBloodyHands( bool bloodyhands, array< string > guids )
 	{
@@ -789,6 +561,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -840,7 +615,7 @@ class JMPlayerModule: JMRenderableModuleBase
 				objSpawnerModule.SpawnCompatibleAttachments(vehicle, null, 0);
 
 			GetCommunityOnlineToolsBase().Log( ident, "Repaired Transport [guid=" + players[i].GetGUID() + "]" );
-			SendWebhook( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle" );
+			SendWebhookColored( "Vehicle", instance, "Repaired " + players[i].FormatSteamWebhook() + " vehicle", JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 			players[i].Update();
 		}
@@ -850,6 +625,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -890,7 +668,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position );
 
-			SendWebhook( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to " + position.ToString() );
+			SendWebhookColored( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
 
 			players[i].Update();
 		}
@@ -904,6 +682,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -943,7 +724,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported to " + position + " [guid=" + other.GetGUID() + "]" );
-			SendWebhook( "Teleport", instance, "Teleported the admin to " + other.FormatSteamWebhook() + "" );
+			SendWebhookColored( "Teleport", instance, "Teleported the admin to " + other.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_TELEPORT );
 		}
 	}
 
@@ -990,7 +771,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			player.SetWorldPosition( position );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported [guid=" + players[i].GetGUID() + "] to " + position + " [previous]" );
-			SendWebhook( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to their previous position" );
+			SendWebhookColored( "Teleport", instance, "Teleported " + players[i].FormatSteamWebhook() + " to their previous position", JMConstants.WEBHOOK_COLOR_TELEPORT );
 
 			players[i].Update();
 		}
@@ -1000,6 +781,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -1538,9 +1322,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetCommunityOnlineToolsBase().Log( ident, "Set " + toggle + " to " + value + " [guid=" + player.GetGUID() + "]" );
 
 		if ( value )
-			SendWebhook( "Set", instance, "Gave " + player.FormatSteamWebhook() + " " + toggle );
+			SendWebhookColored( "Set", instance, "Gave " + player.FormatSteamWebhook() + " " + toggle, JMConstants.WEBHOOK_COLOR_WARNING );
 		else
-			SendWebhook( "Set", instance, "Removed " + player.FormatSteamWebhook() + " " + toggle );
+			SendWebhookColored( "Set", instance, "Removed " + player.FormatSteamWebhook() + " " + toggle, JMConstants.WEBHOOK_COLOR_WARNING );
 
 		player.Update();
 	}
@@ -1579,6 +1363,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -1632,6 +1419,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Freeze", senderRPC, instance ) )
 			return;
@@ -1681,6 +1471,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -1755,6 +1548,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.CannotBeTargetedByAI", senderRPC, instance ) )
 			return;
@@ -1824,6 +1620,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -1903,6 +1702,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.RemoveCollision", senderRPC, instance ) )
 			return;
@@ -1975,6 +1777,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2051,6 +1856,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.AdminNVG", senderRPC, instance ) )
 			return;
@@ -2125,6 +1933,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.UnlimitedStamina", senderRPC, instance ) )
 			return;
@@ -2179,6 +1990,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( guids ) )
 			return;
 
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Vomit", senderRPC, instance ) )
 			return;
@@ -2224,8 +2038,13 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( value ) )
 			return;
 
+		value = Math.Clamp( value, 0.1, 10.0 );
+
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2292,6 +2111,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2408,7 +2230,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Healed [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Healed " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "Set", instance, "Healed " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 			if (!allowDamage)
 				player.SetAllowDamage(false);
@@ -2437,6 +2259,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2511,13 +2336,16 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		GetCommunityOnlineToolsBase().Log( ident, "Banned [guid=" + player.GetGUID() + "]" );
 
-		SendWebhook( "Ban", instance, "Banned " + player.FormatSteamWebhook() );
+		SendWebhookColored( "Ban", instance, "Banned " + player.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_DANGER );
 	}
 
 	private void RPC_Ban( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		string messageText;
@@ -2599,13 +2427,16 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		GetCommunityOnlineToolsBase().Log( ident, "Kicked [guid=" + player.GetGUID() + "]" );
 
-		SendWebhook( "Kick", instance, "Kicked " + player.FormatSteamWebhook() );
+		SendWebhookColored( "Kick", instance, "Kicked " + player.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_MODERATION );
 	}
 
 	private void RPC_Kick( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		string messageText;
@@ -2696,7 +2527,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Stripped [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Inventory", instance, "Stripped " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "Inventory", instance, "Stripped " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
 
 			players[i].Update();
 		}
@@ -2706,6 +2537,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2742,7 +2576,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Cleared Cargo [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Inventory", instance, "Cleared Cargo " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "Inventory", instance, "Cleared Cargo " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
 
 			players[i].Update();
 		}
@@ -2752,6 +2586,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2788,7 +2625,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Dried [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Inventory", instance, "Dried " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "Inventory", instance, "Dried " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_INFO );
 
 			players[i].Update();
 		}
@@ -2798,6 +2635,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2834,7 +2674,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Bleeding stopped [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "Set", instance, "Stopped " + players[i].FormatSteamWebhook() + " bleeding." );
+			SendWebhookColored( "Set", instance, "Stopped " + players[i].FormatSteamWebhook() + " bleeding.", JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 			players[i].Update();
 		}
@@ -2844,6 +2684,9 @@ class JMPlayerModule: JMRenderableModuleBase
 	{
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2886,7 +2729,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated permissions [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "PF", instance, "Updated permissions for " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "PF", instance, "Updated permissions for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_MODERATION );
 		}
 	}
 
@@ -2901,6 +2744,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;
@@ -2938,7 +2784,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 			GetCommunityOnlineToolsBase().Log( ident, "Updated roles [guid=" + players[i].GetGUID() + "]" );
 
-			SendWebhook( "PF", instance, "Updated roles for " + players[i].FormatSteamWebhook() );
+			SendWebhookColored( "PF", instance, "Updated roles for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_MODERATION );
 		}
 	}
 
@@ -2950,6 +2796,9 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		array< string > guids;
 		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
 		JMPlayerInstance instance;

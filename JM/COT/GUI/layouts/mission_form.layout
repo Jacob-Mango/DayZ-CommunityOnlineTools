@@ -4,8 +4,8 @@ PanelWidgetClass JMMissionSelectorForm {
  size 700 600
  hexactpos 0
  vexactpos 0
- hexactsize 0
- vexactsize 0
+ hexactsize 1
+ vexactsize 1
  scriptclass "JMMissionSelectorForm"
  style DayZDefaultPanel
  Columns 1

@@ -329,7 +329,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( shouldLog )
 			{
 				GetCommunityOnlineToolsBase().Log( ident, "Teleported "+ players[i].GetSteam64ID() +" to position " + position.ToString() );
-				SendWebhook( "Vector", instance, "Teleported "+players[i].GetSteam64ID()+" to position " + position.ToString() );
+				SendWebhookColored( "Vector", instance, "Teleported "+players[i].GetSteam64ID()+" to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
 			}
 		}
 
@@ -349,8 +349,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( isCursor ) )
 				return;
 
-			array< string > guids
+			array< string > guids;
 			if ( !ctx.Read( guids ) )
+				return;
+
+			if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 				return;
 
 			Server_Position( pos, isCursor, guids, senderRPC );
@@ -406,7 +409,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
 		
-			SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+			SendWebhookColored( "Vector", instance, "Teleported to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
 		}
 	}
 
@@ -494,7 +497,7 @@ class JMTeleportModule: JMRenderableModuleBase
 			SetPlayerPosition( player, tempPos );
 
 			GetCommunityOnlineToolsBase().Log( ident, "Teleported " + players[j].GetGUID() + " to (" + location.Name + ", " + tempPos.ToString() + ")" );
-			SendWebhook( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name );
+			SendWebhookColored( "Location", instance, "Teleported " + players[j].FormatSteamWebhook() + " to " + location.Name, JMConstants.WEBHOOK_COLOR_TELEPORT );
 
 			players[j].Update();
 		}
@@ -571,7 +574,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		OnSettingsUpdated();
 
 		GetCommunityOnlineToolsBase().Log( ident, "Added TP Location " + locName + " (" + catName + ": "+ playerpos +" )" );
-		SendWebhook( "Location", instance, "Added TP " + locName + " (" + catName + ": "+ playerpos +" )" );
+		SendWebhookColored( "Location", instance, "Added TP " + locName + " (" + catName + ": "+ playerpos +" )", JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	private void RPC_RemoveLocation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -609,8 +612,8 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove", ident, instance ) )
 			return;
 
-		int id;
-		bool hasType;
+		int id = -1;
+		bool hasType = false;
 		for(int i=0; i < m_Settings.Locations.Count(); i++)
 		{
 			if (m_Settings.Locations[i].Type == locName.Type)
@@ -645,7 +648,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		OnSettingsUpdated();
 
 		GetCommunityOnlineToolsBase().Log( ident, "Removed TP Location " + locName.Name + " (" + locName.Type + ")" );
-		SendWebhook( "Location", instance, "Removed TP " + locName.Name + " (" + locName.Type + ")" );
+		SendWebhookColored( "Location", instance, "Removed TP " + locName.Name + " (" + locName.Type + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 	}
 
 	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
@@ -676,7 +679,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		SetPlayerPosition( player, position );
 
 		GetCommunityOnlineToolsBase().Log( player.GetIdentity(), "Teleported to position " + position.ToString() );
-		SendWebhook( "Vector", instance, "Teleported to position " + position.ToString() );
+		SendWebhookColored( "Vector", instance, "Teleported to position " + position.ToString(), JMConstants.WEBHOOK_COLOR_TELEPORT );
 	}
 
 	void Command_Get(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)

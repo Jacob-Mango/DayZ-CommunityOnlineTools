@@ -876,7 +876,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
-			return
+			return;
 
 		Exec_SetWindMagnitude( p1, senderRPC );
 	}
@@ -891,7 +891,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
-			return
+			return;
 
 		Exec_SetWindDirection( p1, senderRPC );
 	}
@@ -1019,7 +1019,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		{
 		case JMWeatherModuleRPC.Load:
 			RPC_Load( ctx, sender, target );
-			break
+			break;
 		case JMWeatherModuleRPC.FreezeTime:
 			RPC_FreezeTime( ctx, sender, target );
 			break;

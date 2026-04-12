@@ -20,11 +20,6 @@ modded class JMModuleConstructor
 		modules.Insert( JMtemStatsModule );
 #endif
 
-		if ( IsMissionOffline() )
-			modules.Insert( JMMissionSelectorModule );
-		else if (modules.Find(JMMissionSelectorModule) != -1)
-			modules.RemoveItem(JMMissionSelectorModule);
-		
 		// Namalsk specific checks
 		if ( IsModLoaded("NamEventManager") && IsModLoaded("EVRStorm") )
 			modules.Insert( JMNamalskEventManagerModule );
