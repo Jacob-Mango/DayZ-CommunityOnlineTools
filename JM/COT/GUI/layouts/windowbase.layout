@@ -97,6 +97,39 @@ PanelWidgetClass base_window {
      "text halign" left
      "text valign" center
     }
+    ButtonWidgetClass pin_button {
+     ignorepointer 0
+     visible 1
+     color 0.2 0.2 0.2 1
+     position 57 0
+     size 25 25
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style Default
+     {
+      TextWidgetClass pin_button_label {
+       ignorepointer 1
+       color 0.6 0.6 0.6 1
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Normal
+       text "P"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 13
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
     ButtonWidgetClass minimize_button {
      ignorepointer 0
      visible 1
@@ -164,9 +197,9 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_up {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.15
+   color 0.3 0.5 1.0 1
    position 0 0
-   size 1 5
+   size 1 3
    hexactpos 1
    vexactpos 1
    hexactsize 0
@@ -175,9 +208,9 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_down {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.15
+   color 0.3 0.5 1.0 1
    position 0 0
-   size 1 5
+   size 1 3
    hexactpos 1
    vexactpos 1
    hexactsize 0
@@ -188,9 +221,9 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_left {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.15
+   color 0.3 0.5 1.0 1
    position 0 0
-   size 5 1
+   size 3 1
    hexactpos 1
    vexactpos 1
    hexactsize 1
@@ -199,9 +232,9 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_right {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.15
+   color 0.3 0.5 1.0 1
    position 0 0
-   size 5 1
+   size 3 1
    hexactpos 1
    vexactpos 1
    hexactsize 1
@@ -212,7 +245,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_top_left {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.3
+   color 0.3 0.5 1.0 1
    position 0 0
    size 10 10
    hexactpos 1
@@ -225,7 +258,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_top_right {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.3
+   color 0.3 0.5 1.0 1
    position 0 0
    size 10 10
    hexactpos 1
@@ -238,7 +271,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_bot_left {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.3
+   color 0.3 0.5 1.0 1
    position 0 0
    size 10 10
    hexactpos 1
@@ -251,7 +284,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_bot_right {
    ignorepointer 1
    visible 0
-   color 1 1 1 0.3
+   color 0.3 0.5 1.0 1
    position 0 0
    size 10 10
    hexactpos 1

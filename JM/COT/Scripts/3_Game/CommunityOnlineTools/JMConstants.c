@@ -35,6 +35,29 @@ class JMConstants
 	static const string EXT_TELEPORT 	= ".json";
 	static const string EXT_LOADOUT 	= ".json";
 
+	// RPC security limits
+	static const int    RPC_MAX_GUIDS         = 64;   // max targets per multi-target RPC
+	static const float  RPC_RATE_LIMIT_S      = 0.1;  // minimum seconds between RPCs per sender
+
+	// Player stat clamp ranges  [min, max]
+	static const float STAT_HEALTH_MIN        = 0.0;
+	static const float STAT_HEALTH_MAX        = 100.0;
+	static const float STAT_BLOOD_MIN         = 0.0;
+	static const float STAT_BLOOD_MAX         = 5000.0;
+	static const float STAT_SHOCK_MIN         = 0.0;
+	static const float STAT_SHOCK_MAX         = 100.0;
+	static const float STAT_ENERGY_MIN        = 0.0;
+	static const float STAT_ENERGY_MAX        = 20000.0;
+	static const float STAT_WATER_MIN         = 0.0;
+	static const float STAT_WATER_MAX         = 5000.0;
+	static const float STAT_STAMINA_MIN       = 0.0;
+	static const float STAT_STAMINA_MAX       = 100.0;
+	static const float STAT_HEATBUFFER_MIN    = 0.0;
+	static const float STAT_HEATBUFFER_MAX    = 1.0;
+
+	// Spawner config file
+	static const string FILE_SPAWNER_CONFIG   = DIR_COT + "SpawnerConfig.json";
+
 	// Legacy
 	static const string DIR_VEHICLES = DIR_COT + "Vehicles\\";
 	static const string FT_VEHICLE = "json";
@@ -44,4 +67,18 @@ class JMConstants
 	static const string FT_ITEM = "json";
 	static const string EXT_ITEM = "." + FT_ITEM;
 	// Legacy
+
+	// Discord embed color palette (decimal representation of hex colors)
+	static const int WEBHOOK_COLOR_DEFAULT    = 16766720;  // 0xFFCC00 - amber/gold  (default, generic info)
+	static const int WEBHOOK_COLOR_INFO       = 3447003;   // 0x3498DB - blue        (join, neutral info)
+	static const int WEBHOOK_COLOR_SUCCESS    = 3066993;   // 0x2ECC71 - green       (server startup, positive)
+	static const int WEBHOOK_COLOR_WARNING    = 16098851;  // 0xF5A623 - orange      (admin actions, modifications)
+	static const int WEBHOOK_COLOR_DANGER     = 15158332;  // 0xE74C3C - red         (death, ban, damage)
+	static const int WEBHOOK_COLOR_CRITICAL   = 10038562;  // 0x992D22 - dark red    (mass delete, critical admin ops)
+	static const int WEBHOOK_COLOR_MODERATION = 10181046;  // 0x9B59B6 - purple      (kick, permissions, roles)
+	static const int WEBHOOK_COLOR_NEUTRAL    = 9807270;   // 0x95A5A6 - grey        (leave, shutdown)
+	static const int WEBHOOK_COLOR_SPAWN      = 1752220;   // 0x1ABC9C - teal        (object/loadout spawn)
+	static const int WEBHOOK_COLOR_TELEPORT   = 3553599;   // 0x3643FF - indigo      (teleport actions)
+	static const int WEBHOOK_COLOR_ESP        = 8311585;   // 0x7ED321 - lime green  (ESP actions on objects)
+	static const int WEBHOOK_COLOR_CAMERA     = 8900331;   // 0x87CEEB - sky blue    (camera actions)
 }

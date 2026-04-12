@@ -433,20 +433,37 @@ class JMESPModule: JMRenderableModuleBase
 
 	bool IncludeImmovable()
 	{
-		if (m_ViewTypesByType[JMESPViewTypePlainObject].View)
-			return true;
+		JMESPViewType vt;
 
-		if (m_ViewTypesByType[JMESPViewTypeRock].View)
-			return true;
+		if ( m_ViewTypesByType.Contains( JMESPViewTypePlainObject ) )
+		{
+			vt = m_ViewTypesByType[ JMESPViewTypePlainObject ];
+			if ( vt && vt.View ) return true;
+		}
 
-		if (m_ViewTypesByType[JMESPViewTypeBush].View)
-			return true;
+		if ( m_ViewTypesByType.Contains( JMESPViewTypeRock ) )
+		{
+			vt = m_ViewTypesByType[ JMESPViewTypeRock ];
+			if ( vt && vt.View ) return true;
+		}
 
-		if (m_ViewTypesByType[JMESPViewTypeTree].View)
-			return true;
+		if ( m_ViewTypesByType.Contains( JMESPViewTypeBush ) )
+		{
+			vt = m_ViewTypesByType[ JMESPViewTypeBush ];
+			if ( vt && vt.View ) return true;
+		}
 
-		if (m_ViewTypesByType[JMESPViewTypeImmovable].View)
-			return true;
+		if ( m_ViewTypesByType.Contains( JMESPViewTypeTree ) )
+		{
+			vt = m_ViewTypesByType[ JMESPViewTypeTree ];
+			if ( vt && vt.View ) return true;
+		}
+
+		if ( m_ViewTypesByType.Contains( JMESPViewTypeImmovable ) )
+		{
+			vt = m_ViewTypesByType[ JMESPViewTypeImmovable ];
+			if ( vt && vt.View ) return true;
+		}
 
 		return false;
 	}
@@ -1172,7 +1189,7 @@ class JMESPModule: JMRenderableModuleBase
 	private void Exec_Log( string log, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
 		GetCommunityOnlineToolsBase().Log( ident, "ESP: " + log );
-		SendWebhook( "Log", instance, "Logging ESP action: " + log );
+		SendWebhookColored( "Log", instance, "Logging ESP action: " + log, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1199,6 +1216,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetPosition( vector position, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( !target )
+			return;
+
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
@@ -1216,7 +1236,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 		
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
-		SendWebhook( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString() );
+		SendWebhookColored( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	private void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1251,6 +1271,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetOrientation( vector orientation, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( !target )
+			return;
+
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
 		{
@@ -1268,7 +1291,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
-		SendWebhook( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString() );
+		SendWebhookColored( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	private void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1303,13 +1326,16 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_SetHealth( float health, string zone, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
 	{
+		if ( !target )
+			return;
+
 		if ( (target.IsInherited(Man) || target.IsInherited(DayZCreature)) && !target.IsAlive() )
 			return;
 
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
-		SendWebhook( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health );
+		SendWebhookColored( "Health", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") health to " + health, JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	private void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1360,7 +1386,7 @@ class JMESPModule: JMRenderableModuleBase
 		g_Game.ObjectDelete( target );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
-		SendWebhook( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString() );
+		SendWebhookColored( "Delete", instance, "Deleted " + obtype + " at " + transform[3].ToString(), JMConstants.WEBHOOK_COLOR_DANGER );
 	}
 
 	private void RPC_DeleteObject( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1404,7 +1430,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.GetConstruction().COT_BuildRequiredParts( part_name, player, requireMaterials );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=built part=" + part_name + " required_materials=" + requireMaterials );
-		SendWebhook( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhookColored( "BB_Build", instance, "Built the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	private void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1443,7 +1469,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.GetConstruction().COT_DismantleRequiredParts( part_name, player );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=dismantle part=" + part_name  );
-		SendWebhook( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhookColored( "BB_Dismantle", instance, "Dismantled the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 	}
 
 	private void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1479,7 +1505,7 @@ class JMESPModule: JMRenderableModuleBase
 		target.GetConstruction().COT_RepairPart( part_name );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repair part=" + part_name  );
-		SendWebhook( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")" );
+		SendWebhookColored( "BB_Repair", instance, "Repaired the part \"" + part_name + "\" for \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	private void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1519,7 +1545,7 @@ class JMESPModule: JMRenderableModuleBase
 		}
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=Unstuck " );
-		SendWebhook( "Vehicle_Unstuck", instance, "Unstuck " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
+		SendWebhookColored( "Vehicle_Unstuck", instance, "Unstuck " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void RPC_Vehicle_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1548,7 +1574,7 @@ class JMESPModule: JMRenderableModuleBase
 		CommunityOnlineToolsBase.Refuel(target);
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=refuel" );
-		SendWebhook( "Vehicle_Refuel", instance, "Refuelled " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
+		SendWebhookColored( "Vehicle_Refuel", instance, "Refuelled " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	private void RPC_Vehicle_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1598,7 +1624,7 @@ class JMESPModule: JMRenderableModuleBase
 			target.SetAllowDamage(false);
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=heal" );
-		SendWebhook( "Heal", instance, "Healed " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition() );
+		SendWebhookColored( "Heal", instance, "Healed " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -1753,7 +1779,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( removed > 0 )
 		{
 			GetCommunityOnlineToolsBase().Log( instance, "ESP action=delete_all count=" + removed + " attempted=" + count );
-			SendWebhook( "DeleteAll", instance, "Performed a delete on " + removed + " objects." );
+			SendWebhookColored( "DeleteAll", instance, "Performed a delete on " + removed + " objects.", JMConstants.WEBHOOK_COLOR_CRITICAL );
 		}
 	}
 
@@ -1825,7 +1851,7 @@ class JMESPModule: JMRenderableModuleBase
 		if ( moved > 0 )
 		{
 			GetCommunityOnlineToolsBase().Log( instance, "ESP action=move_to_cursor count=" + moved + " attempted=" + count );
-			SendWebhook( "MoveToCursor", instance, "Performed a move to cursor on " + moved + " objects." );
+			SendWebhookColored( "MoveToCursor", instance, "Performed a move to cursor on " + moved + " objects.", JMConstants.WEBHOOK_COLOR_ESP );
 		}
 	}
 

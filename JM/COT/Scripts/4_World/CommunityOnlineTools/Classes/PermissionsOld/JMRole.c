@@ -78,11 +78,22 @@ class JMRole : Managed
 	{
 		auto trace = CF_Trace_1(this, "Save").Add(Name);
 
+		// Skip writing if the role has no custom permissions (all INHERIT).
+		// If a file exists from a previous save when permissions were set, remove it.
+		if ( !RootPermission.m_Sync )
+		{
+			string cleanPath = JMConstants.DIR_ROLES + FileReadyStripName( Name ) + JMConstants.EXT_ROLE;
+			if ( FileExist( cleanPath ) )
+				DeleteFile( cleanPath );
+
+			return true;
+		}
+
 		string filename = FileReadyStripName( Name );
 
-		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );
-			
 		Serialize();
+
+		FileHandle file = OpenFile( JMConstants.DIR_ROLES + filename + JMConstants.EXT_ROLE, FileMode.WRITE );
 
 		if ( file != 0 )
 		{
@@ -92,9 +103,9 @@ class JMRole : Managed
 			{
 				FPrintln( file, SerializedData[i] );
 			}
-			
+
 			CloseFile(file);
-			
+
 			return true;
 		}
 

@@ -37,7 +37,10 @@ class JMWindowManager
 	void HideAllActive()
 	{
 		foreach(JMWindowBase window: m_Windows)
-			window.Hide();
+		{
+			if ( !window.IsPinned() )
+				window.Hide();
+		}
 	}
 
 	bool HasAnyActive()
@@ -45,6 +48,16 @@ class JMWindowManager
 		foreach(JMWindowBase window: m_Windows)
 		{
 			if ( window.IsVisible() )
+				return true;
+		}
+		return false;
+	}
+
+	bool HasAnyUnpinnedActive()
+	{
+		foreach(JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() && !window.IsPinned() )
 				return true;
 		}
 		return false;

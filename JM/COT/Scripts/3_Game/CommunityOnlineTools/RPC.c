@@ -151,11 +151,23 @@ enum JMESPModuleRPC
 	COUNT
 }
 
+enum JMStatType
+{
+	Health = 0,
+	Blood,
+	Shock,
+	Energy,
+	Water,
+	Stamina,
+	HeatBuffer,
+	COUNT
+}
+
 enum JMPlayerModuleRPC
 {
 	INVALID = 10320,
 
-	// Player Vitals
+	// Player Vitals (legacy individual RPCs kept for backwards compat)
 	SetHealth,
 	SetBlood,
 	SetShock,
@@ -163,6 +175,9 @@ enum JMPlayerModuleRPC
 	SetWater,
 	SetStamina,
 	SetHeatBuffer,
+
+	// Batched stat RPC (replaces the 7 above for new callers)
+	SetStat,
 
 	SetBloodyHands,
 	RepairTransport,

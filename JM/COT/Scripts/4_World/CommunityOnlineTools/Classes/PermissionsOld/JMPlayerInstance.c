@@ -407,6 +407,20 @@ class JMPlayerInstance : Managed
 		}
 	}
 
+	// Returns true when the player has no customisation: only the "everyone" role and no
+	// explicitly set permissions.  Files should not be written in this state.
+	bool IsDefaultState()
+	{
+		if ( m_Roles.Count() != 1 || m_Roles[0] != "everyone" )
+			return false;
+
+		// m_Sync is set true as soon as any non-INHERIT permission is added to the tree.
+		if ( m_RootPermission.m_Sync )
+			return false;
+
+		return true;
+	}
+
 	void Save()
 	{
 		auto trace = CF_Trace_1(this, "Save").Add(m_GUID);
@@ -418,23 +432,55 @@ class JMPlayerInstance : Managed
 		if ( !g_Game.IsServer() )
 			return;
 
+		string playerFilePath    = m_PlayerFile.m_FileName;
+		string permissionsPath   = JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION;
+
+		// If the player is back to default, remove any files we previously wrote.
+		if ( IsDefaultState() )
+		{
+			if ( FileExist( playerFilePath ) )
+				DeleteFile( playerFilePath );
+
+			if ( FileExist( permissionsPath ) )
+				DeleteFile( permissionsPath );
+
+			return;
+		}
+
 		array< string > permissions = new array< string >;
 		m_RootPermission.Serialize( permissions );
 
-		m_PlayerFile.Roles.Clear();
-		m_PlayerFile.Roles.Copy( m_Roles );
-		m_PlayerFile.Save();
-
-		FileHandle file = OpenFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION, FileMode.WRITE );
-		if ( file != 0 )
+		// Only write the player JSON if roles differ from default.
+		bool rolesAreDefault = ( m_Roles.Count() == 1 && m_Roles[0] == "everyone" );
+		if ( !rolesAreDefault )
 		{
-			string line;
-			for ( int i = 0; i < permissions.Count(); i++ )
+			m_PlayerFile.Roles.Clear();
+			m_PlayerFile.Roles.Copy( m_Roles );
+			m_PlayerFile.Save();
+		}
+		else if ( FileExist( playerFilePath ) )
+		{
+			DeleteFile( playerFilePath );
+		}
+
+		// Only write the permissions file if there is at least one explicit permission.
+		if ( m_RootPermission.m_Sync )
+		{
+			FileHandle file = OpenFile( permissionsPath, FileMode.WRITE );
+			if ( file != 0 )
 			{
-				FPrintln( file, permissions[i] );
+				string line;
+				for ( int i = 0; i < permissions.Count(); i++ )
+				{
+					FPrintln( file, permissions[i] );
+				}
+
+				CloseFile( file );
 			}
-			
-			CloseFile( file );
+		}
+		else if ( FileExist( permissionsPath ) )
+		{
+			DeleteFile( permissionsPath );
 		}
 	}
 
@@ -485,30 +531,39 @@ class JMPlayerInstance : Managed
 
 		Update();
 
-		JMPlayerSerialize.Load( this, m_PlayerFile );
+		bool hadFile = JMPlayerSerialize.Load( this, m_PlayerFile );
 
 		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
 		{
 			AddRole( m_PlayerFile.Roles[j] );
 		}
 
+		// Track whether any legacy permission file was migrated so we know whether to re-save.
+		bool migratedPermissions = false;
+
 		if ( !ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION ) )
 		{
 			if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_GUID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+				migratedPermissions = true;
 			}
 			else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION );
+				migratedPermissions = true;
 			}
 			else if ( ReadPermissions( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT ) )
 			{
 				DeleteFile( JMConstants.DIR_PERMISSIONS + FileReadyStripName( m_Steam64ID ) + JMConstants.EXT_PERMISSION + JMConstants.EXT_WINDOWS_DEFAULT );
+				migratedPermissions = true;
 			}
 		}
 
-		Save();
+		// Only persist on load when we migrated legacy files.
+		// Normal connects (new player or existing GUID file) are saved on demand by admin actions.
+		if ( migratedPermissions )
+			Save();
 	}
 
 	void DebugPrint()

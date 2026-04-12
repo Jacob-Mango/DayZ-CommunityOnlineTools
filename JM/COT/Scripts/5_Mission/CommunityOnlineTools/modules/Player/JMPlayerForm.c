@@ -218,6 +218,14 @@ class JMPlayerForm: JMFormBase
 		RefreshStats(true);  //! Show correct state on reinit
 	}
 
+	override void OnResize( float w, float h )
+	{
+		if ( m_PlayerListScroller )      m_PlayerListScroller.UpdateScroller();
+		if ( m_PermissionsListScroller ) m_PermissionsListScroller.UpdateScroller();
+		if ( m_RolesListScroller )       m_RolesListScroller.UpdateScroller();
+		if ( m_ActionListScroller )      m_ActionListScroller.UpdateScroller();
+	}
+
 	private void InitWidgetsLeft()
 	{
 		m_LeftPanel = layoutRoot.FindAnyWidget( "panel_left" );

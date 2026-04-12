@@ -204,8 +204,14 @@ class JMESPForm: JMFormBase
 
 		ESPFilters( left_bottom );
 		ESPSelectedObjects( right_bottom );
-		
+
 		Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+	}
+
+	override void OnResize( float w, float h )
+	{
+		if ( m_ESPListScroller )    m_ESPListScroller.UpdateScroller();
+		if ( m_ESPSelectedObjects ) m_ESPSelectedObjects.UpdateScroller();
 	}
 
 	override void OnShow()

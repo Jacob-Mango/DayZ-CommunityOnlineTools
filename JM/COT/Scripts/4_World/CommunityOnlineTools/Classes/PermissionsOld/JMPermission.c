@@ -297,6 +297,11 @@ class JMPermission : Managed
 	void Clear()
 	{
 		Children.Clear();
+		// Reset the sync flag so callers can detect that there are no longer any custom permissions.
+		if ( Root )
+			Root.m_Sync = false;
+		else
+			m_Sync = false;
 	}
 
 	void Serialize( array< string > output, string prepend = "" )

@@ -43,6 +43,12 @@ class JMWebhookForm: JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 
+	override void OnResize( float w, float h )
+	{
+		if ( m_sclr_MainActions )
+			m_sclr_MainActions.UpdateScroller();
+	}
+
 	override void OnSettingsUpdated()
 	{
 		array< ref JMWebhookConnectionGroup > groups = m_Module.GetConnections();

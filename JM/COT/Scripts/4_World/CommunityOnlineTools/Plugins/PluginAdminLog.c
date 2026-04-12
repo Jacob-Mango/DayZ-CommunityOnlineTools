@@ -20,29 +20,34 @@ modded class PluginAdminLog
 		TerritoryFlag territory;
 		if (Class.CastTo( territory, item ))
 		{
-			auto msg = m_Webhook.CreateDiscordMessage();
+			auto msg = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_WARNING );
 
-			msg.GetEmbed().AddField( "Item Placement", "" + PBplayer.FormatSteamWebhook() + " Placed " + item.GetDisplayName() + " at "+ item.GetPosition(), false );
+			msg.GetEmbed().SetTitle( "Territory Flag Placed" );
+			msg.GetEmbed().SetDescription( PBplayer.FormatSteamWebhook() + " placed **" + item.GetDisplayName() + "**" );
+			msg.GetEmbed().AddField( "Position", item.GetPosition().ToString(), false );
 
 			m_Webhook.Post( "TerritoryDeployed", msg );
 		}
 		else
 		{
-			auto msg1 = m_Webhook.CreateDiscordMessage();
+			auto msg1 = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_INFO );
 
-			msg1.GetEmbed().AddField( "Item Placement", "" + PBplayer.FormatSteamWebhook() + " Placed " + item.GetDisplayName() + " at "+ item.GetPosition(), false );
+			msg1.GetEmbed().SetTitle( "Item Placed" );
+			msg1.GetEmbed().SetDescription( PBplayer.FormatSteamWebhook() + " placed **" + item.GetDisplayName() + "**" );
+			msg1.GetEmbed().AddField( "Position", item.GetPosition().ToString(), false );
 
 			m_Webhook.Post( "ItemDeployed", msg1 );
 		}
 	}
-	
+
 	override void PlayerList()
 	{
 		super.PlayerList();
 
-		auto msg = m_Webhook.CreateDiscordMessage();
+		auto msg = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_INFO );
 
-		msg.GetEmbed().AddField( "Server Population", "" + m_PlayerArray.Count() + " Players are currently on the server.", false );
+		msg.GetEmbed().SetTitle( "Server Population" );
+		msg.GetEmbed().SetDescription( "" + m_PlayerArray.Count() + " players are currently online." );
 
 		m_Webhook.Post( "PlayerCount", msg );
 	}
@@ -60,9 +65,8 @@ modded class PluginAdminLog
 
 	void COT_WebHookPlayerKilled(PlayerBase player, Object source, bool showPos = true)
 	{
-		auto message = m_Webhook.CreateDiscordMessage();
+		auto message = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_DANGER );
 		auto embed = message.GetEmbed();
-		embed.SetColor( 16711680 ); // 0xFF0000
 
 		PlayerBase pbKiller = NULL;
 
@@ -86,12 +90,12 @@ modded class PluginAdminLog
 
 			if ( deathBreakdown == "" )
 			{
-				deathBreakdown = "Unknown cause of death";
-
-				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " died of unnatural causes." );
+				embed.SetTitle( "Player Died" );
+				embed.SetDescription( player.FormatSteamWebhook() + " died of unnatural causes." );
 			} else
 			{
-				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " died of natural causes." );
+				embed.SetTitle( "Player Died" );
+				embed.SetDescription( player.FormatSteamWebhook() + " died of natural causes." );
 			}
 
 		} else if ( source.IsWeapon() || source.IsMeleeWeapon() )
@@ -102,19 +106,22 @@ modded class PluginAdminLog
 			{
 				string distanceWeapon = "";
 				if ( !source.IsMeleeWeapon() )
-					distanceWeapon = " from " + vector.Distance( player.GetPosition(), pbKiller.GetPosition() ) + " meters.";
-				
+					distanceWeapon = " (" + vector.Distance( player.GetPosition(), pbKiller.GetPosition() ) + "m)";
+
 				if (showPos)
 					deathBreakdown += "Killer Position: " + pbKiller.GetPosition() + "\n";
 
-				embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " was killed by " + pbKiller.FormatSteamWebhook() + " with " + source.GetDisplayName() + distanceWeapon );
+				embed.SetTitle( "Player Killed" );
+				embed.SetDescription( player.FormatSteamWebhook() + " was killed by " + pbKiller.FormatSteamWebhook() + " with **" + source.GetDisplayName() + "**" + distanceWeapon );
 			}
 		} else
 		{
-			embed.AddField( "Player Death", "" + player.FormatSteamWebhook() + " was killed by " + source.GetDisplayName() );
+			embed.SetTitle( "Player Died" );
+			embed.SetDescription( player.FormatSteamWebhook() + " was killed by **" + source.GetDisplayName() + "**" );
 		}
 
-		embed.AddField( "Breakdown", deathBreakdown );
+		if ( deathBreakdown != "" )
+			embed.AddField( "Breakdown", deathBreakdown, false );
 
 		if (showPos)
 			m_Webhook.Post( "PlayerDeath", message );
@@ -143,29 +150,29 @@ modded class PluginAdminLog
 
 		bool isFallDamage;
 
-		auto message = m_Webhook.CreateDiscordMessage();
+		auto message = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_DANGER );
 		auto embed = message.GetEmbed();
-		embed.SetColor( 16711680 ); // 0xFF0000
 
 		PlayerBase pbKiller = NULL;
+		string damageDescription;
 
 		switch ( damageType )
 		{
 		case DT_CLOSE_COMBAT:
 			if ( source.IsZombie() || source.IsAnimal() )
 			{
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + source.GetDisplayName() );
+				damageDescription = player.FormatSteamWebhook() + " was hit by **" + source.GetDisplayName() + "**";
 			} else if ( source.IsPlayer() )
 			{
 				Class.CastTo( pbKiller, source );
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + pbKiller.FormatSteamWebhook() + " using fists" );
+				damageDescription = player.FormatSteamWebhook() + " was hit by " + pbKiller.FormatSteamWebhook() + " using fists";
 			} else if ( source.IsMeleeWeapon() )
 			{
 				Class.CastTo( pbKiller, source.GetHierarchyParent() );
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + pbKiller.FormatSteamWebhook() + " with " + source.GetDisplayName() );
+				damageDescription = player.FormatSteamWebhook() + " was hit by " + pbKiller.FormatSteamWebhook() + " with **" + source.GetDisplayName() + "**";
 			} else
 			{
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + source.GetDisplayName() );
+				damageDescription = player.FormatSteamWebhook() + " was hit by **" + source.GetDisplayName() + "**";
 			}
 			break;
 		case DT_FIRE_ARM:
@@ -173,18 +180,17 @@ modded class PluginAdminLog
 			{
 				Class.CastTo( pbKiller, source.GetHierarchyParent() );
 				float distance = vector.Distance( player.GetPosition(), pbKiller.GetPosition() );
-
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + pbKiller.FormatSteamWebhook() + " with " + source.GetDisplayName() + " from " + distance + " meters." );
+				damageDescription = player.FormatSteamWebhook() + " was shot by " + pbKiller.FormatSteamWebhook() + " with **" + source.GetDisplayName() + "** (" + distance + "m)";
 			} else
 			{
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + source.GetDisplayName() );
+				damageDescription = player.FormatSteamWebhook() + " was hit by **" + source.GetDisplayName() + "**";
 			}
 			break;
 		case DT_EXPLOSION:
-			embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by an explosion." );
+			damageDescription = player.FormatSteamWebhook() + " was hit by an **explosion**";
 			break;
 		case DT_STUN:
-			embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was stunned." );
+			damageDescription = player.FormatSteamWebhook() + " was stunned";
 			break;
 		case DT_CUSTOM:
 			if (ammo.IndexOf("FallDamage") == 0)
@@ -193,20 +199,20 @@ modded class PluginAdminLog
 					return;
 
 				isFallDamage = true;
-				embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " fell." );
+				damageDescription = player.FormatSteamWebhook() + " took fall damage";
 			} else
 			{
 				if ( source )
-				{
-					embed.AddField( "Player Damaged", "" + player.FormatSteamWebhook() + " was hit by " + source.GetDisplayName() );
-				}
+					damageDescription = player.FormatSteamWebhook() + " was hit by **" + source.GetDisplayName() + "**";
 			}
-
 			break;
 		default:
-			embed.AddField( "Player Damaged", "WARNING: " + player.FormatSteamWebhook() + " was hit by an unknown damage type!" );
+			damageDescription = player.FormatSteamWebhook() + " was hit by an unknown damage type";
 			break;
 		}
+
+		embed.SetTitle( "Player Damaged" );
+		embed.SetDescription( damageDescription );
 
 		string hitMessage = "";
 		if ( damageResult )
@@ -225,8 +231,8 @@ modded class PluginAdminLog
 		if (!isFallDamage)
 			hitMessage += "Type: " + ammo + "\n";
 
-		if (hitMessage)
-			embed.AddField( "Damage Breakdown", hitMessage );
+		if (hitMessage != "")
+			embed.AddField( "Damage Breakdown", hitMessage, false );
 
 		m_Webhook.Post( "PlayerDamage", message );
 	}

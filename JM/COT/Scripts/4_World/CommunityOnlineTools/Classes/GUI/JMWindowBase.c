@@ -24,6 +24,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	private ButtonWidget m_CloseButton;
 	private ButtonWidget m_MinimizeButton;
 	private TextWidget   m_MinimizeButtonLabel;
+	private ButtonWidget m_PinButton;
+	private TextWidget   m_PinButtonLabel;
 	private Widget m_TitleWrapper;
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
@@ -90,6 +92,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private bool m_IsShown;
 	private bool m_HasBeenCentered;
+
+	//! Pin state — window survives COT close when pinned
+	private bool m_IsPinned;
 
 	//! Minimize state
 	private bool m_IsMinimized;
@@ -164,6 +169,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_CloseButton         = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
 		m_MinimizeButton      = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
 		m_MinimizeButtonLabel = TextWidget.Cast(   layoutRoot.FindAnyWidget( "minimize_button_label" ) );
+		m_PinButton           = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "pin_button" ) );
+		m_PinButtonLabel      = TextWidget.Cast(   layoutRoot.FindAnyWidget( "pin_button_label" ) );
 		m_TitleWrapper        = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 		m_TitlePanel          = layoutRoot.FindAnyWidget( "title_wrapper" );
 		m_TitleAccent         = Widget.Cast( layoutRoot.FindAnyWidget( "title_accent" ) );
@@ -195,6 +202,28 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_HighlightTopRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_top_right" ) );
 		m_HighlightBotLeft  = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_bot_left" ) );
 		m_HighlightBotRight = Widget.Cast( layoutRoot.FindAnyWidget( "resize_highlight_bot_right" ) );
+
+		// Guarantee highlights render above all content
+		int highlightSort = 32000;
+		if ( m_HighlightUp )        m_HighlightUp.SetSort( highlightSort );
+		if ( m_HighlightDown )      m_HighlightDown.SetSort( highlightSort );
+		if ( m_HighlightLeft )      m_HighlightLeft.SetSort( highlightSort );
+		if ( m_HighlightRight )     m_HighlightRight.SetSort( highlightSort );
+		if ( m_HighlightTopLeft )   m_HighlightTopLeft.SetSort( highlightSort );
+		if ( m_HighlightTopRight )  m_HighlightTopRight.SetSort( highlightSort );
+		if ( m_HighlightBotLeft )   m_HighlightBotLeft.SetSort( highlightSort );
+		if ( m_HighlightBotRight )  m_HighlightBotRight.SetSort( highlightSort );
+
+		// Also raise drag handles above content so they stay hittable
+		int dragSort = 32001;
+		if ( m_ResizeDragUp )       m_ResizeDragUp.SetSort( dragSort );
+		if ( m_ResizeDragDown )     m_ResizeDragDown.SetSort( dragSort );
+		if ( m_ResizeDragLeft )     m_ResizeDragLeft.SetSort( dragSort );
+		if ( m_ResizeDragRight )    m_ResizeDragRight.SetSort( dragSort );
+		if ( m_ResizeDragTopLeft )  m_ResizeDragTopLeft.SetSort( dragSort );
+		if ( m_ResizeDragTopRight ) m_ResizeDragTopRight.SetSort( dragSort );
+		if ( m_ResizeDragBotLeft )  m_ResizeDragBotLeft.SetSort( dragSort );
+		if ( m_ResizeDragBotRight ) m_ResizeDragBotRight.SetSort( dragSort );
 
 		// Cache title bar height — used everywhere instead of repeated GetSize() calls
 		float tw, th;
@@ -238,6 +267,15 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			float width = -1;
 			float height = -1;
 			menu.GetSize( width, height );
+
+			float screenW, screenH;
+			g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
+
+			if ( width > screenW )
+				width = screenW;
+
+			if ( height + m_TitleBarHeight > screenH )
+				height = screenH - m_TitleBarHeight;
 
 			m_ContentWidget.SetSize( width, height );
 			SetSize( width, height );
@@ -342,6 +380,24 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return m_IsMinimized;
 	}
 
+	bool IsPinned()
+	{
+		return m_IsPinned;
+	}
+
+	void TogglePin()
+	{
+		m_IsPinned = !m_IsPinned;
+
+		if ( m_PinButtonLabel )
+		{
+			if ( m_IsPinned )
+				m_PinButtonLabel.SetColor( ARGB( 255, 255, 200, 50 ) );
+			else
+				m_PinButtonLabel.SetColor( ARGB( 255, 153, 153, 153 ) );
+		}
+	}
+
 	void Show()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -400,7 +456,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		layoutRoot.Show( false );
 
-		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyActive() )
+		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyUnpinnedActive() )
 		{
 			g_Game.GetInput().ResetGameFocus();
 			g_Game.GetUIManager().ShowUICursor( false );
@@ -523,6 +579,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( w == m_MinimizeButton )
 		{
 			ToggleMinimize();
+			return true;
+		}
+
+		if ( w == m_PinButton )
+		{
+			TogglePin();
 			return true;
 		}
 

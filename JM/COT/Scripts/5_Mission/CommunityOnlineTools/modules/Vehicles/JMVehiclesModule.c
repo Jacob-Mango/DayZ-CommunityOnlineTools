@@ -589,19 +589,21 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
+			auto next = node.m_Next;
 			if ( !node.m_Value.GetExpansionVehicle().HasKey() )
 				node.m_Value.Delete();
 
-			node = node.m_Next;
+			node = next;
 		}
 
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
+			auto boatNext = boats.m_Next;
 			if ( !boats.m_Value.GetExpansionVehicle().HasKey() )
 				boats.m_Value.Delete();
 
-			boats = boats.m_Next;
+			boats = boatNext;
 		}
 
 		auto vehicles = ExpansionVehicleBase.GetAll();
@@ -612,18 +614,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 			if ( vehicle.GetExpansionVehicle().HasKey() )
 				continue;
-			
+
 			g_Game.ObjectDelete( vehicle );
 		}
 
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
+			auto coverNext = cover.m_Next;
 			auto keychain = ExpansionKeyChainBase.Cast(cover.m_Value.GetAttachmentByType(ExpansionKeyChainBase));
 			if (!keychain || !keychain.Expansion_HasOwner())
 				cover.m_Value.Delete();
 
-			cover = cover.m_Next;
+			cover = coverNext;
 		}
 	}
 	#endif
@@ -646,21 +649,23 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
+			auto next = node.m_Next;
 			if ( node.m_Value.IsDamageDestroyed() )
 				node.m_Value.Delete();
 
-			node = node.m_Next;
+			node = next;
 		}
 
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
+			auto boatNext = boats.m_Next;
 			if ( boats.m_Value.IsDamageDestroyed() )
 				boats.m_Value.Delete();
 
-			boats = boats.m_Next;
+			boats = boatNext;
 		}
-		
+
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
@@ -677,10 +682,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
+			auto coverNext = cover.m_Next;
 			if ( cover.m_Value.IsDamageDestroyed() )
 				cover.m_Value.Delete();
 
-			cover = cover.m_Next;
+			cover = coverNext;
 		}
 		#endif
 	}
@@ -703,23 +709,25 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
+			auto next = node.m_Next;
 			node.m_Value.Delete();
-			node = node.m_Next;
+			node = next;
 		}
 
 		auto boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
+			auto boatNext = boats.m_Next;
 			boats.m_Value.Delete();
-			boats = boats.m_Next;
+			boats = boatNext;
 		}
-		
+
 		#ifdef EXPANSIONMODVEHICLE
 		auto vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
 			if ( !vehicle )
-				return;
+				continue;
 
 			g_Game.ObjectDelete( vehicle );
 		}
@@ -727,8 +735,9 @@ class JMVehiclesModule: JMRenderableModuleBase
 		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
+			auto coverNext = cover.m_Next;
 			cover.m_Value.Delete();
-			cover = cover.m_Next;
+			cover = coverNext;
 		}
 		#endif
 	}

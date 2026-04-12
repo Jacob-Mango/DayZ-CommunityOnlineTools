@@ -168,7 +168,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		#ifndef CF_WINDOWS
 		GetCOTWindowManager().HideAllActive();
-		if ( !GetCOTWindowManager().HasAnyActive() )
+		if ( !GetCOTWindowManager().HasAnyUnpinnedActive() )
 		{
 			g_Game.GetInput().ResetGameFocus();
 			g_Game.GetUIManager().ShowUICursor( false );

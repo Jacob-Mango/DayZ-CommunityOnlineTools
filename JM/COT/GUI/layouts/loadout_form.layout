@@ -4,8 +4,8 @@ PanelWidgetClass JMLoadoutForm {
  size 600 350
  hexactpos 0
  vexactpos 0
- hexactsize 0
- vexactsize 0
+ hexactsize 1
+ vexactsize 1
  scriptclass "JMLoadoutForm"
  style DayZDefaultPanel
  {

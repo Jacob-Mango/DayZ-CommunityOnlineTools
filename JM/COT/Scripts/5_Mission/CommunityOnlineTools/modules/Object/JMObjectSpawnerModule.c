@@ -6,50 +6,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	string m_SearchText;
 	int m_OverrideDebugSpawnDepth;
 
-	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
-	private ref array< string > m_UnfinishedItems =
-	{
-		"quickiebow",
-		"recurvebow",
-		"gp25base",
-		"gp25",
-		"gp25_standalone",
-		"m203base",
-		"m203",
-		"m203_standalone",
-		"red9",
-		"pvcbow",
-		"m249",
-		"undersluggrenadem4",
-		"groza",
-		"trumpet",
-		"lawbase",
-		"law",
-		"rpg7base",
-		"rpg7",
-		"dartgun",
-		"shockpistol",
-		"shockpistol_black",
-		"fnx45_arrow",
-		"makarovpb",
-		"mp133shotgun_pistolgrip",
-
-		"largetentbackpack",
-		"leatherbelt_natural",
-		"leatherbelt_beige",
-		"leatherbelt_brown",
-		"leatherbelt_black",
-		"leatherknifesheath"
-	};
-
-	private ref array< string > m_RestrictedClassNames =
-	{
-		"placing",
-		"debug",
-		"bldr_",
-		"land_",
-		"staticobj_"
-	};
+	// Loaded from SpawnerConfig.json — no longer hardcoded
+	private ref array< string > m_UnfinishedItems     = new array< string >;
+	private ref array< string > m_RestrictedClassNames = new array< string >;
 
 	bool m_AllowRestrictedClassNames;
 	bool m_FilterWithDisplayName;
@@ -60,6 +19,27 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Entity.Spawn.Inventory" );
 		GetPermissionsManager().RegisterPermission( "Entity.Delete" );
 		GetPermissionsManager().RegisterPermission( "Entity.View" );
+	}
+
+	override void OnMissionLoaded()
+	{
+		super.OnMissionLoaded();
+
+		if ( IsMissionHost() )
+			LoadSpawnerConfig();
+	}
+
+	private void LoadSpawnerConfig()
+	{
+		JMSpawnerConfig cfg = JMSpawnerConfig.Load();
+
+		m_UnfinishedItems.Clear();
+		foreach ( string item: cfg.UnfinishedItems )
+			m_UnfinishedItems.Insert( item );
+
+		m_RestrictedClassNames.Clear();
+		foreach ( string pattern: cfg.RestrictedPatterns )
+			m_RestrictedClassNames.Insert( pattern );
 	}
 
 	override void EnableUpdate()
@@ -376,7 +356,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		g_Game.ObjectDelete( obj );
 		
 		GetCommunityOnlineToolsBase().Log( ident, "Deleted Entity " + obtype + " at " + transform[3].ToString() );
-		SendWebhook( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString() );
+		SendWebhookColored( "Delete", instance, "Deleted object " + obtype + " at " + transform[3].ToString(), JMConstants.WEBHOOK_COLOR_DANGER );
 	}
 
 	private void RPC_DeleteEntity( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -692,9 +672,9 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 		GetCommunityOnlineToolsBase().Log(callerInstance.PlayerObject.GetIdentity(), msg);
 		if (parent)
-			SendWebhook("Player", callerInstance, msg);
+			SendWebhookColored( "Player", callerInstance, msg, JMConstants.WEBHOOK_COLOR_SPAWN );
 		else
-			SendWebhook("Vector", callerInstance, msg);
+			SendWebhookColored( "Vector", callerInstance, msg, JMConstants.WEBHOOK_COLOR_SPAWN );
 
 		return ent;
 	}

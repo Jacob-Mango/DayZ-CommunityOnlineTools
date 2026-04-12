@@ -13,6 +13,12 @@ class JMNamalskEventManagerForm: JMFormBase
 		m_sclr_MainActions.UpdateScroller();
 	}
 	
+	override void OnResize( float w, float h )
+	{
+		if ( m_sclr_MainActions )
+			m_sclr_MainActions.UpdateScroller();
+	}
+
 	protected override bool SetModule(JMRenderableModuleBase mdl)
 	{
 		return Class.CastTo(m_Module, mdl);

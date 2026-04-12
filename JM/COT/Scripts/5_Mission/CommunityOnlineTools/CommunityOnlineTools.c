@@ -117,16 +117,18 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if (!instance)
 			return;
 
-		auto message = m_Webhook.CreateDiscordMessage();
-		
+		auto message = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_WARNING );
+
 		if ( active )
 		{
-			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has activated Community Online Tools" );
+			message.GetEmbed().SetTitle( "Admin Activated COT" );
+			message.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has activated Community Online Tools." );
 			GetCommunityOnlineToolsBase().Log( senderRPC, "Activated Community Online Tools [guid=" + instance.GetGUID() + "]" );
 		}
 		else
 		{
-			message.GetEmbed().AddField( "Admin Activity", "" + instance.FormatSteamWebhook() + " has de-activated Community Online Tools" );
+			message.GetEmbed().SetTitle( "Admin Deactivated COT" );
+			message.GetEmbed().SetDescription( instance.FormatSteamWebhook() + " has de-activated Community Online Tools." );
 			GetCommunityOnlineToolsBase().Log( senderRPC, "Deactivated Community Online Tools [guid=" + instance.GetGUID() + "]" );
 		}
 

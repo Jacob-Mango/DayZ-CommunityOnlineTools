@@ -2,13 +2,13 @@ PanelWidgetClass confirmation_panel_inner {
  ignorepointer 1
  color 0.12 0.16 0.22 1
  position 0 0
- size 0.85 0.85
+ size 340 220
  halign center_ref
  valign center_ref
  hexactpos 0
  vexactpos 0
- hexactsize 0
- vexactsize 0
+ hexactsize 1
+ vexactsize 1
  style DayZDefaultPanel
  {
   FrameWidgetClass confirmation_title_panel {
