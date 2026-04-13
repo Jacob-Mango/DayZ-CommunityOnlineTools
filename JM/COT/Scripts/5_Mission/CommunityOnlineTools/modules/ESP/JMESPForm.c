@@ -181,8 +181,8 @@ class JMESPForm: JMFormBase
 		m_ExportTypeList.SetSelectorWidth(1.0);
 
 		Widget rowMisc = UIActionManager.CreateWrapSpacerFit( container );
-		UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CROSSHAIR", this, "Click_MoveToCursor" );
-		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_DELETE_SELECTED", this, "Click_DeleteSelected" );
+		UIActionManager.CreateButton( rowMisc, "Move To Cursor", this, "Click_MoveToCursor" );
+		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "Delete", this, "Click_DeleteSelected" );
 		delbtn.SetColor(COLOR_RED);
 
 		m_ESPSelectedObjects.UpdateScroller();

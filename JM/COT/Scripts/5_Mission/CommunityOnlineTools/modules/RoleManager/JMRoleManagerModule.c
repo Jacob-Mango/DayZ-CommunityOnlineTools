@@ -22,6 +22,11 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/role_manager_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "Players";
+	}
+
 	override string GetTitle()
 	{
 		return "Role Manager";

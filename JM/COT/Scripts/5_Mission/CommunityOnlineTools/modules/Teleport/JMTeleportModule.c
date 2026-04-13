@@ -54,6 +54,11 @@ class JMTeleportModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/teleport_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "World";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_TELEPORT_MODULE_NAME";

@@ -33,6 +33,11 @@ class JMMapModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/mapview_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "World";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_MAP_MODULE_NAME";

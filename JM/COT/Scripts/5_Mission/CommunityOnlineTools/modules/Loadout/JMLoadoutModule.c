@@ -34,6 +34,11 @@ class JMLoadoutModule: JMRenderableModuleBase
 		return "JM\\COT\\GUI\\layouts\\loadout_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "Items";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_LOADOUT_MODULE_NAME";

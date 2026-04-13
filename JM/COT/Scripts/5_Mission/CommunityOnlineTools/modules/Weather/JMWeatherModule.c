@@ -69,6 +69,11 @@ class JMWeatherModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/weather_form.layout";
 	}
 	
+	override string GetCategory()
+	{
+		return "World";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_WEATHER_MODULE_NAME";

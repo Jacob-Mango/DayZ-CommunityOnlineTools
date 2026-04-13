@@ -68,6 +68,11 @@ class JMCameraModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/camera_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "World";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_CAMERA_MODULE_NAME";
@@ -873,6 +878,7 @@ class JMCameraModule: JMRenderableModuleBase
 			JMCameraWaypoint copy = new JMCameraWaypoint();
 			copy.Position           = wp.Position;
 			copy.Time               = wp.Time;
+			copy.Speed              = wp.Speed;
 			copy.Smooth             = wp.Smooth;
 			copy.Orientation        = wp.Orientation;
 			copy.OrientationCaptured = wp.OrientationCaptured;

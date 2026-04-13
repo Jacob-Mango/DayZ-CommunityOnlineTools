@@ -37,7 +37,7 @@ class JMCameraForm: JMFormBase
 		private ref TStringArray       m_WaypointNames;
 
 		// Edit-selected-waypoint controls
-		private UIActionSlider         m_SliderTravelTime;
+		private UIActionSlider         m_SliderWaypointSpeed;
 		private UIActionSlider         m_SliderHoldTime;
 		private UIActionCheckbox       m_ToggleCatmull;
 		private UIActionCheckbox       m_ToggleTrackTarget;
@@ -192,32 +192,32 @@ class JMCameraForm: JMFormBase
 		m_SliderBlurStrength.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderBlurStrength.SetStepValue( 0.1 );
 		m_SliderBlurStrength.SetWidth( 1.0 );
-		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetLabelWidget(), 0.3 );
-		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetSliderWidget(), 0.7 );
+		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetLabelWidget(), 0.4 );
+		m_SliderBlurStrength.SetWidgetWidth( m_SliderBlurStrength.GetSliderWidget(), 0.6 );
 
 		m_SliderFocusDistance = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_FOCUS", 0, 1000, this, "OnChange_Focus" );
 		m_SliderFocusDistance.SetCurrent( 0 );
 		m_SliderFocusDistance.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocusDistance.SetStepValue( 0.1 );
 		m_SliderFocusDistance.SetWidth( 1.0 );
-		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetLabelWidget(), 0.3 );
-		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetSliderWidget(), 0.7 );
+		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetLabelWidget(), 0.4 );
+		m_SliderFocusDistance.SetWidgetWidth( m_SliderFocusDistance.GetSliderWidget(), 0.6 );
 
 		m_SliderFocalLength = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_FOCAL_LENGTH", 0, 1000, this, "OnChange_FocalLength" );
 		m_SliderFocalLength.SetCurrent( 0 );
 		m_SliderFocalLength.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocalLength.SetStepValue( 0.1 );
 		m_SliderFocalLength.SetWidth( 1.0 );
-		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetLabelWidget(), 0.3 );
-		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetSliderWidget(), 0.7 );
+		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetLabelWidget(), 0.4 );
+		m_SliderFocalLength.SetWidgetWidth( m_SliderFocalLength.GetSliderWidget(), 0.6 );
 
 		m_SliderFocalNear = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_FOCAL_NEAR", 0, 1000, this, "OnChange_FocalNear" );
 		m_SliderFocalNear.SetCurrent( 0 );
 		m_SliderFocalNear.SetFormat( "#STR_COT_FORMAT_METRE" );
 		m_SliderFocalNear.SetStepValue( 0.1 );
 		m_SliderFocalNear.SetWidth( 1.0 );
-		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetLabelWidget(), 0.3 );
-		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetSliderWidget(), 0.7 );
+		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetLabelWidget(), 0.4 );
+		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_POSTPROCESS", "" );
 		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
@@ -227,16 +227,16 @@ class JMCameraForm: JMFormBase
 		m_SliderExposure.SetFormat( "#STR_COT_FORMAT_NONE" );
 		m_SliderExposure.SetStepValue( 0.05 );
 		m_SliderExposure.SetWidth( 1.0 );
-		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.3 );
-		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.7 );
+		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetLabelWidget(), 0.4 );
+		m_SliderExposure.SetWidgetWidth( m_SliderExposure.GetSliderWidget(), 0.6 );
 
 		m_SliderVignette = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_VIGNETTE", 0, 1, this, "OnChange_Vignette" );
 		m_SliderVignette.SetCurrent( 0 );
 		m_SliderVignette.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		m_SliderVignette.SetStepValue( 0.01 );
 		m_SliderVignette.SetWidth( 1.0 );
-		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.3 );
-		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.7 );
+		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetLabelWidget(), 0.4 );
+		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_CONTROLS", "" );
 		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
@@ -245,15 +245,15 @@ class JMCameraForm: JMFormBase
 		m_SliderSpeed.SetCurrent( JMCameraBase.s_CurrentSpeed );
 		m_SliderSpeed.SetStepValue( 0.001 );
 		m_SliderSpeed.SetWidth( 1.0 );
-		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetLabelWidget(), 0.3 );
-		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.7 );
+		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetLabelWidget(), 0.4 );
+		m_SliderSpeed.SetWidgetWidth( m_SliderSpeed.GetSliderWidget(), 0.6 );
 
 		m_SliderFOV = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_FOV", 0.001, 4, this, "OnChange_FOV" );
 		m_SliderFOV.SetCurrent( m_Module.m_CurrentFOV );
 		m_SliderFOV.SetStepValue( 0.001 );
 		m_SliderFOV.SetWidth( 1.0 );
-		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetLabelWidget(), 0.3 );
-		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetSliderWidget(), 0.7 );
+		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetLabelWidget(), 0.4 );
+		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SHAKE", "" );
 		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
@@ -263,18 +263,18 @@ class JMCameraForm: JMFormBase
 		m_SliderShakeIntensity.SetFormat( "#STR_COT_FORMAT_NONE" );
 		m_SliderShakeIntensity.SetStepValue( 0.005 );
 		m_SliderShakeIntensity.SetWidth( 1.0 );
-		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetLabelWidget(), 0.3 );
-		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetSliderWidget(), 0.7 );
+		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetLabelWidget(), 0.4 );
+		m_SliderShakeIntensity.SetWidgetWidth( m_SliderShakeIntensity.GetSliderWidget(), 0.6 );
 
 		m_SliderShakeFrequency = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_SHAKE_FREQUENCY", 0.1, 10, this, "OnChange_ShakeFrequency" );
 		m_SliderShakeFrequency.SetCurrent( 1.0 );
 		m_SliderShakeFrequency.SetFormat( "#STR_COT_FORMAT_NONE" );
 		m_SliderShakeFrequency.SetStepValue( 0.1 );
 		m_SliderShakeFrequency.SetWidth( 1.0 );
-		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetLabelWidget(), 0.3 );
-		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetSliderWidget(), 0.7 );
+		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetLabelWidget(), 0.4 );
+		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetSliderWidget(), 0.6 );
 
-		UIActionManager.CreateButton( col, "#STR_COT_CAMERA_MODULE_RESET_EFFECTS", this, "OnClick_ResetEffects" );
+		UIActionManager.CreateButton( col, "Reset", this, "OnClick_ResetEffects" );
 	}
 
 	void InitCameraSettings()
@@ -302,26 +302,26 @@ class JMCameraForm: JMFormBase
 
 		// Add / Remove / Move Up / Move Down in a 2x2 grid
 		Widget gridListButtons = UIActionManager.CreateGridSpacer( col, 2, 2 );
-		UIActionManager.CreateButton( gridListButtons, "#STR_COT_CAMERA_MODULE_ADD_WAYPOINT", this, "OnClick_AddWaypoint" );
-		UIActionManager.CreateButton( gridListButtons, "Remove Selected",                     this, "OnClick_DeleteWaypoint" );
-		UIActionManager.CreateButton( gridListButtons, "Move Up",                             this, "OnClick_MoveWaypointUp" );
-		UIActionManager.CreateButton( gridListButtons, "Move Down",                           this, "OnClick_MoveWaypointDown" );
+		UIActionManager.CreateButton( gridListButtons, "Add",    this, "OnClick_AddWaypoint"     );
+		UIActionManager.CreateButton( gridListButtons, "Delete", this, "OnClick_DeleteWaypoint"   );
+		UIActionManager.CreateButton( gridListButtons, "Up",             this, "OnClick_MoveWaypointUp"   );
+		UIActionManager.CreateButton( gridListButtons, "Down",           this, "OnClick_MoveWaypointDown" );
 
-		UIActionManager.CreateButton( col, "#STR_COT_CAMERA_MODULE_CLEAR_WAYPOINTS", this, "OnClick_ClearWaypoints" );
+		UIActionManager.CreateButton( col, "Clear All", this, "OnClick_ClearWaypoints" );
 
 		// ---- Edit Selected Waypoint ----
 		UIActionManager.CreateText( col, "Edit Selected Waypoint", "" );
 		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
 
-		UIActionManager.CreateButton( col, "#STR_COT_CAMERA_MODULE_SET", this, "OnClick_CapturePosition" );
+		UIActionManager.CreateButton( col, "Capture Position", this, "OnClick_CapturePosition" );
 
-		m_SliderTravelTime = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_TRAVEL_TIME", 1, 60, this, "OnChange_TravelTime" );
-		m_SliderTravelTime.SetCurrent( 5 );
-		m_SliderTravelTime.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderTravelTime.SetStepValue( 0.5 );
-		m_SliderTravelTime.SetWidth( 1.0 );
-		m_SliderTravelTime.SetWidgetWidth( m_SliderTravelTime.GetLabelWidget(), 0.5 );
-		m_SliderTravelTime.SetWidgetWidth( m_SliderTravelTime.GetSliderWidget(), 0.5 );
+		m_SliderWaypointSpeed = UIActionManager.CreateSlider( col, "Speed (m/s)", 0.1, 50, this, "OnChange_WaypointSpeed" );
+		m_SliderWaypointSpeed.SetCurrent( 5 );
+		m_SliderWaypointSpeed.SetFormat( "#STR_COT_FORMAT_NONE" );
+		m_SliderWaypointSpeed.SetStepValue( 0.1 );
+		m_SliderWaypointSpeed.SetWidth( 1.0 );
+		m_SliderWaypointSpeed.SetWidgetWidth( m_SliderWaypointSpeed.GetLabelWidget(), 0.5 );
+		m_SliderWaypointSpeed.SetWidgetWidth( m_SliderWaypointSpeed.GetSliderWidget(), 0.5 );
 
 		m_SliderHoldTime = UIActionManager.CreateSlider( col, "Hold Time", 0, 10, this, "OnChange_HoldTime" );
 		m_SliderHoldTime.SetCurrent( 0 );
@@ -396,10 +396,10 @@ class JMCameraForm: JMFormBase
 
 		// Clipboard shortcuts
 		Widget gridPosActions = UIActionManager.CreateGridSpacer( col, 1, 2 );
-		UIActionManager.CreateButton( gridPosActions, "#STR_COT_CAMERA_MODULE_COPY",  this, "OnClick_CopyPos" );
-		UIActionManager.CreateButton( gridPosActions, "#STR_COT_CAMERA_MODULE_PASTE", this, "OnClick_PastePos" );
+		UIActionManager.CreateButton( gridPosActions, "Copy Pos",  this, "OnClick_CopyPos"  );
+		UIActionManager.CreateButton( gridPosActions, "Paste Pos", this, "OnClick_PastePos" );
 
-		UIActionManager.CreateButton( col, "#STR_COT_CAMERA_MODULE_LOOK_AT_OBJECT", this, "OnClick_LookAtSelection" );
+		UIActionManager.CreateButton( col, "Look At", this, "OnClick_LookAtSelection" );
 
 		// ---- Path Controls ----
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_PATH_CONTROLS", "" );
@@ -409,7 +409,7 @@ class JMCameraForm: JMFormBase
 		m_TravelModeSelectBox.SetSelectorWidth(1.0);
 		m_TravelModeSelectBox.SetSelection(0, false);
 
-		m_SliderSpeedMult = UIActionManager.CreateSlider( col, "Speed", 0.1, 4, this, "OnChange_SpeedMult" );
+		m_SliderSpeedMult = UIActionManager.CreateSlider( col, "Speed Mult.", 0.1, 4, this, "OnChange_SpeedMult" );
 		m_SliderSpeedMult.SetCurrent( 1.0 );
 		m_SliderSpeedMult.SetFormat( "#STR_COT_FORMAT_NONE" );
 		m_SliderSpeedMult.SetStepValue( 0.1 );
@@ -420,8 +420,8 @@ class JMCameraForm: JMFormBase
 		m_LabelDuration = UIActionManager.CreateText( col, "Est. Duration: --", "" );
 
 		Widget gridPlayback = UIActionManager.CreateGridSpacer( col, 1, 2 );
-		UIActionManager.CreateButton( gridPlayback, "#STR_COT_CAMERA_MODULE_TRAVEL_START", this, "OnClick_GoToPositions" );
-		UIActionManager.CreateButton( gridPlayback, "Pause / Resume",                      this, "OnClick_PauseResume" );
+		UIActionManager.CreateButton( gridPlayback, "Travel", this, "OnClick_GoToPositions" );
+		UIActionManager.CreateButton( gridPlayback, "Pause",               this, "OnClick_PauseResume"   );
 
 		// ---- Saved Paths ----
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SAVED_PATHS", "" );
@@ -434,9 +434,9 @@ class JMCameraForm: JMFormBase
 		m_PathName = UIActionManager.CreateEditableText( col, "#STR_COT_CAMERA_MODULE_PATH_NAME", this );
 
 		Widget gridPathActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionManager.CreateButton( gridPathActions, "#STR_COT_CAMERA_MODULE_PATH_SAVE",   this, "OnClick_SavePath" );
-		UIActionManager.CreateButton( gridPathActions, "#STR_COT_CAMERA_MODULE_PATH_LOAD",   this, "OnClick_LoadPath" );
-		UIActionManager.CreateButton( gridPathActions, "#STR_COT_CAMERA_MODULE_PATH_DELETE", this, "OnClick_DeletePath" );
+		UIActionManager.CreateButton( gridPathActions, "Save",           this, "OnClick_SavePath"   );
+		UIActionManager.CreateButton( gridPathActions, "Load",          this, "OnClick_LoadPath"   );
+		UIActionManager.CreateButton( gridPathActions, "Delete", this, "OnClick_DeletePath" );
 	}
 
 	void InitCameraBookmarks()
@@ -451,9 +451,9 @@ class JMCameraForm: JMFormBase
 		m_BookmarkSelectBox.SetSelectorWidth(1.0);
 
 		Widget gridBookmarkActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionManager.CreateButton( gridBookmarkActions, "#STR_COT_CAMERA_MODULE_BOOKMARK_SAVE",     this, "OnClick_SaveBookmark" );
-		UIActionManager.CreateButton( gridBookmarkActions, "#STR_COT_CAMERA_MODULE_BOOKMARK_TELEPORT", this, "OnClick_TeleportBookmark" );
-		UIActionButton deleteBtn = UIActionManager.CreateButton( gridBookmarkActions, "#STR_COT_CAMERA_MODULE_BOOKMARK_DELETE", this, "OnClick_DeleteBookmark" );
+		UIActionManager.CreateButton( gridBookmarkActions, "Save",               this, "OnClick_SaveBookmark"    );
+		UIActionManager.CreateButton( gridBookmarkActions, "Go To", this, "OnClick_TeleportBookmark" );
+		UIActionButton deleteBtn = UIActionManager.CreateButton( gridBookmarkActions, "Delete", this, "OnClick_DeleteBookmark" );
 		deleteBtn.SetColor( COLOR_RED );
 	}
 
@@ -669,10 +669,10 @@ class JMCameraForm: JMFormBase
 		m_Waypoints[m_WaypointID].Position = g_Game.GetCurrentCameraPosition();
 	}
 
-	void OnChange_TravelTime( UIEvent eid, UIActionBase action )
+	void OnChange_WaypointSpeed( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE || m_Waypoints.Count() == 0 ) return;
-		m_Waypoints[m_WaypointID].Time = action.GetCurrent();
+		m_Waypoints[m_WaypointID].Speed = action.GetCurrent();
 		UpdateDurationLabel();
 	}
 
@@ -719,7 +719,8 @@ class JMCameraForm: JMFormBase
 		if ( m_Waypoints.Count() > 0 )
 		{
 			JMCameraWaypoint prev = m_Waypoints[m_Waypoints.Count() - 1];
-			wp.Time           = prev.Time;
+			wp.Speed          = prev.Speed;
+			if ( wp.Speed <= 0 ) wp.Speed = 5.0;
 			wp.HoldTime       = prev.HoldTime;
 			wp.UseCatmull     = prev.UseCatmull;
 			wp.TrackTarget    = prev.TrackTarget;
@@ -1065,18 +1066,29 @@ class JMCameraForm: JMFormBase
 		if ( speedMult <= 0 ) speedMult = 1.0;
 
 		int count = m_Waypoints.Count();
-		// Segment times are on waypoints[1..N-1] (time to arrive from previous)
 		for ( int i = 1; i < count; i++ )
 		{
-			total += m_Waypoints[i].Time / speedMult;
-			total += m_Waypoints[i].HoldTime;
+			JMCameraWaypoint wp = m_Waypoints[i];
+			float segTime;
+			if ( wp.Speed > 0 )
+			{
+				int j = i - 1;
+				float dist = vector.Distance( m_Waypoints[j].Position, wp.Position );
+				if ( dist < 0.01 ) dist = 0.01;
+				segTime = ( dist / wp.Speed ) / speedMult;
+			}
+			else
+			{
+				segTime = wp.Time / speedMult;
+			}
+			total += segTime + wp.HoldTime;
 		}
 
 		string label;
 		if ( count < 2 )
 			label = "Est. Duration: --";
 		else
-			label = string.Format("Est. Duration: %1s", Math.Round(total * 10) * 0.1);
+			label = string.Format( "Est. Duration: %1s", Math.Round( total * 10 ) * 0.1 );
 
 		m_LabelDuration.SetLabel( label );
 	}
@@ -1089,8 +1101,8 @@ class JMCameraForm: JMFormBase
 
 		JMCameraWaypoint wp = m_Waypoints[m_WaypointID];
 
-		float time = m_SliderTravelTime.GetCurrent();
-		if ( time > 0 ) wp.Time = time;
+		float speed = m_SliderWaypointSpeed.GetCurrent();
+		if ( speed > 0 ) wp.Speed = speed;
 
 		wp.HoldTime    = m_SliderHoldTime.GetCurrent();
 		wp.UseCatmull  = m_ToggleCatmull.IsChecked();
@@ -1120,7 +1132,7 @@ class JMCameraForm: JMFormBase
 
 		if ( m_WaypointID < 0 || m_Waypoints.Count() == 0 )
 		{
-			m_SliderTravelTime.SetCurrent(5);
+			m_SliderWaypointSpeed.SetCurrent(5);
 			m_SliderHoldTime.SetCurrent(0);
 			m_ToggleCatmull.SetChecked(false);
 			m_ToggleTrackTarget.SetChecked(false);
@@ -1136,7 +1148,9 @@ class JMCameraForm: JMFormBase
 		}
 
 		JMCameraWaypoint wp = m_Waypoints[m_WaypointID];
-		m_SliderTravelTime.SetCurrent( wp.Time );
+		float displaySpeed = wp.Speed;
+		if ( displaySpeed <= 0 ) displaySpeed = 5.0;
+		m_SliderWaypointSpeed.SetCurrent( displaySpeed );
 		m_SliderHoldTime.SetCurrent( wp.HoldTime );
 		m_ToggleCatmull.SetChecked( wp.UseCatmull );
 		m_ToggleTrackTarget.SetChecked( wp.TrackTarget );

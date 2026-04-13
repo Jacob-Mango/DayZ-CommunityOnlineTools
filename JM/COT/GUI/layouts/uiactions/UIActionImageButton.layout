@@ -1,10 +1,10 @@
 PanelWidgetClass UIActionImageButton {
- size 1 30
+ size 32 32
  halign left_ref
  valign top_ref
  hexactpos 0
  vexactpos 0
- hexactsize 0
+ hexactsize 1
  vexactsize 1
  color 0 0 0 0
  style rover_sim_colorable
@@ -89,7 +89,7 @@ PanelWidgetClass UIActionImageButton {
       }
       ImageWidgetClass action_image {
        ignorepointer 1
-       size 16 16
+       size 24 24
        halign center_ref
        valign center_ref
        hexactsize 1
@@ -97,8 +97,8 @@ PanelWidgetClass UIActionImageButton {
        mode blend
        "src alpha" 1
        "no wrap" 1
-       stretch 0
-       image0 "set:dayz_gui image:icon_x"
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
      }
     }

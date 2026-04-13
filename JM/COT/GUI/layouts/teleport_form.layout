@@ -12,20 +12,19 @@ PanelWidgetClass JMTeleportForm {
   GridSpacerWidgetClass actions_filter_wrapper {
    position 0 0
    priority 20
-   size 1 0.07
-   hexactpos 1
-   vexactpos 1
+   size 1 0.12
+   hexactpos 0
+   vexactpos 0
    hexactsize 0
    vexactsize 0
-   "Size To Content V" 1
    Columns 1
    Rows 2
   }
   TextListboxWidgetClass tls_ppp_pm_positions_list {
    visible 1
    priority 10
-   position 0 0.07
-   size 1 0.63
+   position 0 0.12
+   size 1 0.55
    hexactpos 0
    vexactpos 0
    hexactsize 0
@@ -37,16 +36,14 @@ PanelWidgetClass JMTeleportForm {
    "exact text size" 16
   }
   GridSpacerWidgetClass actions_wrapper {
-   position 0 0
-   size 1 0.30
+   position 0 0.67
+   size 1 0.33
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   valign bottom_ref
-   "Size To Content V" 1
    Columns 1
-   Rows 3
+   Rows 5
   }
  }
 }

@@ -41,6 +41,13 @@ class JMCinematicCamera: JMCameraBase
 	private int    m_FromIdx;   // cached from-waypoint index for effects interpolation
 	private int    m_ToIdx;     // cached to-waypoint index for effects interpolation
 
+	// Speed-based travel (smooth speed transitions between waypoints)
+	private float  m_CurrentSpeed;    // actual instantaneous speed (m/s), lerped each frame
+	private float  m_TargetSpeed;     // destination speed for this segment (from waypoint)
+	private float  m_SegmentLength;   // arc length of current segment (metres)
+	private float  m_TravelDistance;  // distance traveled in current segment (metres)
+	private bool   m_UseSpeedTravel;  // true when the current segment uses speed-based travel
+
 	// Arc-length reparameterization lookup table (per segment, 20 samples)
 	private static const int ARC_SAMPLES = 20;
 	private ref array< float > m_ArcTable;  // normalized cumulative arc lengths [0..1]
@@ -180,11 +187,30 @@ class JMCinematicCamera: JMCameraBase
 				}
 				else
 				{
-					currentTime += timeslice;
+					float t;
 
-					float t = Math.Clamp(currentTime / targetTime, 0.0, 1.0);
+					if ( m_UseSpeedTravel )
+					{
+						// Smoothly lerp instantaneous speed toward the target waypoint speed
+						float speedRamp = timeslice * 2.0;
+						m_CurrentSpeed = Math.Lerp( m_CurrentSpeed, m_TargetSpeed * m_SpeedMult, speedRamp );
 
-					if ( currentTime >= targetTime )
+						m_TravelDistance += m_CurrentSpeed * timeslice;
+						t = Math.Clamp( m_TravelDistance / m_SegmentLength, 0.0, 1.0 );
+					}
+					else
+					{
+						currentTime += timeslice;
+						t = Math.Clamp( currentTime / targetTime, 0.0, 1.0 );
+					}
+
+					bool segmentDone;
+					if ( m_UseSpeedTravel )
+						segmentDone = m_TravelDistance >= m_SegmentLength;
+					else
+						segmentDone = currentTime >= targetTime;
+
+					if ( segmentDone )
 					{
 						// Snap to exact end of segment
 						ApplyTravelEffectsAtT(1.0, timeslice);
@@ -432,6 +458,8 @@ class JMCinematicCamera: JMCameraBase
 		m_TravelDirection  = 1;
 		m_Holding          = false;
 		m_HoldTimer        = 0.0;
+		m_TravelDistance   = 0.0;
+		m_CurrentSpeed     = 0.0;  // will ramp up from rest at start of first segment
 
 		// Seed effect values from waypoint[0] to prevent visual jump
 		JMCameraWaypoint wp0 = travelWaypoints[0];
@@ -476,9 +504,33 @@ class JMCinematicCamera: JMCameraBase
 		startPosition = travelWaypoints[fromIdx].Position;
 		endPosition   = travelWaypoints[toIdx].Position;
 
-		targetTime = travelWaypoints[toIdx].Time / m_SpeedMult;
+		JMCameraWaypoint wpTarget = travelWaypoints[toIdx];
+		float segDist = vector.Distance( travelWaypoints[fromIdx].Position, travelWaypoints[toIdx].Position );
+		if ( segDist < 0.01 ) segDist = 0.01;
+
+		m_TravelDistance = 0.0;
+
+		if ( wpTarget.Speed > 0 )
+		{
+			m_UseSpeedTravel = true;
+			m_TargetSpeed    = wpTarget.Speed;
+			m_SegmentLength  = segDist;
+
+			// If m_CurrentSpeed is 0 (first segment), seed it at target speed so we don't start from a dead stop
+			if ( m_CurrentSpeed <= 0 )
+				m_CurrentSpeed = m_TargetSpeed;
+
+			// targetTime is kept as an upper-bound safety timeout (dist / speed gives exact expected time)
+			targetTime = ( segDist / wpTarget.Speed ) / m_SpeedMult;
+		}
+		else
+		{
+			m_UseSpeedTravel = false;
+			m_SegmentLength  = segDist;
+			targetTime       = wpTarget.Time / m_SpeedMult;
+		}
 		if ( targetTime <= 0 )
-			targetTime = 5.0;
+			targetTime = 1.0;
 
 		// Orientation — only interpolate when both endpoints have a captured orientation
 		JMCameraWaypoint wpFrom = travelWaypoints[fromIdx];

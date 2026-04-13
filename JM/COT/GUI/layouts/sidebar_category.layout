@@ -1,0 +1,84 @@
+PanelWidgetClass cat_bkg {
+ visible 1
+ color 0 0 0 0.25
+ position 5 2
+ size 290 54
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ style rover_sim_colorable
+ {
+  ButtonWidgetClass cat_btn {
+   color 1 0 0 1
+   position 5 0
+   size 290 1
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 0
+   "no focus" 1
+   style rover_sim_colorable
+   {
+    PanelWidgetClass img_cnt {
+     ignorepointer 1
+     position 0 0
+     size 50 54
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     {
+      PanelWidgetClass img_sizer {
+       ignorepointer 1
+       position 0 0
+       size 0.85 0.85
+       halign center_ref
+       valign center_ref
+       hexactsize 0
+       vexactsize 0
+       {
+        ImageWidgetClass cat_icon {
+         visible 1
+         ignorepointer 1
+         size 48 48
+         halign center_ref
+         valign center_ref
+         hexactsize 1
+         vexactsize 1
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+     }
+    }
+    TextWidgetClass cat_ttl {
+     ignorepointer 1
+     color 1 1 1 1
+     position 0 0
+     size 230 54
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "{CATEGORY}"
+     font "gui/fonts/sdf_MetronLight36"
+     "exact text" 1
+     "exact text size" 18
+     "text halign" left
+     "text valign" center
+    }
+   }
+  }
+ }
+}

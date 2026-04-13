@@ -28,6 +28,7 @@ enum JMBanModuleRPC
     RequestBanList,
     RequestBan,
     UnbanPlayer,
+    EditBanDuration,
 
     // Server → Client
     BanList,
@@ -68,6 +69,11 @@ class JMBanModule : JMRenderableModuleBase
     override string GetLayoutRoot()
     {
         return "JM/COT/GUI/layouts/ban_form.layout";
+    }
+
+    override string GetCategory()
+    {
+        return "Players";
     }
 
     override string GetTitle()
@@ -172,6 +178,9 @@ class JMBanModule : JMRenderableModuleBase
             break;
         case JMBanModuleRPC.UnbanPlayer:
             RPC_UnbanPlayer( ctx, sender, target );
+            break;
+        case JMBanModuleRPC.EditBanDuration:
+            RPC_EditBanDuration( ctx, sender, target );
             break;
         case JMBanModuleRPC.BanList:
             RPC_BanList( ctx, sender, target );
@@ -283,6 +292,15 @@ class JMBanModule : JMRenderableModuleBase
             rpc.Write( ban.IssuedByName );
         }
 
+        // Append known player list (all ever-connected players) for "Ban Offline" dropdown
+        array< JMPlayerInstance > knownPlayers = GetPermissionsManager().GetPlayers();
+        rpc.Write( knownPlayers.Count() );
+        foreach ( JMPlayerInstance pi : knownPlayers )
+        {
+            rpc.Write( pi.GetGUID() );
+            rpc.Write( pi.GetName() );
+        }
+
         rpc.Send( NULL, JMBanModuleRPC.BanList, true, sender );
     }
 
@@ -358,6 +376,74 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
+    //  Public API: edit duration of an existing ban
+    //  durationSeconds: -1 = permanent, else relative seconds from now
+    // -------------------------------------------------------------------------
+
+    void EditBanDuration( string steamID, int durationSeconds )
+    {
+        if ( IsMissionHost() )
+        {
+            Exec_EditBanDuration( steamID, durationSeconds, NULL );
+        }
+        else
+        {
+            ScriptRPC rpc = new ScriptRPC();
+            rpc.Write( steamID         );
+            rpc.Write( durationSeconds );
+            rpc.Send( NULL, JMBanModuleRPC.EditBanDuration, true, NULL );
+        }
+    }
+
+    private void Exec_EditBanDuration( string steamID, int durationSeconds, PlayerIdentity adminIdent )
+    {
+        JMPlayerBan ban = m_ActiveIndex.Get( steamID );
+        if ( !ban )
+        {
+            if ( adminIdent )
+                COTCreateNotification( adminIdent, new StringLocaliser( "No active ban found for: " + steamID ) );
+            return;
+        }
+
+        if ( durationSeconds == -1 )
+        {
+            ban.BanDuration = -1;
+        }
+        else
+        {
+            CF_Date now = CF_Date.Now( true );
+            ban.BanDuration = now.GetTimestamp() + durationSeconds;
+        }
+
+        Save();
+
+        GetCommunityOnlineToolsBase().Log( adminIdent, "Edited ban duration [steamID=" + steamID + "] -> " + durationSeconds );
+    }
+
+    private void RPC_EditBanDuration( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+    {
+        if ( !IsMissionHost() )
+            return;
+
+        JMPlayerInstance instance;
+        if ( !GetPermissionsManager().HasPermission( "Admin.Ban.Unban", sender, instance ) )
+            return;
+
+        string steamID;
+        int    durationSeconds;
+
+        if ( !ctx.Read( steamID )         ) return;
+        if ( !ctx.Read( durationSeconds ) ) return;
+
+        if ( steamID == "" )
+            return;
+
+        Exec_EditBanDuration( steamID, durationSeconds, sender );
+
+        RPC_RequestBanList( ctx, sender, target );
+    }
+
+    // -------------------------------------------------------------------------
     //  Client RPC: receive ban list, push to open form (matching JMESPModule pattern)
     // -------------------------------------------------------------------------
 
@@ -381,10 +467,26 @@ class JMBanModule : JMRenderableModuleBase
             bans.Insert( ban );
         }
 
+        // Read known player list for "Ban Offline" dropdown
+        array<string> playerGuids = new array<string>();
+        array<string> playerNames = new array<string>();
+        int playerCount;
+        if ( ctx.Read( playerCount ) )
+        {
+            for ( int j = 0; j < playerCount; j++ )
+            {
+                string guid, name;
+                if ( !ctx.Read( guid ) || !ctx.Read( name ) )
+                    break;
+                playerGuids.Insert( guid );
+                playerNames.Insert( name );
+            }
+        }
+
         // Push to the open form — GetForm() pattern confirmed from JMESPModule
         JMBanForm form;
         if ( Class.CastTo( form, GetForm() ) )
-            form.PopulateBanList( bans );
+            form.PopulateBanList( bans, playerGuids, playerNames );
     }
 
     // -------------------------------------------------------------------------

@@ -9,7 +9,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 	private bool m_IsAnimatingIn;
 	private bool m_IsAnimatingOut;
-	
+
 	private bool m_IsTargetCompact;
 	private bool m_IsCompact;
 	private bool m_WasCompact;
@@ -17,11 +17,15 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	private float m_TotalAnimateTime;
 	private float m_AnimateTime;
 
+	private ref array< ref JMCOTSideBarCategory > m_Categories;
+
+
 	void JMCOTSideBar()
 	{
 		m_TotalAnimateTime = 0.35;
+		m_Categories = new array< ref JMCOTSideBarCategory >;
 	}
-	
+
 	void ~JMCOTSideBar()
 	{
 		if (!g_Game)
@@ -43,6 +47,32 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		return m_LayoutRoot;
 	}
 
+	// Returns true if w is the sidebar layout root, any child of it,
+	// or any child of a category flyout (which is a top-level workspace widget).
+	bool ContainsWidget( Widget w )
+	{
+		if ( !w )
+			return false;
+
+		// Walk up the widget's parent chain to find the sidebar root
+		Widget cur = w;
+		while ( cur )
+		{
+			if ( cur == m_LayoutRoot )
+				return true;
+			cur = cur.GetParent();
+		}
+
+		// Check all category flyouts (they are top-level, not parented to m_LayoutRoot)
+		foreach ( JMCOTSideBarCategory cat: m_Categories )
+		{
+			if ( cat.ContainsWidget( w ) )
+				return true;
+		}
+
+		return false;
+	}
+
 	bool IsVisible()
 	{
 		return m_LayoutRoot && m_LayoutRoot.IsVisible();
@@ -55,25 +85,89 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		Init();
 	}
-	
+
 	void Init()
 	{
-		Class.CastTo(m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ));
+		Class.CastTo( m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ) );
 
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "CreditsText" ) ).SetText("");
 		TextWidget.Cast( m_LayoutRoot.FindAnyWidget( "Version_Text" ) ).SetText("");
 
+		Widget buttonsContainer = m_LayoutRoot.FindAnyWidget( "Buttons" );
+
 		array< JMRenderableModuleBase > modules = new array< JMRenderableModuleBase >;
 		SortModuleArray( GetModuleManager().GetCOTModules(), modules );
 
-		for ( int i = 0; i < modules.Count(); i++ )
-		{
-			JMRenderableModuleBase module = modules.Get( i );
+		// Group modules by category, preserving preferred order
+		array< string > categoryOrder = new array< string >;
+		JMSideBarConfig.GetCategoryOrder( categoryOrder );
 
-			if ( modules[i] && modules[i].HasButton() )
+		// Collect all unique categories not in preferred order
+		foreach ( JMRenderableModuleBase mod: modules )
+		{
+			if ( !mod.HasButton() )
+				continue;
+
+			string cat = mod.GetCategory();
+			bool found = false;
+			foreach ( string existing: categoryOrder )
 			{
-				modules[i].InitButton( g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_LayoutRoot.FindAnyWidget( "Buttons" ) ) );
+				if ( existing == cat )
+				{
+					found = true;
+					break;
+				}
 			}
+			if ( !found )
+				categoryOrder.Insert( cat );
+		}
+
+		// Create one category tile per non-empty category
+		foreach ( string catName: categoryOrder )
+		{
+			// Check if any module belongs to this category
+			bool hasAny = false;
+			foreach ( JMRenderableModuleBase checkMod: modules )
+			{
+				if ( checkMod.HasButton() && checkMod.GetCategory() == catName )
+				{
+					hasAny = true;
+					break;
+				}
+			}
+
+			if ( !hasAny )
+				continue;
+
+			// Create the category tile widget
+			Widget catWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_category.layout", buttonsContainer );
+			if ( !catWidget )
+				continue;
+
+			// Set the category label and icon
+			TextWidget catTtl = TextWidget.Cast( catWidget.FindAnyWidget( "cat_ttl" ) );
+			if ( catTtl )
+				catTtl.SetText( catName );
+
+			ImageWidget catIcon = ImageWidget.Cast( catWidget.FindAnyWidget( "cat_icon" ) );
+			if ( catIcon )
+				catIcon.LoadImageFile( 0, JMSideBarConfig.GetCategoryIcon( catName ) );
+
+			// Create the category manager (also creates the flyout as a top-level widget)
+			JMCOTSideBarCategory category = new JMCOTSideBarCategory();
+			category.SetSideBar( this );
+			category.Init( catName, catWidget );
+
+			// Add all modules in this category
+			foreach ( JMRenderableModuleBase mod2: modules )
+			{
+				if ( mod2.HasButton() && mod2.GetCategory() == catName )
+				{
+					category.AddModule( mod2 );
+				}
+			}
+
+			m_Categories.Insert( category );
 		}
 
 		float h;
@@ -82,6 +176,17 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		Hide();
 		m_LayoutRoot.Show( false );
+	}
+
+	// Close every flyout except the one belonging to the given category.
+	// Called by a category when it opens its flyout, so siblings close instantly.
+	void CloseOtherFlyouts( JMCOTSideBarCategory except )
+	{
+		foreach ( JMCOTSideBarCategory cat: m_Categories )
+		{
+			if ( cat != except )
+				cat.ForceHideFlyout();
+		}
 	}
 
 	private void SortModuleArray( array< JMRenderableModuleBase > modules, out array< JMRenderableModuleBase > sorted )
@@ -125,12 +230,12 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		SetFocus( NULL );
 
-		if ( !IsMissionClient() ) 
+		if ( !IsMissionClient() )
 			return;
 
 		if ( !m_LayoutRoot )
 			return;
-		
+
 		ShowAllWidgets();
 
 		m_IsAnimatingIn = true;
@@ -144,8 +249,14 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 		SetFocus( NULL );
 
-		if ( !IsMissionClient() ) 
+		if ( !IsMissionClient() )
 			return;
+
+		// Close any open category flyout before hiding
+		foreach ( JMCOTSideBarCategory hideCat: m_Categories )
+		{
+			hideCat.ForceHideFlyout();
+		}
 
 		m_IsAnimatingOut = true;
 		m_AnimateTime = 0.0;
@@ -179,7 +290,13 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	void OnUpdate( float timeslice )
 	{
 		CheckForVisibleModules();
-		
+
+		// Update all categories (for flyout hide delay logic)
+		foreach ( JMCOTSideBarCategory cat: m_Categories )
+		{
+			cat.OnUpdate( timeslice );
+		}
+
 		if (m_IsAnimatingIn || m_IsAnimatingOut || (m_IsTargetCompact != m_IsCompact))
 		{
 			if (m_AnimateTime == 0)
@@ -224,6 +341,12 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 			m_LayoutRoot.SetPos( m_CurrentWidth, 0 );
 
+			// Keep any open flyout anchored to its category tile during animation
+			foreach ( JMCOTSideBarCategory animCat: m_Categories )
+			{
+				animCat.RepositionFlyout();
+			}
+
 			if ( m_AnimateTime > m_TotalAnimateTime )
 			{
 				if ( m_IsAnimatingOut )
@@ -264,23 +387,5 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		}
 
 		m_IsTargetCompact = false;
-	}
-
-	override bool OnClick( Widget w, int x, int y, int button )
-	{
-		if ( !IsMissionClient() ) 
-			return false;
-		
-		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
-		foreach(JMRenderableModuleBase module: modules)
-		{
-			if ( w == module.GetMenuButton() )
-			{
-				module.ToggleShow();
-				return false;
-			}
-		}
-
-		return false;
 	}
 }

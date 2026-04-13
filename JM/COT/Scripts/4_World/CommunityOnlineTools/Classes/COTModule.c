@@ -242,28 +242,31 @@ class COTModule : JMModuleBase
 		{
 			bool canContinue = false;
 
-			Widget parentWidget = GetWidgetUnderCursor();
-			while ( parentWidget != NULL )
-			{   
-				if ( m_COTMenu && m_COTMenu.GetLayoutRoot() == parentWidget )
-				{
-					canContinue = true;
-					break;
-				}
+			Widget clickedWidget = GetWidgetUnderCursor();
 
-				if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
-				{
-					canContinue = true;
-					break;
-				}
+			// Check sidebar root + all category flyouts in one call
+			if ( m_COTMenu && m_COTMenu.ContainsWidget( clickedWidget ) )
+				canContinue = true;
 
-				if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
+			if ( !canContinue )
+			{
+				Widget parentWidget = clickedWidget;
+				while ( parentWidget != NULL )
 				{
-					canContinue = true;
-					break;
-				}
+					if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
+					{
+						canContinue = true;
+						break;
+					}
 
-				parentWidget = parentWidget.GetParent();
+					if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
+					{
+						canContinue = true;
+						break;
+					}
+
+					parentWidget = parentWidget.GetParent();
+				}
 			}
 
 			if ( !canContinue )

@@ -289,6 +289,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/vehicles/Vehicles_Menu.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "Items";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_VEHICLE_MANAGEMENT_MODULE_NAME";

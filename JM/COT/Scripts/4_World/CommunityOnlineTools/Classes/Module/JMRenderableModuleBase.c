@@ -125,6 +125,11 @@ class JMRenderableModuleBase: JMModuleBase
 		return text;
 	}
 
+	string GetCategory()
+	{
+		return "Other";
+	}
+
 	string GetImageSet()
 	{
 		return "";

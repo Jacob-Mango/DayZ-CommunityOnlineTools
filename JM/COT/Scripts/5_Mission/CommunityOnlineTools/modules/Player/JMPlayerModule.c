@@ -103,6 +103,11 @@ class JMPlayerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/player_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "Players";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_PLAYER_MODULE_NAME";

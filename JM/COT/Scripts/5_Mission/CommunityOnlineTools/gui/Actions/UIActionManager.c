@@ -552,7 +552,7 @@ class UIActionManager
 		if ( action )
 		{
 			action.SetCallback( instance, funcname );
-			//action.SetImage( image );
+			action.SetImage( image );
 
 			return action;
 		}
@@ -560,6 +560,13 @@ class UIActionManager
 		UIAMError("Couldn't get script", widget, parent);
 
 		return NULL;
+	}
+
+	// Shorthand for creating a button with one of the built-in COT icon textures.
+	// iconPath — full icon path constant from JMIcons.c, e.g. JMIcon_Add, JMIcon_Trash
+	static UIActionImageButton CreateIconButton( notnull Widget parent, string iconPath, Class instance, string funcname, float width = 1 )
+	{
+		return CreateImageButton( parent, iconPath, instance, funcname, width );
 	}
 
 	static void SetSize( Widget widget, float width = -1, float height = -1 )

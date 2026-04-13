@@ -26,7 +26,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_GUID;
 	private UIActionButton m_Name;
 	private UIActionButton m_Steam64ID;
-	private UIActionButton m_SteamProfile;
+	private UIActionImageButton m_SteamProfile;
 
 	#ifdef GAMELABS
 	private UIActionButton m_CFToolsID;
@@ -96,9 +96,6 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_SendMessage;
 	private UIActionButton m_KickPlayer;
 	private UIActionButton m_BanPlayer;
-	private UIActionSelectBox m_BanDuration;
-	private ref array<string> m_BanDurationText = { "Permanent", "1 Hour", "6 Hours", "1 Day", "3 Days", "1 Week", "30 Days", "90 Days" };
-	private ref array<int> m_BanDurationSeconds = { -1, 3600, 21600, 86400, 259200, 604800, 2592000, 7776000 };
 
 	private int m_NumPlayerCount;
 
@@ -311,7 +308,7 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		m_Steam64ID.SetWidth( 0.45 );
 		m_Steam64ID.SetPosition( 0.15 );
 
-		m_SteamProfile = UIActionManager.CreateButton( actions, "Open Profile (Web)", this, "Click_OpenPlayerSteamProfile" );
+		m_SteamProfile = UIActionManager.CreateIconButton( actions, JMIcon_Steam, this, "Click_OpenPlayerSteamProfile" );
 		m_SteamProfile.SetWidth( 0.4 );
 		m_SteamProfile.SetPosition( 0.6 );
 
@@ -366,9 +363,9 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 
 		Widget positionHeader = UIActionManager.CreateGridSpacer( parent, 1, 3 );
 
-		m_CopyRotationPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_ORIENTATION_COPY", this, "Click_CopyPlayerRotation");
-        m_CopyPositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_COPY", this, "Click_CopyPlayerPostion");
-        m_PastePositionPlayer = UIActionManager.CreateButton(positionHeader, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_PASTE", this, "Click_PastePlayerPostion");
+		m_CopyRotationPlayer  = UIActionManager.CreateButton( positionHeader, "Rot.",  this, "Click_CopyPlayerRotation" );
+        m_CopyPositionPlayer  = UIActionManager.CreateButton( positionHeader, "Copy",  this, "Click_CopyPlayerPostion"  );
+        m_PastePositionPlayer = UIActionManager.CreateButton( positionHeader, "Paste", this, "Click_PastePlayerPostion" );
 
 		Widget positionActions = UIActionManager.CreateGridSpacer( parent, 2, 1 );
 		Widget positionActionsVec = UIActionManager.CreateGridSpacer( positionActions, 1, 3 );
@@ -382,13 +379,13 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		m_PositionZ.SetOnlyNumbers( true );
 		
 		Widget positionActionsBut = UIActionManager.CreateGridSpacer( positionActions, 1, 2 );
-		m_PositionRefresh = UIActionManager.CreateButton( positionActionsBut, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_REFRESH_COORDINATES", this, "Click_RefreshTeleports" );
-		m_Position = UIActionManager.CreateButton( positionActionsBut, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_COORDINATES", this, "Click_SetPosition" );
+		m_PositionRefresh = UIActionManager.CreateButton( positionActionsBut, "Refresh", this, "Click_RefreshTeleports" );
+		m_Position = UIActionManager.CreateButton( positionActionsBut, "Set Position", this, "Click_SetPosition" );
 
 		Widget teleportActions = UIActionManager.CreateGridSpacer( parent, 1, 3 );
-		m_TeleportToMe = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_TO_ME", this, "Click_TeleportToMe" );
-		m_TeleportMeTo = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", this, "Click_TeleportMeTo" );
-		m_TeleportPrevious = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_PREVIOUS", this, "Click_TeleportPrevious" );
+		m_TeleportToMe   = UIActionManager.CreateButton( teleportActions, "Teleport To Me", this, "Click_TeleportToMe"     );
+		m_TeleportMeTo   = UIActionManager.CreateButton( teleportActions, "Teleport Me To", this, "Click_TeleportMeTo"     );
+		m_TeleportPrevious = UIActionManager.CreateButton( teleportActions, "Previous", this, "Click_TeleportPrevious" );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
 
@@ -435,8 +432,8 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		m_HeatBuffer.SetSliderWidth(0.5);
 
 		Widget actionButtons = UIActionManager.CreateGridSpacer( parent, 1, 2 );
-		m_ApplyStats = UIActionManager.CreateButton( actionButtons, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "Click_ApplyStats" );
-		m_RefreshStats = UIActionManager.CreateButton( actionButtons, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_RefreshStats" );
+		m_ApplyStats = UIActionManager.CreateButton( actionButtons, "Apply", this, "Click_ApplyStats" );
+		m_RefreshStats = UIActionManager.CreateButton( actionButtons, "Refresh", this, "Click_RefreshStats" );
 
 		Widget actions2 = UIActionManager.CreateGridSpacer( parent, 5, 2 );
 
@@ -470,33 +467,29 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 
 		// Friendly actions at the top
 		Widget actionsFriendly = UIActionManager.CreateGridSpacer( parent, 3, 2 );
-		m_HealPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_HEAL", this, "Click_HealPlayer" );
-		m_RepairTransport = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_REPAIR_TRANSPORT", this, "Click_RepairTransport" );
-		m_StopBleeding = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", this, "Click_StopBleeding" );
-		m_DryPlayer = UIActionManager.CreateButton( actionsFriendly, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_DRY", this, "Click_DryPlayer" );
+		m_HealPlayer = UIActionManager.CreateButton( actionsFriendly, "Heal",    this, "Click_HealPlayer"    );
+		m_RepairTransport = UIActionManager.CreateButton( actionsFriendly, "Repair", this, "Click_RepairTransport" );
+		m_StopBleeding = UIActionManager.CreateButton( actionsFriendly, "Stop Bleeding", this, "Click_StopBleeding"  );
+		m_DryPlayer = UIActionManager.CreateButton( actionsFriendly, "Dry",     this, "Click_DryPlayer"     );
 		
 		// Misc actions inbetween
 		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
 		Widget actionsMisc = UIActionManager.CreateGridSpacer( parent, 3, 2 );
-		m_SpectatePlayer = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SPECTATE", this, "Click_SpectatePlayer" );
-		m_SendMessage 	 = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SEND_MESSAGE", this, "Click_SendMessage" );
-		m_VomitPlayer 	 = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_VOMIT", this, "Click_VomitPlayer" );
-		m_SetScalePlayer = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_SETSCALE", this, "Click_ScalePlayer" );
+		m_SpectatePlayer = UIActionManager.CreateButton( actionsMisc, "Spectate", this, "Click_SpectatePlayer" );
+		m_SendMessage 	 = UIActionManager.CreateButton( actionsMisc, "Message",  this, "Click_SendMessage"    );
+		m_VomitPlayer 	 = UIActionManager.CreateButton( actionsMisc, "Vomit",  this, "Click_VomitPlayer"    );
+		m_SetScalePlayer = UIActionManager.CreateButton( actionsMisc, "Scale",  this, "Click_ScalePlayer"    );
 	#ifdef DZ_Expansion_Core
-		m_CopyExpLoadout = UIActionManager.CreateButton( actionsMisc, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_EXPLOADOUT", this, "Click_CopyExpLoadout" );
+		m_CopyExpLoadout = UIActionManager.CreateButton( actionsMisc, "Exp.Loadout", this, "Click_CopyExpLoadout" );
 	#endif
 
 		// Destructive actions at the bottom
 		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
 		Widget actionsDestructive = UIActionManager.CreateGridSpacer( parent, 4, 2 );
-		m_KillPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
-		m_StripPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
-		m_KickPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
-		m_BanPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
-		UIActionManager.CreateText( actionsDestructive, "Ban Duration:" );
-		m_BanDuration = UIActionManager.CreateSelectionBox( actionsDestructive, "", m_BanDurationText, this );
-		m_BanDuration.SetSelectorWidth( 1.0 );
-		m_BanDuration.SetSelection( 0, false );
+		m_KillPlayer  = UIActionManager.CreateButton( actionsDestructive, "Kill",  this, "Click_KillPlayer"  );
+		m_StripPlayer = UIActionManager.CreateButton( actionsDestructive, "Strip", this, "Click_StripPlayer" );
+		m_KickPlayer  = UIActionManager.CreateButton( actionsDestructive, "Kick",  this, "Click_KickPlayer"  );
+		m_BanPlayer   = UIActionManager.CreateButton( actionsDestructive, "Ban",   this, "Click_BanPlayer"   );
 
 		m_KillPlayer.SetColor(COLOR_RED);
 		m_StripPlayer.SetColor(COLOR_RED);
@@ -915,12 +908,12 @@ UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 
 	void BanPlayerMulti(JMConfirmation confirmation)
 	{
-		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue(), m_BanDurationSeconds[m_BanDuration.GetSelection()] );
+		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue(), -1 );
 	}
 
 	void BanPlayerSingle(JMConfirmation confirmation)
 	{
-		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue(), m_BanDurationSeconds[m_BanDuration.GetSelection()] );
+		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue(), -1 );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )

@@ -154,10 +154,10 @@ class JMWeatherForm: JMFormBase
 		m_ButtonList = UIActionManager.CreateButton( spacer, "#STR_COT_WEATHER_MODULE_PRESET_DONTUSE", this, "OnClick_List" );
 		m_ButtonList.SetWidth( 0.24 );
 
-		m_ButtonApply = UIActionManager.CreateButton( spacer, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_APPLY", this, "OnClick_Apply" );
+		m_ButtonApply = UIActionManager.CreateButton( spacer, "Apply", this, "OnClick_Apply" );
 		m_ButtonApply.SetWidth( 0.24 );
 
-		m_ButtonRefresh = UIActionManager.CreateButton( spacer, "#STR_COT_WEATHER_MODULE_REFRESH", this, "OnClick_Refresh" );
+		m_ButtonRefresh = UIActionManager.CreateButton( spacer, "Refresh", this, "OnClick_Refresh" );
 		m_ButtonRefresh.SetWidth( 0.24 );
 
 		spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
@@ -786,9 +786,9 @@ class JMWeatherForm: JMFormBase
 
 	private void InitPresetRun( Widget actionsParent )
 	{
-		m_ButtonPresetUse = UIActionManager.CreateButton( actionsParent, "#STR_COT_WEATHER_MODULE_PRESET_APPLY", this, "OnClick_PresetRun" );
+		m_ButtonPresetUse = UIActionManager.CreateButton( actionsParent, "Run", this, "OnClick_PresetRun" );
 		m_ButtonPresetUpdate = UIActionManager.CreateButton( actionsParent, "#STR_COT_WEATHER_MODULE_PRESET_SAVE", this, "OnClick_PresetUpdate" );
-		m_ButtonPresetRemove = UIActionManager.CreateButton( actionsParent, "#STR_COT_WEATHER_MODULE_PRESET_DELETE", this, "OnClick_PresetRemove" );
+		m_ButtonPresetRemove = UIActionManager.CreateButton( actionsParent, "Remove", this, "OnClick_PresetRemove" );
 	}
 
 	void OnClick_List( UIEvent eid, UIActionBase action )
@@ -1040,17 +1040,17 @@ class JMWeatherForm: JMFormBase
 	
 		Widget actionsWeather 	= UIActionManager.CreateGridSpacer( m_PanelQuickActions, 1, 5 );
 
-		m_BtnQuickActionClear 	= UIActionManager.CreateButton( actionsWeather, "#STR_COT_WEATHER_CLEAR", this, "OnClick_PresetClear" );
-		m_BtnQuickActionCloudy 	= UIActionManager.CreateButton( actionsWeather, "#STR_COT_WEATHER_CLOUDY", this, "OnClick_PresetCloudy" );
-		m_BtnQuickActionRainy 	= UIActionManager.CreateButton( actionsWeather, "#STR_COT_WEATHER_MODULE_RAINY", this, "OnClick_PresetRainy" );
-		m_BtnQuickActionSnowy 	= UIActionManager.CreateButton( actionsWeather, "#STR_COT_WEATHER_MODULE_SNOWY", this, "OnClick_PresetSnowy" );
-		m_BtnQuickActionStorm 	= UIActionManager.CreateButton( actionsWeather, "#STR_COT_WEATHER_MODULE_STORM", this, "OnClick_PresetStorm" );
+		m_BtnQuickActionClear 	= UIActionManager.CreateButton( actionsWeather, "Clear",  this, "OnClick_PresetClear"  );
+		m_BtnQuickActionCloudy 	= UIActionManager.CreateButton( actionsWeather, "Cloudy", this, "OnClick_PresetCloudy" );
+		m_BtnQuickActionRainy 	= UIActionManager.CreateButton( actionsWeather, "Rainy",  this, "OnClick_PresetRainy"  );
+		m_BtnQuickActionSnowy 	= UIActionManager.CreateButton( actionsWeather, "Snowy",  this, "OnClick_PresetSnowy"  );
+		m_BtnQuickActionStorm 	= UIActionManager.CreateButton( actionsWeather, "Storm",  this, "OnClick_PresetStorm"  );
 
 		Widget actionsDate 		= UIActionManager.CreateGridSpacer( m_PanelQuickActions, 1, 4 );
-		m_BtnQuickActionNight 	= UIActionManager.CreateButton( actionsDate, "#STR_COT_WEATHER_NIGHT", this, "OnClick_PresetNight" );
-		m_BtnQuickActionDusk 	= UIActionManager.CreateButton( actionsDate, "#STR_COT_WEATHER_DUSK", this, "OnClick_PresetDusk" );
-		m_BtnQuickActionDay 	= UIActionManager.CreateButton( actionsDate, "#STR_COT_WEATHER_DAY", this, "OnClick_PresetDay" );
-		m_BtnQuickActionDawn 	= UIActionManager.CreateButton( actionsDate, "#STR_COT_WEATHER_DAWN", this, "OnClick_PresetDawn" );
+		m_BtnQuickActionNight 	= UIActionManager.CreateButton( actionsDate, "Night", this, "OnClick_PresetNight" );
+		m_BtnQuickActionDusk 	= UIActionManager.CreateButton( actionsDate, "Dusk",  this, "OnClick_PresetDusk"  );
+		m_BtnQuickActionDay 	= UIActionManager.CreateButton( actionsDate, "Day",   this, "OnClick_PresetDay"   );
+		m_BtnQuickActionDawn 	= UIActionManager.CreateButton( actionsDate, "Dawn",  this, "OnClick_PresetDawn"  );
 
 		UIActionManager.CreatePanel( m_PanelQuickActions, 0xFF000000, 1 );
 	}

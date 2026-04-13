@@ -113,6 +113,7 @@ class JMCameraSerialize : Managed
 			JMCameraWaypoint wp = new JMCameraWaypoint();
 			wp.Position            = src.Position;
 			wp.Time                = src.Time;
+			wp.Speed               = src.Speed;
 			wp.Smooth              = src.Smooth;
 			wp.Orientation         = src.Orientation;
 			wp.OrientationCaptured = src.OrientationCaptured;
