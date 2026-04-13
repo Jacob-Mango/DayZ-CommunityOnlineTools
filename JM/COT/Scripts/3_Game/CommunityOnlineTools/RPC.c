@@ -240,6 +240,7 @@ enum JMWebhookCOTModuleRPC
 	Load,
 	AddConnectionGroup,
 	RemoveConnectionGroup,
+	EditConnectionGroup,
 	AddType,
 	RemoveType,
 	TypeState,

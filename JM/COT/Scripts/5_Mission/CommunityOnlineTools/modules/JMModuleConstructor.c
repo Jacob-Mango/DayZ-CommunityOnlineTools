@@ -16,6 +16,7 @@ modded class JMModuleConstructor
 		modules.Insert( JMCommandModule );
 		modules.Insert( JMBanModule );
 		modules.Insert( JMRoleManagerModule );
+		modules.Insert( JMWebhookCOTModule );
 
 #ifdef DIAG
 		modules.Insert( JMExampleModule );

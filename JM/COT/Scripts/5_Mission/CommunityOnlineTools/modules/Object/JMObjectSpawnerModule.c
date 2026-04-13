@@ -78,6 +78,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/objectspawner_form.layout";
 	}
 
+	override string GetCategory()
+	{
+		return "Items";
+	}
+
 	override string GetTitle()
 	{
 		return "#STR_COT_OBJECT_MODULE_NAME";

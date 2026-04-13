@@ -1,0 +1,30 @@
+PanelWidgetClass JMCOTFlyout {
+ visible 0
+ color 0.03 0.04 0.06 0.95
+ priority 101
+ position 0 0
+ size 300 60
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ style DayZDefaultPanelLeft
+ {
+  WrapSpacerWidgetClass FlyoutButtons {
+   clipchildren 0
+   color 1 1 1 0
+   position 0 0
+   size 300 60
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Outline
+   "Size To Content V" 1
+  }
+ }
+}

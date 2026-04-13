@@ -6,11 +6,18 @@ class JMWebhookQueueItem : Managed
 
 	ref JMWebhookMessage m_Message;
 
-	void JMWebhookQueueItem( string type, JMWebhookMessage message )
+	// Optional target context for per-player/per-role filtering.
+	// Empty strings mean "no specific target" (send to all groups).
+	string m_TargetGUID;
+	string m_TargetRole;
+
+	void JMWebhookQueueItem( string type, JMWebhookMessage message, string targetGUID = "", string targetRole = "" )
 	{
 		m_Type = type;
 		m_Message = message;
 		m_Time = g_Game.GetTickTime();
+		m_TargetGUID = targetGUID;
+		m_TargetRole = targetRole;
 	}
 
 	string GetType()
@@ -26,6 +33,16 @@ class JMWebhookQueueItem : Managed
 	JMWebhookMessage GetMessage()
 	{
 		return m_Message;
+	}
+
+	string GetTargetGUID()
+	{
+		return m_TargetGUID;
+	}
+
+	string GetTargetRole()
+	{
+		return m_TargetRole;
 	}
 }
 
@@ -366,6 +383,18 @@ class JMWebhookModule: JMModuleBase
 		m_Queue.Insert( new JMWebhookQueueItem( connectionType, message ) );
 	}
 
+	// Post with an optional target GUID / role for per-player or per-role filtering.
+	void Post( string connectionType, JMWebhookMessage message, string targetGUID, string targetRole = "" )
+	{
+		if ( IsMissionClient() )
+			return;
+
+		if ( Assert_Null( message ) )
+			return;
+
+		m_Queue.Insert( new JMWebhookQueueItem( connectionType, message, targetGUID, targetRole ) );
+	}
+
 	private void Thread_ProcessQueue()
 	{
 		#ifdef JM_COT_DIAG_LOGGING
@@ -392,8 +421,35 @@ class JMWebhookModule: JMModuleBase
 						CF_Log.Debug("Thread_ProcessQueue - item type \"%1\"", item.GetType());
 						#endif
 						for ( int i = 0; i < connections.Count(); i++ )
-							if ( connections[i] != NULL )
-								connections[i].Post( m_Core, s_Serializer, item.GetMessage() );
+						{
+							if ( connections[i] == NULL )
+								continue;
+
+							// Check group-level filter: if the group has a GUID or role filter,
+							// only fire if the queue item's target matches.
+							JMWebhookConnectionGroup grp = connections[i].m_Group;
+							if ( grp )
+							{
+								if ( grp.FilterGUID != "" && grp.FilterGUID != item.GetTargetGUID() )
+									continue;
+
+								if ( grp.FilterRole != "" )
+								{
+									// Check if the target player has the required role
+									bool roleMatch = false;
+									if ( item.GetTargetGUID() != "" )
+									{
+										JMPlayerInstance pi = GetPermissionsManager().GetPlayer( item.GetTargetGUID() );
+										if ( pi && pi.HasRole( grp.FilterRole ) )
+											roleMatch = true;
+									}
+									if ( !roleMatch )
+										continue;
+								}
+							}
+
+							connections[i].Post( m_Core, s_Serializer, item.GetMessage() );
+						}
 					}
 					else
 					{

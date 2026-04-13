@@ -28,7 +28,7 @@ class JMLoadoutForm: JMFormBase
 
 		Widget buttonswrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 2 );
 
-			UIActionManager.CreateButton( buttonswrapper, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "OnClick_Refresh" );
+			UIActionManager.CreateButton( buttonswrapper, "Refresh", this, "OnClick_Refresh" );
 			
 			m_SpawnModeSelect = UIActionManager.CreateSelectionBox( buttonswrapper, "", m_SpawnModeText, this );
 			m_SpawnModeSelect.SetSelectorWidth(1.0);
@@ -84,10 +84,10 @@ class JMLoadoutForm: JMFormBase
 			
 				Widget bttnwrapper = UIActionManager.CreateGridSpacer( wrapper, 1, 2 );
 
-					UIActionButton spwnbttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_GENERIC_SPAWN", this, "OnClick_Spawn" );
+					UIActionButton spwnbttn = UIActionManager.CreateButton( bttnwrapper, "Spawn", this, "OnClick_Spawn" );
 					spwnbttn.SetData( new JMLoadoutButtonData( name ) );
-				
-					UIActionButton delbttn = UIActionManager.CreateButton( bttnwrapper, "#STR_COT_OBJECT_MODULE_DELETE", this, "OnClick_Delete" );
+
+					UIActionButton delbttn = UIActionManager.CreateButton( bttnwrapper, "Delete", this, "OnClick_Delete" );
 					delbttn.SetData( new JMLoadoutButtonData( name ) );
 					delbttn.SetColor(COLOR_RED);
 		}

@@ -431,8 +431,11 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
-		g_Game.GetInput().ChangeGameFocus( 1 );
-		g_Game.GetUIManager().ShowUICursor( true );
+		if ( !GetCommunityOnlineToolsBase().IsOpen() )
+		{
+			g_Game.GetInput().ChangeGameFocus( 1 );
+			g_Game.GetUIManager().ShowUICursor( true );
+		}
 
 		m_IsShown = true;
 	}

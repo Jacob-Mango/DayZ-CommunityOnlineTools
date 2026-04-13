@@ -17,7 +17,8 @@ enum JMCameraEasing
 class JMCameraWaypoint
 {
 	vector Position;
-	float  Time              = 5.0;
+	float  Time              = 5.0;  // legacy: kept for JSON compat and fallback
+	float  Speed             = 5.0;  // travel speed in m/s (0 = use Time fallback)
 	bool   Smooth;            // legacy: kept for JSON compat
 	vector Orientation;
 	bool   OrientationCaptured;

@@ -34,53 +34,52 @@ class JMTeleportForm: JMFormBase
 
 	override void OnInit()
 	{
+		// ---- Filter bar (top, 2 rows in actions_filter_wrapper) ----------------
 		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
 
-		Widget topRow = UIActionManager.CreateGridSpacer( m_ActionsFilterWrapper, 1, 2 );
+		m_Filter = UIActionManager.CreateEditableTextPreview( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
 
-		m_Filter = UIActionManager.CreateEditableTextPreview( topRow, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
-		
-		m_CategoriesList = UIActionManager.CreateSelectionBox( topRow, "", {"ALL"}, this, "Click_LocationType" );
+		m_CategoriesList = UIActionManager.CreateSelectionBox( m_ActionsFilterWrapper, "", {"ALL"}, this, "Click_LocationType" );
 		m_CategoriesList.SetSelectorWidth(1.0);
 
+		// ---- Position list (middle, from layout) --------------------------------
 		m_LstPositionList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget("tls_ppp_pm_positions_list") );
 
+		// ---- Bottom action area (5 rows in actions_wrapper) --------------------
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		Widget rows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		// Row 1 — selected position coordinates
+		Widget coordRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		m_PositionX = UIActionManager.CreateText( coordRow, "X: " );
+		m_PositionZ = UIActionManager.CreateText( coordRow, "Z: " );
 
-		m_PositionX = UIActionManager.CreateText( rows, "X: " );
-		m_PositionZ = UIActionManager.CreateText( rows, "Z: " );
+		// Row 2 — teleport button (full width)
+		m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "Teleport", this, "Click_Teleport" );
 
-		if ( g_Game.IsServer() )
-			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_OFFLINE", this, "Click_Teleport" );
-		else
-			m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "#STR_COT_TELEPORT_MODULE_TELEPORT_ONLINE", this, "Click_Teleport" );
-
-		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
-
-		Widget inputRows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 2, 2 );
-
-		m_InputTextLocation = UIActionManager.CreateText( inputRows, "#STR_COT_GENERIC_NAME" );
-		m_InputTextCategory = UIActionManager.CreateText( inputRows, "#STR_COT_GENERIC_CATEGORY" );
-
-		m_InputLocation = UIActionManager.CreateEditableText( inputRows, "", this );
+		// Row 3 — name label + editable input side by side
+		Widget nameRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		m_InputTextLocation = UIActionManager.CreateText( nameRow, "#STR_COT_GENERIC_NAME" );
+		m_InputLocation = UIActionManager.CreateEditableText( nameRow, "", this );
 		m_InputLocation.SetWidgetWidth( m_InputLocation.GetLabelWidget(), 0.0 );
 		m_InputLocation.SetWidgetWidth( m_InputLocation.GetEditBoxWidget(), 1.0 );
 
-		m_InputCategory = UIActionManager.CreateEditableTextPreview( inputRows, "", this, "InputCategory_OnChange" );
+		// Row 4 — category label + editable input with autocomplete side by side
+		Widget catRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		m_InputTextCategory = UIActionManager.CreateText( catRow, "#STR_COT_GENERIC_CATEGORY" );
+		m_InputCategory = UIActionManager.CreateEditableTextPreview( catRow, "", this, "InputCategory_OnChange" );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetLabelWidget(), 0.0 );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditBoxWidget(), 1.0 );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditPreviewBoxWidget(), 1.0 );
-		
-		Widget inputBtnRows = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
 
-		m_InputAdd = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_GENERIC_ADD", this, "Click_AddLocation" );
-		m_InputRefresh = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REFRESH", this, "Click_Refresh" );
-		m_InputRemove = UIActionManager.CreateButton( inputBtnRows, "#STR_COT_OBJECT_MODULE_DELETE", this, "Click_RemoveLocation" );
+		// Row 5 — Add / Refresh / Remove buttons
+		Widget btnRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
+		m_InputAdd     = UIActionManager.CreateButton( btnRow, "Add",     this, "Click_AddLocation"   );
+		m_InputRefresh = UIActionManager.CreateButton( btnRow, "Refresh", this, "Click_Refresh"        );
+		m_InputRemove  = UIActionManager.CreateButton( btnRow, "Remove",  this, "Click_RemoveLocation" );
 		m_InputAdd.SetColor(COLOR_GREEN);
 		m_InputRemove.SetColor(COLOR_RED);
 
+		// ---- Permission gating -------------------------------------------------
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
 		{
 			m_InputTextLocation.Disable();
@@ -92,7 +91,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) )
 			m_InputRemove.Disable();
-		
+
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
 			m_InputRefresh.Disable();
 	}
