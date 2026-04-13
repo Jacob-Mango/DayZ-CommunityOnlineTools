@@ -1,9 +1,6 @@
 class JMPlayerForm: JMFormBase
 {
 	private autoptr array< JMPlayerRowWidget > m_PlayerList;
-	private autoptr array< JMPermissionRowWidget > m_PermissionList;
-	private autoptr array< JMRoleRowWidget > m_RoleList;
-	private ref JMPermission m_RootPermission;
 
 	private Widget m_LeftPanel;
 	private Widget m_RightPanel;
@@ -22,11 +19,6 @@ class JMPlayerForm: JMFormBase
 	private UIActionScroller m_PlayerListScroller;
 	private Widget m_PlayerListRows;
 
-	private UIActionScroller m_PermissionsListScroller;
-	private Widget m_PermissionsRows;
-
-	private UIActionScroller m_RolesListScroller;
-	private Widget m_RolesRows;
 
 	private UIActionScroller m_ActionListScroller;
 	private Widget m_ActionsWrapper;
@@ -86,10 +78,7 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_PositionRefresh;
 	private UIActionButton m_Position;
 
-	private UIActionButton m_ModifyPermissions;
-	private UIActionButton m_SavePermissions;
-	private UIActionButton m_ModifyRoles;
-	private UIActionButton m_SaveRoles;
+
 
 	private UIActionButton m_RepairTransport;
 	private UIActionButton m_SpectatePlayer;
@@ -107,6 +96,9 @@ class JMPlayerForm: JMFormBase
 	private UIActionButton m_SendMessage;
 	private UIActionButton m_KickPlayer;
 	private UIActionButton m_BanPlayer;
+	private UIActionSelectBox m_BanDuration;
+	private ref array<string> m_BanDurationText = { "Permanent", "1 Hour", "6 Hours", "1 Day", "3 Days", "1 Week", "30 Days", "90 Days" };
+	private ref array<int> m_BanDurationSeconds = { -1, 3600, 21600, 86400, 259200, 604800, 2592000, 7776000 };
 
 	private int m_NumPlayerCount;
 
@@ -125,8 +117,6 @@ class JMPlayerForm: JMFormBase
 	void JMPlayerForm()
 	{
 		m_PlayerList = new array< JMPlayerRowWidget >;
-		m_PermissionList = new array< JMPermissionRowWidget >;
-		m_RoleList = new array< JMRoleRowWidget >;
 
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
@@ -167,10 +157,7 @@ class JMPlayerForm: JMFormBase
 
 		UpdatePermission( m_BloodyHands, "Admin.Player.Set.BloodyHands" );
 
-		UpdatePermission( m_ModifyPermissions, "Admin.Player.Permissions" );
-		UpdatePermission( m_ModifyRoles, "Admin.Player.Roles" );
-
-		UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
+UpdatePermission( m_Freeze, "Admin.Player.Freeze" );
 		UpdatePermission( m_Invisibility, "Admin.Player.Invisibility" );
 		UpdatePermission( m_UnlimitedAmmo, "Admin.Player.UnlimitedAmmo" );
 		UpdatePermission( m_AdminNVG, "Admin.Player.AdminNVG" );
@@ -183,6 +170,7 @@ class JMPlayerForm: JMFormBase
 		UpdatePermission( m_DryPlayer, "Admin.Player.Dry" );
 		UpdatePermission( m_ReceiveDmgDealt, "Admin.Player.ReceiveDamageDealt" );
 		UpdatePermission( m_KickPlayer, "Admin.Player.Kick" );
+		UpdatePermission( m_BanPlayer, "Admin.Player.Ban" );
 		UpdatePermission( m_VomitPlayer, "Admin.Player.Vomit" );
 		UpdatePermission( m_SetScalePlayer, "Admin.Player.Scale" );
 		UpdatePermission( m_CannotBeTargetedByAI, "Admin.Player.CannotBeTargetedByAI" );
@@ -220,10 +208,8 @@ class JMPlayerForm: JMFormBase
 
 	override void OnResize( float w, float h )
 	{
-		if ( m_PlayerListScroller )      m_PlayerListScroller.UpdateScroller();
-		if ( m_PermissionsListScroller ) m_PermissionsListScroller.UpdateScroller();
-		if ( m_RolesListScroller )       m_RolesListScroller.UpdateScroller();
-		if ( m_ActionListScroller )      m_ActionListScroller.UpdateScroller();
+		if ( m_PlayerListScroller ) m_PlayerListScroller.UpdateScroller();
+		if ( m_ActionListScroller ) m_ActionListScroller.UpdateScroller();
 	}
 
 	private void InitWidgetsLeft()
@@ -288,13 +274,12 @@ class JMPlayerForm: JMFormBase
 		m_RightPanelDisable = layoutRoot.FindAnyWidget( "panel_right_disable" );
 
 		m_ActionListScroller = UIActionManager.CreateScroller( m_RightPanel );
-		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ActionListScroller.GetContentWidget(), 9, 1 );
-		
+		m_ActionsWrapper = UIActionManager.CreateGridSpacer( m_ActionListScroller.GetContentWidget(), 8, 1 );
+
 		InitActionWidgetsIdentity( m_ActionsWrapper );
 		InitActionWidgetsPosition( m_ActionsWrapper );
 		InitActionWidgetsStats( m_ActionsWrapper );
 		InitActionWidgetsQuick( m_ActionsWrapper );
-		InitActionWidgetsPermissions( m_ActionsWrapper );
 
 		m_ActionListScroller.UpdateScroller();
 	}
@@ -477,32 +462,6 @@ class JMPlayerForm: JMFormBase
 		return parent;
 	}
 
-	private Widget InitActionWidgetsPermissions( Widget actionsParent )
-	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 3, 1 );
-
-		UIActionManager.CreateText( parent, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HEADER", "" );
-
-		Widget actions = UIActionManager.CreateGridSpacer( parent, 4, 1 );
-
-		m_ModifyPermissions = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_PERMISSIONS", this, "Click_ModifyPermissions" );
-		m_SavePermissions = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_PERMISSIONS", this, "Click_SavePermissions" );
-		m_PermissionsListScroller = UIActionManager.CreateScroller( actions );
-		m_PermissionsListScroller.SetFixedHeight( 400 );
-		
-		m_ModifyRoles = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_ROLES", this, "Click_ModifyRoles" );
-		m_SaveRoles = UIActionManager.CreateButton( actions, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SAVE_ROLES", this, "Click_SaveRoles" );
-		m_RolesListScroller = UIActionManager.CreateScroller( actions );
-		m_RolesListScroller.SetFixedHeight( 400 );
-
-		UIActionManager.CreatePanel( parent, 0xFF000000, 3 );
-
-		HidePermissions();
-		HideRoles();
-
-		return parent;
-	}
-
 	private Widget InitActionWidgetsQuick( Widget actionsParent )
 	{
 		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 7, 1 );
@@ -529,11 +488,15 @@ class JMPlayerForm: JMFormBase
 
 		// Destructive actions at the bottom
 		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
-		Widget actionsDestructive = UIActionManager.CreateGridSpacer( parent, 3, 2 );
+		Widget actionsDestructive = UIActionManager.CreateGridSpacer( parent, 4, 2 );
 		m_KillPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KILL", this, "Click_KillPlayer" );
 		m_StripPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_CLEAR_INVENTORY", this, "Click_StripPlayer" );
 		m_KickPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_KICK", this, "Click_KickPlayer" );
 		m_BanPlayer = UIActionManager.CreateButton( actionsDestructive, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_BAN", this, "Click_BanPlayer" );
+		UIActionManager.CreateText( actionsDestructive, "Ban Duration:" );
+		m_BanDuration = UIActionManager.CreateSelectionBox( actionsDestructive, "", m_BanDurationText, this );
+		m_BanDuration.SetSelectorWidth( 1.0 );
+		m_BanDuration.SetSelection( 0, false );
 
 		m_KillPlayer.SetColor(COLOR_RED);
 		m_StripPlayer.SetColor(COLOR_RED);
@@ -634,213 +597,6 @@ class JMPlayerForm: JMFormBase
 	{
 		SelectAllPlayerList(true);
 	}	
-
-	void HidePermissions()
-	{
-		m_ModifyPermissions.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_PERMISSIONS" );
-		m_SavePermissions.Hide();
-		m_PermissionsListScroller.Hide();
-
-		if ( m_PermissionsRows )
-			m_PermissionsRows.Unlink();
-
-		m_PermissionList.Clear();
-
-		m_ActionListScroller.UpdateScroller();
-	}
-
-	void ShowPermissions()
-	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::ShowPermissions" );
-		#endif
-
-		m_ModifyPermissions.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_PERMISSIONS" );
-		m_SavePermissions.Show();
-		m_PermissionsListScroller.Show();
-
-		int permissionIdx = 0;
-
-		m_PermissionsRows = UIActionManager.CreateActionRows( m_PermissionsListScroller.GetContentWidget() );
-
-		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
-
-		m_RootPermission = pi.GetPermissions();
-		array< JMPermission > permissions = new array< JMPermission >();
-		GetPermissionsManager().GetPermissionsAsList( m_RootPermission, permissions );
-
-		for ( int i = 0; i < 10; i++ )
-		{
-			GridSpacerWidget gsw;
-			if ( !Class.CastTo( gsw, m_PermissionsRows.FindAnyWidget( "Content_Row_0" + i ) ) )
-				continue;
-
-			gsw.Show( true );
-
-			for ( int j = 0; j < 100; j++ )
-			{
-				if ( permissionIdx >= permissions.Count() )
-					break;
-
-				permissionIdx++;
-
-				Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/permission_widget.layout", gsw );
-				
-				if ( !prWidget )
-					continue;
-
-				JMPermissionRowWidget prScript;
-				prWidget.GetScript( prScript );
-
-				if ( !prScript )
-					continue;
-
-				prScript.InitPermission( permissions[permissionIdx - 1] );
-				prScript.Enable();
-
-				m_PermissionList.Insert( prScript );
-			}
-
-			if ( permissionIdx >= permissions.Count() )
-				break;
-		}		
-
-		m_PermissionsListScroller.UpdateScroller();
-		m_ActionListScroller.UpdateScroller();
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::ShowPermissions" );
-		#endif
-	}
-
-	void HideRoles()
-	{
-		m_ModifyRoles.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_SHOW_ROLES" );
-		m_SaveRoles.Hide();
-		m_RolesListScroller.Hide();
-
-		if ( m_RolesRows )
-			m_RolesRows.Unlink();
-
-		m_RoleList.Clear();
-
-		m_ActionListScroller.UpdateScroller();
-	}
-
-	void ShowRoles()
-	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::ShowRoles" );
-		#endif
-
-		m_ModifyRoles.SetButton( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_PERMISSIONS_HIDE_ROLES" );
-		m_SaveRoles.Show();
-		m_RolesListScroller.Show();
-
-		m_RolesRows = UIActionManager.CreateActionRows( m_RolesListScroller.GetContentWidget() );
-
-		GridSpacerWidget parentSpacer;
-		int spacerIndex = 0;
-
-		array< JMRole > roles = new array< JMRole >;
-
-		GetPermissionsManager().GetRolesAsList( roles );
-
-		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( JM_GetSelected().GetPlayers()[0] );
-
-		for ( int i = 0; i < 10; i++ )
-		{
-			if ( !Class.CastTo( parentSpacer, m_RolesRows.FindAnyWidget( "Content_Row_0" + i ) ) )
-				continue;
-
-			parentSpacer.Show( false );
-		}
-
-		for ( int j = 0; j < roles.Count(); j++ )
-		{
-			if ( m_RoleList.Count() % 100 == 0 )
-			{
-				if ( !Class.CastTo( parentSpacer, m_RolesRows.FindAnyWidget( "Content_Row_0" + spacerIndex ) ) )
-					return;
-
-				parentSpacer.Show( true );
-
-				spacerIndex++;
-			}
-
-			Widget prWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/role_widget.layout", parentSpacer );
-
-			if ( !prWidget )
-				continue;
-
-			JMRoleRowWidget prScript;
-			prWidget.GetScript( prScript );
-
-			if ( !prScript )
-				continue;
-
-			prScript.Show();
-			prScript.InitRole( roles[j].Name );
-			prScript.SetChecked( pi.HasRole( roles[j].Name ) );
-
-			if ( roles[j].Name == "everyone" )
-			{
-				prScript.Disable();
-			}
-
-			m_RoleList.Insert( prScript );
-		}
-
-		m_RolesListScroller.UpdateScroller();
-		m_ActionListScroller.UpdateScroller();
-
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::ShowRoles" );
-		#endif
-	}
-
-	void Click_ModifyPermissions( UIEvent eid, UIActionBase action )
-	{
-		if ( m_PermissionsListScroller.IsVisible() )
-			HidePermissions();
-		else
-			ShowPermissions();
-	}
-	
-	void Click_ModifyRoles( UIEvent eid, UIActionBase action )
-	{
-		if ( m_RolesListScroller.IsVisible() )
-			HideRoles();
-		else
-			ShowRoles();
-	}
-
-	void Click_SavePermissions( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		UpdateLastChangeTime();
-
-		m_Module.SetPermissions( m_RootPermission, {JM_GetSelected().GetPlayers()[0]} );
-	}
-	
-	void Click_SaveRoles( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		array< string > roles = new array< string >();
-		for ( int i = 0; i < m_RoleList.Count(); ++i )
-		{
-			if ( m_RoleList[i].IsChecked() )
-				roles.Insert( m_RoleList[i].Name );
-		}
-
-		UpdateLastChangeTime();
-
-		m_Module.SetRoles( roles, {JM_GetSelected().GetPlayers()[0]} );
-	}
 
 	void Click_StripPlayer( UIEvent eid, UIActionBase action )
 	{
@@ -1159,12 +915,12 @@ class JMPlayerForm: JMFormBase
 
 	void BanPlayerMulti(JMConfirmation confirmation)
 	{
-		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue() );
+		m_Module.Ban( JM_GetSelected().GetPlayers(), confirmation.GetEditBoxValue(), m_BanDurationSeconds[m_BanDuration.GetSelection()] );
 	}
 
 	void BanPlayerSingle(JMConfirmation confirmation)
 	{
-		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue() );
+		m_Module.Ban( {JM_GetSelected().GetPlayers()[0]}, confirmation.GetEditBoxValue(), m_BanDurationSeconds[m_BanDuration.GetSelection()] );
 	}
 
 	void Click_StopBleeding( UIEvent eid, UIActionBase action )

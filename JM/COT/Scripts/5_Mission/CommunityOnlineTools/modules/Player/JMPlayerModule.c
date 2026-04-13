@@ -2309,7 +2309,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			SendBanMessage(player.PlayerObject.GetIdentity(), messageText, duration);
 
 			//! Kick and Ban player after delay so client can still receive kickmessage RPC
-			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Exec_Ban_Single, 500, false, player, ident, instance, messageText, duration);
 		}
 
 		if (cantBanAdmin)
@@ -2318,7 +2318,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SyncEvents.SendPlayerList, 1500);
 	}
 
-	private void Exec_Ban_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL)
+	private void Exec_Ban_Single(JMPlayerInstance player, PlayerIdentity ident, JMPlayerInstance instance = NULL, string messageText = "", int duration = -1)
 	{
 		if (!g_Game || !player.PlayerObject)
 			return;
@@ -2352,26 +2352,19 @@ class JMPlayerModule: JMRenderableModuleBase
 		if (!ctx.Read(messageText))
 			return;
 
+		int duration;
+		if ( !ctx.Read( duration ) )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC, instance ) )
 			return;
 
-		Exec_Ban( guids, senderRPC, instance, messageText );
+		Exec_Ban( guids, senderRPC, instance, messageText, duration );
 	}
 	
 	private void SendBanMessage(PlayerIdentity identity, string messageText, int duration = -1)
 	{
-		if (duration > 0)
-		{
-			CF_Date nowUTC = CF_Date.Now(true);
-			duration = nowUTC.GetTimestamp() + duration;
-		}
-
-		JMPlayerBan banData = new JMPlayerBan;
-		banData.Message = messageText;
-		banData.BanDuration = duration;
-		banData.Save(banData, identity.GetId());
-
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write(messageText);
 		rpc.Send(NULL, JMPlayerModuleRPC.BanMessage, true, identity);
@@ -2808,4 +2801,3 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetRoles( roles, guids, senderRPC, instance );
 	}
 }
-
