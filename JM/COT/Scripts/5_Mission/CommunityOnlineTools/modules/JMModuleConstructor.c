@@ -14,6 +14,8 @@ modded class JMModuleConstructor
 		modules.Insert( JMMapModule );
 		modules.Insert( JMVehiclesModule );
 		modules.Insert( JMCommandModule );
+		modules.Insert( JMBanModule );
+		modules.Insert( JMRoleManagerModule );
 
 #ifdef DIAG
 		modules.Insert( JMExampleModule );

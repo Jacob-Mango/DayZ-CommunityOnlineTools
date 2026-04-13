@@ -258,3 +258,19 @@ enum JMLoadoutModuleRPC
 	COUNT
 }
 
+enum JMRoleManagerModuleRPC
+{
+	INVALID = 10500,
+
+	// Client → Server
+	RequestRoleList,
+	CreateRole,
+	DeleteRole,
+	SetRolePermissions,
+
+	// Server → Client
+	RoleList,
+
+	COUNT
+}
+

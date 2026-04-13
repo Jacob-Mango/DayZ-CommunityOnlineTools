@@ -1,0 +1,43 @@
+PanelWidgetClass JMRoleManagerForm {
+ color 0 0 0 0
+ position 0 0
+ size 700 500
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMRoleManagerForm"
+ style DayZDefaultPanel
+ {
+  FrameWidgetClass panel_left {
+   position 0 0
+   size 0.35 1
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+  }
+  PanelWidgetClass panel_split {
+   color 0 0 0 1
+   position 0.355 0
+   size 3 0.98
+   halign left_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   style DayZDefaultPanel
+  }
+  FrameWidgetClass panel_right {
+   position 0.36 0
+   size 0.64 1
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+  }
+ }
+}
