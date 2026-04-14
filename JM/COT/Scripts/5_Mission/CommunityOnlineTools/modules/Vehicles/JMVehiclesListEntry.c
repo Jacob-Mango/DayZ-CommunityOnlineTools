@@ -9,9 +9,9 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 	protected ImageWidget m_VehicleStatusIcon;
 	
 	protected ref JMVehicleMetaData m_Vehicle;
-	protected ref JMVehiclesMenu m_COTVehicleMenu;
+	protected ref JMVehiclesForm m_COTVehicleMenu;
 
-	void JMVehiclesListEntry(Widget parent, JMVehiclesMenu menu, JMVehicleMetaData vehicle)
+	void JMVehiclesListEntry(Widget parent, JMVehiclesForm menu, JMVehicleMetaData vehicle)
 	{
 		m_Root					= g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
 		m_VehicleName			= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_name" ) );
@@ -59,7 +59,8 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 			if ( m_Vehicle.m_DestructionType != JMDT_NONE )
 			{
 				m_VehicleStatusIcon.SetColor( ARGB( 255,255,0,0 ) );
-			} else
+			}
+			else
 			{
 				m_VehicleStatusIcon.SetColor( ARGB( 255,0,255,0 ) );
 			}
