@@ -59,6 +59,7 @@ enum JMVehiclesModuleRPC
 	DeleteVehicleUnclaimed,
 	DeleteVehicleDestroyed,
 	TeleportToVehicle,
+	TeleportVehicleToMe,
 	COUNT
 }
 
