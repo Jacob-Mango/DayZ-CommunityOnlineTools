@@ -11,13 +11,13 @@ if not defined PrefixLinkRoot (
 	exit /b 1
 )
 
-set "modName=%~1"
+set "modPrefix=%~1"
 
-if not defined modName (
-	echo ERROR: modName not defined
+if not defined modPrefix (
+	echo ERROR: modPrefix not defined
 	exit /b 1
 )
 
 echo %date% %time% Getting "special" file paths...
-dir /B /S IGNORE? > "%workDrive%Temp\%PrefixLinkRoot%\%modName%-specialpaths.list" 2>NUL
+dir /B /S IGNORE? > "%workDrive%Temp\%PrefixLinkRoot%-%modPrefix%-specialpaths.list" 2>NUL
 echo %date% %time% ...got "special" file paths
