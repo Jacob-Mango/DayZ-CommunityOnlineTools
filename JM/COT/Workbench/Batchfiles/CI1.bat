@@ -105,7 +105,7 @@ REM IMPORTANT: CFG parsing WITHOUT enabledelayedexpansion!
 if exist "..\project.cfg.%modPrefix%.bat" del "..\project.cfg.%modPrefix%.bat"
 
 for /f "usebackq delims=" %%a in ( ../project.cfg ) do (
-	echo set %%a>>"..\project.cfg.%modPrefix%.bat"
+	echo set "%%a">>"..\project.cfg.%modPrefix%.bat"
 )
 
 call "..\project.cfg.%modPrefix%.bat"
@@ -113,7 +113,7 @@ call "..\project.cfg.%modPrefix%.bat"
 if exist "..\user.cfg.%modPrefix%.bat" del "..\user.cfg.%modPrefix%.bat"
 
 for /f "usebackq delims=" %%a in ( ../user.cfg ) do (
-	echo set %%a>>"..\user.cfg.%modPrefix%.bat"
+	echo set "%%a">>"..\user.cfg.%modPrefix%.bat"
 )
 
 call "..\user.cfg.%modPrefix%.bat"
