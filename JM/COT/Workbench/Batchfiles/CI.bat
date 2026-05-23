@@ -15,7 +15,7 @@ REM IMPORTANT: CFG parsing WITHOUT enabledelayedexpansion!
 if exist "%~dp0..\project.cfg.bat" del "%~dp0..\project.cfg.bat"
 
 for /f "usebackq delims=" %%a in ( "%~dp0..\project.cfg" ) do (
-	echo set %%a>>"%~dp0..\project.cfg.bat"
+	echo set "%%a">>"%~dp0..\project.cfg.bat"
 )
 
 call "%~dp0..\project.cfg.bat"
@@ -23,7 +23,7 @@ call "%~dp0..\project.cfg.bat"
 if exist "%~dp0..\user.cfg.bat" del "..\user.cfg.bat"
 
 for /f "usebackq delims=" %%a in ( "%~dp0..\user.cfg" ) do (
-	echo set %%a>>"%~dp0..\user.cfg.bat"
+	echo set "%%a">>"%~dp0..\user.cfg.bat"
 )
 
 call "%~dp0..\user.cfg.bat"
