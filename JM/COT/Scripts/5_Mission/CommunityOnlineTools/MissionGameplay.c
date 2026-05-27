@@ -31,7 +31,6 @@ modded class MissionGameplay
 	void OfflineMissionStart()
 	{
 		vector position = GetSpawnPoints().GetRandomElement();
-		// position = "13931.9 0 13231.4";
 		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), position, 0, "NONE" ) );
 		g_Game.SelectPlayer( NULL, player );
 
@@ -52,12 +51,14 @@ modded class MissionGameplay
 			item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
 			item = player.GetInventory().CreateInInventory( "MilitaryBelt" );
 			item.GetInventory().CreateInInventory( "NylonKnifeSheath" );
-			item.GetInventory().CreateInInventory( "CombatKnife" );
+			player.SetQuickBarEntityShortcut(item.GetInventory().CreateInInventory( "CombatKnife" ), 0);
 			item.GetInventory().CreateInInventory( "PlateCarrierHolster" );
-			item.GetInventory().CreateInInventory( "Magnum" );
 			item.GetInventory().CreateInInventory( "Canteen" );
-			item = player.GetInventory().CreateInInventory( "Shovel" );
-			item = player.GetInventory().CreateInInventory( "Hatchet" );
+			item = item.GetInventory().CreateInInventory( "Magnum" );
+			Weapon_Base.Cast(item).SpawnAmmo();
+			player.SetQuickBarEntityShortcut(item, 1);
+			player.SetQuickBarEntityShortcut(player.GetInventory().CreateInInventory( "Shovel" ), 2);
+			player.SetQuickBarEntityShortcut(player.GetInventory().CreateInInventory( "Hatchet" ), 3);
 		}
 	}
 
