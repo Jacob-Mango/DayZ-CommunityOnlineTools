@@ -31,6 +31,21 @@ modded class MissionGameplay
 	void OfflineMissionStart()
 	{
 		vector position = GetSpawnPoints().GetRandomElement();
+
+		JsonDataContaminatedAreas effectAreaData = EffectAreaLoader.GetData();
+		if (effectAreaData)
+		{
+			foreach (JsonDataContaminatedArea area: effectAreaData.Areas)
+			{
+				vector areaPos = Vector(area.Data.Pos[0], 0, area.Data.Pos[2]);
+				if (Math.IsPointInCircle(areaPos, area.Data.Radius, position))
+				{
+					position = MiscGameplayFunctions.GetClosestSafePos(position, effectAreaData.SafePositions);
+					break;
+				}
+			}
+		}
+		
 		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), position, 0, "NONE" ) );
 		g_Game.SelectPlayer( NULL, player );
 
