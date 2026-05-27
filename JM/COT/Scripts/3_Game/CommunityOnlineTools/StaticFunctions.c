@@ -135,6 +135,18 @@ static TVectorArray GetSpawnPoints()
 	string location_config_path = "CfgWorlds " + worldName + " Names";
 	int classNamesCount = g_Game.ConfigGetChildrenCount(location_config_path);
 
+	//! Need to use GetSurface with type RoadWay, syncMode Wait and rsd UNDER else GetWaterDepth won't return the correct value!
+	auto surfParams = new SurfaceDetectionParameters();
+	surfParams.type = SurfaceDetectionType.Roadway;
+	surfParams.syncMode = UseObjectsMode.Wait;
+	surfParams.rsd = RoadSurfaceDetection.UNDER;
+
+	auto surfResult = new SurfaceDetectionResult();
+
+#ifdef DIAG_DEVELOPER
+	int tickCount = TickCount(0);
+#endif
+
 	for (int l = 0; l < classNamesCount; ++l) 
 	{
 		string location_class_name;
@@ -148,13 +160,25 @@ static TVectorArray GetSpawnPoints()
 		if (location_position.Count() != 2)
 			continue;
 
-		vector spawnPoint = Vector(location_position[0], g_Game.SurfaceY(location_position[0], location_position[1]), location_position[1]);
+		vector spawnPoint = Vector(location_position[0], 0, location_position[1]);
 
-		if (g_Game.GetWaterDepth(spawnPoint) > 0)
+		surfParams.position = spawnPoint;
+		g_Game.GetSurface(surfParams, surfResult);
+		spawnPoint[1] = surfResult.height;
+
+		float waterDepth = g_Game.GetWaterDepth(spawnPoint);
+	#ifdef DIAG_DEVELOPER
+		PrintFormat("%1 %2 %3 water depth %3", location_class_name, spawnPoint.ToString(), waterDepth);
+	#endif
+		if (waterDepth > 0)
 			continue;
 
 		spawnPoints.Insert(spawnPoint);
 	}
+
+#ifdef DIAG_DEVELOPER
+	PrintFormat("COT GetSpawnPoints elapsed %1 ms", TickCount(tickCount) * 0.0001);
+#endif
 
 	if (spawnPoints.Count() == 0)
 	{
