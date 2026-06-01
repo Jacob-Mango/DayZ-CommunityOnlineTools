@@ -57,16 +57,17 @@ modded class MissionGameplay
 
 		//! Having to determine surface yet again is needed because returned surface height can be different when
 		//! player character is there vs not there
-		auto surfParams = new SurfaceDetectionParameters();
-		surfParams.type = SurfaceDetectionType.Roadway;
-		surfParams.syncMode = UseObjectsMode.Wait;
-		surfParams.rsd = RoadSurfaceDetection.UNDER;
-		auto surfResult = new SurfaceDetectionResult();
-		//! Using a high Y for checking deals with corner cases like Livonia bunker (Dambog) or Namalsk A3
-		surfParams.position = Vector(position[0], 1000, position[2]);
-		g_Game.GetSurface(surfParams, surfResult);
-		position[1] = surfResult.height;
-		player.SetPosition(position);
+		vector begPos = position + "0 1000 0";
+		vector endPos = position - "0 1000 0";
+		PhxInteractionLayers layers;
+		layers |= PhxInteractionLayers.TERRAIN;
+		layers |= PhxInteractionLayers.ROADWAY;
+		Object hitObj;
+		vector hitPos;
+		vector hitNorm;
+		float hitFrac;
+		if (DayZPhysics.RayCastBullet(begPos, endPos, layers, player, hitObj, hitPos, hitNorm, hitFrac))
+			player.SetPosition(hitPos);
 
 		if ( player )
 		{
