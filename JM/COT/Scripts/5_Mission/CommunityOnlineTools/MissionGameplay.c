@@ -70,29 +70,101 @@ modded class MissionGameplay
 
 		if ( player )
 		{
-			EntityAI item = NULL;
+			EntityAI item;
+			EntityAI knife;
+			Weapon_Base weapon;
+			EntityAI shovel;
+			EntityAI hatchet;
 			
-			//item = player.GetInventory().CreateInInventory( "AirborneMask" );
-			item = player.GetInventory().CreateInInventory( "Mich2001Helmet" );
-			item.GetInventory().CreateInInventory( "NVGoggles" );
-			item.GetInventory().CreateInInventory( "UniversalLight" );
-			item.GetInventory().CreateInInventory( "Battery9V" );
-			item.GetInventory().CreateInInventory( "Battery9V" );
-			item = player.GetInventory().CreateInInventory( "TacticalGloves_Black" );
-			item = player.GetInventory().CreateInInventory( "TTsKOJacket_Camo" );
-			item = player.GetInventory().CreateInInventory( "TTSKOPants" );
-			item = player.GetInventory().CreateInInventory( "TTSKOBoots" );
-			item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
-			item = player.GetInventory().CreateInInventory( "MilitaryBelt" );
-			item.GetInventory().CreateInInventory( "NylonKnifeSheath" );
-			player.SetQuickBarEntityShortcut(item.GetInventory().CreateInInventory( "CombatKnife" ), 0);
-			item.GetInventory().CreateInInventory( "PlateCarrierHolster" );
-			item.GetInventory().CreateInInventory( "Canteen" );
-			item = item.GetInventory().CreateInInventory( "Magnum" );
-			Weapon_Base.Cast(item).SpawnAmmo();
-			player.SetQuickBarEntityShortcut(item, 1);
-			player.SetQuickBarEntityShortcut(player.GetInventory().CreateInInventory( "Shovel" ), 2);
-			player.SetQuickBarEntityShortcut(player.GetInventory().CreateInInventory( "Hatchet" ), 3);
+		#ifdef EXPANSIONMODCORE
+			string loadout = "AdminLoadout";
+
+			if (FileExist(EXPANSION_LOADOUT_FOLDER + loadout + ".json"))
+			{
+				ExpansionHumanLoadout.Apply(player, loadout);
+
+				item = player.FindAttachmentBySlotName("Hips");
+				if (!item)
+					item = player;
+
+				//! Find knife/weapon/shovel/hatchet (if any)
+				array<EntityAI> children = {};
+				player.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, children);
+				foreach (EntityAI child: children)
+				{
+					if (!weapon && Class.CastTo(weapon, child))
+						continue;
+
+					if (!shovel && child.IsKindOf("Hatchet"))
+					{
+						hatchet = child;
+						continue;
+					}
+
+					if (!shovel && child.IsKindOf("Shovel") || child.IsKindOf("FieldShovel"))
+					{
+						shovel = child;
+						continue;
+					}
+
+					if (!knife)
+					{
+						TStringArray inventorySlot = {};
+						child.ConfigGetTextArray("inventorySlot", inventorySlot);
+						foreach (string slotName: inventorySlot)
+						{
+							slotName.ToLower();
+							if (slotName == "knife")
+							{
+								knife = child;
+								continue;
+							}
+						}
+					}
+
+					if (knife && weapon && shovel && hatchet)
+						break;
+				}
+			}
+
+			if (!item)
+			{
+				//! No loadout applied, spawn default loadout
+				//item = player.GetInventory().CreateInInventory( "AirborneMask" );
+				item = player.GetInventory().CreateInInventory( "Mich2001Helmet" );
+				item.GetInventory().CreateInInventory( "NVGoggles" );
+				item.GetInventory().CreateInInventory( "UniversalLight" );
+				item.GetInventory().CreateInInventory( "Battery9V" );
+				item.GetInventory().CreateInInventory( "Battery9V" );
+				item = player.GetInventory().CreateInInventory( "TacticalGloves_Black" );
+				item = player.GetInventory().CreateInInventory( "TTsKOJacket_Camo" );
+				item = player.GetInventory().CreateInInventory( "TTSKOPants" );
+				item = player.GetInventory().CreateInInventory( "TTSKOBoots" );
+				item = player.GetInventory().CreateInInventory( "AliceBag_Camo" );
+				item = player.GetInventory().CreateInInventory( "MilitaryBelt" );
+				item.GetInventory().CreateInInventory( "NylonKnifeSheath" );
+				knife = item.GetInventory().CreateInInventory( "CombatKnife" );
+				item.GetInventory().CreateInInventory( "PlateCarrierHolster" );
+				item.GetInventory().CreateInInventory( "Canteen" );
+				Class.CastTo(weapon, item.GetInventory().CreateInInventory( "Magnum" ));
+				shovel = player.GetInventory().CreateInInventory( "Shovel" );
+				hatchet = player.GetInventory().CreateInInventory( "Hatchet" );
+			}
+
+			if (knife)
+				player.SetQuickBarEntityShortcut(knife, 0);
+
+			if (weapon)
+			{
+				weapon.SpawnAmmo();
+				player.SetQuickBarEntityShortcut(weapon, 1);
+			}
+
+			if (shovel)
+				player.SetQuickBarEntityShortcut(shovel, 2);
+
+			if (hatchet)
+				player.SetQuickBarEntityShortcut(hatchet, 3);
 		}
 	}
 
