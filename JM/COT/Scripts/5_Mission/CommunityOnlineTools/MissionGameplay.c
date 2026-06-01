@@ -49,6 +49,19 @@ modded class MissionGameplay
 		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), position, 0, "NONE" ) );
 		g_Game.SelectPlayer( NULL, player );
 
+		//! Having to determine surface yet again is needed because returned surface height can be different when
+		//! player character is there vs not there
+		auto surfParams = new SurfaceDetectionParameters();
+		surfParams.type = SurfaceDetectionType.Roadway;
+		surfParams.syncMode = UseObjectsMode.Wait;
+		surfParams.rsd = RoadSurfaceDetection.UNDER;
+		auto surfResult = new SurfaceDetectionResult();
+		//! Using a high Y for checking deals with corner cases like Livonia bunker (Dambog) or Namalsk A3
+		surfParams.position = Vector(position[0], 1000, position[2]);
+		g_Game.GetSurface(surfParams, surfResult);
+		position[1] = surfResult.height;
+		player.SetPosition(position);
+
 		if ( player )
 		{
 			EntityAI item = NULL;

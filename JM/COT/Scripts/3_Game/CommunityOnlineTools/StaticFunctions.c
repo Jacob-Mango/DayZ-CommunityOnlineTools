@@ -168,7 +168,7 @@ static TVectorArray GetSpawnPoints()
 
 		float waterDepth = g_Game.GetWaterDepth(spawnPoint);
 	#ifdef DIAG_DEVELOPER
-		PrintFormat("%1 %2 %3 water depth %3", location_class_name, spawnPoint.ToString(), waterDepth);
+		PrintFormat("%1 %2 water depth %3", location_class_name, spawnPoint.ToString(), waterDepth);
 	#endif
 		if (waterDepth > 0)
 			continue;
