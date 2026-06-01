@@ -45,8 +45,14 @@ modded class MissionGameplay
 				}
 			}
 		}
-		
-		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, g_Game.CreateRandomPlayer(), position, 0, "NONE" ) );
+
+		string characterType = g_Game.CreateRandomPlayer();
+		string preferredCharacterType = g_Game.GetMenuDefaultCharacterData().GetCharacterType();
+
+		if (g_Game.ListAvailableCharacters().Find(preferredCharacterType) > -1)
+			characterType = preferredCharacterType;
+
+		PlayerBase player = PlayerBase.Cast( g_Game.CreatePlayer( NULL, characterType, position, 0, "NONE" ) );
 		g_Game.SelectPlayer( NULL, player );
 
 		//! Having to determine surface yet again is needed because returned surface height can be different when
