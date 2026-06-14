@@ -394,16 +394,12 @@ class JMTeleportModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
 			return;
 
-		Object ignore;
-		if (!Class.CastTo(ignore, player.GetParent()))
-			ignore = player;
-
 		float distance = g_Game.ServerConfigGetInt("defaultVisibility");
 		if (distance < 1375)
 			distance = 1375;
 
 		bool hit;
-		vector position = COT_PerformRayCast( rayStart, rayStart + direction.Normalized() * distance, ignore, hit );
+		vector position = COT_PerformRayCast( rayStart, rayStart + direction.Normalized() * distance, player, hit );
 
 		if ( !hit )
 		{
