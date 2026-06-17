@@ -102,7 +102,12 @@ class JMWeatherModule: JMRenderableModuleBase
 		super.OnMissionLoaded();
 
 		if (g_Game.IsServer())
+		{
+			if (!g_Game.IsMultiplayer() && !g_Game.IsMissionMainMenu())
+				SetFreezeTime(true);  //! Freeze weather by default in SP/offline
+
 			Load();
+		}
 	}
 
 	bool HasSettings()
