@@ -7,10 +7,17 @@ enum JMWeatherTypes
 	COUNT
 }
 
+enum JMWeatherBehavior
+{
+	UseWorldData,
+	UseForecastOnly,
+	Static
+}
+
 class JMWeatherModule: JMRenderableModuleBase
 {
 	private ref JMWeatherSerialize settings;
-	protected ref JMWeatherPreset m_CachedWeatherPreset;
+	protected ref JMWeatherPreset m_CachedWeatherPreset = new JMWeatherPreset;
 
 	protected bool m_bFreezeTime;
 
@@ -23,6 +30,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Date" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.FreezeTime" );
+		GetPermissionsManager().RegisterPermission( "Weather.Behavior" );
 
 		GetPermissionsManager().RegisterPermission( "Weather.Date" );
 
@@ -296,6 +304,14 @@ class JMWeatherModule: JMRenderableModuleBase
 		} 
 	}
 
+	void SetWeatherBehavior(JMWeatherBehavior mode)
+	{
+		if ( g_Game.IsServer() )
+			Exec_SetWeatherBehavior( mode, NULL );
+		else
+			Send_SetWeatherBehavior( mode );
+	}
+
 	void SetWindMagnitude( float forecast, float time = 0, float minDuration = 0 )
 	{
 		JMWeatherWindMagnitude wBase = new JMWeatherWindMagnitude;
@@ -469,6 +485,13 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Send( NULL, JMWeatherModuleRPC.Overcast, true, NULL );
 	}
 	
+	private void Send_SetWeatherBehavior( JMWeatherBehavior mode )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( mode );
+		rpc.Send( NULL, JMWeatherModuleRPC.SetWeatherBehavior, true, NULL );
+	}
+	
 	private void Send_SetWindMagnitude( JMWeatherWindMagnitude wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();
@@ -535,19 +558,23 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	private void Exec_FreezeTime( bool state, PlayerIdentity ident )
 	{
-		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(Repeat_FreezeTime);
+		Weather weather = g_Game.GetWeather();
 
 		if (state)
 		{
-			m_CachedWeatherPreset = new JMWeatherPreset;
+			//! Step 1: Stop current phenomenon changes in progress (if any)
 			m_CachedWeatherPreset.SetFromWorld();
-			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
-		}
-	}
+			m_CachedWeatherPreset.StopCurrentChangesInProgress();
 
-	protected void Repeat_FreezeTime()
-	{
-		m_CachedWeatherPreset.Apply();
+			//! Step 2: Need to set mission weather to false so weather update freeze actually does something
+			weather.MissionWeather(false);
+		}
+		else
+		{
+			m_CachedWeatherPreset.ResumeCurrentChangesInProgress();
+		}
+
+		weather.SetWeatherUpdateFreeze(state);
 	}
 	
 	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident )
@@ -596,6 +623,29 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+	}
+	
+	private void Exec_SetWeatherBehavior( JMWeatherBehavior mode, PlayerIdentity ident )
+	{
+		Weather weather = g_Game.GetWeather();
+
+		switch (mode)
+		{
+			case JMWeatherBehavior.UseWorldData:
+				weather.MissionWeather(false);
+				weather.SetWeatherUpdateFreeze(false);
+				break;
+
+			case JMWeatherBehavior.UseForecastOnly:
+				weather.MissionWeather(true);
+				weather.SetWeatherUpdateFreeze(false);
+				break;
+
+			case JMWeatherBehavior.Static:
+				weather.MissionWeather(false);  //! Need to set mission weather to false so weather update freeze actually does something
+				weather.SetWeatherUpdateFreeze(true);
+				break;
+		}
 	}
 
 	private void Exec_SetWindMagnitude( JMWeatherWindMagnitude wBase, PlayerIdentity ident )
@@ -865,6 +915,21 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		Exec_SetOvercast( p1, senderRPC );
 	}
+	
+	private void RPC_SetWeatherBehavior( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int mode;
+		if ( !ctx.Read( mode ) )
+			return;
+
+		if (!g_Game.IsServer())
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Weather.Mode", senderRPC ) )
+			return;
+
+		Exec_SetWeatherBehavior( mode, senderRPC );
+	}
 
 	private void RPC_SetWindMagnitude( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
@@ -1046,6 +1111,9 @@ class JMWeatherModule: JMRenderableModuleBase
 			break;
 		case JMWeatherModuleRPC.Overcast:
 			RPC_SetOvercast( ctx, sender, target );
+			break;
+		case JMWeatherModuleRPC.SetWeatherBehavior:
+			RPC_SetWeatherBehavior( ctx, sender, target );
 			break;
 		case JMWeatherModuleRPC.WindMagnitude:
 			RPC_SetWindMagnitude( ctx, sender, target );
