@@ -112,7 +112,6 @@ enum JMWeatherModuleRPC
 	Snow,
 	SnowThresholds,
 	Overcast,
-	Wind, // LEGACY
 	WindFunctionParams,
 	WindMagnitude,
 	WindDirection,
@@ -122,6 +121,7 @@ enum JMWeatherModuleRPC
 	UpdatePreset,
 	RemovePreset,
 	FreezeTime,
+	SetWeatherBehavior,  //! @note AT MAX! Need to increase JMESPModuleRPC enum starting entry if adding any new entry to JMWeatherModuleRPC
 	COUNT
 }
 
