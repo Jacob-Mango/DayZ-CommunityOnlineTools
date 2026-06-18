@@ -573,10 +573,14 @@ class JMWeatherModule: JMRenderableModuleBase
 
 			//! Step 2: Need to set mission weather to false so weather update freeze actually does something
 			weather.MissionWeather(false);
+
+			g_Game.GetWorld().SetTimeMultiplier(0);
 		}
 		else
 		{
 			m_CachedWeatherPreset.ResumeCurrentChangesInProgress();
+
+			g_Game.GetWorld().SetTimeMultiplier(-1);
 		}
 
 		weather.SetWeatherUpdateFreeze(state);
