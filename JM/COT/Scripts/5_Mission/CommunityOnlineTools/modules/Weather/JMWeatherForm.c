@@ -169,9 +169,11 @@ class JMWeatherForm: JMFormBase
 		m_Checkbox_AutoRefresh = UIActionManager.CreateCheckbox( spacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH" );
 
 		spacer = UIActionManager.CreateWrapSpacer( tParent );
-		m_Selector_WeatherBehavior = UIActionManager.CreateSelectionBox( spacer, "Weather behavior:", GetWeatherBehaviors(), this, "OnChange_WeatherBehavior" );
-		m_Selector_WeatherBehavior.SetSelectorWidth(0.6);
-		m_Selector_WeatherBehavior.SetWidth(0.7);
+		auto label = UIActionManager.CreateText(spacer, "Weather behavior:");
+		label.SetWidth(0.3);
+		m_Selector_WeatherBehavior = UIActionManager.CreateSelectionBox( spacer, "", GetWeatherBehaviors(), this, "OnChange_WeatherBehavior" );
+		m_Selector_WeatherBehavior.SetSelectorWidth(1.0);
+		m_Selector_WeatherBehavior.SetWidth(0.5);
 
 		Weather weather = g_Game.GetWeather();
 		if (weather.GetMissionWeather())
