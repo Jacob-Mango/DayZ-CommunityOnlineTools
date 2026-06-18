@@ -287,12 +287,12 @@ class JMWeatherPhenomenon: JMWeatherBase
 		if (Actual != Forecast)
 		{
 			float change = Forecast - Actual;
-			float timeToForecast = Math.AbsFloat(change) * 100;  //! Each 1% of change = one second
+			float timeToForecast = Math.AbsFloat(change) * 1000;  //! Each 0.1% of change = one second
 			float timeUntilNextChange = GetPhenomenon().GetNextChange();
 
 			if (timeToForecast > timeUntilNextChange)
 			{
-				Forecast = Actual + change * timeUntilNextChange * 0.01;
+				Forecast = Actual + Math.Sign(change) * timeUntilNextChange * 0.001;
 				timeToForecast = timeUntilNextChange;
 			}
 
@@ -306,7 +306,6 @@ class JMWeatherPhenomenon: JMWeatherBase
 
 			Time = time;
 			MinDuration = minDuration;
-			GetPhenomenon().SetNextChange(timeUntilNextChange);
 		}
 	}
 
