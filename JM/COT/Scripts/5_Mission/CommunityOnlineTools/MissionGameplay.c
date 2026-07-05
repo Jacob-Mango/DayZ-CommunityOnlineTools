@@ -4,15 +4,22 @@ modded class MissionGameplay
 
 	protected JMPlayerInstance m_OfflineInstance;
 
+	protected bool m_COT_DebugMonitorWasVisible;
+
 	void MissionGameplay()
 	{
 		if ( !g_cotBase )
 			g_cotBase = new CommunityOnlineTools;
+
+		JMScriptInvokers.COT_ON_OPEN.Insert(COT_OnOpen);
 	}
 
 	void ~MissionGameplay()
 	{
 		g_cotBase = null;
+
+		if (g_Game)
+			JMScriptInvokers.COT_ON_OPEN.Remove(COT_OnOpen);
 	}
 
 	override void ResetGUI()
@@ -224,14 +231,6 @@ modded class MissionGameplay
 
 			GetCommunityOnlineTools().OnUpdate( timeslice );
 
-			if ( m_DebugMonitor )
-			{
-				if ( GetCommunityOnlineToolsBase().IsOpen() )
-					m_DebugMonitor.Hide();
-				else 
-					m_DebugMonitor.Show();
-			}
-
 			PlayerBase player;
 			if (Class.CastTo(player, g_Game.GetPlayer()) && player.COTIsInvisible(JMInvisibilityType.DisableSimulation))
 			{
@@ -240,6 +239,30 @@ modded class MissionGameplay
 				player.COT_SimulationDisabled_OnFrame(timeslice);
 			}
 		}
+	}
+
+	void COT_OnOpen(bool isOpen)
+	{
+		if (m_DebugMonitor)
+		{
+			if (isOpen)
+			{
+				m_COT_DebugMonitorWasVisible = m_DebugMonitor.IsVisible();
+				m_DebugMonitor.Hide();
+			}
+			else if (m_COT_DebugMonitorWasVisible)
+			{
+				m_DebugMonitor.Show();
+			}
+		}
+	}
+
+	override void HideDebugMonitor()
+	{
+		super.HideDebugMonitor();
+
+		if (!m_DebugMonitor || !m_DebugMonitor.IsVisible())
+			m_COT_DebugMonitorWasVisible = false;
 	}
 
 	override void ShowInventory()
