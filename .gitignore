@@ -21,3 +21,8 @@ ServerProfile/*
 JM/COT/Workbench/*.cfg.bat
 JM/COT/Workbench/*.cfg.*.bat
 JM/COT/Workbench/Logs/
+/JM/COT/Workbench/Batchfiles/*.deploy
+/JM/COT/Workbench/Batchfiles/*.success
+/JM/COT/Workbench/experimental
+/JM/COT/Workbench/internal
+/JM/COT/Workbench/release

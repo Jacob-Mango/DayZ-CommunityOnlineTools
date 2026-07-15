@@ -2,6 +2,7 @@ class JMTeleportModule: JMRenderableModuleBase
 {
 	JMMapModule m_MapModule;
 	JMMapForm m_MapMenu;
+	int m_LastTeleportCursorTime;
 	
 	private ref JMTeleportSerialize m_Settings;
 	
@@ -168,6 +169,14 @@ class JMTeleportModule: JMRenderableModuleBase
 				ShowInactiveNotification("STR_COT_INPUT_TELEPORT_CROSSHAIR");
 			return;
 		}
+
+		int time = g_Game.GetTime();
+
+		//! Rate limit to prevent *severe* server FPS drop when holding key
+		if (time - m_LastTeleportCursorTime < 50)
+			return;
+
+		m_LastTeleportCursorTime = time;
 
 		vector rayStart;
 		vector direction;
@@ -377,22 +386,20 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	private void Server_PositionRaycast( vector rayStart, vector direction, PlayerBase player )
 	{
+	#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Server_PositionRaycast");
+	#endif
 
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
 			return;
-
-		Object ignore;
-		if (!Class.CastTo(ignore, player.GetParent()))
-			ignore = player;
 
 		float distance = g_Game.ServerConfigGetInt("defaultVisibility");
 		if (distance < 1375)
 			distance = 1375;
 
 		bool hit;
-		vector position = COT_PerformRayCast( rayStart, rayStart + direction.Normalized() * distance, ignore, hit );
+		vector position = COT_PerformRayCast( rayStart, rayStart + direction.Normalized() * distance, player, hit );
 
 		if ( !hit )
 		{
