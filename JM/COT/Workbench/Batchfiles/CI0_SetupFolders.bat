@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Usage: CI0_SetupFolders <modName>
+REM Usage: CI0_SetupFolders <modName> [forceSingleModPboNamesRefresh]
 REM Creates/clears pboNames\<modName> folder, creates Mod\<modName> and Temp\<modName> subfolders, and copies key.
 
 echo CI0_SetupFolders %* running...
@@ -10,6 +10,10 @@ set "modName=%~1"
 
 IF "%modName%"=="" (
 	echo CI0_SetupFolders - ERROR: modName not given
+	exit /B 1
+)
+IF "%singleMod%"=="1" if "%singleModName%"=="" (
+	echo CI0_SetupFolders - ERROR: singleModName not set
 	exit /B 1
 )
 
@@ -28,6 +32,11 @@ IF "%keyDirectory%"=="" (
 IF "%keyName%"=="" (
 	echo CI0_SetupFolders - ERROR: keyName not set
 	exit /B 1
+)
+
+if /I "%modName%%~2" NEQ "%singleModName%" IF exist "%workDrive%Temp\PboNames\%modName%\*.pbo" (
+	echo Deleting "%workDrive%Temp\PboNames\%modName%\*.pbo"
+	del /Q "%workDrive%Temp\PboNames\%modName%\*.pbo"
 )
 
 IF NOT exist "%workDrive%Temp\PboNames\%modName%" (
@@ -59,6 +68,7 @@ IF NOT exist "%workDrive%Temp\%modName%\addons\" (
 	mkdir "%workDrive%Temp\%modName%\addons\"
 )
 
+del "%modBuildDirectory%%modName%\keys\*.bikey"
 echo Copying over "%keyDirectory%%keyName%.bikey" to "%modBuildDirectory%%modName%\keys\"
 copy "%keyDirectory%%keyName%.bikey" "%modBuildDirectory%%modName%\keys\"
 

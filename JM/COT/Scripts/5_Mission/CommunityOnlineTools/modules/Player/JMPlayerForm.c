@@ -2254,7 +2254,6 @@ class JMPlayerForm: JMFormBase
 		{
 			m_TeleportToMe.Disable();
 			m_TeleportMeTo.Disable();
-			m_TeleportPrevious.Disable();
 			m_SpectatePlayer.Disable();
 		}
 

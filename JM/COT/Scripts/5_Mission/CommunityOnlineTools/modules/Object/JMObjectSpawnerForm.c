@@ -524,14 +524,31 @@ class JMObjectSpawnerForm: JMFormBase
 		
 		string strSelection = GetCurrentSelection();
 
-		if ( m_PreviewItem ) 
+		if (m_PreviewItem && m_PreviewItem.GetType() != strSelection) 
 		{
 			g_Game.ObjectDelete( m_PreviewItem );
+			m_PreviewItem = null;
 		}
 
-		m_Orientation = vector.Zero;
+		if (!m_PreviewItem)
+		{
+			m_PreviewItem = EntityAI.Cast( g_Game.CreateObject( strSelection, vector.Zero, true, false, false ) );
 
-		m_PreviewItem = EntityAI.Cast( g_Game.CreateObject( strSelection, vector.Zero, true, false, false ) );
+			if (m_PreviewItem)
+			{
+				dBodyActive(m_PreviewItem, ActiveState.INACTIVE);
+				dBodyDynamic(m_PreviewItem, false);
+				m_PreviewItem.DisableSimulation(true);
+				m_ItemPreview.SetItem( m_PreviewItem );
+
+				m_Distance = 0;
+				m_Orientation = vector.Zero;
+				m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
+				m_ItemPreview.SetModelOrientation( vector.Zero );
+				m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
+				m_ItemPreview.Show( true );
+			}
+		}
 
 		m_QuantityItem.Disable();
 		UpdateHealthControls(strSelection);
@@ -542,17 +559,6 @@ class JMObjectSpawnerForm: JMFormBase
 
 		if ( m_PreviewItem )
 		{
-			dBodyActive(m_PreviewItem, ActiveState.INACTIVE);
-			//dBodyDynamic(m_PreviewItem, false);
-			m_PreviewItem.DisableSimulation(true);
-
-			m_ItemPreview.SetItem( m_PreviewItem );
-			m_Distance = 0;
-			m_ItemPreview.SetModelPosition( Vector( m_Distance, 0, 0.5 + m_Distance ) );
-			m_ItemPreview.SetModelOrientation( vector.Zero );
-			m_ItemPreview.SetView( m_ItemPreview.GetItem().GetViewIndex() );
-			m_ItemPreview.Show( true );
-
 			if (m_HealthItem.IsEnabled() && !m_PreviewItem.IsTransport())
 				m_PreviewItem.SetHealth("", "", m_HealthItem.GetCurrent());
 
@@ -945,7 +951,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 				strNameLower.ToLower();
 
-				if (m_Module.m_FilterWithDisplayName || m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
+				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
 					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
 						continue;

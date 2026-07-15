@@ -6,7 +6,14 @@ class JMWeatherBase
 
 	void SetFromWorld()
 	{
+	}
 
+	void StopCurrentChangeInProgress()
+	{
+	}
+
+	void ResumeCurrentChangeInProgress()
+	{
 	}
 	
 	void Log( PlayerIdentity pidentLog )
@@ -86,6 +93,53 @@ class JMWeatherPhenomenon: JMWeatherBase
 		Actual = GetPhenomenon().GetActual();
 	}
 
+	override void StopCurrentChangeInProgress()
+	{
+		if (Actual != Forecast)
+		{
+			float forecast = Forecast;
+			float time = Time;
+			float minDuration = MinDuration;
+
+			Forecast = Actual;
+			Time = 0;
+			MinDuration = GetPhenomenon().GetNextChange();
+
+			Apply();
+
+			Forecast = forecast;
+			Time = time;
+			MinDuration = minDuration;
+		}
+	}
+
+	override void ResumeCurrentChangeInProgress()
+	{
+		if (Actual != Forecast)
+		{
+			float change = Forecast - Actual;
+			float timeToForecast = Math.AbsFloat(change) * 1000;  //! Each 0.1% of change = one second
+			float timeUntilNextChange = GetPhenomenon().GetNextChange();
+
+			if (timeToForecast > timeUntilNextChange)
+			{
+				Forecast = Actual + Math.Sign(change) * timeUntilNextChange * 0.001;
+				timeToForecast = timeUntilNextChange;
+			}
+
+			float time = Time;
+			float minDuration = MinDuration;
+
+			Time = timeToForecast;
+			MinDuration = timeUntilNextChange - timeToForecast;
+
+			Apply();
+
+			Time = time;
+			MinDuration = minDuration;
+		}
+	}
+
 	override void Log( PlayerIdentity pidentLog )
 	{
 		if ( IsMissionHost() )
@@ -123,6 +177,13 @@ class JMWeatherDynamicFog: JMWeatherBase
 		Distance = g_Game.GetWeather().GetDynVolFogDistanceDensity();
 		Height = g_Game.GetWeather().GetDynVolFogHeightDensity();
 		Bias = g_Game.GetWeather().GetDynVolFogHeightBias();
+	}
+
+	override void StopCurrentChangeInProgress()
+	{
+		Time = 0;
+
+		Apply();
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -270,85 +331,79 @@ class JMWeatherPreset
 
 	float Time;
 
-	autoptr JMWeatherDate PDate;
+	autoptr JMWeatherDate PDate = new JMWeatherDate;
 
-	autoptr JMWeatherStorm Storm;
-	autoptr JMWeatherOvercast POvercast;
+	autoptr JMWeatherStorm Storm = new JMWeatherStorm;
+	autoptr JMWeatherOvercast POvercast = new JMWeatherOvercast;
 
-	autoptr JMWeatherFog PFog;
-	autoptr JMWeatherDynamicFog PDynFog;
+	autoptr JMWeatherFog PFog = new JMWeatherFog;
+	autoptr JMWeatherDynamicFog PDynFog = new JMWeatherDynamicFog;
 
-	autoptr JMWeatherRain PRain;
-	autoptr JMWeatherRainThreshold RainThreshold;
+	autoptr JMWeatherRain PRain = new JMWeatherRain;
+	autoptr JMWeatherRainThreshold RainThreshold = new JMWeatherRainThreshold;
 	
-	autoptr JMWeatherSnow PSnow;
-	autoptr JMWeatherSnowThreshold SnowThreshold;
+	autoptr JMWeatherSnow PSnow = new JMWeatherSnow;
+	autoptr JMWeatherSnowThreshold SnowThreshold = new JMWeatherSnowThreshold;
 
-	autoptr JMWeatherWindMagnitude PWindMagnitude;
-	autoptr JMWeatherWindDirection PWindDirection;
-	autoptr JMWeatherWindFunction WindFunc;
+	autoptr JMWeatherWindMagnitude PWindMagnitude = new JMWeatherWindMagnitude;
+	autoptr JMWeatherWindDirection PWindDirection = new JMWeatherWindDirection;
+	autoptr JMWeatherWindFunction WindFunc = new JMWeatherWindFunction;
 
-	void JMWeatherPreset()
+	array<JMWeatherBase> GetPhenomena()
 	{
-		PDate = new JMWeatherDate;
+		array<JMWeatherBase> phenomena = {};
 
-		Storm = new JMWeatherStorm;
-		POvercast = new JMWeatherOvercast;
+		typename e = Type();
+		int cnt = e.GetVariableCount();
+		JMWeatherBase phenomenom;
 
-		PFog = new JMWeatherFog;
-		PDynFog = new JMWeatherDynamicFog;
+		for (int i = 0; i < cnt; ++i)
+		{
+			if (e.GetVariableValue(this, i, phenomenom))
+				phenomena.Insert(phenomenom);
+		}
 
-		PRain = new JMWeatherRain;
-		RainThreshold = new JMWeatherRainThreshold;
-
-		PSnow = new JMWeatherSnow;
-		SnowThreshold = new JMWeatherSnowThreshold;
-
-		PWindMagnitude = new JMWeatherWindMagnitude;
-		PWindDirection = new JMWeatherWindDirection;
-		WindFunc = new JMWeatherWindFunction;
+		return phenomena;
 	}
 
 	void Apply()
 	{
-		PDate.Apply();
+		array<JMWeatherBase> phenomena = GetPhenomena();
 
-		Storm.Apply();
-		POvercast.Apply();
-
-		PFog.Apply();
-		PDynFog.Apply();
-
-		PRain.Apply();
-		RainThreshold.Apply();
-
-		PSnow.Apply();
-		SnowThreshold.Apply();
-
-		PWindMagnitude.Apply();
-		PWindDirection.Apply();
-		WindFunc.Apply();
+		foreach (JMWeatherBase phenomenom: phenomena)
+		{
+			phenomenom.Apply();
+		}
 	}
 
 	void SetFromWorld()
 	{
-		PDate.SetFromWorld();
+		array<JMWeatherBase> phenomena = GetPhenomena();
 
-		Storm.SetFromWorld();
-		POvercast.SetFromWorld();
+		foreach (JMWeatherBase phenomenom: phenomena)
+		{
+			phenomenom.SetFromWorld();
+		}
+	}
 
-		PFog.SetFromWorld();
-		PDynFog.SetFromWorld();
+	void StopCurrentChangesInProgress()
+	{
+		array<JMWeatherBase> phenomena = GetPhenomena();
 
-		PRain.SetFromWorld();
-		RainThreshold.SetFromWorld();
+		foreach (JMWeatherBase phenomenom: phenomena)
+		{
+			phenomenom.StopCurrentChangeInProgress();
+		}
+	}
 
-		PSnow.SetFromWorld();
-		SnowThreshold.SetFromWorld();
+	void ResumeCurrentChangesInProgress()
+	{
+		array<JMWeatherBase> phenomena = GetPhenomena();
 
-		PWindMagnitude.SetFromWorld();
-		PWindDirection.SetFromWorld();
-		WindFunc.SetFromWorld();
+		foreach (JMWeatherBase phenomenom: phenomena)
+		{
+			phenomenom.ResumeCurrentChangeInProgress();
+		}
 	}
 
 	void Log( PlayerIdentity pidentLogPP )
@@ -357,23 +412,12 @@ class JMWeatherPreset
 		{
 			GetCommunityOnlineToolsBase().Log( pidentLogPP, "Start Weather Preset " + Name );
 
-			PDate.Log( pidentLogPP );
+			array<JMWeatherBase> phenomena = GetPhenomena();
 
-			Storm.Log( pidentLogPP );
-			POvercast.Log( pidentLogPP );
-
-			PFog.Log( pidentLogPP );
-			PDynFog.Log( pidentLogPP );
-
-			PRain.Log( pidentLogPP );
-			RainThreshold.Log( pidentLogPP );
-
-			PSnow.Log( pidentLogPP );
-			SnowThreshold.Log( pidentLogPP );
-
-			PWindMagnitude.Log( pidentLogPP );
-			PWindDirection.Log( pidentLogPP );
-			WindFunc.Log( pidentLogPP );
+			foreach (JMWeatherBase phenomenom: phenomena)
+			{
+				phenomenom.Log(pidentLogPP);
+			}
 		}
 	}
 }

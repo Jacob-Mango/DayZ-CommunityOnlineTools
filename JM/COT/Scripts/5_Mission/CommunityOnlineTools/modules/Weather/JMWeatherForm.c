@@ -13,6 +13,7 @@ class JMWeatherForm: JMFormBase
 	private UIActionButton m_ButtonApply;
 	private UIActionCheckbox m_Checkbox_AutoRefresh;
 	private UIActionCheckbox m_Checkbox_EasyMode;
+	private UIActionSelectBox m_Selector_WeatherBehavior;
 	private UIActionCheckbox m_Checkbox_FreezeTime;
 
 	private Widget m_PanelPresetManageActions;
@@ -162,10 +163,23 @@ class JMWeatherForm: JMFormBase
 
 		spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
 		m_Checkbox_EasyMode = UIActionManager.CreateCheckbox( spacer, "#STR_COT_WEATHER_MODULE_EASYMODE", this, "OnClick_EasyMode" );
-		m_Checkbox_FreezeTime = UIActionManager.CreateCheckbox( spacer, "Freeze Time", this, "OnClick_FreezeTime" );
+		m_Checkbox_FreezeTime = UIActionManager.CreateCheckbox( spacer, "Freeze", this, "OnClick_FreezeTime" );
 		m_Checkbox_FreezeTime.SetChecked(m_Module.IsTimeFrozen());
 		
 		m_Checkbox_AutoRefresh = UIActionManager.CreateCheckbox( spacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH" );
+
+		spacer = UIActionManager.CreateWrapSpacer( tParent );
+		auto label = UIActionManager.CreateText(spacer, "Weather behavior:");
+		label.SetWidth(0.3);
+		m_Selector_WeatherBehavior = UIActionManager.CreateSelectionBox( spacer, "", GetWeatherBehaviors(), this, "OnChange_WeatherBehavior" );
+		m_Selector_WeatherBehavior.SetSelectorWidth(1.0);
+		m_Selector_WeatherBehavior.SetWidth(0.5);
+
+		Weather weather = g_Game.GetWeather();
+		if (weather.GetMissionWeather())
+			m_Selector_WeatherBehavior.SetSelection(JMWeatherBehavior.UseForecastOnly);
+		else
+			m_Selector_WeatherBehavior.SetSelection(JMWeatherBehavior.UseWorldData);
 
 		InitLeftPanel( m_PanelLeft );
 		InitRightPanel( m_PanelRight );
@@ -679,6 +693,42 @@ class JMWeatherForm: JMFormBase
 		preset.WindFunc.Speed = ToFloat( m_EditWindFuncChangeFreq.GetText() );
 	}
 
+	TStringArray GetWeatherBehaviors()
+	{
+		TStringArray wweatherBehaviors = {};
+
+		typename e = JMWeatherBehavior;
+		int cnt = e.GetVariableCount();
+		int val;
+
+		for (int i = 0; i < cnt; ++i)
+		{
+			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val))
+			{
+				string name;
+
+				switch (val)
+				{
+					case JMWeatherBehavior.UseWorldData:
+						name = "Dynamic using world data";
+						break;
+
+					case JMWeatherBehavior.UseForecastOnly:
+						name = "Dynamic using forecast only";
+						break;
+
+					default:
+						name = e.GetVariableName(i);
+						break;
+				}
+
+				wweatherBehaviors.Insert(name);
+			}
+		}
+
+		return wweatherBehaviors;
+	}
+
 	static float PI2DEG(float value)
 	{
 		return (value * Math.RAD2DEG) + 180;
@@ -819,6 +869,18 @@ class JMWeatherForm: JMFormBase
 			return;
 
 		m_Module.SetFreezeTime(m_Checkbox_FreezeTime.IsChecked());
+
+		if (!m_Checkbox_FreezeTime.IsChecked())
+			m_Module.SetWeatherBehavior(m_Selector_WeatherBehavior.GetSelection());
+	}
+
+	void OnChange_WeatherBehavior(UIEvent eid, UIActionBase action)
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		if (!m_Checkbox_FreezeTime.IsChecked())
+			m_Module.SetWeatherBehavior(action.GetSelection());
 	}
 
 	void OnClick_Refresh( UIEvent eid, UIActionBase action )

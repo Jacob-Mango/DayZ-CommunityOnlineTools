@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-set modName=%~n0
-set modName=%modName:~3%
+set modPrefix=%~n0
+set modPrefix=%modPrefix:~3%
 
 set exitCmd=0
 
@@ -23,13 +23,13 @@ where tee > nul 2>&1
 if errorlevel 1 (
 	REM tee not available, just redirect to logfile
 	echo Please wait, working...
-	call "%~dp0CI1.bat" %modName% %* > "%~dp0..\Logs\%modName%.log" 2>&1
+	call "%~dp0CI1.bat" %modPrefix% %* > "%~dp0..\Logs\%modPrefix%.log" 2>&1
 ) else (
 	REM tee available
-	call "%~dp0CI1.bat" %modName% %* | tee "%~dp0..\Logs\%modName%.log"
+	call "%~dp0CI1.bat" %modPrefix% %* | tee "%~dp0..\Logs\%modPrefix%.log"
 )
 set exitcode=0
-if exist "%~dp0..\Logs\Build.failure" set exitcode=1
-if not exist "%~dp0..\Logs\Build.success" set exitcode=1
+if exist "%~dp0%modPrefix%.failure" set exitcode=1
+if not exist "%~dp0%modPrefix%.success" set exitcode=1
 if %exitCmd%==0 exit /B %exitcode%
 exit %exitcode%
