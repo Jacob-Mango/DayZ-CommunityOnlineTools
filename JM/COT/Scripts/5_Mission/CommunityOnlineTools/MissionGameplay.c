@@ -134,6 +134,7 @@ modded class MissionGameplay
 						break;
 				}
 			}
+		#endif
 
 			if (!item)
 			{
