@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<modded_inputs>
+	<inputs>
+		<actions>
+			<input name="UAExpansionConfigReloadMenu" loc="STR_ECR_Input_Toggle" />
+		</actions>
+		<exclude name="expansionconfigreload">
+			<input name="UAExpansionConfigReloadMenu" />
+		</exclude>
+		<sorting name="expansion" loc="STR_EXPANSION_LABEL">
+			<input name="UAExpansionConfigReloadMenu" />
+		</sorting>
+	</inputs>
+	<preset>
+		<input name="UAExpansionConfigReloadMenu">
+			<btn name="kF10" />
+		</input>
+	</preset>
+</modded_inputs>

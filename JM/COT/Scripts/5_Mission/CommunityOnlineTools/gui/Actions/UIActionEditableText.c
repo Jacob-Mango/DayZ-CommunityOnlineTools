@@ -4,6 +4,10 @@ class UIActionEditableText: UIActionBase
 
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
+	//! The visible field (fill + focus ring + edit box). Resizing this is what
+	//! makes the input itself wider, rather than shrinking the text area inside
+	//! a field that keeps its old width.
+	protected Widget m_Chrome;
 	protected ButtonWidget m_Button;
 	protected TextWidget m_ButtonText;
 
@@ -25,6 +29,7 @@ class UIActionEditableText: UIActionBase
 
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
+		m_Chrome = layoutRoot.FindAnyWidget( "action_chrome" );
 	}
 
 	override void OnShow()
@@ -122,16 +127,20 @@ class UIActionEditableText: UIActionBase
 	{
 		m_Edited = false;
 
+		string newText;
+		bool hasDecimal;
+		bool failed;
+		int i;
+
 		if ( m_OnlyNumbers )
 		{
-			string newText = m_Text.GetText();
-
-			bool hasDecimal = false;
-			bool failed = false;
+			newText = m_Text.GetText();
+			hasDecimal = false;
+			failed = false;
 
 			if ( newText.Length() > 0 )
 			{
-				int i = 0;
+				i = 0;
 				if ( newText.Get( i ) == "-" )
 					i = 1;
 
@@ -248,11 +257,22 @@ class UIActionEditableText: UIActionBase
 
 	void SetEditBoxWidth( float width )
 	{
-		float w;
-		float h;
-		
-		m_Text.GetSize( w, h );
-		m_Text.SetSize( width, h );
-		m_Text.Update();
+		// The edit box fills its chrome, so the chrome is what has to change
+		// size. Resizing the inner box instead left the field drawn at its
+		// original width with the usable text area stopping short of the edge.
+		if ( m_Chrome )
+		{
+			SetWidgetWidth( m_Chrome, width );
+			return;
+		}
+
+		SetWidgetWidth( m_Text, width );
+	}
+
+	//! Set label column width and expand the edit box to fill the remainder.
+	void SetLabelWidth( float labelFraction )
+	{
+		SetWidgetWidth( m_Label, labelFraction );
+		SetWidgetWidth( m_Text, 1.0 - labelFraction );
 	}
 }

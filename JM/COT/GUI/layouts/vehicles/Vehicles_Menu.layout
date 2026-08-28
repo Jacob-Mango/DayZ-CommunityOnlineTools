@@ -9,102 +9,83 @@ PanelWidgetClass JMVehiclesForm {
  vexactsize 1
  draggable 1
  scriptclass "JMVehiclesForm"
- style DayZDefaultPanel
+ style COTSurface
  {
-  PanelWidgetClass vehicles_window_panel {
-   ignorepointer 1
+  PanelWidgetClass panel_left {
+   color 0 0 0 0
    position 0 0
-   size 1 1
+   size 0.35 1
+   halign left_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
    {
-    PanelWidgetClass vehicles_list_panel {
+    FrameWidgetClass panel_left_top {
      ignorepointer 1
-     color 0 0 0 1
      position 0 0
-     size 0.35 1
+     size 1 0.28
      hexactpos 0
      vexactpos 0
      hexactsize 0
      vexactsize 0
-     style DayZDefaultPanel
-     {
-      PanelWidgetClass vehicles_list_label_panel {
-       ignorepointer 1
-       position 0 0
-       size 1 20
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 1
-       style blank
-       {
-        TextWidgetClass vehicles_list_label {
-         ignorepointer 1
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         style Bold
-         text "#STR_COT_VEHICLE_LIST_TITLE"
-         "text halign" center
-         "text valign" center
-        }
-       }
-      }
-      ScrollWidgetClass vehicles_list_scroller {
-       ignorepointer 0
-       position 0 20
-       size 1 400
-       halign center_ref
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 1
-       style blank
-       "Scrollbar V" 1
-       {
-        WrapSpacerWidgetClass vehicles_list_content {
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-         "Size To Content V" 1
-        }
-       }
-      }
-      PanelWidgetClass vehicles_list_buttons {
-       ignorepointer 1
-       size 1 175
-       valign bottom_ref
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 1
-       style blank
-      }
-     }
     }
-    PanelWidgetClass map_window_panel {
+    FrameWidgetClass panel_left_bottom {
+     ignorepointer 1
+     position 0 0.28
+     size 1 0.72
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+   }
+  }
+  PanelWidgetClass panel_split {
+   color 0 0 0 1
+   position 0.355 0
+   size 3 0.98
+   halign left_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   style COTSurface
+  }
+  PanelWidgetClass panel_right {
+   color 0 0 0 0
+   position 0.36 0
+   size 0.64 1
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    FrameWidgetClass panel_right_tabs {
      ignorepointer 0
-     size 0.65 1
-     halign right_ref
+     position 0 0
+     size 1 0.06
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+    FrameWidgetClass panel_right_content {
+     ignorepointer 0
+     position 0 0.06
+     size 1 0.94
      hexactpos 0
      vexactpos 0
      hexactsize 0
      vexactsize 0
      {
       PanelWidgetClass vehicles_map_panel {
+       priority 50
        clipchildren 1
        position 0 0
        size 1 1
-       halign right_ref
        hexactpos 0
        vexactpos 0
        hexactsize 0
@@ -112,7 +93,8 @@ PanelWidgetClass JMVehiclesForm {
        style blank
        {
         MapWidgetClass vehicles_map {
-         clipchildren 0
+         clipchildren 1
+         inheritalpha 0
          position 0 0
          size 1 1
          hexactpos 1
@@ -122,27 +104,37 @@ PanelWidgetClass JMVehiclesForm {
         }
        }
       }
+      FrameWidgetClass vehicle_actions_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass vehicle_info_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
      }
     }
-    PanelWidgetClass vehicle_info_panel {
-     position 0.088 0
-     size 0.45 1
-     halign center_ref
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-    }
-    PanelWidgetClass vehicle_info_buttons_panel {
-     position 0 0
-     size 0.185 1
-     halign right_ref
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-    }
    }
+  }
+  PanelWidgetClass panel_right_disable {
+   visible 0
+   color 0.098 0.118 0.141 0.985
+   position 0.36 0.06
+   size 0.64 0.94
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style COTSurface
   }
  }
 }

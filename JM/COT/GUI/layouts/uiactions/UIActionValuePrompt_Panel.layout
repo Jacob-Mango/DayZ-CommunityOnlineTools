@@ -1,0 +1,23 @@
+PanelWidgetClass UIActionValuePrompt_Panel {
+ position 0 0
+ size 340 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ color 0.114 0.137 0.165 0.988
+ style COTBox8Set
+ {
+  GridSpacerWidgetClass prompt_grid {
+   position 12 12
+   size 316 1
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   "Size To Content V" 1
+   Columns 1
+   Rows 3
+  }
+ }
+}

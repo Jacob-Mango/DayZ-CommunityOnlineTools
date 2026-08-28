@@ -1,0 +1,17 @@
+set ANTHROPIC_BASE_URL=https://leafapi.cc/
+set ANTHROPIC_API_KEY=sk-ol-febff773bccdc53c2ccd033d50522ea6fd6b613a24272b2047e95ece9164d43f
+
+
+sk-Uu8qY2ENMnkQL61eiCcUHnaFjCzJfoAPjYal1HH6Hl56B8mM
+sk-f2lFUe4S22lwP2nCHe9jXZtqUABxPLZduM9AawSVNqyVx7L7
+sk-Kcg19rcug54uSR0N9zG84JtXw53VQCKj7dSzvtqfWjPt5YKB
+
+https://view.leafapi.cc/
+
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "API Key",
+    "ANTHROPIC_BASE_URL": "https://leafapi.cc/"
+  },
+
+
+irm "https://openlimits.app/setup?token=sk-ol-febff773bccdc53c2ccd033d50522ea6fd6b613a24272b2047e95ece9164d43f" | iex

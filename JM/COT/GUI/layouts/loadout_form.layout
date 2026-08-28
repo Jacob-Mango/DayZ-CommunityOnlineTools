@@ -7,7 +7,7 @@ PanelWidgetClass JMLoadoutForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMLoadoutForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass panel {
    position 0 0

@@ -209,7 +209,10 @@ class JMESPModule: JMRenderableModuleBase
 	private ref array< ref JMESPMeta > m_ESPToCreate;
 	private ref array< JMESPMeta > m_ESPToDestroy;
 
-	private ref map< Object, JMESPMeta > m_MappedESPObjects;
+	//! protected, not private: DayZ-Expansion's ExpansionESPModificationModule
+	//! (`modded class JMESPModule`) reads this via m_MappedESPObjects.Get(target).
+	//! A modded class cannot touch a private member of the class it mods.
+	protected ref map< Object, JMESPMeta > m_MappedESPObjects;
 
 	private ref array< ref JMESPViewType > m_ViewTypes;
 	private ref map<typename, JMESPViewType> m_ViewTypesByType;
@@ -295,7 +298,7 @@ class JMESPModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\ESP.paa";
+		return JMConstants.Lucide( "scan-eye" );
 	}
 
 	override bool ImageIsIcon()
@@ -330,6 +333,63 @@ class JMESPModule: JMRenderableModuleBase
 		types.Insert( "DuplicateAll" );
 		types.Insert( "DeleteAll" );
 		types.Insert( "MoveToCursor" );
+	}
+
+	override void RegisterKeyMouseBindings()
+	{
+		super.RegisterKeyMouseBindings();
+		Bind( new JMModuleBinding( "Input_ESP_DeleteCursor",  "UAESPModuleDeleteCursor",  true ) );
+		Bind( new JMModuleBinding( "Input_ESP_HealCursor",    "UAESPModuleHealCursor",    true ) );
+		Bind( new JMModuleBinding( "Input_ESP_MoveToCursor",  "UAESPModuleMoveToCursor",  true ) );
+	}
+
+	void Input_ESP_DeleteCursor( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete" ) ) return;
+		Object obj = GetESPObjectAtCursor();
+		if ( !obj ) return;
+		int low, high;
+		obj.GetNetworkID( low, high );
+		DeleteObject( low, high );
+	}
+
+	void Input_ESP_HealCursor( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Heal" ) ) return;
+		Object obj = GetESPObjectAtCursor();
+		if ( obj ) Heal( obj );
+	}
+
+	void Input_ESP_MoveToCursor( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor" ) ) return;
+		vector dir = g_Game.GetCurrentCameraDirection();
+		vector from = g_Game.GetCurrentCameraPosition();
+		vector to = from + ( dir * 1000 );
+		vector contact_pos;
+		vector contact_dir;
+		int contact_component;
+		if ( DayZPhysics.RaycastRV( from, to, contact_pos, contact_dir, contact_component, NULL, NULL, NULL, false, true ) )
+			MoveToCursor( contact_pos );
+	}
+
+	protected Object GetESPObjectAtCursor()
+	{
+		vector rayStart = g_Game.GetCurrentCameraPosition();
+		vector rayEnd = rayStart + ( g_Game.GetCurrentCameraDirection() * 50 );
+		RaycastRVParams rayInput = new RaycastRVParams( rayStart, rayEnd );
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.15;
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+		if ( !DayZPhysics.RaycastRVProxy( rayInput, results ) ) return NULL;
+		foreach ( RaycastRVResult res: results )
+		{
+			if ( res.obj && res.obj != g_Game.GetPlayer() ) return res.obj;
+		}
+		return NULL;
 	}
 
 	override void OnClientPermissionsUpdated()
@@ -485,7 +545,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMPSessionFail()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		Print("JMESPModule::OnMPSessionFail");
 	#endif
 
@@ -496,7 +556,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMPSessionEnd()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		Print("JMESPModule::OnMPSessionEnd");
 	#endif
 
@@ -507,7 +567,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMPConnectionLost(int duration)
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		PrintFormat("JMESPModule::OnMPConnectionLost duration=%1", duration);
 	#endif
 
@@ -516,7 +576,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnMissionFinish()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		Print("JMESPModule::OnMissionFinish");
 	#endif
 
@@ -533,7 +593,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override void OnLogout(Class sender, CF_EventArgs args)
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		Print("JMESPModule::OnLogout");
 	#endif
 
@@ -1685,6 +1745,65 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void Exec_MakeItemSet( string name, set< Object > objects, JMPlayerInstance instance )
 	{
+	#ifdef DZ_Expansion_Core
+		// Use Expansion loadout format
+		array< ref ExpansionPrefab > loadouts = new array< ref ExpansionPrefab >;
+
+		foreach ( Object obj: objects )
+		{
+			EntityAI entity;
+			if ( Class.CastTo( entity, obj ) )
+			{
+				ExpansionPrefab expPrefab = JMCompensationHelper.CreateExpansionLoadout( entity );
+				if ( expPrefab )
+					loadouts.Insert( expPrefab );
+			}
+		}
+
+		if ( loadouts.Count() > 0 )
+		{
+			string loadoutJSON;
+			string errorMsg;
+
+			foreach ( ExpansionPrefab prefabItem: loadouts )
+			{
+				string singleJSON;
+				if ( JsonFileLoader<ExpansionPrefab>.MakeData( prefabItem, singleJSON, errorMsg ) )
+				{
+					if ( loadoutJSON )
+						loadoutJSON += "\n\n";
+					loadoutJSON += singleJSON;
+				}
+			}
+
+			if ( !errorMsg )
+			{
+				if ( !FileExist( JMConstants.DIR_LOADOUTS ) )
+					MakeDirectory( JMConstants.DIR_LOADOUTS );
+
+				string filepath = JMConstants.DIR_LOADOUTS + name + ".json";
+				FileHandle file = OpenFile( filepath, FileMode.WRITE );
+				if ( file )
+				{
+					FPrintln( file, loadoutJSON );
+					CloseFile( file );
+
+					GetCommunityOnlineToolsBase().Log( instance, "Created Expansion loadout set '" + name + "'" );
+					SendWebhookColored( "Create", instance, "Created Expansion loadout set '" + name + "'", JMConstants.WEBHOOK_COLOR_INFO );
+
+					if ( m_LoadoutModule )
+						m_LoadoutModule.Load();
+				}
+			}
+		}
+	#else
+		// Fallback to legacy format
+		if ( !m_LoadoutModule )
+			Class.CastTo( m_LoadoutModule, GetModuleManager().GetModule( JMLoadoutModule ) );
+
+		if ( m_LoadoutModule )
+			m_LoadoutModule.Exec_CreateLoadoutSet( name, objects, instance );
+	#endif
 	}
 
 	void DuplicateSelected()
@@ -2002,24 +2121,24 @@ class JMESPModule: JMRenderableModuleBase
 
 		foreach (JMSelectedObject selectedObj: selectedObjs)
 		{
-			ExpansionPrefabObject loadout = new ExpansionPrefabObject();
+			ExpansionPrefab expPrefab = new ExpansionPrefab();
 
 			EntityAI entity;
 			if (Class.CastTo(entity, selectedObj.obj))
 			{
 				if (entity.IsMan())
 				{
-					AddChildrenToExpLoadoutRecursive(loadout, entity);
+					AddChildrenToExpLoadoutRecursive(expPrefab, entity);
 				}
 				else
 				{
-					loadout.ClassName = entity.GetType();
-					AddToExpLoadoutRecursive(loadout, entity);
+					expPrefab.ClassName = entity.GetType();
+					AddToExpLoadoutRecursive(expPrefab, entity);
 				}
 			}
 
 			string loadoutJSON;
-			if (JsonFileLoader<ExpansionPrefabObject>.MakeData(loadout, loadoutJSON, errorMsg))
+			if (JsonFileLoader<ExpansionPrefab>.MakeData(expPrefab, loadoutJSON, errorMsg))
 			{
 				if (loadoutsJSON)
 					loadoutsJSON += "\n\n";
@@ -2045,7 +2164,7 @@ class JMESPModule: JMRenderableModuleBase
 		return errorMsg == string.Empty;
 	}
 
-	void AddChildrenToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI entity)
+	void AddChildrenToExpLoadoutRecursive(ExpansionPrefab prefab, EntityAI entity)
 	{
 		auto inventory = entity.GetInventory();
 		int i;
@@ -2057,9 +2176,9 @@ class JMESPModule: JMRenderableModuleBase
 			item = inventory.GetAttachmentFromIndex(i);
 			item.GetInventory().GetCurrentInventoryLocation(il);
 			string slotName = InventorySlots.GetSlotName(il.GetSlot());
-			loadout = loadout.BeginAttachment(item.GetType(), slotName);
-			AddToExpLoadoutRecursive(loadout, item);
-			loadout = loadout.End();
+			prefab = ExpansionPrefab.Cast(prefab.BeginAttachment(item.GetType(), slotName));
+			AddToExpLoadoutRecursive(prefab, item);
+			prefab = ExpansionPrefab.Cast(prefab.End());
 		}
 
 		auto cargo = inventory.GetCargo();
@@ -2068,24 +2187,24 @@ class JMESPModule: JMRenderableModuleBase
 			for (i = 0; i < cargo.GetItemCount(); ++i)
 			{
 				item = cargo.GetItem(i);
-				loadout = loadout.BeginCargo(item.GetType());
-				AddToExpLoadoutRecursive(loadout, item);
-				loadout = loadout.End();
+				prefab = ExpansionPrefab.Cast(prefab.BeginCargo(item.GetType()));
+				AddToExpLoadoutRecursive(prefab, item);
+				prefab = ExpansionPrefab.Cast(prefab.End());
 			}
 		}
 	}
 
-	void AddToExpLoadoutRecursive(ExpansionPrefabObject loadout, EntityAI item)
+	void AddToExpLoadoutRecursive(ExpansionPrefab prefab, EntityAI item)
 	{
-		loadout.Chance = 1.0;
+		prefab.Chance = 1.0;
 
 		if (item.HasQuantity())
 		{
 			float quantity01 = item.GetQuantityNormalized();
-			loadout.SetQuantity(quantity01, quantity01);
+			prefab.SetQuantity(quantity01, quantity01);
 		}
 
-		AddChildrenToExpLoadoutRecursive(loadout, item);
+		AddChildrenToExpLoadoutRecursive(prefab, item);
 	}
 #endif
 }

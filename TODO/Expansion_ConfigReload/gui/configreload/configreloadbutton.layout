@@ -1,0 +1,21 @@
+PanelWidgetClass ConfigReloadButtonRow {
+ clipchildren 1
+ color 0.11 0.1 0.08 0.65
+ size 1 0.095
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ style DayZDefaultPanel
+ {
+  ButtonWidgetClass ReloadActionButton {
+   position 0.015 0.06
+   size 0.97 0.88
+   color 0.34 0.28 0.18 1
+   style Editor
+   "no focus" 1
+   text ""
+   font "gui/fonts/metronbook16"
+  }
+ }
+}

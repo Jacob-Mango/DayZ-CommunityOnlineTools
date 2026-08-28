@@ -4,19 +4,19 @@
 //  Standalone ban management module for COT.
 //
 //  Structure confirmed from real source:
-//    • Extends JMRenderableModuleBase
-//    • Constructor registers permissions via GetPermissionsManager()
-//    • GetLayoutRoot / GetTitle / GetIconName / ImageIsIcon / GetWebhookTitle
-//    • GetRPCMin / GetRPCMax bracket the enum
-//    • OnRPC with internal switch (matching JMPlayerModule / JMLoadoutModule)
-//    • OnMissionLoaded for server-side init (matching JMLoadoutModule)
-//    • OnUpdate( float timeslice ) for the prune sweep (matching JMESPModule)
-//    • EnableUpdate() overridden empty to disable client-side ticking
-//    • GetForm() cast to JMBanForm to push data to the open panel
-//    • Registered in JMModuleConstructor via modules.Insert( JMBanModule )
+//    * Extends JMRenderableModuleBase
+//    * Constructor registers permissions via GetPermissionsManager()
+//    * GetLayoutRoot / GetTitle / GetIconName / ImageIsIcon / GetWebhookTitle
+//    * GetRPCMin / GetRPCMax bracket the enum
+//    * OnRPC with internal switch (matching JMPlayerModule / JMLoadoutModule)
+//    * OnMissionLoaded for server-side init (matching JMLoadoutModule)
+//    * OnUpdate( float timeslice ) for the prune sweep (matching JMESPModule)
+//    * EnableUpdate() overridden empty to disable client-side ticking
+//    * GetForm() cast to JMBanForm to push data to the open panel
+//    * Registered in JMModuleConstructor via modules.Insert( JMBanModule )
 //
 //  Ban-on-connect enforcement: JMPlayerBan.Save() writes a per-player file
-//  that COT's mission connect code checks automatically — we don't need a
+//  that COT's mission connect code checks automatically - we don't need a
 //  separate connect hook here.
 // =============================================================================
 
@@ -24,13 +24,13 @@ enum JMBanModuleRPC
 {
     INVALID = 10800,
 
-    // Client → Server
+    // Client -> Server
     RequestBanList,
     RequestBan,
     UnbanPlayer,
     EditBanDuration,
 
-    // Server → Client
+    // Server -> Client
     BanList,
 
     COUNT
@@ -48,7 +48,7 @@ class JMBanModule : JMRenderableModuleBase
     protected float                            m_PruneTimer;
 
     // -------------------------------------------------------------------------
-    //  Constructor — register permissions, matching JMPlayerModule style
+    //  Constructor - register permissions, matching JMPlayerModule style
     // -------------------------------------------------------------------------
 
     void JMBanModule()
@@ -83,12 +83,17 @@ class JMBanModule : JMRenderableModuleBase
 
     override string GetIconName()
     {
-        return "B";
+        return JMConstants.Lucide( "gavel" );
     }
 
     override bool ImageIsIcon()
     {
-        return false;
+        return true;
+    }
+
+    override bool ImageHasPath()
+    {
+        return true;
     }
 
     override string GetWebhookTitle()
@@ -98,8 +103,9 @@ class JMBanModule : JMRenderableModuleBase
 
     override void GetWebhookTypes( out array<string> types )
     {
-        types.Insert( "Ban"   );
-        types.Insert( "Unban" );
+        types.Insert( "Ban"     );
+        types.Insert( "Unban"   );
+        types.Insert( "EditBan" );
     }
 
     // -------------------------------------------------------------------------
@@ -117,7 +123,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  Update — only needed server-side for expiry pruning.
+    //  Update - only needed server-side for expiry pruning.
     //  Override EnableUpdate empty on client (matching JMESPModule #ifdef SERVER)
     // -------------------------------------------------------------------------
 
@@ -128,7 +134,7 @@ class JMBanModule : JMRenderableModuleBase
 #endif
 
     // -------------------------------------------------------------------------
-    //  OnMissionLoaded — load ban store on server (matching JMLoadoutModule)
+    //  OnMissionLoaded - load ban store on server (matching JMLoadoutModule)
     // -------------------------------------------------------------------------
 
     override void OnMissionLoaded()
@@ -144,7 +150,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  OnUpdate — sweep expired timed bans (matching JMESPModule signature)
+    //  OnUpdate - sweep expired timed bans (matching JMESPModule signature)
     // -------------------------------------------------------------------------
 
     override void OnUpdate( float timeslice )
@@ -163,7 +169,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  OnRPC — single override with internal switch (matching JMPlayerModule)
+    //  OnRPC - single override with internal switch (matching JMPlayerModule)
     // -------------------------------------------------------------------------
 
     override void OnRPC( PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx )
@@ -189,7 +195,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  Public API — called by JMBanForm
+    //  Public API - called by JMBanForm
     // -------------------------------------------------------------------------
 
     // Issue a ban for an online or offline player.
@@ -305,7 +311,7 @@ class JMBanModule : JMRenderableModuleBase
     }
 
     // -------------------------------------------------------------------------
-    //  Server RPC: RequestBan — client asks server to ban a player
+    //  Server RPC: RequestBan - client asks server to ban a player
     // -------------------------------------------------------------------------
 
     private void RPC_RequestBan( ParamsReadContext ctx, PlayerIdentity sender, Object target )
@@ -418,6 +424,7 @@ class JMBanModule : JMRenderableModuleBase
         Save();
 
         GetCommunityOnlineToolsBase().Log( adminIdent, "Edited ban duration [steamID=" + steamID + "] -> " + durationSeconds );
+        SendWebhook( "EditBan", NULL, "Edited ban duration for SteamID: " + steamID + " -> " + durationSeconds + "s" );
     }
 
     private void RPC_EditBanDuration( ParamsReadContext ctx, PlayerIdentity sender, Object target )
@@ -483,14 +490,14 @@ class JMBanModule : JMRenderableModuleBase
             }
         }
 
-        // Push to the open form — GetForm() pattern confirmed from JMESPModule
+        // Push to the open form - GetForm() pattern confirmed from JMESPModule
         JMBanForm form;
         if ( Class.CastTo( form, GetForm() ) )
             form.PopulateBanList( bans, playerGuids, playerNames );
     }
 
     // -------------------------------------------------------------------------
-    //  Persistence — JsonFileLoader<JMPlayerBanStore>
+    //  Persistence - JsonFileLoader<JMPlayerBanStore>
     // -------------------------------------------------------------------------
 
     private void Load()

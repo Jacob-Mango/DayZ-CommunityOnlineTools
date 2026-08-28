@@ -1,0 +1,143 @@
+GridSpacerWidgetClass JMBuildingsDetailRow {
+ visible 1
+ clipchildren 1
+ ignorepointer 0
+ position 0 0
+ size 1 26
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ scriptclass ""
+ style Empty
+ Padding 0
+ Margin 0
+ "Size To Content H" 1
+ "Size To Content V" 1
+ Columns 1
+ Rows 1
+ {
+  PanelWidgetClass row_bg {
+   visible 1
+   clipchildren 0
+   ignorepointer 1
+   color 0 0 0 0.3922
+   position 0 0
+   size 1 26
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   style DayZDefaultPanel
+   "no focus" 1
+   {
+    TextWidgetClass row_name {
+     ignorepointer 1
+     position 0.01 0
+     size 0.345 1
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "Nom"
+     "exact text" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass row_health {
+     ignorepointer 1
+     position 0.365 0
+     size 0.12 1
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "100 %"
+     "exact text" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass row_life {
+     ignorepointer 1
+     position 0.495 0
+     size 0.15 1
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "45 j"
+     "exact text" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass row_state {
+     ignorepointer 1
+     position 0.655 0
+     size 0.075 1
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "OK"
+     "exact text" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    ButtonWidgetClass row_tp_button {
+     ignorepointer 0
+     position 0.745 0.08
+     size 0.12 0.84
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "no focus" 0
+     {
+      TextWidgetClass row_tp_label {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_BBM_TP_SHORT"
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+    ButtonWidgetClass row_delete_button {
+     ignorepointer 0
+     position 0.875 0.08
+     size 0.12 0.84
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "no focus" 0
+     {
+      TextWidgetClass row_delete_label {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_BBM_DELETE_SHORT"
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+ }
+}

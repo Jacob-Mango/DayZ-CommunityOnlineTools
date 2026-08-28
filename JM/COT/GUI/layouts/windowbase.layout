@@ -11,14 +11,14 @@ PanelWidgetClass base_window {
   PanelWidgetClass background {
    visible 1
    ignorepointer 1
-   color 0.06 0.08 0.11 0.8
+   color 0.098 0.118 0.141 0.800
    position 0 0
    size 1 1
    hexactpos 1
    vexactpos 1
    hexactsize 0
    vexactsize 0
-   style DayZDefaultPanel
+   style COTSurface
   }
   PanelWidgetClass content {
    visible 1
@@ -32,14 +32,14 @@ PanelWidgetClass base_window {
   }
   PanelWidgetClass confirmation_panel {
    visible 0
-   color 0.06 0.08 0.11 0.9
+   color 0.098 0.118 0.141 0.900
    position 0 0
-   size 1 1
+   size 800 600
    hexactpos 1
    vexactpos 1
-   hexactsize 0
-   vexactsize 0
-   style DayZDefaultPanel
+   hexactsize 1
+   vexactsize 1
+   style COTSurface
    scriptclass "JMConfirmationForm"
   }
   PanelWidgetClass title_bar_drag {
@@ -57,7 +57,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass title_wrapper {
    ignorepointer 1
    visible 1
-   color 0.02 0.02 0.06 1
+   color 0.082 0.098 0.118 1.000
    position 0 0
    size 1 25
    hexactpos 1
@@ -65,12 +65,12 @@ PanelWidgetClass base_window {
    hexactsize 0
    vexactsize 1
    draggable 0
-   style DayZDefaultPanel
+   style COTSurface
    {
     PanelWidgetClass title_accent {
      ignorepointer 1
      visible 0
-     color 0.3 0.5 1.0 1
+     color 0.376 0.365 1.000 1.000
      position 0 0
      size 1 2
      hexactpos 1
@@ -82,7 +82,7 @@ PanelWidgetClass base_window {
      ignorepointer 1
      color 1 1 1 1
      position 6 0
-     size 1 1
+     size 0.86 1
      halign left_ref
      valign center_ref
      hexactpos 1
@@ -100,7 +100,7 @@ PanelWidgetClass base_window {
     ButtonWidgetClass pin_button {
      ignorepointer 0
      visible 1
-     color 0.2 0.2 0.2 1
+     color 0.196 0.220 0.247 1.000
      position 57 0
      size 25 25
      halign right_ref
@@ -109,31 +109,43 @@ PanelWidgetClass base_window {
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     style Default
+     style Empty
      {
-      TextWidgetClass pin_button_label {
+      PanelWidgetClass pin_button_hover {
        ignorepointer 1
-       color 0.6 0.6 0.6 1
+       visible 0
        position 0 0
        size 1 1
        hexactpos 0
        vexactpos 0
        hexactsize 0
        vexactsize 0
-       style Normal
-       text "P"
-       font "gui/fonts/sdf_MetronLight24"
-       "exact text" 1
-       "exact text size" 13
-       "text halign" center
-       "text valign" center
+       color 1.000 1.000 1.000 0.180
+       style COTPill6Set
+      }
+      ImageWidgetClass pin_button_label {
+       ignorepointer 1
+       position 0 0
+       size 16 16
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       image0 "JM/COT/GUI/textures/icons/lucide/pin-off.edds"
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
      }
     }
     ButtonWidgetClass minimize_button {
      ignorepointer 0
      visible 1
-     color 0.2 0.2 0.2 1
+     color 0.196 0.220 0.247 1.000
      position 31 0
      size 25 25
      halign right_ref
@@ -142,31 +154,43 @@ PanelWidgetClass base_window {
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     style Default
+     style Empty
      {
-      TextWidgetClass minimize_button_label {
+      PanelWidgetClass minimize_button_hover {
        ignorepointer 1
-       color 1 1 1 1
+       visible 0
        position 0 0
        size 1 1
        hexactpos 0
        vexactpos 0
        hexactsize 0
        vexactsize 0
-       style Normal
-       text "_"
-       font "gui/fonts/sdf_MetronLight24"
-       "exact text" 1
-       "exact text size" 16
-       "text halign" center
-       "text valign" center
+       color 1.000 1.000 1.000 0.180
+       style COTPill6Set
+      }
+      ImageWidgetClass minimize_button_label {
+       ignorepointer 1
+       position 0 0
+       size 16 16
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       image0 "JM/COT/GUI/textures/icons/lucide/chevrons-down-up.edds"
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
      }
     }
     ButtonWidgetClass close_button {
      ignorepointer 0
      visible 1
-     color 1 0 0 1
+     color 1.000 0.384 0.490 1.000
      position 6 0
      size 25 25
      halign right_ref
@@ -175,19 +199,36 @@ PanelWidgetClass base_window {
      vexactpos 1
      hexactsize 1
      vexactsize 1
-     style Default
+     style Empty
      {
+      PanelWidgetClass close_button_hover {
+       ignorepointer 1
+       visible 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 1.000 0.384 0.490 0.350
+       style COTPill6Set
+      }
       ImageWidgetClass close_button_image {
        ignorepointer 1
        position 0 0
-       size 1 1
-       halign right_ref
+       size 16 16
+       halign center_ref
        valign center_ref
-       hexactsize 0
-       vexactsize 0
-       image0 "set:dayz_gui image:icon_x"
-       mode additive
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       image0 "JM/COT/GUI/textures/icons/close.edds"
+       mode blend
        "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
      }
     }
@@ -197,7 +238,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_up {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 1 3
    hexactpos 1
@@ -208,7 +249,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_down {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 1 3
    hexactpos 1
@@ -221,7 +262,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_left {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 3 1
    hexactpos 1
@@ -232,7 +273,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_right {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 3 1
    hexactpos 1
@@ -245,7 +286,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_top_left {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 10 10
    hexactpos 1
@@ -258,7 +299,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_top_right {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 10 10
    hexactpos 1
@@ -271,7 +312,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_bot_left {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 10 10
    hexactpos 1
@@ -284,7 +325,7 @@ PanelWidgetClass base_window {
   PanelWidgetClass resize_highlight_bot_right {
    ignorepointer 1
    visible 0
-   color 0.3 0.5 1.0 1
+   color 0.376 0.365 1.000 1.000
    position 0 0
    size 10 10
    hexactpos 1

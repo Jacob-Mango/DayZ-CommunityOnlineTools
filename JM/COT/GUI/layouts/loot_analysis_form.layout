@@ -1,0 +1,160 @@
+PanelWidgetClass JMLootAnalysisForm {
+ visible 1
+ color 0 0 0 0
+ position 0 0
+ size 650 510
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMLootAnalysisForm"
+ style COTSurface
+ {
+  PanelWidgetClass panel_top {
+   ignorepointer 0
+   color 0 0 0 0
+   position 0 0
+   size 1 0.2
+   halign center_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style blank
+   {
+    PanelWidgetClass category_panel {
+     ignorepointer 0
+     position 0 0
+     size 1 0.65
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style blank
+    }
+    PanelWidgetClass search_panel {
+     ignorepointer 0
+     position 0 0.65
+     size 1 0.35
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style blank
+    }
+   }
+  }
+  PanelWidgetClass panel_bottom {
+   color 0 0 0 0
+   position 0 0.2
+   size 1 0.8
+   halign center_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   fixaspect 0
+   {
+    PanelWidgetClass item_list_wrapper {
+     position 0 0
+     size 1 0.55
+     halign center_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextListboxWidgetClass loot_item_list {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style debugUI
+       lines 20
+       font "gui/fonts/MetronLight14"
+      }
+     }
+    }
+    FrameWidgetClass panel_bottom_tabs {
+     ignorepointer 0
+     position 0 0.55
+     size 1 0.12
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+    FrameWidgetClass panel_bottom_content {
+     ignorepointer 0
+     position 0 0.67
+     size 1 0.33
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      PanelWidgetClass item_scan_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style blank
+       {
+        PanelWidgetClass item_actions_panel {
+         position 0 0
+         size 1 1
+         halign center_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         style blank
+        }
+       }
+      }
+      PanelWidgetClass loot_distribution_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style blank
+       {
+        PanelWidgetClass distribution_info_panel {
+         ignorepointer 0
+         position 0 0
+         size 1 0.4
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         style blank
+        }
+        PanelWidgetClass distribution_buttons {
+         ignorepointer 0
+         position 0 0.4
+         size 1 0.6
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         style blank
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

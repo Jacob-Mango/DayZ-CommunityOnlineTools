@@ -60,6 +60,15 @@ enum JMVehiclesModuleRPC
 	DeleteVehicleDestroyed,
 	TeleportToVehicle,
 	TeleportVehicleToMe,
+	RepairVehicle,
+	RefuelVehicle,
+	UnstuckVehicle,
+	CoverVehicle,
+	LockVehicle,
+	UnPairVehicle,
+	// Appended after 1.x - delta-refresh slots. Old clients never see these.
+	SendVehicleUpsert,
+	SendVehicleRemove,
 	COUNT
 }
 
@@ -113,7 +122,6 @@ enum JMWeatherModuleRPC
 	Snow,
 	SnowThresholds,
 	Overcast,
-	Wind, // LEGACY
 	WindFunctionParams,
 	WindMagnitude,
 	WindDirection,
@@ -168,16 +176,6 @@ enum JMPlayerModuleRPC
 {
 	INVALID = 10320,
 
-	// Player Vitals (legacy individual RPCs kept for backwards compat)
-	SetHealth,
-	SetBlood,
-	SetShock,
-	SetEnergy,
-	SetWater,
-	SetStamina,
-	SetHeatBuffer,
-
-	// Batched stat RPC (replaces the 7 above for new callers)
 	SetStat,
 
 	SetBloodyHands,
@@ -215,6 +213,37 @@ enum JMPlayerModuleRPC
 	SetRoles,
 	VONStartedTransmitting,
 	VONStoppedTransmitting,
+	AddDisease,
+	RemoveDisease,
+	RemoveAllDiseases,
+	SendDiseaseMask,
+	AddBleedingPart,
+	StopBleedingPart,
+	SendBleedingState,
+	//! Appended, never inserted: these are wire values, and renumbering an
+	//! existing entry silently mismatches a client on an older build.
+	RequestInventory,
+	InventoryDelete,
+	InventoryRepair,
+	InventoryTake,
+	RequestPlayerStats,
+	InventoryModify,
+	COUNT
+}
+
+//! Which edit an InventoryModify request is asking for. One RPC covers all of
+//! them because they share every argument but the value: the item is addressed
+//! the same way, checked against the same permission and answered with the same
+//! refreshed listing, so five ids would have been five copies of one handler.
+//!
+//! Wire values - append only.
+enum JMInventoryModifyOp
+{
+	UNJAM = 0,
+	QUANTITY,      //!< ammo count for magazines, quantity for everything else
+	TEMPERATURE,
+	FOOD_STAGE,    //!< FoodStageType
+	LIQUID_TYPE,   //!< LIQUID_*
 	COUNT
 }
 
@@ -260,19 +289,134 @@ enum JMLoadoutModuleRPC
 	COUNT
 }
 
+enum JMCompensationsModuleRPC
+{
+	INVALID = 10480,
+	Load,
+	SpawnCursor,
+	SpawnTarget,
+	SpawnPlayers,
+	Delete,
+	COUNT
+}
+
 enum JMRoleManagerModuleRPC
 {
 	INVALID = 10500,
 
-	// Client → Server
+	// Client -> Server
 	RequestRoleList,
 	CreateRole,
 	DeleteRole,
 	SetRolePermissions,
 
-	// Server → Client
+	// Server -> Client
 	RoleList,
 
 	COUNT
 }
 
+enum JMLootAnalysisModuleRPC
+{
+	INVALID = 10520,
+
+	// Client -> Server
+	RequestItemScan,
+	RequestLootDistribution,
+	DeleteAllItems,
+
+	// Server -> Client
+	SendItemScanResults,
+	SendLootDistribution,
+
+	COUNT
+}
+
+// Generic JMEntityManagerModule RPCs. Every concrete manager (events, garage,
+// territory) gets its own range below that reuses the same three slots:
+//   Request  - client -> server: "send me entities"
+//   Send     - server -> client: "here are the entities"
+//   Action   - client -> server: "perform action id X on entity Y"
+//
+// SendUpsert / SendRemove were appended afterwards for the delta-refresh path
+// (server -> client). They MUST stay at the end of each enum so pre-delta
+// clients still match on the first four slots.
+
+enum JMEventsModuleRPC
+{
+	INVALID = 10540,
+	Request,
+	Send,
+	Action,
+	SendUpsert,
+	SendRemove,
+	COUNT
+}
+
+enum JMTerritoryModuleRPC
+{
+	INVALID = 10560,
+	RequestTerritories,
+	SendTerritories,
+	SetLevel,
+	COUNT
+}
+
+// Map editor - 3D place / scale / move / delete of world objects.
+// Stored objects survive mission restart (per-mission JSON on the server).
+// RPCs are deliberately coarse: one RPC per mutation, GUID-list batched on read.
+enum JMMapEditorModuleRPC
+{
+	INVALID = 10900,
+
+	// Client -> Server
+	RequestList,
+	SpawnObject,
+	TransformObject,
+	DeleteObject,
+	ClearAll,
+	BulkTransform,
+	BulkDelete,
+	CloneObject,
+	Undo,
+	Redo,
+
+	// Server -> Client
+	List,
+	//! RESERVED, not yet implemented: intended to push undo/redo stack depth to
+	//! the client so the form can grey out unavailable buttons. The stacks are
+	//! server-side (m_UndoStack), so the client currently cannot know. Never
+	//! sent and deliberately has no OnRPC case -- rpc_check flags this, see
+	//! ai/tools/README.md.
+	UndoState,
+
+	COUNT
+}
+
+// Anti-cheat detection module - server-side only, periodic poll.
+// Server fires webhooks; admin UI reads flag state via dedicated RPCs.
+enum JMAntiCheatModuleRPC
+{
+	INVALID = 10920,
+
+	// Client -> Server
+	RequestFlags,
+
+	// Server -> Client
+	Flags,
+
+	COUNT
+}
+
+
+// Server performance broadcast - sampled on the server, pushed to admin
+// clients on a timer. No client -> server direction: nothing is requested.
+enum JMServerStatsModuleRPC
+{
+	INVALID = 10940,
+
+	// Server -> Client
+	Stats,
+
+	COUNT
+}

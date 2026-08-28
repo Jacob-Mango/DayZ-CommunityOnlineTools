@@ -11,6 +11,10 @@ class JMSpawnerConfig
 	// out map objects, building pieces, etc. that should not be spawnable.
 	ref array< string > RestrictedPatterns = new array< string >;
 
+	// Substring patterns (lowercase) matched against class names to filter
+	// out map objects, building pieces, etc. that should not be spawnable.
+	ref array< string > RestrictedStartPatterns = new array< string >;
+
 	static JMSpawnerConfig Defaults()
 	{
 		JMSpawnerConfig cfg = new JMSpawnerConfig();
@@ -48,9 +52,10 @@ class JMSpawnerConfig
 
 		cfg.RestrictedPatterns.Insert( "placing" );
 		cfg.RestrictedPatterns.Insert( "debug" );
-		cfg.RestrictedPatterns.Insert( "bldr_" );
-		cfg.RestrictedPatterns.Insert( "land_" );
-		cfg.RestrictedPatterns.Insert( "staticobj_" );
+
+		cfg.RestrictedStartPatterns.Insert( "bldr_" );
+		cfg.RestrictedStartPatterns.Insert( "land_" );
+		cfg.RestrictedStartPatterns.Insert( "staticobj_" );
 
 		return cfg;
 	}

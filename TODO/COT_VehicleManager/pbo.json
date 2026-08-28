@@ -1,0 +1,19 @@
+{
+    "compress": {
+        "exclude": [
+        ],
+        "include": [
+            "\\.csv$"
+        ]
+    },
+    "headers": [
+        {
+            "name": "prefix",
+            "value": "COT_VehicleManager"
+        },
+        {
+            "name": "product",
+            "value": "dayz ugc"
+        }
+    ]
+}

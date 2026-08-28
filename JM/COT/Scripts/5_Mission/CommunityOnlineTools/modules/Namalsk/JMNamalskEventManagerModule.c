@@ -38,6 +38,22 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Namalsk.View" );
 	}
 
+	override string GetCategory()
+	{
+		return "Events";
+	}
+
+	override string GetWebhookTitle()
+	{
+		return "Namalsk Events Module";
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "StartEvent"  );
+		types.Insert( "CancelEvent" );
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/eventspawner_form.layout";
@@ -50,7 +66,17 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		
 	override string GetIconName()
 	{
-		return "N";
+		return JMConstants.Lucide( "radiation" );
+	}
+
+	override bool ImageIsIcon()
+	{
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 	
 	override void OnMissionLoaded()
@@ -106,7 +132,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 				if (!ctx.Read(evt)) return;
 
 				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Start", sender, instance)) return;
-				
+
+				GetCommunityOnlineToolsBase().Log( sender, "Started Namalsk event: " + evt );
+				SendWebhookColored( "StartEvent", instance, "Started Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
+
 				StartEvent(evt);
 
 				return;
@@ -117,7 +146,10 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 				if (!ctx.Read(evt)) return;
 
 				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Cancel", sender, instance)) return;
-				
+
+				GetCommunityOnlineToolsBase().Log( sender, "Cancelled Namalsk event: " + evt );
+				SendWebhookColored( "CancelEvent", instance, "Cancelled Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
+
 				CancelEvent(evt);
 
 				return;

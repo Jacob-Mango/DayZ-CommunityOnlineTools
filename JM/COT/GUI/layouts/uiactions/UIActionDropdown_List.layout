@@ -1,0 +1,24 @@
+PanelWidgetClass UIActionDropdown_List {
+ position 0 0
+ size 1 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ clipchildren 1
+ color 0.082 0.098 0.118 0.980
+ style COTBox8Set
+ {
+  GridSpacerWidgetClass action_list_grid {
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Columns 1
+   Rows 1
+  }
+ }
+}

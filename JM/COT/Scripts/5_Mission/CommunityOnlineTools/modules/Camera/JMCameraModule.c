@@ -78,9 +78,20 @@ class JMCameraModule: JMRenderableModuleBase
 		return "#STR_COT_CAMERA_MODULE_NAME";
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Camera Module";
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "Enter" );
+		types.Insert( "Leave" );
+	}
+
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Camera.paa";
+		return JMConstants.Lucide( "video" );
 	}
 
 	override bool ImageIsIcon()
@@ -398,6 +409,8 @@ class JMCameraModule: JMRenderableModuleBase
 		}
 
 		GetCommunityOnlineToolsBase().Log( sender, "Entered the Free Camera");
+		JMPlayerInstance enterInst = GetPermissionsManager().GetPlayer( sender.GetId() );
+		SendWebhookColored( "Enter", enterInst, "Entered free camera", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void RPC_Enter( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -451,7 +464,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if (CurrentActiveCamera.IsInherited(JMCinematicCamera))
 		{
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
 		#endif
 			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
@@ -501,7 +514,7 @@ class JMCameraModule: JMRenderableModuleBase
 		else
 		{
 			player.COT_EnableBonePositionUpdate(false);
-			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
+			COTCreateLocalAdminNotification(new StringLocaliser("Left freecam. In case your 3rd person camera or collision is broken, use the 'Sit Crossed' emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
 			if (g_Game.IsMultiplayer())
 			{
@@ -552,6 +565,8 @@ class JMCameraModule: JMRenderableModuleBase
 			}
 
 			GetCommunityOnlineToolsBase().Log( sender, "Left the Free Camera");
+			JMPlayerInstance leaveInst = GetPermissionsManager().GetPlayer( sender.GetId() );
+			SendWebhookColored( "Leave", leaveInst, "Left free camera", JMConstants.WEBHOOK_COLOR_INFO );
 			if (player.m_JM_SpectatedObject)
 				return;
 
@@ -739,7 +754,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( !Class.CastTo(cineCamera, CurrentActiveCamera) )
 			return;
 
-		// Build filtered copies — skip zero-position waypoints, never mutate the UI's array
+		// Build filtered copies - skip zero-position waypoints, never mutate the UI's array
 		array< ref JMCameraWaypoint > filtered = new array< ref JMCameraWaypoint >;
 		foreach ( JMCameraWaypoint wp : waypoints )
 		{
@@ -851,7 +866,7 @@ class JMCameraModule: JMRenderableModuleBase
 	}
 
 	// ----------------------------------------------------------------
-	//  Feature 1 — Named path persistence
+	//  Feature 1 - Named path persistence
 	// ----------------------------------------------------------------
 
 	void SaveCurrentPath( string name )
@@ -913,7 +928,7 @@ class JMCameraModule: JMRenderableModuleBase
 	}
 
 	// ----------------------------------------------------------------
-	//  Feature 5 — Named position bookmarks
+	//  Feature 5 - Named position bookmarks
 	// ----------------------------------------------------------------
 
 	void SaveBookmark( string name, vector position )

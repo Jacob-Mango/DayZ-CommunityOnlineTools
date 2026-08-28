@@ -1,12 +1,17 @@
 class JMWebhookForm: JMFormBase
 {
+	private static const float           HEADER_HEIGHT = 35;
+
+	private Widget                       m_Panel;
 	private UIActionScroller             m_Scroller;
 	private Widget                       m_ActionsWrapper;
+	private UIActionText                 m_HeaderTitle;
 
 	private ref map< string, ref JMWebhookSection > m_Sections;
 	private ref array< string >          m_Types;
 
-	private JMWebhookCOTModule           m_Module;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMWebhookCOTModule         m_Module;
 
 	private string                       m_PendingName;
 
@@ -25,16 +30,28 @@ class JMWebhookForm: JMFormBase
 
 	override void OnInit()
 	{
-		// Header: Add Webhook button — right-aligned, moderate width
+		// ----------------------------------------------------------------------
+		// Webhook form layout map (400 x 350 px)
+		// ----------------------------------------------------------------------
+		// HEADER (35 px):   "Webhooks (N)" ????????????? [+ Add Webhook]
+		// PANEL  (315 px):  scrollable list of JMWebhookSection blocks.
+		// ----------------------------------------------------------------------
+
 		Widget header = layoutRoot.FindAnyWidget( "header_panel" );
-		Widget headerSpacer = UIActionManager.CreateGridSpacer( header, 1, 2 );
-		// Empty left cell pushes the button to the right side
-		UIActionManager.CreateText( headerSpacer, "" );
-		UIActionButton addBtn = UIActionManager.CreateButton( headerSpacer, "+ Add Webhook", this, "Action_AddWebhook" );
-		addBtn.SetColor( COLOR_GREEN );
+		Widget headerRow = UIActionManager.CreateWrapSpacer( header, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+		m_HeaderTitle = UIActionManager.CreateText( headerRow, "Webhooks" );
+		m_HeaderTitle.SetWidth( 0.59 );
+		m_HeaderTitle.SetLabelVAlign( UIActionVAlign.CENTER );
+
+		UIActionButton addBtn = UIActionManager.CreateButton( headerRow, "+ Add Webhook", this, "Action_AddWebhook" );
+		addBtn.SetWidth( 0.4 );
+		addBtn.SetColor( JMTheme.SUCCESS_FILL );
+		addBtn.SetTooltip( "Create a new Discord webhook configuration" );
 
 		// Scrollable content area
-		m_Scroller      = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
+		m_Panel         = layoutRoot.FindAnyWidget( "panel" );
+		m_Scroller      = UIActionManager.CreateScroller( m_Panel );
 		m_ActionsWrapper = m_Scroller.GetContentWidget();
 
 		OnSettingsUpdated();
@@ -44,6 +61,11 @@ class JMWebhookForm: JMFormBase
 
 	override void OnResize( float w, float h )
 	{
+		// Panel width is relative to the form root, height is in pixels, so only
+		// the height has to follow the window: fill everything below the header.
+		if ( m_Panel )
+			m_Panel.SetSize( 1.0, Math.Max( 0, h - HEADER_HEIGHT ) );
+
 		if ( m_Scroller )
 			m_Scroller.UpdateScroller();
 	}
@@ -67,22 +89,29 @@ class JMWebhookForm: JMFormBase
 			child = next;
 		}
 
-		for ( int i = 0; i < groups.Count(); i++ )
-		{
-			JMWebhookConnectionGroup group = groups[i];
-			JMWebhookSection section = new JMWebhookSection( m_ActionsWrapper, this, group, m_Types );
-			m_Sections.Insert( group.Name, section );
-		}
+		if ( m_HeaderTitle )
+			m_HeaderTitle.SetLabel( "Webhooks (" + groups.Count() + ")" );
 
 		if ( groups.Count() == 0 )
+		{
 			UIActionManager.CreateText( m_ActionsWrapper, "No webhooks configured. Click 'Add Webhook' to create one." );
+		}
+		else
+		{
+			for ( int i = 0; i < groups.Count(); i++ )
+			{
+				JMWebhookConnectionGroup group = groups[i];
+				JMWebhookSection section = new JMWebhookSection( m_ActionsWrapper, this, group, m_Types );
+				m_Sections.Insert( group.Name, section );
+			}
+		}
 
 		if ( m_Scroller )
 			m_Scroller.UpdateScroller();
 	}
 
 	// -------------------------------------------------------------------------
-	//  Add Webhook — two-step: name then URL
+	//  Add Webhook - two-step: name then URL
 	// -------------------------------------------------------------------------
 
 	void Action_AddWebhook( UIEvent eid, UIActionBase action )
@@ -161,29 +190,19 @@ class JMWebhookForm: JMFormBase
 	//  Remove Webhook
 	// -------------------------------------------------------------------------
 
+	// ConfirmInline button: fires UIEvent.CHANGE only after the user has
+	// confirmed the action through its built-in two-step interaction, so
+	// no extra confirmation popup is needed here.
 	void Action_RemoveWebhook( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		JMWebhookTypeData data;
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		m_PendingName = data.Name;
-
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Remove Webhook",
-			"Remove webhook '" + data.Name + "'? This cannot be undone.",
-			"#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_REMOVE", "Action_RemoveWebhook_Confirm" );
-	}
-
-	void Action_RemoveWebhook_Confirm( JMConfirmation confirmation )
-	{
-		if ( m_PendingName == "" )
-			return;
-
-		m_Module.RemoveConnectionGroup( m_PendingName );
-		m_PendingName = "";
+		m_Module.RemoveConnectionGroup( data.Name );
 	}
 
 	// -------------------------------------------------------------------------
@@ -218,7 +237,7 @@ class JMWebhookForm: JMFormBase
 
 	void Action_RemoveType( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		JMWebhookTypeData data;

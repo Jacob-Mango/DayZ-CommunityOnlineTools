@@ -53,17 +53,3 @@ class COT_BloodTypes
 	static const int AB_P = LIQUID_BLOOD_AB_P;
 	static const int AB_N = LIQUID_BLOOD_AB_N;
 }
-
-//! LEGACY, not used
-class COT_LiquidTypes
-{
-	static const int UNKNOWN;
-	static const int WATER = LIQUID_WATER;
-	static const int RIVERWATER = LIQUID_RIVERWATER;
-	static const int VODKA = LIQUID_VODKA;
-	static const int BEER = LIQUID_BEER;
-	static const int GASOLINE = LIQUID_GASOLINE;
-	static const int DIESEL = LIQUID_DIESEL;
-	static const int DISINFECTANT = LIQUID_DISINFECTANT;
-	static const int SOLUTION = LIQUID_SOLUTION;
-}

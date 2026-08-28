@@ -1,0 +1,133 @@
+PanelWidgetClass UIActionDropdown {
+ size 1 30
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ scriptclass "UIActionDropdown"
+ {
+  FrameWidgetClass action_wrapper {
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    TextWidgetClass action_label {
+     ignorepointer 1
+     position 0 0
+     size 0.30 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     halign left_ref
+     valign center_ref
+     style Light
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+     "text halign" left
+     "text valign" center
+    }
+    PanelWidgetClass action_field {
+     ignorepointer 0
+     position 0.30 0
+     size 0.70 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     halign left_ref
+     valign top_ref
+     color 0.133 0.161 0.196 0.700
+     style COTField4Set
+     {
+      ImageWidgetClass action_selected_icon {
+       visible 0
+       ignorepointer 1
+       position 4 0
+       size 16 16
+       halign left_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
+      }
+      TextWidgetClass action_selected_text {
+       ignorepointer 1
+       position 0 0
+       size 0.92 1
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       halign left_ref
+       valign center_ref
+       style Light
+       font "gui/fonts/sdf_MetronLight24"
+       "text offset" 40 0
+       "exact text" 1
+       "exact text size" 14
+       "text halign" left
+       "text valign" center
+      }
+      ButtonWidgetClass action_toggle {
+       ignorepointer 0
+       position 0 0
+       size 24 1
+       hexactpos 1
+       hexactsize 1
+       vexactpos 0
+       vexactsize 0
+       halign right_ref
+       valign top_ref
+       {
+        ImageWidgetClass action_toggle_image {
+         ignorepointer 1
+         position 0 0
+         size 16 16
+         halign center_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.098 0.118 0.141 0.996
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style COTField4Set
+  }
+ }
+}

@@ -27,6 +27,22 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Notif" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.CannotBeTargetedByAI" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.AccessInventory" );
+
+		//! New permissions default to INHERIT, so no existing role gains these on
+		//! upgrade - an admin has to grant them before the inventory tab can do
+		//! anything beyond listing.
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Inventory.Delete" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Inventory.Repair" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Inventory.Take" );
+
+		//! Covers every in-place edit of an item the admin already sees:
+		//! unjamming, quantity, temperature, food stage and liquid type. They
+		//! are one permission because they are one kind of act - rewriting a
+		//! carried item's state - and splitting them would leave a role able to
+		//! set a canned bean rotten but not burned.
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Inventory.Modify" );
+
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Statistics.View" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.RemoveCollision" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.AdminNVG" );
 
@@ -46,7 +62,18 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.HeatBuffer" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Set.BloodyHands" );
 
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Disease.Add" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Disease.Remove" );
+
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Bleed.Add" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Bleed.Stop" );
+
 		GetPermissionsManager().RegisterPermission( "Admin.Transport.Repair" );
+
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Vomit" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.GodMode" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Scale" );
+		GetPermissionsManager().RegisterPermission( "COT" );
 
 		JMScriptInvokers.MENU_PLAYER_CHECKBOX.Insert( OnPlayer_Checked );
 		JMScriptInvokers.MENU_PLAYER_BUTTON.Insert( OnPlayer_Button );
@@ -74,7 +101,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		Bind( new JMModuleBinding( "InputToggleUnlimitedAmmo",	"UAPlayerModuleUnlimitedAmmo",	true 	) );
 		Bind( new JMModuleBinding( "InputToggleAdminNV",	"UAPlayerModuleAdminNV",	true 	) );
 		Bind( new JMModuleBinding( "InputFreezePlayer",		"UAPlayerModuleFreezePlayer",		true 	) );
-		Bind( new JMModuleBinding( "EndSpectating",		"UAPlayerModuleStopSpectating",		true 	) );
+		Bind( new JMModuleBinding( "EndSpectating",      "UAPlayerModuleStopSpectating", true ) );
+		Bind( new JMModuleBinding( "Input_HealSelf",     "UAPlayerModuleHealSelf",       true ) );
+		Bind( new JMModuleBinding( "Input_ToggleFly",    "UAPlayerModuleToggleFly",      true ) );
 	}
 
 	void OnPlayer_Checked( string guid, bool checked )
@@ -91,6 +120,11 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if ( check )
 			JM_GetSelected().AddPlayer( guid );
+	}
+
+	override bool HasAccess()
+	{
+		return true;
 	}
 
 	override string GetInputToggle()
@@ -115,7 +149,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Player.paa";
+		return JMConstants.Lucide( "user-cog" );
 	}
 
 	override bool ImageIsIcon()
@@ -142,7 +176,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		types.Insert( "PF" );
 		types.Insert( "Kick" );
 		types.Insert( "Message" );
+		types.Insert( "Notif" );
 		types.Insert( "Ban" );
+		types.Insert( "Disease" );
 	}
 
 	override int GetRPCMin()
@@ -267,6 +303,45 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.SetScale:
 			RPC_SetScale( ctx, sender, target );
 			break;
+		case JMPlayerModuleRPC.AddDisease:
+			RPC_AddDisease( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.RemoveDisease:
+			RPC_RemoveDisease( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.RemoveAllDiseases:
+			RPC_RemoveAllDiseases( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SendDiseaseMask:
+			RPC_SendDiseaseMask( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.AddBleedingPart:
+			RPC_AddBleedingPart( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.StopBleedingPart:
+			RPC_StopBleedingPart( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.SendBleedingState:
+			RPC_SendBleedingState( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.RequestInventory:
+			RPC_RequestInventory( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.InventoryDelete:
+			RPC_InventoryDelete( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.InventoryRepair:
+			RPC_InventoryRepair( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.InventoryTake:
+			RPC_InventoryTake( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.InventoryModify:
+			RPC_InventoryModify( ctx, sender, target );
+			break;
+		case JMPlayerModuleRPC.RequestPlayerStats:
+			RPC_RequestPlayerStats( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -298,6 +373,9 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			if (!player.PlayerObject)
 				continue;
+
+			GetCommunityOnlineToolsBase().Log( ident, "Sent message to " + player.GetName() + " (" + player.GetGUID() + "): " + messageText );
+			SendWebhookColored( "Message", instance, "Sent message to " + player.FormatSteamWebhook() + ": " + messageText, JMConstants.WEBHOOK_COLOR_INFO );
 
 			Message( player.PlayerObject, messageText );
 		}
@@ -353,6 +431,12 @@ class JMPlayerModule: JMRenderableModuleBase
 			if (!player.PlayerObject)
 				continue;
 
+			if ( ident )
+			{
+				GetCommunityOnlineToolsBase().Log( ident, "Sent notification to " + player.GetName() + " (" + player.GetGUID() + "): " + NotifText );
+				SendWebhookColored( "Notif", instance, "Sent notification to " + player.FormatSteamWebhook() + ": " + NotifText, JMConstants.WEBHOOK_COLOR_INFO );
+			}
+
 			NotificationSystem.Create( new StringLocaliser( "#STR_COT_NOTIFICATION_MESSAGE_FROM_ADMIN" ), new StringLocaliser( NotifText ), "JM//COT//gui//textures//cot_icon.edds", COLOR_RED, 10, player.PlayerObject.GetIdentity() );
 		}
 	}
@@ -385,7 +469,7 @@ class JMPlayerModule: JMRenderableModuleBase
 	}
 
 	// -----------------------------------------------------------------------
-	// Batched stat setter — single RPC replaces 7 individual SetX methods.
+	// Batched stat setter - single RPC replaces 7 individual SetX methods.
 	// Public entry points below are kept as thin wrappers so call sites and
 	// form code don't need to change.
 	// -----------------------------------------------------------------------
@@ -515,7 +599,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetStat( type, value, guids, senderRPC, instance );
 	}
 
-	// Public wrappers — keep existing call sites working without changes
+	// Public wrappers - keep existing call sites working without changes
 	void SetHealth(     float v, array< string > guids ) { SetStat( JMStatType.Health,     v, guids ); }
 	void SetBlood(      float v, array< string > guids ) { SetStat( JMStatType.Blood,      v, guids ); }
 	void SetShock(      float v, array< string > guids ) { SetStat( JMStatType.Shock,      v, guids ); }
@@ -999,7 +1083,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			COT_PreviousActiveCamera.SetActive( false );
 
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
 		#endif
 			g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
@@ -1170,7 +1254,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			CurrentActiveCamera.SetActive( false );
 
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			ErrorEx("g_Game.ObjectDeleteOnClient(CurrentActiveCamera)", ErrorExSeverity.INFO);
 		#endif
 			g_Game.ObjectDeleteOnClient(CurrentActiveCamera);
@@ -1204,7 +1288,7 @@ class JMPlayerModule: JMRenderableModuleBase
 
 		if (COT_PreviousActiveCamera && COT_PreviousActiveCamera.IsInherited(JMSpectatorCamera))
 		{
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			ErrorEx("g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera)", ErrorExSeverity.INFO);
 		#endif
 			g_Game.ObjectDeleteOnClient(COT_PreviousActiveCamera);
@@ -1239,7 +1323,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		{
 			CF_Log.Debug("JMPlayerModule::Client_Check_EndSpectating - player idle");
 			playerSpectator.COT_EnableBonePositionUpdate(false);
-			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating. In case your 3rd person camera or collision is broken, use the “Sit Crossed” emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
+			COTCreateLocalAdminNotification(new StringLocaliser("Stopped spectating. In case your 3rd person camera or collision is broken, use the 'Sit Crossed' emote to fix it."), "set:ccgui_enforce image:HudBuild", 5);
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send(NULL, JMPlayerModuleRPC.EndSpectating_Finish, true, NULL);
@@ -2169,6 +2253,29 @@ class JMPlayerModule: JMRenderableModuleBase
 		Heal(guids);
 	}
 
+	void Input_HealSelf( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Heal", instance ) ) return;
+
+		array< string > guids = {instance.GetGUID()};
+		Heal( guids );
+	}
+
+	void Input_ToggleFly( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.RemoveCollision", instance ) ) return;
+
+		bool value = !instance.GetRemoveCollision();
+		array< string > guids = {instance.GetGUID()};
+		SetRemoveCollision( value, guids );
+	}
+
 	void InputToggleGodMode( UAInput input )
 	{
 		if ( !input.LocalPress() )
@@ -2754,27 +2861,42 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetPermissions( permission, guids, senderRPC, instance );
 	}
 
-	void SetRoles( array< string > roles, array< string > guids )
+	// nameRestrictions: optional map of role -> required in-game name (case-sensitive).
+	void SetRoles( array< string > roles, array< string > guids, map< string, string > nameRestrictions = NULL )
 	{
 		if ( IsMissionHost() )
 		{
-			Exec_SetRoles( roles, guids, NULL );
+			Exec_SetRoles( roles, guids, NULL, NULL, nameRestrictions );
 		} else
 		{
+			// Serialize nameRestrictions as two parallel arrays
+			array< string > nrKeys   = new array< string >;
+			array< string > nrValues = new array< string >;
+			if ( nameRestrictions )
+			{
+				for ( int ni = 0; ni < nameRestrictions.Count(); ni++ )
+				{
+					nrKeys.Insert( nameRestrictions.GetKey( ni ) );
+					nrValues.Insert( nameRestrictions.GetElement( ni ) );
+				}
+			}
+
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( roles );
 			rpc.Write( guids );
+			rpc.Write( nrKeys );
+			rpc.Write( nrValues );
 			rpc.Send( NULL, JMPlayerModuleRPC.SetRoles, true, NULL );
 		}
 	}
 
-	private void Exec_SetRoles( array< string > roles, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL  )
+	private void Exec_SetRoles( array< string > roles, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL, map< string, string > nameRestrictions = NULL )
 	{
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
 
 		for ( int i = 0; i < players.Count(); i++ )
-		{		
-			players[i].LoadRoles( roles );
+		{
+			players[i].LoadRoles( roles, nameRestrictions );
 
 			players[i].Update();
 
@@ -2799,10 +2921,1444 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
 			return;
 
+		// Read optional name restriction arrays (added in later version - gracefully skip if absent)
+		array< string > nrKeys   = new array< string >;
+		array< string > nrValues = new array< string >;
+		ctx.Read( nrKeys );
+		ctx.Read( nrValues );
+
+		map< string, string > nameRestrictions = new map< string, string >;
+		int nrCount = Math.Min( nrKeys.Count(), nrValues.Count() );
+		for ( int ni = 0; ni < nrCount; ni++ )
+			nameRestrictions.Insert( nrKeys[ni], nrValues[ni] );
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Roles", senderRPC, instance ) )
 			return;
 
-		Exec_SetRoles( roles, guids, senderRPC, instance );
+		Exec_SetRoles( roles, guids, senderRPC, instance, nameRestrictions );
+	}
+
+	// ---------------- Disease Add / Remove ----------------
+	// Bulk friendly: one RPC carries the agent id, count, and GUID list.
+	// Server applies via PlayerBase.COTAddDisease/COTRemoveDisease helpers.
+
+	void AddDisease( int agent, float count, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_AddDisease( agent, count, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( agent );
+			rpc.Write( count );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.AddDisease, true, NULL );
+		}
+	}
+
+	private void Exec_AddDisease( int agent, float count, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		array<JMPlayerInstance> affectedPlayers = {};
+		int affected = 0;
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTAddDisease( agent, count );
+
+			affectedPlayers.Insert( players[i] );
+			affected++;
+
+			GetCommunityOnlineToolsBase().Log( ident, "Added disease agent=" + agent.ToString() + " count=" + count.ToString() + " [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Disease", instance, "Added disease (agent=" + agent.ToString() + ", count=" + count.ToString() + ") for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
+
+			players[i].Update();
+		}
+
+		if ( affected > 0 )
+		{
+			foreach ( JMPlayerInstance pi : affectedPlayers )
+			{
+				GetCommunityOnlineTools().SetClient( pi );
+			}
+		}
+	}
+
+	private void RPC_AddDisease( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int agent;
+		if ( !ctx.Read( agent ) )
+			return;
+
+		float count;
+		if ( !ctx.Read( count ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Add", senderRPC, instance ) )
+			return;
+
+		Exec_AddDisease( agent, count, guids, senderRPC, instance );
+	}
+
+	void RemoveDisease( int agent, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_RemoveDisease( agent, guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( agent );
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.RemoveDisease, true, NULL );
+		}
+	}
+
+	private void Exec_RemoveDisease( int agent, array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		array<JMPlayerInstance> affectedPlayers = {};
+		int affected = 0;
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTRemoveDisease( agent );
+
+			affectedPlayers.Insert( players[i] );
+			affected++;
+
+			GetCommunityOnlineToolsBase().Log( ident, "Removed disease agent=" + agent.ToString() + " [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Disease", instance, "Removed disease (agent=" + agent.ToString() + ") for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
+
+			players[i].Update();
+		}
+
+		if ( affected > 0 )
+		{
+			foreach ( JMPlayerInstance pi : affectedPlayers )
+			{
+				GetCommunityOnlineTools().SetClient( pi );
+			}
+		}
+	}
+
+	private void RPC_RemoveDisease( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int agent;
+		if ( !ctx.Read( agent ) )
+			return;
+
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove", senderRPC, instance ) )
+			return;
+
+		Exec_RemoveDisease( agent, guids, senderRPC, instance );
+	}
+
+	void RemoveAllDiseases( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_RemoveAllDiseases( guids, NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guids );
+			rpc.Send( NULL, JMPlayerModuleRPC.RemoveAllDiseases, true, NULL );
+		}
+	}
+
+	private void Exec_RemoveAllDiseases( array< string > guids, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+
+		array<JMPlayerInstance> affectedPlayers = {};
+		int affected = 0;
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( player == NULL )
+				continue;
+
+			player.COTRemoveAllDiseases();
+
+			affectedPlayers.Insert( players[i] );
+			affected++;
+
+			GetCommunityOnlineToolsBase().Log( ident, "Cleared all diseases [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Disease", instance, "Cleared all diseases for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+
+			players[i].Update();
+		}
+
+		if ( affected > 0 )
+		{
+			foreach ( JMPlayerInstance pi : affectedPlayers )
+			{
+				GetCommunityOnlineTools().SetClient( pi );
+			}
+		}
+	}
+
+	private void RPC_RemoveAllDiseases( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove", senderRPC, instance ) )
+			return;
+
+		Exec_RemoveAllDiseases( guids, senderRPC, instance );
+	}
+
+	// ---------------- Disease mask sync (server -> client) ----------------
+	// Client requests the current disease bitmask for a single player (the one
+	// currently selected in the form). Server reads the live AgentPool bits
+	// and pushes them back. Cheap: one bitmask per form-show.
+
+	void RequestDiseaseMask( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			SendDiseaseMaskTo( NULL, guid );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Send( NULL, JMPlayerModuleRPC.SendDiseaseMask, true, NULL );
+	}
+
+	private void RPC_SendDiseaseMask( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		// Server-side: client requested a mask - read the guid and send back
+		if ( IsMissionHost() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+
+			JMPlayerInstance instance;
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Add", senderRPC, instance ) )
+				return;
+
+			SendDiseaseMaskTo( senderRPC, guid );
+			return;
+		}
+
+		// Client-side: server pushed a mask - populate the form
+		string maskGuid;
+		int cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal;
+
+		if ( !ctx.Read( maskGuid ) )    return;
+		if ( !ctx.Read( cholera ) )     return;
+		if ( !ctx.Read( influenza ) )   return;
+		if ( !ctx.Read( salmonella ) )  return;
+		if ( !ctx.Read( brain ) )       return;
+		if ( !ctx.Read( foodPoison ) )  return;
+		if ( !ctx.Read( chemPoison ) )  return;
+		if ( !ctx.Read( wound ) )       return;
+		if ( !ctx.Read( nerve ) )       return;
+		if ( !ctx.Read( heavyMetal ) )  return;
+
+		JMPlayerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnDiseaseMaskUpdated( maskGuid, cholera, influenza, salmonella, brain, foodPoison, chemPoison, wound, nerve, heavyMetal );
+	}
+
+	private void SendDiseaseMaskTo( PlayerIdentity to, string guid )
+	{
+		int mask = 0;
+		int cholera = 0, influenza = 0, salmonella = 0, brain = 0;
+		int foodPoison = 0, chemPoison = 0, wound = 0, nerve = 0, heavyMetal = 0;
+
+		if ( guid != "" )
+		{
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+			if ( players.Count() > 0 )
+			{
+				PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+				if ( player && player.GetAgents() )
+				{
+					cholera    = player.GetSingleAgentCount( eAgents.CHOLERA );
+					influenza  = player.GetSingleAgentCount( eAgents.INFLUENZA );
+					salmonella = player.GetSingleAgentCount( eAgents.SALMONELLA );
+					brain      = player.GetSingleAgentCount( eAgents.BRAIN );
+					foodPoison = player.GetSingleAgentCount( eAgents.FOOD_POISON );
+					chemPoison = player.GetSingleAgentCount( eAgents.CHEMICAL_POISON );
+					wound      = player.GetSingleAgentCount( eAgents.WOUND_AGENT );
+					nerve      = player.GetSingleAgentCount( eAgents.NERVE_AGENT );
+					heavyMetal = player.GetSingleAgentCount( eAgents.HEAVYMETAL );
+				}
+			}
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( cholera );
+		rpc.Write( influenza );
+		rpc.Write( salmonella );
+		rpc.Write( brain );
+		rpc.Write( foodPoison );
+		rpc.Write( chemPoison );
+		rpc.Write( wound );
+		rpc.Write( nerve );
+		rpc.Write( heavyMetal );
+		rpc.Send( NULL, JMPlayerModuleRPC.SendDiseaseMask, true, to );
+	}
+
+	private void RPC_ReceiveDiseaseMask( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		// Removed - combined into RPC_SendDiseaseMask above.
+	}
+
+	// ---------------- Session statistics (server -> client) ----------------
+	//
+	// Playtime, deaths and lifespan live in the per-player JSON on the server
+	// and are pulled on demand, the same way the disease mask is.
+	//
+	// Deliberately NOT folded into JMPlayerInstance.OnSendHealth: that runs for
+	// every roster entry several times a second, so seven more ints per player
+	// would be a real bandwidth cost on a full server for numbers nobody is
+	// looking at unless the Statistics tab happens to be open.
+
+	void RequestPlayerStats( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			SendPlayerStatsTo( NULL, guid );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Send( NULL, JMPlayerModuleRPC.RequestPlayerStats, true, NULL );
+	}
+
+	private void RPC_RequestPlayerStats( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		// Server-side: a client asked for a player history.
+		if ( IsMissionHost() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+
+			JMPlayerInstance instance;
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View", senderRPC, instance ) )
+				return;
+
+			SendPlayerStatsTo( senderRPC, guid );
+			return;
+		}
+
+		// Client-side: the server pushed a history.
+		string statsGuid;
+		int playtime, sessions, firstSeen, lastSeen, deaths, longestLife, currentLife;
+
+		if ( !ctx.Read( statsGuid ) )   return;
+		if ( !ctx.Read( playtime ) )    return;
+		if ( !ctx.Read( sessions ) )    return;
+		if ( !ctx.Read( firstSeen ) )   return;
+		if ( !ctx.Read( lastSeen ) )    return;
+		if ( !ctx.Read( deaths ) )      return;
+		if ( !ctx.Read( longestLife ) ) return;
+		if ( !ctx.Read( currentLife ) ) return;
+
+		JMPlayerStats stats = new JMPlayerStats();
+		stats.TotalPlaytimeSec     = playtime;
+		stats.SessionCount         = sessions;
+		stats.FirstSeenUnix        = firstSeen;
+		stats.LastSeenUnix         = lastSeen;
+		stats.Deaths               = deaths;
+		stats.LongestLifeSec       = longestLife;
+		stats.CurrentLifeStartUnix = currentLife;
+
+		JMPlayerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnPlayerStatsUpdated( statsGuid, stats );
+	}
+
+	private void SendPlayerStatsTo( PlayerIdentity to, string guid )
+	{
+		int playtime = 0;
+		int sessions = 0;
+		int firstSeen = 0;
+		int lastSeen = 0;
+		int deaths = 0;
+		int longestLife = 0;
+		int currentLife = 0;
+
+	#ifndef CF_MODULE_PERMISSIONS
+		if ( guid != "" )
+		{
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+			if ( players.Count() > 0 )
+			{
+				JMPlayerStats stats = players[0].GetStats();
+				if ( stats )
+				{
+					// The live figure, not the stored one: an admin looking at a
+					// connected player expects the session in progress to count.
+					playtime    = stats.GetLivePlaytimeSeconds();
+					sessions    = stats.SessionCount;
+					firstSeen   = stats.FirstSeenUnix;
+					lastSeen    = stats.LastSeenUnix;
+					deaths      = stats.Deaths;
+					longestLife = stats.LongestLifeSec;
+					currentLife = stats.CurrentLifeStartUnix;
+				}
+			}
+		}
+	#endif
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( playtime );
+		rpc.Write( sessions );
+		rpc.Write( firstSeen );
+		rpc.Write( lastSeen );
+		rpc.Write( deaths );
+		rpc.Write( longestLife );
+		rpc.Write( currentLife );
+		rpc.Send( NULL, JMPlayerModuleRPC.RequestPlayerStats, true, to );
+	}
+
+	// ---------------- Inventory listing and item operations ----------------
+	//
+	// The client has no inventory data of its own: JMPlayerInstance syncs stats
+	// and position, never cargo. So the tab asks for a snapshot when it is
+	// opened and after every operation, and never on a timer - an unrequested
+	// ~10 KB per second per connected admin is not something a full server can
+	// afford for a panel nobody may be looking at.
+	//
+	// Same request/response shape as SendDiseaseMask: one RPC id, one handler,
+	// branching on IsMissionHost() for the server and client halves.
+
+	void RequestInventory( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			SendInventoryTo( NULL, guid );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Send( NULL, JMPlayerModuleRPC.RequestInventory, true, NULL );
+	}
+
+	private void RPC_RequestInventory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		// Server-side: a client asked for a listing.
+		if ( IsMissionHost() )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+
+			JMPlayerInstance instance;
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory", senderRPC, instance ) )
+				return;
+
+			SendInventoryTo( senderRPC, guid );
+			return;
+		}
+
+		// Client-side: the server pushed a listing.
+		string listGuid;
+		bool truncated;
+		int count;
+
+		if ( !ctx.Read( listGuid ) )  return;
+		if ( !ctx.Read( truncated ) ) return;
+		if ( !ctx.Read( count ) )     return;
+
+		if ( count < 0 || count > JMConstants.INVENTORY_MAX_ITEMS )
+			return;
+
+		array< ref JMPlayerInventoryItem > items = new array< ref JMPlayerInventoryItem >;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			JMPlayerInventoryItem item = new JMPlayerInventoryItem();
+
+			// A short read means the rest of the payload is unusable; render
+			// nothing rather than a half-decoded list.
+			if ( !item.OnReceive( ctx ) )
+				return;
+
+			items.Insert( item );
+		}
+
+		JMPlayerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnInventoryUpdated( listGuid, items, truncated );
+	}
+
+	private void SendInventoryTo( PlayerIdentity to, string guid )
+	{
+		array< ref JMPlayerInventoryItem > items = new array< ref JMPlayerInventoryItem >;
+		bool truncated = false;
+
+		if ( guid != "" )
+		{
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+			if ( players.Count() > 0 )
+			{
+				PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+				if ( player && player.GetInventory() )
+					truncated = CollectInventory( player, items );
+			}
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( truncated );
+		rpc.Write( items.Count() );
+
+		foreach ( JMPlayerInventoryItem item : items )
+			item.OnSend( rpc );
+
+		rpc.Send( NULL, JMPlayerModuleRPC.RequestInventory, true, to );
+	}
+
+	//! Flatten the player inventory into `items`. Returns true when the cap cut
+	//! the listing short.
+	//!
+	//! PREORDER visits a parent before its children, so by the time a child is
+	//! reached its parent is already in `indexOf` and ParentIndex resolves with
+	//! no recursion and no second pass.
+	private bool CollectInventory( PlayerBase player, array< ref JMPlayerInventoryItem > items )
+	{
+		array< EntityAI > entities = {};
+		player.GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, entities );
+
+		map< EntityAI, int > indexOf = new map< EntityAI, int >;
+
+		foreach ( EntityAI entity : entities )
+		{
+			if ( !entity )
+				continue;
+
+			// The traversal includes the player itself.
+			if ( entity == player )
+				continue;
+
+			if ( items.Count() >= JMConstants.INVENTORY_MAX_ITEMS )
+				return true;
+
+			JMPlayerInventoryItem item = new JMPlayerInventoryItem();
+
+			int netLow, netHigh;
+			entity.GetNetworkID( netLow, netHigh );
+			item.NetIdLow  = netLow;
+			item.NetIdHigh = netHigh;
+			item.Type      = entity.GetType();
+
+			EntityAI parent = entity.GetHierarchyParent();
+			int parentIndex = -1;
+			if ( parent && indexOf.Contains( parent ) )
+				parentIndex = indexOf.Get( parent );
+
+			item.ParentIndex = parentIndex;
+
+			int depth = 0;
+			if ( parentIndex >= 0 )
+				depth = items[parentIndex].Depth + 1;
+
+			item.Depth = depth;
+
+			int flags = 0;
+			if ( entity.GetInventory() && entity.GetInventory().IsInCargo() )
+				flags = flags | JMPlayerInventoryItem.FLAG_CARGO;
+
+			InventoryLocation loc = new InventoryLocation();
+			if ( entity.GetInventory() && entity.GetInventory().GetCurrentInventoryLocation( loc ) )
+			{
+				if ( loc.GetType() == InventoryLocationType.ATTACHMENT )
+				{
+					flags = flags | JMPlayerInventoryItem.FLAG_ATTACHMENT;
+					item.SlotName = InventorySlots.GetSlotName( loc.GetSlot() );
+				}
+			}
+
+			if ( entity.IsWeapon() )
+				flags = flags | JMPlayerInventoryItem.FLAG_WEAPON;
+
+			if ( entity.IsMagazine() )
+				flags = flags | JMPlayerInventoryItem.FLAG_MAGAZINE;
+
+			// GetHealthLevel is the coarse 0-4 state; the health value itself is
+			// what the admin wants, on the same 0-100 scale the vitals use.
+			item.Health      = entity.GetHealth( "", "" );
+			item.HealthLevel = entity.GetHealthLevel();
+
+			if ( entity.GetMaxHealth( "", "" ) > 0 && item.Health <= 0 )
+				flags = flags | JMPlayerInventoryItem.FLAG_RUINED;
+
+			// A magazine's quantity is its AMMO COUNT. Reading GetQuantity on
+			// one answers 1 of 1 - the magazine itself - which is how a full
+			// 30-round mag reached the admin as "1/1".
+			Magazine asMag;
+			ItemBase asItem;
+			Class.CastTo( asItem, entity );
+
+			if ( Class.CastTo( asMag, entity ) )
+			{
+				item.Quantity    = asMag.GetAmmoCount();
+				item.QuantityMax = asMag.GetAmmoMax();
+
+				// An ammo pile that reaches 0 deletes itself, so its floor is 1
+				// round - the same floor the object spawner's quantity slider
+				// uses for one.
+				if ( asMag.IsAmmoPile() && asMag.GetAmmoMax() > 1 )
+					item.QuantityMin = 1;
+			}
+			else if ( asItem )
+			{
+				item.Quantity    = asItem.GetQuantity();
+				item.QuantityMax = asItem.GetQuantityMax();
+				item.QuantityMin = asItem.GetQuantityMin();
+			}
+
+			// State the per-item edits need. All of it is read off the LIVE
+			// entity: a jam and a half-drunk canteen are runtime facts the
+			// client cannot look up in a config.
+			Weapon_Base asWeapon;
+			if ( Class.CastTo( asWeapon, entity ) && asWeapon.IsJammed() )
+				flags = flags | JMPlayerInventoryItem.FLAG_JAMMED;
+
+			if ( asItem )
+			{
+				item.Temperature = asItem.GetTemperature();
+
+				if ( asItem.IsLiquidContainer() )
+				{
+					flags = flags | JMPlayerInventoryItem.FLAG_LIQUID;
+					item.LiquidType = asItem.GetLiquidType();
+				}
+
+				Edible_Base asFood;
+				if ( asItem.HasFoodStage() && Class.CastTo( asFood, asItem ) && asFood.GetFoodStage() )
+				{
+					flags = flags | JMPlayerInventoryItem.FLAG_FOOD;
+					item.Stage = asFood.GetFoodStage().GetFoodStageType();
+				}
+			}
+
+			item.Flags = flags;
+
+			indexOf.Insert( entity, items.Count() );
+			items.Insert( item );
+		}
+
+		return false;
+	}
+
+	//! Resolve a client-supplied network ID to an entity.
+	//!
+	//! SECURITY: the ID is matched ONLY against the named target player own
+	//! inventory. Resolving it against the world instead would let a client
+	//! delete or take any object on the server by guessing an ID, with the
+	//! permission check passing because the permission is per-admin, not
+	//! per-object.
+	private EntityAI ResolveInventoryItem( PlayerBase player, int netLow, int netHigh )
+	{
+		if ( !player || !player.GetInventory() )
+			return NULL;
+
+		array< EntityAI > entities = {};
+		player.GetInventory().EnumerateInventory( InventoryTraversalType.PREORDER, entities );
+
+		foreach ( EntityAI entity : entities )
+		{
+			if ( !entity || entity == player )
+				continue;
+
+			int entLow, entHigh;
+			entity.GetNetworkID( entLow, entHigh );
+
+			if ( entLow == netLow && entHigh == netHigh )
+				return entity;
+		}
+
+		return NULL;
+	}
+
+	//! Shared client half of the three item operations.
+	private void SendInventoryOp( int rpcId, string guid, int netLow, int netHigh )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
+		rpc.Send( NULL, rpcId, true, NULL );
+	}
+
+	//! Shared server half: read the request, check the permission, resolve the
+	//! entity against the target inventory. Returns NULL when any step fails.
+	private EntityAI ReadInventoryOp( ParamsReadContext ctx, PlayerIdentity senderRPC, string permission, out JMPlayerInstance instance, out JMPlayerInstance targetInstance, out string guid )
+	{
+		int netLow, netHigh;
+
+		if ( !ctx.Read( guid ) )     return NULL;
+		if ( !ctx.Read( netLow ) )   return NULL;
+		if ( !ctx.Read( netHigh ) )  return NULL;
+
+		if ( !GetPermissionsManager().HasPermission( permission, senderRPC, instance ) )
+			return NULL;
+
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+		if ( players.Count() == 0 )
+			return NULL;
+
+		targetInstance = players[0];
+
+		PlayerBase player = PlayerBase.Cast( targetInstance.PlayerObject );
+		if ( !player )
+			return NULL;
+
+		return ResolveInventoryItem( player, netLow, netHigh );
+	}
+
+	void InventoryDelete( string guid, int netLow, int netHigh )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_InventoryDelete( guid, netLow, netHigh, NULL, NULL );
+			return;
+		}
+
+		SendInventoryOp( JMPlayerModuleRPC.InventoryDelete, guid, netLow, netHigh );
+	}
+
+	private void Exec_InventoryDelete( string guid, int netLow, int netHigh, PlayerIdentity ident, JMPlayerInstance instance )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+		if ( players.Count() == 0 )
+			return;
+
+		PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+		EntityAI entity = ResolveInventoryItem( player, netLow, netHigh );
+		if ( !entity )
+			return;
+
+		FinishInventoryOp( "Deleted", entity.GetType(), guid, players[0], ident, instance, ident );
+		entity.DeleteSafe();
+	}
+
+	private void RPC_InventoryDelete( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		JMPlayerInstance targetInstance;
+		string guid;
+
+		EntityAI entity = ReadInventoryOp( ctx, senderRPC, "Admin.Player.Inventory.Delete", instance, targetInstance, guid );
+		if ( !entity )
+			return;
+
+		FinishInventoryOp( "Deleted", entity.GetType(), guid, targetInstance, senderRPC, instance, senderRPC );
+		entity.DeleteSafe();
+	}
+
+	void InventoryRepair( string guid, int netLow, int netHigh )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_InventoryRepair( guid, netLow, netHigh, NULL, NULL );
+			return;
+		}
+
+		SendInventoryOp( JMPlayerModuleRPC.InventoryRepair, guid, netLow, netHigh );
+	}
+
+	private void Exec_InventoryRepair( string guid, int netLow, int netHigh, PlayerIdentity ident, JMPlayerInstance instance )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+		if ( players.Count() == 0 )
+			return;
+
+		PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+		EntityAI entity = ResolveInventoryItem( player, netLow, netHigh );
+		if ( !entity )
+			return;
+
+		RepairEntity( entity );
+		FinishInventoryOp( "Repaired", entity.GetType(), guid, players[0], ident, instance, ident );
+	}
+
+	private void RPC_InventoryRepair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		JMPlayerInstance targetInstance;
+		string guid;
+
+		EntityAI entity = ReadInventoryOp( ctx, senderRPC, "Admin.Player.Inventory.Repair", instance, targetInstance, guid );
+		if ( !entity )
+			return;
+
+		RepairEntity( entity );
+		FinishInventoryOp( "Repaired", entity.GetType(), guid, targetInstance, senderRPC, instance, senderRPC );
+	}
+
+	//! Full health and bone dry, matching what the Heal action does to worn
+	//! attachments so the two do not disagree about what "repaired" means.
+	private void RepairEntity( EntityAI entity )
+	{
+		entity.SetHealth( "", "", entity.GetMaxHealth( "", "" ) );
+
+		ItemBase asItem;
+		if ( Class.CastTo( asItem, entity ) )
+			asItem.SetWet( 0 );
+	}
+
+	void InventoryTake( string guid, int netLow, int netHigh )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_InventoryTake( guid, netLow, netHigh, NULL, NULL );
+			return;
+		}
+
+		SendInventoryOp( JMPlayerModuleRPC.InventoryTake, guid, netLow, netHigh );
+	}
+
+	private void Exec_InventoryTake( string guid, int netLow, int netHigh, PlayerIdentity ident, JMPlayerInstance instance )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+		if ( players.Count() == 0 )
+			return;
+
+		PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+		EntityAI entity = ResolveInventoryItem( player, netLow, netHigh );
+		if ( !entity )
+			return;
+
+		PlayerBase admin = PlayerBase.Cast( GetPermissionsManager().GetClientPlayer().PlayerObject );
+		TakeEntity( admin, entity );
+		FinishInventoryOp( "Took", entity.GetType(), guid, players[0], ident, instance, ident );
+	}
+
+	private void RPC_InventoryTake( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		JMPlayerInstance targetInstance;
+		string guid;
+
+		EntityAI entity = ReadInventoryOp( ctx, senderRPC, "Admin.Player.Inventory.Take", instance, targetInstance, guid );
+		if ( !entity )
+			return;
+
+		PlayerBase admin;
+		if ( instance )
+			admin = PlayerBase.Cast( instance.PlayerObject );
+
+		TakeEntity( admin, entity );
+		FinishInventoryOp( "Took", entity.GetType(), guid, targetInstance, senderRPC, instance, senderRPC );
+	}
+
+	//! Move the item into the admin inventory, or drop it at their feet when
+	//! there is no room. Falling back to the ground rather than failing silently
+	//! matters: a full admin inventory is the common case, and an item that
+	//! simply never moves reads as a broken button.
+	private void TakeEntity( PlayerBase admin, EntityAI entity )
+	{
+		if ( !admin )
+			return;
+
+		if ( admin.GetHumanInventory() && admin.GetHumanInventory().TakeEntityToInventory( InventoryMode.SERVER, FindInventoryLocationType.ANY, entity ) )
+			return;
+
+		entity.PlaceOnSurface();
+		entity.SetPosition( admin.GetPosition() );
+	}
+
+	// ---------------- In-place item edits ----------------
+	//
+	// One request shape for all five: the item is addressed by the same network
+	// ID, checked against the same permission, and answered with the same fresh
+	// listing. Only the op code and the value differ, so they share a handler
+	// instead of being five near-identical copies of the take/repair pair.
+	//
+	// The value is a float on the wire even for the three ops that are really
+	// integers - a quantity, a food stage, a liquid type. Rounding once on the
+	// server is cheaper than a second numeric field nothing else would use.
+
+	void InventoryModify( string guid, int netLow, int netHigh, int op, float value )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_InventoryModify( guid, netLow, netHigh, op, value, NULL, NULL );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
+		rpc.Write( op );
+		rpc.Write( value );
+		rpc.Send( NULL, JMPlayerModuleRPC.InventoryModify, true, NULL );
+	}
+
+	private void Exec_InventoryModify( string guid, int netLow, int netHigh, int op, float value, PlayerIdentity ident, JMPlayerInstance instance )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+		if ( players.Count() == 0 )
+			return;
+
+		PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+		EntityAI entity = ResolveInventoryItem( player, netLow, netHigh );
+		if ( !entity )
+			return;
+
+		string verb;
+		if ( !ApplyInventoryModify( entity, op, value, verb ) )
+			return;
+
+		FinishInventoryOp( verb, entity.GetType(), guid, players[0], ident, instance, ident );
+	}
+
+	private void RPC_InventoryModify( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		JMPlayerInstance targetInstance;
+		string guid;
+
+		// Reads the three shared arguments and answers the permission; the op
+		// and its value are still in the stream behind them.
+		EntityAI entity = ReadInventoryOp( ctx, senderRPC, "Admin.Player.Inventory.Modify", instance, targetInstance, guid );
+		if ( !entity )
+			return;
+
+		int op;
+		float value;
+
+		if ( !ctx.Read( op ) )    return;
+		if ( !ctx.Read( value ) ) return;
+
+		string verb;
+		if ( !ApplyInventoryModify( entity, op, value, verb ) )
+			return;
+
+		FinishInventoryOp( verb, entity.GetType(), guid, targetInstance, senderRPC, instance, senderRPC );
+	}
+
+	//! Apply one edit. Returns false when the op does not apply to this item -
+	//! a caller then logs nothing, because nothing happened.
+	//!
+	//! Every op re-checks the item against the request rather than trusting the
+	//! client's menu: the listing the admin right-clicked can be seconds old,
+	//! and by now the canteen may be a rifle.
+	private bool ApplyInventoryModify( EntityAI entity, int op, float value, out string verb )
+	{
+		ItemBase asItem;
+		Class.CastTo( asItem, entity );
+
+		// The three integer ops round once, here, rather than each doing it to
+		// its own argument at the call site.
+		int intValue = Math.Round( value );
+
+		switch ( op )
+		{
+		case JMInventoryModifyOp.UNJAM:
+			return UnjamWeapon( entity, verb );
+
+		case JMInventoryModifyOp.QUANTITY:
+			return SetItemQuantity( entity, asItem, value, verb );
+
+		case JMInventoryModifyOp.TEMPERATURE:
+			if ( !asItem )
+				return false;
+
+			float temperature = Math.Clamp( value, GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR );
+			asItem.SetTemperatureEx( new TemperatureData( temperature ) );
+			verb = "Set temperature " + temperature.ToString();
+			return true;
+
+		case JMInventoryModifyOp.FOOD_STAGE:
+			return SetItemFoodStage( asItem, intValue, verb );
+
+		case JMInventoryModifyOp.LIQUID_TYPE:
+			return SetItemLiquidType( asItem, intValue, verb );
+		}
+
+		return false;
+	}
+
+	//! Clear a jam without the player having to hold the weapon.
+	//!
+	//! SetJammed alone is not enough: the jam is also a state the weapon's FSM
+	//! is sitting in, and the next stable state re-reads it back out of there.
+	//! RandomizeFSMState reselects a stable state from what the weapon is now -
+	//! same magazine, same chambers, no jam - which is the only script-side way
+	//! to leave that state for a weapon nobody is holding.
+	private bool UnjamWeapon( EntityAI entity, out string verb )
+	{
+		Weapon_Base weapon;
+		if ( !Class.CastTo( weapon, entity ) )
+			return false;
+
+		if ( !weapon.IsJammed() )
+			return false;
+
+		weapon.SetJammed( false );
+		weapon.RandomizeFSMState();
+		weapon.Synchronize();
+
+		verb = "Unjammed";
+		return true;
+	}
+
+	//! Ammo count for a magazine or an ammo pile, quantity for everything else.
+	//! A magazine answers GetQuantity with 1 of 1 - itself - so the two cannot
+	//! share a path.
+	private bool SetItemQuantity( EntityAI entity, ItemBase asItem, float value, out string verb )
+	{
+		Magazine asMag;
+		if ( Class.CastTo( asMag, entity ) )
+		{
+			int rounds = Math.Clamp( Math.Round( value ), 0, asMag.GetAmmoMax() );
+			asMag.ServerSetAmmoCount( rounds );
+			verb = "Set quantity " + rounds.ToString();
+			return true;
+		}
+
+		if ( !asItem || !asItem.HasQuantity() )
+			return false;
+
+		float quantity = Math.Clamp( value, asItem.GetQuantityMin(), asItem.GetQuantityMax() );
+		asItem.SetQuantity( quantity );
+
+		// Batteries and the like carry their charge as energy, not quantity, and
+		// the two have to move together or the item reads full and behaves flat.
+		if ( asItem.GetCompEM() && asItem.GetQuantityMax() > 0 )
+			asItem.GetCompEM().SetEnergy0To1( quantity / asItem.GetQuantityMax() );
+
+		verb = "Set quantity " + quantity.ToString();
+		return true;
+	}
+
+	private bool SetItemFoodStage( ItemBase asItem, int stage, out string verb )
+	{
+		if ( !asItem || !asItem.HasFoodStage() )
+			return false;
+
+		if ( stage <= FoodStageType.NONE || stage >= FoodStageType.COUNT )
+			return false;
+
+		Edible_Base asFood;
+		if ( !Class.CastTo( asFood, asItem ) || !asFood.GetFoodStage() )
+			return false;
+
+		asFood.GetFoodStage().ChangeFoodStage( stage );
+
+		verb = "Set state " + typename.EnumToString( FoodStageType, stage );
+		return true;
+	}
+
+	private bool SetItemLiquidType( ItemBase asItem, int liquidType, out string verb )
+	{
+		if ( !asItem || !asItem.IsLiquidContainer() )
+			return false;
+
+		// Two independent checks, and both matter: the first rejects a type no
+		// config defines, the second rejects a real liquid this container was
+		// never meant to hold - a client is free to send either.
+		if ( !Liquid.GetNutritionalProfileByType( liquidType ) )
+			return false;
+
+		if ( ( liquidType & asItem.GetLiquidContainerMask() ) == 0 )
+			return false;
+
+		asItem.SetLiquidType( liquidType );
+
+		verb = "Set liquid " + Liquid.GetLiquidClassname( liquidType );
+		return true;
+	}
+
+	//! Log, webhook, and push a fresh listing back to whoever asked.
+	//!
+	//! The refresh is unconditional and happens on every operation including the
+	//! ones that half-worked, because it is the only way the admin finds out
+	//! whether the item actually moved.
+	private void FinishInventoryOp( string verb, string type, string guid, JMPlayerInstance targetInstance, PlayerIdentity ident, JMPlayerInstance instance, PlayerIdentity replyTo )
+	{
+		GetCommunityOnlineToolsBase().Log( ident, "Inventory " + verb + " [guid=" + guid + "] [item=" + type + "]" );
+
+		if ( targetInstance )
+			SendWebhookColored( "Inventory", instance, verb + " " + type + " - " + targetInstance.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
+
+		SendInventoryTo( replyTo, guid );
+	}
+
+	// ---------------- Bleed-from-body-part ----------------
+	// Body-part selections are looked up by name (string) end-to-end. Server
+	// resolves the selectionName -> bit via the COT mod of the bleeding manager
+	// (COT_GetZoneSelectionName / COT_GetZoneBit), guaranteeing the part
+	// the admin picks matches the part that actually starts bleeding.
+
+	void AddBleedingPart( string selectionName, array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_AddBleedingPart( selectionName, guids, NULL );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( selectionName );
+		rpc.Write( guids );
+		rpc.Send( NULL, JMPlayerModuleRPC.AddBleedingPart, true, NULL );
+	}
+
+	private void RPC_AddBleedingPart( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		string selectionName;
+		array< string > guids;
+
+		if ( !ctx.Read( selectionName ) ) return;
+		if ( !ctx.Read( guids ) )          return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add", senderRPC, instance ) )
+			return;
+
+		Exec_AddBleedingPart( selectionName, guids, senderRPC );
+	}
+
+	private void Exec_AddBleedingPart( string selectionName, array< string > guids, PlayerIdentity ident )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		array< JMPlayerInstance > affectedPlayers = new array< JMPlayerInstance >;
+		int affected = 0;
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( !player )
+				continue;
+
+			bool ok = player.COTAddBleedingByName( selectionName );
+			if ( !ok )
+				continue;
+
+			affectedPlayers.Insert( players[i] );
+			affected++;
+
+			JMPlayerInstance instance;
+			GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add", ident, instance );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Added bleeding on " + selectionName + " [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Bleed", instance, "Added bleeding on " + selectionName + " for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_WARNING );
+
+			players[i].Update();
+		}
+
+		if ( affected > 0 )
+		{
+			foreach ( JMPlayerInstance pi : affectedPlayers )
+			{
+				GetCommunityOnlineTools().SetClient( pi );
+			}
+		}
+	}
+
+	void StopBleedingPart( array< string > guids )
+	{
+		if ( IsMissionHost() )
+		{
+			Exec_StopBleedingPart( guids, NULL );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guids );
+		rpc.Send( NULL, JMPlayerModuleRPC.StopBleedingPart, true, NULL );
+	}
+
+	private void RPC_StopBleedingPart( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		array< string > guids;
+		if ( !ctx.Read( guids ) )
+			return;
+
+		if ( guids.Count() > JMConstants.RPC_MAX_GUIDS )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Stop", senderRPC, instance ) )
+			return;
+
+		Exec_StopBleedingPart( guids, senderRPC );
+	}
+
+	private void Exec_StopBleedingPart( array< string > guids, PlayerIdentity ident )
+	{
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
+		array< JMPlayerInstance > affectedPlayers = new array< JMPlayerInstance >;
+		int affected = 0;
+
+		for ( int i = 0; i < players.Count(); i++ )
+		{
+			PlayerBase player = PlayerBase.Cast( players[i].PlayerObject );
+			if ( !player )
+				continue;
+
+			BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
+			if ( !bms )
+				continue;
+
+			// Vanilla has no public "remove just part X" - RemoveAllSources clears all
+			bms.RemoveAllSources();
+
+			affectedPlayers.Insert( players[i] );
+			affected++;
+
+			JMPlayerInstance instance;
+			GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Stop", ident, instance );
+
+			GetCommunityOnlineToolsBase().Log( ident, "Stopped bleeding [guid=" + players[i].GetGUID() + "]" );
+			SendWebhookColored( "Bleed", instance, "Stopped bleeding for " + players[i].FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+
+			players[i].Update();
+		}
+
+		if ( affected > 0 )
+		{
+			foreach ( JMPlayerInstance pi : affectedPlayers )
+			{
+				GetCommunityOnlineTools().SetClient( pi );
+			}
+		}
+	}
+
+	// ---------------- Per-body-part bleeding state (server -> client) ----------------
+	// Client requests the current bleeding-state for the selected player; server
+	// pushes back the list of registered zones + which bits are active so the
+	// dropdown rows can render a red icon for bleeding parts.
+
+	void RequestBleedingState( string guid )
+	{
+		if ( IsMissionHost() )
+		{
+			SendBleedingStateTo( NULL, guid );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Send( NULL, JMPlayerModuleRPC.SendBleedingState, true, NULL );
+	}
+
+	private void RPC_SendBleedingState( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( IsMissionHost() )
+		{
+			string reqGuid;
+			if ( !ctx.Read( reqGuid ) )
+				return;
+
+			JMPlayerInstance instance;
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add", senderRPC, instance ) )
+				return;
+
+			SendBleedingStateTo( senderRPC, reqGuid );
+			return;
+		}
+
+		// Client receives the populated state.
+		//
+		// Read order MUST match SendBleedingStateTo's write order exactly:
+		//   guid, names.Count, names[], bits[], bleedingBits,
+		//   activePartIndices.Count, activePartIndices[]
+		//
+		// A single misaligned read corrupts every subsequent field and the
+		// engine's string deserializer throws "String CORRUPTED". Every read
+		// is checked and we `return` (not `break`) on the first failure so a
+		// desync surfaces at the exact field rather than cascading into a
+		// garbage string-length read.
+		string guidIn;
+		int count;
+		int activePartCount;
+
+		if ( !ctx.Read( guidIn ) )          return;
+		if ( !ctx.Read( count ) )           return;
+
+		// Sanity-bound the count so a corrupted/garbage length can't drive a
+		// multi-million-iteration read loop before the deserializer trips.
+		if ( count < 0 || count > 512 )     return;
+
+		array< string > names = new array< string >;
+		for ( int na = 0; na < count; na++ )
+		{
+			string s;
+			if ( !ctx.Read( s ) ) return;
+			names.Insert( s );
+		}
+
+		array< int > bits = new array< int >;
+		for ( int nb = 0; nb < count; nb++ )
+		{
+			int b;
+			if ( !ctx.Read( b ) ) return;
+			bits.Insert( b );
+		}
+
+		int bleedingBits = 0;
+		if ( !ctx.Read( bleedingBits ) )    return;
+		if ( !ctx.Read( activePartCount ) ) return;
+		if ( activePartCount < 0 || activePartCount > 512 ) return;
+
+		array< int > activeParts = new array< int >;
+		for ( int np = 0; np < activePartCount; np++ )
+		{
+			int p;
+			if ( !ctx.Read( p ) ) return;
+			activeParts.Insert( p );
+		}
+
+		JMPlayerForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnBleedingStateUpdated( guidIn, names, bits, bleedingBits, activeParts );
+	}
+
+	private void SendBleedingStateTo( PlayerIdentity to, string guid )
+	{
+		array< string > names = new array< string >;
+		array< int > bits = new array< int >;
+		int bleedingBits = 0;
+		array< int > activePartIndices = new array< int >;
+
+		if ( guid != "" )
+		{
+			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
+			if ( players.Count() > 0 )
+			{
+				PlayerBase player = PlayerBase.Cast( players[0].PlayerObject );
+				if ( player )
+				{
+					BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
+					bleedingBits = player.GetBleedingBits();
+
+					if ( bms )
+					{
+						int count = bms.COT_GetZoneCount();
+						for ( int i = 0; i < count; i++ )
+						{
+							string nm = bms.COT_GetZoneSelectionName( i );
+							int bit = bms.COT_GetZoneBit( i );
+							names.Insert( nm );
+							bits.Insert( bit );
+							if ( ( bit & bleedingBits ) != 0 )
+								activePartIndices.Insert( i );
+						}
+					}
+				}
+			}
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( guid );
+		rpc.Write( names.Count() );
+		for ( int n = 0; n < names.Count(); n++ )
+			rpc.Write( names[n] );
+		for ( int b = 0; b < bits.Count(); b++ )
+			rpc.Write( bits[b] );
+		rpc.Write( bleedingBits );
+		rpc.Write( activePartIndices.Count() );
+		for ( int p = 0; p < activePartIndices.Count(); p++ )
+			rpc.Write( activePartIndices[p] );
+		rpc.Send( NULL, JMPlayerModuleRPC.SendBleedingState, true, to );
+	}
+
+	// Helpers exposed to the form for the body-part dropdown labels. Reads
+	// from any connected player's BleedingSourcesManagerServer (which carries
+	// the modded COT_GetZoneSelectionName / COT_GetZoneCount). Falls back to
+	// the local player if no other is available.
+	int GetBleedingZoneCount()
+	{
+		return GetBleedingZoneCountFor( NULL );
+	}
+
+	string GetBleedingZoneSelectionName( int idx )
+	{
+		return GetBleedingZoneSelectionNameFor( NULL, idx );
+	}
+
+	// Variants that take an explicit target player - used by the form to populate
+	// the dropdown from the selected player (whose BleedingSourcesManagerServer
+	// is always constructed on the server).
+	int GetBleedingZoneCountFor( PlayerBase player )
+	{
+		if ( !player )
+			player = PlayerBase.Cast( g_Game.GetPlayer() );
+		if ( !player )
+			return 0;
+		BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
+		if ( !bms )
+			return 0;
+		return bms.COT_GetZoneCount();
+	}
+
+	string GetBleedingZoneSelectionNameFor( PlayerBase player, int idx )
+	{
+		if ( !player )
+			player = PlayerBase.Cast( g_Game.GetPlayer() );
+		if ( !player )
+			return "";
+		BleedingSourcesManagerServer bms = player.GetBleedingManagerServer();
+		if ( !bms )
+			return "";
+		return bms.COT_GetZoneSelectionName( idx );
 	}
 }

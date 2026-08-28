@@ -1,0 +1,223 @@
+WindowWidgetClass rootFrame {
+ clipchildren 1
+ position 0 0
+ size 1 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 0
+ draggable 0
+ {
+  PanelWidgetClass OverlayDim {
+   ignorepointer 1
+   color 0.06 0.05 0.04 0.82
+   position 0 0
+   size 1 1
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 0
+   style blank
+  }
+  PanelWidgetClass Main {
+   visible 1
+   clipchildren 1
+   inheritalpha 0
+   color 0.14 0.13 0.11 0.98
+   position 0 0
+   size 0.38 0.5
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 0
+   scaled 1
+   draggable 0
+   style DayZDefaultPanel
+   "no focus" 0
+   {
+    PanelWidgetClass Header {
+     ignorepointer 0
+     position 0 0
+     size 1 0.075
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     draggable 1
+     style blank
+    }
+    PanelWidgetClass TitleBar {
+     ignorepointer 1
+     color 0.22 0.19 0.14 1
+     position 0 0
+     size 1 0.075
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     style DayZDefaultPanel
+     {
+      PanelWidgetClass TitleAccent {
+       ignorepointer 1
+       color 0.55 0.42 0.22 1
+       position 0 0
+       size 1 0.12
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       style blank
+      }
+      TextWidgetClass Title {
+       ignorepointer 1
+       color 0.9 0.82 0.62 1
+       position 0.05 0
+       size 0.78 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_ECR_Menu_Title"
+       font "gui/fonts/metronbook16"
+       "bold text" 1
+       "exact text" 0
+       "exact text size" 17
+       "text halign" center
+       "text valign" center
+      }
+      ButtonWidgetClass BtnClose {
+       clipchildren 1
+       color 0.28 0.12 0.1 1
+       size 0.075 0.72
+       halign right_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       style Editor
+       "no focus" 1
+       {
+        TextWidgetClass CloseLabel {
+         ignorepointer 1
+         color 0.85 0.48 0.32 1
+         size 1 1
+         halign center_ref
+         valign center_ref
+         text "X"
+         font "gui/fonts/metronbook-bold16"
+         "bold text" 1
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    PanelWidgetClass DescriptionPanel {
+     ignorepointer 1
+     color 0.08 0.07 0.05 0.9
+     position 0.04 0.085
+     size 0.92 0.2
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style DayZDefaultPanel
+     {
+      MultilineTextWidgetClass Description {
+       ignorepointer 1
+       color 0.72 0.68 0.58 1
+       position 0.03 0.06
+       size 0.94 0.88
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "#STR_ECR_Menu_Description"
+       font "gui/fonts/metronbook16"
+       "exact text" 0
+       "exact text size" 14
+       "text halign" center
+       "text valign" center
+       wrap 1
+       "condense whitespace" 1
+      }
+     }
+    }
+    PanelWidgetClass SectionBar {
+     ignorepointer 1
+     color 0.18 0.16 0.12 1
+     position 0.04 0.3
+     size 0.92 0.048
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style DayZDefaultPanel
+     {
+      PanelWidgetClass SectionAccent {
+       ignorepointer 1
+       color 0.62 0.48 0.22 0.9
+       position 0 0
+       size 0.012 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style blank
+      }
+      TextWidgetClass SectionTitle {
+       ignorepointer 1
+       color 0.78 0.62 0.32 1
+       size 1 1
+       halign center_ref
+       valign center_ref
+       text "#STR_ECR_Section_Actions"
+       font "gui/fonts/metronbook16"
+       "bold text" 1
+       "exact text" 0
+       "exact text size" 15
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+    ScrollWidgetClass ButtonScroll {
+     visible 1
+     clipchildren 1
+     ignorepointer 0
+     color 0.1 0.09 0.07 0.55
+     position 0.04 0.36
+     size 0.92 0.6
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style blank
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass ButtonGrid {
+       visible 1
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       Padding 6
+       Margin 3
+       "Size To Content V" 1
+       Columns 1
+       Rows 50
+      }
+     }
+    }
+   }
+  }
+ }
+}

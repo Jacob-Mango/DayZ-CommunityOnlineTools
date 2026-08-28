@@ -46,8 +46,17 @@ class JMBanForm : JMFormBase
     private UIActionScroller              m_Scroller;
     private Widget                        m_ContentWidget;
 
+    private UIActionScroller              m_OfflineScroller;
+
+    private UIActionTabs                  m_Tabs;
+    private Widget                        m_TabListPanel;
+    private Widget                        m_TabOfflinePanel;
+
+    static const int TAB_BANS    = 0;
+    static const int TAB_OFFLINE = 1;
+
     // Shared search bar (filters both dropdown and ban list)
-    private UIActionEditableTextPreview   m_SearchBar;
+    private UIActionSearchBox             m_SearchBar;
 
     // Ban Offline section
     private UIActionDropdownList          m_PlayerDropdown;
@@ -59,14 +68,14 @@ class JMBanForm : JMFormBase
 
     // Action toolbar (above ban list)
     private UIActionButton                m_EditDurationBtn;
-    private UIActionButton                m_UnbanBtn;
+    private UIActionConfirmInline         m_UnbanBtn;
 
     // Duration picker panel (shown inline when Edit Duration is clicked)
     private Widget                        m_DurationPickerWrapper;
     private UIActionSelectBox             m_DurationSelect;
     private bool                          m_DurationPickerVisible;
 
-    // Selection tracking — SteamID of the checked ban entry
+    // Selection tracking - SteamID of the checked ban entry
     private string                        m_SelectedBanSteamID;
     private string                        m_SelectedBanPlayerName;
 
@@ -86,7 +95,8 @@ class JMBanForm : JMFormBase
     private ref array<string>             m_FilteredGuids = new array<string>();
     private ref array<string>             m_FilteredNames = new array<string>();
 
-    private JMBanModule                   m_Module;
+    //! protected, not private: sub-mods reach for the module through the form.
+    protected JMBanModule                 m_Module;
 
     // -------------------------------------------------------------------------
     //  SetModule
@@ -103,45 +113,140 @@ class JMBanForm : JMFormBase
 
     override void OnInit()
     {
-        m_Scroller      = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
-        m_ContentWidget = m_Scroller.GetContentWidget();
+        InitWidgetsTop();
+        InitWidgetsBottom();
+    }
 
-        // ---- Top bar: Refresh + shared search -------------------------------
-        Widget topRow = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 2 );
+    //! Filter and the actions that apply to the current selection. Archetype B:
+    //! a fixed header over a data grid, not a roster over a detail pane - the
+    //! ban list is a table, and it wants the whole width.
+    protected void InitWidgetsTop()
+    {
+        Widget top = layoutRoot.FindAnyWidget( "panel_top" );
 
-        UIActionButton refreshBtn = UIActionManager.CreateButton( topRow, "Refresh", this, "OnClick_Refresh" );
-        refreshBtn.SetWidth( 0.22 );
+        Widget topRow = UIActionManager.CreateWrapSpacer( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-        m_SearchBar = UIActionManager.CreateEditableTextPreview( topRow, "Search name / SteamID...", this, "OnChange_Search" );
-        m_SearchBar.SetWidth( 0.78 );
-        m_SearchBar.SetEditBoxWidth( 0.72 );
+        UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( topRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
 
-        UIActionManager.CreatePanel( m_ContentWidget, 0xFF444444, 2 );
+        m_SearchBar = UIActionManager.CreateSearchBox( topRow, this, "OnChange_Search", "Search name / SteamID..." );
+        m_SearchBar.SetWidth( 0.85 );
 
-        // ---- Ban Offline section --------------------------------------------
-        UIActionManager.CreateText( m_ContentWidget, "Ban Offline Player" );
+        // Toolbar: Unban (delete-style icon) + Edit Duration. Both act on the
+        // checked rows, so they belong with the filter, above the grid.
+        Widget toolbarRow = UIActionManager.CreateWrapSpacer( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-        // Player dropdown — full width, populated on data arrival
+        m_UnbanBtn = UIActionManager.CreateConfirmInline( toolbarRow, "", this, "OnClick_Unban" );
+        UIActionIconGrid.ApplyDeletePreset( m_UnbanBtn );
+        m_UnbanBtn.SetButton( "" );
+        m_UnbanBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+        m_UnbanBtn.CenterIcon( ICON_BUTTON_PX, 16 );
+        m_UnbanBtn.SetConfirmLabel( "O" );
+        m_UnbanBtn.SetCancelLabel( "X" );
+        m_UnbanBtn.SetTooltip( "Lift the selected ban(s) immediately" );
+        m_UnbanBtn.Disable();
+
+        m_EditDurationBtn = UIActionManager.CreateButton( toolbarRow, "Edit Duration", this, "OnClick_EditDuration" );
+        m_EditDurationBtn.SetWidth( 1.0 );
+        m_EditDurationBtn.Disable();
+        m_EditDurationBtn.SetTooltip( "Change the duration of the selected ban(s)" );
+
+        RegisterPermission( m_UnbanBtn, "Admin.Ban.Unban" );
+    }
+
+    protected void InitWidgetsBottom()
+    {
+        m_TabListPanel    = layoutRoot.FindAnyWidget( "ban_list_panel" );
+        m_TabOfflinePanel = layoutRoot.FindAnyWidget( "ban_offline_panel" );
+
+        ref array<string> tabLabels = { "Active Bans", "Ban Offline Player" };
+        ref array<string> tabIcons  = { JMConstants.Lucide( "ban" ), JMConstants.Lucide( "user-x" ) };
+
+        m_Tabs = UIActionManager.CreateTabs( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), tabLabels, tabIcons, this, "OnChange_Tab" );
+
+        m_Tabs.AddContent( m_TabListPanel );
+        m_Tabs.AddContent( m_TabOfflinePanel );
+
+        InitTabState( 2 );
+
+        m_Tabs.SetSelection( TAB_BANS, false );
+
+        BuildTabIfNeeded( TAB_BANS );
+    }
+
+    private void BuildTabIfNeeded( int tabIdx )
+    {
+        if ( !ShouldBuildTab( tabIdx ) )
+            return;
+
+        switch ( tabIdx )
+        {
+            case TAB_BANS:    InitWidgetsBanList(); break;
+            case TAB_OFFLINE: InitWidgetsOffline(); break;
+        }
+    }
+
+    override int GetActiveTabIndex()
+    {
+        if ( !m_Tabs )
+            return -1;
+
+        return m_Tabs.GetSelection();
+    }
+
+    void OnChange_Tab( UIEvent eid, UIActionBase action )
+    {
+        if ( eid != UIEvent.CHANGE )
+            return;
+
+        CloseAllOverlays();
+
+        BuildTabIfNeeded( GetActiveTabIndex() );
+    }
+
+    protected void InitWidgetsOffline()
+    {
+        m_OfflineScroller = UIActionManager.CreateScroller( m_TabOfflinePanel );
+        Widget offlineContent = m_OfflineScroller.GetContentWidget();
+
+        UIActionCard card = UIActionManager.CreateCard( offlineContent, "Ban Offline Player" );
+        Widget cardBody = card.GetContent();
+
+        // Player dropdown - full width, populated on data arrival
         array<string> emptyList = new array<string>();
         emptyList.Insert( "Loading players..." );
-        m_PlayerDropdown = UIActionManager.CreateDropdownBox( m_ContentWidget, layoutRoot, "Select player...", emptyList );
+        m_PlayerDropdown = UIActionManager.CreateDropdownBox( cardBody, layoutRoot, "Select player...", emptyList );
+        RegisterOverlay( m_PlayerDropdown );
 
         // Action row: Ban Selected + Ban by ID
-        m_BanOfflineActionsRow = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 2 );
+        // Fractional widths must sum < 1.0 in WrapSpacer or the second child
+        // wraps. Use 0.71+0.28 = 0.99 to preserve the 72/28 visual proportion.
+        m_BanOfflineActionsRow = UIActionManager.CreateWrapSpacer( cardBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
         UIActionButton banSelBtn = UIActionManager.CreateButton( m_BanOfflineActionsRow, "Ban Selected", this, "OnClick_ManualBanSelected" );
-        banSelBtn.SetWidth( 0.72 );
-        banSelBtn.SetColor( COLOR_RED );
+        banSelBtn.SetWidth( 0.71 );
+        banSelBtn.SetColor( JMTheme.DANGER_FILL );
+        banSelBtn.SetTooltip( "Ban the player selected in the dropdown above" );
 
         UIActionButton banByIDBtn = UIActionManager.CreateButton( m_BanOfflineActionsRow, "Ban by ID", this, "OnClick_ManualBan" );
-        banByIDBtn.SetWidth( 0.26 );
-        banByIDBtn.SetPosition( 0.74 );
+        banByIDBtn.SetWidth( 0.28 );
+        banByIDBtn.SetTooltip( "Ban an offline player by typing their SteamID or GUID" );
 
-        UIActionManager.CreatePanel( m_ContentWidget, 0xFF444444, 2 );
+        // The ban itself is executed through JMPlayerModule.Ban, so it is that
+        // module's permission that gates it - JMBanModule only registers View
+        // and Unban.
+        RegisterPermission( banSelBtn,  "Admin.Player.Ban" );
+        RegisterPermission( banByIDBtn, "Admin.Player.Ban" );
 
-        // ---- Active Bans header + action toolbar ----------------------------
+        m_OfflineScroller.UpdateScroller();
+    }
+
+    protected void InitWidgetsBanList()
+    {
+        m_Scroller      = UIActionManager.CreateScroller( m_TabListPanel );
+        m_ContentWidget = m_Scroller.GetContentWidget();
+
         m_ActiveBansHeader = UIActionManager.CreateText( m_ContentWidget, "Active Bans" );
 
-        // Duration picker — hidden by default, shown when Edit Duration clicked
+        // Duration picker - hidden by default, shown when Edit Duration clicked
         m_DurationPickerWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 2 );
 
         array<string> durationOptions = new array<string>();
@@ -150,32 +255,34 @@ class JMBanForm : JMFormBase
         m_DurationSelect = UIActionManager.CreateSelectionBox( m_DurationPickerWrapper, "Duration:", durationOptions );
         m_DurationSelect.SetSelectorWidth( 0.65 );
 
-        Widget durationBtnRow = UIActionManager.CreateGridSpacer( m_DurationPickerWrapper, 2, 1 );
+        Widget durationBtnRow = UIActionManager.CreateGridSpacer( m_DurationPickerWrapper, 1, 2 );
         UIActionButton applyDurBtn = UIActionManager.CreateButton( durationBtnRow, "Apply", this, "OnClick_ApplyDuration" );
+        applyDurBtn.SetColor( JMTheme.SUCCESS_FILL );
+        applyDurBtn.SetTooltip( "Save the new ban duration for the selected entries" );
         UIActionButton cancelDurBtn = UIActionManager.CreateButton( durationBtnRow, "Cancel", this, "OnClick_CancelDuration" );
+        cancelDurBtn.SetTooltip( "Cancel duration editing without saving" );
 
         m_DurationPickerWrapper.Show( false );
         m_DurationPickerVisible = false;
 
-        // Toolbar: Edit Duration + Unban
-        Widget toolbarRow = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 2 );
-        m_EditDurationBtn = UIActionManager.CreateButton( toolbarRow, "Edit Duration", this, "OnClick_EditDuration" );
-        m_EditDurationBtn.SetWidth( 0.72 );
-        m_EditDurationBtn.Disable();
-
-        m_UnbanBtn = UIActionManager.CreateButton( toolbarRow, "Unban", this, "OnClick_Unban" );
-        m_UnbanBtn.SetWidth( 0.26 );
-        m_UnbanBtn.SetPosition( 0.74 );
-        m_UnbanBtn.SetColor( COLOR_RED );
-        m_UnbanBtn.Disable();
-
-        UIActionManager.CreatePanel( m_ContentWidget, 0xFF555555, 1 );
+        UIActionManager.CreatePanel( m_ContentWidget, JMTheme.DIVIDER_LIGHT, 1 );
 
         // ---- Ban list (populated dynamically) ------------------------------
         m_BanListWrapper = UIActionManager.CreateGridSpacer( m_ContentWidget, 1, 1 );
         UIActionManager.CreateText( m_BanListWrapper, "Loading..." );
 
         m_Scroller.UpdateScroller();
+    }
+
+    override void OnResize( float w, float h )
+    {
+        PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h * 0.86, TAB_STRIP_HEIGHT );
+
+        if ( m_Scroller )
+            m_Scroller.UpdateScroller();
+
+        if ( m_OfflineScroller )
+            m_OfflineScroller.UpdateScroller();
     }
 
     // -------------------------------------------------------------------------
@@ -193,6 +300,7 @@ class JMBanForm : JMFormBase
     override void OnClientPermissionsUpdated()
     {
         super.OnClientPermissionsUpdated();
+        
         RebuildBanList();
     }
 
@@ -205,7 +313,7 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  PopulateBanList — called from module on RPC receive
+    //  PopulateBanList - called from module on RPC receive
     // -------------------------------------------------------------------------
 
     void PopulateBanList( array<ref JMPlayerBan> bans, array<string> playerGuids, array<string> playerNames )
@@ -279,6 +387,11 @@ class JMBanForm : JMFormBase
 
     private void RebuildBanList()
     {
+        // Arrives from a server response, which does not wait for the Active
+        // Bans tab to have been opened.
+        if ( !m_ContentWidget )
+            return;
+
         // Clear selection whenever list rebuilds
         m_SelectedBanSteamID    = "";
         m_SelectedBanPlayerName = "";
@@ -320,7 +433,7 @@ class JMBanForm : JMFormBase
         UIActionManager.CreateText( header, "Expires"          );
         UIActionManager.CreateText( header, "Banned By"        );
 
-        UIActionManager.CreatePanel( m_BanListWrapper, 0xFF555555, 1 );
+        UIActionManager.CreatePanel( m_BanListWrapper, JMTheme.DIVIDER_LIGHT, 1 );
 
         foreach ( JMPlayerBan ban : m_BanList )
         {
@@ -337,7 +450,7 @@ class JMBanForm : JMFormBase
 
             Widget row = UIActionManager.CreateGridSpacer( m_BanListWrapper, 1, 5 );
 
-            // Checkbox — only rendered if user has unban permission
+            // Checkbox - only rendered if user has unban permission
             if ( canUnban )
             {
                 UIActionCheckbox cb = UIActionManager.CreateCheckbox( row, "", this, "OnClick_BanRowCheckbox", false );
@@ -366,7 +479,7 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  Ban row checkbox — only one can be checked at a time
+    //  Ban row checkbox - only one can be checked at a time
     // -------------------------------------------------------------------------
 
     void OnClick_BanRowCheckbox( UIEvent eid, UIActionBase action )
@@ -407,7 +520,7 @@ class JMBanForm : JMFormBase
         }
         else
         {
-            // Unchecked — clear selection
+            // Unchecked - clear selection
             m_SelectedBanSteamID    = "";
             m_SelectedBanPlayerName = "";
             HideDurationPicker();
@@ -513,9 +626,11 @@ class JMBanForm : JMFormBase
     //  Unban
     // -------------------------------------------------------------------------
 
+    // ConfirmInline (Unban button) already provides the confirm gesture,
+    // so we act on CHANGE directly without a popup.
     void OnClick_Unban( UIEvent eid, UIActionBase action )
     {
-        if ( eid != UIEvent.CLICK )
+        if ( eid != UIEvent.CHANGE )
             return;
 
         if ( m_SelectedBanSteamID == "" )
@@ -524,9 +639,7 @@ class JMBanForm : JMFormBase
         m_PendingSteamID    = m_SelectedBanSteamID;
         m_PendingPlayerName = m_SelectedBanPlayerName;
 
-        CreateConfirmation_Two( JMConfirmationType.INFO, "Confirm Unban",
-            "Remove the active ban for " + m_PendingPlayerName + " (" + m_PendingSteamID + ")?",
-            "#STR_COT_GENERIC_NO", "", "#STR_COT_GENERIC_YES", "OnClick_UnbanConfirm" );
+        OnClick_UnbanConfirm( null );
     }
 
     void OnClick_UnbanConfirm( JMConfirmation confirmation )
@@ -551,12 +664,16 @@ class JMBanForm : JMFormBase
         if ( eid != UIEvent.CLICK )
             return;
 
+        UIActionButton btn;
+        if ( Class.CastTo( btn, action ) )
+            btn.TriggerSpin( 2 );
+
         if ( m_Module )
             m_Module.RequestBanList();
     }
 
     // -------------------------------------------------------------------------
-    //  Shared search — filters both dropdown and ban list
+    //  Shared search - filters both dropdown and ban list
     // -------------------------------------------------------------------------
 
     void OnChange_Search( UIEvent eid, UIActionBase action )
@@ -576,7 +693,7 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  Ban Offline — from dropdown selection
+    //  Ban Offline - from dropdown selection
     // -------------------------------------------------------------------------
 
     void OnClick_ManualBanSelected( UIEvent eid, UIActionBase action )
@@ -612,7 +729,7 @@ class JMBanForm : JMFormBase
     }
 
     // -------------------------------------------------------------------------
-    //  Ban Offline — manual SteamID entry
+    //  Ban Offline - manual SteamID entry
     // -------------------------------------------------------------------------
 
     void OnClick_ManualBan( UIEvent eid, UIActionBase action )
@@ -644,6 +761,20 @@ class JMBanForm : JMFormBase
                 break;
             }
         }
+
+        // NOTE: chaining a second EDIT-type CreateConfirmation_Two from the
+        // callback of the first EDIT-type confirmation was silently failing
+        // to open the popup (engine bug - the inner modal handler doesn't
+        // release the focus lock before the chained CreateConfirmation_Two
+        // tries to acquire it again). Workaround: defer the second popup
+        // by one CallLater tick so the first modal is fully torn down.
+        GetGame().GetCallQueue( CALL_CATEGORY_GUI ).CallLater( OpenBanReasonPopup, 50, false );
+    }
+
+    private void OpenBanReasonPopup()
+    {
+        if ( m_PendingSteamID == "" )
+            return;
 
         CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason",
             "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):",

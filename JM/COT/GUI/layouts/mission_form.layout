@@ -7,7 +7,7 @@ PanelWidgetClass JMMissionSelectorForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMMissionSelectorForm"
- style DayZDefaultPanel
+ style COTSurface
  Columns 1
  Rows 1
  {
@@ -29,7 +29,7 @@ PanelWidgetClass JMMissionSelectorForm {
    vexactpos 0
    hexactsize 1
    vexactsize 0
-   style DayZDefaultPanel
+   style COTSurface
    color 0 0 0 1
   }
   PanelWidgetClass panel_right {
@@ -52,8 +52,8 @@ PanelWidgetClass JMMissionSelectorForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style DayZDefaultPanel
-   color 0.06 0.08 0.11 0.985
+   style COTSurface
+   color 0.098 0.118 0.141 0.985
    { 
     PanelWidgetClass panel_split {
      position 0 0
@@ -64,7 +64,7 @@ PanelWidgetClass JMMissionSelectorForm {
      vexactpos 0
      hexactsize 1
      vexactsize 0
-     style DayZDefaultPanel
+     style COTSurface
      color 0 0 0 1
     }
    }

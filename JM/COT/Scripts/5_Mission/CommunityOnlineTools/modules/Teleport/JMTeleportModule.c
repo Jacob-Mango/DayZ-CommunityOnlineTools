@@ -66,7 +66,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Teleport.paa";
+		return JMConstants.Lucide( "map-pin" );
 	}
 
 	override bool ImageIsIcon()
@@ -103,11 +103,26 @@ class JMTeleportModule: JMRenderableModuleBase
 		super.OnSettingsUpdated();
 	}
 
-	override void RegisterKeyMouseBindings() 
+	override void RegisterKeyMouseBindings()
 	{
 		super.RegisterKeyMouseBindings();
-		
-		Bind( new JMModuleBinding( "Input_Cursor_RaycastOnServer",				"UATeleportModuleTeleportCursor",		true 	) );
+
+		Bind( new JMModuleBinding( "Input_Cursor_RaycastOnServer", "UATeleportModuleTeleportCursor", true ) );
+		Bind( new JMModuleBinding( "Input_TeleportBack",           "UATeleportModuleTeleportBack",   true ) );
+	}
+
+	void Input_TeleportBack( UAInput input )
+	{
+		if ( !input.LocalPress() ) return;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) ) return;
+
+		JMPlayerModule playerModule;
+		if ( !Class.CastTo( playerModule, GetModuleManager().GetModule( JMPlayerModule ) ) ) return;
+
+		JMPlayerInstance self = GetPermissionsManager().GetClientPlayer();
+		if ( !self ) return;
+
+		playerModule.TeleportToPrevious( {self.GetGUID()} );
 	}
 
 	array< ref JMTeleportLocation > GetLocations()

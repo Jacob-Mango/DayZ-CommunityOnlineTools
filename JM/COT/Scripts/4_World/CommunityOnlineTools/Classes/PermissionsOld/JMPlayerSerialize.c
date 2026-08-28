@@ -6,9 +6,22 @@ class JMPlayerSerialize : Managed
 
 	ref array< string > Roles;
 
+	// Optional per-role name restriction: role name -> required exact in-game name.
+	// If an entry exists for a role, the role is only applied when the player's
+	// current name matches exactly (case-sensitive).
+	ref map< string, string > NameRestrictions;
+
+	//! Session history - playtime, deaths, lifespan. Absent from files written
+	//! before this existed; JsonFileLoader leaves a missing member at its
+	//! default, so the constructor value below is what an old file loads with
+	//! and no migration step is needed.
+	ref JMPlayerStats Stats;
+
 	void JMPlayerSerialize()
 	{
 		Roles = new array< string >;
+		NameRestrictions = new map< string, string >;
+		Stats = new JMPlayerStats();
 	}
 
 	static string FileReadyStripName( string name )
@@ -45,7 +58,7 @@ class JMPlayerSerialize : Managed
 		if ( FileExist( playerFile.m_FileName ) )
 		{
 			JsonFileLoader<JMPlayerSerialize>.JsonLoadFile( playerFile.m_FileName, playerFile );
-			// File already exists in the correct location — no re-save needed.
+			// File already exists in the correct location - no re-save needed.
 			return true;
 		}
 
@@ -75,7 +88,7 @@ class JMPlayerSerialize : Managed
 			return true;
 		}
 
-		// No file found — new player with default state.  Set up the filename for future saves but do NOT write anything.
+		// No file found - new player with default state.  Set up the filename for future saves but do NOT write anything.
 		playerFile.m_FileName = JMConstants.DIR_PLAYERS + FileReadyStripName( inst.GetGUID() ) + JMConstants.EXT_PLAYER;
 		playerFile.Roles.Insert( "everyone" );
 		return false;

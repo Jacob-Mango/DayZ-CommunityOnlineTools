@@ -42,7 +42,7 @@ class JMESPMeta: COT_WidgetHolder
 
 	UIActionEditableText m_Action_Health;
 
-	UIActionButton m_Action_Delete;
+	UIActionConfirmInline m_Action_Delete;
 	UIActionButton m_HealButton;
 	UIActionButton m_SpectateButton;
 
@@ -183,9 +183,11 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_Position = UIActionManager.CreateButton( positionActionsButtons, "Set", this, "Action_SetPosition", 0.25 );
 
 		m_Action_GetPosition = UIActionManager.CreateButton( positionActionsButtons, "C", this, "Action_GetPosition", 0.12 );
+		m_Action_GetPosition.SetIcon( JMConstants.ICON_STACK );
 
 		m_Action_PastePosition = UIActionManager.CreateButton( positionActionsButtons, "P", this, "Action_PastePosition", 0.12 );
 		m_Action_RefreshPosition = UIActionManager.CreateButton( positionActionsButtons, "Refresh", this, "Action_RefreshPosition", 0.35 );
+		m_Action_RefreshPosition.SetIcon( JMConstants.ICON_CLOCKWISE );
 		m_Action_AutoRefreshPosition = UIActionManager.CreateCheckbox( positionActionsButtons, "", this, "Click_AutoRefreshPosition", false, 0.11 );
 
 		UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
@@ -206,9 +208,11 @@ class JMESPMeta: COT_WidgetHolder
 		m_Action_Orientation = UIActionManager.CreateButton( orientationActionsButtons, "Set", this, "Action_SetOrientation", 0.25 );
 
 		m_Action_GetOrientation = UIActionManager.CreateButton( orientationActionsButtons, "C", this, "Action_GetOrientation", 0.12 );
+		m_Action_GetOrientation.SetIcon( JMConstants.ICON_STACK );
 
 		m_Action_PasteOrientation = UIActionManager.CreateButton( orientationActionsButtons, "P", this, "Action_PasteOrientation", 0.12 );
 		m_Action_RefreshOrientation = UIActionManager.CreateButton( orientationActionsButtons, "Refresh", this, "Action_RefreshOrientation", 0.35 );
+		m_Action_RefreshOrientation.SetIcon( JMConstants.ICON_CLOCKWISE );
 		m_Action_AutoRefreshOrientation = UIActionManager.CreateCheckbox( orientationActionsButtons, "", this, "Click_AutoRefreshOrientation", false, 0.11 );
 
 		if (target)
@@ -241,7 +245,7 @@ class JMESPMeta: COT_WidgetHolder
 		{
 			UIActionManager.CreatePanel( parent, 0xFF000000, 1 );
 
-			m_Action_Delete = UIActionManager.CreateButton( parent, "Delete Object", this, "Action_Delete" );
+			m_Action_Delete = UIActionManager.CreateConfirmInline( parent, "Delete Object", this, "Action_Delete" );
 		}
 
 		//! Basic object type properties that are not covered by view types
@@ -435,6 +439,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		m_Action_RefreshPosition.TriggerSpin( 2 );
 		RefreshPosition();
 	}
 
@@ -510,6 +515,7 @@ class JMESPMeta: COT_WidgetHolder
 		if ( eid != UIEvent.CLICK )
 			return;
 
+		m_Action_RefreshOrientation.TriggerSpin( 2 );
 		RefreshOrientation();
 	}
 
@@ -533,7 +539,7 @@ class JMESPMeta: COT_WidgetHolder
 
 	void Action_Delete( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		if ( IsMissionOffline() || (!networkLow && !networkHigh) )

@@ -1,8 +1,8 @@
 class JMMapModule: JMRenderableModuleBase
 {
 	protected ref array< Man > m_ServerPlayers;
-	
-	void JMMapModule() 
+
+	void JMMapModule()
 	{
 		m_ServerPlayers = new array< Man >;
 
@@ -27,7 +27,7 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		return "UACOTToggleMap";
 	}
-	
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/mapview_form.layout";
@@ -42,10 +42,10 @@ class JMMapModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_MAP_MODULE_NAME";
 	}
-	
+
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\COTMap.paa";
+		return JMConstants.Lucide( "map" );
 	}
 
 	override bool ImageIsIcon()
@@ -56,5 +56,23 @@ class JMMapModule: JMRenderableModuleBase
 	override bool ImageHasPath()
 	{
 		return true;
+	}
+
+	void SetLootMarkers(array<string> names, array<vector> positions)
+	{
+		JMMapForm form;
+		if (Class.CastTo(form, GetForm()))
+		{
+			form.SetLootMarkers(names, positions);
+		}
+	}
+
+	void ClearLootMarkers()
+	{
+		JMMapForm form;
+		if (Class.CastTo(form, GetForm()))
+		{
+			form.ClearLootMarkers();
+		}
 	}
 }

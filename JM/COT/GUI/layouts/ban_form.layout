@@ -7,16 +7,63 @@ PanelWidgetClass JMBanForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMBanForm"
- style DayZDefaultPanel
+ style COTSurface
  {
-  FrameWidgetClass panel {
+  PanelWidgetClass panel_top {
+   color 0 0 0 0
    position 0 0
-   size 1 1
-   halign top_ref
+   size 1 0.14
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
+  }
+  PanelWidgetClass panel_bottom {
+   color 0 0 0 0
+   position 0 0.14
+   size 1 0.86
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    FrameWidgetClass panel_bottom_tabs {
+     ignorepointer 0
+     position 0 0
+     size 1 0.07
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+    FrameWidgetClass panel_bottom_content {
+     ignorepointer 0
+     position 0 0.07
+     size 1 0.93
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      FrameWidgetClass ban_list_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass ban_offline_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+     }
+    }
+   }
   }
  }
 }

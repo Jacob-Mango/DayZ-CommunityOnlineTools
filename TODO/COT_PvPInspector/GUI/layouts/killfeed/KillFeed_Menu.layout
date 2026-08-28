@@ -1,0 +1,1470 @@
+PanelWidgetClass JMKillFeedMenuRoot {
+ visible 1
+ ignorepointer 1
+ color 0 0 0 0
+ position 0 0
+ size 1081 600
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ draggable 1
+ scriptclass "JMKillFeedMenu"
+ style DayZDefaultPanel
+ {
+  PanelWidgetClass page_list {
+   visible 1
+   ignorepointer 1
+   color 0 0 0 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style DayZDefaultPanel
+   {
+    GridSpacerWidgetClass kf_filter_bar {
+     ignorepointer 1
+     position 0 4
+     size 1 28
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     style Empty
+     Padding 2
+     Margin 0
+     Columns 7
+     Rows 1
+     {
+      ButtonWidgetClass kf_f0 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f0_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_ALL"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f1 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f1_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_SUSPECT"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f2 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f2_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_NOLOS"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f3 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f3_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_BADAIM"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f4 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f4_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_LONG"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f5 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f5_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_TRAPS"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_f6 {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_f6_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_F_VEHICLES"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    PanelWidgetClass list_header {
+     ignorepointer 1
+     color 1 1 1 0.08
+     position 0 36
+     size 1 20
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     {
+   TextWidgetClass kf_head_0 {
+    ignorepointer 1
+    position 0.010 0
+    size 0.185 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_DATE"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_1 {
+    ignorepointer 1
+    position 0.198 0
+    size 0.132 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_KILLER"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_2 {
+    ignorepointer 1
+    position 0.333 0
+    size 0.132 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_VICTIM"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_3 {
+    ignorepointer 1
+    position 0.468 0
+    size 0.062 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_DISTANCE"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_4 {
+    ignorepointer 1
+    position 0.533 0
+    size 0.150 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_WEAPON"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_5 {
+    ignorepointer 1
+    position 0.686 0
+    size 0.140 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_LOS_Q"
+    "text offset" 4 0
+    "text valign" center
+   }
+   TextWidgetClass kf_head_6 {
+    ignorepointer 1
+    position 0.829 0
+    size 0.166 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    style Bold
+    text "#STR_GKFM_AIM_ANGLE"
+    "text offset" 4 0
+    "text valign" center
+   }
+     }
+    }
+    ScrollWidgetClass list_scroller {
+     ignorepointer 0
+     position 0 58
+     size 1 478
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     style blank
+     "Scrollbar V" 1
+     {
+      WrapSpacerWidgetClass list_content {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+      }
+     }
+    }
+    GridSpacerWidgetClass list_buttons {
+     ignorepointer 1
+     position 0 8
+     size 1 38
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     style Empty
+     Padding 6
+     Margin 0
+     Columns 4
+     Rows 1
+     {
+      ButtonWidgetClass kf_refresh_button {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_refresh_button_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Bold
+         text "#STR_GKFM_REFRESH"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_hideall_button {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_hideall_button_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Bold
+         text "#STR_GKFM_CLEAN_SCENES"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_clear_button {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_clear_button_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Bold
+         text "#STR_GKFM_CLEAR_LOG"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_banlist_button {
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_banlist_button_label {
+         ignorepointer 1
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Bold
+         text "#STR_GKFM_BAN_LIST"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass page_detail {
+   visible 0
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    PanelWidgetClass detail_left {
+     ignorepointer 1
+     color 0 0 0 1
+     position 0 0
+     size 0.4 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style DayZDefaultPanel
+     {
+      TextWidgetClass detail_title {
+       ignorepointer 1
+       position 0 0
+       size 1 0.05
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_DETAIL_TITLE"
+       "text halign" center
+       "text valign" center
+      }
+      GridSpacerWidgetClass detail_grid {
+       ignorepointer 1
+       position 0 0.06
+       size 1 0.62
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       Columns 1
+       Rows 14
+       {
+    PanelWidgetClass kf_d_killer_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_killer_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_KILLER"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_killer_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_killerguid_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_killerguid_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_KILLER_GUID"
+       "text offset" 6 0
+       "text valign" center
+      }
+      ButtonWidgetClass kf_d_killerguid_value {
+       ignorepointer 0
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_d_killerguid_text {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         "text offset" 6 0
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    PanelWidgetClass kf_d_victim_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_victim_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_VICTIM"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_victim_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_victimguid_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_victimguid_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_VICTIM_GUID"
+       "text offset" 6 0
+       "text valign" center
+      }
+      ButtonWidgetClass kf_d_victimguid_value {
+       ignorepointer 0
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       {
+        TextWidgetClass kf_d_victimguid_text {
+         ignorepointer 1
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         "text offset" 6 0
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+    PanelWidgetClass kf_d_weapon_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_weapon_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_WEAPON"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_weapon_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_ammo_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_ammo_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_AMMO"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_ammo_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_dist_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_dist_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_DISTANCE"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_dist_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_vis_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_vis_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_VISIBILITY"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_vis_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_aim_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_aim_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_AIM"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_aim_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_angle_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_angle_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_ANGLE"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_angle_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_kpos_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_kpos_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_KILLER_POS"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_kpos_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_vpos_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_vpos_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_VICTIM_POS"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_vpos_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_time_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_time_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_TIME"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_time_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+    PanelWidgetClass kf_d_cause_row {
+     ignorepointer 1
+     size 1 0.071
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_d_cause_label {
+       ignorepointer 1
+       size 0.42 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_CAUSE"
+       "text offset" 6 0
+       "text valign" center
+      }
+      TextWidgetClass kf_d_cause_value {
+       ignorepointer 1
+       size 0.58 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       "text offset" 6 0
+       "text valign" center
+      }
+     }
+    }
+       }
+      }
+      PanelWidgetClass detail_buttons {
+       ignorepointer 1
+       position 0 0.70
+       size 1 0.29
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       {
+     ButtonWidgetClass kf_btn_tp_killer {
+      position 0.01 0.0
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_tp_killer_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_TP_KILLER"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_tp_victim {
+      position 0.505 0.0
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_tp_victim_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_TP_VICTIM"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_show {
+      position 0.01 0.25
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_show_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_SHOW_VICTIM"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_hide {
+      position 0.505 0.25
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_hide_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_HIDE_VICTIM"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_show_killer {
+      position 0.01 0.5
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_show_killer_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_SHOW_KILLER"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_hide_killer {
+      position 0.505 0.5
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_hide_killer_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_HIDE_KILLER"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_back {
+      position 0.01 0.75
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_back_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_BACK"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+     ButtonWidgetClass kf_btn_ban {
+      position 0.505 0.75
+      size 0.485 0.22
+      hexactpos 0
+      vexactpos 0
+      hexactsize 0
+      vexactsize 0
+      {
+       TextWidgetClass kf_btn_ban_label {
+        ignorepointer 1
+        size 1 1
+        hexactpos 0
+        vexactpos 0
+        hexactsize 0
+        vexactsize 0
+        font "gui/fonts/sdf_MetronLight24"
+        "exact text" 1
+        "exact text size" 16
+        text "#STR_GKFM_BAN"
+        "text halign" center
+        "text valign" center
+       }
+      }
+     }
+       }
+      }
+     }
+    }
+    PanelWidgetClass detail_map_panel {
+     visible 1
+     clipchildren 1
+     keepsafezone 1
+     position 0 0
+     size 0.6 1
+     halign right_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      MapWidgetClass kf_map {
+       visible 1
+       clipchildren 1
+       keepsafezone 1
+       position 0 0
+       size 1 1
+       halign right_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       scriptclass ""
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass page_ban_input {
+   visible 0
+   color 0 0 0 0.7
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style DayZDefaultPanel
+   {
+    PanelWidgetClass ban_input_box {
+     color 0.12 0.16 0.22 1
+     position 0 0
+     size 410 235
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     style DayZDefaultPanel
+     {
+      TextWidgetClass kf_ban_input_title {
+       ignorepointer 1
+       position 0 14
+       size 0.92 26
+       halign center_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       style Light
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 18
+       text "#STR_GKFM_BAN"
+       "text halign" center
+       "text valign" center
+      }
+      TextWidgetClass kf_ban_input_hint {
+       ignorepointer 1
+       position 0 50
+       size 0.92 22
+       halign center_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 16
+       text "#STR_GKFM_BAN_DURATION_PROMPT"
+       "text halign" center
+       "text valign" center
+      }
+      EditBoxWidgetClass kf_ban_days {
+       ignorepointer 0
+       position 0 80
+       size 0.45 26
+       halign center_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       style Editor
+       font "gui/fonts/Metron"
+       "exact text" 1
+       text ""
+       "text halign" center
+      }
+      MultilineTextWidgetClass kf_ban_input_note {
+       ignorepointer 1
+       position 0 116
+       size 0.92 40
+       halign center_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 1
+       hexactsize 0
+       vexactsize 1
+       color 0.7 0.7 0.7 1
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       text "#STR_GKFM_BAN_PERMANENT_NOTE"
+       "text halign" center
+       "text valign" center
+       wrap 1
+      }
+      ButtonWidgetClass kf_ban_confirm {
+       ignorepointer 0
+       position -68 18
+       size 120 26
+       halign center_ref
+       valign bottom_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       {
+        TextWidgetClass kf_ban_confirm_label {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Light
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_CONFIRM"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+      ButtonWidgetClass kf_ban_cancel {
+       ignorepointer 0
+       position 68 18
+       size 120 26
+       halign center_ref
+       valign bottom_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       {
+        TextWidgetClass kf_ban_cancel_label {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 0
+         style Light
+         font "gui/fonts/sdf_MetronLight24"
+         "exact text" 1
+         "exact text size" 16
+         text "#STR_GKFM_CANCEL"
+         "text halign" center
+         "text valign" center
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass page_banlist {
+   visible 0
+   color 0 0 0 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style DayZDefaultPanel
+   {
+    TextWidgetClass kf_banlist_title {
+     ignorepointer 1
+     position 0.01 0.02
+     size 0.98 0.06
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 20
+     text "#STR_GKFM_BAN_LIST"
+     "text halign" center
+     "text valign" center
+    }
+    TextWidgetClass kf_banlist_h_name {
+     ignorepointer 1
+     position 0.02 0.10
+     size 0.27 0.05
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Bold
+     text "#STR_GKFM_COL_IDENTIFIER"
+     "text valign" center
+    }
+    TextWidgetClass kf_banlist_h_dur {
+     ignorepointer 1
+     position 0.29 0.10
+     size 0.22 0.05
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Bold
+     text "#STR_GKFM_COL_REMAINING"
+     "text valign" center
+    }
+    TextWidgetClass kf_banlist_h_admin {
+     ignorepointer 1
+     position 0.52 0.10
+     size 0.30 0.05
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Bold
+     text "#STR_GKFM_COL_MESSAGE"
+     "text valign" center
+    }
+    TextWidgetClass kf_banlist_h_action {
+     ignorepointer 1
+     position 0.83 0.10
+     size 0.16 0.05
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style Bold
+     text "#STR_GKFM_COL_ACTION"
+     "text valign" center
+    }
+    ScrollWidgetClass kf_banlist_scroll {
+     position 0.02 0.16
+     size 0.96 0.74
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style blank
+     "Scrollbar V" 1
+     {
+      WrapSpacerWidgetClass kf_banlist_content {
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       "Size To Content V" 1
+      }
+     }
+    }
+    ButtonWidgetClass kf_banlist_back {
+     position 0.40 0.92
+     size 0.20 0.06
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_banlist_back_label {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       style Bold
+       text "#STR_GKFM_BACK"
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+ }
+}

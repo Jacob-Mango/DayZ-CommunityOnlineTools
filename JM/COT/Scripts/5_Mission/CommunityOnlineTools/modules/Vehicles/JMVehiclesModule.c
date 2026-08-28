@@ -32,6 +32,8 @@ class JMVehicleMetaData
 	string m_OwnerName;
 	string m_OwnerUID;
 	string m_LastDriverUID;
+	string m_LastDriverSteam;
+	string m_LastDriverGUID;
 
 	[NonSerialized()]
 	string m_DisplayName;
@@ -39,49 +41,47 @@ class JMVehicleMetaData
 	[NonSerialized()]
 	EntityAI m_Entity;
 	
-	static JMVehicleMetaData Create(EntityAI entity, string type = string.Empty)
+	static JMVehicleMetaData Create( EntityAI entity, string type = string.Empty )
 	{
 		JMVehicleMetaData meta = new JMVehicleMetaData();
-
-		meta.AcquireFrom(entity, type);
-
+		meta.AcquireFrom( entity, type );
 		return meta;
 	}
 
-	void AcquireFrom(EntityAI entity, string type = string.Empty)
+	void AcquireFrom( EntityAI entity, string type = string.Empty )
 	{
 		m_Entity = entity;
 
-		entity.GetNetworkID(m_NetworkIDLow, m_NetworkIDHigh);
-		entity.GetPersistentID(m_PersistentIDA, m_PersistentIDB, m_PersistentIDC, m_PersistentIDD);
+		entity.GetNetworkID( m_NetworkIDLow, m_NetworkIDHigh );
+		entity.GetPersistentID( m_PersistentIDA, m_PersistentIDB, m_PersistentIDC, m_PersistentIDD );
 
-		if (type == string.Empty)
+		if ( type == string.Empty )
 			type = entity.GetType();
 
 		m_ClassName = type;
 		m_Position = entity.GetPosition();
 		m_Orientation = entity.GetOrientation();
 
-		if (entity.IsDamageDestroyed())
+		if ( entity.IsDamageDestroyed() )
 			m_DestructionType |= JMDT_DESTROYED;
 
 	#ifdef EXPANSIONMODVEHICLE
 		ExpansionVehicle vehicle;
-		if (ExpansionVehicle.Get(vehicle, entity))
+		if ( ExpansionVehicle.Get( vehicle, entity ) )
 		{
-			if (vehicle.IsCar())
+			if ( vehicle.IsCar() )
 				m_VehicleType |= JMVT_CAR;
 
-			if (vehicle.IsBoat())
+			if ( vehicle.IsBoat() )
 				m_VehicleType |= JMVT_BOAT;
 
-			if (vehicle.IsHelicopter())
+			if ( vehicle.IsHelicopter() )
 				m_VehicleType |= JMVT_HELICOPTER;
 
-			if (vehicle.IsPlane())
+			if ( vehicle.IsPlane() )
 				m_VehicleType |= JMVT_PLANE;
 
-			if (vehicle.IsExploded())
+			if ( vehicle.IsExploded() )
 				m_DestructionType |= JMDT_EXPLODED;
 
 			m_HasKeys = vehicle.HasKey();
@@ -91,41 +91,39 @@ class JMVehicleMetaData
 			m_LastDriverUID = vehicle.GetLastDriverUID();
 		}
 	#else
-		if (entity.IsInherited(CarScript))
+		if ( entity.IsInherited( CarScript ) )
+		{
 			m_VehicleType = JMVT_CAR;
-		else if (entity.IsInherited(BoatScript))
+			CarScript car = CarScript.Cast( entity );
+			if ( car && car.m_JM_LastDriverUID != "" )
+				m_LastDriverUID = car.m_JM_LastDriverUID;
+		}
+		else if ( entity.IsInherited( BoatScript ) )
+		{
 			m_VehicleType = JMVT_BOAT;
+			BoatScript boat = BoatScript.Cast( entity );
+			if ( boat && boat.m_JM_LastDriverUID != "" )
+				m_LastDriverUID = boat.m_JM_LastDriverUID;
+		}
 	#endif
 	}
 
-	static JMVehicleMetaData CreateCarScript( CarScript car )
-	{
-		Error("DEPRECATED, use Create");
-		return Create(car);
-	}
-	
 	#ifdef EXPANSIONMODVEHICLE
-	static JMVehicleMetaData CreateVehicle( ExpansionVehicleBase vehicle )
-	{
-		Error("DEPRECATED, use Create");
-		return Create(vehicle);
-	}
-	
 	static JMVehicleMetaData CreateCover( ExpansionVehicleCover cover )
 	{
 		string type = cover.Expansion_GetStoredEntityType();
 
-		JMVehicleMetaData meta = Create(cover, type);
+		JMVehicleMetaData meta = Create( cover, type );
 
-		if ( g_Game.IsKindOf(type, "ExpansionHelicopterScript") )
+		if ( g_Game.IsKindOf( type, "ExpansionHelicopterScript" ) )
 			meta.m_VehicleType |= JMVT_HELICOPTER;
-		else if ( g_Game.IsKindOf(type, "ExpansionBoatScript") || g_Game.IsKindOf(type, "BoatScript") )
+		else if ( g_Game.IsKindOf( type, "ExpansionBoatScript" ) || g_Game.IsKindOf( type, "BoatScript" ) )
 			meta.m_VehicleType |= JMVT_BOAT;
 		else
 			meta.m_VehicleType |= JMVT_CAR;
 
-		auto keychain = ExpansionKeyChainBase.Cast(cover.GetAttachmentByType(ExpansionKeyChainBase));
-		if (keychain && keychain.Expansion_HasOwner())
+		ExpansionKeyChainBase keychain = ExpansionKeyChainBase.Cast( cover.GetAttachmentByType( ExpansionKeyChainBase ) );
+		if ( keychain && keychain.Expansion_HasOwner() )
 		{
 			meta.m_HasKeys = true;
 
@@ -191,7 +189,7 @@ class JMVehicleMetaData
 
 	void SetDisplayName()
 	{
-		if (g_Game.ConfigIsExisting("cfgVehicles " + m_ClassName + " displayName"))
+		if ( g_Game.ConfigIsExisting( "cfgVehicles " + m_ClassName + " displayName" ) )
 			g_Game.ConfigGetText( "cfgVehicles " + m_ClassName + " displayName", m_DisplayName );
 		else
 			m_DisplayName = m_ClassName;
@@ -199,61 +197,65 @@ class JMVehicleMetaData
 
 	void Write( ParamsWriteContext ctx )
 	{
-		ctx.Write(m_NetworkIDLow);
-		ctx.Write(m_NetworkIDHigh);
+		ctx.Write( m_NetworkIDLow );
+		ctx.Write( m_NetworkIDHigh );
 
-		ctx.Write(m_PersistentIDA);
-		ctx.Write(m_PersistentIDB);
-		ctx.Write(m_PersistentIDC);
-		ctx.Write(m_PersistentIDD);
+		ctx.Write( m_PersistentIDA );
+		ctx.Write( m_PersistentIDB );
+		ctx.Write( m_PersistentIDC );
+		ctx.Write( m_PersistentIDD );
 
-		ctx.Write(m_ClassName);
-		ctx.Write(m_Position);
-		ctx.Write(m_Orientation);
+		ctx.Write( m_ClassName );
+		ctx.Write( m_Position );
+		ctx.Write( m_Orientation );
 
-		ctx.Write(m_VehicleType);
-		ctx.Write(m_DestructionType);
+		ctx.Write( m_VehicleType );
+		ctx.Write( m_DestructionType );
 
 	#ifdef EXPANSIONMODVEHICLE
-		ctx.Write(m_HasKeys);
-		ctx.Write(m_IsCover);
+		ctx.Write( m_HasKeys );
+		ctx.Write( m_IsCover );
 
-		ctx.Write(m_OwnerName);
-		ctx.Write(m_OwnerUID);
+		ctx.Write( m_OwnerName );
+		ctx.Write( m_OwnerUID );
 	#endif
 
 	#ifdef EXPANSIONMODCORE
-		ctx.Write(m_LastDriverUID);
+		ctx.Write( m_LastDriverUID );
+		ctx.Write( m_LastDriverSteam );
+		ctx.Write( m_LastDriverGUID );
 	#endif
 	}
 
 	bool Read( ParamsReadContext ctx )
 	{
-		if (!ctx.Read(m_NetworkIDLow)) return false;
-		if (!ctx.Read(m_NetworkIDHigh)) return false;
+		if ( !ctx.Read( m_NetworkIDLow ) ) return false;
+		if ( !ctx.Read( m_NetworkIDHigh ) ) return false;
 
-		if (!ctx.Read(m_PersistentIDA)) return false;
-		if (!ctx.Read(m_PersistentIDB)) return false;
-		if (!ctx.Read(m_PersistentIDC)) return false;
-		if (!ctx.Read(m_PersistentIDD)) return false;
+		if ( !ctx.Read( m_PersistentIDA ) ) return false;
+		if ( !ctx.Read( m_PersistentIDB ) ) return false;
+		if ( !ctx.Read( m_PersistentIDC ) ) return false;
+		if ( !ctx.Read( m_PersistentIDD ) ) return false;
 
-		if (!ctx.Read(m_ClassName)) return false;
-		if (!ctx.Read(m_Position)) return false;
-		if (!ctx.Read(m_Orientation)) return false;
+		if ( !ctx.Read( m_ClassName ) ) return false;
+		if ( !ctx.Read( m_Position ) ) return false;
+		if ( !ctx.Read( m_Orientation ) ) return false;
 
-		if (!ctx.Read(m_VehicleType)) return false;
-		if (!ctx.Read(m_DestructionType)) return false;
+		if ( !ctx.Read( m_VehicleType ) ) return false;
+		if ( !ctx.Read( m_DestructionType ) ) return false;
 
 	#ifdef EXPANSIONMODVEHICLE
-		if (!ctx.Read(m_HasKeys)) return false;
-		if (!ctx.Read(m_IsCover)) return false;
+		if ( !ctx.Read( m_HasKeys ) ) return false;
+		if ( !ctx.Read( m_IsCover ) ) return false;
 
-		if (!ctx.Read(m_OwnerName)) return false;
-		if (!ctx.Read(m_OwnerUID)) return false;
+		if ( !ctx.Read( m_OwnerName ) ) return false;
+		if ( !ctx.Read( m_OwnerUID ) ) return false;
 	#endif
 
 	#ifdef EXPANSIONMODCORE
-		if (!ctx.Read(m_LastDriverUID)) return false;
+		if ( !ctx.Read( m_LastDriverUID ) ) return false;
+		if ( !ctx.Read( m_LastDriverSteam ) ) return false;
+		if ( !ctx.Read( m_LastDriverGUID ) ) return false;
 	#endif
 
 		return true;
@@ -267,7 +269,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 	void JMVehiclesModule()
 	{
 		GetPermissionsManager().RegisterPermission( "Vehicles.View" );
-		
+
 		GetPermissionsManager().RegisterPermission( "Vehicles.Delete" );
 		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.All" );
 		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.Destroyed" );
@@ -275,7 +277,15 @@ class JMVehiclesModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.Unclaimed" );
 		#endif
 		GetPermissionsManager().RegisterPermission( "Vehicles.Teleport" );
-		
+		GetPermissionsManager().RegisterPermission( "Vehicles.Repair" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.Refuel" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.Unstuck" );
+		#ifdef EXPANSIONMODVEHICLE
+		GetPermissionsManager().RegisterPermission( "Vehicles.Cover" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.Lock" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.UnPair" );
+		#endif
+
 		m_Vehicles = new array<ref JMVehicleMetaData>;
 	}
 
@@ -291,7 +301,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	override string GetCategory()
 	{
-		return "Items";
+		return "Vehicles";
 	}
 
 	override string GetTitle()
@@ -301,7 +311,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Vehicles.paa";
+		return JMConstants.Lucide( "car" );
 	}
 
 	override bool ImageIsIcon()
@@ -314,39 +324,81 @@ class JMVehiclesModule: JMRenderableModuleBase
 		return true;
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Vehicles Module";
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "Delete"   );
+		types.Insert( "Teleport" );
+		types.Insert( "Repair"   );
+		types.Insert( "Refuel"   );
+		types.Insert( "Unstuck"  );
+		types.Insert( "Cover"    );
+		types.Insert( "Lock"     );
+		types.Insert( "Unpair"   );
+	}
+
+	override void RegisterKeyMouseBindings()
+	{
+		super.RegisterKeyMouseBindings();
+		Bind( new JMModuleBinding( "Input_TeleportToSelected", "UAVehicleModuleTeleportTo", true ) );
+		Bind( new JMModuleBinding( "Input_RepairSelected",     "UAVehicleModuleRepair",     true ) );
+	}
+
+	void Input_TeleportToSelected()
+	{
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) ) return;
+		JMVehiclesForm form;
+		if ( !Class.CastTo( form, GetForm() ) ) return;
+		JMVehicleMetaData meta = form.GetCurrentVehicle();
+		if ( meta ) RequestTeleportToVehicle( meta );
+	}
+
+	void Input_RepairSelected()
+	{
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Repair" ) ) return;
+		JMVehiclesForm form;
+		if ( !Class.CastTo( form, GetForm() ) ) return;
+		JMVehicleMetaData meta = form.GetCurrentVehicle();
+		if ( meta ) RequestRepairVehicle( meta );
+	}
+
 	private void UpdateVehiclesMetaData()
 	{
 		if ( m_Vehicles.Count() > 0 )
 			m_Vehicles.Clear();
-		
-		auto node = CarScript.s_JM_AllCars.m_Head;
+
+		CF_DoublyLinkedNode_WeakRef<CarScript> node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
 			if ( !node.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( node.m_Value ) );
 			node = node.m_Next;
 		}
-		
-		auto boat = BoatScript.s_JM_AllBoats.m_Head;
+
+		CF_DoublyLinkedNode_WeakRef<BoatScript> boat = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boat )
 		{
 			if ( !boat.m_Value.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( boat.m_Value ) );
 			boat = boat.m_Next;
 		}
-		
+
 		#ifdef EXPANSIONMODVEHICLE
-		auto vehicles = ExpansionVehicleBase.GetAll();
+		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
-			if ( !vehicle ) // should not be possible
+			if ( !vehicle )
 				continue;
 
 			if ( !vehicle.IsSetForDeletion() )
 				m_Vehicles.Insert( JMVehicleMetaData.Create( vehicle ) );
 		}
 
-		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
 			if ( !cover.m_Value.IsSetForDeletion() )
@@ -354,13 +406,39 @@ class JMVehiclesModule: JMRenderableModuleBase
 			cover = cover.m_Next;
 		}
 		#endif
+
+		// Resolve last driver Steam/GUID from online players where possible.
+		// A single session-scoped cache keeps the cost at O(unique_drivers)
+		// instead of O(vehicles). On a 200-vehicle server where most drivers
+		// repeat (or are null), this is typically ~5-10 map lookups instead
+		// of 200.
+		map<string, JMPlayerInstance> driverCache = new map<string, JMPlayerInstance>;
+
+		foreach ( JMVehicleMetaData meta: m_Vehicles )
+		{
+			if ( meta.m_LastDriverUID == "" )
+				continue;
+
+			JMPlayerInstance driverInst;
+			if ( !driverCache.Find( meta.m_LastDriverUID, driverInst ) )
+			{
+				driverInst = GetPermissionsManager().GetPlayer( meta.m_LastDriverUID );
+				driverCache.Set( meta.m_LastDriverUID, driverInst );
+			}
+
+			if ( driverInst )
+			{
+				meta.m_LastDriverSteam = driverInst.GetSteam64ID();
+				meta.m_LastDriverGUID  = driverInst.GetGUID();
+			}
+		}
 	}
 
 	void UpdateVehiclesMetaData_SP()
 	{
 		UpdateVehiclesMetaData();
 
-		foreach (auto meta: m_Vehicles)
+		foreach ( auto meta: m_Vehicles )
 		{
 			meta.SetDisplayName();
 		}
@@ -410,20 +488,168 @@ class JMVehiclesModule: JMRenderableModuleBase
 		case JMVehiclesModuleRPC.TeleportVehicleToMe:
 			RPC_TeleportVehicleToMe( ctx, sender, target );
 			break;
+		case JMVehiclesModuleRPC.RepairVehicle:
+			RPC_RepairVehicle( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.RefuelVehicle:
+			RPC_RefuelVehicle( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.UnstuckVehicle:
+			RPC_UnstuckVehicle( ctx, sender, target );
+			break;
+		#ifdef EXPANSIONMODVEHICLE
+		case JMVehiclesModuleRPC.CoverVehicle:
+			RPC_CoverVehicle( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.LockVehicle:
+			RPC_LockVehicle( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.UnPairVehicle:
+			RPC_UnPairVehicle( ctx, sender, target );
+			break;
+		#endif
+		case JMVehiclesModuleRPC.SendVehicleUpsert:
+			RPC_SendVehicleUpsert( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.SendVehicleRemove:
+			RPC_SendVehicleRemove( ctx, sender, target );
+			break;
 		}
+	}
+
+	// --- Delta send helpers (server) -----------------------------------------
+
+	//! Rebuild metadata for ONE vehicle identified by its network id and push
+	//! it to the requester as an Upsert. Much cheaper than the old
+	//! "re-walk every linked list and resend 200 vehicles" after each action.
+	protected void SendVehicleUpsert( int netLow, int netHigh, PlayerIdentity sender )
+	{
+		if ( !sender )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+		{
+			// Object is gone - caller meant to mutate it but it no longer
+			// exists. Send a Remove so the client drops its stale row.
+			SendVehicleRemove( netLow, netHigh, sender );
+			return;
+		}
+
+		JMVehicleMetaData meta = BuildMetaForObject( obj );
+		if ( !meta )
+			return;
+
+		// Resolve last-driver Steam/GUID the same way the full refresh does.
+		if ( meta.m_LastDriverUID != "" )
+		{
+			JMPlayerInstance driverInst = GetPermissionsManager().GetPlayer( meta.m_LastDriverUID );
+			if ( driverInst )
+			{
+				meta.m_LastDriverSteam = driverInst.GetSteam64ID();
+				meta.m_LastDriverGUID  = driverInst.GetGUID();
+			}
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		meta.Write( rpc );
+		rpc.Send( NULL, JMVehiclesModuleRPC.SendVehicleUpsert, true, sender );
+	}
+
+	protected void SendVehicleRemove( int netLow, int netHigh, PlayerIdentity sender )
+	{
+		if ( !sender )
+			return;
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.SendVehicleRemove, true, sender );
+	}
+
+	//! Construct a fresh JMVehicleMetaData for the given world object.
+	//! Mirrors the branches in UpdateVehiclesMetaData for all vehicle subtypes.
+	protected JMVehicleMetaData BuildMetaForObject( Object obj )
+	{
+		if ( !obj )
+			return null;
+
+		CarScript car = CarScript.Cast( obj );
+		if ( car )
+			return JMVehicleMetaData.Create( car );
+
+		BoatScript boat = BoatScript.Cast( obj );
+		if ( boat )
+			return JMVehicleMetaData.Create( boat );
+
+	#ifdef EXPANSIONMODVEHICLE
+		ExpansionVehicleBase expVeh = ExpansionVehicleBase.Cast( obj );
+		if ( expVeh )
+			return JMVehicleMetaData.Create( expVeh );
+
+		ExpansionVehicleCover cover = ExpansionVehicleCover.Cast( obj );
+		if ( cover )
+			return JMVehicleMetaData.CreateCover( cover );
+	#endif
+
+		return null;
+	}
+
+	// --- Delta receive handlers (client) -------------------------------------
+
+	protected void RPC_SendVehicleUpsert( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	{
+		if ( !IsMissionClient() )
+			return;
+
+		JMVehicleMetaData fresh = new JMVehicleMetaData();
+		if ( !fresh.Read( ctx ) )
+			return;
+		fresh.SetDisplayName();
+
+		bool replaced = false;
+		for ( int i = 0; i < m_Vehicles.Count(); i++ )
+		{
+			JMVehicleMetaData v = m_Vehicles[i];
+			if ( v && v.m_NetworkIDLow == fresh.m_NetworkIDLow && v.m_NetworkIDHigh == fresh.m_NetworkIDHigh )
+			{
+				m_Vehicles.Set( i, fresh );
+				replaced = true;
+				break;
+			}
+		}
+		if ( !replaced )
+			m_Vehicles.Insert( fresh );
+
+		JMVehiclesForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnDeltaUpsert( fresh );
+	}
+
+	protected void RPC_SendVehicleRemove( ParamsReadContext ctx, PlayerIdentity sender, Object target )
+	{
+		if ( !IsMissionClient() )
+			return;
+
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) )  return;
+		if ( !ctx.Read( netHigh ) ) return;
+
+		for ( int i = m_Vehicles.Count() - 1; i >= 0; i-- )
+		{
+			JMVehicleMetaData v = m_Vehicles[i];
+			if ( v && v.m_NetworkIDLow == netLow && v.m_NetworkIDHigh == netHigh )
+				m_Vehicles.Remove( i );
+		}
+
+		JMVehiclesForm form;
+		if ( Class.CastTo( form, GetForm() ) )
+			form.OnDeltaRemove( netLow, netHigh );
 	}
 
 	void RequestServerVehicles()
 	{
-		if (g_Game.IsClient())
-		{
-			auto rpc = new ScriptRPC();
- 			rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
-		}
-		else
-		{
-			UpdateVehiclesMetaData_SP();
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMVehiclesModuleRPC.RequestServerVehicles, true );
 	}
 
 	void RPC_RequestServerVehicles( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -433,10 +659,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", senderRPC ) )
 			return;
-		
+
+		// In SP / listen-server the admin IS the host - update the form directly
+		if ( IsMissionHost() && !g_Game.IsDedicatedServer() )
+		{
+			UpdateVehiclesMetaData_SP();
+			return;
+		}
+
 		UpdateVehiclesMetaData();
 
-		auto rpc = new ScriptRPC();
+		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( m_Vehicles.Count() );
 		foreach ( auto vehicle: m_Vehicles )
 		{
@@ -461,7 +694,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		while ( count )
 		{
-			auto vehicle = new JMVehicleMetaData();
+			JMVehicleMetaData vehicle = new JMVehicleMetaData();
 
 			if ( !vehicle.Read( ctx ) )
 			{
@@ -481,75 +714,32 @@ class JMVehiclesModule: JMRenderableModuleBase
 			form.LoadVehicles();
 	}
 
-	void DeleteVehicleUnclaimed( )
+	void DeleteVehicleUnclaimed()
 	{
 	#ifdef EXPANSIONMODVEHICLE
-		if (g_Game.IsClient())
-		{
-			auto rpc = new ScriptRPC();
-			
-			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleUnclaimed, true );
-		}
-		else
-		{
-			Exec_DeleteVehicleUnclaimed();
-			UpdateVehiclesMetaData_SP();
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleUnclaimed, true );
 	#endif
 	}
 
-	void DeleteVehicleDestroyed( )
+	void DeleteVehicleDestroyed()
 	{
-		if (g_Game.IsClient())
-		{
-			auto rpc = new ScriptRPC();
-			
-			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleDestroyed, true );
-		}
-		else
-		{
-			Exec_DeleteVehicleDestroyed();
-			UpdateVehiclesMetaData_SP();
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleDestroyed, true );
 	}
 
-	void DeleteVehicleAll( )
+	void DeleteVehicleAll()
 	{
-		if (g_Game.IsClient())
-		{
-			auto rpc = new ScriptRPC();
-			
-			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleAll, true );
-		}
-		else
-		{
-			Exec_DeleteVehicleAll();
-			UpdateVehiclesMetaData_SP();
-		}
-	}
-
-	void DeleteVehicle(JMVehicleMetaData meta)
-	{
-		if (g_Game.IsClient())
-		{
-			DeleteVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
-		}
-		else
-		{
-			g_Game.ObjectDelete(meta.m_Entity);
-			UpdateVehiclesMetaData_SP();
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicleAll, true );
 	}
 
 	void DeleteVehicle( int netLow, int netHigh )
 	{
-		if ( IsMissionClient() )
-		{
-			auto rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
-			rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicle, true );
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.DeleteVehicle, true );
 	}
 
 	private void RPC_DeleteVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -557,9 +747,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete", senderRPC ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete", senderRPC, instance ) )
 			return;
-		
+
 		int netLow;
 		if ( !ctx.Read( netLow ) )
 			return;
@@ -567,15 +758,19 @@ class JMVehiclesModule: JMRenderableModuleBase
 		int netHigh;
 		if ( !ctx.Read( netHigh ) )
 			return;
-		
+
 		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 
 		if ( !obj )
 			return;
 
+		string className = obj.GetType();
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted vehicle [netId=" + netLow + " " + netHigh + "] " + className );
+		SendWebhookColored( "Delete", instance, "Deleted vehicle [netId=" + netLow + " " + netHigh + "] " + className, JMConstants.WEBHOOK_COLOR_CRITICAL );
+
 		g_Game.ObjectDelete( obj );
 
-		RPC_RequestServerVehicles( ctx, senderRPC, target );
+		SendVehicleRemove( netLow, netHigh, senderRPC );
 	}
 
 	#ifdef EXPANSIONMODVEHICLE
@@ -584,9 +779,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC, instance ) )
 			return;
-		
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all UNCLAIMED vehicles" );
+		SendWebhookColored( "Delete", instance, "Deleted all UNCLAIMED vehicles", JMConstants.WEBHOOK_COLOR_CRITICAL );
+
 		Exec_DeleteVehicleUnclaimed();
 
 		RPC_RequestServerVehicles( ctx, senderRPC, target );
@@ -594,27 +793,27 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Exec_DeleteVehicleUnclaimed()
 	{
-		auto node = CarScript.s_JM_AllCars.m_Head;
+		CF_DoublyLinkedNode_WeakRef<CarScript> node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			auto next = node.m_Next;
+			CF_DoublyLinkedNode_WeakRef<CarScript> next = node.m_Next;
 			if ( !node.m_Value.GetExpansionVehicle().HasKey() )
 				node.m_Value.Delete();
 
 			node = next;
 		}
 
-		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		CF_DoublyLinkedNode_WeakRef<BoatScript> boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
-			auto boatNext = boats.m_Next;
+			CF_DoublyLinkedNode_WeakRef<BoatScript> boatNext = boats.m_Next;
 			if ( !boats.m_Value.GetExpansionVehicle().HasKey() )
 				boats.m_Value.Delete();
 
 			boats = boatNext;
 		}
 
-		auto vehicles = ExpansionVehicleBase.GetAll();
+		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
 			if ( !vehicle )
@@ -626,10 +825,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 			g_Game.ObjectDelete( vehicle );
 		}
 
-		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
-			auto coverNext = cover.m_Next;
+			CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> coverNext = cover.m_Next;
 			auto keychain = ExpansionKeyChainBase.Cast(cover.m_Value.GetAttachmentByType(ExpansionKeyChainBase));
 			if (!keychain || !keychain.Expansion_HasOwner())
 				cover.m_Value.Delete();
@@ -644,8 +843,12 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC, instance ) )
 			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all DESTROYED vehicles" );
+		SendWebhookColored( "Delete", instance, "Deleted all DESTROYED vehicles", JMConstants.WEBHOOK_COLOR_CRITICAL );
 
 		Exec_DeleteVehicleDestroyed();
 
@@ -654,20 +857,20 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Exec_DeleteVehicleDestroyed()
 	{
-		auto node = CarScript.s_JM_AllCars.m_Head;
+		CF_DoublyLinkedNode_WeakRef<CarScript> node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			auto next = node.m_Next;
+			CF_DoublyLinkedNode_WeakRef<CarScript> next = node.m_Next;
 			if ( node.m_Value.IsDamageDestroyed() )
 				node.m_Value.Delete();
 
 			node = next;
 		}
 
-		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		CF_DoublyLinkedNode_WeakRef<BoatScript> boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
-			auto boatNext = boats.m_Next;
+			CF_DoublyLinkedNode_WeakRef<BoatScript> boatNext = boats.m_Next;
 			if ( boats.m_Value.IsDamageDestroyed() )
 				boats.m_Value.Delete();
 
@@ -675,7 +878,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		}
 
 		#ifdef EXPANSIONMODVEHICLE
-		auto vehicles = ExpansionVehicleBase.GetAll();
+		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
 			if ( !vehicle )
@@ -687,10 +890,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 			g_Game.ObjectDelete( vehicle );
 		}
 
-		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
-			auto coverNext = cover.m_Next;
+			CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> coverNext = cover.m_Next;
 			if ( cover.m_Value.IsDamageDestroyed() )
 				cover.m_Value.Delete();
 
@@ -704,9 +907,13 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC ) )
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC, instance ) )
 			return;
-		
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted ALL vehicles" );
+		SendWebhookColored( "Delete", instance, "Deleted ALL vehicles", JMConstants.WEBHOOK_COLOR_CRITICAL );
+
 		Exec_DeleteVehicleAll();
 
 		RPC_RequestServerVehicles( ctx, senderRPC, target );
@@ -714,24 +921,24 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Exec_DeleteVehicleAll()
 	{
-		auto node = CarScript.s_JM_AllCars.m_Head;
+		CF_DoublyLinkedNode_WeakRef<CarScript> node = CarScript.s_JM_AllCars.m_Head;
 		while ( node )
 		{
-			auto next = node.m_Next;
+			CF_DoublyLinkedNode_WeakRef<CarScript> next = node.m_Next;
 			node.m_Value.Delete();
 			node = next;
 		}
 
-		auto boats = BoatScript.s_JM_AllBoats.m_Head;
+		CF_DoublyLinkedNode_WeakRef<BoatScript> boats = BoatScript.s_JM_AllBoats.m_Head;
 		while ( boats )
 		{
-			auto boatNext = boats.m_Next;
+			CF_DoublyLinkedNode_WeakRef<BoatScript> boatNext = boats.m_Next;
 			boats.m_Value.Delete();
 			boats = boatNext;
 		}
 
 		#ifdef EXPANSIONMODVEHICLE
-		auto vehicles = ExpansionVehicleBase.GetAll();
+		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
 		{
 			if ( !vehicle )
@@ -740,37 +947,22 @@ class JMVehiclesModule: JMRenderableModuleBase
 			g_Game.ObjectDelete( vehicle );
 		}
 
-		auto cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
+		CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> cover = ExpansionVehicleCover.s_JM_AllCovers.m_Head;
 		while ( cover )
 		{
-			auto coverNext = cover.m_Next;
+			CF_DoublyLinkedNode_WeakRef<ExpansionVehicleCover> coverNext = cover.m_Next;
 			cover.m_Value.Delete();
 			cover = coverNext;
 		}
 		#endif
 	}
 
-	void RequestTeleportToVehicle(JMVehicleMetaData meta)
+	void RequestTeleportToVehicle( JMVehicleMetaData meta )
 	{
-		if (g_Game.IsClient())
-		{
-			RequestTeleportToVehicle(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
-		}
-		else
-		{
-			Exec_TeleportToVehicle(PlayerBase.Cast(g_Game.GetPlayer()), meta.m_Entity);
-		}
-	}
-
-	void RequestTeleportToVehicle( int netLow, int netHigh )
-	{
-		if ( IsMissionClient() )
-		{
-			auto rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
- 			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportToVehicle, true );
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportToVehicle, true );
 	}
 
 	private void RPC_TeleportToVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -798,43 +990,27 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !obj )
 			return;
 
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported to vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Teleport", instance, "Teleported to vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
 		Exec_TeleportToVehicle(player, obj);
 	}
 
-	void Exec_TeleportToVehicle(PlayerBase player, Object obj)
+	void Exec_TeleportToVehicle( PlayerBase player, Object obj )
 	{
 		vector pos = obj.GetPosition();
-		vector minMax[2];
-		obj.ClippingInfo( minMax );
-
+		pos[1] = g_Game.SurfaceRoadY3D( pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER );
 		player.SetLastPosition();
-		pos = pos + minMax[1];
-		pos[1] = g_Game.SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
 		player.SetWorldPosition( pos );
 	}
 
 
-	void RequestTeleportVehicleToMe(JMVehicleMetaData meta)
+	void RequestTeleportVehicleToMe( JMVehicleMetaData meta )
 	{
-		if (GetGame().IsClient())
-		{
-			RequestTeleportVehicleToMe(meta.m_NetworkIDLow, meta.m_NetworkIDHigh);
-		}
-		else
-		{
-			Exec_TeleportVehicleToMe(PlayerBase.Cast(GetGame().GetPlayer()), meta.m_Entity);
-		}
-	}
-
-	void RequestTeleportVehicleToMe( int netLow, int netHigh )
-	{
-		if ( IsMissionClient() )
-		{
-			auto rpc = new ScriptRPC();
-			rpc.Write( netLow );
-			rpc.Write( netHigh );
- 			rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
-		}
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleToMe, true );
 	}
 
 	private void RPC_TeleportVehicleToMe( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -853,27 +1029,443 @@ class JMVehiclesModule: JMRenderableModuleBase
 		int netHigh;
 		if ( !ctx.Read( netHigh ) )
 			return;
-		
+
 		PlayerBase player;
 		if ( !Class.CastTo( player, senderRPC.GetPlayer() ) )
 			return;
 
-		Object obj = GetGame().GetObjectByNetworkId( netLow, netHigh );
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 		if ( !obj )
 			return;
 
-		Exec_TeleportVehicleToMe(player, obj);
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported vehicle [netId=" + netLow + " " + netHigh + "] to self" );
+		SendWebhookColored( "Teleport", instance, "Teleported vehicle [netId=" + netLow + " " + netHigh + "] to self", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_TeleportVehicleToMe( player, obj );
+
+		// Position changed - push a fresh metadata upsert to the requester.
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
 	}
 
-	void Exec_TeleportVehicleToMe(PlayerBase player, Object obj)
+	void Exec_TeleportVehicleToMe( PlayerBase player, Object obj )
 	{
 		vector pos = player.GetPosition();
-		vector minMax[2];
-		player.ClippingInfo( minMax );
-
-		pos = pos + minMax[1];
-		pos[1] = GetGame().SurfaceRoadY3D(pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER);
+		pos[1] = g_Game.SurfaceRoadY3D( pos[0], pos[1], pos[2], RoadSurfaceDetection.UNDER );
 		obj.SetPosition( pos );
+	}
+
+	// -------------------------------------------------------------------------
+	// Repair
+	// -------------------------------------------------------------------------
+
+	void RequestRepairVehicle( JMVehicleMetaData meta )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.RepairVehicle, true );
+	}
+
+	private void RPC_RepairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Repair", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Repaired vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Repair", instance, "Repaired vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_RepairVehicle( obj );
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	}
+
+	void Exec_RepairVehicle( Object obj )
+	{
+		EntityAI entity = EntityAI.Cast( obj );
+		if ( !entity )
+			return;
+
+		// Restore health on vehicle body and all existing attachments
+		entity.SetHealth( "", "", entity.GetMaxHealth( "", "" ) );
+
+		int attachCount = entity.GetInventory().AttachmentCount();
+		for ( int i = 0; i < attachCount; i++ )
+		{
+			EntityAI attachment = entity.GetInventory().GetAttachmentFromIndex( i );
+			if ( attachment )
+				attachment.SetHealth( "", "", attachment.GetMaxHealth( "", "" ) );
+		}
+
+		// Spawn any missing compatible attachments (wheels, engine parts, etc.)
+		JMObjectSpawnerModule spawnerModule;
+		if ( CF_Modules<JMObjectSpawnerModule>.Get( spawnerModule ) )
+			spawnerModule.SpawnCompatibleAttachments( entity, NULL, 2 );
+
+		// Refuel
+		Exec_RefuelVehicle( obj );
+	}
+
+	// -------------------------------------------------------------------------
+	// Refuel
+	// -------------------------------------------------------------------------
+
+	void RequestRefuelVehicle( JMVehicleMetaData meta )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.RefuelVehicle, true );
+	}
+
+	private void RPC_RefuelVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Refuel", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Refueled vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Refuel", instance, "Refueled vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_RefuelVehicle( obj );
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	}
+
+	void Exec_RefuelVehicle( Object obj )
+	{
+		CarScript car = CarScript.Cast( obj );
+		if ( car )
+		{
+			car.Fill( CarFluid.FUEL, car.GetFluidCapacity( CarFluid.FUEL ) );
+			car.Fill( CarFluid.OIL, car.GetFluidCapacity( CarFluid.OIL ) );
+			car.Fill( CarFluid.BRAKE, car.GetFluidCapacity( CarFluid.BRAKE ) );
+			car.Fill( CarFluid.COOLANT, car.GetFluidCapacity( CarFluid.COOLANT ) );
+			return;
+		}
+
+		#ifdef EXPANSIONMODVEHICLE
+		ExpansionVehicleBase expVehicle = ExpansionVehicleBase.Cast( obj );
+		if ( expVehicle )
+		{
+			expVehicle.Fill( CarFluid.FUEL, expVehicle.GetFluidCapacity( CarFluid.FUEL ) );
+			expVehicle.Fill( CarFluid.OIL, expVehicle.GetFluidCapacity( CarFluid.OIL ) );
+			expVehicle.Fill( CarFluid.BRAKE, expVehicle.GetFluidCapacity( CarFluid.BRAKE ) );
+			expVehicle.Fill( CarFluid.COOLANT, expVehicle.GetFluidCapacity( CarFluid.COOLANT ) );
+		}
+		#endif
+	}
+
+	// -------------------------------------------------------------------------
+	// Unstuck (teleport slightly up so it drops to the ground)
+	// -------------------------------------------------------------------------
+
+	void RequestUnstuckVehicle( JMVehicleMetaData meta )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.UnstuckVehicle, true );
+	}
+
+	private void RPC_UnstuckVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Unstuck", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Unstuck vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Unstuck", instance, "Unstuck vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_UnstuckVehicle( obj );
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	}
+
+	void Exec_UnstuckVehicle( Object obj )
+	{
+		vector pos = obj.GetPosition();
+		pos[1] = pos[1] + 1.5;
+		obj.SetPosition( pos );
+	}
+
+	// -------------------------------------------------------------------------
+	// Cover / Uncover (Expansion only)
+	// -------------------------------------------------------------------------
+
+	void RequestCoverVehicle( JMVehicleMetaData meta )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.CoverVehicle, true );
+	#endif
+	}
+
+	private void RPC_CoverVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Cover", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Cover/uncover vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Cover", instance, "Cover/uncover vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		JMVehicleMetaData meta = new JMVehicleMetaData();
+		meta.AcquireFrom( EntityAI.Cast( obj ) );
+		Exec_CoverVehicle( obj, meta );
+
+		// Cover/Uncover swaps the world object for a placeholder or vice versa,
+		// so the old netId may be invalid. Easiest correct path is a full
+		// refresh here - it's rare and the only action with this semantic.
+		RPC_RequestServerVehicles( ctx, senderRPC, target );
+	#endif
+	}
+
+	void Exec_CoverVehicle( Object obj, JMVehicleMetaData meta )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ExpansionEntityStoragePlaceholder placeholder;
+		if ( meta.m_IsCover )
+		{
+			// It is already a cover - uncover it
+			placeholder = ExpansionEntityStoragePlaceholder.Cast( obj );
+			if ( placeholder && placeholder.Expansion_HasStoredEntity() )
+			{
+				EntityAI restoredEntity;
+				vector position = placeholder.GetPosition();
+				vector orientation = placeholder.GetOrientation();
+
+				placeholder.SetPosition( "0 0 0" );
+
+				if ( ExpansionEntityStorageModule.RestoreFromFile( placeholder.Expansion_GetEntityStorageFileName(), restoredEntity, placeholder ) )
+				{
+					// Calculate proper position offset
+					vector placeholderMinMax[2];
+					if ( !placeholder.GetCollisionBox( placeholderMinMax ) )
+						placeholder.ClippingInfo( placeholderMinMax );
+
+					float placeHolderOffsetY = placeholderMinMax[0][1];
+					if ( placeHolderOffsetY > 0 )
+						placeHolderOffsetY = 0;
+
+					vector entityMinMax[2];
+					if ( !restoredEntity.GetCollisionBox( entityMinMax ) )
+						restoredEntity.ClippingInfo( entityMinMax );
+
+					float entityOffsetY = entityMinMax[0][1];
+					if ( entityOffsetY > 0 )
+						entityOffsetY = 0;
+
+					position[1] = position[1] + placeHolderOffsetY - entityOffsetY;
+
+					// Handle keychain transfer
+					int slotId = InventorySlots.GetSlotIdFromString( "KeyChain" );
+					auto keychain = ExpansionKeyChainBase.Cast( placeholder.GetInventory().FindAttachment( slotId ) );
+					if ( keychain && restoredEntity.GetInventory().HasAttachmentSlot( slotId ) )
+					{
+						restoredEntity.ServerTakeEntityAsAttachmentEx( keychain, slotId );
+					}
+
+					g_Game.ObjectDelete( placeholder );
+
+					restoredEntity.SetPosition( position );
+					restoredEntity.SetOrientation( orientation );
+				}
+				else
+				{
+					placeholder.SetPosition( position );
+				}
+			}
+		}
+		else
+		{
+			// Cover the vehicle
+			ExpansionVehicle vehicle = ExpansionVehicle.Get( obj );
+			if ( vehicle && vehicle.CanCover() )
+			{
+				vehicle.Cover( null, placeholder );
+			}
+		}
+	#endif
+	}
+
+	// -------------------------------------------------------------------------
+	// Lock / Unlock (Expansion only)
+	// -------------------------------------------------------------------------
+
+	void RequestLockVehicle( JMVehicleMetaData meta )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.LockVehicle, true );
+	#endif
+	}
+
+	private void RPC_LockVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Lock", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Lock/unlock vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Lock", instance, "Lock/unlock vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_LockVehicle( obj );
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	#endif
+	}
+
+	void Exec_LockVehicle( Object obj )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ExpansionVehicle expVehicle;
+		if ( ExpansionVehicle.Get( expVehicle, EntityAI.Cast( obj ) ) )
+		{
+			ExpansionCarAdminKey admincarkey;
+			if ( expVehicle.IsLocked() )
+				expVehicle.Unlock(admincarkey);
+			else
+				expVehicle.Lock(admincarkey);
+		}
+	#endif
+	}
+
+	// -------------------------------------------------------------------------
+	// UnPair Keys (Expansion only)
+	// -------------------------------------------------------------------------
+
+	void RequestUnPairVehicle( JMVehicleMetaData meta )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.UnPairVehicle, true );
+	#endif
+	}
+
+	private void RPC_UnPairVehicle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.UnPair", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Unpaired keys for vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Unpair", instance, "Unpaired keys for vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_UnPairVehicle( obj );
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	#endif
+	}
+
+	void Exec_UnPairVehicle( Object obj )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ExpansionVehicle expVehicle;
+		if ( ExpansionVehicle.Get( expVehicle, EntityAI.Cast( obj ) ) )
+		{
+			expVehicle.ResetKeyPairing();
+		}
+	#endif
 	}
 
 	array< ref JMVehicleMetaData > GetServerVehicles()

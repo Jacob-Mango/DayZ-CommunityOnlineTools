@@ -7,7 +7,7 @@ PanelWidgetClass JMExampleForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMExampleForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass panel {
    position 0 0

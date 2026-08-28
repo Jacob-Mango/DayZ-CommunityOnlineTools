@@ -11,7 +11,7 @@ class JMItemStatsForm: JMFormBase
 		"Weapon",
 		"Edible",
 		"Vehicles",
-		"Magazine"
+		"Magazine",
 		"Optic",
 		"All Items"
 	};
@@ -29,7 +29,8 @@ class JMItemStatsForm: JMFormBase
 
 	protected JMItemStatsEnum m_ItemMode;
 	
-	protected JMtemStatsModule m_Module;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMItemStatsModule m_Module;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
@@ -41,8 +42,22 @@ class JMItemStatsForm: JMFormBase
 		m_Scroller = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		Widget actions = m_Scroller.GetContentWidget();
 
-		m_ItemModeButton = UIActionManager.CreateNavButton( actions, m_ItemModeButtonWordList[0], JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "OnClick_NavButton" );
-		m_Button = UIActionManager.CreateButton( actions, "Generate Data", this, "OnClick_Button" );
+		UIActionCard card = UIActionManager.CreateCard( actions, "#STR_COT_ITEMSTATS_SECTION_EXPORT" );
+		Widget body = card.GetContent();
+
+		m_ItemModeButton = UIActionManager.CreateNavButton( body, m_ItemModeButtonWordList[0], JM_COT_ICON_ARROW_LEFT, JM_COT_ICON_ARROW_RIGHT, this, "OnClick_NavButton" );
+		m_ItemModeButton.SetTooltip( "#STR_COT_ITEMSTATS_TT_CATEGORY" );
+
+		m_Button = UIActionManager.CreateButton( body, "Generate Data", this, "OnClick_Button" );
+		m_Button.SetTooltip( "#STR_COT_ITEMSTATS_TT_GENERATE" );
+
+		m_Scroller.UpdateScroller();
+	}
+
+	override void OnResize( float w, float h )
+	{
+		if ( m_Scroller )
+			m_Scroller.UpdateScroller();
 	}
 
 	void OnClick_NavButton( UIEvent eid, UIActionBase action )
@@ -69,11 +84,16 @@ class JMItemStatsForm: JMFormBase
 			return;
 
 		GenerateData();
-		
+
 		if (!m_Items)
+		{
+			action.AnimateError();
 			return;
-		
+		}
+
 		CreateFile();
+
+		action.AnimateFeedback();
 
 		COTCreateLocalAdminNotification( new StringLocaliser( "Created ItemStatsExported.csv" ) );
 	}

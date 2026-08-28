@@ -5,11 +5,12 @@ class JMRenderableModuleBase: JMModuleBase
 
 	private ButtonWidget m_MenuButton;
 
-	private int m_MenuButtonColour = 0;
+	//! Tint over this module's sidebar entry, marking whether its window is open.
+	private int m_MenuButtonColour = JMTheme.TRANSPARENT;
 
 	void JMRenderableModuleBase()
 	{
-		SetMenuButtonColour( 1, 1, 0, 0 );
+		SetMenuButtonColor( JMTheme.TRANSPARENT );
 	}
 
 #ifndef DAYZ_1_26
@@ -25,56 +26,93 @@ class JMRenderableModuleBase: JMModuleBase
 
 	bool InitButton( Widget button_bkg )
 	{
-		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::InitButton" );
-		#endif
+		Print("[COT-TRACE] InitButton begin: module=" + this + " title=" + GetTitle());
 
-		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
-
-		if ( button_bkg && m_MenuButton )
+		if ( !button_bkg )
 		{
-			m_MenuButton.SetColor( m_MenuButtonColour );
+			Print("[COT-TRACE] InitButton: button_bkg NULL, abort");
+			return false;
+		}
 
-			TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
+		Print("[COT-TRACE] InitButton: find btn");
+		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
+		Print("[COT-TRACE] InitButton: m_MenuButton=" + (m_MenuButton != null).ToString());
+
+		if ( !m_MenuButton )
+		{
+			Print("[COT-TRACE] InitButton: m_MenuButton NULL, abort");
+			return false;
+		}
+
+		m_MenuButton.SetColor( m_MenuButtonColour );
+
+		Print("[COT-TRACE] InitButton: find ttl");
+		TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
+		Print("[COT-TRACE] InitButton: ttl=" + (ttl != null).ToString());
+		if ( ttl )
 			ttl.SetText( GetLocalisedTitle() );
 
-			ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
-			TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
+		Print("[COT-TRACE] InitButton: find btn_img, btn_txt");
+		ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
+		TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
+		Print("[COT-TRACE] InitButton: btn_img=" + (btn_img != null).ToString() + " btn_txt=" + (btn_txt != null).ToString());
 
-			if ( ImageIsIcon() )
+		string iconName = GetIconName();
+		Print("[COT-TRACE] InitButton: ImageIsIcon=" + ImageIsIcon() + " ImageHasPath=" + ImageHasPath() + " IconName='" + iconName + "'");
+
+		if ( ImageIsIcon() )
+		{
+			if ( btn_txt ) btn_txt.Show( false );
+			if ( btn_img )
 			{
-				btn_txt.Show( false );
 				btn_img.Show( true );
 
 				if (ImageHasPath())
-					btn_img.LoadImageFile( 0, GetIconName());
+				{
+					Print("[COT-TRACE] InitButton: LoadImageFile path='" + iconName + "'");
+					btn_img.LoadImageFile( 0, iconName );
+				}
 				else
-					btn_img.LoadImageFile( 0, "set:" + GetImageSet() + " image:" + GetIconName() );
-			} else
+				{
+					string setRef = "set:" + GetImageSet() + " image:" + iconName;
+					Print("[COT-TRACE] InitButton: LoadImageFile setRef='" + setRef + "'");
+					btn_img.LoadImageFile( 0, setRef );
+				}
+			}
+		}
+		else
+		{
+			if ( btn_txt )
 			{
 				btn_txt.Show( true );
-				btn_img.Show( false );
-
-				btn_txt.SetText( GetIconName() );
+				btn_txt.SetText( iconName );
 			}
-
-			#ifdef COT_DEBUGLOGS
-			Print( "-" + this + "::InitButton true" );
-			#endif
-			return true;
+			if ( btn_img ) btn_img.Show( false );
 		}
 
-		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::InitButton" );
-		#endif
-		return false;
+		Print("[COT-TRACE] InitButton end: " + GetTitle());
+		return true;
 	}
 
-	void SetMenuButtonColour( float r, float g, float b, float alpha )
+	//! Set the sidebar entry tint directly. Prefer a JMTheme token.
+	void SetMenuButtonColor( int color )
 	{
-		m_MenuButtonColour = ARGB( r * 255, g * 255, b * 255, alpha * 255 );
+		m_MenuButtonColour = color;
+
 		if ( m_MenuButton )
 			m_MenuButton.SetColor( m_MenuButtonColour );
+	}
+
+	//! Legacy float overload, kept so external callers keep compiling.
+	//!
+	//! @note this used to build its value as ARGB( r, g, b, alpha ) - but ARGB
+	//! takes ( a, r, g, b ). Every call therefore packed the red channel from
+	//! `r`, the green from `g`... and the ALPHA from `r` too, so the intended
+	//! fully transparent SetMenuButtonColour( 1, 1, 0, 0 ) came out as opaque
+	//! RED over every sidebar entry. The channels are ordered correctly now.
+	void SetMenuButtonColour( float r, float g, float b, float alpha )
+	{
+		SetMenuButtonColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
 	}
 
 	ButtonWidget GetMenuButton()

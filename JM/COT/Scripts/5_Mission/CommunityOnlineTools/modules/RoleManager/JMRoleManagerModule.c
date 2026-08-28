@@ -34,12 +34,17 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "R";
+		return JMConstants.Lucide( "shield-user" );
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()
@@ -97,7 +102,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  Public API — called by JMRoleManagerForm
+	//  Public API - called by JMRoleManagerForm
 	// -------------------------------------------------------------------------
 
 	void RequestRoleList()
@@ -358,7 +363,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 	}
 }
 
-// Lightweight DTO used to pass role data from server → client via RPC
+// Lightweight DTO used to pass role data from server -> client via RPC
 class JMRoleData
 {
 	string           Name;

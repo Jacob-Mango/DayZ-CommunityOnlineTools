@@ -8,8 +8,8 @@ class JMESPForm: JMFormBase
 
 	private UIActionScroller m_ESPSelectedObjects;
 
-	private UIActionSelectBox m_slbx_PlayerSkeletons;
-	private UIActionSelectBox m_slbx_Skeletons_LineThickness;
+	private UIActionDropdown m_slbx_PlayerSkeletons;
+	private UIActionDropdown m_slbx_Skeletons_LineThickness;
 
 	private UIActionButton m_btn_Toggle;
 	
@@ -21,12 +21,20 @@ class JMESPForm: JMFormBase
 	private UIActionCheckbox m_DisableSafetyCheckbox;
 
 	private UIActionButton m_ExportButton;
-	private UIActionSelectBox m_ExportTypeList;
+	private UIActionDropdown m_ExportTypeList;
 
-	private JMESPModule m_Module;
-	private JMLoadoutModule m_LoadoutModule;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMESPModule m_Module;
+	protected JMLoadoutModule m_LoadoutModule;
 
-	private UIActionEditableTextPreview m_SearchBox;
+	protected UIActionTabs m_Tabs;
+	protected Widget m_TabFiltersPanel;
+	protected Widget m_TabSelectedPanel;
+
+	static const int TAB_FILTERS  = 0;
+	static const int TAB_SELECTED = 1;
+
+	private UIActionSearchBox m_SearchBox;
 
 	void JMESPForm()
 	{
@@ -50,45 +58,53 @@ class JMESPForm: JMFormBase
 	{
 		Widget mainSpacer = UIActionManager.CreateGridSpacer( parent, 5, 1 );
 
-		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 3, 2 );
-		
-		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE", this, "Click_UpdateESP" );
+		// 4 cells: [Toggle btn] [2-row checkbox column]
+		//          [AutoRefresh checkbox] [Refresh-rate slider]
+		Widget quadSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 2, 2 );
+
+		m_btn_Toggle = UIActionManager.CreateButton( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE", this, "OnClick_UpdateESP" );
+		m_btn_Toggle.SetTooltip( "Toggle the ESP overlay on/off" );
 
 		Widget checkboxesSpacer = UIActionManager.CreateGridSpacer( quadSpacer, 2, 1 );
 
-		UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "Click_UseClassName", JMESPWidgetHandler.UseClassName );
-		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "Click_DisableSafety", m_Module.GetFilterSafetyState() );
+		UIActionCheckbox chkClassName = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_CLASS_NAME", this, "OnClick_UseClassName", JMESPWidgetHandler.UseClassName );
+		chkClassName.SetTooltip( "Show each object's config classname on the overlay" );
+		m_DisableSafetyCheckbox = UIActionManager.CreateCheckbox( checkboxesSpacer, "#STR_COT_ESP_MODULE_TOGGLE_SAFETY", this, "OnClick_DisableSafety", m_Module.GetFilterSafetyState() );
+		m_DisableSafetyCheckbox.SetTooltip( "Bypass the 'too many results' safety limit on filters" );
 
-		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "Click_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
-		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "Change_UpdateRate" );
+		m_chkbx_Refresh = UIActionManager.CreateCheckbox( quadSpacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH", this, "OnClick_UpdateAtRate", m_Module.GetState() == JMESPState.Update );
+		m_chkbx_Refresh.SetTooltip( "Continuously refresh the tracked objects at the rate below" );
+		m_sldr_Refresh = UIActionManager.CreateSlider( quadSpacer, "", 1.0, 10.0, this, "OnChange_UpdateRate" );
 		m_sldr_Refresh.SetCurrent( m_Module.ESPUpdateTime );
 		m_sldr_Refresh.SetFormat("#STR_COT_FORMAT_SECOND_LONG");
 		m_sldr_Refresh.SetStepValue( 1.0 );
 
 		Widget skeletonSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_slbx_PlayerSkeletons = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_ESP_MODULE_DRAW_PLAYER_SKELETONS", {"#STR_COT_GENERIC_NONE", "#STR_COT_GENERIC_OTHERS", "#STR_COT_GENERIC_ALL"}, this, "Change_PlayerSkeletons" );
-		m_slbx_PlayerSkeletons.SetSelectorWidth(0.4);
+		array<string> skeletonOpts = {"#STR_COT_GENERIC_NONE", "#STR_COT_GENERIC_OTHERS", "#STR_COT_GENERIC_ALL"};
+		m_slbx_PlayerSkeletons = UIActionManager.CreateDropdown( skeletonSpacer, "#STR_COT_ESP_MODULE_DRAW_PLAYER_SKELETONS", parent, this, "OnChange_PlayerSkeletons", skeletonOpts );
+		RegisterOverlay( m_slbx_PlayerSkeletons );
 		int idx = m_Module.GetDrawPlayerSkeletonsEnabled();
 		if (idx)
 			idx += m_Module.DrawPlayerSkeletonsIncludingMyself;
 		m_slbx_PlayerSkeletons.SetSelection(idx, false);
-		m_slbx_Skeletons_LineThickness = UIActionManager.CreateSelectionBox( skeletonSpacer, "#STR_COT_GENERIC_LINE_THICKNESS", {"1", "2", "3", "4"}, this, "Change_Skeleton_LineThickness" );
-		m_slbx_Skeletons_LineThickness.SetSelectorWidth(0.4);
+		array<string> thickOpts = {"1", "2", "3", "4"};
+		m_slbx_Skeletons_LineThickness = UIActionManager.CreateDropdown( skeletonSpacer, "#STR_COT_GENERIC_LINE_THICKNESS", parent, this, "OnChange_Skeleton_LineThickness", thickOpts );
+		RegisterOverlay( m_slbx_Skeletons_LineThickness );
 		m_slbx_Skeletons_LineThickness.SetSelection( m_Module.SkeletonLineThickness - 1 );
 
 		Widget filterSpacer = UIActionManager.CreateGridSpacer( mainSpacer, 1, 2 );
 
-		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, m_Module.GetMaxRadius(), this, "Change_Range" );
+		m_sldr_Radius = UIActionManager.CreateSlider( filterSpacer, "#STR_COT_ESP_MODULE_RADIUS", 0, m_Module.GetMaxRadius(), this, "OnChange_Range" );
 		m_sldr_Radius.SetCurrent( m_Module.ESPRadius );
 		m_sldr_Radius.SetFormat("#STR_COT_FORMAT_METRE_LONG");
 		m_sldr_Radius.SetStepValue( 10.0 );
 
-		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( filterSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_ESP_MODULE_CLASS_FILTER", this, "Change_Filter", m_Module.Filter );
-		m_SearchBox.SetWidth( 0.91 );
+		Widget searchSpacer = UIActionManager.CreateWrapSpacer( filterSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		m_SearchBox = UIActionManager.CreateSearchBox( searchSpacer, this, "OnChange_Filter", "#STR_COT_ESP_MODULE_CLASS_FILTER", m_Module.Filter );
+		m_SearchBox.SetWidth( 1.0 );
 		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "Reset_Filter" );
-		button.SetFixedSize( 28, 28 );
+		button.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
 	
 		UIActionManager.CreatePanel( mainSpacer, 0xFF000000, 3 );
 
@@ -107,8 +123,10 @@ class JMESPForm: JMFormBase
 		Widget container = m_ESPListScroller.GetContentWidget();
 
 		Widget rowSelectors = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_ESPSelectAll" );
-		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_ESPDeselectAll" );
+		UIActionButton btnEspSelAll   = UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "OnClick_ESPSelectAll" );
+		btnEspSelAll.SetTooltip( "Enable every ESP category filter" );
+		UIActionButton btnEspDeselAll = UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "OnClick_ESPDeselectAll" );
+		btnEspDeselAll.SetTooltip( "Disable every ESP category filter" );
 
 		m_ESPListRows = UIActionManager.CreateActionRows( container );
 
@@ -159,13 +177,17 @@ class JMESPForm: JMFormBase
 		
 		UIActionManager.CreateText(container,"Visible Items");
 		Widget rowSelectors = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "Click_SelectAll" );
-		UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "Click_DeselectAll" );
+		UIActionButton btnSelAll   = UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL", this, "OnClick_SelectAll" );
+		btnSelAll.SetTooltip( "Select every visible object in the list" );
+		UIActionButton btnDeselAll = UIActionManager.CreateButton( rowSelectors, "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL", this, "OnClick_DeselectAll" );
+		btnDeselAll.SetTooltip( "Clear the current selection" );
 
 		UIActionManager.CreateText(container,"Selected Items");
 	
 		Widget rowExports = UIActionManager.CreateGridSpacer( container, 1, 2 );
-		m_ExportButton = UIActionManager.CreateButton( rowExports, "#STR_COT_TO_CLIPBOARD", this, "Click_CopyToClipboard" );
+		m_ExportButton = UIActionManager.CreateButton( rowExports, "#STR_COT_TO_CLIPBOARD", this, "OnClick_CopyToClipboard" );
+		m_ExportButton.SetIcon( JMConstants.ICON_STACK );
+		m_ExportButton.SetTooltip( "Copy the selected objects to the clipboard in the chosen format" );
 		TStringArray exportChoices = {
 			"Raw",
 			"SpawnableTypes",
@@ -177,13 +199,15 @@ class JMESPForm: JMFormBase
 		#endif
 			"#STR_COT_LOADOUT_MODULE_NAME"
 		};
-		m_ExportTypeList = UIActionManager.CreateSelectionBox( rowExports, "", exportChoices, this, "Click_ExportType" );
-		m_ExportTypeList.SetSelectorWidth(1.0);
+		m_ExportTypeList = UIActionManager.CreateDropdown( rowExports, "", parent, this, "OnClick_ExportType", exportChoices );
+		RegisterOverlay( m_ExportTypeList );
 
 		Widget rowMisc = UIActionManager.CreateWrapSpacerFit( container );
-		UIActionManager.CreateButton( rowMisc, "Move To Cursor", this, "Click_MoveToCursor" );
-		UIActionButton delbtn = UIActionManager.CreateButton( rowMisc, "Delete", this, "Click_DeleteSelected" );
-		delbtn.SetColor(COLOR_RED);
+		UIActionButton btnMove = UIActionManager.CreateButton( rowMisc, "Move To Cursor", this, "OnClick_MoveToCursor" );
+		btnMove.SetTooltip( "Move every selected object to your cursor position" );
+		UIActionConfirmInline delbtn = UIActionManager.CreateConfirmInline( rowMisc, "Delete", this, "OnClick_DeleteSelected" );
+		UIActionIconGrid.ApplyDeletePreset( delbtn );
+		delbtn.SetTooltip( "Delete every selected object from the world" );
 
 		m_ESPSelectedObjects.UpdateScroller();
 	}
@@ -194,18 +218,65 @@ class JMESPForm: JMFormBase
 
 		ESPControls( layoutRoot.FindAnyWidget( "panel_top" ) );
 
-		Widget left_bottom = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
-		Widget right_bottom = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", layoutRoot.FindAnyWidget( "panel_bottom" ) );
-
-		left_bottom.SetSize( 0.5, 1.0 );
-		right_bottom.SetSize( 0.5, 1.0 );
-		left_bottom.SetPos( 0.0, 0.0 );
-		right_bottom.SetPos( 0.5, 0.0 );
-
-		ESPFilters( left_bottom );
-		ESPSelectedObjects( right_bottom );
+		InitWidgetsBottom();
 
 		Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
+	}
+
+	//! Archetype B: the controls stay pinned on top, the two lists below become
+	//! tabs. They used to be two UIPanel layouts created at runtime and
+	//! hand-positioned to 50/50 - at 700px wide that left each of them 350px for
+	//! a filter tree and an object list that both want the full width.
+	protected void InitWidgetsBottom()
+	{
+		m_TabFiltersPanel  = layoutRoot.FindAnyWidget( "esp_filters_panel" );
+		m_TabSelectedPanel = layoutRoot.FindAnyWidget( "esp_selected_panel" );
+
+		ref array<string> tabLabels = { "#STR_COT_ESP_TAB_FILTERS", "#STR_COT_ESP_TAB_VISIBLE" };
+		ref array<string> tabIcons  = { JMConstants.Lucide( "filter" ), JMConstants.Lucide( "eye" ) };
+
+		m_Tabs = UIActionManager.CreateTabs( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), tabLabels, tabIcons, this, "OnChange_Tab" );
+
+		m_Tabs.AddContent( m_TabFiltersPanel );
+		m_Tabs.AddContent( m_TabSelectedPanel );
+
+		InitTabState( 2 );
+
+		m_Tabs.SetSelection( TAB_FILTERS, false );
+
+		BuildTabIfNeeded( TAB_FILTERS );
+	}
+
+	private void BuildTabIfNeeded( int tabIdx )
+	{
+		if ( !ShouldBuildTab( tabIdx ) )
+			return;
+
+		switch ( tabIdx )
+		{
+			case TAB_FILTERS:  ESPFilters( m_TabFiltersPanel );          break;
+			case TAB_SELECTED: ESPSelectedObjects( m_TabSelectedPanel ); break;
+		}
+
+		UpdateUI();
+	}
+
+	override int GetActiveTabIndex()
+	{
+		if ( !m_Tabs )
+			return -1;
+
+		return m_Tabs.GetSelection();
+	}
+
+	void OnChange_Tab( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CHANGE )
+			return;
+
+		CloseAllOverlays();
+
+		BuildTabIfNeeded( GetActiveTabIndex() );
 	}
 
 	override void OnResize( float w, float h )
@@ -247,11 +318,11 @@ class JMESPForm: JMFormBase
 		if ( m_Module.GetState() != JMESPState.Remove )
 		{
 			m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_CLEAR_ESP" );
-			m_btn_Toggle.SetColor(COLOR_RED_A);
+			m_btn_Toggle.SetColor(JMTheme.DANGER_FILL);
 		}
 		else
 		{
-			m_btn_Toggle.SetColor(COLOR_GREEN_A);
+			m_btn_Toggle.SetColor(JMTheme.SUCCESS_FILL);
 			if ( m_chkbx_Refresh.IsChecked() )
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
@@ -262,7 +333,7 @@ class JMESPForm: JMFormBase
 			{
 				m_btn_Toggle.SetButton( "#STR_COT_ESP_MODULE_ACTION_SHOW_ESP" );
 
-				m_sldr_Refresh.SetColor(COLOR_WHITE);
+				m_sldr_Refresh.SetColor(JMTheme.TEXT_PRIMARY);
 				m_sldr_Refresh.Disable();
 			}
 		}
@@ -328,7 +399,7 @@ class JMESPForm: JMFormBase
 		m_SearchBox.SetTextPreview(closestMatch);
 	}
 
-	void Click_UpdateESP( UIEvent eid, UIActionBase action )
+	void OnClick_UpdateESP( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -357,7 +428,7 @@ class JMESPForm: JMFormBase
 		UpdateUI();
 	}
 	
-	void Change_Filter( UIEvent eid, UIActionBase action )
+	void OnChange_Filter( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -376,20 +447,20 @@ class JMESPForm: JMFormBase
 		UpdateList();
 	}
 
-	void Change_UpdateRate( UIEvent eid, UIActionBase action )
+	void OnChange_UpdateRate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
 		
 		if ( m_sldr_Refresh.GetCurrent() > 0 )
-			m_sldr_Refresh.SetColor(COLOR_WHITE);
+			m_sldr_Refresh.SetColor(JMTheme.TEXT_PRIMARY);
 		else
-			m_sldr_Refresh.SetColor(COLOR_RED_A);
+			m_sldr_Refresh.SetColor(JMTheme.DANGER);
 
 		m_Module.ESPUpdateTime = action.GetCurrent();
 	}
 
-	void Change_Range( UIEvent eid, UIActionBase action )
+	void OnChange_Range( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -397,7 +468,7 @@ class JMESPForm: JMFormBase
 		m_Module.ESPRadius = action.GetCurrent();
 	}
 
-	void Click_DisableSafety( UIEvent eid, UIActionBase action )
+	void OnClick_DisableSafety( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -414,7 +485,7 @@ class JMESPForm: JMFormBase
 		m_sldr_Radius.SetCurrent(m_Module.ESPRadius);
 	}	
 
-	void Click_UseClassName( UIEvent eid, UIActionBase action )
+	void OnClick_UseClassName( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -422,7 +493,7 @@ class JMESPForm: JMFormBase
 		JMESPWidgetHandler.UseClassName = action.IsChecked();
 	}
 
-	void Click_UpdateAtRate( UIEvent eid, UIActionBase action )
+	void OnClick_UpdateAtRate( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -444,7 +515,7 @@ class JMESPForm: JMFormBase
 		UpdateUI();
 	}
 	
-	void Change_PlayerSkeletons( UIEvent eid, UIActionBase action )
+	void OnChange_PlayerSkeletons( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -457,7 +528,7 @@ class JMESPForm: JMFormBase
 		m_Module.DrawPlayerSkeletonsIncludingMyself = idx > 1;
 	}
 
-	void Click_ExportType( UIEvent eid, UIActionBase action )
+	void OnClick_ExportType( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -468,7 +539,7 @@ class JMESPForm: JMFormBase
 			m_ExportButton.SetButton("#STR_COT_TO_CLIPBOARD");
 	}	
 
-	void Change_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
+	void OnChange_Skeleton_LineThickness( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CHANGE )
 			return;
@@ -476,7 +547,7 @@ class JMESPForm: JMFormBase
 		m_Module.SkeletonLineThickness = action.GetSelection() + 1;
 	}
 	
-	void Click_DuplicateSelected( UIEvent eid, UIActionBase action )
+	void OnClick_DuplicateSelected( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -484,7 +555,7 @@ class JMESPForm: JMFormBase
 		m_Module.DuplicateSelected();
 	}
 	
-	void Click_ESPDeselectAll( UIEvent eid, UIActionBase action )
+	void OnClick_ESPDeselectAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -493,7 +564,7 @@ class JMESPForm: JMFormBase
 			espType.SetChecked(false);
 	}
 	
-	void Click_ESPSelectAll( UIEvent eid, UIActionBase action )
+	void OnClick_ESPSelectAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -502,9 +573,9 @@ class JMESPForm: JMFormBase
 			espType.SetChecked(true);
 	}
 	
-	void Click_DeleteSelected( UIEvent eid, UIActionBase action )
+	void OnClick_DeleteSelected( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		CreateAdvancedObjectConfirm("DeleteSelected", "DeleteSelected");
@@ -515,7 +586,7 @@ class JMESPForm: JMFormBase
 		m_Module.DeleteSelected();
 	}
 	
-	void Click_SelectAll( UIEvent eid, UIActionBase action )
+	void OnClick_SelectAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -530,7 +601,7 @@ class JMESPForm: JMFormBase
 		}
 	}
 	
-	void Click_DeselectAll( UIEvent eid, UIActionBase action )
+	void OnClick_DeselectAll( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -546,7 +617,7 @@ class JMESPForm: JMFormBase
 		JM_GetSelected().ClearObjects();
 	}
 	
-	void Click_MoveToCursor( UIEvent eid, UIActionBase action )
+	void OnClick_MoveToCursor( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
@@ -567,7 +638,7 @@ class JMESPForm: JMFormBase
 			m_Module.MoveToCursor( contact_pos );
 	}
 	
-	void Click_CopyToClipboard( UIEvent eid, UIActionBase action )
+	void OnClick_CopyToClipboard( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;

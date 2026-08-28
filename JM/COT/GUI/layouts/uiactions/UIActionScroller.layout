@@ -41,8 +41,8 @@ FrameWidgetClass UIActionScroller {
      vexactsize 0
      position 0 0
      size 12 1
-     color 0.25 0.25 0.25 1.0 
-     style rover_sim_colorable
+     color 0.196 0.220 0.247 1.000
+     style COTPill6Set
      {
       PanelWidgetClass Scroller {
        halign center_ref
@@ -52,8 +52,8 @@ FrameWidgetClass UIActionScroller {
        hexactsize 0
        vexactsize 1
        size 1 100
-       color 0.75 0.75 0.75 1.0 
-       style rover_sim_colorable
+       color 0.925 0.976 1.000 0.750
+       style COTPill6Set
        {
        }
       }
@@ -65,10 +65,10 @@ FrameWidgetClass UIActionScroller {
    visible 0
    clipchildren 0
    ignorepointer 0
-   color 0.1569 0.1569 0.1569 0.902
+   color 0.082 0.098 0.118 0.902
    position 0 0
    size 1 1
-   style rover_sim_colorable
+   style COTField4Set
   }
  }
 }

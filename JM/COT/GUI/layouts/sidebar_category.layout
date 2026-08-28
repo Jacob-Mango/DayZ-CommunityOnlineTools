@@ -1,6 +1,6 @@
 PanelWidgetClass cat_bkg {
  visible 1
- color 0 0 0 0.25
+ color 0 0 0 0
  position 5 2
  size 290 54
  halign left_ref
@@ -11,8 +11,34 @@ PanelWidgetClass cat_bkg {
  vexactsize 1
  style rover_sim_colorable
  {
+  PanelWidgetClass fill {
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0 0 0 0
+   style rover_sim_colorable
+  }
+  PanelWidgetClass accent {
+   ignorepointer 1
+   position 0 0
+   size 4 1
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   color 0 0 0 0
+   style rover_sim_colorable
+  }
   ButtonWidgetClass cat_btn {
-   color 1 0 0 1
+   color 0 0 0 0
    position 5 0
    size 290 1
    hexactpos 1
@@ -20,7 +46,7 @@ PanelWidgetClass cat_bkg {
    hexactsize 1
    vexactsize 0
    "no focus" 1
-   style rover_sim_colorable
+   style Empty
    {
     PanelWidgetClass img_cnt {
      ignorepointer 1
@@ -60,11 +86,30 @@ PanelWidgetClass cat_bkg {
       }
      }
     }
+    ImageWidgetClass cat_arrow {
+     visible 0
+     ignorepointer 1
+     position 12 0
+     size 20 20
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     image0 "set:dayz_gui image:icon_expand"
+     mode blend
+     color 1 1 1 1
+     "src alpha" 1
+     "no wrap" 1
+     stretch 0
+     rotation 0 0 0
+    }
     TextWidgetClass cat_ttl {
      ignorepointer 1
      color 1 1 1 1
-     position 0 0
-     size 230 54
+     position 34 0
+     size 196 54
      halign right_ref
      valign center_ref
      hexactpos 1

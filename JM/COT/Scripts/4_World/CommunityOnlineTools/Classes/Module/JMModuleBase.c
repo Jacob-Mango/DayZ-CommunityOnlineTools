@@ -117,6 +117,7 @@ modded class JMModuleBase
 #ifndef CF_MODULE_PERMISSIONS
 	override void OnClientPermissionsUpdated()
 	{
+		super.OnClientPermissionsUpdated();
 	}
 #endif
 

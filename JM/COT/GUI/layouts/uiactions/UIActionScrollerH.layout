@@ -1,0 +1,72 @@
+FrameWidgetClass UIActionScrollerH {
+ clipchildren 1
+ size 1 1
+ position 0 0
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ scriptclass "UIActionScrollerH"
+ {
+  FrameWidgetClass action_wrapper {
+   clipchildren 1
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    GridSpacerWidgetClass Content {
+     position 0 0
+     size 0 1
+     hexactpos 1
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     "Size To Content H" 1
+     Columns 1
+     Rows 1
+     {
+     }
+    }
+    PanelWidgetClass ScrollerContainer {
+     ignorepointer 0
+     halign left_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     position 0 0
+     size 1 8
+     color 0.196 0.220 0.247 1.000
+     style COTField4Set
+     {
+      PanelWidgetClass Scroller {
+       halign left_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 0
+       size 100 1
+       color 0.925 0.976 1.000 0.750
+       style COTField4Set
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.082 0.098 0.118 0.902
+   position 0 0
+   size 1 1
+   style COTField4Set
+  }
+ }
+}

@@ -1,7 +1,7 @@
 class JMTeleportForm: JMFormBase
 {
 	protected Widget m_ActionsFilterWrapper;
-	protected UIActionEditableTextPreview m_Filter;
+	protected UIActionSearchBox m_Filter;
 
 	protected string m_CurrentCategory = "ALL";
 	protected ref TStringArray m_Categories;
@@ -19,13 +19,14 @@ class JMTeleportForm: JMFormBase
 	protected UIActionText m_InputTextCategory;
 
 	protected UIActionEditableText m_InputLocation;
-	protected UIActionEditableTextPreview m_InputCategory;
+	protected UIActionSearchBox m_InputCategory;
 
 	protected UIActionButton m_InputAdd;
-	protected UIActionButton m_InputRefresh;
-	protected UIActionButton m_InputRemove;
+	protected UIActionImageButton m_InputRefresh;
+	protected UIActionConfirmInline m_InputRemove;
 
-	private JMTeleportModule m_Module;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMTeleportModule m_Module;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
 	{
@@ -34,10 +35,10 @@ class JMTeleportForm: JMFormBase
 
 	override void OnInit()
 	{
-		// ---- Filter bar (top, 2 rows in actions_filter_wrapper) ----------------
-		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "actions_filter_wrapper" );
+		// ---- Filter bar (archetype B header) -----------------------------------
+		m_ActionsFilterWrapper = layoutRoot.FindAnyWidget( "panel_top" );
 
-		m_Filter = UIActionManager.CreateEditableTextPreview( m_ActionsFilterWrapper, "#STR_COT_TELEPORT_MODULE_FILTER", this, "Type_UpdateList" );
+		m_Filter = UIActionManager.CreateSearchBox( m_ActionsFilterWrapper, this, "Type_UpdateList", "#STR_COT_TELEPORT_MODULE_FILTER" );
 
 		m_CategoriesList = UIActionManager.CreateSelectionBox( m_ActionsFilterWrapper, "", {"ALL"}, this, "Click_LocationType" );
 		m_CategoriesList.SetSelectorWidth(1.0);
@@ -48,52 +49,69 @@ class JMTeleportForm: JMFormBase
 		// ---- Bottom action area (5 rows in actions_wrapper) --------------------
 		m_ActionsWrapper = layoutRoot.FindAnyWidget( "actions_wrapper" );
 
-		// Row 1 — selected position coordinates
+		// Row 1 - selected position coordinates
 		Widget coordRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
 		m_PositionX = UIActionManager.CreateText( coordRow, "X: " );
 		m_PositionZ = UIActionManager.CreateText( coordRow, "Z: " );
 
-		// Row 2 — teleport button (full width)
+		// Row 2 - teleport button (full width)
 		m_Teleport = UIActionManager.CreateButton( m_ActionsWrapper, "Teleport", this, "Click_Teleport" );
+		m_Teleport.SetTooltip( "Teleport yourself to the selected saved location" );
 
-		// Row 3 — name label + editable input side by side
-		Widget nameRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		// Row 3 - name label (25%) + editable input (75%).
+		// Fractional widths must sum to slightly less than 1.0 in a WrapSpacer;
+		// at exactly 1.0 the engine wraps the second child to a new line.
+		Widget nameRow = UIActionManager.CreateWrapSpacer( m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 		m_InputTextLocation = UIActionManager.CreateText( nameRow, "#STR_COT_GENERIC_NAME" );
+		m_InputTextLocation.SetWidth( 0.24 );
+		m_InputTextLocation.SetLabelVAlign( UIActionVAlign.CENTER );
 		m_InputLocation = UIActionManager.CreateEditableText( nameRow, "", this );
+		m_InputLocation.SetWidth( 0.74 );
 		m_InputLocation.SetWidgetWidth( m_InputLocation.GetLabelWidget(), 0.0 );
 		m_InputLocation.SetWidgetWidth( m_InputLocation.GetEditBoxWidget(), 1.0 );
 
-		// Row 4 — category label + editable input with autocomplete side by side
-		Widget catRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+		// Row 4 - category label (25%) + editable input with autocomplete (75%)
+		Widget catRow = UIActionManager.CreateWrapSpacer( m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 		m_InputTextCategory = UIActionManager.CreateText( catRow, "#STR_COT_GENERIC_CATEGORY" );
-		m_InputCategory = UIActionManager.CreateEditableTextPreview( catRow, "", this, "InputCategory_OnChange" );
-		m_InputCategory.SetWidgetWidth( m_InputCategory.GetLabelWidget(), 0.0 );
+		m_InputTextCategory.SetWidth( 0.24 );
+		m_InputTextCategory.SetLabelVAlign( UIActionVAlign.CENTER );
+		m_InputCategory = UIActionManager.CreateSearchBox( catRow, this, "InputCategory_OnChange" );
+		m_InputCategory.SetWidth( 0.74 );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditBoxWidget(), 1.0 );
 		m_InputCategory.SetWidgetWidth( m_InputCategory.GetEditPreviewBoxWidget(), 1.0 );
 
-		// Row 5 — Add / Refresh / Remove buttons
-		Widget btnRow = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 3 );
-		m_InputAdd     = UIActionManager.CreateButton( btnRow, "Add",     this, "Click_AddLocation"   );
-		m_InputRefresh = UIActionManager.CreateButton( btnRow, "Refresh", this, "Click_Refresh"        );
-		m_InputRemove  = UIActionManager.CreateButton( btnRow, "Remove",  this, "Click_RemoveLocation" );
-		m_InputAdd.SetColor(COLOR_GREEN);
-		m_InputRemove.SetColor(COLOR_RED);
+		// Row 5 - Delete (icon) | Refresh (icon) | Add (label, fills rest)
+		Widget btnRow = UIActionManager.CreateWrapSpacer( m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+		m_InputRemove = UIActionManager.CreateConfirmInline( btnRow, "", this, "Click_RemoveLocation" );
+		UIActionIconGrid.ApplyDeletePreset( m_InputRemove );
+		m_InputRemove.SetButton( "" );
+		m_InputRemove.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+		m_InputRemove.CenterIcon( ICON_BUTTON_PX, 16 );
+		m_InputRemove.SetConfirmLabel( "O" );
+		m_InputRemove.SetCancelLabel( "X" );
+		m_InputRemove.SetTooltip( "Delete the selected saved location" );
+
+		m_InputRefresh = UIActionManager.CreateRefreshButton( btnRow, this, "Click_Refresh", "#STR_COT_GENERIC_REFRESH" );
+		m_InputRefresh.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+
+		m_InputAdd = UIActionManager.CreateButton( btnRow, "Add", this, "Click_AddLocation" );
+		m_InputAdd.SetWidth( 1.0 );
+		m_InputAdd.SetColor( JMTheme.SUCCESS_FILL );
+		m_InputAdd.SetTooltip( "Save your current position as a new location" );
 
 		// ---- Permission gating -------------------------------------------------
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
-		{
-			m_InputTextLocation.Disable();
-			m_InputTextCategory.Disable();
-			m_InputLocation.Disable();
-			m_InputCategory.Disable();
-			m_InputAdd.Disable();
-		}
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) )
-			m_InputRemove.Disable();
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
-			m_InputRefresh.Disable();
+		// Bound rather than evaluated once: this used to run only here, so a
+		// permission granted while the form was open left the controls dead
+		// until it was closed and reopened.
+		RegisterPermission( m_InputTextLocation, "Admin.Player.Teleport.Location.Add" );
+		RegisterPermission( m_InputTextCategory, "Admin.Player.Teleport.Location.Add" );
+		RegisterPermission( m_InputLocation,     "Admin.Player.Teleport.Location.Add" );
+		RegisterPermission( m_InputCategory,     "Admin.Player.Teleport.Location.Add" );
+		RegisterPermission( m_InputAdd,          "Admin.Player.Teleport.Location.Add" );
+		RegisterPermission( m_InputRemove,       "Admin.Player.Teleport.Location.Remove" );
+		RegisterPermission( m_InputRefresh,      "Admin.Player.Teleport.Location.Refresh" );
+		RegisterPermission( m_Teleport,          "Admin.Player.Teleport.Location" );
 	}
 
 	void Click_Refresh( UIEvent eid, UIActionBase action )
@@ -104,18 +122,19 @@ class JMTeleportForm: JMFormBase
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
 			return;
 
+		m_InputRefresh.TriggerSpin( 2 );
 		m_Module.Reload();
 	}
 
 	void Click_RemoveLocation( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
 		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "#STR_COT_OBJECT_MODULE_DELETE "+ GetCurrentPositionName(), "#STR_COT_GENERIC_YES", "RemoveLocation_Confirmed", "#STR_COT_GENERIC_NO", "" );
+		RemoveLocation_Confirmed();
 	}
 
 	void RemoveLocation_Confirmed()

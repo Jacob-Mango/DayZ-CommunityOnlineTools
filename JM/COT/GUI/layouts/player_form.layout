@@ -7,7 +7,7 @@ PanelWidgetClass JMPlayerForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMPlayerForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   PanelWidgetClass panel_left {
    color 0 0 0 0
@@ -22,7 +22,7 @@ PanelWidgetClass JMPlayerForm {
     FrameWidgetClass panel_left_top {
      ignorepointer 1
      position 0 0
-     size 1 0.225
+     size 1 0.15
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -30,8 +30,8 @@ PanelWidgetClass JMPlayerForm {
     }
     FrameWidgetClass panel_left_bottom {
      ignorepointer 1
-     position 0 0.225
-     size 1 0.775
+     position 0 0.15
+     size 1 0.85
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -49,7 +49,7 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 1
    vexactsize 0
-   style DayZDefaultPanel
+   style COTSurface
   }
   PanelWidgetClass panel_right {
    color 0 0 0 0
@@ -60,10 +60,30 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
+   {
+    FrameWidgetClass panel_right_tabs {
+     ignorepointer 0
+     position 0 0
+     size 1 0.06
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+    FrameWidgetClass panel_right_content {
+     ignorepointer 0
+     position 0 0.06
+     size 1 0.94
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+    }
+   }
   }
   PanelWidgetClass panel_right_disable {
    visible 0
-   color 0.06 0.08 0.11 0.985
+   color 0.098 0.118 0.141 0.985
    position 0.305 0
    size 0.695 1
    halign left_ref
@@ -71,7 +91,7 @@ PanelWidgetClass JMPlayerForm {
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style DayZDefaultPanel
+   style COTSurface
    {
     PanelWidgetClass panel_split {
      color 0 0 0 1
@@ -83,7 +103,7 @@ PanelWidgetClass JMPlayerForm {
      vexactpos 0
      hexactsize 1
      vexactsize 0
-     style DayZDefaultPanel
+     style COTSurface
     }
    }
   }

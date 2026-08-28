@@ -29,7 +29,36 @@ modded class Weapon_Base
 					}
 				}
 			}
+
+			COT_ReportShotToAntiCheat( player, muzzleType );
 		}
+	}
+
+	//! Feed the anti-cheat infinite-ammo rule: who fired, and how many
+	//! cartridges are left afterwards. The rule is only that the number has to
+	//! move; a magazine that never empties across many shots is not one the
+	//! game produced.
+	//!
+	//! COT's own unlimited-ammo grant is refilled a few lines above, so it has
+	//! to be excluded here or every admin using it flags themselves. Same
+	//! reasoning as godmode: an admin decision is not a cheat.
+	//!
+	//! Reporting only - the rule lives in JMAntiCheatModule. This runs inside
+	//! the firing path of every weapon on the server, so anything expensive
+	//! here is paid for by every player on every trigger pull.
+	protected void COT_ReportShotToAntiCheat( PlayerBase player, int muzzleType )
+	{
+		if ( !g_Game.IsServer() )
+			return;
+
+		if ( player.COTHasUnlimitedAmmo() )
+			return;
+
+		PlayerIdentity identity = player.GetIdentity();
+		if ( !identity )
+			return;
+
+		JMAntiCheatSignals.ReportShot( identity.GetId(), GetTotalCartridgeCount( muzzleType ) );
 	}
 
 	TStringArray COTGetMagazineTypesValidated(string name = "magazines", int muzzleIndex = 0)

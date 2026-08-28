@@ -1,0 +1,33 @@
+PanelWidgetClass UIActionColorPicker_Popup {
+ position 0 0
+ size 220 150
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ color 0.082 0.098 0.118 0.980
+ style COTBox8Set
+ {
+  PanelWidgetClass popup_swatch {
+   ignorepointer 1
+   position 6 6
+   size 208 20
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 1 1 1 1
+   style COTField4Set
+  }
+  GridSpacerWidgetClass popup_content {
+   position 6 30
+   size 208 114
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   Columns 1
+   Rows 4
+  }
+ }
+}

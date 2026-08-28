@@ -1,6 +1,6 @@
 class JMObjectSpawnerForm: JMFormBase
 {
-	private autoptr map< string, string > m_ObjectTypes;
+	private UIActionIconGrid m_TypeFilter;
 
 	private Widget m_TypesActionsWrapper;
 	private Widget m_SpawnerActionsWrapper;
@@ -8,29 +8,41 @@ class JMObjectSpawnerForm: JMFormBase
 	private UIActionSlider m_QuantityItem;
 	private UIActionSlider m_TemperatureItem;
 	private UIActionSlider m_HealthItem;
-	private UIActionDropdownList m_ItemDataList;
-	
-	private UIActionEditableTextPreview m_SearchBox;
-	private UIActionSelectBox m_SpawnMode;
 
-	private UIActionSelectBox m_ObjSetupMode;
+	private UIActionSearchBox m_SearchBox;
+	private UIActionDropdown m_SpawnMode;
+
+	private UIActionDropdown m_ObjSetupMode;
 
 	private TextListboxWidget m_ClassList;
 
 	private ItemPreviewWidget m_ItemPreview;
+	//! The preview's wrapper panel. The preview itself is no longer the layout
+	//! root: it now hangs inside a plainly-styled panel, the way vanilla's own
+	//! previews do, so it never inherits whatever style the engine has
+	//! registered as the default for a styleless widget - which is exactly what
+	//! COT's own style table changes. Geometry is applied to the WRAPPER; the
+	//! preview fills it fractionally.
+	private Widget m_ItemPreviewPanel;
 	private EntityAI m_PreviewItem;
+	//! Setup mode the current preview entity was built with. The attachments a
+	//! spawn produces depend on it, so a mode change has to rebuild the preview
+	//! exactly like a class change does - an entity that already has its debug
+	//! attachments cannot be walked back to a bare one.
+	private int m_PreviewSetupMode;
 	private vector m_Orientation;
 	private float m_Distance;
 
 	private int m_MouseX;
 	private int m_MouseY;
 
-	private JMObjectSpawnerModule m_Module;
-
-	private Object m_DeletingObject;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMObjectSpawnerModule m_Module;
 
 	private UIActionButton m_SpawnButton;
-	private UIActionButton m_AttachmentsButton;
+	private UIActionImageButton m_RefreshListButton;
+	private UIActionScrollerH m_CategoryScroller;
+	private ref UIActionFlexRow m_Footer;
 	private static int s_ObjSpawnMode = COT_ObjectSpawnerMode.CURSOR;
 	private ref array< string > m_ObjSpawnModeText =
 	{
@@ -45,32 +57,9 @@ class JMObjectSpawnerForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_TARGET"
 	};
 
-	private ref array< string > m_ObjItemStateFoodText = {};
-
-	private ref array< string > m_ObjItemStateBloodText =
-	{
-		// Blood bags
-		"UNKNOWN",
-		"0+",
-		"0-",
-		"A+",
-		"A-",
-		"B+",
-		"B-",
-		"AB+",
-		"AB-"
-	};
-
-	private ref array< int > m_ObjItemStateLiquid = {};
-	private ref array< string > m_ObjItemStateLiquidText = {};
-	private ref map<int, int> m_ObjItemStateLiquidColors = new map<int, int>;
-
-	private int m_ItemStateType = -1;
-	private int m_LiquidType;
-
 	void JMObjectSpawnerForm()
 	{
-		m_ObjectTypes = new map< string, string >;
+		m_PreviewSetupMode = -1;
 	}
 
 	void ~JMObjectSpawnerForm()
@@ -84,195 +73,191 @@ class JMObjectSpawnerForm: JMFormBase
 		return Class.CastTo( m_Module, mdl );
 	}
 
+	override void OnResize( float w, float h )
+	{
+		super.OnResize( w, h );
+
+		// Fixed top (search 40 + categories 52 = 92) and a bottom-anchored footer
+		// (actions 160, valign bottom_ref self-pins). The browse panel is the ONE
+		// fill panel: it grows to occupy whatever is left between them. This is the
+		// legitimate single-fill case - only browse is computed, the footer anchors
+		// itself. h is correct content-height layout pixels from JMWindowBase.
+		Widget browseWrap = layoutRoot.FindAnyWidget( "object_browse_wrapper" );
+		if ( browseWrap && h > 1 )
+		{
+			int topH    = 92;
+			int actionH = 160;
+
+			float browseH = h - topH - actionH;
+			if ( browseH < 1 ) browseH = 1;
+
+			browseWrap.SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE, true );
+			browseWrap.SetPos( 0, topH );
+			browseWrap.SetSize( 1, browseH );
+
+			// List + preview each fill half the browse panel. Their layout files use
+			// fractional height (size 0.5 1) AND the list has `lines 20`, which gives
+			// the TextListbox a 20-row intrinsic height that overflows the panel and
+			// bleeds into the sliders below. Pin both to EXACT pixels filling the
+			// panel so neither the fractional re-resolution nor the line-count
+			// intrinsic height can push them past browseWrap's bottom edge.
+			float halfW = w * 0.5;
+			if ( m_ClassList )
+			{
+				m_ClassList.SetFlags( WidgetFlags.HEXACTPOS | WidgetFlags.VEXACTPOS | WidgetFlags.HEXACTSIZE | WidgetFlags.VEXACTSIZE, true );
+				m_ClassList.SetPos( 0, 0 );
+				m_ClassList.SetSize( halfW, browseH );
+			}
+			if ( m_ItemPreviewPanel )
+			{
+				m_ItemPreviewPanel.SetFlags( WidgetFlags.HEXACTPOS | WidgetFlags.VEXACTPOS | WidgetFlags.HEXACTSIZE | WidgetFlags.VEXACTSIZE, true );
+				m_ItemPreviewPanel.SetPos( halfW, 0 );
+				m_ItemPreviewPanel.SetSize( halfW, browseH );
+			}
+		}
+
+		// Category scroller recomputes its thumb/overflow against the new width.
+		if ( m_CategoryScroller )
+			m_CategoryScroller.UpdateScroller();
+
+		// Re-flow the footer flex row (Mode / Setup / Spawn min-width + grow).
+		if ( m_Footer )
+			m_Footer.Layout();
+	}
+
+	override void OnShow()
+	{
+		super.OnShow();
+
+		if ( m_ItemPreview )
+			m_ItemPreview.Show( true );
+		// _UpdateScroller fires 34ms after OnInit via CallLater, but the form
+		// is not rendered yet then so GetScreenSize returns 0 -> chips get 0px
+		// content height. Re-trigger once the form is actually on screen.
+		if ( m_CategoryScroller )
+			m_CategoryScroller.UpdateScroller();
+
+		// Same story for the footer flex row: OnResize fired from SetModule before
+		// render, where GetScreenSize returns 0 and Layout() no-ops. Defer one tick
+		// so it re-flows against real on-screen widths. Bind to a this-method (the
+		// proven CallLater pattern here) rather than m_Footer.Layout directly.
+		if ( m_Footer )
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( _LayoutFooter, 34 );
+	}
+
+	//! this-bound trampoline for the deferred footer flex layout (CallLater target).
+	void _LayoutFooter()
+	{
+		if ( m_Footer )
+			m_Footer.Layout();
+	}
+
+	override void OnHide()
+	{
+		super.OnHide();
+		if ( m_ItemPreview )
+			m_ItemPreview.Show( false );
+	}
+
 	override void OnInit()
 	{
-		m_ClassList = TextListboxWidget.Cast( layoutRoot.FindAnyWidget( "object_spawn_list" ) );
+		// ----------------------------------------------------------------------
+		// Search-first layout (June 2026 redesign).
+		//
+		// Fixed-top / fill-body / bottom-anchored-footer model:
+		//   object_search_wrapper      (40px  fixed, top_ref)    - search + checkboxes
+		//   object_categories_wrapper  (52px  fixed, top_ref)    - horizontal chip scroller
+		//   object_browse_wrapper      (fills, top_ref)          - list + preview
+		//   object_actions_wrapper     (130px fixed, bottom_ref) - sliders + footer
+		// The footer self-anchors to the bottom (valign bottom_ref) and the top
+		// two panels are fixed height, so only the browse panel needs computing:
+		// it fills the gap (h - 92 top - 130 footer). Done in OnResize/UpdateBrowseHeight.
+		// ----------------------------------------------------------------------
 
-		m_TypesActionsWrapper = layoutRoot.FindAnyWidget( "object_types_actions_wrapper" );
+		Widget searchWrap = layoutRoot.FindAnyWidget( "object_search_wrapper" );
+		Widget catsWrap   = layoutRoot.FindAnyWidget( "object_categories_wrapper" );
+		Widget browseWrap = layoutRoot.FindAnyWidget( "object_browse_wrapper" );
+		Widget actionsWrap = layoutRoot.FindAnyWidget( "object_actions_wrapper" );
 
-		m_ItemPreview = ItemPreviewWidget.Cast( layoutRoot.FindAnyWidget( "object_preview" ) );
+		// --- Row 1: Search anchor -------------------------------------------
+		// Icon-button first, then fractional widgets summing to <= 0.99 to keep
+		// all siblings on the same row (engine wraps at exactly 1.0).
+		Widget searchRow = UIActionManager.CreateWrapSpacer( searchWrap, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-		Widget typesButtons = UIActionManager.CreateGridSpacer( m_TypesActionsWrapper, 8, 1 );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_ALL", "" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Food", "edible_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Vehicles", "transport" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Firearms", "weapon_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Ammo_Magazines", "magazine_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Clothing", "clothing_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Containers", "container_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Items", "inventory_base" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_Buildings", "house" );
-		AddObjectType( typesButtons, "#STR_COT_OBJECT_MODULE_FILTER_TYPE_AI", "dz_lightai" );
+		m_SearchBox = UIActionManager.CreateSearchBox( searchRow, this, "SearchInput_OnChange", "#STR_COT_OBJECT_MODULE_SEARCH" );
+		m_SearchBox.SetWidth( 0.40 );
 
-		Widget spawnactionswrapper = layoutRoot.FindAnyWidget( "object_spawn_actions_wrapper" );
+		UIActionCheckbox chkDisplayName = UIActionManager.CreateCheckbox( searchRow, "#STR_COT_OBJECT_MODULE_SPAWN_DISPLAYNAME", this, "Click_OnFilterDisplayName", m_Module.m_FilterWithDisplayName );
+		chkDisplayName.SetWidth( 0.27 );
+		chkDisplayName.SetTooltip( "Match search against in-game display names instead of class names" );
 
-		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( spawnactionswrapper, 4, 1 );
+		UIActionCheckbox chkUnsafe = UIActionManager.CreateCheckbox( searchRow, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_AllowRestrictedClassNames );
+		chkUnsafe.SetWidth( 0.27 );
+		chkUnsafe.SetTooltip( "Show classes blacklisted by JMObjectSpawnerModule (proxy_, *Source, etc.)" );
 
-		Widget actions = UIActionManager.CreatePanel( m_SpawnerActionsWrapper, 0x00000000, 35 );
-
-		Widget searchSpacer = UIActionManager.CreateWrapSpacerCompact( actions, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-		m_SearchBox = UIActionManager.CreateEditableTextPreview( searchSpacer, "#STR_COT_OBJECT_MODULE_SEARCH", this, "SearchInput_OnChange" );
-		m_SearchBox.SetWidth( 0.65 );
-
-		UIActionImageButton button = UIActionManager.CreateImageButton( searchSpacer, "set:dayz_gui image:icon_x", this, "SearchInput_OnClickReset" );
-		button.SetFixedSize( 28, 28 );
-
-		int foodStageCount = FoodStageType.COUNT;
-		for (int foodStage = 0; foodStage < FoodStageType.COUNT; foodStage++)
+		// --- Row 2: Category strip (horizontal scroller) --------------------
+		// Layout provides catsWrap as a fixed-height (~10% of form) panel with
+		// clipchildren=1. Inside it we put a horizontal scroller that pans
+		// through the labeled chip row.
+		Widget hScrollerWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionScrollerH.layout", catsWrap );
+		Widget catsContent = catsWrap;
+		if ( hScrollerWidget )
 		{
-			m_ObjItemStateFoodText.Insert(typename.EnumToString(FoodStageType, foodStage));
+			hScrollerWidget.GetScript( m_CategoryScroller );
+			if ( m_CategoryScroller )
+				catsContent = m_CategoryScroller.GetContentWidget();
 		}
+		m_TypesActionsWrapper = catsContent;
+		m_TypeFilter = UIActionManager.CreateIconGridHorizontal( m_TypesActionsWrapper, this, "OnClick_TypeFilter" );
+		m_TypeFilter.UseLabeledCells( true );
+		m_TypeFilter.UseHorizontalLayout();
+		m_TypeFilter.AddIcon( "",              JMConstants.Lucide( "layers" ),   "All"            );
+		m_TypeFilter.AddIcon( "edible_base",   JMConstants.ICON_MEAT,            "Food"           );
+		m_TypeFilter.AddIcon( "bottle_base",   JMConstants.ICON_BEER_BOTTLE,     "Drinks"         );
+		m_TypeFilter.AddIcon( "transport",     JMConstants.ICON_JEEP,            "Vehicles"       );
+		m_TypeFilter.AddIcon( "weapon_base",   JMConstants.ICON_FAMAS,           "Firearms"       );
+		m_TypeFilter.AddIcon( "meleeweapon",   JMConstants.ICON_GLADIUS,         "Melee"          );
+		m_TypeFilter.AddIcon( "magazine_base", JMConstants.ICON_MACHINE_GUN_MAG, "Ammo/Magazines" );
+		m_TypeFilter.AddIcon( "clothing_base", JMConstants.ICON_CLOTHES,         "Clothing"       );
+		m_TypeFilter.AddIcon( "headgear_base", JMConstants.ICON_STAHLHELM,       "Headgear"       );
+		m_TypeFilter.AddIcon( "mask_base",     JMConstants.ICON_BALACLAVA,       "Masks"          );
+		m_TypeFilter.AddIcon( "glasses_base",  JMConstants.ICON_SUNGLASSES,      "Glasses"        );
+		m_TypeFilter.AddIcon( "top_base",      JMConstants.ICON_T_SHIRT,         "Tops"           );
+		m_TypeFilter.AddIcon( "pants_base",    JMConstants.ICON_TROUSERS,        "Pants"          );
+		m_TypeFilter.AddIcon( "vest_base",     JMConstants.ICON_BELT,            "Vests"          );
+		m_TypeFilter.AddIcon( "gloves_base",   JMConstants.ICON_GLOVES,          "Gloves"         );
+		m_TypeFilter.AddIcon( "shoes_base",    JMConstants.ICON_TROUSERS,        "Shoes"          );
+		m_TypeFilter.AddIcon( "backpack_base", JMConstants.ICON_LIGHT_BACKPACK,  "Backpacks"      );
+		m_TypeFilter.AddIcon( "container_base",JMConstants.ICON_KNAPSACK,        "Containers"     );
+		m_TypeFilter.AddIcon( "inventory_base",JMConstants.ICON_FULL_FOLDER,     "Items"          );
+		m_TypeFilter.AddIcon( "itemmedical",   JMConstants.ICON_MEDICINES,       "Medical"        );
+		m_TypeFilter.AddIcon( "tool_base",     JMConstants.ICON_SHARP_AXE,       "Tools"          );
+		m_TypeFilter.AddIcon( "trapbase",      JMConstants.ICON_TINKER,          "Traps"          );
+		m_TypeFilter.AddIcon( "electricdevice",JMConstants.ICON_ELECTRIC,        "Electronics"    );
+		m_TypeFilter.AddIcon( "tentbase",      JMConstants.ICON_CAMPING_TENT,    "Tents"          );
+		m_TypeFilter.AddIcon( "grenade_base",  JMConstants.ICON_UNLIT_BOMB,      "Explosives"     );
+		m_TypeFilter.AddIcon( "house",         JMConstants.ICON_HOME_GARAGE,     "Buildings"      );
+		m_TypeFilter.AddIcon( "dz_lightai",    JMConstants.ICON_SHAMBLING_ZOMBIE,"AI"             );
+		m_TypeFilter.SetSelected( "" );
 
-		m_ObjItemStateLiquidColors[0] = COLOR_WHITE;
+		// Force the inner WrapSpacer to a known pixel width that fits all 27
+		// chips (110px each + gaps) and a 30px height so chips never wrap to
+		// a 2nd row. Size-To-Content-H wouldn't propagate through the nested
+		// spacer chain otherwise.
+		m_TypeFilter.ForceContentWidth( 27 * 115, 36 );
 
-		string displayName;
-		string translated;
-		int color;
-		foreach (int liquidType, LiquidInfo liquidInfo: Liquid.m_LiquidInfosByType)
-		{
-			NutritionalProfile nutritionProfile = liquidInfo.m_NutriProfile;
+		// --- Row 3: Browse pane - list + preview ----------------------------
+		// browseWrap is a 53%-of-form-height panel from the layout file. List
+		// and preview are added directly as children with size=0.5 1 each so
+		// they fill the panel without a GridSpacer (which would shrink to
+		// content via Size-To-Content-V).
+		m_ClassList = TextListboxWidget.Cast( g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/objectspawner_classlist.layout", browseWrap ) );
+		m_ItemPreviewPanel = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/objectspawner_preview.layout", browseWrap );
 
-			string liquidClsName = nutritionProfile.GetLiquidClassname();
-			string underscored = JMStatics.CamelCaseToWords(liquidClsName, "_");
+		if ( m_ItemPreviewPanel )
+			Class.CastTo( m_ItemPreview, m_ItemPreviewPanel.FindAnyWidget( "object_preview" ) );
 
-			//! Liquids (except blood)
-			if (nutritionProfile.IsLiquid() && liquidType > 255)
-			{
-				//!@note most of this joinked from ExpansionWorld::GetLiquidDisplayName
 
-				g_Game.ConfigGetTextRaw("CfgLiquidDefinitions " + liquidClsName +  " displayName", displayName);
-				g_Game.FormatRawConfigStringKeys(displayName);
-
-				if (displayName.IndexOf("#") == 0)
-					translated = Widget.TranslateString(displayName);
-				else
-					translated = displayName;
-
-				//! Fix up vanilla liquid display name
-				if (displayName.IndexOf("#STR_cfgLiquidDefinitions_") == 0 && translated.IndexOf("$UNT$") == 0)
-					translated = liquidClsName;
-
-				int idx = 0;
-				foreach (string liquidText: m_ObjItemStateLiquidText)
-				{
-					if (JMStatics.StrCaseCmp(translated, liquidText) < 0)
-						break;
-					idx++;
-				}
-
-				m_ObjItemStateLiquid.InsertAt(liquidType, idx);
-				m_ObjItemStateLiquidText.InsertAt(translated, idx);
-			}
-
-			//! Liquids (including blood)
-			if (nutritionProfile.IsLiquid())
-			{
-				string colorPath = "CfgLiquidDefinitions " + liquidClsName +  " color";
-
-				color = g_Game.ConfigGetInt(colorPath);
-
-				if (!color)
-				{
-					string colorConstantName;
-					g_Game.ConfigGetTextRaw(colorPath, colorConstantName);
-
-					if (!colorConstantName)
-					{
-						//! Fallback to liquid classname, all uppercase
-						colorConstantName = liquidClsName;
-						colorConstantName.ToUpper();
-					}
-
-					bool found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
-
-					if (!found)
-					{
-						if (!colorConstantName.Contains("LIQUID"))
-						{
-							colorConstantName += "LIQUID";  //! e.g. RaG_Liquid_Framework
-							found = JMStatics.StringToEnumEx(Colors, colorConstantName, color);
-						}
-
-						if (!found)
-						{
-							//! Fallback to liquid classname, all uppercase, words delimited by underscore
-							colorConstantName = underscored;
-							colorConstantName.ToUpper();
-
-							if (!JMStatics.StringToEnumEx(Colors, colorConstantName, color))
-							{
-								switch (liquidType)
-								{
-									case LIQUID_BEER:
-										color = Colors.ORANGE;
-										break;
-									case LIQUID_DIESEL:
-									case LIQUID_GASOLINE:
-										color = Colors.YELLOW;
-										break;
-									case LIQUID_DISINFECTANT:
-									case LIQUID_VODKA:
-										color = Colors.GRAY;
-										break;
-									default:
-										if (liquidType > 255)
-											color = Colors.COLOR_LIQUID;
-										else
-											//! Blood
-											color = Colors.RED;
-										break;
-								}
-							}
-						}
-					}
-				}
-
-				m_ObjItemStateLiquidColors[liquidType] = color;
-			}
-		}
-		
-	#ifdef DIAG
-		for (int k = 0; k < m_ObjItemStateLiquidText.Count(); k++)
-		{
-			TIntArray argb = {};
-
-			for (int i = 0; i < 4; i++)
-			{
-				argb.Insert((m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]] >> (24 - i * 8)) & 255);
-			}
-
-			m_ObjItemStateLiquidColors[m_ObjItemStateLiquid[k]];
-			PrintFormat("LIQUID %1 displayName='%2' type=%3 className='%4' color={%5, %6, %7, %8}", k, m_ObjItemStateLiquidText[k], m_ObjItemStateLiquid[k], Liquid.GetNutritionalProfileByType(m_ObjItemStateLiquid[k]).GetLiquidClassname(), argb[0], argb[1], argb[2], argb[3]);
-		}
-	#endif
-
-		m_ItemDataList = UIActionManager.CreateDropdownBox( actions, spawnactionswrapper, "State:", {""}, this, "Click_ItemData" );
-		m_ItemDataList.SetPosition( 0.70 );
-		m_ItemDataList.SetWidth( 0.3 );
-		m_ItemDataList.Disable();
-
-		Widget itemData = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 2, 2 );
-
-		m_QuantityItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
-		m_QuantityItem.SetCurrent( 100 );
-
-		m_HealthItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_HEALTH", 0, 100, this, "Click_SetHealth");
-		m_HealthItem.SetStepValue( 1 );
-		m_HealthItem.SetCurrent( 100 );
-
-		m_TemperatureItem = UIActionManager.CreateSlider( itemData, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
-		m_TemperatureItem.SetSliderWidth(0.6);
-		m_TemperatureItem.SetStepValue( 1 );
-		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
-		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
-
-		UIActionManager.CreateCheckbox( itemData, "#STR_COT_OBJECT_MODULE_SPAWN_DISPLAYNAME", this, "Click_OnFilterDisplayName", m_Module.m_FilterWithDisplayName );
-
-		Widget spawnButtons = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
-
-		m_SpawnButton = UIActionManager.CreateButton( spawnButtons, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
-		
 		if ( !g_Game.IsMultiplayer() )
 			m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_INVENTORY");
 		else
@@ -280,38 +265,88 @@ class JMObjectSpawnerForm: JMFormBase
 
 		m_ObjSpawnModeText.Insert("#STR_COT_OBJECT_MODULE_SELECTED_OBJECTS");
 
-		m_SpawnMode = UIActionManager.CreateSelectionBox( spawnButtons, "", m_ObjSpawnModeText, this, "ChangeSpawnMode" );
-		m_SpawnMode.SetSelectorWidth(1.0);
+		// ----------------------------------------------------------------------
+		// BOTTOM AREA - inside actionsWrap (136px bottom-anchored).
+		//
+		// GridSpacer(4 rows, 1 col) with "Size To Content V": stacks its 4
+		// children vertically, each row taking its child's natural height, and
+		// the grid grows to fit (it does NOT divide height equally - proven by
+		// JMExampleForm which stacks 16 varying-height widgets this way).
+		//   rows 1-3 = sliders (30px each)
+		//   row 4    = footer flex row (32px, horizontal: delete + dropdowns + spawn)
+		// Slider cells fill the column width automatically, so no SetWidth(1.0) is
+		// needed. The footer uses UIActionFlexRow for min-width + grow layout.
+		// ----------------------------------------------------------------------
+		m_SpawnerActionsWrapper = UIActionManager.CreateGridSpacer( actionsWrap, 4, 1 );
+
+		// 3 sliders (one per row).
+		m_QuantityItem = UIActionManager.CreateSlider( m_SpawnerActionsWrapper, "#STR_COT_OBJECT_MODULE_QUANTITY", 0, 100);
+		m_QuantityItem.SetCurrent( 100 );
+
+		m_HealthItem = UIActionManager.CreateSlider( m_SpawnerActionsWrapper, "#STR_COT_OBJECT_MODULE_HEALTH", 0, 100, this, "Click_SetHealth");
+		m_HealthItem.SetStepValue( 1 );
+		m_HealthItem.SetCurrent( 100 );
+
+		m_TemperatureItem = UIActionManager.CreateSlider( m_SpawnerActionsWrapper, "#STR_COT_OBJECT_MODULE_TEMPERATURE", GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, this, "Click_SetTemperature");
+		m_TemperatureItem.SetSliderWidth(0.6);
+		m_TemperatureItem.SetStepValue( 1 );
+		m_TemperatureItem.SetFormat( "#STR_COT_FORMAT_DEGREE" );
+		m_TemperatureItem.SetCurrent( GameConstants.STATE_NEUTRAL_TEMP );
+
+		// Footer row - Refresh + delete icon + Mode + Setup + Spawn, laid out with the flex
+		// system (UIActionFlexRow). Refresh + Delete are fixed 32px icons; Mode/Setup have a
+		// pixel floor and small grow; Spawn has the biggest grow so it soaks up
+		// leftover width but never shrinks below its min. m_Footer.Layout() is
+		// called from OnResize to re-flow on window resize.
+		m_Footer = UIActionManager.CreateFlexRow( m_SpawnerActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		Widget footer = m_Footer.GetContent();
+
+		m_RefreshListButton = UIActionManager.CreateRefreshButton( footer, this, "OnClick_RefreshList", "#STR_COT_GENERIC_REFRESH" );
+		m_RefreshListButton.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+		m_Footer.Add( m_RefreshListButton );
+
+		UIActionConfirmInline deleteBtn = UIActionManager.CreateConfirmInline( footer, "", this, "DeleteCursor" );
+		UIActionIconGrid.ApplyDeletePreset( deleteBtn );
+		deleteBtn.SetButton( "" );
+		deleteBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+		deleteBtn.CenterIcon( ICON_BUTTON_PX, 16 );
+		deleteBtn.SetTooltip( "Delete the object under the cursor" );
+		m_Footer.Add( deleteBtn );
+
+		RegisterPermission( deleteBtn, "Entity.Delete" );
+
+		m_SpawnMode = UIActionManager.CreateDropdown( footer, "Mode", layoutRoot, this, "ChangeSpawnMode", m_ObjSpawnModeText );
+		m_SpawnMode.SetFlex( 1.0, 120 );   // min 120px, grows modestly
 		m_SpawnMode.SetSelection(s_ObjSpawnMode, false);
+		RegisterOverlay( m_SpawnMode );
+		m_Footer.Add( m_SpawnMode );
 
-		UIActionButton delbtn = UIActionManager.CreateButton( spawnButtons, "Delete", this, "DeleteCursor" );
-		delbtn.SetColor(COLOR_RED);
-
-		Widget spawnOptions = UIActionManager.CreateGridSpacer( m_SpawnerActionsWrapper, 1, 3 );
-
-		m_AttachmentsButton = UIActionManager.CreateButton(spawnOptions, "#STR_COT_OBJECT_MODULE_SPAWN_WITH", this, "Click_SpawnObject");
-		m_ObjSetupMode =  UIActionManager.CreateSelectionBox( spawnOptions, "", {"#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG", "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE", "#STR_COT_GENERIC_NONE"}, this, "Click_ObjSetupMode" );
-		m_ObjSetupMode.SetSelectorWidth(1.0);
+		array<string> setupOptions = {"#STR_COT_OBJECT_MODULE_SPAWN_WITH_DEBUG", "#STR_COT_OBJECT_MODULE_SPAWN_WITH_CE", "#STR_COT_GENERIC_NONE"};
+		m_ObjSetupMode = UIActionManager.CreateDropdown( footer, "Setup", layoutRoot, this, "Click_ObjSetupMode", setupOptions );
+		m_ObjSetupMode.SetFlex( 1.0, 120 );   // min 120px, grows modestly
 		m_ObjSetupMode.SetSelection(m_Module.m_ObjSetupMode, false);
+		m_ObjSetupMode.SetTooltip( "Setup mode for spawning with attachments" );
+		RegisterOverlay( m_ObjSetupMode );
+		m_Footer.Add( m_ObjSetupMode );
 
-		UIActionManager.CreateCheckbox( spawnOptions, "#STR_COT_OBJECT_MODULE_SHOWUNSAFE", this, "Click_OnSafetyToogle", m_Module.m_AllowRestrictedClassNames );
+		// Spawn button: min 160px so the label never truncates, biggest grow weight
+		// so it absorbs most of the leftover width as the form widens - true
+		// "min size + stretch to fill", which the raw WrapSpacer fraction couldn't do.
+		m_SpawnButton = UIActionManager.CreateButton( footer, "#STR_COT_OBJECT_MODULE_SPAWN_ON", this, "Click_SpawnObject" );
+		m_SpawnButton.SetFlex( 3.0, 160 );
+		m_SpawnButton.SetColor( JMTheme.SUCCESS_FILL );
+		m_SpawnButton.SetTooltip( "Spawn the selected item according to the chosen spawn mode" );
+		m_Footer.Add( m_SpawnButton );
+
+		// Sync the Spawn button label to whatever mode was last persisted -
+		// ChangeSpawnMode flips the label to "Copy to clipboard" for clipboard
+		// modes and back to "Spawn on ..." for spawn modes.
+		SyncSpawnButtonLabel();
 
 		m_SearchBox.SetText(m_Module.m_SearchText);
 		UpdateList();
 
 		UpdateItemPreview();
-	}
-
-	void Click_ItemData( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-		
-		if (m_ItemStateType == 0)
-			m_LiquidType = m_ObjItemStateLiquid[m_ItemDataList.GetSelection()];
-		
-		UpdateQuantityItemColor();
-		UpdatePreviewItemState();
 	}
 
 	void Click_SetHealth( UIEvent eid, UIActionBase action )
@@ -332,86 +367,22 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateItemPreview();
 	}
 
-	void UpdateItemStateType(int mode, int liquidType = 0)
-	{
-		m_ItemStateType = mode;
-
-		int idx = -1;
-
-		switch (mode)
-		{
-			case 0: // Liquids
-				m_ItemDataList.SetItems(m_ObjItemStateLiquidText);
-				idx = m_ObjItemStateLiquid.Find(m_LiquidType);
-				if (idx == -1)
-				{
-					idx = m_ObjItemStateLiquid.Find(liquidType);  //! Fallback
-					m_LiquidType = liquidType;
-				}
-				break;
-			case 1: // Blood
-				m_ItemDataList.SetItems(m_ObjItemStateBloodText);
-				idx = FindEnumValue(COT_BloodTypes, m_LiquidType);
-				if (idx == -1)
-				{
-					idx = FindEnumValue(COT_BloodTypes, liquidType);  //! Fallback
-					m_LiquidType = liquidType;
-				}
-				break;
-			case 2: // Food
-				m_ItemDataList.SetItems(m_ObjItemStateFoodText);
-				break;
-		}
-
-		// Reset to default since 0 is used for UNKNOWN
-		if (idx == -1)
-			idx = 1;
-
-		m_ItemDataList.SetSelection(idx, false);
-		
-		UpdateQuantityItemColor();
-		UpdatePreviewItemState();
-	}
-
-	int FindEnumValue(typename e, int enumValue)
-	{
-		int cnt = e.GetVariableCount();
-		int val;
-
-		for (int i = 0; i < cnt; i++)
-		{
-			if (e.GetVariableType(i) == int && e.GetVariableValue(null, i, val) && val == enumValue)
-				return i;
-		}
-
-		return -1;
-	}
-
-	void UpdatePreviewItemState()
-	{
-		Edible_Base edible;
-		if (Class.CastTo(edible, m_PreviewItem) && edible.HasFoodStage())
-			edible.GetFoodStage().ChangeFoodStage(m_ItemDataList.GetSelection());
-	}
-
-	void UpdateQuantityItemColor()
-	{
-		int color;
-
-		if (!m_ObjItemStateLiquidColors.Find(m_LiquidType, color))
-			color = COLOR_WHITE;
-
-		m_QuantityItem.SetColor( color );
-		m_QuantityItem.SetAlpha( 1.0 );
-	}
-
 	void UpdateHealthControls(string type)
 	{
 		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(type);
 		if (maxHealth > 0)
 		{
 			m_HealthItem.Enable();
+
+			float oldMax = m_HealthItem.GetMax();
+			float pct;
+			if (oldMax > 0)
+				pct = m_HealthItem.GetCurrent() / oldMax;
+			else
+				pct = 1.0;
+
 			m_HealthItem.SetMinMax(0, maxHealth);
+			m_HealthItem.SetCurrent(pct * maxHealth);
 		}
 		else
 		{
@@ -423,7 +394,7 @@ class JMObjectSpawnerForm: JMFormBase
 	{
 		if (!m_HealthItem.IsEnabled())
 		{
-			m_HealthItem.SetColor( ARGB( 255, 220, 220, 220 ) );
+			m_HealthItem.SetColor( JMTheme.VALUE_OK );
 			return;
 		}
 
@@ -481,6 +452,8 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		m_Module.m_ObjSetupMode = action.GetSelection();
+
+		UpdateItemPreview();
 	}
 
 	void Click_SpawnObject( UIEvent eid, UIActionBase action )
@@ -491,12 +464,6 @@ class JMObjectSpawnerForm: JMFormBase
 		SpawnObject(s_ObjSpawnMode);
 	}
 
-	void AddObjectType( Widget parent, string name, string config )
-	{
-		name = Widget.TranslateString( name );
-		UIActionManager.CreateButton( parent, name, this, "SetListType" );
-		m_ObjectTypes.Insert( name, config );
-	}
 
 	void UpdateRotation( int mouse_x, int mouse_y, bool is_dragging )
 	{
@@ -524,7 +491,9 @@ class JMObjectSpawnerForm: JMFormBase
 		
 		string strSelection = GetCurrentSelection();
 
-		if (m_PreviewItem && m_PreviewItem.GetType() != strSelection) 
+		bool modeChanged = m_PreviewSetupMode != m_Module.m_ObjSetupMode;
+
+		if (m_PreviewItem && (m_PreviewItem.GetType() != strSelection || modeChanged)) 
 		{
 			g_Game.ObjectDelete( m_PreviewItem );
 			m_PreviewItem = null;
@@ -533,12 +502,22 @@ class JMObjectSpawnerForm: JMFormBase
 		if (!m_PreviewItem)
 		{
 			m_PreviewItem = EntityAI.Cast( g_Game.CreateObject( strSelection, vector.Zero, true, false, false ) );
+			m_PreviewSetupMode = m_Module.m_ObjSetupMode;
 
 			if (m_PreviewItem)
 			{
 				dBodyActive(m_PreviewItem, ActiveState.INACTIVE);
 				dBodyDynamic(m_PreviewItem, false);
 				m_PreviewItem.DisableSimulation(true);
+
+				// Give the preview entity the same attachment pass the spawn
+				// itself would run, so a weapon shows its optic and magazine and
+				// a vehicle its parts instead of a stripped model that never
+				// matches what actually lands in the world.
+				PlayerBase previewOwner = PlayerBase.Cast( g_Game.GetPlayer() );
+				if ( previewOwner )
+					m_Module.SetupEntityForMode( m_PreviewItem, previewOwner, m_Module.m_ObjSetupMode );
+
 				m_ItemPreview.SetItem( m_PreviewItem );
 
 				m_Distance = 0;
@@ -555,47 +534,33 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateHealthItemColor();
 		m_TemperatureItem.Disable();
 
-		int itemStateType = m_ItemStateType;
-
 		if ( m_PreviewItem )
 		{
+			// Same pass the spawn runs: the value lands on the item, on its
+			// damage zones, and on every attachment at the same PERCENTAGE of
+			// that attachment's own max health. Without the cascade a ruined
+			// rifle previews with a pristine optic and magazine hanging off it.
+			// temp stays -1 - the temperature slider is a spawn-time value and
+			// has nothing to show in the preview.
 			if (m_HealthItem.IsEnabled() && !m_PreviewItem.IsTransport())
-				m_PreviewItem.SetHealth("", "", m_HealthItem.GetCurrent());
+				m_Module.SetupEntityHealth( m_PreviewItem, m_HealthItem.GetCurrent(), -1 );
 
-			if (m_PreviewItem.IsInherited(ItemBase)) 
+			if (m_PreviewItem.IsInherited(ItemBase))
 			{
 				ItemBase item = ItemBase.Cast(m_PreviewItem);
 
-				if ( item.IsLiquidContainer() )
-				{
-					if ( item.IsBloodContainer() )
-					{
-						itemStateType = 1;
-					}
-					else
-					{
-						m_TemperatureItem.Enable();
-						itemStateType = 0;
-					}
-					int liquidType = item.GetLiquidTypeInit();
-					if ( m_ItemStateType != itemStateType || m_LiquidType != liquidType )
-						UpdateItemStateType(itemStateType, liquidType);
-				}
+				if ( item.IsLiquidContainer() || ( item.HasFoodStage() && item.CanBeCooked() ) )
+					m_TemperatureItem.Enable();
+
+				// Snapshot quantity percentage before range changes so switching items scales the value.
+				float qOldMin = m_QuantityItem.GetMin();
+				float qOldMax = m_QuantityItem.GetMax();
+				float qOldRange = qOldMax - qOldMin;
+				float qPct;
+				if (qOldRange > 0)
+					qPct = (m_QuantityItem.GetCurrent() - qOldMin) / qOldRange;
 				else
-				{
-					if ( item.HasFoodStage() && item.CanBeCooked() )
-					{
-						m_TemperatureItem.Enable();
-						
-						if ( m_ItemStateType != 2 )
-							UpdateItemStateType(2);
-					}
-					else
-					{
-						m_ItemStateType = -1;
-						m_LiquidType = 0;
-					}
-				}
+					qPct = 1.0;
 
 				Magazine mag;
 				if (Class.CastTo(mag, item))
@@ -611,6 +576,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 						m_QuantityItem.SetMinMax(min, mag.GetAmmoMax());
 						m_QuantityItem.SetStepValue(1);
+						m_QuantityItem.SetCurrent(min + qPct * (mag.GetAmmoMax() - min));
 						m_QuantityItem.Enable();
 					}
 				}
@@ -621,7 +587,10 @@ class JMObjectSpawnerForm: JMFormBase
 					else
 						m_QuantityItem.SetStepValue(0.1);
 
-					m_QuantityItem.SetMinMax(item.GetQuantityMin(), item.GetQuantityMax());
+					float qNewMin = item.GetQuantityMin();
+					float qNewMax = item.GetQuantityMax();
+					m_QuantityItem.SetMinMax(qNewMin, qNewMax);
+					m_QuantityItem.SetCurrent(qNewMin + qPct * (qNewMax - qNewMin));
 					m_QuantityItem.Enable();
 				}
 			}
@@ -629,17 +598,6 @@ class JMObjectSpawnerForm: JMFormBase
 		else
 		{
 			m_ItemPreview.Show( false );
-		}
-
-		if (m_ItemStateType > -1)
-		{
-			m_ItemDataList.Enable();
-		}		
-		else if (m_ItemStateType != itemStateType)
-		{
-			m_ItemDataList.SetItems({""});
-			UpdateQuantityItemColor();
-			m_ItemDataList.Disable();
 		}
 
 		#ifdef COT_DEBUGLOGS
@@ -663,7 +621,7 @@ class JMObjectSpawnerForm: JMFormBase
 
 	override bool OnItemSelected( Widget w, int x, int y, int row, int column, int oldRow, int oldColumn )
 	{
-		if ( w == m_ClassList ) 
+		if ( w == m_ClassList )
 		{
 			UpdateItemPreview();
 
@@ -714,14 +672,77 @@ class JMObjectSpawnerForm: JMFormBase
 		return false;
 	}
 
-	void SetListType( UIEvent eid, UIActionBase action )
+	void OnClick_TypeFilter( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		m_Module.m_CurrentType = m_ObjectTypes.Get( action.GetButton() );
+		m_Module.m_CurrentType = m_TypeFilter.GetLastClickedId();
 
 		UpdateList();
+	}
+
+	void OnClick_RefreshList( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( m_RefreshListButton )
+			m_RefreshListButton.TriggerSpin( 2 );
+
+		UpdateList();
+	}
+
+	// Reflect the current s_ObjSpawnMode on the Spawn button label + enable/disable
+	// the Setup dropdown (clipboard modes don't use setup options).
+	void SyncSpawnButtonLabel()
+	{
+		string label;
+		switch (s_ObjSpawnMode)
+		{
+			case COT_ObjectSpawnerMode.CURSOR:
+				label = "Spawn at Crosshair";
+				m_ObjSetupMode.Enable();
+				break;
+			case COT_ObjectSpawnerMode.PLAYER_POSITION:
+				label = "Spawn at Player";
+				m_ObjSetupMode.Enable();
+				break;
+			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
+				label = "Spawn at Target";
+				m_ObjSetupMode.Enable();
+				break;
+			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
+				if (g_Game.IsMultiplayer())
+					label = "Spawn in Selected Player(s)";
+				else
+					label = "Spawn in Own Inventory";
+				m_ObjSetupMode.Enable();
+				break;
+			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
+				label = "Spawn in Selected Object(s)";
+				m_ObjSetupMode.Enable();
+				break;
+			case COT_ObjectSpawnerMode.COPYLISTRAW:
+				label = "Copy Class List";
+				m_ObjSetupMode.Disable();
+				break;
+			case COT_ObjectSpawnerMode.COPYLISTTYPES:
+				label = "Copy as types.xml";
+				m_ObjSetupMode.Disable();
+				break;
+		#ifdef DZ_Expansion_Market
+			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
+				label = "Copy as Market Category";
+				m_ObjSetupMode.Disable();
+				break;
+		#endif
+			default:
+				label = "Spawn";
+				m_ObjSetupMode.Enable();
+				break;
+		}
+		m_SpawnButton.SetButton( label );
 	}
 
 	void ChangeSpawnMode( UIEvent eid, UIActionBase action )
@@ -730,29 +751,7 @@ class JMObjectSpawnerForm: JMFormBase
 			return;
 
 		s_ObjSpawnMode = action.GetSelection();
-		
-		switch (s_ObjSpawnMode)
-		{
-			default:
-			case COT_ObjectSpawnerMode.PLAYER_POSITION:
-			case COT_ObjectSpawnerMode.CURSOR:
-			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
-			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
-			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
-				m_SpawnButton.SetButton("#STR_COT_OBJECT_MODULE_SPAWN_ON");
-				m_AttachmentsButton.Enable();
-				m_ObjSetupMode.Enable();
-			break;
-			case COT_ObjectSpawnerMode.COPYLISTRAW:
-			case COT_ObjectSpawnerMode.COPYLISTTYPES:
-		#ifdef DZ_Expansion_Market
-			case COT_ObjectSpawnerMode.COPYLISTEXPMARKET:
-		#endif
-				m_SpawnButton.SetButton("#STR_COT_TO_CLIPBOARD:");
-				m_AttachmentsButton.Disable();
-				m_ObjSetupMode.Disable();
-			break;
-		}
+		SyncSpawnButtonLabel();
 	}
 
 	void SpawnObject(int mode = COT_ObjectSpawnerMode.CURSOR)
@@ -760,18 +759,16 @@ class JMObjectSpawnerForm: JMFormBase
 		string clipboardOutput = "";
 		string result;
 
-		int itemState = 0; // 0 mean don't do anything
-		if ( m_ItemStateType != -1 )
+		string selection = GetCurrentSelection();
+		#ifdef DZ_Expansion_Market
+		if ( selection == "" && mode != COT_ObjectSpawnerMode.COPYLISTRAW && mode != COT_ObjectSpawnerMode.COPYLISTTYPES && mode != COT_ObjectSpawnerMode.COPYLISTEXPMARKET)
+		#else
+		if ( selection == "" && mode != COT_ObjectSpawnerMode.COPYLISTRAW && mode != COT_ObjectSpawnerMode.COPYLISTTYPES)
+		#endif
+			
 		{
-			itemState = m_ItemDataList.GetSelection();
-			if (m_ItemStateType == 0)
-			{
-				//! Liquid
-				itemState = m_ObjItemStateLiquid[itemState];
-			#ifdef DIAG
-				PrintFormat("Liquid type %1 %2", itemState, Liquid.GetNutritionalProfileByType(itemState).GetLiquidClassname());
-			#endif
-			}
+			COTCreateLocalAdminNotification( new StringLocaliser( "No class selected. Use the search bar to find a class, then select it from the list." ) );
+			return;
 		}
 
 		float health = m_HealthItem.GetCurrent();
@@ -782,23 +779,23 @@ class JMObjectSpawnerForm: JMFormBase
 		{
 			default:
 			case COT_ObjectSpawnerMode.PLAYER_POSITION:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), g_Game.GetPlayer().GetPosition(), quantity, health, temp, itemState);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), g_Game.GetPlayer().GetPosition(), quantity, health, temp, 0);
 				break;
 
 			case COT_ObjectSpawnerMode.CURSOR:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, itemState);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, 0);
 				break;
 
 			case COT_ObjectSpawnerMode.TARGET_INVENTORY:
-				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, itemState, true);
+				m_Module.SpawnEntity_Position(GetCurrentSelection(), GetCursorPos(), quantity, health, temp, 0, true);
 				break;
 
 			case COT_ObjectSpawnerMode.PLAYER_INVENTORY:
-				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, temp, itemState);
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetPlayers(), quantity, health, temp, 0);
 				break;
 
 			case COT_ObjectSpawnerMode.OBJECT_INVENTORY:
-				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetObjects(), quantity, health, temp, itemState);
+				m_Module.SpawnEntity_Inventory(GetCurrentSelection(), JM_GetSelected().GetObjects(), quantity, health, temp, 0);
 				break;
 
 			case COT_ObjectSpawnerMode.COPYLISTRAW:
@@ -858,48 +855,21 @@ class JMObjectSpawnerForm: JMFormBase
 
 	void DeleteCursor( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
-		Object obj = m_Module.GetObjectAtCursor();
-
-		if ( obj )
-			 DeleteCursor(obj);
+		DeleteCursor( m_Module.GetObjectAtCursor() );
 	}
 
-	void DeleteCursor(Object obj)
+	void DeleteCursor( Object obj )
 	{
-		m_DeletingObject = obj;
-		
-		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE_CONFIRMATION_BODY" ), Object.GetDebugName( obj ) ), "#STR_COT_GENERIC_NO", "DeleteEntity_No", "#STR_COT_GENERIC_YES", "DeleteEntity_Yes" );
-	}
-
-	private void DeleteEntity_Yes( JMConfirmation confirmation )
-	{
-		m_Module.DeleteEntity( m_DeletingObject );
-
-		m_DeletingObject = NULL;
-
-		if (m_Module.m_AutoShow)
-			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
-	}
-
-	private void DeleteEntity_No( JMConfirmation confirmation )
-	{
-		m_DeletingObject = NULL;
-
-		if (m_Module.m_AutoShow)
-			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(m_Module.Hide);  //! Hide after a delay so we can still block actions
-	}
-
-	void SearchInput_OnClickReset( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
+		if ( !obj )
 			return;
 
-		m_SearchBox.SetText("");
-		m_Module.m_SearchText = "";
-		UpdateList();
+		m_Module.DeleteEntity( obj );
+
+		if ( m_Module.m_AutoShow )
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Call( m_Module.Hide );
 	}
 
 	void SearchInput_OnChange( UIEvent eid, UIActionBase action )
@@ -908,15 +878,60 @@ class JMObjectSpawnerForm: JMFormBase
 		UpdateList();
 	}
 
+	protected void ReportExactClassRejection( string searchText, TStringArray configs )
+	{
+		string searchLower = searchText;
+		searchLower.ToLower();
+
+		foreach ( string cfgPath: configs )
+		{
+			int count = g_Game.ConfigGetChildrenCount( cfgPath );
+			for ( int i = 0; i < count; i++ )
+			{
+				string name;
+				g_Game.ConfigGetChildName( cfgPath, i, name );
+
+				string nameLower = name;
+				nameLower.ToLower();
+
+				if ( nameLower != searchLower )
+					continue;
+
+				int scope = g_Game.ConfigGetInt( cfgPath + " " + name + " scope" );
+				if ( scope == 0 || (scope == 1 && !m_Module.m_AllowRestrictedClassNames) )
+				{
+					COTCreateLocalAdminNotification( new StringLocaliser( name + " exists but has scope < 2 (private/modder-only). Enable 'Show Unsafe' to reveal it." ) );
+					return;
+				}
+
+				string model;
+				if ( !g_Game.ConfigGetText( cfgPath + " " + name + " model", model ) || model == string.Empty || model == "bmp" )
+				{
+					COTCreateLocalAdminNotification( new StringLocaliser( name + " exists but has no valid model and cannot be spawned." ) );
+					return;
+				}
+
+				if ( m_Module.IsExcludedClassName( nameLower ) )
+				{
+					COTCreateLocalAdminNotification( new StringLocaliser( name + " is on the spawner blacklist. Enable 'Show Unsafe' to bypass it." ) );
+					return;
+				}
+
+				// Class exists and passed all filters - no rejection to report.
+				return;
+			}
+		}
+	}
+
 	void UpdateList()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		int ticks = TickCount(0);
 	#endif
 
 		m_ClassList.ClearItems();
 		string closestMatch;
-		
+
 		TStringArray configs = new TStringArray;
 		configs.Insert( CFG_VEHICLESPATH );
 		configs.Insert( CFG_WEAPONSPATH );
@@ -938,6 +953,9 @@ class JMObjectSpawnerForm: JMFormBase
 
 				g_Game.ConfigGetChildName( strConfigPath, nClass, strName );
 
+				string strNameLower = strName;
+				strNameLower.ToLower();
+
 				int scope = g_Game.ConfigGetInt( strConfigPath + " " + strName + " scope" );
 
 				if ( scope == 0 || (scope == 1 && !m_Module.m_AllowRestrictedClassNames) )
@@ -947,35 +965,32 @@ class JMObjectSpawnerForm: JMFormBase
 				if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " model", model) || model == string.Empty || model == "bmp")
 					continue;
 
-				COT_String strNameLower = strName;
-
-				strNameLower.ToLower();
-
 				if (m_Module.m_CurrentType == "" || g_Game.IsKindOf( strNameLower, m_Module.m_CurrentType ) )
 				{
-					if ( m_Module.IsExcludedClassName( strNameLower ) ) 
+					if ( m_Module.IsExcludedClassName( strNameLower ) )
 						continue;
-					
+
+					COT_String strNameSearch = strNameLower;
 					if (m_Module.m_FilterWithDisplayName)
 					{
-						if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strNameLower))
+						if (!g_Game.ConfigGetText(strConfigPath + " " + strName + " displayName", strNameSearch))
 							continue;
 
-						strNameLower.ToLower();
+						strNameSearch.ToLower();
 					}
 
-					if ( strSearch != "" )
-					{
-						if (!strNameLower.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch))
-							continue;
-					}
+					if ( strSearch != "" && !strNameSearch.KeywordSearchImplEx(strSearch, keywords, requireAllKeywords, closestMatch) )
+						continue;
 
 					m_ClassList.AddItem( strName, NULL, 0 );
 				}
 			}
 		}
 
-	#ifdef DIAG_DEVELOPER
+		//if ( strSearch != "" && m_ClassList.GetNumItems() == 0 )
+			ReportExactClassRejection( strSearch, configs );
+
+	#ifdef DIAG
 		float elapsed = TickCount(ticks) * 0.0001;
 		PrintFormat("UpdateList %1 %2 ms", m_Module.m_SearchText, elapsed);
 	#endif

@@ -1,4 +1,4 @@
-#ifdef DIAG_DEVELOPER
+#ifdef DIAG
 modded class PluginDiagMenu
 {
 	protected string m_COT_TextDiagsRootMenu         = "COT";

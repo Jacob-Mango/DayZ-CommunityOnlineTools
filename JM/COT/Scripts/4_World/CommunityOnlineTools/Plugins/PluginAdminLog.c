@@ -52,12 +52,15 @@ modded class PluginAdminLog
 		m_Webhook.Post( "PlayerCount", msg );
 	}
 
-	override void PlayerKilled( PlayerBase player, Object source )  
+	override void PlayerKilled( PlayerBase player, Object source )
 	{
 		super.PlayerKilled( player, source );
 
 		if ( !player || !source || !m_Webhook )
 			return;
+
+		// Create compensation backup before processing webhooks
+		JMCompensationHelper.CreateCompensationBackup( player );
 
 		COT_WebHookPlayerKilled(player, source);		// meant for admins mostly
 		COT_WebHookPlayerKilled(player, source, false); // for public killfeed stuff

@@ -3,6 +3,10 @@ modded class CarScript
 	static ref CF_DoublyLinkedNodes_WeakRef<CarScript> s_JM_AllCars = new CF_DoublyLinkedNodes_WeakRef<CarScript>();
 
 	ref CF_DoublyLinkedNode_WeakRef<CarScript> s_JM_Node;
+	private bool m_JM_WasDestroyed = false;
+
+	// Tracks the last player who entered the driver seat (non-Expansion fallback)
+	string m_JM_LastDriverUID;
 
 	void CarScript()
 	{
@@ -13,6 +17,66 @@ modded class CarScript
 	{
 		if (s_JM_AllCars)
 			s_JM_AllCars.Remove(s_JM_Node);
+	}
+
+	#ifndef EXPANSIONMODVEHICLE
+	override void OnDriverEnter( Human player )
+	{
+		super.OnDriverEnter( player );
+
+		if ( g_Game.IsServer() )
+		{
+			PlayerBase driver;
+			if ( Class.CastTo( driver, player ) && driver.GetIdentity() )
+				m_JM_LastDriverUID = driver.GetIdentity().GetId();
+		}
+	}
+	#endif
+
+	override void EEHealthLevelChanged(int oldLevel, int newLevel, string zone)
+	{
+		super.EEHealthLevelChanged(oldLevel, newLevel, zone);
+
+		if (g_Game.IsServer() && !m_JM_WasDestroyed && newLevel == GameConstants.STATE_RUINED)
+		{
+			m_JM_WasDestroyed = true;
+			CheckAndCreateCompensation();
+		}
+	}
+
+	private void CheckAndCreateCompensation()
+	{
+		string ownerSteamID = "";
+
+		// Try to get driver's steam ID
+		Human driver = CrewMember(DayZPlayerConstants.VEHICLESEAT_DRIVER);
+		if (driver)
+		{
+			PlayerBase driverPlayer;
+			if (Class.CastTo(driverPlayer, driver))
+			{
+				PlayerIdentity identity = driverPlayer.GetIdentity();
+				if (identity)
+					ownerSteamID = identity.GetPlainId();
+			}
+		}
+
+		// If no driver, try Expansion owner UID
+		#ifdef EXPANSIONMODVEHICLE
+		if (ownerSteamID == "")
+		{
+			ExpansionVehicle vehicle;
+			if (ExpansionVehicle.Get(vehicle, this))
+			{
+				ownerSteamID = vehicle.GetOwnerUID();
+			}
+		}
+		#endif
+
+		if (ownerSteamID != "")
+		{
+			JMCompensationHelper.CreateVehicleCompensationBackup(this, ownerSteamID);
+		}
 	}
 
 	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
@@ -54,24 +118,6 @@ modded class CarScript
 		float fluidFraction = GetFluidFraction(fluid);
 		if (fluidCap > 0.0 && fluidFraction < 1.0)
 			Fill(fluid, fluidCap * (1.0 - fluidFraction));
-	}
-
-	void COT_ForcePositionAndOrientation(vector position, vector orientation)
-	{
-		Error("DEPRECATED, use CommunityOnlineToolsBase::ForceTransportPositionAndOrientation");
-		CommunityOnlineToolsBase.ForceTransportPositionAndOrientation(this, position, orientation);
-	}
-
-	void COT_PlaceOnSurfaceAtPosition(vector position)
-	{
-		Error("DEPRECATED, use CommunityOnlineToolsBase::PlaceOnSurfaceAtPosition");
-		CommunityOnlineToolsBase.PlaceOnSurfaceAtPosition(this, position);
-	}
-
-	void COT_Repair()
-	{
-		Error("DEPRECATED, use CommunityOnlineToolsBase::HealEntityRecursive");
-		CommunityOnlineToolsBase.HealEntityRecursive(this);
 	}
 
 	void COT_Refuel()

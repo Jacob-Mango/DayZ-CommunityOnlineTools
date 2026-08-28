@@ -4,7 +4,7 @@ class JMLoadoutForm: JMFormBase
 	private Widget m_ContentWrapper;
 	private Widget m_ActionsWrapper;
 
-	protected UIActionSelectBox m_SpawnModeSelect;
+	protected UIActionDropdown m_SpawnModeDropdown;
 	protected ref array< string > m_SpawnModeText =
 	{
 		"#STR_COT_OBJECT_MODULE_CROSSHAIR",
@@ -12,8 +12,9 @@ class JMLoadoutForm: JMFormBase
 		"#STR_COT_OBJECT_MODULE_SELECTED_PLAYERS"
 	};
 
-	private JMLoadoutModule m_Module;
-	
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMLoadoutModule m_Module;
+
 	JMLoadoutButtonData m_TempData;
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -26,14 +27,19 @@ class JMLoadoutForm: JMFormBase
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
 
-		Widget buttonswrapper = UIActionManager.CreateGridSpacer( m_ContentWrapper, 1, 2 );
+		// Toolbar: 32x32 refresh icon on the left, dropdown fills the remaining row width.
+		// WrapSpacer, not GridSpacer - GridSpacer(1,2) splits the row into equal halves.
+		// Fractional < 1.0 on the dropdown keeps the row tight at narrow panel widths.
+		Widget toolbar = UIActionManager.CreateWrapSpacer( m_ContentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-			UIActionManager.CreateButton( buttonswrapper, "Refresh", this, "OnClick_Refresh" );
-			
-			m_SpawnModeSelect = UIActionManager.CreateSelectionBox( buttonswrapper, "", m_SpawnModeText, this );
-			m_SpawnModeSelect.SetSelectorWidth(1.0);
-			m_SpawnModeSelect.SetSelection(0, false);
-		
+		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
+		refreshBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+
+		m_SpawnModeDropdown = UIActionManager.CreateDropdown( toolbar, "", layoutRoot, this, "OnClick_SpawnMode", m_SpawnModeText );
+		m_SpawnModeDropdown.SetWidth( 0.85 );
+		m_SpawnModeDropdown.SetSelection( 0, false );
+		RegisterOverlay( m_SpawnModeDropdown );
+
 		m_sclr_MainActions.UpdateScroller();
 	}
 
@@ -78,74 +84,95 @@ class JMLoadoutForm: JMFormBase
 			if ( name == string.Empty )
 				continue;
 
-			Widget wrapper = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 1, 2 );
+			// WrapSpacer so all three siblings pack on the same row.
+			Widget row = UIActionManager.CreateWrapSpacer( m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-			UIActionManager.CreateText( wrapper, name );
-			
-				Widget bttnwrapper = UIActionManager.CreateGridSpacer( wrapper, 1, 2 );
+			// Icon-only delete (32x32). Compact confirm labels because the button
+			// is narrow - full "Confirm"/"Cancel" would clip on small widths.
+			UIActionConfirmInline delbttn = UIActionManager.CreateConfirmInline( row, "", this, "OnClick_Delete" );
+			UIActionIconGrid.ApplyDeletePreset( delbttn );
+			delbttn.SetButton( "" );
+			delbttn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+			delbttn.CenterIcon( ICON_BUTTON_PX, 16 );
+			delbttn.SetConfirmLabel( "O" );
+			delbttn.SetCancelLabel( "X" );
+			delbttn.SetTooltip( "Delete this loadout" );
+			delbttn.SetData( new JMLoadoutButtonData( name ) );
 
-					UIActionButton spwnbttn = UIActionManager.CreateButton( bttnwrapper, "Spawn", this, "OnClick_Spawn" );
-					spwnbttn.SetData( new JMLoadoutButtonData( name ) );
+			// Fractional Spawn directly after the delete icon.
+			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "Spawn", this, "OnClick_Spawn" );
+			spwnbttn.SetWidth( 0.20 );
+			spwnbttn.SetData( new JMLoadoutButtonData( name ) );
 
-					UIActionButton delbttn = UIActionManager.CreateButton( bttnwrapper, "Delete", this, "OnClick_Delete" );
-					delbttn.SetData( new JMLoadoutButtonData( name ) );
-					delbttn.SetColor(COLOR_RED);
+			// Loadout name fills the rest of the row.
+			UIActionText nameText = UIActionManager.CreateText( row, "", name );
+			nameText.SetWidth( 0.74 );
+			nameText.SetTextVAlign( UIActionVAlign.CENTER );
 		}
 
 		m_sclr_MainActions.UpdateScroller();
 	}
 	
-	void OnClick_Delete( UIEvent eid, UIActionBase action ) 
+	void OnClick_Delete( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
-		
-		if ( !Class.CastTo( m_TempData, action.GetData() ) )
-			return;
-	
-		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_LOADOUT_MODULE_LOADOUT_CONFIRMATION_BODY" ), m_TempData.Filename ), "#STR_COT_GENERIC_NO", "", "#STR_COT_GENERIC_YES", "OnClick_DeleteConfirm" );
-	}
-
-	void OnClick_DeleteConfirm(JMConfirmation confirmation) 
-	{
-		m_Module.Delete( m_TempData.Filename );
-
-		m_Module.Load();
-
-		OnSettingsUpdated();
-	}
-	
-	void OnClick_Refresh( UIEvent eid, UIActionBase action ) 
-	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
-		m_Module.Load();
-
-		OnSettingsUpdated();
-	}
-
-	void OnClick_Spawn( UIEvent eid, UIActionBase action ) 
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-		
 		JMLoadoutButtonData data;
 		if ( !Class.CastTo( data, action.GetData() ) )
 			return;
 
-		switch(m_SpawnModeSelect.GetSelection())
+		m_Module.Delete( data.Filename );
+		m_Module.Load();
+		OnSettingsUpdated();
+	}
+	
+	void OnClick_Refresh( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UIActionButton btn;
+		if ( Class.CastTo( btn, action ) )
+			btn.TriggerSpin( 2 );
+
+		m_Module.Load();
+
+		OnSettingsUpdated();
+	}
+
+	void OnClick_SpawnMode( UIEvent eid, UIActionBase action )
+	{
+	}
+
+	void OnClick_Spawn( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMLoadoutButtonData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
+
+		int spawnMode = m_SpawnModeDropdown.GetSelection();
+		if ( spawnMode < 0 )
+			spawnMode = COT_LoadoutSpawnMode.CURSOR;
+
+		switch ( spawnMode )
 		{
 			case COT_LoadoutSpawnMode.CURSOR:
 				m_Module.SpawnCursor( data.Filename, GetCursorPos() );
 			break;
 			case COT_LoadoutSpawnMode.TARGET:
 				EntityAI ent;
-				if (Class.CastTo(ent, CF_Modules<JMObjectSpawnerModule>.Get().GetObjectAtCursor()))
+				if ( Class.CastTo( ent, CF_Modules<JMObjectSpawnerModule>.Get().GetObjectAtCursor() ) )
 					m_Module.SpawnTarget( data.Filename, ent );
 			break;
 			case COT_LoadoutSpawnMode.PLAYER:
 				m_Module.SpawnPlayers( data.Filename, JM_GetSelected().GetPlayersOrSelf() );
+			break;
+			default:
+				CreateConfirmation_One( JMConfirmationType.INFO, "Unknown spawn mode", "Selected spawn mode is not handled. Re-select the mode and try again.", "#STR_COT_GENERIC_OK", "" );
 			break;
 		}
 	}

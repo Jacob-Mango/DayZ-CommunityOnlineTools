@@ -9,8 +9,8 @@ enum JMCameraEasing
 	LINEAR        = 0,
 	EASE_IN       = 1,   // accelerate from rest
 	EASE_OUT      = 2,   // decelerate to rest
-	EASE_IN_OUT   = 3,   // SmoothStep — accelerate then decelerate (default)
-	SMOOTHER_STEP = 4,   // quintic — second-derivative continuous
+	EASE_IN_OUT   = 3,   // SmoothStep - accelerate then decelerate (default)
+	SMOOTHER_STEP = 4,   // quintic - second-derivative continuous
 	BOUNCE        = 4    // not yet used; reserved
 }
 

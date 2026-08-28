@@ -1,0 +1,131 @@
+PanelWidgetClass KillFeedEntry {
+ visible 1
+ clipchildren 1
+ ignorepointer 0
+ color 0 0 0 0.3922
+ position 0 0
+ size 1 26
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ style DayZDefaultPanel
+ "no focus" 1
+ {
+  ButtonWidgetClass entry_button {
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style Default
+  }
+    TextWidgetClass col_date {
+     clipchildren 1
+     ignorepointer 1
+     position 0.010 0
+     size 0.185 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_killer {
+     clipchildren 1
+     ignorepointer 1
+     position 0.198 0
+     size 0.132 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_victim {
+     clipchildren 1
+     ignorepointer 1
+     position 0.333 0
+     size 0.132 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_dist {
+     clipchildren 1
+     ignorepointer 1
+     position 0.468 0
+     size 0.062 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_weapon {
+     clipchildren 1
+     ignorepointer 1
+     position 0.533 0
+     size 0.150 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_los {
+     clipchildren 1
+     ignorepointer 1
+     position 0.686 0
+     size 0.140 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_aim {
+     clipchildren 1
+     ignorepointer 1
+     position 0.829 0
+     size 0.166 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+ }
+}

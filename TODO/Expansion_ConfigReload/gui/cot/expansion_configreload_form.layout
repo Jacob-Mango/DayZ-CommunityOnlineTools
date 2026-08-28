@@ -1,0 +1,24 @@
+PanelWidgetClass ExpansionConfigReloadCOTForm {
+ color 0 0 0 0
+ position 0 0
+ size 360 420
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "ExpansionConfigReloadCOTForm"
+ style DayZDefaultPanel
+ {
+  GridSpacerWidgetClass actions_wrapper {
+   position 5 5
+   size 350 400
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   "Size To Content V" 1
+   Columns 1
+   Rows 8
+  }
+ }
+}

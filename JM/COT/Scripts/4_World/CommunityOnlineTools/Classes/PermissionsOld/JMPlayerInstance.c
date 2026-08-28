@@ -12,7 +12,11 @@ enum JMPlayerVariables
 	REMOVE_COLLISION = 512,
 	ADMIN_NVG = 1024,
 	HAS_CUSTOM_SCALE = 2048,
-	INVISIBILITY_INTERACTIVE = 4096
+	INVISIBILITY_INTERACTIVE = 4096,
+	UNCONSCIOUS = 8192,
+	SICK = 16384,
+	BLEEDING = 32768,
+	DEAD = 65536
 }
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -20,11 +24,18 @@ class JMPlayerInstance : Managed
 {
 	private ref JMPermission m_RootPermission;
 	private ref array< string > m_Roles;
+	private ref map<string, string> m_RoleNameRestrictions;
 	private ref map<string, bool> m_SyncedToClient;
 
 	PlayerBase PlayerObject;
 
-	private int m_DataLastUpdated;
+	//! protected, not private: DayZ-Expansion's `modded class JMPlayerInstance`
+	//! (DayZExpansion_AI, DayZExpansion_Hardline) reads this in its Update()
+	//! override to rate-limit faction/reputation netsync. A modded class cannot
+	//! touch a private member of the class it mods. The CF_MODULE_PERMISSIONS
+	//! variant of JMPlayerInstance already declares this protected - keep the two
+	//! in sync so mods compile against either.
+	protected int m_DataLastUpdated;
 
 	private string m_Name;
 	private string m_GUID;
@@ -81,6 +92,7 @@ class JMPlayerInstance : Managed
 		m_RootPermission = new JMPermission( JMConstants.PERM_ROOT );
 		m_RootPermission.CopyPermissions(GetPermissionsManager().RootPermission);
 		m_Roles = new array< string >();
+		m_RoleNameRestrictions = new map<string, string>();
 		m_SyncedToClient = new map<string, bool>();
 		m_PlayerFile = new JMPlayerSerialize();
 	}
@@ -101,7 +113,7 @@ class JMPlayerInstance : Managed
 	{
 		if ( g_Game.IsServer() && ( g_Game.GetTime() - m_DataLastUpdated ) >= 100 )
 		{
-			if ( !g_Game.IsMultiplayer() )
+			if ( !g_Game.IsMultiplayer() && !PlayerObject )
 				Class.CastTo( PlayerObject, g_Game.GetPlayer() );
 
 			if ( PlayerObject )
@@ -177,19 +189,23 @@ class JMPlayerInstance : Managed
 		m_SyncedToClient.Clear();
 	}
 
-	void LoadRoles( notnull array< string > roles )
+	void LoadRoles( notnull array< string > roles, map< string, string > nameRestrictions = NULL )
 	{
 		ClearRoles();
 
 		for ( int i = 0; i < roles.Count(); i++ )
 		{
-			AddRole( roles[i] );
+			string nameRestriction = "";
+			if ( nameRestrictions && nameRestrictions.Contains( roles[i] ) )
+				nameRestriction = nameRestrictions.Get( roles[i] );
+
+			AddRole( roles[i], nameRestriction );
 		}
 
 		Save();
 	}
 
-	void AddRole( string role )
+	void AddRole( string role, string nameRestriction = "" )
 	{
 		Assert_Null( GetPermissionsManager() );
 		Assert_Null( m_Roles );
@@ -199,6 +215,11 @@ class JMPlayerInstance : Managed
 
 		if ( m_Roles.Find( role ) < 0 )
 			m_Roles.Insert( role );
+
+		if ( nameRestriction != "" )
+			m_RoleNameRestrictions.Insert( role, nameRestriction );
+		else
+			m_RoleNameRestrictions.Remove( role );
 
 		m_SyncedToClient.Clear();
 	}
@@ -211,6 +232,13 @@ class JMPlayerInstance : Managed
 	array< string > GetRoles()
 	{
 		return m_Roles;
+	}
+
+	string GetRoleNameRestriction( string role )
+	{
+		string val;
+		m_RoleNameRestrictions.Find( role, val );
+		return val;
 	}
 
 	// doesn't check through roles.
@@ -226,8 +254,21 @@ class JMPlayerInstance : Managed
 	void ClearRoles()
 	{
 		m_Roles.Clear();
+		m_RoleNameRestrictions.Clear();
 
 		AddRole( "everyone" );
+	}
+
+	//! Does this player hold `permission` in their OWN tree, with no role
+	//! involved? HasPermission() below falls back to every role the player is
+	//! in; this deliberately does not, so a caller can tell "granted to this
+	//! person" apart from "comes with the role they are in".
+	bool HasOwnPermission( string permission )
+	{
+		Assert_Null( m_RootPermission );
+
+		JMPermissionType ownPermType;
+		return m_RootPermission.HasPermission( permission, ownPermType );
 	}
 
 	bool HasPermission( string permission )
@@ -247,6 +288,11 @@ class JMPlayerInstance : Managed
 
 		for ( int j = 0; j < m_Roles.Count(); j++ )
 		{
+			// Skip this role if a name restriction is set and the current name doesn't match
+			string requiredName;
+			if ( m_RoleNameRestrictions.Find( m_Roles[j], requiredName ) && requiredName != "" && m_Name != requiredName )
+				continue;
+
 			JMRole role = GetPermissionsManager().GetRole( m_Roles[j] );
 			if ( !role )
 				continue;
@@ -418,7 +464,35 @@ class JMPlayerInstance : Managed
 		if ( m_RootPermission.m_Sync )
 			return false;
 
+		// Session history counts as state worth keeping. Without this an
+		// ordinary player - default roles, no explicit permissions - has their
+		// file deleted on the very next save, taking their playtime with it.
+		if ( HasStats() )
+			return false;
+
 		return true;
+	}
+
+	//! True when this player has session history worth persisting.
+	bool HasStats()
+	{
+		if ( !m_PlayerFile || !m_PlayerFile.Stats )
+			return false;
+
+		return !m_PlayerFile.Stats.IsEmpty();
+	}
+
+	//! The stats block for this player, creating it on first use. Server-side
+	//! only - the client copy of an instance has no player file.
+	JMPlayerStats GetStats()
+	{
+		if ( !m_PlayerFile )
+			return NULL;
+
+		if ( !m_PlayerFile.Stats )
+			m_PlayerFile.Stats = new JMPlayerStats();
+
+		return m_PlayerFile.Stats;
 	}
 
 	void Save()
@@ -450,12 +524,19 @@ class JMPlayerInstance : Managed
 		array< string > permissions = new array< string >;
 		m_RootPermission.Serialize( permissions );
 
-		// Only write the player JSON if roles differ from default.
+		// Write the player JSON when roles differ from default OR there is
+		// session history to keep. Deleting on default roles alone would throw
+		// away the playtime of every ordinary player on the server.
 		bool rolesAreDefault = ( m_Roles.Count() == 1 && m_Roles[0] == "everyone" );
-		if ( !rolesAreDefault )
+		if ( !rolesAreDefault || HasStats() )
 		{
 			m_PlayerFile.Roles.Clear();
 			m_PlayerFile.Roles.Copy( m_Roles );
+
+			m_PlayerFile.NameRestrictions.Clear();
+			for ( int nr = 0; nr < m_RoleNameRestrictions.Count(); nr++ )
+				m_PlayerFile.NameRestrictions.Insert( m_RoleNameRestrictions.GetKey( nr ), m_RoleNameRestrictions.GetElement( nr ) );
+
 			m_PlayerFile.Save();
 		}
 		else if ( FileExist( playerFilePath ) )
@@ -535,7 +616,11 @@ class JMPlayerInstance : Managed
 
 		for ( int j = 0; j < m_PlayerFile.Roles.Count(); j++ )
 		{
-			AddRole( m_PlayerFile.Roles[j] );
+			string loadedNameRestriction = "";
+			if ( m_PlayerFile.NameRestrictions && m_PlayerFile.NameRestrictions.Contains( m_PlayerFile.Roles[j] ) )
+				loadedNameRestriction = m_PlayerFile.NameRestrictions.Get( m_PlayerFile.Roles[j] );
+
+			AddRole( m_PlayerFile.Roles[j], loadedNameRestriction );
 		}
 
 		// Track whether any legacy permission file was migrated so we know whether to re-save.
@@ -690,6 +775,11 @@ class JMPlayerInstance : Managed
 		return m_LifeSpanState;
 	}
 
+	bool IsUnconscious()
+	{
+		return m_PlayerVars[JMPlayerVariables.UNCONSCIOUS];
+	}
+
 	bool HasBloodyHands()
 	{
 		return m_PlayerVars[JMPlayerVariables.BLOODY_HANDS];
@@ -743,6 +833,21 @@ class JMPlayerInstance : Managed
 	bool GetRemoveCollision()
 	{
 		return m_PlayerVars[JMPlayerVariables.REMOVE_COLLISION];
+	}
+
+	bool IsSick()
+	{
+		return m_PlayerVars[JMPlayerVariables.SICK];
+	}
+
+	bool IsBleeding()
+	{
+		return m_PlayerVars[JMPlayerVariables.BLEEDING];
+	}
+
+	bool IsDead()
+	{
+		return m_Health <= 0 || m_PlayerVars[JMPlayerVariables.DEAD];
 	}
 }
 #endif

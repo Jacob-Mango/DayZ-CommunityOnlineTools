@@ -1,0 +1,96 @@
+PanelWidgetClass KillFeedBanEntry {
+ visible 1
+ clipchildren 1
+ ignorepointer 0
+ color 0 0 0 0.3922
+ position 0 0
+ size 1 28
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ style DayZDefaultPanel
+ "no focus" 1
+ {
+    ButtonWidgetClass col_ban_name {
+     ignorepointer 0
+     position 0.01 0
+     size 0.27 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass col_ban_name_text {
+       clipchildren 1
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "-"
+       "exact text" 0
+       "size to text h" 0
+       "text offset" 4 0
+       "text valign" center
+      }
+     }
+    }
+    TextWidgetClass col_ban_duration {
+     clipchildren 1
+     ignorepointer 1
+     position 0.29 0
+     size 0.22 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    TextWidgetClass col_ban_admin {
+     clipchildren 1
+     ignorepointer 1
+     position 0.52 0
+     size 0.30 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     text "-"
+     "exact text" 0
+     "size to text h" 0
+     "text offset" 4 0
+     "text valign" center
+    }
+    ButtonWidgetClass kf_ban_unban {
+     ignorepointer 0
+     position 0.83 0.12
+     size 0.16 0.76
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      TextWidgetClass kf_ban_unban_label {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       text "#STR_GKFM_UNBAN"
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+ }
+}

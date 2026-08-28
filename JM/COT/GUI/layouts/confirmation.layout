@@ -1,20 +1,20 @@
 PanelWidgetClass confirmation_panel_inner {
  ignorepointer 1
- color 0.12 0.16 0.22 1
+ color 0.133 0.161 0.196 1.000
  position 0 0
- size 340 220
+ size 440 300
  halign center_ref
  valign center_ref
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass confirmation_title_panel {
    ignorepointer 1
-   position 0 0.04
-   size 0.95 0.22
+   position 0 0.03
+   size 0.95 0.16
    halign center_ref
    valign top_ref
    hexactpos 0
@@ -42,19 +42,19 @@ PanelWidgetClass confirmation_panel_inner {
   }
   PanelWidgetClass confirmation_spacer_title_message {
    color 0 0 0 1
-   position 0 0.27
+   position 0 0.20
    size 0.95 0.01
    halign center_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style DayZDefaultPanel
+   style COTSurface
   }
   FrameWidgetClass confirmation_message_panel {
    ignorepointer 1
-   position 0 0.28
-   size 0.95 0.44
+   position 0 0.22
+   size 0.95 0.53
    halign center_ref
    valign top_ref
    hexactpos 0
@@ -80,13 +80,33 @@ PanelWidgetClass confirmation_panel_inner {
      "text valign" center
      wrap 1
     }
+    PanelWidgetClass confirmation_input_fill {
+     visible 0
+     ignorepointer 1
+     position 0 0
+     size 1 22
+     valign bottom_ref
+     vexactsize 1
+     color 0.082 0.098 0.118 0.941
+     style COTField4Set
+    }
+    PanelWidgetClass confirmation_input_ring {
+     visible 0
+     ignorepointer 1
+     position 0 0
+     size 1 22
+     valign bottom_ref
+     vexactsize 1
+     color 0.925 0.976 1.000 0.502
+     style COTField4LineSet
+    }
     EditBoxWidgetClass confirmation_message_input {
      visible 0
      position 0 0
      size 1 22
      valign bottom_ref
      vexactsize 1
-     style Editor
+     style COTInput
      text ""
      "exact text" 1
      font "gui/fonts/Metron"
@@ -95,8 +115,8 @@ PanelWidgetClass confirmation_panel_inner {
   }
   FrameWidgetClass confirmation_buttons_panel {
    ignorepointer 1
-   position 0 0.04
-   size 0.95 0.22
+   position 0 0.03
+   size 0.95 0.17
    halign center_ref
    valign bottom_ref
    hexactpos 0

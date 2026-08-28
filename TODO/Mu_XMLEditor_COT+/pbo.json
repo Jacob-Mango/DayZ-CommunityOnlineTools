@@ -1,0 +1,24 @@
+{
+    "compress": {
+        "exclude": [
+        ],
+        "include": [
+            "\\.xml$",
+            "\\.csv$"
+        ]
+    },
+    "headers": [
+        {
+            "name": "prefix",
+            "value": "Mu_XMLEditor"
+        },
+        {
+            "name": "Mikero",
+            "value": "DePbo.dll.10.20"
+        },
+        {
+            "name": "version",
+            "value": "26062216"
+        }
+    ]
+}

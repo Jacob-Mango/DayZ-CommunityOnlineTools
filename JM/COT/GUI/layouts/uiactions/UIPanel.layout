@@ -7,6 +7,6 @@ PanelWidgetClass UIPanel {
  halign left_ref
  valign top_ref
  color 0 0 0 0
- style DayZDefaultPanel
+ style COTSurface
  "Size To Content V" 1
 }

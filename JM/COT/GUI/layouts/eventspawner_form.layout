@@ -7,7 +7,7 @@ PanelWidgetClass JMNamalskEventManagerForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMNamalskEventManagerForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass panel {
    position 0 0

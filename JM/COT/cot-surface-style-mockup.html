@@ -1,0 +1,1733 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COT UI Component Mockup</title>
+  <style>
+    :root {
+      /* ---------- COTSurface palette ------------------------------------ */
+      --bg: #07090d;
+      --surface: rgba(13, 18, 26, 0.94);
+      --surface-raised: rgba(20, 27, 38, 0.96);
+      --surface-soft: rgba(255, 255, 255, 0.035);
+      --surface-deep: rgba(7, 10, 16, 0.55);
+      --stroke: rgba(155, 184, 218, 0.18);
+      --stroke-strong: rgba(155, 184, 218, 0.34);
+      --stroke-focus: rgba(79, 156, 255, 0.65);
+      --text: #e8edf4;
+      --text-dim: #b6c0cf;
+      --muted: #94a2b4;
+      --accent: #4f9cff;
+      --accent-soft: rgba(79, 156, 255, 0.18);
+      --good: #49b875;
+      --warn: #d9a441;
+      --danger: #d85a5a;
+      --info: #7c93ff;
+      --shadow: rgba(0, 0, 0, 0.45);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(120deg, rgba(79, 156, 255, 0.10), transparent 34%),
+        linear-gradient(180deg, #0c1017, var(--bg));
+      color: var(--text);
+      padding: 24px;
+    }
+
+    /* ---------- Doc layout ----------------------------------------------- */
+    .doc { max-width: 1280px; margin: 0 auto; display: grid; gap: 24px; }
+    .doc-header { padding: 16px 0; border-bottom: 1px solid var(--stroke); }
+    .doc-header h1 { margin: 0; font-size: 22px; }
+    .doc-header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .toc a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 12px;
+      padding: 3px 8px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+    }
+    .toc a:hover { color: var(--accent); border-color: var(--stroke-focus); }
+
+    .doc-section { display: grid; gap: 10px; }
+    .doc-section > h2 {
+      font-size: 16px; margin: 24px 0 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .doc-section > h2::before {
+      content: ""; width: 3px; height: 18px; background: var(--accent);
+    }
+    .doc-section > p { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .demo-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .demo {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .demo > .demo-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .demo > .demo-hint { color: var(--muted); font-size: 12px; }
+
+    /* ---------- COTSurface base ------------------------------------------ */
+    .cot-surface {
+      background: var(--surface-raised);
+      border: 1px solid var(--stroke);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .cot-surface.deep { background: var(--surface-deep); }
+
+    /* ============================================================
+       Window chrome (windowbase.layout)
+       ============================================================ */
+    .window {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      box-shadow: 0 18px 48px var(--shadow);
+      overflow: hidden;
+    }
+    .titlebar {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 0 0 8px;
+      background: rgba(5, 8, 14, 0.96);
+      border-bottom: 1px solid var(--stroke-strong);
+    }
+    .title-text { font-size: 13px; font-weight: 600; flex: 1; color: var(--text); }
+    .title-controls { display: flex; gap: 0; }
+    .title-controls .icon-button {
+      width: 28px; height: 28px; border: 0; border-left: 1px solid var(--stroke);
+      background: transparent; color: var(--muted);
+      display: grid; place-items: center; cursor: pointer;
+    }
+    .title-controls .icon-button:hover { background: var(--accent-soft); color: var(--text); }
+    .title-controls .icon-button.close:hover { background: rgba(216,90,90,0.25); color: var(--danger); }
+    .title-controls .icon-button svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ============================================================
+       Sidebar (sidebar_menu.layout)
+       ============================================================ */
+    .sidebar-window {
+      width: 300px;
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      min-height: 600px;
+    }
+    .sidebar-header {
+      height: 40px;
+      display: flex; align-items: center;
+      padding: 0 12px;
+      background: rgba(5,8,14,0.96);
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 1px solid var(--stroke);
+    }
+    .sidebar-categories {
+      padding: 8px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+    .sidebar-category {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-soft);
+      border: 1px solid var(--stroke);
+      cursor: pointer;
+    }
+    .sidebar-category:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .sidebar-category .cat-icon {
+      width: 24px; height: 24px;
+      background: var(--surface-deep); border: 1px solid var(--stroke);
+      display: grid; place-items: center; color: var(--accent);
+    }
+    .sidebar-category .cat-icon svg { width: 14px; height: 14px; fill: currentColor; }
+    .sidebar-category .cat-name { flex: 1; font-size: 13px; }
+    .sidebar-category .cat-count { color: var(--muted); font-size: 11px; }
+    .sidebar-credits {
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--stroke);
+    }
+
+    /* Flyout (sidebar_flyout.layout) */
+    .flyout {
+      width: 300px;
+      background: rgba(13, 18, 26, 0.98);
+      border: 1px solid var(--stroke-strong);
+      padding: 6px;
+      display: grid;
+      gap: 4px;
+      box-shadow: 0 10px 32px var(--shadow);
+    }
+    .flyout-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-soft);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .flyout-item:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .flyout-item .item-icon {
+      width: 32px; height: 32px;
+      background: var(--surface-deep); border: 1px solid var(--stroke);
+      display: grid; place-items: center; color: var(--accent);
+    }
+    .flyout-item .item-icon svg { width: 16px; height: 16px; fill: currentColor; }
+    .flyout-item .item-name { flex: 1; font-size: 13px; }
+
+    /* ============================================================
+       Form layout
+       ============================================================ */
+    .form-window {
+      width: 920px;
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      overflow: hidden;
+    }
+    .form-body { padding: 12px; display: grid; gap: 10px; }
+    .form-split { display: grid; grid-template-columns: 280px 1fr; gap: 12px; min-height: 480px; }
+    .form-split .pane { background: var(--surface-raised); border: 1px solid var(--stroke); padding: 10px; }
+
+    /* ============================================================
+       UIActionBase chrome
+       ============================================================ */
+
+    /* UIActionButton */
+    .button {
+      height: 30px;
+      padding: 0 14px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .button:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .button.primary { border-color: var(--stroke-focus); background: var(--accent-soft); color: var(--text); }
+    .button.primary:hover { background: rgba(79,156,255,0.32); }
+    .button.success { border-color: rgba(73,184,117,0.55); background: rgba(73,184,117,0.16); }
+    .button.danger { border-color: rgba(216,90,90,0.55); background: rgba(216,90,90,0.16); color: #f5c6c6; }
+    .button.danger:hover { background: rgba(216,90,90,0.30); }
+    .button.icon { width: 30px; padding: 0; }
+    .button.icon svg { width: 14px; height: 14px; fill: currentColor; }
+    .button.fixed-32 { width: 32px; height: 32px; padding: 0; }
+    .button.fixed-32 svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* UIActionNavigateButton */
+    .nav-button {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-soft); border: 1px solid var(--stroke);
+      cursor: pointer; height: 40px;
+    }
+    .nav-button:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .nav-button .nav-icon { width: 16px; height: 16px; color: var(--accent); }
+    .nav-button .nav-icon svg { width: 100%; height: 100%; fill: currentColor; }
+    .nav-button .nav-label { flex: 1; font-size: 13px; }
+    .nav-button .nav-chev { color: var(--muted); font-size: 16px; }
+
+    /* UIActionImageButton (icon-only) */
+    .image-button {
+      width: 32px; height: 32px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      color: var(--muted);
+      display: grid; place-items: center;
+      cursor: pointer;
+    }
+    .image-button:hover { border-color: var(--stroke-focus); color: var(--text); background: var(--accent-soft); }
+    .image-button svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* UIActionConfirmInline */
+    .confirm-inline {
+      display: inline-flex;
+      height: 30px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .confirm-inline.delete { border-color: rgba(216,90,90,0.55); }
+    .confirm-inline .confirm-action {
+      width: 32px; height: 30px;
+      display: grid; place-items: center;
+      color: var(--danger);
+      border-right: 1px solid var(--stroke);
+    }
+    .confirm-inline .confirm-action svg { width: 14px; height: 14px; fill: currentColor; }
+    .confirm-inline.delete .confirm-action { background: rgba(216,90,90,0.16); }
+    .confirm-inline .confirm-ok,
+    .confirm-inline .confirm-cancel {
+      width: 32px; height: 30px;
+      display: grid; place-items: center;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+    }
+    .confirm-inline .confirm-ok { background: rgba(73,184,117,0.22); color: var(--good); }
+    .confirm-inline .confirm-cancel { background: rgba(216,90,90,0.22); color: var(--danger); border-left: 1px solid var(--stroke); }
+
+    /* UIActionButtonToggle */
+    .button-toggle {
+      display: inline-flex;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+    }
+    .button-toggle .toggle-side {
+      padding: 0 14px; height: 30px;
+      display: flex; align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .button-toggle .toggle-side.active { background: var(--accent-soft); color: var(--text); }
+
+    /* UIActionToggleSwitch */
+    .toggle-switch {
+      display: inline-flex; align-items: center; gap: 10px;
+      cursor: pointer;
+    }
+    .switch-track {
+      width: 36px; height: 18px;
+      background: rgba(7,10,16,0.7); border: 1px solid var(--stroke);
+      border-radius: 2px;
+      position: relative;
+    }
+    .switch-track .switch-thumb {
+      position: absolute; top: 1px; left: 1px;
+      width: 14px; height: 14px;
+      background: var(--muted);
+    }
+    .toggle-switch.on .switch-track { background: var(--accent-soft); border-color: var(--stroke-focus); }
+    .toggle-switch.on .switch-track .switch-thumb { left: 19px; background: var(--accent); }
+    .toggle-switch .switch-label { font-size: 13px; }
+
+    /* UIActionCheckbox / UIActionToggle */
+    .checkbox {
+      display: inline-flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 6px 0;
+    }
+    .checkbox .box {
+      width: 18px; height: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(120,120,130,0.16);
+      display: grid; place-items: center;
+    }
+    .checkbox.checked .box {
+      background: var(--accent-soft); border-color: var(--stroke-focus);
+    }
+    .checkbox.checked .box::after {
+      content: ""; width: 10px; height: 10px;
+      background: var(--accent);
+    }
+    .checkbox.round .box { border-radius: 50%; }
+    .checkbox.round.checked .box::after { border-radius: 50%; }
+    .checkbox .label { font-size: 13px; }
+
+    /* UIActionText (label : value) */
+    .text-field {
+      display: flex; align-items: center;
+      height: 26px; padding: 0 10px;
+    }
+    .text-field .text-label { font-weight: 700; flex: 1; font-size: 13px; }
+    .text-field .text-value { color: var(--text-dim); font-size: 13px; text-align: right; }
+
+    /* UIActionEditableText */
+    .editable-text {
+      display: flex; align-items: center;
+      height: 30px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.32);
+    }
+    .editable-text .et-label { width: 28%; padding: 0 10px; font-weight: 700; font-size: 13px; }
+    .editable-text .et-input {
+      flex: 1; padding: 0 10px;
+      color: var(--text); font-size: 13px;
+      background: transparent;
+    }
+    .editable-text .et-input.placeholder { color: var(--muted); font-style: italic; }
+    .editable-text.focus { border-color: var(--stroke-focus); }
+
+    /* UIActionSearchBox */
+    .search-box {
+      display: flex; align-items: center;
+      height: 30px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.32);
+      position: relative;
+    }
+    .search-box .sb-icon { width: 28px; display: grid; place-items: center; color: var(--muted); }
+    .search-box .sb-icon svg { width: 13px; height: 13px; fill: currentColor; }
+    .search-box .sb-input { flex: 1; padding: 0 8px; font-size: 13px; color: var(--text); }
+    .search-box .sb-input.placeholder { color: var(--muted); }
+    .search-box .sb-clear {
+      width: 28px; display: grid; place-items: center;
+      color: var(--muted); border-left: 1px solid var(--stroke); cursor: pointer;
+    }
+    .search-box .sb-clear:hover { color: var(--danger); }
+    .search-box .sb-clear svg { width: 12px; height: 12px; fill: currentColor; }
+
+    /* Search box with open suggestion list */
+    .search-with-list { position: relative; }
+    .suggest-list {
+      position: absolute; top: 32px; left: 0; right: 0;
+      background: rgba(13, 18, 26, 0.98);
+      border: 1px solid var(--stroke-strong);
+      max-height: 200px;
+      box-shadow: 0 10px 32px var(--shadow);
+      z-index: 2;
+    }
+    .suggest-list .suggest-item {
+      padding: 8px 10px; font-size: 13px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(155,184,218,0.08);
+    }
+    .suggest-list .suggest-item:hover { background: var(--accent-soft); }
+
+    /* UIActionDropdown */
+    .dropdown {
+      display: flex; align-items: center;
+      height: 30px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      cursor: pointer;
+    }
+    .dropdown .dd-label { width: 36%; padding: 0 10px; font-weight: 700; font-size: 13px; color: var(--muted); }
+    .dropdown .dd-selected { flex: 1; padding: 0 10px; font-size: 13px; }
+    .dropdown .dd-arrow { width: 28px; display: grid; place-items: center; color: var(--muted); border-left: 1px solid var(--stroke); }
+    .dropdown .dd-arrow svg { width: 12px; height: 12px; fill: currentColor; }
+    .dropdown.open { border-color: var(--stroke-focus); }
+
+    .dropdown-list {
+      position: relative; margin-top: 2px;
+      background: rgba(13, 18, 26, 0.98);
+      border: 1px solid var(--stroke-strong);
+      max-height: 220px; overflow: auto;
+      box-shadow: 0 10px 32px var(--shadow);
+    }
+    .dropdown-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid rgba(155,184,218,0.08); }
+    .dropdown-row:hover { background: var(--accent-soft); }
+    .dropdown-row.selected { background: var(--accent-soft); color: var(--accent); }
+    .dropdown-row .row-icon { width: 14px; height: 14px; color: var(--accent); }
+    .dropdown-row .row-icon svg { width: 100%; height: 100%; fill: currentColor; }
+
+    /* UIActionSelectBox (arrow-based) */
+    .selectbox {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      height: 30px;
+    }
+    .selectbox .sel-arrow {
+      width: 26px; height: 30px;
+      display: grid; place-items: center;
+      color: var(--muted); cursor: pointer;
+    }
+    .selectbox .sel-arrow:hover { color: var(--accent); }
+    .selectbox .sel-arrow svg { width: 12px; height: 12px; fill: currentColor; }
+    .selectbox .sel-value { padding: 0 14px; font-size: 13px; }
+
+    /* UIActionSlider */
+    .slider {
+      display: grid; grid-template-columns: 1fr 1fr auto; align-items: center;
+      gap: 10px;
+      height: 30px;
+    }
+    .slider .sl-label { font-size: 13px; font-weight: 700; }
+    .slider .sl-track {
+      position: relative;
+      height: 6px;
+      background: rgba(7,10,16,0.7);
+      border: 1px solid var(--stroke);
+    }
+    .slider .sl-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--accent); }
+    .slider .sl-handle {
+      position: absolute; top: -4px;
+      width: 10px; height: 14px;
+      background: #6db2ff;
+      border: 1px solid var(--accent);
+      transform: translateX(-50%);
+    }
+    .slider .sl-value { min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--text-dim); }
+
+    /* UIActionSliderRange (double handle) */
+    .slider-range {
+      display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 10px; height: 30px;
+    }
+    .slider-range .srng-track { position: relative; height: 6px; background: rgba(7,10,16,0.7); border: 1px solid var(--stroke); }
+    .slider-range .srng-fill { position: absolute; top: 0; height: 100%; background: var(--accent); }
+    .slider-range .srng-handle { position: absolute; top: -4px; width: 10px; height: 14px; background: #6db2ff; border: 1px solid var(--accent); transform: translateX(-50%); }
+
+    /* UIActionProgressBar */
+    .progress {
+      display: grid; grid-template-columns: 1fr 2fr auto; align-items: center; gap: 10px;
+      height: 28px;
+    }
+    .progress .pr-label { font-size: 13px; font-weight: 700; }
+    .progress .pr-track { position: relative; height: 12px; background: rgba(7,10,16,0.7); border: 1px solid var(--stroke); }
+    .progress .pr-fill { height: 100%; background: var(--good); }
+    .progress .pr-value { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--text-dim); min-width: 56px; text-align: right; }
+
+    /* UIActionSpinner */
+    .spinner {
+      display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 6px;
+      height: 30px;
+    }
+    .spinner .sp-label { font-size: 13px; font-weight: 700; }
+    .spinner .sp-button {
+      width: 24px; height: 26px;
+      border: 1px solid var(--stroke); background: var(--surface-soft);
+      display: grid; place-items: center; cursor: pointer; font-size: 14px; color: var(--muted);
+    }
+    .spinner .sp-button:hover { color: var(--accent); border-color: var(--stroke-focus); }
+    .spinner .sp-value {
+      min-width: 72px; height: 26px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.32);
+      display: grid; place-items: center;
+      font-variant-numeric: tabular-nums; font-size: 13px;
+    }
+
+    /* UIActionColorPicker */
+    .color-picker {
+      display: flex; align-items: center; gap: 10px;
+      height: 30px;
+    }
+    .color-picker .cp-label { font-weight: 700; font-size: 13px; flex: 0 0 auto; }
+    .color-picker .cp-swatch {
+      width: 30px; height: 24px;
+      border: 1px solid var(--stroke);
+    }
+    .color-picker .cp-input {
+      flex: 1; padding: 0 10px; height: 26px;
+      border: 1px solid var(--stroke); background: rgba(0,0,0,0.32);
+      font-variant-numeric: tabular-nums; font-size: 13px;
+    }
+
+    /* UIActionTimePicker */
+    .time-picker {
+      display: flex; align-items: center; gap: 6px; height: 30px;
+    }
+    .time-picker .tp-label { font-weight: 700; font-size: 13px; margin-right: 8px; }
+    .time-picker .tp-field {
+      width: 36px; height: 26px;
+      border: 1px solid var(--stroke); background: rgba(0,0,0,0.32);
+      display: grid; place-items: center;
+      font-variant-numeric: tabular-nums; font-size: 13px;
+    }
+    .time-picker .tp-sep { color: var(--muted); font-weight: 700; }
+
+    /* UIActionBadge */
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 10px; height: 22px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      font-size: 12px;
+    }
+    .badge .badge-dot { width: 8px; height: 8px; background: var(--muted); }
+    .badge.good { border-color: rgba(73,184,117,0.55); }
+    .badge.good .badge-dot { background: var(--good); }
+    .badge.warn { border-color: rgba(217,164,65,0.55); }
+    .badge.warn .badge-dot { background: var(--warn); }
+    .badge.danger { border-color: rgba(216,90,90,0.55); }
+    .badge.danger .badge-dot { background: var(--danger); }
+    .badge.info { border-color: rgba(124,147,255,0.55); }
+    .badge.info .badge-dot { background: var(--info); }
+
+    /* UIActionTabs */
+    .tabs {
+      display: flex; gap: 0; border-bottom: 1px solid var(--stroke);
+    }
+    .tabs .tab {
+      padding: 8px 16px; font-size: 13px;
+      cursor: pointer; color: var(--muted);
+      border-right: 1px solid var(--stroke);
+    }
+    .tabs .tab:hover { color: var(--text); }
+    .tabs .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -1px; background: var(--accent-soft); }
+
+    /* UIActionPaginator */
+    .paginator {
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .paginator .pg-button {
+      width: 28px; height: 26px; border: 1px solid var(--stroke);
+      background: var(--surface-soft); display: grid; place-items: center;
+      cursor: pointer; color: var(--muted);
+    }
+    .paginator .pg-button:hover { color: var(--accent); border-color: var(--stroke-focus); }
+    .paginator .pg-info { font-size: 13px; font-variant-numeric: tabular-nums; }
+
+    /* UIActionCollapsibleSection */
+    .collapsible {
+      background: var(--surface-raised);
+      border: 1px solid var(--stroke);
+    }
+    .collapsible .col-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid transparent;
+    }
+    .collapsible.open .col-header { border-bottom: 1px solid var(--stroke); }
+    .collapsible .col-arrow {
+      width: 12px; height: 12px;
+      color: var(--muted);
+      transition: transform 0.15s;
+    }
+    .collapsible.open .col-arrow { transform: rotate(90deg); color: var(--accent); }
+    .collapsible .col-title { flex: 1; font-weight: 700; font-size: 13px; }
+    .collapsible .col-body { padding: 10px 12px; display: grid; gap: 8px; }
+    .collapsible:not(.open) .col-body { display: none; }
+
+    /* UIActionDataTable */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table thead { background: rgba(5,8,14,0.85); }
+    .data-table th, .data-table td {
+      padding: 8px 12px; text-align: left;
+      border-bottom: 1px solid rgba(155,184,218,0.10);
+    }
+    .data-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .data-table tbody tr:hover { background: var(--accent-soft); }
+    .data-table .row-checkbox { width: 16px; }
+    .data-table .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+    /* UIActionLogView */
+    .log-view {
+      background: var(--surface-deep);
+      border: 1px solid var(--stroke);
+      padding: 10px 12px;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      max-height: 200px; overflow: auto;
+    }
+    .log-view .log-line { color: var(--text-dim); }
+    .log-view .log-line.info { color: var(--info); }
+    .log-view .log-line.warn { color: var(--warn); }
+    .log-view .log-line.error { color: var(--danger); }
+    .log-view .log-line .log-ts { color: var(--muted); }
+
+    /* UIActionKeyValueList */
+    .kv-list { display: grid; gap: 1px; background: var(--stroke); border: 1px solid var(--stroke); }
+    .kv-list .kv-row { display: grid; grid-template-columns: 1fr 2fr; background: var(--surface-raised); padding: 8px 12px; }
+    .kv-list .kv-key { font-weight: 700; color: var(--muted); font-size: 12px; }
+    .kv-list .kv-value { color: var(--text); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+    /* UIActionStagedIcon */
+    .staged-icon {
+      width: 56px; height: 56px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      display: grid; place-items: center;
+      cursor: pointer; position: relative;
+    }
+    .staged-icon svg { width: 28px; height: 28px; fill: var(--accent); }
+    .staged-icon .stage-pip {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 16px; height: 16px;
+      background: var(--accent); color: white;
+      display: grid; place-items: center; font-size: 10px; font-weight: 700;
+    }
+
+    /* UIActionStepList */
+    .step-list { display: grid; gap: 8px; }
+    .step-list .step {
+      display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center;
+      padding: 8px 10px;
+      background: var(--surface-soft); border: 1px solid var(--stroke);
+    }
+    .step-list .step .step-num {
+      width: 22px; height: 22px;
+      background: var(--surface-deep); border: 1px solid var(--stroke);
+      display: grid; place-items: center;
+      font-weight: 700; font-size: 12px; color: var(--muted);
+    }
+    .step-list .step.done .step-num { background: var(--accent-soft); border-color: var(--stroke-focus); color: var(--accent); }
+    .step-list .step.done .step-name { color: var(--accent); }
+    .step-list .step .step-name { font-size: 13px; }
+
+    /* UIActionMultiSelectList */
+    .multi-select {
+      max-height: 180px; overflow: auto;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+    }
+    .multi-select .ms-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 12px; font-size: 13px;
+      border-bottom: 1px solid rgba(155,184,218,0.08);
+      cursor: pointer;
+    }
+    .multi-select .ms-row:hover { background: var(--accent-soft); }
+    .multi-select .ms-check {
+      width: 14px; height: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.32);
+      display: grid; place-items: center;
+    }
+    .multi-select .ms-row.selected .ms-check { background: var(--accent); border-color: var(--accent); }
+    .multi-select .ms-row.selected .ms-check::after { content: ""; width: 8px; height: 8px; background: white; }
+
+    /* UIActionFilterBar */
+    .filter-bar {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 8px;
+      background: var(--surface-deep); border: 1px solid var(--stroke);
+    }
+    .filter-bar .filter-btn {
+      height: 24px; padding: 0 10px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .filter-bar .filter-btn:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .filter-bar .filter-btn.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+    /* UIActionIconGrid */
+    .icon-grid {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+      padding: 8px;
+    }
+    .icon-grid .ig-cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      display: grid; place-items: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .icon-grid .ig-cell:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+    .icon-grid .ig-cell.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .icon-grid .ig-cell.selected::after {
+      content: ""; position: absolute; inset: -1px;
+      border: 2px solid var(--accent);
+    }
+    .icon-grid .ig-cell svg { width: 22px; height: 22px; fill: var(--accent); }
+
+    /* Tooltip (UIActionTooltip) */
+    .tooltip {
+      display: inline-flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px;
+      background: rgba(5,8,14,0.96);
+      border: 1px solid var(--stroke-strong);
+      box-shadow: 0 8px 24px var(--shadow);
+      max-width: 320px;
+    }
+    .tooltip .tt-swatch { width: 4px; align-self: stretch; background: var(--accent); }
+    .tooltip .tt-icon { width: 22px; height: 22px; color: var(--accent); display: grid; place-items: center; }
+    .tooltip .tt-icon svg { width: 100%; height: 100%; fill: currentColor; }
+    .tooltip .tt-text { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+    /* UIActionContentRows -- a generic row container */
+    .content-rows .content-row {
+      display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: center;
+      padding: 8px 10px;
+      border-top: 1px solid rgba(155,184,218,0.08);
+    }
+    .content-rows .content-row:first-child { border-top: 0; }
+    .content-rows .content-row .row-icon-slot {
+      width: 32px; height: 32px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-soft);
+      display: grid; place-items: center; color: var(--muted);
+    }
+
+    /* Inline labels & helpers */
+    .meta { color: var(--muted); font-size: 12px; }
+    .stack { display: grid; gap: 8px; }
+    .stack-tight { display: grid; gap: 4px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .hr { border: 0; border-top: 1px solid var(--stroke); margin: 4px 0; }
+
+    /* Window-level demo container */
+    .demo-window-wrap {
+      background: var(--surface-deep);
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      justify-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <h1>Community Online Tools — UI Component Reference</h1>
+      <p>Visual reference for every layout/widget COT uses. The dark navy
+        background is <code>COTSurface</code>; every widget renders against it.
+        This mockup is a flat HTML/CSS approximation of the real DayZ widgets
+        defined in <code>JM/COT/GUI/layouts/uiactions/*.layout</code>.</p>
+      <nav class="toc">
+        <a href="#chrome">Window chrome</a>
+        <a href="#sidebar">Sidebar &amp; flyout</a>
+        <a href="#buttons">Buttons</a>
+        <a href="#toggles">Toggles &amp; checkboxes</a>
+        <a href="#text">Text &amp; inputs</a>
+        <a href="#search">Search &amp; dropdowns</a>
+        <a href="#sliders">Sliders &amp; pickers</a>
+        <a href="#progress">Progress &amp; metrics</a>
+        <a href="#tabs">Tabs &amp; navigation</a>
+        <a href="#lists">Lists &amp; tables</a>
+        <a href="#layout">Layout primitives</a>
+        <a href="#overlays">Overlays</a>
+        <a href="#form">Full form sample</a>
+      </nav>
+    </header>
+
+    <!-- =================================================================
+         WINDOW CHROME
+         ================================================================= -->
+    <section class="doc-section" id="chrome">
+      <h2>Window chrome — <code>windowbase.layout</code></h2>
+      <p>Every COT module form is wrapped in this chrome: drag-to-move title
+        bar with title text, pin / minimize / close icon buttons.</p>
+      <div class="demo-window-wrap">
+        <div class="window" style="width: 600px;">
+          <div class="titlebar">
+            <span class="title-text">Player Manager</span>
+            <div class="title-controls">
+              <button class="icon-button" title="Pin window">
+                <svg viewBox="0 0 16 16"><path d="M9.5 1.5l5 5-2 1-2.5 6-2-2-3 3v-3l-3 3v-3l-3 3 3-3h-3l3-3h-3l3-3 2 2 6-2.5 1-2z"/></svg>
+              </button>
+              <button class="icon-button" title="Minimize / restore">
+                <svg viewBox="0 0 16 16"><rect x="2" y="9" width="12" height="2"/></svg>
+              </button>
+              <button class="icon-button close" title="Close">
+                <svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+              </button>
+            </div>
+          </div>
+          <div style="padding: 30px; color: var(--muted); font-size: 13px;">
+            Form content goes here. Resize handles surround the window on all
+            8 edges/corners (invisible 5-10 px hit areas, with a 3 px blue
+            highlight on hover).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         SIDEBAR
+         ================================================================= -->
+    <section class="doc-section" id="sidebar">
+      <h2>Sidebar &amp; flyout — <code>sidebar_menu.layout</code></h2>
+      <p>Right-side dock with category tiles. Hovering a category opens a
+        flyout to the left listing every module in that category.</p>
+      <div class="demo-window-wrap" style="grid-template-columns: 1fr 1fr; display: grid; align-items: start;">
+        <!-- Sidebar -->
+        <div class="sidebar-window" style="justify-self: end;">
+          <div class="sidebar-header">Community Online Tools</div>
+          <div class="sidebar-categories">
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+              <span class="cat-name">Players</span>
+              <span class="cat-count">4</span>
+            </div>
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" fill="none" stroke="currentColor"/></svg></span>
+              <span class="cat-name">World</span>
+              <span class="cat-count">5</span>
+            </div>
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="3"/><rect x="3" y="7" width="10" height="3"/><rect x="3" y="11" width="10" height="2"/></svg></span>
+              <span class="cat-name">Items</span>
+              <span class="cat-count">3</span>
+            </div>
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><path d="M2 11h12l-2-5H4z"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg></span>
+              <span class="cat-name">Vehicles</span>
+              <span class="cat-count">1</span>
+            </div>
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><path d="M8 1L4 6h3v9h2V6h3z"/></svg></span>
+              <span class="cat-name">Events</span>
+              <span class="cat-count">1</span>
+            </div>
+            <div class="sidebar-category">
+              <span class="cat-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/></svg></span>
+              <span class="cat-name">Server</span>
+              <span class="cat-count">1</span>
+            </div>
+          </div>
+          <div class="sidebar-credits">v1.29 · Created by Jacob_Mango, Arkensor &amp; DannyDog</div>
+        </div>
+        <!-- Flyout -->
+        <div style="justify-self: start;">
+          <div class="meta" style="margin-bottom: 6px;">Hovering "Players" opens this flyout:</div>
+          <div class="flyout">
+            <div class="flyout-item">
+              <span class="item-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+              <span class="item-name">Player Manager</span>
+            </div>
+            <div class="flyout-item">
+              <span class="item-icon"><svg viewBox="0 0 16 16"><rect x="3" y="6" width="10" height="6"/><path d="M5 6V4h6v2"/></svg></span>
+              <span class="item-name">Ban Manager</span>
+            </div>
+            <div class="flyout-item">
+              <span class="item-icon"><svg viewBox="0 0 16 16"><rect x="4" y="2" width="2" height="12"/><rect x="10" y="2" width="2" height="12"/><rect x="7" y="2" width="2" height="12"/></svg></span>
+              <span class="item-name">Role Manager</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         BUTTONS
+         ================================================================= -->
+    <section class="doc-section" id="buttons">
+      <h2>Buttons</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionButton</div>
+          <div class="demo-hint">Standard rectangular button. <code>SetColor()</code> for emphasis (primary/success/danger).</div>
+          <div class="row">
+            <button class="button">Default</button>
+            <button class="button primary">Primary</button>
+            <button class="button success">Save</button>
+            <button class="button danger">Delete</button>
+          </div>
+          <div class="row">
+            <button class="button">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2"/></svg>
+              With icon
+            </button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionImageButton (icon-only, 32×32)</div>
+          <div class="demo-hint">Used for refresh, delete-icon, and any compact toolbar action.</div>
+          <div class="row">
+            <button class="image-button" title="Refresh">
+              <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 11-2-4.47L14 1v5h-5"/></svg>
+            </button>
+            <button class="image-button" title="Add">
+              <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+            <button class="image-button" title="Settings">
+              <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M3 13l2-2M11 5l2-2"/></svg>
+            </button>
+            <button class="image-button" title="Copy">
+              <svg viewBox="0 0 16 16"><rect x="3" y="3" width="8" height="10"/><rect x="5" y="1" width="8" height="10"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionNavigateButton</div>
+          <div class="demo-hint">Used in sidebar / breadcrumb navigation. Icon left, chevron right.</div>
+          <div class="stack">
+            <div class="nav-button">
+              <span class="nav-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+              <span class="nav-label">Player Settings</span>
+              <span class="nav-chev">›</span>
+            </div>
+            <div class="nav-button">
+              <span class="nav-icon"><svg viewBox="0 0 16 16"><path d="M2 11h12l-2-5H4z"/></svg></span>
+              <span class="nav-label">Vehicle Manager</span>
+              <span class="nav-chev">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionConfirmInline</div>
+          <div class="demo-hint">Two-step destructive action. Tap icon → expands to OK / X.</div>
+          <div class="row">
+            <span class="confirm-inline delete">
+              <span class="confirm-action"><svg viewBox="0 0 16 16"><path d="M3 5h10l-1 9H4zM6 3h4v2H6z"/></svg></span>
+              <span class="confirm-ok">OK</span>
+              <span class="confirm-cancel">X</span>
+            </span>
+            <span class="meta">Pending confirm state</span>
+          </div>
+          <div class="row">
+            <span class="confirm-inline delete" style="overflow: hidden;">
+              <span class="confirm-action"><svg viewBox="0 0 16 16"><path d="M3 5h10l-1 9H4zM6 3h4v2H6z"/></svg></span>
+            </span>
+            <span class="meta">Resting state (icon only)</span>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionButtonToggle</div>
+          <div class="demo-hint">Two-way toggle button (A/Z, list/grid view).</div>
+          <div class="row">
+            <span class="button-toggle">
+              <span class="toggle-side active">A/Z</span>
+              <span class="toggle-side">Z/A</span>
+            </span>
+            <span class="button-toggle">
+              <span class="toggle-side">List</span>
+              <span class="toggle-side active">Grid</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionPaginator</div>
+          <div class="demo-hint">Previous / next pager with current/total readout.</div>
+          <div class="row">
+            <div class="paginator">
+              <button class="pg-button">‹</button>
+              <span class="pg-info">Page 3 / 12</span>
+              <button class="pg-button">›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TOGGLES & CHECKBOXES
+         ================================================================= -->
+    <section class="doc-section" id="toggles">
+      <h2>Toggles &amp; checkboxes</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionCheckbox (square)</div>
+          <div class="demo-hint">Multi-select / independent boolean. Default checkbox in COT (backed by <code>UIActionToggle</code>).</div>
+          <div class="stack-tight">
+            <label class="checkbox checked"><span class="box"></span><span class="label">God Mode</span></label>
+            <label class="checkbox"><span class="box"></span><span class="label">Unlimited Stamina</span></label>
+            <label class="checkbox checked"><span class="box"></span><span class="label">Invisibility</span></label>
+            <label class="checkbox"><span class="box"></span><span class="label">Bloody Hands</span></label>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionToggle (round / radio)</div>
+          <div class="demo-hint">Single-choice variant of the same widget. Set with <code>SetRound(true)</code>.</div>
+          <div class="stack-tight">
+            <label class="checkbox round checked"><span class="box"></span><span class="label">Spawn at cursor</span></label>
+            <label class="checkbox round"><span class="box"></span><span class="label">Spawn at player</span></label>
+            <label class="checkbox round"><span class="box"></span><span class="label">Spawn at target</span></label>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionToggleSwitch</div>
+          <div class="demo-hint">Animated horizontal switch for settings.</div>
+          <div class="stack-tight">
+            <div class="toggle-switch on">
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label">Auto-refresh enabled</span>
+            </div>
+            <div class="toggle-switch">
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label">Show ESP overlay</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">Disabled state</div>
+          <div class="demo-hint">A semi-opaque overlay greys out any action widget. The greying is the same shade across the whole UI.</div>
+          <div class="stack-tight" style="opacity: 0.5;">
+            <label class="checkbox checked"><span class="box"></span><span class="label">Locked feature</span></label>
+            <button class="button" disabled>Cannot click</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TEXT & INPUTS
+         ================================================================= -->
+    <section class="doc-section" id="text">
+      <h2>Text labels &amp; inputs</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionText</div>
+          <div class="demo-hint">Label : value display. Click to copy if <code>OnClick</code> is not bound.</div>
+          <div class="stack-tight">
+            <div class="text-field"><span class="text-label">SteamID:</span><span class="text-value">76561198032148123</span></div>
+            <div class="text-field"><span class="text-label">Position:</span><span class="text-value">7321.42 / 0 / 8264.17</span></div>
+            <div class="text-field"><span class="text-label">Ping:</span><span class="text-value">42 ms</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionEditableText</div>
+          <div class="demo-hint">Inline text input. Supports number-only mode and character whitelisting.</div>
+          <div class="stack-tight">
+            <div class="editable-text focus">
+              <span class="et-label">Reason</span>
+              <span class="et-input">Hacking with weapons</span>
+            </div>
+            <div class="editable-text">
+              <span class="et-label">Quantity</span>
+              <span class="et-input">100</span>
+            </div>
+            <div class="editable-text">
+              <span class="et-label">Location</span>
+              <span class="et-input placeholder">Enter a name…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionEditableVector</div>
+          <div class="demo-hint">Three numeric inputs combined for x / y / z editing.</div>
+          <div class="stack-tight">
+            <div class="text-field"><span class="text-label">Position</span></div>
+            <div class="row" style="gap: 6px;">
+              <div class="editable-text" style="flex: 1;"><span class="et-label">X</span><span class="et-input">7321.4</span></div>
+              <div class="editable-text" style="flex: 1;"><span class="et-label">Y</span><span class="et-input">0</span></div>
+              <div class="editable-text" style="flex: 1;"><span class="et-label">Z</span><span class="et-input">8264.2</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionEditableRichText</div>
+          <div class="demo-hint">Multi-line edit box with markup support (used for messages, motd).</div>
+          <div style="background: rgba(0,0,0,0.32); border: 1px solid var(--stroke); padding: 8px 10px; min-height: 80px; font-size: 13px;">
+            Welcome to the server!<br>
+            <span style="color: var(--accent);">Server restart in 30 minutes.</span><br>
+            Type <code>/help</code> for commands.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         SEARCH & DROPDOWNS
+         ================================================================= -->
+    <section class="doc-section" id="search">
+      <h2>Search &amp; dropdowns</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionSearchBox</div>
+          <div class="demo-hint">Search field with placeholder + inline × clear button. Autocomplete list opens below.</div>
+          <div class="stack">
+            <div class="search-with-list">
+              <div class="search-box">
+                <span class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                <span class="sb-input">m4a1</span>
+                <span class="sb-clear" title="Clear"><svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="2"/></svg></span>
+              </div>
+              <div class="suggest-list">
+                <div class="suggest-item">m4a1</div>
+                <div class="suggest-item">m4a1_black</div>
+                <div class="suggest-item">m4a1_camo</div>
+              </div>
+            </div>
+            <div class="search-box">
+              <span class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/></svg></span>
+              <span class="sb-input placeholder">Search class name…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionDropdown</div>
+          <div class="demo-hint">Click to expand; selected item shows in the field with optional icon.</div>
+          <div class="stack">
+            <div class="dropdown">
+              <span class="dd-label">Spawn mode</span>
+              <span class="dd-selected">Crosshair</span>
+              <span class="dd-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            </div>
+            <div class="dropdown open">
+              <span class="dd-label">Setup mode</span>
+              <span class="dd-selected">Debug Spawn</span>
+              <span class="dd-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            </div>
+            <div class="dropdown-list">
+              <div class="dropdown-row selected">
+                <span class="row-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/></svg></span>
+                <span>Debug Spawn</span>
+              </div>
+              <div class="dropdown-row">
+                <span class="row-icon"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10"/></svg></span>
+                <span>CE Spawn</span>
+              </div>
+              <div class="dropdown-row">
+                <span class="row-icon"></span>
+                <span>None</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionDropdownList</div>
+          <div class="demo-hint">Search-as-you-type dropdown (backed by <code>UIActionSearchBox</code>).</div>
+          <div class="search-with-list">
+            <div class="search-box">
+              <span class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/></svg></span>
+              <span class="sb-input">Sni</span>
+              <span class="sb-clear"><svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="2"/></svg></span>
+            </div>
+            <div class="suggest-list">
+              <div class="suggest-item">M14_Sniper</div>
+              <div class="suggest-item">VSS_Sniper</div>
+              <div class="suggest-item">SVD_Sniper</div>
+              <div class="suggest-item">B95_Sniper</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionSelectBox</div>
+          <div class="demo-hint">Previous / next arrows around current value (used for cycle-through options).</div>
+          <div class="stack">
+            <div class="selectbox">
+              <span class="sel-arrow">‹</span>
+              <span class="sel-value">Crosshair</span>
+              <span class="sel-arrow">›</span>
+            </div>
+            <div class="selectbox">
+              <span class="sel-arrow">‹</span>
+              <span class="sel-value">Bloody Hands</span>
+              <span class="sel-arrow">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionFilterBar</div>
+          <div class="demo-hint">Inline filter pills, used for tag-style filtering. Multi-select.</div>
+          <div class="filter-bar">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Food</button>
+            <button class="filter-btn active">Weapons</button>
+            <button class="filter-btn">Ammo</button>
+            <button class="filter-btn">Clothing</button>
+            <button class="filter-btn">Medical</button>
+            <button class="filter-btn">Vehicles</button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionMultiSelectList</div>
+          <div class="demo-hint">Scrollable list of checkboxes (used for permissions, event types).</div>
+          <div class="multi-select">
+            <div class="ms-row selected"><span class="ms-check"></span><span>Admin.Player.Spawn</span></div>
+            <div class="ms-row"><span class="ms-check"></span><span>Admin.Player.Teleport</span></div>
+            <div class="ms-row selected"><span class="ms-check"></span><span>Admin.Player.Kick</span></div>
+            <div class="ms-row"><span class="ms-check"></span><span>Admin.Player.Ban</span></div>
+            <div class="ms-row selected"><span class="ms-check"></span><span>Admin.Vehicle.Delete</span></div>
+            <div class="ms-row"><span class="ms-check"></span><span>Admin.Weather.Modify</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         SLIDERS & PICKERS
+         ================================================================= -->
+    <section class="doc-section" id="sliders">
+      <h2>Sliders &amp; pickers</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionSlider</div>
+          <div class="demo-hint">Single-handle slider with label and live value readout.</div>
+          <div class="stack" style="gap: 12px;">
+            <div class="slider">
+              <span class="sl-label">Health</span>
+              <span class="sl-track"><span class="sl-fill" style="width: 78%;"></span><span class="sl-handle" style="left: 78%;"></span></span>
+              <span class="sl-value">78</span>
+            </div>
+            <div class="slider">
+              <span class="sl-label">Temperature</span>
+              <span class="sl-track"><span class="sl-fill" style="width: 56%; background: var(--warn);"></span><span class="sl-handle" style="left: 56%; background: #ffd86b; border-color: var(--warn);"></span></span>
+              <span class="sl-value">36.6°C</span>
+            </div>
+            <div class="slider">
+              <span class="sl-label">Quantity</span>
+              <span class="sl-track"><span class="sl-fill" style="width: 100%;"></span><span class="sl-handle" style="left: 100%;"></span></span>
+              <span class="sl-value">100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionSliderRange</div>
+          <div class="demo-hint">Two-handle range slider for min / max.</div>
+          <div class="slider-range">
+            <span class="sl-label">Loot tier</span>
+            <span class="srng-track">
+              <span class="srng-fill" style="left: 25%; width: 50%;"></span>
+              <span class="srng-handle" style="left: 25%;"></span>
+              <span class="srng-handle" style="left: 75%;"></span>
+            </span>
+            <span class="sl-value">2 – 6</span>
+          </div>
+          <div class="meta">Range: 2 to 6</div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionSpinner</div>
+          <div class="demo-hint">Numeric input with +/- buttons.</div>
+          <div class="spinner">
+            <span class="sp-label">Quantity</span>
+            <button class="sp-button">−</button>
+            <span class="sp-value">42</span>
+            <button class="sp-button">+</button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionColorPicker</div>
+          <div class="demo-hint">Swatch + ARGB text input.</div>
+          <div class="color-picker">
+            <span class="cp-label">Tint</span>
+            <span class="cp-swatch" style="background: #4f9cff;"></span>
+            <span class="cp-input">FF4F9CFF</span>
+          </div>
+          <div class="color-picker">
+            <span class="cp-label">Tint</span>
+            <span class="cp-swatch" style="background: #49b875;"></span>
+            <span class="cp-input">FF49B875</span>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionTimePicker</div>
+          <div class="demo-hint">Three small fields for h : m : s with separators.</div>
+          <div class="time-picker">
+            <span class="tp-label">Duration</span>
+            <span class="tp-field">02</span><span class="tp-sep">:</span>
+            <span class="tp-field">30</span><span class="tp-sep">:</span>
+            <span class="tp-field">00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         PROGRESS & METRICS
+         ================================================================= -->
+    <section class="doc-section" id="progress">
+      <h2>Progress &amp; status</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionProgressBar</div>
+          <div class="demo-hint">Read-only fill bar with label and value.</div>
+          <div class="stack" style="gap: 10px;">
+            <div class="progress">
+              <span class="pr-label">Server load</span>
+              <span class="pr-track"><span class="pr-fill" style="width: 34%;"></span></span>
+              <span class="pr-value">34%</span>
+            </div>
+            <div class="progress">
+              <span class="pr-label">Memory</span>
+              <span class="pr-track"><span class="pr-fill" style="width: 72%; background: var(--warn);"></span></span>
+              <span class="pr-value">72%</span>
+            </div>
+            <div class="progress">
+              <span class="pr-label">Disk</span>
+              <span class="pr-track"><span class="pr-fill" style="width: 94%; background: var(--danger);"></span></span>
+              <span class="pr-value">94%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionBadge</div>
+          <div class="demo-hint">Inline status pill, used in lists.</div>
+          <div class="row" style="flex-wrap: wrap; gap: 8px;">
+            <span class="badge good"><span class="badge-dot"></span>Online</span>
+            <span class="badge warn"><span class="badge-dot"></span>Idle</span>
+            <span class="badge danger"><span class="badge-dot"></span>Banned</span>
+            <span class="badge info"><span class="badge-dot"></span>Admin</span>
+            <span class="badge"><span class="badge-dot"></span>Unknown</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TABS & NAVIGATION
+         ================================================================= -->
+    <section class="doc-section" id="tabs">
+      <h2>Tabs &amp; navigation</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionTabs</div>
+          <div class="demo-hint">Tab bar with active highlight.</div>
+          <div class="tabs">
+            <span class="tab">Basics</span>
+            <span class="tab active">Layout</span>
+            <span class="tab">Lists</span>
+            <span class="tab">Special</span>
+            <span class="tab">Animations</span>
+          </div>
+          <div class="meta" style="padding: 12px 0 0;">Active panel content area below the tabs.</div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionCollapsibleSection</div>
+          <div class="demo-hint">Section that toggles open/closed when the header is clicked.</div>
+          <div class="stack">
+            <div class="collapsible open">
+              <div class="col-header">
+                <svg class="col-arrow" viewBox="0 0 12 12"><path d="M3 2l5 4-5 4" fill="currentColor"/></svg>
+                <span class="col-title">Advanced settings</span>
+              </div>
+              <div class="col-body">
+                <label class="checkbox checked"><span class="box"></span><span class="label">Enable debug logs</span></label>
+                <label class="checkbox"><span class="box"></span><span class="label">Show internal IDs</span></label>
+              </div>
+            </div>
+            <div class="collapsible">
+              <div class="col-header">
+                <svg class="col-arrow" viewBox="0 0 12 12"><path d="M3 2l5 4-5 4" fill="currentColor"/></svg>
+                <span class="col-title">Permissions (collapsed)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         LISTS & TABLES
+         ================================================================= -->
+    <section class="doc-section" id="lists">
+      <h2>Lists &amp; tables</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionDataTable</div>
+          <div class="demo-hint">Sortable, scrollable table of rows.</div>
+          <div style="overflow-x: auto; border: 1px solid var(--stroke);">
+            <table class="data-table">
+              <thead>
+                <tr><th class="row-checkbox"></th><th>Name</th><th>Steam ID</th><th class="num">Ping</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><span class="checkbox"><span class="box"></span></span></td><td>Survivor Admin</td><td>76561198…</td><td class="num">42</td><td><span class="badge info"><span class="badge-dot"></span>Admin</span></td></tr>
+                <tr><td><span class="checkbox checked"><span class="box"></span></span></td><td>Jacob_Mango</td><td>76561197…</td><td class="num">63</td><td><span class="badge good"><span class="badge-dot"></span>Online</span></td></tr>
+                <tr><td><span class="checkbox"><span class="box"></span></span></td><td>RandomPlayer</td><td>76561199…</td><td class="num">120</td><td><span class="badge warn"><span class="badge-dot"></span>Idle</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionKeyValueList</div>
+          <div class="demo-hint">Static metadata grid (used by Vehicle Info / Player Info).</div>
+          <div class="kv-list">
+            <div class="kv-row"><span class="kv-key">Name</span><span class="kv-value">M1025 Armored</span></div>
+            <div class="kv-row"><span class="kv-key">ClassName</span><span class="kv-value">CivilianSedan</span></div>
+            <div class="kv-row"><span class="kv-key">Type</span><span class="kv-value">Wheeled</span></div>
+            <div class="kv-row"><span class="kv-key">Position</span><span class="kv-value">7321.4 / 0 / 8264.2</span></div>
+            <div class="kv-row"><span class="kv-key">Owner</span><span class="kv-value">Survivor Admin</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionLogView</div>
+          <div class="demo-hint">Console-style scrolling log.</div>
+          <div class="log-view">
+            <div class="log-line"><span class="log-ts">[14:32:18]</span> Server: Player connected (Survivor Admin)</div>
+            <div class="log-line info"><span class="log-ts">[14:32:24]</span> COT: Loaded 18 modules</div>
+            <div class="log-line"><span class="log-ts">[14:32:31]</span> Vehicles: 312 vehicles tracked</div>
+            <div class="log-line warn"><span class="log-ts">[14:32:45]</span> Weather: storm preset activated</div>
+            <div class="log-line error"><span class="log-ts">[14:33:02]</span> RPC: SetLevel failed (invalid territory)</div>
+            <div class="log-line"><span class="log-ts">[14:33:18]</span> Ban: removed expired entry (76561199…)</div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionStepList</div>
+          <div class="demo-hint">Ordered checklist for multi-step flows.</div>
+          <div class="step-list">
+            <div class="step done"><span class="step-num">1</span><span class="step-name">Connect to server</span><span class="badge good"><span class="badge-dot"></span>done</span></div>
+            <div class="step done"><span class="step-num">2</span><span class="step-name">Authenticate as admin</span><span class="badge good"><span class="badge-dot"></span>done</span></div>
+            <div class="step"><span class="step-num">3</span><span class="step-name">Configure permissions</span><span class="badge"><span class="badge-dot"></span>active</span></div>
+            <div class="step"><span class="step-num">4</span><span class="step-name">Test commands</span><span class="badge"><span class="badge-dot"></span>pending</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionContentRows</div>
+          <div class="demo-hint">Generic icon + label + action row container.</div>
+          <div class="content-rows" style="border: 1px solid var(--stroke); background: var(--surface-raised);">
+            <div class="content-row">
+              <span class="row-icon-slot"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><circle cx="8" cy="8" r="4"/></svg></span>
+              <span class="label">Vehicle <strong>M1025</strong> — owner: Survivor</span>
+              <span class="badge good"><span class="badge-dot"></span>healthy</span>
+            </div>
+            <div class="content-row">
+              <span class="row-icon-slot"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><rect x="3" y="3" width="10" height="10"/></svg></span>
+              <span class="label">Vehicle <strong>Sedan</strong> — owner: Player_1</span>
+              <span class="badge warn"><span class="badge-dot"></span>damaged</span>
+            </div>
+            <div class="content-row">
+              <span class="row-icon-slot"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 11h12l-2-5H4z"/></svg></span>
+              <span class="label">Vehicle <strong>Truck</strong> — no owner</span>
+              <span class="badge danger"><span class="badge-dot"></span>destroyed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         LAYOUT PRIMITIVES
+         ================================================================= -->
+    <section class="doc-section" id="layout">
+      <h2>Layout primitives</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionIconGrid</div>
+          <div class="demo-hint">Selectable icon cells in a grid (used by Object Spawner category filter).</div>
+          <div class="icon-grid">
+            <div class="ig-cell selected"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="3"/><rect x="3" y="7" width="10" height="3"/><rect x="3" y="11" width="10" height="2"/></svg></div>
+            <div class="ig-cell"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></div>
+            <div class="ig-cell"><svg viewBox="0 0 16 16"><path d="M2 11h12l-2-5H4z"/></svg></div>
+            <div class="ig-cell"><svg viewBox="0 0 16 16"><rect x="2" y="6" width="12" height="4"/></svg></div>
+            <div class="ig-cell"><svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><rect x="4" y="9" width="8" height="5"/></svg></div>
+            <div class="ig-cell"><svg viewBox="0 0 16 16"><rect x="3" y="2" width="10" height="11"/></svg></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionStagedIcon</div>
+          <div class="demo-hint">Icon that cycles through stages on click (e.g. battery charge level).</div>
+          <div class="row" style="gap: 14px;">
+            <div class="staged-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="8" width="16" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="20" y="10" width="2" height="4"/><rect x="5" y="10" width="10" height="4"/></svg>
+              <span class="stage-pip">3</span>
+            </div>
+            <div class="staged-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="8" width="16" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="20" y="10" width="2" height="4"/><rect x="5" y="10" width="5" height="4"/></svg>
+              <span class="stage-pip">2</span>
+            </div>
+            <div class="staged-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="8" width="16" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="20" y="10" width="2" height="4"/></svg>
+              <span class="stage-pip">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">GridSpacer / WrapSpacer</div>
+          <div class="demo-hint">Engine-level layout containers. The visible "cell grid" below is purely structural — no border or background.</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 1</div>
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 2</div>
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 3</div>
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 4</div>
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 5</div>
+            <div class="cot-surface" style="padding: 12px; text-align: center; font-size: 12px;">Cell 6</div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">UIActionScroller</div>
+          <div class="demo-hint">Scroll container wrapping any overflowable child.</div>
+          <div style="background: var(--surface-deep); border: 1px solid var(--stroke); max-height: 140px; overflow: auto; padding: 8px 10px;">
+            <div class="meta" style="margin-bottom: 8px;">Scroll me ↓</div>
+            <div class="stack-tight">
+              <div class="text-field"><span class="text-label">Row 1</span><span class="text-value">Value 1</span></div>
+              <div class="text-field"><span class="text-label">Row 2</span><span class="text-value">Value 2</span></div>
+              <div class="text-field"><span class="text-label">Row 3</span><span class="text-value">Value 3</span></div>
+              <div class="text-field"><span class="text-label">Row 4</span><span class="text-value">Value 4</span></div>
+              <div class="text-field"><span class="text-label">Row 5</span><span class="text-value">Value 5</span></div>
+              <div class="text-field"><span class="text-label">Row 6</span><span class="text-value">Value 6</span></div>
+              <div class="text-field"><span class="text-label">Row 7</span><span class="text-value">Value 7</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         OVERLAYS
+         ================================================================= -->
+    <section class="doc-section" id="overlays">
+      <h2>Overlays</h2>
+      <div class="demo-grid">
+        <div class="demo">
+          <div class="demo-label">UIActionTooltip</div>
+          <div class="demo-hint">Hover-anchored tooltip with optional left swatch, icon, and rich text.</div>
+          <div class="row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+            <div class="tooltip">
+              <span class="tt-swatch"></span>
+              <div class="tt-text">Refresh the list of online players. Server is queried via RPC; updates may take 1-2 seconds.</div>
+            </div>
+            <div class="tooltip">
+              <span class="tt-swatch" style="background: var(--warn);"></span>
+              <span class="tt-icon"><svg viewBox="0 0 16 16"><path d="M8 1L1 14h14z"/><circle cx="8" cy="11" r="0.8" fill="black"/></svg></span>
+              <div class="tt-text"><strong>Caution:</strong> deleting a vehicle removes it instantly. Players inside will be ejected.</div>
+            </div>
+            <div class="tooltip">
+              <span class="tt-swatch" style="background: var(--danger);"></span>
+              <span class="tt-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5"/></svg></span>
+              <div class="tt-text"><strong>Permission denied.</strong> You need <code>Admin.Player.Kick</code> to use this action.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-label">Modal confirmation dialog</div>
+          <div class="demo-hint">Block input outside the dialog. Two-button (Yes/No), one-button (OK), or text-entry variants.</div>
+          <div class="window" style="width: 360px;">
+            <div class="titlebar"><span class="title-text">Confirm</span></div>
+            <div style="padding: 18px;">
+              <div style="font-size: 14px; font-weight: 700;">Delete vehicle?</div>
+              <div class="meta" style="margin: 10px 0 18px;">This will destroy the M1025 at 7321 / 8264. The action cannot be undone.</div>
+              <div class="row" style="justify-content: flex-end;">
+                <button class="button">Cancel</button>
+                <button class="button danger">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         FULL FORM SAMPLE
+         ================================================================= -->
+    <section class="doc-section" id="form">
+      <h2>Full form sample — Object Spawner</h2>
+      <p>How the components combine in a real module form.</p>
+      <div class="demo-window-wrap">
+        <div class="form-window">
+          <div class="titlebar">
+            <span class="title-text">Object Spawner</span>
+            <div class="title-controls">
+              <button class="icon-button" title="Pin">
+                <svg viewBox="0 0 16 16"><path d="M9.5 1.5l5 5-2 1-2.5 6-2-2-3 3v-3l-3 3v-3l-3 3 3-3h-3l3-3h-3l3-3 2 2 6-2.5 1-2z"/></svg>
+              </button>
+              <button class="icon-button" title="Minimize">
+                <svg viewBox="0 0 16 16"><rect x="2" y="9" width="12" height="2"/></svg>
+              </button>
+              <button class="icon-button close" title="Close">
+                <svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-body">
+            <!-- Top: category filter + search -->
+            <div class="row" style="gap: 8px;">
+              <div class="filter-bar" style="flex: 1;">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Food</button>
+                <button class="filter-btn">Weapons</button>
+                <button class="filter-btn">Ammo</button>
+                <button class="filter-btn">Clothing</button>
+                <button class="filter-btn">Medical</button>
+              </div>
+            </div>
+            <div class="row" style="gap: 8px;">
+              <div class="search-box" style="flex: 1;">
+                <span class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                <span class="sb-input placeholder">Search class name…</span>
+              </div>
+              <button class="image-button" title="Refresh">
+                <svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 11-2-4.47L14 1v5h-5"/></svg>
+              </button>
+            </div>
+
+            <!-- Two columns: list + preview/options -->
+            <div class="form-split">
+              <!-- Class list -->
+              <div class="pane" style="display: grid; grid-template-rows: 1fr; padding: 0;">
+                <div style="overflow: auto;">
+                  <div class="stack-tight" style="padding: 8px;">
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">M4A1</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px; background: var(--accent-soft); color: var(--accent);">AKM</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">CZ75</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">FNX45</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">Magnum</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">Mosin9130</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">SVD</div>
+                    <div class="suggest-item" style="padding: 6px 10px; cursor: pointer; font-size: 13px;">VSS</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Options pane -->
+              <div class="pane" style="display: grid; gap: 12px;">
+                <div class="text-field"><span class="text-label">Selected</span><span class="text-value">AKM</span></div>
+
+                <div class="stack" style="gap: 10px;">
+                  <div class="slider">
+                    <span class="sl-label">Health</span>
+                    <span class="sl-track"><span class="sl-fill" style="width: 100%;"></span><span class="sl-handle" style="left: 100%;"></span></span>
+                    <span class="sl-value">100</span>
+                  </div>
+                  <div class="slider">
+                    <span class="sl-label">Quantity</span>
+                    <span class="sl-track"><span class="sl-fill" style="width: 100%;"></span><span class="sl-handle" style="left: 100%;"></span></span>
+                    <span class="sl-value">1</span>
+                  </div>
+                  <div class="slider">
+                    <span class="sl-label">Temperature</span>
+                    <span class="sl-track"><span class="sl-fill" style="width: 50%; background: var(--warn);"></span><span class="sl-handle" style="left: 50%; background: #ffd86b; border-color: var(--warn);"></span></span>
+                    <span class="sl-value">20°C</span>
+                  </div>
+                </div>
+
+                <hr class="hr">
+
+                <div class="row" style="gap: 8px;">
+                  <span class="confirm-inline delete">
+                    <span class="confirm-action"><svg viewBox="0 0 16 16"><path d="M3 5h10l-1 9H4zM6 3h4v2H6z"/></svg></span>
+                  </span>
+                  <button class="button success" style="flex: 1;">Spawn</button>
+                </div>
+                <div class="row" style="gap: 8px;">
+                  <div class="dropdown" style="flex: 1;">
+                    <span class="dd-label">Mode</span>
+                    <span class="dd-selected">Crosshair</span>
+                    <span class="dd-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                  </div>
+                  <div class="dropdown" style="flex: 1;">
+                    <span class="dd-label">Setup</span>
+                    <span class="dd-selected">Debug Spawn</span>
+                    <span class="dd-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+                  </div>
+                </div>
+                <div class="row" style="gap: 16px;">
+                  <label class="checkbox checked"><span class="box"></span><span class="label">Filter by display name</span></label>
+                  <label class="checkbox"><span class="box"></span><span class="label">Show unsafe classes</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="doc-section" style="opacity: 0.6; padding-top: 24px; border-top: 1px solid var(--stroke);">
+      <p class="meta">All visuals are CSS approximations of the actual DayZ widgets. See
+        <code>JM/COT/GUI/layouts/uiactions/*.layout</code> for the real
+        definitions and <code>JM/COT/docs/ui/</code> for full reference docs.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

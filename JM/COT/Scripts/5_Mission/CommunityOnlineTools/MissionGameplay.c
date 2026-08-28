@@ -1,5 +1,12 @@
 modded class MissionGameplay
 {
+	//! Kept as the name third-party mods call. The state itself moved to
+	//! JMWidgetStyles, which registers the imageset before any mission exists.
+	static bool IsCOTImageSetLoaded()
+	{
+		return JMWidgetStyles.IsImageSetLoaded();
+	}
+
 	protected ref JMDebugMonitor m_CDebugMonitor;  //! Legacy, not used, only kept for compatibility with 3rd party mods
 
 	protected JMPlayerInstance m_OfflineInstance;
@@ -65,9 +72,37 @@ modded class MissionGameplay
 	{
 		super.OnInit();
 
+		// Backstop only. The real registration happens in
+		// DayZGame.OnAfterCreate, BEFORE any mission exists - doing it from
+		// here invalidates the UI render resources this mission has already
+		// built, and every MapWidget and ItemPreviewWidget draws an empty rect
+		// for the rest of the session. JMWidgetStyles.Load is idempotent, so
+		// this call is a no-op on every normal path.
+		JMWidgetStyles.Load();
+
 		JMESPModule espModule;
 		if (CF_Modules<JMESPModule>.Get(espModule))
 			espModule.CreateCanvas();
+	}
+
+	//! Preview Lab tentative H3 only. COT has never needed a scripted menu of
+	//! its own - its windows are workspace widgets - but every vanilla map and
+	//! item preview lives in one, and that is the last untested difference.
+	override UIScriptedMenu CreateScriptedMenu( int id )
+	{
+		if ( id == JMPreviewLabMenu.MENU_ID )
+			return new JMPreviewLabMenu();
+
+		if ( id == JMPreviewLabProbeMenu.MENU_ID )
+			return new JMPreviewLabProbeMenu();
+
+		if ( id == JMPreviewLayerMenu.MENU_ID )
+			return new JMPreviewLayerMenu();
+
+		if ( id == JMPreviewPrimerMenu.MENU_ID )
+			return new JMPreviewPrimerMenu();
+
+		return super.CreateScriptedMenu( id );
 	}
 
 	override void OnMissionStart()

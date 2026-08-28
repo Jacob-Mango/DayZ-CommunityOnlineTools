@@ -1,0 +1,14 @@
+ItemPreviewWidgetClass lab_preview {
+ visible 0
+ clipchildren 1
+ ignorepointer 1
+ position 0 0
+ size 64 64
+ halign left_ref
+ valign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ scaled 0
+}

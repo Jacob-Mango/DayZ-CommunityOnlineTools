@@ -1,0 +1,14 @@
+PanelWidgetClass player_inventory_canvas {
+ visible 1
+ ignorepointer 1
+ position 0 0
+ size 1 72
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style blank
+}

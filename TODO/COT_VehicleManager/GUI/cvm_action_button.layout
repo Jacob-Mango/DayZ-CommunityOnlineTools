@@ -1,0 +1,21 @@
+ButtonWidgetClass cvm_action_button {
+ position 0.03 0.029
+ size 0.196 0.173
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ {
+  TextWidgetClass cvm_action_button_label {
+   ignorepointer 1
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   text ""
+   "text halign" center
+   "text valign" center
+  }
+ }
+}

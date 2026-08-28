@@ -1,0 +1,15 @@
+{
+    "compress": {
+        "exclude": [
+        ],
+        "include": [
+            "\\.csv$"
+        ]
+    },
+    "headers": [
+        {
+            "name": "prefix",
+            "value": "COT_PvPInspector"
+        }
+    ]
+}

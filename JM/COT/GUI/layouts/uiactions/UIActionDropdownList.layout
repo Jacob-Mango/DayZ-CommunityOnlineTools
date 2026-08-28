@@ -1,6 +1,5 @@
 PanelWidgetClass UIActionDropdownList {
  size 1 30
- clipchildren 0
  halign left_ref
  valign top_ref
  hexactpos 0
@@ -21,72 +20,186 @@ PanelWidgetClass UIActionDropdownList {
    vexactsize 0
    {
     TextWidgetClass action_label {
-     size 1 20
+     visible 0
+     ignorepointer 1
+     position 0 0
+     size 0 20
+     halign left_ref
      valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
      vexactsize 1
-     text "{LABEL}"
+     text ""
      font "gui/fonts/sdf_MetronLight24"
      "text offset" 10 0
      "bold text" 1
      "exact text" 1
      "exact text size" 16
+     "text valign" center
     }
-    EditBoxWidgetClass action {
+    PanelWidgetClass action_chrome {
+     ignorepointer 0
+     color 0 0 0 0
      position 0 -1
-     size 0.7 22
+     size 1 22
+     halign left_ref
+     valign center_ref
      vexactpos 1
      vexactsize 1
-     halign right_ref
-     valign center_ref
-     text "{TEXT}"
-     "exact text" 1
-     "no focus" 0
-     font "gui/fonts/Metron"
-     style Editor
-    }
-    PanelWidgetClass action_toggle_container {
-     ignorepointer 1
-     color 0 0 0 0
-     size 22 22
-     hexactpos 0
-     vexactpos 0
-     hexactsize 1
-     vexactsize 1
-     halign right_ref
-     valign center_ref
-     fixaspect fixwidth
      {
-      ButtonWidgetClass action_toggle {
-       ignorepointer 0
-       color 1 1 1 1
-       size 0.938 0.938
+      PanelWidgetClass action_fill {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
        hexactpos 0
        vexactpos 0
        hexactsize 0
        vexactsize 0
+       color 0.082 0.098 0.118 0.941
+       style COTField4Set
+      }
+      PanelWidgetClass action_ring {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTField4LineSet
+      }
+      EditBoxWidgetClass action {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       ignorepointer 0
+       text ""
+       "exact text" 1
+       "no focus" 0
+       font "gui/fonts/Metron"
+       style COTInput
+       "text offset" 6 0
+      }
+     }
+    }
+    EditBoxWidgetClass action_preview {
+     visible 0
+     ignorepointer 1
+     position 0 -1
+     size 1 22
+     halign left_ref
+     valign center_ref
+     vexactpos 1
+     vexactsize 1
+     text ""
+     color 0.925 0.976 1.000 0.502
+     "exact text" 1
+     "no focus" 1
+     font "gui/fonts/Metron"
+     style COTInput
+     "text offset" 6 0
+    }
+    TextWidgetClass action_placeholder {
+     visible 0
+     ignorepointer 1
+     position 10 0
+     size 1 22
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text ""
+     color 0.925 0.976 1.000 0.502
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 14
+     "text valign" center
+    }
+    ButtonWidgetClass action_button_chevron {
+     ignorepointer 0
+     position 4 -1.1
+     size 24 24
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style Empty
+     {
+      PanelWidgetClass action_chevron_hover {
+       ignorepointer 1
+       visible 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 1 1 1 0.18
+       style COTPill11Set
+      }
+      ImageWidgetClass action_chevron {
+       ignorepointer 1
+       position 0 0
+       size 12 12
        halign center_ref
        valign center_ref
-       scaled 0
-       style Default
-       {
-        ImageWidgetClass action_toggle_image {
-         ignorepointer 1
-         size 1 1
-         hexactpos 0
-         vexactpos 0
-         hexactsize 0
-         vexactsize 0
-         halign center_ref
-         valign center_ref
-         fixaspect fixwidth
-         image0 "set:dayz_gui image:icon_collapse"
-         mode additive
-         "src alpha" 1
-         "flip u" 0
-         "flip v" 0
-         "Transition width" 0.311
-        }
-       }
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       color 0.722 0.769 0.792 1.000
+       image0 "JM/COT/GUI/textures/icons/lucide/chevron-down.edds"
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
+       rotation 0 0 0
+      }
+     }
+    }
+    ButtonWidgetClass action_button_clear {
+     ignorepointer 0
+     visible 0
+     position 4 -1.1
+     size 24 24
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style Empty
+     {
+      ImageWidgetClass action_clear_icon {
+       ignorepointer 1
+       position 0 0
+       size 12 12
+       halign center_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       mode blend
+       color 0.925 0.976 1.000 0.800
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
      }
     }
@@ -96,10 +209,10 @@ PanelWidgetClass UIActionDropdownList {
    visible 0
    clipchildren 0
    ignorepointer 0
-   color 0.1569 0.1569 0.1569 0.902
+   color 0.082 0.098 0.118 0.902
    position 0 0
    size 1 1
-   style rover_sim_colorable
+   style COTField4Set
   }
  }
 }

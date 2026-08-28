@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<modded_inputs>
+    <inputs>
+        <actions>
+            <input name="UACOTToggleXMLEditor" loc="STR_COT_INPUT_TOGGLE_MENU_XMLEDITOR" />
+        </actions>
+
+        <sorting name="JM_COT" loc="COT">
+            <input name="UACOTToggleXMLEditor" />
+        </sorting>
+    </inputs>
+
+    <preset>
+        <input name="UACOTToggleXMLEditor">
+            <btn name="kRMenu">
+                <btn name="kX" />
+            </btn>
+        </input>
+    </preset>
+</modded_inputs>

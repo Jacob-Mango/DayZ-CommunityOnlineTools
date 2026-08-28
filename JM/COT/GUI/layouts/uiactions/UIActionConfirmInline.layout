@@ -1,0 +1,182 @@
+PanelWidgetClass UIActionConfirmInline {
+ size 1 30
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style rover_sim_colorable
+ scriptclass "UIActionConfirmInline"
+ {
+  FrameWidgetClass action_wrapper {
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    ButtonWidgetClass action_button {
+     ignorepointer 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      PanelWidgetClass fill {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.133 0.161 0.196 0.400
+       style COTField4Set
+      }
+      PanelWidgetClass border_top {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 1
+       halign left_ref
+       valign top_ref
+       color 0.925 0.976 1.000 0.500
+       style rover_sim_colorable
+      }
+      PanelWidgetClass border_bottom {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 1
+       halign left_ref
+       valign bottom_ref
+       color 0.925 0.976 1.000 0.500
+       style rover_sim_colorable
+      }
+      ImageWidgetClass action_icon {
+       visible 0
+       ignorepointer 1
+       position 0 0
+       size 16 16
+       halign center_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
+      }
+      TextWidgetClass action {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "{ACTION}"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 16
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+    ButtonWidgetClass action_button_confirm {
+     ignorepointer 0
+     visible 0
+     size 0.5 1
+     halign left_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      PanelWidgetClass fill {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.000 0.298 0.224 0.900
+       style COTField4Set
+      }
+      TextWidgetClass confirm_text {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "Confirm"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+    ButtonWidgetClass action_button_cancel {
+     ignorepointer 0
+     visible 0
+     size 0.5 1
+     halign right_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      PanelWidgetClass fill {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.302 0.008 0.094 0.900
+       style COTField4Set
+      }
+      TextWidgetClass cancel_text {
+       ignorepointer 1
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text "Cancel"
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.082 0.098 0.118 0.902
+   position 0 0
+   size 1 1
+   style COTField4Set
+  }
+ }
+}

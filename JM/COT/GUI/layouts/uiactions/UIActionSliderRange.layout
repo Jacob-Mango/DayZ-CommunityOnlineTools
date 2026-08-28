@@ -1,0 +1,129 @@
+PanelWidgetClass UIActionSliderRange {
+ size 1 44
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style rover_sim_colorable
+ scriptclass "UIActionSliderRange"
+ {
+  FrameWidgetClass action_wrapper {
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    TextWidgetClass action_label {
+     size 1 20
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 1
+     text "{LABEL}"
+     font "gui/fonts/sdf_MetronLight24"
+     "text offset" 10 0
+     "bold text" 1
+     "exact text" 1
+     "exact text size" 16
+     "text valign" center
+    }
+    TextWidgetClass action {
+     ignorepointer 1
+     size 1 20
+     halign right_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 1
+     text ""
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 13
+     "text halign" right
+     "text valign" center
+     "text offset" 10 0
+    }
+    PanelWidgetClass action_track {
+     ignorepointer 0
+     size 1 12
+     halign left_ref
+     valign bottom_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 1
+     color 0 0 0 0
+     style rover_sim_colorable
+     {
+      PanelWidgetClass action_track_bg {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.082 0.098 0.118 0.941
+       style COTPill6Set
+      }
+      PanelWidgetClass action_fill {
+       ignorepointer 1
+       size 0 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.376 0.365 1.000 1.000
+       style COTPill6Set
+      }
+      PanelWidgetClass action_handle_low {
+       ignorepointer 0
+       size 16 16
+       halign left_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       color 0.475 0.475 1.000 1.000
+       style COTBox8Set
+      }
+      PanelWidgetClass action_handle_high {
+       ignorepointer 0
+       size 16 16
+       halign left_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       color 0.475 0.475 1.000 1.000
+       style COTBox8Set
+      }
+     }
+    }
+   }
+  }
+  PanelWidgetClass action_wrapper_disable {
+   visible 0
+   clipchildren 0
+   ignorepointer 0
+   color 0.082 0.098 0.118 0.902
+   position 0 0
+   size 1 1
+   style COTField4Set
+  }
+ }
+}

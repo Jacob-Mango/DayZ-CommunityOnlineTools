@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<modded_inputs>
+	<inputs>
+		<actions>
+			<input name="UAZenCOT_CopyPosition" loc="ZenCOT - Copy Position"/>
+		</actions>
+		<sorting name="JM_COT" loc="COT">
+			<input name="UAZenCOT_CopyPosition"/>
+		</sorting>
+	</inputs>
+	<preset>
+		<input name="UAZenCOT_CopyPosition">
+			<btn name="kP"/>
+		</input>	
+	</preset>
+</modded_inputs>

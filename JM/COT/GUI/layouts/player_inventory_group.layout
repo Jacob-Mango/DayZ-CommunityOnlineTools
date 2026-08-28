@@ -1,0 +1,64 @@
+PanelWidgetClass player_inventory_group {
+ visible 1
+ ignorepointer 1
+ position 0 0
+ size 100 100
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ color 0.035 0.039 0.043 0.784
+ style COTBox8Set
+ {
+  PanelWidgetClass group_accent {
+   ignorepointer 1
+   position 0 0
+   size 3 1
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 0
+   color 0.000 0.827 0.733 1.000
+  }
+  ImageWidgetClass group_icon {
+   ignorepointer 1
+   position 10 4
+   size 12 12
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.000 0.827 0.733 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  TextWidgetClass group_label {
+   ignorepointer 1
+   position 27 3
+   size 1 14
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 0
+   vexactsize 1
+   style Light
+   text ""
+   font "gui/fonts/sdf_MetronLight24"
+   color 0.925 0.976 1.000 0.702
+   "exact text" 1
+   "exact text size" 11
+   "text halign" left
+   "text valign" center
+  }
+ }
+}

@@ -1,33 +1,51 @@
-FrameWidgetClass map_editor_menu {
- ignorepointer 1
+PanelWidgetClass JMMapEditorForm {
+ color 0 0 0 0
  position 0 0
- size 1 1
+ size 1600 900
  hexactpos 0
  vexactpos 0
- hexactsize 0
- vexactsize 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMMapEditorForm"
+ style COTSurface
  {
-  PanelWidgetClass object_info_wrapper {
-   color 0 0 0 0.95
-   position 20 80
-   size 800 40
-   valign bottom_ref
-   hexactpos 1
+  // Top toolbar — 2 rows so the snap toggles don't squish the mode buttons
+  PanelWidgetClass panel_top {
+   ignorepointer 1
+   position 0 0
+   size 1 90
+   hexactpos 0
    vexactpos 1
-   hexactsize 1
+   hexactsize 0
    vexactsize 1
-   style DayZDefaultPanel
+   color 0.133 0.161 0.196 0.950
   }
-  PanelWidgetClass object_controls {
+  // Left sidebar — asset browser
+  PanelWidgetClass panel_left {
+   ignorepointer 1
+   position 0 90
+   size 1 -90
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
    color 0 0 0 0.95
-   position 20 20
-   size 800 40
-   valign bottom_ref
-   hexactpos 1
-   vexactpos 1
-   hexactsize 1
-   vexactsize 1
-   style DayZDefaultPanel
   }
+  // Right panel — properties / selection
+  PanelWidgetClass panel_right {
+   ignorepointer 1
+   position 0 90
+   size 0.8 -90
+   halign right_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0 0 0 0.95
+  }
+  // The 3D viewport IS the full centre area between the sidebars. No widget
+  // fills it — the player view through the JMFreecam IS the viewport, and
+  // the form's Tick() draws the gizmo + selection wireframe directly with
+  // Debug.DrawLine / Debug.DrawArrow.
  }
 }

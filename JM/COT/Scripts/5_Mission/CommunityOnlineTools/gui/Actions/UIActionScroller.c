@@ -21,6 +21,7 @@ class UIActionScroller: UIActionBase
 	override void OnInit() 
 	{
 		super.OnInit();
+
 		
 		m_Content = layoutRoot.FindAnyWidget( "Content" );
 		m_ScrollerContainer = layoutRoot.FindAnyWidget( "ScrollerContainer" );
@@ -198,6 +199,15 @@ class UIActionScroller: UIActionBase
 		{
 			UpdateMouseScroll();
 			UpdateScroller();
+		}
+
+		// Re-check scroll state when the container is resized (e.g. window resize).
+		if ( !m_IsUpdating && layoutRoot )
+		{
+			float w, h;
+			layoutRoot.GetScreenSize( w, h );
+			if ( h != m_RootHeight )
+				UpdateScroller();
 		}
 	}
 

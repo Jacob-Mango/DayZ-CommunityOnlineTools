@@ -1,0 +1,83 @@
+FrameWidgetClass player_position_map {
+ visible 1
+ clipchildren 0
+ priority 50
+ color 0 0 0 0
+ position 0 0
+ size 1 220
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ {
+  WindowWidgetClass WindowWidget {
+   visible 1
+   style Default
+   position 0 0
+   size 1 1
+   halign center_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    PanelWidgetClass Background {
+     visible 1
+     clipchildren 0
+     ignorepointer 1
+     color 0 0 0 0
+     position 0 0
+     size 1 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     draggable 0
+     style blank
+    }
+    PanelWidgetClass BackPanelWidget {
+     visible 1
+     style blank
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      MapWidgetClass map_widget {
+       visible 1
+       clipchildren 1
+       inheritalpha 0
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+      }
+     }
+    }
+    PanelWidgetClass MapRing {
+     visible 1
+     ignorepointer 1
+     color 0.925 0.976 1.000 0.302
+     position 0 0
+     size 1 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     style COTField4LineSet
+    }
+   }
+  }
+ }
+}

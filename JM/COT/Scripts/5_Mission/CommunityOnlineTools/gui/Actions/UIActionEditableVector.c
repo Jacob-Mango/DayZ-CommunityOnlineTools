@@ -124,4 +124,11 @@ class UIActionEditableVector: UIActionBase
 
 		return ret;
 	}
+
+	override void OnRegisterChrome()
+	{
+		RegisterChromeRing( "action_x_ring" );
+		RegisterChromeRing( "action_y_ring" );
+		RegisterChromeRing( "action_z_ring" );
+	}
 }

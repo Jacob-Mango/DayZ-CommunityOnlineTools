@@ -31,7 +31,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	override string GetLayoutRoot()
 	{
-		return "JM\\COT\\GUI\\layouts\\loadout_form.layout";
+		return "JM/COT/GUI/layouts/loadout_form.layout";
 	}
 
 	override string GetCategory()
@@ -46,7 +46,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\SetSpawner.paa";
+		return JMConstants.Lucide( "backpack" );
 	}
 
 	override bool ImageIsIcon()
@@ -233,12 +233,41 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	private void Server_SpawnCursor( string Loadout, vector position, PlayerIdentity ident )
 	{
-		JMLoadout file = JMLoadoutSettings.Load( Loadout );
-		if ( !file )
-			return;
-
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.Cursor", ident, instance ) )
+			return;
+
+	#ifdef DZ_Expansion_Core
+		// Try to load as Expansion format first
+		string filepath = JMConstants.DIR_LOADOUTS + Loadout + ".json";
+		if ( FileExist( filepath ) )
+		{
+			string content;
+			FileHandle expfile = OpenFile( filepath, FileMode.READ );
+			if ( expfile )
+			{
+				string line;
+				while ( FGets( expfile, line ) > 0 )
+					content += line + "\n";
+				CloseFile( expfile );
+
+				// Try to parse as Expansion format
+				ExpansionPrefab expLoadout = new ExpansionPrefab();
+				string errorMsg;
+				if ( JsonFileLoader<ExpansionPrefab>.MakeData( expLoadout, content, errorMsg ) )
+				{
+					SpawnExpansionLoadout( expLoadout, position );
+					GetCommunityOnlineToolsBase().Log( ident, "Expansion loadout set " + Loadout + " spawned at " + position );
+					SendWebhookColored( "Spawn", instance, "Spawned Expansion loadout set \"" + Loadout + "\" at " + position.ToString(), JMConstants.WEBHOOK_COLOR_SPAWN );
+					return;
+				}
+			}
+		}
+	#endif
+
+		// Fallback to legacy format
+		JMLoadout file = JMLoadoutSettings.Load( Loadout );
+		if ( !file )
 			return;
 
 		SpawnLoadout( file, position );
@@ -286,6 +315,52 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	private void Server_SpawnPlayers( string Loadout, array< string > guids, PlayerIdentity ident )
 	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers", ident, instance ) )
+			return;
+
+	#ifdef DZ_Expansion_Core
+		// Try to load as Expansion format first
+		string filepath = JMConstants.DIR_LOADOUTS + Loadout + ".json";
+		if ( FileExist( filepath ) )
+		{
+			string content;
+			FileHandle expfile = OpenFile( filepath, FileMode.READ );
+			if ( expfile )
+			{
+				string line;
+				while ( FGets( expfile, line ) > 0 )
+					content += line + "\n";
+				CloseFile( expfile );
+
+				// Try to parse as Expansion format
+				ExpansionPrefab expLoadout = new ExpansionPrefab();
+				string errorMsg;
+				if ( JsonFileLoader<ExpansionPrefab>.MakeData( expLoadout, content, errorMsg ) )
+				{
+					array< JMPlayerInstance > expplayers = GetPermissionsManager().GetPlayers( guids );
+					foreach ( JMPlayerInstance exppData: expplayers )
+					{
+						exppData.Update();
+
+						//! Tell the anti-cheat this armful of items is ours, or
+						//! the item-add-rate rule reads an admin loadout as a
+						//! spawn cheat. Announced BEFORE the spawn: the
+						//! inventory poll can land mid-loadout.
+						JMAntiCheatSanction.Grant( exppData.GetGUID(), JMAntiCheatSanction.INVENTORY, JMAntiCheatSanction.SPAWN_GRACE_SECONDS );
+
+						SpawnExpansionLoadout( expLoadout, exppData.PlayerObject );
+
+						GetCommunityOnlineToolsBase().Log( ident, "Expansion loadout set " + Loadout + " spawned on " + exppData.GetGUID() );
+						SendWebhookColored( "Spawn", instance, "Spawned Expansion loadout set \"" + Loadout + "\" on " + exppData.FormatSteamWebhook(), JMConstants.WEBHOOK_COLOR_SPAWN );
+					}
+					return;
+				}
+			}
+		}
+	#endif
+
+		// Fallback to legacy format
 		JMLoadout file = JMLoadoutSettings.Load( Loadout );
 		if ( !file )
 			return;
@@ -294,24 +369,23 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( count == 0 )
 			return;
 
-		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers", ident, instance ) )
-			return;
-
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( guids );
-		foreach(JMPlayerInstance pData: players)
+		foreach ( JMPlayerInstance pData: players )
 		{
-			pData.Update();			
+			pData.Update();
 
-			int id = Math.RandomInt(0, count);
-			if (IsKindOfLoadout( file.m_Items[0].m_Classname, "SurvivorBase" ))
+			//! See above - a sanctioned spawn, declared before it happens.
+			JMAntiCheatSanction.Grant( pData.GetGUID(), JMAntiCheatSanction.INVENTORY, JMAntiCheatSanction.SPAWN_GRACE_SECONDS );
+
+			int id = Math.RandomInt( 0, count );
+			if ( IsKindOfLoadout( file.m_Items[0].m_Classname, "SurvivorBase" ) )
 			{
-				foreach(JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments)
-					SpawnInItem(itemSubData, pData.PlayerObject);
+				foreach ( JMLoadoutSubItem itemSubData: file.m_Items[id].m_Attachments )
+					SpawnInItem( itemSubData, pData.PlayerObject );
 			}
 			else
 			{
-				SpawnItem(file.m_Items[id], pData.PlayerObject);
+				SpawnItem( file.m_Items[id], pData.PlayerObject );
 			}
 
 			GetCommunityOnlineToolsBase().Log( ident, "Loadout set " + file + " spawned on " + pData.GetGUID() );
@@ -361,16 +435,45 @@ class JMLoadoutModule: JMRenderableModuleBase
 
 	private void Server_SpawnTarget( string Loadout, EntityAI ent, PlayerIdentity ident )
 	{
-		JMLoadout file = JMLoadoutSettings.Load( Loadout );
-		if ( !file )
-			return;
-
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.Target", ident, instance ) )
 			return;
 
+	#ifdef DZ_Expansion_Core
+		// Try to load as Expansion format first
+		string filepath = JMConstants.DIR_LOADOUTS + Loadout + ".json";
+		if ( FileExist( filepath ) )
+		{
+			string content;
+			FileHandle expfile = OpenFile( filepath, FileMode.READ );
+			if ( expfile )
+			{
+				string line;
+				while ( FGets( expfile, line ) > 0 )
+					content += line + "\n";
+				CloseFile( expfile );
+
+				// Try to parse as Expansion format
+				ExpansionPrefab expLoadout = new ExpansionPrefab();
+				string errorMsg;
+				if ( JsonFileLoader<ExpansionPrefab>.MakeData( expLoadout, content, errorMsg ) )
+				{
+					SpawnExpansionLoadout( expLoadout, ent );
+					GetCommunityOnlineToolsBase().Log( ident, "Expansion loadout " + Loadout + " spawned on " + ent.GetType() );
+					SendWebhookColored( "Spawn", instance, "Spawned Expansion loadout \"" + Loadout + "\" on " + ent.GetType(), JMConstants.WEBHOOK_COLOR_SPAWN );
+					return;
+				}
+			}
+		}
+	#endif
+
+		// Fallback to legacy format
+		JMLoadout file = JMLoadoutSettings.Load( Loadout );
+		if ( !file )
+			return;
+
 		SpawnLoadout( file, ent );
-		
+
 		GetCommunityOnlineToolsBase().Log( ident, "Loadout  " + Loadout + " spawned on " + ent.GetType() );
 		SendWebhookColored( "Spawn", instance, "Spawned Loadout  \"" + Loadout + "\" on " + ent.GetType(), JMConstants.WEBHOOK_COLOR_SPAWN );
 	}
@@ -439,7 +542,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 			SpawnItem(itemData, position, file.m_IsLocalPosition);
 	}
 
-	private EntityAI SpawnItem( JMLoadoutItem itemData, vector centerPos, bool isLocalPos = true )
+	EntityAI SpawnItem( JMLoadoutItem itemData, vector centerPos, bool isLocalPos = true )
 	{
 		vector pos;
 		if (isLocalPos)
@@ -487,7 +590,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		return ent;
 	}
 
-	private EntityAI SpawnItem( JMLoadoutItem itemData, EntityAI parent )
+	EntityAI SpawnItem( JMLoadoutItem itemData, EntityAI parent )
 	{
 		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
 		if (!ent)
@@ -501,7 +604,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		return ent;
 	}
 
-	private EntityAI SpawnInItem( JMLoadoutSubItem itemData, EntityAI parent )
+	EntityAI SpawnInItem( JMLoadoutSubItem itemData, EntityAI parent )
 	{
 		EntityAI ent = parent.GetInventory().CreateInInventory(itemData.m_Classname);
 		if (!ent)
@@ -796,4 +899,60 @@ class JMLoadoutModule: JMRenderableModuleBase
 			SendWebhookColored( "Backup", instance, "Created Deletion Backup '"+name+"'", JMConstants.WEBHOOK_COLOR_INFO );
 		}
 	}
+
+	void Exec_CreateLoadoutSet( string name, set< Object > objects, JMPlayerInstance instance )
+	{
+		array< ref JMLoadoutItem > loadouts = new array< ref JMLoadoutItem >;
+		array< Object > props = new array< Object >;
+		array< EntityAI > parents = new array< EntityAI >;
+
+		int count = objects.Count();
+		for ( int i = 0; i < count; i++ )
+		{
+			EntityAI parent;
+			if ( Class.CastTo( parent, objects[i] ) )
+				parents.Insert( parent );
+			else
+				props.Insert( objects[i] );
+		}
+
+		if ( count > 0 )
+		{
+			foreach ( EntityAI prnt: parents )
+				loadouts.Insert( LoadoutProcessItem( prnt, prnt.GetPosition(), prnt.GetOrientation() ) );
+
+			foreach ( Object obj: props )
+				loadouts.Insert( LoadoutProcessObject( obj, obj.GetPosition(), obj.GetOrientation() ) );
+
+			JMLoadout loadout = new JMLoadout;
+			loadout.m_Items = new array< ref JMLoadoutItem >;
+			loadout.m_Items = loadouts;
+			loadout.m_IsLocalPosition = false;
+
+			JMLoadoutSettings.Save( loadout, name );
+
+			GetCommunityOnlineToolsBase().Log( instance, "Created loadout set '" + name + "'" );
+			SendWebhookColored( "Create", instance, "Created loadout set '" + name + "'", JMConstants.WEBHOOK_COLOR_INFO );
+
+			Load();
+		}
+	}
+
+#ifdef DZ_Expansion_Core
+	private void SpawnExpansionLoadout( ExpansionPrefab prefab, vector position )
+	{
+		if ( !prefab )
+			return;
+
+		prefab.Spawn( position );
+	}
+
+	private void SpawnExpansionLoadout( ExpansionPrefab prefab, EntityAI target )
+	{
+		if ( !prefab || !target )
+			return;
+
+		prefab.SpawnOn( target );
+	}
+#endif
 }

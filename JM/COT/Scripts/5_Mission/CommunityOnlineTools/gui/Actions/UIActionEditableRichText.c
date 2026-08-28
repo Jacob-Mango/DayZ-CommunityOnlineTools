@@ -4,6 +4,8 @@ class UIActionEditableRichText: UIActionBase
 
 	protected TextWidget m_Label;
 	protected EditBoxWidget m_Text;
+	//! Visible field wrapper - see UIActionEditableText.SetEditBoxWidth.
+	protected Widget m_Chrome;
 	protected ButtonWidget m_Button;
 	protected TextWidget m_ButtonText;
 
@@ -25,6 +27,7 @@ class UIActionEditableRichText: UIActionBase
 
 		Class.CastTo( m_Label, layoutRoot.FindAnyWidget( "action_label" ) );
 		Class.CastTo( m_Text, layoutRoot.FindAnyWidget( "action" ) );
+		m_Chrome = layoutRoot.FindAnyWidget( "action_chrome" );
 	}
 
 	override void OnShow()
@@ -119,16 +122,20 @@ class UIActionEditableRichText: UIActionBase
 	{
 		m_Edited = false;
 
+		string newText;
+		bool hasDecimal;
+		bool failed;
+		int i;
+
 		if ( m_OnlyNumbers )
 		{
-			string newText = m_Text.GetText();
-
-			bool hasDecimal = false;
-			bool failed = false;
+			newText = m_Text.GetText();
+			hasDecimal = false;
+			failed = false;
 
 			if ( newText.Length() > 0 )
 			{
-				int i = 0;
+				i = 0;
 				if ( newText.Get( i ) == "-" )
 					i = 1;
 
@@ -244,12 +251,15 @@ class UIActionEditableRichText: UIActionBase
 
 	void SetEditBoxWidth( float width )
 	{
-		float w;
-		float h;
-		
-		m_Text.GetSize( w, h );
-		m_Text.SetSize( width, h );
-		m_Text.Update();
+		// Resize the visible field, not the edit box inside it - see
+		// UIActionEditableText.SetEditBoxWidth.
+		if ( m_Chrome )
+		{
+			SetWidgetWidth( m_Chrome, width );
+			return;
+		}
+
+		SetWidgetWidth( m_Text, width );
 	}
 
 	void SetEditBoxHeight( float height )

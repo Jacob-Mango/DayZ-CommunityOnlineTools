@@ -1,0 +1,2055 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COT Forms — Interactive Mockup</title>
+<style>
+/* ============================================================
+   Real DayZ fonts (copied from P:\gui\fonts\)
+   metronlight.ttf  = body text in COT (MetronLight14 etc)
+   metronbook.ttf   = bolder accents (Metron-Bold58 = window title)
+   ============================================================ */
+@font-face {
+  font-family: "MetronLight";
+  src: url("cot-mockup-assets/fonts/metronlight.ttf") format("truetype");
+  font-weight: normal; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: "MetronBook";
+  src: url("cot-mockup-assets/fonts/metronbook.ttf") format("truetype");
+  font-weight: normal; font-style: normal; font-display: block;
+}
+
+/* ============================================================
+   COTSurface palette (matches JM/COT/GUI/styles/cot.styles)
+   In-game: dark navy panels with light grey strokes, slightly
+   bigger text and chunkier controls than typical web UI.
+   ============================================================ */
+:root {
+  /* --ui-scale: global multiplier applied via CSS zoom on .workspace
+     to simulate DayZ engine resolution scaling. 1.0 = 1080p baseline. */
+  --ui-scale: 1.0;
+  --bg-deep:        #050709;
+  --bg:             #07090d;
+  --surface:        rgba(13,18,26,0.96);
+  --surface-raised: rgba(20,27,38,0.96);
+  --surface-soft:   rgba(255,255,255,0.04);
+  --surface-deep:   rgba(5,8,14,0.85);
+  --stroke:         rgba(180,200,225,0.20);
+  --stroke-strong:  rgba(180,200,225,0.36);
+  --stroke-focus:   rgba(79,156,255,0.70);
+  --text:           #e8edf4;
+  --text-dim:       #cdd5e0;
+  --muted:          #9aa6b6;
+  --accent:         #4f9cff;
+  --accent-soft:    rgba(79,156,255,0.22);
+  --good:           #49b875;
+  --warn:           #d9a441;
+  --danger:         #d85a5a;
+  --info:           #7c93ff;
+  --shadow:         rgba(0,0,0,0.55);
+  font-family: "MetronLight", "Segoe UI", Arial, sans-serif;
+}
+/* Window titles use the heavier book cut (in-game: Metron-Bold58) */
+.titlebar .title-text { font-family: "MetronBook", "MetronLight", "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; height:100%; }
+body {
+  background:
+    linear-gradient(120deg, rgba(79,156,255,0.08), transparent 34%),
+    linear-gradient(180deg, #0c1017, var(--bg));
+  color: var(--text);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   Picker bar (top) - replaces the old left nav panel
+   ============================================================ */
+.picker {
+  position: fixed; top: 0; left: 0; right: 0; height: 44px;
+  background: rgba(5,8,14,0.96);
+  border-bottom: 1px solid var(--stroke);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 16px;
+  z-index: 100;
+}
+.picker .pk-title { font-weight: 700; font-size: 14px; }
+.picker select {
+  background: rgba(0,0,0,0.32); border: 1px solid var(--stroke);
+  color: var(--text); padding: 4px 10px; font-family: inherit; font-size: 13px;
+  outline: none; min-width: 240px; cursor: pointer;
+}
+.picker select:focus { border-color: var(--stroke-focus); }
+.picker .pk-hint { color: var(--muted); font-size: 12px; margin-left: auto; }
+.picker .pk-active-meta { color: var(--muted); font-size: 12px; }
+.picker .pk-sep { width: 1px; height: 22px; background: var(--stroke); margin: 0 4px; }
+.picker .pk-ctrl {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--text-dim); font-size: 12px; padding: 2px 6px;
+  border: 1px solid transparent; border-radius: 3px;
+  cursor: pointer; user-select: none;
+}
+.picker .pk-ctrl:hover { border-color: var(--stroke); background: rgba(255,255,255,0.03); }
+.picker .pk-ctrl input[type="checkbox"] { accent-color: var(--accent); margin: 0; }
+.picker .pk-ctrl input[type="range"] { width: 96px; }
+.picker .pk-num { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 38px; }
+
+/* ============================================================
+   Engine-quirk simulation overlays
+   ============================================================ */
+/* Style trap: PanelWidget with `style COTSurface` but the style isn't
+   registered for that widget type -> engine null-deref on first render. */
+body.quirk-bad-style .style-trap {
+  outline: 2px dashed #ff3b3b !important;
+  outline-offset: -2px !important;
+  background-image: repeating-linear-gradient(45deg, rgba(255,59,59,0.18), rgba(255,59,59,0.18) 6px, transparent 6px, transparent 12px) !important;
+  position: relative;
+}
+body.quirk-bad-style .style-trap::after {
+  content: "CTD"; position: absolute; top: 2px; right: 2px;
+  background: #ff3b3b; color: #fff; font-size: 10px; font-weight: 700;
+  padding: 1px 4px; border-radius: 2px; pointer-events: none;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Frame-with-style: FrameWidget silently ignores `style` -> visuals missing */
+body.quirk-frame-style .frame-styled {
+  outline: 2px dashed #d9a441 !important;
+  outline-offset: -2px !important;
+  background-image: repeating-linear-gradient(-45deg, rgba(217,164,65,0.16), rgba(217,164,65,0.16) 6px, transparent 6px, transparent 12px) !important;
+  position: relative;
+}
+body.quirk-frame-style .frame-styled::after {
+  content: "FRAME"; position: absolute; top: 2px; right: 2px;
+  background: #d9a441; color: #1a1206; font-size: 10px; font-weight: 700;
+  padding: 1px 4px; border-radius: 2px; pointer-events: none;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Overflow risk: label/text that *might* exceed its bounds in-game */
+body.quirk-overflow .overflow-risk {
+  position: relative;
+}
+body.quirk-overflow .overflow-risk::before {
+  content: ""; position: absolute; inset: 0;
+  outline: 1px dashed #4f9cff;
+  pointer-events: none;
+}
+body.quirk-overflow .overflow-risk[data-overflow]::after {
+  content: attr(data-overflow); position: absolute; top: -14px; left: 0;
+  font-size: 9px; color: #4f9cff; white-space: nowrap;
+  font-family: "Segoe UI", sans-serif;
+  pointer-events: none;
+}
+
+/* Font fallback: simulate engine without our custom font loaded */
+body.quirk-font-fallback,
+body.quirk-font-fallback .window,
+body.quirk-font-fallback .titlebar .title-text {
+  font-family: "Times New Roman", serif !important;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Workspace
+   ============================================================ */
+.workspace {
+  position: fixed; top: 44px; left: 0; right: 300px; bottom: 0;
+  overflow: hidden;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='rgba(0,0,0,0)'/><path d='M0 0h100v100H0z' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='0.3'/></svg>");
+}
+
+/* ============================================================
+   COT sidebar (right edge of the screen)
+   Mirrors sidebar_menu.layout: 300px wide, dark header,
+   category tiles, credits line.
+   ============================================================ */
+.sidebar {
+  position: fixed; top: 44px; right: 0; bottom: 0;
+  width: 300px;
+  background: var(--surface);
+  border-left: 1px solid var(--stroke);
+  display: grid; grid-template-rows: 40px 1fr auto;
+  z-index: 90;
+}
+.sidebar-header {
+  padding: 0 14px;
+  display: flex; align-items: center;
+  background: rgba(5,8,14,0.96);
+  border-bottom: 1px solid var(--stroke);
+  font-weight: 700; font-size: 13px;
+}
+.sidebar-cats {
+  padding: 8px;
+  display: grid; gap: 8px;
+  align-content: start;
+  overflow: auto;
+}
+.sidebar-cat {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--stroke);
+  cursor: pointer;
+}
+.sidebar-cat:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+.sidebar-cat.open { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.sidebar-cat .cat-icon {
+  width: 22px; height: 22px;
+  color: var(--accent);
+  display: grid; place-items: center;
+}
+.sidebar-cat .cat-icon svg { width: 14px; height: 14px; fill: currentColor; }
+.sidebar-cat .cat-name { flex: 1; font-size: 13px; }
+.sidebar-cat .cat-count { font-size: 10px; color: var(--muted); }
+.sidebar-credits {
+  padding: 8px 14px;
+  font-size: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--stroke);
+}
+
+/* Flyout (the per-category popup that floats to the LEFT of the sidebar) */
+.flyout {
+  position: fixed;
+  width: 280px;
+  background: rgba(13,18,26,0.98);
+  border: 1px solid var(--stroke-strong);
+  padding: 6px;
+  display: grid; gap: 4px;
+  box-shadow: 0 10px 32px var(--shadow);
+  z-index: 95;
+}
+.flyout-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface-soft);
+  border: 1px solid transparent;
+  cursor: pointer;
+  height: 50px;
+}
+.flyout-item:hover {
+  border-color: var(--stroke-focus);
+  background: var(--accent-soft);
+}
+.flyout-item .fi-icon {
+  width: 30px; height: 30px;
+  background: var(--surface-deep);
+  border: 1px solid var(--stroke);
+  display: grid; place-items: center;
+  color: var(--accent);
+}
+.flyout-item .fi-icon svg { width: 16px; height: 16px; fill: currentColor; }
+.flyout-item .fi-name { flex: 1; font-size: 13px; }
+
+/* ============================================================
+   Window chrome — matches in-game windowbase.layout
+   ============================================================ */
+.window {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 20px 56px var(--shadow);
+  display: grid; grid-template-rows: 36px 1fr;
+  user-select: none;
+}
+.window.dragging { box-shadow: 0 26px 64px rgba(0,0,0,0.7); border-color: var(--stroke-focus); }
+.titlebar {
+  height: 36px; display: flex; align-items: center;
+  padding: 0 0 0 14px;
+  background: rgba(5,8,14,0.96);
+  border-bottom: 1px solid var(--stroke-strong);
+  cursor: grab;
+}
+.titlebar.dragging { cursor: grabbing; }
+.title-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+.title-meta { font-size: 11px; color: var(--muted); margin-right: 12px; }
+.title-controls { display: flex; }
+.title-controls button {
+  width: 36px; height: 36px; border: 0;
+  background: transparent; color: var(--muted);
+  display: grid; place-items: center; cursor: pointer;
+  font-family: inherit;
+}
+.title-controls button:hover { background: var(--accent-soft); color: var(--text); }
+.title-controls button.close:hover { background: rgba(216,90,90,0.3); color: var(--danger); }
+.title-controls button svg { width: 14px; height: 14px; fill: currentColor; }
+
+.window-body { padding: 0; overflow: hidden; position: relative; }
+
+/* ============================================================
+   Resize handles (8: edges + corners)
+   Matches windowbase.layout: thin transparent draggable strips
+   that highlight with a blue band on hover.
+   ============================================================ */
+.window .resize-handle {
+  position: absolute;
+  z-index: 5;
+  background: transparent;
+}
+.window .resize-handle::after {
+  content: ""; position: absolute; inset: 0;
+  background: transparent;
+}
+.window .resize-handle.hover::after,
+.window .resize-handle.dragging::after {
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+/* Edge strips: 5px thick along the full edge */
+.window .resize-handle.n { top: 36px; left: 10px; right: 10px; height: 5px; cursor: ns-resize; }
+.window .resize-handle.s { bottom: 0;  left: 10px; right: 10px; height: 5px; cursor: ns-resize; }
+.window .resize-handle.w { top: 46px;  bottom: 10px; left: 0;  width: 5px;  cursor: ew-resize; }
+.window .resize-handle.e { top: 46px;  bottom: 10px; right: 0; width: 5px;  cursor: ew-resize; }
+/* Corner pads: 10x10 */
+.window .resize-handle.nw { top: 36px;    left: 0;  width: 10px; height: 10px; cursor: nwse-resize; }
+.window .resize-handle.ne { top: 36px;    right: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.window .resize-handle.sw { bottom: 0;    left: 0;  width: 10px; height: 10px; cursor: nesw-resize; }
+.window .resize-handle.se { bottom: 0;    right: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+/* While dragging anywhere, lock the cursor */
+body.resizing { user-select: none; }
+body.resizing.ns { cursor: ns-resize; }
+body.resizing.ew { cursor: ew-resize; }
+body.resizing.nwse { cursor: nwse-resize; }
+body.resizing.nesw { cursor: nesw-resize; }
+
+/* ============================================================
+   Inspector overlay
+   ============================================================ */
+.inspector {
+  position: absolute; top: 12px; right: 12px;
+  width: 240px;
+  background: rgba(5,8,14,0.95);
+  border: 1px solid var(--stroke);
+  padding: 10px 12px;
+  font-size: 11px; line-height: 1.7;
+  color: var(--text-dim);
+  z-index: 50;
+}
+.inspector h4 { margin: 0 0 6px; font-size: 12px; color: var(--text); }
+.inspector .ip-line { display: flex; justify-content: space-between; gap: 8px; }
+.inspector .ip-line span:first-child { color: var(--muted); }
+
+/* ============================================================
+   COTSurface helper
+   ============================================================ */
+.cot-surface { background: var(--surface-raised); border: 1px solid var(--stroke); }
+.cot-surface.deep { background: var(--surface-deep); }
+
+/* ============================================================
+   Buttons — in-game proportions
+   ============================================================ */
+.btn {
+  height: 32px; padding: 0 14px;
+  border: 1px solid var(--stroke); background: var(--surface-soft);
+  color: var(--text); font-family: inherit; font-size: 13px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+.btn.primary { border-color: var(--stroke-focus); background: var(--accent-soft); }
+.btn.success { border-color: rgba(73,184,117,0.55); background: rgba(73,184,117,0.18); color: #c0e8d2; }
+.btn.danger  { border-color: rgba(216,90,90,0.55); background: rgba(216,90,90,0.18); color: #f5c6c6; }
+.btn.icon { width: 32px; padding: 0; }
+.btn.fixed-32 { width: 32px; height: 32px; padding: 0; }
+.btn.fixed-32 svg, .btn.icon svg { width: 16px; height: 16px; fill: currentColor; }
+.btn.full { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================================
+   ConfirmInline button (delete preset = trash, expands to OK/X)
+   ============================================================ */
+.cinline {
+  display: inline-flex; height: 32px;
+  border: 1px solid rgba(216,90,90,0.55);
+  background: var(--surface-soft);
+  cursor: pointer;
+}
+.cinline .ci-icon {
+  width: 32px; display: grid; place-items: center;
+  color: var(--danger); background: rgba(216,90,90,0.16);
+}
+.cinline .ci-icon svg { width: 14px; height: 14px; fill: currentColor; }
+.cinline .ci-ok, .cinline .ci-cancel { display: none; }
+.cinline.pending .ci-icon { display: none; }
+.cinline.pending .ci-ok,
+.cinline.pending .ci-cancel {
+  display: grid; place-items: center;
+  width: 36px; font-weight: 700; font-size: 12px;
+}
+.cinline.pending .ci-ok { background: rgba(73,184,117,0.25); color: var(--good); }
+.cinline.pending .ci-cancel { background: rgba(216,90,90,0.25); color: var(--danger); border-left: 1px solid var(--stroke); }
+.cinline.fixed-32 { width: 32px; height: 32px; }
+.cinline.fixed-32:not(.pending) .ci-icon { width: 32px; height: 32px; }
+
+/* ============================================================
+   Search box - matches in-game "Search:" style
+   The in-game one has icon left, full-width input, no clear by default
+   ============================================================ */
+.search {
+  display: flex; align-items: center;
+  height: 32px;
+  background: rgba(0,0,0,0.36); border: 1px solid var(--stroke);
+}
+.search .s-icon { width: 36px; display: grid; place-items: center; color: var(--muted); }
+.search .s-icon svg { width: 14px; height: 14px; fill: currentColor; }
+.search input {
+  flex: 1; background: transparent; border: 0; outline: none;
+  color: var(--text); font-family: inherit; font-size: 13px; padding: 0 8px;
+}
+.search input::placeholder { color: var(--muted); font-style: italic; }
+.search .s-clear {
+  width: 32px; display: grid; place-items: center;
+  color: var(--muted); border-left: 1px solid var(--stroke);
+  cursor: pointer;
+}
+.search .s-clear:hover { color: var(--danger); }
+.search .s-clear svg { width: 12px; height: 12px; fill: currentColor; }
+.search.focus { border-color: var(--stroke-focus); }
+
+/* ============================================================
+   Field input with label - in-game uses a wider label area
+   ============================================================ */
+.field {
+  display: flex; align-items: center;
+  height: 32px;
+  border: 1px solid var(--stroke); background: rgba(0,0,0,0.36);
+}
+.field .f-label {
+  padding: 0 12px; font-weight: 700; font-size: 13px;
+  border-right: 1px solid var(--stroke);
+  display: grid; place-items: center; height: 100%;
+  background: var(--surface-soft);
+  min-width: 80px;
+}
+.field input {
+  flex: 1; background: transparent; border: 0; outline: none;
+  color: var(--text); font-family: inherit; font-size: 13px; padding: 0 10px;
+}
+
+/* ============================================================
+   Dropdown
+   ============================================================ */
+.dd {
+  display: flex; align-items: center; height: 32px;
+  border: 1px solid var(--stroke); background: var(--surface-soft);
+  cursor: pointer; position: relative;
+}
+.dd .dd-label {
+  padding: 0 12px; font-weight: 700; font-size: 13px; color: var(--muted);
+  border-right: 1px solid var(--stroke);
+  display: grid; place-items: center; height: 100%;
+}
+.dd .dd-val { flex: 1; padding: 0 12px; font-size: 13px; }
+.dd .dd-arrow {
+  width: 32px; display: grid; place-items: center; color: var(--muted);
+  border-left: 1px solid var(--stroke);
+}
+.dd .dd-arrow svg { width: 10px; height: 10px; fill: currentColor; }
+.dd:hover, .dd.open { border-color: var(--stroke-focus); }
+
+.dd-list {
+  position: absolute; z-index: 200;
+  background: rgba(13,18,26,0.98); border: 1px solid var(--stroke-strong);
+  box-shadow: 0 12px 32px var(--shadow);
+  display: none; min-width: 180px;
+}
+.dd-list.open { display: block; }
+.dd-row {
+  padding: 9px 14px; font-size: 13px; cursor: pointer;
+  border-bottom: 1px solid rgba(155,184,218,0.08);
+}
+.dd-row:hover { background: var(--accent-soft); }
+.dd-row.selected { background: var(--accent-soft); color: var(--accent); }
+
+/* ============================================================
+   Slider — in-game style: inline "Label: [track]  value"
+   ============================================================ */
+.slider {
+  display: grid; grid-template-columns: 110px 1fr 56px;
+  gap: 12px; align-items: center; height: 32px;
+}
+.slider .sl-label { font-weight: 700; font-size: 13px; }
+.slider .sl-track {
+  position: relative; height: 14px;
+  background: rgba(7,10,16,0.7); border: 1px solid var(--stroke);
+  cursor: pointer;
+}
+.slider .sl-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--accent); }
+.slider .sl-handle {
+  position: absolute; top: -3px;
+  width: 12px; height: 18px;
+  background: #6db2ff; border: 1px solid var(--accent);
+  transform: translateX(-50%);
+}
+.slider .sl-value {
+  text-align: right; font-variant-numeric: tabular-nums; font-size: 13px;
+  color: var(--text-dim); padding-right: 6px;
+}
+
+/* ============================================================
+   Checkbox
+   ============================================================ */
+.cb {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 28px; cursor: pointer;
+}
+.cb .cb-box {
+  width: 18px; height: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(120,120,130,0.18);
+  display: grid; place-items: center;
+}
+.cb.checked .cb-box {
+  background: var(--accent-soft); border-color: var(--stroke-focus);
+}
+.cb.checked .cb-box::after { content: ""; width: 10px; height: 10px; background: var(--accent); }
+.cb .cb-label { font-size: 13px; }
+.cb.round .cb-box, .cb.round .cb-box::after { border-radius: 50%; }
+
+/* ============================================================
+   Badge
+   ============================================================ */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 9px; height: 22px;
+  border: 1px solid var(--stroke); background: var(--surface-soft);
+  font-size: 11px;
+}
+.badge .b-dot { width: 7px; height: 7px; background: var(--muted); }
+.badge.good { border-color: rgba(73,184,117,0.55); }
+.badge.good .b-dot { background: var(--good); }
+.badge.warn { border-color: rgba(217,164,65,0.55); }
+.badge.warn .b-dot { background: var(--warn); }
+.badge.danger { border-color: rgba(216,90,90,0.55); }
+.badge.danger .b-dot { background: var(--danger); }
+.badge.info { border-color: rgba(124,147,255,0.55); }
+.badge.info .b-dot { background: var(--info); }
+
+/* ============================================================
+   List — TextListboxWidget style (matches in-game)
+   Light scrollbar, slim row separators, plain text rows
+   ============================================================ */
+.list {
+  border: 1px solid var(--stroke); background: var(--surface-deep);
+  overflow: auto;
+  scrollbar-color: rgba(220,228,240,0.5) rgba(0,0,0,0.3);
+}
+.list::-webkit-scrollbar { width: 12px; background: rgba(0,0,0,0.3); }
+.list::-webkit-scrollbar-thumb { background: rgba(220,228,240,0.4); border: 2px solid rgba(0,0,0,0.3); }
+.list::-webkit-scrollbar-thumb:hover { background: rgba(220,228,240,0.6); }
+.list-row {
+  padding: 6px 12px; font-size: 13px; cursor: pointer;
+  border-bottom: 1px solid rgba(155,184,218,0.06);
+  display: flex; align-items: center; gap: 8px;
+  min-height: 28px;
+}
+.list-row:hover { background: var(--accent-soft); }
+.list-row.selected { background: var(--accent-soft); color: var(--accent); }
+
+/* ============================================================
+   Icon grid — vertical, 2-column, icon-only (UIActionIconGrid)
+   This is what Object Spawner's categories actually look like.
+   ============================================================ */
+.icon-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; padding: 8px; overflow-y: auto;
+  align-content: start;
+}
+.icon-grid .ig-cell {
+  aspect-ratio: 1;
+  background: var(--surface-soft); border: 1px solid var(--stroke);
+  display: grid; place-items: center;
+  cursor: pointer; position: relative;
+  min-height: 42px;
+}
+.icon-grid .ig-cell:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+.icon-grid .ig-cell.selected {
+  background: rgba(79,156,255,0.32); border-color: var(--accent);
+}
+.icon-grid .ig-cell svg { width: 28px; height: 28px; fill: var(--accent); }
+
+/* Horizontal category strip (Object Spawner search-first layout) */
+.cat-strip {
+  display: flex; gap: 4px;
+  overflow-x: auto; overflow-y: hidden;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.18);
+  padding: 4px;
+  scrollbar-width: thin;
+}
+.cat-strip::-webkit-scrollbar { height: 6px; }
+.cat-strip::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 3px; }
+.cat-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 8px;
+  background: var(--surface-soft); border: 1px solid var(--stroke);
+  cursor: pointer; user-select: none;
+  white-space: nowrap; flex: 0 0 auto;
+  height: 30px;
+}
+.cat-chip:hover { border-color: var(--stroke-focus); background: var(--accent-soft); }
+.cat-chip.selected { background: rgba(79,156,255,0.32); border-color: var(--accent); }
+.cat-chip svg { width: 16px; height: 16px; fill: var(--accent); }
+.cat-chip-lbl { font-size: 11px; color: var(--text-dim); }
+.cat-chip.selected .cat-chip-lbl { color: var(--text); }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--stroke); }
+.tabs .tab {
+  padding: 8px 16px; font-size: 13px; cursor: pointer;
+  color: var(--muted); border-right: 1px solid var(--stroke);
+}
+.tabs .tab:hover { color: var(--text); }
+.tabs .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); margin-bottom: -1px; background: var(--accent-soft); }
+
+/* Layout helpers */
+.row { display: flex; align-items: center; gap: 8px; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.grow { flex: 1; }
+.divider { height: 1px; background: var(--stroke); margin: 4px 0; }
+.form-pane { padding: 12px; display: grid; gap: 10px; }
+.section-title {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); padding-bottom: 4px;
+  border-bottom: 1px solid var(--stroke);
+}
+.split { display: grid; gap: 8px; }
+.split-2 { grid-template-columns: 1fr 1fr; }
+</style>
+</head>
+
+<body>
+<!-- ============================================================
+     Top picker (replaces the in-game-incorrect left nav panel)
+     ============================================================ -->
+<div class="picker">
+  <span class="pk-title">COT Forms Mockup</span>
+  <select id="formPicker"></select>
+  <span class="pk-active-meta" id="pkMeta"></span>
+  <span class="pk-sep"></span>
+  <label class="pk-ctrl">
+    Res
+    <select id="resPicker">
+      <option value="1280x720">1280 x 720</option>
+      <option value="1600x900">1600 x 900</option>
+      <option value="1920x1080" selected>1920 x 1080</option>
+      <option value="2560x1440">2560 x 1440</option>
+      <option value="3840x2160">3840 x 2160 (4K)</option>
+    </select>
+  </label>
+  <label class="pk-ctrl">
+    UI Scale
+    <input id="uiScale" type="range" min="0.6" max="1.6" step="0.05" value="1.0">
+    <span id="uiScaleVal" class="pk-num">1.00x</span>
+  </label>
+  <label class="pk-ctrl" title="Render text using approximate DayZ Roboto+Bistream-style fallback metrics for missing fonts">
+    <input id="quirkFontFallback" type="checkbox"> Engine font fallback
+  </label>
+  <label class="pk-ctrl" title="Simulate Style-not-registered CTD: red overlay where engine would null-deref">
+    <input id="quirkBadStyle" type="checkbox"> Show style traps
+  </label>
+  <label class="pk-ctrl" title="Simulate label overflow: text bleeds past widget bounds (28px offset bug)">
+    <input id="quirkOverflow" type="checkbox"> Show overflow risks
+  </label>
+  <label class="pk-ctrl" title="Highlight FrameWidget regions where style would be silently ignored">
+    <input id="quirkFrameStyle" type="checkbox"> Show frame-style bugs
+  </label>
+  <span class="pk-hint">Click a form to preview. Drag the title bar to move.</span>
+</div>
+
+<div class="workspace" id="workspace">
+  <div class="inspector" id="inspector">
+    <h4>Inspector</h4>
+    <div class="ip-line"><span>Form</span><span id="ipForm">—</span></div>
+    <div class="ip-line"><span>Size</span><span id="ipSize">—</span></div>
+    <div class="ip-line"><span>Position</span><span id="ipPos">—</span></div>
+    <div class="ip-line"><span>Source</span><span id="ipSrc">—</span></div>
+  </div>
+</div>
+
+<!-- COT sidebar (right edge of screen, matches sidebar_menu.layout) -->
+<aside class="sidebar">
+  <div class="sidebar-header">Community Online Tools</div>
+  <div class="sidebar-cats" id="sidebarCats"></div>
+  <div class="sidebar-credits">v1.29 — interactive mockup</div>
+</aside>
+
+<script>
+/* ----------------- SVG icon library --------------------------- */
+const icons = {
+  refresh: '<svg viewBox="0 0 16 16"><path d="M14 8a6 6 0 11-2-4.47L14 1v5h-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  search:  '<svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/></svg>',
+  close:   '<svg viewBox="0 0 16 16"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+  trash:   '<svg viewBox="0 0 16 16"><path d="M3 5h10l-1 9H4zM6 3h4v2H6z"/></svg>',
+  add:     '<svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+  copy:    '<svg viewBox="0 0 16 16"><rect x="3" y="3" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="1" width="8" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  pin:     '<svg viewBox="0 0 16 16"><path d="M9 1l5 5-3 1-1 3-3-3-5 5 5-5-3-3 3-1z"/></svg>',
+  expand:  '<svg viewBox="0 0 16 16"><rect x="2" y="9" width="12" height="2"/></svg>',
+  arrowDn: '<svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  // Object spawner category icons (representative subset matching in-game)
+  c_all:    '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="4"/><rect x="4" y="10" width="16" height="4"/><rect x="4" y="16" width="16" height="3"/></svg>',
+  c_food:   '<svg viewBox="0 0 24 24"><path d="M5 7c0-3 14-3 14 0v12c0 2-14 2-14 0z"/></svg>',
+  c_drink:  '<svg viewBox="0 0 24 24"><path d="M7 3h10l-1 18H8zm2 6h6"/></svg>',
+  c_veh:    '<svg viewBox="0 0 24 24"><path d="M3 16h18l-3-7H6z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+  c_gun:    '<svg viewBox="0 0 24 24"><path d="M2 10h14v3l3-1v4h-3l-2 3-3-1-2 2-2-2H2z"/></svg>',
+  c_melee:  '<svg viewBox="0 0 24 24"><path d="M19 3l2 2-12 12-3 3-1-1 3-3z"/></svg>',
+  c_ammo:   '<svg viewBox="0 0 24 24"><rect x="6" y="3" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>',
+  c_clothes:'<svg viewBox="0 0 24 24"><path d="M4 8l4-4h8l4 4-3 4v8H7v-8z"/></svg>',
+  c_hat:    '<svg viewBox="0 0 24 24"><path d="M3 17h18M6 17V8c0-3 4-5 6-5s6 2 6 5v9"/></svg>',
+  c_mask:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.5" fill="#0c1017"/><circle cx="15" cy="10" r="1.5" fill="#0c1017"/></svg>',
+  c_glasses:'<svg viewBox="0 0 24 24"><circle cx="7" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 13h2" stroke="currentColor" stroke-width="1.8"/></svg>',
+  c_top:    '<svg viewBox="0 0 24 24"><path d="M6 6l3-3h6l3 3-3 3v11H9V9z"/></svg>',
+  c_pants:  '<svg viewBox="0 0 24 24"><path d="M6 3h12l-1 9-1 9h-3l-1-9-1 9H8L7 12z"/></svg>',
+  c_vest:   '<svg viewBox="0 0 24 24"><path d="M6 4h12v6l-2 2v8H8v-8l-2-2z"/></svg>',
+  c_gloves: '<svg viewBox="0 0 24 24"><path d="M6 9h2v-3a2 2 0 014 0v3h1v-2a2 2 0 014 0v9c0 3-2 5-5 5h-2c-3 0-4-2-4-4z"/></svg>',
+  c_shoes:  '<svg viewBox="0 0 24 24"><path d="M3 16c0-2 1-3 3-3l4-7c2 0 4 2 4 4l-1 3 8 3v3H3z"/></svg>',
+  c_bag:    '<svg viewBox="0 0 24 24"><path d="M5 9h14v12H5zM8 9V6a4 4 0 018 0v3"/></svg>',
+  c_container:'<svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14"/><rect x="4" y="6" width="16" height="4"/></svg>',
+  c_items:  '<svg viewBox="0 0 24 24"><path d="M4 5l8-3 8 3v6c0 4-4 8-8 11-4-3-8-7-8-11z"/></svg>',
+  c_medical:'<svg viewBox="0 0 24 24"><path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z"/></svg>',
+  c_tools:  '<svg viewBox="0 0 24 24"><path d="M3 18l9-9 3 3-9 9zM15 6l3-3 3 3-3 3z"/></svg>',
+  c_traps:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3v18" stroke="currentColor" stroke-width="2"/></svg>',
+  c_elec:   '<svg viewBox="0 0 24 24"><path d="M11 2L4 14h6l-1 8 7-12h-6z"/></svg>',
+  c_tent:   '<svg viewBox="0 0 24 24"><path d="M3 20L12 4l9 16zM12 4v16"/></svg>',
+  c_bomb:   '<svg viewBox="0 0 24 24"><circle cx="11" cy="14" r="8"/><path d="M16 6l3-3M19 3v3M19 3h3"/></svg>',
+  c_house:  '<svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9v9H3z"/></svg>',
+  c_zombie: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 22c0-5 3-9 6-9s6 4 6 9"/></svg>',
+
+  // Sidebar category icons (Players, World, Items, Vehicles, Events, Server, Expansion)
+  sb_players:   '<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>',
+  sb_world:     '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" fill="none" stroke="currentColor" stroke-width="1"/></svg>',
+  sb_items:     '<svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="3"/><rect x="3" y="7" width="10" height="3"/><rect x="3" y="11" width="10" height="2"/></svg>',
+  sb_vehicles:  '<svg viewBox="0 0 16 16"><path d="M2 11h12l-2-5H4z"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>',
+  sb_events:    '<svg viewBox="0 0 16 16"><path d="M8 1L4 8h3v7l5-9H8z"/></svg>',
+  sb_server:    '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M3 13l2-2M11 5l2-2" stroke="currentColor" stroke-width="1.4"/></svg>',
+  sb_expansion: '<svg viewBox="0 0 16 16"><path d="M3 1v14h1V9c4-2 5 2 9 0V2c-4 2-5-2-9 0z"/></svg>',
+
+  // Per-module flyout icons (one per module, reuses sidebar style)
+  m_player:        '<svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>',
+  m_ban:           '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 3.5l9 9" stroke="currentColor" stroke-width="1.5"/></svg>',
+  m_role:          '<svg viewBox="0 0 16 16"><path d="M8 1l5 3v4c0 3-2 6-5 7-3-1-5-4-5-7V4z"/></svg>',
+  m_teleport:      '<svg viewBox="0 0 16 16"><path d="M8 1L2 8l3 1-2 6 6-7-3-1z"/></svg>',
+  m_camera:        '<svg viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="6" y="3" width="4" height="2"/></svg>',
+  m_weather:       '<svg viewBox="0 0 16 16"><circle cx="6" cy="7" r="3"/><path d="M9 9c2-1 4 0 4 2"/></svg>',
+  m_map:           '<svg viewBox="0 0 16 16"><path d="M2 4l4-2 4 2 4-2v10l-4 2-4-2-4 2zM6 2v10M10 4v10" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+  m_loot:          '<svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l5 5" stroke="currentColor" stroke-width="1.5"/><path d="M3 3h6v6h-6z" opacity="0.3"/></svg>',
+  m_esp:           '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2"/></svg>',
+  m_object:        '<svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="3"/><rect x="3" y="7" width="10" height="3"/><rect x="3" y="11" width="10" height="2"/></svg>',
+  m_loadout:       '<svg viewBox="0 0 16 16"><path d="M3 6h10v8H3zM5 6V4c0-1.5 1-3 3-3s3 1.5 3 3v2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+  m_compensations: '<svg viewBox="0 0 16 16"><circle cx="5" cy="6" r="3"/><circle cx="10" cy="9" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+  m_vehicles:      '<svg viewBox="0 0 16 16"><path d="M2 11h12l-2-5H4z"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>',
+  m_territory:     '<svg viewBox="0 0 16 16"><path d="M3 1v14h1V9c4-2 5 2 9 0V2c-4 2-5-2-9 0z"/></svg>',
+  m_events:        '<svg viewBox="0 0 16 16"><path d="M8 1L4 8h3v7l5-9H8z"/></svg>',
+  m_webhook:       '<svg viewBox="0 0 16 16"><circle cx="3" cy="3" r="2"/><circle cx="13" cy="3" r="2"/><circle cx="8" cy="13" r="2"/><path d="M4 5l3 6M12 5L9 11" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>',
+  m_serverinfo:    '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v0M8 7v4" stroke="currentColor" stroke-width="2"/></svg>',
+  m_namalsk:       '<svg viewBox="0 0 16 16"><path d="M8 1L4 8h3v7l5-9H8z"/></svg>',
+};
+
+/* ----------------- Module catalogue --------------------------- */
+const modules = [
+  { id:'object',         cat:'Items',    title:'Object Spawner',     size:[650,510], render: renderObject,    src:'objectspawner_form.layout' },
+  { id:'loadout',        cat:'Items',    title:'Loadout',            size:[600,350], render: renderLoadout,   src:'loadout_form.layout' },
+  { id:'compensations',  cat:'Items',    title:'Compensations',      size:[500,400], render: renderCompensations, src:'compensations_form.layout' },
+  { id:'player',         cat:'Players',  title:'Player Manager',     size:[800,600], render: renderPlayer,    src:'player_form.layout' },
+  { id:'ban',            cat:'Players',  title:'Ban Manager',        size:[800,600], render: renderBan,       src:'ban_form.layout' },
+  { id:'role',           cat:'Players',  title:'Role Manager',       size:[800,600], render: renderRole,      src:'role_manager_form.layout' },
+  { id:'teleport',       cat:'World',    title:'Teleport',           size:[400,510], render: renderTeleport,  src:'teleport_form.layout' },
+  { id:'camera',         cat:'World',    title:'Camera',             size:[800,650], render: renderCamera,    src:'camera_form.layout' },
+  { id:'weather',        cat:'World',    title:'Weather',            size:[800,600], render: renderWeather,   src:'weather_form.layout' },
+  { id:'map',            cat:'World',    title:'Map',                size:[900,700], render: renderMap,       src:'mapview_form.layout' },
+  { id:'loot_analysis',  cat:'World',    title:'Loot Analysis',      size:[800,600], render: renderLootAnalysis, src:'loot_analysis_form.layout' },
+  { id:'esp',            cat:'World',    title:'ESP',                size:[700,600], render: renderESP,       src:'esp_form.layout' },
+  { id:'vehicles',       cat:'Vehicles', title:'Vehicles',           size:[1000,650], render: renderVehicles, src:'Vehicles_Menu.layout' },
+  { id:'territory',      cat:'Vehicles', title:'Territory',          size:[500,500], render: renderTerritory, src:'territory_form.layout' },
+  { id:'events',         cat:'Events',   title:'Events',             size:[700,500], render: renderEvents,    src:'eventspawner_form.layout' },
+  { id:'webhook',        cat:'Server',   title:'Webhook',            size:[400,500], render: renderWebhook,   src:'webhook_form.layout' },
+  { id:'serverinfo',     cat:'Server',   title:'Server Info',        size:[400,450], render: renderServerInfo, src:'serverinfo_form.layout' },
+  { id:'namalsk',        cat:'Expansion',title:'Namalsk Events',     size:[500,400], render: renderNamalsk,   src:'eventspawner_form.layout' },
+];
+
+/* ----------------- Picker setup ------------------------------- */
+function buildPicker() {
+  const sel = document.getElementById('formPicker');
+  const groups = {};
+  modules.forEach(m => (groups[m.cat] ??= []).push(m));
+  sel.innerHTML = '';
+  Object.entries(groups).forEach(([cat, mods]) => {
+    const og = document.createElement('optgroup');
+    og.label = cat;
+    mods.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.title;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  sel.addEventListener('change', () => openForm(sel.value));
+}
+
+/* ----------------- Sidebar setup ------------------------------ */
+const sidebarCats = [
+  { name:'Players',   icon:'sb_players' },
+  { name:'World',     icon:'sb_world' },
+  { name:'Items',     icon:'sb_items' },
+  { name:'Vehicles',  icon:'sb_vehicles' },
+  { name:'Events',    icon:'sb_events' },
+  { name:'Server',    icon:'sb_server' },
+  { name:'Expansion', icon:'sb_expansion' },
+];
+
+function buildSidebar() {
+  const root = document.getElementById('sidebarCats');
+  root.innerHTML = '';
+  sidebarCats.forEach(c => {
+    const count = modules.filter(m => m.cat === c.name).length;
+    if (!count) return;
+    const el = document.createElement('div');
+    el.className = 'sidebar-cat';
+    el.dataset.cat = c.name;
+    el.innerHTML = `
+      <span class="cat-icon">${icons[c.icon] || icons.sb_server}</span>
+      <span class="cat-name">${c.name}</span>
+      <span class="cat-count">${count}</span>
+    `;
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); toggleFlyout(c.name, el); });
+    root.appendChild(el);
+  });
+}
+
+let currentFlyout = null;
+function toggleFlyout(catName, anchorEl) {
+  // Close any existing flyout
+  if (currentFlyout) {
+    const wasSame = currentFlyout.cat === catName;
+    closeFlyout();
+    if (wasSame) return;
+  }
+  const fly = document.createElement('div');
+  fly.className = 'flyout';
+  const rect = anchorEl.getBoundingClientRect();
+  fly.style.top = rect.top + 'px';
+  fly.style.right = (window.innerWidth - rect.left + 6) + 'px';
+
+  modules.filter(m => m.cat === catName).forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'flyout-item';
+    item.innerHTML = `
+      <span class="fi-icon">${icons['m_' + m.id] || icons.sb_server}</span>
+      <span class="fi-name">${m.title}</span>
+    `;
+    item.onclick = (e) => { e.stopPropagation(); openForm(m.id); closeFlyout(); };
+    fly.appendChild(item);
+  });
+  document.body.appendChild(fly);
+  anchorEl.classList.add('open');
+  currentFlyout = { el: fly, cat: catName, anchor: anchorEl };
+
+  // Defer the outside-click listener by a frame so this click doesn't immediately dismiss it
+  setTimeout(() => document.addEventListener('click', onFlyoutOutside), 0);
+}
+function onFlyoutOutside(e) {
+  if (!currentFlyout) return;
+  if (currentFlyout.el.contains(e.target)) return;
+  if (e.target.closest('.sidebar-cat')) return;
+  closeFlyout();
+}
+function closeFlyout() {
+  if (!currentFlyout) return;
+  currentFlyout.el.remove();
+  currentFlyout.anchor.classList.remove('open');
+  currentFlyout = null;
+  document.removeEventListener('click', onFlyoutOutside);
+}
+
+/* ----------------- Window builder ----------------------------- */
+const openWindows = new Map();
+
+function openForm(id) {
+  const m = modules.find(x => x.id === id);
+  if (!m) return;
+  // close existing
+  openWindows.forEach(w => w.remove());
+  openWindows.clear();
+
+  const ws = document.getElementById('workspace');
+  const win = document.createElement('div');
+  win.className = 'window style-trap';
+  // Real layouts apply `style COTSurface` on the root PanelWidget; this is
+  // the slot that engine-crashes if cot.styles is misconfigured. Flag it
+  // when the "Show style traps" quirk is on.
+  win.dataset.layoutWidget = 'PanelWidget';
+  win.style.width = m.size[0] + 'px';
+  win.style.height = m.size[1] + 'px';
+  // Center the window in the workspace
+  const wsRect = ws.getBoundingClientRect();
+  const left = Math.max(20, (wsRect.width - m.size[0]) / 2);
+  const top = Math.max(20, (wsRect.height - m.size[1]) / 2 - 30);
+  win.style.left = left + 'px';
+  win.style.top = top + 'px';
+  win.style.zIndex = 100;
+  win.innerHTML = `
+    <div class="titlebar">
+      <span class="title-text">${m.title}</span>
+      <span class="title-meta" data-meta>${m.size[0]}×${m.size[1]}</span>
+      <div class="title-controls">
+        <button title="Pin">${icons.pin}</button>
+        <button title="Minimize">${icons.expand}</button>
+        <button class="close" title="Close">${icons.close}</button>
+      </div>
+    </div>
+    <div class="window-body" data-body></div>
+    <div class="resize-handle n"  data-dir="n"></div>
+    <div class="resize-handle s"  data-dir="s"></div>
+    <div class="resize-handle w"  data-dir="w"></div>
+    <div class="resize-handle e"  data-dir="e"></div>
+    <div class="resize-handle nw" data-dir="nw"></div>
+    <div class="resize-handle ne" data-dir="ne"></div>
+    <div class="resize-handle sw" data-dir="sw"></div>
+    <div class="resize-handle se" data-dir="se"></div>
+  `;
+  ws.appendChild(win);
+
+  const body = win.querySelector('[data-body]');
+  m.render(body);
+
+  // wire controls
+  const ctrls = win.querySelectorAll('.title-controls button');
+  ctrls[2].onclick = () => { win.remove(); openWindows.delete(id); resetInspector(); };
+
+  enableDrag(win, m);
+  enableResize(win, m);
+  openWindows.set(id, win);
+  document.getElementById('formPicker').value = id;
+  updateInspector(m, win);
+}
+
+const MIN_WIDTH = 280;
+const MIN_HEIGHT = 180;
+
+function enableResize(win, m) {
+  win.querySelectorAll('.resize-handle').forEach(handle => {
+    const dir = handle.dataset.dir;
+    handle.addEventListener('mouseenter', () => {
+      if (!document.body.classList.contains('resizing')) handle.classList.add('hover');
+    });
+    handle.addEventListener('mouseleave', () => handle.classList.remove('hover'));
+
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const sx = e.clientX, sy = e.clientY;
+      const ox = parseFloat(win.style.left);
+      const oy = parseFloat(win.style.top);
+      const ow = win.offsetWidth;
+      const oh = win.offsetHeight;
+      handle.classList.add('dragging');
+      document.body.classList.add('resizing');
+      // Lock cursor while resizing
+      if (dir === 'n' || dir === 's') document.body.classList.add('ns');
+      else if (dir === 'w' || dir === 'e') document.body.classList.add('ew');
+      else if (dir === 'nw' || dir === 'se') document.body.classList.add('nwse');
+      else document.body.classList.add('nesw');
+
+      function onMove(ev) {
+        const dx = ev.clientX - sx;
+        const dy = ev.clientY - sy;
+        let nx = ox, ny = oy, nw = ow, nh = oh;
+
+        if (dir.includes('e')) nw = Math.max(MIN_WIDTH, ow + dx);
+        if (dir.includes('w')) {
+          nw = Math.max(MIN_WIDTH, ow - dx);
+          nx = ox + (ow - nw);
+        }
+        if (dir.includes('s')) nh = Math.max(MIN_HEIGHT, oh + dy);
+        if (dir.includes('n')) {
+          nh = Math.max(MIN_HEIGHT, oh - dy);
+          ny = oy + (oh - nh);
+        }
+
+        win.style.left = nx + 'px';
+        win.style.top = ny + 'px';
+        win.style.width = nw + 'px';
+        win.style.height = nh + 'px';
+
+        // Reflect the live size on the title bar and inspector
+        const meta = win.querySelector('[data-meta]');
+        if (meta) meta.textContent = nw + '×' + nh;
+        updateInspectorLive(m, win, nw, nh);
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        handle.classList.remove('dragging', 'hover');
+        document.body.classList.remove('resizing', 'ns', 'ew', 'nwse', 'nesw');
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+}
+
+function updateInspectorLive(m, win, w, h) {
+  document.getElementById('ipForm').textContent = m.title;
+  document.getElementById('ipSize').textContent = w + ' × ' + h;
+  document.getElementById('ipPos').textContent =
+    Math.round(parseFloat(win.style.left)) + ', ' + Math.round(parseFloat(win.style.top));
+  document.getElementById('ipSrc').textContent = m.src;
+  document.getElementById('pkMeta').textContent = w + '×' + h + ' — ' + m.src;
+}
+
+function enableDrag(win, m) {
+  const bar = win.querySelector('.titlebar');
+  let sx, sy, ox, oy, dragging = false;
+  bar.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    dragging = true;
+    bar.classList.add('dragging');
+    win.classList.add('dragging');
+    sx = e.clientX; sy = e.clientY;
+    ox = parseFloat(win.style.left); oy = parseFloat(win.style.top);
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    win.style.left = (ox + e.clientX - sx) + 'px';
+    win.style.top  = (oy + e.clientY - sy) + 'px';
+    updateInspector(m, win);
+  });
+  document.addEventListener('mouseup', () => {
+    if (dragging) {
+      dragging = false;
+      bar.classList.remove('dragging');
+      win.classList.remove('dragging');
+    }
+  });
+}
+
+function updateInspector(m, win) {
+  document.getElementById('ipForm').textContent = m.title;
+  document.getElementById('ipSize').textContent = m.size[0] + ' × ' + m.size[1];
+  document.getElementById('ipPos').textContent =
+    Math.round(parseFloat(win.style.left)) + ', ' + Math.round(parseFloat(win.style.top));
+  document.getElementById('ipSrc').textContent = m.src;
+  document.getElementById('pkMeta').textContent = m.size[0] + '×' + m.size[1] + ' — ' + m.src;
+}
+function resetInspector() {
+  ['ipForm','ipSize','ipPos','ipSrc'].forEach(id => document.getElementById(id).textContent = '—');
+  document.getElementById('pkMeta').textContent = '';
+}
+
+/* ============================================================
+   Interactive widget binders
+   ============================================================ */
+function bindCheckbox(el) { el.addEventListener('click', () => el.classList.toggle('checked')); }
+function bindConfirmInline(el) {
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.ci-ok')) {
+      el.classList.remove('pending');
+      flashRow(el, 'success');
+    } else if (e.target.closest('.ci-cancel')) {
+      el.classList.remove('pending');
+    } else {
+      el.classList.add('pending');
+      setTimeout(() => el.classList.remove('pending'), 4000);
+    }
+  });
+}
+function flashRow(el, kind) {
+  const orig = el.style.background;
+  el.style.background = kind === 'success' ? 'rgba(73,184,117,0.32)' : 'rgba(216,90,90,0.32)';
+  setTimeout(() => el.style.background = orig, 400);
+}
+function bindSlider(el) {
+  const track = el.querySelector('.sl-track');
+  const fill = el.querySelector('.sl-fill');
+  const handle = el.querySelector('.sl-handle');
+  const valEl = el.querySelector('.sl-value');
+  const min = parseFloat(el.dataset.min || 0);
+  const max = parseFloat(el.dataset.max || 100);
+  const fmt = el.dataset.fmt || '';
+  let dragging = false;
+  function setFromX(clientX) {
+    const r = track.getBoundingClientRect();
+    let t = (clientX - r.left) / r.width;
+    t = Math.max(0, Math.min(1, t));
+    fill.style.width = (t * 100) + '%';
+    handle.style.left = (t * 100) + '%';
+    const v = min + t * (max - min);
+    valEl.textContent = (Math.round(v * 10) / 10) + fmt;
+  }
+  track.addEventListener('mousedown', (e) => { dragging = true; setFromX(e.clientX); });
+  document.addEventListener('mousemove', (e) => { if (dragging) setFromX(e.clientX); });
+  document.addEventListener('mouseup', () => dragging = false);
+}
+function bindDropdown(el, options) {
+  const val = el.querySelector('.dd-val');
+  let list;
+  el.addEventListener('click', () => {
+    if (list) { list.remove(); list = null; el.classList.remove('open'); return; }
+    list = document.createElement('div');
+    list.className = 'dd-list open';
+    const r = el.getBoundingClientRect();
+    list.style.left = r.left + 'px';
+    list.style.top = (r.bottom + 2) + 'px';
+    list.style.width = r.width + 'px';
+    options.forEach(opt => {
+      const row = document.createElement('div');
+      row.className = 'dd-row';
+      if (opt === val.textContent) row.classList.add('selected');
+      row.textContent = opt;
+      row.onclick = (e) => { e.stopPropagation(); val.textContent = opt; list.remove(); list = null; el.classList.remove('open'); };
+      list.appendChild(row);
+    });
+    document.body.appendChild(list);
+    el.classList.add('open');
+  });
+}
+function bindIconGrid(grid) {
+  grid.querySelectorAll('.ig-cell').forEach(c => {
+    c.addEventListener('click', () => {
+      grid.querySelectorAll('.ig-cell').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+    });
+  });
+}
+function wireInteractive(root) {
+  root.querySelectorAll('[data-cb]').forEach(bindCheckbox);
+  root.querySelectorAll('[data-confirm]').forEach(bindConfirmInline);
+  root.querySelectorAll('.slider').forEach(bindSlider);
+  root.querySelectorAll('[data-dd]').forEach(el => {
+    let opts;
+    try { opts = JSON.parse(el.dataset.dd); } catch { opts = []; }
+    bindDropdown(el, opts);
+  });
+  root.querySelectorAll('.icon-grid').forEach(bindIconGrid);
+  root.querySelectorAll('.cat-strip').forEach(strip => {
+    strip.querySelectorAll('.cat-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        strip.querySelectorAll('.cat-chip').forEach(x => x.classList.remove('selected'));
+        chip.classList.add('selected');
+      });
+    });
+  });
+  root.querySelectorAll('.tabs').forEach(group => {
+    group.querySelectorAll('.tab').forEach(t => {
+      t.onclick = () => {
+        group.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+      };
+    });
+  });
+}
+
+/* ============================================================
+   Object Spawner — matches the in-game screenshot
+   ============================================================ */
+function renderObject(body) {
+  const cats = [
+    ['c_all','All'], ['c_food','Food'], ['c_drink','Drinks'], ['c_veh','Vehicles'],
+    ['c_gun','Firearms'], ['c_melee','Melee'], ['c_ammo','Ammo'], ['c_clothes','Clothing'],
+    ['c_hat','Headgear'], ['c_mask','Masks'], ['c_glasses','Glasses'], ['c_top','Tops'],
+    ['c_pants','Pants'], ['c_vest','Vests'], ['c_gloves','Gloves'], ['c_shoes','Shoes'],
+    ['c_bag','Backpacks'], ['c_container','Containers'], ['c_items','Items'],
+    ['c_medical','Medical'], ['c_tools','Tools'], ['c_traps','Traps'], ['c_elec','Electronics'],
+    ['c_tent','Tents'], ['c_bomb','Explosives'], ['c_house','Buildings'], ['c_zombie','AI'],
+  ];
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: 36px 48px 1fr auto auto; height:100%; gap:6px; padding:8px; box-sizing:border-box;">
+      <!-- Row 1: SEARCH ANCHOR. User starts here, so it's the visual top. -->
+      <div class="row">
+        <button class="btn fixed-32" title="Refresh class list">${icons.refresh}</button>
+        <div class="search grow">
+          <span class="s-icon">${icons.search}</span>
+          <input placeholder="Search class name...">
+        </div>
+        <div class="cb checked" data-cb title="Match search against in-game display names"><span class="cb-box"></span><span class="cb-label">Display name</span></div>
+        <div class="cb" data-cb title="Show classes blacklisted by the module"><span class="cb-box"></span><span class="cb-label">Show unsafe</span></div>
+      </div>
+
+      <!-- Row 2: HORIZONTAL CATEGORY STRIP. Single row, scrolls horizontally. -->
+      <div class="cat-strip">
+        ${cats.map((c,i) =>
+          `<div class="cat-chip ${i===0?'selected':''}" title="${c[1]}">${icons[c[0]]}<span class="cat-chip-lbl">${c[1]}</span></div>`
+        ).join('')}
+      </div>
+
+      <!-- Row 3: BODY - list (60%) + preview (40%). Takes all remaining vertical space. -->
+      <div style="display:grid; grid-template-columns: 60% 40%; gap:6px; min-height:0; border:1px solid var(--stroke);">
+        <div class="list" style="border:0; border-right:1px solid var(--stroke); border-radius:0;">
+          ${['AKM','AKM_Black','AK101','AK74','M4A1','M16A2','M14','M249Para','SVD','VSS','Mosin9130','CZ527','CZ550','Famas','SSG82','UMP','MP5','Trumpet','Trumpet_Camo','PB6P9','PM73Rak','Mosin9130_Black','Winchester70','Repeater','BK43','BK18','SporterCarbine','Magnum','FNX45','Glock_19','MakarovIJ70','CZ75','Deagle','SkorpionVz61']
+            .map((c,i) => `<div class="list-row ${i===0?'selected':''}">${c}</div>`).join('')}
+        </div>
+        <div style="padding:8px; display:grid; gap:6px; grid-template-rows: auto 1fr auto;">
+          <div style="font-weight:700; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">Preview</div>
+          <div style="background:radial-gradient(circle at center, rgba(79,156,255,0.12), transparent 60%); border:1px solid var(--stroke); display:grid; place-items:center;">
+            <span style="color:var(--muted); font-size:12px;">[3D preview]</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; padding: 6px 8px; background:var(--surface-soft); border:1px solid var(--stroke);">
+            <span style="width:6px; height:14px; background:var(--accent);"></span>
+            <span style="font-size:13px; font-weight:700;">AKM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: SLIDERS. Each slider gets a full-width row so the track is
+           long enough to be readable and click-targets are large. -->
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div class="slider" data-min="0" data-max="100"><span class="sl-label">Quantity</span><span class="sl-track"><span class="sl-fill" style="width:100%"></span><span class="sl-handle" style="left:100%"></span></span><span class="sl-value">100</span></div>
+        <div class="slider" data-min="0" data-max="100"><span class="sl-label">Health</span><span class="sl-track"><span class="sl-fill" style="width:100%"></span><span class="sl-handle" style="left:100%"></span></span><span class="sl-value">100</span></div>
+        <div class="slider" data-min="-40" data-max="40" data-fmt="°"><span class="sl-label">Temperature</span><span class="sl-track"><span class="sl-fill" style="width:69%; background:var(--warn)"></span><span class="sl-handle" style="left:69%; background:#ffd86b; border-color:var(--warn)"></span></span><span class="sl-value">15°</span></div>
+      </div>
+
+      <!-- Row 5: ACTION FOOTER. Mode + Setup get more width; Spawn stays
+           prominent (success color + bold) but no longer hogs the row. -->
+      <div class="row" style="gap:6px;">
+        <span class="cinline fixed-32" data-confirm title="Delete object under cursor"><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+        <div class="dd grow" data-dd='["Crosshair","Self","Target","Selected Players","Selected Objects"]'><span class="dd-label">Mode</span><span class="dd-val">Crosshair</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+        <div class="dd grow" data-dd='["Debug Spawn","CE Spawn","None"]'><span class="dd-label">Setup</span><span class="dd-val">Debug</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+        <button class="btn success" style="height:36px; font-weight:700; font-size:14px; width:200px;">Spawn on Crosshair</button>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Player Manager — 800×600
+   Left 30%: list panel
+   Right 70%: identity + position + stats + actions, scrollable
+   ============================================================ */
+function renderPlayer(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-columns: 30% 70%; height:100%;">
+      <div style="display:grid; grid-template-rows: auto 1fr; border-right:1px solid var(--stroke);">
+        <div class="form-pane" style="border-bottom:1px solid var(--stroke); gap:8px;">
+          <div style="font-weight:700;">Players (44 / 60)</div>
+          <div class="search"><span class="s-icon">${icons.search}</span><input placeholder="Filter..."></div>
+          <div class="row" style="gap:6px;">
+            <button class="btn grow" style="font-size:11px;">Save</button>
+            <button class="btn grow" style="font-size:11px;">Load</button>
+          </div>
+          <div class="row" style="gap:6px;">
+            <button class="btn primary" style="font-size:11px; width:44px;">A/Z</button>
+            <button class="btn grow" style="font-size:11px;">Select All</button>
+            <button class="btn grow" style="font-size:11px;">Deselect All</button>
+          </div>
+        </div>
+        <div class="list">
+          ${['Survivor Admin','Jacob_Mango','Arkensor','DannyDog','Eight','RandomPlayer_1','Random_42','Player_NX','HE114','TestUser']
+            .map((p,i) => `<div class="list-row ${i===0?'selected':''}"><div class="cb checked" style="pointer-events:none; height:14px;"><span class="cb-box" style="width:14px; height:14px;"></span></div><span style="flex:1;">${p}</span>${i<2?'<span class="badge info" style="font-size:10px;"><span class="b-dot"></span>admin</span>':''}</div>`).join('')}
+        </div>
+      </div>
+      <div style="overflow:auto;">
+        <div class="form-pane">
+          <div class="section-title">Identity</div>
+          <div class="field"><span class="f-label">Name:</span><input value="Survivor Admin"></div>
+          <div class="field"><span class="f-label">GUID:</span><input value="bf5b9c..." readonly></div>
+          <div class="field"><span class="f-label">SteamID:</span><input value="76561198032148123" readonly></div>
+          <button class="btn full">Open Profile (Web)</button>
+
+          <div class="section-title" style="margin-top:6px;">Position</div>
+          <div class="row" style="gap:6px;">
+            <button class="btn grow" style="font-size:11px;">Rot.</button>
+            <button class="btn grow" style="font-size:11px;">${icons.copy} Copy</button>
+            <button class="btn grow" style="font-size:11px;">Paste</button>
+          </div>
+          <div class="row" style="gap:6px;">
+            <div class="field grow"><span class="f-label">X:</span><input value="7321.4"></div>
+            <div class="field grow"><span class="f-label">Y:</span><input value="0"></div>
+            <div class="field grow"><span class="f-label">Z:</span><input value="8264.2"></div>
+          </div>
+          <div class="row" style="gap:6px;">
+            <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+            <button class="btn grow">Set Position</button>
+          </div>
+          <div class="row" style="gap:6px;">
+            <button class="btn grow">Teleport to Me</button>
+            <button class="btn grow">Teleport Me To</button>
+            <button class="btn grow">Previous</button>
+          </div>
+
+          <div class="section-title" style="margin-top:6px;">Stats</div>
+          <div class="slider" data-min="0" data-max="100"><span class="sl-label">Health</span><span class="sl-track"><span class="sl-fill" style="width:78%"></span><span class="sl-handle" style="left:78%"></span></span><span class="sl-value">78</span></div>
+          <div class="slider" data-min="0" data-max="100"><span class="sl-label">Shock</span><span class="sl-track"><span class="sl-fill" style="width:50%"></span><span class="sl-handle" style="left:50%"></span></span><span class="sl-value">50</span></div>
+          <div class="slider" data-min="0" data-max="5000"><span class="sl-label">Blood</span><span class="sl-track"><span class="sl-fill" style="width:80%"></span><span class="sl-handle" style="left:80%"></span></span><span class="sl-value">4000</span></div>
+          <div class="slider" data-min="0" data-max="100"><span class="sl-label">Energy</span><span class="sl-track"><span class="sl-fill" style="width:60%"></span><span class="sl-handle" style="left:60%"></span></span><span class="sl-value">60</span></div>
+          <div class="slider" data-min="0" data-max="100"><span class="sl-label">Water</span><span class="sl-track"><span class="sl-fill" style="width:60%"></span><span class="sl-handle" style="left:60%"></span></span><span class="sl-value">60</span></div>
+          <div class="slider" data-min="0" data-max="100"><span class="sl-label">Stamina</span><span class="sl-track"><span class="sl-fill" style="width:100%"></span><span class="sl-handle" style="left:100%"></span></span><span class="sl-value">100</span></div>
+          <div class="row" style="gap:6px;">
+            <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+            <button class="btn primary grow">Apply</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+            ${['God Mode','Freeze','Invisibility','Bloody Hands','Unlimited Ammo','Unlimited Stamina','Broken Legs','Admin NVG','Remove Collision','Ignored by AI','Receive Dmg Dealt']
+              .map((t,i) => `<div class="cb ${i%3===0?'checked':''}" data-cb><span class="cb-box"></span><span class="cb-label">${t}</span></div>`).join('')}
+          </div>
+
+          <div class="section-title" style="margin-top:6px;">Quick Actions</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+            ${['Heal','Repair','Stop Bleeding','Dry'].map(b => `<button class="btn">${b}</button>`).join('')}
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+            ${['Spectate','Message','Vomit','Scale'].map(b => `<button class="btn">${b}</button>`).join('')}
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+            ${['Kill','Strip','Kick','Ban'].map(b => `<button class="btn danger">${b}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Ban Manager — 800×600
+   ============================================================ */
+function renderBan(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="row">
+        <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+        <div class="search grow"><span class="s-icon">${icons.search}</span><input placeholder="Search name / SteamID..."></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Ban Offline Player</div>
+      <div class="dd" data-dd='["Survivor Admin","Jacob_Mango","Player_42","RandomGuy","HE114"]'><span class="dd-label">Player:</span><span class="dd-val">Survivor Admin</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+      <div class="row">
+        <button class="btn danger grow">Ban Selected</button>
+        <button class="btn" style="width:28%;">Ban by ID</button>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Active Bans (12)</div>
+      <div class="row">
+        <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+        <button class="btn grow" disabled>Edit Duration</button>
+      </div>
+      <div class="list" style="max-height: 320px;">
+        <div class="list-row" style="background:rgba(5,8,14,0.7); font-size:11px; text-transform:uppercase; color:var(--muted); cursor:default;">
+          <div style="width:24px;"></div>
+          <div style="flex:1;">Player / SteamID</div>
+          <div style="width:30%;">Reason</div>
+          <div style="width:20%;">Expires</div>
+          <div style="width:18%;">Banned by</div>
+        </div>
+        ${[
+          ['Hacker_42','76561...23','Hacking',  '2026-12-31','Admin'],
+          ['Player_X', '76561...44','Spam',     'Permanent', 'Jacob'],
+          ['Random_88','76561...09','Bug abuse','2026-07-15','Arkensor'],
+          ['Hammer',   '76561...11','Toxicity', '2026-10-04','Eight'],
+        ].map(([n,sid,r,e,b]) => `
+          <div class="list-row">
+            <div class="cb" style="pointer-events:none; height:14px;"><span class="cb-box" style="width:14px; height:14px;"></span></div>
+            <div style="flex:1;"><div>${n}</div><div style="font-size:10px; color:var(--muted);">${sid}</div></div>
+            <div style="width:30%; color:var(--text-dim);">${r}</div>
+            <div style="width:20%; color:var(--text-dim);">${e}</div>
+            <div style="width:18%; color:var(--text-dim);">${b}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Role Manager — 800×600
+   ============================================================ */
+function renderRole(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-columns: 35% 65%; height:100%;">
+      <div style="border-right:1px solid var(--stroke); display:grid; grid-template-rows: auto auto 1fr;">
+        <div class="tabs"><span class="tab active">Roles</span><span class="tab">Players</span></div>
+        <div class="form-pane">
+          <div class="row">
+            <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+            <button class="btn success grow">+ New Role</button>
+          </div>
+        </div>
+        <div class="list">
+          ${['admin','moderator','helper','vip','everyone'].map((r,i) =>
+            `<div class="list-row ${i===0?'selected':''}">${r}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-pane" style="overflow:auto;">
+        <div class="row" style="margin-bottom:6px;">
+          <div style="flex:1; font-size:16px; font-weight:700;">Role: admin</div>
+          <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">Permissions</div>
+        ${[
+          ['Admin.Player', true,  ['Spawn','Teleport','Kick','Ban','Heal','SetStats','Strip']],
+          ['Admin.Vehicle', true, ['Spawn','Delete','Teleport','Repair']],
+          ['Admin.Weather', false,['Modify','Preset.Save','Preset.Delete']],
+        ].map(([cat, open, children]) => `
+          <div class="cot-surface" style="margin-bottom:6px;">
+            <div class="row" style="padding:8px 12px; cursor:pointer; border-bottom:${open?'1px solid var(--stroke)':'0'};">
+              <span style="color:var(--accent);">${open?'▼':'▶'}</span>
+              <span style="font-weight:700; flex:1;">${cat}</span>
+              <span class="badge ${open?'good':''}"><span class="b-dot"></span>${open?'allowed':'inherit'}</span>
+            </div>
+            ${open ? `<div style="padding:10px 12px;">${children.map(c => `<div class="cb checked" data-cb style="padding-left:20px;"><span class="cb-box"></span><span class="cb-label">${c}</span></div>`).join('')}</div>` : ''}
+          </div>
+        `).join('')}
+        <div class="row" style="margin-top:6px;">
+          <button class="btn grow">Reset</button>
+          <button class="btn success grow">Save Permissions</button>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Teleport — 400×510
+   ============================================================ */
+function renderTeleport(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto 1fr auto; height:100%;">
+      <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+        <div class="search"><span class="s-icon">${icons.search}</span><input placeholder="Filter locations..."></div>
+        <div class="dd" data-dd='["ALL","Cities","Military","PoIs","Custom"]'><span class="dd-label">Category:</span><span class="dd-val">ALL</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+      </div>
+      <div class="list">
+        ${['Cherno - Spawn','NWAF - Tents','Berezino - Hospital','Stary - Tents','Tisy - Bunker','Krasno - Hospital','Lopatino - Bunker','Pavlovo - Bunker','Gorka - PD','Polana - Bunker']
+          .map((n,i) => `<div class="list-row ${i===2?'selected':''}">${n}</div>`).join('')}
+      </div>
+      <div class="form-pane" style="border-top:1px solid var(--stroke);">
+        <div class="row" style="gap:6px;">
+          <div class="field grow"><span class="f-label">X:</span><input value="7321.4" readonly></div>
+          <div class="field grow"><span class="f-label">Z:</span><input value="8264.2" readonly></div>
+        </div>
+        <button class="btn primary full">Teleport</button>
+        <div class="field"><span class="f-label">Name</span><input placeholder="Enter a name..."></div>
+        <div class="search"><span class="s-icon">${icons.search}</span><input placeholder="Category (autocomplete)..."></div>
+        <div class="row">
+          <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+          <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+          <button class="btn success grow">Add</button>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Camera — 800×650
+   ============================================================ */
+function renderCamera(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto 1fr; height:100%;">
+      <div class="form-pane">
+        <div class="dd" data-dd='["Effects","Traveling","Bookmarks","Settings"]'><span class="dd-label">Panel:</span><span class="dd-val">Traveling</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+      </div>
+      <div class="form-pane" style="overflow:auto;">
+        <div class="section-title">Waypoint Editor</div>
+        <div class="dd" data-dd='["Waypoint 1 (5.0 m/s)","Waypoint 2 (3.0 m/s)","Waypoint 3 (7.5 m/s)"]'><span class="dd-label">Select:</span><span class="dd-val">Waypoint 2 (3.0 m/s)</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+          <button class="btn">Add</button>
+          <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+          <button class="btn">Up</button>
+          <button class="btn">Down</button>
+        </div>
+        <button class="btn full">Clear All</button>
+
+        <div class="section-title" style="margin-top:6px;">Edit Selected</div>
+        <button class="btn full">Capture Position</button>
+        <div class="slider" data-min="0.1" data-max="50"><span class="sl-label">Speed (m/s)</span><span class="sl-track"><span class="sl-fill" style="width:6%"></span><span class="sl-handle" style="left:6%"></span></span><span class="sl-value">3.0</span></div>
+        <div class="slider" data-min="0" data-max="10" data-fmt="s"><span class="sl-label">Hold Time</span><span class="sl-track"><span class="sl-fill" style="width:0%"></span><span class="sl-handle" style="left:0%"></span></span><span class="sl-value">0s</span></div>
+        <div class="row">
+          <div class="cb grow" data-cb><span class="cb-box"></span><span class="cb-label">Catmull-Rom</span></div>
+          <div class="cb grow" data-cb><span class="cb-box"></span><span class="cb-label">Track Target</span></div>
+        </div>
+
+        <div class="section-title" style="margin-top:6px;">Path Actions</div>
+        <div class="row">
+          <button class="btn grow">Play</button>
+          <button class="btn grow">Stop</button>
+        </div>
+        <div class="field"><span class="f-label">Path Name</span><input value="cinematic-1"></div>
+        <div class="row">
+          <button class="btn grow">Save</button>
+          <button class="btn grow">Load</button>
+          <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Weather — 800×600
+   ============================================================ */
+function renderWeather(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto auto 1fr; height:100%;">
+      <div class="form-pane">
+        <div class="row">
+          <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+          <button class="btn grow">Presets ▾</button>
+          <button class="btn success grow">Apply</button>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
+          <div class="cb checked" data-cb><span class="cb-box"></span><span class="cb-label">Easy Mode</span></div>
+          <div class="cb" data-cb><span class="cb-box"></span><span class="cb-label">Freeze Time</span></div>
+          <div class="cb checked" data-cb><span class="cb-box"></span><span class="cb-label">Auto-Refresh</span></div>
+        </div>
+      </div>
+      <div class="form-pane" style="border-top:1px solid var(--stroke); border-bottom:1px solid var(--stroke);">
+        <div class="section-title">Quick Actions</div>
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:6px;">
+          ${['Clear','Cloudy','Rainy','Snowy','Storm'].map(b => `<button class="btn">${b}</button>`).join('')}
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
+          ${['Night','Dusk','Day','Dawn'].map(b => `<button class="btn">${b}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-pane" style="overflow:auto;">
+        <div class="section-title">Date / Time</div>
+        <div class="row" style="gap:6px;">
+          <div class="field" style="width:90px;"><span class="f-label" style="min-width:auto;">Year:</span><input value="2026"></div>
+          <div class="slider grow" data-min="1" data-max="12"><span class="sl-label">Month</span><span class="sl-track"><span class="sl-fill" style="width:50%"></span><span class="sl-handle" style="left:50%"></span></span><span class="sl-value">6</span></div>
+        </div>
+        <div class="slider" data-min="1" data-max="31"><span class="sl-label">Day</span><span class="sl-track"><span class="sl-fill" style="width:80%"></span><span class="sl-handle" style="left:80%"></span></span><span class="sl-value">24</span></div>
+        <div class="slider" data-min="0" data-max="23"><span class="sl-label">Hour</span><span class="sl-track"><span class="sl-fill" style="width:55%"></span><span class="sl-handle" style="left:55%"></span></span><span class="sl-value">13</span></div>
+        <div class="slider" data-min="0" data-max="59"><span class="sl-label">Minute</span><span class="sl-track"><span class="sl-fill" style="width:50%"></span><span class="sl-handle" style="left:50%"></span></span><span class="sl-value">30</span></div>
+
+        <div class="section-title" style="margin-top:6px;">Detail</div>
+        ${[
+          ['Overcast', 30], ['Storm Density', 0], ['Storm Threshold', 0],
+          ['Fog', 0], ['Dynamic Fog', 0], ['Rain', 0],
+          ['Rain Threshold', 0], ['Snow', 0], ['Snow Threshold', 0],
+          ['Wind Magnitude', 5], ['Wind Direction', 90],
+        ].map(([n,v]) =>
+          `<div class="slider" data-min="0" data-max="100"><span class="sl-label">${n}</span><span class="sl-track"><span class="sl-fill" style="width:${v}%"></span><span class="sl-handle" style="left:${v}%"></span></span><span class="sl-value">${v}</span></div>`
+        ).join('')}
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Map — 900×700
+   ============================================================ */
+function renderMap(body) {
+  // The actual map root is a FrameWidgetClass COTMap. FrameWidget does NOT
+  // support styles — so any `style COTSurface` here is silently ignored
+  // (background invisible). Tag for the frame-style quirk overlay.
+  body.innerHTML = `
+    <div class="frame-styled" data-layout-widget="FrameWidget" style="position:relative; width:100%; height:100%; background: radial-gradient(circle at 60% 40%, rgba(73,184,117,0.08), transparent 40%), linear-gradient(180deg, #1a2228, #0e1216);">
+      <div style="position:absolute; inset:20px; border:1px dashed var(--stroke); display:grid; place-items:center; color:var(--muted); font-size:13px;">
+        [DayZ MapWidget — players, markers, safe-zones]
+      </div>
+      <div style="position:absolute; top:14px; left:14px; display:flex; gap:8px;">
+        <button class="btn">Players</button>
+        <button class="btn">Markers</button>
+        <button class="btn">Safe Zones</button>
+      </div>
+      <div style="position:absolute; bottom:14px; right:14px;">
+        <span class="badge info"><span class="b-dot"></span>Double-click to teleport</span>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Loot Analysis — 800×600
+   ============================================================ */
+function renderLootAnalysis(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto auto auto 1fr auto; height:100%;">
+      <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+        <div class="row">
+          <button class="btn primary grow">Item Scan</button>
+          <button class="btn grow">Loot Distribution</button>
+        </div>
+      </div>
+      <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+        <div style="display:grid; grid-template-columns: repeat(8, 1fr); gap:6px;">
+          ${['All','Food','Vehicles','Firearms','Ammo','Clothing','Containers','Items'].map((c,i) =>
+            `<button class="btn ${i===3?'primary':''}" style="font-size:11px; padding:0 6px;">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+        <div class="row">
+          <div class="search grow"><span class="s-icon">${icons.search}</span><input placeholder="Search by classname..."></div>
+          <button class="btn fixed-32">${icons.close}</button>
+        </div>
+      </div>
+      <div class="list">
+        ${['AK74_Magazine','AK74_RailHndgrd','AK74_Wood_Bttstck','M16_30Rnd_Mag','PistolMag_M1911','SVD_Magazine']
+          .map((n,i) => `<div class="list-row ${i===0?'selected':''}">${n}</div>`).join('')}
+      </div>
+      <div class="form-pane" style="border-top:1px solid var(--stroke);">
+        <div class="row">
+          <button class="btn grow">Show On Map</button>
+          <button class="btn grow">Clear Markers</button>
+          <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   ESP — 700×600
+   ============================================================ */
+function renderESP(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto auto 1fr; height:100%;">
+      <div class="form-pane">
+        <div style="display:grid; grid-template-columns: auto 1fr; gap:8px;">
+          <button class="btn primary">Toggle ESP</button>
+          <div class="col" style="gap:6px;">
+            <div class="cb checked" data-cb><span class="cb-box"></span><span class="cb-label">Use Class Name</span></div>
+            <div class="cb" data-cb><span class="cb-box"></span><span class="cb-label">Disable Safety</span></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="cb checked" data-cb style="flex:1;"><span class="cb-box"></span><span class="cb-label">Auto-Refresh</span></div>
+          <div class="slider grow" data-min="1" data-max="10" data-fmt="s"><span class="sl-label">Rate</span><span class="sl-track"><span class="sl-fill" style="width:30%"></span><span class="sl-handle" style="left:30%"></span></span><span class="sl-value">3s</span></div>
+        </div>
+        <div class="row">
+          <div class="dd grow" data-dd='["None","Others","All"]'><span class="dd-label">Skeletons:</span><span class="dd-val">Others</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+          <div class="dd grow" data-dd='["1","2","3","4"]'><span class="dd-label">Line:</span><span class="dd-val">2</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+        </div>
+        <div class="row">
+          <div class="slider grow" data-min="0" data-max="3000" data-fmt="m"><span class="sl-label">Radius</span><span class="sl-track"><span class="sl-fill" style="width:25%"></span><span class="sl-handle" style="left:25%"></span></span><span class="sl-value">750m</span></div>
+        </div>
+        <div class="search"><span class="s-icon">${icons.search}</span><input placeholder="Class filter..."></div>
+      </div>
+      <div class="form-pane" style="border-top:1px solid var(--stroke); border-bottom:1px solid var(--stroke);">
+        <div class="row">
+          <button class="btn grow">Select All</button>
+          <button class="btn grow">Deselect All</button>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; height:100%;">
+        <div class="list" style="border:0; border-right:1px solid var(--stroke); border-radius:0;">
+          ${['Players','Zombies','Animals','Vehicles','Buildings','Safes','Explosives','Loot','Magazines','Weapons']
+            .map((c,i) => `<div class="list-row"><div class="cb ${i<3?'checked':''}" style="pointer-events:none; height:14px;"><span class="cb-box" style="width:14px; height:14px;"></span></div>${c}</div>`).join('')}
+        </div>
+        <div style="display:grid; grid-template-rows: auto 1fr auto;">
+          <div class="form-pane">
+            <div class="section-title">Selected Items (3)</div>
+            <div class="row"><button class="btn grow">Select All</button><button class="btn grow">Deselect All</button></div>
+          </div>
+          <div class="list" style="border:0; border-radius:0;">
+            ${['M4A1 — 7321,8264','AKM — 7401,8211','Player_42 — 7250,8180'].map((n,i) =>
+              `<div class="list-row"><div class="cb ${i===0?'checked':''}" style="pointer-events:none; height:14px;"><span class="cb-box" style="width:14px; height:14px;"></span></div>${n}</div>`).join('')}
+          </div>
+          <div class="form-pane">
+            <div class="row">
+              <button class="btn grow">Export</button>
+              <div class="dd grow" data-dd='["Raw","Types","Market","Loadout"]'><span class="dd-val">Raw</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+            </div>
+            <div class="row">
+              <button class="btn grow">Move To Cursor</button>
+              <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Loadout — 600×350
+   ============================================================ */
+function renderLoadout(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="row">
+        <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+        <div class="dd grow" data-dd='["Crosshair","Target","Selected Players"]'><span class="dd-val">Crosshair</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+      </div>
+      <div class="divider"></div>
+      ${['Survivor Default','Tactical Operator','Hospital Doctor','Construction Worker','Bandit Outfit','Police Patrol','Hunter Setup','Winter Gear']
+        .map(n => `
+          <div class="row">
+            <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            <div style="flex:1; font-size:13px;">${n}</div>
+            <button class="btn primary" style="width:25%;">Spawn</button>
+          </div>
+        `).join('')}
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Compensations — 500×400
+   ============================================================ */
+function renderCompensations(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="row">
+        <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+        <div class="dd grow" data-dd='["Crosshair","Selected Players"]'><span class="dd-val">Crosshair</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+      </div>
+      <div class="search"><span class="s-icon">${icons.search}</span><input placeholder="Search by name or Steam ID..."></div>
+      <div class="divider"></div>
+      ${[
+        ['Survivor Admin (76561198032148123)', ['2026-06-22 14:30','2026-06-15 09:12','2026-06-01 21:45']],
+        ['Player_42 (76561197960287930)',      ['2026-06-20 12:00']],
+      ].map(([name, dates]) => `
+        <div style="font-weight:700; padding:6px 0;">${name}</div>
+        ${dates.map(d => `
+          <div class="row" style="padding-left:8px;">
+            <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            <div style="flex:1; font-size:12px; color:var(--text-dim);">${d}</div>
+            <button class="btn primary" style="width:25%;">Spawn</button>
+          </div>
+        `).join('')}
+      `).join('')}
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Vehicles — 1000×650
+   ============================================================ */
+function renderVehicles(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-columns: 35% 65%; height:100%;">
+      <div style="display:grid; grid-template-rows: auto auto 1fr; border-right:1px solid var(--stroke);">
+        <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+          <div style="text-align:center; font-weight:700; font-size:14px;">Vehicle List</div>
+        </div>
+        <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+          <div class="row">
+            <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+            <div class="search grow"><span class="s-icon">${icons.search}</span><input placeholder="Search"></div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
+            <span class="cinline" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            <button class="btn" style="font-size:11px; padding:0 6px;">Del Destroyed</button>
+            <button class="btn" style="font-size:11px; padding:0 6px;">Del Unclaimed</button>
+          </div>
+        </div>
+        <div class="list">
+          ${['M1025 Armored','OffroadHatchback','CivilianSedan','Truck_01','V3S Cargo','UAZ469','MH-6 LittleBird','Hummer','Ural Truck','Olga 24','Sarka 120']
+            .map((n,i) => `<div class="list-row ${i===0?'selected':''}">${n}</div>`).join('')}
+        </div>
+      </div>
+      <div style="display:grid; grid-template-rows: 50% 50%;">
+        <div style="position:relative; background: radial-gradient(circle at 50% 50%, rgba(79,156,255,0.06), transparent 40%), linear-gradient(180deg, #18222a, #0e1216); border-bottom:1px solid var(--stroke);">
+          <div style="position:absolute; inset:20px; border:1px dashed var(--stroke); display:grid; place-items:center; color:var(--muted); font-size:13px;">[Vehicle map markers]</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 50% 50%;">
+          <div class="form-pane" style="overflow:auto; border-right:1px solid var(--stroke);">
+            <div class="section-title">Options</div>
+            <span class="cinline" data-confirm style="width:100%;"><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            ${['Repair','Refuel','Unstuck','Cover/Uncover','Lock/Unlock','UnPair Keys','Teleport To Vehicle','Teleport Vehicle To Me','Return']
+              .map(b => `<button class="btn">${b}</button>`).join('')}
+          </div>
+          <div class="form-pane" style="overflow:auto;">
+            <div class="section-title">Information</div>
+            ${[
+              ['Name','M1025 Armored'],
+              ['ClassName','OffroadHatchback'],
+              ['Status','Healthy'],
+              ['Type','Wheeled'],
+              ['ID','42'],
+              ['Position','7321 / 0 / 8264'],
+              ['Rotation','0,0,90'],
+              ['Owner','Survivor Admin'],
+              ['Last Driver','—'],
+              ['Covered','No'],
+            ].map(([k,v]) => `
+              <div class="row" style="font-size:12px;">
+                <button class="btn icon" title="Copy" style="width:22px; height:22px;">${icons.copy}</button>
+                <div style="flex:1;"><strong>${k}:</strong> <span style="color:var(--text-dim);">${v}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Territory — 500×500
+   ============================================================ */
+function renderTerritory(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="row">
+        <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+        <div style="flex:1; font-size:13px; color:var(--muted);">Expansion territories</div>
+      </div>
+      <div class="divider"></div>
+      ${['Northern Stronghold','Cherno Coast','Berezino Outpost','Tisy Compound','Stary Sobor Base']
+        .map((n,i) => {
+          const cur = (i+1) * 2 + 1, max = 7;
+          return `
+            <div class="row" style="border-top:1px solid rgba(155,184,218,0.08); padding-top:8px;">
+              <div style="flex:1;">${n} [${cur}/${max}]</div>
+              <button class="btn icon" title="Downgrade" style="width:32px; font-size:14px;">▼</button>
+              <button class="btn icon primary" title="Upgrade" style="width:32px; font-size:14px;">▲</button>
+            </div>`;
+        }).join('')}
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Events — 700×500
+   ============================================================ */
+function renderEvents(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-columns: 50% 50%; height:100%;">
+      <div style="display:grid; grid-template-rows: auto auto 1fr; border-right:1px solid var(--stroke);">
+        <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+          <div style="font-weight:700; font-size:13px;">Active Events (3)</div>
+        </div>
+        <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+          <div class="row">
+            <button class="btn fixed-32" title="Refresh">${icons.refresh}</button>
+            <div class="search grow"><span class="s-icon">${icons.search}</span><input placeholder="Filter events..."></div>
+          </div>
+        </div>
+        <div class="list">
+          ${['Helicopter Crash — Berezino','Contaminated Zone — Tisy','Airdrop — NWAF','Helicopter Crash — Polana','Contaminated Zone — Pavlovo']
+            .map((n,i) => `<div class="list-row ${i===0?'selected':''}">${n}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-pane" style="overflow:auto;">
+        <div class="section-title">Event Details</div>
+        <div class="field"><span class="f-label">Name:</span><input value="Helicopter Crash" readonly></div>
+        <div class="field"><span class="f-label">Position:</span><input value="9234.1 / 0 / 5421.8" readonly></div>
+        <div class="field"><span class="f-label">Spawned:</span><input value="2026-06-24 13:42:11" readonly></div>
+        <div class="field"><span class="f-label">Despawn:</span><input value="14:42:11 (in 28m)" readonly></div>
+
+        <div class="section-title" style="margin-top:8px;">Actions</div>
+        <button class="btn full">Show on Map</button>
+        <button class="btn full">Teleport to Event</button>
+        <button class="btn full primary">Reset Despawn Timer</button>
+        <span class="cinline" data-confirm style="width:100%;"><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+
+        <div class="section-title" style="margin-top:8px;">Spawn New</div>
+        <div class="dd" data-dd='["Helicopter Crash","Airdrop","Contaminated Zone","Police Car","Hunting Tower"]'><span class="dd-label">Type:</span><span class="dd-val">Helicopter Crash</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+        <button class="btn success full">Spawn at Crosshair</button>
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Webhook — 400×500
+   ============================================================ */
+function renderWebhook(body) {
+  body.innerHTML = `
+    <div style="display:grid; grid-template-rows: auto 1fr; height:100%;">
+      <div class="form-pane" style="border-bottom:1px solid var(--stroke);">
+        <div class="row">
+          <div style="flex:1; font-weight:700;">Webhooks (2)</div>
+          <button class="btn success" style="width:50%;">+ Add Webhook</button>
+        </div>
+      </div>
+      <div class="form-pane" style="overflow:auto;">
+        ${[
+          ['Discord-Admin','https://discord.com/api/webhooks/xxx', ['Ban','Kick','SpawnObject']],
+          ['Discord-Logs','https://discord.com/api/webhooks/yyy', ['Login','Logout','Death']],
+        ].map(([name, url, evts]) => `
+          <div class="cot-surface" style="padding:8px; margin-bottom:10px;">
+            <div style="background:rgba(5,8,14,0.6); padding:6px 10px; margin:-8px -8px 8px; border-bottom:1px solid var(--stroke);">
+              <strong>[ ${name} ]</strong>
+            </div>
+            <div class="col">
+              <div class="field"><span class="f-label">Name:</span><input value="${name}"></div>
+              <div class="field"><span class="f-label">URL:</span><input value="${url}"></div>
+              <div class="field"><span class="f-label">GUID:</span><input placeholder="(all)"></div>
+              <div class="field"><span class="f-label">Role:</span><input placeholder="(all)"></div>
+              <div class="row">
+                <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+                <button class="btn success grow">Save</button>
+              </div>
+              <div class="divider"></div>
+              <div class="section-title">Event Types</div>
+              ${evts.map(e => `
+                <div class="row">
+                  <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+                  <div class="cb checked grow" data-cb><span class="cb-box"></span><span class="cb-label">${e}</span></div>
+                </div>`).join('')}
+              <div class="row">
+                <div class="dd grow" data-dd='["TeleportPlayer","SetGodMode","Heal","Repair"]'><span class="dd-val">Add event type</span><span class="dd-arrow">${icons.arrowDn}</span></div>
+                <button class="btn success" style="width:25%;">Add</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Server Info — 400×450
+   ============================================================ */
+function renderServerInfo(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="section-title">Server</div>
+      ${[
+        ['Name','My DayZ Server'],
+        ['Version','1.29.163047'],
+        ['Map','sakhal'],
+        ['Players','44 / 60'],
+        ['Uptime','2d 14h 22m'],
+        ['Tick rate','20 Hz'],
+        ['IP','127.0.0.1:2302'],
+      ].map(([k,v]) => `
+        <div class="row" style="font-size:13px; padding:6px 0; border-bottom:1px solid rgba(155,184,218,0.08);">
+          <div style="flex:1; color:var(--muted);">${k}</div>
+          <div style="color:var(--text-dim);">${v}</div>
+        </div>`).join('')}
+      <div class="section-title" style="margin-top:8px;">Settings</div>
+      ${[
+        ['Third Person',true],
+        ['Crosshair',false],
+        ['Persistence',true],
+        ['Whitelist',false],
+      ].map(([k,v]) => `<div class="cb ${v?'checked':''}" data-cb><span class="cb-box"></span><span class="cb-label">${k}</span></div>`).join('')}
+      <div class="section-title" style="margin-top:8px;">Actions</div>
+      <button class="btn full">Save Server Settings</button>
+      <button class="btn full danger">Restart Server</button>
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Namalsk — 500×400
+   ============================================================ */
+function renderNamalsk(body) {
+  body.innerHTML = `
+    <div class="form-pane" style="height:100%; overflow:auto;">
+      <div class="section-title">Namalsk Events</div>
+      ${['EVRStorm','EVRBlizzard','NM_Athena','NM_Anomaly_Storm','NM_Lantia_Distress']
+        .map(n => `
+          <div class="row" style="padding:8px 0; border-bottom:1px solid rgba(155,184,218,0.08);">
+            <div style="flex:1; font-weight:700;">${n}</div>
+            <span class="cinline fixed-32" data-confirm><span class="ci-icon">${icons.trash}</span><span class="ci-ok">OK</span><span class="ci-cancel">X</span></span>
+            <button class="btn success" style="width:30%;">Start</button>
+          </div>`).join('')}
+    </div>
+  `;
+  wireInteractive(body);
+}
+
+/* ============================================================
+   Engine-quirk + scaling controls
+   ============================================================ */
+/* DayZ scales the UI based on resolution. The engine uses a virtual
+   "safezone" coordinate space and maps it to actual pixels; effectively
+   the same layout renders larger at 4K and smaller at 720p. We simulate
+   that by multiplying a base ratio (currentRes / 1080) with the user's
+   UI Scale slider. */
+function applyScale() {
+  const res = document.getElementById('resPicker').value;
+  const scaleSlider = parseFloat(document.getElementById('uiScale').value);
+  document.getElementById('uiScaleVal').textContent = scaleSlider.toFixed(2) + 'x';
+  const [w, h] = res.split('x').map(Number);
+  // DayZ ties UI size to vertical resolution. 1080 = baseline.
+  const resRatio = h / 1080;
+  const effective = resRatio * scaleSlider;
+  const ws = document.getElementById('workspace');
+  // CSS `zoom` scales the whole workspace including hit-testing, which is
+  // closest to what the engine does. Transform: scale() would break drag
+  // math because the parent rect stays the unscaled size.
+  ws.style.zoom = effective.toFixed(3);
+  // Annotate picker so user knows what they're looking at.
+  const meta = document.getElementById('pkMeta');
+  if (meta) {
+    const baseTxt = meta.dataset.base || meta.textContent;
+    if (!meta.dataset.base) meta.dataset.base = baseTxt;
+    meta.textContent = `${baseTxt} — ${res} @ ${effective.toFixed(2)}x effective`;
+  }
+}
+document.getElementById('resPicker').addEventListener('change', applyScale);
+document.getElementById('uiScale').addEventListener('input', applyScale);
+
+function wireQuirk(id, cls) {
+  const el = document.getElementById(id);
+  el.addEventListener('change', () => {
+    document.body.classList.toggle(cls, el.checked);
+  });
+}
+wireQuirk('quirkBadStyle',     'quirk-bad-style');
+wireQuirk('quirkFrameStyle',   'quirk-frame-style');
+wireQuirk('quirkOverflow',     'quirk-overflow');
+wireQuirk('quirkFontFallback', 'quirk-font-fallback');
+
+/* Auto-tag overflow-risk widgets after every render. We mark labels that
+   are likely to clip in-game: text whose rendered width (in MetronLight)
+   exceeds the parent column. The mockup uses the real Metron font now,
+   so we can measure with canvas.measureText. */
+const _measureCanvas = document.createElement('canvas');
+const _measureCtx = _measureCanvas.getContext('2d');
+function measureLabel(text, pxFont) {
+  _measureCtx.font = pxFont + 'px MetronLight, "Segoe UI", sans-serif';
+  return _measureCtx.measureText(text || '').width;
+}
+function tagOverflowRisks(scope) {
+  scope = scope || document;
+  // Heuristic: any element with class 'lbl', 'cb-label', 'btn-label', 'opt-label'
+  // whose own text overruns its bounding box at the default font size.
+  const sels = ['.lbl', '.cb-label', '.btn-label', '.opt-label', '.input-label', '.tile-label'];
+  scope.querySelectorAll(sels.join(',')).forEach(el => {
+    const txt = el.textContent.trim();
+    if (!txt) return;
+    const cs = getComputedStyle(el);
+    const fs = parseFloat(cs.fontSize) || 13;
+    const w  = measureLabel(txt, fs);
+    const bw = el.clientWidth;
+    if (bw > 0 && w > bw - 4) {
+      el.classList.add('overflow-risk');
+      el.setAttribute('data-overflow', `clips: ${Math.round(w)} > ${bw}px`);
+    } else {
+      el.classList.remove('overflow-risk');
+      el.removeAttribute('data-overflow');
+    }
+  });
+}
+// Re-tag after every form open + after every resize.
+const _origOpenForm = openForm;
+window.openForm = function(id) {
+  _origOpenForm(id);
+  requestAnimationFrame(() => tagOverflowRisks());
+};
+window.addEventListener('resize', () => tagOverflowRisks());
+// Also re-tag periodically because window-resize handlers in this mockup
+// mutate widget bounds without firing the window 'resize' event.
+setInterval(() => tagOverflowRisks(), 750);
+
+/* ============================================================
+   Init
+   ============================================================ */
+buildPicker();
+buildSidebar();
+openForm('object');
+applyScale();
+</script>
+</body>
+</html>

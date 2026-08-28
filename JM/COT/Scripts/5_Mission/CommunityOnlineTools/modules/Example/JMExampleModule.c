@@ -32,12 +32,17 @@ class JMExampleModule: JMRenderableModuleBase
 	
 	override string GetIconName()
 	{
-		return "E";
+		return JMConstants.Lucide( "info" );
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()

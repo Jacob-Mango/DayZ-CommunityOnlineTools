@@ -62,8 +62,6 @@ class UIActionEditableTextPreview: UIActionEditableText
 
 		if ( preview != "" )
 		{
-			//! @note OnKeyPress seems to only receive letter/number key events, not control characters like tab, return/enter etc
-			//! so this doesn't currently work
 			if ( key == KeyCode.KC_TAB || key == KeyCode.KC_RETURN || key == KeyCode.KC_NUMPADENTER )
 			{
 				m_Text.SetText(preview);
@@ -78,11 +76,9 @@ class UIActionEditableTextPreview: UIActionEditableText
 	{
 		super.SetEditBoxWidth(width);
 
-		float w;
-		float h;
-		
-		m_TextPreview.GetSize( w, h );
-		m_TextPreview.SetSize( width, h );
-		m_TextPreview.Update();
+		// The ghost-text preview is a sibling of the field, laid out on top of
+		// it, so it has to match the field's new width.
+		if ( m_TextPreview )
+			SetWidgetWidth( m_TextPreview, width );
 	}
 }

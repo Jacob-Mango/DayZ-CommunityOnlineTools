@@ -1,0 +1,230 @@
+PanelWidgetClass player_inventory_cell {
+ visible 1
+ ignorepointer 0
+ color 0 0 0 0
+ position 0 0
+ size 72 72
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ {
+  PanelWidgetClass cell_fill {
+   ignorepointer 1
+   position 2 2
+   size 68 68
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.133 0.161 0.196 0.902
+   style COTBox8Set
+  }
+  PanelWidgetClass cell_preview_frame {
+   clipchildren 1
+   ignorepointer 1
+   color 0 0 0 0
+   style blank
+   position 4 4
+   size 64 64
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   {
+    ItemPreviewWidgetClass cell_preview {
+     visible 0
+     clipchildren 1
+     inheritalpha 0
+     ignorepointer 1
+     color 0.702 0.702 0.702 1
+     position 0 0
+     size 1 1
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 0
+     scaled 1
+     priority 151
+    }
+   }
+  }
+  ImageWidgetClass cell_ghost {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 0 0
+   size 40 40
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.925 0.976 1.000 0.298
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  MultilineTextWidgetClass cell_name {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 8 8
+   size 56 40
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style DayZNormal
+   text ""
+   font "gui/fonts/sdf_MetronLight24"
+   color 0.925 0.976 1.000 0.702
+   "exact text" 1
+   "exact text size" 10
+   "text halign" center
+   "text valign" center
+   wrap 1
+  }
+  TextWidgetClass cell_quantity {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 6 46
+   size 58 12
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   text ""
+   font "gui/fonts/sdf_MetronLight24"
+   color 0.925 0.976 1.000 0.851
+   "exact text" 1
+   "exact text size" 11
+   "text halign" right
+   "text valign" center
+  }
+  PanelWidgetClass cell_quantity_track {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 6 60
+   size 60 6
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.082 0.098 0.118 0.941
+   style COTPill6Set
+  }
+  PanelWidgetClass cell_quantity_fill {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 6 60
+   size 60 6
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.376 0.365 1.000 1.000
+   style COTPill6Set
+  }
+  ImageWidgetClass cell_expand {
+   priority 200
+   visible 0
+   ignorepointer 1
+   position 6 6
+   size 12 12
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass cell_health_ring {
+   priority 200
+   ignorepointer 1
+   position 54 5
+   size 12 12
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.035 0.035 0.043 0.902
+   image0 "set:cot_gui image:circle_fill"
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass cell_health_dot {
+   priority 200
+   ignorepointer 1
+   position 55 6
+   size 10 10
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.000 0.827 0.565 1.000
+   image0 "set:cot_gui image:circle_fill"
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  PanelWidgetClass cell_ring_inner {
+   visible 0
+   priority 200
+   ignorepointer 1
+   position 3 3
+   size 66 66
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.376 0.365 1.000 1.000
+   style COTBox8LineSet
+  }
+  PanelWidgetClass cell_ring {
+   priority 200
+   ignorepointer 1
+   position 2 2
+   size 68 68
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.925 0.976 1.000 0.302
+   style COTBox8LineSet
+  }
+ }
+}
