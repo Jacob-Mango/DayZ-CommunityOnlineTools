@@ -2,7 +2,7 @@ PanelWidgetClass JMPlayerRowWidget {
  ignorepointer 1
  color 0 0 0 0
  position 0 0
- size 1 30
+ size 1 28
  valign center_ref
  hexactpos 0
  vexactpos 0
@@ -10,74 +10,269 @@ PanelWidgetClass JMPlayerRowWidget {
  vexactsize 1
  scriptclass "JMPlayerRowWidget"
  {
-  GridSpacerWidgetClass player_row_grid {
+  PanelWidgetClass row_fill {
+   ignorepointer 1
    position 0 0
    size 1 1
+   halign left_ref
+   valign top_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   Columns 2
-   Rows 1
-   content_halign left
-   "Size To Content H" 1
+   color 0 0 0 0
+   style COTField4Set
+  }
+  PanelWidgetClass row_focus_bar {
+   visible 0
+   ignorepointer 1
+   position 0 0
+   size 3 18
+   halign left_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   color 0.376 0.365 1.000 1.000
+   style COTPill11Set
+  }
+  ButtonWidgetClass button {
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style Empty
    {
-    PanelWidgetClass checkbox_wrapper {
-     ignorepointer 0
-     color 0 0 0 0
-     position 0 0
-     size 30 1
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 0
-     fixaspect fixwidth
-     {
-      CheckBoxWidgetClass checkbox {
-       ignorepointer 0
-       color 1 1 1 1
-       position 0 0
-       size 24 24
-       halign center_ref
-       valign center_ref
-       hexactpos 0
-       vexactpos 0
-       hexactsize 1
-       vexactsize 1
-       scaled 0
-       style Default
-       checked 0
-      }
-     }
-    }
-    ButtonWidgetClass button {
-     ignorepointer 0
+    TextWidgetClass text_name {
+     ignorepointer 1
      position 0 0
      size 1 1
-     hexactpos 1
-     vexactpos 1
+     halign left_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
      hexactsize 0
      vexactsize 0
-     style Empty
-     {
-      TextWidgetClass text_name {
-       ignorepointer 1
-       position 0 0
-       size 1 30
-       halign left_ref
-       valign center_ref
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
-       vexactsize 1
-       text ""
-       font "gui/fonts/sdf_MetronLight24"
-       "exact text" 1
-       "exact text size" 16
-       "text halign" left
-       "text valign" center
-      }
-     }
+     text ""
+     font "gui/fonts/sdf_MetronLight24"
+     "text offset" 38 0
+     "exact text" 1
+     "exact text size" 15
+     "text halign" left
+     "text valign" center
+    }
+   }
+  }
+  ImageWidgetClass badge_flagged {
+   visible 0
+   ignorepointer 1
+   position 26 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 1.000 0.384 0.490 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass badge_role {
+   visible 0
+   ignorepointer 1
+   position 6 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.988 0.718 0.000 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass badge_dead {
+   visible 0
+   ignorepointer 1
+   position 46 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.95 0.20 0.20 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass badge_uncon {
+   visible 0
+   ignorepointer 1
+   position 64 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 1.00 0.60 0.00 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass badge_broken_leg {
+   visible 0
+   ignorepointer 1
+   position 82 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 1.00 0.45 0.00 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ImageWidgetClass badge_sick {
+   visible 0
+   ignorepointer 1
+   position 100 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.85 0.35 0.85 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  ButtonWidgetClass chevron_button {
+   visible 0
+   ignorepointer 0
+   position 2 0
+   size 24 1
+   halign right_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   style Empty
+   {
+    ImageWidgetClass chevron_down {
+     ignorepointer 1
+     position 0 0
+     size 14 14
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     mode blend
+     color 0.925 0.976 1.000 0.702
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
+    }
+    ImageWidgetClass chevron_right {
+     ignorepointer 1
+     position 0 0
+     size 14 14
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     mode blend
+     color 0.925 0.976 1.000 0.702
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
+    }
+   }
+  }
+  ButtonWidgetClass checkbox_button {
+   ignorepointer 0
+   position 0 0
+   size 30 1
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   style Empty
+   {
+    PanelWidgetClass check_box {
+     ignorepointer 1
+     position 0 0
+     size 13 13
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     mode blend
+     color 0.722 0.769 0.792 1.000
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
+     style COTField4Set
+    }
+    ImageWidgetClass check_mark {
+     visible 0
+     ignorepointer 1
+     position 0 0
+     size 9 9
+     halign center_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     mode blend
+     color 1.000 1.000 1.000 1.000
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
     }
    }
   }

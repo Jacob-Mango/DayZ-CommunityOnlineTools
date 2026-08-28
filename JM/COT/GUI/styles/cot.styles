@@ -1,0 +1,644 @@
+<WidgetStyles>
+    <!--
+        COTSurface
+        ============
+        The standard surface for COT panels and containers: form bodies,
+        window chrome, split panels, list entries.  Nine-sliced from cot_gui's
+        box8 art, so the 8px corner radius holds at any panel size; the
+        widget's Color is multiplied with it.
+
+        Default fill colour:
+            0xE6191E24 = JMTheme.SURFACE_BASE, daisyUI dark base-200 at 90%.
+            30 of the 46 consumers set no colour of their own and inherit this,
+            so it has to track the theme -- it carried a pre-daisyUI navy
+            (0xF0141B26) through the theme conversion because it lives in XML
+            rather than in JMTheme.c.
+
+        Per-widget overrides:
+            A widget that declares `style COTSurface` can override the colour
+            with `color R G B A` in the layout (or SetColor() in script).
+
+        Mandatory widget contexts:
+            DayZ resolves styles by (widget class, style name).  COTSurface
+            must therefore be defined separately under EVERY widget type that
+            references it.  Missing a context here = engine crash on first
+            render of that widget type, because the engine dereferences a null
+            state lookup.
+
+            Current consumer widget types (audited from the layout tree):
+                PanelWidget          - the majority of cases
+                GridSpacerWidget     - JMServerInfoForm root
+                WrapSpacerWidget     - reserved (no current consumer)
+                ScrollWidget         - reserved (no current consumer)
+
+            FrameWidget does NOT support styles in vanilla DayZ; layouts that
+            put `style COTSurface` on a FrameWidgetClass are bugs and should
+            either remove the style or change to PanelWidgetClass.
+    -->
+    <Widget Name="PanelWidget">
+        <Style Name="COTSurface" Font="" ImageSet="cot_gui" Color="3860405796">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+
+
+        <!--
+            SPIKE variant B - nine-slice via the COT IMAGESET (the vanilla way).
+            Slices come from JM/COT/GUI/imagesets/cot_gui.imageset, which is
+            hand-authored: .edds is a plain DDS (Pillow writes DXT5), and the
+            {GUID} on the texture path is not authoritative - four vanilla
+            imagesets, rover_imageset included, carry a GUID that disagrees with
+            their own .meta and still resolve.
+        -->
+        <Style Name="COTBox8Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTBox8LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_line_lefttop" />
+                <Item Name="Top" Image="box8_line_top" />
+                <Item Name="RightTop" Image="box8_line_righttop" />
+                <Item Name="Right" Image="box8_line_right" />
+                <Item Name="RightBottom" Image="box8_line_rightbottom" />
+                <Item Name="Bottom" Image="box8_line_bottom" />
+                <Item Name="LeftBottom" Image="box8_line_leftbottom" />
+                <Item Name="Center" Image="box8_line_center" />
+                <Item Name="Left" Image="box8_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_line_lefttop" />
+                <Item Name="Top" Image="box8_line_top" />
+                <Item Name="RightTop" Image="box8_line_righttop" />
+                <Item Name="Right" Image="box8_line_right" />
+                <Item Name="RightBottom" Image="box8_line_rightbottom" />
+                <Item Name="Bottom" Image="box8_line_bottom" />
+                <Item Name="LeftBottom" Image="box8_line_leftbottom" />
+                <Item Name="Center" Image="box8_line_center" />
+                <Item Name="Left" Image="box8_line_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTField4Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTField4LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="field4_line_lefttop" />
+                <Item Name="Top" Image="field4_line_top" />
+                <Item Name="RightTop" Image="field4_line_righttop" />
+                <Item Name="Right" Image="field4_line_right" />
+                <Item Name="RightBottom" Image="field4_line_rightbottom" />
+                <Item Name="Bottom" Image="field4_line_bottom" />
+                <Item Name="LeftBottom" Image="field4_line_leftbottom" />
+                <Item Name="Center" Image="field4_line_center" />
+                <Item Name="Left" Image="field4_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="field4_line_lefttop" />
+                <Item Name="Top" Image="field4_line_top" />
+                <Item Name="RightTop" Image="field4_line_righttop" />
+                <Item Name="Right" Image="field4_line_right" />
+                <Item Name="RightBottom" Image="field4_line_rightbottom" />
+                <Item Name="Bottom" Image="field4_line_bottom" />
+                <Item Name="LeftBottom" Image="field4_line_leftbottom" />
+                <Item Name="Center" Image="field4_line_center" />
+                <Item Name="Left" Image="field4_line_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill6Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill6_lefttop" />
+                <Item Name="Top" Image="pill6_top" />
+                <Item Name="RightTop" Image="pill6_righttop" />
+                <Item Name="Right" Image="pill6_right" />
+                <Item Name="RightBottom" Image="pill6_rightbottom" />
+                <Item Name="Bottom" Image="pill6_bottom" />
+                <Item Name="LeftBottom" Image="pill6_leftbottom" />
+                <Item Name="Center" Image="pill6_center" />
+                <Item Name="Left" Image="pill6_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill6_lefttop" />
+                <Item Name="Top" Image="pill6_top" />
+                <Item Name="RightTop" Image="pill6_righttop" />
+                <Item Name="Right" Image="pill6_right" />
+                <Item Name="RightBottom" Image="pill6_rightbottom" />
+                <Item Name="Bottom" Image="pill6_bottom" />
+                <Item Name="LeftBottom" Image="pill6_leftbottom" />
+                <Item Name="Center" Image="pill6_center" />
+                <Item Name="Left" Image="pill6_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill6LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill6_line_lefttop" />
+                <Item Name="Top" Image="pill6_line_top" />
+                <Item Name="RightTop" Image="pill6_line_righttop" />
+                <Item Name="Right" Image="pill6_line_right" />
+                <Item Name="RightBottom" Image="pill6_line_rightbottom" />
+                <Item Name="Bottom" Image="pill6_line_bottom" />
+                <Item Name="LeftBottom" Image="pill6_line_leftbottom" />
+                <Item Name="Center" Image="pill6_line_center" />
+                <Item Name="Left" Image="pill6_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill6_line_lefttop" />
+                <Item Name="Top" Image="pill6_line_top" />
+                <Item Name="RightTop" Image="pill6_line_righttop" />
+                <Item Name="Right" Image="pill6_line_right" />
+                <Item Name="RightBottom" Image="pill6_line_rightbottom" />
+                <Item Name="Bottom" Image="pill6_line_bottom" />
+                <Item Name="LeftBottom" Image="pill6_line_leftbottom" />
+                <Item Name="Center" Image="pill6_line_center" />
+                <Item Name="Left" Image="pill6_line_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill9Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill9_lefttop" />
+                <Item Name="Top" Image="pill9_top" />
+                <Item Name="RightTop" Image="pill9_righttop" />
+                <Item Name="Right" Image="pill9_right" />
+                <Item Name="RightBottom" Image="pill9_rightbottom" />
+                <Item Name="Bottom" Image="pill9_bottom" />
+                <Item Name="LeftBottom" Image="pill9_leftbottom" />
+                <Item Name="Center" Image="pill9_center" />
+                <Item Name="Left" Image="pill9_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill9_lefttop" />
+                <Item Name="Top" Image="pill9_top" />
+                <Item Name="RightTop" Image="pill9_righttop" />
+                <Item Name="Right" Image="pill9_right" />
+                <Item Name="RightBottom" Image="pill9_rightbottom" />
+                <Item Name="Bottom" Image="pill9_bottom" />
+                <Item Name="LeftBottom" Image="pill9_leftbottom" />
+                <Item Name="Center" Image="pill9_center" />
+                <Item Name="Left" Image="pill9_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill9LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill9_line_lefttop" />
+                <Item Name="Top" Image="pill9_line_top" />
+                <Item Name="RightTop" Image="pill9_line_righttop" />
+                <Item Name="Right" Image="pill9_line_right" />
+                <Item Name="RightBottom" Image="pill9_line_rightbottom" />
+                <Item Name="Bottom" Image="pill9_line_bottom" />
+                <Item Name="LeftBottom" Image="pill9_line_leftbottom" />
+                <Item Name="Center" Image="pill9_line_center" />
+                <Item Name="Left" Image="pill9_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill9_line_lefttop" />
+                <Item Name="Top" Image="pill9_line_top" />
+                <Item Name="RightTop" Image="pill9_line_righttop" />
+                <Item Name="Right" Image="pill9_line_right" />
+                <Item Name="RightBottom" Image="pill9_line_rightbottom" />
+                <Item Name="Bottom" Image="pill9_line_bottom" />
+                <Item Name="LeftBottom" Image="pill9_line_leftbottom" />
+                <Item Name="Center" Image="pill9_line_center" />
+                <Item Name="Left" Image="pill9_line_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill11Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill11_lefttop" />
+                <Item Name="Top" Image="pill11_top" />
+                <Item Name="RightTop" Image="pill11_righttop" />
+                <Item Name="Right" Image="pill11_right" />
+                <Item Name="RightBottom" Image="pill11_rightbottom" />
+                <Item Name="Bottom" Image="pill11_bottom" />
+                <Item Name="LeftBottom" Image="pill11_leftbottom" />
+                <Item Name="Center" Image="pill11_center" />
+                <Item Name="Left" Image="pill11_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill11_lefttop" />
+                <Item Name="Top" Image="pill11_top" />
+                <Item Name="RightTop" Image="pill11_righttop" />
+                <Item Name="Right" Image="pill11_right" />
+                <Item Name="RightBottom" Image="pill11_rightbottom" />
+                <Item Name="Bottom" Image="pill11_bottom" />
+                <Item Name="LeftBottom" Image="pill11_leftbottom" />
+                <Item Name="Center" Image="pill11_center" />
+                <Item Name="Left" Image="pill11_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill11LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill11_line_lefttop" />
+                <Item Name="Top" Image="pill11_line_top" />
+                <Item Name="RightTop" Image="pill11_line_righttop" />
+                <Item Name="Right" Image="pill11_line_right" />
+                <Item Name="RightBottom" Image="pill11_line_rightbottom" />
+                <Item Name="Bottom" Image="pill11_line_bottom" />
+                <Item Name="LeftBottom" Image="pill11_line_leftbottom" />
+                <Item Name="Center" Image="pill11_line_center" />
+                <Item Name="Left" Image="pill11_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill11_line_lefttop" />
+                <Item Name="Top" Image="pill11_line_top" />
+                <Item Name="RightTop" Image="pill11_line_righttop" />
+                <Item Name="Right" Image="pill11_line_right" />
+                <Item Name="RightBottom" Image="pill11_line_rightbottom" />
+                <Item Name="Bottom" Image="pill11_line_bottom" />
+                <Item Name="LeftBottom" Image="pill11_line_leftbottom" />
+                <Item Name="Center" Image="pill11_line_center" />
+                <Item Name="Left" Image="pill11_line_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill10Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill10_lefttop" />
+                <Item Name="Top" Image="pill10_top" />
+                <Item Name="RightTop" Image="pill10_righttop" />
+                <Item Name="Right" Image="pill10_right" />
+                <Item Name="RightBottom" Image="pill10_rightbottom" />
+                <Item Name="Bottom" Image="pill10_bottom" />
+                <Item Name="LeftBottom" Image="pill10_leftbottom" />
+                <Item Name="Center" Image="pill10_center" />
+                <Item Name="Left" Image="pill10_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill10_lefttop" />
+                <Item Name="Top" Image="pill10_top" />
+                <Item Name="RightTop" Image="pill10_righttop" />
+                <Item Name="Right" Image="pill10_right" />
+                <Item Name="RightBottom" Image="pill10_rightbottom" />
+                <Item Name="Bottom" Image="pill10_bottom" />
+                <Item Name="LeftBottom" Image="pill10_leftbottom" />
+                <Item Name="Center" Image="pill10_center" />
+                <Item Name="Left" Image="pill10_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTPill10LineSet" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="pill10_line_lefttop" />
+                <Item Name="Top" Image="pill10_line_top" />
+                <Item Name="RightTop" Image="pill10_line_righttop" />
+                <Item Name="Right" Image="pill10_line_right" />
+                <Item Name="RightBottom" Image="pill10_line_rightbottom" />
+                <Item Name="Bottom" Image="pill10_line_bottom" />
+                <Item Name="LeftBottom" Image="pill10_line_leftbottom" />
+                <Item Name="Center" Image="pill10_line_center" />
+                <Item Name="Left" Image="pill10_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="pill10_line_lefttop" />
+                <Item Name="Top" Image="pill10_line_top" />
+                <Item Name="RightTop" Image="pill10_line_righttop" />
+                <Item Name="Right" Image="pill10_line_right" />
+                <Item Name="RightBottom" Image="pill10_line_rightbottom" />
+                <Item Name="Bottom" Image="pill10_line_bottom" />
+                <Item Name="LeftBottom" Image="pill10_line_leftbottom" />
+                <Item Name="Center" Image="pill10_line_center" />
+                <Item Name="Left" Image="pill10_line_left" />
+            </State>
+        </Style>
+    </Widget>
+
+    <Widget Name="GridSpacerWidget">
+        <Style Name="COTSurface" Font="" ImageSet="cot_gui" Color="3860405796">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+    </Widget>
+
+    <Widget Name="WrapSpacerWidget">
+        <Style Name="COTSurface" Font="" ImageSet="cot_gui" Color="3860405796">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+    </Widget>
+
+    <Widget Name="ScrollWidget">
+        <Style Name="COTSurface" Font="" ImageSet="cot_gui" Color="3860405796">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+    </Widget>
+
+    <Widget Name="ButtonWidget">
+        <Style Name="COTField4Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+            <State Name="Pushed">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+            <State Name="Highlight">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+            <State Name="Focus">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="field4_lefttop" />
+                <Item Name="Top" Image="field4_top" />
+                <Item Name="RightTop" Image="field4_righttop" />
+                <Item Name="Right" Image="field4_right" />
+                <Item Name="RightBottom" Image="field4_rightbottom" />
+                <Item Name="Bottom" Image="field4_bottom" />
+                <Item Name="LeftBottom" Image="field4_leftbottom" />
+                <Item Name="Center" Image="field4_center" />
+                <Item Name="Left" Image="field4_left" />
+            </State>
+        </Style>
+
+        <Style Name="COTBox8Set" Font="" ImageSet="cot_gui" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Pushed">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Highlight">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Focus">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="box8_lefttop" />
+                <Item Name="Top" Image="box8_top" />
+                <Item Name="RightTop" Image="box8_righttop" />
+                <Item Name="Right" Image="box8_right" />
+                <Item Name="RightBottom" Image="box8_rightbottom" />
+                <Item Name="Bottom" Image="box8_bottom" />
+                <Item Name="LeftBottom" Image="box8_leftbottom" />
+                <Item Name="Center" Image="box8_center" />
+                <Item Name="Left" Image="box8_left" />
+            </State>
+        </Style>
+    </Widget>
+
+    <!--
+        COTInput
+        ========
+        Vanilla's EditBoxWidget "Default" paints dayz_gui's `area_focus` into
+        the Center slice on focus - the red wash every COT input was showing.
+        This replaces it: nothing at rest, and on focus a field4 ring in the
+        primary colour, matching the ring the base class paints on hover.
+
+        A Style carries ONE Color for all its states, which is why the resting
+        and disabled states draw no image at all rather than a dimmer ring.
+    -->
+    <Widget Name="EditBoxWidget">
+        <Style Name="COTInput" Font="gui/fonts/sdf_MetronLight24" ImageSet="cot_gui" Color="4284505599">
+            <State Name="Normal">
+                <Item Name="LeftTop" Image="" />
+                <Item Name="Top" Image="" />
+                <Item Name="RightTop" Image="" />
+                <Item Name="Right" Image="" />
+                <Item Name="RightBottom" Image="" />
+                <Item Name="Bottom" Image="" />
+                <Item Name="LeftBottom" Image="" />
+                <Item Name="Center" Image="" />
+                <Item Name="Left" Image="" />
+            </State>
+            <State Name="Focus">
+                <Item Name="LeftTop" Image="field4_line_lefttop" />
+                <Item Name="Top" Image="field4_line_top" />
+                <Item Name="RightTop" Image="field4_line_righttop" />
+                <Item Name="Right" Image="field4_line_right" />
+                <Item Name="RightBottom" Image="field4_line_rightbottom" />
+                <Item Name="Bottom" Image="field4_line_bottom" />
+                <Item Name="LeftBottom" Image="field4_line_leftbottom" />
+                <Item Name="Center" Image="field4_line_center" />
+                <Item Name="Left" Image="field4_line_left" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="LeftTop" Image="" />
+                <Item Name="Top" Image="" />
+                <Item Name="RightTop" Image="" />
+                <Item Name="Right" Image="" />
+                <Item Name="RightBottom" Image="" />
+                <Item Name="Bottom" Image="" />
+                <Item Name="LeftBottom" Image="" />
+                <Item Name="Center" Image="" />
+                <Item Name="Left" Image="" />
+            </State>
+        </Style>
+    </Widget>
+
+    <Widget Name="CheckBoxWidget">
+        <!-- CheckBoxWidget does NOT use the nine-slice item names (LeftTop/Top/
+             Center/...) that PanelWidget, ButtonWidget and EditBoxWidget use. It
+             draws exactly one item, named "CheckBox", per state. A style built
+             from nine-slice items therefore resolves to nothing and the box is
+             invisible even though the widget still toggles. -->
+        <Style Name="COTCheckbox" Font="" ImageSet="ccgui_enforce" Color="4294967295">
+            <State Name="Normal">
+                <Item Name="CheckBox" Image="CheckboxNormal" />
+            </State>
+            <State Name="Highlight">
+                <Item Name="CheckBox" Image="CheckboxHover" />
+            </State>
+            <State Name="Mark">
+                <Item Name="CheckBox" Image="MarkDone" />
+            </State>
+            <State Name="Disabled">
+                <Item Name="CheckBox" Image="CheckboxDisabled" />
+            </State>
+        </Style>
+    </Widget>
+</WidgetStyles>
+

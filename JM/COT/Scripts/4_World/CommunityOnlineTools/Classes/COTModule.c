@@ -37,18 +37,48 @@ class COTModule : JMModuleBase
 		
 		if ( IsMissionClient() )
 		{
+			Print("[COT-TRACE] COTModule.OnMissionLoaded: client setup begin");
 			if ( !JMStatics.ESP_CONTAINER )
+			{
+				Print("[COT-TRACE] COTModule: create screen_esp.layout");
 				JMStatics.ESP_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
-			
+				Print("[COT-TRACE] COTModule: screen_esp.layout done");
+			}
+
 			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
+			{
+				Print("[COT-TRACE] COTModule: create screen_windows.layout");
 				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
+
+				//! The container deliberately keeps its default sort.
+				//!
+				//! MapWidget and ItemPreviewWidget render nothing when an
+				//! ancestor carries a high sort, and this container used to be
+				//! set to JMUILayout.SORT_WINDOW (920) - which is why every COT
+				//! item preview and every COT map was blank everywhere, no
+				//! matter what its own layout or style said. The base game has
+				//! no counter-example: its one workspace-hosted preview,
+				//! PluginItemDiagnostic, sits at priority 5.
+				//!
+				//! The sort was originally raised so the in-game HUD would not
+				//! draw over module windows. If that returns, the fix is a sort
+				//! high enough to beat the HUD and low enough to keep these
+				//! widgets rendering - not SORT_WINDOW.
+				Print("[COT-TRACE] COTModule: screen_windows.layout done");
+			}
 			#endif
 
 			if ( m_COTMenu == NULL )
 			{
-				g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" ).GetScript( m_COTMenu );
+				Print("[COT-TRACE] COTModule: create sidebar_menu.layout");
+				Widget sidebarW = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" );
+				Print("[COT-TRACE] COTModule: sidebar_menu.layout created=" + (sidebarW != null).ToString());
+				if (sidebarW)
+					sidebarW.GetScript( m_COTMenu );
+				Print("[COT-TRACE] COTModule: m_COTMenu set=" + (m_COTMenu != null).ToString());
 			}
+			Print("[COT-TRACE] COTModule.OnMissionLoaded: client setup end");
 		}
 
 		if ( IsMissionHost() )
@@ -70,7 +100,48 @@ class COTModule : JMModuleBase
 
 				GetPermissionsManager().CreateRole( "admin", data );
 			}
+
+		#ifndef CF_MODULE_PERMISSIONS
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( FlushPlayerStats, STATS_FLUSH_INTERVAL_MS, true );
+		#endif
 		}
+	}
+
+	//! How often open sessions are written through, in milliseconds.
+	//!
+	//! Playtime is only folded into the total on disconnect, so without this a
+	//! server crash loses every connected player's session outright - and a
+	//! crash is exactly when a server has been up longest. Five minutes bounds
+	//! that loss without writing a file per player any more often than a role
+	//! change already does.
+	static const int STATS_FLUSH_INTERVAL_MS = 300000;
+
+	//! Fold the in-progress session of every connected player into their total
+	//! and write it out. AccumulateSession re-bases its own start time, so
+	//! running this repeatedly does not double-count.
+	void FlushPlayerStats()
+	{
+	#ifndef CF_MODULE_PERMISSIONS
+		if ( !IsMissionHost() )
+			return;
+
+		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+		if ( !players )
+			return;
+
+		foreach ( JMPlayerInstance instance : players )
+		{
+			if ( !instance )
+				continue;
+
+			JMPlayerStats stats = instance.GetStats();
+			if ( !stats )
+				continue;
+
+			stats.AccumulateSession();
+			instance.Save();
+		}
+	#endif
 	}
 
 	override void OnMissionFinish()
@@ -80,6 +151,16 @@ class COTModule : JMModuleBase
 			m_COTMenu.Destroy();
 			m_COTMenu = null;
 		}
+
+	#ifndef CF_MODULE_PERMISSIONS
+		//! A graceful shutdown is the one crash-like event that CAN be handled:
+		//! close every open session before the mission goes away.
+		if ( IsMissionHost() )
+		{
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( FlushPlayerStats );
+			FlushPlayerStats();
+		}
+	#endif
 	}
 
 	override void RegisterKeyMouseBindings() 
@@ -183,13 +264,18 @@ class COTModule : JMModuleBase
 
 	void SetMenuState( bool show )
 	{
+		Print("[COT-TRACE] COTModule.SetMenuState show=" + show.ToString() + " m_COTMenu=" + (m_COTMenu != null).ToString());
 		if ( !m_COTMenu )
 			return;
 
 		if ( show )
 		{
 			if ( !m_COTMenu.IsVisible() )
+			{
+				Print("[COT-TRACE] COTModule.SetMenuState: calling m_COTMenu.Show");
 				m_COTMenu.Show();
+				Print("[COT-TRACE] COTModule.SetMenuState: m_COTMenu.Show returned");
+			}
 		} else {
 			if ( m_COTMenu.IsVisible() )
 				m_COTMenu.Hide();
@@ -265,6 +351,12 @@ class COTModule : JMModuleBase
 						break;
 					}
 
+					if ( JMStatics.IsOverlay( parentWidget ) )
+					{
+						canContinue = true;
+						break;
+					}
+
 					parentWidget = parentWidget.GetParent();
 				}
 			}
@@ -322,6 +414,15 @@ class COTModule : JMModuleBase
 		if ( GetPermissionsManager().OnClientConnected( identity, instance ) )
 		{
 			instance.PlayerObject = player;
+
+		#ifndef CF_MODULE_PERMISSIONS
+			JMPlayerStats connectStats = instance.GetStats();
+			if ( connectStats )
+			{
+				connectStats.OnSessionStart();
+				instance.Save();
+			}
+		#endif
 
 			GetCommunityOnlineToolsBase().SetClient( instance, identity );
 
@@ -399,6 +500,21 @@ class COTModule : JMModuleBase
 		#endif
 
 		Assert_Null( GetPermissionsManager() );
+
+	#ifndef CF_MODULE_PERMISSIONS
+		//! Before OnClientDisconnected below, which drops the instance: closing
+		//! the session afterwards would have nothing left to close.
+		JMPlayerInstance leaving = GetPermissionsManager().GetPlayer( uid );
+		if ( leaving )
+		{
+			JMPlayerStats leaveStats = leaving.GetStats();
+			if ( leaveStats )
+			{
+				leaveStats.OnSessionEnd();
+				leaving.Save();
+			}
+		}
+	#endif
 
 		JMPlayerInstance instance;
 		if ( GetPermissionsManager().OnClientDisconnected( uid, instance ) )

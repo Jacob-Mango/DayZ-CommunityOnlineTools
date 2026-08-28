@@ -1,0 +1,84 @@
+PanelWidgetClass icon_cell {
+ position 0 0
+ size 110 36
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ color 0 0 0 0
+ {
+  ButtonWidgetClass action_button {
+   color 0 0 0 0
+   style Empty
+   ignorepointer 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    PanelWidgetClass fill {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     color 0.133 0.161 0.196 0.902
+     style COTBox8Set
+    }
+    PanelWidgetClass outline {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     color 0.925 0.976 1.000 0.502
+     style COTBox8LineSet
+    }
+    ImageWidgetClass action_image {
+     ignorepointer 1
+     position 4 0
+     size 16 16
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 1
+     mode blend
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
+    }
+    TextWidgetClass action_label {
+     ignorepointer 1
+     position 34 0
+     size 72 1
+     halign left_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 0
+     hexactsize 1
+     vexactsize 0
+     text ""
+     color 0.925 0.976 1.000 0.900
+     font "gui/fonts/MetronLight14"
+     "text offset" 0 0
+     "text valign" center
+     "text halign" left
+    }
+   }
+  }
+ }
+}

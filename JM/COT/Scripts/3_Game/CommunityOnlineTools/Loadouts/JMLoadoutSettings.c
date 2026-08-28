@@ -72,6 +72,46 @@ class JMLoadoutSettings
 		AtomicSave(filepath, data);
 	}
 
+	static void SaveCompensation(JMLoadout data, string steamID, string filename)
+	{
+		if (!FileExist(JMConstants.DIR_COMPENSATIONS))
+			MakeDirectory(JMConstants.DIR_COMPENSATIONS);
+
+		string playerDir = JMConstants.DIR_COMPENSATIONS + FileReadyStripName( steamID ) + "\\";
+		if (!FileExist(playerDir))
+			MakeDirectory(playerDir);
+
+		// Keep only the 3 most recent backups
+		array< string > existingFiles = new array< string >;
+		string fileName;
+		FileAttr fileAttr;
+		FindFileHandle findFileHandle = FindFile( playerDir + "*" + JMConstants.EXT_LOADOUT, fileName, fileAttr, 0 );
+		if ( findFileHandle )
+		{
+			while ( fileName != "" )
+			{
+				existingFiles.Insert( fileName );
+				fileName = "";
+				FindNextFile( findFileHandle, fileName, fileAttr );
+			}
+			CloseFindFile( findFileHandle );
+		}
+
+		// Sort by name (timestamp-based names will sort chronologically)
+		existingFiles.Sort();
+
+		// Delete oldest files if we have 3 or more
+		while ( existingFiles.Count() >= 3 )
+		{
+			string oldestFile = existingFiles.Get( 0 );
+			DeleteFile( playerDir + oldestFile );
+			existingFiles.Remove( 0 );
+		}
+
+		string filepath = playerDir + FileReadyStripName( filename ) + JMConstants.EXT_LOADOUT;
+		AtomicSave(filepath, data);
+	}
+
 	// Writes to a .tmp file first, then renames over the target so a crash
 	// mid-write never leaves a corrupted JSON file behind.
 	private static void AtomicSave(string filepath, JMLoadout data)

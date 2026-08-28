@@ -82,7 +82,7 @@ class JMWindowManager
 	{
 		if ( window.GetModule() )
 		{
-			window.GetModule().SetMenuButtonColour( 1, 1, 0, 0 );
+			window.GetModule().SetMenuButtonColor( JMTheme.TRANSPARENT );
 		}
 
 		int cIdx = m_Windows.Find( window );
@@ -112,7 +112,7 @@ class JMWindowManager
 	{
 		if ( window.GetModule() )
 		{
-			window.GetModule().SetMenuButtonColour( 1, 0.5, 0, 0 );
+			window.GetModule().SetMenuButtonColor( JMTheme.MENU_ACTIVE );
 		}
 
 		m_Windows.Insert( window );

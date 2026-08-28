@@ -1,0 +1,8 @@
+{
+  "name": "cot-icon-pipeline",
+  "private": true,
+  "description": "SVG rasteriser for the COT .edds icon pipeline (see build_icons.py).",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}

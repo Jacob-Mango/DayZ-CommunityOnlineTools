@@ -1,0 +1,40 @@
+FrameWidgetClass lab_host {
+ clipchildren 0
+ inheritalpha 0
+ keepsafezone 0
+ position 0 0
+ size 350 260
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ scaled 1
+ priority 5
+ draggable 0
+ {
+  PanelWidgetClass Header {
+   clipchildren 0
+   ignorepointer 0
+   keepsafezone 0
+   color 0.1608 0.1725 0.1608 1
+   size 350 260
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style rover_sim_colorable
+   {
+    MapWidgetClass lab_map {
+     ignorepointer 1
+     keepsafezone 0
+     position 0 0
+     size 350 256
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+   }
+  }
+ }
+}

@@ -38,7 +38,7 @@ class JMCameraBase: Camera
 
 	void JMCameraBase()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		ErrorEx("JMCameraBase()", ErrorExSeverity.INFO);
 	#endif
 
@@ -56,7 +56,7 @@ class JMCameraBase: Camera
 
 	void ~JMCameraBase()
 	{
-	#ifdef DIAG_DEVELOPER
+	#ifdef DIAG
 		ErrorEx("~JMCameraBase()", ErrorExSeverity.INFO);
 	#endif
 

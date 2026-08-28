@@ -6,7 +6,7 @@ TextListboxWidgetClass action_list {
  vexactpos 1
  hexactsize 1
  vexactsize 1
- style Editor
+ style debugUI
  font "gui/fonts/Metron12"
  lines 8
 }

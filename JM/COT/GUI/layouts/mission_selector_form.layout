@@ -10,7 +10,7 @@ PanelWidgetClass JMMissionSelectorForm {
  vexactsize 0
  draggable 1
  scriptclass "JMMissionSelectorForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   GridSpacerWidgetClass actions_filter_wrapper {
    position 0 0
@@ -31,7 +31,7 @@ PanelWidgetClass JMMissionSelectorForm {
    vexactpos 1
    hexactsize 0
    vexactsize 0
-   style Editor
+   style debugUI
    lines 20
    font "gui/fonts/sdf_MetronLight24"
    "exact text" 1

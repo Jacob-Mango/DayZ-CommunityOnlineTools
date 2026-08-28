@@ -7,7 +7,7 @@ PanelWidgetClass JMESPForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMESPForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass panel_top {
    position 0 0
@@ -18,14 +18,52 @@ PanelWidgetClass JMESPForm {
    hexactsize 0
    vexactsize 1
   }
-  FrameWidgetClass panel_bottom {
-   position 0 0
+  PanelWidgetClass panel_bottom {
+   color 0 0 0 0
+   position 0 180
    size 1 320
-   valign bottom_ref
    hexactpos 0
-   vexactpos 0
+   vexactpos 1
    hexactsize 0
    vexactsize 1
+   {
+    FrameWidgetClass panel_bottom_tabs {
+     ignorepointer 0
+     position 0 0
+     size 1 34
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+    FrameWidgetClass panel_bottom_content {
+     ignorepointer 0
+     position 0 34
+     size 1 286
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     {
+      FrameWidgetClass esp_filters_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass esp_selected_panel {
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+     }
+    }
+   }
   }
  }
 }

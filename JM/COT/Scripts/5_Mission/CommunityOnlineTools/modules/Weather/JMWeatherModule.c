@@ -64,6 +64,30 @@ class JMWeatherModule: JMRenderableModuleBase
 		return "UACOTToggleWeather";
 	}
 
+	override void RegisterKeyMouseBindings()
+	{
+		super.RegisterKeyMouseBindings();
+
+		Bind( new JMModuleBinding( "Input_FreezeTime",  "UAWeatherModuleFreezeTime",  true ) );
+		Bind( new JMModuleBinding( "Input_CyclePreset", "UAWeatherModuleCyclePreset", true ) );
+	}
+
+	void Input_FreezeTime()
+	{
+		if ( !GetPermissionsManager().HasPermission( "Weather.FreezeTime" ) )
+			return;
+		SetFreezeTime( !IsTimeFrozen() );
+	}
+
+	void Input_CyclePreset()
+	{
+		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Use" ) )
+			return;
+		if ( !settings || !settings.Presets || settings.Presets.Count() == 0 )
+			return;
+		UsePreset( settings.Presets[0].Name );
+	}
+
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/weather_form.layout";
@@ -78,10 +102,25 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		return "#STR_COT_WEATHER_MODULE_NAME";
 	}
-	
+
+	override string GetWebhookTitle()
+	{
+		return "Weather Module";
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "SetWeather" );
+		types.Insert( "SetTime" );
+		types.Insert( "UsePreset" );
+		types.Insert( "CreatePreset" );
+		types.Insert( "UpdatePreset" );
+		types.Insert( "RemovePreset" );
+	}
+
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Weather.paa";
+		return JMConstants.Lucide( "cloud-sun" );
 	}
 
 	override bool ImageIsIcon()
@@ -548,6 +587,15 @@ class JMWeatherModule: JMRenderableModuleBase
 			m_CachedWeatherPreset.SetFromWorld();
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
 		}
+
+		if ( IsMissionHost() )
+		{
+			string ftMsg;
+			if ( state ) ftMsg = "Froze time"; else ftMsg = "Unfroze time";
+			GetCommunityOnlineToolsBase().Log( ident, ftMsg );
+			JMPlayerInstance ftInst = GetPermissionsManager().GetPlayer( ident.GetId() );
+			SendWebhookColored( "SetTime", ftInst, ftMsg, JMConstants.WEBHOOK_COLOR_INFO );
+		}
 	}
 
 	protected void Repeat_FreezeTime()
@@ -559,72 +607,96 @@ class JMWeatherModule: JMRenderableModuleBase
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set storm density=" + wBase.Density + " threshold=" + wBase.Threshold, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetFog( JMWeatherFog wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set fog=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetDynamicFog( JMWeatherDynamicFog wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set dynamic fog dist=" + wBase.Distance + " height=" + wBase.Height, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetRain( JMWeatherRain wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set rain=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetRainThresholds( JMWeatherRainThreshold wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set rain thresholds min=" + wBase.OvercastMin + " max=" + wBase.OvercastMax, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetSnow( JMWeatherSnow wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set snow=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetSnowThresholds( JMWeatherSnowThreshold wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set snow thresholds min=" + wBase.OvercastMin + " max=" + wBase.OvercastMax, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetOvercast( JMWeatherOvercast wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set overcast=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetWindMagnitude( JMWeatherWindMagnitude wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set wind magnitude=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetWindDirection( JMWeatherWindDirection wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set wind direction=" + wBase.Forecast, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetWindFunctionParams( JMWeatherWindFunction wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetWeather", inst, "Set wind function params", JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_SetDate( JMWeatherDate wBase, PlayerIdentity ident )
 	{
 		wBase.Apply();
 		wBase.Log( ident );
+		JMPlayerInstance inst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "SetTime", inst, "Set date " + wBase.Year + "/" + wBase.Month + "/" + wBase.Day + " " + wBase.Hour + ":" + wBase.Minute, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
 	private void Exec_UsePreset( string name, PlayerIdentity ident )
@@ -646,6 +718,8 @@ class JMWeatherModule: JMRenderableModuleBase
 
 		preset.Apply();
 		preset.Log( ident );
+		JMPlayerInstance upInst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "UsePreset", upInst, "Applied weather preset: " + name, JMConstants.WEBHOOK_COLOR_SUCCESS );
 	}
 
 	private void Exec_CreatePreset( JMWeatherPreset preset, PlayerIdentity ident )
@@ -670,6 +744,8 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Created Weather Preset " + preset.Name );
+		JMPlayerInstance cpInst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "CreatePreset", cpInst, "Created weather preset: " + preset.Name, JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 		settings.Save();
 	}
@@ -703,6 +779,8 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Updated Weather Preset " + preset.Name );
+		JMPlayerInstance updInst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "UpdatePreset", updInst, "Updated weather preset: " + preset.Name, JMConstants.WEBHOOK_COLOR_SUCCESS );
 
 		settings.Save();
 	}
@@ -732,6 +810,8 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 
 		GetCommunityOnlineToolsBase().Log( ident, "Removed Weather Preset (Name: " + name + ")" );
+		JMPlayerInstance rmInst = GetPermissionsManager().GetPlayer( ident.GetId() );
+		SendWebhookColored( "RemovePreset", rmInst, "Removed weather preset: " + name, JMConstants.WEBHOOK_COLOR_WARNING );
 
 		settings.Save();
 	}

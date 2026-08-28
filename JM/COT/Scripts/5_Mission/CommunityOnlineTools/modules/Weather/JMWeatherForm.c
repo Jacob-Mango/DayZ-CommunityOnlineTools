@@ -7,9 +7,10 @@ class JMWeatherForm: JMFormBase
 
 	private Widget m_PanelLeft;
 	private Widget m_PanelRight;
+	private Widget m_ListScroller;
 
 	private UIActionButton m_ButtonList;
-	private UIActionButton m_ButtonRefresh;
+	private UIActionImageButton m_ButtonRefresh;
 	private UIActionButton m_ButtonApply;
 	private UIActionCheckbox m_Checkbox_AutoRefresh;
 	private UIActionCheckbox m_Checkbox_EasyMode;
@@ -148,24 +149,41 @@ class JMWeatherForm: JMFormBase
 	{
 		m_PanelLeft = layoutRoot.FindAnyWidget( "panel_left" );
 		m_PanelRight = layoutRoot.FindAnyWidget( "panel_right" );
+		m_ListScroller = layoutRoot.FindAnyWidget( "list_scroller" );
 
 		Widget tParent = layoutRoot.FindAnyWidget( "actions_wrapper" );
+
+		// Toolbar - refresh icon + List + Apply.
+		// Pattern: outer WrapSpacer for [icon + fractional]; inner GridSpacer
+		// for the two-button pair (GridSpacer guarantees side-by-side, while
+		// WrapSpacer + SetWidth(0.5)+SetWidth(0.5) wraps the second to a new
+		// line under certain widths).
+		Widget topRow = UIActionManager.CreateGridSpacer( tParent, 1, 2 );
+		UIActionManager.SetWidthFraction( topRow, 1.0 );
+
+		Widget refreshWrap = UIActionManager.CreateWrapSpacer( topRow, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+		m_ButtonRefresh = UIActionManager.CreateRefreshButton( refreshWrap, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
+		m_ButtonRefresh.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+
+		Widget btnPair = UIActionManager.CreateGridSpacer( topRow, 1, 2 );
+		UIActionManager.SetWidthFraction( btnPair, 1.0 );
+
+		m_ButtonList = UIActionManager.CreateButton( btnPair, "#STR_COT_WEATHER_MODULE_PRESET_DONTUSE", this, "OnClick_List" );
+
+		m_ButtonApply = UIActionManager.CreateButton( btnPair, "Apply", this, "OnClick_Apply" );
+		m_ButtonApply.SetColor( JMTheme.SUCCESS_FILL );
+
 		Widget spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
-		m_ButtonList = UIActionManager.CreateButton( spacer, "#STR_COT_WEATHER_MODULE_PRESET_DONTUSE", this, "OnClick_List" );
-		m_ButtonList.SetWidth( 0.24 );
-
-		m_ButtonApply = UIActionManager.CreateButton( spacer, "Apply", this, "OnClick_Apply" );
-		m_ButtonApply.SetWidth( 0.24 );
-
-		m_ButtonRefresh = UIActionManager.CreateButton( spacer, "Refresh", this, "OnClick_Refresh" );
-		m_ButtonRefresh.SetWidth( 0.24 );
-
-		spacer = UIActionManager.CreateGridSpacer( tParent, 1, 3 );
 		m_Checkbox_EasyMode = UIActionManager.CreateCheckbox( spacer, "#STR_COT_WEATHER_MODULE_EASYMODE", this, "OnClick_EasyMode" );
+		m_Checkbox_EasyMode.SetTooltip( "Reduce the form to the most common weather presets" );
 		m_Checkbox_FreezeTime = UIActionManager.CreateCheckbox( spacer, "Freeze Time", this, "OnClick_FreezeTime" );
 		m_Checkbox_FreezeTime.SetChecked(m_Module.IsTimeFrozen());
-		
+		m_Checkbox_FreezeTime.SetTooltip( "Pause the in-game clock at the current time of day" );
+		RegisterPermission( m_Checkbox_FreezeTime, "Weather.FreezeTime" );
+
 		m_Checkbox_AutoRefresh = UIActionManager.CreateCheckbox( spacer, "#STR_COT_ESP_MODULE_TOGGLE_AUTO_REFRESH" );
+		m_Checkbox_AutoRefresh.SetTooltip( "Automatically pull live weather values from the server" );
 
 		InitLeftPanel( m_PanelLeft );
 		InitRightPanel( m_PanelRight );
@@ -183,12 +201,21 @@ class JMWeatherForm: JMFormBase
 	{
 		super.OnShow();
 
+		UpdateListScrollerBounds();
+
 		if (m_Module.IsLoaded())
 			OnSettingsUpdated();
 		else
 			m_Module.Load();
 
 		UpdateStates();
+	}
+
+	override void OnResize( float w, float h )
+	{
+		super.OnResize( w, h );
+
+		UpdateListScrollerBounds();
 	}
 
 	override void OnSettingsUpdated()
@@ -265,6 +292,24 @@ class JMWeatherForm: JMFormBase
 		widget.SetPos( xPos, y );
 	}
 
+	private void UpdateListScrollerBounds()
+	{
+		if ( !m_PanelLeft || !m_ListScroller )
+			return;
+
+		float panelW, panelH;
+		m_PanelLeft.GetScreenSize( panelW, panelH );
+
+		static const int HEADER_H = 35;
+		float scrollH = panelH - HEADER_H;
+		if ( scrollH < 1 )
+			scrollH = 1;
+
+		m_ListScroller.SetFlags( WidgetFlags.VEXACTPOS | WidgetFlags.VEXACTSIZE );
+		m_ListScroller.SetPos( 0, HEADER_H );
+		m_ListScroller.SetSize( 1, scrollH );
+	}
+
 	void ShowList()
 	{
 		#ifdef COT_DEBUGLOGS
@@ -276,6 +321,7 @@ class JMWeatherForm: JMFormBase
 
 		SetWidthPos( m_PanelLeft, 0.25, 0 );
 		SetWidthPos( m_PanelRight, 0.75, 0.25 );
+		UpdateListScrollerBounds();
 
 		m_ButtonList.SetButton("#STR_COT_WEATHER_MODULE_PRESET_DONTUSE");
 
@@ -299,6 +345,7 @@ class JMWeatherForm: JMFormBase
 
 		SetWidthPos( m_PanelLeft, 0.0, 0.0 );
 		SetWidthPos( m_PanelRight, 1.0, 0.0 );
+		UpdateListScrollerBounds();
 
 		m_ButtonList.SetButton("#STR_COT_WEATHER_MODULE_PRESET_USE");
 
@@ -696,36 +743,30 @@ class JMWeatherForm: JMFormBase
 		Widget rwWidget = NULL;
 		JMWeatherPresetWidget rwScript = NULL;
 
-		//for ( int i = 0; i < 10; i++ )
+		GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_container" ) );
+
+		if ( !gsw )
+			return;
+
+		//! Fixed pool, handed out and reused by the list rather than created and
+		//! destroyed on every refresh.
+		for ( int j = 0; j < 100; j++ )
 		{
-			//GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_0" + i ) );
-			GridSpacerWidget gsw = GridSpacerWidget.Cast( parent.FindAnyWidget( "list_01" ) );
-			
-			//if ( !gsw )
-				//break;
+			rwWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
 
-			for ( int j = 0; j < 100; j++ )
-			{
-				rwWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/weather_preset_widget.layout", gsw );
-				
-				if ( rwWidget == NULL )
-				{
-					break;
-				}
+			if ( rwWidget == NULL )
+				break;
 
-				rwWidget.GetScript( rwScript );
+			rwWidget.GetScript( rwScript );
 
-				if ( rwScript == NULL )
-				{
-					break;
-				}
+			if ( rwScript == NULL )
+				break;
 
-				rwScript.Init( this );
+			rwScript.Init( this );
 
-				rwScript.SetPreset( "" );
+			rwScript.SetPreset( "" );
 
-				m_WidgetsPreset.Insert( rwScript );
-			}
+			m_WidgetsPreset.Insert( rwScript );
 		}
 	}
 
@@ -825,7 +866,8 @@ class JMWeatherForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-		
+
+		m_ButtonRefresh.TriggerSpin( 2 );
 		RefreshValues(true);
 	}
 
@@ -1294,15 +1336,15 @@ class JMWeatherForm: JMFormBase
 	
 		Widget actions = UIActionManager.CreateGridSpacer( m_PanelToggles, 2, 4 );
 
-		m_ToggleQuickActions= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_QUICK", "[×] #STR_COT_WEATHER_MODULE_QUICK", this, "OnClick_Toggle" );
-		m_ToggleDate 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_DATE", "[×] #STR_COT_WEATHER_MODULE_DATE", this, "OnClick_Toggle" );
-		m_ToggleStorm 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_STORM", "[×] #STR_COT_WEATHER_MODULE_STORM", this, "OnClick_Toggle" );
-		m_ToggleOvercast 	= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_OVERCAST", "[×] #STR_COT_WEATHER_MODULE_OVERCAST", this, "OnClick_Toggle" );
+		m_ToggleQuickActions= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_QUICK", "[x] #STR_COT_WEATHER_MODULE_QUICK", this, "OnClick_Toggle" );
+		m_ToggleDate 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_DATE", "[x] #STR_COT_WEATHER_MODULE_DATE", this, "OnClick_Toggle" );
+		m_ToggleStorm 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_STORM", "[x] #STR_COT_WEATHER_MODULE_STORM", this, "OnClick_Toggle" );
+		m_ToggleOvercast 	= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_OVERCAST", "[x] #STR_COT_WEATHER_MODULE_OVERCAST", this, "OnClick_Toggle" );
 		
-		m_ToggleRain 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_RAIN", "[×] #STR_COT_WEATHER_MODULE_RAIN", this, "OnClick_Toggle" );
-		m_ToggleSnow 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_SNOW", "[×] #STR_COT_WEATHER_MODULE_SNOW", this, "OnClick_Toggle" );
-		m_ToggleFog 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_FOG", "[×] #STR_COT_WEATHER_MODULE_FOG", this, "OnClick_Toggle" );
-		m_ToggleWind 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_WIND", "[×] #STR_COT_WEATHER_MODULE_WIND", this, "OnClick_Toggle" );
+		m_ToggleRain 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_RAIN", "[x] #STR_COT_WEATHER_MODULE_RAIN", this, "OnClick_Toggle" );
+		m_ToggleSnow 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_SNOW", "[x] #STR_COT_WEATHER_MODULE_SNOW", this, "OnClick_Toggle" );
+		m_ToggleFog 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_FOG", "[x] #STR_COT_WEATHER_MODULE_FOG", this, "OnClick_Toggle" );
+		m_ToggleWind 		= UIActionManager.CreateButtonToggle( actions, "[  ] #STR_COT_WEATHER_MODULE_WIND", "[x] #STR_COT_WEATHER_MODULE_WIND", this, "OnClick_Toggle" );
 
 		m_ToggleQuickActions.SetToggle(true);
 
@@ -1787,7 +1829,7 @@ class JMWeatherForm: JMFormBase
 			index = 0;
 
 		string cardinal = CARDINAL_DIRECTIONS[index];
-		m_SliderWindDirectionForecast.SetText( string.Format("%1 %2°", cardinal, direction) );
+		m_SliderWindDirectionForecast.SetText( string.Format("%1 %2 deg", cardinal, direction) );
 	}
 	
 	private void InitWindFuncWidgets( Widget actionsParent )

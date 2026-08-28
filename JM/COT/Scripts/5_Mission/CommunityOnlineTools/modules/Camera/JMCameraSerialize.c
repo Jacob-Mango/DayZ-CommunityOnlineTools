@@ -2,7 +2,7 @@
 
 // ============================================================
 //  JMCameraPath
-//  A named list of waypoints — one saved path.
+//  A named list of waypoints - one saved path.
 // ============================================================
 class JMCameraPath
 {
@@ -34,7 +34,7 @@ class JMCameraBookmark
 
 // ============================================================
 //  JMCameraSerialize
-//  Root JSON object — holds all saved paths and bookmarks.
+//  Root JSON object - holds all saved paths and bookmarks.
 //  Stored at $profile:CommunityOnlineTools\CameraPaths.json
 // ============================================================
 class JMCameraSerialize : Managed

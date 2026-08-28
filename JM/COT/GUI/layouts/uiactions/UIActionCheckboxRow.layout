@@ -1,0 +1,65 @@
+PanelWidgetClass checkbox_row {
+ size 1 30
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ {
+  ButtonWidgetClass action {
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0 0 0 0
+   style Empty
+  }
+  PanelWidgetClass action_box_square {
+   ignorepointer 1
+   position 4 0
+   size 12 12
+   halign left_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   color 0.722 0.769 0.792 1.000
+   style COTField4Set
+  }
+  ImageWidgetClass action_check {
+   ignorepointer 1
+   position 6 0
+   size 8 8
+   halign left_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 1 1 1 1
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
+  TextWidgetClass action_label {
+   ignorepointer 1
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "text offset" 31 0
+   text ""
+   font "gui/fonts/sdf_MetronLight24"
+   "exact text" 1
+   "exact text size" 14
+   "text valign" center
+  }
+ }
+}

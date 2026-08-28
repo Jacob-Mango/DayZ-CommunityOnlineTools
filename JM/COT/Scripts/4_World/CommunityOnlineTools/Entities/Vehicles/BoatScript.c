@@ -3,6 +3,10 @@ modded class BoatScript
 	static ref CF_DoublyLinkedNodes_WeakRef<BoatScript> s_JM_AllBoats = new CF_DoublyLinkedNodes_WeakRef<BoatScript>();
 
 	ref CF_DoublyLinkedNode_WeakRef<BoatScript> s_JM_Node;
+	private bool m_JM_WasDestroyed = false;
+
+	// Tracks the last player who entered the driver seat (non-Expansion fallback)
+	string m_JM_LastDriverUID;
 
 	void BoatScript()
 	{
@@ -13,6 +17,66 @@ modded class BoatScript
 	{
 		if (s_JM_AllBoats)
 			s_JM_AllBoats.Remove(s_JM_Node);
+	}
+
+	#ifndef EXPANSIONMODVEHICLE
+	override void OnDriverEnter( Human player )
+	{
+		super.OnDriverEnter( player );
+
+		if ( g_Game.IsServer() )
+		{
+			PlayerBase driver;
+			if ( Class.CastTo( driver, player ) && driver.GetIdentity() )
+				m_JM_LastDriverUID = driver.GetIdentity().GetId();
+		}
+	}
+	#endif
+
+	override void EEHealthLevelChanged(int oldLevel, int newLevel, string zone)
+	{
+		super.EEHealthLevelChanged(oldLevel, newLevel, zone);
+
+		if (g_Game.IsServer() && !m_JM_WasDestroyed && newLevel == GameConstants.STATE_RUINED)
+		{
+			m_JM_WasDestroyed = true;
+			CheckAndCreateCompensation();
+		}
+	}
+
+	private void CheckAndCreateCompensation()
+	{
+		string ownerSteamID = "";
+
+		// Try to get driver's steam ID
+		Human driver = CrewMember(DayZPlayerConstants.VEHICLESEAT_DRIVER);
+		if (driver)
+		{
+			PlayerBase driverPlayer;
+			if (Class.CastTo(driverPlayer, driver))
+			{
+				PlayerIdentity identity = driverPlayer.GetIdentity();
+				if (identity)
+					ownerSteamID = identity.GetPlainId();
+			}
+		}
+
+		// If no driver, try Expansion owner UID
+		#ifdef EXPANSIONMODVEHICLE
+		if (ownerSteamID == "")
+		{
+			ExpansionVehicle vehicle;
+			if (ExpansionVehicle.Get(vehicle, this))
+			{
+				ownerSteamID = vehicle.GetOwnerUID();
+			}
+		}
+		#endif
+
+		if (ownerSteamID != "")
+		{
+			JMCompensationHelper.CreateVehicleCompensationBackup(this, ownerSteamID);
+		}
 	}
 
 	override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)

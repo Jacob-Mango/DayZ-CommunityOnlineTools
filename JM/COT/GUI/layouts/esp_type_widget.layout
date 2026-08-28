@@ -35,7 +35,7 @@ PanelWidgetClass JMESPViewTypeWidget {
      {
       CheckBoxWidgetClass checkbox {
        ignorepointer 0
-       color 1 1 1 1
+       color 0.925 0.976 1.000 0.702
        position 0 0
        size 24 24
        halign center_ref
@@ -45,7 +45,7 @@ PanelWidgetClass JMESPViewTypeWidget {
        hexactsize 1
        vexactsize 1
        scaled 0
-       style Default
+       style COTCheckbox
        checked 0
       }
      }

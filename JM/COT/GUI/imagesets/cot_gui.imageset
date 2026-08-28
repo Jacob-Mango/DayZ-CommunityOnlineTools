@@ -1,0 +1,672 @@
+ImageSetClass {
+ Name "cot_gui"
+ RefSize 512 64
+ Textures {
+  ImageSetTextureClass {
+   mpix 3
+   path "JM/COT/GUI/imagesets/cot_gui.paa"
+  }
+ }
+ Images {
+  ImageSetDefClass box8_lefttop {
+   Name "box8_lefttop"
+   Pos 0 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_top {
+   Name "box8_top"
+   Pos 8 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_righttop {
+   Name "box8_righttop"
+   Pos 16 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_left {
+   Name "box8_left"
+   Pos 0 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_center {
+   Name "box8_center"
+   Pos 8 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_right {
+   Name "box8_right"
+   Pos 16 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_leftbottom {
+   Name "box8_leftbottom"
+   Pos 0 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_bottom {
+   Name "box8_bottom"
+   Pos 8 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_rightbottom {
+   Name "box8_rightbottom"
+   Pos 16 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_lefttop {
+   Name "box8_line_lefttop"
+   Pos 26 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_top {
+   Name "box8_line_top"
+   Pos 34 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_righttop {
+   Name "box8_line_righttop"
+   Pos 42 0
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_left {
+   Name "box8_line_left"
+   Pos 26 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_center {
+   Name "box8_line_center"
+   Pos 34 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_right {
+   Name "box8_line_right"
+   Pos 42 8
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_leftbottom {
+   Name "box8_line_leftbottom"
+   Pos 26 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_bottom {
+   Name "box8_line_bottom"
+   Pos 34 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass box8_line_rightbottom {
+   Name "box8_line_rightbottom"
+   Pos 42 16
+   Size 8 8
+   Flags 0
+  }
+  ImageSetDefClass field4_lefttop {
+   Name "field4_lefttop"
+   Pos 52 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_top {
+   Name "field4_top"
+   Pos 56 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_righttop {
+   Name "field4_righttop"
+   Pos 60 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_left {
+   Name "field4_left"
+   Pos 52 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_center {
+   Name "field4_center"
+   Pos 56 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_right {
+   Name "field4_right"
+   Pos 60 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_leftbottom {
+   Name "field4_leftbottom"
+   Pos 52 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_bottom {
+   Name "field4_bottom"
+   Pos 56 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_rightbottom {
+   Name "field4_rightbottom"
+   Pos 60 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_lefttop {
+   Name "field4_line_lefttop"
+   Pos 66 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_top {
+   Name "field4_line_top"
+   Pos 70 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_righttop {
+   Name "field4_line_righttop"
+   Pos 74 0
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_left {
+   Name "field4_line_left"
+   Pos 66 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_center {
+   Name "field4_line_center"
+   Pos 70 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_right {
+   Name "field4_line_right"
+   Pos 74 4
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_leftbottom {
+   Name "field4_line_leftbottom"
+   Pos 66 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_bottom {
+   Name "field4_line_bottom"
+   Pos 70 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass field4_line_rightbottom {
+   Name "field4_line_rightbottom"
+   Pos 74 8
+   Size 4 4
+   Flags 0
+  }
+  ImageSetDefClass pill6_lefttop {
+   Name "pill6_lefttop"
+   Pos 80 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_top {
+   Name "pill6_top"
+   Pos 86 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_righttop {
+   Name "pill6_righttop"
+   Pos 92 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_left {
+   Name "pill6_left"
+   Pos 80 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_center {
+   Name "pill6_center"
+   Pos 86 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_right {
+   Name "pill6_right"
+   Pos 92 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_leftbottom {
+   Name "pill6_leftbottom"
+   Pos 80 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_bottom {
+   Name "pill6_bottom"
+   Pos 86 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_rightbottom {
+   Name "pill6_rightbottom"
+   Pos 92 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_lefttop {
+   Name "pill6_line_lefttop"
+   Pos 100 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_top {
+   Name "pill6_line_top"
+   Pos 106 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_righttop {
+   Name "pill6_line_righttop"
+   Pos 112 0
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_left {
+   Name "pill6_line_left"
+   Pos 100 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_center {
+   Name "pill6_line_center"
+   Pos 106 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_right {
+   Name "pill6_line_right"
+   Pos 112 6
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_leftbottom {
+   Name "pill6_line_leftbottom"
+   Pos 100 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_bottom {
+   Name "pill6_line_bottom"
+   Pos 106 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill6_line_rightbottom {
+   Name "pill6_line_rightbottom"
+   Pos 112 12
+   Size 6 6
+   Flags 0
+  }
+  ImageSetDefClass pill9_lefttop {
+   Name "pill9_lefttop"
+   Pos 120 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_top {
+   Name "pill9_top"
+   Pos 129 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_righttop {
+   Name "pill9_righttop"
+   Pos 138 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_left {
+   Name "pill9_left"
+   Pos 120 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_center {
+   Name "pill9_center"
+   Pos 129 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_right {
+   Name "pill9_right"
+   Pos 138 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_leftbottom {
+   Name "pill9_leftbottom"
+   Pos 120 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_bottom {
+   Name "pill9_bottom"
+   Pos 129 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_rightbottom {
+   Name "pill9_rightbottom"
+   Pos 138 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_lefttop {
+   Name "pill9_line_lefttop"
+   Pos 149 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_top {
+   Name "pill9_line_top"
+   Pos 158 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_righttop {
+   Name "pill9_line_righttop"
+   Pos 167 0
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_left {
+   Name "pill9_line_left"
+   Pos 149 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_center {
+   Name "pill9_line_center"
+   Pos 158 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_right {
+   Name "pill9_line_right"
+   Pos 167 9
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_leftbottom {
+   Name "pill9_line_leftbottom"
+   Pos 149 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_bottom {
+   Name "pill9_line_bottom"
+   Pos 158 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill9_line_rightbottom {
+   Name "pill9_line_rightbottom"
+   Pos 167 18
+   Size 9 9
+   Flags 0
+  }
+  ImageSetDefClass pill10_lefttop {
+   Name "pill10_lefttop"
+   Pos 178 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_top {
+   Name "pill10_top"
+   Pos 188 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_righttop {
+   Name "pill10_righttop"
+   Pos 198 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_left {
+   Name "pill10_left"
+   Pos 178 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_center {
+   Name "pill10_center"
+   Pos 188 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_right {
+   Name "pill10_right"
+   Pos 198 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_leftbottom {
+   Name "pill10_leftbottom"
+   Pos 178 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_bottom {
+   Name "pill10_bottom"
+   Pos 188 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_rightbottom {
+   Name "pill10_rightbottom"
+   Pos 198 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_lefttop {
+   Name "pill10_line_lefttop"
+   Pos 210 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_top {
+   Name "pill10_line_top"
+   Pos 220 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_righttop {
+   Name "pill10_line_righttop"
+   Pos 230 0
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_left {
+   Name "pill10_line_left"
+   Pos 210 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_center {
+   Name "pill10_line_center"
+   Pos 220 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_right {
+   Name "pill10_line_right"
+   Pos 230 10
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_leftbottom {
+   Name "pill10_line_leftbottom"
+   Pos 210 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_bottom {
+   Name "pill10_line_bottom"
+   Pos 220 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill10_line_rightbottom {
+   Name "pill10_line_rightbottom"
+   Pos 230 20
+   Size 10 10
+   Flags 0
+  }
+  ImageSetDefClass pill11_lefttop {
+   Name "pill11_lefttop"
+   Pos 242 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_top {
+   Name "pill11_top"
+   Pos 253 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_righttop {
+   Name "pill11_righttop"
+   Pos 264 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_left {
+   Name "pill11_left"
+   Pos 242 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_center {
+   Name "pill11_center"
+   Pos 253 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_right {
+   Name "pill11_right"
+   Pos 264 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_leftbottom {
+   Name "pill11_leftbottom"
+   Pos 242 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_bottom {
+   Name "pill11_bottom"
+   Pos 253 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_rightbottom {
+   Name "pill11_rightbottom"
+   Pos 264 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_lefttop {
+   Name "pill11_line_lefttop"
+   Pos 277 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_top {
+   Name "pill11_line_top"
+   Pos 288 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_righttop {
+   Name "pill11_line_righttop"
+   Pos 299 0
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_left {
+   Name "pill11_line_left"
+   Pos 277 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_center {
+   Name "pill11_line_center"
+   Pos 288 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_right {
+   Name "pill11_line_right"
+   Pos 299 11
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_leftbottom {
+   Name "pill11_line_leftbottom"
+   Pos 277 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_bottom {
+   Name "pill11_line_bottom"
+   Pos 288 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass pill11_line_rightbottom {
+   Name "pill11_line_rightbottom"
+   Pos 299 22
+   Size 11 11
+   Flags 0
+  }
+  ImageSetDefClass circle_fill {
+   Name "circle_fill"
+   Pos 320 0
+   Size 32 32
+   Flags 0
+  }
+  ImageSetDefClass circle_line {
+   Name "circle_line"
+   Pos 356 0
+   Size 32 32
+   Flags 0
+  }
+ }
+}

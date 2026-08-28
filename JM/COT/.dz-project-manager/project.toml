@@ -1,0 +1,115 @@
+# dz-project-manager — Community Online Tools
+#
+# Proves the tool builds a mod it was not written for. Nothing here is
+# COT-specific tooling: every value below is an ordinary project.toml key that
+# EgoLand also sets, just pointed at a different tree.
+#
+# LAYOUT NOTE. COT is not shaped like EgoLand. There is no Scripts_Client /
+# Scripts_Server / Data split — the addons are `Scripts`, `GUI`, `languagecore`
+# and `Objects\Debug`, each a folder holding a config.cpp. That is fine: the
+# build enumerates addons by walking `prefix_root` for config.cpp files, so the
+# folder names never had to match EgoLand's.
+#
+# PREFIX. prefix_link_root is the path under the work drive that the PBO prefix
+# is anchored at. `JM\COT` makes P:\JM\COT\Scripts build with prefix
+# `JM\COT\Scripts`, which is exactly what COT's own CfgPatches class
+# (`JM_COT_Scripts`) expects.
+
+[project]
+id = "cot"
+name = "Community Online Tools"
+# NOT "@Community-Online-Tools" on purpose. That folder is the live, installed
+# COT this machine actually loads; building into it would overwrite a working
+# mod as a side effect of a tooling test. This ships to its own folder instead.
+prefix = "@COT_dzpmtest"
+prefix_link_root = "JM\\COT"
+author = "COT Mod Team"
+repo = "https://github.com/Jacob-Mango/DayZ-CommunityOnlineTools"
+
+[content]
+# COT keeps all Enforce layers (1_Core/3_Game/4_World/5_Mission) inside one
+# `Scripts` addon rather than splitting client and server into sibling trees.
+scripts_client = "Scripts"
+scripts_server = ""
+config_dir = ""
+data_dir = ""
+mission_dir = "P:\\Profiles\\missions"
+autotest_dir = ""
+
+[installs]
+steam_common = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\"
+workshop_directory = ""
+dayz_experimental = false
+game_directory = ""
+server_directory = ""
+dayz_tools_directory = ""
+
+[build]
+workdrive = "P:\\"
+mod_build_dir = "%WorkDrive%Mods\\"
+key_dir = "%WorkDrive%Bikey\\"
+# Reuses the dev key already on this machine (P:\Bikey\UserName.*). A real COT
+# release would mint its own; for a local build any valid keypair signs fine.
+key_name = "UserName"
+addon_builder = "%DayZToolsInstall%Bin\\AddonBuilder\\AddonBuilder.exe"
+binarize_exe = "%DayZToolsInstall%Bin\\binarize\\binarize.exe"
+max_build_jobs = 8
+obfuscation = false
+ignore_p3ds = []
+extra_p3d_args = []
+
+[profiles]
+root = "%WorkDrive%Profiles\\"
+server = "%ProfilesRoot%Server\\"
+client_a = "%ProfilesRoot%ClientA\\"
+client_b = "%ProfilesRoot%ClientB\\"
+client_c = "%ProfilesRoot%ClientC\\"
+
+[server]
+exe = "DayZDiag_x64.exe"
+config_file = "%ServerProfileDirectory%serverDZ.cfg"
+port = 2302
+password = ""
+launch_params = "-server -newErrorsAreWarnings=1 -extrace=0"
+mission = "dayzOffline.chernarusplus"
+profile_dir = ""
+
+[client]
+exe = "DayZDiag_x64.exe"
+launch_params = "-newErrorsAreWarnings=1 -extrace=0"
+
+[players]
+primary_name = "ClientA"
+primary_steam_id = "76561190000000001"
+secondary_name = "ClientB"
+secondary_steam_id = "76561190000000002"
+tertiary_name = "ClientC"
+tertiary_steam_id = "76561190000000003"
+
+[mods]
+# COT requires Community Framework at runtime.
+shared = ["@CF", "@COT_dzpmtest"]
+server = []
+multiplayer = []
+editor = []
+extra = []
+
+[publishing]
+steamcmd = "C:\\SteamCMD\\steamcmd.exe"
+workshop_id = ""
+steam_login = ""
+
+[workbench]
+directory = "%DayZToolsInstall%Bin\\Workbench\\"
+workdrive = "%DayZToolsInstall%WorkbenchDrive\\"
+exe = "%DayZToolsInstall%Bin\\Workbench\\workbenchApp.exe"
+project_file = "%WorkDrive%Workbench\\dayz.gproj"
+
+[ai]
+inherit_global = true
+max_model_override = ""
+max_cost_per_task_override_usd = 0.0
+
+[server_automation]
+enabled = false
+mode = "manual"

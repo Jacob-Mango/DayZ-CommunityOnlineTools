@@ -5,6 +5,45 @@ class JMStatics
 
 	static Widget WINDOWS_CONTAINER;
 
+	//! Floating overlays: popups that live outside the window they belong to
+	//! (the colour picker's ARGB panel, for one) so the window cannot clip them.
+	//! COTModule decides "did this click land on COT UI or on the world" by
+	//! walking a widget's ancestors looking for a window; an overlay parented
+	//! next to the windows instead of inside one fails that test, the click is
+	//! read as a world click, and the game grabs the mouse back mid-drag.
+	//! Registering the overlay's root makes that walk recognise it.
+	static ref array<Widget> OVERLAY_WIDGETS;
+
+	static void RegisterOverlay( Widget w )
+	{
+		if ( !w )
+			return;
+
+		if ( !OVERLAY_WIDGETS )
+			OVERLAY_WIDGETS = new array<Widget>;
+
+		if ( OVERLAY_WIDGETS.Find( w ) == -1 )
+			OVERLAY_WIDGETS.Insert( w );
+	}
+
+	static void UnregisterOverlay( Widget w )
+	{
+		if ( !w || !OVERLAY_WIDGETS )
+			return;
+
+		int idx = OVERLAY_WIDGETS.Find( w );
+		if ( idx != -1 )
+			OVERLAY_WIDGETS.RemoveOrdered( idx );
+	}
+
+	static bool IsOverlay( Widget w )
+	{
+		if ( !w || !OVERLAY_WIDGETS )
+			return false;
+
+		return OVERLAY_WIDGETS.Find( w ) != -1;
+	}
+
 	static void SortStringArray( out array< string > arr )
 	{
 		int count = arr.Count();

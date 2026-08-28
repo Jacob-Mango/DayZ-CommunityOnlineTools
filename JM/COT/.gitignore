@@ -1,0 +1,11 @@
+# dz-project-manager overrides
+/dz-project-manager.exe
+/.dz-project-manager/local.toml
+/.dz-project-manager/steam_workshop.json
+/.dz-project-manager/.steam-workshop-last-online-refresh
+/.dz-project-manager/automation/
+/.dz-project-manager/state.json
+/.dz-project-manager/audit.jsonl
+/.logs
+/graphify-out
+/ai

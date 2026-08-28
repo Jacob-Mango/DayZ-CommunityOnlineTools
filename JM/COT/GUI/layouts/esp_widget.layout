@@ -1,6 +1,6 @@
 GridSpacerWidgetClass JMESPWidgetHandler {
  ignorepointer 1
- color 0.0784 0.098 0.1294 0.985
+ color 0.098 0.118 0.141 0.985
  size 300 20
  hexactpos 1
  vexactpos 1
@@ -35,7 +35,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
      {
       CheckBoxWidgetClass esp_select_checkbox {
        ignorepointer 0
-       color 1 1 1 1
+       color 0.925 0.976 1.000 0.702
        size 0.938 0.938
        halign center_ref
        valign bottom_ref
@@ -44,7 +44,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
        hexactsize 0
        vexactsize 0
        scaled 0
-       style Default
+       style COTCheckbox
        checked 0
       }
      }
@@ -54,7 +54,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
      clipchildren 0
      inheritalpha 0
      ignorepointer 1
-     color 0 1 0 1
+     color 0.000 0.827 0.565 1.000
      position 24 0
      size 16 16
      valign center_ref
@@ -71,7 +71,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
     }
     TextWidgetClass esp_object_name {
      ignorepointer 1
-     position 44 0
+     position 54 0
      size 1 20
      halign left_ref
      valign center_ref
@@ -111,7 +111,7 @@ GridSpacerWidgetClass JMESPWidgetHandler {
        hexactsize 0
        vexactsize 0
        scaled 0
-       style Default
+       style Empty
        {
         ImageWidgetClass esp_toggle_button_image {
          ignorepointer 1

@@ -95,14 +95,7 @@ class COTPPERequester_CameraNV: PPERequester_CameraNV
 		float daylightHours = sunsetTimeStart - sunriseTimeStart;
 		float timeScale = daylightHours / 16.0;
 
-		float time[6] = {
-			Math.Max(sunriseTimeStart - 1.5 * timeScale, 0.0),
-			sunriseTimeStart,
-			sunriseTimeStart + 1.0 * timeScale,
-			sunsetTimeStart - 1.5 * timeScale,
-			sunsetTimeStart,
-			Math.Min(sunsetTimeStart + 1.0 * timeScale, 23.9833333)
-		};
+		float time[6] = { Math.Max(sunriseTimeStart - 1.5 * timeScale, 0.0), sunriseTimeStart, sunriseTimeStart + 1.0 * timeScale, sunsetTimeStart - 1.5 * timeScale, sunsetTimeStart, Math.Min(sunsetTimeStart + 1.0 * timeScale, 23.9833333) };
 
 		return Math.COT_LookUp(hour + minute / 60.0, 6, time, m_COT_TimeVisibility_Out);
 	}

@@ -28,7 +28,7 @@ GridSpacerWidgetClass JMVehiclesListEntry {
    vexactpos 1
    hexactsize 0
    vexactsize 1
-   style DayZDefaultPanel
+   style COTSurface
    "no focus" 1
    {
     ButtonWidgetClass edit_button {
@@ -39,14 +39,14 @@ GridSpacerWidgetClass JMVehiclesListEntry {
      vexactpos 0
      hexactsize 0
      vexactsize 0
-     style Default
+     style Empty
     }
     ImageWidgetClass vehicle_status_icon {
      visible 1
      clipchildren 1
      ignorepointer 1
      keepsafezone 0
-     color 1 0 0 1
+     color 1.000 0.384 0.490 1.000
      position 10 0
      size 10 10
      valign center_ref

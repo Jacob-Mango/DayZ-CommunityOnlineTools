@@ -19,9 +19,9 @@ PanelWidgetClass UIActionNavigateButton {
    hexactsize 0
    vexactsize 0
    {
-    ContentWidgetClass ContentWidget {
+    FrameWidgetClass ContentWidget {
      visible 1
-     ignorepointer 1
+     ignorepointer 0
      size 1 1
      hexactpos 0
      vexactpos 0
@@ -30,7 +30,7 @@ PanelWidgetClass UIActionNavigateButton {
      {
       PanelWidgetClass fill {
        ignorepointer 1
-       color 0.04 0.04 0.12 0.4
+       position 0 0
        size 1 1
        halign left_ref
        valign top_ref
@@ -38,55 +38,38 @@ PanelWidgetClass UIActionNavigateButton {
        vexactpos 0
        hexactsize 0
        vexactsize 0
-       style rover_sim_colorable
+       color 0.133 0.161 0.196 0.902
+       style COTBox8Set
       }
-      PanelWidgetClass border_top {
+      PanelWidgetClass outline {
        ignorepointer 1
-       color 0.042 0.056 0.077 0.5
+       position 0 0
        size 1 1
        halign left_ref
        valign top_ref
        hexactpos 0
        vexactpos 0
        hexactsize 0
-       vexactsize 1
-       style rover_sim_colorable
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTBox8LineSet
       }
-      PanelWidgetClass border_left {
+      ImageWidgetClass action_icon {
+       visible 0
        ignorepointer 1
-       color 0.042 0.056 0.077 0.5
-       size 1 1
-       halign left_ref
-       valign top_ref
+       position 0 0
+       size 16 16
+       halign center_ref
+       valign center_ref
        hexactpos 0
        vexactpos 0
        hexactsize 1
-       vexactsize 0
-       style rover_sim_colorable
-      }
-      PanelWidgetClass border_bottom {
-       ignorepointer 1
-       color 0.042 0.056 0.077 0.5
-       size 1 1
-       halign left_ref
-       valign bottom_ref
-       hexactpos 0
-       vexactpos 0
-       hexactsize 0
        vexactsize 1
-       style rover_sim_colorable
-      }
-      PanelWidgetClass border_right {
-       ignorepointer 1
-       color 0.042 0.056 0.077 0.5
-       size 1 1
-       halign right_ref
-       valign top_ref
-       hexactpos 0
-       vexactpos 0
-       hexactsize 1
-       vexactsize 0
-       style rover_sim_colorable
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       "clamp mode" clamp
+       "stretch mode" stretch_w_h
       }
       TextWidgetClass action {
        ignorepointer 1
@@ -105,6 +88,8 @@ PanelWidgetClass UIActionNavigateButton {
        "text valign" center
       }
       ButtonWidgetClass action_button_left {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position 0 0
        size 0.25 1
@@ -118,25 +103,27 @@ PanelWidgetClass UIActionNavigateButton {
          disabled 0
          ignorepointer 1
          position 0 0
-         size 20 20
+         size 16 16
          halign center_ref
          valign center_ref
-         hexactpos 1
-         vexactpos 1
+         hexactpos 0
+         vexactpos 0
          hexactsize 1
          vexactsize 1
-         image0 "set:dayz_gui image:icon_expand"
-         mode blend
-         "src alpha" 1
-         "no wrap" 1
          stretch 0
          "flip u" 0
          "flip v" 0
          rotation 0 0 -90
+         image0 "set:dayz_gui image:icon_expand"
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
         }
        }
       }
       ButtonWidgetClass action_button_right {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position 0 0
        size 0.25 1
@@ -149,21 +136,21 @@ PanelWidgetClass UIActionNavigateButton {
         ImageWidgetClass image_right {
          ignorepointer 1
          position 0 0
-         size 20 20
+         size 16 16
          halign center_ref
          valign center_ref
-         hexactpos 1
-         vexactpos 1
+         hexactpos 0
+         vexactpos 0
          hexactsize 1
          vexactsize 1
-         image0 "set:dayz_gui image:icon_expand"
-         mode blend
-         "src alpha" 1
-         "no wrap" 1
          stretch 0
          "flip u" 0
          "flip v" 0
          rotation 0 0 90
+         image0 "set:dayz_gui image:icon_expand"
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
         }
        }
       }
@@ -175,10 +162,16 @@ PanelWidgetClass UIActionNavigateButton {
    visible 0
    clipchildren 0
    ignorepointer 0
-   color 0.1569 0.1569 0.1569 0.902
    position 0 0
    size 1 1
-   style rover_sim_colorable
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0.082 0.098 0.118 0.651
+   style COTField4Set
   }
  }
 }

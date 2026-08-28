@@ -37,7 +37,7 @@ PanelWidgetClass JMRoleRowWidget
      {
       CheckBoxWidgetClass role_setting {
        ignorepointer 0
-       color 1 1 1 1
+       color 0.925 0.976 1.000 0.702
        position 0 0
        size 24 24
        halign center_ref
@@ -47,7 +47,7 @@ PanelWidgetClass JMRoleRowWidget
        hexactsize 1
        vexactsize 1
        scaled 0
-       style Default
+       style COTCheckbox
        checked 0
       }
      }
@@ -86,7 +86,7 @@ PanelWidgetClass JMRoleRowWidget
   PanelWidgetClass role_setting_wrapper_disable {
    visible 0
    ignorepointer 1
-   color 0.1569 0.1569 0.1569 0.902
+   color 0.082 0.098 0.118 0.902
    size 1 1
    position 0 0
    hexactpos 0
@@ -95,7 +95,7 @@ PanelWidgetClass JMRoleRowWidget
    vexactsize 0
    Padding 0
    Margin 0
-   style DayZDefaultPanel
+   style COTSurface
   }
  }
 }

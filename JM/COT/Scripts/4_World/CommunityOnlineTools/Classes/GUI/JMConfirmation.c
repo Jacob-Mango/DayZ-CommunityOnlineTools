@@ -18,6 +18,11 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	private TextWidget m_TextTitle;
 	private TextWidget m_TextMessage;
 	private EditBoxWidget m_EditBox;
+	//! The input drew its own box through vanilla's Editor style, which is the
+	//! olive menuButton nine-slice. It now uses the same fill/ring chrome as
+	//! every other COT input, so the two panels track the box's visibility.
+	private Widget m_EditBoxFill;
+	private Widget m_EditBoxRing;
 
 	private Widget m_Buttons1Panel;
 	private Widget m_Buttons2Panel;
@@ -36,9 +41,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	private string m_Callback3;
 
 	private string m_EditBoxValue;
-
-	private int m_ButtonIdPressed;  //! DEPRECATED
-	private int m_ButtonIdOffset;  //! DEPRECATED
 
 	string m_SelectedCallback;
 
@@ -93,6 +95,8 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		Class.CastTo( m_TextTitle, layoutRoot.FindAnyWidget( "confirmation_title_text" ) );
 		Class.CastTo( m_TextMessage, layoutRoot.FindAnyWidget( "confirmation_message_text" ) );
 		Class.CastTo( m_EditBox, layoutRoot.FindAnyWidget( "confirmation_message_input" ) );
+		m_EditBoxFill = layoutRoot.FindAnyWidget( "confirmation_input_fill" );
+		m_EditBoxRing = layoutRoot.FindAnyWidget( "confirmation_input_ring" );
 
 		Class.CastTo( m_Buttons1Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_1" ) );
 		Class.CastTo( m_Buttons2Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_2" ) );
@@ -110,7 +114,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 
 		if ( callback != "" )
 		{
-			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallByName( m_Base, callback, new Param1<JMConfirmation>( this ) );
+			g_Game.GameScript.CallFunctionParams( m_Base, callback, NULL, new Param1<JMConfirmation>( this ) );
 		}
 	}
 
@@ -124,7 +128,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button1 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
-			m_ButtonIdPressed = m_ButtonIdOffset + 1;
 
 			Close();
 
@@ -135,7 +138,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button2 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
-			m_ButtonIdPressed = m_ButtonIdOffset + 2;
 
 			Close();
 
@@ -147,7 +149,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		if ( w == m_Button3 )
 		{
 			m_EditBoxValue = m_EditBox.GetText();
-			m_ButtonIdPressed = m_ButtonIdOffset + 3;
 
 			Close();
 
@@ -159,7 +160,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback, int btnIdOffset = -1 )
+	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_One" );
@@ -184,12 +185,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText1, m_Button1.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText1.SetText( button1Title );
 		}
-		
-		if (btnIdOffset != -1)
-		{
-			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
-			m_ButtonIdOffset = btnIdOffset;
-		}
 
 		OnShow();
 
@@ -198,7 +193,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		#endif
 	}
 
-	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback, int btnIdOffset = -1 )
+	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_Two" );
@@ -231,12 +226,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			Class.CastTo( m_ButtonText2, m_Button2.FindAnyWidget( "confirmation_text" ) );
 			m_ButtonText2.SetText( button2Title );
 		}
-		
-		if (btnIdOffset != -1)
-		{
-			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
-			m_ButtonIdOffset = btnIdOffset;
-		}
 
 		OnShow();
 
@@ -245,7 +234,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		#endif
 	}
 
-	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback, int btnIdOffset = -1 )
+	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::CreateConfirmation_Three" );
@@ -288,12 +277,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 			m_ButtonText3.SetText( button3Title );
 		}
 
-		if (btnIdOffset != -1)
-		{
-			ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
-			m_ButtonIdOffset = btnIdOffset;
-		}
-
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
@@ -312,11 +295,11 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		case JMConfirmationType.INFO:
 		case JMConfirmationType.SELECTION:
 			m_TextMessage.SetSize(1, 1);
-			m_EditBox.Show( false );
+			ShowEditBox( false );
 			break;
 		case JMConfirmationType.EDIT:
 			m_TextMessage.SetSize(1, 0.5);
-			m_EditBox.Show( true );
+			ShowEditBox( true );
 			break;
 		}
 
@@ -325,14 +308,14 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		#endif
 	}
 
-	void Close()
+	override void Close()
 	{
 		#ifdef COT_DEBUGLOGS
 		Print( "+" + this + "::Close" );
 		#endif
 
 		m_EditBox.SetText( "" );
-		m_EditBox.Show( false );
+		ShowEditBox( false );
 		layoutRoot.Show( false );
 
 		OnHide();
@@ -383,12 +366,6 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		return true;
 	}
 
-	int GetSelectedID()
-	{
-		ErrorEx("DEPRECATED, use different callbacks for the different options", ErrorExSeverity.WARNING);
-		return m_ButtonIdPressed;
-	}
-
 	string GetSelectedCallback()
 	{
 		return m_SelectedCallback;
@@ -397,5 +374,12 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	Widget GetLayoutRoot() 
 	{
 		return layoutRoot;
+	}
+
+	private void ShowEditBox( bool show )
+	{
+		if ( m_EditBox )     m_EditBox.Show( show );
+		if ( m_EditBoxFill ) m_EditBoxFill.Show( show );
+		if ( m_EditBoxRing ) m_EditBoxRing.Show( show );
 	}
 }

@@ -11,69 +11,67 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 	protected string m_MarkerIcon;
 	protected int m_MarkerColor;
 	protected int m_MarkerAlpha;
-	
+
 	protected float m_OffsetX;
 	protected float m_OffsetY;
 
+	// When true, the consolidated form-level ticker skips this marker's
+	// position sync - used to freeze the hover-highlight state.
+	protected bool m_Frozen;
+
 	protected ref JMVehicleMetaData m_Vehicle;
 	protected ref JMVehiclesForm m_COTVehicleMenu;
-	
-	protected ref Timer m_MarkerUpdateTimer;
 
-	void JMVehiclesMapMarker(Widget parent, MapWidget mapwidget, vector pos, int color, string icon, JMVehicleMetaData vehicle, JMVehiclesForm menu)
+	void JMVehiclesMapMarker( Widget parent, MapWidget mapwidget, vector pos, int color, string icon, JMVehicleMetaData vehicle, JMVehiclesForm menu )
 	{
-		m_Root 				= g_Game.GetWorkspace().CreateWidgets("JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent);
+		m_Root = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_Marker.layout", parent );
 
-		m_Name				= TextWidget.Cast( m_Root.FindAnyWidget("marker_name") );
-		m_Icon				= ImageWidget.Cast( m_Root.FindAnyWidget("marker_icon") );
-		m_MarkerButton		= ButtonWidget.Cast( m_Root.FindAnyWidget("marker_button") );
-		m_MarkerDragging 	= ButtonWidget.Cast( m_Root.FindAnyWidget("marker_icon_panel") );
+		m_Name = TextWidget.Cast( m_Root.FindAnyWidget( "marker_name" ) );
+		m_Icon = ImageWidget.Cast( m_Root.FindAnyWidget( "marker_icon" ) );
+		m_MarkerButton = ButtonWidget.Cast( m_Root.FindAnyWidget( "marker_button" ) );
+		m_MarkerDragging = ButtonWidget.Cast( m_Root.FindAnyWidget( "marker_icon_panel" ) );
 
-		m_MapWidget			= mapwidget;
-		m_MarkerPos			= pos;
-		m_MarkerIcon		= icon;
-		m_MarkerColor		= color;
-		m_Vehicle 			= vehicle;
-		m_COTVehicleMenu 	= menu;
-		
+		m_MapWidget = mapwidget;
+		m_MarkerPos = pos;
+		m_MarkerIcon = icon;
+		m_MarkerColor = color;
+		m_Vehicle = vehicle;
+		m_COTVehicleMenu = menu;
+
 		m_MarkerName = m_Vehicle.m_DisplayName;
-		
-		if (m_MarkerIcon)
-			m_Icon.LoadImageFile(0, m_MarkerIcon);
-		
-		m_Icon.SetColor(m_MarkerColor);
-		m_Name.SetText(m_MarkerName);
-		m_Name.SetColor(m_MarkerColor);
-		
-		m_Root.SetHandler(this);
-		
-		RunUpdateTimer();
+
+		if ( m_MarkerIcon )
+			m_Icon.LoadImageFile( 0, m_MarkerIcon );
+
+		m_Icon.SetColor( m_MarkerColor );
+		m_Name.SetText( m_MarkerName );
+		m_Name.SetColor( m_MarkerColor );
+
+		m_Root.SetHandler( this );
 	}
 
 	void ~JMVehiclesMapMarker()
 	{
-		StopUpdateTimer();
-		
 		if (g_Game && m_Root)
 			m_Root.Unlink();
 	}
 
-	void ChangeColor(int color)
+	void ChangeColor( int color )
 	{
 		m_MarkerColor = color;
 	}
 
-	void SetPosition(vector position)
+	void SetPosition( vector position )
 	{
 		m_MarkerPos = position;
 	}
 
-	void ChangeIcon(string icon)
+	void ChangeIcon( string icon )
 	{
 		m_MarkerIcon = icon;
 	}
 
-	void ChangeName(string name)
+	void ChangeName( string name )
 	{
 		m_MarkerName = name;
 	}
@@ -83,11 +81,14 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 		return m_MarkerName;
 	}
 
-	void Update(float timeslice)
+	// Called from JMVehiclesForm's consolidated per-form tick. Cheap to skip
+	// when frozen (hover state) or when the widget has no map anchor yet.
+	void UpdatePosition()
 	{
+		if ( m_Frozen )
+			return;
 		if ( !m_MapWidget )
 			return;
-
 		if ( !m_MarkerPos )
 			return;
 
@@ -102,12 +103,12 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 
 	override bool OnMouseEnter( Widget w, int x, int y )
 	{
-		if (m_MarkerButton && w == m_MarkerButton)
+		if ( m_MarkerButton && w == m_MarkerButton )
 		{
-			StopUpdateTimer();
-			
-			m_Icon.SetColor(ARGB(255,255,255,255));
-			m_Name.SetColor(ARGB(255,255,255,255));
+			m_Frozen = true;
+
+			m_Icon.SetColor( ARGB( 255, 255, 255, 255 ) );
+			m_Name.SetColor( ARGB( 255, 255, 255, 255 ) );
 			return true;
 		}
 
@@ -116,12 +117,12 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 
 	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
 	{
-		if (m_MarkerButton && w == m_MarkerButton)
+		if ( m_MarkerButton && w == m_MarkerButton )
 		{
-			RunUpdateTimer();
-			
-			m_Icon.SetColor(m_MarkerColor);
-			m_Name.SetColor(m_MarkerColor);
+			m_Frozen = false;
+
+			m_Icon.SetColor( m_MarkerColor );
+			m_Name.SetColor( m_MarkerColor );
 			return true;
 		}
 
@@ -153,26 +154,5 @@ class JMVehiclesMapMarker: ScriptedWidgetEventHandler
 	void ShowMarker()
 	{
 		m_Root.Show( true );
-	}
-
-	void StopUpdateTimer()
-	{
-		if (m_MarkerUpdateTimer && m_MarkerUpdateTimer.IsRunning())
-		{
-			m_MarkerUpdateTimer.Stop();
-			m_MarkerUpdateTimer = NULL;
-		}
-	}
-
-	void RunUpdateTimer()
-	{
-		if (!m_MarkerUpdateTimer)
-		{
-			m_MarkerUpdateTimer = new Timer( CALL_CATEGORY_GUI );
-			if (!m_MarkerUpdateTimer.IsRunning())
-			{
-				m_MarkerUpdateTimer.Run( 0.01, this, "Update", NULL, true ); // Call Update all 0.01 seconds
-			}
-		}
 	}
 }

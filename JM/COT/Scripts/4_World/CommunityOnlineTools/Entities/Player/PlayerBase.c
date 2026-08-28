@@ -38,7 +38,6 @@ modded class PlayerBase
 	private ref map<int, bool> m_COT_PlayerVars;
 	private int m_COT_PlayerVarsBitmask;
 
-	PlayerBase m_JM_SpectatedPlayer;  //! Obsolete, unused, kept for compat with 3rd party mods
 	Object m_JM_SpectatedObject;
 	vector m_JM_CameraPosition;
 	private bool m_COT_EdgeTick;
@@ -124,6 +123,17 @@ modded class PlayerBase
 		playerVars[JMPlayerVariables.ADMIN_NVG] = COTHasAdminNVG();
 		playerVars[JMPlayerVariables.HAS_CUSTOM_SCALE] = COTHasCustomScale();
 		playerVars[JMPlayerVariables.INVISIBILITY_INTERACTIVE] = COTIsInvisible(JMInvisibilityType.Interactive);
+		playerVars[JMPlayerVariables.UNCONSCIOUS] = IsUnconscious();
+
+		bool isSick = HasDisease();
+		if ( !isSick && GetModifiersManager() )
+		{
+			isSick = GetModifiersManager().IsModifierActive( eModifiers.MDF_CHOLERA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_INFLUENZA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SALMONELLA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_POISONING ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION2 );
+		}
+
+		playerVars[JMPlayerVariables.SICK] = isSick;
+		playerVars[JMPlayerVariables.BLEEDING] = IsBleeding();
+		playerVars[JMPlayerVariables.DEAD] = !IsAlive();
 	}
 
 	void COT_SynchPlayerVars()
@@ -232,7 +242,7 @@ modded class PlayerBase
 			switch (value)
 			{
 				case JMPlayerVariables.GODMODE:
-				#ifdef DIAG_DEVELOPER
+				#ifdef DIAG
 					if (m_COT_GodMode != enabled)
 						PrintFormat("%1 COT GodMode %2", this, enabled);
 				#endif
@@ -256,7 +266,7 @@ modded class PlayerBase
 					break;
 
 				case JMPlayerVariables.UNLIMITED_AMMO:
-				#ifdef DIAG_DEVELOPER
+				#ifdef DIAG
 					if (m_JMHasUnlimitedAmmo != enabled)
 						PrintFormat("%1 COT Unlimited Ammo %2", this, enabled);
 				#endif
@@ -264,7 +274,7 @@ modded class PlayerBase
 					break;
 
 				case JMPlayerVariables.UNLIMITED_STAMINA:
-				#ifdef DIAG_DEVELOPER
+				#ifdef DIAG
 					if (m_JMHasUnlimitedStamina != enabled)
 						PrintFormat("%1 COT Unlimited Stamina %2", this, enabled);
 				#endif
@@ -276,7 +286,7 @@ modded class PlayerBase
 					break;
 
 				case JMPlayerVariables.HAS_CUSTOM_SCALE:
-				#ifdef DIAG_DEVELOPER
+				#ifdef DIAG
 					if (m_JMHasCustomScale != enabled)
 						PrintFormat("%1 COT Custom Scale %2", this, enabled);
 				#endif
@@ -295,7 +305,7 @@ modded class PlayerBase
 
 		if ( m_JMIsInvisibleRemoteSynch != m_JMIsInvisible )
 		{
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			PrintFormat("%1 COT Invisibility %2", this, m_JMIsInvisibleRemoteSynch);
 		#endif
 
@@ -316,7 +326,7 @@ modded class PlayerBase
 
 		if ( m_JMIsFrozenRemoteSynch != m_JMIsFrozen )
 		{
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			PrintFormat("%1 COT Frozen %2", this, m_JMIsFrozenRemoteSynch);
 		#endif
 
@@ -332,7 +342,7 @@ modded class PlayerBase
 
 		if ( m_JMHasAdminNVGRemoteSynch != m_JMHasAdminNVG )
 		{
-		#ifdef DIAG_DEVELOPER
+		#ifdef DIAG
 			PrintFormat("%1 COT Admin NVG %2", this, m_JMHasAdminNVGRemoteSynch);
 		#endif
 
@@ -555,6 +565,42 @@ modded class PlayerBase
 
 		if (m_JM_CameraPosition != vector.Zero || m_JM_SpectatedObject)
 			SetLastPosition(true);
+
+		//! Every path into here is somebody being moved rather than moving:
+		//! an admin teleport, a spectate exit, a vehicle unstuck. Tell the
+		//! anti-cheat so the next position sample is discarded instead of
+		//! being read as a several-kilometre jump.
+		COT_ReportEngineMove();
+	}
+
+	//! Excuse the next movement samples for this player. Safe to call from any
+	//! side and at any time - the anti-cheat only acts on it server-side.
+	//!
+	//! Because this sits on PlayerBase.SetWorldPosition, ANY mod that teleports
+	//! a player through that method is covered without knowing COT exists. Mods
+	//! that move a player some other way - a raw SetPosition, a sync juncture -
+	//! should call COT_SanctionAction themselves.
+	void COT_ReportEngineMove()
+	{
+		COT_SanctionAction(JMAntiCheatSanction.MOVEMENT, JMAntiCheatSanction.MoveGraceSeconds);
+	}
+
+	//! Declare that the server is about to do something to this player that an
+	//! anti-cheat rule would otherwise read as a cheat. Call it BEFORE acting.
+	//!
+	//! This is how a scripted action is told apart from a cheat: not by who the
+	//! player is, but by whether our own code announced the action. See
+	//! JMAntiCheatSanction for the buckets.
+	void COT_SanctionAction(string bucket, float seconds)
+	{
+		if (!g_Game || !g_Game.IsServer())
+			return;
+
+		PlayerIdentity identity = GetIdentity();
+		if (!identity)
+			return;
+
+		JMAntiCheatSanction.Grant(identity.GetId(), bucket, seconds);
 	}
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -857,13 +903,61 @@ modded class PlayerBase
 		if ( g_Game.IsServer() )
 		{
 			GetModifiersManager().DeactivateAllModifiers();
-			
+
 			if ( m_AgentPool )
 				m_AgentPool.RemoveAllAgents();
 
 			if ( IsUnconscious() )
 				DayZPlayerSyncJunctures.SendPlayerUnconsciousness(this, false);
 		}
+	}
+
+	void COTAddDisease( int agent, float count )
+	{
+		if ( g_Game.IsServer() )
+		{
+			if ( m_AgentPool )
+				m_AgentPool.AddAgent( agent, count );
+		}
+	}
+
+	void COTRemoveDisease( int agent )
+	{
+		if ( g_Game.IsServer() )
+		{
+			if ( m_AgentPool )
+				m_AgentPool.RemoveAgent( agent );
+		}
+	}
+
+	// Activate a bleeding source on the named body-part selection
+	// (e.g. "Head", "LeftArm"). Vanilla only exposes AddBleedingSource(int bit)
+	// and only DebugActivateBleedingSource(int idx) maps to a part - but those
+	// index maps are internal. We round-trip via the COT mod of the base class
+	// which exposes zone enumeration, then call AddBleedingSource(bit).
+	bool COTAddBleedingByName( string selectionName )
+	{
+		if ( !g_Game.IsServer() )
+			return false;
+		if ( selectionName == "" )
+			return false;
+
+		BleedingSourcesManagerServer bms = GetBleedingManagerServer();
+		if ( !bms )
+			return false;
+
+		int count = bms.COT_GetZoneCount();
+		for ( int i = 0; i < count; i++ )
+		{
+			if ( bms.COT_GetZoneSelectionName( i ) == selectionName )
+			{
+				int bit = bms.COT_GetZoneBit( i );
+				if ( bit != 0 )
+					bms.COT_ActivateBleedingSource( bit );
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void COTResetItemWetness()
@@ -1188,5 +1282,64 @@ modded class PlayerBase
 			//StartCommand_Vehicle(m_COT_TransportCache, m_COT_TransportCache_CrewIndex, m_COT_TransportCache_Seat, IsUnconscious());
 			//m_COT_TransportCache = null;
 		//}
+	}
+
+	// ========================================================================
+	//  COT kill-tracking hooks
+	//
+	//  Two events fire on the entity by the engine:
+	//    EEHitBy  -- every damage hit from a real source; we record body-part
+	//                and approximate hit/miss by checking if the source was
+	//                a real player vs the world
+	//    EEKilled  -- final death; killer is the entity that landed the
+	//                killing blow.  Body-part + distance captured here.
+	//
+	//  The static methods on JMAntiCheatKillHook (defined in this same file)
+	//  forward the events to the anti-cheat module.  A static forwarder
+	//  avoids a cross-file class reference that the Mission module's compile
+	//  scope has to keep clean.
+	// ========================================================================
+
+	//! State of the last hit this player took, captured while it is still
+	//! accurate. EEKilled can fire minutes later (bleed-out, shock) by which
+	//! time the weapon is holstered, the explosive deleted, and both players
+	//! moved -- so a distance computed there is meaningless.
+	protected ref JMAntiCheatKillEvent m_COT_LastHitSnapshot;
+	protected int m_COT_LastHitTime;
+
+	void COT_SetLastHitSnapshot(JMAntiCheatKillEvent evt, int timeMs)
+	{
+		m_COT_LastHitSnapshot = evt;
+		m_COT_LastHitTime = timeMs;
+	}
+
+	JMAntiCheatKillEvent COT_GetLastHitSnapshot()
+	{
+		return m_COT_LastHitSnapshot;
+	}
+
+	int COT_GetLastHitTime()
+	{
+		return m_COT_LastHitTime;
+	}
+
+	override void EEKilled(Object killer)
+	{
+		super.EEKilled(killer);
+
+		JMAntiCheatKillHook.OnPlayerKilled(this, killer);
+		JMPlayerStatsHook.OnPlayerKilled(this, killer);
+
+		//! The position history is keyed by guid, not by character, so without
+		//! this the first sample after respawning reads as a teleport from
+		//! wherever this character died.
+		COT_ReportEngineMove();
+	}
+
+	override void EEHitBy(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
+	{
+		super.EEHitBy(damageResult, damageType, source, component, dmgZone, ammo, modelPos, speedCoef);
+
+		JMAntiCheatKillHook.OnPlayerHit(this, source, dmgZone, damageResult, ammo);
 	}
 }

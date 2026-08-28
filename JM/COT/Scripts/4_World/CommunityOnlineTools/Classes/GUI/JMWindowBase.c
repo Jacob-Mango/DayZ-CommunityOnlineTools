@@ -23,9 +23,18 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	private ButtonWidget m_CloseButton;
 	private ButtonWidget m_MinimizeButton;
-	private TextWidget   m_MinimizeButtonLabel;
+	private ImageWidget  m_MinimizeButtonLabel;
 	private ButtonWidget m_PinButton;
-	private TextWidget   m_PinButtonLabel;
+	private ImageWidget  m_PinButtonLabel;
+
+	// Title-bar button chrome: a backdrop behind each icon, shown on hover and
+	// deepened while held. The buttons use style Empty, so without these they
+	// gave no feedback at all.
+	private Widget m_CloseButtonHover;
+	private Widget m_MinimizeButtonHover;
+	private Widget m_PinButtonHover;
+	private ImageWidget m_CloseButtonLabel;
+	private Widget m_PressedButton;
 	private Widget m_TitleWrapper;
 	private TextWidget m_TitleText;
 	private Widget m_TitlePanel;
@@ -84,16 +93,16 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	//! Pixels from a screen edge within which the window snaps flush to it
 	static const float SNAP_THRESHOLD = 10;
 
-	//! Minimize animation duration in seconds
+	//! Minimize animation duration in seconds (see also JMUIAnimations.WINDOW_MINIMIZE_TIME)
 	static const float MINIMIZE_ANIMATE_TIME = 0.2;
 
-	//! Cached title bar height — read once in Init()
+	//! Cached title bar height - read once in Init()
 	private float m_TitleBarHeight;
 
 	private bool m_IsShown;
 	private bool m_HasBeenCentered;
 
-	//! Pin state — window survives COT close when pinned
+	//! Pin state - window survives COT close when pinned
 	private bool m_IsPinned;
 
 	//! Minimize state
@@ -154,6 +163,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void OnWidgetScriptInit( Widget w )
 	{
+		Print("[COT-TRACE] WindowBase.OnWidgetScriptInit");
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
 
@@ -162,15 +172,24 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void Init()
 	{
+		Print("[COT-TRACE] WindowBase.Init begin");
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
 
 		m_CloseButton         = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "close_button" ) );
-		m_MinimizeButton      = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button" ) );
-		m_MinimizeButtonLabel = TextWidget.Cast(   layoutRoot.FindAnyWidget( "minimize_button_label" ) );
-		m_PinButton           = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "pin_button" ) );
-		m_PinButtonLabel      = TextWidget.Cast(   layoutRoot.FindAnyWidget( "pin_button_label" ) );
+		m_MinimizeButton      = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "minimize_button"       ) );
+		m_MinimizeButtonLabel = ImageWidget.Cast(  layoutRoot.FindAnyWidget( "minimize_button_label" ) );
+		m_PinButton           = ButtonWidget.Cast( layoutRoot.FindAnyWidget( "pin_button"             ) );
+		m_PinButtonLabel      = ImageWidget.Cast(  layoutRoot.FindAnyWidget( "pin_button_label"       ) );
+		m_CloseButtonLabel    = ImageWidget.Cast(  layoutRoot.FindAnyWidget( "close_button_image"     ) );
+		m_CloseButtonHover    = layoutRoot.FindAnyWidget( "close_button_hover"    );
+		m_MinimizeButtonHover = layoutRoot.FindAnyWidget( "minimize_button_hover" );
+		m_PinButtonHover      = layoutRoot.FindAnyWidget( "pin_button_hover"      );
+
+		ResetTitleButtonChrome();
+		SyncPinIcon();
+		SyncMinimizeIcon( m_IsMinimized );
 		m_TitleWrapper        = Widget.Cast( layoutRoot.FindAnyWidget( "title_bar_drag" ) );
 		m_TitlePanel          = layoutRoot.FindAnyWidget( "title_wrapper" );
 		m_TitleAccent         = Widget.Cast( layoutRoot.FindAnyWidget( "title_accent" ) );
@@ -178,6 +197,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Background          = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
 		m_ContentWidget       = Widget.Cast( layoutRoot.FindAnyWidget( "content" ) );
 		m_ConfirmationPanel   = Widget.Cast( layoutRoot.FindAnyWidget( "confirmation_panel" ) );
+		Print("[COT-TRACE] WindowBase.Init: close=" + (m_CloseButton != null).ToString() + " min=" + (m_MinimizeButton != null).ToString() + " minLbl=" + (m_MinimizeButtonLabel != null).ToString() + " pin=" + (m_PinButton != null).ToString() + " pinLbl=" + (m_PinButtonLabel != null).ToString());
+		Print("[COT-TRACE] WindowBase.Init: titleWrap=" + (m_TitleWrapper != null).ToString() + " titlePanel=" + (m_TitlePanel != null).ToString() + " titleAccent=" + (m_TitleAccent != null).ToString() + " titleText=" + (m_TitleText != null).ToString());
+		Print("[COT-TRACE] WindowBase.Init: bg=" + (m_Background != null).ToString() + " content=" + (m_ContentWidget != null).ToString() + " confirm=" + (m_ConfirmationPanel != null).ToString());
 
 		// Edge drag handles
 		m_ResizeDragUp    = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
@@ -225,10 +247,19 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_ResizeDragBotLeft )  m_ResizeDragBotLeft.SetSort( dragSort );
 		if ( m_ResizeDragBotRight ) m_ResizeDragBotRight.SetSort( dragSort );
 
-		// Cache title bar height — used everywhere instead of repeated GetSize() calls
-		float tw, th;
-		m_TitleWrapper.GetSize( tw, th );
-		m_TitleBarHeight = th;
+		// Cache title bar height - used everywhere instead of repeated GetSize() calls
+		if ( m_TitleWrapper )
+		{
+			float tw, th;
+			m_TitleWrapper.GetSize( tw, th );
+			m_TitleBarHeight = th;
+			Print("[COT-TRACE] WindowBase.Init: title bar height=" + m_TitleBarHeight);
+		}
+		else
+		{
+			Print("[COT-TRACE] WindowBase.Init: m_TitleWrapper NULL, using default 25");
+			m_TitleBarHeight = 25;
+		}
 
 		// Position content and confirmation panel below the title bar
 		if ( m_ContentWidget )
@@ -244,10 +275,12 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_HighlightUp )        m_HighlightUp.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopLeft )   m_HighlightTopLeft.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopRight )  m_HighlightTopRight.SetPos( 0, m_TitleBarHeight, true );
+		Print("[COT-TRACE] WindowBase.Init end");
 	}
 
 	void SetModule( JMRenderableModuleBase module )
 	{
+		Print("[COT-TRACE] WindowBase.SetModule begin: module=" + module);
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "SetModule").Add(module.ToString());
 		#endif
@@ -255,18 +288,22 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Module = module;
 		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
 			return;
+		Print("[COT-TRACE] WindowBase.SetModule: module title=" + m_Module.GetTitle() + " layoutRoot=" + m_Module.GetLayoutRoot());
 
 		Widget menu = m_ContentWidget;
 
 		if ( m_Module.GetLayoutRoot() != "" )
 		{
+			Print("[COT-TRACE] WindowBase.SetModule: CreateWidgets " + m_Module.GetLayoutRoot());
 			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), m_ContentWidget );
+			Print("[COT-TRACE] WindowBase.SetModule: menu widget=" + (menu != null).ToString());
 			if ( Assert_Null( menu, "No valid widget supplied." ) )
 				return;
 
 			float width = -1;
 			float height = -1;
 			menu.GetSize( width, height );
+			Print("[COT-TRACE] WindowBase.SetModule: menu size=" + width + "x" + height);
 
 			float screenW, screenH;
 			g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
@@ -280,18 +317,27 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_ContentWidget.SetSize( width, height );
 			SetSize( width, height );
 
+			Print("[COT-TRACE] WindowBase.SetModule: menu.GetScript");
 			menu.GetScript( m_Form );
+			Print("[COT-TRACE] WindowBase.SetModule: m_Form=" + (m_Form != null).ToString());
 		}
 
 		m_FormRoot = menu;
 
 		if ( !m_Form )
+		{
+			Print("[COT-TRACE] WindowBase.SetModule: m_Module.InitForm (script class fallback)");
 			m_Form = m_Module.InitForm( menu );
+			Print("[COT-TRACE] WindowBase.SetModule: InitForm returned " + (m_Form != null).ToString());
+		}
 
 		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
 			return;
 
+		Print("[COT-TRACE] WindowBase.SetModule: m_Form.Init");
 		m_Form.Init( this, m_Module );
+		Print("[COT-TRACE] WindowBase.SetModule: m_Form.Init returned");
+
 		m_TitleText.SetText( m_Module.GetTitle() );
 		GetCOTWindowManager().BringFront( this );
 
@@ -303,7 +349,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		// Notify form of its initial size so it can lay out immediately
 		float winW, winH;
 		layoutRoot.GetSize( winW, winH );
+		Print("[COT-TRACE] WindowBase.SetModule: OnResize " + winW + "x" + (winH - m_TitleBarHeight));
 		m_Form.OnResize( winW, winH - m_TitleBarHeight );
+		Print("[COT-TRACE] WindowBase.SetModule end");
 	}
 
 	JMRenderableModuleBase GetModule()
@@ -327,32 +375,55 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, int btnIdOffset = -1 )
+	//! The confirmation scrim is sized in pixels by the open/resize animations,
+	//! so a dialog raised before either has run would still be at the layout's
+	//! default size - and the inner panel centres itself inside whatever this
+	//! is, so getting it wrong puts the dialog off-screen with only the scrim
+	//! visible. Cheap enough to just re-derive on every raise.
+	private void SyncConfirmationPanel()
+	{
+		if ( !m_ConfirmationPanel )
+			return;
+
+		float w, h;
+		layoutRoot.GetSize( w, h );
+
+		m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
+		m_ConfirmationPanel.SetSize( w, Math.Max( 0, h - m_TitleBarHeight ), true );
+	}
+
+	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
 	{
 		if ( !m_Confirmation )
 			return NULL;
 
-		m_Confirmation.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne, btnIdOffset );
+		SyncConfirmationPanel();
+
+		m_Confirmation.CreateConfirmation_One( type, title, message, callBackOneName, callBackOne );
 
 		return m_Confirmation;
 	}
 
-	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, int btnIdOffset = -1 )
+	JMConfirmation CreateConfirmation_Two( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo )
 	{
 		if ( !m_Confirmation )
 			return NULL;
 
-		m_Confirmation.CreateConfirmation_Two( type, title, message, callBackOneName, callBackTwoName, callBackOne, callBackTwo, btnIdOffset );
+		SyncConfirmationPanel();
+
+		m_Confirmation.CreateConfirmation_Two( type, title, message, callBackOneName, callBackTwoName, callBackOne, callBackTwo );
 
 		return m_Confirmation;
 	}
 
-	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree, int btnIdOffset = -1 )
+	JMConfirmation CreateConfirmation_Three( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne, string callBackTwoName, string callBackTwo, string callBackThreeName, string callBackThree )
 	{
 		if ( !m_Confirmation )
 			return NULL;
 
-		m_Confirmation.CreateConfirmation_Three( type, title, message, callBackOneName, callBackTwoName, callBackThreeName, callBackOne, callBackTwo, callBackThree, btnIdOffset );
+		SyncConfirmationPanel();
+
+		m_Confirmation.CreateConfirmation_Three( type, title, message, callBackOneName, callBackTwoName, callBackThreeName, callBackOne, callBackTwo, callBackThree );
 
 		return m_Confirmation;
 	}
@@ -389,13 +460,57 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 	{
 		m_IsPinned = !m_IsPinned;
 
-		if ( m_PinButtonLabel )
+		SyncPinIcon();
+	}
+
+	//! Point the pin button at the state it is currently in: a plain pin while
+	//! the window is pinned, a struck-through pin while it is not. The colour
+	//! swap stays - it is what makes the state readable at a glance - but the
+	//! glyph now carries it too, so the button is not two identical pins that
+	//! only differ in tint.
+	private void SyncPinIcon()
+	{
+		if ( !m_PinButtonLabel )
+			return;
+
+		if ( m_IsPinned )
 		{
-			if ( m_IsPinned )
-				m_PinButtonLabel.SetColor( ARGB( 255, 255, 200, 50 ) );
-			else
-				m_PinButtonLabel.SetColor( ARGB( 255, 153, 153, 153 ) );
+			m_PinButtonLabel.LoadImageFile( 0, JMConstants.ICON_PIN );
+			m_PinButtonLabel.SetColor( JMUIColors.PIN_ACTIVE );
 		}
+		else
+		{
+			m_PinButtonLabel.LoadImageFile( 0, JMConstants.ICON_PIN_OFF );
+			m_PinButtonLabel.SetColor( JMUIColors.PIN_INACTIVE );
+		}
+
+		m_PinButtonLabel.SetImage( 0 );
+	}
+
+	//! Same idea for the collapse button: chevrons pointing at each other while
+	//! the window is open (click to collapse), pointing apart while it is
+	//! collapsed (click to restore).
+	//! @param collapsed the state the window is heading INTO. Minimize() and
+	//!        Restore() both start an animation and only flip m_IsMinimized when
+	//!        it finishes, so the caller says where it is going rather than
+	//!        letting this read a flag that has not moved yet.
+	private void SyncMinimizeIcon( bool collapsed )
+	{
+		if ( !m_MinimizeButtonLabel )
+			return;
+
+		if ( collapsed )
+		{
+			m_MinimizeButtonLabel.LoadImageFile( 0, JMConstants.ICON_EXPAND_VERTICAL );
+			m_MinimizeButtonLabel.SetColor( JMUIColors.PIN_ACTIVE );
+		}
+		else
+		{
+			m_MinimizeButtonLabel.LoadImageFile( 0, JMConstants.ICON_COLLAPSE_VERTICAL );
+			m_MinimizeButtonLabel.SetColor( JMUIColors.PIN_INACTIVE );
+		}
+
+		m_MinimizeButtonLabel.SetImage( 0 );
 	}
 
 	void Show()
@@ -487,9 +602,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_AnimateToH   = m_TitleBarHeight;
 		m_AnimateTime  = 0;
 
-		if ( m_MinimizeButtonLabel ) m_MinimizeButtonLabel.SetText( "^" );
-
 		m_IsAnimatingMinimize = true;
+
+		SyncMinimizeIcon( true );
 	}
 
 	//! Restore the window to its pre-minimized size with an animated transition.
@@ -508,9 +623,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_AnimateToH   = m_RestoreHeight;
 		m_AnimateTime  = 0;
 
-		if ( m_MinimizeButtonLabel ) m_MinimizeButtonLabel.SetText( "_" );
-
 		m_IsAnimatingRestore = true;
+
+		SyncMinimizeIcon( false );
 	}
 
 	//! Toggle between minimized and restored states.
@@ -524,8 +639,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void Focus()
 	{
-		SetBackgroundColour( 0.9995, 0.06, 0.08, 0.11 );
-		SetTitleColour( 1.0, 0.04, 0.04, 0.12 );
+		SetBackgroundColour( JMUIColors.BG_FOCUSED_A,     JMUIColors.BG_FOCUSED_R,     JMUIColors.BG_FOCUSED_G,     JMUIColors.BG_FOCUSED_B );
+		SetTitleColour(      JMUIColors.TITLE_FOCUSED_A,  JMUIColors.TITLE_FOCUSED_R,  JMUIColors.TITLE_FOCUSED_G,  JMUIColors.TITLE_FOCUSED_B );
 
 		if ( m_TitleAccent ) m_TitleAccent.Show( true );
 
@@ -534,8 +649,8 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void Unfocus()
 	{
-		SetBackgroundColour( 0.95, 0.042, 0.056, 0.077 );
-		SetTitleColour( 1.0, 0.02, 0.02, 0.06 );
+		SetBackgroundColour( JMUIColors.BG_UNFOCUSED_A,    JMUIColors.BG_UNFOCUSED_R,    JMUIColors.BG_UNFOCUSED_G,    JMUIColors.BG_UNFOCUSED_B );
+		SetTitleColour(      JMUIColors.TITLE_UNFOCUSED_A, JMUIColors.TITLE_UNFOCUSED_R, JMUIColors.TITLE_UNFOCUSED_G, JMUIColors.TITLE_UNFOCUSED_B );
 
 		if ( m_TitleAccent ) m_TitleAccent.Show( false );
 
@@ -557,6 +672,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
+		if ( button == MouseState.LEFT )
+			SetTitleButtonPressed( w, true );
+
 		Widget parentWidget = w;
 		while ( parentWidget != NULL )
 		{
@@ -569,6 +687,14 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 
 		return super.OnMouseButtonDown( w, x, y, button );
+	}
+
+	override bool OnMouseButtonUp( Widget w, int x, int y, int button )
+	{
+		if ( m_PressedButton )
+			SetTitleButtonPressed( m_PressedButton, false );
+
+		return super.OnMouseButtonUp( w, x, y, button );
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -596,6 +722,15 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	override bool OnMouseEnter( Widget w, int x, int y )
 	{
+		Widget buttonHover = GetTitleButtonHover( w );
+		if ( buttonHover )
+		{
+			buttonHover.SetColor( GetTitleButtonHoverColor( w, false ) );
+			buttonHover.Show( true );
+			SetTitleButtonIconAlpha( w, ICON_ALPHA_HOVER );
+			return true;
+		}
+
 		if ( m_IsMinimized )
 			return false;
 
@@ -611,6 +746,18 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
 	{
+		Widget buttonHover = GetTitleButtonHover( w );
+		if ( buttonHover )
+		{
+			buttonHover.Show( false );
+			SetTitleButtonIconAlpha( w, ICON_ALPHA_REST );
+
+			if ( m_PressedButton == w )
+				m_PressedButton = NULL;
+
+			return true;
+		}
+
 		Widget highlight = GetHandleHighlight( w );
 		if ( highlight )
 		{
@@ -619,6 +766,86 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		}
 
 		return false;
+	}
+
+	// -- Title-bar button chrome ---------------------------------------------
+
+	static const float ICON_ALPHA_REST  = 0.75;
+	static const float ICON_ALPHA_HOVER = 1.0;
+
+	//! Held state deepens the same backdrop instead of swapping colour, so the
+	//! close button keeps its red and the other two stay neutral. These are set
+	//! explicitly rather than via SetAlpha, which clamps at 1.0 and so cannot
+	//! express "more opaque than the hover state".
+	static const int HOVER_NEUTRAL         = 0x2EFFFFFF;
+	static const int HOVER_NEUTRAL_PRESSED = 0x4DFFFFFF;
+	static const int HOVER_CLOSE           = 0x59FF627D;
+	static const int HOVER_CLOSE_PRESSED   = 0x8CFF627D;
+
+	private Widget GetTitleButtonHover( Widget w )
+	{
+		if ( w == m_CloseButton    ) return m_CloseButtonHover;
+		if ( w == m_MinimizeButton ) return m_MinimizeButtonHover;
+		if ( w == m_PinButton      ) return m_PinButtonHover;
+
+		return NULL;
+	}
+
+	private int GetTitleButtonHoverColor( Widget w, bool pressed )
+	{
+		if ( w == m_CloseButton )
+		{
+			if ( pressed )
+				return HOVER_CLOSE_PRESSED;
+			return HOVER_CLOSE;
+		}
+
+		if ( pressed )
+			return HOVER_NEUTRAL_PRESSED;
+
+		return HOVER_NEUTRAL;
+	}
+
+	private void SetTitleButtonIconAlpha( Widget w, float alpha )
+	{
+		if ( w == m_CloseButton && m_CloseButtonLabel )
+			m_CloseButtonLabel.SetAlpha( alpha );
+		else if ( w == m_MinimizeButton && m_MinimizeButtonLabel )
+			m_MinimizeButtonLabel.SetAlpha( alpha );
+		else if ( w == m_PinButton && m_PinButtonLabel )
+			m_PinButtonLabel.SetAlpha( alpha );
+	}
+
+	private void ResetTitleButtonChrome()
+	{
+		if ( m_CloseButtonHover )    m_CloseButtonHover.Show( false );
+		if ( m_MinimizeButtonHover ) m_MinimizeButtonHover.Show( false );
+		if ( m_PinButtonHover )      m_PinButtonHover.Show( false );
+
+		if ( m_CloseButtonLabel )    m_CloseButtonLabel.SetAlpha( ICON_ALPHA_REST );
+		if ( m_MinimizeButtonLabel ) m_MinimizeButtonLabel.SetAlpha( ICON_ALPHA_REST );
+		if ( m_PinButtonLabel )      m_PinButtonLabel.SetAlpha( ICON_ALPHA_REST );
+
+		m_PressedButton = NULL;
+	}
+
+	private void SetTitleButtonPressed( Widget w, bool pressed )
+	{
+		Widget hover = GetTitleButtonHover( w );
+		if ( !hover )
+			return;
+
+		hover.SetColor( GetTitleButtonHoverColor( w, pressed ) );
+
+		if ( pressed )
+		{
+			hover.Show( true );
+			m_PressedButton = w;
+		}
+		else
+		{
+			m_PressedButton = NULL;
+		}
 	}
 
 	override bool OnDrag( Widget w, int x, int y )
@@ -733,7 +960,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_TitleWrapper.SetPos( 0, 0, true );
 	}
 
-	// ─── Private helpers ────────────────────────────────────────────────────────
+	// ??? Private helpers ????????????????????????????????????????????????????????
 
 	private void CenterOnScreen()
 	{
@@ -744,7 +971,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		layoutRoot.GetSize( winW, winH );
 
 		int openCount = GetCOTWindowManager().Count() - 1;
-		float cascade = Math.Clamp( openCount * 20, 0, 200 );
+		float cascade = Math.Clamp( openCount * JMUILayout.WINDOW_CASCADE_OFFSET, 0, JMUILayout.WINDOW_CASCADE_MAX );
 
 		SetPosition( ( screenW - winW ) * 0.5 + cascade, ( screenH - winH ) * 0.5 + cascade );
 	}

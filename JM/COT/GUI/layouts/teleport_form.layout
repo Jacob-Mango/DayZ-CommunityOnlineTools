@@ -7,9 +7,9 @@ PanelWidgetClass JMTeleportForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMTeleportForm"
- style DayZDefaultPanel
+ style COTSurface
  {
-  GridSpacerWidgetClass actions_filter_wrapper {
+  GridSpacerWidgetClass panel_top {
    position 0 0
    priority 20
    size 1 0.12
@@ -20,30 +20,41 @@ PanelWidgetClass JMTeleportForm {
    Columns 1
    Rows 2
   }
-  TextListboxWidgetClass tls_ppp_pm_positions_list {
-   visible 1
-   priority 10
+  PanelWidgetClass panel_bottom {
+   color 0 0 0 0
    position 0 0.12
-   size 1 0.55
+   size 1 0.88
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   style Editor
-   lines 20
-   font "gui/fonts/sdf_MetronLight24"
-   "exact text" 1
-   "exact text size" 16
-  }
-  GridSpacerWidgetClass actions_wrapper {
-   position 0 0.67
-   size 1 0.33
-   hexactpos 0
-   vexactpos 0
-   hexactsize 0
-   vexactsize 0
-   Columns 1
-   Rows 5
+   {
+    TextListboxWidgetClass tls_ppp_pm_positions_list {
+     visible 1
+     priority 10
+     position 0 0
+     size 1 0.625
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     style debugUI
+     lines 20
+     font "gui/fonts/sdf_MetronLight24"
+     "exact text" 1
+     "exact text size" 16
+    }
+    GridSpacerWidgetClass actions_wrapper {
+     position 0 0.625
+     size 1 0.375
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     Columns 1
+     Rows 5
+    }
+   }
   }
  }
 }

@@ -11,32 +11,32 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 	protected ref JMVehicleMetaData m_Vehicle;
 	protected ref JMVehiclesForm m_COTVehicleMenu;
 
-	void JMVehiclesListEntry(Widget parent, JMVehiclesForm menu, JMVehicleMetaData vehicle)
+	void JMVehiclesListEntry( Widget parent, JMVehiclesForm menu, JMVehicleMetaData vehicle )
 	{
-		m_Root					= g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
-		m_VehicleName			= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_name" ) );
-		m_VehicleID				= TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_id" ) );
-		m_EditButton			= ButtonWidget.Cast( m_Root.FindAnyWidget( "edit_button" ) );
-		m_VehicleStatusIcon		= ImageWidget.Cast( m_Root.FindAnyWidget( "vehicle_status_icon" ) );
-		
-		m_COTVehicleMenu		= menu;
-		m_Vehicle				= vehicle;
-		
+		m_Root = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/vehicles/Vehicles_List_Entry_New.layout", parent );
+		m_VehicleName = TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_name" ) );
+		m_VehicleID = TextWidget.Cast( m_Root.FindAnyWidget( "vehicle_id" ) );
+		m_EditButton = ButtonWidget.Cast( m_Root.FindAnyWidget( "edit_button" ) );
+		m_VehicleStatusIcon = ImageWidget.Cast( m_Root.FindAnyWidget( "vehicle_status_icon" ) );
+
+		m_COTVehicleMenu = menu;
+		m_Vehicle = vehicle;
+
 		m_Root.SetHandler( this );
-		
+
 		SetEntry();
 	}
 
 	void ~JMVehiclesListEntry()
 	{
-		if (g_Game && m_Root)
+		if ( g_Game && m_Root )
 			m_Root.Unlink();
 	}
 
-	void SetSort(int sort, bool immedUpdate = true)
+	void SetSort( int sort, bool immedUpdate = true )
 	{
 		m_Sort = sort;
-		m_Root.SetSort(sort, immedUpdate);
+		m_Root.SetSort( sort, immedUpdate );
 		SetEntry();
 	}
 
@@ -55,14 +55,14 @@ class JMVehiclesListEntry: ScriptedWidgetEventHandler
 			m_VehicleID.SetText( id );
 
 			m_Label = m_Vehicle.m_DisplayName + id;
-			
+
 			if ( m_Vehicle.m_DestructionType != JMDT_NONE )
 			{
-				m_VehicleStatusIcon.SetColor( ARGB( 255,255,0,0 ) );
+				m_VehicleStatusIcon.SetColor( ARGB( 255, 255, 0, 0 ) );
 			}
 			else
 			{
-				m_VehicleStatusIcon.SetColor( ARGB( 255,0,255,0 ) );
+				m_VehicleStatusIcon.SetColor( ARGB( 255, 0, 255, 0 ) );
 			}
 		}
 	}

@@ -6,9 +6,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	string m_SearchText;
 	int m_OverrideDebugSpawnDepth;
 
-	// Loaded from SpawnerConfig.json — no longer hardcoded
+	// Loaded from SpawnerConfig.json - no longer hardcoded
 	private ref array< string > m_UnfinishedItems     = new array< string >;
 	private ref array< string > m_RestrictedClassNames = new array< string >;
+	private ref array< string > m_RestrictedStartClassNames = new array< string >;	
 
 	bool m_AllowRestrictedClassNames;
 	bool m_FilterWithDisplayName;
@@ -40,6 +41,10 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		m_RestrictedClassNames.Clear();
 		foreach ( string pattern: cfg.RestrictedPatterns )
 			m_RestrictedClassNames.Insert( pattern );
+
+		m_RestrictedStartClassNames.Clear();
+		foreach ( string startPattern: cfg.RestrictedStartPatterns )
+			m_RestrictedStartClassNames.Insert( startPattern );
 	}
 
 	override void EnableUpdate()
@@ -90,7 +95,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "JM\\COT\\GUI\\textures\\modules\\Object.paa";
+		return JMConstants.Lucide( "package-plus" );
 	}
 
 	override bool ImageIsIcon()
@@ -223,6 +228,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					foreach (string blacklistedName: m_RestrictedClassNames)
 					{
 						if ( name.Contains(blacklistedName) )
+						{
+							blacklisted = true;
+							break;
+						}
+					}
+
+					foreach (string blacklistedStartName: m_RestrictedStartClassNames)
+					{
+						if ( name.IndexOf(blacklistedStartName) == 0 )
 						{
 							blacklisted = true;
 							break;
@@ -617,13 +631,19 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		Object obj = g_Game.CreateObjectEx(type, position, flags);
 
 		if (!obj)
+		{
+			CF_Log.Error("JMObjectSpawnerModule::SpawnEntity failed - CreateObjectEx returned null for class '%1' (flags=%2)", type, flags.ToString());
+			if ( callerInstance && callerInstance.PlayerObject )
+				GetCommunityOnlineToolsBase().Log( callerInstance.PlayerObject.GetIdentity(), "Spawn FAILED for class '" + type + "' - class not found or not spawnable" );
 			return null;
+		}
 
 		EntityAI ent;
 
 		if (!Class.CastTo(ent, obj))
 		{
 			g_Game.ObjectDelete(obj);
+			CF_Log.Error("JMObjectSpawnerModule::SpawnEntity failed - '%1' is not an EntityAI", type);
 			return null;
 		}
 
@@ -684,7 +704,15 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		return ent;
 	}
 
-	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
+	//! Apply the attachment half of a setup mode - and nothing else. Kept apart
+	//! from SetupEntity so the spawner form can run the exact same pass over the
+	//! local entity behind its item preview: the preview then shows the
+	//! attachments and magazine the real spawn would produce, instead of a bare
+	//! model that never matches what lands in the world.
+	//!
+	//! Quantity / health / temperature deliberately stay in SetupEntity - the
+	//! preview drives those from its own sliders.
+	void SetupEntityForMode( EntityAI entity, PlayerBase player, COT_ObjectSetupMode mode )
 	{
 		switch (mode)
 		{
@@ -723,6 +751,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 				}
 				break;
 		}
+	}
+
+	private void SetupEntity( EntityAI entity, float quantity, float health, float temp, int itemState, PlayerBase player, COT_ObjectSetupMode mode = COT_ObjectSetupMode.NONE )
+	{
+		SetupEntityForMode( entity, player, mode );
 
 		ItemBase item;
 		if ( Class.CastTo( item, entity ) )
@@ -765,6 +798,24 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			}
 		}
 
+		SetupEntityHealth( entity, health, temp );
+	}
+
+	//! Push a global health value onto an entity, its damage zones, and
+	//! everything hanging off it - attachments take the same PERCENTAGE of their
+	//! own max health rather than the raw number, so a 50% rifle carries a 50%
+	//! optic and not an optic pinned to the rifle's HP value.
+	//!
+	//! Recurses, so an attachment's own attachments follow too.
+	//!
+	//! Split out of SetupEntity so the spawner form can run the identical pass
+	//! over its local preview entity: the preview spawns the same attachments
+	//! the real spawn would, and they have to answer to the health slider the
+	//! same way.
+	//!
+	//! @param health -1 means "full". @param temp -1 means "leave alone".
+	void SetupEntityHealth( EntityAI entity, float health, float temp )
+	{
 		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(entity.GetType());
 		if (maxHealth > 0)
 		{
@@ -790,7 +841,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 					{
 						EntityAI attachment = entity.GetInventory().GetAttachmentFromIndex(i);
 						float attachmentHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth(attachment.GetType()) * health01;
-						SetupEntity(attachment, -1, attachmentHealth, temp, 0, player, COT_ObjectSetupMode.NONE);
+						SetupEntityHealth(attachment, attachmentHealth, temp);
 					}
 				}
 			}
@@ -810,6 +861,11 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			foreach ( string restrictedClassName: m_RestrictedClassNames )
 			{
 				if ( className.Contains( restrictedClassName ) )
+					return true;
+			}
+			foreach (string blacklistedStartName: m_RestrictedStartClassNames)
+			{
+				if ( className.IndexOf(blacklistedStartName) == 0 )
 					return true;
 			}
 		}

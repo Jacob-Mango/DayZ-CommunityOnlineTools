@@ -2,7 +2,7 @@
 //  JMPlayerBan.c
 //
 //  Persistent ban record. All public fields are reflected automatically by
-//  JsonFileLoader<JMPlayerBanStore> — no manual serialisation needed.
+//  JsonFileLoader<JMPlayerBanStore> - no manual serialisation needed.
 //
 //  NOTE: BanDuration stores an absolute Unix expiry timestamp (not a relative
 //  duration). This matches how JMPlayerModule.SendBanMessage() works:
@@ -12,7 +12,7 @@
 
 class JMPlayerBan
 {
-    // Canonical identifier — Steam 64-bit ID (GetIdentity().GetId()).
+    // Canonical identifier - Steam 64-bit ID (GetIdentity().GetId()).
     // Never use PlayerName for lookups; names change.
     string SteamID;
 
@@ -86,7 +86,7 @@ class JMPlayerBan
     }
 
     // -------------------------------------------------------------------------
-    //  Static helpers — called by MissionServer.IsCOTBanned at connect time.
+    //  Static helpers - called by MissionServer.IsCOTBanned at connect time.
     //  These read/write Bans.json directly so they work before the module loads.
     // -------------------------------------------------------------------------
 

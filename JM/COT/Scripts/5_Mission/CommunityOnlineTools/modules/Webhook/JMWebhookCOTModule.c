@@ -41,7 +41,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	override string GetCategory()
 	{
-		return "Other";
+		return "Server";
 	}
 
 	override string GetTitle()
@@ -51,12 +51,17 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	override string GetIconName()
 	{
-		return "WH";
+		return JMConstants.Lucide( "webhook" );
 	}
 
 	override bool ImageIsIcon()
 	{
-		return false;
+		return true;
+	}
+
+	override bool ImageHasPath()
+	{
+		return true;
 	}
 
 	override string GetWebhookTitle()
@@ -146,7 +151,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 	private void Server_Load( notnull PlayerIdentity ident )
 	{
-		// Skip permission check for the initial settings sync — the player instance
+		// Skip permission check for the initial settings sync - the player instance
 		// may not exist yet if the Load RPC arrives before the player is fully registered.
 		// Mutation RPCs (Add/Remove/Edit) still enforce full permission checks.
 		ScriptRPC rpc = new ScriptRPC();
@@ -253,7 +258,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  EditConnectionGroup — update name, URL, and optional player/role filter
+	//  EditConnectionGroup - update name, URL, and optional player/role filter
 	// -------------------------------------------------------------------------
 
 	void EditConnectionGroup( string oldName, string newName, string newUrl, string filterGUID, string filterRole )

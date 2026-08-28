@@ -52,6 +52,10 @@ class JMCameraForm: JMFormBase
 		private UIActionSlider         m_WP_SliderShakeIntensity;
 		private UIActionSlider         m_WP_SliderShakeFrequency;
 
+		// Playback buttons
+		private UIActionButton         m_BtnTravel;
+		private UIActionButton         m_BtnPauseResume;
+
 		// Path controls
 		private UIActionSelectBox      m_TravelModeSelectBox;
 		private ref TStringArray       m_TravelModeNames;
@@ -69,11 +73,13 @@ class JMCameraForm: JMFormBase
 
 	// ---- Bookmarks panel ----
 	protected GridSpacerWidget m_PanelBookmarks;
-		private UIActionSelectBox    m_BookmarkSelectBox;
-		private ref TStringArray     m_BookmarkNames;
-		private string               m_PendingBookmarkName;
+		private UIActionSelectBox      m_BookmarkSelectBox;
+		private ref TStringArray       m_BookmarkNames;
+		private string                 m_PendingBookmarkName;
+		private UIActionConfirmInline  m_DeleteBookmarkBtn;
 
-	private JMCameraModule m_Module;
+	//! protected, not private: sub-mods reach for the module through the form.
+	protected JMCameraModule m_Module;
 
 	void JMCameraForm()
 	{
@@ -83,6 +89,14 @@ class JMCameraForm: JMFormBase
 		m_WaypointNames = new TStringArray;
 		m_EasingNames   = new TStringArray;
 		m_TravelModeNames = new TStringArray;
+
+		// Waypoint SelectBox is created during OnInit, before any waypoints
+		// exist. OptionSelectorMultistate VME's on an empty options array,
+		// so seed a placeholder and let UpdateWaypoints replace it once
+		// real waypoints are loaded. (See also UIActionSelectBox.SetSelections
+		// guard against empty arrays.)
+		if ( m_WaypointNames.Count() == 0 )
+			m_WaypointNames.Insert( "(none)" );
 
 		m_EasingNames.Insert("Linear");
 		m_EasingNames.Insert("Ease In");
@@ -185,7 +199,7 @@ class JMCameraForm: JMFormBase
 		Widget col = UIActionManager.CreateGridSpacer( m_PanelEffects, 1, 1 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_DOF", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_SliderBlurStrength = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_BLUR", 0, 100, this, "OnChange_Blur" );
 		m_SliderBlurStrength.SetCurrent( 0 );
@@ -220,7 +234,7 @@ class JMCameraForm: JMFormBase
 		m_SliderFocalNear.SetWidgetWidth( m_SliderFocalNear.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_POSTPROCESS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_SliderExposure = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_EXPOSURE", -5, 5, this, "OnChange_Exposure" );
 		m_SliderExposure.SetCurrent( 0 );
@@ -239,7 +253,7 @@ class JMCameraForm: JMFormBase
 		m_SliderVignette.SetWidgetWidth( m_SliderVignette.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_CONTROLS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_SliderSpeed = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_SPEED", 0.001, 10, this, "OnChange_Speed" );
 		m_SliderSpeed.SetCurrent( JMCameraBase.s_CurrentSpeed );
@@ -256,7 +270,7 @@ class JMCameraForm: JMFormBase
 		m_SliderFOV.SetWidgetWidth( m_SliderFOV.GetSliderWidget(), 0.6 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SHAKE", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_SliderShakeIntensity = UIActionManager.CreateSlider( col, "#STR_COT_CAMERA_MODULE_SHAKE_INTENSITY", 0, 0.5, this, "OnChange_ShakeIntensity" );
 		m_SliderShakeIntensity.SetCurrent( 0 );
@@ -274,7 +288,8 @@ class JMCameraForm: JMFormBase
 		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetLabelWidget(), 0.4 );
 		m_SliderShakeFrequency.SetWidgetWidth( m_SliderShakeFrequency.GetSliderWidget(), 0.6 );
 
-		UIActionManager.CreateButton( col, "Reset", this, "OnClick_ResetEffects" );
+		UIActionButton btnResetFx = UIActionManager.CreateButton( col, "Reset", this, "OnClick_ResetEffects" );
+		btnResetFx.SetTooltip( "Reset every screen effect back to its default" );
 	}
 
 	void InitCameraSettings()
@@ -282,11 +297,14 @@ class JMCameraForm: JMFormBase
 		Widget col = UIActionManager.CreateGridSpacer( m_PanelSettings, 1, 1 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_OPTIONS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_EnableFullmapCamera    = UIActionManager.CreateCheckbox( col, "#STR_COT_CAMERA_MODULE_FULLMAP_UPDATE",  this, "OnClick_EnableFullmap",         m_Module.m_EnableFullmapCamera );
+		m_EnableFullmapCamera.SetTooltip( "Update the fullscreen map to follow the free camera position" );
 		m_1stPersonADS_HideScope = UIActionManager.CreateCheckbox( col, "#STR_COT_CAMERA_MODULE_HIDE_SCOPE",     this, "OnClick_1stPersonADS_HideScope", GetCurrentCamera1stPersonADSHideScope() );
+		m_1stPersonADS_HideScope.SetTooltip( "Hide the scope reticle overlay while aiming in first-person" );
 		m_HideGrass              = UIActionManager.CreateCheckbox( col, "#STR_COT_CAMERA_MODULE_HIDE_GRASS",     this, "OnClick_HideGrass",              m_Module.m_HideGrass );
+		m_HideGrass.SetTooltip( "Disable grass rendering so distant objects are visible" );
 	}
 
 	void InitCameraTraveling()
@@ -295,25 +313,32 @@ class JMCameraForm: JMFormBase
 
 		// ---- Waypoint List ----
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_WAYPOINT_EDITOR", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_WaypointSelectBox = UIActionManager.CreateSelectionBox( col, "Select", m_WaypointNames, this, "OnClick_WaypointSelectBox" );
 		m_WaypointSelectBox.SetSelectorWidth(1.0);
 
 		// Add / Remove / Move Up / Move Down in a 2x2 grid
 		Widget gridListButtons = UIActionManager.CreateGridSpacer( col, 2, 2 );
-		UIActionManager.CreateButton( gridListButtons, "Add",    this, "OnClick_AddWaypoint"     );
-		UIActionManager.CreateButton( gridListButtons, "Delete", this, "OnClick_DeleteWaypoint"   );
-		UIActionManager.CreateButton( gridListButtons, "Up",             this, "OnClick_MoveWaypointUp"   );
-		UIActionManager.CreateButton( gridListButtons, "Down",           this, "OnClick_MoveWaypointDown" );
+		UIActionButton btnAddWp = UIActionManager.CreateButton( gridListButtons, "Add",    this, "OnClick_AddWaypoint"     );
+		btnAddWp.SetTooltip( "Add a new waypoint at the current camera position" );
+		UIActionConfirmInline delWaypointBtn = UIActionManager.CreateConfirmInline( gridListButtons, "Delete", this, "OnClick_DeleteWaypoint" );
+		UIActionIconGrid.ApplyDeletePreset( delWaypointBtn );
+		delWaypointBtn.SetTooltip( "Remove the selected waypoint" );
+		UIActionButton btnUp   = UIActionManager.CreateButton( gridListButtons, "Up",             this, "OnClick_MoveWaypointUp"   );
+		btnUp.SetTooltip( "Move the selected waypoint earlier in the path" );
+		UIActionButton btnDown = UIActionManager.CreateButton( gridListButtons, "Down",           this, "OnClick_MoveWaypointDown" );
+		btnDown.SetTooltip( "Move the selected waypoint later in the path" );
 
-		UIActionManager.CreateButton( col, "Clear All", this, "OnClick_ClearWaypoints" );
+		UIActionButton btnClear = UIActionManager.CreateButton( col, "Clear All", this, "OnClick_ClearWaypoints" );
+		btnClear.SetTooltip( "Remove every waypoint from the current path" );
 
 		// ---- Edit Selected Waypoint ----
 		UIActionManager.CreateText( col, "Edit Selected Waypoint", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
-		UIActionManager.CreateButton( col, "Capture Position", this, "OnClick_CapturePosition" );
+		UIActionButton btnCapPos = UIActionManager.CreateButton( col, "Capture Position", this, "OnClick_CapturePosition" );
+		btnCapPos.SetTooltip( "Update the selected waypoint with the current camera position" );
 
 		m_SliderWaypointSpeed = UIActionManager.CreateSlider( col, "Speed (m/s)", 0.1, 50, this, "OnChange_WaypointSpeed" );
 		m_SliderWaypointSpeed.SetCurrent( 5 );
@@ -334,9 +359,12 @@ class JMCameraForm: JMFormBase
 		// Catmull + Track Target on the same row
 		Widget gridCatmullTrack = UIActionManager.CreateGridSpacer( col, 1, 2 );
 		m_ToggleCatmull     = UIActionManager.CreateCheckbox( gridCatmullTrack, "Catmull-Rom",  this );
+		m_ToggleCatmull.SetTooltip( "Smooth the travel path with Catmull-Rom spline interpolation" );
 		m_ToggleTrackTarget = UIActionManager.CreateCheckbox( gridCatmullTrack, "Track Target", this, "OnClick_TrackTarget" );
+		m_ToggleTrackTarget.SetTooltip( "Keep the camera pointed at the selected target during travel" );
 
 		m_CaptureOrientation = UIActionManager.CreateCheckbox( col, "#STR_COT_CAMERA_MODULE_CAPTURE_ORIENT", this, "OnClick_CaptureOrientation" );
+		m_CaptureOrientation.SetTooltip( "Store the current camera rotation when Capture Position is pressed" );
 
 		m_EasingSelectBox = UIActionManager.CreateSelectionBox( col, "Easing", m_EasingNames, this, "OnClick_EasingSelectBox" );
 		m_EasingSelectBox.SetSelectorWidth(1.0);
@@ -344,7 +372,7 @@ class JMCameraForm: JMFormBase
 
 		// ---- Per-Waypoint Screen Effects ----
 		UIActionManager.CreateText( col, "Waypoint Effects", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_WP_SliderExposure = UIActionManager.CreateSlider( col, "Exposure (EV)", -5, 5, this, "OnChange_WP_Exposure" );
 		m_WP_SliderExposure.SetCurrent( 0 );
@@ -396,14 +424,18 @@ class JMCameraForm: JMFormBase
 
 		// Clipboard shortcuts
 		Widget gridPosActions = UIActionManager.CreateGridSpacer( col, 1, 2 );
-		UIActionManager.CreateButton( gridPosActions, "Copy Pos",  this, "OnClick_CopyPos"  );
-		UIActionManager.CreateButton( gridPosActions, "Paste Pos", this, "OnClick_PastePos" );
+		UIActionButton btnCopyPos  = UIActionManager.CreateButton( gridPosActions, "Copy Pos",  this, "OnClick_CopyPos"  );
+		btnCopyPos.SetIcon( JMConstants.ICON_STACK );
+		btnCopyPos.SetTooltip( "Copy this waypoint's world position to the clipboard" );
+		UIActionButton btnPastePos = UIActionManager.CreateButton( gridPosActions, "Paste Pos", this, "OnClick_PastePos" );
+		btnPastePos.SetTooltip( "Paste a world position from the clipboard into this waypoint" );
 
-		UIActionManager.CreateButton( col, "Look At", this, "OnClick_LookAtSelection" );
+		UIActionButton btnLookAt = UIActionManager.CreateButton( col, "Look At", this, "OnClick_LookAtSelection" );
+		btnLookAt.SetTooltip( "Rotate this waypoint so the camera points at the current target" );
 
 		// ---- Path Controls ----
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_PATH_CONTROLS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_TravelModeSelectBox = UIActionManager.CreateSelectionBox( col, "Mode", m_TravelModeNames, this, "OnClick_TravelModeSelectBox" );
 		m_TravelModeSelectBox.SetSelectorWidth(1.0);
@@ -420,12 +452,16 @@ class JMCameraForm: JMFormBase
 		m_LabelDuration = UIActionManager.CreateText( col, "Est. Duration: --", "" );
 
 		Widget gridPlayback = UIActionManager.CreateGridSpacer( col, 1, 2 );
-		UIActionManager.CreateButton( gridPlayback, "Travel", this, "OnClick_GoToPositions" );
-		UIActionManager.CreateButton( gridPlayback, "Pause",               this, "OnClick_PauseResume"   );
+		m_BtnTravel = UIActionManager.CreateButton( gridPlayback, "Travel", this, "OnClick_GoToPositions" );
+		m_BtnTravel.SetIcon( JMConstants.ICON_PLAY );
+		m_BtnTravel.SetTooltip( "Start travelling through the waypoints" );
+		m_BtnPauseResume = UIActionManager.CreateButton( gridPlayback, "Pause", this, "OnClick_PauseResume" );
+		m_BtnPauseResume.SetIcon( JMConstants.ICON_PAUSE );
+		m_BtnPauseResume.SetTooltip( "Pause or resume the current travel" );
 
 		// ---- Saved Paths ----
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_SAVED_PATHS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_PathNames     = m_Module.GetPathNames();
 		m_PathSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_MODULE_SAVED_PATHS", m_PathNames, this, "OnClick_PathSelectBox" );
@@ -434,9 +470,13 @@ class JMCameraForm: JMFormBase
 		m_PathName = UIActionManager.CreateEditableText( col, "#STR_COT_CAMERA_MODULE_PATH_NAME", this );
 
 		Widget gridPathActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionManager.CreateButton( gridPathActions, "Save",           this, "OnClick_SavePath"   );
-		UIActionManager.CreateButton( gridPathActions, "Load",          this, "OnClick_LoadPath"   );
-		UIActionManager.CreateButton( gridPathActions, "Delete", this, "OnClick_DeletePath" );
+		UIActionButton btnSavePath = UIActionManager.CreateButton( gridPathActions, "Save",           this, "OnClick_SavePath"   );
+		btnSavePath.SetTooltip( "Save the current waypoint path under the name above" );
+		UIActionButton btnLoadPath = UIActionManager.CreateButton( gridPathActions, "Load",          this, "OnClick_LoadPath"   );
+		btnLoadPath.SetTooltip( "Load the selected saved path into the editor" );
+		UIActionConfirmInline delPathBtn = UIActionManager.CreateConfirmInline( gridPathActions, "Delete", this, "OnClick_DeletePath" );
+		UIActionIconGrid.ApplyDeletePreset( delPathBtn );
+		delPathBtn.SetTooltip( "Delete the selected saved path" );
 	}
 
 	void InitCameraBookmarks()
@@ -444,17 +484,20 @@ class JMCameraForm: JMFormBase
 		Widget col = UIActionManager.CreateGridSpacer( m_PanelBookmarks, 1, 1 );
 
 		UIActionManager.CreateText( col, "#STR_COT_CAMERA_SECTION_BOOKMARKS", "" );
-		UIActionManager.CreatePanel( col, 0xFF1A1A1A, 2 );
+		UIActionManager.CreatePanel( col, JMTheme.DIVIDER_DARK, 2 );
 
 		m_BookmarkNames     = m_Module.GetBookmarkNames();
 		m_BookmarkSelectBox = UIActionManager.CreateSelectionBox( col, "#STR_COT_CAMERA_MODULE_BOOKMARKS", m_BookmarkNames, this, "OnClick_BookmarkSelectBox" );
 		m_BookmarkSelectBox.SetSelectorWidth(1.0);
 
 		Widget gridBookmarkActions = UIActionManager.CreateGridSpacer( col, 1, 3 );
-		UIActionManager.CreateButton( gridBookmarkActions, "Save",               this, "OnClick_SaveBookmark"    );
-		UIActionManager.CreateButton( gridBookmarkActions, "Go To", this, "OnClick_TeleportBookmark" );
-		UIActionButton deleteBtn = UIActionManager.CreateButton( gridBookmarkActions, "Delete", this, "OnClick_DeleteBookmark" );
-		deleteBtn.SetColor( COLOR_RED );
+		UIActionButton btnSaveBm = UIActionManager.CreateButton( gridBookmarkActions, "Save",   this, "OnClick_SaveBookmark"    );
+		btnSaveBm.SetTooltip( "Save the current camera position as a bookmark" );
+		UIActionButton btnGoToBm = UIActionManager.CreateButton( gridBookmarkActions, "Go To",  this, "OnClick_TeleportBookmark" );
+		btnGoToBm.SetTooltip( "Teleport the camera to the selected bookmark" );
+		m_DeleteBookmarkBtn = UIActionManager.CreateConfirmInline( gridBookmarkActions, "Delete", this, "OnClick_DeleteBookmark" );
+		UIActionIconGrid.ApplyDeletePreset( m_DeleteBookmarkBtn );
+		m_DeleteBookmarkBtn.SetTooltip( "Remove the selected bookmark" );
 	}
 
 	// ----------------------------------------------------------------
@@ -741,7 +784,7 @@ class JMCameraForm: JMFormBase
 
 	void OnClick_DeleteWaypoint( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CHANGE ) return;
 		if ( m_Waypoints.Count() == 0 ) return;
 
 		m_Waypoints.Remove( m_WaypointID );
@@ -887,6 +930,19 @@ class JMCameraForm: JMFormBase
 	{
 		if ( eid != UIEvent.CLICK ) return;
 		m_Module.ToggleTravelPause();
+		if ( m_BtnPauseResume )
+		{
+			if ( m_Module.IsTravelPaused() )
+			{
+				m_BtnPauseResume.SetButton( "Resume" );
+				m_BtnPauseResume.SetIcon( JMConstants.ICON_PLAY );
+			}
+			else
+			{
+				m_BtnPauseResume.SetButton( "Pause" );
+				m_BtnPauseResume.SetIcon( JMConstants.ICON_PAUSE );
+			}
+		}
 	}
 
 	// ----------------------------------------------------------------
@@ -897,6 +953,11 @@ class JMCameraForm: JMFormBase
 	{
 		if ( !m_PathSelectBox ) return;
 		m_PathNames = m_Module.GetPathNames();
+		// Belt + suspenders: UIActionSelectBox.SetSelections seeds an empty
+		// array, but pre-seeding here gives the placeholder a UX-meaningful
+		// label and survives if SetSelections' guard changes.
+		if ( m_PathNames.Count() == 0 )
+			m_PathNames.Insert( "(no paths)" );
 		m_PathSelectBox.SetSelections( m_PathNames );
 	}
 
@@ -934,7 +995,7 @@ class JMCameraForm: JMFormBase
 
 	void OnClick_DeletePath( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
+		if ( eid != UIEvent.CHANGE ) return;
 		string name = m_PathName.GetText();
 		if ( name == "" ) return;
 		m_Module.DeletePath( name );
@@ -949,12 +1010,17 @@ class JMCameraForm: JMFormBase
 	{
 		if ( !m_BookmarkSelectBox ) return;
 		m_BookmarkNames = m_Module.GetBookmarkNames();
+		// Belt + suspenders: even though UIActionSelectBox.SetSelections seeds
+		// an empty array with "(empty)", guard here too so the call is
+		// self-documenting and survives if SetSelections' guard changes.
+		if ( m_BookmarkNames.Count() == 0 )
+			m_BookmarkNames.Insert( "(no bookmarks)" );
 		m_BookmarkSelectBox.SetSelections( m_BookmarkNames );
 	}
 
 	void OnClick_BookmarkSelectBox( UIEvent eid, UIActionBase action )
 	{
-		// selection drives teleport/delete — no name field to populate
+		// selection drives teleport/delete - no name field to populate
 	}
 
 	string GetSelectedBookmarkName()
@@ -994,14 +1060,7 @@ class JMCameraForm: JMFormBase
 
 	void OnClick_DeleteBookmark( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK ) return;
-		string name = GetSelectedBookmarkName();
-		if ( name == "" ) return;
-		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", string.Format( Widget.TranslateString( "#STR_COT_OBJECT_MODULE_DELETE" ) + " '%1'?", name ), "#STR_COT_GENERIC_NO", "", "#STR_COT_GENERIC_YES", "OnClick_DeleteBookmark_Confirm" );
-	}
-
-	void OnClick_DeleteBookmark_Confirm( JMConfirmation confirmation )
-	{
+		if ( eid != UIEvent.CHANGE ) return;
 		string name = GetSelectedBookmarkName();
 		if ( name == "" ) return;
 		m_Module.DeleteBookmark( name );
@@ -1118,6 +1177,12 @@ class JMCameraForm: JMFormBase
 		int count = m_Waypoints.Count();
 		for ( int i = 0; i < count; i++ )
 			m_WaypointNames.Insert( string.Format("Waypoint %1", i + 1) );
+
+		// Belt + suspenders: UIActionSelectBox.SetSelections also seeds an
+		// empty array with "(empty)", but seeding here keeps the placeholder
+		// UX-meaningful ("(no waypoints)") and survives SetSelections refactors.
+		if ( m_WaypointNames.Count() == 0 )
+			m_WaypointNames.Insert( "(no waypoints)" );
 
 		if ( m_WaypointSelectBox )
 			m_WaypointSelectBox.SetSelections( m_WaypointNames );

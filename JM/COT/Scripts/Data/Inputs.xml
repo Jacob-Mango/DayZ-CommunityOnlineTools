@@ -29,6 +29,16 @@
             <input name="UACameraToolSpeedIncrease" loc="STR_COT_INPUT_FREECAM_SPEED_INCREASE" />
             <input name="UACameraToolSpeedDecrease" loc="STR_COT_INPUT_FREECAM_SPEED_DECREASE" />
 
+            <input name="UAMapEditorMoveForward"  loc="STR_COT_MAPEDITOR_MOVE_FORWARD"  visible="false" />
+            <input name="UAMapEditorMoveBackward" loc="STR_COT_MAPEDITOR_MOVE_BACKWARD" visible="false" />
+            <input name="UAMapEditorMoveLeft"     loc="STR_COT_MAPEDITOR_MOVE_LEFT"     visible="false" />
+            <input name="UAMapEditorMoveRight"    loc="STR_COT_MAPEDITOR_MOVE_RIGHT"    visible="false" />
+            <input name="UAMapEditorMoveUp"       loc="STR_COT_MAPEDITOR_MOVE_UP"       visible="false" />
+            <input name="UAMapEditorMoveDown"     loc="STR_COT_MAPEDITOR_MOVE_DOWN"     visible="false" />
+            <input name="UAMapEditorBoost"        loc="STR_COT_MAPEDITOR_BOOST"         visible="false" />
+            <input name="UAMapEditorSlow"         loc="STR_COT_MAPEDITOR_SLOW"          visible="false" />
+            <input name="UAMapEditorLook"         loc="STR_COT_MAPEDITOR_LOOK"          visible="false" />
+
             <input name="UAObjectModuleSpawnInfected" loc="STR_COT_INPUT_SPAWN_INFECTED" />
             <input name="UAObjectModuleSpawnAnimal" loc="STR_COT_INPUT_SPAWN_ANIMAL" />
             <input name="UAObjectModuleSpawnWolf" loc="STR_COT_INPUT_SPAWN_WOLF" />
@@ -225,6 +235,37 @@
             <btn name="kRMenu">
                 <btn name="kN" />
             </btn>
+        </input>
+
+        <!-- Map editor 3D freecam — polled each tick by JMFreecam.EOnFrame via
+             GetUApi().GetInputByName(...).LocalHold(). Held combinations give
+             smooth camera flight. Look (mouse-look) is gated by RMB. -->
+        <input name="UAMapEditorMoveForward">
+            <btn name="kW" />
+        </input>
+        <input name="UAMapEditorMoveBackward">
+            <btn name="kS" />
+        </input>
+        <input name="UAMapEditorMoveLeft">
+            <btn name="kA" />
+        </input>
+        <input name="UAMapEditorMoveRight">
+            <btn name="kD" />
+        </input>
+        <input name="UAMapEditorMoveUp">
+            <btn name="kE" />
+        </input>
+        <input name="UAMapEditorMoveDown">
+            <btn name="kQ" />
+        </input>
+        <input name="UAMapEditorBoost">
+            <btn name="kLShift" />
+        </input>
+        <input name="UAMapEditorSlow">
+            <btn name="kLCtrl" />
+        </input>
+        <input name="UAMapEditorLook">
+            <btn name="kRButton" />
         </input>
     </preset>
 </modded_inputs>

@@ -7,7 +7,7 @@ PanelWidgetClass JMCameraForm {
  hexactsize 1
  vexactsize 1
  scriptclass "JMCameraForm"
- style DayZDefaultPanel
+ style COTSurface
  {
   FrameWidgetClass panel {
    position 0 0

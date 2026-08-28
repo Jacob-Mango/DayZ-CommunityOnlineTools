@@ -52,7 +52,7 @@ class JMCinematicCamera: JMCameraBase
 	private static const int ARC_SAMPLES = 20;
 	private ref array< float > m_ArcTable;  // normalized cumulative arc lengths [0..1]
 
-	// Interpolated travel effects — read by JMCameraModule.OnUpdate
+	// Interpolated travel effects - read by JMCameraModule.OnUpdate
 	float m_TravelExposure;
 	float m_TravelVignette;
 	float m_TravelBlur = 1.0;
@@ -289,7 +289,7 @@ class JMCinematicCamera: JMCameraBase
 			}
 		}
 
-		// Camera shake — additive noise on top of final position/orientation
+		// Camera shake - additive noise on top of final position/orientation
 		if ( m_ShakeIntensity > 0 )
 		{
 			m_ShakeTime += timeslice * m_ShakeFrequency;
@@ -319,7 +319,7 @@ class JMCinematicCamera: JMCameraBase
 		return m_ToIdx;
 	}
 
-	// Shortest-arc lerp for a single angle (degrees), handles wrap at ±180
+	// Shortest-arc lerp for a single angle (degrees), handles wrap at +/-180
 	private float LerpAngle( float a, float b, float t )
 	{
 		float diff = b - a;
@@ -356,8 +356,7 @@ class JMCinematicCamera: JMCameraBase
 			int i0 = Math.Max(i1 - 1, 0);
 			int i2 = currentTargetIndex;
 			int i3 = Math.Min(i2 + 1, travelWaypoints.Count() - 1);
-			pos = CatmullRom(travelWaypoints[i0].Position, travelWaypoints[i1].Position,
-			                 travelWaypoints[i2].Position, travelWaypoints[i3].Position, tRemap);
+			pos = CatmullRom(travelWaypoints[i0].Position, travelWaypoints[i1].Position, travelWaypoints[i2].Position, travelWaypoints[i3].Position, tRemap);
 		}
 		else
 		{
@@ -430,7 +429,7 @@ class JMCinematicCamera: JMCameraBase
 			}
 			else
 			{
-				// ONCE — stop
+				// ONCE - stop
 				shouldTravel = false;
 			}
 		}
@@ -532,7 +531,7 @@ class JMCinematicCamera: JMCameraBase
 		if ( targetTime <= 0 )
 			targetTime = 1.0;
 
-		// Orientation — only interpolate when both endpoints have a captured orientation
+		// Orientation - only interpolate when both endpoints have a captured orientation
 		JMCameraWaypoint wpFrom = travelWaypoints[fromIdx];
 		JMCameraWaypoint wpTo   = travelWaypoints[toIdx];
 		if ( wpFrom.OrientationCaptured && wpTo.OrientationCaptured )
@@ -572,8 +571,7 @@ class JMCinematicCamera: JMCameraBase
 		for ( int s = 1; s <= ARC_SAMPLES; s++ )
 		{
 			float tt = (float)s / ARC_SAMPLES;
-			vector curr = CatmullRom(travelWaypoints[i0].Position, travelWaypoints[i1].Position,
-			                         travelWaypoints[i2].Position, travelWaypoints[i3].Position, tt);
+			vector curr = CatmullRom(travelWaypoints[i0].Position, travelWaypoints[i1].Position, travelWaypoints[i2].Position, travelWaypoints[i3].Position, tt);
 			totalLen += vector.Distance(prev, curr);
 			m_ArcTable.Insert(totalLen);
 			prev = curr;

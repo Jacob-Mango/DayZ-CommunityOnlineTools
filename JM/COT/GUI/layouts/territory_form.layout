@@ -1,0 +1,35 @@
+PanelWidgetClass JMTerritoryForm {
+ color 0 0 0 0
+ position 0 0
+ size 500 350
+ hexactpos 0
+ vexactpos 0
+ hexactsize 1
+ vexactsize 1
+ scriptclass "JMTerritoryForm"
+ style COTSurface
+ {
+  PanelWidgetClass panel_top {
+   color 0 0 0 0
+   position 0 0
+   size 1 0.14
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+  }
+  PanelWidgetClass panel_bottom {
+   color 0 0 0 0
+   position 0 0.14
+   size 1 0.86
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+  }
+ }
+ {
+  ScriptParamsClass {
+  }
+ }
+}

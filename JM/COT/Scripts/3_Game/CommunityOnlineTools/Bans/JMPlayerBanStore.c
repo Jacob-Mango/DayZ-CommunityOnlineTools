@@ -12,7 +12,7 @@
 //    }
 //
 //  This is exactly the same pattern COT uses for its settings / loadout
-//  classes — one wrapper class, one array member, JsonFileLoader does the rest.
+//  classes - one wrapper class, one array member, JsonFileLoader does the rest.
 // =============================================================================
 
 class JMPlayerBanStore

@@ -1,0 +1,24 @@
+PanelWidgetClass UIActionContextMenu_Panel {
+ position 0 0
+ size 160 1
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ clipchildren 1
+ color 0.114 0.137 0.165 0.969
+ style COTBox8Set
+ {
+  GridSpacerWidgetClass menu_grid {
+   position 0 0
+   size 1 1
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   "Size To Content V" 1
+   Columns 1
+   Rows 1
+  }
+ }
+}

@@ -1,4 +1,4 @@
-class JMtemStatsModule: JMRenderableModuleBase
+class JMItemStatsModule: JMRenderableModuleBase
 {
 	//! Items that are unfinished may not work or show properly or may even cause the game to segfault
 	private ref array< string > m_UnfinishedItems =
@@ -45,7 +45,7 @@ class JMtemStatsModule: JMRenderableModuleBase
 		"staticobj_"
 	};
 
-	void JMtemStatsModule()
+	void JMItemStatsModule()
 	{
 		GetPermissionsManager().RegisterPermission( "ItemStats.View" );
 	}
