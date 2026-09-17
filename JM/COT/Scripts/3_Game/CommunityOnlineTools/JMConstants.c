@@ -36,6 +36,7 @@ class JMConstants
 	static const string FILE_WEBHOOK 	= DIR_COT + "Webhooks.json";
 	static const string FILE_WEATHER 	= DIR_COT + "Weather.json";
 	static const string FILE_TELEPORT 	= DIR_COT + "Teleports_";
+	static const string FILE_ESP 		= DIR_COT + "ESP.json";
 	static const string DIR_LOGS 		= DIR_COT + "Logs\\";
 	static const string DIR_LOADOUTS 	= DIR_COT + "Loadouts\\";
 	static const string DIR_DELETIONS 	= DIR_COT + "Deletions\\";
@@ -121,6 +122,8 @@ class JMConstants
 	static const string ICON_CAR_WHEEL             = "JM/COT/GUI/textures/icons/car-wheel.edds";
 	static const string ICON_CHECK_MARK            = "JM/COT/GUI/textures/icons/lucide/check.edds";
 	static const string ICON_CHEVRON_DOWN          = "JM/COT/GUI/textures/icons/lucide/chevron-down.edds";
+	static const string ICON_CHEVRON_LEFT          = "JM/COT/GUI/textures/icons/lucide/chevron-left.edds";
+	static const string ICON_CHEVRON_RIGHT         = "JM/COT/GUI/textures/icons/lucide/chevron-right.edds";
 	static const string ICON_CITY_CAR              = "JM/COT/GUI/textures/icons/city-car.edds";
 	static const string ICON_CLOCKWISE             = "JM/COT/GUI/textures/icons/lucide/refresh-cw.edds";
 	static const string ICON_CLOTHES               = "JM/COT/GUI/textures/icons/clothes.edds";
@@ -201,6 +204,13 @@ class JMConstants
 	static const string ICON_SAVE_ARROW            = "JM/COT/GUI/textures/icons/lucide/save.edds";
 	static const string ICON_SAWED_OFF_SHOTGUN     = "JM/COT/GUI/textures/icons/sawed-off-shotgun.edds";
 	static const string ICON_SCOOTER               = "JM/COT/GUI/textures/icons/scooter.edds";
+	//! Select-all / deselect-all pair. One source of truth: every list in COT
+	//! that can be bulk-selected uses these two, so the gesture looks the same
+	//! whether it is the player roster, the ESP categories or the tracked
+	//! objects. Both are list glyphs on purpose - a bare tick reads as "this
+	//! one item is on" rather than "act on the whole list".
+	static const string ICON_SELECT_ALL            = "JM/COT/GUI/textures/icons/lucide/list-checks.edds";
+	static const string ICON_DESELECT_ALL          = "JM/COT/GUI/textures/icons/lucide/list-x.edds";
 	static const string ICON_SETTINGS_KNOBS        = "JM/COT/GUI/textures/icons/lucide/sliders-horizontal.edds";
 	static const string ICON_SHAMBLING_ZOMBIE      = "JM/COT/GUI/textures/icons/lucide/skull.edds";
 	static const string ICON_SHARP_AXE             = "JM/COT/GUI/textures/icons/sharp-axe.edds";
@@ -230,6 +240,7 @@ class JMConstants
 	static const string ICON_UNCERTAINTY           = "JM/COT/GUI/textures/icons/lucide/circle-help.edds";
 	static const string ICON_UNLIT_BOMB            = "JM/COT/GUI/textures/icons/lucide/bomb.edds";
 	static const string ICON_VERTICAL_FLIP         = "JM/COT/GUI/textures/icons/lucide/flip-vertical.edds";
+	static const string ICON_WARNING               = "JM/COT/GUI/textures/icons/lucide/triangle-alert.edds";
 	static const string ICON_WAX_TABLET            = "JM/COT/GUI/textures/icons/lucide/scroll-text.edds";
 	static const string ICON_WINDSOCK              = "JM/COT/GUI/textures/icons/lucide/wind.edds";
 	static const string ICON_WINTER_HAT            = "JM/COT/GUI/textures/icons/winter-hat.edds";

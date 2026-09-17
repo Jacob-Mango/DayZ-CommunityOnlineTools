@@ -1,117 +1,235 @@
 PanelWidgetClass JMWeatherForm {
+ ignorepointer 1
  color 0 0 0 0
  position 0 0
- size 700 600
+ size 900 640
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
+ draggable 1
  scriptclass "JMWeatherForm"
  style COTSurface
  {
-  PanelWidgetClass panel_left {
-   color 0 0 0 0
-   position 0 0
-   size 0.25 1
-   halign left_ref
-   hexactpos 0
-   vexactpos 0
-   hexactsize 0
-   vexactsize 0
-   style COTSurface
-   {
-    ScrollWidgetClass list_scroller {
-     position 0 35
-     size 1 525
-     halign center_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     style blank
-     "Scrollbar V" 1
-     {
-      GridSpacerWidgetClass list_container {
-       position 0 0
-       size 1 1
-       hexactpos 1
-       vexactpos 1
-       hexactsize 0
-       vexactsize 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 100
-       }
-      }
-     }
-    TextWidgetClass title {
-     position 5 10
-     size 1 20
-     halign left_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     text "Presets"
-     font "gui/fonts/sdf_MetronLight24"
-     "exact text" 1
-     "exact text size" 16
-    }
-    TextWidgetClass count {
-     position 5 10
-     size 1 20
-     halign right_ref
-     valign top_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
-     text "N/A Total"
-     font "gui/fonts/sdf_MetronLight24"
-     "exact text" 1
-     "exact text size" 16
-     "text halign" right
-    }
-   }
-  }
   PanelWidgetClass panel_right {
    color 0 0 0 0
-   position 0.25 0
-   size 0.75 1
+   position 0 0
+   size 1 1
    halign left_ref
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
    {
-    ScrollWidgetClass actions_scroller {
+    FrameWidgetClass panel_right_tabs {
+     ignorepointer 0
      position 0 0
-     size 1 1
-     halign center_ref
-     valign bottom_ref
+     size 1 0.06
      hexactpos 0
      vexactpos 0
      hexactsize 0
      vexactsize 0
-     style blank
-     "Scrollbar V" 1
+    }
+    PanelWidgetClass mode_banner {
+     ignorepointer 1
+     position 0 0.06
+     size 1 0.05
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     color 0.376 0.365 1.000 1.000
+     style COTPill6Set
      {
-      GridSpacerWidgetClass actions_wrapper {
+      TextWidgetClass mode_banner_text {
+       ignorepointer 1
+       position 0 0
+       size 0.8 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       text ""
+       font "gui/fonts/sdf_MetronLight24"
+       "exact text" 1
+       "exact text size" 14
+       "bold text" 1
+       "text halign" left
+       "text valign" center
+       "text offset" 12 0
+      }
+      ButtonWidgetClass mode_banner_save {
+       ignorepointer 0
+       visible 0
+       color 0 0 0 0
+       position 38 0
+       size 22 22
+       halign right_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       style Empty
+       {
+        PanelWidgetClass mode_banner_save_hover {
+         ignorepointer 1
+         visible 0
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1.000 1.000 1.000 0.180
+         style COTPill6Set
+        }
+        ImageWidgetClass mode_banner_save_icon {
+         ignorepointer 1
+         position 0 0
+         size 15 15
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+      ButtonWidgetClass mode_banner_close {
+       ignorepointer 0
+       visible 0
+       color 0 0 0 0
+       position 10 0
+       size 22 22
+       halign right_ref
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       style Empty
+       {
+        PanelWidgetClass mode_banner_close_hover {
+         ignorepointer 1
+         visible 0
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1.000 1.000 1.000 0.180
+         style COTPill6Set
+        }
+        ImageWidgetClass mode_banner_close_icon {
+         ignorepointer 1
+         position 0 0
+         size 15 15
+         halign center_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "clamp mode" clamp
+         "stretch mode" stretch_w_h
+        }
+       }
+      }
+     }
+    }
+    FrameWidgetClass panel_right_content {
+     ignorepointer 0
+     position 0 0.11
+     size 1 0.89
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     {
+      FrameWidgetClass tab_overview {
+       ignorepointer 0
        position 0 0
        size 1 1
        hexactpos 0
        vexactpos 0
        hexactsize 0
        vexactsize 0
-       "Size To Content V" 1
-       Columns 1
-       Rows 1000
+      }
+      FrameWidgetClass tab_sky {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass tab_precipitation {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass tab_wind {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass tab_time {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+      }
+      FrameWidgetClass tab_presets {
+       ignorepointer 0
+       position 0 0
+       size 1 1
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
       }
      }
     }
    }
+  }
+  PanelWidgetClass panel_right_disable {
+   visible 0
+   color 0.098 0.118 0.141 0.985
+   position 0 0.06
+   size 1 0.94
+   halign left_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style COTSurface
   }
  }
 }

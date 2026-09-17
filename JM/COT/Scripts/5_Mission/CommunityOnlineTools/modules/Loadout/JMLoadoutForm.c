@@ -33,7 +33,7 @@ class JMLoadoutForm: JMFormBase
 		Widget toolbar = UIActionManager.CreateWrapSpacer( m_ContentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-		refreshBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+		refreshBtn.SetFixedSize( 30, 30 );
 
 		m_SpawnModeDropdown = UIActionManager.CreateDropdown( toolbar, "", layoutRoot, this, "OnClick_SpawnMode", m_SpawnModeText );
 		m_SpawnModeDropdown.SetWidth( 0.85 );
@@ -103,6 +103,25 @@ class JMLoadoutForm: JMFormBase
 			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "Spawn", this, "OnClick_Spawn" );
 			spwnbttn.SetWidth( 0.20 );
 			spwnbttn.SetData( new JMLoadoutButtonData( name ) );
+
+			//! These rows are rebuilt on every refresh, so bind per-call rather
+			//! than registering a permanent binding to a widget that is about
+			//! to be destroyed.
+			UpdatePermission( delbttn, "Loadouts.Delete" );
+
+			//! Spawn has no single permission - which one the server checks
+			//! depends on the spawn-mode dropdown at click time (Cursor,
+			//! Target or SelectedPlayers). Offer the button if any of the
+			//! three is held and let the server enforce the specific one,
+			//! rather than hiding a button the admin could legitimately use
+			//! after changing mode.
+			bool canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.Cursor" );
+			if ( !canSpawnAny )
+				canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.Target" );
+			if ( !canSpawnAny )
+				canSpawnAny = GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers" );
+
+			spwnbttn.SetEnabled( canSpawnAny );
 
 			// Loadout name fills the rest of the row.
 			UIActionText nameText = UIActionManager.CreateText( row, "", name );

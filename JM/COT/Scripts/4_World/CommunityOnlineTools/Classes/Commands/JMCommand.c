@@ -17,6 +17,8 @@ class JMCommand
 
 	void Execute(PlayerIdentity sender, array<string> arguments)
 	{
+		if (!sender) return;
+
 		JMPlayerInstance instance;
 		if (!GetPermissionsManager().HasPermission(m_Permission, sender, instance)) return;
 

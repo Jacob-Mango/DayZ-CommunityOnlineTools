@@ -46,7 +46,8 @@ class JMPlayerInventoryItem
 	int    Depth;        //!< 0 = directly on the player
 	int    ParentIndex;  //!< index into the flat array; -1 at the top level
 
-	float  Health;       //!< 0..100
+	float  Health;       //!< 0..MaxHealth, NOT always 0..100 - see MaxHealth
+	float  MaxHealth;    //!< the item's own GetMaxHealth( "", "" ), config-defined
 
 	//! GameConstants.STATE_*: pristine / worn / damaged / badly damaged /
 	//! ruined, as the ITEM's own config defines the bands. Sent rather than
@@ -72,6 +73,7 @@ class JMPlayerInventoryItem
 		Depth       = 0;
 		ParentIndex = -1;
 		Health      = 0;
+		MaxHealth   = 0;
 		HealthLevel = -1;
 		Quantity    = 0;
 		QuantityMax = 0;
@@ -91,6 +93,7 @@ class JMPlayerInventoryItem
 		ctx.Write( Depth );
 		ctx.Write( ParentIndex );
 		ctx.Write( Health );
+		ctx.Write( MaxHealth );
 		ctx.Write( HealthLevel );
 		ctx.Write( Quantity );
 		ctx.Write( QuantityMax );
@@ -112,6 +115,7 @@ class JMPlayerInventoryItem
 		if ( !ctx.Read( Depth ) )       return false;
 		if ( !ctx.Read( ParentIndex ) ) return false;
 		if ( !ctx.Read( Health ) )      return false;
+		if ( !ctx.Read( MaxHealth ) )   return false;
 		if ( !ctx.Read( HealthLevel ) ) return false;
 		if ( !ctx.Read( Quantity ) )    return false;
 		if ( !ctx.Read( QuantityMax ) ) return false;

@@ -49,6 +49,11 @@ class JMWebhookForm: JMFormBase
 		addBtn.SetColor( JMTheme.SUCCESS_FILL );
 		addBtn.SetTooltip( "Create a new Discord webhook configuration" );
 
+		//! Matches the key RPC_AddConnectionGroup enforces server-side. The
+		//! per-webhook controls are gated in JMWebhookSection, which rebuilds
+		//! them whenever the settings change.
+		RegisterPermission( addBtn, "Webhook.Manage.URL.Add" );
+
 		// Scrollable content area
 		m_Panel         = layoutRoot.FindAnyWidget( "panel" );
 		m_Scroller      = UIActionManager.CreateScroller( m_Panel );
@@ -70,6 +75,20 @@ class JMWebhookForm: JMFormBase
 			m_Scroller.UpdateScroller();
 	}
 
+	//! Every webhook section carries its own unsaved Name/URL/filter edits
+	//! until its Save button is clicked. This fires on ANY webhook settings
+	//! change - including one admin flipping an event-type checkbox on webhook
+	//! A - so tearing down and rebuilding every section from scratch here used
+	//! to wipe whatever another admin (or this one) had half-typed into an
+	//! unrelated, unsaved section.
+	//!
+	//! A webhook add/remove/rename changes the set of names m_Sections is
+	//! keyed by, and there is no safe "in place" edit for that - those still
+	//! fall back to the original full rebuild. Everything else (toggling,
+	//! adding or removing an event type; saving a URL/filter edit without
+	//! renaming) keeps the same set of names, and is refreshed in place via
+	//! JMWebhookSection.UpdateState() instead, leaving every other section's
+	//! widgets - and any unsaved edits sitting in them - untouched.
 	override void OnSettingsUpdated()
 	{
 		if ( !m_Module || !m_ActionsWrapper )
@@ -77,10 +96,37 @@ class JMWebhookForm: JMFormBase
 
 		array< ref JMWebhookConnectionGroup > groups = m_Module.GetConnections();
 
-		// Rebuild all sections from scratch to stay in sync with server state
+		if ( m_HeaderTitle )
+			m_HeaderTitle.SetLabel( "Webhooks (" + groups.Count() + ")" );
+
+		if ( groups.Count() != m_Sections.Count() )
+		{
+			RebuildAllSections( groups );
+			return;
+		}
+
+		for ( int i = 0; i < groups.Count(); i++ )
+		{
+			JMWebhookConnectionGroup group = groups[i];
+			JMWebhookSection section = m_Sections.Get( group.Name );
+
+			if ( !section )
+			{
+				//! Count matched but this name did not, e.g. a rename - the
+				//! set of keys changed even though the count didn't, which
+				//! the in-place path cannot express safely.
+				RebuildAllSections( groups );
+				return;
+			}
+
+			section.UpdateState( group, m_Types );
+		}
+	}
+
+	private void RebuildAllSections( array< ref JMWebhookConnectionGroup > groups )
+	{
 		m_Sections.Clear();
 
-		// Remove existing children by relinking
 		Widget child = m_ActionsWrapper.GetChildren();
 		while ( child )
 		{
@@ -88,9 +134,6 @@ class JMWebhookForm: JMFormBase
 			child.Unlink();
 			child = next;
 		}
-
-		if ( m_HeaderTitle )
-			m_HeaderTitle.SetLabel( "Webhooks (" + groups.Count() + ")" );
 
 		if ( groups.Count() == 0 )
 		{
@@ -119,9 +162,7 @@ class JMWebhookForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook",
-			"Enter a name for this webhook:",
-			"#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotName" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook", "Enter a name for this webhook:", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotName" );
 	}
 
 	void Action_AddWebhook_GotName( JMConfirmation confirmation )
@@ -133,9 +174,7 @@ class JMWebhookForm: JMFormBase
 
 		m_PendingName = name;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook",
-			"Enter the Discord webhook URL for '" + name + "':",
-			"#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotURL" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "Add Webhook", "Enter the Discord webhook URL for '" + name + "':", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "Action_AddWebhook_GotURL" );
 	}
 
 	void Action_AddWebhook_GotURL( JMConfirmation confirmation )

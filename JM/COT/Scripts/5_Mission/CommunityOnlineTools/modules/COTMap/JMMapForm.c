@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class JMMapForm: JMFormBase
 {
 	private MapWidget m_MapWidget;
@@ -13,7 +16,7 @@ class JMMapForm: JMFormBase
 	override void OnInit()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::OnInit" );
+		Print( "+JMMapForm::OnInit" );
 		#endif
 
 		m_MapWidget = MapWidget.Cast( layoutRoot.FindAnyWidget( "map_widget" ) );
@@ -22,7 +25,7 @@ class JMMapForm: JMFormBase
 		m_BackgroundWidget.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::OnInit" );
+		Print( "-JMMapForm::OnInit" );
 		#endif
 	}
 

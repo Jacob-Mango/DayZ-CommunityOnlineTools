@@ -26,6 +26,7 @@ modded class CF_Permission_Player
 		m_BloodyHands = PBObject.HasBloodyHands();
 		m_GodMode = PBObject.COTHasGodMode();
 		m_Frozen = PBObject.COTIsFrozen();
+		m_Ragdoll = PBObject.COTIsRagdoll();
 		m_Invisibility = PBObject.COTIsInvisible();
 		m_UnlimitedAmmo = PBObject.COTHasUnlimitedAmmo();
 		m_ReceiveDmgDealt = PBObject.COTGetReceiveDamageDealt();

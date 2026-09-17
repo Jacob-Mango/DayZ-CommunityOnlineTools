@@ -26,39 +26,29 @@ class JMRenderableModuleBase: JMModuleBase
 
 	bool InitButton( Widget button_bkg )
 	{
-		Print("[COT-TRACE] InitButton begin: module=" + this + " title=" + GetTitle());
 
 		if ( !button_bkg )
 		{
-			Print("[COT-TRACE] InitButton: button_bkg NULL, abort");
 			return false;
 		}
 
-		Print("[COT-TRACE] InitButton: find btn");
 		Class.CastTo( m_MenuButton, button_bkg.FindAnyWidget( "btn" ) );
-		Print("[COT-TRACE] InitButton: m_MenuButton=" + (m_MenuButton != null).ToString());
 
 		if ( !m_MenuButton )
 		{
-			Print("[COT-TRACE] InitButton: m_MenuButton NULL, abort");
 			return false;
 		}
 
 		m_MenuButton.SetColor( m_MenuButtonColour );
 
-		Print("[COT-TRACE] InitButton: find ttl");
 		TextWidget ttl = TextWidget.Cast( button_bkg.FindAnyWidget( "ttl" ) );
-		Print("[COT-TRACE] InitButton: ttl=" + (ttl != null).ToString());
 		if ( ttl )
 			ttl.SetText( GetLocalisedTitle() );
 
-		Print("[COT-TRACE] InitButton: find btn_img, btn_txt");
 		ImageWidget btn_img = ImageWidget.Cast( button_bkg.FindAnyWidget( "btn_img" ) );
 		TextWidget btn_txt = TextWidget.Cast( button_bkg.FindAnyWidget( "btn_txt" ) );
-		Print("[COT-TRACE] InitButton: btn_img=" + (btn_img != null).ToString() + " btn_txt=" + (btn_txt != null).ToString());
 
 		string iconName = GetIconName();
-		Print("[COT-TRACE] InitButton: ImageIsIcon=" + ImageIsIcon() + " ImageHasPath=" + ImageHasPath() + " IconName='" + iconName + "'");
 
 		if ( ImageIsIcon() )
 		{
@@ -69,13 +59,11 @@ class JMRenderableModuleBase: JMModuleBase
 
 				if (ImageHasPath())
 				{
-					Print("[COT-TRACE] InitButton: LoadImageFile path='" + iconName + "'");
 					btn_img.LoadImageFile( 0, iconName );
 				}
 				else
 				{
 					string setRef = "set:" + GetImageSet() + " image:" + iconName;
-					Print("[COT-TRACE] InitButton: LoadImageFile setRef='" + setRef + "'");
 					btn_img.LoadImageFile( 0, setRef );
 				}
 			}
@@ -90,7 +78,6 @@ class JMRenderableModuleBase: JMModuleBase
 			if ( btn_img ) btn_img.Show( false );
 		}
 
-		Print("[COT-TRACE] InitButton end: " + GetTitle());
 		return true;
 	}
 
@@ -212,15 +199,16 @@ class JMRenderableModuleBase: JMModuleBase
 
 	void Show()
 	{
+
 		if ( HasAccess() )
 		{
 			#ifdef CF_WINDOWS
 			m_Window = new CF_Window();
-			
+
 			Widget widgets = m_Window.CreateWidgets(GetLayoutRoot());
-			
+
 			widgets.GetScript(m_Form);
-			
+
 			m_Form.Init(m_Window, this);
 			#else
 			if ( !m_Window )
@@ -231,6 +219,9 @@ class JMRenderableModuleBase: JMModuleBase
 
 			m_Window.Show();
 			#endif
+		}
+		else
+		{
 		}
 	}
 
@@ -247,9 +238,26 @@ class JMRenderableModuleBase: JMModuleBase
 		}
 	}
 
+	//! Called by JMWindowManager.RemoveWindow() once m_Window is actually gone
+	//! - both Close()'s own DestroyLater() and JMWindowManager.DestroyAllWindows()
+	//! (mission end / respawn, see MissionGameplay.OnMissionFinish) end up
+	//! deleting the window object without ever routing back through Close(),
+	//! and neither path used to clear this reference. A module left open
+	//! across a respawn was then a dangling m_Window: IsVisible() kept
+	//! dereferencing the freed CF_Window every frame via JMCOTSideBar's
+	//! CheckForVisibleModules(), reading unstable garbage that flapped
+	//! m_IsTargetCompact and re-triggered the sidebar's open/close animation
+	//! every frame it disagreed with itself - the "open close open close"
+	//! flicker on the next COT open after that module's window died this way.
+	void OnWindowDestroyed()
+	{
+		m_Window = NULL;
+	}
+
 	void ToggleShow()
 	{
-		if ( IsVisible() ) 
+
+		if ( IsVisible() )
 		{
 			Close();
 		} else
@@ -267,7 +275,7 @@ class JMRenderableModuleBase: JMModuleBase
 				ShowInactiveNotification(GetTitle());
 				return;
 			}
-			
+
 			Show();
 		}
 	}

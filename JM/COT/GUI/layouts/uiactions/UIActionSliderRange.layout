@@ -49,7 +49,7 @@ PanelWidgetClass UIActionSliderRange {
      "exact text size" 13
      "text halign" right
      "text valign" center
-     "text offset" 10 0
+     "text offset" -10 0
     }
     PanelWidgetClass action_track {
      ignorepointer 0
@@ -87,6 +87,477 @@ PanelWidgetClass UIActionSliderRange {
        vexactsize 0
        color 0.376 0.365 1.000 1.000
        style COTPill6Set
+      }
+      PanelWidgetClass action_cap_low {
+       ignorepointer 1
+       position 0 0
+       size 12 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 0
+       color 0 0 0 0
+       style COTPill6Set
+      }
+      PanelWidgetClass action_cap_high {
+       ignorepointer 1
+       position 0 0
+       size 12 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 0
+       color 0 0 0 0
+       style COTPill6Set
+      }
+      PanelWidgetClass action_gradient {
+       visible 0
+       ignorepointer 1
+       position 0 0
+       size 0 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0 0 0 0
+       style rover_sim_colorable
+       {
+        PanelWidgetClass grad_0 {
+         ignorepointer 1
+         position 0.000000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_1 {
+         ignorepointer 1
+         position 0.062500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_2 {
+         ignorepointer 1
+         position 0.125000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_3 {
+         ignorepointer 1
+         position 0.187500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_4 {
+         ignorepointer 1
+         position 0.250000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_5 {
+         ignorepointer 1
+         position 0.312500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_6 {
+         ignorepointer 1
+         position 0.375000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_7 {
+         ignorepointer 1
+         position 0.437500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_8 {
+         ignorepointer 1
+         position 0.500000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_9 {
+         ignorepointer 1
+         position 0.562500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_10 {
+         ignorepointer 1
+         position 0.625000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_11 {
+         ignorepointer 1
+         position 0.687500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_12 {
+         ignorepointer 1
+         position 0.750000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_13 {
+         ignorepointer 1
+         position 0.812500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_14 {
+         ignorepointer 1
+         position 0.875000 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+        PanelWidgetClass grad_15 {
+         ignorepointer 1
+         position 0.937500 0
+         size 0.062500 1
+         halign left_ref
+         valign top_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 1 1 1 1
+         style rover_sim_colorable
+        }
+       }
+      }
+      PanelWidgetClass action_flow {
+       visible 0
+       clipchildren 1
+       ignorepointer 1
+       position 0 0
+       size 0 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0 0 0 0
+       style rover_sim_colorable
+       {
+        ImageWidgetClass flow_0 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_1 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_2 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_3 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_4 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_5 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_6 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_7 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_8 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_9 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_10 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+        ImageWidgetClass flow_11 {
+         ignorepointer 1
+         position 0 0
+         size 14 14
+         halign left_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         color 1 1 1 0.55
+         mode blend
+         "src alpha" 1
+         "no wrap" 1
+         "stretch mode" stretch_w_h
+         filter 1
+        }
+       }
       }
       PanelWidgetClass action_handle_low {
        ignorepointer 0

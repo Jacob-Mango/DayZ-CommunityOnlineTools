@@ -176,6 +176,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				auto trace2 = CF_Trace_0(this, "OnRPC - RequestEvents");
 
+				if (!sender) return;
+
 				if (!GetPermissionsManager().HasPermission("Namalsk", sender, instance)) return;
 
 				ScriptRPC rpc = new ScriptRPC();

@@ -35,6 +35,24 @@ PanelWidgetClass UIActionTimePicker {
      "exact text size" 16
      "text valign" center
     }
+    ImageWidgetClass action_warn {
+     visible 0
+     ignorepointer 0
+     position 190 0
+     size 18 18
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     color 1 0.384 0.490 1
+     mode blend
+     "src alpha" 1
+     "no wrap" 1
+     "stretch mode" stretch_w_h
+     filter 1
+    }
     FrameWidgetClass action_fields {
      ignorepointer 0
      size 0.6 1

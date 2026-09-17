@@ -1,0 +1,57 @@
+PanelWidgetClass loot_analysis_attachment_icon {
+ visible 1
+ ignorepointer 1
+ color 0 0 0 0
+ position 0 0
+ size 36 36
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ {
+  PanelWidgetClass lai_fill {
+   ignorepointer 1
+   position 0 0
+   size 36 36
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.133 0.161 0.196 0.902
+   style COTBox8Set
+  }
+  PanelWidgetClass lai_preview_frame {
+   clipchildren 1
+   ignorepointer 1
+   color 0 0 0 0
+   style blank
+   position 2 2
+   size 32 32
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   {
+   ItemPreviewWidgetClass lai_preview {
+    visible 0
+    clipchildren 1
+    inheritalpha 0
+    ignorepointer 1
+    color 0.702 0.702 0.702 1
+    position 0 0
+    size 1 1
+    halign center_ref
+    valign center_ref
+    hexactpos 1
+    vexactpos 1
+    hexactsize 0
+    vexactsize 0
+    scaled 1
+    priority 151
+   }
+   }
+  }
+ }
+}

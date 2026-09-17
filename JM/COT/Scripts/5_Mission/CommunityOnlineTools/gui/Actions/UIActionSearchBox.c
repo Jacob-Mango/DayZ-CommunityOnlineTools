@@ -36,6 +36,7 @@ class UIActionSearchBox: UIActionBase
 	// ---- Suggestion list (optional, enabled by InitSuggestionList) ----------
 	protected Widget             m_ListAnchor;
 	protected Widget             m_ListPanel;
+	protected ScrollWidget       m_Scroller;
 	protected GridSpacerWidget   m_List;
 	protected ref array<string>  m_Suggestions;
 	protected bool               m_ListOpen;
@@ -50,6 +51,7 @@ class UIActionSearchBox: UIActionBase
 	protected int                m_SelectedIndex;
 
 	static const int CHANGE_DEBOUNCE_MS = 100;
+	static const float LIST_EDGE_MARGIN = 4;
 
 	override void OnInit()
 	{
@@ -96,12 +98,12 @@ class UIActionSearchBox: UIActionBase
 	{
 		m_ListAnchor = listAnchor;
 
-		m_ListPanel = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionDropdown_List.layout", m_ListAnchor );
+		m_ListPanel = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdown_List.layout", m_ListAnchor );
 
 		if ( m_ListPanel )
 		{
-			Class.CastTo( m_List, m_ListPanel.FindAnyWidget( "action_list_grid" ) );
+			Class.CastTo( m_Scroller, m_ListPanel.FindAnyWidget( "action_list_scroller" ) );
+			Class.CastTo( m_List,     m_ListPanel.FindAnyWidget( "action_list_grid" ) );
 			m_ListPanel.Show( false );
 			m_ListPanel.SetHandler( this );
 			if ( m_List )
@@ -368,6 +370,8 @@ class UIActionSearchBox: UIActionBase
 					if ( next >= rowCount )
 						next = 0;
 					SetHoveredRow( next );
+					if ( m_Scroller )
+						m_Scroller.VScrollStep( 1 );
 					return true;
 				}
 				if ( key == KeyCode.KC_UP )
@@ -376,6 +380,8 @@ class UIActionSearchBox: UIActionBase
 					if ( prev < 0 )
 						prev = rowCount - 1;
 					SetHoveredRow( prev );
+					if ( m_Scroller )
+						m_Scroller.VScrollStep( -1 );
 					return true;
 				}
 				if ( key == KeyCode.KC_RETURN || key == KeyCode.KC_NUMPADENTER || key == KeyCode.KC_TAB )
@@ -410,6 +416,25 @@ class UIActionSearchBox: UIActionBase
 			}
 		}
 		return super.OnKeyPress( w, x, y, key );
+	}
+
+	//! See UIActionDropdown.OnMouseWheel - same fix, same reason: a direct
+	//! pixel move instead of VScrollStep, which jumped several rows per notch
+	//! and scrolled backwards from what the wheel showed.
+	static const float WHEEL_PIXEL_STEP = 40.0;
+
+	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
+	{
+		if ( m_ListOpen && m_Scroller && m_ListPanel && m_ListPanel.IsVisible() )
+		{
+			float pos = m_Scroller.GetVScrollPos();
+			pos -= wheel * WHEEL_PIXEL_STEP;
+			m_Scroller.VScrollToPos( pos );
+
+			return true;
+		}
+
+		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
 	protected void FireChange()
@@ -545,8 +570,7 @@ class UIActionSearchBox: UIActionBase
 					continue;
 			}
 
-			Widget row = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionDropdown_Row.layout", m_List );
+			Widget row = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdown_Row.layout", m_List );
 			if ( !row )
 				continue;
 			row.SetHandler( this );
@@ -752,17 +776,38 @@ class UIActionSearchBox: UIActionBase
 
 		if ( m_ListPanel.IsVisible() && m_FullHeight > 0 )
 		{
-			float animH = m_FullHeight * t;
+			float maxH = anchorH - LIST_EDGE_MARGIN * 2;
+			float fullH = m_FullHeight;
+
+			float listCapH = 360.0;
+			if ( maxH > 0 && maxH < listCapH )
+				listCapH = maxH;
+
+			if ( fullH > listCapH )
+				fullH = listCapH;
+
+			//! No runtime scrollbar-visibility setter exists on ScrollWidget -
+			//! the native C++ side shows it on its own once content actually
+			//! overflows the capped height set below.
+			float animH = fullH * t;
 			m_ListPanel.SetFlags( WidgetFlags.HEXACTSIZE );
 			m_ListPanel.SetFlags( WidgetFlags.VEXACTSIZE );
 			m_ListPanel.SetSize( fw, animH );
 			m_ListPanel.SetAlpha( t );
 
 			float posY;
-			if ( fy + fh + m_FullHeight > ay + anchorH )
+			if ( fy + fh + fullH > ay + anchorH )
 				posY = fy - ay - animH;
 			else
 				posY = fy - ay + fh;
+
+			float maxY = anchorH - animH - LIST_EDGE_MARGIN;
+
+			if ( posY > maxY )
+				posY = maxY;
+
+			if ( posY < LIST_EDGE_MARGIN )
+				posY = LIST_EDGE_MARGIN;
 
 			m_ListPanel.SetPos( fx - ax, posY );
 		}
@@ -782,30 +827,31 @@ class UIActionSearchBox: UIActionBase
 		}
 	}
 
+	protected bool IsListWidget( Widget widget )
+	{
+		if ( !widget || !m_ListPanel )
+			return false;
+
+		Widget w = widget;
+		while ( w )
+		{
+			if ( w == m_ListPanel )
+				return true;
+
+			w = w.GetParent();
+		}
+
+		return false;
+	}
+
 	protected bool IsSearchOrList( Widget w )
 	{
 		if ( !w )
 			return false;
-		// The chevron counts as part of the control, otherwise the outside-click
-		// check below would close the list on the very press that toggles it and
-		// OnClick would immediately reopen it.
-		if ( w == m_EditBox || w == m_ClearBtn || w == m_ChevronBtn || w == m_ListPanel )
+		if ( w == m_EditBox || w == m_ClearBtn || w == m_ChevronBtn )
 			return true;
-		if ( m_List && m_ListPanel && m_ListPanel.IsVisible() )
-		{
-			Widget child = m_List.GetChildren();
-			while ( child )
-			{
-				if ( w == child ) return true;
-				Widget sub = child.GetChildren();
-				while ( sub )
-				{
-					if ( w == sub ) return true;
-					sub = sub.GetSibling();
-				}
-				child = child.GetSibling();
-			}
-		}
+		if ( IsListWidget( w ) )
+			return true;
 		return false;
 	}
 }

@@ -23,8 +23,8 @@ PanelWidgetClass JMVehiclesForm {
    {
     FrameWidgetClass panel_left_top {
      ignorepointer 1
-     position 0 0
-     size 1 0.28
+     position 0.02 0.01
+     size 0.96 0.27
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -32,8 +32,8 @@ PanelWidgetClass JMVehiclesForm {
     }
     FrameWidgetClass panel_left_bottom {
      ignorepointer 1
-     position 0 0.28
-     size 1 0.72
+     position 0.02 0.28
+     size 0.96 0.70
      hexactpos 0
      vexactpos 0
      hexactsize 0
@@ -91,18 +91,6 @@ PanelWidgetClass JMVehiclesForm {
        hexactsize 0
        vexactsize 0
        style blank
-       {
-        MapWidgetClass vehicles_map {
-         clipchildren 1
-         inheritalpha 0
-         position 0 0
-         size 1 1
-         hexactpos 1
-         vexactpos 1
-         hexactsize 0
-         vexactsize 0
-        }
-       }
       }
       FrameWidgetClass vehicle_actions_panel {
        position 0 0

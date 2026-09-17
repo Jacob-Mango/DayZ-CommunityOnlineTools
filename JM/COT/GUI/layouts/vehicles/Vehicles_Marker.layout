@@ -53,6 +53,25 @@ FrameWidgetClass JMVehicleMapMarker {
      draggable 0
      style blank
      {
+      ImageWidgetClass marker_select_ring {
+       visible 0
+       ignorepointer 1
+       keepsafezone 0
+       position 0 0
+       size 44 44
+       halign center_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 1
+       vexactsize 1
+       mode blend
+       "src alpha" 1
+       "no wrap" 1
+       stretch 1
+       filter 1
+       nocache 0
+      }
       ImageWidgetClass marker_icon {
        clipchildren 1
        ignorepointer 1

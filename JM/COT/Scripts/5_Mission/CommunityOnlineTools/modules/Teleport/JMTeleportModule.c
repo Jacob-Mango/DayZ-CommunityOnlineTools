@@ -12,6 +12,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Add" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Refresh" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Remove" );
+		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Edit" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor.NoLog" );
 	
@@ -244,6 +245,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		case JMTeleportModuleRPC.RemoveLocation:
 			RPC_RemoveLocation( ctx, sender, target );
 			break;
+		case JMTeleportModuleRPC.EditLocation:
+			RPC_EditLocation( ctx, sender, target );
+			break;
 		}
 	}
 
@@ -291,13 +295,21 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void RPC_Load( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		if ( g_Game.IsDedicatedServer() )
+		{
+			if ( !senderRPC )
+				return;
 			Server_Load( senderRPC );
+		}
 		else if ( m_Settings.Read( ctx ) )
 				OnSettingsUpdated();
 	}
 
 	void Position( vector position, array< string > guids = NULL, bool isCursor = false )
 	{
+		//! Saved locations, the map, the crosshair teleport and the ESP menu all
+		//! land here, so recording once covers every one of them.
+		JMTeleportHistory.PushPlayers( guids );
+
 		if ( IsMissionOffline() )
 		{
 			Server_Position( position, isCursor, guids, NULL );
@@ -343,7 +355,13 @@ class JMTeleportModule: JMRenderableModuleBase
 				isSelfOnly = false;
 
 			count++;
-			
+
+			//! Captured before the move, one entry per targeted player, for
+			//! the shared global Ctrl+Z - separate from JMTeleportHistory's
+			//! own per-target stack, which the ESP menu's dedicated Undo/Redo
+			//! rows still walk unchanged.
+			JMActionHistory.Push( new JMTeleportSnapshotEntry( player, player.GetPosition() ) );
+
 			SetPlayerPosition( player, position );
 
 			if ( shouldLog )
@@ -354,7 +372,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		}
 
 		if (!isSelfOnly && count > 0)
-			COTCreateNotification( ident, new StringLocaliser( "Teleported "+count.ToString()+" Player(s)" ) );
+			COTCreateNotification( ident, new StringLocaliser( Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TELEPORTED_PREFIX" ) + count.ToString() + Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_PLAYERS_SUFFIX" ) ) );
 	}
 
 	private void RPC_Position( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -363,6 +381,9 @@ class JMTeleportModule: JMRenderableModuleBase
 		{
 			vector pos;
 			if ( !ctx.Read( pos ) )
+				return;
+
+			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) )
 				return;
 
 			bool isCursor;
@@ -382,6 +403,10 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	void PositionRaycast( vector rayStart, vector direction )
 	{
+		//! Where the ray lands is only known on the server, but WHO is being
+		//! moved is known here - it is always the admin who pressed the key.
+		JMTeleportHistory.PushSelf();
+
 		if ( IsMissionOffline() )
 		{
 			Server_PositionRaycast( rayStart, direction, PlayerBase.Cast( g_Game.GetPlayer() ) );
@@ -443,6 +468,11 @@ class JMTeleportModule: JMRenderableModuleBase
 
 			vector dir;
 			if ( !ctx.Read( dir ) )
+				return;
+
+			//! Both come off the wire and both feed a raycast: a NaN start or
+			//! direction gives a hit position physics cannot resolve.
+			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( pos ) || !CommunityOnlineToolsBase.IsFiniteVector( dir ) )
 				return;
 
 			PlayerBase player;
@@ -574,6 +604,11 @@ class JMTeleportModule: JMRenderableModuleBase
 			if ( !ctx.Read( playerpos ) )
 				return;
 
+			//! This one is written to disk and handed back out to every admin
+			//! afterwards, so a bad value outlives the packet that carried it.
+			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( playerpos ) )
+				return;
+
 			Server_AddLocation( locName, catName, playerpos, senderRPC );
 		}
 	}
@@ -671,6 +706,124 @@ class JMTeleportModule: JMRenderableModuleBase
 		SendWebhookColored( "Location", instance, "Removed TP " + locName.Name + " (" + locName.Type + ")", JMConstants.WEBHOOK_COLOR_WARNING );
 	}
 
+	//! Rename and recategorise one saved location IN PLACE.
+	//!
+	//! A remove followed by an add would do the same job from the client, but
+	//! as two independent messages: a failure or a permission change between
+	//! them loses the location outright, and every other admin sees it vanish
+	//! and reappear. One message cannot half-happen.
+	//!
+	//! The position is deliberately not editable here. Moving a saved location
+	//! is a different intent from renaming one, and the coordinates panel plus
+	//! Save already covers it.
+	void EditLocation( JMTeleportLocation target, string newName, string newCategory )
+	{
+		if ( !target )
+			return;
+
+		if ( IsMissionOffline() )
+		{
+			Server_EditLocation( target, newName, newCategory, NULL );
+		}
+		else if ( IsMissionClient() )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit" ) )
+				return;
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( target );
+			rpc.Write( newName );
+			rpc.Write( newCategory );
+			rpc.Send( NULL, JMTeleportModuleRPC.EditLocation, true, NULL );
+		}
+	}
+
+	private void RPC_EditLocation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMTeleportLocation location;
+		if ( !ctx.Read( location ) )
+			return;
+
+		string newName;
+		if ( !ctx.Read( newName ) )
+			return;
+
+		string newCategory;
+		if ( !ctx.Read( newCategory ) )
+			return;
+
+		Server_EditLocation( location, newName, newCategory, senderRPC );
+	}
+
+	private void Server_EditLocation( JMTeleportLocation target, string newName, string newCategory, PlayerIdentity ident )
+	{
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit", ident, instance ) )
+			return;
+
+		if ( newName == "" )
+			return;
+
+		int found = -1;
+		for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
+		{
+			if ( m_Settings.Locations[i].Type != target.Type )
+				continue;
+
+			if ( m_Settings.Locations[i].Name != target.Name )
+				continue;
+
+			found = i;
+			break;
+		}
+
+		if ( found < 0 )
+			return;
+
+		string oldName = m_Settings.Locations[found].Name;
+		string oldType = m_Settings.Locations[found].Type;
+
+		m_Settings.Locations[found].Name = newName;
+		m_Settings.Locations[found].Type = newCategory;
+
+		if ( m_Settings.Types.Find( newCategory ) == -1 )
+			m_Settings.Types.Insert( newCategory );
+
+		//! The old category may have just lost its last member, in which case it
+		//! is not a category any more. Add does the same bookkeeping in reverse.
+		if ( oldType != newCategory )
+			PruneEmptyType( oldType );
+
+		m_Settings.Save();
+
+		OnSettingsUpdated();
+
+		GetCommunityOnlineToolsBase().Log( ident, "Edited TP Location " + oldName + " (" + oldType + ") -> " + newName + " (" + newCategory + ")" );
+		SendWebhookColored( "Location", instance, "Edited TP " + oldName + " (" + oldType + ") -> " + newName + " (" + newCategory + ")", JMConstants.WEBHOOK_COLOR_INFO );
+	}
+
+	//! Drop a category no location uses any more.
+	private void PruneEmptyType( string type )
+	{
+		for ( int i = 0; i < m_Settings.Locations.Count(); i++ )
+		{
+			if ( m_Settings.Locations[i].Type == type )
+				return;
+		}
+
+		for ( int t = 0; t < m_Settings.Types.Count(); t++ )
+		{
+			if ( m_Settings.Types[t] != type )
+				continue;
+
+			m_Settings.Types.Remove( t );
+			return;
+		}
+	}
+
 	void Command_Position(JMCommandParameterList params, PlayerIdentity sender, JMPlayerInstance instance)
 	{
 		PlayerBase player = GetPlayerObjectByIdentity(sender);
@@ -708,7 +861,7 @@ class JMTeleportModule: JMRenderableModuleBase
 		if (!player)
 			return;
 
-		Message(player, "Your position is: " + player.GetPosition());
+		Message(player, Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_YOUR_POSITION_IS" ) + player.GetPosition());
 	}
 
 	override void GetSubCommands(inout array<ref JMCommand> commands)

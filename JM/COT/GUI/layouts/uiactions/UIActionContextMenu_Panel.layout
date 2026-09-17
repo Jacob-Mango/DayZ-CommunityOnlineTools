@@ -9,16 +9,29 @@ PanelWidgetClass UIActionContextMenu_Panel {
  color 0.114 0.137 0.165 0.969
  style COTBox8Set
  {
-  GridSpacerWidgetClass menu_grid {
+  ScrollWidgetClass menu_scroller {
+   ignorepointer 0
    position 0 0
    size 1 1
    hexactpos 0
    vexactpos 0
    hexactsize 0
    vexactsize 0
-   "Size To Content V" 1
-   Columns 1
-   Rows 1
+   "Scrollbar V" 1
+   "Scrollbar H" 0
+   {
+   GridSpacerWidgetClass menu_grid {
+    position 0 0
+    size 1 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    "Size To Content V" 1
+    Columns 1
+    Rows 1
+   }
+   }
   }
  }
 }

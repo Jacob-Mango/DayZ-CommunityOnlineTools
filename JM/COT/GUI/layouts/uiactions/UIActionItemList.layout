@@ -1,0 +1,87 @@
+PanelWidgetClass UIActionItemList {
+ position 0 0
+ size 1 1
+ halign left_ref
+ valign top_ref
+ hexactpos 0
+ vexactpos 0
+ hexactsize 0
+ vexactsize 0
+ color 0 0 0 0
+ scriptclass "UIActionItemList"
+ {
+  PanelWidgetClass list_frame {
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0.082 0.098 0.118 0.949
+   style COTField4Set
+  }
+  PanelWidgetClass list_body {
+   clipchildren 1
+   ignorepointer 0
+   position 0 0
+   size 1 1
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0 0 0 0
+  }
+  TextWidgetClass list_empty {
+   visible 0
+   ignorepointer 1
+   position 0 0
+   size 1 1
+   halign left_ref
+   valign top_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   color 0.925 0.976 1.000 0.502
+   font "gui/fonts/sdf_MetronLight24"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" center
+   "text valign" center
+  }
+  PanelWidgetClass list_scroll_container {
+   visible 0
+   ignorepointer 0
+   position 4 4
+   size 8 1
+   halign right_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 0
+   color 0.196 0.220 0.247 1.000
+   style COTPill6Set
+   {
+    PanelWidgetClass list_scroll_handle {
+     ignorepointer 0
+     position 0 0
+     size 1 40
+     halign center_ref
+     valign top_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     color 0.925 0.976 1.000 0.750
+     style COTPill6Set
+    }
+   }
+  }
+ }
+}

@@ -52,21 +52,36 @@ class UIActionValuePrompt: UIActionBase
 	protected bool   m_Open;
 	protected bool   m_IsSlider;
 
+	//! Optional per-value colouring for the slider fill, e.g. health or
+	//! temperature - matches the object spawner's own coloured sliders instead
+	//! of leaving every prompt the same flat fill regardless of what the number
+	//! means. NONE leaves the slider's default colour alone.
+	protected int m_SliderColorMode;
+
+	static const int SLIDER_COLOR_NONE        = 0;
+	static const int SLIDER_COLOR_HEALTH      = 1;
+	static const int SLIDER_COLOR_TEMPERATURE = 2;
+
 	//! Measured off the content grid once it has been laid out; 0 until then.
 	protected float m_FullHeight;
 
-	static const float PANEL_WIDTH  = 340;
+	//! 340 put the slider's value readout and the right edge of the Confirm
+	//! button hard against the panel's own edge - a long item name on the slider
+	//! label pushed both past it. The row this has to fit is label + track +
+	//! value, and two buttons side by side under it.
+	static const float PANEL_WIDTH  = 420;
 	static const float PANEL_PAD    = 12;
 
 	override void OnInit()
 	{
 		super.OnInit();
 
-		m_OptionValues = new array<int>;
-		m_PromptId     = "";
-		m_Open         = false;
-		m_IsSlider     = true;
-		m_FullHeight   = 0;
+		m_OptionValues    = new array<int>;
+		m_PromptId        = "";
+		m_Open            = false;
+		m_IsSlider        = true;
+		m_FullHeight      = 0;
+		m_SliderColorMode = SLIDER_COLOR_NONE;
 	}
 
 	void ~UIActionValuePrompt()
@@ -123,6 +138,13 @@ class UIActionValuePrompt: UIActionBase
 		return m_Open;
 	}
 
+	//! layoutRoot is a 1px stub here too (see class note) - m_Open is the real
+	//! open/closed state the Escape priority chain needs.
+	override bool IsVisible()
+	{
+		return m_Open;
+	}
+
 	string GetPromptId()
 	{
 		return m_PromptId;
@@ -152,14 +174,16 @@ class UIActionValuePrompt: UIActionBase
 		return m_OptionValues[row];
 	}
 
-	//! Ask for a number.
-	void ShowSlider( string id, string title, string label, float min, float max, float current, float step = 1, string format = "%1" )
+	//! Ask for a number. `colorMode` is one of the SLIDER_COLOR_* constants -
+	//! leave it NONE for a plain slider.
+	void ShowSlider( string id, string title, string label, float min, float max, float current, float step = 1, string format = "%1", int colorMode = 0 )
 	{
 		if ( !m_Panel || !m_Slider )
 			return;
 
 		m_PromptId = id;
 		m_IsSlider = true;
+		m_SliderColorMode = colorMode;
 
 		m_TitleAction.SetLabel( title );
 
@@ -173,7 +197,63 @@ class UIActionValuePrompt: UIActionBase
 		m_Dropdown.GetLayoutRoot().Show( false );
 		m_Dropdown.Close();
 
+		UpdateSliderColor();
+
 		Open();
+	}
+
+	//! Repaints the slider fill for the current handle position. Called on
+	//! open and on every drag - a health slider left green at 5 health would
+	//! tell the admin nothing they could not already read off the number.
+	protected void UpdateSliderColor()
+	{
+		if ( !m_Slider || m_SliderColorMode == SLIDER_COLOR_NONE )
+			return;
+
+		float value = m_Slider.GetCurrent();
+
+		if ( m_SliderColorMode == SLIDER_COLOR_HEALTH )
+		{
+			float max = m_Slider.GetMax();
+			float percent = 100;
+			if ( max > 0 )
+				percent = ( value / max ) * 100;
+
+			m_Slider.SetColor( HealthSliderColor( percent ) | 0xFF000000 );
+			return;
+		}
+
+		if ( m_SliderColorMode == SLIDER_COLOR_TEMPERATURE )
+		{
+			int intValue = value;
+
+			m_Slider.SetColor( ObjectTemperatureState.GetStateData( intValue ).m_Color | 0xFF000000 );
+
+			if ( ObjectTemperatureState.GetStateData( intValue ).m_State != GameConstants.STATE_NEUTRAL_TEMP )
+				m_Slider.SetFormat( "#STR_COT_FORMAT_DEGREE " + ObjectTemperatureState.GetStateData( intValue ).m_LocalizedName );
+			else
+				m_Slider.SetFormat( "#STR_COT_FORMAT_DEGREE" );
+		}
+	}
+
+	//! Same bands vanilla's own health colouring uses - see
+	//! ItemManager.GetItemHealthColor - so a 0..100 admin slider reads the same
+	//! as the condition dot next to it.
+	protected int HealthSliderColor( float health )
+	{
+		if ( health > 70 )
+			return Colors.COLOR_PRISTINE;
+
+		if ( health > 50 )
+			return Colors.COLOR_WORN;
+
+		if ( health > 30 )
+			return Colors.COLOR_DAMAGED;
+
+		if ( health > 0 )
+			return Colors.COLOR_BADLY_DAMAGED;
+
+		return Colors.COLOR_RUINED;
 	}
 
 	//! Ask for one of a fixed list. `labels` and `values` are parallel; the row
@@ -277,10 +357,40 @@ class UIActionValuePrompt: UIActionBase
 		if ( m_FullHeight <= 0 )
 			return;
 
+		// Never wider than what there is room to draw. Past the anchor's edge
+		// the panel is clipped, and what gets cut is the right-hand end of the
+		// row - the Confirm button and the slider's value readout.
+		float width = PANEL_WIDTH;
+		if ( aw >= 1 && width > aw )
+			width = aw;
+
 		m_Panel.SetFlags( WidgetFlags.HEXACTSIZE );
 		m_Panel.SetFlags( WidgetFlags.VEXACTSIZE );
-		m_Panel.SetSize( PANEL_WIDTH, m_FullHeight );
-		m_Panel.SetPos( ( aw - PANEL_WIDTH ) * 0.5, ( ah - m_FullHeight ) * 0.5 );
+		m_Panel.SetSize( width, m_FullHeight );
+
+		// The layout hardcodes the grid's width, so a panel that is any size
+		// other than the layout's own leaves the content sized for the old one.
+		// Drive it from the panel instead and the two can never disagree.
+		//
+		// Only once the grid has a real measured height: passing the 0 it
+		// answers before it is laid out would collapse it.
+		if ( gh >= 1 )
+		{
+			m_Grid.SetFlags( WidgetFlags.HEXACTSIZE );
+			m_Grid.SetSize( width - ( PANEL_PAD * 2 ), gh );
+		}
+
+		// Clamped, not just centred: a negative origin puts the left edge of the
+		// panel outside the anchor, and that end is clipped just as hard.
+		float px = ( aw - width ) * 0.5;
+		float py = ( ah - m_FullHeight ) * 0.5;
+
+		if ( px < 0 )
+			px = 0;
+		if ( py < 0 )
+			py = 0;
+
+		m_Panel.SetPos( px, py );
 	}
 
 	override void Update( float timeSlice )
@@ -306,9 +416,10 @@ class UIActionValuePrompt: UIActionBase
 
 	void OnChange_Slider( UIEvent eid, UIActionBase action )
 	{
-		// The value is read on confirm, so a drag needs no handler of its own -
-		// but the slider must have a callback target or it never fires CHANGE
-		// and stops repainting mid-drag.
+		// The value itself is read on confirm; the callback still has to exist
+		// or the slider never fires CHANGE and stops repainting mid-drag. The
+		// colour, if this prompt has one, has to keep up with the drag though.
+		UpdateSliderColor();
 	}
 
 	void OnClick_Cancel( UIEvent eid, UIActionBase action )

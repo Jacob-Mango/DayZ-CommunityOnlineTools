@@ -10,8 +10,16 @@ class UIActionToggleSwitch: UIActionBase
 	protected ButtonWidget m_Button;
 	protected Widget       m_Track;
 	protected Widget       m_Thumb;
+	protected ImageWidget  m_ThumbImage;
 
 	protected bool m_Checked;
+
+	//! Per-instance thumb colours. Default to the shared ON/OFF pair; a caller
+	//! that bakes a meaningful icon into the thumb - ESP puts the category
+	//! glyph there and tints it with that category's overlay colour - overrides
+	//! them so the switch doubles as the colour swatch.
+	protected int m_ThumbColorOn;
+	protected int m_ThumbColorOff;
 
 	protected ref JMAnimFloat  m_AnimPos;     // thumb X
 	protected ref JMAnimColor  m_AnimTrack;   // track colour
@@ -47,11 +55,15 @@ class UIActionToggleSwitch: UIActionBase
 		Class.CastTo( m_Button, layoutRoot.FindAnyWidget( "action_button" ) );
 		Class.CastTo( m_Track,  layoutRoot.FindAnyWidget( "action_track"  ) );
 		Class.CastTo( m_Thumb,  layoutRoot.FindAnyWidget( "action_thumb"  ) );
+		Class.CastTo( m_ThumbImage, layoutRoot.FindAnyWidget( "action_thumb" ) );
+
+		m_ThumbColorOn  = COLOR_THUMB_ON;
+		m_ThumbColorOff = COLOR_THUMB_OFF;
 
 		m_Checked    = false;
 		m_AnimPos    = new JMAnimFloat();   m_AnimPos.Set( m_ThumbXOff );
 		m_AnimTrack  = new JMAnimColor();   m_AnimTrack.Set( COLOR_TRACK_OFF );
-		m_AnimThumb  = new JMAnimColor();   m_AnimThumb.Set( COLOR_THUMB_OFF );
+		m_AnimThumb  = new JMAnimColor();   m_AnimThumb.Set( m_ThumbColorOff );
 
 		ApplyImmediate();
 	}
@@ -61,6 +73,15 @@ class UIActionToggleSwitch: UIActionBase
 		text = Widget.TranslateString( text );
 		if ( m_Label )
 			m_Label.SetText( text );
+	}
+
+	//! Colour of the LABEL. NOT SetColor - the base paints layoutRoot, so a
+	//! caller reaching for "mark this row dangerous" with SetColor fills the
+	//! whole row with a flat block of that colour instead of tinting the text.
+	void SetLabelColor( int color )
+	{
+		if ( m_Label )
+			m_Label.SetColor( color );
 	}
 
 	override void SetChecked( bool checked )
@@ -79,15 +100,44 @@ class UIActionToggleSwitch: UIActionBase
 		SetChecked( !m_Checked );
 	}
 
+	//! Bake a glyph into the sliding thumb, replacing the plain circle. The
+	//! switch then says WHAT it toggles as well as whether it is on, which is
+	//! what lets a long list of them stay readable without a separate icon
+	//! column per row.
+	void SetThumbIcon( string imagePath )
+	{
+		if ( !m_ThumbImage || imagePath == "" )
+			return;
+
+		m_ThumbImage.LoadImageFile( 0, imagePath );
+	}
+
+	//! Override the thumb's ON/OFF tint for this switch only. Call before
+	//! SetChecked, or follow it with SetChecked to re-target the animation.
+	void SetThumbColors( int colorOn, int colorOff )
+	{
+		m_ThumbColorOn  = colorOn;
+		m_ThumbColorOff = colorOff;
+
+		RetargetAnim();
+	}
+
+	//! Right-click never toggles - it reports CLICK_RIGHT so the host can raise
+	//! a context menu on the row. Same contract as UIActionStagedIcon.
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
-		if ( w == m_Button )
+		if ( w != m_Button )
+			return false;
+
+		if ( button == MouseState.RIGHT )
 		{
-			Toggle();
-			CallEvent( UIEvent.CLICK );
+			CallEvent( UIEvent.CLICK_RIGHT );
 			return true;
 		}
-		return false;
+
+		Toggle();
+		CallEvent( UIEvent.CLICK );
+		return true;
 	}
 
 	override void Update( float timeSlice )
@@ -157,12 +207,12 @@ class UIActionToggleSwitch: UIActionBase
 	private void RetargetAnim()
 	{
 		int trackColor = COLOR_TRACK_OFF;
-		int thumbColor = COLOR_THUMB_OFF;
+		int thumbColor = m_ThumbColorOff;
 		float px       = m_ThumbXOff;
 		if ( m_Checked )
 		{
 			trackColor = COLOR_TRACK_ON;
-			thumbColor = COLOR_THUMB_ON;
+			thumbColor = m_ThumbColorOn;
 			px         = m_ThumbXOn;
 		}
 
@@ -175,12 +225,12 @@ class UIActionToggleSwitch: UIActionBase
 	private void ApplyImmediate()
 	{
 		int trackColor = COLOR_TRACK_OFF;
-		int thumbColor = COLOR_THUMB_OFF;
+		int thumbColor = m_ThumbColorOff;
 		float px       = m_ThumbXOff;
 		if ( m_Checked )
 		{
 			trackColor = COLOR_TRACK_ON;
-			thumbColor = COLOR_THUMB_ON;
+			thumbColor = m_ThumbColorOn;
 			px         = m_ThumbXOn;
 		}
 

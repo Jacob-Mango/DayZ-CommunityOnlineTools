@@ -48,6 +48,19 @@ PanelWidgetClass UIActionDropdown {
      color 0.133 0.161 0.196 0.700
      style COTField4Set
      {
+      PanelWidgetClass action_ring {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign left_ref
+       valign top_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       color 0.925 0.976 1.000 0.502
+       style COTField4LineSet
+      }
       ImageWidgetClass action_selected_icon {
        visible 0
        ignorepointer 1

@@ -29,26 +29,20 @@ class JMCompensationsForm: JMFormBase
 		m_sclr_MainActions = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel" ) );
 		m_ContentWrapper = m_sclr_MainActions.GetContentWidget();
 
-		// Toolbar row: 32x32 refresh icon on the left, dropdown fills the remaining row width.
-		// WrapSpacer, not GridSpacer - GridSpacer(1,2) splits the row into equal
-		// halves and gives the refresh button a wide empty cell.
-		//
-		// Onresize + the dropdown's intrinsic min-width can briefly leave the
-		// dropdown stretched wider than the actual content; WrapSpacer with
-		// fractional < 1.0 siblings keeps them on one row at panel narrow.
-		Widget toolbar = UIActionManager.CreateWrapSpacer( m_ContentWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		UIActionCard topCard = UIActionManager.CreateCard( m_ContentWrapper, "Compensation Controls" );
+		Widget topBody = topCard.GetContent();
+
+		Widget toolbar = UIActionManager.CreateWrapSpacer( topBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
-		refreshBtn.SetFixedSize( ICON_BUTTON_PX, ICON_BUTTON_PX );
+		refreshBtn.SetFixedSize( 30, 30 );
 
 		m_SpawnModeDropdown = UIActionManager.CreateDropdown( toolbar, "", layoutRoot, this, "OnClick_SpawnMode", m_SpawnModeText );
-		// Fractional width fills the remaining row space; sum stays well under 1.0
-		// so WrapSpacer never wraps the dropdown to a new line at narrow widths.
 		m_SpawnModeDropdown.SetWidth( 0.85 );
 		m_SpawnModeDropdown.SetSelection( 0, false );
 		RegisterOverlay( m_SpawnModeDropdown );
 
-		m_SearchBox = UIActionManager.CreateSearchBox( m_ContentWrapper, this, "OnSearchChanged", "Search by name or Steam ID" );
+		m_SearchBox = UIActionManager.CreateSearchBox( topBody, this, "OnSearchChanged", "Search by name or Steam ID" );
 
 		m_sclr_MainActions.UpdateScroller();
 	}
@@ -91,18 +85,17 @@ class JMCompensationsForm: JMFormBase
 			return;
 		}
 
-		// Sort by steam ID, then by timestamp (newest first)
 		m_Compensations.Sort();
 		m_Compensations.Invert();
 
 		string currentSteamID = "";
 		string playerName;
-		Widget playerSection;
+		UIActionCard currentCard;
+		Widget cardBody;
 		int visibleCount = 0;
 
 		foreach ( JMCompensationEntry entry: m_Compensations )
 		{
-			// Apply search filter
 			if ( m_SearchFilter != "" )
 			{
 				string steamIDLower = entry.m_SteamID;
@@ -117,29 +110,17 @@ class JMCompensationsForm: JMFormBase
 
 			visibleCount++;
 
-			// Create new section for each player.
-			// Note: the player header (name + SteamID) is now rendered inline on
-			// the same row as the FIRST entry's Spawn/Delete buttons (see below).
-			// We only need to update the section marker + add vertical spacing
-			// between players here.
 			if ( entry.m_SteamID != currentSteamID )
 			{
 				currentSteamID = entry.m_SteamID;
-
-				// Add vertical spacing between players (blank row above the first entry).
-				if ( playerSection )
-					UIActionManager.CreateText( m_ActionsWrapper, "" );
+				playerName = GetPlayerNameFromSteamID( entry.m_SteamID );
+				string cardTitle = playerName + " (" + entry.m_SteamID + ")";
+				currentCard = UIActionManager.CreateCard( m_ActionsWrapper, cardTitle );
+				cardBody = currentCard.GetContent();
 			}
 
-			// Compensation entry - same row for delete + spawn + (entry name on first entry per player) + timestamp.
-			// WrapSpacer so siblings can flow horizontally; fractional widths sum < 0.95 to avoid wrapping
-			// (the delete icon is fixed 32px - that takes a real-pixel slice that isn't reflected in the
-			// fractional budget, so we leave ~0.05 of headroom for it).
-			Widget row = UIActionManager.CreateWrapSpacer( m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+			Widget row = UIActionManager.CreateWrapSpacer( cardBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-			// Icon-only delete (32x32), no text label. Compact confirm labels
-			// ("O" / "X") because the button is narrow - full "Confirm"/"Cancel"
-			// would clip on small widths.
 			UIActionConfirmInline delbttn = UIActionManager.CreateConfirmInline( row, "", this, "OnClick_Delete" );
 			UIActionIconGrid.ApplyDeletePreset( delbttn );
 			delbttn.SetButton( "" );
@@ -150,35 +131,22 @@ class JMCompensationsForm: JMFormBase
 			delbttn.SetTooltip( "Delete this compensation entry" );
 			delbttn.SetData( new JMCompensationButtonData( entry.m_SteamID, entry.m_Timestamp ) );
 
-			// Spawn button - sits directly after the delete icon. Fractional width
-			// (not SetFixedSize) so the WrapSpacer can pack all four siblings on
-			// the same row - mixing a fixed-pixel sibling with fractional siblings
-			// causes the fractional ones to wrap to the next line.
 			UIActionButton spwnbttn = UIActionManager.CreateButton( row, "Spawn", this, "OnClick_Spawn" );
 			spwnbttn.SetData( new JMCompensationButtonData( entry.m_SteamID, entry.m_Timestamp ) );
-			spwnbttn.SetWidth( 0.18 );
+			spwnbttn.SetWidth( 0.22 );
 
-			// Player name appears on the same row as the first entry's Spawn/Delete.
-			// Subsequent entries for the same player skip this label.
-			UIActionText labelText;
-			if ( entry.m_SteamID != currentSteamID )
-			{
-				playerName = GetPlayerNameFromSteamID( entry.m_SteamID );
-				string headerText = playerName + " (" + entry.m_SteamID + ")";
-				labelText = UIActionManager.CreateText( row, "", headerText );
-				labelText.SetWidth( 0.35 );
-				labelText.SetTextVAlign( UIActionVAlign.CENTER );
-			}
+			//! UpdatePermission rather than RegisterPermission: these rows are
+			//! rebuilt from scratch on every refresh, so a permanent binding
+			//! would leave the form's map full of destroyed widgets. Matches
+			//! what JMCompensationsModule's RPC handlers already enforce.
+			UpdatePermission( delbttn,  "Compensations.Delete" );
+			UpdatePermission( spwnbttn, "Compensations.Spawn" );
 
-			// Timestamp text expands to fill the remaining row width. Sum with
-			// spawn-button + (optional label) width fractions stays under 0.95
-			// so all siblings share the same WrapSpacer row.
 			UIActionText tsText = UIActionManager.CreateText( row, "", entry.m_Timestamp );
-			if ( labelText )
-				tsText.SetWidth( 0.55 );
-			else
-				tsText.SetWidth( 0.78 );
+			tsText.SetWidth( 0.68 );
 			tsText.SetTextVAlign( UIActionVAlign.CENTER );
+
+			UIActionManager.CreatePanel( cardBody, 0x22FFFFFF, 1 );
 		}
 
 		if ( visibleCount == 0 )

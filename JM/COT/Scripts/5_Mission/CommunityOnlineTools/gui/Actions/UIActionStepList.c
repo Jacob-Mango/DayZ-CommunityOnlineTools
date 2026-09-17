@@ -138,8 +138,7 @@ class UIActionStepList: UIActionBase
 	private ref JMStepListRow BuildRow( string label )
 	{
 		// Row layout: [index 30px] [label fill] [^ 24px] [v 24px] [x 24px]
-		Widget rowRoot = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer5.layout", m_Rows );
+		Widget rowRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer5.layout", m_Rows );
 
 		if ( !rowRoot )
 			return null;
@@ -151,8 +150,7 @@ class UIActionStepList: UIActionBase
 		row.Root  = rowRoot;
 
 		// Index cell
-		Widget idxWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowRoot );
+		Widget idxWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowRoot );
 		if ( idxWidget )
 		{
 			idxWidget.GetScript( row.IndexText );
@@ -162,8 +160,7 @@ class UIActionStepList: UIActionBase
 		}
 
 		// Label cell
-		Widget lblWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowRoot );
+		Widget lblWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowRoot );
 		if ( lblWidget )
 		{
 			UIActionText lblAction;
@@ -174,8 +171,7 @@ class UIActionStepList: UIActionBase
 		}
 
 		// ^ button
-		Widget upWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
+		Widget upWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
 		if ( upWidget )
 		{
 			upWidget.SetHandler( this );
@@ -187,8 +183,7 @@ class UIActionStepList: UIActionBase
 		}
 
 		// v button
-		Widget downWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
+		Widget downWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
 		if ( downWidget )
 		{
 			downWidget.SetHandler( this );
@@ -200,8 +195,7 @@ class UIActionStepList: UIActionBase
 		}
 
 		// x button
-		Widget removeWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
+		Widget removeWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionButton.layout", rowRoot );
 		if ( removeWidget )
 		{
 			removeWidget.SetHandler( this );

@@ -20,6 +20,7 @@ class UIActionToggle: UIActionBase
 	protected ImageWidget  m_CheckSquare;   // a tick glyph, still a bitmap
 	protected Widget       m_CheckCircle;   // styled panel, COTField4Set
 	protected TextWidget   m_Label;
+	protected ImageWidget  m_Icon;
 
 	protected bool  m_Checked;
 	protected bool  m_Round;
@@ -55,6 +56,7 @@ class UIActionToggle: UIActionBase
 		Class.CastTo( m_CheckSquare, layoutRoot.FindAnyWidget( "action_check"       ) );
 		Class.CastTo( m_CheckCircle, layoutRoot.FindAnyWidget( "action_check_image" ) );
 		Class.CastTo( m_Label,       layoutRoot.FindAnyWidget( "action_label"       ) );
+		Class.CastTo( m_Icon,        layoutRoot.FindAnyWidget( "action_icon"        ) );
 
 		m_Checked       = false;
 		m_Round         = false;
@@ -83,6 +85,26 @@ class UIActionToggle: UIActionBase
 	{
 		if ( m_Label )
 			m_Label.SetText( Widget.TranslateString( text ) );
+	}
+
+	override void SetIcon( string imagePath )
+	{
+		if ( !m_Icon )
+			return;
+
+		if ( imagePath == "" )
+		{
+			m_Icon.Show( false );
+			if ( m_Label )
+				m_Label.SetTextOffset( 31, 0 );
+			return;
+		}
+
+		m_Icon.LoadImageFile( 0, imagePath );
+		m_Icon.Show( true );
+
+		if ( m_Label )
+			m_Label.SetTextOffset( 56, 0 );
 	}
 
 	void SetRound( bool round )

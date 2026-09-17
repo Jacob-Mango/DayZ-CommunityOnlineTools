@@ -18,7 +18,8 @@ class JMEntityManagerForm: JMFormBase
 	// Left panel
 	protected UIActionScroller m_ListScroller;
 	protected Widget m_ListContent;
-	protected UIActionButton m_RefreshButton;
+	protected UIActionImageButton m_RefreshButton;
+	protected ref UIActionFlexRow m_SearchRow;
 	protected UIActionSearchBox m_SearchBar;
 	protected ref array<ref UIActionBase> m_BulkButtons;
 	protected ref array<ref UIActionButton> m_FilterButtons;
@@ -122,14 +123,27 @@ class JMEntityManagerForm: JMFormBase
 		if ( m_FilterLabels.Count() > 0 )
 			filterRows = 1;
 
-		// Grid: search + refresh + N bulk + optional filter row
-		Widget grid = UIActionManager.CreateGridSpacer( listButtons, 2 + bulkCount + filterRows, 1 );
-			m_SearchBar     = UIActionManager.CreateSearchBox( grid, this, "OnChange_Search", "Search" );
+		// Grid: search/refresh row + N bulk + optional filter row
+		Widget grid = UIActionManager.CreateGridSpacer( listButtons, 1 + bulkCount + filterRows, 1 );
+			m_SearchRow = UIActionManager.CreateFlexRow( grid, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+			Widget searchRow = m_SearchRow.GetContent();
+
+			m_RefreshButton = UIActionManager.CreateRefreshButton( searchRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
+			if ( m_RefreshButton )
+			{
+				m_RefreshButton.SetFixedSize( 30, 30 );
+				m_SearchRow.Add( m_RefreshButton );
+			}
+
+			m_SearchBar = UIActionManager.CreateSearchBox( searchRow, this, "OnChange_Search", "Search" );
 			if ( m_SearchBar )
+			{
+				m_SearchBar.SetFlex( 1.0, 60 );
 				m_SearchBar.SetTooltip( "Filter the list by name" );
-			m_RefreshButton = UIActionManager.CreateButton( grid, "#STR_COT_GENERIC_REFRESH", this, "OnClick_Refresh" );
-			m_RefreshButton.SetIcon( JMConstants.Lucide( "refresh-cw" ) );
-			m_RefreshButton.SetTooltip( "#STR_COT_GENERIC_REFRESH" );
+				m_SearchRow.Add( m_SearchBar );
+			}
+
+			m_SearchRow.SetGap( 14 );
 
 			foreach ( JMEntityAction bulkAct: actions )
 			{
@@ -143,6 +157,8 @@ class JMEntityManagerForm: JMFormBase
 					b.SetUserData( bulkAct );
 					if ( bulkAct.m_Tooltip != "" )
 						b.SetTooltip( bulkAct.m_Tooltip );
+					if ( bulkAct.m_Permission != "" )
+						UpdatePermission( b, bulkAct.m_Permission );
 					m_BulkButtons.Insert( b );
 				}
 				else
@@ -151,6 +167,8 @@ class JMEntityManagerForm: JMFormBase
 					b2.SetUserData( bulkAct );
 					if ( bulkAct.m_Tooltip != "" )
 						b2.SetTooltip( bulkAct.m_Tooltip );
+					if ( bulkAct.m_Permission != "" )
+						UpdatePermission( b2, bulkAct.m_Permission );
 					m_BulkButtons.Insert( b2 );
 				}
 			}
@@ -257,6 +275,12 @@ class JMEntityManagerForm: JMFormBase
 			if ( act.m_IsBulk )
 				continue;
 
+			//! Every adapter's actions carry their own permission key, and the
+			//! server already refuses one the caller does not hold
+			//! (JMEntityManagerModule). Binding here means the button reflects
+			//! that instead of failing silently on click. An empty key means
+			//! the action is deliberately ungated - do not bind it, or
+			//! HasPermission("") would disable it for everyone.
 			if ( act.m_IsDestructive )
 			{
 				UIActionConfirmInline btn = UIActionManager.CreateConfirmInline( optGrid, act.m_Label, this, "OnEntityClick" );
@@ -264,6 +288,8 @@ class JMEntityManagerForm: JMFormBase
 				btn.SetUserData( act );
 				if ( act.m_Tooltip != "" )
 					btn.SetTooltip( act.m_Tooltip );
+				if ( act.m_Permission != "" )
+					UpdatePermission( btn, act.m_Permission );
 				m_ActionButtons.Set( act.m_Id, btn );
 			}
 			else
@@ -272,6 +298,8 @@ class JMEntityManagerForm: JMFormBase
 				btn2.SetUserData( act );
 				if ( act.m_Tooltip != "" )
 					btn2.SetTooltip( act.m_Tooltip );
+				if ( act.m_Permission != "" )
+					UpdatePermission( btn2, act.m_Permission );
 				m_ActionButtons.Set( act.m_Id, btn2 );
 			}
 		}

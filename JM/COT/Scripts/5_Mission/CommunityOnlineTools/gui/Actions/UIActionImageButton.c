@@ -17,6 +17,10 @@ class UIActionImageButton: UIActionButton
 	protected bool   m_FeedbackActive;
 	protected float  m_FeedbackTimer;
 
+	protected bool   m_PulseActive;
+	protected float  m_PulseTimer;
+	protected float  m_PulseDuration;
+
 	override void OnInit()
 	{
 		// super wires up the pill (fill / outline) and its hover + press
@@ -32,6 +36,10 @@ class UIActionImageButton: UIActionButton
 		m_FeedbackHold   = FEEDBACK_HOLD;
 		m_FeedbackActive = false;
 		m_FeedbackTimer  = 0;
+
+		m_PulseActive   = false;
+		m_PulseTimer    = 0;
+		m_PulseDuration = 2.0;
 	}
 
 	void SetImage( string image )
@@ -123,6 +131,29 @@ class UIActionImageButton: UIActionButton
 		ShowFeedback();
 	}
 
+	void TriggerPulse( float duration = 2.0 )
+	{
+		m_PulseDuration  = Math.Max( 0.2, duration );
+		m_PulseTimer     = 0;
+		m_SavedFillColor = m_FillColor;
+		m_PulseActive    = true;
+	}
+
+	override void AnimatePulse( float duration = 2.0 )
+	{
+		TriggerPulse( duration );
+	}
+
+	void StopPulse()
+	{
+		if ( !m_PulseActive )
+			return;
+
+		m_PulseActive = false;
+		m_PulseTimer  = 0;
+		SetColor( m_SavedFillColor );
+	}
+
 	override void AnimateSpin( float revolutions = 1.0 )
 	{
 		TriggerSpin( Math.Max( 1, revolutions ) );
@@ -141,6 +172,7 @@ class UIActionImageButton: UIActionButton
 
 		// A form closed mid-swap would come back still wearing the check mark.
 		ResetFeedback();
+		StopPulse();
 	}
 
 	override void Update( float timeSlice )
@@ -149,6 +181,23 @@ class UIActionImageButton: UIActionButton
 
 		if ( m_Image && m_SpinActive )
 			m_Image.SetRotation( 0, 0, m_SpinAngle );
+
+		if ( m_PulseActive )
+		{
+			m_PulseTimer += timeSlice;
+			if ( m_PulseTimer >= m_PulseDuration )
+			{
+				StopPulse();
+			}
+			else
+			{
+				float factor = ( Math.Sin( ( m_PulseTimer / m_PulseDuration ) * Math.PI * 4.0 ) + 1.0 ) * 0.5;
+				int r = Math.Lerp( 30, 73, factor );
+				int g = Math.Lerp( 36, 184, factor );
+				int b = Math.Lerp( 48, 117, factor );
+				SetColor( ARGB( 255, r, g, b ) );
+			}
+		}
 
 		if ( !m_FeedbackActive )
 			return;

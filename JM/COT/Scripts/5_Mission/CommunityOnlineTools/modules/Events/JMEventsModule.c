@@ -7,6 +7,9 @@
 // =============================================================================
 class JMEventsModule: JMEntityManagerModule
 {
+	// Temporarily hidden from the sidebar.
+	override bool HasButton() { return false; }
+
 	override JMEntityManagerAdapter CreateAdapter()
 	{
 		return new JMEventsAdapter();

@@ -19,6 +19,7 @@ class JMWorldConditions
 	static const int WEATHER_RAIN     = 4;
 	static const int WEATHER_STORM    = 5;
 	static const int WEATHER_SNOW     = 6;
+	static const int WEATHER_SANDSTORM = 7;
 
 	//! Time-of-day buckets. Returned by GetTimeOfDay.
 	static const int TOD_DAWN  = 0;
@@ -152,6 +153,13 @@ class JMWorldConditions
 		if ( !weather )
 			return WEATHER_CLEAR;
 
+		//! Sandstorm forces overcast/wind and zeroes rain while active, which
+		//! would otherwise misclassify it as plain overcast - the live/active
+		//! state (not the forecast, which has nothing to say about it) always
+		//! wins outright.
+		if ( weather.GetSandstorm() && weather.GetSandstorm().IsActive() )
+			return WEATHER_SANDSTORM;
+
 		float snow = ReadPhenomenon( weather.GetSnowfall(), forecast );
 
 		if ( snow > SNOW_VISIBLE )
@@ -194,6 +202,9 @@ class JMWorldConditions
 	//! Stringtable key for a weather kind. Resolve with Widget.TranslateString.
 	static string GetWeatherLabel( int kind )
 	{
+		if ( kind == WEATHER_SANDSTORM )
+			return "#STR_COT_WEATHER_MODULE_SANDSTORM";
+
 		if ( kind == WEATHER_SNOW )
 			return "#STR_COT_WEATHER_MODULE_SNOW";
 
@@ -219,6 +230,9 @@ class JMWorldConditions
 	//! and a night variant, because a sun icon at 02:00 reads as a bug.
 	static string GetWeatherIcon( int kind, bool isNight )
 	{
+		if ( kind == WEATHER_SANDSTORM )
+			return JMConstants.Lucide( "wind" );
+
 		if ( kind == WEATHER_SNOW )
 			return JMConstants.Lucide( "cloud-snow" );
 

@@ -427,7 +427,7 @@ class UIActionManager
 		return NULL;
 	}
 
-	static UIActionCheckbox CreateCheckbox( notnull Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1 )
+	static UIActionCheckbox CreateCheckbox( notnull Widget parent, string label, Class instance = NULL, string funcname = "", bool checked = false, float width = 1, string icon = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionCheckbox.layout";
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
@@ -448,6 +448,8 @@ class UIActionManager
 			action.SetCallback( instance, funcname );
 			action.SetLabel( label );
 			action.SetCheckedSilent( checked );
+			if ( icon != "" )
+				action.SetIcon( icon );
 
 			return action;
 		}
@@ -652,7 +654,7 @@ class UIActionManager
 		UIActionImageButton btn = CreateIconButton( parent, JMConstants.Lucide( "refresh-cw" ), instance, funcname );
 		if ( btn )
 		{
-			btn.SetFixedSize( 28, 28 );
+			btn.SetFixedSize( 30, 30 );
 			if ( tooltip != "" ) btn.SetTooltip( tooltip );
 		}
 		return btn;
@@ -1103,9 +1105,7 @@ class UIActionManager
 	//          "Apply",  this, "OnClick_Apply",  btnApply,
 	//          "Cancel", this, "OnClick_Cancel", btnCancel );
 	// ---------------------------------------------------------------------------
-	static void CreateButtonPair( notnull Widget parent,
-		string labelA, Class instA, string cbA, out UIActionButton btnA,
-		string labelB, Class instB, string cbB, out UIActionButton btnB )
+	static void CreateButtonPair( notnull Widget parent, string labelA, Class instA, string cbA, out UIActionButton btnA, string labelB, Class instB, string cbB, out UIActionButton btnB )
 	{
 		Widget row = CreateGridSpacer( parent, 1, 2 );
 		btnA = CreateButton( row, labelA, instA, cbA );
@@ -1124,10 +1124,7 @@ class UIActionManager
 	//          "Unban", this, "OnClick_Unban", 0,         JMUILayout.BTN_PAIR_NARROW,
 	//          btnBan, btnUnban );
 	// ---------------------------------------------------------------------------
-	static void CreateButtonPair( notnull Widget parent,
-		string labelA, Class instA, string cbA, int colorA, float widthA,
-		string labelB, Class instB, string cbB, int colorB, float widthB,
-		out UIActionButton btnA, out UIActionButton btnB )
+	static void CreateButtonPair( notnull Widget parent, string labelA, Class instA, string cbA, int colorA, float widthA, string labelB, Class instB, string cbB, int colorB, float widthB, out UIActionButton btnA, out UIActionButton btnB )
 	{
 		Widget row = CreateGridSpacer( parent, 1, 2 );
 		btnA = CreateButton( row, labelA, instA, cbA );
@@ -1154,8 +1151,7 @@ class UIActionManager
 	//      UIActionManager.CreateDivider( parent );
 	//      UIActionManager.CreateDivider( parent, JMUIStyle.DIVIDER_LIGHT, 1 );
 	// ---------------------------------------------------------------------------
-	static void CreateDivider( notnull Widget parent,
-		int color = JMTheme.DIVIDER_MEDIUM, int height = 2 )
+	static void CreateDivider( notnull Widget parent, int color = JMTheme.DIVIDER_MEDIUM, int height = 2 )
 	{
 		CreatePanel( parent, color, height );
 	}
@@ -1210,6 +1206,111 @@ class UIActionManager
 		{
 			action.SetLabel( title );
 			action.SetExpanded( startExpanded );
+			return action;
+		}
+
+		UIAMError( "Couldn't get script", widget, parent );
+		return null;
+	}
+
+	// ---------------------------------------------------------------------------
+	//  CreateMap - a world map with markers the caller can add, move and remove
+	//  one at a time. `height` is in layout pixels; the map is not fractional
+	//  because a MapWidget reports no content height and a size-to-content host
+	//  would collapse it to nothing.
+	//  Fires CLICK on a press and DOUBLE_CLICK on a double press; read what was
+	//  hit off the action. See UIActionMap.
+	// ---------------------------------------------------------------------------
+	static UIActionMap CreateMap( notnull Widget parent, Class instance = null, string funcname = "", int height = 220 )
+	{
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionMap.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
+
+		if ( !CheckWidget( widget, parent, layout, "UIActionMap" ) )
+			return null;
+
+		UIActionMap action;
+		widget.GetScript( action );
+
+		if ( !action )
+		{
+			UIAMError( "Couldn't get script", widget, parent );
+			return NULL;
+		}
+
+		action.SetCallback( instance, funcname );
+
+		widget.SetFlags( WidgetFlags.VEXACTSIZE, true );
+
+		float w, h;
+		widget.GetSize( w, h );
+		widget.SetSize( w, height );
+
+		return action;
+	}
+
+	// ---------------------------------------------------------------------------
+	//  CreateMapFill - a world map that fills whatever parent it is given,
+	//  rather than the fixed pixel band CreateMap pins a card's map to. For a
+	//  map that IS the whole tab, like Vehicle Manager's, not one dropped into
+	//  a card alongside other content.
+	// ---------------------------------------------------------------------------
+	static UIActionMap CreateMapFill( notnull Widget parent, Class instance = null, string funcname = "" )
+	{
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionMap.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
+
+		if ( !CheckWidget( widget, parent, layout, "UIActionMap" ) )
+			return null;
+
+		UIActionMap action;
+		widget.GetScript( action );
+
+		if ( !action )
+		{
+			UIAMError( "Couldn't get script", widget, parent );
+			return NULL;
+		}
+
+		action.SetCallback( instance, funcname );
+
+		//! Overrides the layout's own exact-220px sizing (authored for
+		//! CreateMap's card use) with a fraction that fills the parent instead.
+		//! SetFlags only ever ADDS a flag - VEXACTSIZE has to come off through
+		//! ClearFlags, or this SetSize(1, 1) is read as an exact 1x1 PIXEL size
+		//! instead of "100% of parent" and the map collapses to a sliver.
+		widget.ClearFlags( WidgetFlags.VEXACTSIZE );
+		widget.SetSize( 1, 1 );
+
+		return action;
+	}
+
+	// ---------------------------------------------------------------------------
+	//  CreateFoldPanel - headerless container that slides open and shut.
+	//  Rows go into action.GetContent(); the panel measures them itself. Unlike
+	//  CreateCollapsibleSection it brings no header of its own, so the control
+	//  that opens it can live wherever the host's layout wants it.
+	//  Fires CHANGE while the height is moving.
+	// ---------------------------------------------------------------------------
+	static UIActionFoldPanel CreateFoldPanel( notnull Widget parent, Class instance = null, string funcname = "", bool startExpanded = false )
+	{
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionFoldPanel.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
+
+		if ( !CheckWidget( widget, parent, layout, "UIActionFoldPanel" ) )
+			return null;
+
+		UIActionFoldPanel action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+
+			// Never animated: this is the fold's starting state, not a fold the
+			// user just asked for.
+			action.SetExpanded( startExpanded, false );
+
 			return action;
 		}
 
@@ -1297,8 +1398,12 @@ class UIActionManager
 		if ( action )
 		{
 			action.SetLabel( label );
-			if ( status.Length() > 0 )
-				action.SetStatus( status, color );
+
+			//! Unconditional: the pill's layout ships with a "{STATUS}"
+			//! placeholder, so skipping this on an empty status left the
+			//! literal token on screen and dropped the caller's colour too.
+			//! An empty status is a deliberate blank pill, not "leave as-is".
+			action.SetStatus( status, color );
 			return action;
 		}
 
@@ -1754,6 +1859,38 @@ class UIActionManager
 	//  CreateTimePicker - HH:MM:SS duration / time input.
 	//  Fires CHANGE on field commit.  Use GetTotalSeconds() / SetTotalSeconds().
 	// ---------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
+	//  CreateItemList - themed, virtualised single-column list.
+	//
+	//  Only the rows that fit on screen exist; scrolling moves the data through
+	//  them. Use it wherever a set is too large to give a widget each - the
+	//  object spawner's ~14000 classes, for one.
+	//
+	//  The list cannot measure itself on the frame it is built, so tell it how
+	//  tall its viewport is with SetViewportHeight() from wherever that height
+	//  is decided.
+	// ---------------------------------------------------------------------------
+	static UIActionItemList CreateItemList( notnull Widget parent, Class instance = null, string funcname = "" )
+	{
+		string layout = "JM/COT/GUI/layouts/uiactions/UIActionItemList.layout";
+		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
+
+		if ( !CheckWidget( widget, parent, layout, "UIActionItemList" ) )
+			return null;
+
+		UIActionItemList action;
+		widget.GetScript( action );
+
+		if ( action )
+		{
+			action.SetCallback( instance, funcname );
+			return action;
+		}
+
+		UIAMError( "Couldn't get script", widget, parent );
+		return NULL;
+	}
+
 	static UIActionTimePicker CreateTimePicker( notnull Widget parent, string label, Class instance = null, string funcname = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionTimePicker.layout";

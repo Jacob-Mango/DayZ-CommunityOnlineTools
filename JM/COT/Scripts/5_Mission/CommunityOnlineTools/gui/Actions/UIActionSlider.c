@@ -7,6 +7,11 @@ class UIActionSlider: UIActionBase
 	protected TextWidget  m_Value;
 	protected int         m_FillColor;
 
+	//! Height of the fill bar as a fraction of the track, 1.0 being the full
+	//! track. A slider whose value IS a thickness can grow the bar with the
+	//! value so it previews what it sets; everything else leaves it at 1.
+	protected float       m_FillThickness;
+
 	protected float m_Min;
 	protected float m_Max;
 	protected float m_Current;
@@ -40,6 +45,7 @@ class UIActionSlider: UIActionBase
 		m_Format    = "%1";
 		m_Dragging  = false;
 		m_FillColor = JMTheme.ACCENT;
+		m_FillThickness = 1.0;
 
 		UpdateVisuals();
 		UpdateHandleColor();
@@ -128,6 +134,15 @@ class UIActionSlider: UIActionBase
 			m_Fill.SetAlpha( alpha );
 	}
 
+	//! Draw the fill as a bar `frac` of the track's height. Used by a slider
+	//! that sets a thickness, so the bar is a preview of the value rather than
+	//! just a position.
+	void SetFillThickness( float frac )
+	{
+		m_FillThickness = Math.Clamp( frac, 0.1, 1.0 );
+		UpdateVisuals();
+	}
+
 	void SetSliderWidth( float width )
 	{
 		if ( m_Track )
@@ -201,8 +216,22 @@ class UIActionSlider: UIActionBase
 
 	void UpdateValue()
 	{
-		if ( m_Value )
-			m_Value.SetText( string.Format( Widget.TranslateString( m_Format ), m_Current ) );
+		if ( !m_Value )
+			return;
+
+		// Only a STRINGTABLE KEY goes through TranslateString - it looks up the
+		// key and hands back the raw "%1..." text untouched. A format built at
+		// runtime (e.g. "%1 / 125") is not a key, and translating it anyway
+		// silently ate the %1 token, leaving the literal tail with nothing
+		// substituted into it.
+		string fmt = m_Format;
+		if ( fmt.Length() > 0 && fmt.Substring( 0, 1 ) == "#" )
+			fmt = Widget.TranslateString( fmt );
+
+		if ( m_Step >= 1.0 )
+			m_Value.SetText( string.Format( fmt, Math.Round( m_Current ) ) );
+		else
+			m_Value.SetText( string.Format( fmt, m_Current ) );
 	}
 
 	override bool OnChange( Widget w, int x, int y, bool finished )
@@ -256,8 +285,10 @@ class UIActionSlider: UIActionBase
 
 		if ( m_Fill )
 		{
-			m_Fill.SetPos( 0, 0 );
-			m_Fill.SetSize( t, 1 );
+			//! Centred in the track rather than pinned to its top, so a bar
+			//! thinner than the track grows outward from the middle.
+			m_Fill.SetPos( 0, ( 1.0 - m_FillThickness ) * 0.5 );
+			m_Fill.SetSize( t, m_FillThickness );
 		}
 
 		// The handle's position is relative to the track, but its size is in

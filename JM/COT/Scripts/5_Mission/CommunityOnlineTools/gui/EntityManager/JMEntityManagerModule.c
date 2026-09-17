@@ -216,6 +216,9 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		if ( !m_Adapter )
 			return;
 
+		if ( !sender )
+			return;
+
 		if ( !GetPermissionsManager().HasPermission( m_Adapter.GetPermissionPrefix() + ".View", sender ) )
 			return;
 

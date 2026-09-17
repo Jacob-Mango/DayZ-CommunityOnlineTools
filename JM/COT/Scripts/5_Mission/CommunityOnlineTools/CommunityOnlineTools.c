@@ -1,5 +1,13 @@
+//! Enforce compiles GameLib/Game/World/Mission as SEPARATE modules - a
+//! #define in a 3_Game or 4_World file is invisible here. Kept in exact
+//! sync with StaticFunctions.c's block; all three must change together.
+#define COT_DEBUGLOGS
+
 class CommunityOnlineTools: CommunityOnlineToolsBase
 {
+	//! Floor on how often one admin's activation toggle may reach the webhook.
+	static const int ACTIVE_MIN_INTERVAL_MS = 2000;
+
 	void CommunityOnlineTools()
 	{
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Read" );
@@ -14,6 +22,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 	override void OnStart()
 	{
 		super.OnStart();
+
+		#ifdef JM_COT_AUTOTEST
+		JMAutoTest_TryRun();
+		#endif
 	}
 
 	override void OnFinish()
@@ -58,6 +70,12 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 				break;
 			case JMClientRPC.SetClient:
 				RPC_SetClient( ctx, sender, target );
+				break;
+			case JMClientRPC.UpdateClientBatch:
+				RPC_UpdateClientBatch( ctx, sender, target );
+				break;
+			case JMClientRPC.UpdateClientPositionBatch:
+				RPC_UpdateClientPositionBatch( ctx, sender, target );
 				break;
 			}
 		} else if ( rpc_type > JMRoleRPC.INVALID && rpc_type < JMRoleRPC.COUNT )
@@ -112,9 +130,29 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !ctx.Read( active ) )
 			return;
 
-		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( senderRPC.GetId() );
+		if ( !senderRPC )
+			return;
 
-		if (!instance)
+		//! Same permission the sidebar needs to open at all.
+		//!
+		//! Without it this handler is one webhook post and one log line per
+		//! packet, from any player on the server, announcing an admin
+		//! activation that never happened - forged audit entries and a flooded
+		//! Discord endpoint in the same call.
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "COT.View", senderRPC, instance ) )
+			return;
+
+		if ( !instance )
+			return;
+
+		//! Nothing changed, so nothing to announce. A toggle held down, or a
+		//! client repeating itself, is not another activation.
+		if ( m_ActiveGUIDs.Contains( senderRPC.GetId() ) && m_ActiveGUIDs.Get( senderRPC.GetId() ) == active )
+			return;
+
+		//! Even a permitted admin cannot spend the webhook faster than this.
+		if ( !JMRPCThrottle.Allow( senderRPC.GetId(), "cot_active", ACTIVE_MIN_INTERVAL_MS ) )
 			return;
 
 		auto message = m_Webhook.CreateDiscordMessageColored( JMConstants.WEBHOOK_COLOR_WARNING );
@@ -156,31 +194,39 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "RPC_RefreshClients").Add(senderRPC);
 		#endif
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
+		if ( !senderRPC )
 			return;
 
-		#ifdef SERVER
-		ScriptRPC rpc = new ScriptRPC();
-		#endif
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
+			return;
 
 		if ( IsMissionHost() )
 		{
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
 
+			//! One array send for the whole roster instead of one unicast RPC
+			//! per connected player - this used to fire N separate RPCs every
+			//! refresh, and the Players tab refreshes on a 1.5s timer while
+			//! it's open (see JMPlayerForm.UpdatePlayerList).
+			#ifdef SERVER
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( players.Count() );
+			#endif
+
 			for ( int i = 0; i < players.Count(); i++ )
 			{
 				players[i].Update();
-				
+
 				#ifdef SERVER
 				rpc.Write( players[i].PlayerObject );
 				rpc.Write( players[i].GetGUID() );
 				players[i].OnSend( rpc, senderRPC.GetId() );
-
-				rpc.Send( NULL, JMClientRPC.UpdateClient, true, senderRPC );
-
-				rpc.Reset();
 				#endif
 			}
+
+			#ifdef SERVER
+			rpc.Send( NULL, JMClientRPC.UpdateClientBatch, true, senderRPC );
+			#endif
 		}
 	}
 
@@ -199,14 +245,20 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		auto trace = CF_Trace_1(this, "RPC_RefreshClientPositions").Add(senderRPC);
 		#endif
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
+		if ( !senderRPC )
 			return;
 
-		ScriptRPC rpc = new ScriptRPC();
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
+			return;
 
 		if ( IsMissionHost() )
 		{
 			array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
+
+			//! One array send for the whole roster instead of one unicast RPC
+			//! per connected player - same batching as RPC_RefreshClients.
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( players.Count() );
 
 			for ( int i = 0; i < players.Count(); i++ )
 			{
@@ -214,11 +266,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 				rpc.Write( players[i].GetGUID() );
 				players[i].OnSendPosition( rpc );
-
-				rpc.Send( NULL, JMClientRPC.UpdateClientPosition, true, senderRPC );
-
-				rpc.Reset();
 			}
+
+			rpc.Send( NULL, JMClientRPC.UpdateClientPositionBatch, true, senderRPC );
 		}
 	}
 
@@ -227,6 +277,10 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( IsMissionHost() )
 		{
 			m_ActiveGUIDs.Remove(guid);
+
+			//! Their rate limit windows go with them, so a reconnect does not
+			//! inherit a cooldown from the session before it.
+			JMRPCThrottle.Clear(guid);
 
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Write( guid );
@@ -308,6 +362,9 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 
 		if ( g_Game.IsServer() )
 		{
+			if ( !senderRPC )
+				return;
+
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
 				return;
 
@@ -349,6 +406,70 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			}
 
 			player.OnRecievePosition( ctx );
+		}
+	}
+
+	//! Batched reply to RPC_RefreshClients - one player entry per iteration,
+	//! same wire shape RPC_UpdateClient's client branch already reads.
+	private void RPC_UpdateClientBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "RPC_UpdateClientBatch").Add(senderRPC);
+		#endif
+
+		if ( !g_Game.IsClient() )
+			return;
+
+		int count;
+		if ( !ctx.Read( count ) )
+			return;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			PlayerBase po;
+			if ( !ctx.Read( po ) )
+				return;
+
+			string pg;
+			if ( !ctx.Read( pg ) )
+				return;
+
+			Client_UpdateClient( pg, ctx, po );
+		}
+	}
+
+	//! Batched reply to RPC_RefreshClientPositions. A guid this client does
+	//! not know yet still has its position bytes read and discarded, so the
+	//! stream stays aligned for the remaining entries in the same message.
+	private void RPC_UpdateClientPositionBatch( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		#ifdef JM_COT_DIAG_LOGGING
+		auto trace = CF_Trace_1(this, "RPC_UpdateClientPositionBatch").Add(senderRPC);
+		#endif
+
+		if ( !g_Game.IsClient() )
+			return;
+
+		int count;
+		if ( !ctx.Read( count ) )
+			return;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			string guid;
+			if ( !ctx.Read( guid ) )
+				return;
+
+			JMPlayerInstance player = GetPermissionsManager().GetPlayer( guid );
+			if ( player )
+			{
+				player.OnRecievePosition( ctx );
+			} else
+			{
+				vector discard;
+				if ( !ctx.Read( discard ) )
+					return;
+			}
 		}
 	}
 
@@ -505,6 +626,22 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		JMObjectSpawnerModule objSpawnerModule;
 		if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
 			objSpawnerModule.SpawnCompatibleAttachments(entity, player, depth);
+	}
+
+	override void SpawnCompatibleAttachmentsWithColor(EntityAI entity, PlayerBase player, int depth = 3, string preferredColor = "")
+	{
+		JMObjectSpawnerModule objSpawnerModule;
+		if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
+			objSpawnerModule.SpawnCompatibleAttachmentsWithColor(entity, player, depth, preferredColor);
+	}
+
+	override EntityAI RecolorEntityAndAttachments(EntityAI entity, PlayerBase player, string newColor, int depth = 3)
+	{
+		JMObjectSpawnerModule objSpawnerModule;
+		if (CF_Modules<JMObjectSpawnerModule>.Get(objSpawnerModule))
+			return objSpawnerModule.RecolorEntityAndAttachments(entity, player, newColor, depth);
+
+		return entity;
 	}
 }
 

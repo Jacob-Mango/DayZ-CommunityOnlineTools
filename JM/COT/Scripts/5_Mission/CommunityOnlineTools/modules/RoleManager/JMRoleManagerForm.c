@@ -1,65 +1,121 @@
+// =============================================================================
+//  JMRoleManagerForm.c
+//
+//  Role management + player role assignment view.
+//  Archetype A: Split-Pane (Left Roster + Right Detail Editor).
+// =============================================================================
+
 class JMRoleManagerForm : JMFormBase
 {
 	// -------------------------------------------------------------------------
-	//  Mode
+	//  Mode state
 	// -------------------------------------------------------------------------
 
-	private bool                        m_PlayerMode = false; // false = Roles, true = Players
+	protected bool                        m_PlayerMode = false; // false = Roles, true = Players
+
+	static const int TAB_ROLES            = 0;
+	static const int TAB_PLAYERS          = 1;
+
+	//! Height of the roster toolbar block pinned above the list.
+	static const int LEFT_TOOLBAR_HEIGHT  = 75;
+
+	//! Identity row fractions - the same layout the player manager's own
+	//! identity card uses: label on the left, value/copy button on the right.
+	static const float IDENTITY_LABEL_WIDTH = 0.22;
+	static const float IDENTITY_VALUE_WIDTH = 0.76;
 
 	// -------------------------------------------------------------------------
 	//  Widgets
 	// -------------------------------------------------------------------------
 
-	private UIActionScroller            m_LeftScroller;
-	private Widget                      m_LeftContent;
+	protected UIActionScroller            m_LeftScroller;
+	protected Widget                      m_LeftContent;
 
-	private UIActionScroller            m_RightScroller;
-	private Widget                      m_RightScrollContent;
+	protected UIActionScroller            m_RightScroller;
+	protected Widget                      m_RightScrollContent;
 
-	// Mode toggle buttons
-	private UIActionButton              m_BtnModeRoles;
-	private UIActionButton              m_BtnModePlayers;
+	// Left panel geometry - tab strip over the roster block
+	protected Widget                      m_LeftTabStrip;
+	protected Widget                      m_LeftBody;
+	protected Widget                      m_LeftToolbar;
+	protected Widget                      m_LeftList;
 
-	// Per-mode toolbars. Both live in panel_left_top for the life of the form
-	// and are shown/hidden by mode - the list below them is what gets rebuilt.
-	private Widget                      m_RolesToolbar;
-	private Widget                      m_PlayersToolbar;
-	private UIActionButton              m_CreateRoleBtn;
-	private UIActionText                m_PlayerCountLabel;
+	// Mode tabs - Roles / Players
+	protected UIActionTabs                m_Tabs;
+
+	// Per-mode toolbars
+	protected Widget                      m_RolesToolbar;
+	protected Widget                      m_PlayersToolbar;
+	protected UIActionButton              m_CreateRoleBtn;
+	protected UIActionSearchBox           m_PlayerSearchBar;
 
 	// Left panel - dynamic list area (roles or players)
-	private Widget                      m_ListWrapper;
+	protected Widget                      m_ListWrapper;
+	protected Widget                      m_PlayerRows;
 
 	// Right panel - editor
-	private Widget                      m_EditorWrapper;
-	private UIActionButton              m_SavePermBtn;
-	private UIActionButton              m_SaveRolesBtn;
+	protected Widget                      m_EditorWrapper;
+	protected UIActionImageButton         m_SavePermBtn;
+	protected UIActionImageButton         m_SaveRolesBtn;
 
 	// ---- Roles mode state --------------------------------------------------
-	private string                      m_SelectedRole;
-	private autoptr array<ref JMRoleData> m_RoleList = new array<ref JMRoleData>();
-	private ref JMRole                  m_TempRole;
-	private string                      m_PendingDeleteRole;
+	protected string                      m_SelectedRole;
+	protected autoptr array<ref JMRoleData> m_RoleList = new array<ref JMRoleData>();
+	protected ref JMRole                  m_TempRole;
+	//! Role name m_TempRole was built for. Compared against m_SelectedRole
+	//! rather than just checking "is m_TempRole set" so a rename - which moves
+	//! m_SelectedRole onto a new name while the editor is still open - is
+	//! detected as a change and redrawn, instead of being mistaken for "already
+	//! showing this role, leave it alone".
+	protected string                      m_TempRoleBuiltFor = "";
+	protected string                      m_PendingDeleteRole;
+	protected string                      m_EditingRenameRole;
+
+	//! A role list arrives from the server every time the tab is reopened, not
+	//! just when the admin clicks Refresh - JMRoleManagerModule.RequestRoleList()
+	//! is called from OnShow() and from the Player Manager deep link too. That
+	//! response must not blow away an editor the admin is mid-edit in, so
+	//! PopulateRoleList() only forces a full editor rebuild when this is set -
+	//! i.e. right before a call that came from an explicit Refresh click.
+	protected bool                        m_ForceEditorRefresh = false;
 
 	// ---- Permission tree collapse state ------------------------------------
-	// Key: permission full name (e.g. "Camera.View"), Value: true = collapsed
-	private ref map< string, bool >     m_Collapsed = new map< string, bool >();
+	//! Rows at a depth >= this start folded. 0 folds every level, so the tree
+	//! opens showing only the top-level categories instead of dumping every
+	//! permission the mod owns on screen. An entry in m_Collapsed always wins
+	//! over this default.
+	static const int                      PERM_TREE_OPEN_DEPTH = 0;
+	protected ref map< string, bool >     m_Collapsed = new map< string, bool >();
+
+	// ---- Permission tree search ---------------------------------------------
+	protected UIActionSearchBox           m_PermSearchBar;
+	protected string                      m_PermSearchFilter = "";
+	//! Parent widget the tree wrapper is rebuilt into on every filter change.
+	protected Widget                      m_PermTreeHost;
+	protected Widget                      m_PermTreeWrapper;
+
+	//! The tree as it currently stands on screen - top-level nodes only, each
+	//! holding its own children. Built alongside the widgets so a toggle can
+	//! reach its whole subtree without walking the widget hierarchy back.
+	protected ref array< ref JMPermTreeNode > m_PermRoots = new array< ref JMPermTreeNode >();
 
 	// ---- Players mode state ------------------------------------------------
-	private string                      m_SelectedGUID;
-	private string                      m_SelectedPlayerName;
-	private string                      m_PlayerSearchFilter;
+	protected string                      m_SelectedGUID;
+	protected string                      m_SelectedPlayerName;
+	protected string                      m_PlayerSearchFilter;
 
-	// Radio-button role selection: maps role name -> checkbox widget
-	// Only one can be "selected" at a time
-	private ref map< string, UIActionCheckbox > m_PlayerRoleChecks = new map< string, UIActionCheckbox >();
-	private string                      m_PlayerSelectedRole;
+	protected ref map< string, UIActionToggleSwitch > m_PlayerRoleChecks = new map< string, UIActionToggleSwitch >();
+	protected string                      m_PlayerSelectedRole;
 
-	// Optional name restriction for the selected role
-	private UIActionEditableText        m_NameRestrictionInput;
+	//! GUID the player-role editor was built for - same reasoning as
+	//! m_TempRoleBuiltFor above, on the Players side of the tab.
+	protected string                      m_PlayerEditorBuiltFor = "";
+
+	protected ref map< string, string >   m_PlayerNameRestrictions = new map< string, string >();
+	protected string                      m_EditingRestrictionRole;
 
 	//! protected, not private: sub-mods reach for the module through the form.
-	protected JMRoleManagerModule       m_Module;
+	protected JMRoleManagerModule         m_Module;
 
 	// -------------------------------------------------------------------------
 	//  SetModule
@@ -79,6 +135,12 @@ class JMRoleManagerForm : JMFormBase
 		m_LeftPanel         = layoutRoot.FindAnyWidget( "panel_left" );
 		m_RightPanel        = layoutRoot.FindAnyWidget( "panel_right" );
 		m_RightPanelDisable = layoutRoot.FindAnyWidget( "panel_right_disable" );
+		m_RightContent      = layoutRoot.FindAnyWidget( "panel_right_content" );
+
+		m_LeftTabStrip      = layoutRoot.FindAnyWidget( "panel_left_tabs" );
+		m_LeftBody          = layoutRoot.FindAnyWidget( "panel_left_body" );
+		m_LeftToolbar       = layoutRoot.FindAnyWidget( "panel_left_top" );
+		m_LeftList          = layoutRoot.FindAnyWidget( "panel_left_bottom" );
 
 		InitWidgetsLeft();
 		InitWidgetsRight();
@@ -86,62 +148,56 @@ class JMRoleManagerForm : JMFormBase
 		UpdateUI();
 	}
 
-	//! The mode toggle and both per-mode toolbars sit in panel_left_top and are
-	//! built once; only the list in panel_left_bottom is rebuilt. Before, the
-	//! toolbar was recreated inside RebuildRoleList/RebuildPlayerList on every
-	//! refresh, which is what made the search box lose focus mid-typing.
 	protected void InitWidgetsLeft()
 	{
-		Widget toolbarHost = layoutRoot.FindAnyWidget( "panel_left_top" );
+		//! The tabs own the mode; both panels are rebuilt on CHANGE, so no
+		//! content panels are registered with UIActionTabs here.
+		if ( m_LeftTabStrip )
+		{
+			ref array<string> tabLabels = { "#STR_COT_ROLEMANAGER_MODULE_TAB_ROLES", "#STR_COT_ROLEMANAGER_MODULE_TAB_PLAYERS" };
+			ref array<string> tabIcons  = { JMConstants.Lucide( "shield" ), JMConstants.Lucide( "users" ) };
 
-		Widget modeBar = UIActionManager.CreateGridSpacer( toolbarHost, 1, 2 );
-		m_BtnModeRoles   = UIActionManager.CreateButton( modeBar, "Roles",   this, "OnClick_ModeRoles"   );
-		m_BtnModeRoles.SetTooltip( "Manage roles and their permissions" );
-		m_BtnModePlayers = UIActionManager.CreateButton( modeBar, "Players", this, "OnClick_ModePlayers" );
-		m_BtnModePlayers.SetTooltip( "Assign existing roles to online players" );
+			m_Tabs = UIActionManager.CreateTabs( m_LeftTabStrip, tabLabels, tabIcons, this, "OnChange_Tab" );
 
-		// ---- Roles-mode toolbar -------------------------------------------
-		m_RolesToolbar = UIActionManager.CreateWrapSpacer( toolbarHost, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+			if ( m_Tabs )
+				m_Tabs.SetSelection( TAB_ROLES, false );
+		}
 
-		UIActionImageButton btnRefreshRoles = UIActionManager.CreateRefreshButton( m_RolesToolbar, this, "OnClick_Refresh" );
+		Widget toolbarHost = m_LeftToolbar;
+		if ( toolbarHost )
+		{
+			// ---- Players-mode toolbar -----------------------------------------
+			m_PlayersToolbar = UIActionManager.CreateWrapSpacer( toolbarHost, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-		m_CreateRoleBtn = UIActionManager.CreateButton( m_RolesToolbar, "New Role", this, "OnClick_CreateRole" );
-		m_CreateRoleBtn.SetWidth( 0.85 );
-		m_CreateRoleBtn.SetColor( JMTheme.SUCCESS_FILL );
-		m_CreateRoleBtn.SetTooltip( "Create a new empty role" );
+			UIActionImageButton btnRefreshPlayers = UIActionManager.CreateRefreshButton( m_PlayersToolbar, this, "OnClick_RefreshPlayers" );
+			if ( btnRefreshPlayers )
+				btnRefreshPlayers.SetFixedSize( 30, 30 );
 
-		RegisterPermission( m_CreateRoleBtn, "Admin.Roles.Create" );
-
-		// ---- Players-mode toolbar -----------------------------------------
-		m_PlayersToolbar = UIActionManager.CreateGridSpacer( toolbarHost, 2, 1 );
-
-		Widget playerToolbarRow = UIActionManager.CreateWrapSpacer( m_PlayersToolbar, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-		UIActionImageButton btnRefreshPlayers = UIActionManager.CreateRefreshButton( playerToolbarRow, this, "OnClick_RefreshPlayers" );
-
-		m_PlayerCountLabel = UIActionManager.CreateText( playerToolbarRow, "", "" );
-		m_PlayerCountLabel.SetWidth( 0.85 );
-		m_PlayerCountLabel.SetTextVAlign( UIActionVAlign.CENTER );
-
-		m_PlayerSearchBar = UIActionManager.CreateSearchBox( m_PlayersToolbar, this, "OnChange_PlayerSearch", "Search by name..." );
-		m_PlayerSearchBar.SetWidth( 1.0 );
-		m_PlayerSearchBar.SetEditBoxWidth( 0.85 );
+			//! No count readout. The roster below is the count, and a number
+			//! beside the box only took width the search wanted.
+			m_PlayerSearchBar = UIActionManager.CreateSearchBox( m_PlayersToolbar, this, "OnChange_PlayerSearch", "#STR_COT_ROLEMANAGER_MODULE_SEARCH_PLAYERS_PLACEHOLDER" );
+			m_PlayerSearchBar.SetWidth( 0.85 );
+		}
 
 		ApplyModeToolbars();
 
 		// ---- The list itself ----------------------------------------------
-		m_LeftScroller = UIActionManager.CreateScroller( layoutRoot.FindAnyWidget( "panel_left_bottom" ) );
+		m_LeftScroller = UIActionManager.CreateScroller( m_LeftList );
 		m_LeftContent  = m_LeftScroller.GetContentWidget();
 
 		m_ListWrapper = UIActionManager.CreateGridSpacer( m_LeftContent, 1, 1 );
-		UIActionManager.CreateText( m_ListWrapper, "Loading..." );
+		UIActionManager.CreateText( m_ListWrapper, "#STR_COT_ROLEMANAGER_MODULE_LOADING" );
 
 		m_LeftScroller.UpdateScroller();
 	}
 
 	protected void InitWidgetsRight()
 	{
-		m_RightScroller      = UIActionManager.CreateScroller( m_RightPanel );
+		Widget rightTarget = m_RightContent;
+		if ( !rightTarget )
+			rightTarget = m_RightPanel;
+
+		m_RightScroller      = UIActionManager.CreateScroller( rightTarget );
 		m_RightScrollContent = m_RightScroller.GetContentWidget();
 
 		m_EditorWrapper = UIActionManager.CreateGridSpacer( m_RightScrollContent, 1, 1 );
@@ -149,17 +205,28 @@ class JMRoleManagerForm : JMFormBase
 		m_RightScroller.UpdateScroller();
 	}
 
-	//! Only one of the two toolbars is on screen at a time.
 	protected void ApplyModeToolbars()
 	{
-		if ( m_RolesToolbar )
-			m_RolesToolbar.Show( !m_PlayerMode );
+		if ( m_LeftToolbar )
+			m_LeftToolbar.Show( m_PlayerMode );
 
-		if ( m_PlayersToolbar )
-			m_PlayersToolbar.Show( m_PlayerMode );
+		float h = 600;
+		if ( layoutRoot )
+		{
+			float w;
+			layoutRoot.GetScreenSize( w, h );
+		}
+
+		int toolbarH = 0;
+		if ( m_PlayerMode )
+			toolbarH = 40;
+
+		PinStripGeometry( m_LeftToolbar, m_LeftList, h - TAB_STRIP_HEIGHT, toolbarH );
+
+		if ( m_LeftScroller )
+			m_LeftScroller.UpdateScroller();
 	}
 
-	//! Nothing picked on the left means there is nothing to edit on the right.
 	void UpdateUI()
 	{
 		bool hasSelection = ( m_SelectedRole != "" );
@@ -175,13 +242,20 @@ class JMRoleManagerForm : JMFormBase
 
 	override void OnResize( float w, float h )
 	{
+		super.OnResize( w, h );
+
+		PinRightPanelGeometry( h );
+		PinStripGeometry( m_LeftTabStrip, m_LeftBody, h, TAB_STRIP_HEIGHT );
+
+		int toolbarH = 0;
+		if ( m_PlayerMode )
+			toolbarH = 40;
+
+		PinStripGeometry( m_LeftToolbar, m_LeftList, h - TAB_STRIP_HEIGHT, toolbarH );
+
 		if ( m_LeftScroller  ) m_LeftScroller.UpdateScroller();
 		if ( m_RightScroller ) m_RightScroller.UpdateScroller();
 	}
-
-	// -------------------------------------------------------------------------
-	//  OnShow
-	// -------------------------------------------------------------------------
 
 	override void OnShow()
 	{
@@ -191,55 +265,100 @@ class JMRoleManagerForm : JMFormBase
 			m_Module.RequestRoleList();
 	}
 
+	override void OnClientPermissionsUpdated()
+	{
+		super.OnClientPermissionsUpdated();
+
+		UpdateUI();
+	}
+
+	override void OnHide()
+	{
+		super.OnHide();
+	}
+
 	// -------------------------------------------------------------------------
 	//  Mode helpers
 	// -------------------------------------------------------------------------
 
-	void OnClick_ModeRoles( UIEvent eid, UIActionBase action )
+	void OnChange_Tab( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CLICK )
+		if ( eid != UIEvent.CHANGE )
 			return;
+
+		UIActionTabs tabs;
+		if ( !Class.CastTo( tabs, action ) )
+			return;
+
+		SetMode( tabs.GetSelection() == TAB_PLAYERS );
+	}
+
+	protected void SetMode( bool playerMode )
+	{
+		if ( m_PlayerMode == playerMode )
+			return;
+
+		m_PlayerMode = playerMode;
+		m_PlayerRows = NULL;
+
+		ApplyModeToolbars();
 
 		if ( m_PlayerMode )
 		{
-			m_PlayerMode   = false;
-			m_SelectedGUID = "";
-			m_PlayerRows   = NULL;
-			ApplyModeToolbars();
-			RebuildRoleList();
-			RebuildEditorEmpty( "Select a role to edit its permissions." );
-		}
-	}
-
-	void OnClick_ModePlayers( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		if ( !m_PlayerMode )
-		{
-			m_PlayerMode = true;
-			m_SelectedRole = "";
+			m_SelectedRole       = "";
 			m_PlayerSearchFilter = "";
-			m_PlayerRows = NULL;
-			ApplyModeToolbars();
 			RebuildPlayerList();
-			RebuildEditorEmpty( "Select a player to manage their role." );
+			RebuildEditorEmpty( "#STR_COT_ROLEMANAGER_MODULE_SELECT_PLAYER_PROMPT" );
+		}
+		else
+		{
+			m_SelectedGUID = "";
+			RebuildRoleList();
+			RebuildEditorEmpty( "#STR_COT_ROLEMANAGER_MODULE_SELECT_ROLE_PROMPT" );
 		}
 	}
 
 	// -------------------------------------------------------------------------
-	//  PopulateRoleList - called by module on RPC receive
+	//  PopulateRoleList
 	// -------------------------------------------------------------------------
 
 	void PopulateRoleList( array<ref JMRoleData> roles )
 	{
+		bool forceEditor = m_ForceEditorRefresh;
+		m_ForceEditorRefresh = false;
+
 		m_RoleList.Clear();
 		foreach ( JMRoleData rd : roles )
 			m_RoleList.Insert( rd );
 
 		if ( !m_PlayerMode )
+		{
+			if ( m_SelectedRole == "" && m_RoleList.Count() > 0 )
+				m_SelectedRole = "everyone";
+
+			//! The roster is cheap and stateless - always safe to redraw with
+			//! whatever the server just sent.
 			RebuildRoleList();
+
+			//! The editor is not stateless: m_TempRole holds unsaved toggles.
+			//! Only (re)build it when it is not already showing this exact
+			//! role, or when this response is the direct result of an
+			//! explicit Refresh click - never as a side effect of the tab
+			//! merely being reopened. Comparing the role NAME (not just
+			//! "is m_TempRole set") is what still catches a rename, which
+			//! moves m_SelectedRole onto a new name while the editor is open.
+			if ( m_SelectedRole != "" && ( m_TempRoleBuiltFor != m_SelectedRole || forceEditor ) )
+				RebuildRolePermEditor();
+
+			return;
+		}
+
+		//! Same reasoning on the Players side: m_PlayerSelectedRole /
+		//! m_PlayerNameRestrictions hold an unsaved assignment. Rebuild only
+		//! when the editor isn't already showing this player, or on an
+		//! explicit Refresh.
+		if ( m_SelectedGUID != "" && ( m_PlayerEditorBuiltFor != m_SelectedGUID || forceEditor ) )
+			RebuildPlayerEditor();
 	}
 
 	// =========================================================================
@@ -253,56 +372,67 @@ class JMRoleManagerForm : JMFormBase
 
 		m_ListWrapper = UIActionManager.CreateGridSpacer( m_LeftContent, 1, 1 );
 
+		UIActionCard card = UIActionManager.CreateCard( m_ListWrapper, "#STR_COT_ROLEMANAGER_MODULE_CONFIGURED_ROLES" );
+		card.AddRefreshButton( this, "OnClick_Refresh", "#STR_COT_ROLEMANAGER_MODULE_REFRESH_ROLES_TOOLTIP" );
+		Widget cardContent = card.GetContent();
+
 		foreach ( JMRoleData rd : m_RoleList )
 		{
-			UIActionButton selectBtn = UIActionManager.CreateButton( m_ListWrapper, rd.Name, this, "OnClick_SelectRole" );
+			UIActionButton selectBtn = UIActionManager.CreateButton( cardContent, rd.Name, this, "OnClick_SelectRole" );
 			selectBtn.SetData( new JMStringData( rd.Name ) );
 
-			UIActionManager.CreatePanel( m_ListWrapper, 0x22FFFFFF, 1 );
+			UIActionManager.CreatePanel( cardContent, 0x22FFFFFF, 1 );
 		}
+
+		m_CreateRoleBtn = UIActionManager.CreateButton( cardContent, "#STR_COT_ROLEMANAGER_MODULE_NEW_ROLE_BUTTON", this, "OnClick_CreateRole" );
+		m_CreateRoleBtn.SetColor( JMTheme.SUCCESS_FILL );
+		m_CreateRoleBtn.SetTooltip( "#STR_COT_ROLEMANAGER_MODULE_NEW_ROLE_TOOLTIP" );
+
+		RegisterPermission( m_CreateRoleBtn, "Admin.Roles.Create" );
 
 		m_LeftScroller.UpdateScroller();
 	}
 
-	// -------------------------------------------------------------------------
-	//  Role permission editor
-	// -------------------------------------------------------------------------
-
 	private void RebuildRolePermEditor()
 	{
 		m_TempRole = NULL;
+		m_TempRoleBuiltFor = "";
 		m_Collapsed.Clear();
 		RebuildEditorClear();
 
 		if ( m_SelectedRole == "" )
 		{
-			UIActionManager.CreateText( m_EditorWrapper, "Select a role to edit its permissions." );
+			UIActionManager.CreateText( m_EditorWrapper, "#STR_COT_ROLEMANAGER_MODULE_SELECT_ROLE_PROMPT" );
 			m_RightScroller.UpdateScroller();
 			return;
 		}
 
-		// ---- Header row: title + Delete button on the right ----------------
 		bool isDeletable = ( m_SelectedRole != "admin" && m_SelectedRole != "everyone" );
 
-		int headerCols = 1;
+		// Permission Configuration Card
+		UIActionCard permCard = UIActionManager.CreateCard( m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PERMISSION_CONFIG_TITLE" ) + ": " + m_SelectedRole );
+		m_SavePermBtn = permCard.AddSaveButton( this, "OnClick_SaveRolePermissions", Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_SAVE_PERMISSIONS_TOOLTIP" ) + ": " + m_SelectedRole );
+		RegisterPermission( m_SavePermBtn, "Admin.Roles.Permissions" );
+
 		if ( isDeletable )
-			headerCols = 2;
-
-		Widget headerRow = UIActionManager.CreateGridSpacer( m_EditorWrapper, 1, headerCols );
-		UIActionManager.CreateText( headerRow, "Role: " + m_SelectedRole );
-
-		if ( isDeletable && GetPermissionsManager().HasPermission( "Admin.Roles.Delete" ) )
 		{
-			UIActionConfirmInline delBtn = UIActionManager.CreateConfirmInline( headerRow, "Delete", this, "OnClick_DeleteRole" );
-			UIActionIconGrid.ApplyDeletePreset( delBtn );
-			delBtn.SetData( new JMStringData( m_SelectedRole ) );
-			delBtn.SetTooltip( "Permanently delete this role. Players with it will lose these permissions." );
+			UIActionImageButton renameBtn = permCard.AddCardHeaderAction( JMConstants.ICON_FOLDED_PAPER, this, "OnClick_RenameRole", Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TOOLTIP" ) + " '" + m_SelectedRole + "'" );
+			renameBtn.SetData( new JMStringData( m_SelectedRole ) );
+
+			if ( GetPermissionsManager().HasPermission( "Admin.Roles.Delete" ) )
+			{
+				UIActionImageButton delBtn = permCard.AddDeleteButton( this, "OnClick_DeleteRole", "#STR_COT_ROLEMANAGER_MODULE_DELETE_ROLE_TOOLTIP" );
+				delBtn.SetData( new JMStringData( m_SelectedRole ) );
+			}
 		}
 
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
+		Widget permBody = permCard.GetContent();
+
+		m_PermSearchBar = UIActionManager.CreateSearchBox( permBody, this, "OnChange_PermSearch", "#STR_COT_ROLEMANAGER_MODULE_SEARCH_PERMISSIONS_PLACEHOLDER", m_PermSearchFilter );
+
+		m_PermTreeHost = permBody;
 
 		JMRoleData roleData = GetRoleData( m_SelectedRole );
-
 		m_TempRole = new JMRole( m_SelectedRole );
 		if ( roleData )
 		{
@@ -310,16 +440,68 @@ class JMRoleManagerForm : JMFormBase
 				m_TempRole.AddPermission( line );
 		}
 
-		// Build collapsable permission tree
-		BuildPermissionTree( m_EditorWrapper, m_TempRole.RootPermission, 0 );
+		m_TempRoleBuiltFor = m_SelectedRole;
 
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
-		m_SavePermBtn = UIActionManager.CreateButton( m_EditorWrapper, "Save Permissions", this, "OnClick_SaveRolePermissions" );
-		RegisterPermission( m_SavePermBtn, "Admin.Roles.Permissions" );
-		m_SavePermBtn.SetColor( JMTheme.SUCCESS_FILL );
-		m_SavePermBtn.SetTooltip( "Push the current permission selection to the server" );
+		RebuildPermTreeWidgets();
 
 		m_RightScroller.UpdateScroller();
+	}
+
+	//! Rebuilds just the tree portion of the permission editor - used both for
+	//! the initial build and for every keystroke in the search box, so the card
+	//! header, save/rename/delete buttons and m_TempRole are left untouched.
+	private void RebuildPermTreeWidgets()
+	{
+		if ( !m_TempRole || !m_PermTreeHost )
+			return;
+
+		m_PermRoots.Clear();
+
+		if ( m_PermTreeWrapper )
+			delete m_PermTreeWrapper;
+
+		m_PermTreeWrapper = UIActionManager.CreateGridSpacer( m_PermTreeHost, 1, 1 );
+
+		BuildPermissionTree( m_PermTreeWrapper, m_TempRole.RootPermission, NULL, 0 );
+		RefreshPermTreeState();
+
+		m_RightScroller.UpdateScroller();
+	}
+
+	void OnChange_PermSearch( UIEvent eid, UIActionBase action )
+	{
+		UIActionSearchBox searchBar;
+		if ( !Class.CastTo( searchBar, action ) )
+			return;
+
+		m_PermSearchFilter = searchBar.GetText();
+		RebuildPermTreeWidgets();
+	}
+
+	//! True if this permission's own name matches the active search filter, or
+	//! anything nested under it does - a branch stays visible while filtering
+	//! as long as something inside it is still a match.
+	private bool PermSubtreeMatchesFilter( JMPermission perm )
+	{
+		if ( !perm )
+			return false;
+
+		string filterLow = m_PermSearchFilter;
+		filterLow.ToLower();
+
+		string nameLow = perm.Name;
+		nameLow.ToLower();
+
+		if ( nameLow.IndexOf( filterLow ) != -1 )
+			return true;
+
+		for ( int i = 0; i < perm.Children.Count(); i++ )
+		{
+			if ( PermSubtreeMatchesFilter( perm.Children[i] ) )
+				return true;
+		}
+
+		return false;
 	}
 
 	void OnClick_Refresh( UIEvent eid, UIActionBase action )
@@ -331,6 +513,8 @@ class JMRoleManagerForm : JMFormBase
 		if ( Class.CastTo( btn, action ) )
 			btn.TriggerSpin( 2 );
 
+		m_ForceEditorRefresh = true;
+
 		if ( m_Module )
 			m_Module.RequestRoleList();
 	}
@@ -340,7 +524,7 @@ class JMRoleManagerForm : JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "Create Role", "Enter new role name:", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnCreateRole_Confirm" );
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_ROLEMANAGER_MODULE_CREATE_ROLE_TITLE", "#STR_COT_ROLEMANAGER_MODULE_CREATE_ROLE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnCreateRole_Confirm" );
 	}
 
 	void OnCreateRole_Confirm( JMConfirmation confirmation )
@@ -370,7 +554,7 @@ class JMRoleManagerForm : JMFormBase
 
 	void OnClick_DeleteRole( UIEvent eid, UIActionBase action )
 	{
-		if ( eid != UIEvent.CHANGE )
+		if ( eid != UIEvent.CLICK && eid != UIEvent.CHANGE )
 			return;
 
 		JMStringData data;
@@ -379,7 +563,7 @@ class JMRoleManagerForm : JMFormBase
 
 		m_PendingDeleteRole = data.Value;
 
-		string delMsg = "Delete role '" + m_PendingDeleteRole + "'? Players with this role will lose its permissions.";
+		string delMsg = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_DELETE_ROLE_CONFIRM_BODY" ), m_PendingDeleteRole );
 
 		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_GENERIC_CONFIRM", delMsg, "#STR_COT_GENERIC_NO", "", "#STR_COT_GENERIC_YES", "OnDeleteRole_Confirm" );
 	}
@@ -392,11 +576,53 @@ class JMRoleManagerForm : JMFormBase
 		if ( m_SelectedRole == m_PendingDeleteRole )
 		{
 			m_SelectedRole = "";
-			RebuildEditorEmpty( "Select a role to edit its permissions." );
+			RebuildEditorEmpty( "#STR_COT_ROLEMANAGER_MODULE_SELECT_ROLE_PROMPT" );
 		}
 
 		m_Module.DeleteRole( m_PendingDeleteRole );
 		m_PendingDeleteRole = "";
+	}
+
+	protected void MarkRolePermChanged()
+	{
+		if ( m_SavePermBtn )
+			m_SavePermBtn.AnimatePulse( 5.0 );
+	}
+
+	void OnClick_RenameRole( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMStringData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
+
+		m_EditingRenameRole = data.Value;
+
+		string renameTitle = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_TITLE" ) + ": " + m_EditingRenameRole;
+		string renameBody  = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_RENAME_ROLE_BODY" ), m_EditingRenameRole );
+
+		CreateConfirmation_Two( JMConfirmationType.EDIT, renameTitle, renameBody, "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmRenameRole" );
+	}
+
+	void ConfirmRenameRole( JMConfirmation confirmation = NULL )
+	{
+		if ( !confirmation || m_EditingRenameRole == "" || !m_Module || !m_TempRole )
+			return;
+
+		string newName = confirmation.GetEditBoxValue();
+		newName.Trim();
+
+		if ( newName == "" || newName == m_EditingRenameRole )
+			return;
+
+		m_Module.CreateRole( newName );
+		m_Module.SetRolePermissions( newName, m_TempRole.Serialize() );
+		m_Module.DeleteRole( m_EditingRenameRole );
+
+		m_SelectedRole = newName;
+		m_EditingRenameRole = "";
 	}
 
 	void OnClick_SaveRolePermissions( UIEvent eid, UIActionBase action )
@@ -411,18 +637,64 @@ class JMRoleManagerForm : JMFormBase
 
 		m_Module.SetRolePermissions( m_SelectedRole, m_TempRole.Serialize() );
 
-		COTCreateLocalAdminNotification( new StringLocaliser( "Saved permissions for role: " + m_SelectedRole ) );
+		UIActionImageButton btn;
+		if ( Class.CastTo( btn, action ) )
+			btn.StopPulse();
+
+		action.AnimateSpin( 1.0 );
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_SAVED_PERMISSIONS_NOTIFICATION", m_SelectedRole ) );
 	}
 
 	// =========================================================================
 	//  PLAYERS MODE
 	// =========================================================================
 
-	private UIActionSearchBox m_PlayerSearchBar;
-	private Widget                      m_PlayerRows;   // only the player buttons - rebuilt on filter change
-	private Widget                      m_PlayerCountText; // refreshed without rebuild
+	//! Deep link from another form - the Player Manager's identity card sends
+	//! the admin here to change the role they are looking at.
+	//!
+	//! SetMode() is deliberately not used: it returns early when the form is
+	//! already in Players mode, which is the common case for a second jump, and
+	//! it would then leave the previous player selected.
+	void OpenPlayer( string guid )
+	{
+		if ( guid == "" )
+			return;
 
-	// Build the stable toolbar + search bar once; only rebuild the rows below.
+		if ( m_Tabs )
+			m_Tabs.SetSelection( TAB_PLAYERS, false );
+
+		m_PlayerMode         = true;
+		m_PlayerRows         = NULL;
+		m_SelectedRole       = "";
+		m_PlayerSearchFilter = "";
+
+		//! The filter is state the roster still reads, so clearing the string
+		//! without clearing the box would hide rows for no visible reason.
+		if ( m_PlayerSearchBar )
+			m_PlayerSearchBar.SetText( "" );
+
+		ApplyModeToolbars();
+		RebuildPlayerList();
+
+		m_SelectedGUID = guid;
+
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( guid );
+		if ( pi )
+			m_SelectedPlayerName = pi.GetName();
+		else
+			m_SelectedPlayerName = guid;
+
+		RebuildPlayerEditor();
+		UpdateUI();
+
+		//! The role checkboxes are built from m_RoleList, which arrives from the
+		//! server. On a first open it is still empty here - PopulateRoleList
+		//! rebuilds the editor when it lands.
+		if ( m_Module )
+			m_Module.RequestRoleList();
+	}
+
 	private void RebuildPlayerList()
 	{
 		if ( m_ListWrapper )
@@ -433,10 +705,6 @@ class JMRoleManagerForm : JMFormBase
 
 		array<JMPlayerInstance> players = GetPermissionsManager().GetPlayers();
 
-		if ( m_PlayerCountLabel )
-			m_PlayerCountLabel.SetText( "" + players.Count() + " online" );
-
-		// Player rows container - this is the only part we delete on filter changes
 		m_PlayerRows = UIActionManager.CreateGridSpacer( m_ListWrapper, 1, 1 );
 
 		FilterPlayerRows( players );
@@ -444,8 +712,6 @@ class JMRoleManagerForm : JMFormBase
 		m_LeftScroller.UpdateScroller();
 	}
 
-	// Rebuild only the player row buttons inside m_PlayerRows.
-	// The search bar widget is untouched so focus is preserved.
 	private void FilterPlayerRows( array<JMPlayerInstance> players = NULL )
 	{
 		if ( !m_PlayerRows )
@@ -454,7 +720,6 @@ class JMRoleManagerForm : JMFormBase
 		if ( players == NULL )
 			players = GetPermissionsManager().GetPlayers();
 
-		// Clear old rows
 		Widget child = m_PlayerRows.GetChildren();
 		while ( child )
 		{
@@ -465,20 +730,33 @@ class JMRoleManagerForm : JMFormBase
 
 		if ( players.Count() == 0 )
 		{
-			UIActionManager.CreateText( m_PlayerRows, "No players online." );
+			UIActionManager.CreateText( m_PlayerRows, "#STR_COT_ROLEMANAGER_MODULE_NO_PLAYERS_ONLINE" );
 			m_LeftScroller.UpdateScroller();
 			return;
 		}
-
-		string selfGUID = "";
-		JMPlayerInstance selfInst = GetPermissionsManager().GetClientPlayer();
-		if ( selfInst )
-			selfGUID = selfInst.GetGUID();
 
 		COT_String strSearch = m_PlayerSearchFilter;
 		bool requireAllKeywords;
 		TStringArray keywords = strSearch.KeywordSearch_Prepare( requireAllKeywords );
 		string closestMatch;
+
+		// The player currently open for editing is pinned to the top of its
+		// own list, the same way a checked row in the player manager floats
+		// above the rest - scrolling to find it again after every role tweak
+		// would defeat the point of keeping the editor open beside the list.
+		if ( m_SelectedGUID != "" )
+		{
+			for ( int i = 0; i < players.Count(); i++ )
+			{
+				if ( players[i].GetGUID() != m_SelectedGUID )
+					continue;
+
+				JMPlayerInstance selected = players[i];
+				players.RemoveOrdered( i );
+				players.InsertAt( selected, 0 );
+				break;
+			}
+		}
 
 		bool anyShown = false;
 		foreach ( JMPlayerInstance pi : players )
@@ -496,14 +774,16 @@ class JMRoleManagerForm : JMFormBase
 			UIActionButton btn = UIActionManager.CreateButton( m_PlayerRows, pi.GetName(), this, "OnClick_SelectPlayer" );
 			btn.SetData( new JMStringData( pi.GetGUID() ) );
 
-			if ( pi.GetGUID() == selfGUID )
-				btn.SetColor( 0xFFFF8800 );
+			// Blue/purple accent, matching every other "this is the selected
+			// one" mark in COT - orange here read as a warning, not a selection.
+			if ( pi.GetGUID() == m_SelectedGUID )
+				btn.SetColor( JMTheme.ACCENT );
 
 			UIActionManager.CreatePanel( m_PlayerRows, 0x22FFFFFF, 1 );
 		}
 
 		if ( !anyShown )
-			UIActionManager.CreateText( m_PlayerRows, "No players match the search." );
+			UIActionManager.CreateText( m_PlayerRows, "#STR_COT_ROLEMANAGER_MODULE_NO_PLAYERS_MATCH_SEARCH" );
 
 		if ( m_PlayerSearchBar )
 			m_PlayerSearchBar.SetTextPreview( closestMatch );
@@ -559,11 +839,12 @@ class JMRoleManagerForm : JMFormBase
 	{
 		m_PlayerRoleChecks.Clear();
 		m_PlayerSelectedRole = "";
+		m_PlayerEditorBuiltFor = "";
 		RebuildEditorClear();
 
 		if ( m_SelectedGUID == "" )
 		{
-			UIActionManager.CreateText( m_EditorWrapper, "Select a player to manage their role." );
+			UIActionManager.CreateText( m_EditorWrapper, "#STR_COT_ROLEMANAGER_MODULE_SELECT_PLAYER_PROMPT" );
 			m_RightScroller.UpdateScroller();
 			return;
 		}
@@ -571,22 +852,41 @@ class JMRoleManagerForm : JMFormBase
 		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( m_SelectedGUID );
 		if ( !pi )
 		{
-			UIActionManager.CreateText( m_EditorWrapper, "Player not found: " + m_SelectedPlayerName );
+			UIActionManager.CreateText( m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_NOT_FOUND" ) + ": " + m_SelectedPlayerName );
 			m_RightScroller.UpdateScroller();
 			return;
 		}
 
-		UIActionManager.CreateText( m_EditorWrapper, "Player: " + m_SelectedPlayerName );
-		// GUID (internal identity ID)
-		UIActionManager.CreateText( m_EditorWrapper, "GUID: " + pi.GetGUID() );
-		// Steam 64 ID (plainId)
-		UIActionManager.CreateText( m_EditorWrapper, "Steam: " + pi.GetSteam64ID() );
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
+		// ---- Card 1: Player Credentials ----
+		UIActionCard idCard = UIActionManager.CreateCard( m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PLAYER_IDENTITY_TITLE" ) + ": " + m_SelectedPlayerName );
+		Widget idBody = idCard.GetContent();
 
-		UIActionManager.CreateText( m_EditorWrapper, "Role:" );
-		UIActionManager.CreatePanel( m_EditorWrapper, 0x44FFFFFF, 1 );
+		// Label on the left, value + copy icon on the right - the same identity
+		// row the player manager uses, rather than one button carrying both the
+		// label and the value baked into its own text.
+		Widget rowGuid = UIActionManager.CreatePanel( idBody, 0x00000000, IDENTITY_ROW_HEIGHT );
+		UIActionManager.CreateText( rowGuid, "#STR_COT_ROLEMANAGER_MODULE_GUID_LABEL", "" );
+		UIActionFeedbackButton btnGuid = UIActionManager.CreateFeedbackButton( rowGuid, pi.GetGUID(), "#STR_COT_COPIED", JMConstants.ICON_CHECK_MARK, this, "OnClick_CopyGUID" );
+		btnGuid.SetWidth( IDENTITY_VALUE_WIDTH );
+		btnGuid.SetPosition( IDENTITY_LABEL_WIDTH );
+		btnGuid.SetIcon( JMConstants.ICON_STACK );
+		btnGuid.SetTooltip( "#STR_COT_ROLEMANAGER_MODULE_COPY_GUID_TOOLTIP" );
 
-		// Determine current role (first non-"everyone" role, if any)
+		Widget rowSteam = UIActionManager.CreatePanel( idBody, 0x00000000, IDENTITY_ROW_HEIGHT );
+		UIActionManager.CreateText( rowSteam, "#STR_COT_ROLEMANAGER_MODULE_STEAM64_LABEL", "" );
+		UIActionFeedbackButton btnSteam = UIActionManager.CreateFeedbackButton( rowSteam, pi.GetSteam64ID(), "#STR_COT_COPIED", JMConstants.ICON_CHECK_MARK, this, "OnClick_CopySteam" );
+		btnSteam.SetWidth( IDENTITY_VALUE_WIDTH );
+		btnSteam.SetPosition( IDENTITY_LABEL_WIDTH );
+		btnSteam.SetIcon( JMConstants.ICON_STACK );
+		btnSteam.SetTooltip( "#STR_COT_ROLEMANAGER_MODULE_COPY_STEAM64_TOOLTIP" );
+
+		// ---- Card 2: Role Assignment ----
+		UIActionCard roleCard = UIActionManager.CreateCard( m_EditorWrapper, "#STR_COT_ROLEMANAGER_MODULE_ASSIGNED_ROLE_TITLE" );
+		m_SaveRolesBtn = roleCard.AddSaveButton( this, "OnClick_SavePlayerRole", "#STR_COT_ROLEMANAGER_MODULE_SAVE_ROLE_ASSIGNMENT_TOOLTIP" );
+		RegisterPermission( m_SaveRolesBtn, "Admin.Roles.Permissions" );
+
+		Widget roleBody = roleCard.GetContent();
+
 		array<string> currentRoles = pi.GetRoles();
 		foreach ( string rn : currentRoles )
 		{
@@ -597,7 +897,6 @@ class JMRoleManagerForm : JMFormBase
 			}
 		}
 
-		// Build radio-button style role list
 		array<JMRole> allRoles = new array<JMRole>();
 		GetPermissionsManager().GetRolesAsList( allRoles );
 
@@ -606,42 +905,131 @@ class JMRoleManagerForm : JMFormBase
 			if ( role.Name == "everyone" )
 				continue;
 
+			if ( !m_PlayerNameRestrictions.Contains( role.Name ) )
+			{
+				string existingRestriction = pi.GetRoleNameRestriction( role.Name );
+				if ( existingRestriction != "" )
+					m_PlayerNameRestrictions.Set( role.Name, existingRestriction );
+			}
+
 			bool isSelected = ( role.Name == m_PlayerSelectedRole );
-			UIActionCheckbox cb = UIActionManager.CreateCheckbox( m_EditorWrapper, role.Name, this, "OnClick_SelectRole_Radio", isSelected );
+
+			Widget roleRow = UIActionManager.CreateWrapSpacer( roleBody, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+			// 1. Edit-name button FIRST (left).
+			string currentRest = "";
+			if ( m_PlayerNameRestrictions.Contains( role.Name ) )
+				currentRest = m_PlayerNameRestrictions.Get( role.Name );
+
+			string noteTip = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_SET_NAME_RESTRICTION_TOOLTIP" ), role.Name );
+			if ( currentRest != "" )
+				noteTip = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_LABEL" ) + ": " + currentRest;
+
+			UIActionImageButton noteBtn = UIActionManager.CreateIconButton( roleRow, JMConstants.ICON_FOLDED_PAPER, this, "OnClick_EditRoleNameRestriction" );
+			noteBtn.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+			noteBtn.SetData( new JMStringData( role.Name ) );
+			noteBtn.SetTooltip( noteTip );
+
+			if ( currentRest != "" )
+				noteBtn.SetColor( JMTheme.WARNING );
+
+			// 2. Toggle switch SECOND - assigning a role reads as an on/off
+			// switch, not a checkbox, even though only one can be on at a time.
+			// No label baked in; the name is its own widget THIRD so the row
+			// reads left to right as edit / switch / name.
+			//
+			// A WrapSpacer only keeps two items on one line if both fit the
+			// remaining width - the toggle and the text default to filling the
+			// WHOLE row (width 1), so each one wrapped to a line of its own.
+			// Explicit narrow widths are what keep edit / switch / name on one
+			// line instead of three.
+			UIActionToggleSwitch cb = UIActionManager.CreateToggleSwitch( roleRow, "", this, "OnClick_SelectRole_Radio", isSelected );
+			cb.SetWidth( 0.18 );
 			cb.SetData( new JMStringData( role.Name ) );
 			m_PlayerRoleChecks.Insert( role.Name, cb );
+
+			// 3. Role name THIRD (right).
+			UIActionText nameText = UIActionManager.CreateText( roleRow, role.Name );
+			nameText.SetWidth( 0.6 );
 		}
 
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
-
-		// Name restriction: optional input - role only activates when the player's
-		// in-game name matches this string exactly (case-sensitive).
-		UIActionManager.CreateText( m_EditorWrapper, "Name Restriction (optional):" );
-		m_NameRestrictionInput = UIActionManager.CreateEditableText( m_EditorWrapper, "Exact name:", this, "" );
-		// Pre-fill with any existing restriction for the currently selected role
-		if ( m_PlayerSelectedRole != "" )
-		{
-			string existingRestriction = pi.GetRoleNameRestriction( m_PlayerSelectedRole );
-			if ( existingRestriction != "" )
-				m_NameRestrictionInput.SetText( existingRestriction );
-		}
-
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
-		m_SaveRolesBtn = UIActionManager.CreateButton( m_EditorWrapper, "Save Role", this, "OnClick_SavePlayerRole" );
-		RegisterPermission( m_SaveRolesBtn, "Admin.Roles.Permissions" );
-		m_SaveRolesBtn.SetColor( JMTheme.SUCCESS_FILL );
-		m_SaveRolesBtn.SetTooltip( "Save the role assignment for the selected player" );
+		m_PlayerEditorBuiltFor = m_SelectedGUID;
 
 		m_RightScroller.UpdateScroller();
 	}
 
-	// Radio-button behaviour: uncheck all others when one is checked
+	protected void MarkPlayerRoleChanged()
+	{
+		if ( m_SaveRolesBtn )
+			m_SaveRolesBtn.AnimatePulse( 5.0 );
+	}
+
+	void OnClick_CopyGUID( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || m_SelectedGUID == "" )
+			return;
+
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( m_SelectedGUID );
+		if ( pi )
+			g_Game.CopyToClipboard( pi.GetGUID() );
+		else
+			g_Game.CopyToClipboard( m_SelectedGUID );
+	}
+
+	void OnClick_CopySteam( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || m_SelectedGUID == "" )
+			return;
+
+		JMPlayerInstance pi = GetPermissionsManager().GetPlayer( m_SelectedGUID );
+		if ( pi )
+			g_Game.CopyToClipboard( pi.GetSteam64ID() );
+	}
+
+	void OnClick_EditRoleNameRestriction( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMStringData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return;
+
+		m_EditingRestrictionRole = data.Value;
+
+		string currentRest = "";
+		if ( m_PlayerNameRestrictions.Contains( m_EditingRestrictionRole ) )
+			currentRest = m_PlayerNameRestrictions.Get( m_EditingRestrictionRole );
+
+		string restrictionTitle = Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_TITLE" ) + ": " + m_EditingRestrictionRole;
+		string restrictionBody  = string.Format( Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_NAME_RESTRICTION_BODY" ), m_EditingRestrictionRole );
+
+		CreateConfirmation_Two( JMConfirmationType.EDIT, restrictionTitle, restrictionBody, "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ConfirmRoleNameRestriction" );
+	}
+
+	void ConfirmRoleNameRestriction( JMConfirmation confirmation = NULL )
+	{
+		if ( !confirmation || m_EditingRestrictionRole == "" )
+			return;
+
+		string newRest = confirmation.GetEditBoxValue();
+		newRest.Trim();
+
+		if ( newRest != "" )
+			m_PlayerNameRestrictions.Set( m_EditingRestrictionRole, newRest );
+		else if ( m_PlayerNameRestrictions.Contains( m_EditingRestrictionRole ) )
+			m_PlayerNameRestrictions.Remove( m_EditingRestrictionRole );
+
+		MarkPlayerRoleChanged();
+		RebuildPlayerEditor();
+	}
+
 	void OnClick_SelectRole_Radio( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		UIActionCheckbox cb;
+		UIActionToggleSwitch cb;
 		if ( !Class.CastTo( cb, action ) )
 			return;
 
@@ -653,31 +1041,19 @@ class JMRoleManagerForm : JMFormBase
 		{
 			m_PlayerSelectedRole = data.Value;
 
-			// Uncheck all other roles
 			for ( int i = 0; i < m_PlayerRoleChecks.Count(); i++ )
 			{
 				string roleName = m_PlayerRoleChecks.GetKey( i );
 				if ( roleName != data.Value )
 					m_PlayerRoleChecks.GetElement( i ).SetChecked( false );
 			}
-
-			// Update name restriction input to show the existing restriction for the newly selected role
-			if ( m_NameRestrictionInput && m_SelectedGUID != "" )
-			{
-				JMPlayerInstance pi = GetPermissionsManager().GetPlayer( m_SelectedGUID );
-				if ( pi )
-					m_NameRestrictionInput.SetText( pi.GetRoleNameRestriction( m_PlayerSelectedRole ) );
-				else
-					m_NameRestrictionInput.SetText( "" );
-			}
 		}
 		else
 		{
-			// Unchecking = no role selected
 			m_PlayerSelectedRole = "";
-			if ( m_NameRestrictionInput )
-				m_NameRestrictionInput.SetText( "" );
 		}
+
+		MarkPlayerRoleChanged();
 	}
 
 	void OnClick_SavePlayerRole( UIEvent eid, UIActionBase action )
@@ -697,19 +1073,25 @@ class JMRoleManagerForm : JMFormBase
 		if ( m_PlayerSelectedRole != "" )
 			roles.Insert( m_PlayerSelectedRole );
 
-		// Build name restriction map from the optional input
 		map<string, string> nameRestrictions = new map<string, string>();
-		if ( m_PlayerSelectedRole != "" && m_NameRestrictionInput )
+		int nameRestCount = m_PlayerNameRestrictions.Count();
+		for ( int i = 0; i < nameRestCount; i++ )
 		{
-			string restrictionName = m_NameRestrictionInput.GetText();
-			restrictionName.Trim();
-			if ( restrictionName != "" )
-				nameRestrictions.Insert( m_PlayerSelectedRole, restrictionName );
+			string rName = m_PlayerNameRestrictions.GetKey( i );
+			string rVal  = m_PlayerNameRestrictions.GetElement( i );
+			if ( rVal != "" )
+				nameRestrictions.Insert( rName, rVal );
 		}
 
 		playerModule.SetRoles( roles, { m_SelectedGUID }, nameRestrictions );
 
-		COTCreateLocalAdminNotification( new StringLocaliser( "Saved role for player: " + m_SelectedPlayerName ) );
+		UIActionImageButton btn;
+		if ( Class.CastTo( btn, action ) )
+			btn.StopPulse();
+
+		action.AnimateSpin( 1.0 );
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_SAVED_ROLE_NOTIFICATION", m_SelectedPlayerName ) );
 	}
 
 	// =========================================================================
@@ -718,14 +1100,21 @@ class JMRoleManagerForm : JMFormBase
 
 	private void RebuildEditorClear()
 	{
-		// The controls below are about to be destroyed - drop their bindings so
-		// the permission map does not fill with dead keys.
 		UnregisterPermission( m_SavePermBtn );
 		UnregisterPermission( m_SaveRolesBtn );
 
-		m_SavePermBtn        = NULL;
-		m_SaveRolesBtn       = NULL;
-		m_NameRestrictionInput = NULL;
+		m_SavePermBtn          = NULL;
+		m_SaveRolesBtn         = NULL;
+
+		// The nodes point at widgets that are about to go, so they go first.
+		m_PermRoots.Clear();
+
+		// m_PermTreeHost/m_PermTreeWrapper/m_PermSearchBar live inside
+		// m_EditorWrapper - about to be deleted below, so drop the references
+		// rather than leave them dangling.
+		m_PermTreeHost    = NULL;
+		m_PermTreeWrapper = NULL;
+		m_PermSearchBar   = NULL;
 
 		if ( m_EditorWrapper )
 			delete m_EditorWrapper;
@@ -736,39 +1125,48 @@ class JMRoleManagerForm : JMFormBase
 	private void RebuildEditorEmpty( string msg )
 	{
 		RebuildEditorClear();
-		UIActionManager.CreateText( m_EditorWrapper, msg );
+
+		//! The editor now shows neither role nor player - clear both "already
+		//! built for X" markers so a later PopulateRoleList() (which only
+		//! compares against m_SelectedRole / m_SelectedGUID) does not mistake
+		//! this placeholder for a live editor and skip rebuilding it once a
+		//! selection is made again.
+		m_TempRoleBuiltFor     = "";
+		m_PlayerEditorBuiltFor = "";
+
+		UIActionCard emptyCard = UIActionManager.CreateCard( m_EditorWrapper, "#STR_COT_ROLEMANAGER_MODULE_SELECTION_REQUIRED_TITLE" );
+		UIActionManager.CreateText( emptyCard.GetContent(), msg );
 		m_RightScroller.UpdateScroller();
 
 		UpdateUI();
 	}
 
 	// =========================================================================
-	//  Collapsable permission tree (checkbox only)
+	//  Permission tree
+	//
+	//  Every branch owns a fold panel and its subtree lives INSIDE that fold,
+	//  not beside it. That is what makes opening one a slide rather than a
+	//  rebuild: the fold clips a single widget whose height is the whole
+	//  subtree however deep it nests, and it measures that height itself, so
+	//  nothing here has to know how tall a branch came out.
+	//
+	//  The old version rebuilt the entire tree on every click, which meant the
+	//  page jumped under the cursor and there was nothing left to animate.
 	// =========================================================================
 
-	// Build tree rows for permission and its children.
-	//
-	// Indentation is done purely via widget widths (font-independent).
-	// The connector label is only the local symbol - no spaces for indent.
-	//
-	// Each row is a 3-column grid:
-	//   col A: indent spacer    - width = depth * INDENT_UNIT, empty text
-	//   col B: connector/toggle - width = CONNECTOR_W, text = "|---" / " \--" / "[+]" / "[-]"
-	//   col C: checkbox         - width = remaining
-	//
-	// A separate pass draws the vertical continuation pipes for open ancestor
-	// levels as thin panel widgets behind each row (not possible without
-	// absolute positioning), so instead we encode the pipe in col A text
-	// only for the immediate parent level - one "|" at the correct indent.
-	private void BuildPermissionTree( Widget parent, JMPermission perm, int depth )
+	private void BuildPermissionTree( Widget parent, JMPermission perm, JMPermTreeNode parentNode, int depth )
 	{
 		if ( !perm )
 			return;
 
-		// Each depth level adds this much width to the indent spacer
-		static const float INDENT_UNIT  = 0.06;
-		// Width of the connector symbol cell
-		static const float CONNECTOR_W  = 0.10;
+		//! One indent step, in pixels. Applied to the label text rather than to
+		//! the row, so every row keeps the same hit area and the switch column
+		//! stays put no matter how deep the node is.
+		static const float INDENT_UNIT = 18.0;
+		//! Width of the switch column on the right of every row.
+		static const float SWITCH_W    = 0.12;
+
+		float labelW = 1.0 - SWITCH_W;
 
 		int count = perm.Children.Count();
 		for ( int i = 0; i < count; i++ )
@@ -777,103 +1175,94 @@ class JMRoleManagerForm : JMFormBase
 			if ( !child )
 				continue;
 
+			if ( m_PermSearchFilter != "" && !PermSubtreeMatchesFilter( child ) )
+				continue;
+
 			bool hasChildren = child.Children.Count() > 0;
-			bool isLast      = ( i == count - 1 );
 			string fullName  = child.GetFullName();
 
-			// All nodes start collapsed by default.
-			bool isCollapsed = true;
+			bool isCollapsed = ( depth >= PERM_TREE_OPEN_DEPTH );
 			if ( m_Collapsed.Contains( fullName ) )
 				isCollapsed = m_Collapsed.Get( fullName );
 
-			// ---- Connector symbol for this node ----------------------------
-			// Depth-0 nodes are roots - no connector, just the toggle indicator.
-			// Deeper nodes: non-last sibling gets "|---", last sibling gets " \--"
-			string connector = "";
-			if ( depth > 0 )
-			{
-				if ( isLast )
-					connector = " \\--";
-				else
-					connector = "|---";
-			}
+			//! While a search is active, force every matching branch open so the
+			//! result is actually visible instead of hiding behind a fold.
+			if ( m_PermSearchFilter != "" )
+				isCollapsed = false;
 
-			// ---- Toggle label for branch nodes -----------------------------
-			string toggleLabel = "";
-			if ( hasChildren )
-			{
-				if ( isCollapsed )
-					toggleLabel = "[+]";
-				else
-					toggleLabel = "[-]";
-			}
+			JMPermTreeNode node = new JMPermTreeNode();
+			node.Perm     = child;
+			node.FullName = fullName;
 
-			// ---- Column widths ---------------------------------------------
-			float indentW = depth * INDENT_UNIT;
-			float cbPos   = indentW + CONNECTOR_W;
-			float cbW     = 1.0 - cbPos;
-
-			// ---- Row: 3 columns --------------------------------------------
 			Widget row = UIActionManager.CreateGridSpacer( parent, 1, 2 );
 
-			// Col A - connector + toggle.
-			// Depth 0 with children: just the toggle label, no connector prefix.
-			// Depth 0 leaf: empty cell.
-			// Deeper branch: connector + toggle as a button.
-			// Deeper leaf: connector as plain text.
-			string connLabel = connector;
-			if ( depth == 0 )
-				connLabel = toggleLabel;
-			else if ( toggleLabel != "" )
-				connLabel = connector + " " + toggleLabel;
-
+			// A branch is the whole row: clicking anywhere on the name folds or
+			// unfolds it. A leaf has nothing to fold, so it is plain text and
+			// never lights up under the cursor.
 			if ( hasChildren )
 			{
-				UIActionButton toggleBtn = UIActionManager.CreateButton( row, connLabel, this, "OnClick_ToggleCollapse" );
-				toggleBtn.SetWidth( CONNECTOR_W );
-				toggleBtn.SetPosition( indentW );
-				toggleBtn.SetData( new JMPermCollapseData( fullName, depth ) );
+				UIActionButton nodeBtn = UIActionManager.CreateButton( row, child.Name, this, "OnClick_ToggleCollapse" );
+				nodeBtn.SetFlat( true );
+
+				//! ONE glyph for both states, turned rather than swapped. The
+				//! turn is the animation - a swap has no in-between to show.
+				nodeBtn.SetIcon( JMConstants.ICON_CHEVRON_DOWN );
+				nodeBtn.SetIconRotation( ChevronAngle( isCollapsed ), false );
+
+				nodeBtn.SetContentIndent( depth * INDENT_UNIT );
+				nodeBtn.SetWidth( labelW );
+				nodeBtn.SetPosition( 0 );
+				nodeBtn.SetData( node );
+
+				node.NodeButton = nodeBtn;
 			}
 			else
 			{
-				UIActionText connText = UIActionManager.CreateText( row, connLabel );
-				connText.SetWidth( CONNECTOR_W );
-				connText.SetPosition( indentW );
+				UIActionText leaf = UIActionManager.CreateText( row, child.Name );
+				leaf.SetLabelColor( JMTheme.TEXT_SECONDARY );
+				// Matches the flat button's icon slot so a leaf's name lines up
+				// with the name of a foldable sibling.
+				leaf.SetLabelOffset( ( depth * INDENT_UNIT ) + UIActionButton.ICON_SLOT_W );
+				leaf.SetWidth( labelW );
+				leaf.SetPosition( 0 );
+
+				node.LeafText = leaf;
 			}
 
-			// Col B - permission checkbox
-			bool isAllow = ( child.Type == JMPermissionType.ALLOW );
-			UIActionCheckbox cb = UIActionManager.CreateCheckbox( row, child.Name, this, "OnClick_PermCheckbox", isAllow );
-			cb.SetWidth( cbW );
-			cb.SetPosition( cbPos );
-			cb.SetData( new JMPermNodeData( child ) );
+			bool isAllow = EffectiveAllow( child );
 
-			// ---- Recurse into children if expanded -------------------------
-			if ( hasChildren && !isCollapsed )
-				BuildPermissionTree( parent, child, depth + 1 );
+			UIActionToggleSwitch sw = UIActionManager.CreateToggleSwitch( row, "", this, "OnClick_PermToggle", isAllow );
+			sw.SetWidth( SWITCH_W );
+			sw.SetPosition( labelW );
+			sw.SetData( node );
+
+			node.Toggle = sw;
+
+			if ( parentNode )
+				parentNode.Children.Insert( node );
+			else
+				m_PermRoots.Insert( node );
+
+			if ( hasChildren )
+			{
+				UIActionFoldPanel fold = UIActionManager.CreateFoldPanel( parent, this, "OnChange_PermFold", !isCollapsed );
+
+				node.Fold = fold;
+
+				BuildPermissionTree( fold.GetContent(), child, node, depth + 1 );
+			}
 		}
 	}
 
-	void OnClick_PermCheckbox( UIEvent eid, UIActionBase action )
+	//! Where the chevron rests. 0 points it down over an open subtree and -90
+	//! points it right at a shut one, which is the convention
+	//! UIActionCollapsibleSection already uses.
+	private float ChevronAngle( bool collapsed )
 	{
-		if ( eid != UIEvent.CLICK )
-			return;
+		if ( collapsed )
+			return -90;
 
-		UIActionCheckbox cb;
-		if ( !Class.CastTo( cb, action ) )
-			return;
-
-		JMPermNodeData data;
-		if ( !Class.CastTo( data, action.GetData() ) )
-			return;
-
-		if ( !data.Perm )
-			return;
-
-		if ( cb.IsChecked() )
-			data.Perm.Type = JMPermissionType.ALLOW;
-		else
-			data.Perm.Type = JMPermissionType.DISALLOW;
+		return 0;
 	}
 
 	void OnClick_ToggleCollapse( UIEvent eid, UIActionBase action )
@@ -881,75 +1270,161 @@ class JMRoleManagerForm : JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		JMPermCollapseData data;
-		if ( !Class.CastTo( data, action.GetData() ) )
+		JMPermTreeNode node;
+		if ( !Class.CastTo( node, action.GetData() ) )
 			return;
 
-		// All nodes start collapsed by default.
-		bool cur = true;
-		if ( m_Collapsed.Contains( data.FullName ) )
-			cur = m_Collapsed.Get( data.FullName );
+		if ( !node.Fold )
+			return;
 
-		// Remove first to guarantee overwrite - Insert may not update existing keys.
-		m_Collapsed.Remove( data.FullName );
-		m_Collapsed.Insert( data.FullName, !cur );
+		bool nowCollapsed = node.Fold.IsExpanded();
 
-		// Re-draw the permission tree without resetting m_TempRole,
-		// so unsaved checkbox changes are preserved.
-		RebuildPermTreeOnly();
+		node.Fold.SetExpanded( !nowCollapsed );
+
+		if ( node.NodeButton )
+			node.NodeButton.SetIconRotation( ChevronAngle( nowCollapsed ) );
+
+		m_Collapsed.Remove( node.FullName );
+		m_Collapsed.Insert( node.FullName, nowCollapsed );
 	}
 
-	// Rebuild just the tree widget area inside the existing editor wrapper,
-	// keeping m_TempRole intact so in-progress edits are not lost.
-	private void RebuildPermTreeOnly()
+	//! The fold reports every frame its height moves, and the page above it
+	//! grows and shrinks with it, so the scroller has to be re-measured for the
+	//! whole slide rather than once at the end.
+	void OnChange_PermFold( UIEvent eid, UIActionBase action )
 	{
-		if ( !m_TempRole || !m_EditorWrapper )
+		if ( eid != UIEvent.CHANGE )
 			return;
 
-		// Destroy existing editor content and recreate it in-place.
-		// We must keep m_EditorWrapper itself (it's a child of m_RightScrollContent).
-		Widget child = m_EditorWrapper.GetChildren();
-		while ( child )
+		if ( m_RightScroller )
+			m_RightScroller.UpdateScroller();
+	}
+
+	void OnClick_PermToggle( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UIActionToggleSwitch sw;
+		if ( !Class.CastTo( sw, action ) )
+			return;
+
+		JMPermTreeNode node;
+		if ( !Class.CastTo( node, action.GetData() ) )
+			return;
+
+		if ( !node.Perm )
+			return;
+
+		bool on = sw.IsChecked();
+
+		if ( on )
+			node.Perm.Type = JMPermissionType.ALLOW;
+		else
+			node.Perm.Type = JMPermissionType.DISALLOW;
+
+		//! Turning a branch off turns its subtree off for real, not just
+		//! visually. A child left ALLOW under a DISALLOW parent is a
+		//! contradiction, and the save would carry it.
+		//! Turning a branch on cascades the same way: enabling a permission
+		//! enables everything nested under it too.
+		if ( on )
+			AllowSubtree( node );
+		else
+			DenySubtree( node );
+
+		ApplySubtreeEnabled( node, on );
+
+		MarkRolePermChanged();
+	}
+
+	//! Write DISALLOW through everything below a node.
+	private void DenySubtree( JMPermTreeNode node )
+	{
+		for ( int i = 0; i < node.Children.Count(); i++ )
 		{
-			Widget next = child.GetSibling();
-			child.Unlink();
-			child = next;
+			JMPermTreeNode child = node.Children[i];
+
+			if ( child.Perm )
+				child.Perm.Type = JMPermissionType.DISALLOW;
+
+			DenySubtree( child );
 		}
+	}
 
-		bool isDeletable = ( m_SelectedRole != "admin" && m_SelectedRole != "everyone" );
-
-		int headerCols2 = 1;
-		if ( isDeletable )
-			headerCols2 = 2;
-
-		Widget headerRow = UIActionManager.CreateGridSpacer( m_EditorWrapper, 1, headerCols2 );
-		UIActionManager.CreateText( headerRow, "Role: " + m_SelectedRole );
-
-		if ( isDeletable && GetPermissionsManager().HasPermission( "Admin.Roles.Delete" ) )
+	//! Write ALLOW through everything below a node.
+	private void AllowSubtree( JMPermTreeNode node )
+	{
+		for ( int i = 0; i < node.Children.Count(); i++ )
 		{
-			UIActionConfirmInline delBtn = UIActionManager.CreateConfirmInline( headerRow, "Delete", this, "OnClick_DeleteRole" );
-			UIActionIconGrid.ApplyDeletePreset( delBtn );
-			delBtn.SetData( new JMStringData( m_SelectedRole ) );
-			delBtn.SetTooltip( "Permanently delete this role. Players with it will lose these permissions." );
+			JMPermTreeNode child = node.Children[i];
+
+			if ( child.Perm )
+				child.Perm.Type = JMPermissionType.ALLOW;
+
+			AllowSubtree( child );
 		}
+	}
 
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
+	//! Grey out and lock everything under a branch that is off, and hand it all
+	//! back when the branch comes on again.
+	//!
+	//! The FOLD stays clickable either way. A locked subtree is still worth
+	//! reading - being unable to grant a permission is not a reason to be
+	//! unable to see that it exists.
+	private void ApplySubtreeEnabled( JMPermTreeNode node, bool parentOn )
+	{
+		for ( int i = 0; i < node.Children.Count(); i++ )
+		{
+			JMPermTreeNode child = node.Children[i];
 
-		BuildPermissionTree( m_EditorWrapper, m_TempRole.RootPermission, 0 );
+			bool childOn = ( child.Perm && EffectiveAllow( child.Perm ) );
+			bool showOn  = ( parentOn && childOn );
 
-		UIActionManager.CreatePanel( m_EditorWrapper, 0xFF444444, 2 );
-		m_SavePermBtn = UIActionManager.CreateButton( m_EditorWrapper, "Save Permissions", this, "OnClick_SaveRolePermissions" );
-		RegisterPermission( m_SavePermBtn, "Admin.Roles.Permissions" );
-		m_SavePermBtn.SetColor( JMTheme.SUCCESS_FILL );
-		m_SavePermBtn.SetTooltip( "Push the current permission selection to the server" );
+			if ( child.Toggle )
+			{
+				child.Toggle.SetChecked( showOn );
+				child.Toggle.SetEnabled( parentOn );
+			}
 
-		m_RightScroller.UpdateScroller();
+			if ( child.NodeButton )
+				child.NodeButton.SetTextColor( RowTextColor( parentOn, true ) );
+
+			if ( child.LeafText )
+				child.LeafText.SetLabelColor( RowTextColor( parentOn, false ) );
+
+			ApplySubtreeEnabled( child, showOn );
+		}
+	}
+
+	private int RowTextColor( bool enabled, bool isBranch )
+	{
+		if ( !enabled )
+			return JMTheme.TEXT_DISABLED;
+
+		if ( isBranch )
+			return JMTheme.TEXT_PRIMARY;
+
+		return JMTheme.TEXT_SECONDARY;
+	}
+
+	//! Run once after a build so a role that arrives with a branch already off
+	//! shows that branch's subtree greyed straight away, rather than only after
+	//! the admin touches something.
+	private void RefreshPermTreeState()
+	{
+		for ( int i = 0; i < m_PermRoots.Count(); i++ )
+		{
+			JMPermTreeNode root = m_PermRoots[i];
+
+			bool on = ( root.Perm && EffectiveAllow( root.Perm ) );
+
+			ApplySubtreeEnabled( root, on );
+		}
 	}
 
 	// =========================================================================
 	//  Inherit optimisation
-	//  Walk the permission tree; for each node whose explicit type would produce
-	//  the same resolved result as inheriting from its parent, set it to INHERIT.
 	// =========================================================================
 
 	private void OptimizeInherit( JMPermission perm )
@@ -963,11 +1438,8 @@ class JMRoleManagerForm : JMFormBase
 			if ( !child )
 				continue;
 
-			// Resolve what the parent chain gives this child if it were INHERIT
 			bool parentAllows = ResolveParentAllows( child );
 
-			// If child's explicit ALLOW/DISALLOW matches what inheritance would give,
-			// collapse it back to INHERIT.
 			if ( child.Type == JMPermissionType.ALLOW && parentAllows )
 				child.Type = JMPermissionType.INHERIT;
 			else if ( child.Type == JMPermissionType.DISALLOW && !parentAllows )
@@ -977,8 +1449,27 @@ class JMRoleManagerForm : JMFormBase
 		}
 	}
 
-	// Returns what the inherited resolution would be for a node if it were INHERIT.
-	// Walks up the parent chain to find the first non-INHERIT ancestor type.
+	//! What a node actually resolves to, matching JMPermission.Check(): an
+	//! explicit ALLOW/DISALLOW is authoritative, and INHERIT looks up the
+	//! chain. OptimizeInherit collapses redundant ALLOW/DISALLOW down to
+	//! INHERIT on save, so a plain `Type == ALLOW` check on a freshly loaded
+	//! role under-reports which permissions are actually on - use this instead
+	//! anywhere the UI needs to show whether a permission is effectively
+	//! granted.
+	private bool EffectiveAllow( JMPermission perm )
+	{
+		if ( !perm )
+			return false;
+
+		if ( perm.Type == JMPermissionType.ALLOW )
+			return true;
+
+		if ( perm.Type == JMPermissionType.DISALLOW )
+			return false;
+
+		return ResolveParentAllows( perm );
+	}
+
 	private bool ResolveParentAllows( JMPermission node )
 	{
 		JMPermission p = node.Parent;
@@ -988,16 +1479,10 @@ class JMRoleManagerForm : JMFormBase
 				return true;
 			if ( p.Type == JMPermissionType.DISALLOW )
 				return false;
-			// INHERIT - keep walking up
 			p = p.Parent;
 		}
-		// Root is always DISALLOW by default
 		return false;
 	}
-
-	// -------------------------------------------------------------------------
-	//  Misc helpers
-	// -------------------------------------------------------------------------
 
 	private JMRoleData GetRoleData( string name )
 	{
@@ -1010,9 +1495,6 @@ class JMRoleManagerForm : JMFormBase
 	}
 }
 
-// -------------------------------------------------------------------------
-//  Simple data carrier for a single string attached to a button
-// -------------------------------------------------------------------------
 class JMStringData : UIActionData
 {
 	string Value;
@@ -1023,30 +1505,29 @@ class JMStringData : UIActionData
 	}
 }
 
-// -------------------------------------------------------------------------
-//  Data carrier for permission node reference (checkbox)
-// -------------------------------------------------------------------------
-class JMPermNodeData : UIActionData
+//! One row of the permission tree: the permission it stands for, the widgets
+//! drawn for it, and the rows nested under it.
+//!
+//! It is a UIActionData so the row's switch and its fold button can both carry
+//! it, which is what lets either of them reach the whole subtree. Children are
+//! owned here; the widget pointers are not - the widgets own their own scripts.
+class JMPermTreeNode : UIActionData
 {
-	JMPermission Perm;
+	JMPermission          Perm;
+	string                FullName;
 
-	void JMPermNodeData( JMPermission perm )
+	UIActionToggleSwitch  Toggle;
+	//! Branch only - the flat row that folds the subtree.
+	UIActionButton        NodeButton;
+	//! Leaf only - a leaf has nothing to fold, so it is text, not a button.
+	UIActionText          LeafText;
+	//! Branch only - holds this node's subtree and animates it open and shut.
+	UIActionFoldPanel     Fold;
+
+	ref array< ref JMPermTreeNode > Children;
+
+	void JMPermTreeNode()
 	{
-		Perm = perm;
-	}
-}
-
-// -------------------------------------------------------------------------
-//  Data carrier for collapse toggle (stores full permission path)
-// -------------------------------------------------------------------------
-class JMPermCollapseData : UIActionData
-{
-	string FullName;
-	int    Depth;
-
-	void JMPermCollapseData( string fullName, int depth )
-	{
-		FullName = fullName;
-		Depth    = depth;
+		Children = new array< ref JMPermTreeNode >();
 	}
 }

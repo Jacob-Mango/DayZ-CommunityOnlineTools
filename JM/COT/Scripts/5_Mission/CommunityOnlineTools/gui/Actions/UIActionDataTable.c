@@ -99,9 +99,7 @@ class UIActionDataTable: UIActionBase
 			cols = values.Count();
 		int count = values.Count();
 
-		string rowLayout = string.Format(
-			"JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer%1.layout",
-			Math.Clamp( cols, 1, 9 ) );
+		string rowLayout = string.Format( "JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer%1.layout", Math.Clamp( cols, 1, 9 ) );
 
 		Widget rowWidget = g_Game.GetWorkspace().CreateWidgets( rowLayout, m_Body );
 		if ( !rowWidget )
@@ -122,8 +120,7 @@ class UIActionDataTable: UIActionBase
 			if ( c < count )
 				val = values[c];
 
-			Widget cellWidget = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowWidget );
+			Widget cellWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", rowWidget );
 
 			if ( !cellWidget )
 				continue;
@@ -302,9 +299,7 @@ class UIActionDataTable: UIActionBase
 		if ( cols == 0 )
 			return;
 
-		string headerLayout = string.Format(
-			"JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer%1.layout",
-			Math.Clamp( cols, 1, 9 ) );
+		string headerLayout = string.Format( "JM/COT/GUI/layouts/uiactions/Wrappers/1/GridSpacer%1.layout", Math.Clamp( cols, 1, 9 ) );
 
 		m_HeaderRow = g_Game.GetWorkspace().CreateWidgets( headerLayout, m_HeaderContainer );
 		if ( !m_HeaderRow )
@@ -326,8 +321,7 @@ class UIActionDataTable: UIActionBase
 
 		for ( int c = 0; c < cols; c++ )
 		{
-			Widget cellWidget = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionText.layout", m_HeaderRow );
+			Widget cellWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", m_HeaderRow );
 
 			if ( !cellWidget )
 				continue;

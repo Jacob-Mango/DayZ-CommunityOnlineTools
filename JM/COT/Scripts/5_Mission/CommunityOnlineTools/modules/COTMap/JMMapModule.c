@@ -23,6 +23,9 @@ class JMMapModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Admin.Map.View" );
 	}
 
+	// Temporarily hidden from the sidebar.
+	override bool HasButton() { return false; }
+
 	override string GetInputToggle()
 	{
 		return "UACOTToggleMap";

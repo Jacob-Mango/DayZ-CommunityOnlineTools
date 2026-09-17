@@ -17,9 +17,16 @@ class UIActionImage: UIActionBase
 	{
 	}
 
+	//! LoadImageFile only fills slot 0; SetImage picks it. Without the second
+	//! call the widget can keep drawing nothing at all, which is invisible
+	//! rather than obviously broken.
 	void SetImage( string image )
 	{
-		m_Label.LoadImageFile(0, image);
+		if ( !m_Label )
+			return;
+
+		m_Label.LoadImageFile( 0, image );
+		m_Label.SetImage( 0 );
 	}
 
 	void SetLabelHAlign( UIActionHAlign type )

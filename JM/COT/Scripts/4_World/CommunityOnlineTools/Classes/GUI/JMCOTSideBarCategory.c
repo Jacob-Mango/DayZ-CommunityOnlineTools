@@ -165,12 +165,10 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 
 	void Init( string categoryName, Widget categoryWidget )
 	{
-		Print("[COT-TRACE] Category.Init begin: " + categoryName);
 		m_CategoryName = categoryName;
 		m_Root = categoryWidget;
 		m_Root.SetHandler( this );
 
-		Print("[COT-TRACE] Category.Init: find cat_btn");
 		Class.CastTo( m_CatBtn, m_Root.FindAnyWidget( "cat_btn" ) );
 		if ( m_CatBtn )
 			m_CatBtn.SetHandler( this );
@@ -184,15 +182,12 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		m_CatSkin = MakeSidebarSkin( m_Root, catLabel, catIcon );
 
 		// Create flyout as a top-level workspace widget so it can appear outside the sidebar
-		Print("[COT-TRACE] Category.Init: create sidebar_flyout.layout");
 		m_FlyoutRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_flyout.layout", NULL );
-		Print("[COT-TRACE] Category.Init: flyout created=" + (m_FlyoutRoot != null).ToString());
 		if ( m_FlyoutRoot )
 		{
 			m_FlyoutRoot.SetHandler( this );
 			m_FlyoutRoot.SetSort( JMUILayout.SORT_FLYOUT );
 			m_FlyoutButtons = m_FlyoutRoot.FindAnyWidget( "FlyoutButtons" );
-			Print("[COT-TRACE] Category.Init: FlyoutButtons found=" + (m_FlyoutButtons != null).ToString());
 			if ( m_FlyoutButtons )
 				m_FlyoutButtons.SetHandler( this );
 			m_FlyoutRoot.Show( false );
@@ -201,27 +196,20 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		m_FlyoutVisible = false;
 		m_MouseOverCategory = false;
 		m_MouseOverFlyout = false;
-		Print("[COT-TRACE] Category.Init end: " + categoryName);
 	}
 
 	void AddModule( JMRenderableModuleBase module )
 	{
-		Print("[COT-TRACE] Category.AddModule begin: '" + module.GetTitle() + "' (cat=" + m_CategoryName + ")");
 		m_Modules.Insert( module );
 
 		if ( !m_FlyoutButtons )
 		{
-			Print("[COT-TRACE] Category.AddModule: no m_FlyoutButtons, abort");
 			return;
 		}
 
-		Print("[COT-TRACE] Category.AddModule: create sidebar_button.layout");
 		Widget btnWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_button.layout", m_FlyoutButtons );
-		Print("[COT-TRACE] Category.AddModule: btnWidget=" + (btnWidget != null).ToString());
 
-		Print("[COT-TRACE] Category.AddModule: module.InitButton");
 		module.InitButton( btnWidget );
-		Print("[COT-TRACE] Category.AddModule: module.InitButton returned");
 
 		// Set our handler on the root button widget and its ButtonWidget child
 		// so both OnMouseButtonDown (Panel) and OnClick (Button) reach us
@@ -249,7 +237,6 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		{
 			m_CatArrow.Show( m_Modules.Count() > 0 );
 		}
-		Print("[COT-TRACE] Category.AddModule end: '" + module.GetTitle() + "'");
 	}
 
 	string GetCategoryName()
@@ -274,9 +261,46 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		return IsChildOf( w, m_FlyoutRoot );
 	}
 
+	int UpdateModuleVisibility()
+	{
+		int visibleCount = 0;
+		for ( int i = 0; i < m_Modules.Count(); i++ )
+		{
+			JMRenderableModuleBase module = m_Modules[i];
+			bool hasAccess = ( module && module.HasAccess() );
+
+			if ( i < m_ButtonRoots.Count() && m_ButtonRoots[i] )
+			{
+				m_ButtonRoots[i].Show( hasAccess );
+			}
+
+			if ( hasAccess )
+			{
+				visibleCount++;
+			}
+		}
+
+		if ( m_Root )
+		{
+			m_Root.Show( visibleCount > 0 );
+		}
+
+		if ( m_CatArrow )
+		{
+			m_CatArrow.Show( visibleCount > 0 );
+		}
+
+		if ( visibleCount == 0 && m_FlyoutVisible )
+		{
+			HideFlyout();
+		}
+
+		return visibleCount;
+	}
+
 	bool HasModules()
 	{
-		return m_Modules.Count() > 0;
+		return UpdateModuleVisibility() > 0;
 	}
 
 	void OnUpdate( float timeslice )
@@ -358,11 +382,12 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		if ( m_SideBar )
 			m_SideBar.CloseOtherFlyouts( this );
 
-		// Each sidebar_button entry: btn_bkg is size 290x50, position 5 5 (pixel exact)
-		// WrapSpacer slot = 50px (child declared size); child visual bottom = slot_top + 5 + 50 = slot_top + 55
-		// Last entry overflows by 5px beyond WrapSpacer content height, plus 15px panel border padding
+		int visibleCount = UpdateModuleVisibility();
+		if ( visibleCount == 0 )
+			return;
+
 		float flyW = 300;
-		float flyH = m_Modules.Count() * 70;
+		float flyH = visibleCount * 70;
 
 		// Resize the panel and spacer to the exact content height
 		m_FlyoutRoot.SetSize( flyW, flyH );
@@ -488,7 +513,7 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 			if ( m_CatSkin )
 				m_CatSkin.SetHovered( true );
 
-			if ( !m_FlyoutVisible )
+			if ( !m_FlyoutVisible && UpdateModuleVisibility() > 0 )
 				ShowFlyout();
 		}
 		else if ( w == m_FlyoutRoot || IsChildOf( w, m_FlyoutRoot ) )
@@ -529,23 +554,15 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	// PanelWidget (btn_bkg) fires this
+	// PanelWidget (btn_bkg) fires this. Deliberately does NOT call
+	// ToggleShow() - InitButton() requires the inner ButtonWidget "btn" to
+	// exist for a tile to be added at all (see AddModule), so OnClick below
+	// always fires for the exact same press too. Toggling from both handlers
+	// flipped the module open then immediately closed (or the reverse)
+	// within one click - visible as an instant open/close flicker on every
+	// sidebar tile press.
 	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
 	{
-		if ( !IsMissionClient() )
-			return false;
-
-		if ( button != 0 )
-			return false;
-
-		JMRenderableModuleBase module = FindModuleForWidget( w );
-		if ( module )
-		{
-			module.ToggleShow();
-			HideFlyout();
-			return true;
-		}
-
 		return false;
 	}
 
@@ -575,6 +592,8 @@ class JMCOTSideBarCategory: COT_ScriptedWidgetEventHandler
 	{
 		foreach ( JMRenderableModuleBase module: m_Modules )
 		{
+			if ( !module || !module.HasAccess() )
+				continue;
 			// w is the ButtonWidget "btn" (from OnClick)
 			if ( w == module.GetMenuButton() )
 				return module;

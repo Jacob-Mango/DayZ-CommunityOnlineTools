@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class JMRoleRowWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
@@ -61,28 +64,28 @@ class JMRoleRowWidget: COT_ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Show" );
+		Print( "+JMRoleRowWidget::Show" );
 		#endif
 
 		layoutRoot.Show( true );
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Show" );
+		Print( "-JMRoleRowWidget::Show" );
 		#endif
 	}
 
 	void Hide()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Hide" );
+		Print( "+JMRoleRowWidget::Hide" );
 		#endif
 
 		OnHide();
 		layoutRoot.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Hide" );
+		Print( "-JMRoleRowWidget::Hide" );
 		#endif
 	}
 

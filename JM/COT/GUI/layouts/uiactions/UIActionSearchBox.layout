@@ -41,12 +41,12 @@ PanelWidgetClass UIActionSearchBox {
     PanelWidgetClass action_chrome {
      ignorepointer 0
      color 0 0 0 0
-     position 0 -1
-     size 1 22
+     position 0 0
+     size 1 1
      halign left_ref
-     valign center_ref
-     vexactpos 1
-     vexactsize 1
+     valign top_ref
+     vexactpos 0
+     vexactsize 0
      {
       PanelWidgetClass action_fill {
        ignorepointer 1

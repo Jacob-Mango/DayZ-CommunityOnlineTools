@@ -7,6 +7,10 @@ enum JMClientRPC
 	UpdateClient,
 	UpdateClientPosition,
 	SetClient,
+	//! Appended: one array send for the whole roster instead of the old
+	//! per-player unicast loop in RPC_RefreshClients / RPC_RefreshClientPositions.
+	UpdateClientBatch,
+	UpdateClientPositionBatch,
 	COUNT
 }
 
@@ -69,6 +73,11 @@ enum JMVehiclesModuleRPC
 	// Appended after 1.x - delta-refresh slots. Old clients never see these.
 	SendVehicleUpsert,
 	SendVehicleRemove,
+	RequestVehicleUpsert,
+	//! Undo: the only vehicle teleport that names its own destination.
+	TeleportVehicleTo,
+	ClearVehicleCargo,
+	SpawnVehicleKey,
 	COUNT
 }
 
@@ -99,6 +108,7 @@ enum JMTeleportModuleRPC
 	Location,
 	AddLocation,
 	RemoveLocation,
+	EditLocation,
 	COUNT
 }
 
@@ -131,6 +141,9 @@ enum JMWeatherModuleRPC
 	UpdatePreset,
 	RemovePreset,
 	FreezeTime,
+	DynamicWeather,
+	Sandstorm,
+	SpecialWeatherStatus,
 	COUNT
 }
 
@@ -156,7 +169,122 @@ enum JMESPModuleRPC
 	DuplicateAll,
 	DeleteAll,
 	MoveToCursor,
-	
+
+	ObjectAction,
+	ObjectActionResult,
+
+	//! Appended, never inserted - these are wire values. It belongs with the
+	//! other BaseBuilding_ entries by meaning, but slotting it there would
+	//! renumber every id below it and silently mismatch an older client.
+	BaseBuilding_SetPartHealth,
+
+	//! Parameterless - pop and replay the most recent entry on the shared
+	//! JMActionHistory stack. See JMActionHistory.
+	UndoLastAction,
+	RedoLastAction,
+
+	//! Sent once per move/rotate gesture (not per throttled position/
+	//! orientation update) so the server can push one JMActionHistory entry
+	//! for the whole drag. See JMESPWidgetHandler.EndDrag.
+	RecordTransformHistory,
+
+	//! Weapon attachment add/remove/swap by classname - not routed through
+	//! ObjectAction because that channel's wire format is (int, float) only
+	//! and has no string slot for a classname.
+	SetAttachment,
+	RemoveAttachment,
+
+	COUNT
+}
+
+//! Everything the ESP object panel can do to a target that is not worth its
+//! own RPC. One channel with an action id keeps RPC.c from growing a line per
+//! button, and every one of them still carries its own permission check on the
+//! server - see JMESPModule.PermissionForAction.
+enum JMESPObjectAction
+{
+	INVALID = 0,
+
+	SetQuantity,
+	SetLiquid,
+	SetCleanness,
+	SetFoodStage,
+	SetOpen,
+
+	SetLock,
+	SetCode,
+	GetCode,
+
+	//! Appended, never inserted: these are wire values, and renumbering an
+	//! existing entry silently mismatches a client on an older build.
+
+	//! Weapons. ivalue is the on/off for the two toggles; LoadMagazine takes
+	//! none and works the type out from the weapon's own config.
+	SetJammed,
+	SetChambered,
+	LoadMagazine,
+
+	//! Fireplaces. SetStoneCircle and SetOven are the two build-quality
+	//! upgrades a fireplace can carry; CookAll finishes everything on it.
+	SetBurning,
+	FireplaceRefuel,
+	SetStoneCircle,
+	SetOven,
+	CookAll,
+
+	//! Every combination lock within reach of the target, not just its own -
+	//! a base is a dozen separate entities and locking them one at a time is
+	//! a dozen right-clicks.
+	SetLockAll,
+
+	SetLockWheels,
+	RefillCoolant,
+	RepairAndFillSlots,
+	SetGrenadePin,
+	TriggerTrap,
+	SetFenceOpen,
+	SetTentOpen,
+	SetCarDoors,
+
+	//! Vehicle fluids as a fraction of their own capacity - fvalue is 0..1.
+	//! RefillCoolant above is the same thing pinned at 1, kept because it is a
+	//! wire value an older client may still send.
+	SetFuel,
+	SetCoolant,
+
+	//! A weapon that takes no detachable magazine loads into the gun itself.
+	FillInternalMagazine,
+
+	//! Every construction part of one object at once, in dependency order.
+	BuildAll,
+	DismantleAll,
+
+	//! Every already-built construction part of one object, healed to full.
+	RepairAll,
+
+	//! A flag pole's mast, fvalue 0..1 raised, refresher timer moved with it.
+	SetFlagRaised,
+
+	//! Delete everything sitting in an object's cargo, the object kept.
+	ClearCargo,
+
+	//! Pin a creature's AI: kept in idle, with its input controller held still.
+	SetImmobilized,
+
+	//! Arm or disarm a trap without anything stepping on it.
+	SetTrapArmed,
+
+	//! Swap the target's classname, and any already-attached child's, for the
+	//! sibling variant carrying a different color token - ivalue indexes into
+	//! JMObjectSpawnerModule.GetColorTokens().
+	ChangeColor,
+
+	//! A static map building's door - ivalue is open/close or lock/unlock (per
+	//! action), fvalue carries the Building door index picked by the raycast,
+	//! since there is no per-door target to route through separately.
+	SetHouseDoorOpen,
+	SetHouseDoorLocked,
+
 	COUNT
 }
 
@@ -174,7 +302,12 @@ enum JMStatType
 
 enum JMPlayerModuleRPC
 {
-	INVALID = 10320,
+	//! Was 10320 - JMESPModuleRPC grew past that boundary once SetAttachment/
+	//! RemoveAttachment were appended (23 entries from its own INVALID=10300),
+	//! so its wire values collided with this block's (SetAttachment/
+	//! RemoveAttachment landed on SetBloodyHands/RepairTransport). Bumped with
+	//! headroom for both blocks; still well under JMNamalskEventManagerRPC's 10400.
+	INVALID = 10340,
 
 	SetStat,
 
@@ -228,6 +361,11 @@ enum JMPlayerModuleRPC
 	InventoryTake,
 	RequestPlayerStats,
 	InventoryModify,
+	InventoryGroupOp,
+	RequestExpansionInfo,
+	SetRagdoll,
+	ActivateModifier,
+	DeactivateModifier,
 	COUNT
 }
 
@@ -244,6 +382,20 @@ enum JMInventoryModifyOp
 	TEMPERATURE,
 	FOOD_STAGE,    //!< FoodStageType
 	LIQUID_TYPE,   //!< LIQUID_*
+	HEALTH,        //!< 0..100
+	COUNT
+}
+
+//! What an InventoryGroupOp request is asking for. The item addressed by the
+//! request is the CONTAINER; the operation is applied to everything it holds
+//! directly - its cargo and its attachments - and never to the container itself.
+//!
+//! Wire values - append only.
+enum JMInventoryGroupOp
+{
+	TAKE_ALL = 0,
+	REPAIR_ALL,
+	DELETE_ALL,
 	COUNT
 }
 
@@ -401,6 +553,7 @@ enum JMAntiCheatModuleRPC
 
 	// Client -> Server
 	RequestFlags,
+	ClearFlag,
 
 	// Server -> Client
 	Flags,

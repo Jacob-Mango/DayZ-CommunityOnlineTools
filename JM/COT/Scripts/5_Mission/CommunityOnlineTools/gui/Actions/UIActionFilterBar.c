@@ -78,8 +78,7 @@ class UIActionFilterBar: UIActionBase
 			return;
 
 		int cols = Math.Clamp( count, 1, 9 );
-		string gridLayout = string.Format(
-			"JM/COT/GUI/layouts/uiactions/Wrappers/TabBar/TabBar%1.layout", cols );
+		string gridLayout = string.Format( "JM/COT/GUI/layouts/uiactions/Wrappers/TabBar/TabBar%1.layout", cols );
 
 		m_Bar = g_Game.GetWorkspace().CreateWidgets( gridLayout, m_BarParent );
 		if ( !m_Bar )
@@ -92,8 +91,7 @@ class UIActionFilterBar: UIActionBase
 			m_Labels.Insert( label );
 			m_Active.Insert( false );
 
-			Widget btnWidget = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionFilterButton.layout", m_Bar );
+			Widget btnWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionFilterButton.layout", m_Bar );
 
 			if ( !btnWidget )
 			{

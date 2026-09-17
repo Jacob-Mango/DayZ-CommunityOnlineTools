@@ -30,9 +30,28 @@ class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 	{
 	}
 
+	//! Whether this control is currently shown - used by the Escape priority
+	//! chain (JMFormBase.HasOpenOverlay/CloseOpenOverlays) to tell an open
+	//! popup from a closed-but-still-registered one. Same reasoning as
+	//! Close(): declared here so a form's overlay registry, typed to this
+	//! common ancestor, can ask any registered control without knowing its
+	//! concrete type. No-op/false on the base.
+	bool IsVisible()
+	{
+		return false;
+	}
+
 	//! Enable/disable this control from a permission key. Same reasoning as
 	//! Close() - the real implementation is UIActionBase's. No-op on the base.
-	void UpdatePermission( string permission )
+	//!
+	//! NOT named UpdatePermission(). Enforce has no method overloading, and
+	//! JMFormBase - which inherits this class - has to keep upstream COT's
+	//! two-argument UpdatePermission( control, permission ) helper, because
+	//! third-party forms call it (DayZ-Expansion's PersonalStorage, AI and
+	//! Hardline JMPlayerForm modules all do). Two same-named methods on one
+	//! class are indistinguishable to the call resolver and crash the script
+	//! compiler, so the polymorphic one-argument version carries its own name.
+	void COT_ApplyPermission( string permission )
 	{
 	}
 }

@@ -6,7 +6,15 @@ class UIActionEditableVector: UIActionBase
 	protected EditBoxWidget m_TextZ;
 	protected ButtonWidget m_Button;
 
-	override void OnInit() 
+	//! Set the moment the user types or wheels a channel, cleared when the host
+	//! consumes the value. A caller that pushes a live value in on a timer -
+	//! JMESPMeta refreshes an object's position and orientation while its
+	//! overlay is open - has to skip a field the user has edited but stepped
+	//! away from. Focus alone is not enough: clicking off the box loses focus
+	//! without discarding what was typed into it.
+	protected bool m_Edited;
+
+	override void OnInit()
 	{
 		super.OnInit();
 
@@ -49,7 +57,7 @@ class UIActionEditableVector: UIActionBase
 
 	override void SetValue( vector v )
 	{
-		if ( IsFocused() )
+		if ( IsFocused() || m_Edited )
 			return;
 
 		m_TextX.SetText( v[0].ToString() );
@@ -84,8 +92,27 @@ class UIActionEditableVector: UIActionBase
 		float currValue = w.GetText().ToFloat();
 		currValue = currValue + (wheel * multiplier);
 		w.SetText(currValue.ToString());
-		
+
+		m_Edited = true;
+
 		CallEvent( UIEvent.MOUSEWHEEL );
+	}
+
+	void SetEdited( bool edited )
+	{
+		m_Edited = edited;
+	}
+
+	bool IsEdited()
+	{
+		return m_Edited;
+	}
+
+	override bool OnKeyPress( Widget w, int x, int y, int key )
+	{
+		m_Edited = true;
+
+		return super.OnKeyPress( w, x, y, key );
 	}
 
 	override void SetButton( string text )

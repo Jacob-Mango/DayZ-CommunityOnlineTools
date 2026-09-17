@@ -29,7 +29,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! of it. 24 rather than the search box's own 22, because UIActionSearchBox
 	//! centres a 22px chrome inside its root and a root of exactly 22 clips the
 	//! chrome's top and bottom border.
-	static const float HEADER_CONTROL_HEIGHT = 24;
+	static const float HEADER_CONTROL_HEIGHT = 30;
 
 	//! Drawn height of a tab strip. The strip's own layout is a fixed 30px row;
 	//! 34 leaves it 2px of breathing room top and bottom.
@@ -183,7 +183,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	{
 	}
 
-	bool IsVisible()
+	override bool IsVisible()
 	{
 		return m_Window != null;
 	}
@@ -278,6 +278,50 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
+	//! Escape priority tier 1 (popup). Whether any registered overlay -
+	//! context menu, dropdown list, value prompt - is currently open on this
+	//! form, as opposed to merely registered. Used by COTModule's Escape
+	//! handler to decide whether Escape closes a popup here or falls through
+	//! to closing the window/sidebar instead.
+	bool HasOpenOverlay()
+	{
+		if ( !m_FloatingOverlays )
+			return false;
+
+		foreach ( COT_ScriptedWidgetEventHandler overlay : m_FloatingOverlays )
+		{
+			if ( overlay && overlay.IsVisible() )
+				return true;
+		}
+
+		return false;
+	}
+
+	//! Closes only the overlay(s) that are actually open right now (unlike
+	//! CloseAllOverlays(), which is a blanket "tear everything down" used on
+	//! hide/tab-change). Returns whether it closed anything, so a caller can
+	//! tell "consumed the Escape press" from "nothing to do here".
+	bool CloseOpenOverlays()
+	{
+		if ( !m_FloatingOverlays )
+			return false;
+
+		bool closedAny = false;
+
+		for ( int i = m_FloatingOverlays.Count() - 1; i >= 0; i-- )
+		{
+			COT_ScriptedWidgetEventHandler overlay = m_FloatingOverlays[i];
+
+			if ( overlay && overlay.IsVisible() )
+			{
+				overlay.Close();
+				closedAny = true;
+			}
+		}
+
+		return closedAny;
+	}
+
 	// ---------------------------------------------------------------------------
 	//  Declarative permission binding
 	// ---------------------------------------------------------------------------
@@ -294,7 +338,27 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		m_PermissionControls.Set( control, permissionKey );
 
-		control.UpdatePermission( permissionKey );
+		control.COT_ApplyPermission( permissionKey );
+	}
+
+	//! Helper to register permission for a specific panel / card control.
+	protected void RegisterPanelPermission( COT_ScriptedWidgetEventHandler panel, string permissionKey )
+	{
+		RegisterPermission( panel, permissionKey );
+	}
+
+	//! Upstream COT's per-call helper, kept for third-party forms that modded
+	//! JMPlayerForm before RegisterPermission() existed - DayZ-Expansion's
+	//! PersonalStorage, AI and Hardline modules each call this from their
+	//! OnClientPermissionsUpdated() override, and dropping it fails the whole
+	//! Mission script module. Takes the 3_Game base type because JMFormBase
+	//! lives in 4_World and cannot see UIActionBase.
+	void UpdatePermission( COT_ScriptedWidgetEventHandler control, string permission )
+	{
+		if ( !control )
+			return;
+
+		control.COT_ApplyPermission( permission );
 	}
 
 	//! Drop a binding whose control is about to be destroyed. Forms that
@@ -320,7 +384,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			control = m_PermissionControls.GetKey( i );
 
 			if ( control )
-				control.UpdatePermission( m_PermissionControls.GetElement( i ) );
+				control.COT_ApplyPermission( m_PermissionControls.GetElement( i ) );
 		}
 	}
 
@@ -335,6 +399,21 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		m_TabBuilt = new array<bool>;
 
 		for ( int i = 0; i < tabCount; i++ )
+		{
+			m_TabBuilt.Insert( false );
+		}
+	}
+
+	//! Append `count` unbuilt slots to the lazy-build array. Call from a
+	//! modded-class OnInit() AFTER super.OnInit() has run InitTabState().
+	//! Each call to ShouldBuildTab() on the new indices will then work
+	//! correctly (true once, false every time after).
+	protected void ExtendTabState( int count )
+	{
+		if ( !m_TabBuilt )
+			return;
+
+		for ( int i = 0; i < count; i++ )
 		{
 			m_TabBuilt.Insert( false );
 		}
