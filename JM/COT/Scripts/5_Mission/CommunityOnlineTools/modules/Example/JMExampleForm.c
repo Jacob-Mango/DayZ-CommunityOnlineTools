@@ -273,9 +273,7 @@ class JMExampleForm: JMFormBase
 
 		UIActionButton btnAdd;
 		UIActionButton btnClear;
-		UIActionManager.CreateButtonPair( p,
-			"Add Row",    this, "OnClick_AddRow",   btnAdd,
-			"Clear List", this, "OnClick_ClearList", btnClear );
+		UIActionManager.CreateButtonPair( p, "Add Row", this, "OnClick_AddRow", btnAdd, "Clear List", this, "OnClick_ClearList", btnClear );
 		m_BtnAdd   = btnAdd;
 		m_BtnClear = btnClear;
 
@@ -1285,20 +1283,17 @@ class JMExampleForm: JMFormBase
 	void OnClick_Button( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK ) return;
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "Kick Selected Player(s)",
-			"#STR_COT_GENERIC_YES", "OnFunnyButtons_01", "#STR_COT_GENERIC_NO", "" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "Kick Selected Player(s)", "#STR_COT_GENERIC_YES", "OnFunnyButtons_01", "#STR_COT_GENERIC_NO", "" );
 	}
 
 	void OnFunnyButtons_01( JMConfirmation conf )
 	{
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "It will kick you included",
-			"#STR_COT_GENERIC_YES", "OnFunnyButtons_02", "#STR_COT_GENERIC_NO", "" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Are you sure?", "It will kick you included", "#STR_COT_GENERIC_YES", "OnFunnyButtons_02", "#STR_COT_GENERIC_NO", "" );
 	}
 
 	void OnFunnyButtons_02( JMConfirmation conf )
 	{
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Please think twice", "You cannot undo this action!",
-			"#STR_COT_GENERIC_YES", "OnConfirmationButton", "#STR_COT_GENERIC_YES", "OnConfirmationButton" );
+		CreateConfirmation_Two( JMConfirmationType.INFO, "Please think twice", "You cannot undo this action!", "#STR_COT_GENERIC_YES", "OnConfirmationButton", "#STR_COT_GENERIC_YES", "OnConfirmationButton" );
 	}
 
 	void OnConfirmationButton( JMConfirmation conf )
@@ -1543,10 +1538,10 @@ class JMExampleForm: JMFormBase
 		int r37  = s_LogCount * 37;
 		int r73  = s_LogCount * 73;
 		int r113 = s_LogCount * 113;
-		int col = ARGB( 255,
-			50 + ( r37  - (r37  / 180) * 180 ),
-			50 + ( r73  - (r73  / 180) * 180 ),
-			50 + ( r113 - (r113 / 180) * 180 ) );
+		int rVal = 50 + ( r37 - (r37 / 180) * 180 );
+		int gVal = 50 + ( r73 - (r73 / 180) * 180 );
+		int bVal = 50 + ( r113 - (r113 / 180) * 180 );
+		int col = ARGB( 255, rVal, gVal, bVal );
 		m_LogView.AppendLine( "Log entry #" + s_LogCount, col );
 	}
 

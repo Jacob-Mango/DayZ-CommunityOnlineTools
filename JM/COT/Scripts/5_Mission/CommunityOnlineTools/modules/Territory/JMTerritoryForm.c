@@ -8,6 +8,7 @@ class JMTerritoryForm: JMFormBase
 	protected Widget m_ContentWrapper;
 	protected Widget m_TerritoriesWrapper;
 
+	protected ref UIActionFlexRow m_SearchRow;
 	protected UIActionSearchBox m_SearchBar;
 	protected string m_SearchFilter;
 
@@ -22,13 +23,24 @@ class JMTerritoryForm: JMFormBase
 	//! under the caret mid-typing.
 	protected void InitWidgetsTop()
 	{
-		Widget toolbar = UIActionManager.CreateWrapSpacer( layoutRoot.FindAnyWidget( "panel_top" ), WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		m_SearchRow = UIActionManager.CreateFlexRow( layoutRoot.FindAnyWidget( "panel_top" ), WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+		Widget searchRow = m_SearchRow.GetContent();
 
-		UIActionManager.CreateRefreshButton( toolbar, this, "OnClick_Refresh", "#STR_COT_TERRITORY_TT_REFRESH" );
+		UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( searchRow, this, "OnClick_Refresh", "#STR_COT_TERRITORY_TT_REFRESH" );
+		if ( refreshBtn )
+		{
+			refreshBtn.SetFixedSize( 30, 30 );
+			m_SearchRow.Add( refreshBtn );
+		}
 
-		m_SearchBar = UIActionManager.CreateSearchBox( toolbar, this, "OnChange_Search", "#STR_COT_GENERIC_SEARCH" );
-		m_SearchBar.SetWidth( 0.85 );
-		m_SearchBar.SetFixedHeight( HEADER_CONTROL_HEIGHT );
+		m_SearchBar = UIActionManager.CreateSearchBox( searchRow, this, "OnChange_Search", "#STR_COT_GENERIC_SEARCH" );
+		if ( m_SearchBar )
+		{
+			m_SearchBar.SetFlex( 1.0, 60 );
+			m_SearchRow.Add( m_SearchBar );
+		}
+
+		m_SearchRow.SetGap( 14 );
 	}
 
 	protected void InitWidgetsBottom()

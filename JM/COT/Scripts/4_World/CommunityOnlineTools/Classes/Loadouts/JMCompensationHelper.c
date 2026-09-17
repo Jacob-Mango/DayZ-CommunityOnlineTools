@@ -143,7 +143,13 @@ class JMCompensationHelper
 
 	static void AddChildrenToExpLoadoutRecursive( ExpansionPrefab prefab, EntityAI entity )
 	{
+		if ( !prefab || !entity )
+			return;
+
 		GameInventory inventory = entity.GetInventory();
+		if ( !inventory )
+			return;
+
 		int i;
 		EntityAI item;
 		InventoryLocation il = new InventoryLocation();
@@ -151,11 +157,19 @@ class JMCompensationHelper
 		for ( i = 0; i < inventory.AttachmentCount(); ++i )
 		{
 			item = inventory.GetAttachmentFromIndex( i );
-			item.GetInventory().GetCurrentInventoryLocation( il );
+			if ( !item )
+				continue;
+
+			if ( item.GetInventory() )
+				item.GetInventory().GetCurrentInventoryLocation( il );
+
 			string slotName = InventorySlots.GetSlotName( il.GetSlot() );
-			prefab = ExpansionPrefab.Cast(prefab.BeginAttachment( item.GetType(), slotName ));
-			AddToExpLoadoutRecursive( prefab, item );
-			prefab = ExpansionPrefab.Cast(prefab.End());
+			ExpansionPrefab childPrefab = ExpansionPrefab.Cast( prefab.BeginAttachment( item.GetType(), slotName ) );
+			if ( childPrefab )
+			{
+				AddToExpLoadoutRecursive( childPrefab, item );
+				childPrefab.End();
+			}
 		}
 
 		CargoBase cargo = inventory.GetCargo();
@@ -164,15 +178,24 @@ class JMCompensationHelper
 			for ( i = 0; i < cargo.GetItemCount(); ++i )
 			{
 				item = cargo.GetItem( i );
-				prefab = ExpansionPrefab.Cast(prefab.BeginCargo( item.GetType() ));
-				AddToExpLoadoutRecursive( prefab, item );
-				prefab = ExpansionPrefab.Cast( prefab.End()) ;
+				if ( !item )
+					continue;
+
+				ExpansionPrefab cargoPrefab = ExpansionPrefab.Cast( prefab.BeginCargo( item.GetType() ) );
+				if ( cargoPrefab )
+				{
+					AddToExpLoadoutRecursive( cargoPrefab, item );
+					cargoPrefab.End();
+				}
 			}
 		}
 	}
 
 	static void AddToExpLoadoutRecursive( ExpansionPrefab prefab, EntityAI item )
 	{
+		if ( !prefab || !item )
+			return;
+
 		prefab.Chance = 1.0;
 
 		if ( item.HasQuantity() )
@@ -187,6 +210,9 @@ class JMCompensationHelper
 
 	private static JMLoadoutItem ProcessPlayerLoadout( PlayerBase player )
 	{
+		if ( !player )
+			return null;
+
 		JMLoadoutItem item = new JMLoadoutItem;
 		JMLoadoutItemData dataItem = new JMLoadoutItemData;
 
@@ -208,20 +234,26 @@ class JMCompensationHelper
 
 		dataItem.m_Temperature = player.GetTemperature();
 
+		GameInventory inventory = player.GetInventory();
+		if ( !inventory )
+			return item;
+
 		ItemBase child;
-		for ( int k = 0; k < player.GetInventory().AttachmentCount(); k++ )
+		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
 		{
-			child = ItemBase.Cast( player.GetInventory().GetAttachmentFromIndex( k ) );
-			item.m_Attachments.Insert( ProcessSubItem( child ) );
+			child = ItemBase.Cast( inventory.GetAttachmentFromIndex( k ) );
+			if ( child )
+				item.m_Attachments.Insert( ProcessSubItem( child ) );
 		}
 
-		CargoBase cargo = player.GetInventory().GetCargo();
+		CargoBase cargo = inventory.GetCargo();
 		if ( cargo )
 		{
 			for ( int j = 0; j < cargo.GetItemCount(); j++ )
 			{
 				child = ItemBase.Cast( cargo.GetItem( j ) );
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
+				if ( child )
+					item.m_Attachments.Insert( ProcessSubItem( child ) );
 			}
 		}
 
@@ -230,6 +262,9 @@ class JMCompensationHelper
 
 	private static JMLoadoutItem ProcessVehicleLoadout( EntityAI vehicle )
 	{
+		if ( !vehicle )
+			return null;
+
 		JMLoadoutItem item = new JMLoadoutItem;
 		JMLoadoutItemData dataItem = new JMLoadoutItemData;
 
@@ -242,20 +277,26 @@ class JMCompensationHelper
 
 		dataItem.m_Health = vehicle.GetHealth();
 
+		GameInventory inventory = vehicle.GetInventory();
+		if ( !inventory )
+			return item;
+
 		EntityAI child;
-		for ( int k = 0; k < vehicle.GetInventory().AttachmentCount(); k++ )
+		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
 		{
-			child = EntityAI.Cast( vehicle.GetInventory().GetAttachmentFromIndex( k ) );
-			item.m_Attachments.Insert( ProcessSubItem( child ) );
+			child = EntityAI.Cast( inventory.GetAttachmentFromIndex( k ) );
+			if ( child )
+				item.m_Attachments.Insert( ProcessSubItem( child ) );
 		}
 
-		CargoBase cargo = vehicle.GetInventory().GetCargo();
+		CargoBase cargo = inventory.GetCargo();
 		if ( cargo )
 		{
 			for ( int j = 0; j < cargo.GetItemCount(); j++ )
 			{
 				child = EntityAI.Cast( cargo.GetItem( j ) );
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
+				if ( child )
+					item.m_Attachments.Insert( ProcessSubItem( child ) );
 			}
 		}
 
@@ -264,6 +305,9 @@ class JMCompensationHelper
 
 	private static JMLoadoutSubItem ProcessSubItem( EntityAI parent )
 	{
+		if ( !parent )
+			return null;
+
 		JMLoadoutSubItem item = new JMLoadoutSubItem;
 		JMLoadoutItemData dataItem = new JMLoadoutItemData;
 
@@ -288,20 +332,26 @@ class JMCompensationHelper
 
 		item.m_Attachments = new array< ref JMLoadoutSubItem >;
 
+		GameInventory inventory = parent.GetInventory();
+		if ( !inventory )
+			return item;
+
 		EntityAI child;
-		for ( int k = 0; k < parent.GetInventory().AttachmentCount(); k++ )
+		for ( int k = 0; k < inventory.AttachmentCount(); k++ )
 		{
-			child = EntityAI.Cast( parent.GetInventory().GetAttachmentFromIndex( k ) );
-			item.m_Attachments.Insert( ProcessSubItem( child ) );
+			child = EntityAI.Cast( inventory.GetAttachmentFromIndex( k ) );
+			if ( child )
+				item.m_Attachments.Insert( ProcessSubItem( child ) );
 		}
 
-		CargoBase cargo = parent.GetInventory().GetCargo();
+		CargoBase cargo = inventory.GetCargo();
 		if ( cargo )
 		{
 			for ( int j = 0; j < cargo.GetItemCount(); j++ )
 			{
 				child = EntityAI.Cast( cargo.GetItem( j ) );
-				item.m_Attachments.Insert( ProcessSubItem( child ) );
+				if ( child )
+					item.m_Attachments.Insert( ProcessSubItem( child ) );
 			}
 		}
 

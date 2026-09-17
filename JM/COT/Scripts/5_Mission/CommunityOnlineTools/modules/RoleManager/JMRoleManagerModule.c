@@ -29,7 +29,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	override string GetTitle()
 	{
-		return "Role Manager";
+		return "#STR_COT_ROLEMANAGER_MODULE_NAME";
 	}
 
 	override string GetIconName()
@@ -192,6 +192,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		if ( !sender ) return;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.View", sender ) )
 			return;
 
@@ -204,6 +205,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !sender ) return;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Create", sender, instance ) )
 			return;
 
@@ -220,6 +222,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !sender ) return;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Delete", sender, instance ) )
 			return;
 
@@ -236,6 +239,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !sender ) return;
 		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Permissions", sender, instance ) )
 			return;
 
@@ -293,7 +297,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( GetPermissionsManager().RoleExists( name ) )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "Role already exists: " + name ) );
+				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_ROLE_ALREADY_EXISTS_NOTIFICATION", name ) );
 			return;
 		}
 
@@ -312,14 +316,14 @@ class JMRoleManagerModule : JMRenderableModuleBase
 		if ( name == "everyone" )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "Cannot delete the 'everyone' role." ) );
+				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_CANNOT_DELETE_EVERYONE_NOTIFICATION" ) );
 			return;
 		}
 
 		if ( !GetPermissionsManager().RoleExists( name ) )
 		{
 			if ( ident )
-				COTCreateNotification( ident, new StringLocaliser( "Role not found: " + name ) );
+				COTCreateNotification( ident, new StringLocaliser( "#STR_COT_ROLEMANAGER_MODULE_ROLE_NOT_FOUND_NOTIFICATION", name ) );
 			return;
 		}
 

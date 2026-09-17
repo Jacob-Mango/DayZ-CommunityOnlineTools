@@ -305,4 +305,40 @@ class UIActionCard: UIActionBase
 		layoutRoot.SetSize( rw, height );
 		layoutRoot.Update();
 	}
+
+	override void UpdatePermission( string permission )
+	{
+		super.UpdatePermission( permission );
+
+		if ( layoutRoot && layoutRoot.IsVisible() )
+		{
+			CheckChildVisibility();
+		}
+	}
+
+	void CheckChildVisibility()
+	{
+		if ( !m_Content )
+			return;
+
+		Widget child = m_Content.GetChildren();
+		if ( child )
+		{
+			bool anyVisible = false;
+			while ( child )
+			{
+				if ( child.IsVisible() )
+				{
+					anyVisible = true;
+					break;
+				}
+				child = child.GetSibling();
+			}
+
+			if ( !anyVisible )
+			{
+				layoutRoot.Show( false );
+			}
+		}
+	}
 }

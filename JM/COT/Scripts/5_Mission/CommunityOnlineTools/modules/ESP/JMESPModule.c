@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 enum JMESPState
 {
 	UNKNOWN = 0,
@@ -217,9 +220,50 @@ class JMESPModule: JMRenderableModuleBase
 	private ref array< ref JMESPViewType > m_ViewTypes;
 	private ref map<typename, JMESPViewType> m_ViewTypesByType;
 
+	//! Client-side per-category colour overrides. Null on a dedicated server -
+	//! nothing there draws an overlay, and it would only create an empty file.
+	private ref JMESPSerialize m_ColourSettings;
+
 	private bool m_IsCreatingWidgets;
 	private bool m_IsDestroyingWidgets;
 	private bool m_IknowWhatIamDoing;
+
+	//! Right-click-anything, for as long as COT's own interface is up.
+	//!
+	//! The button is polled rather than handled, because there is no widget
+	//! between the cursor and the world to hand a click to - the ESP container
+	//! ignores the pointer so the tags under it stay clickable, and a catcher
+	//! panel wide enough to hear the click would swallow every one of theirs.
+	private bool m_WorldMenuRightDown;
+
+	//! The object picked out of the world, kept alive here.
+	//!
+	//! A tag's meta is owned by the tracking lists; one made for a right-click
+	//! is owned by nothing, and the menu holds it weakly.
+	private ref JMESPMeta m_WorldMenuMeta;
+
+	//! How far a right-click reaches. Past this it is scenery an admin is
+	//! looking at rather than something they meant to act on.
+	static const float WORLD_MENU_RANGE = 200;
+
+	//! Bounds on the one RPC that turns a client's string into a line in the
+	//! admin log and a webhook post. The real sender writes a short fixed
+	//! phrase when the ESP view is switched, so neither of these is reachable
+	//! by anything legitimate.
+	static const int LOG_MAX_LENGTH = 256;
+	static const int LOG_MIN_INTERVAL_MS = 1000;
+
+	//! How often a move or a turn is written down, per admin.
+	//!
+	//! Dragging a tag streams a position up to ten times a second, and each of
+	//! those used to append a line to the admin log and post a webhook - so a
+	//! ten second drag was a hundred file writes and a hundred HTTP requests,
+	//! which is enough to get a Discord endpoint rate limited by ordinary use,
+	//! never mind by a client sending them deliberately.
+	//!
+	//! The move itself still applies every time. Only the record of it is
+	//! sampled, which is what an audit trail of a continuous drag wants anyway.
+	static const int MOVE_RECORD_INTERVAL_MS = 2000;
 
 	string Filter;
 
@@ -236,6 +280,16 @@ class JMESPModule: JMRenderableModuleBase
 	ref JMESPCanvas m_ESPCanvas;
 
 	private JMLoadoutModule m_LoadoutModule;
+
+	//! What a fireplace is refuelled with. Firewood rather than sticks: it is
+	//! the highest-energy fuel every fireplace accepts, so one stack is a fire
+	//! that stays lit long enough to be worth lighting.
+	static const string FUEL_TYPE = "Firewood";
+
+	//! How far a lock-all reaches, in metres. Wide enough to take in a whole
+	//! compound from a gate in its wall, short enough that it cannot reach a
+	//! neighbour's base across a street.
+	static const float LOCK_ALL_RADIUS = 40.0;
 
 	void JMESPModule()
 	{
@@ -258,11 +312,35 @@ class JMESPModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Dismantle" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Repair" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.SetHealth" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Unstuck" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.Refuel" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Car.LockWheels" );
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Heal" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.ChangeColor" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetQuantity" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetLiquid" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetCleanness" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetFoodStage" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.OpenClose" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Weapon" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetAttachment" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Fireplace" );
+
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Lock" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.SetCode" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.GetCode" );
+
+		//! New children of ESP.Object, so a role that already allows the parent
+		//! allows these too - an unlisted permission inherits.
+		GetPermissionsManager().RegisterPermission( "ESP.Object.ClearCargo" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Immobilize" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Trap" );
+		GetPermissionsManager().RegisterPermission( "ESP.Object.Flag" );
 	}
 
 #ifdef SERVER
@@ -385,9 +463,18 @@ class JMESPModule: JMRenderableModuleBase
 		rayInput.radius = 0.15;
 		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
 		if ( !DayZPhysics.RaycastRVProxy( rayInput, results ) ) return NULL;
+		PlayerBase selfPlayer = PlayerBase.Cast( g_Game.GetPlayer() );
+		bool allowSelf = selfPlayer && selfPlayer.IsInThirdPerson();
+
 		foreach ( RaycastRVResult res: results )
 		{
-			if ( res.obj && res.obj != g_Game.GetPlayer() ) return res.obj;
+			if ( !res.obj )
+				continue;
+
+			if ( res.obj == g_Game.GetPlayer() && !allowSelf )
+				continue;
+
+			return res.obj;
 		}
 		return NULL;
 	}
@@ -444,6 +531,12 @@ class JMESPModule: JMRenderableModuleBase
 				}
 			}
 		}
+
+		if ( !g_Game.IsDedicatedServer() )
+		{
+			m_ColourSettings = JMESPSerialize.Load();
+			m_ColourSettings.Apply( m_ViewTypes );
+		}
 	}
 
 	void RegisterTypes( out TTypenameArray types )
@@ -489,6 +582,61 @@ class JMESPModule: JMRenderableModuleBase
 	array< ref JMESPViewType > GetViewTypes()
 	{
 		return m_ViewTypes;
+	}
+
+	//! The objects currently tracked and drawn. The form's object list reads
+	//! this rather than walking JMESPMeta.s_JM_All: the linked list also holds
+	//! metas queued for creation and destruction, which are not on screen yet.
+	array< ref JMESPMeta > GetActiveObjects()
+	{
+		return m_ActiveESPObjects;
+	}
+
+	//! Persist a category colour edit made from the filter list. No-op on a
+	//! dedicated server, where the overrides were never loaded.
+	void SetViewTypeColour( JMESPViewType viewType, int colour )
+	{
+		if ( !viewType )
+			return;
+
+		viewType.Colour = colour;
+
+		if ( m_ColourSettings )
+			m_ColourSettings.SetColour( viewType.Permission, colour );
+	}
+
+	//! Drop one category's override. Same trick as the bulk reset: the default
+	//! only exists in the subclass constructor, so a fresh instance is how it
+	//! is read back.
+	void ResetViewTypeColour( JMESPViewType viewType )
+	{
+		if ( !viewType )
+			return;
+
+		if ( m_ColourSettings )
+			m_ColourSettings.ClearColour( viewType.Permission );
+
+		JMESPViewType defaults = JMESPViewType.Cast( viewType.Type().Spawn() );
+
+		if ( defaults )
+			viewType.Colour = defaults.Colour;
+	}
+
+	//! Drop every override and put the constructor defaults back. Spawning a
+	//! fresh instance is how the default is read - it is only ever written in
+	//! the subclass constructor.
+	void ResetViewTypeColours()
+	{
+		if ( m_ColourSettings )
+			m_ColourSettings.ClearColours();
+
+		foreach ( JMESPViewType viewType : m_ViewTypes )
+		{
+			JMESPViewType defaults = JMESPViewType.Cast( viewType.Type().Spawn() );
+
+			if ( defaults )
+				viewType.Colour = defaults.Colour;
+		}
 	}
 
 	JMESPViewType GetViewType(typename type)
@@ -627,8 +775,364 @@ class JMESPModule: JMRenderableModuleBase
 		return 1000;
 	}
 
+	// =========================================================================
+	//  World context menu
+	//
+	//  The menu the ESP tags and the tracked list already raise, over whatever
+	//  the cursor is pointing at - tracked or not, ESP drawing or not. It only
+	//  listens while COT's own interface is up, because that is the only time
+	//  the cursor belongs to the admin rather than to the game.
+	// =========================================================================
+
+	protected void UpdateWorldContextMenu()
+	{
+		if ( !IsMissionClient() )
+			return;
+
+		bool down = ( GetMouseState( MouseState.RIGHT ) & MB_PRESSED_MASK ) != 0;
+
+		//! The edge, not the level: a held button is a drag happening somewhere
+		//! else, not a menu being asked for again every frame.
+		if ( down == m_WorldMenuRightDown )
+			return;
+
+		m_WorldMenuRightDown = down;
+
+		if ( !down )
+			return;
+
+		if ( !IsCOTInterfaceOpen() )
+			return;
+
+		if ( !HasAccess() )
+			return;
+
+		//! A press that landed on COT's own UI belongs to whatever it landed on
+		//! - a window, the sidebar, an ESP tag, or the open menu itself, which
+		//! closes through its own handler.
+		if ( IsCursorOverCOTUI() )
+			return;
+
+		OpenWorldContextMenu();
+	}
+
+	//! Is COT on screen AND holding the mouse?
+	//!
+	//! Both halves of the first test matter: the sidebar can be up with no
+	//! window open, and a pinned window can be up with the sidebar hidden.
+	//!
+	//! The cursor test is the one that makes this safe. COT hands the mouse
+	//! back to the game when a click lands outside its own UI, and a pinned
+	//! window stays on screen through that - so "a window is visible" is not
+	//! the same question as "is the pointer the admin's". Without this, a
+	//! right-click meant as aim down sights would raise a menu nobody could
+	//! click.
+	protected bool IsCOTInterfaceOpen()
+	{
+		if ( !g_Game.GetUIManager() || !g_Game.GetUIManager().IsCursorVisible() )
+			return false;
+
+		//! A game menu of its own - inventory, the escape menu - is holding the
+		//! cursor, not COT. It gets its own right-clicks.
+		if ( g_Game.GetUIManager().GetMenu() )
+			return false;
+
+		if ( GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen() )
+			return true;
+
+		if ( GetCOTWindowManager() && GetCOTWindowManager().HasAnyActive() )
+			return true;
+
+		return false;
+	}
+
+	//! Whether the thing under the cursor is COT's rather than the world's.
+	//!
+	//! Walked up the tree rather than tested directly: the widget the cursor is
+	//! actually over is a label or a panel deep inside a window, and only its
+	//! ancestors say which window - or which tag - it belongs to.
+	protected bool IsCursorOverCOTUI()
+	{
+		Widget under = GetWidgetUnderCursor();
+
+		while ( under )
+		{
+			if ( under == JMStatics.ESP_CONTAINER )
+				return true;
+
+			if ( under == JMStatics.COT_MENU )
+				return true;
+
+			if ( JMStatics.IsOverlay( under ) )
+				return true;
+
+			if ( GetCOTWindowManager() && GetCOTWindowManager().GetWindowFromWidget( under ) )
+				return true;
+
+			under = under.GetParent();
+		}
+
+		return false;
+	}
+
+	protected void OpenWorldContextMenu()
+	{
+		JMESPActionMenu menu = JMESPActionMenu.Shared();
+
+		if ( !menu )
+			return;
+
+		int component;
+		Object obj = PickWorldObject( component );
+
+		if ( !obj )
+			return;
+
+		JMESPMeta meta;
+
+		if ( !CreateMetaForObject( obj, meta ) )
+			return;
+
+		//! Static map buildings only get door actions when the click actually
+		//! landed on one of their doors. GetDoorIndex needs a VIEW geometry
+		//! component specifically - PickWorldObject's component is whichever
+		//! of fire/view/geom answered first (fire usually wins on a building),
+		//! which is the wrong index space and silently maps to the wrong door
+		//! (or none at all), so this re-picks with a dedicated view-only ray.
+		Building building = Building.Cast( obj );
+		if ( building )
+			meta.m_DoorIndex = GetBuildingDoorIndexAtCursor( building );
+		else
+			meta.m_DoorIndex = -1;
+
+		m_WorldMenuMeta = meta;
+
+		int mx;
+		int my;
+		GetMousePos( mx, my );
+
+		menu.Open( meta, mx, my );
+	}
+
+	//! What the mouse is pointing at.
+	//!
+	//! The pointer's direction, not the camera's: with the interface open the
+	//! cursor moves independently of where the camera looks, and a ray down the
+	//! camera axis would answer for the middle of the screen instead of for the
+	//! thing that was clicked.
+	//!
+	//! Three intersection types in order, because one alone misses things an
+	//! admin can plainly see: fire geometry finds most entities, view geometry
+	//! finds foliage and anything with no fire volume, and plain geometry finds
+	//! the rest.
+	//! Insertion sort - result lists here are only ever a handful of entries.
+	protected void SortRaycastResultsByDistance( array< ref RaycastRVResult > results, vector from )
+	{
+		for ( int i = 1; i < results.Count(); i++ )
+		{
+			ref RaycastRVResult current = results[i];
+			float currentDist = vector.Distance( from, current.pos );
+			int j = i - 1;
+
+			while ( j >= 0 && vector.Distance( from, results[j].pos ) > currentDist )
+			{
+				results[j + 1] = results[j];
+				j--;
+			}
+
+			results[j + 1] = current;
+		}
+	}
+
+	//! GetDoorIndex only means anything against a VIEW geometry component -
+	//! this fires its own ray, on the same axis PickWorldObject used, with
+	//! type pinned to ObjIntersectView so the component it reads is in the
+	//! space GetDoorIndex actually expects. Returns -1 if the view ray does
+	//! not land on this same building (a wall gap, the roof, ...) at all.
+	protected int GetBuildingDoorIndexAtCursor( Building building )
+	{
+		if ( !building )
+			return -1;
+
+		vector from = g_Game.GetCurrentCameraPosition();
+		vector dir = g_Game.GetPointerDirection();
+
+		if ( dir.Length() < 0.01 )
+			dir = g_Game.GetCurrentCameraDirection();
+
+		vector to = from + ( dir * WORLD_MENU_RANGE );
+
+		RaycastRVParams rayInput = new RaycastRVParams( from, to );
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.1;
+		rayInput.type = ObjIntersectView;
+
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		if ( !DayZPhysics.RaycastRVProxy( rayInput, results ) )
+			return -1;
+
+		SortRaycastResultsByDistance( results, from );
+
+		foreach ( RaycastRVResult result: results )
+		{
+			Object obj = result.obj;
+			if ( !obj )
+				continue;
+
+			EntityAI entity;
+			if ( Class.CastTo( entity, obj ) && entity.GetHierarchyRoot() )
+				obj = entity.GetHierarchyRoot();
+
+			if ( obj != building )
+				continue;
+
+			return building.GetDoorIndex( result.component );
+		}
+
+		return -1;
+	}
+
+	protected Object PickWorldObject( out int outComponent )
+	{
+		outComponent = -1;
+
+		vector from = g_Game.GetCurrentCameraPosition();
+		vector dir = g_Game.GetPointerDirection();
+
+		if ( dir.Length() < 0.01 )
+			dir = g_Game.GetCurrentCameraDirection();
+
+		vector to = from + ( dir * WORLD_MENU_RANGE );
+
+		RaycastRVParams rayInput = new RaycastRVParams( from, to );
+		rayInput.flags = CollisionFlags.ALLOBJECTS;
+		rayInput.radius = 0.1;
+
+		array< ref RaycastRVResult > results = new array< ref RaycastRVResult >;
+
+		TIntArray types = { ObjIntersectFire, ObjIntersectView, ObjIntersectGeom };
+
+		foreach ( int type: types )
+		{
+			rayInput.type = type;
+
+			if ( !DayZPhysics.RaycastRVProxy( rayInput, results ) )
+				continue;
+
+			//! RaycastRVProxy does not guarantee hit order, so an overlapping
+			//! far object could otherwise win over a nearer one of the same
+			//! intersection type - sort by distance from the cursor ray origin
+			//! so the closest hit is always tried first.
+			SortRaycastResultsByDistance( results, from );
+
+			foreach ( RaycastRVResult result: results )
+			{
+				Object obj = result.obj;
+
+				if ( !obj )
+					continue;
+
+				//! An attachment or a cargo item answers the ray, but the thing
+				//! the admin pointed at is what is holding it.
+				EntityAI entity;
+				if ( Class.CastTo( entity, obj ) && entity.GetHierarchyRoot() )
+					obj = entity.GetHierarchyRoot();
+
+				//! In first person the camera sits inside the admin's own
+				//! collision mesh, so the ray answers with self before it ever
+				//! reaches whatever is actually under the cursor - skip it. In
+				//! third person the camera is well clear of the body, and a
+				//! self-hit there is the admin deliberately pointing at their
+				//! own character; that is a legitimate right-click target.
+				PlayerBase selfPlayer = PlayerBase.Cast( g_Game.GetPlayer() );
+				if ( obj == g_Game.GetPlayer() && ( !selfPlayer || !selfPlayer.IsInThirdPerson() ) )
+					continue;
+
+				COT_String objType = JMESPMeta.GetObjectType( obj );
+				objType.ToLower();
+
+				if ( objType == "#particlesourceenf" )
+					continue;
+
+				outComponent = result.component;
+				return obj;
+			}
+		}
+
+		return NULL;
+	}
+
+	//! A meta for an object nobody is tracking.
+	//!
+	//! Built through the view types rather than by a type switch here: they
+	//! already know which meta subclass an object needs - and third party mods
+	//! add their own - so the menu a right-click raises offers exactly the pages
+	//! it would have offered on a tag.
+	//!
+	//! The permission each view type carries is respected, but its View toggle
+	//! is not: the toggles say what to DRAW, and this draws nothing.
+	//!
+	//! Deliberately not put in m_MappedESPObjects - that map belongs to the ESP
+	//! worker thread, and an entry it did not make would be torn out from under
+	//! it on the next pass.
+	bool CreateMetaForObject( Object obj, out JMESPMeta meta )
+	{
+		if ( !obj )
+			return false;
+
+		//! Already tracked: use the meta the tag is using, so selecting from
+		//! the menu lights up the tag on screen and deselecting from either
+		//! place means the same thing.
+		if ( m_MappedESPObjects )
+		{
+			JMESPMeta tracked = m_MappedESPObjects.Get( obj );
+
+			if ( tracked )
+			{
+				meta = tracked;
+				return true;
+			}
+		}
+
+		array< ref JMESPViewType > viewTypes = GetViewTypes();
+
+		if ( viewTypes )
+		{
+			for ( int i = 0; i < viewTypes.Count(); ++i )
+			{
+				if ( !viewTypes[i].HasPermission )
+					continue;
+
+				if ( viewTypes[i].IsValid( obj, meta ) )
+				{
+					meta.module = this;
+					return true;
+				}
+			}
+		}
+
+		//! Nothing claimed it - every matching view type is denied, or it is
+		//! something no view type describes. The menu still works off the target
+		//! alone, so it gets a bare meta rather than nothing.
+		if ( !meta )
+			meta = new JMESPMeta;
+
+		meta.target = obj;
+		meta.module = this;
+		meta.colour = JMTheme.INK_50;
+
+		obj.GetNetworkID( meta.networkLow, meta.networkHigh );
+
+		meta.name = meta.GetName();
+
+		return true;
+	}
+
 	override void OnUpdate(float timeslice)
 	{
+		UpdateWorldContextMenu();
+
 		if (!DrawPlayerSkeletonsEnabled || !m_ESPCanvas || !m_ESPCanvas.HasCanvas())
 			return;
 
@@ -999,6 +1503,15 @@ class JMESPModule: JMRenderableModuleBase
 				{
 					ChunkGetObjects( objects, totalTimeTaken );
 
+					if ( m_ViewTypesByType[JMESPViewTypePlayer].View || m_ViewTypesByType[JMESPViewTypePlayerAI].View )
+					{
+						foreach ( Man playerBase : ClientData.m_PlayerBaseList )
+						{
+							if ( playerBase )
+								objects.Insert( playerBase );
+						}
+					}
+
 					if (!g_COT_ThreadESP)
 						break;
 
@@ -1049,7 +1562,7 @@ class JMESPModule: JMRenderableModuleBase
 							#ifdef JM_COT_ESP_DEBUG
 							bool metaIsValid = meta.IsValid();
 							#ifdef COT_DEBUGLOGS
-							Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid );
+							Print( "-" + meta.ClassName() + "::IsValid() = " + metaIsValid.ToString() );
 							#endif
 							if ( metaIsValid )
 							#else
@@ -1075,7 +1588,7 @@ class JMESPModule: JMRenderableModuleBase
 								#ifdef JM_COT_ESP_DEBUG
 								bool viewTypeIsValid = validViewTypes[j].IsValid( obj, meta );
 								#ifdef COT_DEBUGLOGS
-								Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + ", out = " + meta + " ) = " + viewTypeIsValid );
+								Print( "-" + validViewTypes[j].ClassName() + "::IsValid( obj = " + Object.GetDebugName( obj ) + " ) = " + viewTypeIsValid.ToString() );
 								#endif
 								if ( viewTypeIsValid )
 								#else
@@ -1211,6 +1724,9 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.BaseBuilding_Repair:
 			RPC_BaseBuilding_Repair( ctx, sender, target );
 			break;
+		case JMESPModuleRPC.BaseBuilding_SetPartHealth:
+			RPC_BaseBuilding_SetPartHealth( ctx, sender, target );
+			break;
 
 		case JMESPModuleRPC.Vehicle_Unstuck:
 			RPC_Vehicle_Unstuck( ctx, sender, target );
@@ -1235,7 +1751,146 @@ class JMESPModule: JMRenderableModuleBase
 		case JMESPModuleRPC.MoveToCursor:
 			RPC_MoveToCursor( ctx, sender, target );
 			break;
+
+		case JMESPModuleRPC.ObjectAction:
+			RPC_ObjectAction( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.ObjectActionResult:
+			RPC_ObjectActionResult( ctx, sender, target );
+			break;
+
+		case JMESPModuleRPC.UndoLastAction:
+			RPC_UndoLastAction( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.RedoLastAction:
+			RPC_RedoLastAction( ctx, sender, target );
+			break;
+
+		case JMESPModuleRPC.RecordTransformHistory:
+			RPC_RecordTransformHistory( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.SetAttachment:
+			RPC_SetAttachment( ctx, sender, target );
+			break;
+		case JMESPModuleRPC.RemoveAttachment:
+			RPC_RemoveAttachment( ctx, sender, target );
+			break;
 		}
+	}
+
+	//! Pop and replay the most recent entry on the shared JMActionHistory
+	//! stack - whatever it is (delete, heal, teleport, ...), not just an
+	//! ESP-flavoured one. This module just happens to already have a working
+	//! RPC pipe, so it hosts the parameterless trigger for all of them.
+	void UndoLastAction()
+	{
+		if ( IsMissionOffline() )
+		{
+			JMActionHistory.Undo( NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMESPModuleRPC.UndoLastAction, true, NULL );
+		}
+	}
+
+	void RedoLastAction()
+	{
+		if ( IsMissionOffline() )
+		{
+			JMActionHistory.Redo( NULL );
+		} else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Send( NULL, JMESPModuleRPC.RedoLastAction, true, NULL );
+		}
+	}
+
+	//! No standalone permission check here - JMActionHistory checks each
+	//! popped entry against the permission ITS OWN action required, which is
+	//! the correct gate: undoing is not a new grant of capability.
+	private void RPC_UndoLastAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMActionHistory.Undo( senderRPC );
+	}
+
+	private void RPC_RedoLastAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		JMActionHistory.Redo( senderRPC );
+	}
+
+	//! One push per move/rotate gesture (JMESPWidgetHandler.EndDrag), not per
+	//! throttled SetPosition/SetOrientation RPC sent during the drag itself -
+	//! those share their RPC with continuous per-frame updates and have no
+	//! per-gesture boundary of their own to record an undo step at.
+	void RecordTransformHistory( Object target, vector previousPosition, vector previousOrientation )
+	{
+		if ( !target )
+			return;
+
+		if ( IsMissionOffline() )
+		{
+			Exec_RecordTransformHistory( previousPosition, previousOrientation, target, NULL );
+		} else
+		{
+			//! Untargeted with a network id in the payload - see SetPosition
+			//! for why a targeted RPC is not safe here.
+			int netLow;
+			int netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Write( previousPosition );
+			rpc.Write( previousOrientation );
+			rpc.Send( NULL, JMESPModuleRPC.RecordTransformHistory, true, NULL );
+		}
+	}
+
+	private void Exec_RecordTransformHistory( vector previousPosition, vector previousOrientation, Object target, PlayerIdentity ident )
+	{
+		if ( !target )
+			return;
+
+		JMActionHistory.Push( new JMTransformHistoryEntry( target, previousPosition, previousOrientation ) );
+	}
+
+	private void RPC_RecordTransformHistory( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+
+		int netLow;
+		int netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		vector previousPosition;
+		vector previousOrientation;
+		if ( !ctx.Read( previousPosition ) )
+			return;
+		if ( !ctx.Read( previousOrientation ) )
+			return;
+
+	#ifdef SERVER
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( previousPosition ) )
+			return;
+
+		if ( !CommunityOnlineToolsBase.IsFiniteVector( previousOrientation ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
+			return;
+
+		Exec_RecordTransformHistory( previousPosition, previousOrientation, obj, senderRPC );
+	#endif
 	}
 
 	void Log( string log )
@@ -1257,15 +1912,55 @@ class JMESPModule: JMRenderableModuleBase
 		SendWebhookColored( "Log", instance, "Logging ESP action: " + log, JMConstants.WEBHOOK_COLOR_INFO );
 	}
 
+	//! An admin's ESP view state, written to the log and the webhook.
+	//!
+	//! Everything here is a guard against a client that is not the ESP form:
+	//! the handler appends to the admin log file and posts a webhook, so
+	//! unchecked it is a way for any player on the server to write whatever
+	//! they like into the audit trail, fill the log with it, and flood the
+	//! Discord endpoint from someone else's IP.
+	//!
+	//! The text is capped rather than rejected on length: the real sender only
+	//! ever writes a few fixed phrases, so anything longer is not a message
+	//! worth keeping whole.
 	private void RPC_Log( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		string log;
 		if ( !ctx.Read( log ) )
 			return;
 
-		Exec_Log( log, senderRPC, GetPermissionsManager().GetPlayer( senderRPC.GetId() ) );
+		if ( !senderRPC )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.View", senderRPC, instance ) )
+			return;
+
+		if ( !JMRPCThrottle.Allow( senderRPC.GetId(), "esp_log", LOG_MIN_INTERVAL_MS ) )
+			return;
+
+		if ( log.Length() > LOG_MAX_LENGTH )
+			log = log.Substring( 0, LOG_MAX_LENGTH );
+
+		Exec_Log( log, senderRPC, instance );
 	}
 
+	//! Sent UNTARGETED, with the target carried as a network id in the payload
+	//! rather than as the RPC's target object.
+	//!
+	//! A targeted ScriptRPC (rpc.Send(target, ...)) killed the server outright:
+	//! vanilla DayZGame.OnRPC dispatches a targeted RPC into native handling and
+	//! then on to target.OnRPC() BEFORE any of this module's script ever runs,
+	//! and with one of these ids aimed at a vehicle that path died in a native
+	//! memmove writing off the end of the thread stack (0xC0000005, identical
+	//! fault address on every crash). Instrumentation proved it: this module's
+	//! OnRPC was never entered for the targeted transform RPCs, while the
+	//! untargeted Log RPC on the same switch was handled normally every time.
+	//!
+	//! Sending untargeted and resolving the object server-side via
+	//! GetObjectByNetworkId keeps the whole exchange in script, and matches
+	//! what the rest of the mod already does (JMPlayerModule's spectate RPC,
+	//! JMVehiclesModule throughout, and RPC_DeleteObject just below).
 	void SetPosition( vector position, Object target )
 	{
 		if ( IsMissionOffline() )
@@ -1273,9 +1968,18 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_SetPosition( position, target, NULL );
 		} else
 		{
+			if ( !target )
+				return;
+
+			int netLow;
+			int netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( position );
-			rpc.Send( target, JMESPModuleRPC.SetPosition, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.SetPosition, true, NULL );
 		}
 	}
 
@@ -1299,28 +2003,61 @@ class JMESPModule: JMRenderableModuleBase
 				SetPosition(position, target);
 		#endif
 		}
-		
+
+		if ( !ShouldRecordMove( ident, "esp_move" ) )
+			return;
+
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=position value=" + position );
 		SendWebhookColored( "Position", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") position to " + position.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
+	//! Whether this admin's continuous transform should be written down again.
+	//!
+	//! An offline host has no identity and is never throttled - there is no
+	//! webhook and no remote sender to spend anything.
+	protected bool ShouldRecordMove( PlayerIdentity ident, string bucket )
+	{
+		if ( !ident )
+			return true;
+
+		return JMRPCThrottle.Allow( ident.GetId(), bucket, MOVE_RECORD_INTERVAL_MS );
+	}
+
 	private void RPC_SetPosition( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+
+		int netLow;
+		int netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		vector position;
 		if ( !ctx.Read( position ) )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 	#ifdef SERVER
+		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
 			return;
 
-		Exec_SetPosition( position, target, senderRPC, instance );
+		Exec_SetPosition( position, obj, senderRPC, instance );
 	#else
-		target.SetPosition( position );
+		obj.SetPosition( position );
 	#endif
 	}
 
+	//! Untargeted with a network id in the payload - see SetPosition above for
+	//! why a targeted RPC is not safe here.
 	void SetOrientation( vector orientation, Object target )
 	{
 		if ( IsMissionOffline() )
@@ -1328,9 +2065,18 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_SetOrientation( orientation, target, NULL );
 		} else
 		{
+			if ( !target )
+				return;
+
+			int netLow;
+			int netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( orientation );
-			rpc.Send( target, JMESPModuleRPC.SetOrientation, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.SetOrientation, true, NULL );
 		}
 	}
 
@@ -1338,6 +2084,7 @@ class JMESPModule: JMRenderableModuleBase
 	{
 		if ( !target )
 			return;
+
 
 		Transport transport;
 		if ( Class.CastTo( transport, target ) )
@@ -1355,24 +2102,43 @@ class JMESPModule: JMRenderableModuleBase
 		#endif
 		}
 
+		if ( !ShouldRecordMove( ident, "esp_turn" ) )
+			return;
+
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=orientation value=" + orientation );
 		SendWebhookColored( "Orientation", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") orientation to " + orientation.ToString(), JMConstants.WEBHOOK_COLOR_ESP );
 	}
 
 	private void RPC_SetOrientation( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+
+		int netLow;
+		int netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		vector orientation;
 		if ( !ctx.Read( orientation ) )
 			return;
 
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 	#ifdef SERVER
+		if ( !CommunityOnlineToolsBase.IsFiniteVector( orientation ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetOrientation", senderRPC ) )
 			return;
 
-		Exec_SetOrientation( orientation, target, senderRPC, instance );
+		Exec_SetOrientation( orientation, obj, senderRPC, instance );
 	#else
-		target.SetOrientation( orientation );
+		obj.SetOrientation( orientation );
 	#endif
 	}
 
@@ -1383,9 +2149,18 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_SetHealth( health, zone, target, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - vanilla OnRPC handles
+			//! that natively before any script runs and a stale/mismatched target
+			//! crashes the server outright (docs/systems/rpc.md - "Never send a
+			//! targeted RPC"). Send untargeted, carry the network id instead.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( health );
-			rpc.Send( target, JMESPModuleRPC.SetHealth, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.SetHealth, true, NULL );
 		}
 	}
 
@@ -1397,6 +2172,19 @@ class JMESPModule: JMRenderableModuleBase
 		if ( (target.IsInherited(Man) || target.IsInherited(DayZCreature)) && !target.IsAlive() )
 			return;
 
+		//! The number came off the wire. Clamped to what this type of entity
+		//! can actually hold, so a hand-written packet cannot hand the damage
+		//! system a negative, a NaN or a value no health bar can represent.
+		if ( !CommunityOnlineToolsBase.IsFiniteFloat( health ) )
+			return;
+
+		float maxHealth = MiscGameplayFunctions.GetTypeMaxGlobalHealth( target.GetType() );
+
+		if ( maxHealth > 0 )
+			health = Math.Clamp( health, 0, maxHealth );
+		else
+			health = Math.Max( health, 0 );
+
 		target.SetHealth( health );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=health value=" + health );
@@ -1405,6 +2193,10 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_SetHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		float health;
 		if ( !ctx.Read( health ) )
 			return;
@@ -1414,11 +2206,1303 @@ class JMESPModule: JMRenderableModuleBase
 		//if ( !ctx.Read( zone ) )
 			//return;
 
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC, instance ) )
 			return;
 
-		Exec_SetHealth( health, zone, target, senderRPC, instance );
+		Exec_SetHealth( health, zone, obj, senderRPC, instance );
+	}
+
+	// =========================================================================
+	//  Object actions
+	//
+	//  One RPC for every per-object property the panel can set. They share a
+	//  channel because they share a shape - an action id, an int and a float -
+	//  and a separate RPC each would be a dozen near-identical triples of
+	//  client call, exec and handler for no gain. The permission is still per
+	//  action, resolved server-side from the id.
+	// =========================================================================
+
+	//! Attach `className` in `slotId`, replacing whatever is already there.
+	//! Not routed through ObjectAction - see RPC.c's note on why this pair
+	//! gets its own RPC ids instead.
+	void SetAttachment( Object target, int slotId, string className )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_SetAttachment( slotId, className, target, NULL );
+		} else
+		{
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Write( slotId );
+			rpc.Write( className );
+			rpc.Send( NULL, JMESPModuleRPC.SetAttachment, true, NULL );
+		}
+	}
+
+	void RemoveAttachment( Object target, int slotId )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_RemoveAttachment( slotId, target, NULL );
+		} else
+		{
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Write( slotId );
+			rpc.Send( NULL, JMESPModuleRPC.RemoveAttachment, true, NULL );
+		}
+	}
+
+	private void RPC_SetAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int netLow, netHigh, slotId;
+		string className;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) || !ctx.Read( className ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetAttachment", senderRPC, instance ) )
+			return;
+
+		Exec_SetAttachment( slotId, className, obj, senderRPC, instance );
+	}
+
+	private void RPC_RemoveAttachment( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int netLow, netHigh, slotId;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) || !ctx.Read( slotId ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetAttachment", senderRPC, instance ) )
+			return;
+
+		Exec_RemoveAttachment( slotId, obj, senderRPC, instance );
+	}
+
+	private void Exec_SetAttachment( int slotId, string className, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		EntityAI entity = EntityAI.Cast( target );
+		if ( !entity || !entity.GetInventory() )
+			return;
+
+		GameInventory inventory = entity.GetInventory();
+
+		EntityAI existing = inventory.FindAttachment( slotId );
+		if ( existing )
+			g_Game.ObjectDelete( existing );
+
+		inventory.CreateAttachmentEx( className, slotId );
+
+		GetCommunityOnlineToolsBase().Log( ident, "Set attachment " + className + " on " + entity.GetType() );
+	}
+
+	private void Exec_RemoveAttachment( int slotId, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		EntityAI entity = EntityAI.Cast( target );
+		if ( !entity || !entity.GetInventory() )
+			return;
+
+		EntityAI existing = entity.GetInventory().FindAttachment( slotId );
+		if ( !existing )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( ident, "Removed attachment " + existing.GetType() + " from " + entity.GetType() );
+
+		g_Game.ObjectDelete( existing );
+	}
+
+	void ObjectAction( int action, int ivalue, float fvalue, Object target )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_ObjectAction( action, ivalue, fvalue, target, NULL );
+		} else
+		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Write( action );
+			rpc.Write( ivalue );
+			rpc.Write( fvalue );
+			rpc.Send( NULL, JMESPModuleRPC.ObjectAction, true, NULL );
+		}
+	}
+
+	//! The permission an action needs. An action with no entry here is not
+	//! dispatchable at all - a new id cannot reach an object by being forgotten
+	//! about.
+	static string PermissionForAction( int action )
+	{
+		switch ( action )
+		{
+			case JMESPObjectAction.SetQuantity:
+				return "ESP.Object.SetQuantity";
+			case JMESPObjectAction.SetLiquid:
+				return "ESP.Object.SetLiquid";
+			case JMESPObjectAction.SetCleanness:
+				return "ESP.Object.SetCleanness";
+			case JMESPObjectAction.SetFoodStage:
+				return "ESP.Object.SetFoodStage";
+			case JMESPObjectAction.SetOpen:
+				return "ESP.Object.OpenClose";
+			case JMESPObjectAction.SetLock:
+				return "ESP.Object.Lock";
+			case JMESPObjectAction.SetCode:
+				return "ESP.Object.SetCode";
+			case JMESPObjectAction.GetCode:
+				return "ESP.Object.GetCode";
+
+			case JMESPObjectAction.SetJammed:
+			case JMESPObjectAction.SetChambered:
+			case JMESPObjectAction.LoadMagazine:
+				return "ESP.Object.Weapon";
+
+			case JMESPObjectAction.SetBurning:
+			case JMESPObjectAction.FireplaceRefuel:
+			case JMESPObjectAction.SetStoneCircle:
+			case JMESPObjectAction.SetOven:
+			case JMESPObjectAction.CookAll:
+				return "ESP.Object.Fireplace";
+
+			//! The same permission as locking one, because that is what it is -
+			//! the radius only changes how many at a time.
+			case JMESPObjectAction.SetLockAll:
+				return "ESP.Object.Lock";
+
+			case JMESPObjectAction.SetLockWheels:
+				return "ESP.Object.Car.LockWheels";
+
+			case JMESPObjectAction.RefillCoolant:
+				return "ESP.Object.Car.Refuel";
+
+			case JMESPObjectAction.RepairAndFillSlots:
+				return "ESP.Object.Heal";
+
+			case JMESPObjectAction.ChangeColor:
+				return "ESP.Object.ChangeColor";
+
+			case JMESPObjectAction.SetGrenadePin:
+				return "ESP.Object.SetQuantity";
+
+			//! Traps have their own permission now that arming is offered
+			//! beside triggering. It is a child of ESP.Object like the rest, so
+			//! a role that allows the parent keeps working unchanged.
+			case JMESPObjectAction.TriggerTrap:
+			case JMESPObjectAction.SetTrapArmed:
+				return "ESP.Object.Trap";
+
+			case JMESPObjectAction.SetFenceOpen:
+				return "ESP.Object.BaseBuilding.Build";
+
+			case JMESPObjectAction.SetTentOpen:
+			case JMESPObjectAction.SetCarDoors:
+			case JMESPObjectAction.SetHouseDoorOpen:
+			case JMESPObjectAction.SetHouseDoorLocked:
+				return "ESP.Object.OpenClose";
+
+			//! Setting a fluid to a fraction is the same power as filling it.
+			case JMESPObjectAction.SetFuel:
+			case JMESPObjectAction.SetCoolant:
+				return "ESP.Object.Car.Refuel";
+
+			case JMESPObjectAction.FillInternalMagazine:
+				return "ESP.Object.Weapon";
+
+			case JMESPObjectAction.BuildAll:
+				return "ESP.Object.BaseBuilding.Build";
+
+			case JMESPObjectAction.DismantleAll:
+				return "ESP.Object.BaseBuilding.Dismantle";
+
+			case JMESPObjectAction.RepairAll:
+				return "ESP.Object.BaseBuilding.Repair";
+
+			case JMESPObjectAction.SetFlagRaised:
+				return "ESP.Object.Flag";
+
+			case JMESPObjectAction.ClearCargo:
+				return "ESP.Object.ClearCargo";
+
+			case JMESPObjectAction.SetImmobilized:
+				return "ESP.Object.Immobilize";
+		}
+
+		return "";
+	}
+
+	//! The lock that governs this object: the object itself if it is one, or
+	//! the one attached to it if it is a gate.
+	static CombinationLock GetCombinationLock( Object target )
+	{
+		CombinationLock combo;
+
+		if ( Class.CastTo( combo, target ) )
+			return combo;
+
+		EntityAI entity = EntityAI.Cast( target );
+
+		if ( !entity || !entity.GetInventory() )
+			return NULL;
+
+		for ( int i = 0; i < entity.GetInventory().AttachmentCount(); ++i )
+		{
+			if ( Class.CastTo( combo, entity.GetInventory().GetAttachmentFromIndex( i ) ) )
+				return combo;
+		}
+
+		return NULL;
+	}
+
+	private void Exec_ObjectAction( int action, int ivalue, float fvalue, Object target, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		if ( !target )
+			return;
+
+		ItemBase item = ItemBase.Cast( target );
+
+		string logValue = ivalue.ToString();
+
+		switch ( action )
+		{
+			case JMESPObjectAction.SetQuantity:
+				if ( !item )
+					return;
+				if ( !CommunityOnlineToolsBase.IsFiniteFloat( fvalue ) )
+					return;
+				//! Same reasoning as SetHealth: the value is a client's, and
+				//! an item's own maximum is the only bound that means anything.
+				fvalue = Math.Clamp( fvalue, 0, item.GetQuantityMax() );
+				item.SetQuantity( fvalue, false );
+				logValue = fvalue.ToString();
+				break;
+
+			case JMESPObjectAction.SetLiquid:
+				if ( !item )
+					return;
+				//! Liquid types are single bits by engine rule - "0 or any
+				//! power of two" - so a negative, or a value with more than one
+				//! bit set, is not a liquid the game defines.
+				if ( ivalue < 0 || ( ivalue & ( ivalue - 1 ) ) != 0 )
+					return;
+				item.SetLiquidType( ivalue );
+				break;
+
+			case JMESPObjectAction.SetCleanness:
+				if ( !item )
+					return;
+				//! Cleanness is a flag, not a scale.
+				if ( ivalue < 0 || ivalue > 1 )
+					return;
+				item.SetCleanness( ivalue );
+				break;
+
+			case JMESPObjectAction.SetFoodStage:
+				Edible_Base edible = Edible_Base.Cast( target );
+				if ( !edible )
+					return;
+				//! A stage outside the enum is not a food state the item has a
+				//! transition for.
+				if ( ivalue < FoodStageType.NONE || ivalue >= FoodStageType.COUNT )
+					return;
+				edible.ChangeFoodStage( ivalue );
+				break;
+
+			case JMESPObjectAction.SetOpen:
+				if ( !item )
+					return;
+				if ( ivalue )
+					item.Open();
+				else
+					item.Close();
+				break;
+
+			case JMESPObjectAction.SetLock:
+				Exec_SetLock( target, ivalue );
+				break;
+
+			case JMESPObjectAction.SetCode:
+				Exec_SetCode( target, ivalue );
+				break;
+
+			case JMESPObjectAction.GetCode:
+				Exec_GetCode( target, ident );
+				return;
+
+			case JMESPObjectAction.SetJammed:
+				if ( !Exec_SetJammed( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.SetChambered:
+				if ( !Exec_SetChambered( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.LoadMagazine:
+				if ( !Exec_LoadMagazine( target ) )
+					return;
+				break;
+
+			case JMESPObjectAction.SetBurning:
+				if ( !Exec_SetBurning( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.FireplaceRefuel:
+				if ( !Exec_FireplaceRefuel( target ) )
+					return;
+				break;
+
+			case JMESPObjectAction.SetStoneCircle:
+				if ( !Exec_SetStoneCircle( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.SetOven:
+				if ( !Exec_SetOven( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.CookAll:
+				logValue = Exec_CookAll( target ).ToString();
+				break;
+
+			case JMESPObjectAction.SetLockAll:
+				logValue = Exec_SetLockAll( target, ivalue ).ToString();
+				break;
+
+			case JMESPObjectAction.SetLockWheels:
+				Exec_SetLockWheels( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.RefillCoolant:
+				Exec_RefillCoolant( target, ident, instance );
+				return;
+
+			case JMESPObjectAction.RepairAndFillSlots:
+				Exec_RepairAndFillSlots( target, ident, instance );
+				return;
+
+			case JMESPObjectAction.ChangeColor:
+				Exec_ChangeColor( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetGrenadePin:
+				Exec_SetGrenadePin( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.TriggerTrap:
+				Exec_TriggerTrap( target, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetFenceOpen:
+				Exec_SetFenceOpen( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetTentOpen:
+				Exec_SetTentOpen( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetCarDoors:
+				Exec_SetCarDoors( target, ivalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetHouseDoorOpen:
+				Exec_SetHouseDoorOpen( target, ivalue, fvalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetHouseDoorLocked:
+				Exec_SetHouseDoorLocked( target, ivalue, fvalue, ident, instance );
+				return;
+
+			case JMESPObjectAction.SetFuel:
+				CommunityOnlineToolsBase.SetFuel01( target, fvalue );
+				logValue = fvalue.ToString();
+				break;
+
+			case JMESPObjectAction.SetCoolant:
+				CommunityOnlineToolsBase.SetCoolant01( target, fvalue );
+				logValue = fvalue.ToString();
+				break;
+
+			case JMESPObjectAction.FillInternalMagazine:
+				if ( !Exec_FillInternalMagazine( target ) )
+					return;
+				break;
+
+			case JMESPObjectAction.BuildAll:
+				logValue = Exec_BuildAll( target, ident, instance ).ToString();
+				break;
+
+			case JMESPObjectAction.DismantleAll:
+				logValue = Exec_DismantleAll( target, ident, instance ).ToString();
+				break;
+
+			case JMESPObjectAction.RepairAll:
+				logValue = Exec_RepairAll( target, ident, instance ).ToString();
+				break;
+
+			case JMESPObjectAction.SetFlagRaised:
+				if ( !Exec_SetFlagRaised( target, fvalue ) )
+					return;
+				logValue = fvalue.ToString();
+				break;
+
+			case JMESPObjectAction.ClearCargo:
+				logValue = CommunityOnlineToolsBase.ClearCargo( EntityAI.Cast( target ) ).ToString();
+				break;
+
+			case JMESPObjectAction.SetImmobilized:
+				if ( !Exec_SetImmobilized( target, ivalue ) )
+					return;
+				break;
+
+			case JMESPObjectAction.SetTrapArmed:
+				if ( !Exec_SetTrapArmed( target, ivalue, ident ) )
+					return;
+				break;
+
+			default:
+				return;
+		}
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=" + action + " value=" + logValue );
+		SendWebhookColored( "Object", instance, "Set \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") action " + action + " to " + logValue, JMConstants.WEBHOOK_COLOR_ESP );
+	}
+
+	private void Exec_SetLockWheels( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		CommunityOnlineToolsBase.SetLockWheels( target, ivalue != 0 );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=lockwheels state=" + ivalue );
+		SendWebhookColored( "SetLockWheels", instance, "Wheels lock state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_RefillCoolant( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		CommunityOnlineToolsBase.RefillCoolant( target );
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=refillcoolant" );
+		SendWebhookColored( "RefillCoolant", instance, "Refilled coolant for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_RepairAndFillSlots( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		EntityAI entity = EntityAI.Cast( target );
+		if ( !entity )
+			return;
+
+		CommunityOnlineToolsBase.RepairEntityRecursive( entity );
+		CommunityOnlineToolsBase.Refuel( entity );
+		GetCommunityOnlineToolsBase().SpawnCompatibleAttachmentsWithColor( entity, NULL, 2, "" );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=repairandfill" );
+		SendWebhookColored( "RepairAndFillSlots", instance, "Repaired and filled slots for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_ChangeColor( Object target, int colorIndex, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		EntityAI entity = EntityAI.Cast( target );
+		if ( !entity )
+			return;
+
+		// Color is a whole-object property - paint the thing a sub-part
+		// belongs to, never the sub-part the menu happened to be opened on.
+		if ( entity.GetHierarchyRoot() )
+			entity = EntityAI.Cast( entity.GetHierarchyRoot() );
+
+		string color = JMObjectSpawnerModule.GetColorTokenAt( colorIndex );
+		if ( color == "" )
+			return;
+
+		string label = target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition();
+
+		GetCommunityOnlineToolsBase().RecolorEntityAndAttachments( entity, NULL, color, 2 );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=changecolor color=" + color );
+		SendWebhookColored( "ChangeColor", instance, "Changed color to " + color + " for " + label, JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetGrenadePin( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		Grenade_Base grenade = Grenade_Base.Cast( target );
+		if ( !grenade )
+			return;
+
+		if ( ivalue != 0 )
+			grenade.Pin();
+		else
+			grenade.Unpin();
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=grenadepin state=" + ivalue );
+		SendWebhookColored( "SetGrenadePin", instance, "Grenade pin state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_TriggerTrap( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		TrapBase trap = TrapBase.Cast( target );
+		if ( !trap )
+			return;
+
+		trap.OnSteppedOn( NULL );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=triggertrap" );
+		SendWebhookColored( "TriggerTrap", instance, "Triggered trap " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetFenceOpen( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		Fence fence = Fence.Cast( target );
+		if ( !fence )
+			return;
+
+		if ( ivalue != 0 )
+			fence.OpenFence();
+		else
+			fence.CloseFence();
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=fenceopen state=" + ivalue );
+		SendWebhookColored( "SetFenceOpen", instance, "Fence open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetHouseDoorOpen( Object target, int ivalue, float fvalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		Building house = Building.Cast( target );
+		if ( !house )
+			return;
+
+		int doorIndex = fvalue;
+
+		if ( ivalue != 0 )
+			house.OpenDoor( doorIndex );
+		else
+			house.CloseDoor( doorIndex );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=housedooropen door=" + doorIndex + " state=" + ivalue );
+		SendWebhookColored( "SetHouseDoorOpen", instance, "Door " + doorIndex + " open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetHouseDoorLocked( Object target, int ivalue, float fvalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		Building house = Building.Cast( target );
+		if ( !house )
+			return;
+
+		int doorIndex = fvalue;
+
+		if ( ivalue != 0 )
+			house.LockDoor( doorIndex );
+		else
+			house.UnlockDoor( doorIndex );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=housedoorlocked door=" + doorIndex + " state=" + ivalue );
+		SendWebhookColored( "SetHouseDoorLocked", instance, "Door " + doorIndex + " locked state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetTentOpen( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		TentBase tent = TentBase.Cast( target );
+		if ( !tent )
+			return;
+
+		if ( ivalue != 0 )
+			tent.Open();
+		else
+			tent.Close();
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=tentopen state=" + ivalue );
+		SendWebhookColored( "SetTentOpen", instance, "Tent open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	private void Exec_SetCarDoors( Object target, int ivalue, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		CarScript car = CarScript.Cast( target );
+		if ( !car )
+			return;
+
+		car.COT_SetCarDoors( ivalue != 0 );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=cardoors state=" + ivalue );
+		SendWebhookColored( "SetCarDoors", instance, "Car doors open state set to " + ivalue + " for " + target.GetDisplayName() + " (" + target.GetType() + ") at " + target.GetPosition(), JMConstants.WEBHOOK_COLOR_SUCCESS );
+	}
+
+	//! Load the magazine a weapon carries INSIDE itself.
+	//!
+	//! Separate from LoadMagazine, which attaches one: a gun is one or the
+	//! other, and the two rows never both apply to the same weapon.
+	private bool Exec_FillInternalMagazine( Object target )
+	{
+		Weapon_Base weapon;
+
+		if ( !Class.CastTo( weapon, target ) )
+			return false;
+
+		if ( !weapon.HasInternalMagazine( -1 ) )
+			return false;
+
+		return weapon.FillInnerMagazine( "", WeaponWithAmmoFlags.CHAMBER );
+	}
+
+	//! Build every part that can be built right now.
+	//!
+	//! Only the parts the construction itself reports as buildable are passed
+	//! in: COT_BuildParts walks each one's required parts on its own, so a
+	//! wall's base is built by asking for the wall rather than by ordering the
+	//! list here.
+	private int Exec_BuildAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		BaseBuildingBase building;
+
+		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+			return 0;
+
+		bool requireMaterials = true;
+		if ( !IsMissionOffline() )
+			requireMaterials = !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired", ident, instance );
+
+		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
+		building.GetConstruction().COT_GetParts( parts, requireMaterials );
+
+		TStringArray names = new TStringArray;
+
+		for ( int i = 0; i < parts.Count(); ++i )
+		{
+			if ( parts.GetElement( i ).m_State == JMConstructionPartState.CAN_BUILD )
+				names.Insert( parts.GetKey( i ) );
+		}
+
+		if ( names.Count() == 0 )
+			return 0;
+
+		PlayerBase player;
+		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
+
+		building.GetConstruction().COT_BuildParts( names, player, requireMaterials );
+
+		SendWebhookColored( "BB_Build", instance, "Built every buildable part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_ESP );
+
+		return names.Count();
+	}
+
+	//! Take the whole construction apart, base part included - which is what
+	//! dismantling a base building object down to nothing means, so the entity
+	//! itself goes with the last part.
+	private int Exec_DismantleAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		BaseBuildingBase building;
+
+		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+			return 0;
+
+		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
+		building.GetConstruction().COT_GetParts( parts, false );
+
+		TStringArray names = new TStringArray;
+
+		for ( int i = 0; i < parts.Count(); ++i )
+		{
+			if ( parts.GetElement( i ).m_State == JMConstructionPartState.BUILT )
+				names.Insert( parts.GetKey( i ) );
+		}
+
+		if ( names.Count() == 0 )
+			return 0;
+
+		PlayerBase player;
+		Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
+
+		building.GetConstruction().COT_DismantleParts( names, player );
+
+		SendWebhookColored( "BB_Dismantle", instance, "Dismantled every built part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_WARNING );
+
+		return names.Count();
+	}
+
+	//! Heal every already-built construction part of a base building object.
+	private int Exec_RepairAll( Object target, PlayerIdentity ident = NULL, JMPlayerInstance instance = NULL )
+	{
+		BaseBuildingBase building;
+
+		if ( !Class.CastTo( building, target ) || !building.GetConstruction() )
+			return 0;
+
+		map< string, ref JMConstructionPartData > parts = new map< string, ref JMConstructionPartData >;
+		building.GetConstruction().COT_GetParts( parts, false );
+
+		TStringArray names = new TStringArray;
+
+		for ( int i = 0; i < parts.Count(); ++i )
+		{
+			if ( parts.GetElement( i ).m_State == JMConstructionPartState.BUILT )
+				names.Insert( parts.GetKey( i ) );
+		}
+
+		if ( names.Count() == 0 )
+			return 0;
+
+		building.GetConstruction().COT_RepairParts( names );
+
+		SendWebhookColored( "BB_Repair", instance, "Repaired every built part (" + names.Count() + ") of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ")", JMConstants.WEBHOOK_COLOR_SUCCESS );
+
+		return names.Count();
+	}
+
+	//! Move a flag pole's mast to a fraction raised.
+	//!
+	//! The mast animation runs the other way round - 0 is fully raised - and
+	//! the refresher timer is moved with it, because in vanilla a flag's height
+	//! IS the remaining refresh time and leaving the two apart makes a raised
+	//! flag that refreshes nothing.
+	private bool Exec_SetFlagRaised( Object target, float raised01 )
+	{
+		TerritoryFlag flag;
+
+		if ( !Class.CastTo( flag, target ) )
+			return false;
+
+		float raised = Math.Clamp( raised01, 0, 1 );
+
+		flag.AnimateFlag( 1 - raised );
+		flag.AddRefresherTime01( raised - flag.GetRefresherTime01() );
+
+		return true;
+	}
+
+	private bool Exec_SetImmobilized( Object target, int state )
+	{
+		ZombieBase zombie;
+		AnimalBase animal;
+
+		if ( Class.CastTo( zombie, target ) )
+			zombie.COT_SetImmobilized( state != 0 );
+		else if ( Class.CastTo( animal, target ) )
+			animal.COT_SetImmobilized( state != 0 );
+		else
+			return false;
+
+		return true;
+	}
+
+	//! Arm or disarm a trap where it lies.
+	//!
+	//! Arming goes through StartActivate rather than SetActive so it takes the
+	//! trap's own arming delay and, through the COT override, records the admin
+	//! who armed it as the owner of whatever it later kills.
+	private bool Exec_SetTrapArmed( Object target, int armed, PlayerIdentity ident = NULL )
+	{
+		TrapBase trap;
+
+		if ( !Class.CastTo( trap, target ) )
+			return false;
+
+		if ( armed != 0 )
+		{
+			if ( trap.IsActive() )
+				return false;
+
+			PlayerBase player;
+			Class.CastTo( player, GetPlayerObjectByIdentity( ident ) );
+
+			trap.StartActivate( player );
+
+			return true;
+		}
+
+		trap.SetInactive();
+
+		return true;
+	}
+
+	// =========================================================================
+	//  Weapons
+	// =========================================================================
+
+	//! Jam or clear a jam.
+	//!
+	//! Unjamming re-rolls the weapon's state machine the same way the player
+	//! manager's inventory unjam does - a weapon left in its jammed FSM state
+	//! with the flag cleared answers every later action as if it were still
+	//! stuck.
+	private bool Exec_SetJammed( Object target, int jammed )
+	{
+		Weapon_Base weapon;
+
+		if ( !Class.CastTo( weapon, target ) )
+			return false;
+
+		if ( weapon.IsJammed() == ( jammed != 0 ) )
+			return false;
+
+		weapon.SetJammed( jammed != 0 );
+		weapon.RandomizeFSMState();
+		weapon.Synchronize();
+
+		return true;
+	}
+
+	//! Put a round in the chamber or take one out.
+	//!
+	//! The cartridge to push is whatever the weapon itself says it can take -
+	//! GetRandomChamberableAmmoTypeName answers per muzzle, so a chambering
+	//! action never has to know what calibre it is looking at.
+	private bool Exec_SetChambered( Object target, int chambered )
+	{
+		Weapon_Base weapon;
+
+		if ( !Class.CastTo( weapon, target ) )
+			return false;
+
+		int muzzle = weapon.GetCurrentMuzzle();
+		bool changed;
+
+		if ( chambered == 0 )
+		{
+			if ( weapon.IsChamberEmpty( muzzle ) )
+				return false;
+
+			float popDamage;
+			string popType;
+
+			changed = weapon.PopCartridgeFromChamber( muzzle, popDamage, popType );
+		}
+		else
+		{
+			if ( weapon.IsChamberFull( muzzle ) )
+				return false;
+
+			string ammoType = weapon.GetRandomChamberableAmmoTypeName( muzzle );
+
+			if ( ammoType == "" )
+				return false;
+
+			changed = weapon.PushCartridgeToChamber( muzzle, 0, ammoType );
+		}
+
+		//! Push/PopCartridgeFromChamber only touch the chamber data - unlike
+		//! every other FSM-relevant change in this file, they don't drive the
+		//! state machine themselves. Vanilla always follows a chamber change
+		//! with this same pair ("FSM cares about chamber state", see
+		//! Weapon_Base.OnStoreSave-adjacent call sites in weapon_base.c) -
+		//! without it the chamber data changes on the server but the FSM/anim
+		//! state never catches up, so the action looks like it did nothing.
+		if ( changed )
+		{
+			weapon.RandomizeFSMState();
+			weapon.Synchronize();
+		}
+
+		return changed;
+	}
+
+	//! Attach a full magazine of whatever the weapon is configured to take.
+	//!
+	//! The type comes from the weapon's own magazines[] array rather than from
+	//! a list here: every weapon declares what fits it, and a table in this file
+	//! would be one more thing to keep in step with every mod that adds a gun.
+	private bool Exec_LoadMagazine( Object target )
+	{
+		Weapon_Base weapon;
+
+		if ( !Class.CastTo( weapon, target ) )
+			return false;
+
+		TStringArray magazines = new TStringArray;
+		g_Game.ConfigGetTextArray( "CfgWeapons " + weapon.GetType() + " magazines", magazines );
+
+		if ( magazines.Count() == 0 )
+			g_Game.ConfigGetTextArray( "CfgVehicles " + weapon.GetType() + " magazines", magazines );
+
+		if ( magazines.Count() == 0 )
+			return false;
+
+		//! Already wearing one: swap rather than stack a second in a slot that
+		//! only holds one anyway.
+		Magazine existing;
+
+		for ( int i = 0; i < weapon.GetInventory().AttachmentCount(); i++ )
+		{
+			if ( Class.CastTo( existing, weapon.GetInventory().GetAttachmentFromIndex( i ) ) )
+			{
+				existing.ServerSetAmmoMax();
+				return true;
+			}
+		}
+
+		Magazine created;
+
+		if ( !Class.CastTo( created, weapon.GetInventory().CreateAttachment( magazines[0] ) ) )
+			return false;
+
+		created.ServerSetAmmoMax();
+
+		return true;
+	}
+
+	// =========================================================================
+	//  Fireplaces
+	// =========================================================================
+
+	//! Light or put out a fire.
+	//!
+	//! force_start is passed so a fireplace that thinks it is already burning
+	//! still re-runs its start path - an admin pressing ignite on something
+	//! that looks unlit means "be lit", not "toggle a flag".
+	//!
+	//! A fire with nothing to burn goes straight back out on its first heating
+	//! tick, which is why refuel exists beside this.
+	private bool Exec_SetBurning( Object target, int burning )
+	{
+		FireplaceBase fireplace;
+
+		if ( !Class.CastTo( fireplace, target ) )
+			return false;
+
+		if ( burning != 0 )
+			fireplace.StartFire( true );
+		else
+			fireplace.StopFire();
+
+		return true;
+	}
+
+	//! Fill the fireplace with firewood.
+	//!
+	//! Created in its cargo rather than handed to the admin: the point is a fire
+	//! that will keep burning, and fuel in an inventory somewhere else does not
+	//! do that.
+	private bool Exec_FireplaceRefuel( Object target )
+	{
+		FireplaceBase fireplace;
+
+		if ( !Class.CastTo( fireplace, target ) || !fireplace.GetInventory() )
+			return false;
+
+		ItemBase wood;
+
+		if ( !Class.CastTo( wood, fireplace.GetInventory().CreateInInventory( FUEL_TYPE ) ) )
+			return false;
+
+		wood.SetQuantityMax();
+
+		return true;
+	}
+
+	private bool Exec_SetStoneCircle( Object target, int state )
+	{
+		FireplaceBase fireplace;
+
+		if ( !Class.CastTo( fireplace, target ) )
+			return false;
+
+		fireplace.SetStoneCircleState( state != 0 );
+
+		return true;
+	}
+
+	private bool Exec_SetOven( Object target, int state )
+	{
+		FireplaceBase fireplace;
+
+		if ( !Class.CastTo( fireplace, target ) )
+			return false;
+
+		fireplace.SetOvenState( state != 0 );
+
+		return true;
+	}
+
+	//! Finish every piece of food on the fireplace, and in anything standing on
+	//! it - a pot or a pan is an attachment holding its own cargo.
+	//!
+	//! Answers how many items it changed, which is what the log line wants: a
+	//! cook-all over an empty fireplace and one over a full pot are the same
+	//! action and should not read the same afterwards.
+	private int Exec_CookAll( Object target )
+	{
+		FireplaceBase fireplace;
+
+		if ( !Class.CastTo( fireplace, target ) || !fireplace.GetInventory() )
+			return 0;
+
+		int cooked = CookContainer( fireplace );
+
+		for ( int i = 0; i < fireplace.GetInventory().AttachmentCount(); i++ )
+		{
+			EntityAI attachment = fireplace.GetInventory().GetAttachmentFromIndex( i );
+
+			if ( attachment )
+				cooked += CookContainer( attachment );
+		}
+
+		return cooked;
+	}
+
+	//! Cook everything directly in `container`'s cargo. Not recursive past one
+	//! level on purpose: a fireplace holds pots, a pot holds food, and nothing
+	//! sensible is nested deeper than that.
+	private int CookContainer( EntityAI container )
+	{
+		//! An attachment need not have an inventory at all - a fireplace tripod
+		//! holds one, a stone does not.
+		if ( !container || !container.GetInventory() )
+			return 0;
+
+		CargoBase cargo = container.GetInventory().GetCargo();
+
+		if ( !cargo )
+			return 0;
+
+		int cooked = 0;
+
+		for ( int i = 0; i < cargo.GetItemCount(); i++ )
+		{
+			Edible_Base edible;
+
+			if ( !Class.CastTo( edible, cargo.GetItem( i ) ) )
+				continue;
+
+			int stage = BestCookedStage( edible.GetType() );
+
+			if ( stage == FoodStageType.NONE )
+				continue;
+
+			edible.ChangeFoodStage( stage );
+			cooked++;
+		}
+
+		return cooked;
+	}
+
+	//! The stage this class calls "cooked".
+	//!
+	//! Read off the config rather than assumed to be BAKED: there is no script
+	//! query for which stages a class declares, and asking for one it does not
+	//! have spawns it unchanged - the action would look like it did nothing.
+	private int BestCookedStage( string classname )
+	{
+		TStringArray names  = { "Baked", "Boiled", "Dried" };
+		TIntArray    stages = { FoodStageType.BAKED, FoodStageType.BOILED, FoodStageType.DRIED };
+
+		for ( int i = 0; i < names.Count(); i++ )
+		{
+			if ( g_Game.ConfigIsExisting( "CfgVehicles " + classname + " Food FoodStages " + names[i] ) )
+				return stages[i];
+		}
+
+		return FoodStageType.NONE;
+	}
+
+	// =========================================================================
+	//  Locks
+	// =========================================================================
+
+	//! Lock or unlock every combination lock standing near the target.
+	//!
+	//! A base is not one entity - every gate, door and tower carries its own
+	//! lock - so "lock the base" cannot be addressed to a single object. The
+	//! radius is what makes it one action instead of one right-click per gate.
+	//!
+	//! Answers how many locks it touched so the log says what actually happened
+	//! rather than just that the button was pressed.
+	private int Exec_SetLockAll( Object target, int locked )
+	{
+		array<Object> nearby = new array<Object>;
+		array<CargoBase> proxy = new array<CargoBase>;
+
+		g_Game.GetObjectsAtPosition3D( target.GetPosition(), LOCK_ALL_RADIUS, nearby, proxy );
+
+		int touched = 0;
+
+		for ( int i = 0; i < nearby.Count(); i++ )
+		{
+			CombinationLock combo = GetCombinationLock( nearby[i] );
+
+			if ( !combo )
+				continue;
+
+			//! An object and the lock hanging off it both answer with the same
+			//! lock, so the same one arrives twice.
+			if ( combo.IsLocked() == ( locked != 0 ) )
+				continue;
+
+			Exec_SetLock( nearby[i], locked );
+			touched++;
+		}
+
+		return touched;
+	}
+
+	//! Locking runs the vanilla server path so the slot lock and the shuffle
+	//! happen too. Unlocking does NOT: UnlockServer is the "take the lock off"
+	//! action and drops it on the ground. An admin unlocking a gate wants it
+	//! open, not disassembled, so the dial is simply turned back to the locked
+	//! combination - which is exactly what the lock itself calls unlocked.
+	private void Exec_SetLock( Object target, int locked )
+	{
+		CombinationLock combo = GetCombinationLock( target );
+
+		if ( !combo )
+			return;
+
+		if ( locked )
+		{
+			combo.LockServer( EntityAI.Cast( combo.GetHierarchyParent() ) );
+			return;
+		}
+
+		combo.SetCombination( combo.m_CombinationLocked );
+		combo.CheckLockedStateServer();
+		combo.Synchronize();
+	}
+
+	//! Changing the code keeps the lock in the state it was already in: a
+	//! locked gate stays locked on the new code rather than falling open.
+	private void Exec_SetCode( Object target, int code )
+	{
+		CombinationLock combo = GetCombinationLock( target );
+
+		if ( !combo )
+			return;
+
+		//! The lock net-syncs its combination as an int registered over exactly
+		//! the range its dials can show. A code from outside that range - which
+		//! is anything a hand-written packet cares to send - is a value the
+		//! sync cannot carry, and leaves a lock nobody can ever open.
+		int maxCode = Math.Pow( 10, combo.GetLockDigits() ) - 1;
+
+		if ( code < 0 || code > maxCode )
+			return;
+
+		bool wasLocked = combo.IsLocked();
+
+		combo.m_CombinationLocked = code;
+		combo.SetCombination( code );
+
+#ifndef DAYZ_1_30
+		if ( wasLocked )
+			combo.ShuffleLock(); //! protected as of 1.30, dials just won't reshuffle visually there
+#endif
+
+		combo.CheckLockedStateServer();
+		combo.Synchronize();
+	}
+
+	//! The locked combination is not among the lock's net-synced variables -
+	//! only the dialled one is - so the client cannot read it and has to ask.
+	private void Exec_GetCode( Object target, PlayerIdentity ident )
+	{
+		CombinationLock combo = GetCombinationLock( target );
+
+		if ( !combo )
+			return;
+
+		if ( !ident )
+		{
+			OnObjectActionResult( JMESPObjectAction.GetCode, combo.m_CombinationLocked );
+			return;
+		}
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( JMESPObjectAction.GetCode );
+		rpc.Write( combo.m_CombinationLocked );
+		rpc.Send( NULL, JMESPModuleRPC.ObjectActionResult, true, ident );
+	}
+
+	private void RPC_ObjectAction( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		int action;
+		if ( !ctx.Read( action ) )
+			return;
+
+		int ivalue;
+		if ( !ctx.Read( ivalue ) )
+			return;
+
+		float fvalue;
+		if ( !ctx.Read( fvalue ) )
+			return;
+
+		string permission = PermissionForAction( action );
+
+		if ( permission == "" )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( permission, senderRPC, instance ) )
+			return;
+
+		Exec_ObjectAction( action, ivalue, fvalue, obj, senderRPC, instance );
+	}
+
+	private void RPC_ObjectActionResult( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionClient() )
+			return;
+
+		int action;
+		if ( !ctx.Read( action ) )
+			return;
+
+		int ivalue;
+		if ( !ctx.Read( ivalue ) )
+			return;
+
+		OnObjectActionResult( action, ivalue );
+	}
+
+	private void OnObjectActionResult( int action, int ivalue )
+	{
+		if ( action != JMESPObjectAction.GetCode )
+			return;
+
+		g_Game.CopyToClipboard( ivalue.ToString() );
+
+		COTCreateLocalAdminNotification( new StringLocaliser( "STR_COT_ESP_MODULE_NOTIFY_CODE_COPIED", ivalue.ToString() ) );
 	}
 
 	void DeleteObject( int networkLow, int networkHigh )
@@ -1448,6 +3532,10 @@ class JMESPModule: JMRenderableModuleBase
 		vector transform[4];
 		target.GetTransform( transform );
 
+		//! Captured before the delete - the entry reads the target's own
+		//! state to know what to bring back.
+		JMActionHistory.Push( new JMDeleteHistoryEntry( target ) );
+
 		g_Game.ObjectDelete( target );
 
 		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + obtype + " position=" + transform[3].ToString() + " action=delete" );
@@ -1463,6 +3551,9 @@ class JMESPModule: JMRenderableModuleBase
 
 		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
 
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC, instance ) )
 			return;
@@ -1477,9 +3568,15 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Build( target, part, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Build, true, NULL );
 		}
 	}
 
@@ -1500,8 +3597,19 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_BaseBuilding_Build( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		string part_name;
 		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
 			return;
 
 		JMPlayerInstance instance;
@@ -1509,7 +3617,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		BaseBuildingBase bb;
-		if ( Class.CastTo( bb, target ) )
+		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Build( bb, part_name, senderRPC, instance );
 	}
 
@@ -1520,9 +3628,15 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Dismantle( target, part, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Dismantle, true, NULL );
 		}
 	}
 
@@ -1539,8 +3653,19 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_BaseBuilding_Dismantle( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		string part_name;
 		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
 			return;
 
 		JMPlayerInstance instance;
@@ -1548,7 +3673,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		BaseBuildingBase bb;
-		if ( Class.CastTo( bb, target ) )
+		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Dismantle( bb, part_name, senderRPC, instance );
 	}
 
@@ -1559,9 +3684,15 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_BaseBuilding_Repair( target, part, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
 			rpc.Write( part );
-			rpc.Send( target, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
+			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_Repair, true, NULL );
 		}
 	}
 
@@ -1575,8 +3706,19 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_BaseBuilding_Repair( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
 		string part_name;
 		if ( !ctx.Read( part_name ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
 			return;
 
 		JMPlayerInstance instance;
@@ -1584,11 +3726,94 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		BaseBuildingBase bb;
-		if ( Class.CastTo( bb, target ) )
+		if ( Class.CastTo( bb, obj ) )
 			Exec_BaseBuilding_Repair( bb, part_name, senderRPC, instance );
 	}
 
-	
+		//! Damage or restore ONE part of a base building object.
+	//!
+	//! Separate from SetHealth, which only ever addresses an object's global
+	//! health: a wall's parts are damage ZONES on one entity, so setting the
+	//! whole thing's health would flatten every part at once and there would be
+	//! no way to ruin a single gate.
+	//!
+	//! `health01` is a fraction of that zone's own maximum, because the maximum
+	//! differs per part and per material tier - a number of hit points would
+	//! mean something different on every row of the menu.
+	void BaseBuilding_SetPartHealth( BaseBuildingBase target, string part, float health01 )
+	{
+		if ( IsMissionOffline() )
+		{
+			Exec_BaseBuilding_SetPartHealth( target, part, health01, NULL );
+		} else
+		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Write( part );
+			rpc.Write( health01 );
+			rpc.Send( NULL, JMESPModuleRPC.BaseBuilding_SetPartHealth, true, NULL );
+		}
+	}
+
+	private void Exec_BaseBuilding_SetPartHealth( BaseBuildingBase target, string part_name, float health01, PlayerIdentity ident, JMPlayerInstance instance = NULL )
+	{
+		if ( !target )
+			return;
+
+		//! The part is named by its CONSTRUCTION part name; the health lives on
+		//! the damage zone that part maps to, and only the damage system knows
+		//! which that is.
+		string damageZone;
+
+		if ( !DamageSystem.GetDamageZoneFromComponentName( target, part_name, damageZone ) )
+			return;
+
+		float maxHealth = target.GetMaxHealth( damageZone, "Health" );
+
+		if ( maxHealth <= 0 )
+			return;
+
+		target.SetHealth( damageZone, "Health", Math.Clamp( health01, 0, 1 ) * maxHealth );
+
+		GetCommunityOnlineToolsBase().Log( ident, "ESP target=" + target + " action=parthealth part=" + part_name + " value=" + health01 );
+		SendWebhookColored( "BB_Repair", instance, "Set the part \"" + part_name + "\" of \"" + target.GetDisplayName() + "\" (" + target.GetType() + ") to " + Math.Round( health01 * 100 ) + "% health", JMConstants.WEBHOOK_COLOR_WARNING );
+	}
+
+	private void RPC_BaseBuilding_SetPartHealth( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		string part_name;
+		if ( !ctx.Read( part_name ) )
+			return;
+
+		float health01;
+		if ( !ctx.Read( health01 ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.SetHealth", senderRPC, instance ) )
+			return;
+
+		BaseBuildingBase bb;
+		if ( Class.CastTo( bb, obj ) )
+			Exec_BaseBuilding_SetPartHealth( bb, part_name, health01, senderRPC, instance );
+	}
+
 	void Vehicle_Unstuck( Object target )
 	{
 		if ( IsMissionOffline() )
@@ -1596,8 +3821,14 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Vehicle_Unstuck( target, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Unstuck, true, NULL );
 		}
 	}
 
@@ -1615,11 +3846,22 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_Vehicle_Unstuck( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
 			return;
 
-		Exec_Vehicle_Unstuck( target, senderRPC, instance );
+		Exec_Vehicle_Unstuck( obj, senderRPC, instance );
 	}
 
 	void Vehicle_Refuel( Object target)
@@ -1629,8 +3871,14 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Vehicle_Refuel( target, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Send( NULL, JMESPModuleRPC.Vehicle_Refuel, true, NULL );
 		}
 	}
 
@@ -1644,11 +3892,22 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_Vehicle_Refuel( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Refuel", senderRPC, instance ) )
 			return;
 
-		Exec_Vehicle_Refuel( target, senderRPC, instance );
+		Exec_Vehicle_Refuel( obj, senderRPC, instance );
 	}
 
 	void Heal( Object target )
@@ -1658,8 +3917,14 @@ class JMESPModule: JMRenderableModuleBase
 			Exec_Heal( target, NULL );
 		} else
 		{
+			//! Never target a ScriptRPC at a world object - see SetHealth() above.
+			int netLow, netHigh;
+			target.GetNetworkID( netLow, netHigh );
+
 			ScriptRPC rpc = new ScriptRPC();
-			rpc.Send( target, JMESPModuleRPC.Heal, true, NULL );
+			rpc.Write( netLow );
+			rpc.Write( netHigh );
+			rpc.Send( NULL, JMESPModuleRPC.Heal, true, NULL );
 		}
 	}
 
@@ -1669,6 +3934,13 @@ class JMESPModule: JMRenderableModuleBase
 
 		if (!allowDamage)
 			target.SetAllowDamage(true);
+
+		//! Captured before the heal - the entry reads the target's own
+		//! current health (and, for a player, energy/water) to know what to
+		//! restore.
+		EntityAI healEntity;
+		if ( Class.CastTo( healEntity, target ) )
+			JMActionHistory.Push( new JMHealHistoryEntry( healEntity ) );
 
 		CommunityOnlineToolsBase.HealEntityRecursive(target);
 
@@ -1694,11 +3966,22 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_Heal( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		int netLow, netHigh;
+		if ( !ctx.Read( netLow ) || !ctx.Read( netHigh ) )
+			return;
+
+		if ( !senderRPC )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Heal", senderRPC, instance ) )
 			return;
 
-		Exec_Heal( target, senderRPC, instance );
+		Exec_Heal( obj, senderRPC, instance );
 	}
 
 	private void OnAddObject( Object obj )
@@ -1728,6 +4011,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_MakeItemSet( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "Items.CreateSet", senderRPC, instance ) )
 			return;
@@ -1815,6 +4101,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_DuplicateAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DuplicateAll", senderRPC, instance ) )
 			return;
@@ -1855,6 +4144,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_DeleteAll( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DeleteAll", senderRPC, instance ) )
 			return;
@@ -1927,6 +4219,9 @@ class JMESPModule: JMRenderableModuleBase
 
 	private void RPC_MoveToCursor( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
+		if ( !senderRPC )
+			return;
+
 		JMPlayerInstance instance;
 		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor", senderRPC, instance ) )
 			return;

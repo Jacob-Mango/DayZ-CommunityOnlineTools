@@ -165,6 +165,8 @@ class JMLoadoutModule: JMRenderableModuleBase
 	{
 		if ( g_Game.IsDedicatedServer() )
 		{
+			if ( !senderRPC )
+				return;
 			Server_Load( senderRPC );
 		}
 		else
@@ -293,6 +295,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 				Error("Failed");
 				return;
 			} 
+
+			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+				return;
 
 			Server_SpawnCursor( Loadout, position, senderRPC );
 		}
@@ -681,6 +686,9 @@ class JMLoadoutModule: JMRenderableModuleBase
 	private void RPC_Create( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
 	{
 		JMPlayerInstance instance;
+		if ( !senderRPC )
+			return;
+
 		if ( !GetPermissionsManager().HasPermission( "Loadouts.Create", senderRPC, instance ) )
 			return;
 		

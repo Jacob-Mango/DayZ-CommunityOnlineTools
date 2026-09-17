@@ -55,8 +55,7 @@ class UIActionMultiSelectList: UIActionBase
 		{
 			m_Items.Insert( item );
 
-			Widget row = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionCheckboxRow.layout", m_ListContainer );
+			Widget row = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionCheckboxRow.layout", m_ListContainer );
 
 			if ( !row )
 				continue;

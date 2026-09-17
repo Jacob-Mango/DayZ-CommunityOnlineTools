@@ -34,6 +34,21 @@ class UIActionConfirmInline: UIActionBase
 	protected float m_Timer;
 	protected float m_TimeoutSeconds;
 
+	//! Set by CenterIcon(); re-applied every frame from ApplyIconCenter()
+	//! rather than computed once, because action_button's real pixel size
+	//! is not known on the frame CenterIcon() is called - a caller sizing
+	//! the button with SetFixedSize() right before CenterIcon() gets that
+	//! size back from GetScreenSize() only after the engine has laid it
+	//! out at least once.
+	protected bool m_CenterIconRequested;
+	protected int  m_CenterIconPx;
+
+	//! Icon strip reserved on the left: 10 (position) + 16 (size) + 8 (gap).
+	//! Half of it is how far the centred label moves right to clear the icon.
+	static const int ICON_RIGHT_EDGE   = 26;
+	static const int ICON_TEXT_GAP     = 8;
+	static const int LABEL_OFFSET_ICON = ( ICON_RIGHT_EDGE + ICON_TEXT_GAP ) / 2;
+
 	override void OnInit()
 	{
 		super.OnInit();
@@ -98,22 +113,60 @@ class UIActionConfirmInline: UIActionBase
 		m_Icon.LoadImageFile( 0, imagePath );
 		m_Icon.Show( true );
 
+		// The label is centred across the WHOLE button while the icon sits at a
+		// fixed x=10, so a centred label grows leftwards straight into the icon.
+		// Shifting the glyphs right by half the reserved strip re-centres them in
+		// the space right of the icon instead - same math as UIActionTabs.
 		if ( m_ActionText )
-			m_ActionText.SetTextOffset( 30, 0 );
+			m_ActionText.SetTextOffset( LABEL_OFFSET_ICON, 0 );
 	}
 
 	// Position the icon at the geometric center of the button. Use after
 	// SetFixedSize when the action text is empty (icon-only mode); the
 	// default layout positions the icon at the left to flank the text.
-	// buttonSize = the SetFixedSize value (square buttons).
-	void CenterIcon( int buttonSize = 32, int iconSize = 16 )
+	// iconSize is the square the icon itself is drawn at; the button's own
+	// size is read back live every frame (see ApplyIconCenter) rather than
+	// taken as a parameter, since a caller's own SetFixedSize() call right
+	// before this one has not necessarily been laid out yet.
+	void CenterIcon( int buttonSizeUnused = 32, int iconSize = 16 )
 	{
 		if ( !m_Icon )
 			return;
+
 		m_Icon.SetSize( iconSize, iconSize );
-		// Clear exact-position flags so halign/valign center_ref takes over.
-		m_Icon.ClearFlags( WidgetFlags.HEXACTPOS | WidgetFlags.VEXACTPOS );
-		m_Icon.SetPos( 0, 0 );
+
+		//! action_icon is declared halign left_ref in the layout - clearing
+		//! the exact-position flags (as this used to do) turns its position
+		//! into a FRACTION of the button instead of centering it, since
+		//! nothing here ever switches the anchor to center_ref. left_ref
+		//! plus an exact pixel offset centers it just as well and does not
+		//! depend on an anchor this widget was never given.
+		m_Icon.SetFlags( WidgetFlags.HEXACTPOS | WidgetFlags.VEXACTPOS, true );
+
+		m_CenterIconPx = iconSize;
+		m_CenterIconRequested = true;
+		ApplyIconCenter();
+	}
+
+	//! Re-centers the icon against action_button's actual current pixel
+	//! size. Called once from CenterIcon() and again every frame from
+	//! Update() until it has something real to measure - GetScreenSize()
+	//! reads 0 on the frame a widget is first sized, the same reason
+	//! UIActionCard seeds tall and shrinks once it can measure itself.
+	protected void ApplyIconCenter()
+	{
+		if ( !m_CenterIconRequested || !m_Icon || !m_BtnAction )
+			return;
+
+		float bw, bh;
+		m_BtnAction.GetScreenSize( bw, bh );
+
+		if ( bw < m_CenterIconPx || bh < m_CenterIconPx )
+			return;
+
+		float offsetX = ( bw - m_CenterIconPx ) / 2.0;
+		float offsetY = ( bh - m_CenterIconPx ) / 2.0;
+		m_Icon.SetPos( offsetX, offsetY );
 	}
 
 	override void SetColor( int color )
@@ -126,6 +179,41 @@ class UIActionConfirmInline: UIActionBase
 	void SetTimeout( float seconds )
 	{
 		m_TimeoutSeconds = Math.Max( 0.5, seconds );
+	}
+
+	bool IsPending()
+	{
+		return m_Pending;
+	}
+
+	//! Programmatic equivalent of the first click: arms the confirm/cancel pair
+	//! and (re)starts the timeout. Used by keybinds that need the same
+	//! "press once to arm, press again to confirm" flow as a mouse click,
+	//! instead of the callback firing straight away.
+	void Arm()
+	{
+		SetState( true );
+		m_Timer = 0;
+		CallEvent( UIEvent.CLICK );
+	}
+
+	//! Programmatic equivalent of clicking Confirm while armed.
+	void ConfirmPending()
+	{
+		if ( !m_Pending )
+			return;
+
+		Revert();
+		CallEvent( UIEvent.CHANGE );
+	}
+
+	//! Programmatic equivalent of clicking Cancel while armed.
+	void CancelPending()
+	{
+		if ( !m_Pending )
+			return;
+
+		Revert();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -157,6 +245,9 @@ class UIActionConfirmInline: UIActionBase
 	override void Update( float timeSlice )
 	{
 		super.Update( timeSlice );
+
+		if ( m_CenterIconRequested )
+			ApplyIconCenter();
 
 		if ( !m_Pending )
 			return;

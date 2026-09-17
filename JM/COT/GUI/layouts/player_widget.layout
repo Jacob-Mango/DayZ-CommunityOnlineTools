@@ -71,7 +71,7 @@ PanelWidgetClass JMPlayerRowWidget {
   }
   ImageWidgetClass badge_flagged {
    visible 0
-   ignorepointer 1
+   ignorepointer 0
    position 26 0
    size 14 14
    halign right_ref
@@ -89,8 +89,8 @@ PanelWidgetClass JMPlayerRowWidget {
   }
   ImageWidgetClass badge_role {
    visible 0
-   ignorepointer 1
-   position 6 0
+   ignorepointer 0
+   position 30 0
    size 14 14
    halign right_ref
    valign center_ref
@@ -107,7 +107,7 @@ PanelWidgetClass JMPlayerRowWidget {
   }
   ImageWidgetClass badge_dead {
    visible 0
-   ignorepointer 1
+   ignorepointer 0
    position 46 0
    size 14 14
    halign right_ref
@@ -125,7 +125,7 @@ PanelWidgetClass JMPlayerRowWidget {
   }
   ImageWidgetClass badge_uncon {
    visible 0
-   ignorepointer 1
+   ignorepointer 0
    position 64 0
    size 14 14
    halign right_ref
@@ -143,7 +143,7 @@ PanelWidgetClass JMPlayerRowWidget {
   }
   ImageWidgetClass badge_broken_leg {
    visible 0
-   ignorepointer 1
+   ignorepointer 0
    position 82 0
    size 14 14
    halign right_ref
@@ -159,10 +159,28 @@ PanelWidgetClass JMPlayerRowWidget {
    "clamp mode" clamp
    "stretch mode" stretch_w_h
   }
+  ImageWidgetClass badge_bleeding {
+   visible 0
+   ignorepointer 0
+   position 100 0
+   size 14 14
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 1
+   mode blend
+   color 0.95 0.20 0.20 1.000
+   "src alpha" 1
+   "no wrap" 1
+   "clamp mode" clamp
+   "stretch mode" stretch_w_h
+  }
   ImageWidgetClass badge_sick {
    visible 0
-   ignorepointer 1
-   position 100 0
+   ignorepointer 0
+   position 118 0
    size 14 14
    halign right_ref
    valign center_ref

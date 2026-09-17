@@ -54,6 +54,22 @@ class UIActionText: UIActionBase
 			m_Text.SetText( m_ActualText );
 	}
 
+	//! Colour of the label text. NOT SetColor - the base paints layoutRoot, which
+	//! is the row's background, so a caller reaching for "make this text red"
+	//! gets a red bar behind black text instead.
+	void SetLabelColor( int color )
+	{
+		if ( m_Label )
+			m_Label.SetColor( color );
+	}
+
+	//! Colour of the value text, the right-hand half of a label/value row.
+	void SetValueColor( int color )
+	{
+		if ( m_Text )
+			m_Text.SetColor( color );
+	}
+
 	//! Put the value in the label's slot - hard left, right after the icon -
 	//! rather than hard right. A label/value row wants the value on the far
 	//! edge so a column of them lines up; an icon+number pair wants the number

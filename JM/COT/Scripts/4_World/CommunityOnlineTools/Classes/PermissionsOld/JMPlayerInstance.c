@@ -16,7 +16,8 @@ enum JMPlayerVariables
 	UNCONSCIOUS = 8192,
 	SICK = 16384,
 	BLEEDING = 32768,
-	DEAD = 65536
+	DEAD = 65536,
+	RAGDOLL = 131072
 }
 
 #ifndef CF_MODULE_PERMISSIONS
@@ -521,9 +522,6 @@ class JMPlayerInstance : Managed
 			return;
 		}
 
-		array< string > permissions = new array< string >;
-		m_RootPermission.Serialize( permissions );
-
 		// Write the player JSON when roles differ from default OR there is
 		// session history to keep. Deleting on default roles alone would throw
 		// away the playtime of every ordinary player on the server.
@@ -544,22 +542,9 @@ class JMPlayerInstance : Managed
 			DeleteFile( playerFilePath );
 		}
 
-		// Only write the permissions file if there is at least one explicit permission.
-		if ( m_RootPermission.m_Sync )
-		{
-			FileHandle file = OpenFile( permissionsPath, FileMode.WRITE );
-			if ( file != 0 )
-			{
-				string line;
-				for ( int i = 0; i < permissions.Count(); i++ )
-				{
-					FPrintln( file, permissions[i] );
-				}
-
-				CloseFile( file );
-			}
-		}
-		else if ( FileExist( permissionsPath ) )
+		//! Per-user permission files are retired - role permissions only.
+		//! Never write permissionsPath anymore; clean up any leftover file instead.
+		if ( FileExist( permissionsPath ) )
 		{
 			DeleteFile( permissionsPath );
 		}
@@ -793,6 +778,11 @@ class JMPlayerInstance : Managed
 	bool IsFrozen()
 	{
 		return m_PlayerVars[JMPlayerVariables.FROZEN];
+	}
+
+	bool IsRagdoll()
+	{
+		return m_PlayerVars[JMPlayerVariables.RAGDOLL];
 	}
 
 	bool HasInvisibility()

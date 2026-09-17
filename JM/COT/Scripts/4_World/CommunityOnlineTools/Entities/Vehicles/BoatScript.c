@@ -120,6 +120,23 @@ modded class BoatScript
 			Fill(fluid, fluidCap * (1.0 - fluidFraction));
 	}
 
+	//! Move one fluid to an exact fraction of its capacity - see
+	//! CarScript::COT_SetCarFluid01 for why both Fill and Leak are needed.
+	void COT_SetBoatFluid01( BoatFluid fluid, float fraction )
+	{
+		float fluidCap = GetFluidCapacity( fluid );
+		if ( fluidCap <= 0.0 )
+			return;
+
+		float target = Math.Clamp( fraction, 0.0, 1.0 );
+		float delta = ( target - GetFluidFraction( fluid ) ) * fluidCap;
+
+		if ( delta > 0.0 )
+			Fill( fluid, delta );
+		else if ( delta < 0.0 )
+			Leak( fluid, -delta );
+	}
+
 	void COT_Refuel()
 	{
 		COT_FillBoatFluid( BoatFluid.FUEL );

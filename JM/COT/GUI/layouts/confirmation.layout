@@ -1,16 +1,46 @@
 PanelWidgetClass confirmation_panel_inner {
  ignorepointer 1
- color 0.133 0.161 0.196 1.000
+ color 0.114 0.137 0.165 0.988
  position 0 0
- size 440 300
+ size 400 200
  halign center_ref
  valign center_ref
  hexactpos 0
  vexactpos 0
  hexactsize 1
  vexactsize 1
- style COTSurface
+ style COTBox8Set
  {
+  ButtonWidgetClass confirmation_close {
+   ignorepointer 0
+   color 0 0 0 0
+   style Empty
+   position -8 8
+   size 22 22
+   halign right_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   {
+    ImageWidgetClass confirmation_close_icon {
+     ignorepointer 1
+     position 0 0
+     size 1 1
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     mode blend
+     color 0.925 0.976 1.000 0.702
+     "src alpha" 1
+     "no wrap" 1
+     "clamp mode" clamp
+     "stretch mode" stretch_w_h
+    }
+   }
+  }
   FrameWidgetClass confirmation_title_panel {
    ignorepointer 1
    position 0 0.03
@@ -41,7 +71,7 @@ PanelWidgetClass confirmation_panel_inner {
    }
   }
   PanelWidgetClass confirmation_spacer_title_message {
-   color 0 0 0 1
+   color 0.925 0.976 1.000 0.161
    position 0 0.20
    size 0.95 0.01
    halign center_ref
@@ -138,6 +168,8 @@ PanelWidgetClass confirmation_panel_inner {
      {
       ButtonWidgetClass confirmation_button_1 {
        visible 1
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position 0 0
        size 0.4 1
@@ -148,6 +180,28 @@ PanelWidgetClass confirmation_panel_inner {
        hexactsize 0
        vexactsize 0
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.133 0.161 0.196 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0
@@ -180,6 +234,8 @@ PanelWidgetClass confirmation_panel_inner {
      vexactsize 0
      {
       ButtonWidgetClass confirmation_button_1 {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position -0.2 0
        size 0.36 1
@@ -190,6 +246,28 @@ PanelWidgetClass confirmation_panel_inner {
        halign center_ref
        valign center_ref
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.133 0.161 0.196 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0
@@ -209,6 +287,8 @@ PanelWidgetClass confirmation_panel_inner {
        }
       }
       ButtonWidgetClass confirmation_button_2 {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position 0.2 0
        size 0.36 1
@@ -219,6 +299,28 @@ PanelWidgetClass confirmation_panel_inner {
        halign center_ref
        valign center_ref
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.047 0.420 0.310 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0
@@ -252,6 +354,8 @@ PanelWidgetClass confirmation_panel_inner {
      vexactsize 0
      {
       ButtonWidgetClass confirmation_button_1 {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position -0.3 0
        size 0.26 1
@@ -262,6 +366,28 @@ PanelWidgetClass confirmation_panel_inner {
        halign center_ref
        valign center_ref
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.133 0.161 0.196 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0
@@ -281,6 +407,8 @@ PanelWidgetClass confirmation_panel_inner {
        }
       }
       ButtonWidgetClass confirmation_button_2 {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        position 0 0
        size 0.26 1
@@ -291,6 +419,28 @@ PanelWidgetClass confirmation_panel_inner {
        halign center_ref
        valign center_ref
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.133 0.161 0.196 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0
@@ -310,6 +460,8 @@ PanelWidgetClass confirmation_panel_inner {
        }
       }
       ButtonWidgetClass confirmation_button_3 {
+       color 0 0 0 0
+       style Empty
        ignorepointer 0
        size 0.26 1
        halign right_ref
@@ -318,6 +470,28 @@ PanelWidgetClass confirmation_panel_inner {
        hexactsize 0
        vexactsize 0
        {
+        PanelWidgetClass confirmation_button_fill {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.047 0.420 0.310 0.941
+         style COTBox8Set
+        }
+        PanelWidgetClass confirmation_button_ring {
+         ignorepointer 1
+         position 0 0
+         size 1 1
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 0
+         color 0.925 0.976 1.000 0.502
+         style COTBox8LineSet
+        }
         TextWidgetClass confirmation_text {
          ignorepointer 1
          position 0 0

@@ -18,6 +18,9 @@ class JMCompensationsModule: JMRenderableModuleBase
 		return GetPermissionsManager().HasPermission( "Compensations.View" );
 	}
 
+	// Temporarily hidden from the sidebar.
+	override bool HasButton() { return false; }
+
 	override string GetInputToggle()
 	{
 		return "UACOTToggleCompensations";
@@ -242,6 +245,9 @@ class JMCompensationsModule: JMRenderableModuleBase
 
 			vector position;
 			if ( !ctx.Read( position ) )
+				return;
+
+			if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
 				return;
 
 			Server_SpawnCursor( steamID, timestamp, position, senderRPC );

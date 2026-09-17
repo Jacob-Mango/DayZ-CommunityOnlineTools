@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class JMPlayerForm: JMFormBase
 {
 	private autoptr array< JMPlayerRowWidget > m_PlayerList;
@@ -19,6 +22,17 @@ class JMPlayerForm: JMFormBase
 	private UIActionImageButtonToggle m_PlayerListSort;
 	private UIActionImageButton m_PlayerListSelectAll;
 	private UIActionImageButton m_PlayerListDeSelectAll;
+	private UIActionImageButton m_PlayerListFilters;
+
+	//! The advanced-filter dropdown, and the state its entries toggle. All on
+	//! by default: an admin who has never touched this sees the whole roster.
+	private UIActionContextMenu m_FilterMenu;
+	private bool m_FilterShowDead     = true;
+	private bool m_FilterShowUncon    = true;
+	private bool m_FilterShowHurt     = true;
+	private bool m_FilterShowSick     = true;
+	private bool m_FilterShowAdmins   = true;
+	private bool m_FilterShowCheaters = true;
 
 	private UIActionImageButton m_PlayerPrefSave;
 	private UIActionImageButton m_PlayerPrefLoad;
@@ -27,13 +41,16 @@ class JMPlayerForm: JMFormBase
 	private Widget m_PlayerListRows;
 
 	private UIActionScroller m_ActionListScroller;
-	private Widget m_ActionsWrapper;
+	//! protected so modded-class fragments (EgoLand tab injection) can append
+	//! new tab panels onto the scroller without a fragile widget-tree walk.
+	protected Widget m_ActionsWrapper;
 
 	//! The right-hand panel is a tab strip over a scroller, not one long
 	//! scroller. The strip has to sit OUTSIDE the scroller or it scrolls away
 	//! with the content, which is why player_form.layout splits panel_right
 	//! into panel_right_tabs and panel_right_content.
-	private UIActionTabs m_Tabs;
+	//! protected so modded-class fragments can call AddContent / SetTabs / SetSelection.
+	protected UIActionTabs m_Tabs;
 	private Widget m_TabGeneral;
 	private Widget m_TabPosition;
 	private Widget m_TabInventory;
@@ -72,18 +89,43 @@ class JMPlayerForm: JMFormBase
 	private UIActionContextMenu m_PlayerMenu;
 	private string              m_PlayerMenuGUID;
 
+	//! Scale prompt, lazily built the first time it is needed - see m_PlayerMenu.
+	//! One shared slider serves all three routing modes; which target set the
+	//! next confirm applies to is remembered here rather than baked into three
+	//! separate prompt ids.
+	private UIActionValuePrompt m_ScalePrompt;
+	private int                 m_ScalePendingMode;
+	static const int SCALE_MODE_MULTI  = 0;
+	static const int SCALE_MODE_SINGLE = 1;
+	static const int SCALE_MODE_SELF   = 2;
+
 	private UIActionBadge m_BadgeGodMode;
 	private UIActionBadge m_BadgeFrozen;
 	private UIActionBadge m_BadgeInvisible;
 	private UIActionBadge m_BadgeUnconscious;
 	private UIActionText  m_IdentityRole;
 
-	private UIActionBadge m_BadgeStatusHealthy;
-	private UIActionBadge m_BadgeStatusDead;
-	private UIActionBadge m_BadgeStatusUnconscious;
-	private UIActionBadge m_BadgeStatusBrokenLeg;
-	private UIActionBadge m_BadgeStatusBleeding;
-	private UIActionBadge m_BadgeStatusSick;
+	//! Jumps to the Role Manager with this player already selected. Reading the
+	//! role here and having to go and FIND the same player in another window to
+	//! change it was the one identity row with no way to act on what it said.
+	private UIActionImageButton m_IdentityRoleEdit;
+
+	private UIActionStagedIcon m_BadgeStatusDead;
+	private UIActionStagedIcon m_BadgeStatusUnconscious;
+	private UIActionStagedIcon m_BadgeStatusBrokenLeg;
+	private UIActionStagedIcon m_BadgeStatusBleeding;
+	private UIActionStagedIcon m_BadgeStatusSick;
+
+	//! The whole Active Statuses card. Hidden outright while the player is in
+	//! none of the five states - an empty card is a heading over a blank strip,
+	//! which reads as a panel that failed to load rather than as "nothing wrong".
+	private Widget m_StatusCardRoot;
+
+	//! Right-click menu for one Active Statuses glyph, and the guid it was
+	//! opened against. Separate from m_PlayerMenu: that one belongs to a list
+	//! row and can be open over a different player than the card is showing.
+	private UIActionContextMenu m_StatusMenu;
+	private string m_StatusMenuGUID;
 
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm`
 	//! (DayZExpansion_AI, DayZExpansion_Hardline) re-sorts these widgets via
@@ -157,16 +199,68 @@ class JMPlayerForm: JMFormBase
 	//! useful if something puts the view back.
 	private UIActionImageButton m_PositionRecenter;
 
-	//! Reserved row the map drops into on first use, so the rows below it do not
-	//! jump down the page the first time the Position tab is opened.
-	private Widget m_PositionMapRoot;
-	private MapWidget m_PositionMap;
+	//! Vehicle Manager's map made generic (UIActionMap) - markers, hover and
+	//! click routing are handled there instead of by hand here.
+	private UIActionMap m_PositionMap;
+
+	//! Whether the deferred first-open recentre has already been scheduled.
+	private bool m_PositionMapCentered;
+
+	//! Widths of the three controls in a history row, as FRACTIONS of the row.
+	//!
+	//! Never a fixed pixel size beside a fraction: a WrapSpacer wraps the moment
+	//! its children total more than the row, and mixing the two units makes that
+	//! edge impossible to reason about. These sum to less than 1.
+	static const float HISTORY_GO_W  = 0.70;
+	static const float HISTORY_BTN_W = 0.13;
+
+	//! The last few places the selected player was moved away FROM, most recent
+	//! first, one button per entry - a click sends them back to that row.
+	//!
+	//! The rows are REBUILT rather than updated: the list is at most
+	//! JMTeleportHistory.MAX_ENTRIES long, and an undo several steps deep drops
+	//! every row above the one it lands on in a single go.
+	private UIActionCard m_TeleportHistoryCard;
+	private UIActionImageButton m_TeleportHistoryClear;
+	private UIActionImageButton m_TeleportHistoryRedo;
+	private Widget m_TeleportHistoryHost;
+	private Widget m_TeleportHistoryGrid;
+	private ref array<ref UIActionButton> m_TeleportHistoryButtons;
+
+	//! The two icon buttons beside each row, in the same order as the row
+	//! buttons above - each array's index IS the step it acts on, because all
+	//! three are filled in one pass.
+	private ref array<ref UIActionImageButton> m_TeleportHistoryCopy;
+	private ref array<ref UIActionImageButton> m_TeleportHistoryFocus;
+
+	private UIActionText m_TeleportHistoryEmpty;
+
+	//! What the panel above was last built for. RefreshTeleports runs ten times
+	//! a second, and rebuilding five buttons on every one of those would churn
+	//! widgets for nothing - and a rebuild under the cursor steals the press.
+	private string m_TeleportHistoryGuid;
+	private int    m_TeleportHistoryCount;
+
+	//! Timestamp of the newest row the panel was built from.
+	//!
+	//! The count alone is not enough to notice a change: once five steps are
+	//! recorded the list is capped, so a sixth teleport pushes one off the
+	//! bottom and leaves the count at five.
+	private int    m_TeleportHistoryTop;
 
 	// -- Statistics tab ----------------------------------------------------
 	private UIActionKeyValueList m_StatsSession;
 	private UIActionKeyValueList m_StatsCombat;
 	private UIActionProgressBar m_StatsHeadshotBar;
 	private UIActionText m_StatsCombatNotice;
+
+#ifdef DZ_Expansion_Core
+	//! Third Statistics card, built only against an Expansion server. Its rows
+	//! are whatever the server sent, so a build with only some of the Expansion
+	//! mods loaded gets a shorter card rather than a card full of "-".
+	private UIActionKeyValueList m_StatsExpansion;
+	private Widget m_StatsExpansionRoot;
+#endif
 	private UIActionImageButton m_StatsRefreshButton;
 
 	//! Last history the server pushed for the selected player.
@@ -216,6 +310,13 @@ class JMPlayerForm: JMFormBase
 	private UIActionContextMenu m_InventoryMenu;
 	private UIActionValuePrompt m_InventoryPrompt;
 
+	//! The container "Delete all" was clicked on. The confirmation is answered
+	//! later and the table can be rebuilt in the meantime, so the container is
+	//! remembered by its network ID, not by its row.
+	private int m_InvGroupPendingLow;
+	private int m_InvGroupPendingHigh;
+	private string m_InvGroupPendingName;
+
 	// -- Inventory item preview --------------------------------------------
 	//! Vanilla's own hover tooltip layout, driven by the same static
 	//! InspectMenuNew.UpdateItemInfo the inventory screen uses.
@@ -249,15 +350,43 @@ class JMPlayerForm: JMFormBase
 	//! UIActionContextMenu round-trips.
 	//! Quick actions on the row the pointer is over. Ids, not indices: the menu
 	//! is rebuilt per click and the freeze entry changes label with the player.
-	static const string ROW_MENU_HEAL     = "heal";
-	static const string ROW_MENU_TP_TO_ME = "tp_to_me";
-	static const string ROW_MENU_TP_ME_TO = "tp_me_to";
-	static const string ROW_MENU_FREEZE   = "freeze";
-	static const string ROW_MENU_SPECTATE = "spectate";
+	//! Advanced list filters. Each one hides a category of player rather than
+	//! selecting one: they start all-on, so the list is complete until an admin
+	//! deliberately narrows it.
+	static const string LIST_FILTER_DEAD     = "f_dead";
+	static const string LIST_FILTER_UNCON    = "f_uncon";
+	static const string LIST_FILTER_HURT     = "f_hurt";
+	static const string LIST_FILTER_SICK     = "f_sick";
+	static const string LIST_FILTER_ADMINS   = "f_admins";
+	static const string LIST_FILTER_CHEATERS = "f_cheaters";
+
+	static const string ROW_MENU_HEAL       = "heal";
+	static const string ROW_MENU_TP_TO_ME   = "tp_to_me";
+	static const string ROW_MENU_TP_ME_TO   = "tp_me_to";
+	static const string ROW_MENU_TP_UNDO    = "tp_undo";
+	static const string ROW_MENU_TP_REDO    = "tp_redo";
+	static const string ROW_MENU_FOCUS_MAP  = "focus_map";
+	static const string ROW_MENU_COPY_GUID  = "copy_guid";
+	static const string ROW_MENU_COPY_STEAM = "copy_steam";
+	static const string ROW_MENU_MESSAGE    = "message";
+	static const string ROW_MENU_CLEARCARGO = "clear_cargo";
+	static const string ROW_MENU_STRIP      = "strip";
+	static const string ROW_MENU_KICK       = "kick";
+	static const string ROW_MENU_BAN        = "ban";
+	static const string ROW_MENU_FREEZE     = "freeze";
+	static const string ROW_MENU_RAGDOLL    = "ragdoll";
+	static const string ROW_MENU_SPECTATE   = "spectate";
+
+	//! Status repairs. Listed on the row menu only while the player is actually
+	//! in that state - an admin scanning a roster wants the fix for what is
+	//! wrong with this one, not the full catalogue of what could be.
+	static const string ROW_MENU_FIX_LEGS   = "fix_legs";
+	static const string ROW_MENU_STOP_BLEED = "stop_bleed";
+	static const string ROW_MENU_CURE       = "cure";
+	static const string ROW_MENU_WAKE       = "wake";
 
 	static const string INV_MENU_INSPECT = "inspect";
 	static const string INV_MENU_TAKE   = "take";
-	static const string INV_MENU_REPAIR = "repair";
 	static const string INV_MENU_DELETE = "delete";
 
 	//! Item-specific entries. Unlike the four above they are only listed when
@@ -270,6 +399,7 @@ class JMPlayerForm: JMFormBase
 	//! second thing to keep in step.
 	static const string INV_MENU_UNJAM       = "unjam";
 	static const string INV_MENU_QUANTITY    = "quantity";
+	static const string INV_MENU_HEALTH      = "health";
 	static const string INV_MENU_TEMPERATURE = "temperature";
 	static const string INV_MENU_STATE       = "state";
 	static const string INV_MENU_LIQUID      = "liquid";
@@ -300,6 +430,21 @@ class JMPlayerForm: JMFormBase
 	static const float IDENTITY_BUTTON_LEFT  = 0.64;
 	static const float IDENTITY_BUTTON_WIDTH = 0.34;
 
+	//! The role row gives up its last few percent to the edit button beside it.
+	static const float IDENTITY_ROLE_VALUE_WIDTH = 0.92;
+	static const float IDENTITY_ROLE_EDIT_LEFT   = 0.93;
+
+	//! The edit glyph is SHORTER than the row it sits in - every other identity
+	//! value fills its row, so only this one has slack to distribute. Its
+	//! position is a fraction of the parent, so the pixel gap above and below is
+	//! converted here rather than hardcoded; left at the layout default of 0 the
+	//! button hung two pixels above the text it belongs to.
+	//! ( IDENTITY_ROW_HEIGHT 32 - HEADER_ACTION_PX 28 ) / 2, over the row height.
+	//! Written out rather than computed: these are another class's static consts
+	//! and a const initialiser is not the place to depend on their evaluation
+	//! order. Revisit if either constant moves.
+	static const float IDENTITY_ROLE_EDIT_TOP = 0.0625;
+
 	//! Drawn height of the embedded map, in layout pixels.
 	//! Cells that get a 3D preview. Every preview is a real client-local
 	//! entity, so this is a frame-time and memory budget, not a display
@@ -316,8 +461,21 @@ class JMPlayerForm: JMFormBase
 	//! Geometry of a container's band: the inset its contents are drawn at, the
 	//! strip its label sits in, and the breathing room after it.
 	static const int INV_BAND_PAD   = 8;
-	static const int INV_BAND_LABEL = 18;
+	static const int INV_BAND_LABEL = 26;
 	static const int INV_BAND_GAP   = 6;
+
+	//! Header action size. Smaller than the cards' HEADER_ACTION_PX because the
+	//! band strip is a band strip, not a card title bar - three 28px buttons
+	//! would be taller than the row they label.
+	static const int INV_BAND_ACTION_PX = 22;
+
+	//! Glyph size inside one of those buttons.
+	//!
+	//! The pill's image is an EXACT 16px in UIActionImageButton.layout - it does
+	//! NOT scale with the button - so a button shrunk below the card size keeps
+	//! a full-size glyph and ends up as a solid disc with a picture jammed edge
+	//! to edge. Kept near the layout's own ratio of 16 in 28.
+	static const int INV_BAND_ICON_PX = 12;
 
 	//! How a cell prints its quantity. See InventoryQuantityMode.
 	static const int INV_QTY_HIDDEN = 0;
@@ -328,6 +486,11 @@ class JMPlayerForm: JMFormBase
 
 	//! Zoom the map returns to when it is recentered.
 	static const float MAP_DEFAULT_SCALE = 0.15;
+
+	//! Zoom the map takes when it is pointed at one recorded step. Closer than
+	//! the default: the point of focusing a step is to see WHERE it is, and at
+	//! the overview scale three positions in the same town are one dot.
+	static const float MAP_FOCUS_SCALE = 0.06;
 
 	static const int MAP_MARK_TARGET = 0xFFFFFF00;
 	static const int MAP_MARK_SELF   = 0xFF00FF00;
@@ -363,6 +526,7 @@ class JMPlayerForm: JMFormBase
 	// Bleed-from-body-part controls
 	private UIActionDropdown m_BleedingPart;
 	private UIActionButton m_BleedApply;
+	private UIActionImageButton m_BleedClear;
 
 	private UIActionFeedbackButton m_CopyExpLoadout;
 
@@ -425,6 +589,10 @@ class JMPlayerForm: JMFormBase
 		m_InvSelectedIndex = -1;
 		m_InvHoveredIndex  = -1;
 		m_CollapsedRoles = new TStringArray;
+		m_TeleportHistoryButtons = new array<ref UIActionButton>;
+		m_TeleportHistoryCopy    = new array<ref UIActionImageButton>;
+		m_TeleportHistoryFocus   = new array<ref UIActionImageButton>;
+		m_TeleportHistoryCount   = -1;
 		m_RoleMembers = new map< string, ref TStringArray >;
 		m_AnimRows = new array< JMPlayerRowWidget >;
 
@@ -505,14 +673,14 @@ class JMPlayerForm: JMFormBase
 	//! right-aligned numbers read as a column that has drifted away from its
 	//! labels. STAT_TEXT_OFFSET is the player list's own name indent, so the
 	//! glyph-to-text gap up here matches the checkbox-to-name gap down there.
-	private UIActionText CreateRosterStat( Widget parent, string icon, string tooltip, float width )
+	private UIActionText CreateRosterStat( Widget parent, string icon, string tooltip, float width, bool valueLeftAligned = true )
 	{
 		UIActionText stat = UIActionManager.CreateText( parent, "" );
 		if ( !stat )
 			return NULL;
 
 		stat.SetIcon( JMConstants.Lucide( icon ) );
-		stat.SetValueLeftAligned( true );
+		stat.SetValueLeftAligned( valueLeftAligned );
 		stat.SetLabelOffset( JMPlayerRowWidget.TEXT_OFFSET_PLAYER );
 		stat.SetTooltip( tooltip );
 		stat.SetWidth( width );
@@ -549,10 +717,15 @@ class JMPlayerForm: JMFormBase
 		if ( hostData )
 			m_MaxPlayers = hostData.m_MaxPlayers;
 
+		//! Not three equal thirds. Online is the only one carrying a slot count
+		//! ("61 / 128"), and an even third clipped it against the peak cell that
+		//! followed. It takes the space the other two do not need, and those two
+		//! right-align their value so they sit as a pair on the right edge
+		//! instead of drifting into the room online just took.
 		Widget countRowGrid = UIActionManager.CreateWrapSpacerCompact( leftPanelGrid );
-		m_PlayerListCount 	= CreateRosterStat( countRowGrid, "users",        "Players online now, against the server slot count", 0.33 );
-		m_PlayerListPeak 	= CreateRosterStat( countRowGrid, "trending-up",  "Peak player count this session",                    0.33 );
-		m_PlayerListSelected 	= CreateRosterStat( countRowGrid, "square-check", "Players currently selected",                        0.33 );
+		m_PlayerListCount 	= CreateRosterStat( countRowGrid, "users",        "#STR_COT_PLAYER_MODULE_TT_STAT_ONLINE",   0.46 );
+		m_PlayerListPeak 	= CreateRosterStat( countRowGrid, "trending-up",  "#STR_COT_PLAYER_MODULE_TT_STAT_PEAK",     0.26, false );
+		m_PlayerListSelected 	= CreateRosterStat( countRowGrid, "square-check", "#STR_COT_PLAYER_MODULE_TT_STAT_SELECTED", 0.26, false );
 
 		// -- Toolbar --------------------------------------------------------
 		//  Icon-only pills, all four on one line: save and load a selection,
@@ -565,19 +738,22 @@ class JMPlayerForm: JMFormBase
 		//  GridSpacer rather than WrapSpacer: a WrapSpacer reserves margin and
 		//  padding around every child, so four children at 0.24 each overflow and
 		//  the fourth wraps onto its own line.
-		Widget toolbarRowGrid = UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 4 );
+		Widget toolbarRowGrid = UIActionManager.CreateGridSpacer( leftPanelGrid, 1, 5 );
 		m_PlayerPrefSave 	= UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "save" ), this, "OnClick_PlayerPrefSave" );
 		m_PlayerPrefLoad 	= UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "folder-open" ), this, "OnClick_PlayerPrefLoad" );
-		m_PlayerListSelectAll 	= UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "list-checks" ), this, "Event_SelectAllPlayerList" );
-		m_PlayerListDeSelectAll = UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "list-x" ), this, "Event_DeSelectAllPlayerList" );
+		m_PlayerListSelectAll 	= UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.ICON_SELECT_ALL, this, "Event_SelectAllPlayerList" );
+		m_PlayerListDeSelectAll = UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.ICON_DESELECT_ALL, this, "Event_DeSelectAllPlayerList" );
+		m_PlayerListFilters     = UIActionManager.CreateIconButton( toolbarRowGrid, JMConstants.Lucide( "list-filter" ), this, "OnClick_PlayerListFilters" );
 
 		if ( m_PlayerPrefSave )        m_PlayerPrefSave.SetTooltip( "#STR_COT_GENERIC_SAVE" );
 		if ( m_PlayerPrefLoad )        m_PlayerPrefLoad.SetTooltip( "#STR_COT_GENERIC_LOAD" );
 		if ( m_PlayerListSelectAll )   m_PlayerListSelectAll.SetTooltip( "#STR_COT_ESP_MODULE_ACTION_SELECT_ALL" );
 		if ( m_PlayerListDeSelectAll ) m_PlayerListDeSelectAll.SetTooltip( "#STR_COT_ESP_MODULE_ACTION_DESELECT_ALL" );
+		if ( m_PlayerListFilters )     m_PlayerListFilters.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_ADVANCED_FILTERS" );
 
 		//! The grid sizes its row to the tallest child, so shrinking all four
 		//! shrinks the row - and the list below grows by the difference.
+		if ( m_PlayerListFilters )     m_PlayerListFilters.SetFixedHeight( HEADER_CONTROL_HEIGHT );
 		if ( m_PlayerPrefSave )        m_PlayerPrefSave.SetFixedHeight( HEADER_CONTROL_HEIGHT );
 		if ( m_PlayerPrefLoad )        m_PlayerPrefLoad.SetFixedHeight( HEADER_CONTROL_HEIGHT );
 		if ( m_PlayerListSelectAll )   m_PlayerListSelectAll.SetFixedHeight( HEADER_CONTROL_HEIGHT );
@@ -702,7 +878,10 @@ class JMPlayerForm: JMFormBase
 
 	//! Build a tab's contents the first time it is asked for. The bookkeeping
 	//! lives in JMFormBase.ShouldBuildTab(); only the cases are ours.
-	private void BuildTabIfNeeded( int tabIdx )
+	//! protected virtual: a modded-class fragment that injects extra tabs can
+	//! override this, call super.BuildTabIfNeeded() for the base cases and
+	//! handle its own tab indices in the extra cases.
+	protected void BuildTabIfNeeded( int tabIdx )
 	{
 		if ( !ShouldBuildTab( tabIdx ) )
 			return;
@@ -712,6 +891,11 @@ class JMPlayerForm: JMFormBase
 			case TAB_GENERAL:
 				InitActionWidgetsIdentity( m_TabGeneral );
 				InitActionWidgetsStats( m_TabGeneral );
+				//! Last card on the tab. It is the one card here that is empty
+				//! most of the time - a healthy player has no statuses - and a
+				//! card that usually says nothing should not sit above the
+				//! identity and the stats an admin opened the tab for.
+				InitActionWidgetsStatuses( m_TabGeneral );
 				break;
 
 			case TAB_POSITION:
@@ -777,9 +961,29 @@ class JMPlayerForm: JMFormBase
 			RequestInventory();
 		else if ( sel == TAB_STATISTICS )
 			RequestStatistics();
+		else if ( sel == TAB_ACTIONS )
+		{
+			if ( m_LastSelectedGuid != "" )
+			{
+				m_Module.RequestDiseaseMask( m_LastSelectedGuid );
+				m_Module.RequestBleedingState( m_LastSelectedGuid );
+			}
+		}
+
+		//! Extension hook - called with the final selected index after all
+		//! built-in tab logic has run. Modded-class fragments override this
+		//! to react to extra tab indices (e.g. requesting data on tab entry)
+		//! without duplicating or replacing the base switch above.
+		OnTabChanged( sel );
 
 		if ( m_ActionListScroller )
 			m_ActionListScroller.UpdateScroller();
+	}
+
+	//! Override in a modded-class fragment to react to any tab index,
+	//! including indices beyond the base form's five tabs.
+	protected void OnTabChanged( int tabIdx )
+	{
 	}
 
 	//! Identity card: a section header, a strip of read-only state badges, then
@@ -859,7 +1063,16 @@ class JMPlayerForm: JMFormBase
 		// Which role bucket the player list filed this player under. It is the
 		// one piece of identity the admin cannot read off the card otherwise,
 		// and the General tab is exactly where "who is this" belongs.
-		m_IdentityRole = UIActionManager.CreateText( section0, "#STR_COT_PLAYER_MODULE_IDENTITY_ROLE", "" );
+		// A row, not a bare CreateText, because the edit button has to sit on
+		// the same line as the value: the label/value pair stops short of the
+		// right edge and the button takes what is left.
+		Widget rowRole = UIActionManager.CreatePanel( section0, 0x00000000, IDENTITY_ROW_HEIGHT );
+		m_IdentityRole = UIActionManager.CreateText( rowRole, "#STR_COT_PLAYER_MODULE_IDENTITY_ROLE", "" );
+		m_IdentityRole.SetWidth( IDENTITY_ROLE_VALUE_WIDTH );
+
+		m_IdentityRoleEdit = UIActionManager.CreateEditButton( rowRole, this, "Click_EditPlayerRoles", "#STR_COT_PLAYER_MODULE_TT_EDIT_ROLES" );
+		m_IdentityRoleEdit.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+		m_IdentityRoleEdit.SetPosition( IDENTITY_ROLE_EDIT_LEFT, IDENTITY_ROLE_EDIT_TOP );
 
 		#ifdef GAMELABS
 		Widget rowCF = UIActionManager.CreatePanel( section0, 0x00000000, IDENTITY_ROW_HEIGHT );
@@ -873,19 +1086,40 @@ class JMPlayerForm: JMFormBase
 		m_CFProfile.SetPosition( IDENTITY_BUTTON_LEFT );
 		#endif
 
-		UIActionCard statusCard = UIActionManager.CreateCard( parent, "Active Statuses" );
+		ShowIdentityWidgets();
+
+		return parent;
+	}
+
+	//! Glyphs, not chips. Each status is one bit of information - it is on or it
+	//! is not - and a labelled pill spent a whole cell saying a word the icon
+	//! says at a glance. The same glyphs the player list uses, so a row badge
+	//! and this card read as the same vocabulary; the word each one stood for
+	//! survives as its tooltip.
+	//!
+	//! Only the bad states are here. "Healthy" was a sixth glyph that meant
+	//! "none of the other five", which is what an empty card already says, and
+	//! it was the one entry with no action behind a right-click.
+	private Widget InitActionWidgetsStatuses( Widget actionsParent )
+	{
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 2, 1 );
+
+		UIActionCard statusCard = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_ACTIVE_STATUSES" );
 		Widget statusContent = statusCard.GetContent();
 		Widget statusRow = UIActionManager.CreatePanel( statusContent, 0x00000000, IDENTITY_ROW_HEIGHT );
-		Widget statusGrid = UIActionManager.CreateGridSpacer( statusRow, 1, 6 );
+		Widget statusGrid = UIActionManager.CreateGridSpacer( statusRow, 1, 5 );
 
-		m_BadgeStatusHealthy     = UIActionManager.CreateBadge( statusGrid, "Healthy", "", JMTheme.SUCCESS );
-		m_BadgeStatusDead        = UIActionManager.CreateBadge( statusGrid, "Dead", "", JMTheme.DANGER );
-		m_BadgeStatusUnconscious = UIActionManager.CreateBadge( statusGrid, "Unconscious", "", JMTheme.WARNING );
-		m_BadgeStatusBrokenLeg   = UIActionManager.CreateBadge( statusGrid, "Broken Leg", "", JMTheme.DANGER );
-		m_BadgeStatusBleeding    = UIActionManager.CreateBadge( statusGrid, "Bleeding", "", JMTheme.DANGER );
-		m_BadgeStatusSick        = UIActionManager.CreateBadge( statusGrid, "Sick", "", JMTheme.DANGER );
+		m_BadgeStatusDead        = CreateStatusIcon( statusGrid, "skull",          "#STR_COT_PLAYER_MODULE_STATUS_DEAD",        JMTheme.DANGER,  "" );
+		m_BadgeStatusUnconscious = CreateStatusIcon( statusGrid, "bed",            "#STR_COT_PLAYER_MODULE_STATUS_UNCONSCIOUS", JMTheme.WARNING, "Click_StatusUnconscious" );
+		m_BadgeStatusBrokenLeg   = CreateStatusIcon( statusGrid, "bone-fracture",  "#STR_COT_PLAYER_MODULE_STATUS_BROKEN_LEGS", JMTheme.WARNING, "Click_StatusBrokenLegs" );
+		m_BadgeStatusBleeding    = CreateStatusIcon( statusGrid, "droplet",        "#STR_COT_PLAYER_MODULE_STATUS_BLEEDING",    JMTheme.DANGER,  "Click_StatusBleeding" );
+		m_BadgeStatusSick        = CreateStatusIcon( statusGrid, "thermometer",    "#STR_COT_PLAYER_MODULE_STATUS_SICK",        JMTheme.DANGER,  "Click_StatusSick" );
 
-		ShowIdentityWidgets();
+		// Hidden until RefreshIdentityBadges finds a state to show. Built here
+		// all the same: the card is cheap and rebuilding it per refresh would
+		// drop the glyph the pointer is over mid right-click.
+		m_StatusCardRoot = parent;
+		m_StatusCardRoot.Show( false );
 
 		return parent;
 	}
@@ -916,20 +1150,115 @@ class JMPlayerForm: JMFormBase
 		bool isBleeding = m_SelectedInstance.IsBleeding();
 		bool isSick = m_SelectedInstance.IsSick();
 
-		bool hasAnyStatus = isDead || isUncon || hasBrokenLeg || isBleeding || isSick;
-
-		if ( m_BadgeStatusHealthy )
-			m_BadgeStatusHealthy.Show( !hasAnyStatus );
 		if ( m_BadgeStatusDead )
-			m_BadgeStatusDead.Show( isDead );
+			m_BadgeStatusDead.SetVisible( isDead );
 		if ( m_BadgeStatusUnconscious )
-			m_BadgeStatusUnconscious.Show( isUncon && !isDead );
+			m_BadgeStatusUnconscious.SetVisible( isUncon && !isDead );
 		if ( m_BadgeStatusBrokenLeg )
-			m_BadgeStatusBrokenLeg.Show( hasBrokenLeg && !isDead );
+			m_BadgeStatusBrokenLeg.SetVisible( hasBrokenLeg && !isDead );
 		if ( m_BadgeStatusBleeding )
-			m_BadgeStatusBleeding.Show( isBleeding && !isDead );
+			m_BadgeStatusBleeding.SetVisible( isBleeding && !isDead );
 		if ( m_BadgeStatusSick )
-			m_BadgeStatusSick.Show( isSick && !isDead );
+			m_BadgeStatusSick.SetVisible( isSick && !isDead );
+
+		// Death hides the other four, so it alone decides the card when it is
+		// set - otherwise any of the remaining states keeps it on screen.
+		bool anyStatus = isDead;
+		if ( !isDead )
+			anyStatus = isUncon || hasBrokenLeg || isBleeding || isSick;
+
+		if ( m_StatusCardRoot && m_StatusCardRoot.IsVisible() != anyStatus )
+		{
+			m_StatusCardRoot.Show( anyStatus );
+
+			// The card sits in the General tab scroller, so appearing or going
+			// away changes the height of everything under it.
+			if ( m_ActionListScroller )
+				m_ActionListScroller.UpdateScroller();
+		}
+	}
+
+	//! One status glyph for the Active Statuses card. A single stage: these do
+	//! not cycle, they are shown or hidden by RefreshIdentityBadges.
+	//!
+	//! `callback` answers UIEvent.CLICK_RIGHT and opens the repair menu for that
+	//! status. Pass "" for a status with nothing to undo - death is the only one.
+	private UIActionStagedIcon CreateStatusIcon( Widget parent, string icon, string tooltip, int color, string callback )
+	{
+		UIActionStagedIcon status = UIActionManager.CreateStagedIcon( parent, this, callback );
+		if ( !status )
+			return NULL;
+
+		status.AddStage( JMConstants.Lucide( icon ), color );
+
+		//! Resolved here rather than handed to the tooltip as a key: the tooltip
+		//! sizes its panel from the string's length, and a "#STR_..." key is not
+		//! the length of the word it stands for.
+		status.SetTooltip( Widget.TranslateString( tooltip ) );
+
+		return status;
+	}
+
+	void Click_StatusUnconscious( UIEvent eid, UIActionBase action )
+	{
+		OpenStatusMenu( eid, action, ROW_MENU_WAKE );
+	}
+
+	void Click_StatusBrokenLegs( UIEvent eid, UIActionBase action )
+	{
+		OpenStatusMenu( eid, action, ROW_MENU_FIX_LEGS );
+	}
+
+	void Click_StatusBleeding( UIEvent eid, UIActionBase action )
+	{
+		OpenStatusMenu( eid, action, ROW_MENU_STOP_BLEED );
+	}
+
+	void Click_StatusSick( UIEvent eid, UIActionBase action )
+	{
+		OpenStatusMenu( eid, action, ROW_MENU_CURE );
+	}
+
+	//! Right-clicking a status glyph offers the one action that clears it. A
+	//! one-entry menu on purpose: the glyph already named the problem, so the
+	//! menu only has to name the fix and give it a deliberate second click.
+	private void OpenStatusMenu( UIEvent eid, UIActionBase action, string repairId )
+	{
+		if ( eid != UIEvent.CLICK_RIGHT || !m_SelectedInstance || !m_Window )
+			return;
+
+		UIActionStagedIcon icon = UIActionStagedIcon.Cast( action );
+		if ( !icon )
+			return;
+
+		if ( !m_StatusMenu )
+		{
+			m_StatusMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_StatusMenu" );
+			RegisterOverlay( m_StatusMenu );
+
+			if ( !m_StatusMenu )
+				return;
+		}
+
+		m_StatusMenuGUID = m_SelectedInstance.GetGUID();
+
+		m_StatusMenu.ClearItems();
+		AddStatusRepairItem( m_StatusMenu, repairId );
+
+		if ( m_StatusMenu.GetItemCount() == 0 )
+			return;
+
+		SetStatusRepairPermissions( m_StatusMenu );
+
+		m_StatusMenu.ShowAt( icon.GetLastRightClickX(), icon.GetLastRightClickY() );
+	}
+
+	void OnClick_StatusMenu( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || !m_StatusMenu )
+			return;
+
+		RunStatusRepair( m_StatusMenu.GetLastClickedId(), m_StatusMenuGUID );
 	}
 
 	//! An active flag reads as a warning, not as a success: every one of these
@@ -1068,6 +1397,10 @@ class JMPlayerForm: JMFormBase
 
 	private void HideIdentityWidgets()
 	{
+		// Nothing is selected, so there are no statuses to be active.
+		if ( m_StatusCardRoot )
+			m_StatusCardRoot.Show( false );
+
 		m_Name.Hide();
 		m_GUID.Hide();
 		m_Steam64ID.Hide();
@@ -1082,8 +1415,8 @@ class JMPlayerForm: JMFormBase
 	private Widget InitActionWidgetsPosition( Widget actionsParent )
 	{
 		// header + toolbar + vector + map header + map slot + teleport header
-		// + teleport row + divider
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 10, 1 );
+		// + teleport row + history header + history rows + divider
+		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 12, 1 );
 
 		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_POSITION" );
 		Widget section0 = section0Card.GetContent();
@@ -1148,7 +1481,273 @@ class JMPlayerForm: JMFormBase
 		m_TeleportMeTo   = UIActionManager.CreateButton( teleportActions, "#STR_COT_PLAYER_MODULE_TELEPORT_ME_TO", this, "Click_TeleportMeTo"     );
 		m_TeleportMeTo.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_TELEPORT_ME_TO" );
 
+		// -- Teleport history ------------------------------------------------
+		//  Where this player has been moved away from, newest first. Recorded on
+		//  this client as the admin issues the moves - it is a record of what
+		//  THIS session did, not a server-side audit trail, so it is empty for
+		//  teleports another admin issued or ones from before this connection.
+		m_TeleportHistoryCard = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_TELEPORT_HISTORY" );
+		m_TeleportHistoryHost = m_TeleportHistoryCard.GetContent();
+
+		//  Clearing is card-level - it wipes every row at once - so it sits in
+		//  the title bar with the other card-level wipes and keeps the caption
+		//  it lost as an icon-only button's tooltip.
+		//  Redo is card-level too: it acts on the stack, not on any one row -
+		//  the rows are the steps still ahead of the target, and a redone step
+		//  is by definition not one of them.
+		m_TeleportHistoryRedo = m_TeleportHistoryCard.AddCardHeaderAction( JMConstants.Lucide( "redo-2" ), this, "Click_RedoTeleport", "#STR_COT_TELEPORT_REDO" );
+		m_TeleportHistoryRedo.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+
+		m_TeleportHistoryClear = m_TeleportHistoryCard.AddDeleteButton( this, "Click_ClearTeleportHistory", "#STR_COT_TELEPORT_HISTORY_CLEAR" );
+		m_TeleportHistoryClear.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+		m_TeleportHistoryClear.SetColor( JMTheme.DANGER_FILL );
+
+		RebuildTeleportHistory();
+
 		return parent;
+	}
+
+	//! Rebuild the history rows for whoever is selected.
+	//!
+	//! Cheap enough to call outright - it is at most five buttons - but never
+	//! from inside one of their own click handlers: the engine answers a
+	//! vanished press target by recentring the cursor, so a rebuild caused by a
+	//! click is deferred a tick.
+	protected void RebuildTeleportHistory()
+	{
+		if ( !m_TeleportHistoryHost )
+			return;
+
+		//! Drop the script references BEFORE the widgets they wrap, so a button
+		//! is never left alive holding a layoutRoot that has been unlinked.
+		m_TeleportHistoryButtons.Clear();
+		m_TeleportHistoryCopy.Clear();
+		m_TeleportHistoryFocus.Clear();
+		m_TeleportHistoryEmpty = NULL;
+
+		if ( m_TeleportHistoryGrid )
+		{
+			m_TeleportHistoryGrid.Unlink();
+			m_TeleportHistoryGrid = NULL;
+		}
+
+		array<ref JMTeleportHistoryEntry> entries = JMTeleportHistory.Entries( JMTeleportHistory.PlayerKey( m_LastSelectedGuid ) );
+
+		int count = 0;
+
+		if ( entries )
+			count = entries.Count();
+
+		m_TeleportHistoryGuid  = m_LastSelectedGuid;
+		m_TeleportHistoryCount = count;
+		m_TeleportHistoryTop   = 0;
+
+		//! Greyed rather than hidden: a header action that comes and goes moves
+		//! the two beside it every time the stack changes.
+		if ( m_TeleportHistoryRedo )
+		{
+			if ( JMTeleportHistory.HasRedo( JMTeleportHistory.PlayerKey( m_LastSelectedGuid ) ) )
+				m_TeleportHistoryRedo.Enable();
+			else
+				m_TeleportHistoryRedo.Disable();
+		}
+
+		if ( count > 0 )
+			m_TeleportHistoryTop = entries[0].Time;
+
+		if ( count == 0 )
+		{
+			m_TeleportHistoryGrid  = UIActionManager.CreateGridSpacer( m_TeleportHistoryHost, 1, 1 );
+			m_TeleportHistoryEmpty = UIActionManager.CreateText( m_TeleportHistoryGrid, "#STR_COT_TELEPORT_HISTORY_EMPTY", "" );
+
+			return;
+		}
+
+		m_TeleportHistoryGrid = UIActionManager.CreateGridSpacer( m_TeleportHistoryHost, count, 1 );
+
+		for ( int i = 0; i < count; i++ )
+		{
+			//! A WrapSpacer packs left to right in creation order, so this IS
+			//! the order on screen: the step, then copy, then focus.
+			Widget rowSpacer = UIActionManager.CreateWrapSpacerCompact( m_TeleportHistoryGrid, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+
+			//! "1. 7521 305 8134  (12s)" - the step, where it was, how long ago.
+			string label = string.Format( "%1. %2  (%3)", i + 1, entries[i].FormatPosition(), entries[i].FormatAge() );
+
+			UIActionButton row = UIActionManager.CreateButton( rowSpacer, label, this, "OnClick_TeleportHistory" );
+			row.SetWidth( HISTORY_GO_W );
+			row.SetTooltip( "#STR_COT_TELEPORT_HISTORY_ROW_DESC" );
+
+			//! Copies in the same "<x, y, z>" shape the coordinate box does, so
+			//! it pastes straight back into that box or into an ESP paste.
+			UIActionImageButton copy = UIActionManager.CreateIconButton( rowSpacer, JMConstants.Lucide( "copy" ), this, "OnClick_TeleportHistoryCopy" );
+			copy.SetWidth( HISTORY_BTN_W );
+			copy.SetTooltip( "#STR_COT_TELEPORT_HISTORY_COPY" );
+
+			//! Shows where the step was WITHOUT moving anyone - the one way to
+			//! tell three sets of coordinates apart is to look at them on a map.
+			UIActionImageButton focus = UIActionManager.CreateIconButton( rowSpacer, JMConstants.Lucide( "locate-fixed" ), this, "OnClick_TeleportHistoryFocus" );
+			focus.SetWidth( HISTORY_BTN_W );
+			focus.SetTooltip( "#STR_COT_TELEPORT_HISTORY_FOCUS" );
+
+			m_TeleportHistoryButtons.Insert( row );
+			m_TeleportHistoryCopy.Insert( copy );
+			m_TeleportHistoryFocus.Insert( focus );
+		}
+	}
+
+	//! The entry a row's controls act on, or NULL if the panel has moved on
+	//! since the button was built.
+	protected JMTeleportHistoryEntry TeleportHistoryEntryAt( int index )
+	{
+		return JMTeleportHistory.EntryAt( JMTeleportHistory.PlayerKey( m_LastSelectedGuid ), index );
+	}
+
+	//! Rebuild only when there is something new to show.
+	//!
+	//! Called off the ten-a-second refresh, so it compares first: who is
+	//! selected, how many steps are recorded, and when the newest of them was
+	//! recorded. The last of those is what catches a push at the cap, where a
+	//! new step drops one off the bottom and the count does not move.
+	protected void SyncTeleportHistory()
+	{
+		if ( !m_TeleportHistoryHost )
+			return;
+
+		if ( m_LastSelectedGuid != m_TeleportHistoryGuid )
+		{
+			RebuildTeleportHistory();
+
+			return;
+		}
+
+		string key = JMTeleportHistory.PlayerKey( m_LastSelectedGuid );
+
+		if ( JMTeleportHistory.Count( key ) != m_TeleportHistoryCount )
+		{
+			RebuildTeleportHistory();
+
+			return;
+		}
+
+		JMTeleportHistoryEntry newest = JMTeleportHistory.EntryAt( key, 0 );
+
+		if ( newest && newest.Time != m_TeleportHistoryTop )
+			RebuildTeleportHistory();
+	}
+
+	//! Send the selected player back to the place this row names.
+	//!
+	//! The rows ABOVE the one clicked go with it - they are places the player
+	//! only passed through on the way here, and leaving them in would make the
+	//! next undo walk forwards. See JMTeleportHistory.Pop.
+	void OnClick_TeleportHistory( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UIActionButton row;
+
+		if ( !Class.CastTo( row, action ) )
+			return;
+
+		int index = m_TeleportHistoryButtons.Find( row );
+
+		if ( index < 0 )
+			return;
+
+		if ( !JMTeleportHistory.UndoPlayer( m_LastSelectedGuid, index ) )
+			return;
+
+		//! Deferred: this rebuild destroys the very button the press landed on.
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildTeleportHistory );
+	}
+
+	void OnClick_TeleportHistoryCopy( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UIActionImageButton button;
+
+		if ( !Class.CastTo( button, action ) )
+			return;
+
+		int index = m_TeleportHistoryCopy.Find( button );
+
+		if ( index < 0 )
+			return;
+
+		JMTeleportHistoryEntry entry = TeleportHistoryEntryAt( index );
+
+		if ( !entry )
+			return;
+
+		//! Same shape as Click_CopyPlayerPostion, so the two are interchangeable
+		//! wherever a position is pasted.
+		g_Game.CopyToClipboard( "<" + entry.Position[0] + ", " + entry.Position[1] + ", " + entry.Position[2] + ">" );
+
+		//! No toast: the button swaps to a check mark where the click happened.
+		button.ShowFeedback();
+	}
+
+	void OnClick_TeleportHistoryFocus( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		UIActionImageButton button;
+
+		if ( !Class.CastTo( button, action ) )
+			return;
+
+		int index = m_TeleportHistoryFocus.Find( button );
+
+		if ( index < 0 )
+			return;
+
+		JMTeleportHistoryEntry entry = TeleportHistoryEntryAt( index );
+
+		if ( !entry )
+			return;
+
+		FocusMap( entry.Position );
+	}
+
+	//! Point the position tab's map at a coordinate, closer in than the default
+	//! so the step is placed rather than just centred.
+	//!
+	//! Split out of RecenterMap because the two differ only in what they centre
+	//! on, and the map is a MapWidget either way - nothing is moved, nothing is
+	//! sent, the view just changes.
+	private void FocusMap( vector position )
+	{
+		if ( !m_PositionMap || position == vector.Zero )
+			return;
+
+		m_PositionMap.CenterOn( position, MAP_FOCUS_SCALE );
+	}
+
+	void Click_RedoTeleport( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( !JMTeleportHistory.RedoPlayer( m_LastSelectedGuid, 0 ) )
+			return;
+
+		//! Deferred: a redo puts a row back on the panel this button lives in.
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildTeleportHistory );
+	}
+
+	void Click_ClearTeleportHistory( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		JMTeleportHistory.Clear( JMTeleportHistory.PlayerKey( m_LastSelectedGuid ) );
+
+		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( RebuildTeleportHistory );
 	}
 
 	//! Vitals and temperatures.
@@ -1223,32 +1822,32 @@ class JMPlayerForm: JMFormBase
 		// 11 checkboxes - 6 rows x 2 cols leaves 1 empty cell, instead of 5,2 which truncates.
 		Widget actions2 = UIActionManager.CreateGridSpacer( section0, 6, 2 );
 
-		m_RemoveCollision = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REMOVE_COLLISION", this, "Click_RemoveCollision", false );
+		m_RemoveCollision = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_REMOVE_COLLISION", this, "Click_RemoveCollision", false, 1, JMConstants.Lucide( "ghost" ) );
 		m_RemoveCollision.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_REMOVE_COLLISION" );
-		m_GodMode = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_GodMode", false );
+		m_GodMode = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_GODMODE", this, "Click_GodMode", false, 1, JMConstants.Lucide( "crown" ) );
 		m_GodMode.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_GODMODE" );
 
-		m_Freeze = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false );
+		m_Freeze = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", this, "Click_Freeze", false, 1, JMConstants.Lucide( "snowflake" ) );
 		m_Freeze.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_FREEZE" );
-		m_Invisibility = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false );
+		m_Invisibility = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_INVISIBLE", this, "Click_Invisible", false, 1, JMConstants.Lucide( "eye-off" ) );
 		m_Invisibility.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_INVISIBLE" );
 
-		m_BloodyHands = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_BloodyHands", false );
+		m_BloodyHands = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BLOODY_HANDS", this, "Click_BloodyHands", false, 1, JMConstants.Lucide( "droplet" ) );
 		m_BloodyHands.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_BLOODY_HANDS" );
-		m_CannotBeTargetedByAI = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI", this, "Click_CannotBeTargetedByAI", false );
+		m_CannotBeTargetedByAI = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_IGNORED_BY_AI", this, "Click_CannotBeTargetedByAI", false, 1, JMConstants.Lucide( "bot-off" ) );
 		m_CannotBeTargetedByAI.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_IGNORED_BY_AI" );
 
-		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false );
+		m_BrokenLegs = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_BROKEN_LEGS", this, "Click_SetBrokenLegs", false, 1, JMConstants.Lucide( "bone-fracture" ) );
 		m_BrokenLegs.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_BROKEN_LEGS" );
-		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false );
+		m_UnlimitedStamina = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_STAMINA", this, "Click_UnlimitedStamina", false, 1, JMConstants.Lucide( "zap" ) );
 		m_UnlimitedStamina.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_UNLIMITED_STAMINA" );
 
-		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false );
+		m_ReceiveDmgDealt = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_RECEIVE_DAMAGE_DEALT", this, "Click_SetReceiveDamageDealt", false, 1, JMConstants.Lucide( "swords" ) );
 		m_ReceiveDmgDealt.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_RECEIVE_DAMAGE_DEALT" );
-		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false );
+		m_UnlimitedAmmo = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_UNLIMITED_AMMO", this, "Click_UnlimitedAmmo", false, 1, JMConstants.Lucide( "infinity" ) );
 		m_UnlimitedAmmo.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_UNLIMITED_AMMO" );
 
-		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_NVG", this, "Click_AdminNVG", false );
+		m_AdminNVG = UIActionManager.CreateCheckbox( actions2, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_NVG", this, "Click_AdminNVG", false, 1, JMConstants.Lucide( "eye" ) );
 		m_AdminNVG.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_NVG" );
 
 		return parent;
@@ -1303,13 +1902,32 @@ class JMPlayerForm: JMFormBase
 		// ---- Bleed-from-body-part ----
 		UIActionCard section1Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_BLEEDING" );
 		Widget section1 = section1Card.GetContent();
+
+		// Stop-all does not read the part dropdown - it clears the whole card -
+		// so it belongs in the title bar next to the other card-level wipes,
+		// exactly where Diseases puts its own. Bound straight to the existing
+		// Click_StopBleeding: "stop every bleed on this player" already had a
+		// handler and a confirmation, it just had no button on this card.
+		m_BleedClear = section1Card.AddDeleteButton( this, "Click_StopBleeding" );
+		m_BleedClear.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
+		m_BleedClear.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_BLEED_CLEAR" );
+		m_BleedClear.SetColor( JMTheme.DANGER_FILL );
+
 		m_BleedingPart = UIActionManager.CreateDropdown( section1, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_BLEEDING_PART", m_Window.GetWidgetRoot(), this, "" );
 		RegisterOverlay( m_BleedingPart );
 		m_BleedingPart.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_BLEEDING_PART" );
 
-		// Populate with a single "All" entry - the real zone list arrives when the
-		// selected player's bleeding state is pushed by the server.
-		m_BleedingPart.AddEntry( "All", JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		// Populate with zone list (default fallback entries until server push arrives)
+		m_BleedingPart.AddEntry( BleedPartLabel( "All" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "Head" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "Torso" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "LeftArm" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "RightArm" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "LeftLeg" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "RightLeg" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "LeftFoot" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.AddEntry( BleedPartLabel( "RightFoot" ), JMConstants.ICON_HEALTH_NORMAL, ARGB(255, 73, 184, 117) );
+		m_BleedingPart.SetSelection( 0, false );
 
 		Widget bleedActions = UIActionManager.CreateGridSpacer( section1, 1, 1 );
 		m_BleedApply = UIActionManager.CreateButton( bleedActions, "#STR_COT_PLAYER_MODULE_BLEED_APPLY", this, "Click_ApplyBleed" );
@@ -1406,8 +2024,9 @@ class JMPlayerForm: JMFormBase
 
 		// ClearCargo has existed on the module since forever with no UI anywhere.
 		// It belongs on this tab; Strip stays with the destructive actions.
-		// Icon-only, so the caption it lost becomes its tooltip; the click still
-		// goes through CreateAdvancedPlayerConfirm, which is the confirmation.
+		// Icon-only, so the caption it lost becomes its tooltip. Always targets
+		// m_SelectedInstance - the player list's own checkbox selection is a
+		// separate concept and has nothing to do with the inventory on screen.
 		m_InventoryClearCargo = section0Card.AddDeleteButton( this, "Click_ClearCargoOnly", "#STR_COT_PLAYER_MODULE_TT_INV_CLEAR_CARGO" );
 		m_InventoryClearCargo.SetColor( JMTheme.DANGER_FILL );
 
@@ -1482,13 +2101,44 @@ class JMPlayerForm: JMFormBase
 		if ( !m_SelectedInstance || guid != m_SelectedInstance.GetGUID() )
 			return;
 
+		// Item indices only mean anything within one listing, so which
+		// containers were open is carried across by NET ID instead - stable
+		// across a refresh unless the tree itself changed, which is what a
+		// routine edit (health, quantity, temperature, ...) never does. Losing
+		// the expansion on every refresh made editing anything inside an open
+		// bag or vest close it right back up.
+		array<int> expandedLow  = {};
+		array<int> expandedHigh = {};
+
+		foreach ( int expandedIndex : m_InvExpanded )
+		{
+			if ( expandedIndex < 0 || expandedIndex >= m_InventoryItems.Count() )
+				continue;
+
+			expandedLow.Insert( m_InventoryItems[expandedIndex].NetIdLow );
+			expandedHigh.Insert( m_InventoryItems[expandedIndex].NetIdHigh );
+		}
+
 		m_InventoryItems.Clear();
 		foreach ( JMPlayerInventoryItem item : items )
 			m_InventoryItems.Insert( item );
 
-		// Item indices only mean anything within one listing, so which
-		// containers were open cannot survive a new one.
 		m_InvExpanded.Clear();
+
+		for ( int i = 0; i < m_InventoryItems.Count(); i++ )
+		{
+			int netLow  = m_InventoryItems[i].NetIdLow;
+			int netHigh = m_InventoryItems[i].NetIdHigh;
+
+			for ( int e = 0; e < expandedLow.Count(); e++ )
+			{
+				if ( expandedLow[e] == netLow && expandedHigh[e] == netHigh )
+				{
+					m_InvExpanded.Insert( i );
+					break;
+				}
+			}
+		}
 
 		RebuildInventoryTable( truncated );
 	}
@@ -1631,10 +2281,10 @@ class JMPlayerForm: JMFormBase
 		return columns;
 	}
 
-	//! Same job as DumpMapDiagnostics, for the other widget the engine renders
-	//! in its own pass: say what the first preview cell actually is, so a blank
-	//! grid can be told apart from a grid of previews drawn at zero size or with
-	//! no entity behind them.
+	//! Say what the first preview cell actually is, so a blank grid can be told
+	//! apart from a grid of previews drawn at zero size or with no entity
+	//! behind them - the inventory preview is the other widget the engine
+	//! renders in its own pass.
 	private void DumpPreviewDiagnostics( int previews )
 	{
 		Print( "[COT-PREVIEW] rebuild: cells=" + m_InvCells.Count() + " previews=" + previews + " entities=" + m_InvCellEntities.Count() );
@@ -2014,6 +2664,8 @@ class JMPlayerForm: JMFormBase
 		if ( Class.CastTo( label, band.FindAnyWidget( "group_label" ) ) )
 			label.SetText( InventoryGroupLabel( index ) );
 
+		BuildInventoryBandActions( band, index );
+
 		float pad   = INV_BAND_PAD * m_InvScale;
 		float strip = INV_BAND_LABEL * m_InvScale;
 
@@ -2029,6 +2681,162 @@ class JMPlayerForm: JMFormBase
 		band.SetScreenSize( width, bandHeight );
 
 		return bandHeight + ( INV_BAND_GAP * m_InvScale );
+	}
+
+	//! The three whole-band operations, in the band's own header strip. They act
+	//! on what the band DRAWS - everything this container holds directly - which
+	//! is the scope an admin looking at an open backpack means by "all of it",
+	//! and the reason they are here rather than on the container's own cell.
+	//!
+	//! Real UIActionImageButtons, the same ones the card headers use, so they
+	//! carry the hover fill, the border and the tooltip every other icon button
+	//! in COT has. They were raw ImageWidgets routed through OnMouseButtonUp,
+	//! which drew the right glyph and answered a click but was dead on hover.
+	//!
+	//! Created per rebuild rather than cached: the band and everything on it is
+	//! destroyed with the canvas on every refresh, so a cached button would be a
+	//! dangling widget by the next listing.
+	//!
+	//! An action the admin lacks the permission for is not created at all.
+	//! Hidden rather than greyed, unlike the context menu: the menu keeps one
+	//! shape so a missing entry reads as a missing PERMISSION, but a band header
+	//! is three unlabelled glyphs over someone else's backpack, and a dead one
+	//! there just reads as broken.
+	private void BuildInventoryBandActions( Widget band, int index )
+	{
+		//! Packed right and centred in the strip. The spacer lays a right-aligned
+		//! run out from the right edge INWARDS, so the FIRST button created is
+		//! the rightmost one - delete is declared first here to land on the
+		//! outside edge, away from the two harmless actions, which is where
+		//! every other destructive control in COT sits.
+		WrapSpacerWidget host;
+		if ( !Class.CastTo( host, band.FindAnyWidget( "group_actions" ) ) )
+			return;
+
+		host.SetContentAlignmentH( WidgetAlignment.WA_RIGHT );
+		host.SetContentAlignmentV( WidgetAlignment.WA_CENTER );
+
+		if ( GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Delete" ) )
+		{
+			UIActionImageButton wipe = UIActionManager.CreateDeleteButton( host, this, "Click_BandDeleteAll", "#STR_COT_PLAYER_MODULE_TT_INV_GROUP_DELETE" );
+
+			//! CreateDeleteButton paints the pill in the bright DANGER accent,
+			//! which is the colour COT uses for TEXT and rings, not for a filled
+			//! control. Every other delete button in the mod overrides it to the
+			//! deeper DANGER_FILL right after creating it - see the Inventory
+			//! card's own clear-cargo button - so this one does too.
+			wipe.SetColor( JMTheme.DANGER_FILL );
+
+			PrepareInventoryBandAction( wipe, index, "" );
+		}
+
+		if ( GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Repair" ) )
+		{
+			UIActionImageButton repair = UIActionManager.CreateIconButton( host, JMConstants.Lucide( "wrench" ), this, "Click_BandRepairAll" );
+			PrepareInventoryBandAction( repair, index, "#STR_COT_PLAYER_MODULE_TT_INV_GROUP_REPAIR" );
+		}
+
+		if ( GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Take" ) )
+		{
+			UIActionImageButton take = UIActionManager.CreateIconButton( host, JMConstants.Lucide( "hand" ), this, "Click_BandTakeAll" );
+			PrepareInventoryBandAction( take, index, "#STR_COT_PLAYER_MODULE_TT_INV_GROUP_TAKE" );
+		}
+	}
+
+	//! Size the button to the header strip and pin the container it belongs to
+	//! onto it. The INDEX is what travels, not the item: the callback re-reads
+	//! m_InventoryItems, which is the array the listing rebuilt.
+	private void PrepareInventoryBandAction( UIActionImageButton button, int index, string tooltip )
+	{
+		if ( !button )
+			return;
+
+		button.SetFixedSize( INV_BAND_ACTION_PX, INV_BAND_ACTION_PX );
+
+		//! See INV_BAND_ICON_PX: the glyph is an exact size in the layout and
+		//! has to be brought down by hand, or the button is all picture and no
+		//! pill and the hover fill has nowhere to show.
+		Widget glyph = button.GetLayoutRoot().FindAnyWidget( "action_image" );
+		if ( glyph )
+		{
+			glyph.SetSize( INV_BAND_ICON_PX, INV_BAND_ICON_PX );
+			glyph.Update();
+		}
+
+		button.SetData( new JMStringData( index.ToString() ) );
+
+		if ( tooltip != "" )
+			button.SetTooltip( tooltip );
+	}
+
+	//! Which container a band action was created for, or -1.
+	private int InventoryBandActionIndex( UIActionBase action )
+	{
+		if ( !action )
+			return -1;
+
+		JMStringData data;
+		if ( !Class.CastTo( data, action.GetData() ) )
+			return -1;
+
+		return data.Value.ToInt();
+	}
+
+	void Click_BandTakeAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		RunInventoryGroupAction( InventoryBandActionIndex( action ), JMInventoryGroupOp.TAKE_ALL );
+	}
+
+	void Click_BandRepairAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		RunInventoryGroupAction( InventoryBandActionIndex( action ), JMInventoryGroupOp.REPAIR_ALL );
+	}
+
+	void Click_BandDeleteAll( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		RunInventoryGroupAction( InventoryBandActionIndex( action ), JMInventoryGroupOp.DELETE_ALL );
+	}
+
+	private void RunInventoryGroupAction( int index, int op )
+	{
+		if ( !m_SelectedInstance )
+			return;
+
+		if ( index < 0 || index >= m_InventoryItems.Count() )
+			return;
+
+		JMPlayerInventoryItem container = m_InventoryItems[index];
+
+		// Deleting a whole container's contents is the one irreversible action
+		// here, and the glyph that starts it is 14 pixels wide - so it asks.
+		if ( op == JMInventoryGroupOp.DELETE_ALL )
+		{
+			m_InvGroupPendingLow  = container.NetIdLow;
+			m_InvGroupPendingHigh = container.NetIdHigh;
+			m_InvGroupPendingName = container.GetDisplayName();
+
+			CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_TITLE", string.Format( Widget.TranslateString( "#STR_COT_PLAYER_MODULE_INV_GROUP_DELETE_BODY" ), InventoryChildCount( index ).ToString(), m_InvGroupPendingName ), "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "InventoryGroupDeleteConfirm" );
+			return;
+		}
+
+		m_Module.InventoryGroupOp( m_SelectedInstance.GetGUID(), container.NetIdLow, container.NetIdHigh, op );
+	}
+
+	void InventoryGroupDeleteConfirm( JMConfirmation confirmation = NULL )
+	{
+		if ( !m_SelectedInstance )
+			return;
+
+		m_Module.InventoryGroupOp( m_SelectedInstance.GetGUID(), m_InvGroupPendingLow, m_InvGroupPendingHigh, JMInventoryGroupOp.DELETE_ALL );
 	}
 
 	//! "Field Backpack (6)" - whose contents these are, and how many.
@@ -2193,10 +3001,17 @@ class JMPlayerForm: JMFormBase
 	}
 
 	//! What a cell's preview entity was built from. Two items of the same type
-	//! holding different things must not share one cached model.
+	//! holding different things must not share one cached model, and neither
+	//! may two states of the SAME item: health, quantity, temperature and food
+	//! stage are all baked into the spawned entity at SpawnLocalPreview time,
+	//! not re-applied afterward, so a key that ignored them kept showing the
+	//! item's state as of whenever the preview first spawned - pristine, full
+	//! and room temperature - no matter how many edits landed on it since.
 	private string InventoryPreviewKey( int index )
 	{
-		return m_InventoryItems[index].Type + "|" + InventoryChildCount( index ).ToString();
+		JMPlayerInventoryItem item = m_InventoryItems[index];
+
+		return item.Type + "|" + InventoryChildCount( index ).ToString() + "|" + item.Health.ToString() + "|" + item.Quantity.ToString() + "|" + item.Temperature.ToString() + "|" + item.Stage.ToString();
 	}
 
 	//! Quantity is drawn the way the item's own config asks for it - vanilla's
@@ -2452,29 +3267,28 @@ class JMPlayerForm: JMFormBase
 		RefreshStats( true );
 	}
 
+	//! Unlike the player-list quick actions, this button lives inside the
+	//! inventory panel itself - it always means the player whose inventory is
+	//! open (m_SelectedInstance), never whatever else is checkbox-selected in
+	//! the list behind it. Going through JM_GetSelected() here meant clicking
+	//! it could wipe cargo on a different player than the one on screen.
 	void Click_ClearCargoOnly( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		CreateAdvancedPlayerConfirm( "#STR_COT_PLAYER_MODULE_INV_CLEAR_CARGO", "ClearCargoOnlyMulti", "ClearCargoOnlySingle", "ClearCargoOnlySelf", false );
+		if ( !m_SelectedInstance )
+			return;
+
+		CreateConfirmation_Two( JMConfirmationType.INFO, "#STR_COT_PLAYER_MODULE_INV_CLEAR_CARGO", "#STR_COT_PLAYER_MODULE_INV_CLEAR_CARGO_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ClearCargoOnlyConfirm" );
 	}
 
-	void ClearCargoOnlyMulti( JMConfirmation confirmation = NULL )
+	void ClearCargoOnlyConfirm( JMConfirmation confirmation = NULL )
 	{
-		m_Module.ClearCargo( JM_GetSelected().GetPlayers() );
-		RequestInventory();
-	}
+		if ( !m_SelectedInstance )
+			return;
 
-	void ClearCargoOnlySingle( JMConfirmation confirmation = NULL )
-	{
-		m_Module.ClearCargo( { JM_GetSelected().GetPlayersOrSelf()[0] } );
-		RequestInventory();
-	}
-
-	void ClearCargoOnlySelf( JMConfirmation confirmation = NULL )
-	{
-		m_Module.ClearCargo( { GetPermissionsManager().GetClientPlayer().GetGUID() } );
+		m_Module.ClearCargo( { m_SelectedInstance.GetGUID() } );
 		RequestInventory();
 	}
 
@@ -2511,24 +3325,238 @@ class JMPlayerForm: JMFormBase
 		m_PlayerMenuGUID = guid;
 
 		m_PlayerMenu.ClearItems();
+
+		//! The repairs come first and only for the states the player is in, so
+		//! the entry an admin opened the menu for is the one under the cursor.
+		AddStatusRepairItems( m_PlayerMenu, instance );
+
+		//! Two entries are meaningless on your own row and are left out rather
+		//! than greyed: "teleport me to" would be a no-op walk to where you are
+		//! already standing, and spectating yourself is what the game already
+		//! does. "Teleport to me" stays - it is how an admin recalls a character
+		//! they left somewhere, and it reads the same either way.
+		bool isSelf = ( guid == GetPermissionsManager().GetClientGUID() );
+
 		m_PlayerMenu.AddItem( ROW_MENU_HEAL,     "#STR_COT_PLAYER_MODULE_ACTION_HEAL",     JMConstants.Lucide( "heart-pulse" ) );
 		m_PlayerMenu.AddItem( ROW_MENU_TP_TO_ME, "#STR_COT_PLAYER_MODULE_TELEPORT_TO_ME",  JMConstants.Lucide( "move-down-left" ) );
-		m_PlayerMenu.AddItem( ROW_MENU_TP_ME_TO, "#STR_COT_PLAYER_MODULE_TELEPORT_ME_TO",  JMConstants.Lucide( "footprints" ) );
+
+		if ( !isSelf )
+			m_PlayerMenu.AddItem( ROW_MENU_TP_ME_TO, "#STR_COT_PLAYER_MODULE_TELEPORT_ME_TO",  JMConstants.Lucide( "footprints" ) );
+
+		//! Greyed rather than dropped when there is nothing to take back: an
+		//! entry that comes and goes moves every row under it between one
+		//! opening of the menu and the next.
+		m_PlayerMenu.AddItem( ROW_MENU_TP_UNDO, "#STR_COT_TELEPORT_UNDO", JMConstants.Lucide( "undo-2" ) );
+		m_PlayerMenu.AddItem( ROW_MENU_TP_REDO, "#STR_COT_TELEPORT_REDO", JMConstants.Lucide( "redo-2" ) );
+
+		//! Moves the Position tab's map, not the player - the one way to tell
+		//! two sets of coordinates apart is to look at them.
+		m_PlayerMenu.AddItem( ROW_MENU_FOCUS_MAP, "#STR_COT_TELEPORT_HISTORY_FOCUS", JMConstants.Lucide( "locate-fixed" ) );
 
 		if ( instance.IsFrozen() )
 			m_PlayerMenu.AddItem( ROW_MENU_FREEZE, "#STR_COT_PLAYER_MODULE_ACTION_UNFREEZE", JMConstants.Lucide( "snowflake" ) );
 		else
 			m_PlayerMenu.AddItem( ROW_MENU_FREEZE, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", JMConstants.Lucide( "snowflake" ) );
 
-		m_PlayerMenu.AddItem( ROW_MENU_SPECTATE, "#STR_COT_PLAYER_MODULE_ACTION_SPECTATE", JMConstants.Lucide( "eye" ) );
+#ifdef DAYZ_1_30
+		if ( instance.IsRagdoll() )
+			m_PlayerMenu.AddItem( ROW_MENU_RAGDOLL, "#STR_COT_PLAYER_MODULE_ACTION_UNRAGDOLL", JMConstants.Lucide( "bone" ) );
+		else
+			m_PlayerMenu.AddItem( ROW_MENU_RAGDOLL, "#STR_COT_PLAYER_MODULE_ACTION_RAGDOLL", JMConstants.Lucide( "bone" ) );
+#endif
 
+		if ( !isSelf )
+			m_PlayerMenu.AddItem( ROW_MENU_SPECTATE, "#STR_COT_PLAYER_MODULE_ACTION_SPECTATE", JMConstants.Lucide( "eye" ) );
+
+		m_PlayerMenu.AddItem( ROW_MENU_COPY_GUID,  "#STR_COT_ESP_MODULE_MENU_COPY_GUID", JMConstants.Lucide( "copy" ) );
+		m_PlayerMenu.AddItem( ROW_MENU_COPY_STEAM, "#STR_COT_ESP_MODULE_MENU_COPY_STEAM", JMConstants.Lucide( "copy" ) );
+
+		//! A context menu cannot be typed into, so the body comes off the
+		//! clipboard - the same route the ESP menu takes for the same reason.
+		m_PlayerMenu.AddItem( ROW_MENU_MESSAGE, "#STR_COT_ESP_MODULE_MENU_MESSAGE", JMConstants.Lucide( "message-square" ) );
+
+		//! Destructive, and tinted like it. These four are the reason the row
+		//! menu is worth having at all - an admin dealing with someone should
+		//! not have to change tab to act.
+		m_PlayerMenu.AddItem( ROW_MENU_CLEARCARGO, "#STR_COT_PLAYER_MODULE_ACTION_CLEAR_CARGO", JMConstants.Lucide( "package-x" ), JMTheme.DANGER );
+		m_PlayerMenu.AddItem( ROW_MENU_STRIP,      "#STR_COT_PLAYER_MODULE_ACTION_STRIP",       JMConstants.Lucide( "shirt" ),     JMTheme.DANGER );
+
+		if ( !isSelf )
+		{
+			m_PlayerMenu.AddItem( ROW_MENU_KICK, "#STR_COT_PLAYER_MODULE_ACTION_KICK", JMConstants.Lucide( "door-open" ), JMTheme.DANGER );
+			m_PlayerMenu.AddItem( ROW_MENU_BAN,  "#STR_COT_PLAYER_MODULE_ACTION_BAN",  JMConstants.Lucide( "gavel" ),     JMTheme.DANGER );
+		}
+
+		//! SetItemEnabled on an id the menu is not carrying is a no-op, so the
+		//! two self-only omissions above need no special case here.
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_HEAL,     GetPermissionsManager().HasPermission( "Admin.Player.Heal" ) );
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_TP_TO_ME, GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) );
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_TP_ME_TO, GetPermissionsManager().HasPermission( "Admin.Player.Teleport.SenderTo" ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_TP_UNDO,  GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) && JMTeleportHistory.Has( JMTeleportHistory.PlayerKey( instance.GetGUID() ) ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_TP_REDO,  GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) && JMTeleportHistory.HasRedo( JMTeleportHistory.PlayerKey( instance.GetGUID() ) ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_MESSAGE,    GetPermissionsManager().HasPermission( "Admin.Player.Message" ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_CLEARCARGO, GetPermissionsManager().HasPermission( "Admin.Player.ClearCargo" ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_STRIP,      GetPermissionsManager().HasPermission( "Admin.Player.Strip" ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_KICK,       GetPermissionsManager().HasPermission( "Admin.Player.Kick" ) );
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_BAN,        GetPermissionsManager().HasPermission( "Admin.Player.Ban" ) );
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_FREEZE,   GetPermissionsManager().HasPermission( "Admin.Player.Freeze" ) );
+#ifdef DAYZ_1_30
+		m_PlayerMenu.SetItemEnabled( ROW_MENU_RAGDOLL,  GetPermissionsManager().HasPermission( "Admin.Player.Ragdoll" ) );
+#endif
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_SPECTATE, GetPermissionsManager().HasPermission( "Admin.Player.Spectate" ) );
 
+		SetStatusRepairPermissions( m_PlayerMenu );
+
 		m_PlayerMenu.ShowAt( x, y );
+	}
+
+	//! GUID a row-menu message prompt is pending for, between ShowAt() (in
+	//! RunRowMessage) and the confirmation's own callback - same pattern as
+	//! JMESPForm.m_PendingMsgPlayerGUID / PromptSendMessage, which already
+	//! solved this identically for the world right-click player menu.
+	private string m_PendingRowMsgGuid;
+
+	//! Opens a text-entry prompt for one player, same as the ESP module's own
+	//! player menu already does. Used to read from the clipboard instead - "a
+	//! context menu cannot be typed into" - but a context menu can raise a
+	//! confirmation dialog just fine, which is exactly what JMESPForm's
+	//! PromptSendMessage does, so this matches it instead of asking the admin
+	//! to pre-copy the message text before right-clicking.
+	private void RunRowMessage( string guid )
+	{
+		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Message" ) )
+			return;
+
+		JMPlayerInstance instance = GetPermissionsManager().GetPlayer( guid );
+		if ( !instance )
+			return;
+
+		m_PendingRowMsgGuid = guid;
+
+		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_MESSAGE_HEADER", Widget.TranslateString( "#STR_COT_ESP_MODULE_MESSAGE_PROMPT" ) + " " + instance.GetName() + ":", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnRowMessage_Confirm" );
+	}
+
+	private void OnRowMessage_Confirm( JMConfirmation confirmation = NULL )
+	{
+		if ( !confirmation )
+			return;
+
+		string msgText = confirmation.GetEditBoxValue();
+		if ( msgText == "" || m_PendingRowMsgGuid == "" )
+			return;
+
+		m_Module.DoMessage( { m_PendingRowMsgGuid }, msgText );
+		m_PendingRowMsgGuid = "";
+	}
+
+	//! The repair entries for whatever is currently wrong with a player, added
+	//! to `menu` in the order the list badges use. A healthy player contributes
+	//! nothing, which is the point: the menu is a list of what can be fixed.
+	//!
+	//! A corpse gets none of them - reviving is not one of these calls, and
+	//! stopping the bleeding of a dead man is not an action worth offering.
+	private void AddStatusRepairItems( UIActionContextMenu menu, JMPlayerInstance instance )
+	{
+		if ( !menu || !instance || instance.IsDead() )
+			return;
+
+		if ( instance.IsUnconscious() )
+			AddStatusRepairItem( menu, ROW_MENU_WAKE );
+
+		if ( instance.HasBrokenLegs() )
+			AddStatusRepairItem( menu, ROW_MENU_FIX_LEGS );
+
+		if ( instance.IsBleeding() )
+			AddStatusRepairItem( menu, ROW_MENU_STOP_BLEED );
+
+		if ( instance.IsSick() )
+			AddStatusRepairItem( menu, ROW_MENU_CURE );
+	}
+
+	//! One repair entry, so the row menu and the status glyphs word the same fix
+	//! the same way. An unknown id adds nothing.
+	private void AddStatusRepairItem( UIActionContextMenu menu, string id )
+	{
+		if ( !menu )
+			return;
+
+		if ( id == ROW_MENU_WAKE )
+			menu.AddItem( ROW_MENU_WAKE, "#STR_COT_PLAYER_MODULE_ACTION_WAKE", JMConstants.Lucide( "bed" ) );
+		else if ( id == ROW_MENU_FIX_LEGS )
+			menu.AddItem( ROW_MENU_FIX_LEGS, "#STR_COT_PLAYER_MODULE_ACTION_FIX_LEGS", JMConstants.Lucide( "bone-fracture" ) );
+		else if ( id == ROW_MENU_STOP_BLEED )
+			menu.AddItem( ROW_MENU_STOP_BLEED, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_QUICK_ACTIONS_STOP_BLEEDING", JMConstants.Lucide( "droplet" ) );
+		else if ( id == ROW_MENU_CURE )
+			menu.AddItem( ROW_MENU_CURE, "#STR_COT_PLAYER_MODULE_ACTION_CURE", JMConstants.Lucide( "thermometer" ) );
+	}
+
+	//! Grey rather than drop: SetItemEnabled on an id the menu does not carry is
+	//! a no-op, so this can be called unconditionally after every build.
+	private void SetStatusRepairPermissions( UIActionContextMenu menu )
+	{
+		if ( !menu )
+			return;
+
+		menu.SetItemEnabled( ROW_MENU_WAKE,       GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock" ) );
+		menu.SetItemEnabled( ROW_MENU_FIX_LEGS,   GetPermissionsManager().HasPermission( "Admin.Player.BrokenLegs" ) );
+		menu.SetItemEnabled( ROW_MENU_STOP_BLEED, GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add" ) );
+		menu.SetItemEnabled( ROW_MENU_CURE,       GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove" ) );
+	}
+
+	//! Run one status repair against one guid. Shared by the player-list row
+	//! menu and the Active Statuses card, which offer the same four fixes.
+	//! Returns false for an id that is not a repair so the caller can go on
+	//! matching its own entries.
+	private bool RunStatusRepair( string id, string guid )
+	{
+		if ( guid == "" || !m_Module )
+			return false;
+
+		if ( id == ROW_MENU_WAKE )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock" ) )
+				return true;
+
+			UpdateLastChangeTime();
+			m_Module.SetShock( SHOCK_CONSCIOUS, { guid } );
+
+			return true;
+		}
+
+		if ( id == ROW_MENU_FIX_LEGS )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.BrokenLegs" ) )
+				return true;
+
+			UpdateLastChangeTime();
+			m_Module.SetBrokenLegs( false, { guid } );
+
+			return true;
+		}
+
+		if ( id == ROW_MENU_STOP_BLEED )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add" ) )
+				return true;
+
+			UpdateLastChangeTime();
+			m_Module.StopBleeding( { guid } );
+
+			return true;
+		}
+
+		if ( id == ROW_MENU_CURE )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove" ) )
+				return true;
+
+			UpdateLastChangeTime();
+			m_Module.RemoveAllDiseases( { guid } );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	//! Every branch addresses m_PlayerMenuGUID alone. None of these go through
@@ -2554,6 +3582,9 @@ class JMPlayerForm: JMFormBase
 		vector toMe = vector.Zero;
 		PlayerBase spectated;
 
+		if ( RunStatusRepair( id, guid ) )
+			return;
+
 		if ( id == ROW_MENU_HEAL )
 		{
 			if ( GetPermissionsManager().HasPermission( "Admin.Player.Heal" ) )
@@ -2571,6 +3602,88 @@ class JMPlayerForm: JMFormBase
 
 			if ( toMe != vector.Zero )
 				m_Module.TeleportTo( toMe, { guid } );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_TP_REDO )
+		{
+			JMTeleportHistory.RedoPlayer( guid, 0 );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_FOCUS_MAP )
+		{
+			JMPlayerInstance focusInstance = GetPermissionsManager().GetPlayer( guid );
+
+			if ( focusInstance )
+				FocusMap( focusInstance.GetPosition() );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_COPY_GUID )
+		{
+			g_Game.CopyToClipboard( guid );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_COPY_STEAM )
+		{
+			JMPlayerInstance steamInstance = GetPermissionsManager().GetPlayer( guid );
+
+			if ( steamInstance )
+				g_Game.CopyToClipboard( steamInstance.GetSteam64ID() );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_MESSAGE )
+		{
+			RunRowMessage( guid );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_CLEARCARGO )
+		{
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.ClearCargo" ) )
+				m_Module.ClearCargo( { guid } );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_STRIP )
+		{
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.Strip" ) )
+				m_Module.Strip( { guid } );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_KICK )
+		{
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.Kick" ) )
+				m_Module.Kick( { guid }, "" );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_BAN )
+		{
+			if ( GetPermissionsManager().HasPermission( "Admin.Player.Ban" ) )
+				m_Module.Ban( { guid }, "" );
+
+			return;
+		}
+
+		if ( id == ROW_MENU_TP_UNDO )
+		{
+			//! One step per use, so repeated right-clicks walk back through the
+			//! whole history rather than needing five separate menu entries.
+			JMTeleportHistory.UndoPlayer( guid, 0 );
 
 			return;
 		}
@@ -2593,6 +3706,19 @@ class JMPlayerForm: JMFormBase
 
 			return;
 		}
+
+#ifdef DAYZ_1_30
+		if ( id == ROW_MENU_RAGDOLL )
+		{
+			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ragdoll" ) )
+				return;
+
+			UpdateLastChangeTime();
+			m_Module.SetRagdoll( !instance.IsRagdoll(), { guid } );
+
+			return;
+		}
+#endif
 
 		if ( id == ROW_MENU_SPECTATE )
 		{
@@ -2703,8 +3829,21 @@ class JMPlayerForm: JMFormBase
 			ent.SetHealth( "", "", item.Health );
 
 		ItemBase asItem;
-		if ( item.QuantityMax > 0 && Class.CastTo( asItem, ent ) )
-			asItem.SetQuantity( item.Quantity, false );
+		if ( Class.CastTo( asItem, ent ) )
+		{
+			if ( item.QuantityMax > 0 )
+				asItem.SetQuantity( item.Quantity, false );
+
+			//! SetTemperatureEx dereferences m_TAC, which EntityAI only builds
+			//! server-side (InitItemVariables). This preview is client-local, so
+			//! the call must be skipped there or it NULLs on entities like Apple.
+			if ( g_Game.IsServer() )
+				asItem.SetTemperatureEx( new TemperatureData( item.Temperature ) );
+
+			Edible_Base asFood;
+			if ( item.HasFoodStage() && Class.CastTo( asFood, asItem ) && asFood.GetFoodStage() )
+				asFood.GetFoodStage().ChangeFoodStage( item.Stage );
+		}
 
 		return ent;
 	}
@@ -2980,7 +4119,7 @@ class JMPlayerForm: JMFormBase
 		m_InventoryMenu.ClearItems();
 		m_InventoryMenu.AddItem( INV_MENU_INSPECT, "#STR_COT_PLAYER_MODULE_INV_INSPECT", JMConstants.Lucide( "eye" ) );
 		m_InventoryMenu.AddItem( INV_MENU_TAKE,   "#STR_COT_PLAYER_MODULE_INV_TAKE",   JMConstants.Lucide( "hand" ) );
-		m_InventoryMenu.AddItem( INV_MENU_REPAIR, "#STR_COT_PLAYER_MODULE_INV_REPAIR", JMConstants.Lucide( "wrench" ) );
+		m_InventoryMenu.AddItem( INV_MENU_HEALTH, "#STR_COT_PLAYER_MODULE_INV_SET_HEALTH", JMConstants.Lucide( "heart-pulse" ) );
 
 		// The item-specific block, between the operations every row has and the
 		// destructive one at the bottom. Listed only when the item can take
@@ -3011,9 +4150,9 @@ class JMPlayerForm: JMFormBase
 		// Greyed rather than dropped, so the menu keeps the same shape whoever
 		// opens it and a missing permission reads as a permission problem.
 		m_InventoryMenu.SetItemEnabled( INV_MENU_TAKE,   GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Take" ) );
-		m_InventoryMenu.SetItemEnabled( INV_MENU_REPAIR, GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Repair" ) );
 		m_InventoryMenu.SetItemEnabled( INV_MENU_DELETE, GetPermissionsManager().HasPermission( "Admin.Player.Inventory.Delete" ) );
 
+		m_InventoryMenu.SetItemEnabled( INV_MENU_HEALTH,      canModify );
 		m_InventoryMenu.SetItemEnabled( INV_MENU_UNJAM,       canModify );
 		m_InventoryMenu.SetItemEnabled( INV_MENU_QUANTITY,    canModify );
 		m_InventoryMenu.SetItemEnabled( INV_MENU_TEMPERATURE, canModify );
@@ -3052,12 +4191,6 @@ class JMPlayerForm: JMFormBase
 			return;
 		}
 
-		if ( id == INV_MENU_REPAIR )
-		{
-			m_Module.InventoryRepair( m_SelectedInstance.GetGUID(), item.NetIdLow, item.NetIdHigh );
-			return;
-		}
-
 		if ( id == INV_MENU_DELETE )
 		{
 			// The confirmation is asynchronous, so remember which row it was
@@ -3089,6 +4222,12 @@ class JMPlayerForm: JMFormBase
 			return;
 		}
 
+		if ( id == INV_MENU_HEALTH )
+		{
+			ShowInventoryHealthPrompt( item );
+			return;
+		}
+
 		if ( id == INV_MENU_TEMPERATURE )
 		{
 			ShowInventoryTemperaturePrompt( item );
@@ -3111,14 +4250,34 @@ class JMPlayerForm: JMFormBase
 	//! way: half a bandage is not a thing an admin ever means to set.
 	private void ShowInventoryQuantityPrompt( JMPlayerInventoryItem item )
 	{
-		m_InventoryPrompt.ShowSlider( INV_MENU_QUANTITY, "#STR_COT_PLAYER_MODULE_INV_SET_QUANTITY", item.GetDisplayName(), item.QuantityMin, item.QuantityMax, item.Quantity, 1, "%1" );
+		string format = "%1";
+		if ( item.QuantityMax > 0 )
+			format = "%1 / " + Math.Round( item.QuantityMax ).ToString();
+
+		m_InventoryPrompt.ShowSlider( INV_MENU_QUANTITY, "#STR_COT_PLAYER_MODULE_INV_SET_QUANTITY", item.GetDisplayName(), item.QuantityMin, item.QuantityMax, item.Quantity, 1, format );
 	}
 
 	//! Same range and the same degree format the object spawner's temperature
 	//! slider uses, so the two read alike.
 	private void ShowInventoryTemperaturePrompt( JMPlayerInventoryItem item )
 	{
-		m_InventoryPrompt.ShowSlider( INV_MENU_TEMPERATURE, "#STR_COT_PLAYER_MODULE_INV_SET_TEMPERATURE", item.GetDisplayName(), GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, item.Temperature, 1, "#STR_COT_FORMAT_DEGREE" );
+		m_InventoryPrompt.ShowSlider( INV_MENU_TEMPERATURE, "#STR_COT_PLAYER_MODULE_INV_SET_TEMPERATURE", item.GetDisplayName(), GameConstants.STATE_COLD_LVL_FOUR, GameConstants.STATE_HOT_LVL_FOUR, item.Temperature, 1, "#STR_COT_FORMAT_DEGREE", UIActionValuePrompt.SLIDER_COLOR_TEMPERATURE );
+	}
+
+	//! Replaces the old one-shot "repair to full" action: an admin can now set
+	//! any health, not only max, coloured the same way the condition dot and
+	//! the object spawner's own health slider are.
+	//!
+	//! Range is the ITEM's own MaxHealth, not a flat 0-100 - most carried items
+	//! happen to top out at 100, but not all of them do, and a slider that
+	//! could not reach an item's real ceiling would silently cap it below full.
+	private void ShowInventoryHealthPrompt( JMPlayerInventoryItem item )
+	{
+		float max = item.MaxHealth;
+		if ( max <= 0 )
+			max = 100;
+
+		m_InventoryPrompt.ShowSlider( INV_MENU_HEALTH, "#STR_COT_PLAYER_MODULE_INV_SET_HEALTH", item.GetDisplayName(), 0, max, item.Health, 1, "%1", UIActionValuePrompt.SLIDER_COLOR_HEALTH );
 	}
 
 	//! Only the stages this item's own config defines.
@@ -3220,6 +4379,12 @@ class JMPlayerForm: JMFormBase
 		if ( id == INV_MENU_QUANTITY )
 		{
 			m_Module.InventoryModify( m_SelectedInstance.GetGUID(), m_InvPromptNetLow, m_InvPromptNetHigh, JMInventoryModifyOp.QUANTITY, m_InventoryPrompt.GetSliderValue() );
+			return;
+		}
+
+		if ( id == INV_MENU_HEALTH )
+		{
+			m_Module.InventoryModify( m_SelectedInstance.GetGUID(), m_InvPromptNetLow, m_InvPromptNetHigh, JMInventoryModifyOp.HEALTH, m_InventoryPrompt.GetSliderValue() );
 			return;
 		}
 
@@ -3404,6 +4569,20 @@ class JMPlayerForm: JMFormBase
 		// fired a shot", which is a different and wrong answer.
 		m_StatsCombatNotice = UIActionManager.CreateText( section1, "", "" );
 
+	#ifdef DZ_Expansion_Core
+		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
+		UIActionCard section2Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_EXPANSION" );
+		m_StatsExpansion = UIActionManager.CreateKeyValueList( section2Card.GetContent() );
+
+		// Hidden until the server answers with at least one row: Expansion being
+		// COMPILED against is not the same as any of its features being on, and
+		// an empty card would claim the player has no money, faction, reputation
+		// or group when the truth is that nothing asked.
+		m_StatsExpansionRoot = section2Card.GetLayoutRoot();
+		if ( m_StatsExpansionRoot )
+			m_StatsExpansionRoot.Show( false );
+	#endif
+
 		return parent;
 	}
 
@@ -3425,6 +4604,13 @@ class JMPlayerForm: JMFormBase
 
 		if ( GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View" ) )
 			m_Module.RequestPlayerStats( m_SelectedInstance.GetGUID() );
+
+	#ifdef DZ_Expansion_Core
+		//! Same permission and the same one-shot request as the session block -
+		//! none of it is on a timer.
+		if ( GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View" ) )
+			m_Module.RequestExpansionInfo( m_SelectedInstance.GetGUID() );
+	#endif
 
 		RequestKillStats();
 		RefreshStatisticsPanel();
@@ -3449,6 +4635,74 @@ class JMPlayerForm: JMFormBase
 		if ( !IsMissionHost() )
 			m_AntiCheatModule.RequestFlags();
 	}
+
+	//! The Expansion block came back. Declared unconditionally - the module
+	//! calls it from an RPC handler that is compiled either way - but it only
+	//! has anywhere to put the rows on an Expansion build.
+	void OnExpansionInfoUpdated( string guid, array< string > ids, array< string > values )
+	{
+	#ifdef DZ_Expansion_Core
+		if ( !m_SelectedInstance || guid != m_SelectedInstance.GetGUID() )
+			return;
+
+		if ( !m_StatsExpansion || !ids || !values )
+			return;
+
+		m_StatsExpansion.Clear();
+
+		int count = ids.Count();
+		if ( values.Count() < count )
+			count = values.Count();
+
+		for ( int i = 0; i < count; i++ )
+			m_StatsExpansion.SetValue( ExpansionInfoLabel( ids[i] ), values[i], ExpansionInfoIcon( ids[i] ) );
+
+		if ( m_StatsExpansionRoot )
+			m_StatsExpansionRoot.Show( count > 0 );
+
+		if ( m_ActionListScroller )
+			m_ActionListScroller.UpdateScroller();
+	#endif
+	}
+
+#ifdef DZ_Expansion_Core
+	//! Row ids are resolved to a label and a glyph HERE rather than sent as
+	//! text, so the server never decides what language the admin reads and an
+	//! id the client does not recognise still renders as itself.
+	private string ExpansionInfoLabel( string id )
+	{
+		if ( id == JMPlayerModule.EXP_INFO_MONEY )
+			return "#STR_COT_PLAYER_MODULE_STAT_EXP_MONEY";
+
+		if ( id == JMPlayerModule.EXP_INFO_FACTION )
+			return "#STR_COT_PLAYER_MODULE_STAT_EXP_FACTION";
+
+		if ( id == JMPlayerModule.EXP_INFO_REPUTATION )
+			return "#STR_COT_PLAYER_MODULE_STAT_EXP_REPUTATION";
+
+		if ( id == JMPlayerModule.EXP_INFO_GROUP )
+			return "#STR_COT_PLAYER_MODULE_STAT_EXP_GROUP";
+
+		return id;
+	}
+
+	private string ExpansionInfoIcon( string id )
+	{
+		if ( id == JMPlayerModule.EXP_INFO_MONEY )
+			return JMConstants.Lucide( "banknote" );
+
+		if ( id == JMPlayerModule.EXP_INFO_FACTION )
+			return JMConstants.Lucide( "flag" );
+
+		if ( id == JMPlayerModule.EXP_INFO_REPUTATION )
+			return JMConstants.Lucide( "star" );
+
+		if ( id == JMPlayerModule.EXP_INFO_GROUP )
+			return JMConstants.Lucide( "users" );
+
+		return JMConstants.Lucide( "info" );
+	}
+#endif
 
 	void OnPlayerStatsUpdated( string guid, JMPlayerStats stats )
 	{
@@ -3586,81 +4840,39 @@ class JMPlayerForm: JMFormBase
 		return source.Get( guid );
 	}
 
-	//! First time the Position tab is shown, build the map into its reserved
-	//! slot. Deferred rather than built in OnInit because a MapWidget is not
-	//! cheap and most sessions never open this tab.
+	//! Built eagerly with the rest of the tab (see InitActionWidgetsMap), but
+	//! kept hidden until the Position tab is actually up - a MapWidget left
+	//! visible behind another tab keeps rendering.
 	private void OnEnterPositionTab()
 	{
-		if ( m_PositionMapRoot )
-			m_PositionMapRoot.Show( true );
+		if ( m_PositionMap )
+			m_PositionMap.Show();
+
+		RebuildTeleportHistory();
 
 		RecenterMap();
 
-		DumpMapDiagnostics( "enter" );
+		//! First open only: CenterOn lands before the widget has been laid out
+		//! on the very first show and is discarded - the map came up on the
+		//! world origin and stayed there until the recentre button was pressed
+		//! by hand. Every later visit re-enters an already-laid-out map, which
+		//! is why this only ever looked broken the first time.
+		if ( !m_PositionMapCentered )
+		{
+			m_PositionMapCentered = true;
+			g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( RecenterMap, 100, false );
+		}
 	}
 
 	private void InitActionWidgetsMap( Widget parent )
 	{
-		m_PositionMapRoot = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/player_position_map.layout", parent );
-
-		if ( !m_PositionMapRoot )
-			return;
-
-		m_PositionMapRoot.SetFlags( WidgetFlags.VEXACTSIZE, true );
-		m_PositionMapRoot.SetSize( 1, MAP_HEIGHT );
-		m_PositionMapRoot.Show( false );
-
-		Class.CastTo( m_PositionMap, m_PositionMapRoot.FindAnyWidget( "map_widget" ) );
-
-		if ( m_PositionMap )
-			m_PositionMap.SetScale( MAP_DEFAULT_SCALE );
-
-		DumpMapDiagnostics( "init" );
-	}
-
-	//! The map is interactive (double-click teleport resolves correct world
-	//! coordinates) but paints nothing, which rules out geometry and leaves the
-	//! draw itself. Print what the engine thinks the widget is so the next round
-	//! is not another guess.
-	private void DumpMapDiagnostics( string when )
-	{
-		if ( !m_PositionMapRoot )
-		{
-			Print( "[COT-MAP] " + when + ": map root is NULL - layout failed to load" );
-			return;
-		}
-
-		float rx, ry, rw, rh;
-		m_PositionMapRoot.GetScreenPos( rx, ry );
-		m_PositionMapRoot.GetScreenSize( rw, rh );
-
-		Print( "[COT-MAP] " + when + ": root visible=" + m_PositionMapRoot.IsVisible().ToString() + " pos=" + rx + "," + ry + " size=" + rw + "x" + rh );
+		m_PositionMap = UIActionManager.CreateMap( parent, this, "OnClick_PositionMap", MAP_HEIGHT );
 
 		if ( !m_PositionMap )
-		{
-			Print( "[COT-MAP] " + when + ": map_widget is NULL - cast failed" );
 			return;
-		}
 
-		float mx, my, mw, mh;
-		m_PositionMap.GetScreenPos( mx, my );
-		m_PositionMap.GetScreenSize( mw, mh );
-
-		Print( "[COT-MAP] " + when + ": map visible=" + m_PositionMap.IsVisible().ToString() + " pos=" + mx + "," + my + " size=" + mw + "x" + mh + " scale=" + m_PositionMap.GetScale() + " mapPos=" + m_PositionMap.GetMapPos() );
-
-		// Same chain walk the preview diagnostic does, for the same reason: a
-		// widget that reports itself visible inside an invisible - or fully
-		// transparent - ancestor is the classic false positive here.
-		Widget mapWalk = m_PositionMap.GetParent();
-		int mapDepth = 0;
-
-		while ( mapWalk && mapDepth < 8 )
-		{
-			Print( "[COT-MAP]   parent[" + mapDepth + "] " + mapWalk.GetName() + " visible=" + mapWalk.IsVisible().ToString() + " alpha=" + mapWalk.GetAlpha() );
-
-			mapWalk = mapWalk.GetParent();
-			mapDepth++;
-		}
+		m_PositionMap.SetScale( MAP_DEFAULT_SCALE );
+		m_PositionMap.Hide();
 	}
 
 	//! Put the view back on the selected player. Only ever called on a selection
@@ -3683,13 +4895,16 @@ class JMPlayerForm: JMFormBase
 				center = self.GetPosition();
 		}
 
-		m_PositionMap.SetScale( MAP_DEFAULT_SCALE );
-		m_PositionMap.SetMapPos( center );
+		m_PositionMap.CenterOn( center, MAP_DEFAULT_SCALE );
 	}
 
 	//! Draw the selected player and the admin, and nothing else. The COT map
 	//! module already exists for a whole-server view; sixty marks a second here
 	//! would only duplicate it.
+	//!
+	//! Both live under stable ids and get moved in place rather than cleared
+	//! and redrawn every poll - UIActionMap.AddMarker replaces the marker
+	//! already under an id, so this only ever touches its own two widgets.
 	private void UpdateMapMarkers()
 	{
 		if ( !m_PositionMap || !m_SelectedInstance )
@@ -3698,14 +4913,43 @@ class JMPlayerForm: JMFormBase
 		if ( !IsTabActive( TAB_POSITION ) )
 			return;
 
-		m_PositionMap.ClearUserMarks();
-		m_PositionMap.AddUserMark( m_SelectedInstance.GetPosition(), m_SelectedInstance.GetName(), MAP_MARK_TARGET, JM_COT_ICON_DOT + ".paa" );
-
 		JMPlayerInstance self = GetPermissionsManager().GetClientPlayer();
+
+		//! Looking at your own row is ONE player, so it gets one mark. Drawing
+		//! both put the admin name and "You" on top of each other at the same
+		//! coordinate, which read as two players standing in the same spot.
+		bool targetIsSelf = false;
 		if ( self )
-			m_PositionMap.AddUserMark( self.GetPosition(), "#STR_COT_PLAYER_MODULE_MAP_YOU", MAP_MARK_SELF, JM_COT_ICON_DOT + ".paa" );
+			targetIsSelf = ( self.GetGUID() == m_SelectedInstance.GetGUID() );
+
+		if ( !targetIsSelf )
+			m_PositionMap.AddMarker( "position_target", m_SelectedInstance.GetPosition(), m_SelectedInstance.GetName(), MAP_MARK_TARGET, UIActionMap.ICON_DOT, "position" );
+		else
+			m_PositionMap.RemoveMarker( "position_target" );
+
+		if ( self )
+			m_PositionMap.AddMarker( "position_self", self.GetPosition(), "#STR_COT_PLAYER_MODULE_MAP_YOU", MAP_MARK_SELF, UIActionMap.ICON_DOT, "position" );
 
 		GetCommunityOnlineTools().RefreshClientPositions();
+	}
+
+	//! Ground clicks: a double press fills the coordinate fields and runs the
+	//! ordinary teleport-to-coordinates path, confirmation dialog included.
+	void OnClick_PositionMap( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.DOUBLE_CLICK )
+			return;
+
+		if ( !m_PositionMap )
+			return;
+
+		vector target = m_PositionMap.GetLastClickWorldPos();
+
+		m_PositionX.SetText( target[0].ToString() );
+		m_PositionY.SetText( target[1].ToString() );
+		m_PositionZ.SetText( target[2].ToString() );
+
+		Click_SetPosition( UIEvent.CLICK, NULL );
 	}
 
 	void Click_RecenterMap( UIEvent eid, UIActionBase action )
@@ -3789,6 +5033,154 @@ class JMPlayerForm: JMFormBase
 		
 		UpdateUI();
 		UpdatePlayerCount();
+	}
+
+	//! Open the advanced-filter dropdown under the toolbar button.
+	//!
+	//! A context menu rather than a panel of checkboxes: the whole row - glyph
+	//! and word together - is already one hit area here, which is exactly the
+	//! behaviour asked for, and it floats over the list instead of costing the
+	//! list a permanent strip of height it only needs while being changed.
+	void OnClick_PlayerListFilters( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( !m_FilterMenu )
+		{
+			m_FilterMenu = UIActionManager.CreateContextMenu( layoutRoot, m_Window.GetWidgetRoot(), this, "OnClick_FilterMenu" );
+			RegisterOverlay( m_FilterMenu );
+
+			if ( !m_FilterMenu )
+				return;
+
+			//! Every row here is a toggle, so a click is never "done with this
+			//! menu". It closes on the button, on Escape, or on a click that
+			//! lands anywhere outside the list.
+			m_FilterMenu.SetCloseOnClick( false );
+
+			if ( m_PlayerListFilters )
+				m_FilterMenu.SetOwnerWidget( m_PlayerListFilters.GetLayoutRoot() );
+		}
+
+		//! Toggle: a second click on the button puts the menu away rather than
+		//! reopening it in place, which is what a dropdown is expected to do.
+		if ( m_FilterMenu.IsOpen() )
+		{
+			m_FilterMenu.Close();
+			return;
+		}
+
+		RebuildFilterMenu();
+
+		float fx, fy, fh, fw;
+		m_PlayerListFilters.GetLayoutRoot().GetScreenPos( fx, fy );
+		m_PlayerListFilters.GetLayoutRoot().GetScreenSize( fw, fh );
+
+		m_FilterMenu.ShowAt( fx, fy + fh );
+	}
+
+	//! Rebuild every entry so each one carries its current state in its colour.
+	//! An active filter is normal text; a disabled one is dimmed, which is the
+	//! whole read-out - there is no separate tick, the row IS the checkbox.
+	private void RebuildFilterMenu()
+	{
+		if ( !m_FilterMenu )
+			return;
+
+		m_FilterMenu.ClearItems();
+
+		AddFilterItem( LIST_FILTER_DEAD,     "#STR_COT_PLAYER_MODULE_FILTER_SHOW_DEAD",     "skull",         m_FilterShowDead );
+		AddFilterItem( LIST_FILTER_UNCON,    "#STR_COT_PLAYER_MODULE_FILTER_SHOW_UNCON",    "bed",           m_FilterShowUncon );
+		AddFilterItem( LIST_FILTER_HURT,     "#STR_COT_PLAYER_MODULE_FILTER_SHOW_HURT",     "droplet",       m_FilterShowHurt );
+		AddFilterItem( LIST_FILTER_SICK,     "#STR_COT_PLAYER_MODULE_FILTER_SHOW_SICK",     "thermometer",   m_FilterShowSick );
+		AddFilterItem( LIST_FILTER_ADMINS,   "#STR_COT_PLAYER_MODULE_FILTER_SHOW_ADMINS",   "shield",        m_FilterShowAdmins );
+		AddFilterItem( LIST_FILTER_CHEATERS, "#STR_COT_PLAYER_MODULE_FILTER_SHOW_CHEATERS", "flag",          m_FilterShowCheaters );
+	}
+
+	private void AddFilterItem( string id, string label, string icon, bool enabled )
+	{
+		m_FilterMenu.AddItem( id, label, JMConstants.Lucide( icon ), FilterItemColor( enabled ) );
+	}
+
+	//! Repaint the entries without touching the widget tree. Rebuilding rows
+	//! here would destroy the very row the click landed on, and the engine
+	//! answers a vanished press target by recentring the cursor.
+	private void RefreshFilterMenuColors()
+	{
+		if ( !m_FilterMenu )
+			return;
+
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_DEAD,     FilterItemColor( m_FilterShowDead ) );
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_UNCON,    FilterItemColor( m_FilterShowUncon ) );
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_HURT,     FilterItemColor( m_FilterShowHurt ) );
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_SICK,     FilterItemColor( m_FilterShowSick ) );
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_ADMINS,   FilterItemColor( m_FilterShowAdmins ) );
+		m_FilterMenu.SetItemTextColor( LIST_FILTER_CHEATERS, FilterItemColor( m_FilterShowCheaters ) );
+	}
+
+	private int FilterItemColor( bool enabled )
+	{
+		if ( enabled )
+			return JMTheme.TEXT_PRIMARY;
+
+		return JMTheme.TEXT_DISABLED;
+	}
+
+	//! Flip the filter the clicked row stands for, repaint the menu so the new
+	//! state is visible without closing it, and rebuild the list behind it.
+	void OnClick_FilterMenu( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || !m_FilterMenu )
+			return;
+
+		string id = m_FilterMenu.GetLastClickedId();
+
+		if ( id == LIST_FILTER_DEAD )
+			m_FilterShowDead = !m_FilterShowDead;
+		else if ( id == LIST_FILTER_UNCON )
+			m_FilterShowUncon = !m_FilterShowUncon;
+		else if ( id == LIST_FILTER_HURT )
+			m_FilterShowHurt = !m_FilterShowHurt;
+		else if ( id == LIST_FILTER_SICK )
+			m_FilterShowSick = !m_FilterShowSick;
+		else if ( id == LIST_FILTER_ADMINS )
+			m_FilterShowAdmins = !m_FilterShowAdmins;
+		else if ( id == LIST_FILTER_CHEATERS )
+			m_FilterShowCheaters = !m_FilterShowCheaters;
+		else
+			return;
+
+		RefreshFilterMenuColors();
+		UpdatePlayerList();
+	}
+
+	//! Does this player survive the advanced filters? Dead is tested before the
+	//! rest because a corpse is not separately unconscious or bleeding as far as
+	//! the list is concerned - it is one row, and "show dead" owns it.
+	private bool PassesListFilters( JMPlayerInstance player )
+	{
+		bool playerDead = player.IsDead();
+
+		if ( playerDead )
+			return m_FilterShowDead;
+
+		if ( !m_FilterShowUncon && player.IsUnconscious() )
+			return false;
+
+		if ( !m_FilterShowHurt && ( player.IsBleeding() || player.HasBrokenLegs() ) )
+			return false;
+
+		if ( !m_FilterShowSick && player.IsSick() )
+			return false;
+
+		if ( !m_FilterShowAdmins && player.HasPermission( "COT" ) )
+			return false;
+
+		if ( !m_FilterShowCheaters && JMAntiCheatStatus.IsFlagged( player.GetGUID() ) )
+			return false;
+
+		return true;
 	}
 
 	void Event_UpdatePlayerList( UIEvent eid, UIActionBase action )
@@ -3954,37 +5346,58 @@ class JMPlayerForm: JMFormBase
 
 	void ScalePlayerMultiConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerMulti" );
+		ShowScalePrompt( SCALE_MODE_MULTI );
 	}
 
 	void ScalePlayerSingleConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerSingle" );
+		ShowScalePrompt( SCALE_MODE_SINGLE );
 	}
 
 	void ScalePlayerSelfConfirm()
 	{
-		CreateConfirmation_Two( JMConfirmationType.EDIT, "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_SET_SCALE_BODY", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "ScalePlayerSelf" );
+		ShowScalePrompt( SCALE_MODE_SELF );
 	}
 
-	void ScalePlayerMulti(JMConfirmation confirmation)
+	//! Lazily built the first time it is needed, exactly like m_PlayerMenu -
+	//! nothing before this ever needed a scale slider.
+	private void ShowScalePrompt( int mode )
 	{
-		float value;
-		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+		if ( !m_ScalePrompt )
+		{
+			if ( !m_Window )
+				return;
+
+			m_ScalePrompt = UIActionManager.CreateValuePrompt( layoutRoot, m_Window.GetWidgetRoot(), this, "OnConfirm_ScalePrompt" );
+			RegisterOverlay( m_ScalePrompt );
+
+			if ( !m_ScalePrompt )
+				return;
+		}
+
+		m_ScalePendingMode = mode;
+
+		// Range matches the server's own clamp in Exec_SetScale/RPC_SetScale -
+		// a slider that could ask for more than the server will ever apply
+		// would just teach the wrong ceiling.
+		m_ScalePrompt.ShowSlider( "scale", "#STR_COT_PLAYER_MODULE_SET_SCALE_HEADER", "#STR_COT_PLAYER_MODULE_ACTION_SCALE", 0.1, 10, 1.0, 0.05, "%1" );
+	}
+
+	void OnConfirm_ScalePrompt( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK || !m_ScalePrompt )
+			return;
+
+		if ( m_ScalePrompt.GetPromptId() != "scale" )
+			return;
+
+		float value = m_ScalePrompt.GetSliderValue();
+
+		if ( m_ScalePendingMode == SCALE_MODE_MULTI )
 			m_Module.SetScale( value, JM_GetSelected().GetPlayers() );
-	}
-
-	void ScalePlayerSingle(JMConfirmation confirmation)
-	{
-		float value;
-		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+		else if ( m_ScalePendingMode == SCALE_MODE_SINGLE )
 			m_Module.SetScale( value, {JM_GetSelected().GetPlayers()[0]} );
-	}
-
-	void ScalePlayerSelf(JMConfirmation confirmation)
-	{
-		float value;
-		if (confirmation.GetEditBoxValueFloat(value, 0.1, 10))
+		else
 			m_Module.SetScale( value, {GetPermissionsManager().GetClientPlayer().GetGUID()} );
 	}
 
@@ -4085,7 +5498,7 @@ class JMPlayerForm: JMFormBase
 
 	void KickPlayerSelfConfirm(JMConfirmation confirmation = NULL)
 	{
-		COTCreateLocalAdminNotification( new StringLocaliser( "You can't kick yourself" ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_PLAYER_MODULE_CANT_KICK_SELF" ) );
 	}
 
 	void KickPlayerMulti(JMConfirmation confirmation)
@@ -4118,7 +5531,7 @@ class JMPlayerForm: JMFormBase
 
 	void BanPlayerSelfConfirm(JMConfirmation confirmation)
 	{
-		COTCreateLocalAdminNotification( new StringLocaliser( "You can't ban yourself" ) );
+		COTCreateLocalAdminNotification( new StringLocaliser( "#STR_COT_PLAYER_MODULE_CANT_BAN_SELF" ) );
 	}
 
 	void BanPlayerMulti(JMConfirmation confirmation)
@@ -4303,15 +5716,15 @@ class JMPlayerForm: JMFormBase
 		counts[8] = heavyMetal;
 
 		string labels[9];
-		labels[0] = "Cholera";
-		labels[1] = "Influenza";
-		labels[2] = "Salmonella";
-		labels[3] = "Brain (Kuru)";
-		labels[4] = "Food Poisoning";
-		labels[5] = "Chemical Poisoning";
-		labels[6] = "Wound Infection";
-		labels[7] = "Nerve Agent";
-		labels[8] = "Heavy Metal Poisoning";
+		labels[0] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_CHOLERA";
+		labels[1] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_INFLUENZA";
+		labels[2] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_SALMONELLA";
+		labels[3] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_BRAIN_KURU";
+		labels[4] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_FOOD_POISONING";
+		labels[5] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_CHEMICAL_POISONING";
+		labels[6] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_WOUND_INFECTION";
+		labels[7] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_NERVE_AGENT";
+		labels[8] = "#STR_COT_PLAYER_MODULE_DISEASE_NAME_HEAVY_METAL_POISONING";
 
 		int COLOR_OK = ARGB(255, 73, 184, 117);   // green = not infected
 		int COLOR_BAD = ARGB(255, 217, 90, 90);  // red = infected
@@ -4340,6 +5753,16 @@ class JMPlayerForm: JMFormBase
 		if ( restore < 0 || restore >= 9 )
 			restore = 0;
 		m_DiseaseAgent.SetSelection( restore, false );
+
+		//! This arrives from a server RPC round-trip kicked off by OnChange_Tab,
+		//! strictly after OnChange_Tab's own one-shot UpdateScroller() call has
+		//! already measured and settled the Actions tab's content height. Nine
+		//! freshly-added dropdown rows can change that height, so the scroller
+		//! needs telling again or it's stuck showing the pre-response size
+		//! (typically "no scrollbar yet" on the very first open, before this
+		//! response has ever arrived).
+		if ( m_ActionListScroller )
+			m_ActionListScroller.UpdateScroller();
 	}
 
 	// Called from the module when the server pushes the selected player's mask.
@@ -4356,6 +5779,34 @@ class JMPlayerForm: JMFormBase
 	{
 		if ( guid == m_LastSelectedGuid )
 			RebuildBleedDropdown( names, bits, activePartIndices );
+	}
+
+	//! Maps a raw bleed zone identifier - the static fallback list above, or a
+	//! zone name the server pushes over RPC - to its localization key. A zone
+	//! name this list does not recognize comes back unchanged rather than
+	//! blanked, since the dropdown still has to show something for it.
+	private string BleedPartLabel( string zoneName )
+	{
+		if ( zoneName == "All" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_ALL";
+		if ( zoneName == "Head" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_HEAD";
+		if ( zoneName == "Torso" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_TORSO";
+		if ( zoneName == "LeftArm" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_LEFT_ARM";
+		if ( zoneName == "RightArm" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_RIGHT_ARM";
+		if ( zoneName == "LeftLeg" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_LEFT_LEG";
+		if ( zoneName == "RightLeg" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_RIGHT_LEG";
+		if ( zoneName == "LeftFoot" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_LEFT_FOOT";
+		if ( zoneName == "RightFoot" )
+			return "#STR_COT_PLAYER_MODULE_BLEED_PART_RIGHT_FOOT";
+
+		return zoneName;
 	}
 
 	private void RebuildBleedDropdown( array< string > names, array< int > bits, array< int > activePartIndices )
@@ -4376,9 +5827,9 @@ class JMPlayerForm: JMFormBase
 		// First entry: "All" - green = no bleeders, red = bleeders present.
 		bool anyBleeding = activePartIndices.Count() > 0;
 		if ( anyBleeding )
-			m_BleedingPart.AddEntry( "All", JMConstants.ICON_BLEEDING_WOUND, COLOR_BAD );
+			m_BleedingPart.AddEntry( BleedPartLabel( "All" ), JMConstants.ICON_BLEEDING_WOUND, COLOR_BAD );
 		else
-			m_BleedingPart.AddEntry( "All", JMConstants.ICON_BLEEDING_WOUND, COLOR_OK );
+			m_BleedingPart.AddEntry( BleedPartLabel( "All" ), JMConstants.ICON_BLEEDING_WOUND, COLOR_OK );
 
 		for ( int i = 0; i < names.Count(); i++ )
 		{
@@ -4393,15 +5844,21 @@ class JMPlayerForm: JMFormBase
 				}
 			}
 			if ( active )
-				m_BleedingPart.AddEntry( nm, JMConstants.ICON_BLEEDING_WOUND, COLOR_BAD );
+				m_BleedingPart.AddEntry( BleedPartLabel( nm ), JMConstants.ICON_BLEEDING_WOUND, COLOR_BAD );
 			else
-				m_BleedingPart.AddEntry( nm, JMConstants.ICON_BLEEDING_WOUND, COLOR_OK );
+				m_BleedingPart.AddEntry( BleedPartLabel( nm ), JMConstants.ICON_BLEEDING_WOUND, COLOR_OK );
 		}
 
 		int restore = prevSel;
-		if ( restore < 0 || restore >= m_BleedingPart.GetSelection() + names.Count() + 1 )
+		int maxEntries = names.Count() + 1;
+		if ( restore < 0 || restore >= maxEntries )
 			restore = 0;
 		m_BleedingPart.SetSelection( restore, false );
+
+		//! Same reasoning as RebuildDiseaseDropdown's own trailing call - this
+		//! also arrives after OnChange_Tab's scroller measurement already ran.
+		if ( m_ActionListScroller )
+			m_ActionListScroller.UpdateScroller();
 	}
 
 	void Click_ClearAllDiseases( UIEvent eid, UIActionBase action )
@@ -4685,6 +6142,10 @@ class JMPlayerForm: JMFormBase
 		m_PositionRefresh.TriggerSpin( 2 );
 		RefreshTeleports(true);
 		RefreshStats(true);
+
+		//! Outright, not through SyncTeleportHistory: nothing about the panel
+		//! has to have changed for the ages on its rows to be stale.
+		RebuildTeleportHistory();
 	}
 	
 	void Change_PositionX( UIEvent eid, UIActionBase action )
@@ -4729,7 +6190,10 @@ class JMPlayerForm: JMFormBase
 		// times a second. Everything below is a cheap SetCurrent / SetChecked and
 		// stays ungated.
 		if ( IsTabActive( TAB_POSITION ) )
+		{
 			RefreshTeleports(force);
+			SyncTeleportHistory();
+		}
 
 		RefreshIdentityBadges();
 
@@ -5156,6 +6620,13 @@ class JMPlayerForm: JMFormBase
 			if ( m_HeatBuffer )
 				m_Module.SetHeatBuffer( m_HeatBuffer.GetCurrent() * 10, guids );
 		}
+
+		//! Apply is otherwise silent: the sliders already read the value they
+		//! were dragged to, so nothing on screen changes when the RPC goes out
+		//! and an admin cannot tell a click that landed from one that missed.
+		//! The check mark on the pill is the receipt.
+		if ( m_ApplyStats )
+			m_ApplyStats.AnimateFeedback();
 	}
 
 	void Click_SetHealth( UIEvent eid, UIActionBase action )
@@ -5502,8 +6973,13 @@ class JMPlayerForm: JMFormBase
 
 	override void HideUI()
 	{
+		//! Do NOT concatenate "this" into a Print() here - that implicit
+		//! object-to-string conversion inside this override crashes the real
+		//! DayZ Tools script compiler natively at module load (confirmed by
+		//! bisection: this file alone, with only this pattern active,
+		//! reproduces the crash). The custom lint tool does not catch it.
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::HideUI" );
+		Print( "[COT_DBG] JMPlayerForm::HideUI enter" );
 		#endif
 
 		ShowIdentityWidgets();
@@ -5517,20 +6993,20 @@ class JMPlayerForm: JMFormBase
 		ApplyListFocus();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::HideUI" );
+		Print( "[COT_DBG] JMPlayerForm::HideUI exit" );
 		#endif
 	}
 
 	override void ShowUI()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::ShowUI" );
+		Print( "[COT_DBG] JMPlayerForm::ShowUI enter" );
 		#endif
 
 		m_RightPanelDisable.Show( false );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::ShowUI" );
+		Print( "[COT_DBG] JMPlayerForm::ShowUI exit" );
 		#endif
 	}
 
@@ -5601,6 +7077,10 @@ class JMPlayerForm: JMFormBase
 		RegisterPermission( m_KickPlayer,            "Admin.Player.Kick"                  );
 		RegisterPermission( m_BanPlayer,             "Admin.Player.Ban"                   );
 
+		//! Roles are edited in the Role Manager, so the jump is only offered to
+		//! an admin who can actually open it.
+		RegisterPermission( m_IdentityRoleEdit,      "Admin.Roles.View"                   );
+
 		RegisterPermission( m_InventoryRefresh,      "Admin.Player.AccessInventory"       );
 		RegisterPermission( m_InventoryClearCargo,   "Admin.Player.ClearCargo"            );
 
@@ -5610,6 +7090,7 @@ class JMPlayerForm: JMFormBase
 		RegisterPermission( m_DiseaseClear,          "Admin.Player.Disease.Remove"        );
 		RegisterPermission( m_BleedingPart,          "Admin.Player.Bleed.Add"             );
 		RegisterPermission( m_BleedApply,            "Admin.Player.Bleed.Add"             );
+		RegisterPermission( m_BleedClear,            "Admin.Player.StopBleeding"          );
 
 		if ( JM_GetSelected().NumPlayers(false) == 1 )
 		{
@@ -5663,6 +7144,10 @@ class JMPlayerForm: JMFormBase
 
 			RecenterMap();
 
+			// A NEW player's net ids have nothing to do with the last one's, so
+			// last player's open containers cannot mean anything here.
+			m_InvExpanded.Clear();
+
 			// Only while the tab is up: every other selection change would
 			// otherwise pull data nobody is looking at.
 			if ( IsTabActive( TAB_INVENTORY ) )
@@ -5707,8 +7192,8 @@ class JMPlayerForm: JMFormBase
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( UpdateGroupAnimation );
 
 		// A MapWidget left visible behind a hidden form keeps rendering.
-		if ( m_PositionMapRoot )
-			m_PositionMapRoot.Show( false );
+		if ( m_PositionMap )
+			m_PositionMap.Hide();
 
 		// Local preview entities are real objects in the world, invisible and
 		// simulation-disabled but real. Leaking one per form open is not
@@ -5723,6 +7208,16 @@ class JMPlayerForm: JMFormBase
 
 		//! A form hidden mid-fold would come back with half-height rows.
 		FinishGroupAnimation();
+	}
+
+	//! The position map's marker widgets need reprojecting onto its current
+	//! pan/zoom every frame the tab is up - see UIActionMap.TickMarkers().
+	override void Update()
+	{
+		super.Update();
+
+		if ( m_PositionMap )
+			m_PositionMap.TickMarkers();
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -5776,24 +7271,12 @@ class JMPlayerForm: JMFormBase
 		return super.OnMouseLeave( w, enterW, x, y );
 	}
 
-	//! Double-clicking the map fills the coordinate fields and then runs the
-	//! ordinary teleport-to-coordinates path, confirmation dialog included.
+	//! The position map's own double-click (teleport-to-cursor) is handled by
+	//! OnClick_PositionMap via UIActionMap's UIEvent.DOUBLE_CLICK now, not here.
 	override bool OnDoubleClick( Widget w, int x, int y, int button )
 	{
 		if ( w == NULL )
 			return false;
-
-		if ( m_PositionMap && w == m_PositionMap )
-		{
-			vector target = SnapToGround( m_PositionMap.ScreenToMap( Vector( x, y, 0 ) ) );
-
-			m_PositionX.SetText( target[0].ToString() );
-			m_PositionY.SetText( target[1].ToString() );
-			m_PositionZ.SetText( target[2].ToString() );
-
-			Click_SetPosition( UIEvent.CLICK, NULL );
-			return true;
-		}
 
 		return super.OnDoubleClick( w, x, y, button );
 	}
@@ -5849,41 +7332,52 @@ class JMPlayerForm: JMFormBase
 		UpdatePlayerCount();
 	}
 
+	//! Sorts by display name. array<T>.Sort() only knows how to order plain
+	//! strings, not an object by a derived key, so the name list is sorted on
+	//! its own and matched back to its owner afterward.
+	//!
+	//! Matched by CONSUMING one remaining player per sorted name, not by a bare
+	//! string comparison against the whole list: two players sharing a display
+	//! name (a fake test player happens to share a name with someone real, or
+	//! any two real players named the same) used to match the SAME source index
+	//! for both of them, which left one array slot written twice and another
+	//! never written at all - a player silently dropped from the list, and no
+	//! error anywhere to say why.
 	private void SortPlayersArray( out array< JMPlayerInstance > players, bool isReversed )
 	{
+		int count = players.Count();
+
 		TStringArray pNames = new TStringArray;
-		TIntArray pIndices = new TIntArray;
+		for ( int i = 0; i < count; i++ )
+			pNames.Insert( players[i].GetName() );
 
-		for ( int i = 0; i < players.Count(); i++ )
-			pNames.Insert(players[ i ].GetName());
-		
-		pNames.Sort(isReversed);
+		pNames.Sort( isReversed );
 
-		for ( i = 0; i < players.Count(); i++ )
+		array< JMPlayerInstance > remaining = new array< JMPlayerInstance >;
+		remaining.Copy( players );
+
+		array< JMPlayerInstance > sorted = new array< JMPlayerInstance >;
+
+		for ( i = 0; i < count; i++ )
 		{
-			for ( int j = 0; j < players.Count(); j++ )
+			string wantName = pNames[i];
+
+			for ( int j = 0; j < remaining.Count(); j++ )
 			{
-				if ( pNames[ j ] == players[ i ].GetName() )
-				{
-					pIndices.Insert(j);
-				}
+				if ( !remaining[j] )
+					continue;
+
+				if ( remaining[j].GetName() != wantName )
+					continue;
+
+				sorted.Insert( remaining[j] );
+				remaining[j] = NULL;
+				break;
 			}
 		}
 
-		array< JMPlayerInstance > playersTemp = new array< JMPlayerInstance >;
-
-		for ( i = 0; i < players.Count(); i++ )
-		{
-			playersTemp.Insert( NULL );
-		}
-
-		for ( i = 0; i < players.Count(); i++ )
-		{
-			playersTemp.Set( pIndices[ i ], players[ i ] );
-		}
-
 		players.Clear();
-		players.Copy( playersTemp );
+		players.Copy( sorted );
 	}
 
 	void UpdatePlayerCount()
@@ -5954,12 +7448,51 @@ class JMPlayerForm: JMFormBase
 	//! "everyone" itself rather than under a made-up bucket name.
 	static const string ROLE_UNGROUPED = "everyone";
 
+	//! Open the Role Manager on the selected player.
+	//!
+	//! The window is created by the module, exactly as the sidebar creates it,
+	//! so an already-open Role Manager is reused rather than duplicated - and
+	//! the deep link is handed over AFTER Show(), because the form does not
+	//! exist until the window has built it.
+	void Click_EditPlayerRoles( UIEvent eid, UIActionBase action )
+	{
+		if ( eid != UIEvent.CLICK )
+			return;
+
+		if ( !m_SelectedInstance )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.View" ) )
+			return;
+
+		JMRoleManagerModule roleModule;
+		if ( !Class.CastTo( roleModule, GetModuleManager().GetModule( JMRoleManagerModule ) ) )
+			return;
+
+		roleModule.Show();
+
+		JMRoleManagerForm roleForm;
+		if ( !Class.CastTo( roleForm, roleModule.GetForm() ) )
+			return;
+
+		roleForm.OpenPlayer( m_SelectedInstance.GetGUID() );
+	}
+
 	private string GetPrimaryRole( JMPlayerInstance player )
 	{
 		array< string > roles = player.GetRoles();
 
-		if ( roles && roles.Count() > 1 )
-			return roles[1];
+		//! Do not assume "everyone" sits at index 0 - a hand-edited player
+		//! file (Roles written directly, not through the Role Manager UI)
+		//! can list roles in any order or omit "everyone" altogether.
+		if ( roles )
+		{
+			for ( int i = 0; i < roles.Count(); i++ )
+			{
+				if ( roles[i] != ROLE_UNGROUPED )
+					return roles[i];
+			}
+		}
 
 		return ROLE_UNGROUPED;
 	}
@@ -6267,8 +7800,22 @@ class JMPlayerForm: JMFormBase
 		array< JMPlayerInstance > bucket;
 		TStringArray bucketGuids;
 
+		//! One row per guid. Rows are keyed by guid everywhere downstream - the
+		//! checkbox, the focus bar and the row menu all match on it - so a guid
+		//! emitted twice produced rows that ticked, focused and acted as one,
+		//! which reads as the list being broken rather than as a roster with a
+		//! duplicate in it.
+		map< string, bool > seenGuids = new map< string, bool >;
+
 		foreach ( JMPlayerInstance cPlayer: players )
 		{
+			string cGuid = cPlayer.GetGUID();
+
+			if ( cGuid == "" || seenGuids.Contains( cGuid ) )
+				continue;
+
+			seenGuids.Insert( cGuid, true );
+
 			COT_String pName = cPlayer.GetName();
 			pName.ToLower();
 
@@ -6277,6 +7824,9 @@ class JMPlayerForm: JMFormBase
 				if ( !pName.KeywordSearchImplEx( strSearch, keywords, requireAllKeywords, closestMatch ) )
 					continue;
 			}
+
+			if ( !PassesListFilters( cPlayer ) )
+				continue;
 
 			string role = GetPrimaryRole( cPlayer );
 
@@ -6297,6 +7847,52 @@ class JMPlayerForm: JMFormBase
 		}
 
 		roleOrder.Sort( isReversed );
+
+		//! You are always the first row of your own category, whichever way the
+		//! sort is pointing. An admin acting on themselves should not have to
+		//! hunt their own name out of sixty, and the alphabetical order that
+		//! decides everyone else has no opinion about that.
+		//!
+		//! The guid list is reordered in step: the header's "all selected" test
+		//! reads it positionally against the bucket.
+		string selfGUID = GetPermissionsManager().GetClientGUID();
+		if ( selfGUID != "" )
+		{
+			array< JMPlayerInstance > selfBucket;
+			TStringArray selfGuids;
+
+			foreach ( string selfRole: roleOrder )
+			{
+				selfBucket = groups.Get( selfRole );
+				if ( !selfBucket )
+					continue;
+
+				int selfIdx = -1;
+				for ( int si = 0; si < selfBucket.Count(); si++ )
+				{
+					if ( selfBucket[si].GetGUID() == selfGUID )
+					{
+						selfIdx = si;
+						break;
+					}
+				}
+
+				if ( selfIdx <= 0 )
+					continue;
+
+				JMPlayerInstance selfInstance = selfBucket[selfIdx];
+				selfBucket.Remove( selfIdx );
+				selfBucket.InsertAt( selfInstance, 0 );
+
+				if ( m_RoleMembers.Find( selfRole, selfGuids ) && selfIdx < selfGuids.Count() )
+				{
+					selfGuids.Remove( selfIdx );
+					selfGuids.InsertAt( selfGUID, 0 );
+				}
+
+				break;
+			}
+		}
 
 		//! Every pool row starts blank, so anything the emit below does not reach
 		//! is hidden rather than left showing whoever it carried last time.

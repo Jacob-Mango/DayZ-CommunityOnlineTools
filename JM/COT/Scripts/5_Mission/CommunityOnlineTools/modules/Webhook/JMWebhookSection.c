@@ -18,12 +18,14 @@ class JMWebhookSection : Managed
 {
 	private string             m_Name;
 
+	private UIActionCard       m_Card;
 	private UIActionEditableText m_NameEdit;
 	private UIActionEditableText m_URLEdit;
 	private UIActionEditableText m_FilterGUIDEdit;
 	private UIActionEditableText m_FilterRoleEdit;
 	private Widget             m_TypesWrapper;
 	private UIActionDropdownList m_DropDownList;
+	private UIActionButton     m_AddTypeBtn;
 
 	private JMWebhookForm      m_Form;
 	private Widget             m_Parent;
@@ -45,51 +47,17 @@ class JMWebhookSection : Managed
 
 	private void Build( JMWebhookConnectionGroup group, array< string > allTypes )
 	{
-		// ----------------------------------------------------------------------
-		// Webhook section layout (one block per webhook, stacked vertically)
-		// ----------------------------------------------------------------------
-		//   ===== Header bar with the webhook name =====
-		//   Name        [editable input]   (built by BuildLabeledInput)
-		//   URL         [editable input]
-		//   GUID Filter [editable input]
-		//   Role Filter [editable input]
-		//   [delete 32] [Save (green, fills)]
-		//   ----- Event Types -----
-		//   [delete 32] [checkbox: EventName 1]
-		//   [delete 32] [checkbox: EventName 2]
-		//   [Add event type 0.75] [Add 0.25]
-		//   --- 10 px divider ---
-		// ----------------------------------------------------------------------
-
-		m_RootSpacer = UIActionManager.CreateGridSpacer( m_Parent, 1, 1 );
-
-		// ---- Section header: coloured background with webhook name + Remove -
-		UIActionManager.CreatePanel( m_RootSpacer, JMTheme.DIVIDER_MEDIUM, 4 );
-
-		// Header row: text + spacer + Remove on the same line.
-		Widget headerRow = UIActionManager.CreateWrapSpacer( m_RootSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-		UIActionText nameTxt = UIActionManager.CreateText( headerRow, "[ " + group.Name + " ]" );
-		nameTxt.SetWidth( 1.0 - 0.12 );
-
-		UIActionConfirmInline removeBtn = UIActionManager.CreateConfirmInline( headerRow, "", m_Form, "Action_RemoveWebhook" );
-		UIActionIconGrid.ApplyDeletePreset( removeBtn );
-		removeBtn.SetButton( "" );
-		removeBtn.SetFixedSize( 32, 32 );
-		removeBtn.CenterIcon( 32, 16 );
-		removeBtn.SetConfirmLabel( "O" );
-		removeBtn.SetCancelLabel( "X" );
+		m_Card = UIActionManager.CreateCard( m_Parent, "[ " + group.Name + " ]" );
+		UIActionImageButton removeBtn = m_Card.AddDeleteButton( m_Form, "Action_RemoveWebhook", "Remove this webhook" );
 		removeBtn.SetData( new JMWebhookTypeData( group.Name ) );
-		removeBtn.SetTooltip( "Remove this webhook" );
 
-		UIActionManager.CreatePanel( m_RootSpacer, JMTheme.DIVIDER_MEDIUM, 2 );
+		m_RootSpacer = m_Card.GetContent();
 
-		// Build the four label+input rows uniformly
 		m_NameEdit       = BuildLabeledInput( "Name",        group.Name );
 		m_URLEdit        = BuildLabeledInput( "URL",         group.Address );
 		m_FilterGUIDEdit = BuildLabeledInput( "GUID Filter", group.FilterGUID );
 		m_FilterRoleEdit = BuildLabeledInput( "Role Filter", group.FilterRole );
 
-		// ---- Save button (full-width) ---------------------------------------
 		Widget saveRow = UIActionManager.CreateWrapSpacer( m_RootSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 		UIActionButton saveBtn = UIActionManager.CreateButton( saveRow, "Save", m_Form, "Action_SaveWebhook" );
 		saveBtn.SetWidth( 1.0 );
@@ -97,7 +65,6 @@ class JMWebhookSection : Managed
 		saveBtn.SetData( new JMWebhookTypeData( group.Name ) );
 		saveBtn.SetTooltip( "Save changes to this webhook" );
 
-		// ---- Event types section --------------------------------------------
 		UIActionManager.CreatePanel( m_RootSpacer, 0xFF3A3A3A, 1 );
 		UIActionManager.CreateText( m_RootSpacer, "Event Types" );
 		UIActionManager.CreatePanel( m_RootSpacer, 0xFF3A3A3A, 1 );
@@ -108,27 +75,36 @@ class JMWebhookSection : Managed
 		else
 			RebuildTypes( group, allTypes );
 
-		// ---- Add type row: dropdown fills, Add button right -----------------
 		array< string > available = GetAvailableTypes( group, allTypes );
 		Widget addRow = UIActionManager.CreateWrapSpacer( m_RootSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
 		m_DropDownList = UIActionManager.CreateDropdownBox( addRow, m_Form.GetLayoutRoot(), "Add event type", available );
 		m_DropDownList.SetWidth( 0.74 );
 
-		UIActionButton addTypeBtn = UIActionManager.CreateButton( addRow, "Add", m_Form, "Action_AddType" );
-		addTypeBtn.SetWidth( 0.25 );
-		addTypeBtn.SetColor( JMTheme.SUCCESS_FILL );
-		addTypeBtn.SetData( new JMWebhookTypeData( group.Name ) );
-		addTypeBtn.SetTooltip( "Add the selected event type to this webhook" );
+		m_AddTypeBtn = UIActionManager.CreateButton( addRow, "Add", m_Form, "Action_AddType" );
+		m_AddTypeBtn.SetWidth( 0.25 );
+		m_AddTypeBtn.SetColor( JMTheme.SUCCESS_FILL );
+		m_AddTypeBtn.SetData( new JMWebhookTypeData( group.Name ) );
+		m_AddTypeBtn.SetTooltip( "Add the selected event type to this webhook" );
 
+		//! Sections are torn down and rebuilt whenever settings change, so bind
+		//! per-call instead of registering bindings to widgets that will not
+		//! outlive the next rebuild. Keys match what JMWebhookCOTModule's RPC
+		//! handlers enforce.
+		m_Form.UpdatePermission( removeBtn,       "Webhook.Manage.URL.Remove" );
+		m_Form.UpdatePermission( saveBtn,         "Webhook.Manage.URL.Edit" );
+		m_Form.UpdatePermission( m_NameEdit,      "Webhook.Manage.URL.Edit" );
+		m_Form.UpdatePermission( m_URLEdit,       "Webhook.Manage.URL.Edit" );
+		m_Form.UpdatePermission( m_FilterGUIDEdit, "Webhook.Manage.URL.Edit" );
+		m_Form.UpdatePermission( m_FilterRoleEdit, "Webhook.Manage.URL.Edit" );
+		m_Form.UpdatePermission( m_AddTypeBtn,    "Webhook.Manage.Type.Add" );
+
+		//! Left last: an empty type list disables Add regardless of permission.
 		if ( available.Count() == 0 )
 		{
 			m_DropDownList.Disable();
-			addTypeBtn.Disable();
+			m_AddTypeBtn.Disable();
 		}
-
-		// ---- Section divider ------------------------------------------------
-		UIActionManager.CreatePanel( m_RootSpacer, 0xFF222222, 10 );
 	}
 
 	private UIActionEditableText BuildLabeledInput( string label, string value )
@@ -148,10 +124,59 @@ class JMWebhookSection : Managed
 		return edit;
 	}
 
-	// Not used - JMWebhookForm.OnSettingsUpdated rebuilds sections from scratch.
-	// Kept for potential future incremental update use.
+	//! Refreshes everything server-derived (event types, the "add type"
+	//! dropdown, the card title) without touching m_NameEdit / m_URLEdit /
+	//! m_FilterGUIDEdit / m_FilterRoleEdit.
+	//!
+	//! Those four are plain text boxes the admin edits locally and commits
+	//! with the Save button - JMWebhookForm.OnSettingsUpdated() used to tear
+	//! down and rebuild every section from scratch on ANY webhook settings
+	//! change, so toggling one event type checkbox on webhook A wiped
+	//! whatever an admin had half-typed into webhook B's Name/URL fields (or
+	//! their own, if it hadn't been saved yet). Called instead of a full
+	//! rebuild whenever the section already exists for this group's name.
 	void UpdateState( JMWebhookConnectionGroup group, array< string > allTypes )
 	{
+		m_Name = group.Name;
+
+		if ( m_Card )
+			m_Card.SetLabel( "[ " + group.Name + " ]" );
+
+		if ( !m_TypesWrapper )
+			return;
+
+		Widget child = m_TypesWrapper.GetChildren();
+		while ( child )
+		{
+			Widget next = child.GetSibling();
+			child.Unlink();
+			child = next;
+		}
+
+		if ( group.Count() == 0 )
+			UIActionManager.CreateText( m_TypesWrapper, "(no event types yet - pick one below)" );
+		else
+			RebuildTypes( group, allTypes );
+
+		array< string > available = GetAvailableTypes( group, allTypes );
+
+		if ( m_DropDownList )
+		{
+			m_DropDownList.SetItems( available );
+
+			if ( available.Count() == 0 )
+				m_DropDownList.Disable();
+			else
+				m_DropDownList.Enable();
+		}
+
+		if ( m_AddTypeBtn )
+		{
+			if ( available.Count() == 0 )
+				m_AddTypeBtn.Disable();
+			else
+				m_AddTypeBtn.Enable();
+		}
 	}
 
 	private void RebuildTypes( JMWebhookConnectionGroup group, array< string > allTypes )
@@ -173,6 +198,9 @@ class JMWebhookSection : Managed
 
 			UIActionCheckbox cb = UIActionManager.CreateCheckbox( typeRow, conn.Name, m_Form, "Action_TypeState", conn.Enabled );
 			cb.SetWidth( 1.0 );
+
+			m_Form.UpdatePermission( removeTypeBtn, "Webhook.Manage.Type.Remove" );
+			m_Form.UpdatePermission( cb,            "Webhook.Manage.Type.State" );
 			cb.SetData( new JMWebhookTypeData( conn.Name, group.Name ) );
 		}
 	}

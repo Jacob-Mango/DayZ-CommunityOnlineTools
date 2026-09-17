@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class JMESPViewType
 {
 	typename MetaType = JMESPMeta;
@@ -51,7 +54,7 @@ class JMESPViewType
 
 		DayZPlayerInstanceType type = player.GetInstanceType();
 
-		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE;
+		return type == DayZPlayerInstanceType.INSTANCETYPE_CLIENT || type == DayZPlayerInstanceType.INSTANCETYPE_REMOTE || type == DayZPlayerInstanceType.INSTANCETYPE_SERVER || player.GetIdentity() != NULL || player == g_Game.GetPlayer();
 	}
 }
 

@@ -26,6 +26,7 @@ modded class CF_Permission_PlayerBase
 	protected bool m_BloodyHands;
 	protected bool m_GodMode;
 	protected bool m_Frozen;
+	protected bool m_Ragdoll;
 	protected bool m_Invisibility;
 	protected bool m_UnlimitedAmmo;
 	protected bool m_ReceiveDmgDealt;
@@ -93,6 +94,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Write( m_BloodyHands );
 		ctx.Write( m_GodMode );
 		ctx.Write( m_Frozen );
+		ctx.Write( m_Ragdoll );
 		ctx.Write( m_Invisibility );
 		ctx.Write( m_UnlimitedAmmo );
 		ctx.Write( m_ReceiveDmgDealt );
@@ -117,6 +119,7 @@ modded class CF_Permission_PlayerBase
 		ctx.Read( m_BloodyHands );
 		ctx.Read( m_GodMode );
 		ctx.Read( m_Frozen );
+		ctx.Read( m_Ragdoll );
 		ctx.Read( m_Invisibility );
 		ctx.Read( m_UnlimitedAmmo );
 		ctx.Read( m_ReceiveDmgDealt );
@@ -212,6 +215,11 @@ modded class CF_Permission_PlayerBase
 	bool IsFrozen()
 	{
 		return m_Frozen;
+	}
+
+	bool IsRagdoll()
+	{
+		return m_Ragdoll;
 	}
 
 	bool HasInvisibility()

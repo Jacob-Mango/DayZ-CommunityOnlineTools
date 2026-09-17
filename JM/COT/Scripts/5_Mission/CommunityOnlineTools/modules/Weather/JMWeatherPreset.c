@@ -23,14 +23,28 @@ class JMWeatherStorm: JMWeatherBase
 	override void Apply()
 	{
 		if (Density != -1)
-			g_Game.GetWeather().SetStorm( Density, Threshold, MinTimeBetweenLightning );
+		{
+			float clampedDensity = Math.Clamp( Density, 0.0, 1.0 );
+			float clampedThreshold = Math.Clamp( Threshold, 0.0, 1.0 );
+			float clampedMinTime = Math.Max( MinTimeBetweenLightning, 0.0 );
+			g_Game.GetWeather().SetStorm( clampedDensity, clampedThreshold, clampedMinTime );
+		}
 	}
 
+	//! Weather exposes SetStorm with no matching getter, so the storm state
+	//! genuinely cannot be read back. -1 is this class's "not set" marker and
+	//! makes Apply skip it, which is the only honest snapshot available.
+	//!
+	//! This used to hardcode 1.0 / 0.7 / 25.0 and present them as the world's
+	//! values. Anything that snapshots and re-applies - Freeze Time above all,
+	//! which re-applies once a second - was therefore CREATING a full-density
+	//! thunderstorm on a server that had none, and the form showed those
+	//! invented figures as if they were live.
 	override void SetFromWorld()
 	{
-		Density = 1.0;
-		Threshold = 0.7;
-		MinTimeBetweenLightning = 25.0;
+		Density = -1;
+		Threshold = -1;
+		MinTimeBetweenLightning = -1;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -38,6 +52,101 @@ class JMWeatherStorm: JMWeatherBase
 		if ( IsMissionHost() )
 		{
 			GetCommunityOnlineToolsBase().Log( pidentLog, "Storm " + Density + ", " + Threshold + ", " + MinTimeBetweenLightning );
+		}
+	}
+}
+
+class JMWeatherSandstorm: JMWeatherBase
+{
+	//! Tri-state: -1 not set (Apply is a no-op), 0 off, 1 on. A sandstorm has
+	//! no intensity dial to speak of - Start/Stop is the whole control surface -
+	//! so a plain bool would leave "not set" indistinguishable from "off".
+	int Enabled;
+
+	//! Seconds the sandstorm takes to fade in on Start, or out on Stop.
+	float Duration;
+
+	//! Wind/overcast/rain knobs the vanilla DEV_SET_SANDSTORM RPC forces
+	//! alongside Start - -1 means "not set", Apply leaves that knob alone.
+	float FadeInTime = -1;
+	float OvercastValue = -1;
+	float WindMagnitudeValue = -1;
+
+	override void Apply()
+	{
+		if (Enabled == -1)
+			return;
+
+		if (!g_Game.IsServer())
+			return;
+
+		float clampedDuration = Math.Max( Duration, 0.0 );
+		Weather weather = g_Game.GetWeather();
+		SandstormController sandstorm = weather.GetSandstorm();
+
+		if (Enabled == 1)
+		{
+			float fadeInTime = Math.Max( FadeInTime, 0.0 );
+
+			vector stormDir = sandstorm.GetDirection();
+			float stormAngle = weather.WindDirectionToAngle( stormDir );
+			weather.GetWindDirection().Set( stormAngle, fadeInTime, clampedDuration );
+
+			if (OvercastValue != -1)
+			{
+				float overcast = Math.Max( OvercastValue, 0.8 );
+				weather.GetOvercast().Set( overcast, fadeInTime, clampedDuration );
+			}
+
+			if (WindMagnitudeValue != -1)
+			{
+				float windMagnitude = Math.Max( WindMagnitudeValue, 18.0 );
+				weather.GetWindMagnitude().Set( windMagnitude, fadeInTime, clampedDuration );
+			}
+
+			weather.GetRain().Set( 0, fadeInTime, clampedDuration );
+
+			if (!sandstorm.IsActive())
+				sandstorm.Start( fadeInTime, true );
+		}
+		else
+		{
+			if (sandstorm.IsActive())
+				sandstorm.Stop( clampedDuration, true );
+		}
+	}
+
+	//! Start/Stop have no forecast to read back, only the live on/off state -
+	//! Duration/FadeInTime/Overcast/WindMagnitude are what the NEXT call will
+	//! use, not anything the world remembers, so they are left at the values
+	//! the preset was authored with.
+	override void SetFromWorld()
+	{
+		//! Unlike Fog/Rain/etc (JMWeatherPhenomenon, reading vanilla
+		//! WeatherPhenomenon forecasts the engine replicates to clients),
+		//! SandstormController's active flag is server-only state with no
+		//! client replication. A client calling IsActive() always reads
+		//! false/stale, so this used to snap the checkbox back off on the
+		//! very next refresh after an admin turned it on - the refresh raced
+		//! JMWeatherForm's own m_DirtySandstorm guard, which ApplySandstorm()
+		//! clears right after sending the RPC, before there is any ack to
+		//! clear it on. Matches Apply()'s own client no-op above: a client
+		//! leaves Enabled at its last known value instead of trusting a read
+		//! it cannot make accurately.
+		if (!g_Game.IsServer())
+			return;
+
+		if (g_Game.GetWeather().GetSandstorm().IsActive())
+			Enabled = 1;
+		else
+			Enabled = 0;
+	}
+
+	override void Log( PlayerIdentity pidentLog )
+	{
+		if ( IsMissionHost() )
+		{
+			GetCommunityOnlineToolsBase().Log( pidentLog, "Sandstorm " + Enabled + ", " + Duration + ", fadeIn=" + FadeInTime + ", overcast=" + OvercastValue + ", windMagnitude=" + WindMagnitudeValue );
 		}
 	}
 }
@@ -75,13 +184,73 @@ class JMWeatherPhenomenon: JMWeatherBase
 	override void Apply()
 	{
 		if (Forecast != -1)
-			GetPhenomenon().Set( Forecast, Time, MinDuration );
+		{
+			WeatherPhenomenon phenom = GetPhenomenon();
+			if ( phenom )
+			{
+				float clampedForecast = Forecast;
+				switch (Type())
+				{
+					case JMWeatherWindMagnitude:
+					{
+						float maxSpeed = g_Game.GetWeather().GetWindMaximumSpeed();
+						clampedForecast = Math.Clamp( clampedForecast, 0.0, maxSpeed );
+						break;
+					}
+					case JMWeatherWindDirection:
+					{
+						clampedForecast = Math.Clamp( clampedForecast, -Math.PI, Math.PI );
+						break;
+					}
+					default:
+					{
+						float minLimit, maxLimit;
+						phenom.GetLimits( minLimit, maxLimit );
+						if ( maxLimit > minLimit )
+							clampedForecast = Math.Clamp( clampedForecast, minLimit, maxLimit );
+						else
+							clampedForecast = Math.Clamp( clampedForecast, 0.0, 1.0 );
+						break;
+					}
+				}
+
+				phenom.Set( clampedForecast, Time, MinDuration );
+			}
+		}
+	}
+
+	//! Apply with a caller-supplied fade and hold, leaving the values the
+	//! preset was saved with untouched.
+	//!
+	//! The dynamic chain draws fresh timing on every roll. Writing that draw
+	//! into the stored preset would persist a random number into Weather.json
+	//! and quietly rewrite what the admin authored, so it is stamped for the
+	//! duration of the call and put back afterwards.
+	void ApplyTimed( float timeOverride, float durationOverride )
+	{
+		float savedTime     = Time;
+		float savedDuration = MinDuration;
+
+		Time        = timeOverride;
+		MinDuration = durationOverride;
+
+		Apply();
+
+		Time        = savedTime;
+		MinDuration = savedDuration;
 	}
 
 	override void SetFromWorld()
 	{
 		Forecast = GetPhenomenon().GetForecast();
-		Time = GetPhenomenon().GetNextChange();
+
+		//! NOT GetNextChange(). That is the countdown until the weather
+		//! controller computes its next forecast - up to an hour - and Apply
+		//! feeds this field back in as the INTERPOLATION time. Reading the
+		//! world and re-applying it therefore produced multi-minute fades
+		//! nobody asked for. A captured state is applied as it stands.
+		Time = 0;
+
 		MinDuration = 240.0;
 		Actual = GetPhenomenon().GetActual();
 	}
@@ -112,9 +281,12 @@ class JMWeatherDynamicFog: JMWeatherBase
 	{
 		if (Distance != -1)
 		{
-			g_Game.GetWeather().SetDynVolFogDistanceDensity( Distance, Time );
-			g_Game.GetWeather().SetDynVolFogHeightDensity( Height, Time );
-			g_Game.GetWeather().SetDynVolFogHeightBias( Bias, Time );
+			float dist = Math.Clamp( Distance, 0.0, 1.0 );
+			float hgt = Math.Clamp( Height, 0.0, 1.0 );
+			float t = Math.Max( Time, 0.0 );
+			g_Game.GetWeather().SetDynVolFogDistanceDensity( dist, t );
+			g_Game.GetWeather().SetDynVolFogHeightDensity( hgt, t );
+			g_Game.GetWeather().SetDynVolFogHeightBias( Bias, t );
 		}
 	}
 
@@ -163,7 +335,12 @@ class JMWeatherWindFunction: JMWeatherBase
 	override void Apply()
 	{
 		if (Speed != -1)
-			g_Game.GetWeather().SetWindFunctionParams( Min, Max, Speed );
+		{
+			float minF = Math.Clamp( Min, 0.0, 1.0 );
+			float maxF = Math.Clamp( Max, 0.0, 1.0 );
+			float spd = Math.Max( Speed, 0.0 );
+			g_Game.GetWeather().SetWindFunctionParams( minF, maxF, spd );
+		}
 	}
 
 	override void SetFromWorld()
@@ -217,14 +394,22 @@ class JMWeatherRainThreshold: JMWeatherBase
 	override void Apply()
 	{
 		if (Time != -1)
-			g_Game.GetWeather().SetRainThresholds( OvercastMin, OvercastMax, Time );
+		{
+			float minO = Math.Clamp( OvercastMin, 0.0, 1.0 );
+			float maxO = Math.Clamp( OvercastMax, 0.0, 1.0 );
+			float t = Math.Max( Time, 0.0 );
+			g_Game.GetWeather().SetRainThresholds( minO, maxO, t );
+		}
 	}
 
+	//! SetRainThresholds / SetSnowfallThresholds have no getters either, so
+	//! there is nothing to read. -1 on Time makes Apply skip it - see the note
+	//! on JMWeatherStorm.SetFromWorld.
 	override void SetFromWorld()
 	{
-		OvercastMin = 0.5;
-		OvercastMax = 1.0;
-		Time = 120.0;
+		OvercastMin = -1;
+		OvercastMax = -1;
+		Time = -1;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -245,14 +430,22 @@ class JMWeatherSnowThreshold: JMWeatherBase
 	override void Apply()
 	{
 		if (Time != -1)
-			g_Game.GetWeather().SetSnowfallThresholds( OvercastMin, OvercastMax, Time );
+		{
+			float minO = Math.Clamp( OvercastMin, 0.0, 1.0 );
+			float maxO = Math.Clamp( OvercastMax, 0.0, 1.0 );
+			float t = Math.Max( Time, 0.0 );
+			g_Game.GetWeather().SetSnowfallThresholds( minO, maxO, t );
+		}
 	}
 
+	//! SetRainThresholds / SetSnowfallThresholds have no getters either, so
+	//! there is nothing to read. -1 on Time makes Apply skip it - see the note
+	//! on JMWeatherStorm.SetFromWorld.
 	override void SetFromWorld()
 	{
-		OvercastMin = 0.5;
-		OvercastMax = 1.0;
-		Time = 120.0;
+		OvercastMin = -1;
+		OvercastMax = -1;
+		Time = -1;
 	}
 
 	override void Log( PlayerIdentity pidentLog )
@@ -273,6 +466,7 @@ class JMWeatherPreset
 	autoptr JMWeatherDate PDate;
 
 	autoptr JMWeatherStorm Storm;
+	autoptr JMWeatherSandstorm PSandstorm;
 	autoptr JMWeatherOvercast POvercast;
 
 	autoptr JMWeatherFog PFog;
@@ -288,11 +482,44 @@ class JMWeatherPreset
 	autoptr JMWeatherWindDirection PWindDirection;
 	autoptr JMWeatherWindFunction WindFunc;
 
+	// --- Dynamic chain -------------------------------------------------------
+	//! Everything the chain needs the moment it arrives here: whether this
+	//! preset takes part at all, how long it fades in over, how long it holds,
+	//! and where it can go next.
+	//!
+	//! Held on the preset rather than centrally so a preset describes itself.
+	//! The timing belongs to the preset being ENTERED - a storm and a clear sky
+	//! have no business sharing a hold.
+
+	//! Whether the random pick at server start may land here. A preset meant to
+	//! be applied by hand can stay out of the rotation and still be reachable
+	//! from other presets.
+	bool InRotation;
+
+	//! Seconds. A roll draws from between the two; equal bounds mean fixed
+	//! timing, which is a range of one rather than a special case.
+	int DurationMin;
+	int DurationMax;
+	int TransitionMin;
+	int TransitionMax;
+
+	autoptr array< ref JMWeatherNextState > NextStates;
+
 	void JMWeatherPreset()
 	{
+		InRotation = true;
+
+		DurationMin   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MIN;
+		DurationMax   = JMWeatherSerialize.DYNAMIC_DEFAULT_DURATION_MAX;
+		TransitionMin = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MIN;
+		TransitionMax = JMWeatherSerialize.DYNAMIC_DEFAULT_TRANSITION_MAX;
+
+		NextStates = new array< ref JMWeatherNextState >;
+
 		PDate = new JMWeatherDate;
 
 		Storm = new JMWeatherStorm;
+		PSandstorm = new JMWeatherSandstorm;
 		POvercast = new JMWeatherOvercast;
 
 		PFog = new JMWeatherFog;
@@ -314,6 +541,7 @@ class JMWeatherPreset
 		PDate.Apply();
 
 		Storm.Apply();
+		PSandstorm.Apply();
 		POvercast.Apply();
 
 		PFog.Apply();
@@ -330,11 +558,124 @@ class JMWeatherPreset
 		WindFunc.Apply();
 	}
 
+	//! Pick where the chain goes from here, or "" to stay put.
+	//!
+	//! The candidates are WEIGHTS drawn against their own total rather than
+	//! against a fixed 100 - two candidates at 30 and 10 pick the first three
+	//! times in four. The form keeps them summing to 100 so the numbers on
+	//! screen are the real odds, but nothing here relies on that.
+	//!
+	//! A preset that lists ITSELF is how weather persists across several rolls;
+	//! there is no implicit "stay put" remainder. "" comes back only when this
+	//! preset names no candidates at all.
+	string RollNext()
+	{
+		if ( !NextStates )
+			return "";
+
+		int i;
+		int total = 0;
+
+		for ( i = 0; i < NextStates.Count(); i++ )
+			total += NextStates[i].Chance;
+
+		if ( total <= 0 )
+			return "";
+
+		int roll = Math.RandomInt( 0, total );
+		int cumulative = 0;
+
+		for ( i = 0; i < NextStates.Count(); i++ )
+		{
+			cumulative += NextStates[i].Chance;
+
+			if ( roll < cumulative )
+				return NextStates[i].To;
+		}
+
+		return "";
+	}
+
+	//! Carry the dynamic block over from another copy of this preset.
+	//!
+	//! Saving a preset from the form builds a BRAND NEW JMWeatherPreset out of
+	//! the tab controls, which know nothing about the chain - so without this
+	//! the update path would reset the chain settings to defaults every time
+	//! the weather values were saved. See JMWeatherModule.Exec_UpdatePreset.
+	void CopyDynamicFrom( JMWeatherPreset other )
+	{
+		if ( !other )
+			return;
+
+		InRotation    = other.InRotation;
+		DurationMin   = other.DurationMin;
+		DurationMax   = other.DurationMax;
+		TransitionMin = other.TransitionMin;
+		TransitionMax = other.TransitionMax;
+
+		NextStates.Clear();
+
+		if ( !other.NextStates )
+			return;
+
+		JMWeatherNextState copy;
+
+		for ( int i = 0; i < other.NextStates.Count(); i++ )
+		{
+			copy = new JMWeatherNextState;
+			copy.To     = other.NextStates[i].To;
+			copy.Chance = other.NextStates[i].Chance;
+
+			NextStates.Insert( copy );
+		}
+	}
+
+	//! Drop every candidate naming a preset that no longer exists.
+	void PruneNextStates( string removed )
+	{
+		if ( !NextStates )
+			return;
+
+		for ( int i = NextStates.Count() - 1; i >= 0; i-- )
+		{
+			if ( NextStates[i].To == removed )
+				NextStates.Remove( i );
+		}
+	}
+
+	//! Apply, but with the dynamic chain's timing rather than the preset's own.
+	//!
+	//! Only the phenomena take the override - they are the parts that fade. The
+	//! date, storm, threshold and wind-function blocks are stamped exactly as
+	//! they were authored.
+	void ApplyTimed( float transition, float duration )
+	{
+		PDate.Apply();
+
+		Storm.Apply();
+		PSandstorm.Apply();
+		POvercast.ApplyTimed( transition, duration );
+
+		PFog.ApplyTimed( transition, duration );
+		PDynFog.Apply();
+
+		PRain.ApplyTimed( transition, duration );
+		RainThreshold.Apply();
+
+		PSnow.ApplyTimed( transition, duration );
+		SnowThreshold.Apply();
+
+		PWindMagnitude.ApplyTimed( transition, duration );
+		PWindDirection.ApplyTimed( transition, duration );
+		WindFunc.Apply();
+	}
+
 	void SetFromWorld()
 	{
 		PDate.SetFromWorld();
 
 		Storm.SetFromWorld();
+		PSandstorm.SetFromWorld();
 		POvercast.SetFromWorld();
 
 		PFog.SetFromWorld();
@@ -360,6 +701,7 @@ class JMWeatherPreset
 			PDate.Log( pidentLogPP );
 
 			Storm.Log( pidentLogPP );
+			PSandstorm.Log( pidentLogPP );
 			POvercast.Log( pidentLogPP );
 
 			PFog.Log( pidentLogPP );

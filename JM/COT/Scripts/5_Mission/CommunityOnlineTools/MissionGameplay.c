@@ -11,6 +11,14 @@ modded class MissionGameplay
 
 	protected JMPlayerInstance m_OfflineInstance;
 
+	//! Global Ctrl+Z/Ctrl+Y - undoes/redoes the shared JMActionHistory stack
+	//! (delete, heal, teleport, ...) from anywhere in COT. Edge-detected so a
+	//! held key fires once, not every frame. Map Editor keeps its own
+	//! separate shortcut for its own placed-object stack while its tab is
+	//! shown - see JMMapEditorForm.IsShown().
+	protected bool m_ActionHistoryUndoKeyWasDown;
+	protected bool m_ActionHistoryRedoKeyWasDown;
+
 	void MissionGameplay()
 	{
 		if ( !g_cotBase )
@@ -151,6 +159,9 @@ modded class MissionGameplay
 
 			GetCommunityOnlineTools().OnUpdate( timeslice );
 
+			if ( GetCommunityOnlineToolsBase().IsOpen() )
+				PollActionHistoryHotkeys();
+
 			if ( m_DebugMonitor )
 			{
 				if ( GetCommunityOnlineToolsBase().IsOpen() )
@@ -167,6 +178,34 @@ modded class MissionGameplay
 				player.COT_SimulationDisabled_OnFrame(timeslice);
 			}
 		}
+	}
+
+	//! Ctrl+Z/Ctrl+Y for the shared JMActionHistory stack. Skipped while
+	//! typing (same EditBoxWidget check CF_InputBindings uses to gate its own
+	//! global input) and while Map Editor's tab is shown (it owns the chord
+	//! for its own stack in that case - see JMMapEditorForm.IsShown()).
+	protected void PollActionHistoryHotkeys()
+	{
+		if ( JMMapEditorForm.IsShown() )
+			return;
+
+		Widget focus = GetFocus();
+		bool typing = focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) );
+
+		bool ctrl = CTRL();
+
+		JMESPModule espModule;
+		CF_Modules<JMESPModule>.Get( espModule );
+
+		bool undoDown = ctrl && ( KeyState( KeyCode.KC_Z ) > 0 );
+		if ( undoDown && !m_ActionHistoryUndoKeyWasDown && !typing && espModule )
+			espModule.UndoLastAction();
+		m_ActionHistoryUndoKeyWasDown = undoDown;
+
+		bool redoDown = ctrl && ( KeyState( KeyCode.KC_Y ) > 0 );
+		if ( redoDown && !m_ActionHistoryRedoKeyWasDown && !typing && espModule )
+			espModule.RedoLastAction();
+		m_ActionHistoryRedoKeyWasDown = redoDown;
 	}
 
 	override void ShowInventory()

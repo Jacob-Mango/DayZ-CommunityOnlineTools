@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class UIActionScroller: UIActionBase 
 {
 	const int WHEEL_STEP = 20;
@@ -58,7 +61,7 @@ class UIActionScroller: UIActionBase
 	void _UpdateScroller()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::UpdateScroller" );
+		Print( "+UIActionScroller::UpdateScroller" );
 		#endif
 
 		m_IsUpdating = false;
@@ -122,7 +125,7 @@ class UIActionScroller: UIActionBase
 		m_Content.SetPos( 0, contentPos );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::UpdateScroller" );
+		Print( "-UIActionScroller::UpdateScroller" );
 		#endif
 	}
 

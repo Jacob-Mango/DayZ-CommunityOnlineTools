@@ -26,7 +26,7 @@ PanelWidgetClass player_inventory_group {
   }
   ImageWidgetClass group_icon {
    ignorepointer 1
-   position 10 4
+   position 10 7
    size 12 12
    halign left_ref
    valign top_ref
@@ -43,8 +43,8 @@ PanelWidgetClass player_inventory_group {
   }
   TextWidgetClass group_label {
    ignorepointer 1
-   position 27 3
-   size 1 14
+   position 27 6
+   size 0.8 14
    halign left_ref
    valign top_ref
    hexactpos 1
@@ -59,6 +59,17 @@ PanelWidgetClass player_inventory_group {
    "exact text size" 11
    "text halign" left
    "text valign" center
+  }
+  WrapSpacerWidgetClass group_actions {
+   ignorepointer 0
+   position 4 0
+   size 90 26
+   halign right_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
   }
  }
 }

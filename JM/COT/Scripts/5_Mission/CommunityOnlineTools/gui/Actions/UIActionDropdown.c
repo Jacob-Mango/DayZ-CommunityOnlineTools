@@ -38,6 +38,7 @@ class UIActionDropdown: UIActionBase
 
 	protected Widget m_ListAnchor;
 	protected Widget           m_ListPanel;
+	protected ScrollWidget     m_Scroller;
 	protected GridSpacerWidget m_List;
 
 	protected ref array<ref JMDropdownEntry> m_Entries;
@@ -45,10 +46,12 @@ class UIActionDropdown: UIActionBase
 	protected int   m_HoveredRow;     // -1 when nothing highlighted
 	protected bool  m_Open;
 	protected bool  m_JustOpened;
-	protected bool  m_ToggleHandled;
 	protected float             m_OpenDelay;
 	protected ref JMAnimFloat   m_AnimT;
 	protected float             m_FullHeight;
+
+	//! Gap kept between an open list and the edges of its anchor.
+	static const float LIST_EDGE_MARGIN = 4;
 
 	static const int COLOR_ROW_NORMAL = JMTheme.SURFACE_OVERLAY;
 	static const int COLOR_ROW_HOVER  = JMTheme.ACCENT_WASH;
@@ -93,6 +96,21 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
+	//! The open list is parented to the ANCHOR, not to this control, so that it
+	//! floats above whatever the host is drawing instead of being clipped by
+	//! it. That also means unlinking the control does not take the panel with
+	//! it - a dropdown built inside a section that gets rebuilt would leave one
+	//! orphan panel behind per rebuild, still handled by a dead script. Take it
+	//! down here.
+	void ~UIActionDropdown()
+	{
+		if ( !g_Game )
+			return;
+
+		if ( m_ListPanel )
+			m_ListPanel.Unlink();
+	}
+
 	void InitList( notnull Widget listAnchor )
 	{
 		m_ListAnchor = listAnchor;
@@ -101,12 +119,38 @@ class UIActionDropdown: UIActionBase
 
 		if ( m_ListPanel )
 		{
-			Class.CastTo( m_List, m_ListPanel.FindAnyWidget( "action_list_grid" ) );
+			Class.CastTo( m_Scroller, m_ListPanel.FindAnyWidget( "action_list_scroller" ) );
+			Class.CastTo( m_List,     m_ListPanel.FindAnyWidget( "action_list_grid" ) );
 			m_ListPanel.Show( false );
 			m_ListPanel.SetHandler( this );
 			if ( m_List )
 				m_List.SetHandler( this );
 		}
+	}
+
+	//! Take the open list down with the control.
+	//!
+	//! The list panel is parented to the ANCHOR, not to this control, so hiding
+	//! the control does not hide it. Neither does the deferred hide in Update()
+	//! - a hidden action is off the update queue, so the frame that would have
+	//! closed the list never arrives and the panel is left floating over
+	//! whatever the host put in this control's place. Close it here, without
+	//! the animation, because there is nothing left on screen to animate from.
+	override void OnHide()
+	{
+		super.OnHide();
+
+		m_Open      = false;
+		m_OpenDelay = 0;
+
+		if ( m_AnimT )
+			m_AnimT.Set( 0 );
+
+		if ( m_ListPanel )
+			m_ListPanel.Show( false );
+
+		if ( m_ToggleImage )
+			m_ToggleImage.SetRotation( 0, 0, 0 );
 	}
 
 	override void SetLabel( string text )
@@ -169,6 +213,15 @@ class UIActionDropdown: UIActionBase
 	}
 
 	bool IsOpen()
+	{
+		return m_Open;
+	}
+
+	//! The base class's IsVisible() reads layoutRoot, which here is the dropdown
+	//! button itself - visible whenever the control is on screen, whether or
+	//! not its list is expanded. m_Open tracks the list, which is what the
+	//! Escape priority chain needs (a closed dropdown is not an open popup).
+	override bool IsVisible()
 	{
 		return m_Open;
 	}
@@ -290,8 +343,7 @@ class UIActionDropdown: UIActionBase
 		{
 			JMDropdownEntry entry = m_Entries[ i ];
 
-			Widget row = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionDropdown_Row.layout", m_List );
+			Widget row = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionDropdown_Row.layout", m_List );
 
 			if ( !row )
 				continue;
@@ -344,6 +396,8 @@ class UIActionDropdown: UIActionBase
 			if ( next >= m_Entries.Count() )
 				next = 0;
 			SetHoveredRow( next );
+			if ( m_Scroller )
+				m_Scroller.VScrollStep( 1 );
 			return true;
 		}
 		if ( key == KeyCode.KC_UP )
@@ -352,6 +406,8 @@ class UIActionDropdown: UIActionBase
 			if ( prev < 0 )
 				prev = m_Entries.Count() - 1;
 			SetHoveredRow( prev );
+			if ( m_Scroller )
+				m_Scroller.VScrollStep( -1 );
 			return true;
 		}
 		if ( key == KeyCode.KC_RETURN || key == KeyCode.KC_NUMPADENTER )
@@ -368,6 +424,28 @@ class UIActionDropdown: UIActionBase
 			return true;
 		}
 		return super.OnKeyPress( w, x, y, key );
+	}
+
+	//! Pixels per wheel notch. A direct GetVScrollPos/VScrollToPos move rather
+	//! than VScrollStep: VScrollStep's own step size is engine-controlled and
+	//! landed several rows at once per notch, which read as the list jumping
+	//! rather than scrolling; this also sidesteps VScrollStep's step direction
+	//! disagreeing with `wheel`'s own sign, which is what had the wheel scroll
+	//! backwards from what it showed - scrolling up moved the list down.
+	static const float WHEEL_PIXEL_STEP = 40.0;
+
+	override bool OnMouseWheel( Widget w, int x, int y, int wheel )
+	{
+		if ( m_Open && m_Scroller && m_ListPanel && m_ListPanel.IsVisible() )
+		{
+			float pos = m_Scroller.GetVScrollPos();
+			pos -= wheel * WHEEL_PIXEL_STEP;
+			m_Scroller.VScrollToPos( pos );
+
+			return true;
+		}
+
+		return super.OnMouseWheel( w, x, y, wheel );
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )
@@ -426,24 +504,53 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
+	//! Is `widget` any part of the collapsed control - the label, the field, the
+	//! selected icon or text, the chevron? The open list is NOT part of it: it
+	//! is parented to the list anchor rather than to layoutRoot, so the walk
+	//! below never reaches it.
+	protected bool IsHeaderWidget( Widget widget )
+	{
+		if ( !widget || !layoutRoot )
+			return false;
+
+		Widget w = widget;
+		while ( w )
+		{
+			if ( w == layoutRoot )
+				return true;
+
+			w = w.GetParent();
+		}
+
+		return false;
+	}
+
+	//! The whole control opens the list, not just the 24px chevron.
+	//!
+	//! On mouse-down rather than through OnClick: action_field is a PanelWidget
+	//! and action_label a TextWidget, and neither raises a click at all - only
+	//! the chevron, which is the one ButtonWidget here, ever did. Handling the
+	//! press means every pixel of the row answers, and it is why OnClick no
+	//! longer toggles: doing both would open on the way down and shut on the
+	//! way up.
+	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
+	{
+		if ( button != MouseState.LEFT || !IsHeaderWidget( w ) )
+			return super.OnMouseButtonDown( w, x, y, button );
+
+		// The disable overlay is a child of layoutRoot, so it passes the header
+		// test. Widget.Enable(false) should already keep events away, but a
+		// disabled control opening its list is not a failure worth risking.
+		if ( !IsEnabled() )
+			return true;
+
+		SetOpen( !m_Open );
+
+		return true;
+	}
+
 	override bool OnClick( Widget w, int x, int y, int button )
 	{
-		// m_Toggle click bubbles up to m_Field - use a flag to avoid double-toggle.
-		if ( w == m_Toggle )
-		{
-			m_ToggleHandled = true;
-			SetOpen( !m_Open );
-			return true;
-		}
-
-		if ( w == m_Field )
-		{
-			if ( !m_ToggleHandled )
-				SetOpen( !m_Open );
-			m_ToggleHandled = false;
-			return true;
-		}
-
 		if ( m_List && w.GetParent() == m_List )
 		{
 			int idx = w.GetName().ToInt();
@@ -498,7 +605,23 @@ class UIActionDropdown: UIActionBase
 
 			if ( m_ListPanel.IsVisible() && m_FullHeight > 0 )
 			{
-				float animH = m_FullHeight * t;
+				// A list can be taller than the window it opens in - the object
+				// spawner's liquid list runs to sixteen entries - and nothing
+				// renders outside the anchor, so cap it there first.
+				float maxH = anchorH - LIST_EDGE_MARGIN * 2;
+				float fullH = m_FullHeight;
+
+				float listCapH = 360.0;
+				if ( maxH > 0 && maxH < listCapH )
+					listCapH = maxH;
+
+				if ( fullH > listCapH )
+					fullH = listCapH;
+
+				//! No runtime scrollbar-visibility setter exists on ScrollWidget -
+				//! the native C++ side shows it on its own once content actually
+				//! overflows the capped height set above.
+				float animH = fullH * t;
 				m_ListPanel.SetFlags( WidgetFlags.HEXACTSIZE );
 				m_ListPanel.SetFlags( WidgetFlags.VEXACTSIZE );
 				m_ListPanel.SetSize( fw, animH );
@@ -506,10 +629,22 @@ class UIActionDropdown: UIActionBase
 
 				// Position list below field; flip upward if it clips past anchor bottom.
 				float posY;
-				if ( fy + fh + m_FullHeight > ay + anchorH )
+				if ( fy + fh + fullH > ay + anchorH )
 					posY = fy - ay - animH;
 				else
 					posY = fy - ay + fh;
+
+				// Then clamp INSIDE the anchor. Flipping up is only right while
+				// there is room above; a long list opening near the bottom used
+				// to flip straight past the top edge and lose its first rows to
+				// a region nothing draws in.
+				float maxY = anchorH - animH - LIST_EDGE_MARGIN;
+
+				if ( posY > maxY )
+					posY = maxY;
+
+				if ( posY < LIST_EDGE_MARGIN )
+					posY = LIST_EDGE_MARGIN;
 
 				m_ListPanel.SetPos( fx - ax, posY );
 			}
@@ -531,28 +666,30 @@ class UIActionDropdown: UIActionBase
 		}
 	}
 
-	override bool IsFocusWidget( Widget widget )
+	protected bool IsListWidget( Widget widget )
 	{
-		if ( widget == m_Field     ) return true;
-		if ( widget == m_Toggle   ) return true;
-		if ( widget == m_ListPanel ) return true;
+		if ( !widget || !m_ListPanel )
+			return false;
 
-		if ( m_List && m_ListPanel && m_ListPanel.IsVisible() )
+		Widget w = widget;
+		while ( w )
 		{
-			Widget child = m_List.GetChildren();
-			while ( child )
-			{
-				if ( widget == child ) return true;
-				Widget subchild = child.GetChildren();
-				while ( subchild )
-				{
-					if ( widget == subchild ) return true;
-					subchild = subchild.GetSibling();
-				}
-				child = child.GetSibling();
-			}
+			if ( w == m_ListPanel )
+				return true;
+
+			w = w.GetParent();
 		}
 
+		return false;
+	}
+
+	override bool IsFocusWidget( Widget widget )
+	{
+		// The whole header, not just the field and the chevron: a press on the
+		// label now toggles the list, so it must not also read as the outside
+		// click that closes it.
+		if ( IsHeaderWidget( widget ) ) return true;
+		if ( IsListWidget( widget ) ) return true;
 		return false;
 	}
 }

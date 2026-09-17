@@ -46,6 +46,12 @@ class UIActionIconGrid: UIActionBase
 	protected string                          m_LastClickedId;
 	protected string                          m_SelectedId;
 
+	//! Momentary grids fire and forget: a click runs a command and leaves no
+	//! cell latched. A selecting grid keeps the pressed cell blue because the
+	//! selection IS the state - a filter, a tab, a chosen tool. See
+	//! SetMomentary.
+	protected bool                            m_Momentary;
+
 	//! A cell is the same rounded pill as a button; the selected one wears the
 	//! selected-blue, exactly like the current tab or the active filter chip.
 	static const int COLOR_SELECTED      = JMTheme.SELECTED_FILL;
@@ -106,8 +112,7 @@ class UIActionIconGrid: UIActionBase
 		// are added; if called after, those children stay on the old grid.
 		if ( m_Grid )
 			m_Grid.Unlink();
-		m_Grid = UIActionManager.CreateWrapSpacer(
-			"JM/COT/GUI/layouts/uiactions/UIWrapSpacerH.layout", layoutRoot );
+		m_Grid = UIActionManager.CreateWrapSpacer( "JM/COT/GUI/layouts/uiactions/UIWrapSpacerH.layout", layoutRoot );
 	}
 
 	//! Force the inner WrapSpacer to a known pixel width and height. Useful
@@ -208,14 +213,12 @@ class UIActionIconGrid: UIActionBase
 		if ( !entry.BadgeText && count > 0 && entry.Button )
 		{
 			// Create badge overlay on first use
-			Widget badgeWidget = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIPanel.layout", entry.Button.GetParent() );
+			Widget badgeWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIPanel.layout", entry.Button.GetParent() );
 
 			// Fallback: just use a TextWidget directly
 			if ( !badgeWidget && entry.Button.GetParent() )
 			{
-				TextWidget tw = TextWidget.Cast(
-					g_Game.GetWorkspace().CreateWidgets( "TextWidget", entry.Button.GetParent() ) );
+				TextWidget tw = TextWidget.Cast( g_Game.GetWorkspace().CreateWidgets( "TextWidget", entry.Button.GetParent() ) );
 				entry.BadgeText = tw;
 			}
 		}
@@ -307,6 +310,25 @@ class UIActionIconGrid: UIActionBase
 		return m_LastClickedId;
 	}
 
+	//! Turn off the latched highlight.
+	//!
+	//! A cell that stays blue is a claim that the thing it selected is still
+	//! in force. For a grid of one-shot commands that claim goes stale the
+	//! instant anything else changes the state, so those grids say so here and
+	//! the cell falls back to plain hover feedback.
+	void SetMomentary( bool momentary )
+	{
+		m_Momentary = momentary;
+
+		if ( momentary )
+			SetSelected( "" );
+	}
+
+	bool IsMomentary()
+	{
+		return m_Momentary;
+	}
+
 	void SetSelected( string id )
 	{
 		// Clear old highlight.
@@ -394,7 +416,10 @@ class UIActionIconGrid: UIActionBase
 			if ( entry.Button && w == entry.Button )
 			{
 				m_LastClickedId = entry.Id;
-				SetSelected( entry.Id );
+
+				if ( !m_Momentary )
+					SetSelected( entry.Id );
+
 				CallEvent( UIEvent.CLICK );
 				return true;
 			}

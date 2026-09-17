@@ -1,3 +1,10 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - a file in
+//! the same 4_World module (e.g. CommunityOnlineToolsBase.c) defining this
+//! does NOT make it visible here. Every file that wants COT_DBG output needs
+//! its own copy of this line. Confirmed by zero COT_DBG output from this
+//! file for an entire debug session despite the ifdefs compiling in fine.
+#define COT_DEBUGLOGS
+
 class COTModule : JMModuleBase
 {
 	protected JMCOTSideBar m_COTMenu;
@@ -34,21 +41,17 @@ class COTModule : JMModuleBase
 		auto trace = CF_Trace_0(this, "OnMissionLoaded");
 
 		super.OnMissionLoaded();
-		
+
 		if ( IsMissionClient() )
 		{
-			Print("[COT-TRACE] COTModule.OnMissionLoaded: client setup begin");
 			if ( !JMStatics.ESP_CONTAINER )
 			{
-				Print("[COT-TRACE] COTModule: create screen_esp.layout");
 				JMStatics.ESP_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_esp.layout", NULL );
-				Print("[COT-TRACE] COTModule: screen_esp.layout done");
 			}
 
 			#ifndef CF_WINDOWS
 			if ( !JMStatics.WINDOWS_CONTAINER )
 			{
-				Print("[COT-TRACE] COTModule: create screen_windows.layout");
 				JMStatics.WINDOWS_CONTAINER = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/screen_windows.layout", NULL );
 
 				//! The container deliberately keeps its default sort.
@@ -65,45 +68,54 @@ class COTModule : JMModuleBase
 				//! draw over module windows. If that returns, the fix is a sort
 				//! high enough to beat the HUD and low enough to keep these
 				//! widgets rendering - not SORT_WINDOW.
-				Print("[COT-TRACE] COTModule: screen_windows.layout done");
 			}
 			#endif
 
 			if ( m_COTMenu == NULL )
 			{
-				Print("[COT-TRACE] COTModule: create sidebar_menu.layout");
 				Widget sidebarW = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_menu.layout" );
-				Print("[COT-TRACE] COTModule: sidebar_menu.layout created=" + (sidebarW != null).ToString());
 				if (sidebarW)
 					sidebarW.GetScript( m_COTMenu );
-				Print("[COT-TRACE] COTModule: m_COTMenu set=" + (m_COTMenu != null).ToString());
 			}
-			Print("[COT-TRACE] COTModule.OnMissionLoaded: client setup end");
 		}
 
 		if ( IsMissionHost() )
 		{
-			array< string > data = GetPermissionsManager().Serialize();
-
-			if ( !GetPermissionsManager().RoleExists( "everyone" ) )
-				GetPermissionsManager().CreateRole( "everyone", data );
-
-			//if ( !GetPermissionsManager().RoleExists( "admin" ) )
-			{
-				for ( int i = 0; i < data.Count(); i++ )
-				{
-					string s = data[i];
-					s.Replace( "0", "2" );
-					data.Remove( i );
-					data.InsertAt( s, i );
-				}
-
-				GetPermissionsManager().CreateRole( "admin", data );
-			}
+			EnsureDefaultRoles();
 
 		#ifndef CF_MODULE_PERMISSIONS
 			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( FlushPlayerStats, STATS_FLUSH_INTERVAL_MS, true );
 		#endif
+		}
+	}
+
+	//! Creates the "everyone"/"admin" default roles if they don't exist yet.
+	//!
+	//! Split out of OnMissionLoaded() so callers that cannot rely on module
+	//! lifecycle ordering (e.g. JM_COT_AUTOTEST, which runs from
+	//! CommunityOnlineTools.OnStart() and previously found "everyone" missing
+	//! when it ran ahead of this module's own OnMissionLoaded) can force
+	//! creation deterministically. Idempotent - safe to call more than once.
+	static void EnsureDefaultRoles()
+	{
+		array< string > data = GetPermissionsManager().Serialize();
+
+		if ( !GetPermissionsManager().RoleExists( "everyone" ) )
+			GetPermissionsManager().CreateRole( "everyone", data );
+
+		//! Deliberately unconditional (not gated on RoleExists) - "admin" is
+		//! always recreated from the current permission set so it stays in
+		//! sync as mods register new permissions after boot.
+		{
+			for ( int i = 0; i < data.Count(); i++ )
+			{
+				string s = data[i];
+				s.Replace( "0", "2" );
+				data.Remove( i );
+				data.InsertAt( s, i );
+			}
+
+			GetPermissionsManager().CreateRole( "admin", data );
 		}
 	}
 
@@ -163,9 +175,11 @@ class COTModule : JMModuleBase
 	#endif
 	}
 
-	override void RegisterKeyMouseBindings() 
+	override void RegisterKeyMouseBindings()
 	{
-		Bind( new JMModuleBinding( "ToggleMenu",	"UACOTToggleButtons",		true 	) );
+		//! UACOTToggleButtons ("Y") is intentionally NOT bound here anymore -
+		//! see ToggleMenu()/OnUpdate() below for why it's polled from raw
+		//! hardware state instead of the CF dispatch system.
 		Bind( new JMModuleBinding( "ToggleCOT",		"UACOTModuleToggleCOT",		false 	) );
 		Bind( new JMModuleBinding( "CloseCOT",		"UAUIBack",					true 	) );
 	}
@@ -175,8 +189,27 @@ class COTModule : JMModuleBase
 	{
 	}
 	#else
+	#ifdef COT_DEBUGLOGS
+	private static bool s_JM_LoggedInputBranch = false;
+	#endif
+
 	override void OnUpdate( float timeslice )
 	{
+		#ifdef COT_DEBUGLOGS
+		if ( !s_JM_LoggedInputBranch )
+		{
+			s_JM_LoggedInputBranch = true;
+			#ifdef CF_WINDOWS
+			Print("[COT_DBG] OnUpdate compiled branch = CF_WINDOWS (click-outside handled entirely by CF_Windows.OverrideInputState, NOT by our OnMouseDown/ContainsWidget code)");
+			#else
+			Print("[COT_DBG] OnUpdate compiled branch = legacy OnMouseDown/UpdateMouseControls polling");
+			#endif
+		}
+		#endif
+
+		PollToggleMenuKey();
+		PollEscapeKey();
+
 		JMStatics.COT_MENU = null;
 		if ( m_COTMenu )
 		{
@@ -190,15 +223,30 @@ class COTModule : JMModuleBase
 				if (!m_WasVisible)
 				{
 					m_WasVisible = true;
+					#ifdef COT_DEBUGLOGS
+					Print("[COT_DBG] CF_WINDOWS: sidebar became visible -> OverrideInputState(true, WINDOW)");
+					#endif
 				}
-				
+
 				CF_Windows.OverrideInputState(true, CF_WindowsFocusState.WINDOW);
 			} else if (!m_COTMenu.IsVisible() && m_WasVisible)
 			{
 				m_WasVisible = false;
+				#ifdef COT_DEBUGLOGS
+				Print("[COT_DBG] CF_WINDOWS: sidebar no longer visible -> OverrideInputState(false)");
+				#endif
 				CF_Windows.OverrideInputState(false);
 			}
 			#else
+			//! Not just "does a click close COT" - this is also what hands
+			//! mouse/camera control back to the game (ResetGameFocus +
+			//! ShowUICursor(false)) so right-click-drag can look around while
+			//! the sidebar stays open. Removing it broke free-look entirely,
+			//! not just the false-positive closes. NEVER calls SetOpen() -
+			//! it only ever touches game/UI focus, so it cannot be the cause
+			//! of the sidebar's m_IsOpen actually flipping to false; that is
+			//! tracked separately (see CommunityOnlineToolsBase.SetOpen's
+			//! DumpStackString instrumentation).
 			if ( m_LeftMouseDown )
 			{
 				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) == 0 )
@@ -212,7 +260,7 @@ class COTModule : JMModuleBase
 				if ( ( GetMouseState( MouseState.LEFT ) & MB_PRESSED_MASK ) != 0 )
 				{
 					OnMouseDown();
-					
+
 					m_LeftMouseDown = true;
 				}
 			}
@@ -242,6 +290,10 @@ class COTModule : JMModuleBase
 		if ( !isMenuOpen && !windowsOpen )
 			return;
 
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] UpdateMouseControls m_GameActive=" + m_GameActive.ToString());
+		#endif
+
 		if ( m_GameActive )
 		{
 			g_Game.GetInput().ResetGameFocus();
@@ -264,20 +316,34 @@ class COTModule : JMModuleBase
 
 	void SetMenuState( bool show )
 	{
-		Print("[COT-TRACE] COTModule.SetMenuState show=" + show.ToString() + " m_COTMenu=" + (m_COTMenu != null).ToString());
+		bool hasCotMenu = m_COTMenu != NULL;
+		bool cotMenuShown = false;
+		if ( hasCotMenu )
+			cotMenuShown = m_COTMenu.IsShown();
+
+		#ifdef COT_DEBUGLOGS
+		//! Bug history: "(m_COTMenu != NULL).ToString()" is fine on its own,
+		//! but ".ToString()" on the PARENTHESIZED "&&" expression itself -
+		//! "(m_COTMenu && m_COTMenu.IsShown()).ToString()" - crashed the real
+		//! engine natively at boot every time (SetMenuState is a COT_ON_OPEN
+		//! listener, invoked unconditionally from OnStart()), despite passing
+		//! the custom lint tool and despite the plain-bool fields above being
+		//! fine. Precomputing into plain bool locals first avoids the pattern
+		//! entirely instead of relying on '.ToString()' placement.
+		Print("[COT_DBG] SetMenuState(" + show.ToString() + ") - COT_ON_OPEN listener, m_COTMenu=" + hasCotMenu.ToString() + " IsShown=" + cotMenuShown.ToString());
+		#endif
+
 		if ( !m_COTMenu )
 			return;
 
 		if ( show )
 		{
-			if ( !m_COTMenu.IsVisible() )
+			if ( !m_COTMenu.IsShown() )
 			{
-				Print("[COT-TRACE] COTModule.SetMenuState: calling m_COTMenu.Show");
 				m_COTMenu.Show();
-				Print("[COT-TRACE] COTModule.SetMenuState: m_COTMenu.Show returned");
 			}
 		} else {
-			if ( m_COTMenu.IsVisible() )
+			if ( m_COTMenu.IsShown() )
 				m_COTMenu.Hide();
 		}
 	}
@@ -290,22 +356,136 @@ class COTModule : JMModuleBase
 		if (!input.LocalPress())
 			return;
 
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] CloseCOT fired (UAUIBack press)");
+		#endif
+
+		//! Only Y (ToggleMenu/UACOTToggleButtons) is allowed to close the
+		//! sidebar - UAUIBack (vanilla Escape/back) used to also SetOpen(false)
+		//! here, which closed the whole sidebar just for backing out of e.g.
+		//! the object spawner menu. Still cleans up input-disable state for
+		//! any open/closing windows, which is not "closing the sidebar".
 		if (GetCommunityOnlineToolsBase())
 		{
-			if (GetCommunityOnlineToolsBase().IsOpen())
-				g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Call( GetCommunityOnlineToolsBase().SetOpen, false );
-
 			if (GetCommunityOnlineToolsBase().IsOpen() || GetCOTWindowManager().HasAnyActive() || GetCOTWindowManager().PendingDeletionCount() > 0)
 				CommunityOnlineToolsBase.ForceDisableInputs(false);
 		}
 	}
 
-	void ToggleMenu( UAInput input = NULL )
+	//! Own down/up edge tracking for the sidebar toggle, polled from raw
+	//! hardware KeyState() in OnUpdate() instead of going through the
+	//! UAInput/CF Bind() dispatch system (see PollToggleMenuKey()). Two
+	//! LocalPress()/LocalHold()-based attempts before this one both still
+	//! misfired: ForceDisable(true)/(false) - which every context menu and
+	//! list-row widget cycles on focus change via UIActionBase::Update - does
+	//! not just gate whether our callback gets invoked, it gates what the
+	//! UAInput itself REPORTS. So if Y was already held down when some
+	//! unrelated widget force-disabled inputs, the read on re-enable comes
+	//! back as a fresh "press" no matter which Local*() method or how the
+	//! edge bookkeeping is done - any state derived from that UAInput is
+	//! equally poisoned. Raw KeyState() reads the physical key directly and
+	//! is not part of COT's own ForceDisable plumbing, so it can't be
+	//! perturbed by a module or context menu opening/closing.
+	protected bool m_ToggleMenuKeyDown;
+
+	//! Client-only, called every frame from OnUpdate(). Bypasses Bind() /
+	//! ForceDisableInputs entirely - see m_ToggleMenuKeyDown's comment for why.
+	void PollToggleMenuKey()
 	{
-		if ( input != NULL && !input.LocalPress() )
+		if ( !g_Game )
 			return;
 
+		//! Same guard CF_InputBindings uses for UAUIMenu: don't treat typing
+		//! "y" into a chat/name/message box as the sidebar hotkey.
+		Widget focus = GetFocus();
+		if ( focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) ) && focus.IsVisible() )
+			return;
+
+		bool keyDown = KeyState( KeyCode.KC_Y ) > 0;
+		bool isEdge = keyDown && !m_ToggleMenuKeyDown;
+		m_ToggleMenuKeyDown = keyDown;
+
+		if ( !isEdge )
+			return;
+
+		ToggleMenu();
+	}
+
+	void ToggleMenu()
+	{
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] ToggleMenu fired (raw KC_Y press)");
+		#endif
+
 		GetCommunityOnlineToolsBase().ToggleOpen();
+	}
+
+	//! Same reasoning as m_ToggleMenuKeyDown: Escape used to go through
+	//! CloseCOT() (Bind()'d to UAUIBack), which is exactly the ForceDisable-
+	//! poisoned path the Y fix moved away from. Polled raw instead so it can't
+	//! misfire from a context menu or module window churning input-disable
+	//! state, and so it can implement the close priority below instead of the
+	//! single global toggle UAUIBack gave it.
+	protected bool m_EscapeKeyDown;
+
+	//! Client-only, called every frame from OnUpdate().
+	void PollEscapeKey()
+	{
+		if ( !g_Game )
+			return;
+
+		Widget focus = GetFocus();
+		if ( focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) ) && focus.IsVisible() )
+			return;
+
+		bool keyDown = KeyState( KeyCode.KC_ESCAPE ) > 0;
+		bool isEdge = keyDown && !m_EscapeKeyDown;
+		m_EscapeKeyDown = keyDown;
+
+		if ( !isEdge )
+			return;
+
+		HandleEscape();
+	}
+
+	//! Priority: pop up (confirmation / context menu / dropdown / value
+	//! prompt) closes first, then the frontmost module window, then COT's
+	//! sidebar itself - each tier only acts if the one before it had nothing
+	//! to close. Leaves Escape alone entirely (falls through to the vanilla
+	//! pause menu etc.) when COT has nothing open at all.
+	void HandleEscape()
+	{
+		bool cotOpen = GetCommunityOnlineToolsBase() && GetCommunityOnlineToolsBase().IsOpen();
+
+		#ifndef CF_WINDOWS
+		bool windowsActive = GetCOTWindowManager().HasAnyActive();
+
+		if ( !cotOpen && !windowsActive )
+			return;
+
+		JMWindowBase topWindow = GetCOTWindowManager().GetTopActive();
+
+		if ( topWindow && topWindow.HasOpenPopup() )
+		{
+			topWindow.CloseOpenPopup();
+			return;
+		}
+
+		if ( topWindow )
+		{
+			if ( topWindow.GetModule() )
+				topWindow.GetModule().Close();
+			else
+				topWindow.Destroy();
+			return;
+		}
+		#else
+		if ( !cotOpen )
+			return;
+		#endif
+
+		if ( cotOpen )
+			ToggleMenu();
 	}
 
 	#ifndef CF_WINDOWS
@@ -319,6 +499,12 @@ class COTModule : JMModuleBase
 		}
 	}
 
+	//! Decides whether a click should hand mouse/camera control back to the
+	//! game (m_GameActive=true) or leave it with COT's UI. NEVER closes the
+	//! sidebar itself (never touches SetOpen/m_IsOpen) - it only changes
+	//! game focus/cursor visibility. A click misclassified as "outside COT"
+	//! here looks like the sidebar closing because the UI becomes unusable,
+	//! but m_IsOpen stays true the whole time.
 	void OnMouseDown()
 	{
 		if ( g_Game.GetUIManager().GetMenu() )
@@ -330,9 +516,21 @@ class COTModule : JMModuleBase
 
 			Widget clickedWidget = GetWidgetUnderCursor();
 
+			#ifdef COT_DEBUGLOGS
+			string clickedName = "NULL";
+			if ( clickedWidget )
+				clickedName = clickedWidget.GetName() + " (" + clickedWidget.ClassName() + ")";
+			Print("[COT_DBG] OnMouseDown clicked=" + clickedName);
+			#endif
+
 			// Check sidebar root + all category flyouts in one call
 			if ( m_COTMenu && m_COTMenu.ContainsWidget( clickedWidget ) )
+			{
 				canContinue = true;
+				#ifdef COT_DEBUGLOGS
+				Print("[COT_DBG] OnMouseDown canContinue=true via m_COTMenu.ContainsWidget");
+				#endif
+			}
 
 			if ( !canContinue )
 			{
@@ -342,24 +540,38 @@ class COTModule : JMModuleBase
 					if ( GetCOTWindowManager().GetWindowFromWidget( parentWidget ) )
 					{
 						canContinue = true;
+						#ifdef COT_DEBUGLOGS
+						Print("[COT_DBG] OnMouseDown canContinue=true via GetWindowFromWidget at " + parentWidget.GetName() + " (" + parentWidget.ClassName() + ")");
+						#endif
 						break;
 					}
 
 					if ( JMStatics.ESP_CONTAINER && JMStatics.ESP_CONTAINER == parentWidget )
 					{
 						canContinue = true;
+						#ifdef COT_DEBUGLOGS
+						Print("[COT_DBG] OnMouseDown canContinue=true via ESP_CONTAINER match");
+						#endif
 						break;
 					}
 
 					if ( JMStatics.IsOverlay( parentWidget ) )
 					{
 						canContinue = true;
+						#ifdef COT_DEBUGLOGS
+						Print("[COT_DBG] OnMouseDown canContinue=true via IsOverlay at " + parentWidget.GetName() + " (" + parentWidget.ClassName() + ")");
+						#endif
 						break;
 					}
 
 					parentWidget = parentWidget.GetParent();
 				}
 			}
+
+			#ifdef COT_DEBUGLOGS
+			if ( !canContinue )
+				Print("[COT_DBG] OnMouseDown canContinue=false -> treating as click OUTSIDE COT, releasing to game");
+			#endif
 
 			if ( !canContinue )
 			{
@@ -377,6 +589,10 @@ class COTModule : JMModuleBase
 	{
 		if ( !( input.LocalPress() ) )
 			return;
+
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] ToggleCOT fired (UACOTModuleToggleCOT press)");
+		#endif
 
 		if ( m_COTMenu == NULL )
 			return;

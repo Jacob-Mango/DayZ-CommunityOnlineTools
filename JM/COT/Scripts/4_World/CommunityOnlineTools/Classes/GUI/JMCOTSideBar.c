@@ -1,3 +1,9 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - a file in
+//! the same 4_World module (e.g. CommunityOnlineToolsBase.c) defining this
+//! does NOT make it visible here. Every file that wants COT_DBG output needs
+//! its own copy of this line.
+#define COT_DEBUGLOGS
+
 class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 {
 	//! Fraction of the sidebar height taken by the title bar. Must match the
@@ -86,14 +92,27 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	bool IsVisible()
+	override bool IsVisible()
 	{
 		return m_LayoutRoot && m_LayoutRoot.IsVisible();
 	}
 
+	//! Where the bar is heading, not where it currently is. The root stays visible
+	//! for the whole slide-out, so IsVisible() answers "open" while the bar is on
+	//! its way off screen - and a re-open arriving in that window would be dropped.
+	bool IsShown()
+	{
+		if ( m_IsAnimatingOut )
+			return false;
+
+		if ( m_IsAnimatingIn )
+			return true;
+
+		return IsVisible();
+	}
+
 	void OnWidgetScriptInit( Widget w )
 	{
-		Print("[COT-TRACE] JMCOTSideBar.OnWidgetScriptInit begin");
 		m_LayoutRoot = w;
 		m_LayoutRoot.SetHandler( this );
 
@@ -102,29 +121,21 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		m_LayoutRoot.SetSort( JMUILayout.SORT_SIDEBAR );
 
 		Init();
-		Print("[COT-TRACE] JMCOTSideBar.OnWidgetScriptInit end");
 	}
 
 	void Init()
 	{
-		Print("[COT-TRACE] JMCOTSideBar.Init: find TitleBarText");
 		Class.CastTo( m_TitleBarText, m_LayoutRoot.FindAnyWidget( "TitleBarText" ) );
 
-		Print("[COT-TRACE] JMCOTSideBar.Init: find Footer");
 		Widget footerW = m_LayoutRoot.FindAnyWidget( "Footer" );
-		Print("[COT-TRACE] JMCOTSideBar.Init: Footer found=" + (footerW != null).ToString());
 		m_Footer.Init( footerW );
-		Print("[COT-TRACE] JMCOTSideBar.Init: Footer init done");
 
 		Class.CastTo( m_ButtonsScroller, m_LayoutRoot.FindAnyWidget( "Buttons_Scroller" ) );
 
-		Print("[COT-TRACE] JMCOTSideBar.Init: find Buttons");
 		Widget buttonsContainer = m_LayoutRoot.FindAnyWidget( "Buttons" );
-		Print("[COT-TRACE] JMCOTSideBar.Init: Buttons found=" + (buttonsContainer != null).ToString());
 
 		array< JMRenderableModuleBase > modules = new array< JMRenderableModuleBase >;
 		SortModuleArray( GetModuleManager().GetCOTModules(), modules );
-		Print("[COT-TRACE] JMCOTSideBar.Init: modules sorted, count=" + modules.Count());
 
 		// Group modules by category, preserving preferred order
 		array< string > categoryOrder = new array< string >;
@@ -153,7 +164,6 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		// Create one category tile per non-empty category
 		foreach ( string catName: categoryOrder )
 		{
-			Print("[COT-TRACE] JMCOTSideBar.Init: examine category '" + catName + "'");
 			// Check if any module belongs to this category
 			bool hasAny = false;
 			foreach ( JMRenderableModuleBase checkMod: modules )
@@ -167,62 +177,49 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 			if ( !hasAny )
 			{
-				Print("[COT-TRACE] JMCOTSideBar.Init: category '" + catName + "' has no modules, skip");
 				continue;
 			}
 
-			Print("[COT-TRACE] JMCOTSideBar.Init: create sidebar_category.layout for '" + catName + "'");
 			// Create the category tile widget
 			Widget catWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/sidebar_category.layout", buttonsContainer );
-			Print("[COT-TRACE] JMCOTSideBar.Init: catWidget created=" + (catWidget != null).ToString());
 			if ( !catWidget )
 				continue;
 
 			// Set the category label and icon
-			Print("[COT-TRACE] JMCOTSideBar.Init: find cat_ttl");
 			TextWidget catTtl = TextWidget.Cast( catWidget.FindAnyWidget( "cat_ttl" ) );
 			if ( catTtl )
 				catTtl.SetText( catName );
 
-			Print("[COT-TRACE] JMCOTSideBar.Init: find cat_icon, will load: " + JMSideBarConfig.GetCategoryIcon( catName ));
 			ImageWidget catIcon = ImageWidget.Cast( catWidget.FindAnyWidget( "cat_icon" ) );
 			if ( catIcon )
 				catIcon.LoadImageFile( 0, JMSideBarConfig.GetCategoryIcon( catName ) );
-			Print("[COT-TRACE] JMCOTSideBar.Init: cat_icon loaded");
 
 			// Create the category manager (also creates the flyout as a top-level widget)
-			Print("[COT-TRACE] JMCOTSideBar.Init: new JMCOTSideBarCategory");
 			JMCOTSideBarCategory category = new JMCOTSideBarCategory();
 			category.SetSideBar( this );
-			Print("[COT-TRACE] JMCOTSideBar.Init: category.Init begin");
 			category.Init( catName, catWidget );
-			Print("[COT-TRACE] JMCOTSideBar.Init: category.Init end");
 
 			// Add all modules in this category
 			foreach ( JMRenderableModuleBase mod2: modules )
 			{
 				if ( mod2.HasButton() && mod2.GetCategory() == catName )
 				{
-					Print("[COT-TRACE] JMCOTSideBar.Init: AddModule '" + mod2.GetTitle() + "' to '" + catName + "'");
 					category.AddModule( mod2 );
-					Print("[COT-TRACE] JMCOTSideBar.Init: AddModule done");
 				}
 			}
 
 			m_Categories.Insert( category );
-			Print("[COT-TRACE] JMCOTSideBar.Init: category '" + catName + "' fully built");
 		}
-		Print("[COT-TRACE] JMCOTSideBar.Init: all categories built");
+
+		UpdatePermissions();
 
 		float h;
 		m_LayoutRoot.GetSize( m_WidthFull, h );
 		m_WidthIcon = m_WidthFull * 0.8;
 
 		LayoutScroller();
-		Print("[COT-TRACE] JMCOTSideBar.Init: GetSize done, calling Hide");
 
 		Hide();
-		Print("[COT-TRACE] JMCOTSideBar.Init: Hide done");
 		m_LayoutRoot.Show( false );
 	}
 
@@ -248,6 +245,17 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			available = 0;
 
 		m_ButtonsScroller.SetSize( 1.0, available );
+	}
+
+	void UpdatePermissions()
+	{
+		foreach ( JMCOTSideBarCategory cat: m_Categories )
+		{
+			if ( cat )
+			{
+				cat.UpdateModuleVisibility();
+			}
+		}
 	}
 
 	// Close every flyout except the one belonging to the given category.
@@ -297,24 +305,27 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 	void Show()
 	{
-		Print("[COT-TRACE] JMCOTSideBar.Show called");
+		#ifdef COT_DEBUGLOGS
+		Print("[COT_DBG] JMCOTSideBar.Show()");
+		#endif
+
+		// Reverse a slide that is still running rather than dropping the request.
+		// EaseIn at p and EaseOut at 1-p resolve to the same offset, so resuming
+		// the opposite animation from the mirrored time is seamless. Bailing out
+		// instead left m_IsOpen saying "open" while the bar finished sliding away.
+		float resume = 0.0;
 		if ( m_IsAnimatingOut )
-		{
-			Print("[COT-TRACE] JMCOTSideBar.Show: already animating out, abort");
-			return;
-		}
+			resume = m_TotalAnimateTime - m_AnimateTime;
 
 		SetFocus( NULL );
 
 		if ( !IsMissionClient() )
 		{
-			Print("[COT-TRACE] JMCOTSideBar.Show: not mission client, abort");
 			return;
 		}
 
 		if ( !m_LayoutRoot )
 		{
-			Print("[COT-TRACE] JMCOTSideBar.Show: m_LayoutRoot null, abort");
 			return;
 		}
 
@@ -322,18 +333,26 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		//! and the rebuilt one comes back at the default sort.
 		m_LayoutRoot.SetSort( JMUILayout.SORT_SIDEBAR );
 
-		Print("[COT-TRACE] JMCOTSideBar.Show: calling ShowAllWidgets");
-		ShowAllWidgets();
-		Print("[COT-TRACE] JMCOTSideBar.Show: ShowAllWidgets done");
+		UpdatePermissions();
 
+		ShowAllWidgets();
+
+		m_IsAnimatingOut = false;
 		m_IsAnimatingIn = true;
-		m_AnimateTime = 0.0;
+		m_AnimateTime = resume;
 	}
 
 	void Hide()
 	{
+		#ifdef COT_DEBUGLOGS
+		string cotDbgHideStack;
+		DumpStackString(cotDbgHideStack);
+		Print("[COT_DBG] JMCOTSideBar.Hide() call stack:\n" + cotDbgHideStack);
+		#endif
+
+		float resume = 0.0;
 		if ( m_IsAnimatingIn )
-			return;
+			resume = m_TotalAnimateTime - m_AnimateTime;
 
 		SetFocus( NULL );
 
@@ -346,8 +365,9 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			hideCat.ForceHideFlyout();
 		}
 
+		m_IsAnimatingIn = false;
 		m_IsAnimatingOut = true;
-		m_AnimateTime = 0.0;
+		m_AnimateTime = resume;
 
 		HideAllWidgets();
 	}
@@ -378,8 +398,6 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	void OnUpdate( float timeslice )
 	{
 		bool animating = m_IsAnimatingIn || m_IsAnimatingOut || (m_IsTargetCompact != m_IsCompact);
-		if (animating)
-			Print("[COT-TRACE] SideBar.OnUpdate animating in=" + m_IsAnimatingIn + " out=" + m_IsAnimatingOut + " t=" + m_AnimateTime);
 
 		CheckForVisibleModules();
 
@@ -415,9 +433,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 			if (m_IsAnimatingIn)
 			{
-				Print("[COT-TRACE] SideBar.OnUpdate: animatingIn, m_LayoutRoot.Show(true)");
 				m_LayoutRoot.Show( true );
-				Print("[COT-TRACE] SideBar.OnUpdate: Show returned");
 				if (m_IsTargetCompact)
 				{
 					m_CurrentWidth = EaseIn(percent, -m_WidthIcon, -m_WidthFull);
@@ -444,19 +460,17 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 				}
 			}
 
-			Print("[COT-TRACE] SideBar.OnUpdate: SetPos " + m_CurrentWidth);
 			m_LayoutRoot.SetPos( m_CurrentWidth, 0 );
-			Print("[COT-TRACE] SideBar.OnUpdate: SetPos done");
 
 			// Keep any open flyout anchored to its category tile during animation
 			foreach ( JMCOTSideBarCategory animCat: m_Categories )
 			{
 				animCat.RepositionFlyout();
 			}
-			Print("[COT-TRACE] SideBar.OnUpdate: RepositionFlyout done");
 
 			if ( m_AnimateTime > m_TotalAnimateTime )
 			{
+
 				if ( m_IsAnimatingOut )
 					m_LayoutRoot.Show( false );
 				else if (!m_IsTargetCompact)
@@ -484,16 +498,20 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 
 	void CheckForVisibleModules()
 	{
+		string visibleTitle = "";
+
 		array< JMRenderableModuleBase > modules = GetModuleManager().GetCOTModules();
 		foreach(JMRenderableModuleBase module: modules)
 		{
 			if ( module.IsVisible() )
 			{
 				m_IsTargetCompact = true;
-				return;
+				visibleTitle = module.GetTitle();
+				break;
 			}
 		}
 
-		m_IsTargetCompact = false;
+		if (visibleTitle == "")
+			m_IsTargetCompact = false;
 	}
 }

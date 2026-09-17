@@ -23,6 +23,9 @@ modded class PlayerBase
 	private bool m_JMIsFrozen;
 	private bool m_JMIsFrozenRemoteSynch;
 
+	private bool m_JMIsRagdoll;
+	private bool m_JMIsRagdollRemoteSynch;
+
 	private vector m_JMLastPosition;
 	private bool m_JMHasLastPosition;
 
@@ -40,6 +43,14 @@ modded class PlayerBase
 
 	Object m_JM_SpectatedObject;
 	vector m_JM_CameraPosition;
+	private bool m_COT_SpectateStatsSaved;
+	private float m_COT_SavedHealth;
+	private float m_COT_SavedBlood;
+	private float m_COT_SavedShock;
+	private float m_COT_SavedEnergy;
+	private float m_COT_SavedWater;
+	private float m_COT_SavedStamina;
+	private float m_COT_SavedHeatComfort;
 	private bool m_COT_EdgeTick;
 
 	private bool m_COT_ReceiveDamageDealt;
@@ -124,11 +135,15 @@ modded class PlayerBase
 		playerVars[JMPlayerVariables.HAS_CUSTOM_SCALE] = COTHasCustomScale();
 		playerVars[JMPlayerVariables.INVISIBILITY_INTERACTIVE] = COTIsInvisible(JMInvisibilityType.Interactive);
 		playerVars[JMPlayerVariables.UNCONSCIOUS] = IsUnconscious();
+		playerVars[JMPlayerVariables.RAGDOLL] = COTIsRagdoll();
 
 		bool isSick = HasDisease();
 		if ( !isSick && GetModifiersManager() )
 		{
 			isSick = GetModifiersManager().IsModifierActive( eModifiers.MDF_CHOLERA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_INFLUENZA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SALMONELLA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_POISONING ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION2 );
+			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE2 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE3 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE4 );
+			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_BREATH ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_EYES );
+			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_STATIC ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_DYNAMIC );
 		}
 
 		playerVars[JMPlayerVariables.SICK] = isSick;
@@ -292,6 +307,10 @@ modded class PlayerBase
 				#endif
 					m_JMHasCustomScale = enabled;
 					break;
+
+				case JMPlayerVariables.RAGDOLL:
+					m_JMIsRagdollRemoteSynch = enabled;
+					break;
 			}
 		}
 	}
@@ -363,6 +382,21 @@ modded class PlayerBase
 				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(RemoveActiveNV, 1000, false, JMNVTypes.NV_COT_OFF);
 			}
 		}
+
+	#ifdef DAYZ_1_30
+		//! COTSetRagdoll() only calls PhysicsSetRagdoll() where it runs - the
+		//! server. That correctly ragdolls the entity everywhere else (other
+		//! clients see it via normal object/physics replication), but the
+		//! OWNING client simulates its own player locally and never got told,
+		//! same as Frozen/AdminNVG above needing their own client-side apply
+		//! here rather than relying on physics replication alone.
+		if ( m_JMIsRagdollRemoteSynch != m_JMIsRagdoll )
+		{
+			m_JMIsRagdoll = m_JMIsRagdollRemoteSynch;
+
+			PhysicsSetRagdoll( m_JMIsRagdoll );
+		}
+	#endif
 	}
 
 	//! @note only way to prevent drawing occluding effects when admin NV is enabled and wearing NVGoggles that are NOT active at the same time
@@ -780,6 +814,31 @@ modded class PlayerBase
 		}
 	}
 
+	bool COTIsRagdoll()
+	{
+		return m_JMIsRagdoll;
+	}
+
+	//! Cached rather than read live off PhysicsIsRagdoll(): this runs from
+	//! COT_UpdatePlayerVars, which COTOnConnect fires for every player the
+	//! moment they connect - querying the physics engine that early crashed
+	//! the server outright, before the entity's physics was up. GodMode and
+	//! Freeze already follow this cached pattern for the same reason.
+	void COTSetRagdoll( bool mode )
+	{
+#ifdef DAYZ_1_30
+		if ( g_Game.IsServer() )
+		{
+			PhysicsSetRagdoll( mode );
+			m_JMIsRagdoll = mode;
+
+			#ifdef SERVER
+			COT_SynchPlayerVars();
+			#endif
+		}
+#endif
+	}
+
 	void COTSetInvisibility( int mode, bool preference = true )
 	{
 		if ( g_Game.IsServer() )
@@ -930,6 +989,26 @@ modded class PlayerBase
 		}
 	}
 
+	void COTActivateModifier( int modifier_id )
+	{
+		if ( g_Game.IsServer() && GetModifiersManager() )
+			GetModifiersManager().ActivateModifier( modifier_id );
+	}
+
+	void COTDeactivateModifier( int modifier_id )
+	{
+		if ( g_Game.IsServer() && GetModifiersManager() )
+			GetModifiersManager().DeactivateModifier( modifier_id );
+	}
+
+	int COTGetAgentCount( int agent )
+	{
+		if ( m_AgentPool )
+			return m_AgentPool.GetSingleAgentCount( agent );
+
+		return 0;
+	}
+
 	// Activate a bleeding source on the named body-part selection
 	// (e.g. "Head", "LeftArm"). Vanilla only exposes AddBleedingSource(int bit)
 	// and only DebugActivateBleedingSource(int idx) maps to a part - but those
@@ -1020,6 +1099,9 @@ modded class PlayerBase
 			return;
 		}
 
+		if (spectate)
+			COTMirrorSpectatedVitals();
+
 		if (freeCam && vector.DistanceSq(m_JMLastPosition, position) <= 22500)
 		{
 			//! If we get close (within 150 m) of original position, place player at original position
@@ -1084,6 +1166,64 @@ modded class PlayerBase
 
 		if (!m_COT_GodMode_Preference)
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(COTSetGodMode, 34, false, false, false);
+
+		COTRestoreOwnVitals();
+	}
+
+	//! While spectating, the admin's own HUD (health/blood/water/energy/
+	//! stamina/heat) is made to read the spectated survivor's vitals instead
+	//! of the admin's own - the vanilla HUD only ever displays the locally
+	//! controlled entity's stats, so there is no other way to make it show
+	//! what the target is going through. First tick snapshots the admin's
+	//! real values so COTRestoreOwnVitals() can put them back on spectate end.
+	protected void COTMirrorSpectatedVitals()
+	{
+		PlayerBase target;
+		if (!Class.CastTo(target, m_JM_SpectatedObject))
+			return;
+
+		if (!m_COT_SpectateStatsSaved)
+		{
+			m_COT_SavedHealth = GetHealth( "GlobalHealth", "Health" );
+			m_COT_SavedBlood = GetHealth( "GlobalHealth", "Blood" );
+			m_COT_SavedShock = GetHealth( "GlobalHealth", "Shock" );
+			m_COT_SavedEnergy = GetStatEnergy().Get();
+			m_COT_SavedWater = GetStatWater().Get();
+			m_COT_SavedStamina = GetStatStamina().Get();
+			m_COT_SavedHeatComfort = GetStatHeatComfort().Get();
+			m_COT_SpectateStatsSaved = true;
+
+			//! The 1s position-sync tick that also calls this is too coarse for
+			//! something like bleeding blood to read as "live" - run this on
+			//! its own faster timer for as long as the spectate lasts.
+			g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).CallLater( COTMirrorSpectatedVitals, 200, true );
+		}
+
+		SetHealth( "GlobalHealth", "Health", target.GetHealth( "GlobalHealth", "Health" ) );
+		SetHealth( "GlobalHealth", "Blood", target.GetHealth( "GlobalHealth", "Blood" ) );
+		SetHealth( "GlobalHealth", "Shock", target.GetHealth( "GlobalHealth", "Shock" ) );
+		GetStatEnergy().Set( target.GetStatEnergy().Get() );
+		GetStatWater().Set( target.GetStatWater().Get() );
+		GetStatStamina().Set( target.GetStatStamina().Get() );
+		GetStatHeatComfort().Set( target.GetStatHeatComfort().Get() );
+	}
+
+	protected void COTRestoreOwnVitals()
+	{
+		if (!m_COT_SpectateStatsSaved)
+			return;
+
+		g_Game.GetCallQueue( CALL_CATEGORY_SYSTEM ).Remove( COTMirrorSpectatedVitals );
+
+		SetHealth( "GlobalHealth", "Health", m_COT_SavedHealth );
+		SetHealth( "GlobalHealth", "Blood", m_COT_SavedBlood );
+		SetHealth( "GlobalHealth", "Shock", m_COT_SavedShock );
+		GetStatEnergy().Set( m_COT_SavedEnergy );
+		GetStatWater().Set( m_COT_SavedWater );
+		GetStatStamina().Set( m_COT_SavedStamina );
+		GetStatHeatComfort().Set( m_COT_SavedHeatComfort );
+
+		m_COT_SpectateStatsSaved = false;
 	}
 
 	void COTSetIsBeingKicked(bool state)
@@ -1270,11 +1410,13 @@ modded class PlayerBase
 			if (Class.CastTo(car, trans))
 			{
 				GetDayZGame().GetBacklit().OnLeaveCar();
+#ifndef DAYZ_1_30
 				if (g_Game.IsServer())
 				{
-					car.ForceUpdateLightsStart();
-					car.ForceUpdateLightsEnd();
+					car.ForceUpdateLightsStart(); //! obsolete 1.30, no replacement
+					car.ForceUpdateLightsEnd(); //! obsolete 1.30, no replacement
 				}
+#endif
 			}
 		}
 		//else if (m_COT_TransportCache)

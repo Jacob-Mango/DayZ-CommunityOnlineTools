@@ -1,0 +1,49 @@
+PanelWidgetClass UIActionItemListRow {
+ ignorepointer 0
+ position 0 0
+ size 1 22
+ halign left_ref
+ valign top_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ color 0 0 0 0
+ style COTField4Set
+ {
+  TextWidgetClass row_text {
+   ignorepointer 1
+   position 0 0
+   size 0.66 1
+   halign left_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   font "gui/fonts/sdf_MetronLight24"
+   "text offset" 8 0
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass row_sub {
+   ignorepointer 1
+   position 0 0
+   size 0.33 1
+   halign right_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   font "gui/fonts/sdf_MetronLight24"
+   "text offset" -8 0
+   "exact text" 1
+   "exact text size" 11
+   "text halign" right
+   "text valign" center
+  }
+ }
+}

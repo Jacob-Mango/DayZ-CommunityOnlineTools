@@ -2,7 +2,7 @@ PanelWidgetClass JMObjectSpawnerForm {
  visible 1
  color 0 0 0 0
  position 0 0
- size 650 510
+ size 900 600
  hexactpos 0
  vexactpos 0
  hexactsize 1
@@ -10,51 +10,92 @@ PanelWidgetClass JMObjectSpawnerForm {
  scriptclass "JMObjectSpawnerForm"
  style COTSurface
  {
-  PanelWidgetClass object_search_wrapper {
+  PanelWidgetClass panel_left {
    color 0 0 0 0
    position 0 0
-   size 1 40
+   size 0.54 1
    halign left_ref
    valign top_ref
    hexactpos 0
-   vexactpos 1
+   vexactpos 0
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
+   {
+    PanelWidgetClass spawner_search_wrapper {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 0
+     size 1 34
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+    PanelWidgetClass spawner_filter_wrapper {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 34
+     size 1 36
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+    PanelWidgetClass spawner_recent_wrapper {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 70
+     size 1 36
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+    PanelWidgetClass spawner_list_wrapper {
+     clipchildren 1
+     color 0 0 0 0
+     position 0 106
+     size 1 200
+     halign left_ref
+     valign top_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+    }
+   }
   }
-  PanelWidgetClass object_categories_wrapper {
+  PanelWidgetClass panel_right {
    color 0 0 0 0
-   position 0 40
-   size 1 52
+   position 0.54 0
+   size 0.46 1
    halign left_ref
    valign top_ref
    hexactpos 0
-   vexactpos 1
+   vexactpos 0
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
   }
-  PanelWidgetClass object_browse_wrapper {
-   clipchildren 1
-   color 0 0 0 0
-   position 0 92
-   size 1 263
-   halign left_ref
-   valign top_ref
-   hexactpos 0
-   vexactpos 1
-   hexactsize 0
-   vexactsize 1
-  }
-  PanelWidgetClass object_actions_wrapper {
+  PanelWidgetClass panel_right_disable {
+   visible 0
    clipchildren 0
-   color 0 0 0 0
-   position 0 0
-   size 1 160
+   ignorepointer 0
+   color 0.082 0.098 0.118 0.902
+   position 0.54 0
+   size 0.46 1
    halign left_ref
-   valign bottom_ref
+   valign top_ref
    hexactpos 0
-   vexactpos 1
+   vexactpos 0
    hexactsize 0
-   vexactsize 1
+   vexactsize 0
+   style COTField4Set
   }
  }
 }

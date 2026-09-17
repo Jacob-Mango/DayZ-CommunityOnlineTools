@@ -27,6 +27,9 @@ class UIActionTabs: UIActionBase
 	protected ref array<TextWidget>    m_TabLabels;  // glyphs get offset when a tab has an icon
 	protected ref array<Widget>        m_ContentPanels;
 	protected ref array<string>        m_Labels;
+	protected ref array<bool>          m_TabEnabled;
+	protected ref array<bool>          m_TabVisible;
+	protected ref map<int, string>     m_TabPermissions;
 	protected int                      m_Selected;
 	protected int                      m_Hovered;    // -1 when no tab hovered
 
@@ -72,6 +75,9 @@ class UIActionTabs: UIActionBase
 		m_TabLabels     = new array<TextWidget>;
 		m_ContentPanels = new array<Widget>;
 		m_Labels        = new array<string>;
+		m_TabEnabled    = new array<bool>;
+		m_TabVisible    = new array<bool>;
+		m_TabPermissions = new map<int, string>;
 		m_Selected      = -1;
 		m_Hovered       = -1;
 	}
@@ -90,8 +96,7 @@ class UIActionTabs: UIActionBase
 			return;
 
 		int cols = Math.Clamp( count, 1, 9 );
-		string gridLayout = string.Format(
-			"JM/COT/GUI/layouts/uiactions/Wrappers/TabBar/TabBar%1.layout", cols );
+		string gridLayout = string.Format( "JM/COT/GUI/layouts/uiactions/Wrappers/TabBar/TabBar%1.layout", cols );
 
 		m_TabBar = g_Game.GetWorkspace().CreateWidgets( gridLayout, m_TabBarParent );
 		if ( !m_TabBar )
@@ -104,11 +109,12 @@ class UIActionTabs: UIActionBase
 		m_TabIcons.Clear();
 		m_TabLabels.Clear();
 		m_Labels.Clear();
+		m_TabEnabled.Clear();
+		m_TabVisible.Clear();
 
 		foreach ( int i, string label : labels )
 		{
-			Widget tabWidget = g_Game.GetWorkspace().CreateWidgets(
-				"JM/COT/GUI/layouts/uiactions/UIActionTabButton.layout", m_TabBar );
+			Widget tabWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionTabButton.layout", m_TabBar );
 
 			if ( !tabWidget )
 				continue;
@@ -138,9 +144,116 @@ class UIActionTabs: UIActionBase
 			m_TabIcons.Insert( icon );
 			m_TabLabels.Insert( txt );
 			m_Labels.Insert( label );
+			m_TabEnabled.Insert( true );
+			m_TabVisible.Insert( true );
 		}
 
 		UpdateTabColors();
+	}
+
+	void SetTabEnabled( int idx, bool enabled )
+	{
+		if ( idx < 0 || idx >= m_TabEnabled.Count() )
+			return;
+
+		m_TabEnabled[idx] = enabled;
+
+		if ( idx < m_TabButtons.Count() && m_TabButtons[idx] )
+			m_TabButtons[idx].Enable( enabled );
+
+		UpdateTabColors();
+	}
+
+	bool IsTabEnabled( int idx )
+	{
+		if ( idx < 0 || idx >= m_TabEnabled.Count() )
+			return false;
+		return m_TabEnabled[idx];
+	}
+
+	void SetTabVisible( int idx, bool visible )
+	{
+		if ( idx < 0 || idx >= m_TabVisible.Count() )
+			return;
+
+		m_TabVisible[idx] = visible;
+
+		if ( idx < m_TabButtons.Count() && m_TabButtons[idx] )
+		{
+			Widget w = m_TabButtons[idx];
+			if ( w.GetParent() && w.GetParent() != m_TabBar )
+				w = w.GetParent();
+
+			w.Show( visible );
+		}
+
+		if ( !visible && m_Selected == idx )
+		{
+			SelectFirstVisibleTab();
+		}
+
+		UpdateTabColors();
+	}
+
+	bool IsTabVisible( int idx )
+	{
+		if ( idx < 0 || idx >= m_TabVisible.Count() )
+			return true;
+		return m_TabVisible[idx];
+	}
+
+	void SelectFirstVisibleTab()
+	{
+		for ( int i = 0; i < m_TabButtons.Count(); i++ )
+		{
+			if ( IsTabVisible( i ) && IsTabEnabled( i ) )
+			{
+				SetSelection( i );
+				return;
+			}
+		}
+		m_Selected = -1;
+		UpdateContentVisibility();
+	}
+
+	void SetTabPermission( int idx, string permission )
+	{
+		if ( !m_TabPermissions )
+			m_TabPermissions = new map<int, string>;
+
+		m_TabPermissions.Set( idx, permission );
+		UpdateTabPermissions();
+	}
+
+	void UpdateTabPermissions()
+	{
+		if ( !m_TabPermissions )
+			return;
+
+		int visibleCount = 0;
+		for ( int i = 0; i < m_TabButtons.Count(); i++ )
+		{
+			bool allowed = true;
+			if ( m_TabPermissions.Contains( i ) )
+			{
+				string perm = m_TabPermissions.Get( i );
+				allowed = GetPermissionsManager().HasPermission( perm );
+			}
+
+			SetTabVisible( i, allowed );
+			SetTabEnabled( i, allowed );
+
+			if ( allowed )
+				visibleCount++;
+		}
+
+		SetVisible( visibleCount > 0 );
+	}
+
+	override void UpdatePermission( string permission )
+	{
+		super.UpdatePermission( permission );
+		UpdateTabPermissions();
 	}
 
 	//! One icon path per tab, in the same order as the labels passed to SetTabs.
@@ -187,7 +300,7 @@ class UIActionTabs: UIActionBase
 
 	override void SetSelection( int i, bool sendEvent = true )
 	{
-		if ( i < 0 || i >= m_TabButtons.Count() )
+		if ( i < 0 || i >= m_TabButtons.Count() || !IsTabEnabled( i ) || !IsTabVisible( i ) )
 			return;
 
 		m_Selected = i;
@@ -203,8 +316,11 @@ class UIActionTabs: UIActionBase
 		int idx = TabIndexOf( w );
 		if ( idx >= 0 )
 		{
-			SetSelection( idx );
-			return true;
+			if ( IsTabEnabled( idx ) && IsTabVisible( idx ) )
+			{
+				SetSelection( idx );
+				return true;
+			}
 		}
 		return false;
 	}
@@ -213,7 +329,7 @@ class UIActionTabs: UIActionBase
 	{
 		super.OnMouseEnter( w, x, y );
 		int idx = TabIndexOf( w );
-		if ( idx >= 0 )
+		if ( idx >= 0 && IsTabEnabled( idx ) && IsTabVisible( idx ) )
 		{
 			m_Hovered = idx;
 			UpdateTabColors();
@@ -247,8 +363,12 @@ class UIActionTabs: UIActionBase
 	{
 		for ( int i = 0; i < m_TabFills.Count(); i++ )
 		{
+			bool enabled = IsTabEnabled( i );
+
 			int color = COLOR_INACTIVE;
-			if ( i == m_Selected )
+			if ( !enabled )
+				color = 0x00000000;
+			else if ( i == m_Selected )
 				color = COLOR_ACTIVE;
 			else if ( i == m_Hovered )
 				color = COLOR_HOVER;
@@ -257,19 +377,30 @@ class UIActionTabs: UIActionBase
 			if ( fill )
 				fill.SetColor( color );
 
-			// The cyan ring marks the active tab only - a hovered tab just warms
-			// its fill, so the ring stays a reliable "you are here".
 			Widget outline = m_TabOutlines[i];
 			if ( outline )
-				outline.Show( i == m_Selected );
+				outline.Show( enabled && i == m_Selected );
 
 			ImageWidget icon = m_TabIcons[i];
 			if ( icon )
 			{
-				if ( i == m_Selected )
+				if ( !enabled )
+					icon.SetColor( ARGB( 50, 255, 255, 255 ) );
+				else if ( i == m_Selected )
 					icon.SetColor( ICON_ACTIVE );
 				else
 					icon.SetColor( ICON_INACTIVE );
+			}
+
+			TextWidget label = m_TabLabels[i];
+			if ( label )
+			{
+				if ( !enabled )
+					label.SetColor( ARGB( 50, 255, 255, 255 ) );
+				else if ( i == m_Selected )
+					label.SetColor( ICON_ACTIVE );
+				else
+					label.SetColor( ICON_INACTIVE );
 			}
 		}
 	}
@@ -279,7 +410,7 @@ class UIActionTabs: UIActionBase
 		foreach ( int i, Widget panel : m_ContentPanels )
 		{
 			if ( panel )
-				panel.Show( i == m_Selected );
+				panel.Show( i == m_Selected && IsTabVisible( i ) );
 		}
 	}
 }

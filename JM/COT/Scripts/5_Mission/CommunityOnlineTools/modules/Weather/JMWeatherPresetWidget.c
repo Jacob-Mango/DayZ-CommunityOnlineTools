@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
@@ -109,7 +112,7 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 	void SetPreset( string name )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::SetPreset" );
+		Print( "+JMWeatherPresetWidget::SetPreset" );
 		#endif
 
 		m_Name = name;
@@ -127,7 +130,7 @@ class JMWeatherPresetWidget: COT_ScriptedWidgetEventHandler
 		m_WRemoveButton.Show( GetPermissionsManager().HasPermission( "Weather.Preset.Remove" ) );
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::SetPreset" );
+		Print( "-JMWeatherPresetWidget::SetPreset" );
 		#endif
 	}
 

@@ -59,8 +59,7 @@ class UIActionKeyValueList: UIActionBase
 		}
 
 		// Create new row via UIActionText layout
-		Widget rowWidget = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionText.layout", m_Rows );
+		Widget rowWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionText.layout", m_Rows );
 
 		if ( !rowWidget )
 			return;

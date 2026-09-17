@@ -163,7 +163,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void OnWidgetScriptInit( Widget w )
 	{
-		Print("[COT-TRACE] WindowBase.OnWidgetScriptInit");
 		layoutRoot = w;
 		layoutRoot.SetHandler( this );
 
@@ -172,7 +171,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 	void Init()
 	{
-		Print("[COT-TRACE] WindowBase.Init begin");
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Init");
 		#endif
@@ -197,9 +195,6 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Background          = Widget.Cast( layoutRoot.FindAnyWidget( "background" ) );
 		m_ContentWidget       = Widget.Cast( layoutRoot.FindAnyWidget( "content" ) );
 		m_ConfirmationPanel   = Widget.Cast( layoutRoot.FindAnyWidget( "confirmation_panel" ) );
-		Print("[COT-TRACE] WindowBase.Init: close=" + (m_CloseButton != null).ToString() + " min=" + (m_MinimizeButton != null).ToString() + " minLbl=" + (m_MinimizeButtonLabel != null).ToString() + " pin=" + (m_PinButton != null).ToString() + " pinLbl=" + (m_PinButtonLabel != null).ToString());
-		Print("[COT-TRACE] WindowBase.Init: titleWrap=" + (m_TitleWrapper != null).ToString() + " titlePanel=" + (m_TitlePanel != null).ToString() + " titleAccent=" + (m_TitleAccent != null).ToString() + " titleText=" + (m_TitleText != null).ToString());
-		Print("[COT-TRACE] WindowBase.Init: bg=" + (m_Background != null).ToString() + " content=" + (m_ContentWidget != null).ToString() + " confirm=" + (m_ConfirmationPanel != null).ToString());
 
 		// Edge drag handles
 		m_ResizeDragUp    = Widget.Cast( layoutRoot.FindAnyWidget( "resize_drag_up" ) );
@@ -253,11 +248,9 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			float tw, th;
 			m_TitleWrapper.GetSize( tw, th );
 			m_TitleBarHeight = th;
-			Print("[COT-TRACE] WindowBase.Init: title bar height=" + m_TitleBarHeight);
 		}
 		else
 		{
-			Print("[COT-TRACE] WindowBase.Init: m_TitleWrapper NULL, using default 25");
 			m_TitleBarHeight = 25;
 		}
 
@@ -275,12 +268,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		if ( m_HighlightUp )        m_HighlightUp.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopLeft )   m_HighlightTopLeft.SetPos( 0, m_TitleBarHeight, true );
 		if ( m_HighlightTopRight )  m_HighlightTopRight.SetPos( 0, m_TitleBarHeight, true );
-		Print("[COT-TRACE] WindowBase.Init end");
 	}
 
 	void SetModule( JMRenderableModuleBase module )
 	{
-		Print("[COT-TRACE] WindowBase.SetModule begin: module=" + module);
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_1(this, "SetModule").Add(module.ToString());
 		#endif
@@ -288,22 +279,18 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Module = module;
 		if ( Assert_Null( m_Module, "No valid RenderableModule supplied." ) )
 			return;
-		Print("[COT-TRACE] WindowBase.SetModule: module title=" + m_Module.GetTitle() + " layoutRoot=" + m_Module.GetLayoutRoot());
 
 		Widget menu = m_ContentWidget;
 
 		if ( m_Module.GetLayoutRoot() != "" )
 		{
-			Print("[COT-TRACE] WindowBase.SetModule: CreateWidgets " + m_Module.GetLayoutRoot());
 			menu = g_Game.GetWorkspace().CreateWidgets( m_Module.GetLayoutRoot(), m_ContentWidget );
-			Print("[COT-TRACE] WindowBase.SetModule: menu widget=" + (menu != null).ToString());
 			if ( Assert_Null( menu, "No valid widget supplied." ) )
 				return;
 
 			float width = -1;
 			float height = -1;
 			menu.GetSize( width, height );
-			Print("[COT-TRACE] WindowBase.SetModule: menu size=" + width + "x" + height);
 
 			float screenW, screenH;
 			g_Game.GetWorkspace().GetScreenSize( screenW, screenH );
@@ -317,26 +304,20 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 			m_ContentWidget.SetSize( width, height );
 			SetSize( width, height );
 
-			Print("[COT-TRACE] WindowBase.SetModule: menu.GetScript");
 			menu.GetScript( m_Form );
-			Print("[COT-TRACE] WindowBase.SetModule: m_Form=" + (m_Form != null).ToString());
 		}
 
 		m_FormRoot = menu;
 
 		if ( !m_Form )
 		{
-			Print("[COT-TRACE] WindowBase.SetModule: m_Module.InitForm (script class fallback)");
 			m_Form = m_Module.InitForm( menu );
-			Print("[COT-TRACE] WindowBase.SetModule: InitForm returned " + (m_Form != null).ToString());
 		}
 
 		if ( Assert_Null( m_Form, "No valid Form supplied." ) )
 			return;
 
-		Print("[COT-TRACE] WindowBase.SetModule: m_Form.Init");
 		m_Form.Init( this, m_Module );
-		Print("[COT-TRACE] WindowBase.SetModule: m_Form.Init returned");
 
 		m_TitleText.SetText( m_Module.GetTitle() );
 		GetCOTWindowManager().BringFront( this );
@@ -349,9 +330,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		// Notify form of its initial size so it can lay out immediately
 		float winW, winH;
 		layoutRoot.GetSize( winW, winH );
-		Print("[COT-TRACE] WindowBase.SetModule: OnResize " + winW + "x" + (winH - m_TitleBarHeight));
 		m_Form.OnResize( winW, winH - m_TitleBarHeight );
-		Print("[COT-TRACE] WindowBase.SetModule end");
 	}
 
 	JMRenderableModuleBase GetModule()
@@ -390,6 +369,38 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		m_ConfirmationPanel.SetPos( 0, m_TitleBarHeight, true );
 		m_ConfirmationPanel.SetSize( w, Math.Max( 0, h - m_TitleBarHeight ), true );
+	}
+
+	//! Escape priority tier 1 (popup), this window's share of it: this
+	//! window's own confirmation dialog, plus its form's registered overlays
+	//! (context menus, dropdowns, value prompts - see JMFormBase.HasOpenOverlay).
+	bool HasOpenPopup()
+	{
+		if ( m_ConfirmationPanel && m_ConfirmationPanel.IsVisible() )
+			return true;
+
+		if ( m_Form && m_Form.HasOpenOverlay() )
+			return true;
+
+		return false;
+	}
+
+	//! Closes whatever popup(s) are open on this window - confirmation first,
+	//! then any open form overlay. Returns whether it closed anything.
+	bool CloseOpenPopup()
+	{
+		bool closedAny = false;
+
+		if ( m_ConfirmationPanel && m_ConfirmationPanel.IsVisible() && m_Confirmation )
+		{
+			m_Confirmation.Close();
+			closedAny = true;
+		}
+
+		if ( m_Form && m_Form.CloseOpenOverlays() )
+			closedAny = true;
+
+		return closedAny;
 	}
 
 	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )
@@ -438,7 +449,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		m_Background.SetColor( ARGB( alpha * 255, r * 255, g * 255, b * 255 ) );
 	}
 
-	bool IsVisible()
+	override bool IsVisible()
 	{
 		if (layoutRoot && layoutRoot.IsVisible())
 			return true;
@@ -519,6 +530,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		auto trace = CF_Trace_0(this);
 		#endif
 
+		string flickerTitle = "?";
+		if (m_Module)
+			flickerTitle = m_Module.GetTitle();
+
 		if ( !layoutRoot )
 			return;
 
@@ -560,6 +575,10 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 		#ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_0(this, "Hide");
 		#endif
+
+		string flickerTitle = "?";
+		if (m_Module)
+			flickerTitle = m_Module.GetTitle();
 
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
 

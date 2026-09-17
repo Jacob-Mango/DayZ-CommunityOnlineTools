@@ -1,3 +1,6 @@
+//! #define scope in Enforce is per-file, NOT per compiled module - see COTModule.c.
+#define COT_DEBUGLOGS
+
 class UIActionBase: COT_ScriptedWidgetEventHandler 
 {
 #ifdef DIAG
@@ -20,6 +23,24 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	protected ref array<int>    m_ChromeRingRest;
 	protected bool m_ChromeHovered;
 	protected bool m_ChromeFocused;
+
+	//! A control whose current value is legal but has a consequence worth
+	//! stopping for. The rings pulse red and an "action_warn" icon, where the
+	//! layout provides one, fades in step with them and carries its own
+	//! tooltip explaining what the value will do.
+	//!
+	//! This is not an error state: the value is accepted and applied either
+	//! way, so nothing is disabled and nothing is blocked.
+	protected ImageWidget m_WarnIcon;
+	protected bool        m_Warning;
+	protected string      m_WarnTooltip;
+	protected float       m_WarnPhase;
+
+	//! The resting ring colours from before the warning took them over. The
+	//! pulse writes m_ChromeRingRest so hover and focus keep working normally
+	//! on top of it, which means the layout's own colours have to be kept
+	//! somewhere to be given back.
+	protected ref array<int> m_WarnRingRest;
 
 	//! Widget has no IsEnabled(), and 11 layouts have no disable
 	//! overlay to read the state back off, so it is tracked here.
@@ -127,6 +148,21 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		RegisterChromeRing( "outline" );
 		OnRegisterChrome();
 
+		//! Optional: only the layouts that have somewhere to put it declare one.
+		Class.CastTo( m_WarnIcon, layoutRoot.FindAnyWidget( "action_warn" ) );
+
+		if ( m_WarnIcon )
+		{
+			m_WarnIcon.LoadImageFile( 0, JMConstants.ICON_WARNING );
+			m_WarnIcon.SetImage( 0 );
+			m_WarnIcon.Show( false );
+		}
+
+		//! Captured before anything can repaint them.
+		m_WarnRingRest = new array<int>;
+		for ( int ringIdx = 0; ringIdx < m_ChromeRingRest.Count(); ringIdx++ )
+			m_WarnRingRest.Insert( m_ChromeRingRest[ringIdx] );
+
 		Show();
 	}
 
@@ -177,7 +213,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	void Show()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Show" );
+		Print( "+UIActionBase::Show" );
 		#endif
 
 		if (m_IsShown)
@@ -191,7 +227,7 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		m_IsShown = true;
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Show" );
+		Print( "-UIActionBase::Show" );
 		#endif
 	}
 
@@ -217,6 +253,8 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 	void Update( float timeSlice )
 	{
+		UpdateWarning( timeSlice );
+
 		// "Focused" means this action owns the currently keyboard-focused widget
 		// AND the mouse is currently over one of our widgets. Without the second
 		// clause, clicking and holding LMB anywhere in the 3D world keeps inputs
@@ -239,10 +277,16 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 
 		if (isFocused && !m_WasFocused)
 		{
+			#ifdef COT_DEBUGLOGS
+			Print("[COT_DBG] UIActionBase::Update isFocused true->ForceDisableInputs(true)");
+			#endif
 			CommunityOnlineTools.ForceDisableInputs(true);
 		}
 		else if (!isFocused && m_WasFocused)
 		{
+			#ifdef COT_DEBUGLOGS
+			Print("[COT_DBG] UIActionBase::Update isFocused false->ForceDisableInputs(false)");
+			#endif
 			CommunityOnlineTools.ForceDisableInputs(false);
 		}
 
@@ -279,9 +323,30 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		return false;
 	}
 
-	override void UpdatePermission( string permission )
+	//! The name every caller uses on a control. Kept as its own declaration
+	//! rather than an override so JMFormBase is free to expose the unrelated
+	//! two-argument UpdatePermission( control, permission ) helper without the
+	//! two colliding on a shared ancestor - see COT_ScriptedWidgetEventHandler.
+	//!
+	//! Hidden rather than shown-disabled without the permission: a control
+	//! that only ever sits there grayed out teaches nothing about what the
+	//! tool can do, and every caller already re-runs this on permission
+	//! changes (OnClientPermissionsUpdated), so a later grant reveals it same
+	//! as before. SetVisible, not layoutRoot.Show(bool) - see SetVisible's own
+	//! comment for why a second Show(bool) is not safe to add here.
+	void UpdatePermission( string permission )
 	{
-		SetEnabled( GetPermissionsManager().HasPermission( permission ) );
+		bool allowed = GetPermissionsManager().HasPermission( permission );
+
+		SetEnabled( allowed );
+		SetVisible( allowed );
+	}
+
+	//! Polymorphic entry point used by JMFormBase's permission registry, which
+	//! lives in 4_World and only ever sees the 3_Game base type.
+	override void COT_ApplyPermission( string permission )
+	{
+		UpdatePermission( permission );
 	}
 
 	void SetEnabled( bool enable )
@@ -328,7 +393,15 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		return !m_Disable.IsVisible();
 	}
 
-	void Show( bool show )
+	//! Show or hide from a condition, without the caller writing the branch.
+	//!
+	//! NOT an overload of Show(). Enforce has no method overloading: a second
+	//! Show taking a bool made the two indistinguishable to the call resolver,
+	//! and resolving a call to it crashed the script compiler outright - a
+	//! native access violation while the Mission module was still compiling,
+	//! so no script error was ever printed and the server died before boot.
+	//! Keep this name distinct from Show()/Hide().
+	void SetVisible( bool show )
 	{
 		if ( show )
 			Show();
@@ -499,11 +572,11 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		return layoutRoot;
 	}
 
-	bool IsVisible()
+	override bool IsVisible()
 	{
 		if ( !layoutRoot )
 			return false;
-			
+
 		return layoutRoot.IsVisible();
 	}
 
@@ -614,6 +687,10 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 	}
 
+	void AnimatePulse( float duration = 2.0 )
+	{
+	}
+
 	void AnimateSuccess()
 	{
 		AnimateFeedback();
@@ -647,6 +724,72 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 		}
 	}
 
+	//! Flag or clear the warning.
+	//!
+	//! `tooltip` is what the icon says on hover - the CONSEQUENCE of the
+	//! current value, not a restatement of the value itself. Passing an empty
+	//! tooltip leaves the icon with nothing to explain, so pass one.
+	void SetWarning( bool warning, string tooltip = "" )
+	{
+		if ( tooltip != "" )
+			m_WarnTooltip = tooltip;
+
+		if ( warning == m_Warning )
+			return;
+
+		m_Warning   = warning;
+		m_WarnPhase = 0;
+
+		if ( m_WarnIcon )
+			m_WarnIcon.Show( warning );
+
+		//! Hand the layout's own ring colours back the moment the warning
+		//! clears, so a control that warned once does not stay red-ish.
+		if ( !warning )
+		{
+			for ( int i = 0; i < m_ChromeRingRest.Count(); i++ )
+			{
+				if ( i < m_WarnRingRest.Count() )
+					m_ChromeRingRest[i] = m_WarnRingRest[i];
+			}
+
+			ApplyChrome();
+		}
+	}
+
+	bool IsWarning()
+	{
+		return m_Warning;
+	}
+
+	//! One step of the red pulse, shared by the rings and the icon so they
+	//! brighten together rather than beating against each other.
+	protected void UpdateWarning( float timeSlice )
+	{
+		if ( !m_Warning )
+			return;
+
+		m_WarnPhase += timeSlice;
+
+		float factor = ( Math.Sin( ( m_WarnPhase / WARN_PULSE_PERIOD ) * Math.PI * 2.0 ) + 1.0 ) * 0.5;
+		int color = JMTheme.Mix( JMTheme.DANGER_DIM, JMTheme.DANGER, factor );
+
+		if ( m_WarnIcon )
+			m_WarnIcon.SetColor( color );
+
+		//! Written as the RESTING colour rather than straight onto the widget,
+		//! so hovering or focusing the control still shows its normal ring and
+		//! the pulse resumes underneath when the pointer leaves.
+		for ( int i = 0; i < m_ChromeRingRest.Count(); i++ )
+			m_ChromeRingRest[i] = color;
+
+		ApplyChrome();
+	}
+
+	//! Seconds for one full dim-to-bright-to-dim cycle. Slow enough to read as
+	//! a warning rather than a flicker.
+	static const float WARN_PULSE_PERIOD = 1.6;
+
 	void RefreshTooltip()
 	{
 		if ( m_TooltipText != "" )
@@ -657,6 +800,15 @@ class UIActionBase: COT_ScriptedWidgetEventHandler
 	{
 		m_ChromeHovered = true;
 		ApplyChrome();
+
+		//! The icon explains the warning; the rest of the control explains what
+		//! it is for. Hovering the icon should answer the question the icon
+		//! itself raised, so its tooltip wins over the control's.
+		if ( w == m_WarnIcon && m_Warning && m_WarnTooltip != "" )
+		{
+			UIActionTooltip.Show( m_WarnTooltip, JMConstants.ICON_WARNING, JMTheme.DANGER, JMTheme.DANGER, w );
+			return false;
+		}
 
 		if ( m_TooltipText != "" )
 			UIActionTooltip.Show( m_TooltipText, m_TooltipIcon, m_TooltipSwatchColor, m_TooltipTextColor, w );

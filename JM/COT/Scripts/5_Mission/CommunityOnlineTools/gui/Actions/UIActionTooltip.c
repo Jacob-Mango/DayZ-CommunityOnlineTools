@@ -44,8 +44,7 @@ class UIActionTooltip: COT_ScriptedWidgetEventHandler
 
 	void UIActionTooltip( notnull Widget anchor )
 	{
-		m_Root = g_Game.GetWorkspace().CreateWidgets(
-			"JM/COT/GUI/layouts/uiactions/UIActionTooltip.layout", anchor );
+		m_Root = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionTooltip.layout", anchor );
 
 		if ( m_Root )
 		{

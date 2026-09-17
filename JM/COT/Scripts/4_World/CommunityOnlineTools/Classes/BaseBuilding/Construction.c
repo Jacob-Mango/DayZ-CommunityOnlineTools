@@ -40,7 +40,11 @@ modded class Construction
 			}
 
 			data.m_Name = part_name;
-			data.m_DisplayName = part.m_Name;
+
+			// 1.30: the part's own m_Name field is stale and no longer
+			// populated - the localized label now only comes through
+			// GetName() -> m_PartTypeData.GetNameLocalized().
+			data.m_DisplayName = part.GetName();
 
 			if ( part.IsBuilt() )
 			{
@@ -155,5 +159,13 @@ modded class Construction
 		{
 			GetParent().SetHealthMax( damage_zone, "Health" );
 		}
+	}
+
+	void COT_RepairParts( TStringArray parts_name )
+	{
+		foreach ( string part_name : parts_name )
+			COT_RepairPart( part_name );
+
+		UpdateVisuals();
 	}
 }

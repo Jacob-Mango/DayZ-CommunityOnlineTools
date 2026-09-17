@@ -4,6 +4,19 @@ const int JMVT_BOAT = 4;
 const int JMVT_HELICOPTER = 8;
 const int JMVT_PLANE = 32;
 const int JMVT_BIKE = 512;
+//! Every type the module knows how to classify. A vehicle carrying none of
+//! these bits is an unclassified mod vehicle, which the UI filters separately.
+//!
+//! WRITTEN OUT AS A LITERAL ON PURPOSE. This was
+//!     JMVT_CAR | JMVT_BOAT | JMVT_HELICOPTER | JMVT_PLANE | JMVT_BIKE
+//! which Enforce does not fold - a global const initialised from other global
+//! consts comes out 0. The failure is quiet and reads as something else
+//! entirely: every row of the type filter draws greyed, while the map still
+//! shows everything, because PassesTypeFilter's "(type & JMVT_ALL) == 0" test
+//! then matches EVERY vehicle and hands them all to the Unclassified toggle.
+//!
+//! 2 | 4 | 8 | 32 | 512 = 558. Keep this in step with the bits above.
+const int JMVT_ALL = 558;
 
 const int JMDT_NONE = 0;
 const int JMDT_EXPLODED = 2;
@@ -28,6 +41,17 @@ class JMVehicleMetaData
 
 	bool m_HasKeys;
 	bool m_IsCover;
+
+	//! Live state, rebuilt every time the metadata is built. The map's hover
+	//! panel reads these, so they are serialised unconditionally - unlike the
+	//! key/owner block above, which only exists when Expansion is loaded.
+	float  m_HealthPct;   //!< 0..1 global health
+	float  m_FuelPct;     //!< 0..1, or -1 when the vehicle carries no fuel tank
+	float  m_CoolantPct;  //!< 0..1, or -1 when the vehicle carries no coolant tank
+	float  m_SpeedKph;
+	int    m_CrewCount;
+	string m_CrewNames;   //!< comma-joined occupant names, driver seat first
+	bool   m_IsLocked;
 
 	string m_OwnerName;
 	string m_OwnerUID;
@@ -65,6 +89,8 @@ class JMVehicleMetaData
 		if ( entity.IsDamageDestroyed() )
 			m_DestructionType |= JMDT_DESTROYED;
 
+		AcquireLiveState( entity );
+
 	#ifdef EXPANSIONMODVEHICLE
 		ExpansionVehicle vehicle;
 		if ( ExpansionVehicle.Get( vehicle, entity ) )
@@ -74,6 +100,9 @@ class JMVehicleMetaData
 
 			if ( vehicle.IsBoat() )
 				m_VehicleType |= JMVT_BOAT;
+
+			if ( vehicle.IsBike() )
+				m_VehicleType |= JMVT_BIKE;
 
 			if ( vehicle.IsHelicopter() )
 				m_VehicleType |= JMVT_HELICOPTER;
@@ -85,6 +114,7 @@ class JMVehicleMetaData
 				m_DestructionType |= JMDT_EXPLODED;
 
 			m_HasKeys = vehicle.HasKey();
+			m_IsLocked = vehicle.IsLocked();
 
 			m_OwnerName = vehicle.GetOwnerName();
 			m_OwnerUID = vehicle.GetOwnerUID();
@@ -105,7 +135,91 @@ class JMVehicleMetaData
 			if ( boat && boat.m_JM_LastDriverUID != "" )
 				m_LastDriverUID = boat.m_JM_LastDriverUID;
 		}
+	#ifdef DAYZ_1_30
+		else if ( entity.IsInherited( Motorbike ) )
+		{
+			m_VehicleType = JMVT_BIKE;
+			MotorbikeScript bike = MotorbikeScript.Cast( entity );
+			if ( bike && bike.m_JM_LastDriverUID != "" )
+				m_LastDriverUID = bike.m_JM_LastDriverUID;
+		}
 	#endif
+	#endif
+	}
+
+	//! Health / fuel / speed / crew, read straight off the entity. Server side
+	//! only - the client never has the vehicle object for a marker outside its
+	//! network bubble, which is exactly why these travel as metadata.
+	//!
+	//! Every read is behind a cast rather than a type check: a vehicle cover
+	//! and an unclassified mod vehicle both land here, and neither is a
+	//! Transport. Enforce has no block scope, so each cast gets its own name.
+	void AcquireLiveState( EntityAI entity )
+	{
+		m_HealthPct = entity.GetHealth01( "", "" );
+
+		//! -1, not 0: "no tank" and "empty tank" are different readouts.
+		m_FuelPct = -1;
+		m_CoolantPct = -1;
+
+		CarScript liveCar;
+		if ( Class.CastTo( liveCar, entity ) )
+		{
+			m_FuelPct = liveCar.GetFluidFraction( CarFluid.FUEL );
+			m_CoolantPct = liveCar.GetFluidFraction( CarFluid.COOLANT );
+		}
+
+		BoatScript liveBoat;
+		if ( Class.CastTo( liveBoat, entity ) )
+			m_FuelPct = liveBoat.GetFluidFraction( BoatFluid.FUEL );
+
+	#ifdef DAYZ_1_30
+		//! No coolant read here - Motorbike has no coolant tank (see
+		//! MotorbikeScript.c's COT_Refuel note), so m_CoolantPct stays -1.
+		MotorbikeScript liveBike;
+		if ( Class.CastTo( liveBike, entity ) )
+			m_FuelPct = liveBike.GetFluidFraction( MotorbikeFluid.FUEL );
+	#endif
+
+		//! GetSpeedometer only exists on Car, and there is no equivalent on
+		//! Boat / Helicopter / a modded base. The rigid body's velocity is the
+		//! one figure every vehicle has. m/s -> km/h.
+		m_SpeedKph = GetVelocity( entity ).Length() * 3.6;
+
+		m_CrewCount = 0;
+		m_CrewNames = "";
+
+		Transport liveTransport;
+		if ( Class.CastTo( liveTransport, entity ) )
+			AcquireCrew( liveTransport );
+	}
+
+	//! Occupants in seat order, so the driver reads first.
+	protected void AcquireCrew( Transport transport )
+	{
+		int seats = transport.CrewSize();
+
+		for ( int i = 0; i < seats; i++ )
+		{
+			Human crewHuman = transport.CrewMember( i );
+			if ( !crewHuman )
+				continue;
+
+			m_CrewCount++;
+
+			//! An AI or an infected in a seat has no identity - name it by what
+			//! it is rather than dropping it from a count that already includes it.
+			string crewName = "Unknown";
+
+			PlayerBase crewPlayer;
+			if ( Class.CastTo( crewPlayer, crewHuman ) && crewPlayer.GetIdentity() )
+				crewName = crewPlayer.GetIdentity().GetName();
+
+			if ( m_CrewNames != "" )
+				m_CrewNames += ", ";
+
+			m_CrewNames += crewName;
+		}
 	}
 
 	#ifdef EXPANSIONMODVEHICLE
@@ -119,6 +233,8 @@ class JMVehicleMetaData
 			meta.m_VehicleType |= JMVT_HELICOPTER;
 		else if ( g_Game.IsKindOf( type, "ExpansionBoatScript" ) || g_Game.IsKindOf( type, "BoatScript" ) )
 			meta.m_VehicleType |= JMVT_BOAT;
+		else if ( g_Game.IsKindOf( type, "Motorbike" ) )
+			meta.m_VehicleType |= JMVT_BIKE;
 		else
 			meta.m_VehicleType |= JMVT_CAR;
 
@@ -150,7 +266,7 @@ class JMVehicleMetaData
 		if ( m_VehicleType & JMVT_PLANE )
 			type += "Plane ";
 		if ( m_VehicleType & JMVT_BIKE )
-			type += "Bike ";
+			type += "Motorbike ";
 
 		return type;
 	}
@@ -225,6 +341,17 @@ class JMVehicleMetaData
 		ctx.Write( m_LastDriverSteam );
 		ctx.Write( m_LastDriverGUID );
 	#endif
+
+		//! Live state travels for every build, Expansion or not - the hover
+		//! panel is not an Expansion feature. Appended last so the ordering of
+		//! everything above is untouched.
+		ctx.Write( m_HealthPct );
+		ctx.Write( m_FuelPct );
+		ctx.Write( m_CoolantPct );
+		ctx.Write( m_SpeedKph );
+		ctx.Write( m_CrewCount );
+		ctx.Write( m_CrewNames );
+		ctx.Write( m_IsLocked );
 	}
 
 	bool Read( ParamsReadContext ctx )
@@ -258,6 +385,14 @@ class JMVehicleMetaData
 		if ( !ctx.Read( m_LastDriverGUID ) ) return false;
 	#endif
 
+		if ( !ctx.Read( m_HealthPct ) ) return false;
+		if ( !ctx.Read( m_FuelPct ) ) return false;
+		if ( !ctx.Read( m_CoolantPct ) ) return false;
+		if ( !ctx.Read( m_SpeedKph ) ) return false;
+		if ( !ctx.Read( m_CrewCount ) ) return false;
+		if ( !ctx.Read( m_CrewNames ) ) return false;
+		if ( !ctx.Read( m_IsLocked ) ) return false;
+
 		return true;
 	}
 }
@@ -284,6 +419,8 @@ class JMVehiclesModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Vehicles.Cover" );
 		GetPermissionsManager().RegisterPermission( "Vehicles.Lock" );
 		GetPermissionsManager().RegisterPermission( "Vehicles.UnPair" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.ClearCargo" );
+		GetPermissionsManager().RegisterPermission( "Vehicles.SpawnKey" );
 		#endif
 
 		m_Vehicles = new array<ref JMVehicleMetaData>;
@@ -387,6 +524,16 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boat = boat.m_Next;
 		}
 
+	#ifdef DAYZ_1_30
+		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bike = MotorbikeScript.s_JM_AllBikes.m_Head;
+		while ( bike )
+		{
+			if ( !bike.m_Value.IsSetForDeletion() )
+				m_Vehicles.Insert( JMVehicleMetaData.Create( bike.m_Value ) );
+			bike = bike.m_Next;
+		}
+	#endif
+
 		#ifdef EXPANSIONMODVEHICLE
 		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
@@ -488,6 +635,15 @@ class JMVehiclesModule: JMRenderableModuleBase
 		case JMVehiclesModuleRPC.TeleportVehicleToMe:
 			RPC_TeleportVehicleToMe( ctx, sender, target );
 			break;
+		case JMVehiclesModuleRPC.TeleportVehicleTo:
+			RPC_TeleportVehicleTo( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.ClearVehicleCargo:
+			RPC_ClearVehicleCargo( ctx, sender, target );
+			break;
+		case JMVehiclesModuleRPC.SpawnVehicleKey:
+			RPC_SpawnVehicleKey( ctx, sender, target );
+			break;
 		case JMVehiclesModuleRPC.RepairVehicle:
 			RPC_RepairVehicle( ctx, sender, target );
 			break;
@@ -514,7 +670,46 @@ class JMVehiclesModule: JMRenderableModuleBase
 		case JMVehiclesModuleRPC.SendVehicleRemove:
 			RPC_SendVehicleRemove( ctx, sender, target );
 			break;
+		case JMVehiclesModuleRPC.RequestVehicleUpsert:
+			RPC_RequestVehicleUpsert( ctx, sender, target );
+			break;
 		}
+	}
+
+	// --- Single-vehicle refresh ----------------------------------------------
+
+	//! Ask the server to re-send ONE vehicle's metadata. The map's hover panel
+	//! shows health, fuel, speed and crew, all of which would otherwise be as
+	//! stale as the last full roster sync - and a full sync on hover would
+	//! resend every vehicle on the server to read one of them.
+	void RequestVehicleUpsert( int netLow, int netHigh )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.RequestVehicleUpsert, true );
+	}
+
+	private void RPC_RequestVehicleUpsert( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		//! Read-only: the same permission that lets the caller see the roster
+		//! at all. Nothing here mutates the vehicle.
+		if ( !senderRPC ) return;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", senderRPC ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
 	}
 
 	// --- Delta send helpers (server) -----------------------------------------
@@ -580,6 +775,12 @@ class JMVehiclesModule: JMRenderableModuleBase
 		BoatScript boat = BoatScript.Cast( obj );
 		if ( boat )
 			return JMVehicleMetaData.Create( boat );
+
+	#ifdef DAYZ_1_30
+		MotorbikeScript bike = MotorbikeScript.Cast( obj );
+		if ( bike )
+			return JMVehicleMetaData.Create( bike );
+	#endif
 
 	#ifdef EXPANSIONMODVEHICLE
 		ExpansionVehicleBase expVeh = ExpansionVehicleBase.Cast( obj );
@@ -657,6 +858,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( !IsMissionHost() )
 			return;
 
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", senderRPC ) )
 			return;
 
@@ -748,6 +950,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete", senderRPC, instance ) )
 			return;
 
@@ -780,6 +983,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC, instance ) )
 			return;
 
@@ -844,6 +1048,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC, instance ) )
 			return;
 
@@ -877,6 +1082,18 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
+	#ifdef DAYZ_1_30
+		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikes = MotorbikeScript.s_JM_AllBikes.m_Head;
+		while ( bikes )
+		{
+			CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikeNext = bikes.m_Next;
+			if ( bikes.m_Value.IsDamageDestroyed() )
+				bikes.m_Value.Delete();
+
+			bikes = bikeNext;
+		}
+	#endif
+
 		#ifdef EXPANSIONMODVEHICLE
 		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
@@ -908,6 +1125,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC, instance ) )
 			return;
 
@@ -937,6 +1155,16 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
+	#ifdef DAYZ_1_30
+		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikes = MotorbikeScript.s_JM_AllBikes.m_Head;
+		while ( bikes )
+		{
+			CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikeNext = bikes.m_Next;
+			bikes.m_Value.Delete();
+			bikes = bikeNext;
+		}
+	#endif
+
 		#ifdef EXPANSIONMODVEHICLE
 		set<ExpansionVehicleBase> vehicles = ExpansionVehicleBase.GetAll();
 		foreach ( ExpansionVehicleBase vehicle: vehicles )
@@ -959,6 +1187,10 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestTeleportToVehicle( JMVehicleMetaData meta )
 	{
+		//! This one moves the ADMIN to the vehicle, so it is the admin's own
+		//! position that the undo has to be able to come back to.
+		JMTeleportHistory.PushSelf();
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( meta.m_NetworkIDLow );
 		rpc.Write( meta.m_NetworkIDHigh );
@@ -971,6 +1203,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
 			return;
 
@@ -1007,6 +1240,11 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestTeleportVehicleToMe( JMVehicleMetaData meta )
 	{
+		//! Recorded from the metadata rather than from the entity: the vehicle
+		//! being moved is often nowhere near the admin, so there may be no
+		//! client-side object to ask.
+		JMTeleportHistory.Push( JMTeleportHistory.ObjectKey( meta.m_NetworkIDLow, meta.m_NetworkIDHigh ), meta.m_Position );
+
 		ScriptRPC rpc = new ScriptRPC();
 		rpc.Write( meta.m_NetworkIDLow );
 		rpc.Write( meta.m_NetworkIDHigh );
@@ -1019,6 +1257,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
 			return;
 
@@ -1054,6 +1293,65 @@ class JMVehiclesModule: JMRenderableModuleBase
 		obj.SetPosition( pos );
 	}
 
+	//! Move a vehicle to an exact position.
+	//!
+	//! The undo path. Every other vehicle teleport works out its destination on
+	//! the server - the admin's feet, the surface under the vehicle - so this is
+	//! the only one that has to carry a position on the wire.
+	void RequestTeleportVehicleTo( JMVehicleMetaData meta, vector position )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Write( position );
+		rpc.Send( NULL, JMVehiclesModuleRPC.TeleportVehicleTo, true );
+	}
+
+	private void RPC_TeleportVehicleTo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		vector position;
+		if ( !ctx.Read( position ) )
+			return;
+
+		if ( !CommunityOnlineToolsBase.IsValidWorldPosition( position ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Teleported vehicle [netId=" + netLow + " " + netHigh + "] to " + position );
+		SendWebhookColored( "Teleport", instance, "Teleported vehicle [netId=" + netLow + " " + netHigh + "] to " + position.ToString(), JMConstants.WEBHOOK_COLOR_INFO );
+
+		Exec_TeleportVehicleTo( obj, position );
+
+		// Position changed - push a fresh metadata upsert to the requester.
+		SendVehicleUpsert( netLow, netHigh, senderRPC );
+	}
+
+	//! No surface snap: the position is one the vehicle was actually AT, and
+	//! re-grounding it would walk it a little further off every undo.
+	void Exec_TeleportVehicleTo( Object obj, vector position )
+	{
+		obj.SetPosition( position );
+	}
+
 	// -------------------------------------------------------------------------
 	// Repair
 	// -------------------------------------------------------------------------
@@ -1072,6 +1370,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Repair", senderRPC, instance ) )
 			return;
 
@@ -1139,6 +1438,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Refuel", senderRPC, instance ) )
 			return;
 
@@ -1174,6 +1474,15 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 		}
 
+	#ifdef DAYZ_1_30
+		MotorbikeScript bike = MotorbikeScript.Cast( obj );
+		if ( bike )
+		{
+			bike.COT_Refuel();
+			return;
+		}
+	#endif
+
 		#ifdef EXPANSIONMODVEHICLE
 		ExpansionVehicleBase expVehicle = ExpansionVehicleBase.Cast( obj );
 		if ( expVehicle )
@@ -1204,6 +1513,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Unstuck", senderRPC, instance ) )
 			return;
 
@@ -1255,6 +1565,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Cover", senderRPC, instance ) )
 			return;
 
@@ -1358,10 +1669,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestLockVehicle( JMVehicleMetaData meta )
 	{
+		RequestLockVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+	}
+
+	//! Same request from a caller that only has a network id - the ESP menu
+	//! works off JMESPMeta, which never builds a JMVehicleMetaData.
+	void RequestLockVehicleById( int netLow, int netHigh )
+	{
 	#ifdef EXPANSIONMODVEHICLE
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
 		rpc.Send( NULL, JMVehiclesModuleRPC.LockVehicle, true );
 	#endif
 	}
@@ -1373,6 +1691,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.Lock", senderRPC, instance ) )
 			return;
 
@@ -1418,10 +1737,16 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void RequestUnPairVehicle( JMVehicleMetaData meta )
 	{
+		RequestUnPairVehicleById( meta.m_NetworkIDLow, meta.m_NetworkIDHigh );
+	}
+
+	//! See RequestLockVehicleById.
+	void RequestUnPairVehicleById( int netLow, int netHigh )
+	{
 	#ifdef EXPANSIONMODVEHICLE
 		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write( meta.m_NetworkIDLow );
-		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Write( netLow );
+		rpc.Write( netHigh );
 		rpc.Send( NULL, JMVehiclesModuleRPC.UnPairVehicle, true );
 	#endif
 	}
@@ -1433,6 +1758,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Vehicles.UnPair", senderRPC, instance ) )
 			return;
 
@@ -1465,6 +1791,161 @@ class JMVehiclesModule: JMRenderableModuleBase
 		{
 			expVehicle.ResetKeyPairing();
 		}
+	#endif
+	}
+
+	// -------------------------------------------------------------------------
+	// Cargo
+	// -------------------------------------------------------------------------
+
+	//! Empty a vehicle's trunk and seats.
+	//!
+	//! Its own permission rather than Vehicles.Delete: deleting a vehicle and
+	//! emptying one are different sizes of mistake, and an admin trusted to
+	//! tidy a trunk is not necessarily trusted to remove the car.
+	void RequestClearVehicleCargo( JMVehicleMetaData meta )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.ClearVehicleCargo, true );
+	}
+
+	private void RPC_ClearVehicleCargo( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.ClearCargo", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		int removed = Exec_ClearVehicleCargo( obj );
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Cleared vehicle cargo [netId=" + netLow + " " + netHigh + "] items=" + removed );
+		SendWebhookColored( "Vehicle", instance, "Cleared " + removed + " item(s) from vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_WARNING );
+	}
+
+	//! Answers how many items it removed, which is what the log wants: emptying
+	//! a full truck and emptying an empty one are the same action and should
+	//! not read the same afterwards.
+	//!
+	//! Walked BACKWARDS: deleting an item shifts every index above it down, so
+	//! a forward loop skips every second one.
+	int Exec_ClearVehicleCargo( Object obj )
+	{
+		EntityAI entity = EntityAI.Cast( obj );
+
+		if ( !entity || !entity.GetInventory() )
+			return 0;
+
+		CargoBase cargo = entity.GetInventory().GetCargo();
+
+		if ( !cargo )
+			return 0;
+
+		int removed = 0;
+
+		for ( int i = cargo.GetItemCount() - 1; i >= 0; i-- )
+		{
+			EntityAI item = cargo.GetItem( i );
+
+			if ( !item )
+				continue;
+
+			g_Game.ObjectDelete( item );
+			removed++;
+		}
+
+		return removed;
+	}
+
+	// -------------------------------------------------------------------------
+	// Keys (Expansion only)
+	// -------------------------------------------------------------------------
+
+	//! Spawn a key already paired to this vehicle, into the admin's inventory.
+	//!
+	//! The counterpart to UnPair: that one orphans a vehicle whose keys are
+	//! lost, this one gets back into one whose keys are lost without having to
+	//! orphan it first.
+	void RequestSpawnVehicleKey( JMVehicleMetaData meta )
+	{
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Write( meta.m_NetworkIDLow );
+		rpc.Write( meta.m_NetworkIDHigh );
+		rpc.Send( NULL, JMVehiclesModuleRPC.SpawnVehicleKey, true );
+	}
+
+	private void RPC_SpawnVehicleKey( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
+			return;
+
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !GetPermissionsManager().HasPermission( "Vehicles.SpawnKey", senderRPC, instance ) )
+			return;
+
+		int netLow;
+		if ( !ctx.Read( netLow ) )
+			return;
+
+		int netHigh;
+		if ( !ctx.Read( netHigh ) )
+			return;
+
+		PlayerBase player;
+		if ( !Class.CastTo( player, senderRPC.GetPlayer() ) )
+			return;
+
+		Object obj = g_Game.GetObjectByNetworkId( netLow, netHigh );
+		if ( !obj )
+			return;
+
+		if ( !Exec_SpawnVehicleKey( player, obj ) )
+			return;
+
+		GetCommunityOnlineToolsBase().Log( senderRPC, "Spawned a paired key for vehicle [netId=" + netLow + " " + netHigh + "]" );
+		SendWebhookColored( "Vehicle", instance, "Spawned a paired key for vehicle [netId=" + netLow + " " + netHigh + "]", JMConstants.WEBHOOK_COLOR_INFO );
+	}
+
+	//! Expansion owns vehicle keys - vanilla has no such item - so without it
+	//! this answers false and the menu row is never offered in the first place.
+	bool Exec_SpawnVehicleKey( PlayerBase player, Object obj )
+	{
+	#ifdef EXPANSIONMODVEHICLE
+		ExpansionVehicle expVehicle;
+
+		if ( !ExpansionVehicle.Get( expVehicle, EntityAI.Cast( obj ) ) )
+			return false;
+
+		ExpansionCarKey key;
+
+		if ( !Class.CastTo( key, player.GetInventory().CreateInInventory( "ExpansionCarKey" ) ) )
+			return false;
+
+		//! Paired from the VEHICLE side: ExpansionCarKey.PairToVehicle is
+		//! overloaded four ways and picking between them from a cast is the
+		//! sort of thing that resolves differently on the next Expansion build.
+		expVehicle.PairKey( key );
+
+		return true;
+	#else
+		return false;
 	#endif
 	}
 

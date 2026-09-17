@@ -103,7 +103,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		Class.CastTo( m_Buttons3Panel, layoutRoot.FindAnyWidget( "confirmation_buttons_3" ) );
 	}
 
-	bool IsVisible()
+	override bool IsVisible()
 	{
 		return layoutRoot.IsVisible();
 	}
@@ -163,7 +163,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	void CreateConfirmation_One( JMConfirmationType type, string title, string message, string button1Title, string button1Callback )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::CreateConfirmation_One" );
+		Print( "+JMConfirmation::CreateConfirmation_One" );
 		#endif
 
 		layoutRoot.Show( true );
@@ -189,14 +189,14 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::CreateConfirmation_One" );
+		Print( "-JMConfirmation::CreateConfirmation_One" );
 		#endif
 	}
 
 	void CreateConfirmation_Two( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button1Callback, string button2Callback )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::CreateConfirmation_Two" );
+		Print( "+JMConfirmation::CreateConfirmation_Two" );
 		#endif
 
 		layoutRoot.Show( true );
@@ -230,14 +230,14 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::CreateConfirmation_Two" );
+		Print( "-JMConfirmation::CreateConfirmation_Two" );
 		#endif
 	}
 
 	void CreateConfirmation_Three( JMConfirmationType type, string title, string message, string button1Title, string button2Title, string button3Title, string button1Callback, string button2Callback, string button3Callback )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::CreateConfirmation_Three" );
+		Print( "+JMConfirmation::CreateConfirmation_Three" );
 		#endif
 
 		layoutRoot.Show( true );
@@ -280,14 +280,14 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		OnShow();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::CreateConfirmation_Three" );
+		Print( "-JMConfirmation::CreateConfirmation_Three" );
 		#endif
 	}
 
 	void UpdateType( JMConfirmationType type )
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::UpdateType" );
+		Print( "+JMConfirmation::UpdateType" );
 		#endif
 
 		switch ( type )
@@ -304,14 +304,14 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		}
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::UpdateType" );
+		Print( "-JMConfirmation::UpdateType" );
 		#endif
 	}
 
 	override void Close()
 	{
 		#ifdef COT_DEBUGLOGS
-		Print( "+" + this + "::Close" );
+		Print( "+JMConfirmation::Close" );
 		#endif
 
 		m_EditBox.SetText( "" );
@@ -321,7 +321,7 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 		OnHide();
 
 		#ifdef COT_DEBUGLOGS
-		Print( "-" + this + "::Close" );
+		Print( "-JMConfirmation::Close" );
 		#endif
 	}
 

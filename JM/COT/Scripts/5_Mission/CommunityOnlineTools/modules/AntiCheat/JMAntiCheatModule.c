@@ -169,6 +169,9 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		case JMAntiCheatModuleRPC.RequestFlags:
 			RPC_RequestFlags( ctx, sender, target );
 			break;
+		case JMAntiCheatModuleRPC.ClearFlag:
+			RPC_ClearFlag( ctx, sender, target );
+			break;
 		case JMAntiCheatModuleRPC.Flags:
 			RPC_Flags( ctx, sender, target );
 			break;
@@ -474,7 +477,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		foreach ( Man m : players )
 		{
 			PlayerBase pb = PlayerBase.Cast( m );
-			if ( !pb || !pb.IsAlive() )
+			if ( !pb || !pb.IsAlive() || !pb.GetIdentity() )
 				continue;
 
 			string guid = pb.GetIdentity().GetId();
@@ -931,6 +934,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.View", senderRPC, instance ) )
 			return;
 
@@ -1094,17 +1098,46 @@ class JMAntiCheatModule : JMRenderableModuleBase
 	void ClearFlag( string guid )
 	{
 		if ( !IsMissionHost() )
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write( guid );
+			rpc.Send( NULL, JMAntiCheatModuleRPC.ClearFlag, true, NULL );
+			return;
+		}
+
+		ExecClearFlag( guid, NULL );
+	}
+
+	private void RPC_ClearFlag( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
+	{
+		if ( !IsMissionHost() )
 			return;
 
+		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
+		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.Clear", senderRPC, instance ) )
+			return;
+
+		string guid;
+		if ( !ctx.Read( guid ) )
+			return;
+
+		ExecClearFlag( guid, senderRPC );
+	}
+
+	private void ExecClearFlag( string guid, PlayerIdentity senderRPC )
+	{
 		if ( m_Flags.Contains( guid ) )
 		{
 			JMAntiCheatFlag flag = m_Flags.Get( guid );
 			Print( "[COT AntiCheat] cleared flags for " + flag.PlayerName );
-			SendWebhookColored( "Action", NULL, "Cleared flags for " + flag.PlayerName, JMConstants.WEBHOOK_COLOR_NEUTRAL );
+			JMPlayerInstance senderInst;
+			if ( senderRPC )
+				senderInst = GetPermissionsManager().GetPlayer( senderRPC.GetId() );
+
+			SendWebhookColored( "Action", senderInst, "Cleared flags for " + flag.PlayerName, JMConstants.WEBHOOK_COLOR_NEUTRAL );
 			m_Flags.Remove( guid );
 
-			//! Written through immediately. An admin who clears a flag and then
-			//! restarts the server should not find it back.
 			m_FlagsDirty = true;
 			SaveFlags( true );
 		}

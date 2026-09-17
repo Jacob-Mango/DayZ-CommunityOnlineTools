@@ -120,12 +120,158 @@ modded class CarScript
 			Fill(fluid, fluidCap * (1.0 - fluidFraction));
 	}
 
+	//! Move one fluid to an exact fraction of its capacity.
+	//!
+	//! Fill only ever adds and Leak only ever takes away, so which of the two
+	//! runs depends on where the tank already is - a "set to 25%" that only
+	//! filled would do nothing to a full tank.
+	void COT_SetCarFluid01( CarFluid fluid, float fraction )
+	{
+		float fluidCap = GetFluidCapacity( fluid );
+		if ( fluidCap <= 0.0 )
+			return;
+
+		float target = Math.Clamp( fraction, 0.0, 1.0 );
+		float delta = ( target - GetFluidFraction( fluid ) ) * fluidCap;
+
+		if ( delta > 0.0 )
+			Fill( fluid, delta );
+		else if ( delta < 0.0 )
+			Leak( fluid, -delta );
+	}
+
 	void COT_Refuel()
 	{
 		COT_FillCarFluid( CarFluid.FUEL );
 		COT_FillCarFluid( CarFluid.OIL );
 		COT_FillCarFluid( CarFluid.BRAKE );
 		COT_FillCarFluid( CarFluid.COOLANT );
+	}
+
+	void COT_RefillCoolant()
+	{
+		COT_FillCarFluid( CarFluid.COOLANT );
+	}
+
+	void COT_SetLockWheels( bool lockState )
+	{
+		if ( !GetInventory() )
+			return;
+
+		int count = GetInventory().GetAttachmentSlotsCount();
+		for ( int i = 0; i < count; ++i )
+		{
+			int slotId = GetInventory().GetAttachmentSlotId( i );
+			if ( slotId != InventorySlots.INVALID )
+			{
+				string slotName = InventorySlots.GetSlotName( slotId );
+				slotName.ToLower();
+				EntityAI att = GetInventory().FindAttachment( slotId );
+				bool isWheel = slotName.Contains( "wheel" );
+				if ( !isWheel && att )
+				{
+					if ( att.IsInherited( CarWheel ) )
+						isWheel = true;
+				}
+
+				if ( isWheel )
+				{
+					GetInventory().SetSlotLock( slotId, lockState );
+				}
+			}
+		}
+	}
+
+	bool COT_AreWheelsLocked()
+	{
+		if ( !GetInventory() )
+			return false;
+
+		int count = GetInventory().GetAttachmentSlotsCount();
+		for ( int i = 0; i < count; ++i )
+		{
+			int slotId = GetInventory().GetAttachmentSlotId( i );
+			if ( slotId != InventorySlots.INVALID )
+			{
+				string slotName = InventorySlots.GetSlotName( slotId );
+				slotName.ToLower();
+				EntityAI att = GetInventory().FindAttachment( slotId );
+				bool isWheel = slotName.Contains( "wheel" );
+				if ( !isWheel && att )
+				{
+					if ( att.IsInherited( CarWheel ) )
+						isWheel = true;
+				}
+
+				if ( isWheel && GetInventory().GetSlotLock( slotId ) )
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	//! Car doors are NOT separate openable inventory items - CarDoor
+	//! attachments are hitzone/health parts, and ItemBase.Open()/Close()/
+	//! IsOpen() are stub declarations for lidded CONTAINERS (cans, barrels)
+	//! that CarDoor never overrides, so calling them here was always a no-op,
+	//! and IsOpen()'s base default unconditionally returns true - which is why
+	//! detection always read every door as "open" too. Doors open/close by
+	//! setting animation phase on a model selection (see vanilla
+	//! ActionCarDoors.OnStartServer), and which selections exist is
+	//! per-vehicle (Van_01 has "doors_cargo3", a sedan doesn't, etc.) - so
+	//! this brute-forces every selection the model actually has, the same way
+	//! Transport.GetSelectionFromAnimSource does, instead of guessing names.
+	protected void COT_ForEachDoorAnimSource( out array<string> animSources )
+	{
+		animSources = new array<string>();
+
+		array<string> allSelections = new array<string>();
+		GetSelectionList( allSelections );
+
+		foreach ( string selection : allSelections )
+		{
+			string selectionLower = selection;
+			selectionLower.ToLower();
+
+			if ( !selectionLower.Contains( "door" ) && !selectionLower.Contains( "hood" ) && !selectionLower.Contains( "trunk" ) )
+				continue;
+
+			string animSource = GetAnimSourceFromSelection( selection );
+			if ( animSource != "" && animSources.Find( animSource ) == -1 )
+				animSources.Insert( animSource );
+		}
+	}
+
+	void COT_SetCarDoors( bool openState )
+	{
+		array<string> animSources;
+		COT_ForEachDoorAnimSource( animSources );
+
+		float phase = 0.0;
+		if ( openState )
+			phase = 1.0;
+
+		foreach ( string animSource : animSources )
+		{
+			SetAnimationPhase( animSource, phase );
+		}
+	}
+
+	bool COT_AreCarDoorsOpen()
+	{
+		array<string> animSources;
+		COT_ForEachDoorAnimSource( animSources );
+
+		foreach ( string animSource : animSources )
+		{
+			if ( GetAnimationPhase( animSource ) > 0.5 )
+				return true;
+		}
+
+		return false;
 	}
 }
 

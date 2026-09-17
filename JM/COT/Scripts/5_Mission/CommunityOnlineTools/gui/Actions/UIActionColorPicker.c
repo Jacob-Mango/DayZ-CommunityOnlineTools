@@ -39,6 +39,20 @@ class UIActionColorPicker: UIActionBase
 	protected UIActionSlider  m_SliderG;
 	protected UIActionSlider  m_SliderB;
 	protected bool            m_Open;
+
+	//! Widget the popup is positioned against. Defaults to this control's own
+	//! swatch; a host that drives the picker from somewhere else - ESP opens it
+	//! from a palette button on each category row, keeping ONE picker for the
+	//! whole list - points it at that button instead, and the popup follows it.
+	protected Widget          m_PopupAnchorWidget;
+
+	//! True while this control is driving its own Update tick because it is
+	//! hidden. UIActionBase.Hide() routes through Deactivate(), which takes
+	//! Update off the GUI update queue - so a picker used purely as a popup
+	//! host (ESP keeps one hidden for the whole category list) would never
+	//! reposition its popup off the anchor and never notice an outside click.
+	//! The popup would sit wherever the layout left it: the top-left corner.
+	protected bool            m_HeadlessTick;
 	//! Swallows the click that opened the popup so it does not immediately
 	//! count as an outside click and close it again.
 	protected float           m_OpenDelay;
@@ -100,7 +114,28 @@ class UIActionColorPicker: UIActionBase
 		if ( widget == m_HexBox )        return true;
 		if ( widget == m_PreviewButton ) return true;
 
+		if ( m_PopupAnchorWidget && IsInsideAnchor( widget ) )
+			return true;
+
 		return IsInsidePopup( widget );
+	}
+
+	//! True for the external anchor and anything inside it, so the button that
+	//! opens the popup is not also read as a click outside it.
+	private bool IsInsideAnchor( Widget widget )
+	{
+		if ( !m_PopupAnchorWidget || !widget )
+			return false;
+
+		Widget cur = widget;
+		while ( cur )
+		{
+			if ( cur == m_PopupAnchorWidget )
+				return true;
+			cur = cur.GetParent();
+		}
+
+		return false;
 	}
 
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -294,6 +329,47 @@ class UIActionColorPicker: UIActionBase
 		return m_Open;
 	}
 
+	//! The base class's IsVisible() reads layoutRoot, which here is the always-
+	//! shown swatch chip, not the ARGB popup - m_Open tracks the popup itself,
+	//! which is what the Escape priority chain needs to know about.
+	override bool IsVisible()
+	{
+		return m_Open;
+	}
+
+	//! Position the popup against `w` rather than this control's own swatch.
+	//! Pass NULL to go back to the swatch.
+	void SetPopupAnchorWidget( Widget w )
+	{
+		m_PopupAnchorWidget = w;
+	}
+
+	//! The widget the popup hangs off. Never null once OnInit has run unless
+	//! the layout is broken.
+	protected Widget PopupReference()
+	{
+		if ( m_PopupAnchorWidget )
+			return m_PopupAnchorWidget;
+
+		return m_PreviewButton;
+	}
+
+	//! Raise the popup without a click on the swatch, for a host driving this
+	//! picker from its own button.
+	void Open()
+	{
+		SetOpen( true );
+	}
+
+	//! Part of the COT_ScriptedWidgetEventHandler overlay contract: JMFormBase
+	//! sweeps every registered overlay on a tab change and on hide. Without
+	//! this the ARGB popup outlived the tab it was opened from.
+	override void Close()
+	{
+		if ( m_Open )
+			SetOpen( false );
+	}
+
 	override void OnHide()
 	{
 		if ( m_Open )
@@ -318,6 +394,13 @@ class UIActionColorPicker: UIActionBase
 			m_Popup.SetSort( 9999, true );
 			m_OpenDelay = 0.15;
 
+			EnsureTick( true );
+
+			//! Placed once here as well as every frame, so the popup is already
+			//! in the right place on the frame it appears rather than jumping
+			//! there on the next tick.
+			PositionPopup();
+
 			// The popup is a modal surface: the sliders never take keyboard
 			// focus, so UIActionBase's focus-driven input guard never trips and
 			// clicks/drags inside the popup reach the world (the camera turns).
@@ -329,7 +412,62 @@ class UIActionColorPicker: UIActionBase
 		{
 			m_Popup.Show( false );
 			CommunityOnlineToolsBase.ForceDisableInputs( false );
+
+			EnsureTick( false );
 		}
+	}
+
+	//! Keep Update running while the popup is open even though the control that
+	//! owns it is hidden. Only ever touches the queue when this control is NOT
+	//! shown - when it is, Show() has already put Update there and a second
+	//! Insert would tick it twice a frame.
+	private void EnsureTick( bool on )
+	{
+		if ( on )
+		{
+			if ( m_IsShown || m_HeadlessTick )
+				return;
+
+			g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
+			m_HeadlessTick = true;
+			return;
+		}
+
+		if ( !m_HeadlessTick )
+			return;
+
+		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Remove( Update );
+		m_HeadlessTick = false;
+	}
+
+	//! Right-align the popup with its anchor, flipping it above when there is
+	//! not enough room below.
+	private void PositionPopup()
+	{
+		Widget popupRef = PopupReference();
+
+		if ( !m_Open || !m_Popup || !m_Anchor || !popupRef )
+			return;
+
+		float ax, ay, anchorW, anchorH;
+		m_Anchor.GetScreenPos( ax, ay );
+		m_Anchor.GetScreenSize( anchorW, anchorH );
+
+		float sx, sy, sw, sh;
+		popupRef.GetScreenPos( sx, sy );
+		popupRef.GetScreenSize( sw, sh );
+
+		float pw, ph;
+		m_Popup.GetScreenSize( pw, ph );
+
+		float posX = sx + sw - pw - ax;
+		posX = Math.Clamp( posX, 0, Math.Max( 0, anchorW - pw ) );
+
+		float posY = sy - ay + sh + 2;
+		if ( sy + sh + ph > ay + anchorH )
+			posY = sy - ay - ph - 2;
+
+		m_Popup.SetPos( posX, posY );
 	}
 
 	//! True for the popup itself and anything inside it, so dragging a slider
@@ -404,30 +542,7 @@ class UIActionColorPicker: UIActionBase
 	{
 		super.Update( timeSlice );
 
-		if ( !m_Open || !m_Popup || !m_Anchor || !m_PreviewButton )
-			return;
-
-		float ax, ay, anchorW, anchorH;
-		m_Anchor.GetScreenPos( ax, ay );
-		m_Anchor.GetScreenSize( anchorW, anchorH );
-
-		float sx, sy, sw, sh;
-		m_PreviewButton.GetScreenPos( sx, sy );
-		m_PreviewButton.GetScreenSize( sw, sh );
-
-		float pw, ph;
-		m_Popup.GetScreenSize( pw, ph );
-
-		// Right-align the popup with the swatch, and flip it above the row when
-		// there is not enough room below.
-		float posX = sx + sw - pw - ax;
-		posX = Math.Clamp( posX, 0, Math.Max( 0, anchorW - pw ) );
-
-		float posY = sy - ay + sh + 2;
-		if ( sy + sh + ph > ay + anchorH )
-			posY = sy - ay - ph - 2;
-
-		m_Popup.SetPos( posX, posY );
+		PositionPopup();
 
 		if ( m_OpenDelay > 0 )
 		{

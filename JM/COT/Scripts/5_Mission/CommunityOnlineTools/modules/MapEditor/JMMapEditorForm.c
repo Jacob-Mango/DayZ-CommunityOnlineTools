@@ -99,6 +99,18 @@ class JMMapEditorForm : JMFormBase
 	private bool    m_LmbWasDown;          // LMB state from previous tick
 	private bool    m_LmbClickPending;     // LMB just released - fire click handler next tick
 
+	// --- Keyboard shortcuts (edge-detected in Tick) ---
+	private bool    m_DeleteKeyWasDown;
+	private bool    m_UndoKeyWasDown;
+	private bool    m_RedoKeyWasDown;
+
+	//! Set whenever this form opens ITS OWN confirmation dialog (Delete /
+	//! Clear All). The dialog widget is one shared, reused instance per
+	//! window rather than a fresh one per call, so a hotkey firing while it
+	//! is still up would race whatever the user is mid-click on - hence the
+	//! guard in HandleKeyboardShortcuts.
+	private JMConfirmation m_ActiveConfirmation;
+
 	private const int  TICK_HANDLE = 0;
 	private const int  TICK_PERIOD_MS = 33;  // ~30 fps UI tick
 
@@ -106,6 +118,15 @@ class JMMapEditorForm : JMFormBase
 	// resolve a method by name when it's a static class member, so the
 	// static TickStatic dispatches to the single active form.
 	private static ref JMMapEditorForm s_Instance;
+
+	//! Whether this form currently owns Ctrl+Z/Ctrl+Y. While shown, its own
+	//! Tick()-polled shortcut handles them against its OWN undo stack; the
+	//! global hotkey (MissionGameplay.OnUpdate) steps aside so the same
+	//! keypress cannot fire both.
+	static bool IsShown()
+	{
+		return s_Instance != NULL;
+	}
 
 	private JMMapEditorModule m_Module;
 
@@ -285,6 +306,28 @@ class JMMapEditorForm : JMFormBase
 		Widget help = UIActionManager.CreatePanel( helpRow, 0x00000000, 140 );
 		UIActionManager.CreateText( help, "How to use:", "1. Open the freecam (Camera module). 2. Click an object in the 3D world to select. 3. Shift-click to multi-select. 4. Use Bulk Move / Rotate / Scale to act on every selected. 5. Use Copy / Cut / Paste to clone. 6. Undo / Redo for history. 7. Snap to Terrain / Grid / Surface as needed." );
 
+		// ---- Permissions ----
+		//! Mirrors exactly what JMMapEditorModule's own RPC handlers enforce, so
+		//! a control is only offered when the matching server call would be
+		//! accepted. The module is already behind Admin.MapEditor.View via
+		//! HasAccess(), so read-only controls (Refresh, Copy, the snap toggles)
+		//! need nothing further.
+		RegisterPermission( m_ApplyTransform, "Admin.MapEditor.Transform" );
+		RegisterPermission( m_BulkMove,       "Admin.MapEditor.Transform" );
+		RegisterPermission( m_BulkRotate,     "Admin.MapEditor.Transform" );
+		RegisterPermission( m_BulkScale,      "Admin.MapEditor.Transform" );
+		RegisterPermission( m_Undo,           "Admin.MapEditor.Transform" );
+		RegisterPermission( m_Redo,           "Admin.MapEditor.Transform" );
+		RegisterPermission( m_UndoBtn,        "Admin.MapEditor.Transform" );
+		RegisterPermission( m_RedoBtn,        "Admin.MapEditor.Transform" );
+
+		RegisterPermission( m_Delete,         "Admin.MapEditor.Delete" );
+		RegisterPermission( m_ClearAll,       "Admin.MapEditor.Delete" );
+		RegisterPermission( m_CutBtn,         "Admin.MapEditor.Delete" );
+
+		RegisterPermission( m_PasteBtn,       "Admin.MapEditor.Spawn" );
+		RegisterPermission( m_Load,           "Admin.MapEditor.Spawn" );
+
 		// ---- Initial paint ----
 		RefreshModeButtons();
 		BuildAssetBrowser();
@@ -347,6 +390,8 @@ class JMMapEditorForm : JMFormBase
 	{
 		if ( !m_Module )
 			return;
+
+		HandleKeyboardShortcuts();
 
 		int mx, my;
 		GetMousePos( mx, my );
@@ -481,6 +526,43 @@ class JMMapEditorForm : JMFormBase
 		// ---- End drag on LMB up ----
 		if ( !m_LmbDown && m_DragAxis != -1 )
 			m_DragAxis = -1;
+	}
+
+	// Delete / Undo / Redo hotkeys. Skipped while the user is typing in one of
+	// this form's own text fields (position / yaw / asset search), the same
+	// EditBoxWidget check CF_InputBindings uses to gate its own global input,
+	// and skipped while this form's own confirmation dialog is up so a
+	// hotkey can never race whatever the user is mid-click on.
+	// Edge-detected against last tick so a held key fires once, not 30x/sec.
+	void HandleKeyboardShortcuts()
+	{
+		Widget focus = GetFocus();
+		bool typing = focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) );
+		bool confirmOpen = m_ActiveConfirmation && m_ActiveConfirmation.IsVisible();
+
+		bool ctrl = CTRL();
+
+		// Shift+Delete, not plain Delete: matches the OS convention (Shift+Delete
+		// bypasses the recycle bin) for "delete now, skip the prompt" and avoids
+		// plain Delete colliding with anything else bound to that raw key.
+		bool deleteDown = SHIFT() && ( KeyState( KeyCode.KC_DELETE ) > 0 );
+		if ( deleteDown && !m_DeleteKeyWasDown && !typing && !confirmOpen && m_SelectedId != -1 && m_Module )
+		{
+			// Keyboard shortcut skips the confirmation prompt - same delete
+			// the confirmed button runs, called directly.
+			OnConfirmation_Delete( NULL );
+		}
+		m_DeleteKeyWasDown = deleteDown;
+
+		bool undoDown = ctrl && ( KeyState( KeyCode.KC_Z ) > 0 );
+		if ( undoDown && !m_UndoKeyWasDown && !typing && !confirmOpen && m_Module )
+			m_Module.Undo();
+		m_UndoKeyWasDown = undoDown;
+
+		bool redoDown = ctrl && ( KeyState( KeyCode.KC_Y ) > 0 );
+		if ( redoDown && !m_RedoKeyWasDown && !typing && !confirmOpen && m_Module )
+			m_Module.Redo();
+		m_RedoKeyWasDown = redoDown;
 	}
 
 	// LMB just-up dispatch: select / place / no-op by mode
@@ -736,14 +818,16 @@ class JMMapEditorForm : JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-		// Server-side undo would require inverse RPCs; client-side best-effort
-		// is intentionally a no-op for now.
+		if ( m_Module )
+			m_Module.Undo();
 	}
 
 	void OnClick_Redo( UIEvent eid, UIActionBase action )
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
+		if ( m_Module )
+			m_Module.Redo();
 	}
 
 	// ========================================================================
@@ -1040,7 +1124,7 @@ class JMMapEditorForm : JMFormBase
 			return;
 		if ( m_SelectedId == -1 || !m_Module )
 			return;
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Delete object", "Delete the selected object?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_Delete" );
+		m_ActiveConfirmation = CreateConfirmation_Two( JMConfirmationType.INFO, "Delete object", "Delete the selected object?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_Delete" );
 	}
 
 	void OnConfirmation_Delete( JMConfirmation confirmation )
@@ -1057,7 +1141,7 @@ class JMMapEditorForm : JMFormBase
 	{
 		if ( eid != UIEvent.CLICK )
 			return;
-		CreateConfirmation_Two( JMConfirmationType.INFO, "Clear all", "Delete every object placed by the map editor?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_ClearAll" );
+		m_ActiveConfirmation = CreateConfirmation_Two( JMConfirmationType.INFO, "Clear all", "Delete every object placed by the map editor?", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnConfirmation_ClearAll" );
 	}
 
 	void OnConfirmation_ClearAll( JMConfirmation confirmation )

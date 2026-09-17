@@ -1,0 +1,188 @@
+PanelWidgetClass JMLootAnalysisHoverInfo {
+ visible 0
+ ignorepointer 1
+ clipchildren 1
+ position 0 0
+ size 300 288
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ color 0.114 0.137 0.165 1
+ style COTBox8Set
+ {
+  TextWidgetClass lahi_title {
+   ignorepointer 1
+   position 12 8
+   size 276 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Normal
+   font "gui/fonts/sdf_MetronLight24"
+   text "ITEM"
+   "exact text" 1
+   "exact text size" 15
+   "text halign" left
+   "text valign" center
+  }
+  ItemPreviewWidgetClass lahi_preview {
+   visible 0
+   ignorepointer 1
+   clipchildren 1
+   inheritalpha 0
+   position 12 36
+   size 276 108
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   color 0.702 0.702 0.702 1
+   scaled 1
+   priority 151
+  }
+  TextWidgetClass lahi_health_label {
+   ignorepointer 1
+   position 12 154
+   size 92 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "Health"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_health_value {
+   ignorepointer 1
+   position 108 154
+   size 180 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "-"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_quantity_label {
+   ignorepointer 1
+   position 12 176
+   size 92 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "Quantity"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_quantity_value {
+   ignorepointer 1
+   position 108 176
+   size 180 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "-"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_lifetime_label {
+   ignorepointer 1
+   position 12 198
+   size 92 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "Lifetime"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_lifetime_value {
+   ignorepointer 1
+   position 108 198
+   size 180 20
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "-"
+   "exact text" 1
+   "exact text size" 13
+   "text halign" left
+   "text valign" center
+  }
+  TextWidgetClass lahi_attachments_label {
+   ignorepointer 1
+   position 12 220
+   size 276 18
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   style Light
+   font "gui/fonts/sdf_MetronLight24"
+   text "Attachments"
+   "exact text" 1
+   "exact text size" 12
+   "text halign" left
+   "text valign" center
+  }
+  PanelWidgetClass lahi_attachments_row {
+   ignorepointer 1
+   color 0 0 0 0
+   position 12 240
+   size 276 40
+   halign left_ref
+   valign top_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+  }
+ }
+}

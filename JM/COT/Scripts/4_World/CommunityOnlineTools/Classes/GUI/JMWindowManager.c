@@ -31,15 +31,29 @@ class JMWindowManager
 	void ShowAllActive()
 	{
 		foreach(JMWindowBase window: m_Windows)
+		{
+			string title = "?";
+			if (window.GetModule())
+				title = window.GetModule().GetTitle();
 			window.Show();
+		}
 	}
 
 	void HideAllActive()
 	{
 		foreach(JMWindowBase window: m_Windows)
 		{
+			string title = "?";
+			if (window.GetModule())
+				title = window.GetModule().GetTitle();
+
 			if ( !window.IsPinned() )
+			{
 				window.Hide();
+			}
+			else
+			{
+			}
 		}
 	}
 
@@ -51,6 +65,19 @@ class JMWindowManager
 				return true;
 		}
 		return false;
+	}
+
+	//! Escape priority tier 2 (module menu): the frontmost visible window, if
+	//! any. BringFront() keeps m_Windows ordered front-to-back (index 0 is
+	//! last-focused), so the first visible entry is the one on top.
+	JMWindowBase GetTopActive()
+	{
+		foreach (JMWindowBase window: m_Windows)
+		{
+			if ( window.IsVisible() )
+				return window;
+		}
+		return NULL;
 	}
 
 	bool HasAnyUnpinnedActive()
@@ -82,7 +109,12 @@ class JMWindowManager
 	{
 		if ( window.GetModule() )
 		{
+
 			window.GetModule().SetMenuButtonColor( JMTheme.TRANSPARENT );
+
+			//! The module's own m_Window would otherwise dangle past this
+			//! point - see JMRenderableModuleBase.OnWindowDestroyed().
+			window.GetModule().OnWindowDestroyed();
 		}
 
 		int cIdx = m_Windows.Find( window );

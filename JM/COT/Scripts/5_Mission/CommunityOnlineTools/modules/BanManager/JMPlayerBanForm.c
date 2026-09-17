@@ -55,6 +55,7 @@ class JMBanForm : JMFormBase
     static const int TAB_BANS    = 0;
     static const int TAB_OFFLINE = 1;
 
+    protected ref UIActionFlexRow         m_SearchRow;
     // Shared search bar (filters both dropdown and ban list)
     private UIActionSearchBox             m_SearchBar;
 
@@ -124,12 +125,24 @@ class JMBanForm : JMFormBase
     {
         Widget top = layoutRoot.FindAnyWidget( "panel_top" );
 
-        Widget topRow = UIActionManager.CreateWrapSpacer( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+        m_SearchRow = UIActionManager.CreateFlexRow( top, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
+        Widget topRow = m_SearchRow.GetContent();
 
         UIActionImageButton refreshBtn = UIActionManager.CreateRefreshButton( topRow, this, "OnClick_Refresh", "#STR_COT_GENERIC_REFRESH" );
+        if ( refreshBtn )
+        {
+            refreshBtn.SetFixedSize( 30, 30 );
+            m_SearchRow.Add( refreshBtn );
+        }
 
         m_SearchBar = UIActionManager.CreateSearchBox( topRow, this, "OnChange_Search", "Search name / SteamID..." );
-        m_SearchBar.SetWidth( 0.85 );
+        if ( m_SearchBar )
+        {
+            m_SearchBar.SetFlex( 1.0, 60 );
+            m_SearchRow.Add( m_SearchBar );
+        }
+
+        m_SearchRow.SetGap( 14 );
 
         // Toolbar: Unban (delete-style icon) + Edit Duration. Both act on the
         // checked rows, so they belong with the filter, above the grid.
@@ -276,7 +289,9 @@ class JMBanForm : JMFormBase
 
     override void OnResize( float w, float h )
     {
-        PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h * 0.86, TAB_STRIP_HEIGHT );
+        super.OnResize( w, h );
+
+        PinStripGeometry( layoutRoot.FindAnyWidget( "panel_bottom_tabs" ), layoutRoot.FindAnyWidget( "panel_bottom_content" ), h - 80, TAB_STRIP_HEIGHT );
 
         if ( m_Scroller )
             m_Scroller.UpdateScroller();
@@ -607,8 +622,7 @@ class JMBanForm : JMFormBase
 
         m_Module.EditBanDuration( m_SelectedBanSteamID, GetDurationSeconds( idx ) );
 
-        COTCreateLocalAdminNotification( new StringLocaliser(
-            "Updated ban duration for: " + m_SelectedBanPlayerName + " - " + GetDurationLabel( idx ) ) );
+        COTCreateLocalAdminNotification( new StringLocaliser( "Updated ban duration for: " + m_SelectedBanPlayerName + " - " + GetDurationLabel( idx ) ) );
 
         HideDurationPicker();
         m_Module.RequestBanList();
@@ -723,9 +737,7 @@ class JMBanForm : JMFormBase
         if ( m_PendingSteamID == "" )
             return;
 
-        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason",
-            "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):",
-            "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotReason" );
+        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason", "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotReason" );
     }
 
     // -------------------------------------------------------------------------
@@ -737,9 +749,7 @@ class JMBanForm : JMFormBase
         if ( eid != UIEvent.CLICK )
             return;
 
-        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Offline Player",
-            "Enter the Steam 64 ID of the player to ban:",
-            "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotSteamID" );
+        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Offline Player", "Enter the Steam 64 ID of the player to ban:", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotSteamID" );
     }
 
     void OnManualBan_GotSteamID( JMConfirmation confirmation )
@@ -776,9 +786,7 @@ class JMBanForm : JMFormBase
         if ( m_PendingSteamID == "" )
             return;
 
-        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason",
-            "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):",
-            "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotReason" );
+        CreateConfirmation_Two( JMConfirmationType.EDIT, "Ban Reason", "Reason for banning " + m_PendingPlayerName + " (" + m_PendingSteamID + "):", "#STR_COT_GENERIC_CANCEL", "", "#STR_COT_GENERIC_CONFIRM", "OnManualBan_GotReason" );
     }
 
     void OnManualBan_GotReason( JMConfirmation confirmation )

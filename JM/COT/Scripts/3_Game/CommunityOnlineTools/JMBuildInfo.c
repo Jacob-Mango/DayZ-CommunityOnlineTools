@@ -18,25 +18,25 @@ class JMBuildInfo
 	static const string CHANNEL_INTERNAL     = "internal";
 
 	//! Bare MAJOR.MINOR.BUILD, no channel suffix.
-	static const string VERSION = "0.8.100451";
+	static const string VERSION = "0.8.100582";
 
 	//! VERSION plus the channel suffix - what the UI shows.
-	static const string DISPLAY_VERSION = "0.8.100451-internal";
+	static const string DISPLAY_VERSION = "0.8.100582-internal";
 
 	//! One of the CHANNEL_* ids above.
 	static const string CHANNEL = "internal";
 
 	//! Short commit the build came from, or "unknown" outside a git checkout.
-	static const string COMMIT = "5207366c";
+	static const string COMMIT = "2f4cedd3";
 
 	//! Branch the build came from.
-	static const string BRANCH = "lt-experiments";
+	static const string BRANCH = "debug-checkpoint-backup";
 
 	//! True when the working tree had uncommitted changes at build time.
 	static const bool DIRTY = true;
 
 	//! UTC build timestamp, "YYYY-MM-DD HH:MM".
-	static const string BUILT_AT = "2026-08-28 01:35";
+	static const string BUILT_AT = "2026-09-16 20:57";
 
 	//! "COT 1.4.2" / "COT 1.4.2-beta". What the sidebar footer renders.
 	static string GetFooterText()

@@ -16,6 +16,11 @@ class JMPermissionManager
 	//! breaks Expansion's compile. Keep protected for mod compatibility.
 	protected bool m_MissionLoaded;
 
+	//! DIAG test roster only - see CreateFakePlayers.
+	private bool m_FakePlayersCreated;
+	private ref TStringArray m_FakeNamesUsed;
+	private static int s_FakePlayerSeq;
+
 	void JMPermissionManager()
 	{
 		Players = new map< string, ref JMPlayerInstance >;
@@ -29,7 +34,8 @@ class JMPermissionManager
 		{
 			MakeDirectory( JMConstants.DIR_PF );
 
-			MakeDirectory( JMConstants.DIR_PERMISSIONS );
+			//! Per-user permission files are retired - role permissions only.
+			//! DIR_PERMISSIONS is intentionally not created here anymore.
 			MakeDirectory( JMConstants.DIR_PLAYERS );
 			MakeDirectory( JMConstants.DIR_ROLES );
 		}
@@ -119,6 +125,8 @@ class JMPermissionManager
 		Assert_Null( Players );
 		Assert_Null( Roles );
 
+		m_FakePlayersCreated = false;
+
 		if ( !IsMissionClient() )
 			return;
 
@@ -126,8 +134,24 @@ class JMPermissionManager
 		Roles.Clear();
 	}
 
+	//! Test roster. SERVER ONLY: the client gets these the same way it gets real
+	//! players, through the permission sync. Run on both ends it built two
+	//! independent sets - the client's own thirty plus the thirty the server
+	//! pushed - and because both draw from the same name pools the roster came
+	//! out looking like every player was listed two or three times.
+	//!
+	//! Also guards against being called twice on the same manager, which would
+	//! reuse the same `i` values for a second batch.
 	void CreateFakePlayers()
 	{
+		if ( !g_Game.IsServer() )
+			return;
+
+		if ( m_FakePlayersCreated )
+			return;
+
+		m_FakePlayersCreated = true;
+
 		vector basePos = "7500 0 7500".ToVector();
 		if ( g_Game.GetPlayer() )
 		{
@@ -136,10 +160,17 @@ class JMPermissionManager
 				basePos = "7500 0 7500".ToVector();
 		}
 
+		//! Drawn without replacement so no two test players share a name. A
+		//! repeated name in a test roster is indistinguishable from a duplicated
+		//! row, and the whole point of this roster is to spot list bugs.
+		m_FakeNamesUsed = new TStringArray;
+
 		for ( int i = 0; i < 30; i++ )
 		{
 			CreateFakePlayer( i, basePos );
 		}
+
+		m_FakeNamesUsed = NULL;
 	}
 
 	private EntityAI CreateItemWithRandomHealth( EntityAI parent, string classname )
@@ -263,11 +294,36 @@ class JMPermissionManager
 		array<string> firstNames = { "Adam", "Alex", "Alice", "Arthur", "Ben", "Charlie", "Chloe", "Daniel", "David", "Emma", "Ethan", "Fiona", "George", "Hannah", "Ian", "Jack", "Julia", "Kevin", "Laura", "Liam", "Lucas", "Marcus", "Mia", "Noah", "Oliver", "Rachel", "Sam", "Sophie", "Victor", "Zack" };
 		array<string> lastNames = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Wilson", "Taylor", "Anderson", "Thomas", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King", "Wright", "Lopez" };
 
-		string firstName = firstNames.GetRandomElement();
-		string lastName = lastNames.GetRandomElement();
-		string fakeName = firstName + " " + lastName;
+		string fakeName = "";
+		int nameTry = 0;
 
-		string fakeGuid = "GFake_" + i + "_" + Math.RandomInt( 1000, 9999 );
+		//! Re-roll a name that is already on the roster. Bounded rather than a
+		//! plain while: the pools give 900 combinations for 30 players, so a
+		//! free name is found in a couple of tries, and the fallback below still
+		//! has to be there for the day somebody raises the count.
+		while ( nameTry < 32 )
+		{
+			fakeName = firstNames.GetRandomElement() + " " + lastNames.GetRandomElement();
+
+			if ( !m_FakeNamesUsed || m_FakeNamesUsed.Find( fakeName ) < 0 )
+				break;
+
+			nameTry++;
+		}
+
+		if ( m_FakeNamesUsed )
+		{
+			if ( m_FakeNamesUsed.Find( fakeName ) >= 0 )
+				fakeName = fakeName + " " + ( i + 1 );
+
+			m_FakeNamesUsed.Insert( fakeName );
+		}
+
+		//! Sequential, not random: a random suffix collides eventually, and two
+		//! test players sharing a guid is the exact bug this roster exists to
+		//! make visible.
+		s_FakePlayerSeq++;
+		string fakeGuid = "GFake_" + s_FakePlayerSeq;
 		string fakeSteam = "76561198" + ( 70000000 + i * 1337 );
 
 		JMPlayerInstance instance = new JMPlayerInstance( NULL );
@@ -448,7 +504,7 @@ class JMPermissionManager
 			if ( IsMissionHost() )
 				return true;
 			
-			if ( !instance /*Assert_Null( instance )*/ )
+			if ( !instance )
 				return false;
 
 			return instance.HasPermission( permission );

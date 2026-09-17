@@ -36,6 +36,11 @@ class UIActionStagedIcon: UIActionBase
 	protected int  m_CurrentStage;
 	protected bool m_CycleOnClick;
 
+	//! Screen position of the last right-click, for a handler that answers
+	//! UIEvent.CLICK_RIGHT by opening a menu there.
+	protected int  m_LastRightClickX;
+	protected int  m_LastRightClickY;
+
 	protected ref JMAnimColor m_ColorAnim;
 
 	override void OnInit()
@@ -49,6 +54,9 @@ class UIActionStagedIcon: UIActionBase
 		m_CurrentStage = -1;
 		m_CycleOnClick = false;
 		m_ColorAnim    = new JMAnimColor();
+
+		m_LastRightClickX = 0;
+		m_LastRightClickY = 0;
 	}
 
 	//! Add a stage: icon path + tint colour (0xAARRGGBB).
@@ -148,6 +156,32 @@ class UIActionStagedIcon: UIActionBase
 			NextStage();
 
 		return true;
+	}
+
+	//! Right-click fires UIEvent.CLICK_RIGHT and never cycles the stage. The
+	//! cursor position is kept so a handler can open a context menu on it -
+	//! ButtonWidget raises no click at all for the right button.
+	override bool OnMouseButtonDown( Widget w, int x, int y, int button )
+	{
+		if ( button != MouseState.RIGHT || w != m_Button )
+			return super.OnMouseButtonDown( w, x, y, button );
+
+		m_LastRightClickX = x;
+		m_LastRightClickY = y;
+
+		CallEvent( UIEvent.CLICK_RIGHT );
+
+		return true;
+	}
+
+	int GetLastRightClickX()
+	{
+		return m_LastRightClickX;
+	}
+
+	int GetLastRightClickY()
+	{
+		return m_LastRightClickY;
 	}
 
 	override bool IsFocusWidget( Widget widget )

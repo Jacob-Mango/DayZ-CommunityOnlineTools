@@ -200,8 +200,7 @@ class JMBanModule : JMRenderableModuleBase
 
     // Issue a ban for an online or offline player.
     // durationSeconds: -1 = permanent, else relative seconds from now.
-    void Ban( string steamID, string playerName, string message,
-              int durationSeconds, string issuedBy, string issuedByName )
+    void Ban( string steamID, string playerName, string message, int durationSeconds, string issuedBy, string issuedByName )
     {
         if ( IsMissionHost() )
         {
@@ -280,6 +279,7 @@ class JMBanModule : JMRenderableModuleBase
         if ( !IsMissionHost() )
             return;
 
+        if ( !sender ) return;
         if ( !GetPermissionsManager().HasPermission( "Admin.Ban.View", sender ) )
             return;
 
@@ -319,8 +319,14 @@ class JMBanModule : JMRenderableModuleBase
         if ( !IsMissionHost() )
             return;
 
+        //! Issuing a ban is gated on the execute permission, NOT on
+        //! Admin.Ban.View. View only grants sight of the ban list - a role
+        //! given read-only access to this panel must not be able to ban
+        //! through it. Admin.Player.Ban is the same key the Player module's
+        //! own ban RPC and the ESP action menu already check.
         JMPlayerInstance instance;
-        if ( !GetPermissionsManager().HasPermission( "Admin.Ban.View", sender, instance ) )
+        if ( !sender ) return;
+        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", sender, instance ) )
             return;
 
         string steamID;
@@ -352,6 +358,7 @@ class JMBanModule : JMRenderableModuleBase
             return;
 
         JMPlayerInstance instance;
+        if ( !sender ) return;
         if ( !GetPermissionsManager().HasPermission( "Admin.Ban.Unban", sender, instance ) )
             return;
 
@@ -433,6 +440,7 @@ class JMBanModule : JMRenderableModuleBase
             return;
 
         JMPlayerInstance instance;
+        if ( !sender ) return;
         if ( !GetPermissionsManager().HasPermission( "Admin.Ban.Unban", sender, instance ) )
             return;
 

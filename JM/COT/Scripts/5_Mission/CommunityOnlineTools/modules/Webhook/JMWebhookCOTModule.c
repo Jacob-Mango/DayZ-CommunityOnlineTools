@@ -100,6 +100,23 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 		}
 	}
 
+	//! The OnMissionStart request can be denied because the server has not
+	//! registered this player yet - see Server_Load. Permissions arriving is
+	//! exactly the point at which that request would now succeed, so ask again.
+	override void OnClientPermissionsUpdated()
+	{
+		super.OnClientPermissionsUpdated();
+
+		if ( IsMissionHost() )
+			return;
+
+		if ( !GetPermissionsManager().HasPermission( "Webhook.View" ) )
+			return;
+
+		ScriptRPC rpc = new ScriptRPC();
+		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, NULL );
+	}
+
 	override void OnMissionFinish()
 	{
 		super.OnMissionFinish();
@@ -149,11 +166,22 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	//  Load
 	// -------------------------------------------------------------------------
 
+	//! These settings carry the Discord webhook URLs, which are secrets - anyone
+	//! holding one can post to the server's Discord. So this is permission
+	//! gated like every other module's Server_Load (Weather, Compensations,
+	//! Loadout, Teleport all do the same).
+	//!
+	//! This used to skip the check because the client requests Load from
+	//! OnMissionStart, which can land before the player is registered
+	//! server-side - and HasPermission denies when it cannot find the instance.
+	//! Denying is the right answer there; the fix for the race is to ask again
+	//! rather than to hand the URLs to everyone. See OnClientPermissionsUpdated
+	//! below, which re-requests once permissions actually arrive.
 	private void Server_Load( notnull PlayerIdentity ident )
 	{
-		// Skip permission check for the initial settings sync - the player instance
-		// may not exist yet if the Load RPC arrives before the player is fully registered.
-		// Mutation RPCs (Add/Remove/Edit) still enforce full permission checks.
+		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident ) )
+			return;
+
 		ScriptRPC rpc = new ScriptRPC();
 		m_Settings.OnSend( rpc );
 		rpc.Send( NULL, JMWebhookCOTModuleRPC.Load, true, ident );
@@ -163,6 +191,8 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	{
 		if ( g_Game.IsDedicatedServer() )
 		{
+			if ( !senderRPC )
+				return;
 			Server_Load( senderRPC );
 		}
 		else
@@ -211,6 +241,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Add", senderRPC, instance ) )
 			return;
 
@@ -249,6 +280,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Remove", senderRPC, instance ) )
 			return;
 
@@ -316,6 +348,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Edit", senderRPC, instance ) )
 			return;
 
@@ -367,6 +400,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Add", senderRPC, instance ) )
 			return;
 
@@ -413,6 +447,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Remove", senderRPC, instance ) )
 			return;
 
@@ -464,6 +499,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.State", senderRPC, instance ) )
 			return;
 

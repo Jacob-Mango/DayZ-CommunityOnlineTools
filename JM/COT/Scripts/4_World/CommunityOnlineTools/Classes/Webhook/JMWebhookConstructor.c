@@ -11,17 +11,20 @@ class JMWebhookConstructor : Managed
 	{
 		JMWebhookConstructor constructor = new JMWebhookConstructor();
 
+		int count = 0;
 #ifdef CF_MODULES
-		int count = CF_ModuleCoreManager.Count();
+		count = CF_ModuleCoreManager.Count();
+#else
+		array< JMModuleBase > modules = GetModuleManager().GetAllModules();
+		count = modules.Count();
+#endif
 		for (int i = 0; i < count; i++)
 		{
 			JMModuleBase module;
+#ifdef CF_MODULES
 			if (!Class.CastTo(module, CF_ModuleCoreManager.Get(i))) continue;
 #else
-		array< JMModuleBase > modules = GetModuleManager().GetAllModules();
-		for ( int i = 0; i < modules.Count(); ++i )
-		{
-			JMModuleBase module = modules[i];
+			module = modules[i];
 #endif
 			constructor.AddConnection( module.GetModuleName() );
 

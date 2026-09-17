@@ -1,6 +1,11 @@
 // staticfunctions
 #define JM_COT_LOADED
 
+//! Temporary: verbose Print() tracing for the 1.30 "clicking closes COT"
+//! investigation (focus/input-disable/open-close chokepoints). Undef once
+//! root cause is confirmed and fixed.
+#define COT_DEBUGLOGS
+
 static const int COT_ZERO_PAD_SIZE = 8;
 static string m_COT_ZeroPad[COT_ZERO_PAD_SIZE] = {"", "0", "00", "000", "0000", "00000", "000000", "0000000"};
 

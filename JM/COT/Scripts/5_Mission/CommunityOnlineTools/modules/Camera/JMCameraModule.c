@@ -330,7 +330,8 @@ class JMCameraModule: JMRenderableModuleBase
 		if (COT_PreviousActiveCamera)
 			COT_PreviousActiveCamera.SetActive( false );
 
-		if ( Class.CastTo( CurrentActiveCamera, Camera.GetCurrentCamera() ) )
+		Camera currentCam = Camera.GetCurrentCamera();
+		if ( currentCam && Class.CastTo( CurrentActiveCamera, currentCam ) )
 		{
 			CurrentActiveCamera.SetActive( true );
 
@@ -421,6 +422,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( IsMissionHost() )
 		{
+			if ( !senderRPC ) return;
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 				return;
 
@@ -582,6 +584,7 @@ class JMCameraModule: JMRenderableModuleBase
 		#endif
 		if ( IsMissionHost() )
 		{
+			if ( !senderRPC ) return;
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 				return;
 
@@ -603,6 +606,7 @@ class JMCameraModule: JMRenderableModuleBase
 #ifdef JM_COT_DIAG_LOGGING
 		auto trace = CF_Trace_2(this, "RPC_Leave_Finish").Add(senderRPC).Add(target);
 #endif
+		if ( !senderRPC ) return;
 		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 			return;
 
@@ -621,6 +625,7 @@ class JMCameraModule: JMRenderableModuleBase
 
 		if ( g_Game.IsDedicatedServer() )
 		{
+			if ( !senderRPC ) return;
 			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
 				return;
 

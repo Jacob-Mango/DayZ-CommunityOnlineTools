@@ -67,8 +67,7 @@ class UIActionLogView: UIActionBase
 		line.Text  = text;
 		line.Color = color;
 
-		TextWidget tw = TextWidget.Cast(
-			g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionLogLine.layout", m_Lines ) );
+		TextWidget tw = TextWidget.Cast( g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionLogLine.layout", m_Lines ) );
 
 		if ( tw )
 		{
