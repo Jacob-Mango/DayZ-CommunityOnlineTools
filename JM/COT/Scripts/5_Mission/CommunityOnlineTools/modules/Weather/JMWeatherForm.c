@@ -30,7 +30,9 @@
 
 class JMWeatherForm: JMFormBase
 {
-	protected static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	//! Public (not protected): JMWeatherFormTabTime reaches this class-qualified
+	//! (JMWeatherForm.m_DaysInMonth), which needs more than protected.
+	static const int m_DaysInMonth [ 12 ] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	static const int TAB_OVERVIEW      = 0;
 	static const int TAB_SKY           = 1;
@@ -119,7 +121,9 @@ class JMWeatherForm: JMFormBase
 	//! number the card sizes itself to, so it has to be exact.
 	static const int QUICK_ROW_H  = 44;
 
-	protected JMWeatherModule m_Module;
+	//! Public enough (no modifier), not protected: JMWeatherFormTabSky/
+	//! Precipitation/Wind/Time reach this through their back-reference.
+	JMWeatherModule m_Module;
 
 	protected UIActionTabs m_Tabs;
 
@@ -129,6 +133,16 @@ class JMWeatherForm: JMFormBase
 	protected Widget m_TabWind;
 	protected Widget m_TabTime;
 	protected Widget m_TabPresets;
+
+	//! One class per tab, in its own file - only this form constructs/
+	//! dispatches to them. Overview and Presets stay on this form: Overview's
+	//! GlobalTransition/GlobalDuration/quick-actions and Presets' preview
+	//! mechanism (PreviewSection) are read by every other tab, so splitting
+	//! them out would just move the coupling instead of removing it.
+	ref JMWeatherFormTabSky           m_TabSkyCtrl;
+	ref JMWeatherFormTabPrecipitation m_TabPrecipitationCtrl;
+	ref JMWeatherFormTabWind          m_TabWindCtrl;
+	ref JMWeatherFormTabTime          m_TabTimeCtrl;
 
 	//! Which mode the weather tabs are in, shown across the full width so it is
 	//! answered before anything is touched rather than after.
@@ -144,10 +158,6 @@ class JMWeatherForm: JMFormBase
 	protected Widget       m_BannerCloseHover;
 
 	protected UIActionScroller m_ScrollerOverview;
-	protected UIActionScroller m_ScrollerSky;
-	protected UIActionScroller m_ScrollerPrecipitation;
-	protected UIActionScroller m_ScrollerWind;
-	protected UIActionScroller m_ScrollerTime;
 	protected UIActionScroller m_ScrollerPresets;
 
 	// --- Overview: live state -------------------------------------------------
@@ -203,40 +213,6 @@ class JMWeatherForm: JMFormBase
 
 	protected UIActionTimePicker m_PickerTransition;
 	protected UIActionTimePicker m_PickerDuration;
-
-	// --- Sky ------------------------------------------------------------------
-	protected UIActionSlider m_SliderOvercastForecast;
-	protected UIActionSlider m_SliderFogForecast;
-	protected UIActionSlider m_SliderDynamicFogDistance;
-	protected UIActionSlider m_SliderDynamicFogHeight;
-	protected UIActionSlider m_SliderDynamicFogBias;
-	protected UIActionSlider m_SliderStormDensity;
-	protected UIActionSlider m_SliderStormThreshold;
-	protected UIActionSlider m_SliderStormLightning;
-	protected UIActionCheckbox m_CheckboxSandstormEnabled;
-	protected UIActionSlider   m_SliderSandstormDuration;
-	protected UIActionSlider   m_SliderSandstormFadeIn;
-	protected UIActionSlider   m_SliderSandstormOvercast;
-	protected UIActionSlider   m_SliderSandstormWindMagnitude;
-
-	// --- Precipitation --------------------------------------------------------
-	protected UIActionSlider      m_SliderRainForecast;
-	protected UIActionSliderRange m_RangeRainThreshold;
-	protected UIActionSlider      m_SliderSnowForecast;
-	protected UIActionSliderRange m_RangeSnowThreshold;
-
-	// --- Wind -----------------------------------------------------------------
-	protected UIActionSlider m_SliderWindMagnitude;
-	protected UIActionSlider m_SliderWindDirection;
-	protected UIActionSlider m_SliderWindFuncMin;
-	protected UIActionSlider m_SliderWindFuncMax;
-	protected UIActionSlider m_SliderWindFuncSpeed;
-
-	// --- Time -----------------------------------------------------------------
-	protected UIActionSpinner    m_SpinnerYear;
-	protected UIActionSpinner    m_SpinnerMonth;
-	protected UIActionSpinner    m_SpinnerDay;
-	protected UIActionTimePicker m_TimeOfDay;
 
 	// --- Presets --------------------------------------------------------------
 	protected UIActionDropdown      m_SelectPreset;
@@ -317,18 +293,38 @@ class JMWeatherForm: JMFormBase
 	protected string m_SelectedPreset;
 	protected string m_RemovePreset;
 
-	//! Which sections the admin has actually touched since the last refresh.
-	//! Apply All writes these and nothing else, and auto-refresh leaves them
-	//! alone so a live poll cannot drag a slider out from under the cursor.
-	protected bool m_DirtyOvercast;
-	protected bool m_DirtyFog;
-	protected bool m_DirtyStorm;
-	protected bool m_DirtySandstorm;
-	protected bool m_DirtyRain;
-	protected bool m_DirtySnow;
-	protected bool m_DirtyWind;
-	protected bool m_DirtyWindFunc;
-	protected bool m_DirtyTime;
+	//! Bitmask tracking which sections the admin has touched since last refresh.
+	protected int m_DirtySectionsMask;
+
+	void SetSectionDirty( int sectionId, bool dirty = true )
+	{
+		if ( dirty )
+			m_DirtySectionsMask = m_DirtySectionsMask | ( 1 << sectionId );
+		else
+			m_DirtySectionsMask = m_DirtySectionsMask & ~( 1 << sectionId );
+
+		UpdateApplyButtonStates();
+	}
+
+	bool IsSectionDirty( int sectionId )
+	{
+		return ( m_DirtySectionsMask & ( 1 << sectionId ) ) != 0;
+	}
+
+	protected void ClearDirtySections()
+	{
+		m_DirtySectionsMask = 0;
+		UpdateApplyButtonStates();
+	}
+
+	//! Was called from SetSectionDirty()/ClearDirtySections() with no definition
+	//! anywhere in the codebase - a pre-existing dangling reference found while
+	//! splitting this form's tabs into their own classes, unrelated to that
+	//! split. Left as a no-op placeholder rather than guessed at, since there is
+	//! no existing per-section Apply-button visual state to restore.
+	protected void UpdateApplyButtonStates()
+	{
+	}
 
 	static autoptr TStringArray CARDINAL_DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
@@ -413,12 +409,33 @@ class JMWeatherForm: JMFormBase
 
 		switch ( tabIdx )
 		{
-			case TAB_OVERVIEW:      InitTabOverview();      break;
-			case TAB_SKY:           InitTabSky();           break;
-			case TAB_PRECIPITATION: InitTabPrecipitation(); break;
-			case TAB_WIND:          InitTabWind();          break;
-			case TAB_TIME:          InitTabTime();          break;
-			case TAB_PRESETS:       InitTabPresets();       break;
+			case TAB_OVERVIEW:
+				InitTabOverview();
+				break;
+
+			case TAB_SKY:
+				m_TabSkyCtrl = new JMWeatherFormTabSky( this );
+				m_TabSkyCtrl.Build( m_TabSky );
+				break;
+
+			case TAB_PRECIPITATION:
+				m_TabPrecipitationCtrl = new JMWeatherFormTabPrecipitation( this );
+				m_TabPrecipitationCtrl.Build( m_TabPrecipitation );
+				break;
+
+			case TAB_WIND:
+				m_TabWindCtrl = new JMWeatherFormTabWind( this );
+				m_TabWindCtrl.Build( m_TabWind );
+				break;
+
+			case TAB_TIME:
+				m_TabTimeCtrl = new JMWeatherFormTabTime( this );
+				m_TabTimeCtrl.Build( m_TabTime );
+				break;
+
+			case TAB_PRESETS:
+				InitTabPresets();
+				break;
 		}
 
 		//! A tab built after the form was already open has missed every refresh
@@ -596,207 +613,6 @@ class JMWeatherForm: JMFormBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  Sky
-	// -------------------------------------------------------------------------
-
-	protected void InitTabSky()
-	{
-		m_ScrollerSky = UIActionManager.CreateScroller( m_TabSky );
-		Widget content = m_ScrollerSky.GetContentWidget();
-
-		UIActionCard overcastCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_OVERCAST" );
-		overcastCard.AddApplyButton( this, "OnClick_ApplyOvercast" );
-		m_SliderOvercastForecast = CreatePercentSlider( overcastCard.GetContent(), "#STR_COT_GENERIC_AMOUNT", "OnChange_Overcast" );
-
-		UIActionCard fogCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_FOG" );
-		fogCard.AddApplyButton( this, "OnClick_ApplyFog" );
-		Widget fogBody = UIActionManager.CreateGridSpacer( fogCard.GetContent(), 4, 1 );
-
-		m_SliderFogForecast = CreatePercentSlider( fogBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Fog" );
-
-		m_SliderDynamicFogDistance = UIActionManager.CreateSlider( fogBody, "#STR_COT_GENERIC_DISTANCE", 0, 1, this, "OnChange_Fog" );
-		m_SliderDynamicFogDistance.SetStepValue( 0.01 );
-		m_SliderDynamicFogDistance.SetTooltip( "#STR_COT_WEATHER_DYNFOG_DESC" );
-
-		m_SliderDynamicFogHeight = UIActionManager.CreateSlider( fogBody, "#STR_COT_GENERIC_HEIGHT", 0, 1, this, "OnChange_Fog" );
-		m_SliderDynamicFogHeight.SetStepValue( 0.01 );
-		m_SliderDynamicFogHeight.SetTooltip( "#STR_COT_WEATHER_DYNFOG_DESC" );
-
-		//! Bias is in metres and signed, unlike every other control on this tab.
-		//! It gets the metre format so it cannot be misread as a percentage.
-		m_SliderDynamicFogBias = UIActionManager.CreateSlider( fogBody, "#STR_COT_GENERIC_BIAS", -500, 500, this, "OnChange_Fog" );
-		m_SliderDynamicFogBias.SetFormat( "#STR_COT_FORMAT_METRE" );
-		m_SliderDynamicFogBias.SetStepValue( 1 );
-		m_SliderDynamicFogBias.SetTooltip( "#STR_COT_WEATHER_DYNFOG_DESC" );
-
-		UIActionCard stormCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_STORM" );
-		stormCard.AddApplyButton( this, "OnClick_ApplyStorm" );
-		Widget stormBody = UIActionManager.CreateGridSpacer( stormCard.GetContent(), 3, 1 );
-
-		m_SliderStormDensity = CreatePercentSlider( stormBody, "#STR_COT_WEATHER_DENSITY", "OnChange_Storm" );
-		m_SliderStormDensity.SetTooltip( "#STR_COT_WEATHER_DENSITY_DESC" );
-
-		m_SliderStormThreshold = CreatePercentSlider( stormBody, "#STR_COT_WEATHER_THRESHOLD", "OnChange_Storm" );
-		m_SliderStormThreshold.SetTooltip( "#STR_COT_WEATHER_STORM_THRESHOLD_DESC" );
-
-		m_SliderStormLightning = UIActionManager.CreateSlider( stormBody, "#STR_COT_WEATHER_LIGHTNING", 0, 120, this, "OnChange_Storm" );
-		m_SliderStormLightning.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderStormLightning.SetStepValue( 1 );
-		m_SliderStormLightning.SetCurrent( DEFAULT_LIGHTNING_INTERVAL );
-		m_SliderStormLightning.SetTooltip( "#STR_COT_WEATHER_LIGHTNING_DESC" );
-
-		UIActionCard sandstormCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SANDSTORM" );
-		sandstormCard.AddApplyButton( this, "OnClick_ApplySandstorm" );
-		Widget sandstormBody = UIActionManager.CreateGridSpacer( sandstormCard.GetContent(), 2, 1 );
-
-		m_CheckboxSandstormEnabled = UIActionManager.CreateCheckbox( sandstormBody, "#STR_COT_WEATHER_SANDSTORM_ENABLED", this, "OnChange_Sandstorm" );
-		m_CheckboxSandstormEnabled.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_ENABLED_DESC" );
-
-		m_SliderSandstormDuration = UIActionManager.CreateSlider( sandstormBody, "#STR_COT_WEATHER_SANDSTORM_DURATION", 0, 120, this, "OnChange_Sandstorm" );
-		m_SliderSandstormDuration.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderSandstormDuration.SetStepValue( 1 );
-		m_SliderSandstormDuration.SetCurrent( DEFAULT_SANDSTORM_DURATION );
-		m_SliderSandstormDuration.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_DURATION_DESC" );
-
-		m_SliderSandstormFadeIn = UIActionManager.CreateSlider( sandstormBody, "#STR_COT_WEATHER_SANDSTORM_FADEIN", 0, 120, this, "OnChange_Sandstorm" );
-		m_SliderSandstormFadeIn.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderSandstormFadeIn.SetStepValue( 1 );
-		m_SliderSandstormFadeIn.SetCurrent( DEFAULT_SANDSTORM_FADEIN );
-		m_SliderSandstormFadeIn.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_FADEIN_DESC" );
-
-		m_SliderSandstormOvercast = CreatePercentSlider( sandstormBody, "#STR_COT_WEATHER_SANDSTORM_OVERCAST", "OnChange_Sandstorm" );
-		m_SliderSandstormOvercast.SetCurrent( DEFAULT_SANDSTORM_OVERCAST * 100.0 );
-		m_SliderSandstormOvercast.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_OVERCAST_DESC" );
-
-		m_SliderSandstormWindMagnitude = UIActionManager.CreateSlider( sandstormBody, "#STR_COT_WEATHER_SANDSTORM_WINDMAGNITUDE", 18, WIND_SCALE_MAX, this, "OnChange_Sandstorm" );
-		m_SliderSandstormWindMagnitude.SetFormat( "#STR_COT_FORMAT_MPS" );
-		m_SliderSandstormWindMagnitude.SetStepValue( 0.5 );
-		m_SliderSandstormWindMagnitude.SetCurrent( DEFAULT_SANDSTORM_WINDMAGNITUDE );
-		m_SliderSandstormWindMagnitude.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_WINDMAGNITUDE_DESC" );
-
-		m_ScrollerSky.UpdateScroller();
-	}
-
-	// -------------------------------------------------------------------------
-	//  Precipitation
-	// -------------------------------------------------------------------------
-
-	protected void InitTabPrecipitation()
-	{
-		m_ScrollerPrecipitation = UIActionManager.CreateScroller( m_TabPrecipitation );
-		Widget content = m_ScrollerPrecipitation.GetContentWidget();
-
-		UIActionCard rainCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_RAIN" );
-		rainCard.AddApplyButton( this, "OnClick_ApplyRain" );
-		Widget rainBody = UIActionManager.CreateGridSpacer( rainCard.GetContent(), 2, 1 );
-
-		m_SliderRainForecast = CreatePercentSlider( rainBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Rain" );
-
-		//! One range control instead of two sliders that must not cross. The
-		//! pair is a single "rain is possible between these overcast levels"
-		//! statement, and a Min above Max is not a state worth allowing.
-		m_RangeRainThreshold = UIActionManager.CreateSliderRange( rainBody, "#STR_COT_WEATHER_THRESHOLDS", 0, 100, this, "OnChange_Rain" );
-		m_RangeRainThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_RangeRainThreshold.SetStep( 1 );
-		m_RangeRainThreshold.SetTooltip( "#STR_COT_WEATHER_THRESHOLDS_DESC" );
-
-		UIActionCard snowCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SNOW" );
-		snowCard.AddApplyButton( this, "OnClick_ApplySnow" );
-		Widget snowBody = UIActionManager.CreateGridSpacer( snowCard.GetContent(), 2, 1 );
-
-		m_SliderSnowForecast = CreatePercentSlider( snowBody, "#STR_COT_GENERIC_AMOUNT", "OnChange_Snow" );
-
-		m_RangeSnowThreshold = UIActionManager.CreateSliderRange( snowBody, "#STR_COT_WEATHER_THRESHOLDS", 0, 100, this, "OnChange_Snow" );
-		m_RangeSnowThreshold.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_RangeSnowThreshold.SetStep( 1 );
-		m_RangeSnowThreshold.SetTooltip( "#STR_COT_WEATHER_THRESHOLDS_DESC" );
-
-		m_ScrollerPrecipitation.UpdateScroller();
-	}
-
-	// -------------------------------------------------------------------------
-	//  Wind
-	// -------------------------------------------------------------------------
-
-	protected void InitTabWind()
-	{
-		m_ScrollerWind = UIActionManager.CreateScroller( m_TabWind );
-		Widget content = m_ScrollerWind.GetContentWidget();
-
-		UIActionCard windCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_WIND" );
-		windCard.AddApplyButton( this, "OnClick_ApplyWind" );
-		Widget windBody = UIActionManager.CreateGridSpacer( windCard.GetContent(), 2, 1 );
-
-		//! Wind magnitude is an absolute speed in m/s, NOT a 0-1 phenomenon like
-		//! everything else on these tabs. The unit is in the value text because
-		//! nothing else on screen would tell you.
-		m_SliderWindMagnitude = UIActionManager.CreateSlider( windBody, "#STR_COT_WEATHER_MAGNITUDE", 0, WIND_SCALE_MAX, this, "OnChange_Wind" );
-		m_SliderWindMagnitude.SetFormat( "#STR_COT_FORMAT_MPS" );
-		m_SliderWindMagnitude.SetStepValue( 0.1 );
-		m_SliderWindMagnitude.SetTooltip( "#STR_COT_WEATHER_MAGNITUDE_DESC" );
-
-		m_SliderWindDirection = UIActionManager.CreateSlider( windBody, "#STR_COT_GENERIC_DIRECTION", 0, 360, this, "OnChange_WindDirection" );
-		m_SliderWindDirection.SetFormat( "" );
-		m_SliderWindDirection.SetStepValue( 1 );
-		m_SliderWindDirection.SetTooltip( "#STR_COT_WEATHER_DIRECTION_DESC" );
-
-		UIActionCard funcCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_FUNCTION" );
-		funcCard.AddApplyButton( this, "OnClick_ApplyWindFunction" );
-		Widget funcBody = UIActionManager.CreateGridSpacer( funcCard.GetContent(), 3, 1 );
-
-		m_SliderWindFuncMin = UIActionManager.CreateSlider( funcBody, "#STR_COT_GENERIC_MIN", 0, 1, this, "OnChange_WindFunction" );
-		m_SliderWindFuncMin.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_SliderWindFuncMin.SetStepValue( 0.05 );
-
-		m_SliderWindFuncMax = UIActionManager.CreateSlider( funcBody, "#STR_COT_GENERIC_MAX", 0, 1, this, "OnChange_WindFunction" );
-		m_SliderWindFuncMax.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
-		m_SliderWindFuncMax.SetStepValue( 0.05 );
-
-		m_SliderWindFuncSpeed = UIActionManager.CreateSlider( funcBody, "#STR_COT_GENERIC_FREQUENCY", 0, 60, this, "OnChange_WindFunction" );
-		m_SliderWindFuncSpeed.SetFormat( "#STR_COT_FORMAT_SECOND" );
-		m_SliderWindFuncSpeed.SetStepValue( 1 );
-		m_SliderWindFuncSpeed.SetTooltip( "#STR_COT_WEATHER_FUNCTION_DESC" );
-
-		m_ScrollerWind.UpdateScroller();
-	}
-
-	// -------------------------------------------------------------------------
-	//  Time
-	// -------------------------------------------------------------------------
-
-	protected void InitTabTime()
-	{
-		m_ScrollerTime = UIActionManager.CreateScroller( m_TabTime );
-		Widget content = m_ScrollerTime.GetContentWidget();
-
-		UIActionCard dateCard = UIActionManager.CreateCard( content, "#STR_COT_GENERIC_DATE" );
-		dateCard.AddApplyButton( this, "OnClick_ApplyTime" );
-		Widget dateBody = UIActionManager.CreateGridSpacer( dateCard.GetContent(), 2, 1 );
-
-		//! Year, month and day are one date, so they read as one row.
-		Widget dateRow = UIActionManager.CreateGridSpacer( dateBody, 1, 3 );
-
-		m_SpinnerYear = UIActionManager.CreateSpinner( dateRow, "#STR_COT_GENERIC_DATE_YEAR", 1900, 2999, 1, this, "OnChange_Time" );
-		m_SpinnerYear.SetIntegerOnly( true );
-		m_SpinnerYear.SetValue( 1985 );
-
-		m_SpinnerMonth = UIActionManager.CreateSpinner( dateRow, "#STR_COT_GENERIC_DATE_MONTH", 1, 12, 1, this, "OnChange_Month" );
-		m_SpinnerMonth.SetIntegerOnly( true );
-		m_SpinnerMonth.SetValue( 1 );
-
-		m_SpinnerDay = UIActionManager.CreateSpinner( dateRow, "#STR_COT_GENERIC_DATE_DAY", 1, 31, 1, this, "OnChange_Time" );
-		m_SpinnerDay.SetIntegerOnly( true );
-		m_SpinnerDay.SetValue( 1 );
-
-		//! Hour and minute as one field rather than two sliders - the pair is a
-		//! single time of day, and a slider is a poor way to hit 08:42.
-		m_TimeOfDay = UIActionManager.CreateTimePicker( dateBody, "#STR_COT_WEATHER_MODULE_START_TIME", this, "OnChange_Time" );
-		m_TimeOfDay.SetMaxHours( 23 );
-
-		m_ScrollerTime.UpdateScroller();
-	}
-
-	// -------------------------------------------------------------------------
 	//  Presets
 	// -------------------------------------------------------------------------
 
@@ -818,6 +634,7 @@ class JMWeatherForm: JMFormBase
 		//! over the tab instead of being clipped by the scroller it lives in.
 		m_SelectPreset = UIActionManager.CreateDropdown( manageBody, "#STR_COT_WEATHER_PRESET_LIST", layoutRoot, this, "OnChange_PresetSelect", BuildPresetOptions() );
 		m_SelectPreset.SetTooltip( "#STR_COT_WEATHER_PRESET_SELECT_DESC" );
+		RegisterOverlay( m_SelectPreset );
 
 		m_EditPresetName = UIActionManager.CreateEditableText( manageBody, "#STR_COT_GENERIC_NAME", this );
 		m_EditPresetName.SetOnlyNumbers( false );
@@ -899,6 +716,7 @@ class JMWeatherForm: JMFormBase
 
 		m_DropAddState = UIActionManager.CreateDropdown( addRow, "", layoutRoot, this, "" );
 		m_DropAddState.SetWidth( ADD_DROPDOWN_W );
+		RegisterOverlay( m_DropAddState );
 
 		m_ButtonAddState = UIActionManager.CreateButton( addRow, "#STR_COT_WEATHER_DYNAMIC_ADD", this, "OnClick_AddState" );
 		m_ButtonAddState.SetFixedSize( ADD_BUTTON_W, ADD_BUTTON_H );
@@ -1001,15 +819,21 @@ class JMWeatherForm: JMFormBase
 
 	//! Every 0-1 phenomenon is edited as a whole percentage. The engine wants
 	//! the fraction, so the read side multiplies by 0.01 - see ReadPercent.
-	protected UIActionSlider CreatePercentSlider( Widget parent, string label, string callback )
+	//! `instance` defaults to this form (Overview has no percent sliders of its
+	//! own, but the default keeps this call-compatible); every other tab class
+	//! passes itself so the CHANGE callback fires on the object that owns it.
+	UIActionSlider CreatePercentSlider( Widget parent, string label, string callback, Class instance = null )
 	{
-		UIActionSlider slider = UIActionManager.CreateSlider( parent, label, 0, 100, this, callback );
+		if ( !instance )
+			instance = this;
+
+		UIActionSlider slider = UIActionManager.CreateSlider( parent, label, 0, 100, instance, callback );
 		slider.SetFormat( "#STR_COT_FORMAT_PERCENTAGE" );
 		slider.SetStepValue( 1 );
 		return slider;
 	}
 
-	protected float ReadPercent( UIActionSlider slider )
+	float ReadPercent( UIActionSlider slider )
 	{
 		if ( !slider )
 			return 0;
@@ -1045,11 +869,12 @@ class JMWeatherForm: JMFormBase
 		PinWeatherGeometry( h );
 
 		if ( m_ScrollerOverview )      m_ScrollerOverview.UpdateScroller();
-		if ( m_ScrollerSky )           m_ScrollerSky.UpdateScroller();
-		if ( m_ScrollerPrecipitation ) m_ScrollerPrecipitation.UpdateScroller();
-		if ( m_ScrollerWind )          m_ScrollerWind.UpdateScroller();
-		if ( m_ScrollerTime )          m_ScrollerTime.UpdateScroller();
 		if ( m_ScrollerPresets )       m_ScrollerPresets.UpdateScroller();
+
+		if ( m_TabSkyCtrl )           m_TabSkyCtrl.OnResize();
+		if ( m_TabPrecipitationCtrl ) m_TabPrecipitationCtrl.OnResize();
+		if ( m_TabWindCtrl )          m_TabWindCtrl.OnResize();
+		if ( m_TabTimeCtrl )          m_TabTimeCtrl.OnResize();
 	}
 
 	//! JMFormBase pins the content directly under the tab strip, which would
@@ -1326,160 +1151,41 @@ class JMWeatherForm: JMFormBase
 
 	//! A section the admin has edited is left alone. Otherwise auto-refresh
 	//! would overwrite a slider between the moment it is dragged and the moment
-	//! Apply is pressed.
+	//! Apply is pressed. Dispatches into whichever tab owns each section - see
+	//! JMWeatherFormTabSky.c's header for why the dispatch itself stays here.
 	void SetUIActionValues( JMWeatherPreset preset, bool actual = false )
 	{
-		if ( !m_DirtyTime )
-			SetTimeValues( preset );
+		if ( !IsSectionDirty( SECTION_TIME ) && m_TabTimeCtrl )
+			m_TabTimeCtrl.SetTimeValues( preset );
 
-		if ( !m_DirtyOvercast )
-			SetOvercastValues( preset, actual );
+		if ( !IsSectionDirty( SECTION_OVERCAST ) && m_TabSkyCtrl )
+			m_TabSkyCtrl.SetOvercastValues( preset, actual );
 
-		if ( !m_DirtyFog )
-			SetFogValues( preset, actual );
+		if ( !IsSectionDirty( SECTION_FOG ) && m_TabSkyCtrl )
+			m_TabSkyCtrl.SetFogValues( preset, actual );
 
-		if ( !m_DirtyStorm )
-			SetStormValues( preset );
+		if ( !IsSectionDirty( SECTION_STORM ) && m_TabSkyCtrl )
+			m_TabSkyCtrl.SetStormValues( preset );
 
-		if ( !m_DirtySandstorm )
-			SetSandstormValues( preset );
+		if ( !IsSectionDirty( SECTION_SANDSTORM ) && m_TabSkyCtrl )
+			m_TabSkyCtrl.SetSandstormValues( preset );
 
-		if ( !m_DirtyRain )
-			SetRainValues( preset, actual );
+		if ( !IsSectionDirty( SECTION_RAIN ) && m_TabPrecipitationCtrl )
+			m_TabPrecipitationCtrl.SetRainValues( preset, actual );
 
-		if ( !m_DirtySnow )
-			SetSnowValues( preset, actual );
+		if ( !IsSectionDirty( SECTION_SNOW ) && m_TabPrecipitationCtrl )
+			m_TabPrecipitationCtrl.SetSnowValues( preset, actual );
 
-		if ( !m_DirtyWind )
-			SetWindValues( preset, actual );
+		if ( !IsSectionDirty( SECTION_WIND ) && m_TabWindCtrl )
+			m_TabWindCtrl.SetWindValues( preset, actual );
 
-		if ( !m_DirtyWindFunc )
-			SetWindFunctionValues( preset );
+		if ( !IsSectionDirty( SECTION_WIND_FUNCTION ) && m_TabWindCtrl )
+			m_TabWindCtrl.SetWindFunctionValues( preset );
 	}
 
-	protected void SetTimeValues( JMWeatherPreset preset )
-	{
-		if ( preset.PDate.Year == -1 )
-			return;
-
-		if ( m_SpinnerYear )
-			m_SpinnerYear.SetValue( preset.PDate.Year );
-
-		if ( m_SpinnerMonth )
-			m_SpinnerMonth.SetValue( preset.PDate.Month );
-
-		if ( m_SpinnerDay )
-		{
-			ClampDayToMonth( preset.PDate.Month );
-			m_SpinnerDay.SetValue( preset.PDate.Day );
-		}
-
-		if ( m_TimeOfDay )
-			m_TimeOfDay.SetTotalSeconds( ( preset.PDate.Hour * 3600 ) + ( preset.PDate.Minute * 60 ) );
-	}
-
-	protected void SetOvercastValues( JMWeatherPreset preset, bool actual )
-	{
-		SetPercentSlider( m_SliderOvercastForecast, preset.POvercast, actual );
-	}
-
-	protected void SetFogValues( JMWeatherPreset preset, bool actual )
-	{
-		SetPercentSlider( m_SliderFogForecast, preset.PFog, actual );
-
-		if ( preset.PDynFog.Distance != -1 )
-		{
-			if ( m_SliderDynamicFogDistance ) m_SliderDynamicFogDistance.SetCurrent( preset.PDynFog.Distance );
-			if ( m_SliderDynamicFogHeight )   m_SliderDynamicFogHeight.SetCurrent( preset.PDynFog.Height );
-			if ( m_SliderDynamicFogBias )     m_SliderDynamicFogBias.SetCurrent( preset.PDynFog.Bias );
-		}
-	}
-
-	//! Storm has no getter in the engine, so SetFromWorld reports -1 and these
-	//! keep whatever the admin last set rather than showing a number the server
-	//! never had.
-	protected void SetStormValues( JMWeatherPreset preset )
-	{
-		if ( preset.Storm.Density == -1 )
-			return;
-
-		if ( m_SliderStormDensity )   m_SliderStormDensity.SetCurrent( preset.Storm.Density * 100.0 );
-		if ( m_SliderStormThreshold ) m_SliderStormThreshold.SetCurrent( preset.Storm.Threshold * 100.0 );
-		if ( m_SliderStormLightning ) m_SliderStormLightning.SetCurrent( preset.Storm.MinTimeBetweenLightning );
-	}
-
-	//! Start/Stop have no forecast either - IsActive is the only thing read
-	//! back, and only into the checkbox. Duration is what the NEXT Apply will
-	//! fade with, not anything the world remembers, so it is left alone here.
-	protected void SetSandstormValues( JMWeatherPreset preset )
-	{
-		if ( preset.PSandstorm.Enabled == -1 )
-			return;
-
-		if ( m_CheckboxSandstormEnabled )
-			m_CheckboxSandstormEnabled.SetChecked( preset.PSandstorm.Enabled == 1 );
-
-		if ( m_SliderSandstormFadeIn && preset.PSandstorm.FadeInTime != -1 )
-			m_SliderSandstormFadeIn.SetCurrent( preset.PSandstorm.FadeInTime );
-
-		if ( m_SliderSandstormOvercast && preset.PSandstorm.OvercastValue != -1 )
-			m_SliderSandstormOvercast.SetCurrent( preset.PSandstorm.OvercastValue * 100.0 );
-
-		if ( m_SliderSandstormWindMagnitude && preset.PSandstorm.WindMagnitudeValue != -1 )
-			m_SliderSandstormWindMagnitude.SetCurrent( preset.PSandstorm.WindMagnitudeValue );
-	}
-
-	protected void SetRainValues( JMWeatherPreset preset, bool actual )
-	{
-		SetPercentSlider( m_SliderRainForecast, preset.PRain, actual );
-
-		if ( preset.RainThreshold.Time != -1 && m_RangeRainThreshold )
-			m_RangeRainThreshold.SetRange( preset.RainThreshold.OvercastMin * 100.0, preset.RainThreshold.OvercastMax * 100.0 );
-	}
-
-	protected void SetSnowValues( JMWeatherPreset preset, bool actual )
-	{
-		SetPercentSlider( m_SliderSnowForecast, preset.PSnow, actual );
-
-		if ( preset.SnowThreshold.Time != -1 && m_RangeSnowThreshold )
-			m_RangeSnowThreshold.SetRange( preset.SnowThreshold.OvercastMin * 100.0, preset.SnowThreshold.OvercastMax * 100.0 );
-	}
-
-	protected void SetWindValues( JMWeatherPreset preset, bool actual )
-	{
-		if ( m_SliderWindMagnitude )
-		{
-			if ( actual )
-				m_SliderWindMagnitude.SetCurrent( preset.PWindMagnitude.Actual );
-			else if ( preset.PWindMagnitude.Forecast != -1 )
-				m_SliderWindMagnitude.SetCurrent( preset.PWindMagnitude.Forecast );
-		}
-
-		float directionRad = 0;
-		if ( actual )
-			directionRad = preset.PWindDirection.Actual;
-		else if ( preset.PWindDirection.Forecast != -1 )
-			directionRad = preset.PWindDirection.Forecast;
-
-		if ( m_SliderWindDirection )
-		{
-			m_SliderWindDirection.SetCurrent( PI2DEG( directionRad ) );
-			UpdateWindDirectionSlider();
-		}
-
-	}
-
-	protected void SetWindFunctionValues( JMWeatherPreset preset )
-	{
-		if ( preset.WindFunc.Speed == -1 )
-			return;
-
-		if ( m_SliderWindFuncMin )   m_SliderWindFuncMin.SetCurrent( preset.WindFunc.Min );
-		if ( m_SliderWindFuncMax )   m_SliderWindFuncMax.SetCurrent( preset.WindFunc.Max );
-		if ( m_SliderWindFuncSpeed ) m_SliderWindFuncSpeed.SetCurrent( preset.WindFunc.Speed );
-	}
-
-	protected void SetPercentSlider( UIActionSlider slider, JMWeatherPhenomenon phenomenon, bool actual )
+	//! Public: every per-tab Set*Values()/Apply*() calls this to paint a
+	//! percent slider from a phenomenon's actual/forecast value.
+	void SetPercentSlider( UIActionSlider slider, JMWeatherPhenomenon phenomenon, bool actual )
 	{
 		if ( !slider )
 			return;
@@ -1488,17 +1194,6 @@ class JMWeatherForm: JMFormBase
 			slider.SetCurrent( phenomenon.Actual * 100.0 );
 		else if ( phenomenon.Forecast != -1 )
 			slider.SetCurrent( phenomenon.Forecast * 100.0 );
-	}
-
-	protected void ClampDayToMonth( int month )
-	{
-		if ( !m_SpinnerDay )
-			return;
-
-		if ( month < 1 || month > 12 )
-			return;
-
-		m_SpinnerDay.SetMinMax( 1, m_DaysInMonth[month - 1] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -1513,83 +1208,22 @@ class JMWeatherForm: JMFormBase
 		if ( m_EditPresetName )
 			preset.Name = m_EditPresetName.GetText();
 
-		if ( m_SpinnerYear )  preset.PDate.Year  = m_SpinnerYear.GetValueInt();
-		if ( m_SpinnerMonth ) preset.PDate.Month = m_SpinnerMonth.GetValueInt();
-		if ( m_SpinnerDay )   preset.PDate.Day   = m_SpinnerDay.GetValueInt();
+		if ( m_TabTimeCtrl )
+			m_TabTimeCtrl.ReadInto( preset );
 
-		if ( m_TimeOfDay )
-		{
-			preset.PDate.Hour   = m_TimeOfDay.GetHours();
-			preset.PDate.Minute = m_TimeOfDay.GetMinutes();
-		}
+		if ( m_TabSkyCtrl )
+			m_TabSkyCtrl.ReadInto( preset, transition, duration );
 
-		preset.Storm.Density                 = ReadPercent( m_SliderStormDensity );
-		preset.Storm.Threshold               = ReadPercent( m_SliderStormThreshold );
-		preset.Storm.MinTimeBetweenLightning = StormLightningInterval();
+		if ( m_TabPrecipitationCtrl )
+			m_TabPrecipitationCtrl.ReadInto( preset, transition, duration );
 
-		if ( m_CheckboxSandstormEnabled )
-		{
-			if ( m_CheckboxSandstormEnabled.IsChecked() )
-				preset.PSandstorm.Enabled = 1;
-			else
-				preset.PSandstorm.Enabled = 0;
-		}
-		preset.PSandstorm.Duration = SandstormDuration();
-		preset.PSandstorm.FadeInTime = SandstormFadeIn();
-		preset.PSandstorm.OvercastValue = SandstormOvercast();
-		preset.PSandstorm.WindMagnitudeValue = SandstormWindMagnitude();
-
-		preset.POvercast.Forecast    = ReadPercent( m_SliderOvercastForecast );
-		preset.POvercast.Time        = transition;
-		preset.POvercast.MinDuration = duration;
-
-		preset.PFog.Forecast    = ReadPercent( m_SliderFogForecast );
-		preset.PFog.Time        = transition;
-		preset.PFog.MinDuration = duration;
-
-		if ( m_SliderDynamicFogDistance ) preset.PDynFog.Distance = m_SliderDynamicFogDistance.GetCurrent();
-		if ( m_SliderDynamicFogHeight )   preset.PDynFog.Height   = m_SliderDynamicFogHeight.GetCurrent();
-		if ( m_SliderDynamicFogBias )     preset.PDynFog.Bias     = m_SliderDynamicFogBias.GetCurrent();
-		preset.PDynFog.Time = transition;
-
-		preset.PRain.Forecast    = ReadPercent( m_SliderRainForecast );
-		preset.PRain.Time        = transition;
-		preset.PRain.MinDuration = duration;
-
-		if ( m_RangeRainThreshold )
-		{
-			preset.RainThreshold.OvercastMin = m_RangeRainThreshold.GetRangeLow() * 0.01;
-			preset.RainThreshold.OvercastMax = m_RangeRainThreshold.GetRangeHigh() * 0.01;
-		}
-		preset.RainThreshold.Time = transition;
-
-		preset.PSnow.Forecast    = ReadPercent( m_SliderSnowForecast );
-		preset.PSnow.Time        = transition;
-		preset.PSnow.MinDuration = duration;
-
-		if ( m_RangeSnowThreshold )
-		{
-			preset.SnowThreshold.OvercastMin = m_RangeSnowThreshold.GetRangeLow() * 0.01;
-			preset.SnowThreshold.OvercastMax = m_RangeSnowThreshold.GetRangeHigh() * 0.01;
-		}
-		preset.SnowThreshold.Time = transition;
-
-		if ( m_SliderWindMagnitude )
-			preset.PWindMagnitude.Forecast = m_SliderWindMagnitude.GetCurrent();
-		preset.PWindMagnitude.Time        = transition;
-		preset.PWindMagnitude.MinDuration = duration;
-
-		if ( m_SliderWindDirection )
-			preset.PWindDirection.Forecast = DEG2PI( m_SliderWindDirection.GetCurrent() );
-		preset.PWindDirection.Time        = transition;
-		preset.PWindDirection.MinDuration = duration;
-
-		if ( m_SliderWindFuncMin )   preset.WindFunc.Min   = m_SliderWindFuncMin.GetCurrent();
-		if ( m_SliderWindFuncMax )   preset.WindFunc.Max   = m_SliderWindFuncMax.GetCurrent();
-		if ( m_SliderWindFuncSpeed ) preset.WindFunc.Speed = m_SliderWindFuncSpeed.GetCurrent();
+		if ( m_TabWindCtrl )
+			m_TabWindCtrl.ReadInto( preset, transition, duration );
 	}
 
-	protected float GlobalTransition()
+	//! Public: read by every per-tab Apply*()/ReadInto(), which is why these
+	//! stay on the form even though the pickers themselves are Overview-owned.
+	float GlobalTransition()
 	{
 		if ( m_PickerTransition )
 			return m_PickerTransition.GetTotalSeconds();
@@ -1597,7 +1231,7 @@ class JMWeatherForm: JMFormBase
 		return DEFAULT_TRANSITION;
 	}
 
-	protected float GlobalDuration()
+	float GlobalDuration()
 	{
 		if ( m_PickerDuration )
 			return m_PickerDuration.GetTotalSeconds();
@@ -1605,118 +1239,8 @@ class JMWeatherForm: JMFormBase
 		return DEFAULT_DURATION;
 	}
 
-	// -------------------------------------------------------------------------
-	//  Dirty tracking
-	// -------------------------------------------------------------------------
-
-	void OnChange_Overcast( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyOvercast = true;
-	}
-
-	void OnChange_Fog( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyFog = true;
-	}
-
-	void OnChange_Storm( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyStorm = true;
-	}
-
-	void OnChange_Sandstorm( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtySandstorm = true;
-	}
-
-	void OnChange_Rain( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyRain = true;
-	}
-
-	void OnChange_Snow( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtySnow = true;
-	}
-
-	void OnChange_Wind( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyWind = true;
-	}
-
-	void OnChange_WindFunction( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyWindFunc = true;
-	}
-
-	void OnChange_WindDirection( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyWind = true;
-
-		UpdateWindDirectionSlider();
-	}
-
-	void OnChange_Time( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyTime = true;
-	}
-
-	void OnChange_Month( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CHANGE )
-			return;
-
-		m_DirtyTime = true;
-
-		if ( m_SpinnerMonth )
-			ClampDayToMonth( m_SpinnerMonth.GetValueInt() );
-	}
-
-	void UpdateWindDirectionSlider()
-	{
-		if ( !m_SliderWindDirection )
-			return;
-
-		float direction = m_SliderWindDirection.GetCurrent();
-
-		//! The degree symbol lives in the stringtable, not here - an Enforce .c
-		//! must stay pure ASCII or it poisons the script type-pool.
-		string degrees = string.Format( Widget.TranslateString( "#STR_COT_FORMAT_DEGREE" ), Math.Round( direction ) );
-
-		m_SliderWindDirection.SetText( CardinalFor( direction ) + "  " + degrees );
-	}
-
-	//! Compass point for a heading in degrees, shared with the preset preview.
+	//! Compass point for a heading in degrees, shared with the preset preview
+	//! and with JMWeatherFormTabWind.
 	static string CardinalFor( float degrees )
 	{
 		int index = Math.Floor( ( ( degrees + 22.5 ) / 45 ) );
@@ -1730,89 +1254,10 @@ class JMWeatherForm: JMFormBase
 	}
 
 	// -------------------------------------------------------------------------
-	//  Apply
+	//  Apply - per-section Apply buttons/logic moved to their owning tab
+	//  class (JMWeatherFormTabSky/Precipitation/Wind/Time.c); Apply All stays
+	//  here since it is Overview's own button and has to reach every section.
 	// -------------------------------------------------------------------------
-
-	void OnClick_ApplyOvercast( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyOvercast();
-	}
-
-	void OnClick_ApplyFog( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyFog();
-	}
-
-	void OnClick_ApplyStorm( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyStorm();
-	}
-
-	void OnClick_ApplySandstorm( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplySandstorm();
-	}
-
-	void OnClick_ApplyRain( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyRain();
-	}
-
-	void OnClick_ApplySnow( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplySnow();
-	}
-
-	void OnClick_ApplyWind( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyWind();
-	}
-
-	void OnClick_ApplyWindFunction( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyWindFunction();
-	}
-
-	void OnClick_ApplyTime( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !m_Module )
-			return;
-
-		action.AnimateFeedback();
-		ApplyTime();
-	}
 
 	//! Writes every section the admin has touched, and only those. A section
 	//! nobody edited is left to the mission's own weather controller.
@@ -1829,27 +1274,27 @@ class JMWeatherForm: JMFormBase
 		//! see the preset, which means all of it.
 		if ( IsPresetMode() )
 		{
-			ApplyOvercast();
-			ApplyFog();
-			ApplyStorm();
-			ApplySandstorm();
-			ApplyRain();
-			ApplySnow();
-			ApplyWind();
-			ApplyWindFunction();
-			ApplyTime();
+			if ( m_TabSkyCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_OVERCAST ) )        m_TabSkyCtrl.ApplyOvercast();
+			if ( m_TabSkyCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_FOG ) )             m_TabSkyCtrl.ApplyFog();
+			if ( m_TabSkyCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_STORM ) )           m_TabSkyCtrl.ApplyStorm();
+			if ( m_TabSkyCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_SANDSTORM ) )       m_TabSkyCtrl.ApplySandstorm();
+			if ( m_TabPrecipitationCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_RAIN ) )  m_TabPrecipitationCtrl.ApplyRain();
+			if ( m_TabPrecipitationCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_SNOW ) )  m_TabPrecipitationCtrl.ApplySnow();
+			if ( m_TabWindCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_WIND ) )           m_TabWindCtrl.ApplyWind();
+			if ( m_TabWindCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_WIND_FUNCPARAMS ) ) m_TabWindCtrl.ApplyWindFunction();
+			if ( m_TabTimeCtrl && JMPermissions.Has( JMConstants.PERM_WEATHER_DATE ) )           m_TabTimeCtrl.ApplyTime();
 			return;
 		}
 
-		if ( m_DirtyOvercast )  ApplyOvercast();
-		if ( m_DirtyFog )       ApplyFog();
-		if ( m_DirtyStorm )     ApplyStorm();
-		if ( m_DirtySandstorm ) ApplySandstorm();
-		if ( m_DirtyRain )      ApplyRain();
-		if ( m_DirtySnow )      ApplySnow();
-		if ( m_DirtyWind )      ApplyWind();
-		if ( m_DirtyWindFunc ) ApplyWindFunction();
-		if ( m_DirtyTime )     ApplyTime();
+		if ( m_TabSkyCtrl && IsSectionDirty( SECTION_OVERCAST ) && JMPermissions.Has( JMConstants.PERM_WEATHER_OVERCAST ) )        m_TabSkyCtrl.ApplyOvercast();
+		if ( m_TabSkyCtrl && IsSectionDirty( SECTION_FOG ) && JMPermissions.Has( JMConstants.PERM_WEATHER_FOG ) )                  m_TabSkyCtrl.ApplyFog();
+		if ( m_TabSkyCtrl && IsSectionDirty( SECTION_STORM ) && JMPermissions.Has( JMConstants.PERM_WEATHER_STORM ) )              m_TabSkyCtrl.ApplyStorm();
+		if ( m_TabSkyCtrl && IsSectionDirty( SECTION_SANDSTORM ) && JMPermissions.Has( JMConstants.PERM_WEATHER_SANDSTORM ) )      m_TabSkyCtrl.ApplySandstorm();
+		if ( m_TabPrecipitationCtrl && IsSectionDirty( SECTION_RAIN ) && JMPermissions.Has( JMConstants.PERM_WEATHER_RAIN ) )      m_TabPrecipitationCtrl.ApplyRain();
+		if ( m_TabPrecipitationCtrl && IsSectionDirty( SECTION_SNOW ) && JMPermissions.Has( JMConstants.PERM_WEATHER_SNOW ) )      m_TabPrecipitationCtrl.ApplySnow();
+		if ( m_TabWindCtrl && IsSectionDirty( SECTION_WIND ) && JMPermissions.Has( JMConstants.PERM_WEATHER_WIND ) )               m_TabWindCtrl.ApplyWind();
+		if ( m_TabWindCtrl && IsSectionDirty( SECTION_WIND_FUNCTION ) && JMPermissions.Has( JMConstants.PERM_WEATHER_WIND_FUNCPARAMS ) ) m_TabWindCtrl.ApplyWindFunction();
+		if ( m_TabTimeCtrl && IsSectionDirty( SECTION_TIME ) && JMPermissions.Has( JMConstants.PERM_WEATHER_DATE ) )               m_TabTimeCtrl.ApplyTime();
 	}
 
 	//! In preset mode Apply is a PREVIEW, and a local one.
@@ -1866,7 +1311,7 @@ class JMWeatherForm: JMFormBase
 	//! The server owns the weather and syncs it, so a preview lasts until the
 	//! next sync rather than forever. That is the right lifetime for a preview,
 	//! but it does mean a long fade may be overwritten part way through.
-	protected bool PreviewSection( int section )
+	bool PreviewSection( int section )
 	{
 		if ( !IsPresetMode() )
 			return false;
@@ -1938,128 +1383,6 @@ class JMWeatherForm: JMFormBase
 		preset.PWindDirection.Time = 0;
 	}
 
-	protected void ApplyOvercast()
-	{
-		if ( PreviewSection( SECTION_OVERCAST ) )
-			return;
-
-		m_Module.SetOvercast( ReadPercent( m_SliderOvercastForecast ), GlobalTransition(), GlobalDuration() );
-
-		m_DirtyOvercast = false;
-	}
-
-	protected void ApplyFog()
-	{
-		if ( PreviewSection( SECTION_FOG ) )
-			return;
-
-		float fogTransition = GlobalTransition();
-
-		m_Module.SetFog( ReadPercent( m_SliderFogForecast ), fogTransition, GlobalDuration() );
-
-		if ( m_SliderDynamicFogDistance && m_SliderDynamicFogHeight && m_SliderDynamicFogBias )
-			m_Module.SetDynamicFog( m_SliderDynamicFogDistance.GetCurrent(), m_SliderDynamicFogHeight.GetCurrent(), m_SliderDynamicFogBias.GetCurrent(), fogTransition );
-
-		m_DirtyFog = false;
-	}
-
-	protected void ApplyStorm()
-	{
-		if ( PreviewSection( SECTION_STORM ) )
-			return;
-
-		m_Module.SetStorm( ReadPercent( m_SliderStormDensity ), ReadPercent( m_SliderStormThreshold ), StormLightningInterval() );
-
-		m_DirtyStorm = false;
-	}
-
-	protected void ApplySandstorm()
-	{
-		if ( PreviewSection( SECTION_SANDSTORM ) )
-			return;
-
-		bool enabled = false;
-		if ( m_CheckboxSandstormEnabled )
-			enabled = m_CheckboxSandstormEnabled.IsChecked();
-
-		m_Module.SetSandstorm( enabled, SandstormDuration(), SandstormFadeIn(), SandstormOvercast(), SandstormWindMagnitude() );
-
-		m_DirtySandstorm = false;
-	}
-
-	protected void ApplyRain()
-	{
-		if ( PreviewSection( SECTION_RAIN ) )
-			return;
-
-		float rainTransition = GlobalTransition();
-
-		m_Module.SetRain( ReadPercent( m_SliderRainForecast ), rainTransition, GlobalDuration() );
-
-		if ( m_RangeRainThreshold )
-			m_Module.SetRainThresholds( m_RangeRainThreshold.GetRangeLow() * 0.01, m_RangeRainThreshold.GetRangeHigh() * 0.01, rainTransition );
-
-		m_DirtyRain = false;
-	}
-
-	protected void ApplySnow()
-	{
-		if ( PreviewSection( SECTION_SNOW ) )
-			return;
-
-		float snowTransition = GlobalTransition();
-
-		m_Module.SetSnow( ReadPercent( m_SliderSnowForecast ), snowTransition, GlobalDuration() );
-
-		if ( m_RangeSnowThreshold )
-			m_Module.SetSnowThresholds( m_RangeSnowThreshold.GetRangeLow() * 0.01, m_RangeSnowThreshold.GetRangeHigh() * 0.01, snowTransition );
-
-		m_DirtySnow = false;
-	}
-
-	protected void ApplyWind()
-	{
-		if ( PreviewSection( SECTION_WIND ) )
-			return;
-
-		float windTransition = GlobalTransition();
-		float windDuration   = GlobalDuration();
-
-		if ( m_SliderWindMagnitude )
-			m_Module.SetWindMagnitude( m_SliderWindMagnitude.GetCurrent(), windTransition, windDuration );
-
-		if ( m_SliderWindDirection )
-			m_Module.SetWindDirection( DEG2PI( m_SliderWindDirection.GetCurrent() ), windTransition, windDuration );
-
-		m_DirtyWind = false;
-	}
-
-	protected void ApplyWindFunction()
-	{
-		if ( PreviewSection( SECTION_WIND_FUNCTION ) )
-			return;
-
-		if ( m_SliderWindFuncMin && m_SliderWindFuncMax && m_SliderWindFuncSpeed )
-			m_Module.SetWindFunctionParams( m_SliderWindFuncMin.GetCurrent(), m_SliderWindFuncMax.GetCurrent(), m_SliderWindFuncSpeed.GetCurrent() );
-
-		m_DirtyWindFunc = false;
-	}
-
-	protected void ApplyTime()
-	{
-		if ( PreviewSection( SECTION_TIME ) )
-			return;
-
-		if ( !m_SpinnerYear || !m_SpinnerMonth || !m_SpinnerDay || !m_TimeOfDay )
-			return;
-
-		ClampDayToMonth( m_SpinnerMonth.GetValueInt() );
-
-		m_Module.SetDate( m_SpinnerYear.GetValueInt(), m_SpinnerMonth.GetValueInt(), m_SpinnerDay.GetValueInt(), m_TimeOfDay.GetHours(), m_TimeOfDay.GetMinutes() );
-
-		m_DirtyTime = false;
-	}
-
 	// -------------------------------------------------------------------------
 	//  Quick actions
 	// -------------------------------------------------------------------------
@@ -2097,21 +1420,21 @@ class JMWeatherForm: JMFormBase
 		else if ( id == "cloudy" )
 		{
 			overcast = Math.RandomFloatInclusive( 0.5, 0.8 );
-			density  = ReadPercent( m_SliderStormDensity );
+			if ( m_TabSkyCtrl ) density = m_TabSkyCtrl.ReadStormDensity();
 		}
 		else if ( id == "rainy" )
 		{
 			overcast = Math.RandomFloatInclusive( 0.7, 1.0 );
 			rain     = Math.RandomFloatInclusive( 0.5, 1.0 );
 			fog      = Math.RandomFloatInclusive( 0.0, 1.0 - windMin );
-			density  = ReadPercent( m_SliderStormDensity );
+			if ( m_TabSkyCtrl ) density = m_TabSkyCtrl.ReadStormDensity();
 		}
 		else if ( id == "snowy" )
 		{
 			overcast = Math.RandomFloatInclusive( 0.7, 1.0 );
 			snow     = Math.RandomFloatInclusive( 0.5, 1.0 );
 			fog      = Math.RandomFloatInclusive( 0.0, 1.0 - windMin );
-			density  = ReadPercent( m_SliderStormDensity );
+			if ( m_TabSkyCtrl ) density = m_TabSkyCtrl.ReadStormDensity();
 		}
 		else if ( id == "storm" )
 		{
@@ -2137,10 +1460,18 @@ class JMWeatherForm: JMFormBase
 		if ( id == "snowy" )
 			m_Module.SetSnowThresholds( 0.5, 1.0, transition );
 
+		float lightningInterval = DEFAULT_LIGHTNING_INTERVAL;
+		float stormThreshold    = 0;
+		if ( m_TabSkyCtrl )
+		{
+			lightningInterval = m_TabSkyCtrl.StormLightningInterval();
+			stormThreshold    = m_TabSkyCtrl.ReadStormThreshold();
+		}
+
 		if ( id == "storm" )
-			m_Module.SetStorm( density, 0.7, StormLightningInterval() );
+			m_Module.SetStorm( density, 0.7, lightningInterval );
 		else if ( density > 0 )
-			m_Module.SetStorm( density, Math.Max( ReadPercent( m_SliderStormThreshold ), 0.7 ), StormLightningInterval() );
+			m_Module.SetStorm( density, Math.Max( stormThreshold, 0.7 ), lightningInterval );
 
 		if ( id == "clear" )
 		{
@@ -2155,7 +1486,7 @@ class JMWeatherForm: JMFormBase
 
 			//! Storm is a separate system with no getter, so nothing else here
 			//! would ever turn the lightning off again.
-			m_Module.SetStorm( 0, 1.0, StormLightningInterval() );
+			m_Module.SetStorm( 0, 1.0, lightningInterval );
 
 			m_Module.SetWindMagnitude( 0, transition, duration );
 			m_Module.SetWindDirection( 0, transition, duration );
@@ -2176,46 +1507,6 @@ class JMWeatherForm: JMFormBase
 		//! not read back into them.
 		if ( !IsPresetMode() )
 			RefreshValues();
-	}
-
-	protected float StormLightningInterval()
-	{
-		if ( m_SliderStormLightning )
-			return m_SliderStormLightning.GetCurrent();
-
-		return DEFAULT_LIGHTNING_INTERVAL;
-	}
-
-	protected float SandstormDuration()
-	{
-		if ( m_SliderSandstormDuration )
-			return m_SliderSandstormDuration.GetCurrent();
-
-		return DEFAULT_SANDSTORM_DURATION;
-	}
-
-	protected float SandstormFadeIn()
-	{
-		if ( m_SliderSandstormFadeIn )
-			return m_SliderSandstormFadeIn.GetCurrent();
-
-		return DEFAULT_SANDSTORM_FADEIN;
-	}
-
-	protected float SandstormOvercast()
-	{
-		if ( m_SliderSandstormOvercast )
-			return ReadPercent( m_SliderSandstormOvercast );
-
-		return DEFAULT_SANDSTORM_OVERCAST;
-	}
-
-	protected float SandstormWindMagnitude()
-	{
-		if ( m_SliderSandstormWindMagnitude )
-			return m_SliderSandstormWindMagnitude.GetCurrent();
-
-		return DEFAULT_SANDSTORM_WINDMAGNITUDE;
 	}
 
 	void OnClick_QuickTime( UIEvent eid, UIActionBase action )
@@ -2281,15 +1572,7 @@ class JMWeatherForm: JMFormBase
 
 	protected void ClearDirty()
 	{
-		m_DirtyOvercast  = false;
-		m_DirtyFog       = false;
-		m_DirtyStorm     = false;
-		m_DirtySandstorm = false;
-		m_DirtyRain      = false;
-		m_DirtySnow      = false;
-		m_DirtyWind      = false;
-		m_DirtyWindFunc  = false;
-		m_DirtyTime      = false;
+		ClearDirtySections();
 	}
 
 	// -------------------------------------------------------------------------
@@ -2528,13 +1811,24 @@ class JMWeatherForm: JMFormBase
 		if ( !IsPresetMode() )
 			return;
 
-		ApplyOvercast();
-		ApplyFog();
-		ApplyStorm();
-		ApplyRain();
-		ApplySnow();
-		ApplyWind();
-		ApplyWindFunction();
+		if ( m_TabSkyCtrl )
+		{
+			m_TabSkyCtrl.ApplyOvercast();
+			m_TabSkyCtrl.ApplyFog();
+			m_TabSkyCtrl.ApplyStorm();
+		}
+
+		if ( m_TabPrecipitationCtrl )
+		{
+			m_TabPrecipitationCtrl.ApplyRain();
+			m_TabPrecipitationCtrl.ApplySnow();
+		}
+
+		if ( m_TabWindCtrl )
+		{
+			m_TabWindCtrl.ApplyWind();
+			m_TabWindCtrl.ApplyWindFunction();
+		}
 	}
 
 	void RemovePreset( string preset )
@@ -3233,14 +2527,15 @@ class JMWeatherForm: JMFormBase
 	//  Permissions / enable state
 	// -------------------------------------------------------------------------
 
-	protected void UpdateActionState( UIActionBase action, string permission, bool shouldDisable = false )
+	//! Public: every per-tab UpdateStates() calls this through the back-reference.
+	void UpdateActionState( UIActionBase action, string permission, bool shouldDisable = false )
 	{
 		if ( !action )
 			return;
 
 		bool disable;
 		if ( permission != "" )
-			disable = !GetPermissionsManager().HasPermission( permission );
+			disable = !JMPermissions.Has( permission );
 
 		if ( disable || shouldDisable )
 			action.Disable();
@@ -3260,39 +2555,10 @@ class JMWeatherForm: JMFormBase
 		UpdateActionState( m_PickerTransition, "Weather.View" );
 		UpdateActionState( m_PickerDuration, "Weather.View" );
 
-		UpdateActionState( m_SpinnerYear, "Weather.Date" );
-		UpdateActionState( m_SpinnerMonth, "Weather.Date" );
-		UpdateActionState( m_SpinnerDay, "Weather.Date" );
-		UpdateActionState( m_TimeOfDay, "Weather.Date" );
-
-		UpdateActionState( m_SliderStormDensity, "Weather.Storm" );
-		UpdateActionState( m_SliderStormThreshold, "Weather.Storm" );
-		UpdateActionState( m_SliderStormLightning, "Weather.Storm" );
-
-		UpdateActionState( m_CheckboxSandstormEnabled, "Weather.Sandstorm" );
-		UpdateActionState( m_SliderSandstormDuration, "Weather.Sandstorm" );
-		UpdateActionState( m_SliderSandstormFadeIn, "Weather.Sandstorm" );
-		UpdateActionState( m_SliderSandstormOvercast, "Weather.Sandstorm" );
-		UpdateActionState( m_SliderSandstormWindMagnitude, "Weather.Sandstorm" );
-
-		UpdateActionState( m_SliderOvercastForecast, "Weather.Overcast" );
-
-		UpdateActionState( m_SliderFogForecast, "Weather.Fog" );
-		UpdateActionState( m_SliderDynamicFogDistance, "Weather.Fog.Dynamic" );
-		UpdateActionState( m_SliderDynamicFogHeight, "Weather.Fog.Dynamic" );
-		UpdateActionState( m_SliderDynamicFogBias, "Weather.Fog.Dynamic" );
-
-		UpdateActionState( m_SliderRainForecast, "Weather.Rain" );
-		UpdateActionState( m_RangeRainThreshold, "Weather.Rain.Thresholds" );
-
-		UpdateActionState( m_SliderSnowForecast, "Weather.Snow" );
-		UpdateActionState( m_RangeSnowThreshold, "Weather.Snow.Thresholds" );
-
-		UpdateActionState( m_SliderWindMagnitude, "Weather.Wind" );
-		UpdateActionState( m_SliderWindDirection, "Weather.Wind" );
-		UpdateActionState( m_SliderWindFuncMin, "Weather.Wind.FunctionParams" );
-		UpdateActionState( m_SliderWindFuncMax, "Weather.Wind.FunctionParams" );
-		UpdateActionState( m_SliderWindFuncSpeed, "Weather.Wind.FunctionParams" );
+		if ( m_TabTimeCtrl )          m_TabTimeCtrl.UpdateStates();
+		if ( m_TabSkyCtrl )           m_TabSkyCtrl.UpdateStates();
+		if ( m_TabPrecipitationCtrl ) m_TabPrecipitationCtrl.UpdateStates();
+		if ( m_TabWindCtrl )          m_TabWindCtrl.UpdateStates();
 
 		UpdateActionState( m_SelectPreset, "Weather.Preset.Use" );
 		UpdateActionState( m_EditPresetName, "Weather.Preset.Create" );

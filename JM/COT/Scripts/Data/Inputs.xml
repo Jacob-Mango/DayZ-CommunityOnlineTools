@@ -17,7 +17,9 @@
             <input name="UACOTToggleVehicle" loc="STR_COT_INPUT_TOGGLE_MENU_VEHICLE" />
             <input name="UACOTToggleWeather" loc="STR_COT_INPUT_TOGGLE_MENU_WEATHER" />
             <input name="UACOTToggleServerInfo" loc="STR_COT_INPUT_TOGGLE_MENU_SERVER_INFO" />
-            
+            <input name="UACOTToggleCompensations" loc="STR_COT_INPUT_TOGGLE_MENU_COMPENSATIONS" />
+            <input name="UACOTToggleWebhook" loc="STR_COT_INPUT_TOGGLE_MENU_WEBHOOK" />
+
             <input name="UATeleportModuleTeleportCursor" loc="STR_COT_INPUT_TELEPORT_CROSSHAIR" />
             <input name="UATeleportModuleWorldToModelLookAt" loc="STR_COT_INPUT_TELEPORT_WORLD_MODEL_LOOK_AT" visible="false" />
 
@@ -72,6 +74,8 @@
 			<input name="UACOTToggleVehicle" />
 			<input name="UACOTToggleWeather" />
 			<input name="UACOTToggleServerInfo" />
+			<input name="UACOTToggleCompensations" />
+			<input name="UACOTToggleWebhook" />
 
 			<input name="UATeleportModuleTeleportCursor" />
 			<input name="UATeleportModuleWorldToModelLookAt" />
@@ -234,6 +238,16 @@
         <input name="UACOTToggleServerInfo">
             <btn name="kRMenu">
                 <btn name="kN" />
+            </btn>
+        </input>
+        <input name="UACOTToggleCompensations">
+            <btn name="kRMenu">
+                <btn name="kComma" />
+            </btn>
+        </input>
+        <input name="UACOTToggleWebhook">
+            <btn name="kRMenu">
+                <btn name="kPeriod" />
             </btn>
         </input>
 

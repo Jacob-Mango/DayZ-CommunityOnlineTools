@@ -177,15 +177,8 @@ class JMTeleportForm: JMFormBase
 	//! panning behind it cannot move the spot the menu is about.
 	protected vector m_MapMenuWorldPos;
 
-	//! Every array below is parallel to the list widget's rows, in the same
-	//! order: m_ListNames[i] / m_ListKinds[i] / m_ListPositions[i] /
-	//! m_ListMarkerIds[i] all describe row i. m_ListNames holds each row's
-	//! unique key - a location's name, a player's GUID, an index string for
-	//! everything else, whatever that kind's map marker id is built from.
-	protected ref TStringArray m_ListNames     = new TStringArray;
-	protected ref TStringArray m_ListKinds     = new TStringArray;
-	protected ref array<vector> m_ListPositions = new array<vector>;
-	protected ref TStringArray m_ListMarkerIds = new TStringArray;
+	//! Strongly-typed list items array replacing legacy parallel arrays.
+	protected ref array< ref JMTeleportRowData > m_ListItems = new array< ref JMTeleportRowData >;
 
 	// ---- Right pane --------------------------------------------------------
 	protected UIActionMap            m_Map;
@@ -665,7 +658,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Add" ) )
 			return;
 
 		ShowPopup( "", m_InputCoords.GetValue(), "", "" );
@@ -841,7 +834,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( m_PopupEditing == "" )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
+			if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Add" ) )
 				return;
 
 			m_Module.AddLocation( name, category, m_PopupWorldPos );
@@ -850,7 +843,7 @@ class JMTeleportForm: JMFormBase
 		}
 		else
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit" ) )
+			if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT ) )
 				return;
 
 			JMTeleportLocation target = FindLocation( m_PopupEditing );
@@ -872,7 +865,7 @@ class JMTeleportForm: JMFormBase
 
 		HidePopup();
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Refresh" ) )
 			return;
 
 		m_Module.Reload();
@@ -901,10 +894,7 @@ class JMTeleportForm: JMFormBase
 		if ( !m_LocationList )
 			return;
 
-		m_ListNames.Clear();
-		m_ListKinds.Clear();
-		m_ListPositions.Clear();
-		m_ListMarkerIds.Clear();
+		m_ListItems.Clear();
 
 		TStringArray rowLabels = new TStringArray;
 		TStringArray rowSubs   = new TStringArray;
@@ -916,7 +906,7 @@ class JMTeleportForm: JMFormBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION ) )
 		{
 			m_LocationList.SetEmptyText( "#STR_COT_TELEPORT_MODULE_NO_VIEW_PERMISSION" );
 			m_LocationList.SetItems( rowLabels, rowSubs );
@@ -1012,10 +1002,7 @@ class JMTeleportForm: JMFormBase
 	//! the same row in all of them.
 	protected void AddRow( string key, string kind, vector position, string markerId )
 	{
-		m_ListNames.Insert( key );
-		m_ListKinds.Insert( kind );
-		m_ListPositions.Insert( position );
-		m_ListMarkerIds.Insert( markerId );
+		m_ListItems.Insert( new JMTeleportRowData( key, kind, position, markerId ) );
 	}
 
 	//! True if `label` matches the current search, or there is no search to
@@ -1033,12 +1020,33 @@ class JMTeleportForm: JMFormBase
 		return s.KeywordSearchImplEx( m_SearchFilter, keywords, requireAllKeywords, unused );
 	}
 
-	//! Mirrors RefreshPlayerMarkers()'s role/selection filtering exactly, so a
-	//! role hidden on the map is hidden here too - the two would otherwise be
-	//! free to disagree about who "the visible players" are.
+	//! Shared by AppendPlayerRows and RefreshPlayerMarkers, so a role hidden on
+	//! the map is hidden here too - the two would otherwise be free to disagree
+	//! about who "the visible players" are.
+	protected bool IsPlayerVisibleByRole( JMPlayerInstance player )
+	{
+		if ( !m_HiddenPlayerRoles || m_HiddenPlayerRoles.Count() == 0 )
+			return true;
+
+		array< string > playerRoles = player.GetRoles();
+
+		if ( playerRoles && playerRoles.Count() > 0 )
+		{
+			for ( int r = 0; r < playerRoles.Count(); r++ )
+			{
+				if ( !IsRoleHidden( playerRoles[r] ) )
+					return true;
+			}
+
+			return false;
+		}
+
+		return !IsRoleHidden( "Default" ) && !IsRoleHidden( "Player" ) && !IsRoleHidden( "Everyone" );
+	}
+
 	protected void AppendPlayerRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.Players" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
@@ -1053,31 +1061,8 @@ class JMTeleportForm: JMFormBase
 			if ( !player )
 				continue;
 
-			if ( m_HiddenPlayerRoles && m_HiddenPlayerRoles.Count() > 0 )
-			{
-				array< string > playerRoles = player.GetRoles();
-				bool showThisPlayer = false;
-
-				if ( playerRoles && playerRoles.Count() > 0 )
-				{
-					for ( int r = 0; r < playerRoles.Count(); r++ )
-					{
-						if ( !IsRoleHidden( playerRoles[r] ) )
-						{
-							showThisPlayer = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					if ( !IsRoleHidden( "Default" ) && !IsRoleHidden( "Player" ) && !IsRoleHidden( "Everyone" ) )
-						showThisPlayer = true;
-				}
-
-				if ( !showThisPlayer )
-					continue;
-			}
+			if ( !IsPlayerVisibleByRole( player ) )
+				continue;
 
 			string name = player.GetName();
 
@@ -1097,7 +1082,7 @@ class JMTeleportForm: JMFormBase
 	//! same vehicle.
 	protected void AppendVehicleRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
 	{
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
 			return;
 
 		JMVehiclesModule vehicles = VehiclesModule();
@@ -1129,10 +1114,12 @@ class JMTeleportForm: JMFormBase
 		}
 	}
 
-	//! Mirrors RefreshMapMarkers()'s Expansion source and index scheme.
-	protected void AppendMapMarkerRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
+	//! Walks the Expansion server-marker list once; shared by AppendMapMarkerRows
+	//! and RefreshMapMarkers so the list and the map can never disagree about
+	//! what a marker is called or where it sits.
+	protected void CollectMapMarkerEntries( out array< ref JMTeleportMapEntry > entries )
 	{
-		string kindLabel = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ROW_MAP_MARKER" );
+		entries = new array< ref JMTeleportMapEntry >();
 
 #ifdef EXPANSIONMODNAVIGATION
 		ExpansionMapSettings mapSettings = GetExpansionSettings().GetMap();
@@ -1149,25 +1136,50 @@ class JMTeleportForm: JMFormBase
 			if ( markerName == "" )
 				markerName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME" );
 
-			if ( !PassesSearch( markerName, keywords, requireAllKeywords ) )
-				continue;
+			//! The marker's own glyph, so a trader reads as a trader here the
+			//! same as it does on Expansion's map. GetIcon() resolves the
+			//! stored icon NAME through ExpansionIcons to a texture path or
+			//! an imageset reference, both of which LoadImageFile takes; a
+			//! marker that named no icon falls back to the plain dot.
+			string markerIcon = marker.GetIcon();
+			if ( markerIcon == "" )
+				markerIcon = UIActionMap.ICON_DOT;
 
-			rowLabels.Insert( markerName );
-			rowSubs.Insert( kindLabel );
-
-			AddRow( "marker_" + i, ROWKIND_MARKER, marker.GetPosition(), "tp_marker_" + i );
+			entries.Insert( new JMTeleportMapEntry( "marker_" + i, marker.GetPosition(), markerName, "", markerIcon, marker.GetColor() ) );
 		}
 #endif
 	}
 
-	//! Mirrors RefreshHeliCrashMarkers()'s two sources and running counter.
-	protected void AppendHeliCrashRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
+	protected void AppendMapMarkerRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
 	{
+		string kindLabel = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_ROW_MAP_MARKER" );
+
+		array< ref JMTeleportMapEntry > entries;
+		CollectMapMarkerEntries( entries );
+
+		for ( int i = 0; i < entries.Count(); i++ )
+		{
+			JMTeleportMapEntry entry = entries[i];
+
+			if ( !PassesSearch( entry.m_Label, keywords, requireAllKeywords ) )
+				continue;
+
+			rowLabels.Insert( entry.m_Label );
+			rowSubs.Insert( kindLabel );
+
+			AddRow( entry.m_Id, ROWKIND_MARKER, entry.m_Position, "tp_" + entry.m_Id );
+		}
+	}
+
+	//! Walks whichever heli-crash list is live once; shared by AppendHeliCrashRows
+	//! and RefreshHeliCrashMarkers.
+	protected void CollectHeliCrashEntries( out array< ref JMTeleportMapEntry > entries )
+	{
+		entries = new array< ref JMTeleportMapEntry >();
+
+		//! Every crash carries the same localized name; the ordinal is the
+		//! only thing that tells two of them apart in a list.
 		string crashName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER" );
-
-		if ( !PassesSearch( crashName, keywords, requireAllKeywords ) )
-			return;
-
 		int crashIndex = 0;
 
 #ifdef EXPANSIONMODAI
@@ -1179,11 +1191,7 @@ class JMTeleportForm: JMFormBase
 				CrashBase expCrash = expNode.m_Value;
 				if ( expCrash )
 				{
-					//! Every crash carries the same localized name; the ordinal
-					//! is the only thing that tells two of them apart in a list.
-					rowLabels.Insert( crashName );
-					rowSubs.Insert( "#" + ( crashIndex + 1 ) );
-					AddRow( "heli_" + crashIndex, ROWKIND_HELICRASH, expCrash.GetPosition(), "tp_heli_" + crashIndex );
+					entries.Insert( new JMTeleportMapEntry( "heli_" + crashIndex, expCrash.GetPosition(), crashName, "#" + ( crashIndex + 1 ), JMConstants.Lucide( "helicopter" ), ARGB( 255, 243, 18, 156 ) ) );
 					crashIndex++;
 				}
 				expNode = expNode.m_Next;
@@ -1198,9 +1206,7 @@ class JMTeleportForm: JMFormBase
 				CrashBase cotCrash = cotNode.m_Value;
 				if ( cotCrash )
 				{
-					rowLabels.Insert( crashName );
-					rowSubs.Insert( "#" + ( crashIndex + 1 ) );
-					AddRow( "heli_" + crashIndex, ROWKIND_HELICRASH, cotCrash.GetPosition(), "tp_heli_" + crashIndex );
+					entries.Insert( new JMTeleportMapEntry( "heli_" + crashIndex, cotCrash.GetPosition(), crashName, "#" + ( crashIndex + 1 ), JMConstants.Lucide( "helicopter" ), ARGB( 255, 243, 18, 156 ) ) );
 					crashIndex++;
 				}
 				cotNode = cotNode.m_Next;
@@ -1209,14 +1215,32 @@ class JMTeleportForm: JMFormBase
 #endif
 	}
 
-	//! Mirrors RefreshToxicZoneMarkers()'s two sources and running counter.
-	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
+	protected void AppendHeliCrashRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
 	{
-		string zoneName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER" );
+		string crashName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER" );
 
-		if ( !PassesSearch( zoneName, keywords, requireAllKeywords ) )
+		if ( !PassesSearch( crashName, keywords, requireAllKeywords ) )
 			return;
 
+		array< ref JMTeleportMapEntry > entries;
+		CollectHeliCrashEntries( entries );
+
+		for ( int i = 0; i < entries.Count(); i++ )
+		{
+			JMTeleportMapEntry entry = entries[i];
+			rowLabels.Insert( entry.m_Label );
+			rowSubs.Insert( entry.m_SubLabel );
+			AddRow( entry.m_Id, ROWKIND_HELICRASH, entry.m_Position, "tp_" + entry.m_Id );
+		}
+	}
+
+	//! Walks whichever toxic-zone list is live once; shared by AppendToxicZoneRows
+	//! and RefreshToxicZoneMarkers.
+	protected void CollectToxicZoneEntries( out array< ref JMTeleportMapEntry > entries )
+	{
+		entries = new array< ref JMTeleportMapEntry >();
+
+		string zoneName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER" );
 		int zoneIndex = 0;
 
 #ifdef EXPANSIONMODMISSIONS
@@ -1228,9 +1252,7 @@ class JMTeleportForm: JMFormBase
 				if ( !expArea )
 					continue;
 
-				rowLabels.Insert( zoneName );
-				rowSubs.Insert( "#" + ( zoneIndex + 1 ) );
-				AddRow( "toxic_" + zoneIndex, ROWKIND_TOXICZONE, expArea.GetPosition(), "tp_toxic_" + zoneIndex );
+				entries.Insert( new JMTeleportMapEntry( "toxic_" + zoneIndex, expArea.GetPosition(), zoneName, "#" + ( zoneIndex + 1 ), JMConstants.Lucide( "biohazard" ), ARGB( 255, 80, 180, 40 ) ) );
 				zoneIndex++;
 			}
 		}
@@ -1243,13 +1265,30 @@ class JMTeleportForm: JMFormBase
 				if ( !effArea )
 					continue;
 
-				rowLabels.Insert( zoneName );
-				rowSubs.Insert( "#" + ( zoneIndex + 1 ) );
-				AddRow( "toxic_" + zoneIndex, ROWKIND_TOXICZONE, effArea.GetPosition(), "tp_toxic_" + zoneIndex );
+				entries.Insert( new JMTeleportMapEntry( "toxic_" + zoneIndex, effArea.GetPosition(), zoneName, "#" + ( zoneIndex + 1 ), JMConstants.Lucide( "biohazard" ), ARGB( 255, 80, 180, 40 ) ) );
 				zoneIndex++;
 			}
 		}
 #endif
+	}
+
+	protected void AppendToxicZoneRows( TStringArray rowLabels, TStringArray rowSubs, TStringArray keywords, bool requireAllKeywords )
+	{
+		string zoneName = Widget.TranslateString( "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER" );
+
+		if ( !PassesSearch( zoneName, keywords, requireAllKeywords ) )
+			return;
+
+		array< ref JMTeleportMapEntry > entries;
+		CollectToxicZoneEntries( entries );
+
+		for ( int i = 0; i < entries.Count(); i++ )
+		{
+			JMTeleportMapEntry entry = entries[i];
+			rowLabels.Insert( entry.m_Label );
+			rowSubs.Insert( entry.m_SubLabel );
+			AddRow( entry.m_Id, ROWKIND_TOXICZONE, entry.m_Position, "tp_" + entry.m_Id );
+		}
 	}
 
 	//! Find the row currently holding (key, kind), after a rebuild has thrown
@@ -1259,9 +1298,10 @@ class JMTeleportForm: JMFormBase
 		if ( key == "" )
 			return -1;
 
-		for ( int i = 0; i < m_ListNames.Count(); i++ )
+		for ( int i = 0; i < m_ListItems.Count(); i++ )
 		{
-			if ( m_ListNames[i] == key && m_ListKinds[i] == kind )
+			JMTeleportRowData item = m_ListItems[i];
+			if ( item && item.m_Name == key && item.m_Kind == kind )
 				return i;
 		}
 
@@ -1277,9 +1317,10 @@ class JMTeleportForm: JMFormBase
 		if ( markerId == "" )
 			return -1;
 
-		for ( int i = 0; i < m_ListMarkerIds.Count(); i++ )
+		for ( int i = 0; i < m_ListItems.Count(); i++ )
 		{
-			if ( m_ListMarkerIds[i] == markerId )
+			JMTeleportRowData item = m_ListItems[i];
+			if ( item && item.m_MarkerId == markerId )
 				return i;
 		}
 
@@ -1369,13 +1410,13 @@ class JMTeleportForm: JMFormBase
 
 		int row = CurrentRow();
 
-		if ( row < 0 || row >= m_ListMarkerIds.Count() )
+		if ( row < 0 || row >= m_ListItems.Count() )
 		{
 			m_Map.SetSelectedMarker( "" );
 			return;
 		}
 
-		m_Map.SetSelectedMarker( m_ListMarkerIds[row] );
+		m_Map.SetSelectedMarker( m_ListItems[row].m_MarkerId );
 	}
 
 	void OnClick_LocationList( UIEvent eid, UIActionBase action )
@@ -1385,7 +1426,7 @@ class JMTeleportForm: JMFormBase
 
 		int row = m_LocationList.GetSelectedIndex();
 
-		if ( row < 0 || row >= m_ListNames.Count() )
+		if ( row < 0 || row >= m_ListItems.Count() )
 			return;
 
 		if ( eid == UIEvent.DOUBLE_CLICK )
@@ -1396,10 +1437,14 @@ class JMTeleportForm: JMFormBase
 			return;
 		}
 
-		m_SelectedName = m_ListNames[row];
-		m_SelectedKind = m_ListKinds[row];
+		JMTeleportRowData item = m_ListItems[row];
+		if ( !item )
+			return;
 
-		vector pos = m_ListPositions[row];
+		m_SelectedName = item.m_Name;
+		m_SelectedKind = item.m_Kind;
+
+		vector pos = item.m_Position;
 
 		m_Module.OnSelectLocation( pos );
 
@@ -1431,10 +1476,14 @@ class JMTeleportForm: JMFormBase
 			return;
 
 		int row = CurrentRow();
-		if ( row < 0 || row >= m_ListKinds.Count() )
+		if ( row < 0 || row >= m_ListItems.Count() )
 			return;
 
-		string kind = m_ListKinds[row];
+		JMTeleportRowData item = m_ListItems[row];
+		if ( !item )
+			return;
+
+		string kind = item.m_Kind;
 
 		if ( !m_RowMenu )
 		{
@@ -1456,11 +1505,11 @@ class JMTeleportForm: JMFormBase
 		//! A location teleport is gated by the location permission; every other
 		//! kind goes through Position(), which is gated by the plain
 		//! teleport-to-position one.
-		string teleportPerm = "Admin.Player.Teleport.Position";
+		string teleportPerm = JMConstants.PERM_PLAYER_TELEPORT_POSITION;
 		if ( kind == ROWKIND_LOCATION )
-			teleportPerm = "Admin.Player.Teleport.Location";
+			teleportPerm = JMConstants.PERM_PLAYER_TELEPORT_LOCATION;
 
-		m_RowMenu.SetItemEnabled( MENU_TELEPORT, GetPermissionsManager().HasPermission( teleportPerm ) );
+		m_RowMenu.SetItemEnabled( MENU_TELEPORT, JMPermissions.Has( teleportPerm ) );
 
 		if ( kind == ROWKIND_LOCATION )
 		{
@@ -1470,8 +1519,8 @@ class JMTeleportForm: JMFormBase
 			//! A row the admin cannot act on still opens the menu; the row is
 			//! greyed instead of missing, so the menu does not change shape from
 			//! one server to the next.
-			m_RowMenu.SetItemEnabled( MENU_EDIT,   GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit" ) );
-			m_RowMenu.SetItemEnabled( MENU_DELETE, GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) );
+			m_RowMenu.SetItemEnabled( MENU_EDIT,   JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT ) );
+			m_RowMenu.SetItemEnabled( MENU_DELETE, JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE ) );
 		}
 
 		int mx, my;
@@ -1488,11 +1537,15 @@ class JMTeleportForm: JMFormBase
 		string id = m_RowMenu.GetLastClickedId();
 
 		int row = CurrentRow();
-		if ( row < 0 || row >= m_ListKinds.Count() )
+		if ( row < 0 || row >= m_ListItems.Count() )
 			return;
 
-		string kind = m_ListKinds[row];
-		vector pos  = m_ListPositions[row];
+		JMTeleportRowData item = m_ListItems[row];
+		if ( !item )
+			return;
+
+		string kind = item.m_Kind;
+		vector pos  = item.m_Position;
 
 		if ( id == MENU_TELEPORT )
 		{
@@ -1526,7 +1579,7 @@ class JMTeleportForm: JMFormBase
 
 		if ( id == MENU_EDIT )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit" ) )
+			if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT ) )
 				return;
 
 			ShowPopup( location.Name, location.Position, location.Name, location.Type );
@@ -1606,8 +1659,8 @@ class JMTeleportForm: JMFormBase
 		m_CategoryMenu.AddItem( FILTER_HELI_CRASHES, "#STR_COT_TELEPORT_MODULE_MENU_HELI_CRASHES", CheckIcon( m_ShowHeliCrashes ), ToggleTextColor( m_ShowHeliCrashes ) );
 		m_CategoryMenu.AddItem( FILTER_TOXIC_ZONES,  "#STR_COT_TELEPORT_MODULE_MENU_TOXIC_ZONES",  CheckIcon( m_ShowToxicZones  ), ToggleTextColor( m_ShowToxicZones  ) );
 
-		m_CategoryMenu.SetItemEnabled( SUB_PLAYERS,  GetPermissionsManager().HasPermission( "Admin.Map.Players" ) );
-		m_CategoryMenu.SetItemEnabled( SUB_VEHICLES, GetPermissionsManager().HasPermission( "Vehicles.View" ) );
+		m_CategoryMenu.SetItemEnabled( SUB_PLAYERS,  JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) );
+		m_CategoryMenu.SetItemEnabled( SUB_VEHICLES, JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) );
 	}
 
 	protected void OpenSubMenu( string subMenuType, float x, float y )
@@ -1678,7 +1731,7 @@ class JMTeleportForm: JMFormBase
 		bool anyVehicleTypeShown = ( m_VehicleTypeFilter != 0 );
 		m_SubMenu.AddItem( TOGGLE_ALL_VEHICLES, "#STR_COT_TELEPORT_MODULE_TOGGLE_ALL", CheckIcon( anyVehicleTypeShown ), ToggleTextColor( anyVehicleTypeShown ) );
 
-		bool canSeeVehicles = GetPermissionsManager().HasPermission( "Vehicles.View" );
+		bool canSeeVehicles = JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW );
 
 		m_SubMenu.AddItem( FILTER_VEH_CAR,   "#STR_COT_TELEPORT_MODULE_VEH_CARS",        CheckIcon( IsVehicleTypeShown( JMVT_CAR ) ),        ToggleTextColor( IsVehicleTypeShown( JMVT_CAR ) ) );
 		m_SubMenu.AddItem( FILTER_VEH_BOAT,  "#STR_COT_TELEPORT_MODULE_VEH_BOATS",       CheckIcon( IsVehicleTypeShown( JMVT_BOAT ) ),       ToggleTextColor( IsVehicleTypeShown( JMVT_BOAT ) ) );
@@ -1703,7 +1756,7 @@ class JMTeleportForm: JMFormBase
 		bool allPlayersShown = m_ShowPlayers && ( !m_HiddenPlayerRoles || m_HiddenPlayerRoles.Count() == 0 );
 		m_SubMenu.AddItem( TOGGLE_ALL_PLAYERS, "#STR_COT_TELEPORT_MODULE_TOGGLE_ALL", CheckIcon( allPlayersShown ), ToggleTextColor( allPlayersShown ) );
 
-		bool canSeePlayers = GetPermissionsManager().HasPermission( "Admin.Map.Players" );
+		bool canSeePlayers = JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS );
 
 		array< JMRole > roles = new array< JMRole >;
 		GetPermissionsManager().GetRolesAsList( roles );
@@ -2061,7 +2114,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void RequestVehicles()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
 			return;
 
 		JMVehiclesModule vehicles = VehiclesModule();
@@ -2100,7 +2153,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void RefreshPlayerMarkers()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.Players" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_MAP_PLAYERS ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers();
@@ -2119,31 +2172,8 @@ class JMTeleportForm: JMFormBase
 			if ( !player )
 				continue;
 
-			if ( m_HiddenPlayerRoles && m_HiddenPlayerRoles.Count() > 0 )
-			{
-				array< string > playerRoles = player.GetRoles();
-				bool showThisPlayer = false;
-
-				if ( playerRoles && playerRoles.Count() > 0 )
-				{
-					for ( int r = 0; r < playerRoles.Count(); r++ )
-					{
-						if ( !IsRoleHidden( playerRoles[r] ) )
-						{
-							showThisPlayer = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					if ( !IsRoleHidden( "Default" ) && !IsRoleHidden( "Player" ) && !IsRoleHidden( "Everyone" ) )
-						showThisPlayer = true;
-				}
-
-				if ( !showThisPlayer )
-					continue;
-			}
+			if ( !IsPlayerVisibleByRole( player ) )
+				continue;
 
 			int color = COLOR_PLAYER;
 
@@ -2169,33 +2199,14 @@ class JMTeleportForm: JMFormBase
 		m_Map.BeginBatch();
 		m_Map.ClearLayer( MAP_LAYER_MARKERS );
 
-#ifdef EXPANSIONMODNAVIGATION
-		ExpansionMapSettings mapSettings = GetExpansionSettings().GetMap();
-		if ( mapSettings && mapSettings.ServerMarkers )
+		array< ref JMTeleportMapEntry > entries;
+		CollectMapMarkerEntries( entries );
+
+		for ( int i = 0; i < entries.Count(); i++ )
 		{
-			for ( int i = 0; i < mapSettings.ServerMarkers.Count(); i++ )
-			{
-				ExpansionMarkerData marker = mapSettings.ServerMarkers[i];
-				if ( !marker )
-					continue;
-
-				string markerName = marker.GetName();
-				if ( markerName == "" )
-					markerName = "#STR_COT_TELEPORT_MODULE_MARKER_DEFAULT_NAME";
-
-				//! The marker's own glyph, so a trader reads as a trader here the
-				//! same as it does on Expansion's map. GetIcon() resolves the
-				//! stored icon NAME through ExpansionIcons to a texture path or
-				//! an imageset reference, both of which LoadImageFile takes; a
-				//! marker that named no icon falls back to the plain dot.
-				string markerIcon = marker.GetIcon();
-				if ( markerIcon == "" )
-					markerIcon = UIActionMap.ICON_DOT;
-
-				m_Map.AddMarker( "tp_marker_" + i, marker.GetPosition(), markerName, marker.GetColor(), markerIcon, MAP_LAYER_MARKERS );
-			}
+			JMTeleportMapEntry entry = entries[i];
+			m_Map.AddMarker( "tp_" + entry.m_Id, entry.m_Position, entry.m_Label, entry.m_Color, entry.m_Icon, MAP_LAYER_MARKERS );
 		}
-#endif
 
 		m_Map.EndBatch();
 	}
@@ -2208,39 +2219,14 @@ class JMTeleportForm: JMFormBase
 		m_Map.BeginBatch();
 		m_Map.ClearLayer( MAP_LAYER_HELICRASH );
 
-		int crashIndex = 0;
+		array< ref JMTeleportMapEntry > entries;
+		CollectHeliCrashEntries( entries );
 
-#ifdef EXPANSIONMODAI
-		if ( CrashBase.s_Expansion_HeliCrashes )
+		for ( int i = 0; i < entries.Count(); i++ )
 		{
-			CF_DoublyLinkedNode_WeakRef<CrashBase> expNode = CrashBase.s_Expansion_HeliCrashes.m_Head;
-			while ( expNode )
-			{
-				CrashBase expCrash = expNode.m_Value;
-				if ( expCrash )
-				{
-					m_Map.AddMarker( "tp_heli_" + crashIndex, expCrash.GetPosition(), "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER", ARGB( 255, 243, 18, 156 ), JMConstants.Lucide( "helicopter" ), MAP_LAYER_HELICRASH );
-					crashIndex++;
-				}
-				expNode = expNode.m_Next;
-			}
+			JMTeleportMapEntry entry = entries[i];
+			m_Map.AddMarker( "tp_" + entry.m_Id, entry.m_Position, entry.m_Label, entry.m_Color, entry.m_Icon, MAP_LAYER_HELICRASH );
 		}
-#else
-		if ( CrashBase.s_JM_COT_AllCrashes )
-		{
-			CF_DoublyLinkedNode_WeakRef<CrashBase> cotNode = CrashBase.s_JM_COT_AllCrashes.m_Head;
-			while ( cotNode )
-			{
-				CrashBase cotCrash = cotNode.m_Value;
-				if ( cotCrash )
-				{
-					m_Map.AddMarker( "tp_heli_" + crashIndex, cotCrash.GetPosition(), "#STR_COT_TELEPORT_MODULE_HELI_CRASH_MARKER", ARGB( 255, 243, 18, 156 ), JMConstants.Lucide( "helicopter" ), MAP_LAYER_HELICRASH );
-					crashIndex++;
-				}
-				cotNode = cotNode.m_Next;
-			}
-		}
-#endif
 
 		m_Map.EndBatch();
 	}
@@ -2253,35 +2239,14 @@ class JMTeleportForm: JMFormBase
 		m_Map.BeginBatch();
 		m_Map.ClearLayer( MAP_LAYER_TOXICZONES );
 
-		int zoneIndex = 0;
+		array< ref JMTeleportMapEntry > entries;
+		CollectToxicZoneEntries( entries );
 
-#ifdef EXPANSIONMODMISSIONS
-		if ( ExpansionContaminatedArea.s_JM_COT_AllAreas )
+		for ( int i = 0; i < entries.Count(); i++ )
 		{
-			for ( int ei = 0; ei < ExpansionContaminatedArea.s_JM_COT_AllAreas.Count(); ei++ )
-			{
-				ExpansionContaminatedArea expArea = ExpansionContaminatedArea.s_JM_COT_AllAreas[ei];
-				if ( !expArea )
-					continue;
-
-				m_Map.AddMarker( "tp_toxic_" + zoneIndex, expArea.GetPosition(), "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER", ARGB( 255, 80, 180, 40 ), JMConstants.Lucide( "biohazard" ), MAP_LAYER_TOXICZONES );
-				zoneIndex++;
-			}
+			JMTeleportMapEntry entry = entries[i];
+			m_Map.AddMarker( "tp_" + entry.m_Id, entry.m_Position, entry.m_Label, entry.m_Color, entry.m_Icon, MAP_LAYER_TOXICZONES );
 		}
-#else
-		if ( EffectArea.s_JM_COT_AllAreas )
-		{
-			for ( int vi = 0; vi < EffectArea.s_JM_COT_AllAreas.Count(); vi++ )
-			{
-				EffectArea effArea = EffectArea.s_JM_COT_AllAreas[vi];
-				if ( !effArea )
-					continue;
-
-				m_Map.AddMarker( "tp_toxic_" + zoneIndex, effArea.GetPosition(), "#STR_COT_TELEPORT_MODULE_TOXIC_ZONE_MARKER", ARGB( 255, 80, 180, 40 ), JMConstants.Lucide( "biohazard" ), MAP_LAYER_TOXICZONES );
-				zoneIndex++;
-			}
-		}
-#endif
 
 		m_Map.EndBatch();
 	}
@@ -2312,7 +2277,7 @@ class JMTeleportForm: JMFormBase
 
 	protected void RefreshVehicleMarkers()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW ) )
 			return;
 
 		JMVehiclesModule vehicles = VehiclesModule();
@@ -2444,11 +2409,11 @@ class JMTeleportForm: JMFormBase
 		{
 			int overlayRow = FindRowByMarkerId( markerId );
 
-			if ( overlayRow >= 0 )
+			if ( overlayRow >= 0 && overlayRow < m_ListItems.Count() )
 			{
 				onMarker       = true;
-				m_SelectedName = m_ListNames[overlayRow];
-				m_SelectedKind = m_ListKinds[overlayRow];
+				m_SelectedName = m_ListItems[overlayRow].m_Name;
+				m_SelectedKind = m_ListItems[overlayRow].m_Kind;
 
 				m_LocationList.SetSelectedIndex( overlayRow, true );
 				ApplyMapSelection();
@@ -2471,8 +2436,8 @@ class JMTeleportForm: JMFormBase
 			else
 			{
 				int posRow = FindRowByMarkerId( markerId );
-				if ( posRow >= 0 )
-					world = m_ListPositions[posRow];
+				if ( posRow >= 0 && posRow < m_ListItems.Count() )
+					world = m_ListItems[posRow].m_Position;
 			}
 		}
 
@@ -2523,8 +2488,8 @@ class JMTeleportForm: JMFormBase
 			m_MapMenu.AddItem( MENU_MAP_SAVE, "#STR_COT_TELEPORT_MODULE_MENU_SAVE_AS_LOCATION", JMConstants.Lucide( "map-pin-plus" ) );
 		}
 
-		m_MapMenu.SetItemEnabled( MENU_MAP_GO,   GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) );
-		m_MapMenu.SetItemEnabled( MENU_MAP_SAVE, GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) );
+		m_MapMenu.SetItemEnabled( MENU_MAP_GO,   JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) );
+		m_MapMenu.SetItemEnabled( MENU_MAP_SAVE, JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Add" ) );
 
 		int mx, my;
 		GetMousePos( mx, my );
@@ -2551,7 +2516,7 @@ class JMTeleportForm: JMFormBase
 		if ( id != MENU_MAP_SAVE )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Add" ) )
 			return;
 
 		ShowPopup( "", m_MapMenuWorldPos, "", "" );
@@ -2706,7 +2671,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Refresh" ) )
 			return;
 
 		m_BtnRefresh.TriggerSpin( 2 );
@@ -2761,10 +2726,14 @@ class JMTeleportForm: JMFormBase
 	protected void TeleportToCurrentRow( array< string > guids )
 	{
 		int row = CurrentRow();
-		if ( row < 0 || row >= m_ListKinds.Count() )
+		if ( row < 0 || row >= m_ListItems.Count() )
 			return;
 
-		if ( m_ListKinds[row] == ROWKIND_LOCATION )
+		JMTeleportRowData item = m_ListItems[row];
+		if ( !item )
+			return;
+
+		if ( item.m_Kind == ROWKIND_LOCATION )
 		{
 			JMTeleportLocation location = GetCurrentLocation();
 			if ( location )
@@ -2773,7 +2742,7 @@ class JMTeleportForm: JMFormBase
 			return;
 		}
 
-		m_Module.Position( m_ListPositions[row], guids );
+		m_Module.Position( item.m_Position, guids );
 	}
 
 	// =========================================================================
@@ -2836,7 +2805,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION ) )
 			return;
 
 		CreateAdvancedPlayerConfirm( "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_POSITION_TELEPORT_ME_TO", "CoordinatesMulti", "CoordinatesSingle", "CoordinatesSelf", false );
@@ -2885,7 +2854,7 @@ class JMTeleportForm: JMFormBase
 		if ( eid != UIEvent.CLICK )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE ) )
 			return;
 
 		JMTeleportLocation location = GetCurrentLocation();
@@ -2909,7 +2878,7 @@ class JMTeleportForm: JMFormBase
 
 		m_SelectedName = "";
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Refresh" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_LOCATION + ".Refresh" ) )
 		{
 			RebuildList();
 			return;

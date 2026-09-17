@@ -1,19 +1,19 @@
 class JMWebhookForm: JMFormBase
 {
-	private static const float           HEADER_HEIGHT = 35;
+	protected static const float           HEADER_HEIGHT = 35;
 
-	private Widget                       m_Panel;
-	private UIActionScroller             m_Scroller;
-	private Widget                       m_ActionsWrapper;
-	private UIActionText                 m_HeaderTitle;
+	protected Widget                       m_Panel;
+	protected UIActionScroller             m_Scroller;
+	protected Widget                       m_ActionsWrapper;
+	protected UIActionText                 m_HeaderTitle;
 
-	private ref map< string, ref JMWebhookSection > m_Sections;
-	private ref array< string >          m_Types;
+	protected ref map< string, ref JMWebhookSection > m_Sections;
+	protected ref array< string >          m_Types;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMWebhookCOTModule         m_Module;
 
-	private string                       m_PendingName;
+	protected string                       m_PendingName;
 
 	void JMWebhookForm()
 	{
@@ -40,11 +40,11 @@ class JMWebhookForm: JMFormBase
 		Widget header = layoutRoot.FindAnyWidget( "header_panel" );
 		Widget headerRow = UIActionManager.CreateWrapSpacer( header, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
 
-		m_HeaderTitle = UIActionManager.CreateText( headerRow, "Webhooks" );
+		m_HeaderTitle = UIActionManager.CreateText( headerRow, "#STR_COT_WEBHOOK_HEADER_TITLE" );
 		m_HeaderTitle.SetWidth( 0.59 );
 		m_HeaderTitle.SetLabelVAlign( UIActionVAlign.CENTER );
 
-		UIActionButton addBtn = UIActionManager.CreateButton( headerRow, "+ Add Webhook", this, "Action_AddWebhook" );
+		UIActionButton addBtn = UIActionManager.CreateButton( headerRow, "#STR_COT_WEBHOOK_ADD_WEBHOOK", this, "Action_AddWebhook" );
 		addBtn.SetWidth( 0.4 );
 		addBtn.SetColor( JMTheme.SUCCESS_FILL );
 		addBtn.SetTooltip( "Create a new Discord webhook configuration" );

@@ -53,8 +53,8 @@ class JMBanModule : JMRenderableModuleBase
 
     void JMBanModule()
     {
-        GetPermissionsManager().RegisterPermission( "Admin.Ban.View"  );
-        GetPermissionsManager().RegisterPermission( "Admin.Ban.Unban" );
+        JMPermissions.Register( JMConstants.PERM_BAN_VIEW  );
+        JMPermissions.Register( JMConstants.PERM_BAN_UNBAN );
     }
 
     // -------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class JMBanModule : JMRenderableModuleBase
 
     override bool HasAccess()
     {
-        return GetPermissionsManager().HasPermission( "Admin.Ban.View" );
+        return JMPermissions.Has( JMConstants.PERM_BAN_VIEW );
     }
 
     override string GetLayoutRoot()
@@ -224,6 +224,21 @@ class JMBanModule : JMRenderableModuleBase
         rpc.Send( NULL, JMBanModuleRPC.RequestBanList, true, NULL );
     }
 
+    // Lift an active ban, same host-direct/RPC split as Ban()/EditBanDuration().
+    void Unban( string steamID )
+    {
+        if ( IsMissionHost() )
+        {
+            Exec_UnbanPlayer( steamID, NULL );
+        }
+        else
+        {
+            ScriptRPC rpc = new ScriptRPC();
+            rpc.Write( steamID );
+            rpc.Send( NULL, JMBanModuleRPC.UnbanPlayer, true, NULL );
+        }
+    }
+
     // -------------------------------------------------------------------------
     //  Store queries
     // -------------------------------------------------------------------------
@@ -280,7 +295,7 @@ class JMBanModule : JMRenderableModuleBase
             return;
 
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( "Admin.Ban.View", sender ) )
+        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_VIEW, sender ) )
             return;
 
         PruneExpired();
@@ -326,7 +341,7 @@ class JMBanModule : JMRenderableModuleBase
         //! own ban RPC and the ESP action menu already check.
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", sender, instance ) )
+        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_PLAYER_BAN, sender, instance ) )
             return;
 
         string steamID;
@@ -359,17 +374,30 @@ class JMBanModule : JMRenderableModuleBase
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( "Admin.Ban.Unban", sender, instance ) )
+        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;
         if ( !ctx.Read( steamID ) || steamID == "" )
             return;
 
+        if ( !Exec_UnbanPlayer( steamID, sender ) )
+            return;
+
+        // Refresh the admin's panel
+        RPC_RequestBanList( ctx, sender, target );
+    }
+
+    //! Shared by RPC_UnbanPlayer (client-triggered) and Unban() (host-direct);
+    //! adminIdent is NULL when the mission host itself performs the unban, so
+    //! every notify/log/webhook call below has to tolerate that.
+    private bool Exec_UnbanPlayer( string steamID, PlayerIdentity adminIdent )
+    {
         if ( !m_ActiveIndex.Contains( steamID ) )
         {
-            COTCreateNotification( sender, new StringLocaliser( "No active ban found for: " + steamID ) );
-            return;
+            if ( adminIdent )
+                COTCreateNotification( adminIdent, new StringLocaliser( "No active ban found for: " + steamID ) );
+            return false;
         }
 
         JMPlayerBan ban = m_ActiveIndex.Get( steamID );
@@ -379,13 +407,17 @@ class JMBanModule : JMRenderableModuleBase
         m_ActiveIndex.Remove( steamID );
         Save();
 
-        GetCommunityOnlineToolsBase().Log( sender, "Unbanned [steamID=" + steamID + "]" );
-        SendWebhook( "Unban", NULL, sender.GetName() + " unbanned SteamID: " + steamID );
+        string issuedByName = "Host";
+        if ( adminIdent )
+            issuedByName = adminIdent.GetName();
 
-        COTCreateNotification( sender, new StringLocaliser( "Unbanned SteamID: " + steamID ) );
+        GetCommunityOnlineToolsBase().Log( adminIdent, "Unbanned [steamID=" + steamID + "]" );
+        SendWebhook( "Unban", NULL, issuedByName + " unbanned SteamID: " + steamID );
 
-        // Refresh the admin's panel
-        RPC_RequestBanList( ctx, sender, target );
+        if ( adminIdent )
+            COTCreateNotification( adminIdent, new StringLocaliser( "Unbanned SteamID: " + steamID ) );
+
+        return true;
     }
 
     // -------------------------------------------------------------------------
@@ -441,7 +473,7 @@ class JMBanModule : JMRenderableModuleBase
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( "Admin.Ban.Unban", sender, instance ) )
+        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;

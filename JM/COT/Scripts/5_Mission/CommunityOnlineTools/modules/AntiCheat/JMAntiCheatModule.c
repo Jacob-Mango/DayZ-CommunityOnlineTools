@@ -101,14 +101,14 @@ class JMAntiCheatModule : JMRenderableModuleBase
 		m_ClientKillGuidOrder = new array< string >;
 		m_ClientKillStats     = new map< string, ref JMAntiCheatKillStats >;
 
-		GetPermissionsManager().RegisterPermission( "Admin.AntiCheat.View" );
-		GetPermissionsManager().RegisterPermission( "Admin.AntiCheat.Clear" );
+		JMPermissions.Register( JMConstants.PERM_ANTICHEAT_VIEW );
+		JMPermissions.Register( JMConstants.PERM_ANTICHEAT_CLEAR );
 		GetPermissionsManager().RegisterPermission( "COT" );
 	}
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.AntiCheat.View" );
+		return JMPermissions.Has( JMConstants.PERM_ANTICHEAT_VIEW );
 	}
 
 	override string GetLayoutRoot()
@@ -935,7 +935,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.View", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ANTICHEAT_VIEW, senderRPC, instance ) )
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -1115,7 +1115,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.Clear", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ANTICHEAT_CLEAR, senderRPC, instance ) )
 			return;
 
 		string guid;

@@ -243,6 +243,11 @@ class CommunityOnlineToolsBase
 		#endif
 
 		JMScriptInvokers.COT_ON_OPEN.Invoke( m_IsOpen );
+
+		if ( !m_IsOpen )
+		{
+			JMScriptInvokers.COT_ON_CLOSE.Invoke();
+		}
 	}
 
 	void ShowInactiveNotification(string inputLoc)

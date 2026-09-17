@@ -297,16 +297,16 @@ class JMESPModule: JMRenderableModuleBase
 
 		ESPUpdateTime = 5;
 
-		GetPermissionsManager().RegisterPermission( "ESP.View" );
+		JMPermissions.Register( JMConstants.PERM_ESP_VIEW );
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetPosition" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetOrientation" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.SetHealth" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.Delete" );
 
-		GetPermissionsManager().RegisterPermission( "ESP.Object.DuplicateAll" );
-		GetPermissionsManager().RegisterPermission( "ESP.Object.DeleteAll" );
-		GetPermissionsManager().RegisterPermission( "ESP.Object.MoveToCursor" );		
+		JMPermissions.Register( JMConstants.PERM_ESP_OBJECT_DUPLICATEALL );
+		JMPermissions.Register( JMConstants.PERM_ESP_OBJECT_DELETEALL );
+		JMPermissions.Register( JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR );
 
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build" );
 		GetPermissionsManager().RegisterPermission( "ESP.Object.BaseBuilding.Build.MaterialsNotRequired" );
@@ -351,7 +351,7 @@ class JMESPModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "ESP.View" );
+		return JMPermissions.Has( JMConstants.PERM_ESP_VIEW );
 	}
 
 	override string GetInputToggle()
@@ -443,7 +443,7 @@ class JMESPModule: JMRenderableModuleBase
 	void Input_ESP_MoveToCursor( UAInput input )
 	{
 		if ( !input.LocalPress() ) return;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor" ) ) return;
+		if ( !JMPermissions.Has( JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR ) ) return;
 		vector dir = g_Game.GetCurrentCameraDirection();
 		vector from = g_Game.GetCurrentCameraPosition();
 		vector to = from + ( dir * 1000 );
@@ -489,7 +489,7 @@ class JMESPModule: JMRenderableModuleBase
 
 		for ( int i = 0; i < m_ViewTypes.Count(); i++ )
 		{
-			m_ViewTypes[i].HasPermission = GetPermissionsManager().HasPermission( "ESP.View." + m_ViewTypes[i].Permission );
+			m_ViewTypes[i].HasPermission = JMPermissions.Has( JMConstants.PERM_ESP_VIEW + "." + m_ViewTypes[i].Permission );
 		}
 
 		JMESPForm form;
@@ -527,7 +527,7 @@ class JMESPModule: JMRenderableModuleBase
 				{
 					m_ViewTypes.Insert( viewType );
 					m_ViewTypesByType[espType] = viewType;
-					GetPermissionsManager().RegisterPermission( "ESP.View." + viewType.Permission );
+					JMPermissions.Register( JMConstants.PERM_ESP_VIEW + "." + viewType.Permission );
 				}
 			}
 		}
@@ -4105,7 +4105,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DuplicateAll", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_DUPLICATEALL, senderRPC, instance ) )
 			return;
 
 		set< Object > objects = new set< Object >;
@@ -4148,7 +4148,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.DeleteAll", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_DELETEALL, senderRPC, instance ) )
 			return;
 
 		set< Object > objects = new set< Object >;
@@ -4223,7 +4223,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.MoveToCursor", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR, senderRPC, instance ) )
 			return;
 		
 		vector cursor;

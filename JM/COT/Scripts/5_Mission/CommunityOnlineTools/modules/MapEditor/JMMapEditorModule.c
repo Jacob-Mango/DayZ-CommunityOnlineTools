@@ -66,6 +66,11 @@ class JMMapEditorModule : JMRenderableModuleBase
 		return "JM/COT/GUI/layouts/mapeditor_form.layout";
 	}
 
+	override string GetInputToggle()
+	{
+		return "UACOTToggleMapEditor";
+	}
+
 	override string GetCategory()
 	{
 		return "World";

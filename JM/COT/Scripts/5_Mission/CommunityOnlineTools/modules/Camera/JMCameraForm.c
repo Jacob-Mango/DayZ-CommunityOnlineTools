@@ -1,6 +1,6 @@
 class JMCameraForm: JMFormBase
 {
-	private UIActionScroller m_sclr_MainActions;
+	protected UIActionScroller m_sclr_MainActions;
 
 	protected UIActionSelectBox m_SelectBox;
 	protected ref array< string > m_SelectBoxText =
@@ -13,70 +13,70 @@ class JMCameraForm: JMFormBase
 
 	// ---- Effects panel ----
 	protected GridSpacerWidget m_PanelEffects;
-		private UIActionSlider m_SliderBlurStrength;
-		private UIActionSlider m_SliderFocusDistance;
-		private UIActionSlider m_SliderFocalLength;
-		private UIActionSlider m_SliderFocalNear;
-		private UIActionSlider m_SliderExposure;
-		private UIActionSlider m_SliderVignette;
-		private UIActionSlider m_SliderSpeed;
-		private UIActionSlider m_SliderFOV;
-		private UIActionSlider m_SliderShakeIntensity;
-		private UIActionSlider m_SliderShakeFrequency;
+		protected UIActionSlider m_SliderBlurStrength;
+		protected UIActionSlider m_SliderFocusDistance;
+		protected UIActionSlider m_SliderFocalLength;
+		protected UIActionSlider m_SliderFocalNear;
+		protected UIActionSlider m_SliderExposure;
+		protected UIActionSlider m_SliderVignette;
+		protected UIActionSlider m_SliderSpeed;
+		protected UIActionSlider m_SliderFOV;
+		protected UIActionSlider m_SliderShakeIntensity;
+		protected UIActionSlider m_SliderShakeFrequency;
 
 	// ---- Settings panel ----
 	protected GridSpacerWidget m_PanelSettings;
-		private UIActionCheckbox m_EnableFullmapCamera;
-		private UIActionCheckbox m_1stPersonADS_HideScope;
-		private UIActionCheckbox m_HideGrass;
+		protected UIActionCheckbox m_EnableFullmapCamera;
+		protected UIActionCheckbox m_1stPersonADS_HideScope;
+		protected UIActionCheckbox m_HideGrass;
 
 	// ---- Traveling panel ----
 	protected GridSpacerWidget m_PanelTraveling;
 		// Waypoint list
-		private UIActionSelectBox      m_WaypointSelectBox;
-		private ref TStringArray       m_WaypointNames;
+		protected UIActionSelectBox      m_WaypointSelectBox;
+		protected ref TStringArray       m_WaypointNames;
 
 		// Edit-selected-waypoint controls
-		private UIActionSlider         m_SliderWaypointSpeed;
-		private UIActionSlider         m_SliderHoldTime;
-		private UIActionCheckbox       m_ToggleCatmull;
-		private UIActionCheckbox       m_ToggleTrackTarget;
-		private UIActionCheckbox       m_CaptureOrientation;
-		private UIActionSelectBox      m_EasingSelectBox;
-		private ref TStringArray       m_EasingNames;
+		protected UIActionSlider         m_SliderWaypointSpeed;
+		protected UIActionSlider         m_SliderHoldTime;
+		protected UIActionCheckbox       m_ToggleCatmull;
+		protected UIActionCheckbox       m_ToggleTrackTarget;
+		protected UIActionCheckbox       m_CaptureOrientation;
+		protected UIActionSelectBox      m_EasingSelectBox;
+		protected ref TStringArray       m_EasingNames;
 		// Per-waypoint screen effects + shake
-		private UIActionSlider         m_WP_SliderExposure;
-		private UIActionSlider         m_WP_SliderVignette;
-		private UIActionSlider         m_WP_SliderBlur;
-		private UIActionSlider         m_WP_SliderFOV;
-		private UIActionSlider         m_WP_SliderShakeIntensity;
-		private UIActionSlider         m_WP_SliderShakeFrequency;
+		protected UIActionSlider         m_WP_SliderExposure;
+		protected UIActionSlider         m_WP_SliderVignette;
+		protected UIActionSlider         m_WP_SliderBlur;
+		protected UIActionSlider         m_WP_SliderFOV;
+		protected UIActionSlider         m_WP_SliderShakeIntensity;
+		protected UIActionSlider         m_WP_SliderShakeFrequency;
 
 		// Playback buttons
-		private UIActionButton         m_BtnTravel;
-		private UIActionButton         m_BtnPauseResume;
+		protected UIActionButton         m_BtnTravel;
+		protected UIActionButton         m_BtnPauseResume;
 
 		// Path controls
-		private UIActionSelectBox      m_TravelModeSelectBox;
-		private ref TStringArray       m_TravelModeNames;
-		private UIActionSlider         m_SliderSpeedMult;
-		private UIActionText           m_LabelDuration;
+		protected UIActionSelectBox      m_TravelModeSelectBox;
+		protected ref TStringArray       m_TravelModeNames;
+		protected UIActionSlider         m_SliderSpeedMult;
+		protected UIActionText           m_LabelDuration;
 
 		// Path save/load
-		private UIActionEditableText   m_PathName;
-		private UIActionSelectBox      m_PathSelectBox;
-		private ref TStringArray       m_PathNames;
+		protected UIActionEditableText   m_PathName;
+		protected UIActionSelectBox      m_PathSelectBox;
+		protected ref TStringArray       m_PathNames;
 
 		// Working waypoint list (shared with module)
-		private int                              m_WaypointID;
-		private ref array< ref JMCameraWaypoint > m_Waypoints;
+		protected int                              m_WaypointID;
+		protected ref array< ref JMCameraWaypoint > m_Waypoints;
 
 	// ---- Bookmarks panel ----
 	protected GridSpacerWidget m_PanelBookmarks;
-		private UIActionSelectBox      m_BookmarkSelectBox;
-		private ref TStringArray       m_BookmarkNames;
-		private string                 m_PendingBookmarkName;
-		private UIActionConfirmInline  m_DeleteBookmarkBtn;
+		protected UIActionSelectBox      m_BookmarkSelectBox;
+		protected ref TStringArray       m_BookmarkNames;
+		protected string                 m_PendingBookmarkName;
+		protected UIActionConfirmInline  m_DeleteBookmarkBtn;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMCameraModule m_Module;

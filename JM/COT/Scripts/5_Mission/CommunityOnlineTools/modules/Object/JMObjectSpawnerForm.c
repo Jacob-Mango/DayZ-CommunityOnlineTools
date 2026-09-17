@@ -9,50 +9,50 @@ class JMObjectSpawnerForm: JMFormBase
 	//! Plain buttons in a wrap row, each a FRACTION of the row: the icon grid
 	//! this replaced had to be told a pixel width that stayed in step with the
 	//! chip count, and it rebuilt itself from inside its own click handler.
-	private ref array<ref UIActionButton> m_RecentButtons;
+	protected ref array<ref UIActionButton> m_RecentButtons;
 
 	//! Categories moved out of a dropdown of their own and behind a filter
 	//! button beside the search box. The dropdown cost a full row of the left
 	//! column permanently for a control that is touched once per search.
-	private UIActionImageButton m_FilterButton;
-	private UIActionContextMenu m_CategoryMenu;
-	private UIActionContextMenu m_CategorySubMenu;
+	protected UIActionImageButton m_FilterButton;
+	protected UIActionContextMenu m_CategoryMenu;
+	protected UIActionContextMenu m_CategorySubMenu;
 
 	//! Which group's submenu is up, "" when none.
-	private string m_CurrentGroup;
+	protected string m_CurrentGroup;
 
-	private ref TStringArray m_RecentIds;
+	protected ref TStringArray m_RecentIds;
 
 	//! Class name for every row currently in the list.
 	//!
 	//! The visible text is NOT the class name once display names are switched
 	//! on, so a row index resolves through this - which is what spawning, and
 	//! every clipboard export, needs.
-	private ref TStringArray m_ListClasses;
+	protected ref TStringArray m_ListClasses;
 
-	private Widget m_SearchWrapper;
-	private Widget m_FilterWrapper;
-	private Widget m_RecentWrapper;
-	private Widget m_ListWrapper;
+	protected Widget m_SearchWrapper;
+	protected Widget m_FilterWrapper;
+	protected Widget m_RecentWrapper;
+	protected Widget m_ListWrapper;
 
-	private UIActionScroller m_RightScroller;
+	protected UIActionScroller m_RightScroller;
 
 	//! Property rows are rebuilt per selection rather than shown and hidden: a
 	//! hidden child still owns its cell in a GridSpacer, which would leave a
 	//! gap where an inapplicable slider used to be. m_PropsHost stays put so
 	//! the rows keep their place in the card; m_PropsGrid is what gets
 	//! replaced.
-	private Widget m_PropsHost;
-	private Widget m_PropsGrid;
-	private UIActionText m_PropsNone;
+	protected Widget m_PropsHost;
+	protected Widget m_PropsGrid;
+	protected UIActionText m_PropsNone;
 
 	//! Ranges, not single values: the low and high handles are the bounds the
 	//! server rolls between, per spawned entity. Dragging them together is how
 	//! you ask for one exact value.
 	//!
 	//! Both start COLLAPSED to one handle - see m_RangeToggle.
-	private UIActionSliderRange m_QuantityItem;
-	private UIActionSliderRange m_HealthItem;
+	protected UIActionSliderRange m_QuantityItem;
+	protected UIActionSliderRange m_HealthItem;
 
 	//! Switches the two spannable rows above between one value and a range.
 	//!
@@ -67,17 +67,17 @@ class JMObjectSpawnerForm: JMFormBase
 	//! a row would have put it in the same list as quantity and health where it
 	//! reads as one more thing that gets spawned. It also outlives the rows -
 	//! the grid under it is destroyed on every selection, the header is not.
-	private UIActionImageButton m_RangeToggle;
-	private bool m_RangesEnabled;
+	protected UIActionImageButton m_RangeToggle;
+	protected bool m_RangesEnabled;
 
 	//! Kept because the header action is created once and the ROWS it governs
 	//! come and go: a class with neither a quantity nor a health bar has
 	//! nothing to switch, and the button is hidden for it.
-	private UIActionCard m_PropsCard;
+	protected UIActionCard m_PropsCard;
 
 	//! Still a single value. Temperature reads back as a NAMED state next to the
 	//! number, and there is no sensible name for a range.
-	private UIActionSlider m_TemperatureItem;
+	protected UIActionSlider m_TemperatureItem;
 
 	//! Cooking state for food.
 	//!
@@ -85,99 +85,99 @@ class JMObjectSpawnerForm: JMFormBase
 	//! safe because UIActionDropdown now unlinks its floating list panel with
 	//! itself - the panel is parented to the FORM root, not to the control, so
 	//! before that it would have been left behind once per rebuild.
-	private UIActionDropdown m_FoodStage;
+	protected UIActionDropdown m_FoodStage;
 
 	//! FoodStageType for each entry of m_FoodStage, in the same order. Only the
 	//! stages the class actually declares are offered, so the indices are not
 	//! the enum's.
-	private ref TIntArray m_FoodStageTypes;
-	private int m_FoodStageValue;
+	protected ref TIntArray m_FoodStageTypes;
+	protected int m_FoodStageValue;
 
 	//! What a liquid container is filled with. The values are liquid-type bits,
 	//! except on a blood container where the module wants a 1-based index into
 	//! the blood types instead - see CollectLiquids.
-	private UIActionDropdown m_LiquidType;
-	private ref TIntArray m_LiquidValues;
-	private int m_LiquidValue;
+	protected UIActionDropdown m_LiquidType;
+	protected ref TIntArray m_LiquidValues;
+	protected int m_LiquidValue;
 
 	//! Which cartridge a magazine is loaded with, as one of its own ammoItems
 	//! classnames. "" leaves it on whatever it is configured to hold.
-	private UIActionDropdown m_AmmoType;
-	private ref TStringArray m_AmmoValues;
-	private string m_AmmoValue;
+	protected UIActionDropdown m_AmmoType;
+	protected ref TStringArray m_AmmoValues;
+	protected string m_AmmoValue;
 
 	//! Rags, bandages and sewing kits spawn either soiled or disinfected.
-	private UIActionToggleSwitch m_Disinfect;
-	private bool m_DisinfectValue;
+	protected UIActionToggleSwitch m_Disinfect;
+	protected bool m_DisinfectValue;
 
 	//! The sliders are destroyed on every rebuild, so what the admin chose has
 	//! to outlive them. Health and quantity are kept as FRACTIONS of their own
 	//! span - the span changes with the class, and 30 rounds of one calibre
 	//! should come back as 30 rounds of the next, not as the number 30 against
 	//! a different maximum. Temperature has a fixed range, so it is absolute.
-	private float m_HealthLowPct;
-	private float m_HealthHighPct;
-	private float m_QuantityLowPct;
-	private float m_QuantityHighPct;
-	private float m_TemperatureValue;
-	private bool  m_TemperatureSet;
+	protected float m_HealthLowPct;
+	protected float m_HealthHighPct;
+	protected float m_QuantityLowPct;
+	protected float m_QuantityHighPct;
+	protected float m_TemperatureValue;
+	protected bool  m_TemperatureSet;
 
-	private UIActionSearchBox m_SearchBox;
+	protected UIActionSearchBox m_SearchBox;
 
 	//! Cycle selectors, not checkboxes: both of these choose between two named
 	//! states rather than switching one on, and a checkbox labelled "display
 	//! name" never says what the other state is.
-	private UIActionSelectBox m_NameModeSelect;
-	private UIActionSelectBox m_UnsafeSelect;
+	protected UIActionSelectBox m_NameModeSelect;
+	protected UIActionSelectBox m_UnsafeSelect;
 
-	private UIActionDropdown m_SpawnMode;
-	private UIActionDropdown m_ObjSetupMode;
+	protected UIActionDropdown m_SpawnMode;
+	protected UIActionDropdown m_ObjSetupMode;
 
 	//! Copying a list is not spawning anything, so it is no longer buried among
 	//! the spawn destinations. Its own card, its own dropdown, its own button.
-	private UIActionDropdown m_ExportMode;
+	protected UIActionDropdown m_ExportMode;
 
 	//! COT_ObjectSpawnerMode for each entry of the two dropdowns, in the order
 	//! they list them. The old single dropdown relied on its index BEING the
 	//! enum value; split in two, neither can.
-	private ref TIntArray m_SpawnModeIds;
-	private ref TIntArray m_ExportModeIds;
+	protected ref TIntArray m_SpawnModeIds;
+	protected ref TIntArray m_ExportModeIds;
 
-	private UIActionItemList m_ClassList;
+	protected UIActionItemList m_ClassList;
 
-	private ItemPreviewWidget m_ItemPreview;
+	protected ItemPreviewWidget m_ItemPreview;
 	//! The preview's wrapper panel. The preview itself is no longer the layout
 	//! root: it now hangs inside a plainly-styled panel, the way vanilla's own
 	//! previews do, so it never inherits whatever style the engine has
 	//! registered as the default for a styleless widget - which is exactly what
 	//! COT's own style table changes. Geometry is applied to the WRAPPER; the
 	//! preview fills it fractionally.
-	private Widget m_ItemPreviewPanel;
-	private EntityAI m_PreviewItem;
+	protected Widget m_ItemPreviewPanel;
+	protected EntityAI m_PreviewItem;
 	//! Setup mode the current preview entity was built with. The attachments a
 	//! spawn produces depend on it, so a mode change has to rebuild the preview
 	//! exactly like a class change does - an entity that already has its debug
 	//! attachments cannot be walked back to a bare one.
-	private int m_PreviewSetupMode;
-	private vector m_Orientation;
-	private float m_Distance;
+	protected int m_PreviewSetupMode;
+	protected vector m_Orientation;
+	protected float m_Distance;
 
-	private int m_MouseX;
-	private int m_MouseY;
+	protected int m_MouseX;
+	protected int m_MouseY;
 
 	//! protected, not private: sub-mods reach for the module through the form.
 	protected JMObjectSpawnerModule m_Module;
 
-	private UIActionButton m_SpawnButton;
-	private UIActionConfirmInline m_DeleteCursorBtn;
+	protected UIActionButton m_SpawnButton;
+	protected UIActionConfirmInline m_DeleteCursorBtn;
 
 	//! Object targeted by the quick-delete keybind while m_DeleteCursorBtn is
 	//! armed. A second keybind press on the same target confirms; aiming at
 	//! something else re-arms on the new target instead of deleting the old one.
-	private Object m_PendingDeleteCursorObj;
+	protected Object m_PendingDeleteCursorObj;
 
-	private static int s_ObjSpawnMode   = COT_ObjectSpawnerMode.CURSOR;
-	private static int s_ObjExportMode  = COT_ObjectSpawnerMode.COPYLISTRAW;
+	protected static int s_ObjSpawnMode   = COT_ObjectSpawnerMode.CURSOR;
+	protected static int s_ObjExportMode  = COT_ObjectSpawnerMode.COPYLISTRAW;
 
 	//! How many recent categories are kept. Small on purpose - this is a
 	//! shortcut back to what was just used, not a second category list.

@@ -2,10 +2,10 @@ class JMRoleManagerModule : JMRenderableModuleBase
 {
 	void JMRoleManagerModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Admin.Roles.View"        );
-		GetPermissionsManager().RegisterPermission( "Admin.Roles.Create"      );
-		GetPermissionsManager().RegisterPermission( "Admin.Roles.Delete"      );
-		GetPermissionsManager().RegisterPermission( "Admin.Roles.Permissions" );
+		JMPermissions.Register( JMConstants.PERM_ROLES_VIEW        );
+		JMPermissions.Register( JMConstants.PERM_ROLES_CREATE      );
+		JMPermissions.Register( JMConstants.PERM_ROLES_DELETE      );
+		JMPermissions.Register( JMConstants.PERM_ROLES_PERMISSIONS );
 	}
 
 	// -------------------------------------------------------------------------
@@ -14,7 +14,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.Roles.View" );
+		return JMPermissions.Has( JMConstants.PERM_ROLES_VIEW );
 	}
 
 	override string GetLayoutRoot()
@@ -193,7 +193,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.View", sender ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_ROLES_VIEW, sender ) )
 			return;
 
 		SendRoleListToClient( sender );
@@ -206,7 +206,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Create", sender, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_CREATE, sender, instance ) )
 			return;
 
 		string name;
@@ -223,7 +223,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Delete", sender, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_DELETE, sender, instance ) )
 			return;
 
 		string name;
@@ -240,7 +240,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Roles.Permissions", sender, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_PERMISSIONS, sender, instance ) )
 			return;
 
 		string roleName;

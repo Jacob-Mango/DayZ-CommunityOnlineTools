@@ -73,6 +73,16 @@ class JMTerritoryModule: JMRenderableModuleBase
 		return JMTerritoryModuleRPC.COUNT;
 	}
 
+	override string GetWebhookTitle()
+	{
+		return "Territory Module";
+	}
+
+	override void GetWebhookTypes( out array<string> types )
+	{
+		types.Insert( "SetLevel" );
+	}
+
 	override void OnMissionLoaded()
 	{
 		super.OnMissionLoaded();
@@ -169,6 +179,8 @@ class JMTerritoryModule: JMRenderableModuleBase
 				ExpansionTerritoryModule territoryModule = ExpansionTerritoryModule.Cast(CF_ModuleCoreManager.Get(ExpansionTerritoryModule));
 				if (territoryModule)
 					territoryModule.Exec_AdminSetTerritoryLevel(territoryID, newLevel, sender);
+
+				SendWebhookColored( "SetLevel", instance, "Set territory " + territoryID + " to level " + newLevel, JMConstants.WEBHOOK_COLOR_WARNING );
 
 				return;
 			}

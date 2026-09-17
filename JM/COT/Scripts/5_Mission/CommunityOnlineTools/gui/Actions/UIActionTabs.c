@@ -293,6 +293,72 @@ class UIActionTabs: UIActionBase
 		m_ContentPanels.Insert( panel );
 	}
 
+	Widget GetContentPanel( int idx )
+	{
+		if ( idx >= 0 && idx < m_ContentPanels.Count() )
+			return m_ContentPanels[idx];
+		return null;
+	}
+
+	int AddTab( string label, string icon = "", Widget contentPanel = null )
+	{
+		if ( !m_TabBar )
+			return -1;
+
+		int idx = m_Labels.Count();
+
+		Widget tabWidget = g_Game.GetWorkspace().CreateWidgets( "JM/COT/GUI/layouts/uiactions/UIActionTabButton.layout", m_TabBar );
+		if ( !tabWidget )
+			return -1;
+
+		ButtonWidget btn;
+		Class.CastTo( btn, tabWidget );
+
+		TextWidget txt;
+		Class.CastTo( txt, tabWidget.FindAnyWidget( "label" ) );
+		if ( txt )
+		{
+			txt.SetText( Widget.TranslateString( label ) );
+			if ( icon != "" )
+				txt.SetTextOffset( LABEL_OFFSET_ICON, 0 );
+			else
+				txt.SetTextOffset( 0, 0 );
+		}
+
+		tabWidget.SetHandler( this );
+
+		Widget fill = tabWidget.FindAnyWidget( "fill" );
+		Widget outline = tabWidget.FindAnyWidget( "outline" );
+
+		ImageWidget iconW;
+		Class.CastTo( iconW, tabWidget.FindAnyWidget( "icon" ) );
+		if ( iconW && icon != "" )
+		{
+			iconW.LoadImageFile( 0, icon );
+			iconW.Show( true );
+		}
+		else if ( iconW )
+		{
+			iconW.Show( false );
+		}
+
+		m_TabButtons.Insert( btn );
+		m_TabFills.Insert( fill );
+		m_TabOutlines.Insert( outline );
+		m_TabIcons.Insert( iconW );
+		m_TabLabels.Insert( txt );
+		m_Labels.Insert( label );
+		m_TabEnabled.Insert( true );
+		m_TabVisible.Insert( true );
+
+		if ( contentPanel )
+			AddContent( contentPanel );
+
+		UpdateTabColors();
+		return idx;
+	}
+
+
 	override int GetSelection()
 	{
 		return m_Selected;

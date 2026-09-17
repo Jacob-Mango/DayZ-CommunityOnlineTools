@@ -85,13 +85,13 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	void JMLootAnalysisModule()
 	{
-		GetPermissionsManager().RegisterPermission("Admin.LootAnalysis.View");
-		GetPermissionsManager().RegisterPermission("Admin.LootAnalysis.ItemScan");
-		GetPermissionsManager().RegisterPermission("Admin.LootAnalysis.Distribution");
-		GetPermissionsManager().RegisterPermission("Admin.LootAnalysis.Delete");
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_VIEW);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION);
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_DELETE);
 		//! Separate from Delete: writing to the server's own types.xml is a
 		//! different order of trust than deleting spawned entities.
-		GetPermissionsManager().RegisterPermission("Admin.LootAnalysis.Edit");
+		JMPermissions.Register(JMConstants.PERM_LOOTANALYSIS_EDIT);
 
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_RequestItemScan", this, SingeplayerExecutionType.Both);
 		GetRPCManager().AddRPC("JM_COT_RPC", "RPC_SendItemScanResults", this, SingeplayerExecutionType.Both);
@@ -105,7 +105,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission("Admin.LootAnalysis.View");
+		return JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_VIEW);
 	}
 
 	override string GetLayoutRoot()
@@ -534,7 +534,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.ItemScan", senderRPC, instance))
+		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -562,7 +562,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// entity, one string per entry, and split back out client-side.
 	private void RPC_SendItemScanResults(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.ItemScan"))
+		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN))
 			return;
 
 		Param7<ref array<string>, ref array<vector>, ref array<float>, ref array<float>, ref array<int>, ref array<string>, ref array<int>> data;
@@ -579,7 +579,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.Distribution", senderRPC, instance))
+		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -605,7 +605,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 	// the client can colour/legend markers by spawn type.
 	private void RPC_SendLootSpawnLocations(CallType type, ParamsReadContext ctx, PlayerIdentity senderRPC, Object target)
 	{
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.Distribution"))
+		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION))
 			return;
 
 		Param3<ref array<string>, ref array<vector>, ref array<string>> data;
@@ -634,7 +634,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.Delete", senderRPC))
+		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_DELETE, senderRPC))
 			return;
 
 		Param1<string> data;
@@ -665,7 +665,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission("Admin.LootAnalysis.Edit", senderRPC, instance))
+		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
 			return;
 
 		Param5<string, int, int, int, int> data;
@@ -704,8 +704,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		bool canScan = GetPermissionsManager().HasPermission("Admin.LootAnalysis.ItemScan", senderRPC, instance);
-		bool canDist = GetPermissionsManager().HasPermission("Admin.LootAnalysis.Distribution", senderRPC, instance);
+		bool canScan = GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
+		bool canDist = GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
 		if (!canScan && !canDist)
 			return;
 

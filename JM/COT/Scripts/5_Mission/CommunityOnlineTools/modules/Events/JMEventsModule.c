@@ -21,6 +21,11 @@ class JMEventsModule: JMEntityManagerModule
 	override int GetRPCSendUpsert() { return JMEventsModuleRPC.SendUpsert;  }
 	override int GetRPCSendRemove() { return JMEventsModuleRPC.SendRemove;  }
 
+	override string GetWebhookTitle()
+	{
+		return "Events Module";
+	}
+
 	override void GetWebhookTypes( out array<string> types )
 	{
 		types.Insert( "Teleport" );

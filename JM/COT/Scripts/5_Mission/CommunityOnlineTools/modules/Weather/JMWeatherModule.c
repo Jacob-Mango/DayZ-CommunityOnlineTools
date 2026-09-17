@@ -16,40 +16,40 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	void JMWeatherModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Weather.QuickAction" );
-		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Clear" );
-		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Cloudy" );
-		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Storm" );
-		GetPermissionsManager().RegisterPermission( "Weather.QuickAction.Date" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_QUICKACTION );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_QUICKACTION_CLEAR );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_QUICKACTION_CLOUDY );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_QUICKACTION_STORM );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_QUICKACTION_DATE );
 
-		GetPermissionsManager().RegisterPermission( "Weather.FreezeTime" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_FREEZETIME );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Date" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_DATE );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Wind" );
-		GetPermissionsManager().RegisterPermission( "Weather.Wind.FunctionParams" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_WIND );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_WIND_FUNCPARAMS );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Storm" );
-		GetPermissionsManager().RegisterPermission( "Weather.Sandstorm" );
-		GetPermissionsManager().RegisterPermission( "Weather.Overcast" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_STORM );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_SANDSTORM );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_OVERCAST );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Fog" );
-		GetPermissionsManager().RegisterPermission( "Weather.Fog.Dynamic" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_FOG );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_FOG_DYNAMIC );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Rain" );
-		GetPermissionsManager().RegisterPermission( "Weather.Rain.Thresholds" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_RAIN );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_RAIN_THRESHOLDS );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Snow" );
-		GetPermissionsManager().RegisterPermission( "Weather.Snow.Thresholds" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_SNOW );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_SNOW_THRESHOLDS );
 
-		GetPermissionsManager().RegisterPermission( "Weather.Preset" );
-		GetPermissionsManager().RegisterPermission( "Weather.Preset.Use" );
-		GetPermissionsManager().RegisterPermission( "Weather.Preset.Create" );
-		GetPermissionsManager().RegisterPermission( "Weather.Preset.Update" );
-		GetPermissionsManager().RegisterPermission( "Weather.Preset.Remove" );
-		GetPermissionsManager().RegisterPermission( "Weather.Preset.Dynamic" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET_USE );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET_CREATE );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET_UPDATE );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET_REMOVE );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_PRESET_DYNAMIC );
 
-		GetPermissionsManager().RegisterPermission( "Weather.View" );
+		JMPermissions.Register( JMConstants.PERM_WEATHER_VIEW );
 	}
 
 	override void EnableUpdate()
@@ -58,7 +58,7 @@ class JMWeatherModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Weather.View" );
+		return JMPermissions.Has( JMConstants.PERM_WEATHER_VIEW );
 	}
 
 	override string GetInputToggle()

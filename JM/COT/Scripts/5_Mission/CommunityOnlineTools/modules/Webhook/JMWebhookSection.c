@@ -59,19 +59,19 @@ class JMWebhookSection : Managed
 		m_FilterRoleEdit = BuildLabeledInput( "Role Filter", group.FilterRole );
 
 		Widget saveRow = UIActionManager.CreateWrapSpacer( m_RootSpacer, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-		UIActionButton saveBtn = UIActionManager.CreateButton( saveRow, "Save", m_Form, "Action_SaveWebhook" );
+		UIActionButton saveBtn = UIActionManager.CreateButton( saveRow, "#STR_COT_WEBHOOK_SAVE", m_Form, "Action_SaveWebhook" );
 		saveBtn.SetWidth( 1.0 );
 		saveBtn.SetColor( JMTheme.SUCCESS_FILL );
 		saveBtn.SetData( new JMWebhookTypeData( group.Name ) );
 		saveBtn.SetTooltip( "Save changes to this webhook" );
 
 		UIActionManager.CreatePanel( m_RootSpacer, 0xFF3A3A3A, 1 );
-		UIActionManager.CreateText( m_RootSpacer, "Event Types" );
+		UIActionManager.CreateText( m_RootSpacer, "#STR_COT_WEBHOOK_EVENT_TYPES" );
 		UIActionManager.CreatePanel( m_RootSpacer, 0xFF3A3A3A, 1 );
 
 		m_TypesWrapper = UIActionManager.CreateGridSpacer( m_RootSpacer, 1, 1 );
 		if ( group.Count() == 0 )
-			UIActionManager.CreateText( m_TypesWrapper, "(no event types yet - pick one below)" );
+			UIActionManager.CreateText( m_TypesWrapper, "#STR_COT_WEBHOOK_NO_EVENT_TYPES" );
 		else
 			RebuildTypes( group, allTypes );
 
@@ -80,8 +80,10 @@ class JMWebhookSection : Managed
 
 		m_DropDownList = UIActionManager.CreateDropdownBox( addRow, m_Form.GetLayoutRoot(), "Add event type", available );
 		m_DropDownList.SetWidth( 0.74 );
+		if ( m_Form )
+			m_Form.RegisterOverlay( m_DropDownList );
 
-		m_AddTypeBtn = UIActionManager.CreateButton( addRow, "Add", m_Form, "Action_AddType" );
+		m_AddTypeBtn = UIActionManager.CreateButton( addRow, "#STR_COT_WEBHOOK_ADD_TYPE", m_Form, "Action_AddType" );
 		m_AddTypeBtn.SetWidth( 0.25 );
 		m_AddTypeBtn.SetColor( JMTheme.SUCCESS_FILL );
 		m_AddTypeBtn.SetData( new JMWebhookTypeData( group.Name ) );
@@ -154,7 +156,7 @@ class JMWebhookSection : Managed
 		}
 
 		if ( group.Count() == 0 )
-			UIActionManager.CreateText( m_TypesWrapper, "(no event types yet - pick one below)" );
+			UIActionManager.CreateText( m_TypesWrapper, "#STR_COT_WEBHOOK_NO_EVENT_TYPES" );
 		else
 			RebuildTypes( group, allTypes );
 

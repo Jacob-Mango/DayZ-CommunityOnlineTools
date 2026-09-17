@@ -89,27 +89,12 @@ class JMVehiclesForm: JMFormBase
 	protected UIActionButton m_TeleportVehicleButton;
 	protected UIActionButton m_TeleportMeButton;
 
-	// Right panel - info (right half of map area)
+	// Right panel - info (right half of map area). Owned by JMVehiclesFormTabInfo.
 	protected Widget m_VehicleInfoPanel;
-	protected UIActionScroller m_VehicleInfoScroller;
-	// Map from copy-button widget -> UIActionText it belongs to
-	protected ref map<Widget, ref UIActionText> m_CopyButtonMap;
-	protected UIActionText m_VehicleName;
-	protected UIActionText m_VehicleClassName;
-	protected UIActionText m_VehicleStatus;
-	protected UIActionText m_VehicleType;
-	protected UIActionText m_VehicleID;
-	protected UIActionText m_VehiclePersistentIDAB;
-	protected UIActionText m_VehiclePersistentIDCD;
-	protected UIActionText m_VehiclePosition;
-	protected UIActionText m_VehicleRotation;
-	protected UIActionText m_VehicleCoolant;
-	protected UIActionText m_VehicleKeys;
-	protected UIActionText m_VehicleInfoOwner;
-	protected UIActionText m_VehicleLastDriverUID;
-	protected UIActionText m_VehicleLastDriverSteam;
-	protected UIActionText m_VehicleLastDriverGUID;
-	protected UIActionText m_VehicleCovered;
+
+	//! One class per tab, in its own file. Not private: SetVehicleInfo() and
+	//! OnResize() forward into it.
+	ref JMVehiclesFormTabInfo m_TabInfo;
 
 	protected UIActionSearchBox m_SearchBar;
 
@@ -185,7 +170,6 @@ class JMVehiclesForm: JMFormBase
 	{
 		m_VehicleByMarkerId = new map<string, ref JMVehicleMetaData>;
 		m_VehicleEntries    = new array<ref JMVehiclesListEntry>;
-		m_CopyButtonMap  = new map<Widget, ref UIActionText>;
 
 		//! Every filter starts open, so the form shows the whole server the
 		//! moment it is opened. Assigned here as well as at the declaration:
@@ -194,25 +178,6 @@ class JMVehiclesForm: JMFormBase
 		//! every vehicle type hidden and no visible reason why.
 		m_TypeFilter      = JMVT_ALL;
 		m_FilterShowOther = true;
-	}
-
-	// Per-info row: [? 22] [label ????  value ????]
-	// Compact spacer keeps the icon tight against the text without a gap.
-	protected UIActionText CreateCopyableText( Widget parent, string label, string value = "" )
-	{
-		Widget row = UIActionManager.CreateWrapSpacerCompact( parent, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER );
-
-		UIActionImageButton copyBtn = UIActionManager.CreateIconButton( row, JMConstants.ICON_STACK, this, "OnClick_CopyInfo" );
-		copyBtn.SetFixedSize( 22, 22 );
-		copyBtn.SetTooltip( "Copy to clipboard" );
-
-		UIActionText txt = UIActionManager.CreateText( row, label, value );
-		txt.SetWidth( 0.9 );
-
-		if ( copyBtn )
-			m_CopyButtonMap.Insert( copyBtn.GetLayoutRoot(), txt );
-
-		return txt;
 	}
 
 	protected override bool SetModule( JMRenderableModuleBase mdl )
@@ -306,9 +271,9 @@ class JMVehiclesForm: JMFormBase
 			m_DeleteDestroyedButton.SetTooltip( "Delete every destroyed / exploded vehicle" );
 			m_DeleteUnclaimedButton.SetTooltip( "Delete vehicles with no keys or registered owner" );
 
-		RegisterPermission( m_DeleteAllButton,       "Vehicles.Delete.All" );
-		RegisterPermission( m_DeleteDestroyedButton, "Vehicles.Delete.Destroyed" );
-		RegisterPermission( m_DeleteUnclaimedButton, "Vehicles.Delete.Unclaimed" );
+		RegisterPermission( m_DeleteAllButton,       JMConstants.PERM_VEHICLES_DELETE_ALL );
+		RegisterPermission( m_DeleteDestroyedButton, JMConstants.PERM_VEHICLES_DELETE_DESTROYED );
+		RegisterPermission( m_DeleteUnclaimedButton, JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED );
 
 		// The roster itself. JMVehiclesListEntry parents into whatever widget it
 		// is handed, so the scroller's content widget is all it needs.
@@ -352,8 +317,14 @@ class JMVehiclesForm: JMFormBase
 
 		switch ( tabIdx )
 		{
-			case TAB_ACTIONS: InitWidgetsActions(); break;
-			case TAB_INFO:    InitWidgetsInfo();    break;
+			case TAB_ACTIONS:
+				InitWidgetsActions();
+				break;
+
+			case TAB_INFO:
+				m_TabInfo = new JMVehiclesFormTabInfo( this );
+				m_TabInfo.Build( m_VehicleInfoPanel );
+				break;
 		}
 
 		// A tab built after a vehicle was already picked has missed the pass
@@ -380,32 +351,32 @@ class JMVehiclesForm: JMFormBase
 			m_DeleteVehicleButton = UIActionManager.CreateConfirmInline( gridOptA, "Delete", this, "OnClick_DeleteVehicle" );
 			UIActionIconGrid.ApplyDeletePreset( m_DeleteVehicleButton );
 			m_DeleteVehicleButton.SetTooltip( "Remove this vehicle from the world" );
-			m_RepairVehicleButton   = UIActionManager.CreateButton( gridOptA, "Repair", this, "OnClick_RepairVehicle" );
+			m_RepairVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_REPAIR", this, "OnClick_RepairVehicle" );
 			m_RepairVehicleButton.SetTooltip( "Restore health and replace missing attachments" );
-			m_RefuelVehicleButton   = UIActionManager.CreateButton( gridOptA, "Refuel", this, "OnClick_RefuelVehicle" );
+			m_RefuelVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_REFUEL", this, "OnClick_RefuelVehicle" );
 			m_RefuelVehicleButton.SetTooltip( "Fill fuel, oil, brake and coolant to full" );
-			m_UnstuckVehicleButton  = UIActionManager.CreateButton( gridOptA, "Unstuck", this, "OnClick_UnstuckVehicle" );
+			m_UnstuckVehicleButton  = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_UNSTUCK", this, "OnClick_UnstuckVehicle" );
 			m_UnstuckVehicleButton.SetTooltip( "Lift 1.5 m and drop back onto the ground" );
-			m_CoverVehicleButton    = UIActionManager.CreateButton( gridOptA, "Cover/Uncover", this, "OnClick_CoverVehicle" );
+			m_CoverVehicleButton    = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_COVER_UNCOVER", this, "OnClick_CoverVehicle" );
 			m_CoverVehicleButton.SetTooltip( "Toggle Expansion vehicle cover" );
-			m_LockVehicleButton     = UIActionManager.CreateButton( gridOptA, "Lock/Unlock", this, "OnClick_LockVehicle" );
+			m_LockVehicleButton     = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_LOCK_UNLOCK", this, "OnClick_LockVehicle" );
 			m_LockVehicleButton.SetTooltip( "Toggle the key lock state" );
-			m_UnPairVehicleButton   = UIActionManager.CreateButton( gridOptA, "UnPair Keys", this, "OnClick_UnPairVehicle" );
+			m_UnPairVehicleButton   = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_UNPAIR_KEYS", this, "OnClick_UnPairVehicle" );
 			m_UnPairVehicleButton.SetTooltip( "Detach all paired keys from this vehicle" );
-			m_TeleportVehicleButton = UIActionManager.CreateButton( gridOptA, "Teleport To Vehicle", this, "OnClick_TeleportToVehicle" );
+			m_TeleportVehicleButton = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_TELEPORT_TO_VEHICLE", this, "OnClick_TeleportToVehicle" );
 			m_TeleportVehicleButton.SetTooltip( "Teleport yourself to this vehicle's location" );
-			m_TeleportMeButton      = UIActionManager.CreateButton( gridOptA, "Teleport Vehicle To Me", this, "OnClick_TeleportVehicleToMe" );
+			m_TeleportMeButton      = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_TELEPORT_VEHICLE_TO_ME", this, "OnClick_TeleportVehicleToMe" );
 			m_TeleportMeButton.SetTooltip( "Move this vehicle to your current position" );
 
-		RegisterPermission( m_DeleteVehicleButton,   "Vehicles.Delete" );
-		RegisterPermission( m_RepairVehicleButton,   "Vehicles.Repair" );
-		RegisterPermission( m_RefuelVehicleButton,   "Vehicles.Refuel" );
-		RegisterPermission( m_UnstuckVehicleButton,  "Vehicles.Unstuck" );
-		RegisterPermission( m_CoverVehicleButton,    "Vehicles.Cover" );
-		RegisterPermission( m_LockVehicleButton,     "Vehicles.Lock" );
-		RegisterPermission( m_UnPairVehicleButton,   "Vehicles.UnPair" );
-		RegisterPermission( m_TeleportVehicleButton, "Vehicles.Teleport" );
-		RegisterPermission( m_TeleportMeButton,      "Vehicles.Teleport" );
+		RegisterPermission( m_DeleteVehicleButton,   JMConstants.PERM_VEHICLES_DELETE );
+		RegisterPermission( m_RepairVehicleButton,   JMConstants.PERM_VEHICLES_REPAIR );
+		RegisterPermission( m_RefuelVehicleButton,   JMConstants.PERM_VEHICLES_REFUEL );
+		RegisterPermission( m_UnstuckVehicleButton,  JMConstants.PERM_VEHICLES_UNSTUCK );
+		RegisterPermission( m_CoverVehicleButton,    JMConstants.PERM_VEHICLES_COVER );
+		RegisterPermission( m_LockVehicleButton,     JMConstants.PERM_VEHICLES_LOCK );
+		RegisterPermission( m_UnPairVehicleButton,   JMConstants.PERM_VEHICLES_UNPAIR );
+		RegisterPermission( m_TeleportVehicleButton, JMConstants.PERM_VEHICLES_TELEPORT );
+		RegisterPermission( m_TeleportMeButton,      JMConstants.PERM_VEHICLES_TELEPORT );
 
 	#ifndef EXPANSIONMODVEHICLE
 		// Cover, Lock, UnPair are Expansion-only - disable them when Expansion is not loaded
@@ -415,36 +386,6 @@ class JMVehiclesForm: JMFormBase
 	#endif
 
 		m_VehicleOptionsScroller.UpdateScroller();
-	}
-
-	protected void InitWidgetsInfo()
-	{
-		m_VehicleInfoScroller = UIActionManager.CreateScroller( m_VehicleInfoPanel );
-		Widget infoContent = m_VehicleInfoScroller.GetContentWidget();
-
-		UIActionCard infoCard = UIActionManager.CreateCard( infoContent, "#STR_COT_VEHICLE_INFORMATION_TITLE" );
-		Widget gridInfoA = UIActionManager.CreateGridSpacer( infoCard.GetContent(), 10, 1 );
-			m_VehicleName           = CreateCopyableText( gridInfoA, "Name:", "Value" );
-			m_VehicleClassName      = CreateCopyableText( gridInfoA, "ClassName:", "Value" );
-			m_VehicleStatus         = CreateCopyableText( gridInfoA, "Status:", "Value" );
-			m_VehicleType           = CreateCopyableText( gridInfoA, "Type:", "Value" );
-			m_VehicleID             = CreateCopyableText( gridInfoA, "ID:", "Value" );
-			m_VehiclePersistentIDAB = CreateCopyableText( gridInfoA, "ID AB:", "Value" );
-			m_VehiclePersistentIDCD = CreateCopyableText( gridInfoA, "ID CD:", "Value" );
-			m_VehiclePosition       = CreateCopyableText( gridInfoA, "Position:", "Value" );
-			m_VehicleRotation       = CreateCopyableText( gridInfoA, "Rotation:", "Value" );
-			m_VehicleCoolant        = CreateCopyableText( gridInfoA, "Coolant:", "Value" );
-
-		Widget gridInfoB = UIActionManager.CreateGridSpacer( infoCard.GetContent(), 7, 1 );
-			m_VehicleKeys            = CreateCopyableText( gridInfoB, "Keys:", "Value" );
-			m_VehicleInfoOwner       = CreateCopyableText( gridInfoB, "Owner:", "Value" );
-			m_VehicleLastDriverUID   = CreateCopyableText( gridInfoB, "Driver UID:", "N/A" );
-			m_VehicleLastDriverSteam = CreateCopyableText( gridInfoB, "Driver Steam:", "N/A" );
-			m_VehicleLastDriverGUID  = CreateCopyableText( gridInfoB, "Driver GUID:", "N/A" );
-			m_VehicleCovered         = CreateCopyableText( gridInfoB, "Covered:", "Value" );
-			UIActionManager.CreateText( gridInfoB, "" );
-
-		m_VehicleInfoScroller.UpdateScroller();
 	}
 
 	override void OnResize( float w, float h )
@@ -463,8 +404,8 @@ class JMVehiclesForm: JMFormBase
 		if ( m_VehicleOptionsScroller )
 			m_VehicleOptionsScroller.UpdateScroller();
 
-		if ( m_VehicleInfoScroller )
-			m_VehicleInfoScroller.UpdateScroller();
+		if ( m_TabInfo )
+			m_TabInfo.OnResize();
 	}
 
 	//! PinStripGeometry pins both left-hand blocks to x=0 / width=1 every time
@@ -789,66 +730,9 @@ class JMVehiclesForm: JMFormBase
 
 		// The Info tab may not have been built yet - it fills itself in from
 		// m_CurrentVehicle when it is.
-		if ( !m_VehicleName )
-			return;
+		if ( m_TabInfo )
+			m_TabInfo.PopulateInfo( vehicle );
 
-		m_VehicleName.SetText( vehicle.m_DisplayName );
-		m_VehicleClassName.SetText( vehicle.m_ClassName );
-		string statusText = vehicle.GetVehicleDestructionState();
-		if ( statusText == "None" )
-			statusText = "OK";
-		m_VehicleStatus.SetText( statusText );
-		m_VehicleType.SetText( vehicle.GetVehicleType() );
-		m_VehicleID.SetText( vehicle.m_NetworkIDHigh.ToString() + " " + vehicle.m_NetworkIDLow.ToString() );
-		m_VehiclePersistentIDAB.SetText( vehicle.m_PersistentIDA.ToString() + " " + vehicle.m_PersistentIDB.ToString() );
-		m_VehiclePersistentIDCD.SetText( vehicle.m_PersistentIDC.ToString() + " " + vehicle.m_PersistentIDD.ToString() );
-		m_VehiclePosition.SetText( vehicle.m_Position.ToString() );
-		m_VehicleRotation.SetText( vehicle.m_Orientation.ToString() );
-
-		string coolantText = "N/A";
-		if ( vehicle.m_CoolantPct >= 0 )
-			coolantText = Math.Round( vehicle.m_CoolantPct * 100 ).ToString() + "%";
-		if ( m_VehicleCoolant )
-			m_VehicleCoolant.SetText( coolantText );
-
-		string hasKeys;
-		if ( vehicle.m_HasKeys )
-			hasKeys = "Yes";
-		else
-			hasKeys = "No";
-		m_VehicleKeys.SetText( hasKeys );
-		if ( vehicle.m_OwnerName != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_OwnerName + " (" + vehicle.m_OwnerUID + ")" );
-		else if ( vehicle.m_LastDriverSteam != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverSteam + " (last driver)" );
-		else if ( vehicle.m_LastDriverUID != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverUID + " (last driver)" );
-		else
-			m_VehicleInfoOwner.SetText( "Unknown" );
-
-		if ( vehicle.m_LastDriverUID != "" )
-			m_VehicleLastDriverUID.SetText( vehicle.m_LastDriverUID );
-		else
-			m_VehicleLastDriverUID.SetText( "N/A" );
-
-		if ( vehicle.m_LastDriverSteam != "" )
-			m_VehicleLastDriverSteam.SetText( vehicle.m_LastDriverSteam );
-		else
-			m_VehicleLastDriverSteam.SetText( "N/A" );
-
-		if ( vehicle.m_LastDriverGUID != "" )
-			m_VehicleLastDriverGUID.SetText( vehicle.m_LastDriverGUID );
-		else
-			m_VehicleLastDriverGUID.SetText( "N/A" );
-
-		string isCovered;
-		if ( vehicle.m_IsCover )
-			isCovered = "Yes";
-		else
-			isCovered = "No";
-		m_VehicleCovered.SetText( isCovered );
-
-		m_VehicleInfoScroller.UpdateScroller();
 		m_VehicleOptionsScroller.UpdateScroller();
 	}
 
@@ -1190,23 +1074,23 @@ class JMVehiclesForm: JMFormBase
 
 		//! SetItemEnabled on an id the menu is not carrying is a no-op, so the
 		//! Expansion-only entries need no special case here.
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_TO,   GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_HERE, GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_TO,   JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_HERE, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) );
 
 		//! Greyed rather than dropped when there is nothing recorded: an entry
 		//! that comes and goes moves every row under it between one opening of
 		//! the menu and the next.
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_UNDO, GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) && HasTeleportUndo( vehicle ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_REDO, GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) && HasTeleportRedo( vehicle ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_CARGO,   GetPermissionsManager().HasPermission( "Vehicles.ClearCargo" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_KEY,     GetPermissionsManager().HasPermission( "Vehicles.SpawnKey" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_REPAIR,  GetPermissionsManager().HasPermission( "Vehicles.Repair" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_REFUEL,  GetPermissionsManager().HasPermission( "Vehicles.Refuel" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_UNSTUCK, GetPermissionsManager().HasPermission( "Vehicles.Unstuck" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_COVER,   GetPermissionsManager().HasPermission( "Vehicles.Cover" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_LOCK,    GetPermissionsManager().HasPermission( "Vehicles.Lock" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_UNPAIR,  GetPermissionsManager().HasPermission( "Vehicles.UnPair" ) );
-		m_MarkerMenu.SetItemEnabled( MK_MENU_DELETE,  GetPermissionsManager().HasPermission( "Vehicles.Delete" ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_UNDO, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) && HasTeleportUndo( vehicle ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_TP_REDO, JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) && HasTeleportRedo( vehicle ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_CARGO,   JMPermissions.Has( JMConstants.PERM_VEHICLES_CLEARCARGO ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_KEY,     JMPermissions.Has( JMConstants.PERM_VEHICLES_SPAWNKEY ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_REPAIR,  JMPermissions.Has( JMConstants.PERM_VEHICLES_REPAIR ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_REFUEL,  JMPermissions.Has( JMConstants.PERM_VEHICLES_REFUEL ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_UNSTUCK, JMPermissions.Has( JMConstants.PERM_VEHICLES_UNSTUCK ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_COVER,   JMPermissions.Has( JMConstants.PERM_VEHICLES_COVER ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_LOCK,    JMPermissions.Has( JMConstants.PERM_VEHICLES_LOCK ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_UNPAIR,  JMPermissions.Has( JMConstants.PERM_VEHICLES_UNPAIR ) );
+		m_MarkerMenu.SetItemEnabled( MK_MENU_DELETE,  JMPermissions.Has( JMConstants.PERM_VEHICLES_DELETE ) );
 
 		int mx, my;
 		GetMousePos( mx, my );
@@ -1276,14 +1160,14 @@ class JMVehiclesForm: JMFormBase
 
 		if ( id == MK_MENU_CARGO )
 		{
-			if ( GetPermissionsManager().HasPermission( "Vehicles.ClearCargo" ) )
+			if ( JMPermissions.Has( JMConstants.PERM_VEHICLES_CLEARCARGO ) )
 				m_Module.RequestClearVehicleCargo( vehicle );
 			return;
 		}
 
 		if ( id == MK_MENU_KEY )
 		{
-			if ( GetPermissionsManager().HasPermission( "Vehicles.SpawnKey" ) )
+			if ( JMPermissions.Has( JMConstants.PERM_VEHICLES_SPAWNKEY ) )
 				m_Module.RequestSpawnVehicleKey( vehicle );
 			return;
 		}
@@ -1326,7 +1210,7 @@ class JMVehiclesForm: JMFormBase
 
 		if ( id == MK_MENU_DELETE )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete" ) )
+			if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_DELETE ) )
 				return;
 
 			m_PendingDeleteLow  = vehicle.m_NetworkIDLow;
@@ -1359,16 +1243,6 @@ class JMVehiclesForm: JMFormBase
 		SyncAndRefreshVehicles();
 	}
 
-	void OnClick_CopyInfo( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK || !action )
-			return;
-
-		UIActionText txt = m_CopyButtonMap.Get( action.GetLayoutRoot() );
-		if ( txt )
-			g_Game.CopyToClipboard( txt.GetText() );
-	}
-
 	//! Whether this vehicle has a move of its own this session that can still
 	//! be taken back.
 	protected bool HasTeleportUndo( JMVehicleMetaData vehicle )
@@ -1396,7 +1270,7 @@ class JMVehiclesForm: JMFormBase
 		if ( !vehicle || !m_Module )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) )
 			return;
 
 		vector forward = JMTeleportHistory.PopRedo( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ), 0, vehicle.m_Position );
@@ -1416,7 +1290,7 @@ class JMVehiclesForm: JMFormBase
 		if ( !vehicle || !m_Module )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) )
 			return;
 
 		vector back = JMTeleportHistory.Pop( JMTeleportHistory.ObjectKey( vehicle.m_NetworkIDLow, vehicle.m_NetworkIDHigh ), 0, vehicle.m_Position );
@@ -1613,6 +1487,13 @@ class JMVehiclesForm: JMFormBase
 		super.OnHide();
 
 		HideHoverInfo();
+	}
+
+	override void OnClientPermissionsUpdated()
+	{
+		super.OnClientPermissionsUpdated();
+
+		UpdateUI();
 	}
 
 	//! Marker sync runs off the window's per-frame Update() rather than a

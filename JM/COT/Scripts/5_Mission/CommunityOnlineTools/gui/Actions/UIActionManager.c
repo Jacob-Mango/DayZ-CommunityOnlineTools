@@ -111,7 +111,7 @@ class UIActionManager
 		return widget;
 	}
 
-	static UIActionButton CreateButton( notnull Widget parent, string button, Class instance, string funcname, float width = 1 )
+	static UIActionButton CreateButton( notnull Widget parent, string button, Class instance, string funcname, float width = 1, string permission = "" )
 	{
 		string layout = "JM/COT/GUI/layouts/uiactions/UIActionButton.layout";
 		Widget widget = g_Game.GetWorkspace().CreateWidgets( layout, parent );
@@ -132,6 +132,11 @@ class UIActionManager
 			action.SetCallback( instance, funcname );
 			action.SetButton( button );
 
+			if ( permission != "" && instance && instance.IsInherited( JMFormBase ) )
+			{
+				JMFormBase.Cast( instance ).RegisterPermission( action, permission );
+			}
+
 			return action;
 		}
 
@@ -139,6 +144,7 @@ class UIActionManager
 
 		return NULL;
 	}
+
 
 	// ---------------------------------------------------------------------------
 	//  CreateFeedbackButton - standard pill button that briefly cross-fades its
@@ -2002,4 +2008,22 @@ class UIActionManager
 	{
 		return new UIActionTooltip( anchor );
 	}
+
+	// ---------------------------------------------------------------------------
+	//  CreateHeaderButton - compact header/toolbar icon button helper
+	// ---------------------------------------------------------------------------
+	static UIActionImageButton CreateHeaderButton( notnull Widget parent, string icon, string tooltip = "", Class target = null, string callback = "", string permission = "" )
+	{
+		UIActionImageButton btn = CreateImageButton( parent, icon, target, callback );
+		if ( btn )
+		{
+			if ( tooltip != "" )
+				btn.SetTooltip( tooltip );
+
+			if ( permission != "" )
+				btn.UpdatePermission( permission );
+		}
+		return btn;
+	}
 }
+

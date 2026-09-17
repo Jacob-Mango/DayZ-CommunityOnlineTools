@@ -36,7 +36,7 @@ class JMMapForm: JMFormBase
 	
 	override void OnShow()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Admin.Map.View" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_MAP_VIEW ) )
 			return;
 
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).CallLater( UpdateMapPosition, 34, false, true, vector.Zero );

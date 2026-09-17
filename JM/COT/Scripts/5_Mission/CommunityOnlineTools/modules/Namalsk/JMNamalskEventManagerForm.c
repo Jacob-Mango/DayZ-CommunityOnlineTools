@@ -38,7 +38,7 @@ class JMNamalskEventManagerForm: JMFormBase
 
 		if (!m_Module || !m_Module.Events || m_Module.Events.Count() < 1)
 		{
-			UIActionManager.CreateText(m_ActionsWrapper, "No Namalsk events available");
+			UIActionManager.CreateText(m_ActionsWrapper, "#STR_COT_NAMALSK_NO_EVENTS_AVAILABLE");
 			m_sclr_MainActions.UpdateScroller();
 			return;
 		}
@@ -51,8 +51,8 @@ class JMNamalskEventManagerForm: JMFormBase
 
 	private void AddEvent(string event_name)
 	{
-		bool canStart  = GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Start");
-		bool canCancel = GetPermissionsManager().HasPermission("Namalsk." + event_name + ".Cancel");
+		bool canStart  = JMPermissions.Has(JMConstants.PERM_NAMALSK + "." + event_name + ".Start");
+		bool canCancel = JMPermissions.Has(JMConstants.PERM_NAMALSK + "." + event_name + ".Cancel");
 
 		Widget row = UIActionManager.CreateWrapSpacer(m_ActionsWrapper, WidgetAlignment.WA_LEFT, WidgetAlignment.WA_CENTER);
 
@@ -83,7 +83,7 @@ class JMNamalskEventManagerForm: JMFormBase
 
 		if (canStart)
 		{
-			UIActionButton startBtn = UIActionManager.CreateButton(row, "Start", this, "OnClick_StartEvent");
+			UIActionButton startBtn = UIActionManager.CreateButton(row, "#STR_COT_NAMALSK_START_EVENT", this, "OnClick_StartEvent");
 			startBtn.SetWidth(0.40);
 			startBtn.SetColor(JMTheme.SUCCESS_FILL);
 			startBtn.SetData(new JMNamalskEventManagerButtonData(event_name));
@@ -93,29 +93,25 @@ class JMNamalskEventManagerForm: JMFormBase
 
 	void OnClick_StartEvent(UIEvent eid, UIActionBase action)
 	{
-		if (eid != UIEvent.CLICK)
+		if (eid != UIEvent.CLICK || !m_Module)
 			return;
 
 		JMNamalskEventManagerButtonData data;
 		if (!Class.CastTo(data, action.GetData()))
 			return;
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write(data.ClassName);
-		rpc.Send(null, JMNamalskEventManagerRPC.StartEvent, true, null);
+		m_Module.RequestStartEvent(data.ClassName);
 	}
 
 	void OnClick_CancelEvent(UIEvent eid, UIActionBase action)
 	{
-		if (eid != UIEvent.CHANGE)
+		if (eid != UIEvent.CHANGE || !m_Module)
 			return;
 
 		JMNamalskEventManagerButtonData data;
 		if (!Class.CastTo(data, action.GetData()))
 			return;
 
-		ScriptRPC rpc = new ScriptRPC();
-		rpc.Write(data.ClassName);
-		rpc.Send(null, JMNamalskEventManagerRPC.CancelEvent, true, null);
+		m_Module.RequestCancelEvent(data.ClassName);
 	}
 }

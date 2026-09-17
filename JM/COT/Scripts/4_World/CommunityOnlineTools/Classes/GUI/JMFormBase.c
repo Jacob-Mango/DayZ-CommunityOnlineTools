@@ -238,7 +238,10 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//  Floating overlay management
 	// ---------------------------------------------------------------------------
 
-	protected void RegisterOverlay( COT_ScriptedWidgetEventHandler control )
+	//! Public (not protected): a per-tab helper class holding a back-reference
+	//! to its owning form (same shape as JMPlayerRowWidget.Menu) needs to call
+	//! this from outside the JMFormBase family.
+	void RegisterOverlay( COT_ScriptedWidgetEventHandler control )
 	{
 		if ( !control )
 			return;
@@ -250,7 +253,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 			m_FloatingOverlays.Insert( control );
 	}
 
-	protected void UnregisterOverlay( COT_ScriptedWidgetEventHandler control )
+	void UnregisterOverlay( COT_ScriptedWidgetEventHandler control )
 	{
 		if ( !control || !m_FloatingOverlays )
 			return;
@@ -262,7 +265,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Dismiss every registered overlay. Safe to call when nothing is open.
-	protected void CloseAllOverlays()
+	void CloseAllOverlays()
 	{
 		if ( !m_FloatingOverlays )
 			return;
@@ -328,7 +331,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	//! Bind a control to a permission key and evaluate it immediately. From
 	//! here on the control is kept in step by OnClientPermissionsUpdated().
-	protected void RegisterPermission( COT_ScriptedWidgetEventHandler control, string permissionKey )
+	void RegisterPermission( COT_ScriptedWidgetEventHandler control, string permissionKey )
 	{
 		if ( !control || permissionKey == "" )
 			return;
@@ -342,7 +345,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Helper to register permission for a specific panel / card control.
-	protected void RegisterPanelPermission( COT_ScriptedWidgetEventHandler panel, string permissionKey )
+	void RegisterPanelPermission( COT_ScriptedWidgetEventHandler panel, string permissionKey )
 	{
 		RegisterPermission( panel, permissionKey );
 	}
@@ -364,7 +367,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Drop a binding whose control is about to be destroyed. Forms that
 	//! rebuild part of their UI on every selection change need this, or the
 	//! map fills up with dead keys.
-	protected void UnregisterPermission( COT_ScriptedWidgetEventHandler control )
+	void UnregisterPermission( COT_ScriptedWidgetEventHandler control )
 	{
 		if ( !control || !m_PermissionControls )
 			return;
@@ -372,7 +375,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		m_PermissionControls.Remove( control );
 	}
 
-	protected void ApplyRegisteredPermissions()
+	void ApplyRegisteredPermissions()
 	{
 		if ( !m_PermissionControls )
 			return;
@@ -394,7 +397,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	//! Sized to the number of tabs, all false. Call once, after the tab
 	//! containers exist.
-	protected void InitTabState( int tabCount )
+	void InitTabState( int tabCount )
 	{
 		m_TabBuilt = new array<bool>;
 
@@ -408,7 +411,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! modded-class OnInit() AFTER super.OnInit() has run InitTabState().
 	//! Each call to ShouldBuildTab() on the new indices will then work
 	//! correctly (true once, false every time after).
-	protected void ExtendTabState( int count )
+	void ExtendTabState( int count )
 	{
 		if ( !m_TabBuilt )
 			return;
@@ -430,7 +433,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//!
 	//!         switch ( tabIdx ) { ... }
 	//!     }
-	protected bool ShouldBuildTab( int tabIdx )
+	bool ShouldBuildTab( int tabIdx )
 	{
 		if ( !m_TabBuilt )
 			return false;
@@ -449,7 +452,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Index of the tab currently on screen. UIActionTabs is a 5_Mission type
 	//! and cannot be named from 4_World, so a subclass that has tabs overrides
 	//! this with "return m_Tabs.GetSelection();".
-	protected int GetActiveTabIndex()
+	int GetActiveTabIndex()
 	{
 		return -1;
 	}
@@ -457,7 +460,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	//! Gate background refreshes on the tab being visible. A form with no tabs
 	//! (or one asked before its strip exists) reports every index active, so an
 	//! unconverted caller keeps its old behaviour.
-	protected bool IsTabActive( int tabIdx )
+	bool IsTabActive( int tabIdx )
 	{
 		int active = GetActiveTabIndex();
 
@@ -535,6 +538,14 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	Widget GetLayoutRoot()
 	{
 		return layoutRoot;
+	}
+
+	//! Public: a per-tab class anchoring a floating overlay (e.g. a context
+	//! menu) to the window root needs this the same way EnsureContextMenu()
+	//! bodies already did before they lived on the form itself.
+	CF_Window GetWindow()
+	{
+		return m_Window;
 	}
 
 	JMConfirmation CreateConfirmation_One( JMConfirmationType type, string title, string message, string callBackOneName, string callBackOne )

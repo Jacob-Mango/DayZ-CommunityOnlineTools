@@ -45,13 +45,11 @@ class JMContextMenuEntry
 	string IconPath;
 	int    TextColor;
 	bool   Enabled;
-
-	//! Draws a trailing chevron. For a row that opens another page of items
-	//! rather than doing something - without it the two read identically and
-	//! the only way to find out which is which is to click.
 	bool   Submenu;
+	Class  Target;
+	string Callback;
 
-	void JMContextMenuEntry( string id, string text, string iconPath = "", int textColor = 0, bool submenu = false )
+	void JMContextMenuEntry( string id, string text, string iconPath = "", int textColor = 0, bool submenu = false, Class target = null, string callback = "" )
 	{
 		Id        = id;
 		Text      = text;
@@ -59,7 +57,11 @@ class JMContextMenuEntry
 		TextColor = textColor;
 		Enabled   = true;
 		Submenu   = submenu;
+		Target    = target;
+		Callback  = callback;
 	}
+
+
 }
 
 class UIActionContextMenu: UIActionBase
@@ -297,11 +299,12 @@ class UIActionContextMenu: UIActionBase
 
 	//! textColor 0 means "use the default", so callers can pass JMTheme.DANGER
 	//! for a destructive entry without every other call site naming a colour.
-	void AddItem( string id, string label, string icon = "", int textColor = 0, bool submenu = false )
+	void AddItem( string id, string label, string icon = "", int textColor = 0, bool submenu = false, Class target = null, string callback = "" )
 	{
-		m_Entries.Insert( new JMContextMenuEntry( id, label, icon, textColor, submenu ) );
+		m_Entries.Insert( new JMContextMenuEntry( id, label, icon, textColor, submenu, target, callback ) );
 		RebuildItems();
 	}
+
 
 	//! A disabled item still draws - a menu that silently loses entries reads
 	//! as a bug - but it is greyed and does not fire.
@@ -622,7 +625,8 @@ class UIActionContextMenu: UIActionBase
 		if ( !m_Entries[idx].Enabled )
 			return true;
 
-		m_LastClickedId = m_Entries[idx].Id;
+		JMContextMenuEntry entry = m_Entries[idx];
+		m_LastClickedId = entry.Id;
 
 		#ifdef COT_DEBUGLOGS
 		Print("[COT_DBG] UIActionContextMenu.OnClick: row id=" + m_LastClickedId + " m_CloseOnClick=" + m_CloseOnClick.ToString());
@@ -631,8 +635,14 @@ class UIActionContextMenu: UIActionBase
 		if ( m_CloseOnClick )
 			Close();
 
+		if ( entry.Target && entry.Callback != "" )
+		{
+			GetGame().GameScript.CallFunctionParams( entry.Target, entry.Callback, null, new Param1<string>( entry.Id ) );
+		}
+
 		CallEvent( UIEvent.CLICK );
 		return true;
+
 	}
 
 	override bool OnMouseEnter( Widget w, int x, int y )

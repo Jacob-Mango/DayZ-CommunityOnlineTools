@@ -70,6 +70,10 @@ class JMItemStatsModule: JMRenderableModuleBase
 		return "ItemStats Module";
 	}
 
+	override void GetWebhookTypes( out array<string> types )
+	{
+	}
+
 	bool IsExcludedClassName( string className )
 	{
 		if ( m_UnfinishedItems.Find( className ) > -1 )

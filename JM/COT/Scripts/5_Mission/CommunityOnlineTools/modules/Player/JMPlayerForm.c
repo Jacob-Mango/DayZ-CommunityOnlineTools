@@ -3,44 +3,44 @@
 
 class JMPlayerForm: JMFormBase
 {
-	private autoptr array< JMPlayerRowWidget > m_PlayerList;
+	protected autoptr array< JMPlayerRowWidget > m_PlayerList;
 
-	private UIActionText m_PlayerListCount;
-	private UIActionText m_PlayerListPeak;
-	private UIActionText m_PlayerListSelected;
-	private UIActionSearchBox m_PlayerListFilter;
+	protected UIActionText m_PlayerListCount;
+	protected UIActionText m_PlayerListPeak;
+	protected UIActionText m_PlayerListSelected;
+	protected UIActionSearchBox m_PlayerListFilter;
 
 	//! Slot count of the server, when the client knows it - a direct connect
 	//! never went through the browser, so it has no host data to read.
-	private int m_MaxPlayers;
+	protected int m_MaxPlayers;
 
 	//! High-water mark of the roster. Static so it survives the form being
 	//! rebuilt (permissions change, menu reopened) and keeps counting for the
 	//! whole session rather than restarting at the current headcount.
-	private static int s_PeakPlayerCount;
+	protected static int s_PeakPlayerCount;
 
-	private UIActionImageButtonToggle m_PlayerListSort;
-	private UIActionImageButton m_PlayerListSelectAll;
-	private UIActionImageButton m_PlayerListDeSelectAll;
-	private UIActionImageButton m_PlayerListFilters;
+	protected UIActionImageButtonToggle m_PlayerListSort;
+	protected UIActionImageButton m_PlayerListSelectAll;
+	protected UIActionImageButton m_PlayerListDeSelectAll;
+	protected UIActionImageButton m_PlayerListFilters;
 
 	//! The advanced-filter dropdown, and the state its entries toggle. All on
 	//! by default: an admin who has never touched this sees the whole roster.
-	private UIActionContextMenu m_FilterMenu;
-	private bool m_FilterShowDead     = true;
-	private bool m_FilterShowUncon    = true;
-	private bool m_FilterShowHurt     = true;
-	private bool m_FilterShowSick     = true;
-	private bool m_FilterShowAdmins   = true;
-	private bool m_FilterShowCheaters = true;
+	protected UIActionContextMenu m_FilterMenu;
+	protected bool m_FilterShowDead     = true;
+	protected bool m_FilterShowUncon    = true;
+	protected bool m_FilterShowHurt     = true;
+	protected bool m_FilterShowSick     = true;
+	protected bool m_FilterShowAdmins   = true;
+	protected bool m_FilterShowCheaters = true;
 
-	private UIActionImageButton m_PlayerPrefSave;
-	private UIActionImageButton m_PlayerPrefLoad;
+	protected UIActionImageButton m_PlayerPrefSave;
+	protected UIActionImageButton m_PlayerPrefLoad;
 
-	private UIActionScroller m_PlayerListScroller;
-	private Widget m_PlayerListRows;
+	protected UIActionScroller m_PlayerListScroller;
+	protected Widget m_PlayerListRows;
 
-	private UIActionScroller m_ActionListScroller;
+	UIActionScroller m_ActionListScroller;
 	//! protected so modded-class fragments (EgoLand tab injection) can append
 	//! new tab panels onto the scroller without a fragile widget-tree walk.
 	protected Widget m_ActionsWrapper;
@@ -51,13 +51,39 @@ class JMPlayerForm: JMFormBase
 	//! into panel_right_tabs and panel_right_content.
 	//! protected so modded-class fragments can call AddContent / SetTabs / SetSelection.
 	protected UIActionTabs m_Tabs;
-	private Widget m_TabGeneral;
-	private Widget m_TabPosition;
-	private Widget m_TabInventory;
-	private Widget m_TabStatistics;
-	private Widget m_TabActions;
+	protected ref map<int, ref JMCustomTabCallback> m_CustomTabCallbacks;
+	protected Widget m_TabGeneral;
+	protected Widget m_TabPosition;
+	protected Widget m_TabInventory;
+	protected Widget m_TabStatistics;
+	protected Widget m_TabActions;
+
+	//! `instance` defaults to the form itself, so every existing third-party
+	//! AddTab(label, icon, "BuildFn") call (see ExampleScriptOverride/) keeps
+	//! resolving BuildFn on `this` unchanged. Pass a separate object (a
+	//! per-tab class, same back-reference shape as JMPlayerRowWidget.Menu) to
+	//! dispatch the build callback there instead.
+	int AddTab( string label, string icon, string buildCallbackFn, Class instance = null )
+	{
+		if ( !m_Tabs || !m_ActionsWrapper )
+			return -1;
+
+		if ( !instance )
+			instance = this;
+
+		Widget tabContent = UIActionManager.CreateGridSpacer( m_ActionsWrapper, 8, 1 );
+		int tabIdx = m_Tabs.AddTab( label, icon, tabContent );
+		ExtendTabState( 1 );
+
+		if ( !m_CustomTabCallbacks )
+			m_CustomTabCallbacks = new map<int, ref JMCustomTabCallback>;
+
+		m_CustomTabCallbacks.Insert( tabIdx, new JMCustomTabCallback( instance, buildCallbackFn ) );
+		return tabIdx;
+	}
 
 	static const int TAB_GENERAL    = 0;
+
 	static const int TAB_POSITION   = 1;
 	static const int TAB_INVENTORY  = 2;
 	static const int TAB_STATISTICS = 3;
@@ -68,113 +94,113 @@ class JMPlayerForm: JMFormBase
 	//! meaning what it always meant: no item.
 	static const int INV_GHOST_BASE = -2;
 
-	private UIActionFeedbackButton m_GUID;
-	private UIActionFeedbackButton m_Name;
-	private UIActionFeedbackButton m_Steam64ID;
-	private UIActionButton m_SteamProfile;
+	protected UIActionFeedbackButton m_GUID;
+	protected UIActionFeedbackButton m_Name;
+	protected UIActionFeedbackButton m_Steam64ID;
+	protected UIActionButton m_SteamProfile;
 
 	#ifdef GAMELABS
-	private UIActionFeedbackButton m_CFToolsID;
-	private UIActionButton m_CFProfile;
+	protected UIActionFeedbackButton m_CFToolsID;
+	protected UIActionButton m_CFProfile;
 	#endif
 
 	//! Read-only mirror of the four JMPlayerVariables flags worth seeing at a
 	//! glance. The checkboxes that set them live on the Actions tab; these say
 	//! what is on without making the admin go and look.
-	private Widget m_FlagStrip;
+	protected Widget m_FlagStrip;
 	//! Right-click menu for the player list, and the player it was opened on.
 	//! The GUID is captured at open time and every item acts on THAT player, so
 	//! the menu can never run on a different one than the row under the pointer
 	//! - the selection set can change underneath it while it is up.
-	private UIActionContextMenu m_PlayerMenu;
-	private string              m_PlayerMenuGUID;
+	protected UIActionContextMenu m_PlayerMenu;
+	protected string              m_PlayerMenuGUID;
 
 	//! Scale prompt, lazily built the first time it is needed - see m_PlayerMenu.
 	//! One shared slider serves all three routing modes; which target set the
 	//! next confirm applies to is remembered here rather than baked into three
 	//! separate prompt ids.
-	private UIActionValuePrompt m_ScalePrompt;
-	private int                 m_ScalePendingMode;
+	protected UIActionValuePrompt m_ScalePrompt;
+	protected int                 m_ScalePendingMode;
 	static const int SCALE_MODE_MULTI  = 0;
 	static const int SCALE_MODE_SINGLE = 1;
 	static const int SCALE_MODE_SELF   = 2;
 
-	private UIActionBadge m_BadgeGodMode;
-	private UIActionBadge m_BadgeFrozen;
-	private UIActionBadge m_BadgeInvisible;
-	private UIActionBadge m_BadgeUnconscious;
-	private UIActionText  m_IdentityRole;
+	protected UIActionBadge m_BadgeGodMode;
+	protected UIActionBadge m_BadgeFrozen;
+	protected UIActionBadge m_BadgeInvisible;
+	protected UIActionBadge m_BadgeUnconscious;
+	protected UIActionText  m_IdentityRole;
 
 	//! Jumps to the Role Manager with this player already selected. Reading the
 	//! role here and having to go and FIND the same player in another window to
 	//! change it was the one identity row with no way to act on what it said.
-	private UIActionImageButton m_IdentityRoleEdit;
+	protected UIActionImageButton m_IdentityRoleEdit;
 
-	private UIActionStagedIcon m_BadgeStatusDead;
-	private UIActionStagedIcon m_BadgeStatusUnconscious;
-	private UIActionStagedIcon m_BadgeStatusBrokenLeg;
-	private UIActionStagedIcon m_BadgeStatusBleeding;
-	private UIActionStagedIcon m_BadgeStatusSick;
+	protected UIActionStagedIcon m_BadgeStatusDead;
+	protected UIActionStagedIcon m_BadgeStatusUnconscious;
+	protected UIActionStagedIcon m_BadgeStatusBrokenLeg;
+	protected UIActionStagedIcon m_BadgeStatusBleeding;
+	protected UIActionStagedIcon m_BadgeStatusSick;
 
 	//! The whole Active Statuses card. Hidden outright while the player is in
 	//! none of the five states - an empty card is a heading over a blank strip,
 	//! which reads as a panel that failed to load rather than as "nothing wrong".
-	private Widget m_StatusCardRoot;
+	protected Widget m_StatusCardRoot;
 
 	//! Right-click menu for one Active Statuses glyph, and the guid it was
 	//! opened against. Separate from m_PlayerMenu: that one belongs to a list
 	//! row and can be open over a different player than the card is showing.
-	private UIActionContextMenu m_StatusMenu;
-	private string m_StatusMenuGUID;
+	protected UIActionContextMenu m_StatusMenu;
+	protected string m_StatusMenuGUID;
 
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm`
 	//! (DayZExpansion_AI, DayZExpansion_Hardline) re-sorts these widgets via
 	//! GetLayoutRoot().SetSort() when injecting its faction/reputation rows.
 	//! A modded class cannot touch a private member of the class it mods.
 	protected UIActionImageButton m_ApplyStats;
-	private UIActionSlider m_Health;
-	private bool m_HealthUpdated;
-	private UIActionSlider m_Blood;
-	private bool m_BloodUpdated;
-	private UIActionSlider m_Energy;
-	private bool m_EnergyUpdated;
-	private UIActionSlider m_Water;
-	private bool m_WaterUpdated;
-	private UIActionSlider m_Shock;
-	private bool m_ShockUpdated;
+	protected UIActionSlider m_Health;
+	protected bool m_HealthUpdated;
+	protected UIActionSlider m_Blood;
+	protected bool m_BloodUpdated;
+	protected UIActionSlider m_Energy;
+	protected bool m_EnergyUpdated;
+	protected UIActionSlider m_Water;
+	protected bool m_WaterUpdated;
+	protected UIActionSlider m_Shock;
+	protected bool m_ShockUpdated;
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm` uses
 	//! m_Stamina.GetLayoutRoot().GetParent() as the anchor to inject its own rows.
 	protected UIActionSlider m_Stamina;
-	private bool m_StaminaUpdated;
-	private UIActionSlider m_HeatComfort;
-	private UIActionSlider m_HeatBuffer;
-	private bool m_HeatBufferUpdated;
-	private UIActionCheckbox m_BloodyHands;
-	private UIActionCheckbox m_GodMode;
-	private UIActionCheckbox m_Freeze;
-	private UIActionCheckbox m_Invisibility;
-	private UIActionCheckbox m_UnlimitedAmmo;
-	private UIActionCheckbox m_AdminNVG;
-	private UIActionCheckbox m_UnlimitedStamina;
-	private UIActionCheckbox m_BrokenLegs;
-	private UIActionCheckbox m_ReceiveDmgDealt;
-	private UIActionCheckbox m_CannotBeTargetedByAI;
-	private UIActionCheckbox m_RemoveCollision;
+	protected bool m_StaminaUpdated;
+	protected UIActionSlider m_HeatComfort;
+	protected UIActionSlider m_HeatBuffer;
+	protected bool m_HeatBufferUpdated;
+	protected UIActionCheckbox m_BloodyHands;
+	protected UIActionCheckbox m_GodMode;
+	protected UIActionCheckbox m_Freeze;
+	protected UIActionCheckbox m_Invisibility;
+	protected UIActionCheckbox m_UnlimitedAmmo;
+	protected UIActionCheckbox m_AdminNVG;
+	protected UIActionCheckbox m_UnlimitedStamina;
+	protected UIActionCheckbox m_BrokenLegs;
+	protected UIActionCheckbox m_ReceiveDmgDealt;
+	protected UIActionCheckbox m_CannotBeTargetedByAI;
+	protected UIActionCheckbox m_RemoveCollision;
 
-    private UIActionImageButton m_CopyRotationPlayer;
-    private UIActionImageButton m_CopyPositionPlayer;
-    private UIActionImageButton m_PastePositionPlayer;
-	private UIActionButton m_TeleportToMe;
-	private UIActionButton m_TeleportMeTo;
+    protected UIActionImageButton m_CopyRotationPlayer;
+    protected UIActionImageButton m_CopyPositionPlayer;
+    protected UIActionImageButton m_PastePositionPlayer;
+	protected UIActionButton m_TeleportToMe;
+	protected UIActionButton m_TeleportMeTo;
 
-	private UIActionEditableText m_PositionX;
-	private bool m_PositionXUpdated;
-	private UIActionEditableText m_PositionY;
-	private bool m_PositionYUpdated;
-	private UIActionEditableText m_PositionZ;
-	private bool m_PositionZUpdated;
-	private UIActionImageButton m_PositionRefresh;
-	private UIActionImageButton m_Position;
+	protected UIActionEditableText m_PositionX;
+	protected bool m_PositionXUpdated;
+	protected UIActionEditableText m_PositionY;
+	protected bool m_PositionYUpdated;
+	protected UIActionEditableText m_PositionZ;
+	protected bool m_PositionZUpdated;
+	protected UIActionImageButton m_PositionRefresh;
+	protected UIActionImageButton m_Position;
 
 	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm`
 	//! (DayZExpansion_AI, DayZExpansion_Hardline, DayZExpansion_PersonalStorage)
@@ -197,14 +223,14 @@ class JMPlayerForm: JMFormBase
 
 	//! Recenters the Position tab map on the selected player. Panning is only
 	//! useful if something puts the view back.
-	private UIActionImageButton m_PositionRecenter;
+	protected UIActionImageButton m_PositionRecenter;
 
 	//! Vehicle Manager's map made generic (UIActionMap) - markers, hover and
 	//! click routing are handled there instead of by hand here.
-	private UIActionMap m_PositionMap;
+	protected UIActionMap m_PositionMap;
 
 	//! Whether the deferred first-open recentre has already been scheduled.
-	private bool m_PositionMapCentered;
+	protected bool m_PositionMapCentered;
 
 	//! Widths of the three controls in a history row, as FRACTIONS of the row.
 	//!
@@ -220,131 +246,115 @@ class JMPlayerForm: JMFormBase
 	//! The rows are REBUILT rather than updated: the list is at most
 	//! JMTeleportHistory.MAX_ENTRIES long, and an undo several steps deep drops
 	//! every row above the one it lands on in a single go.
-	private UIActionCard m_TeleportHistoryCard;
-	private UIActionImageButton m_TeleportHistoryClear;
-	private UIActionImageButton m_TeleportHistoryRedo;
-	private Widget m_TeleportHistoryHost;
-	private Widget m_TeleportHistoryGrid;
-	private ref array<ref UIActionButton> m_TeleportHistoryButtons;
+	protected UIActionCard m_TeleportHistoryCard;
+	protected UIActionImageButton m_TeleportHistoryClear;
+	protected UIActionImageButton m_TeleportHistoryRedo;
+	protected Widget m_TeleportHistoryHost;
+	protected Widget m_TeleportHistoryGrid;
+	protected ref array<ref UIActionButton> m_TeleportHistoryButtons;
 
 	//! The two icon buttons beside each row, in the same order as the row
 	//! buttons above - each array's index IS the step it acts on, because all
 	//! three are filled in one pass.
-	private ref array<ref UIActionImageButton> m_TeleportHistoryCopy;
-	private ref array<ref UIActionImageButton> m_TeleportHistoryFocus;
+	protected ref array<ref UIActionImageButton> m_TeleportHistoryCopy;
+	protected ref array<ref UIActionImageButton> m_TeleportHistoryFocus;
 
-	private UIActionText m_TeleportHistoryEmpty;
+	protected UIActionText m_TeleportHistoryEmpty;
 
 	//! What the panel above was last built for. RefreshTeleports runs ten times
 	//! a second, and rebuilding five buttons on every one of those would churn
 	//! widgets for nothing - and a rebuild under the cursor steals the press.
-	private string m_TeleportHistoryGuid;
-	private int    m_TeleportHistoryCount;
+	protected string m_TeleportHistoryGuid;
+	protected int    m_TeleportHistoryCount;
 
 	//! Timestamp of the newest row the panel was built from.
 	//!
 	//! The count alone is not enough to notice a change: once five steps are
 	//! recorded the list is capped, so a sixth teleport pushes one off the
 	//! bottom and leaves the count at five.
-	private int    m_TeleportHistoryTop;
+	protected int    m_TeleportHistoryTop;
 
 	// -- Statistics tab ----------------------------------------------------
-	private UIActionKeyValueList m_StatsSession;
-	private UIActionKeyValueList m_StatsCombat;
-	private UIActionProgressBar m_StatsHeadshotBar;
-	private UIActionText m_StatsCombatNotice;
-
-#ifdef DZ_Expansion_Core
-	//! Third Statistics card, built only against an Expansion server. Its rows
-	//! are whatever the server sent, so a build with only some of the Expansion
-	//! mods loaded gets a shorter card rather than a card full of "-".
-	private UIActionKeyValueList m_StatsExpansion;
-	private Widget m_StatsExpansionRoot;
-#endif
-	private UIActionImageButton m_StatsRefreshButton;
-
-	//! Last history the server pushed for the selected player.
-	private ref JMPlayerStats m_PlayerStats;
-
-	private JMAntiCheatModule m_AntiCheatModule;
+	//! See JMPlayerFormTabStatistics.c - the whole tab lives there.
+	protected ref JMPlayerFormTabStatistics m_TabStatisticsCtrl;
 
 	// -- Inventory tab -----------------------------------------------------
 	//! Preview entities and the classname each was spawned from, indexed by
 	//! ITEM index - the position in m_InventoryItems, not the position on
 	//! screen. Keying by item means expanding or collapsing a container moves
 	//! no entities at all.
-	private ref array<EntityAI> m_InvCellEntities;
-	private ref array<string>   m_InvCellTypes;
+	protected ref array<EntityAI> m_InvCellEntities;
+	protected ref array<string>   m_InvCellTypes;
 
 	//! The cells currently on screen, and the item index each one is showing.
 	//! Parallel, both rebuilt whenever the tree opens or closes.
-	private ref array<Widget> m_InvCells;
-	private ref array<int>    m_InvCellItem;
+	protected ref array<Widget> m_InvCells;
+	protected ref array<int>    m_InvCellItem;
 
 	//! Item indices of the containers the admin has opened. A container is
 	//! closed until asked for, so a full loadout opens as a dozen cells rather
 	//! than eighty.
-	private ref array<int> m_InvExpanded;
+	protected ref array<int> m_InvExpanded;
 
 	//! Cells and bands are positioned by hand onto this panel. See
 	//! LayoutInventoryLevel for why it is a bare canvas and not a spacer.
-	private Widget m_InventoryCanvas;
+	protected Widget m_InventoryCanvas;
 
 	//! Columns the last layout pass fitted, and the width it fitted them into.
 	//! A resize only has to rebuild when one of these actually moves.
-	private int   m_InvColumns;
-	private float m_InvLayoutWidth;
+	protected int   m_InvColumns;
+	protected float m_InvLayoutWidth;
 
 	//! Drawn size of one cell, in screen pixels, and that against the size the
 	//! layout declares. Everything the layout pass computes is in screen pixels
 	//! - see MeasureInventoryCell for why it cannot be in anything else.
-	private float m_InvCellPixels;
-	private float m_InvScale;
+	protected float m_InvCellPixels;
+	protected float m_InvScale;
 
-	private int m_InvSelectedIndex;
-	private int m_InvHoveredIndex;
+	protected int m_InvSelectedIndex;
+	protected int m_InvHoveredIndex;
 
 	//! Preview entities spawned during the current rebuild. The budget is per
 	//! rebuild, not per level, so a deep tree cannot walk past it.
-	private int m_InvPreviewsBuilt;
-	private UIActionContextMenu m_InventoryMenu;
-	private UIActionValuePrompt m_InventoryPrompt;
+	protected int m_InvPreviewsBuilt;
+	protected UIActionContextMenu m_InventoryMenu;
+	protected UIActionValuePrompt m_InventoryPrompt;
 
 	//! The container "Delete all" was clicked on. The confirmation is answered
 	//! later and the table can be rebuilt in the meantime, so the container is
 	//! remembered by its network ID, not by its row.
-	private int m_InvGroupPendingLow;
-	private int m_InvGroupPendingHigh;
-	private string m_InvGroupPendingName;
+	protected int m_InvGroupPendingLow;
+	protected int m_InvGroupPendingHigh;
+	protected string m_InvGroupPendingName;
 
 	// -- Inventory item preview --------------------------------------------
 	//! Vanilla's own hover tooltip layout, driven by the same static
 	//! InspectMenuNew.UpdateItemInfo the inventory screen uses.
-	private Widget            m_InvTooltip;
-	private ItemPreviewWidget m_InvTooltipPreview;
+	protected Widget            m_InvTooltip;
+	protected ItemPreviewWidget m_InvTooltipPreview;
 
 	//! Client-local stand-ins for the hovered and the inspected item. See
 	//! SpawnLocalPreview for why these are copies and not the real entities.
-	private EntityAI m_InvHoverEntity;
-	private string   m_InvHoverType;
-	private EntityAI m_InvInspectEntity;
-	private bool     m_InvInspectOpen;
+	protected EntityAI m_InvHoverEntity;
+	protected string   m_InvHoverType;
+	protected EntityAI m_InvInspectEntity;
+	protected bool     m_InvInspectOpen;
 	//! Only ever says that the server stopped listing - the per-item count it
 	//! used to carry is what the grid itself shows.
-	private UIActionText m_InventoryNotice;
-	private UIActionImageButton m_InventoryRefresh;
-	private UIActionImageButton m_InventoryClearCargo;
+	protected UIActionText m_InventoryNotice;
+	protected UIActionImageButton m_InventoryRefresh;
+	protected UIActionImageButton m_InventoryClearCargo;
 
 	//! The survivor's equipment slots, in the order the vanilla inventory draws
 	//! them, with the ghost icon each empty one shows. Read once out of config;
 	//! see EnsureInventorySlotTable.
-	private ref array<string> m_InvSlotNames;
-	private ref array<string> m_InvSlotIcons;
-	private bool m_InvSlotsBuilt;
+	protected ref array<string> m_InvSlotNames;
+	protected ref array<string> m_InvSlotIcons;
+	protected bool m_InvSlotsBuilt;
 
 	//! The listing the table was last built from. Row index maps straight into
 	//! this, so the selected row IS the item handle on the client side.
-	private ref array< ref JMPlayerInventoryItem > m_InventoryItems;
+	protected ref array< ref JMPlayerInventoryItem > m_InventoryItems;
 
 	//! Context-menu item ids. Strings rather than an enum because that is what
 	//! UIActionContextMenu round-trips.
@@ -406,14 +416,14 @@ class JMPlayerForm: JMFormBase
 
 	//! Row the context menu was opened on, captured at open time: the delete
 	//! confirmation is asynchronous and the selection can move under it.
-	private int m_InventoryPendingRow;
+	protected int m_InventoryPendingRow;
 
 	//! The item an open prompt is about, held as its network ID rather than as
 	//! a row: answering a prompt takes as long as the admin wants, and the
 	//! listing behind it can be rebuilt by any refresh in the meantime, which
 	//! would leave a row index pointing at somebody else's boots.
-	private int m_InvPromptNetLow;
-	private int m_InvPromptNetHigh;
+	protected int m_InvPromptNetLow;
+	protected int m_InvPromptNetHigh;
 
 	//! Shock value the unconscious chip wakes a player with. The slider it
 	//! shares its permission with runs 0..100, and full is the only value that
@@ -497,7 +507,7 @@ class JMPlayerForm: JMFormBase
 
 	//! Whether the coordinates on screen came from the player's entity on this
 	//! client rather than from the roster snapshot the server pushes.
-	private bool m_PositionIsLive;
+	protected bool m_PositionIsLive;
 
 	//! Coordinate precision. The roster copy of a position is a snapshot sent a
 	//! few times a second; when the entity itself is loaded here it can be read
@@ -506,73 +516,75 @@ class JMPlayerForm: JMFormBase
 	static const int COORD_DECIMALS_LIVE   = 3;
 
 
-	private UIActionButton m_RepairTransport;
-	private UIActionButton m_SpectatePlayer;
-	private UIActionButton m_HealPlayer;
-	private UIActionButton m_StripPlayer;
-	private UIActionButton m_DryPlayer;
+	protected UIActionButton m_RepairTransport;
+	protected UIActionButton m_SpectatePlayer;
+	protected UIActionButton m_HealPlayer;
+	protected UIActionButton m_StripPlayer;
+	protected UIActionButton m_DryPlayer;
 
-	private UIActionButton m_VomitPlayer;
-	private UIActionButton m_SetScalePlayer;
+	protected UIActionButton m_VomitPlayer;
+	protected UIActionButton m_SetScalePlayer;
 
 	// Disease Add/Remove controls (status-aware dropdown)
-	private UIActionDropdown m_DiseaseAgent;
-	private UIActionButton m_DiseaseAdd;
-	private UIActionButton m_DiseaseRemove;
-	private UIActionImageButton m_DiseaseClear;
-	private ref array< int > m_DiseaseAgentIds;
-	private string m_LastSelectedGuid;
+	protected UIActionDropdown m_DiseaseAgent;
+	protected UIActionButton m_DiseaseAdd;
+	protected UIActionButton m_DiseaseRemove;
+	protected UIActionImageButton m_DiseaseClear;
+	protected ref array< int > m_DiseaseAgentIds;
+	protected string m_LastSelectedGuid;
 
 	// Bleed-from-body-part controls
-	private UIActionDropdown m_BleedingPart;
-	private UIActionButton m_BleedApply;
-	private UIActionImageButton m_BleedClear;
+	protected UIActionDropdown m_BleedingPart;
+	protected UIActionButton m_BleedApply;
+	protected UIActionImageButton m_BleedClear;
 
-	private UIActionFeedbackButton m_CopyExpLoadout;
+	protected UIActionFeedbackButton m_CopyExpLoadout;
 
-	private UIActionButton m_KillPlayer;
-	private UIActionButton m_SendMessage;
-	private UIActionButton m_KickPlayer;
-	private UIActionButton m_BanPlayer;
+	protected UIActionButton m_KillPlayer;
+	protected UIActionButton m_SendMessage;
+	protected UIActionButton m_KickPlayer;
+	protected UIActionButton m_BanPlayer;
 
 	//! Roles the user has collapsed. Kept as names rather than as row indices
 	//! because the row pool is reused - the row that carried a group before a
 	//! refresh is probably carrying a different one after it.
-	private ref TStringArray m_CollapsedRoles;
+	protected ref TStringArray m_CollapsedRoles;
 
 	//! Role -> the GUIDs listed under it as of the last rebuild, so a header's
 	//! checkbox and count act on exactly the rows it is sitting above and not on
 	//! members the filter took out.
-	private ref map< string, ref TStringArray > m_RoleMembers;
+	protected ref map< string, ref TStringArray > m_RoleMembers;
 
 	//! The one group currently folding or unfolding. Collapse is not a state
 	//! change followed by a repaint: the rows have to still exist while they
 	//! shrink, so the collapse is only committed to m_CollapsedRoles once the
 	//! animation has run out.
-	private ref array< JMPlayerRowWidget > m_AnimRows;
-	private JMPlayerRowWidget m_AnimHeader;
-	private string m_AnimRole;
-	private bool   m_AnimExpanding;
-	private float  m_AnimTime;
+	protected ref array< JMPlayerRowWidget > m_AnimRows;
+	protected JMPlayerRowWidget m_AnimHeader;
+	protected string m_AnimRole;
+	protected bool   m_AnimExpanding;
+	protected float  m_AnimTime;
 
-	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm` reads
-	//! this to pull per-player faction/reputation for its injected rows.
-	protected JMPlayerInstance m_SelectedInstance;
+	//! public, not protected: DayZ-Expansion's `modded class JMPlayerForm` reads
+	//! this to pull per-player faction/reputation for its injected rows, and the
+	//! tab classes (composed, not inherited) need it too.
+	JMPlayerInstance m_SelectedInstance;
 
-	//! protected, not private: DayZ-Expansion's `modded class JMPlayerForm` calls
-	//! m_Module.SetExpansionFaction() / SetExpansionReputation() on it.
-	protected JMPlayerModule m_Module;
+	//! public, not protected: DayZ-Expansion's `modded class JMPlayerForm` calls
+	//! m_Module.SetExpansionFaction() / SetExpansionReputation() on it, and the
+	//! tab classes (composed, not inherited) need it too.
+	JMPlayerModule m_Module;
 
-	private int m_LastChangeTime;
+	protected int m_LastChangeTime;
 	
-	private autoptr TStringArray m_HeatBufferStates = {"", "+", "++", "+++"};
-	private autoptr TStringArray m_PlayersPref1 = {};
-	private autoptr TStringArray m_PlayersPref2 = {};
+	protected autoptr TStringArray m_HeatBufferStates = {"", "+", "++", "+++"};
+	protected autoptr TStringArray m_PlayersPref1 = {};
+	protected autoptr TStringArray m_PlayersPref2 = {};
 
 	// Default inject count - high enough to cross every disease's activation threshold
 	const int DISEASE_INJECT_COUNT = 200;
 
-	private bool m_AutoSelect = true;  //! Auto-select player when first shown
+	protected bool m_AutoSelect = true;  //! Auto-select player when first shown
 
 	void JMPlayerForm()
 	{
@@ -907,7 +919,9 @@ class JMPlayerForm: JMFormBase
 				break;
 
 			case TAB_STATISTICS:
-				InitActionWidgetsStatistics( m_TabStatistics );
+				if ( !m_TabStatisticsCtrl )
+					m_TabStatisticsCtrl = new JMPlayerFormTabStatistics( this );
+				m_TabStatisticsCtrl.Build( m_TabStatistics );
 				break;
 
 			case TAB_ACTIONS:
@@ -915,7 +929,17 @@ class JMPlayerForm: JMFormBase
 				InitActionWidgetsDiseases( m_TabActions );
 				InitActionWidgetsQuick( m_TabActions );
 				break;
+
+			default:
+				if ( m_CustomTabCallbacks && m_CustomTabCallbacks.Contains( tabIdx ) )
+				{
+					JMCustomTabCallback entry = m_CustomTabCallbacks.Get( tabIdx );
+					Widget parentPanel = m_Tabs.GetContentPanel( tabIdx );
+					GetGame().GameScript.CallFunctionParams( entry.m_Instance, entry.m_FuncName, null, new Param1<Widget>( parentPanel ) );
+				}
+				break;
 		}
+
 
 		// A tab built after the form already has a selection has missed every
 		// UpdateUI/RefreshStats pass so far, so it would come up blank and
@@ -925,6 +949,21 @@ class JMPlayerForm: JMFormBase
 			UpdateUI();
 			RefreshStats( true );
 		}
+	}
+
+	//! Thin forwarders - JMPlayerModule's RPC handlers call GetForm() and expect
+	//! to reach these directly, but the Statistics tab (and its fields) now
+	//! lives in JMPlayerFormTabStatistics.c, not on the form itself.
+	void OnPlayerStatsUpdated( string guid, JMPlayerStats stats )
+	{
+		if ( m_TabStatisticsCtrl )
+			m_TabStatisticsCtrl.OnPlayerStatsUpdated( guid, stats );
+	}
+
+	void OnExpansionInfoUpdated( string guid, array< string > ids, array< string > values )
+	{
+		if ( m_TabStatisticsCtrl )
+			m_TabStatisticsCtrl.OnExpansionInfoUpdated( guid, ids, values );
 	}
 
 	//! Feeds JMFormBase.IsTabActive(), which is what the 10Hz refreshes gate on.
@@ -960,7 +999,7 @@ class JMPlayerForm: JMFormBase
 		else if ( sel == TAB_INVENTORY )
 			RequestInventory();
 		else if ( sel == TAB_STATISTICS )
-			RequestStatistics();
+			m_TabStatisticsCtrl.RequestStatistics();
 		else if ( sel == TAB_ACTIONS )
 		{
 			if ( m_LastSelectedGuid != "" )
@@ -1298,7 +1337,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK || !m_SelectedInstance )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Godmode" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_GODMODE ) )
 			return;
 
 		bool godMode = !m_SelectedInstance.HasGodMode();
@@ -1318,7 +1357,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK || !m_SelectedInstance )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Freeze" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_FREEZE ) )
 			return;
 
 		bool frozen = !m_SelectedInstance.IsFrozen();
@@ -1338,7 +1377,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK || !m_SelectedInstance )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisibility" ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_PLAYER_INVISIBILITY ) )
 			return;
 
 		bool invisible = !m_SelectedInstance.HasInvisibility();
@@ -1363,7 +1402,7 @@ class JMPlayerForm: JMFormBase
 		if ( eid != UIEvent.CLICK || !m_SelectedInstance )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.Shock" ) )
+		if ( !JMPermissions.Has( "Admin.Player.Set.Shock" ) )
 			return;
 
 		bool wake = m_SelectedInstance.IsUnconscious();
@@ -3251,7 +3290,7 @@ class JMPlayerForm: JMFormBase
 	//! a listing that came back identical, a stat block that has not moved - and
 	//! a button that produces no feedback reads as a button that did not work.
 	//! Two revolutions, matching every other refresh button in COT.
-	private void SpinRefreshIcon( UIActionBase action )
+	void SpinRefreshIcon( UIActionBase action )
 	{
 		UIActionImageButton button;
 		if ( Class.CastTo( button, action ) )
@@ -3407,6 +3446,8 @@ class JMPlayerForm: JMFormBase
 
 		SetStatusRepairPermissions( m_PlayerMenu );
 
+		JMScriptInvokers.ON_PLAYER_CONTEXT_MENU.Invoke( m_PlayerMenu, instance, guid );
+
 		m_PlayerMenu.ShowAt( x, y );
 	}
 
@@ -3414,7 +3455,7 @@ class JMPlayerForm: JMFormBase
 	//! RunRowMessage) and the confirmation's own callback - same pattern as
 	//! JMESPForm.m_PendingMsgPlayerGUID / PromptSendMessage, which already
 	//! solved this identically for the world right-click player menu.
-	private string m_PendingRowMsgGuid;
+	protected string m_PendingRowMsgGuid;
 
 	//! Opens a text-entry prompt for one player, same as the ESP module's own
 	//! player menu already does. Used to read from the clipboard instead - "a
@@ -4531,315 +4572,6 @@ class JMPlayerForm: JMFormBase
 		m_Module.InventoryDelete( m_SelectedInstance.GetGUID(), item.NetIdLow, item.NetIdHigh );
 	}
 
-	//! Statistics tab: session history on top, combat below.
-	//!
-	//! The two halves come from different places and different permissions -
-	//! session history from this module, kill stats from the anti-cheat module
-	//! behind Admin.AntiCheat.View - so they refresh independently and either can
-	//! be empty on its own.
-	private Widget InitActionWidgetsStatistics( Widget actionsParent )
-	{
-		Widget parent = UIActionManager.CreateGridSpacer( actionsParent, 12, 1 );
-
-		// Refresh acts on both cards below it, so it sits in the session card
-		// title bar - the same place the Position and Inventory cards put
-		// theirs, spelled with the same glyph. It used to be a loose icon inside
-		// the card body nudged to x=0.9, which cost a row of height and drifted
-		// against the values column as the form was resized.
-		UIActionCard section0Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_SESSION" );
-		Widget section0 = section0Card.GetContent();
-		m_StatsRefreshButton = section0Card.AddRefreshButton( this, "Click_RefreshStatistics" );
-		m_StatsRefreshButton.SetFixedSize( HEADER_ACTION_PX, HEADER_ACTION_PX );
-		m_StatsRefreshButton.SetTooltip( "#STR_COT_PLAYER_MODULE_TT_REFRESH_STATISTICS" );
-
-		m_StatsSession = UIActionManager.CreateKeyValueList( section0 );
-
-		UIActionManager.CreatePanel( section0, 0x00000000, 10 );
-		UIActionCard section1Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_COMBAT" );
-		Widget section1 = section1Card.GetContent();
-		m_StatsCombat = UIActionManager.CreateKeyValueList( section1 );
-
-		// The bar is a summary of the two rows above it, so it gets its own
-		// breathing room instead of reading as a fifth table row.
-		UIActionManager.CreatePanel( section1, 0x00000000, 8 );
-		m_StatsHeadshotBar = UIActionManager.CreateProgressBar( section1, "#STR_COT_PLAYER_MODULE_STAT_HEADSHOT_RATIO", 0 );
-
-		// Shown instead of the combat rows when the admin lacks the anti-cheat
-		// permission. A silently empty section reads as "this player has never
-		// fired a shot", which is a different and wrong answer.
-		m_StatsCombatNotice = UIActionManager.CreateText( section1, "", "" );
-
-	#ifdef DZ_Expansion_Core
-		UIActionManager.CreatePanel( parent, 0x00000000, 10 );
-		UIActionCard section2Card = UIActionManager.CreateCard( parent, "#STR_COT_PLAYER_MODULE_SECTION_EXPANSION" );
-		m_StatsExpansion = UIActionManager.CreateKeyValueList( section2Card.GetContent() );
-
-		// Hidden until the server answers with at least one row: Expansion being
-		// COMPILED against is not the same as any of its features being on, and
-		// an empty card would claim the player has no money, faction, reputation
-		// or group when the truth is that nothing asked.
-		m_StatsExpansionRoot = section2Card.GetLayoutRoot();
-		if ( m_StatsExpansionRoot )
-			m_StatsExpansionRoot.Show( false );
-	#endif
-
-		return parent;
-	}
-
-	void Click_RefreshStatistics( UIEvent eid, UIActionBase action )
-	{
-		if ( eid != UIEvent.CLICK )
-			return;
-
-		SpinRefreshIcon( action );
-		RequestStatistics();
-	}
-
-	//! Pull both halves. Called on tab entry, on a selection change while the tab
-	//! is up, and never on a timer.
-	private void RequestStatistics()
-	{
-		if ( !m_Module || !m_SelectedInstance )
-			return;
-
-		if ( GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View" ) )
-			m_Module.RequestPlayerStats( m_SelectedInstance.GetGUID() );
-
-	#ifdef DZ_Expansion_Core
-		//! Same permission and the same one-shot request as the session block -
-		//! none of it is on a timer.
-		if ( GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View" ) )
-			m_Module.RequestExpansionInfo( m_SelectedInstance.GetGUID() );
-	#endif
-
-		RequestKillStats();
-		RefreshStatisticsPanel();
-	}
-
-	//! Ask the anti-cheat module for its kill table.
-	//!
-	//! On a listen host RequestFlags() returns without sending anything - there
-	//! is no wire to send over - so the server-side map is read directly instead.
-	//! Only the request differs; both paths end up in RefreshStatisticsPanel.
-	private void RequestKillStats()
-	{
-		if ( !m_AntiCheatModule )
-			Class.CastTo( m_AntiCheatModule, GetModuleManager().GetModule( JMAntiCheatModule ) );
-
-		if ( !m_AntiCheatModule )
-			return;
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.View" ) )
-			return;
-
-		if ( !IsMissionHost() )
-			m_AntiCheatModule.RequestFlags();
-	}
-
-	//! The Expansion block came back. Declared unconditionally - the module
-	//! calls it from an RPC handler that is compiled either way - but it only
-	//! has anywhere to put the rows on an Expansion build.
-	void OnExpansionInfoUpdated( string guid, array< string > ids, array< string > values )
-	{
-	#ifdef DZ_Expansion_Core
-		if ( !m_SelectedInstance || guid != m_SelectedInstance.GetGUID() )
-			return;
-
-		if ( !m_StatsExpansion || !ids || !values )
-			return;
-
-		m_StatsExpansion.Clear();
-
-		int count = ids.Count();
-		if ( values.Count() < count )
-			count = values.Count();
-
-		for ( int i = 0; i < count; i++ )
-			m_StatsExpansion.SetValue( ExpansionInfoLabel( ids[i] ), values[i], ExpansionInfoIcon( ids[i] ) );
-
-		if ( m_StatsExpansionRoot )
-			m_StatsExpansionRoot.Show( count > 0 );
-
-		if ( m_ActionListScroller )
-			m_ActionListScroller.UpdateScroller();
-	#endif
-	}
-
-#ifdef DZ_Expansion_Core
-	//! Row ids are resolved to a label and a glyph HERE rather than sent as
-	//! text, so the server never decides what language the admin reads and an
-	//! id the client does not recognise still renders as itself.
-	private string ExpansionInfoLabel( string id )
-	{
-		if ( id == JMPlayerModule.EXP_INFO_MONEY )
-			return "#STR_COT_PLAYER_MODULE_STAT_EXP_MONEY";
-
-		if ( id == JMPlayerModule.EXP_INFO_FACTION )
-			return "#STR_COT_PLAYER_MODULE_STAT_EXP_FACTION";
-
-		if ( id == JMPlayerModule.EXP_INFO_REPUTATION )
-			return "#STR_COT_PLAYER_MODULE_STAT_EXP_REPUTATION";
-
-		if ( id == JMPlayerModule.EXP_INFO_GROUP )
-			return "#STR_COT_PLAYER_MODULE_STAT_EXP_GROUP";
-
-		return id;
-	}
-
-	private string ExpansionInfoIcon( string id )
-	{
-		if ( id == JMPlayerModule.EXP_INFO_MONEY )
-			return JMConstants.Lucide( "banknote" );
-
-		if ( id == JMPlayerModule.EXP_INFO_FACTION )
-			return JMConstants.Lucide( "flag" );
-
-		if ( id == JMPlayerModule.EXP_INFO_REPUTATION )
-			return JMConstants.Lucide( "star" );
-
-		if ( id == JMPlayerModule.EXP_INFO_GROUP )
-			return JMConstants.Lucide( "users" );
-
-		return JMConstants.Lucide( "info" );
-	}
-#endif
-
-	void OnPlayerStatsUpdated( string guid, JMPlayerStats stats )
-	{
-		if ( !m_SelectedInstance || guid != m_SelectedInstance.GetGUID() )
-			return;
-
-		m_PlayerStats = stats;
-		RefreshStatisticsPanel();
-	}
-
-	private void RefreshStatisticsPanel()
-	{
-		RefreshSessionStats();
-		RefreshCombatStats();
-	}
-
-	private void RefreshSessionStats()
-	{
-		if ( !m_StatsSession )
-			return;
-
-		// Every row is written whether or not there is data behind it. A section
-		// that renders a different NUMBER of rows depending on what arrived reads
-		// as a broken panel; one that renders "-" reads as "nothing recorded",
-		// which is the actual answer for a player whose history starts today.
-		string playtime    = "-";
-		string sessions    = "-";
-		string firstSeen   = "-";
-		string lastSeen    = "-";
-		string deaths      = "-";
-		string longestLife = "-";
-		string currentLife = "-";
-
-		if ( m_PlayerStats )
-		{
-			playtime    = JMPlayerStats.FormatDuration( m_PlayerStats.TotalPlaytimeSec );
-			sessions    = m_PlayerStats.SessionCount.ToString();
-			firstSeen   = JMPlayerStats.FormatSince( m_PlayerStats.FirstSeenUnix );
-			lastSeen    = JMPlayerStats.FormatSince( m_PlayerStats.LastSeenUnix );
-			deaths      = m_PlayerStats.Deaths.ToString();
-			longestLife = JMPlayerStats.FormatDuration( m_PlayerStats.LongestLifeSec );
-			currentLife = JMPlayerStats.FormatDuration( m_PlayerStats.GetCurrentLifeSeconds() );
-		}
-
-		// The icon is only read the first time a key is seen, so passing it on
-		// every refresh costs nothing.
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_PLAYTIME", playtime, JMConstants.Lucide( "hourglass" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_SESSIONS", sessions, JMConstants.Lucide( "log-in" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_FIRSTSEEN", firstSeen, JMConstants.Lucide( "calendar-plus" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_LASTSEEN", lastSeen, JMConstants.Lucide( "calendar-check" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_DEATHS", deaths, JMConstants.Lucide( "skull" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_LONGEST_LIFE", longestLife, JMConstants.Lucide( "heart-pulse" ) );
-		m_StatsSession.SetValue( "#STR_COT_PLAYER_MODULE_STAT_CURRENT_LIFE", currentLife, JMConstants.Lucide( "heart" ) );
-	}
-
-	private void RefreshCombatStats()
-	{
-		if ( !m_StatsCombat || !m_SelectedInstance )
-			return;
-
-		if ( !GetPermissionsManager().HasPermission( "Admin.AntiCheat.View" ) )
-		{
-			if ( m_StatsCombatNotice )
-				m_StatsCombatNotice.SetText( "#STR_COT_PLAYER_MODULE_STAT_NO_PERMISSION" );
-			return;
-		}
-
-		JMAntiCheatKillStats stats = GetSelectedKillStats();
-
-		string kills   = "-";
-		string hitStr  = "-";
-		string zones   = "-";
-		string avgStr  = "-";
-		string maxStr  = "-";
-		float headshotRatio = 0;
-
-		if ( stats )
-		{
-			kills = stats.TotalKills.ToString();
-
-			// Math.Round returns a float, so rounding straight into ToString
-			// gives "50.0%". Land it in an int first.
-			float hit = stats.GetHitRatio();
-			if ( hit >= 0 )
-			{
-				int hitPercent = Math.Round( hit * 100 );
-				hitStr = hitPercent.ToString() + "%";
-			}
-
-			zones = stats.BodyHead.ToString() + " / " + stats.BodyTorso.ToString();
-
-			int avgDist = Math.Round( stats.GetAvgDistance() );
-			int maxDist = Math.Round( stats.DistanceMax );
-			avgStr = avgDist.ToString() + "m";
-			maxStr = maxDist.ToString() + "m";
-
-			if ( stats.TotalKills > 0 )
-				headshotRatio = stats.BodyHead / (float)stats.TotalKills;
-		}
-
-		if ( m_StatsCombatNotice )
-		{
-			if ( stats )
-				m_StatsCombatNotice.SetText( "" );
-			else
-				m_StatsCombatNotice.SetText( "#STR_COT_PLAYER_MODULE_STAT_NO_COMBAT" );
-		}
-
-		m_StatsCombat.SetValue( "#STR_COT_PLAYER_MODULE_STAT_KILLS", kills, JMConstants.Lucide( "swords" ) );
-		m_StatsCombat.SetValue( "#STR_COT_PLAYER_MODULE_STAT_HITRATIO", hitStr, JMConstants.Lucide( "target" ) );
-		m_StatsCombat.SetValue( "#STR_COT_PLAYER_MODULE_STAT_HEADSHOTS", zones, JMConstants.Lucide( "scan-face" ) );
-		m_StatsCombat.SetValue( "#STR_COT_PLAYER_MODULE_STAT_AVGDIST", avgStr, JMConstants.Lucide( "ruler" ) );
-		m_StatsCombat.SetValue( "#STR_COT_PLAYER_MODULE_STAT_MAXDIST", maxStr, JMConstants.Lucide( "ruler-dimension-line" ) );
-
-		if ( m_StatsHeadshotBar )
-			m_StatsHeadshotBar.SetProgress( headshotRatio );
-	}
-
-	//! Kill stats for the selected player, from whichever side of the wire has
-	//! them. RequestFlags never fills the client cache on a listen host.
-	private JMAntiCheatKillStats GetSelectedKillStats()
-	{
-		if ( !m_AntiCheatModule || !m_SelectedInstance )
-			return NULL;
-
-		string guid = m_SelectedInstance.GetGUID();
-
-		map< string, ref JMAntiCheatKillStats > source = m_AntiCheatModule.GetClientKillStats();
-		if ( IsMissionHost() )
-			source = m_AntiCheatModule.GetServerKillStats();
-
-		if ( !source || !source.Contains( guid ) )
-			return NULL;
-
-		return source.Get( guid );
-	}
-
 	//! Built eagerly with the rest of the tab (see InitActionWidgetsMap), but
 	//! kept hidden until the Position tab is actually up - a MapWidget left
 	//! visible behind another tab keeps rendering.
@@ -5096,6 +4828,13 @@ class JMPlayerForm: JMFormBase
 		AddFilterItem( LIST_FILTER_SICK,     "#STR_COT_PLAYER_MODULE_FILTER_SHOW_SICK",     "thermometer",   m_FilterShowSick );
 		AddFilterItem( LIST_FILTER_ADMINS,   "#STR_COT_PLAYER_MODULE_FILTER_SHOW_ADMINS",   "shield",        m_FilterShowAdmins );
 		AddFilterItem( LIST_FILTER_CHEATERS, "#STR_COT_PLAYER_MODULE_FILTER_SHOW_CHEATERS", "flag",          m_FilterShowCheaters );
+
+		array< ref JMFilterEntry > customFilters = JMFilterRegistry.GetPlayerFilters();
+		for ( int i = 0; i < customFilters.Count(); i++ )
+		{
+			JMFilterEntry entry = customFilters[i];
+			m_FilterMenu.AddItem( entry.m_Id, entry.m_Label, JMConstants.Lucide( entry.m_Icon ), entry.m_Color, false, entry.m_Target, entry.m_Callback );
+		}
 	}
 
 	private void AddFilterItem( string id, string label, string icon, bool enabled )
@@ -7155,12 +6894,8 @@ class JMPlayerForm: JMFormBase
 
 			// The history belongs to the player, not to the character, so it
 			// has to be dropped rather than left showing the previous numbers.
-			m_PlayerStats = NULL;
-
-			if ( IsTabActive( TAB_STATISTICS ) )
-				RequestStatistics();
-			else
-				RefreshStatisticsPanel();
+			if ( m_TabStatisticsCtrl )
+				m_TabStatisticsCtrl.OnSelectionChanged();
 		}
 
 		ApplyListFocus();

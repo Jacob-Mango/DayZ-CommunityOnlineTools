@@ -8,10 +8,10 @@ class JMMapModule: JMRenderableModuleBase
 
 		GetPermissionsManager().RegisterPermission( "Admin.Map" );
 
-		GetPermissionsManager().RegisterPermission( "Admin.Map.View" );
-		GetPermissionsManager().RegisterPermission( "Admin.Map.Players" );
+		JMPermissions.Register( JMConstants.PERM_MAP_VIEW );
+		JMPermissions.Register( JMConstants.PERM_MAP_PLAYERS );
 
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION );
 	}
 
 	override void EnableUpdate()
@@ -20,7 +20,7 @@ class JMMapModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.Map.View" );
+		return JMPermissions.Has( JMConstants.PERM_MAP_VIEW );
 	}
 
 	// Temporarily hidden from the sidebar.

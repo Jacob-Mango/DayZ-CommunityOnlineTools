@@ -7,8 +7,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 	
 	void JMNamalskEventManagerModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Namalsk" );
-		GetPermissionsManager().RegisterPermission( "Namalsk.View" );
+		JMPermissions.Register( JMConstants.PERM_NAMALSK );
+		JMPermissions.Register( JMConstants.PERM_NAMALSK_VIEW );
 
 		//! Just use a hardcoded list and be done with it
 		TStringArray evts = {"Aurora", "Blizzard", "ExtremeCold", "Snowfall", "EVRStorm", "EVRStormDeadly", "HeavyFog"};
@@ -19,8 +19,8 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 			Events.Insert(evt);
 
-			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Start");
-			GetPermissionsManager().RegisterPermission("Namalsk." + evt + ".Cancel");
+			JMPermissions.Register( JMConstants.PERM_NAMALSK + "." + evt + ".Start" );
+			JMPermissions.Register( JMConstants.PERM_NAMALSK + "." + evt + ".Cancel" );
 		}
 	}
 
@@ -35,7 +35,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Namalsk.View" );
+		return JMPermissions.Has( JMConstants.PERM_NAMALSK_VIEW );
 	}
 
 	override string GetCategory()
@@ -87,7 +87,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		{
 			RetrievePossibleEvents();
 		}
-		else if (GetPermissionsManager().HasPermission("Namalsk"))
+		else if (JMPermissions.Has(JMConstants.PERM_NAMALSK))
 		{
 			RequestEvents();
 		}
@@ -103,7 +103,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 		if (Events.Count() > 0) return;
 
-		if (GetPermissionsManager().HasPermission("Namalsk"))
+		if (JMPermissions.Has(JMConstants.PERM_NAMALSK))
 		{
 			RequestEvents();
 		}
@@ -219,7 +219,45 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		Print("MaxEventCount " + MaxEventCount);
 	}
 
-	void StartEvent(string evt)
+	//! Host-direct/RPC split, same shape as JMBanModule.Ban()/Unban(): a client
+	//! sends the RPC, which OnRPC re-validates and then calls StartEvent()
+	//! below; the mission host calls straight through since it already IS the
+	//! authority the RPC path would otherwise be asking permission of.
+	void RequestStartEvent(string evt)
+	{
+		if (IsMissionHost())
+		{
+			PlayerIdentity hostIdent = NULL;
+			GetCommunityOnlineToolsBase().Log(hostIdent, "Started Namalsk event: " + evt);
+			SendWebhookColored("StartEvent", NULL, "Started Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING);
+			StartEvent(evt);
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(evt);
+			rpc.Send(NULL, JMNamalskEventManagerRPC.StartEvent, true, NULL);
+		}
+	}
+
+	void RequestCancelEvent(string evt)
+	{
+		if (IsMissionHost())
+		{
+			PlayerIdentity hostIdent = NULL;
+			GetCommunityOnlineToolsBase().Log(hostIdent, "Cancelled Namalsk event: " + evt);
+			SendWebhookColored("CancelEvent", NULL, "Cancelled Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING);
+			CancelEvent(evt);
+		}
+		else
+		{
+			ScriptRPC rpc = new ScriptRPC();
+			rpc.Write(evt);
+			rpc.Send(NULL, JMNamalskEventManagerRPC.CancelEvent, true, NULL);
+		}
+	}
+
+	private void StartEvent(string evt)
 	{
 		auto trace = CF_Trace_0(this, "StartEvent");
 
@@ -229,7 +267,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 		g_Script.CallFunctionParams(m_EventManager, "StartEvent", null, parms);
 	}
 
-	void CancelEvent(string evt)
+	private void CancelEvent(string evt)
 	{
 		auto trace = CF_Trace_0(this, "CancelEvent");
 

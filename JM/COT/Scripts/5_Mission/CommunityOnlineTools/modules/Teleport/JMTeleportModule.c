@@ -7,17 +7,17 @@ class JMTeleportModule: JMRenderableModuleBase
 	
 	void JMTeleportModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Position" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Add" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Refresh" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Remove" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Location.Edit" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor" );
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.Cursor.NoLog" );
-	
-		GetPermissionsManager().RegisterPermission( "Admin.Player.Teleport.View" );
-		
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_LOCATION );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_CREATE );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_REMOVE );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_LOCATION_EDIT );
+
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION + ".Cursor" );
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION + ".Cursor.NoLog" );
+
+		JMPermissions.Register( JMConstants.PERM_PLAYER_TELEPORT_POSITION + ".View" );
+
 		if (Class.CastTo(m_MapModule, GetModuleManager().GetModule(JMMapModule)))
 			Class.CastTo(m_MapMenu, m_MapModule.GetForm());
 	}
@@ -42,7 +42,7 @@ class JMTeleportModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Admin.Player.Teleport.View" );
+		return JMPermissions.Has( JMConstants.PERM_PLAYER_TELEPORT_POSITION + ".View" );
 	}
 
 	override string GetInputToggle()

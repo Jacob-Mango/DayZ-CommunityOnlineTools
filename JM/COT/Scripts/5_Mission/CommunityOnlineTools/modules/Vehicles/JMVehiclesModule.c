@@ -403,24 +403,24 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void JMVehiclesModule()
 	{
-		GetPermissionsManager().RegisterPermission( "Vehicles.View" );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_VIEW );
 
-		GetPermissionsManager().RegisterPermission( "Vehicles.Delete" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.All" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.Destroyed" );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_DELETE );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_DELETE_ALL );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_DELETE_DESTROYED );
 		#ifdef EXPANSIONMODVEHICLE
-		GetPermissionsManager().RegisterPermission( "Vehicles.Delete.Unclaimed" );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED );
 		#endif
-		GetPermissionsManager().RegisterPermission( "Vehicles.Teleport" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Repair" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Refuel" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Unstuck" );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_TELEPORT );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_REPAIR );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_REFUEL );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_UNSTUCK );
 		#ifdef EXPANSIONMODVEHICLE
-		GetPermissionsManager().RegisterPermission( "Vehicles.Cover" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.Lock" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.UnPair" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.ClearCargo" );
-		GetPermissionsManager().RegisterPermission( "Vehicles.SpawnKey" );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_COVER );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_LOCK );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_UNPAIR );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_CLEARCARGO );
+		JMPermissions.Register( JMConstants.PERM_VEHICLES_SPAWNKEY );
 		#endif
 
 		m_Vehicles = new array<ref JMVehicleMetaData>;
@@ -428,12 +428,17 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	override bool HasAccess()
 	{
-		return GetPermissionsManager().HasPermission( "Vehicles.View" );
+		return JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW );
 	}
 
 	override string GetLayoutRoot()
 	{
 		return "JM/COT/GUI/layouts/vehicles/Vehicles_Menu.layout";
+	}
+
+	override string GetInputToggle()
+	{
+		return "UACOTToggleVehicle";
 	}
 
 	override string GetCategory()
@@ -487,7 +492,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Input_TeleportToSelected()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport" ) ) return;
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_TELEPORT ) ) return;
 		JMVehiclesForm form;
 		if ( !Class.CastTo( form, GetForm() ) ) return;
 		JMVehicleMetaData meta = form.GetCurrentVehicle();
@@ -496,7 +501,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 	void Input_RepairSelected()
 	{
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Repair" ) ) return;
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_REPAIR ) ) return;
 		JMVehiclesForm form;
 		if ( !Class.CastTo( form, GetForm() ) ) return;
 		JMVehicleMetaData meta = form.GetCurrentVehicle();
@@ -698,7 +703,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		//! Read-only: the same permission that lets the caller see the roster
 		//! at all. Nothing here mutates the vehicle.
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", senderRPC ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW, senderRPC ) )
 			return;
 
 		int netLow;
@@ -859,7 +864,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.View", senderRPC ) )
+		if ( !JMPermissions.Has( JMConstants.PERM_VEHICLES_VIEW, senderRPC ) )
 			return;
 
 		// In SP / listen-server the admin IS the host - update the form directly
@@ -951,7 +956,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_DELETE, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -984,7 +989,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Unclaimed", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all UNCLAIMED vehicles" );
@@ -1049,7 +1054,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.Destroyed", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_DELETE_DESTROYED, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted all DESTROYED vehicles" );
@@ -1126,7 +1131,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Delete.All", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_DELETE_ALL, senderRPC, instance ) )
 			return;
 
 		GetCommunityOnlineToolsBase().Log( senderRPC, "Deleted ALL vehicles" );
@@ -1204,7 +1209,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1258,7 +1263,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1314,7 +1319,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Teleport", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_TELEPORT, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1371,7 +1376,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Repair", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_REPAIR, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1439,7 +1444,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Refuel", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_REFUEL, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1514,7 +1519,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Unstuck", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_UNSTUCK, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1566,7 +1571,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Cover", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_COVER, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1692,7 +1697,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.Lock", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_LOCK, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1759,7 +1764,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.UnPair", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_UNPAIR, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1818,7 +1823,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.ClearCargo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_CLEARCARGO, senderRPC, instance ) )
 			return;
 
 		int netLow;
@@ -1897,7 +1902,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Vehicles.SpawnKey", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_VEHICLES_SPAWNKEY, senderRPC, instance ) )
 			return;
 
 		int netLow;

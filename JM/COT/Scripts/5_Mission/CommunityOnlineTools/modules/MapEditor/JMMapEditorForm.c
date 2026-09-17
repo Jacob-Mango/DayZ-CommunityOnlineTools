@@ -28,96 +28,96 @@ const int SNAP_SURFACE = 4;
 class JMMapEditorForm : JMFormBase
 {
 	// --- Mode toolbar ---
-	private UIActionButton m_ModeSelect;
-	private UIActionButton m_ModeMove;
-	private UIActionButton m_ModeRotate;
-	private UIActionButton m_ModeScale;
-	private UIActionButton m_ModeSpawn;
-	private UIActionButton m_Refresh;
-	private UIActionButton m_Save;
-	private UIActionButton m_Load;
-	private UIActionButton m_Undo;
-	private UIActionButton m_Redo;
+	protected UIActionButton m_ModeSelect;
+	protected UIActionButton m_ModeMove;
+	protected UIActionButton m_ModeRotate;
+	protected UIActionButton m_ModeScale;
+	protected UIActionButton m_ModeSpawn;
+	protected UIActionButton m_Refresh;
+	protected UIActionButton m_Save;
+	protected UIActionButton m_Load;
+	protected UIActionButton m_Undo;
+	protected UIActionButton m_Redo;
 
 	// --- Snap toggles ---
-	private UIActionCheckbox m_SnapTerrain;
-	private UIActionCheckbox m_SnapGrid;
-	private UIActionCheckbox m_SnapSurface;
+	protected UIActionCheckbox m_SnapTerrain;
+	protected UIActionCheckbox m_SnapGrid;
+	protected UIActionCheckbox m_SnapSurface;
 
 	// --- Mode + snaps runtime state ---
-	private int m_Mode;
-	private int m_Snaps;
+	protected int m_Mode;
+	protected int m_Snaps;
 
 	// --- Asset browser (left sidebar) ---
-	private UIActionSearchBox m_AssetSearch;
-	private UIActionScroller m_AssetScroller;
-	private Widget m_AssetContent;
+	protected UIActionSearchBox m_AssetSearch;
+	protected UIActionScroller m_AssetScroller;
+	protected Widget m_AssetContent;
 
 	// --- Selection ---
-	private UIActionText m_SelId;
-	private UIActionText m_SelClass;
-	private UIActionEditableText m_PosX;
-	private UIActionEditableText m_PosY;
-	private UIActionEditableText m_PosZ;
-	private UIActionEditableText m_OriYaw;
-	private UIActionSlider m_Scale;
-	private UIActionButton m_ApplyTransform;
-	private UIActionButton m_TeleportTo;
-	private UIActionButton m_Delete;
-	private UIActionButton m_ClearAll;
+	protected UIActionText m_SelId;
+	protected UIActionText m_SelClass;
+	protected UIActionEditableText m_PosX;
+	protected UIActionEditableText m_PosY;
+	protected UIActionEditableText m_PosZ;
+	protected UIActionEditableText m_OriYaw;
+	protected UIActionSlider m_Scale;
+	protected UIActionButton m_ApplyTransform;
+	protected UIActionButton m_TeleportTo;
+	protected UIActionButton m_Delete;
+	protected UIActionButton m_ClearAll;
 
 	// ---- Bulk + clipboard + undo buttons ----
-	private UIActionButton m_BulkMove;
-	private UIActionButton m_BulkRotate;
-	private UIActionButton m_BulkScale;
-	private UIActionButton m_CopyBtn;
-	private UIActionButton m_CutBtn;
-	private UIActionButton m_PasteBtn;
-	private UIActionButton m_UndoBtn;
-	private UIActionButton m_RedoBtn;
+	protected UIActionButton m_BulkMove;
+	protected UIActionButton m_BulkRotate;
+	protected UIActionButton m_BulkScale;
+	protected UIActionButton m_CopyBtn;
+	protected UIActionButton m_CutBtn;
+	protected UIActionButton m_PasteBtn;
+	protected UIActionButton m_UndoBtn;
+	protected UIActionButton m_RedoBtn;
 
 	// --- Local mirror of server list + spawn state ---
-	private ref array< ref JMMapEditorEntry > m_AllEntries;
-	private int m_SelectedId;
-	private string m_PendingSpawnClass;
+	protected ref array< ref JMMapEditorEntry > m_AllEntries;
+	protected int m_SelectedId;
+	protected string m_PendingSpawnClass;
 
 	// --- Multi-select (shift-click to add / remove from the set) ---
-	private ref set< int > m_SelectedIds;
+	protected ref set< int > m_SelectedIds;
 
 	// --- 3D interaction state ---
-	private ref JMEditorGizmos m_Gizmos;
-	private vector m_DragStartOrigin;     // object pos when drag began
-	private vector m_DragStartOrient;     // object orient when drag began
-	private float   m_DragStartScale;      // object scale when drag began
-	private int     m_DragAxis;            // -1 if not dragging
-	private vector m_DragStartMouseWorld;  // cursor world pos at drag begin
-	private int     m_PreviousMouseX;       // cursor px at last Tick (for delta)
-	private int     m_PreviousMouseY;
-	private bool    m_HasPreviousMouse;
-	private bool    m_LmbDown;             // LMB held this frame
-	private bool    m_RmbDown;             // RMB held this frame (use for look-only)
-	private bool    m_LmbWasDown;          // LMB state from previous tick
-	private bool    m_LmbClickPending;     // LMB just released - fire click handler next tick
+	protected ref JMEditorGizmos m_Gizmos;
+	protected vector m_DragStartOrigin;     // object pos when drag began
+	protected vector m_DragStartOrient;     // object orient when drag began
+	protected float   m_DragStartScale;      // object scale when drag began
+	protected int     m_DragAxis;            // -1 if not dragging
+	protected vector m_DragStartMouseWorld;  // cursor world pos at drag begin
+	protected int     m_PreviousMouseX;       // cursor px at last Tick (for delta)
+	protected int     m_PreviousMouseY;
+	protected bool    m_HasPreviousMouse;
+	protected bool    m_LmbDown;             // LMB held this frame
+	protected bool    m_RmbDown;             // RMB held this frame (use for look-only)
+	protected bool    m_LmbWasDown;          // LMB state from previous tick
+	protected bool    m_LmbClickPending;     // LMB just released - fire click handler next tick
 
 	// --- Keyboard shortcuts (edge-detected in Tick) ---
-	private bool    m_DeleteKeyWasDown;
-	private bool    m_UndoKeyWasDown;
-	private bool    m_RedoKeyWasDown;
+	protected bool    m_DeleteKeyWasDown;
+	protected bool    m_UndoKeyWasDown;
+	protected bool    m_RedoKeyWasDown;
 
 	//! Set whenever this form opens ITS OWN confirmation dialog (Delete /
 	//! Clear All). The dialog widget is one shared, reused instance per
 	//! window rather than a fresh one per call, so a hotkey firing while it
 	//! is still up would race whatever the user is mid-click on - hence the
 	//! guard in HandleKeyboardShortcuts.
-	private JMConfirmation m_ActiveConfirmation;
+	protected JMConfirmation m_ActiveConfirmation;
 
-	private const int  TICK_HANDLE = 0;
-	private const int  TICK_PERIOD_MS = 33;  // ~30 fps UI tick
+	protected const int  TICK_HANDLE = 0;
+	protected const int  TICK_PERIOD_MS = 33;  // ~30 fps UI tick
 
 	// Static handle for the per-frame callback. The CallQueue can only
 	// resolve a method by name when it's a static class member, so the
 	// static TickStatic dispatches to the single active form.
-	private static ref JMMapEditorForm s_Instance;
+	protected static ref JMMapEditorForm s_Instance;
 
 	//! Whether this form currently owns Ctrl+Z/Ctrl+Y. While shown, its own
 	//! Tick()-polled shortcut handles them against its OWN undo stack; the
@@ -128,7 +128,7 @@ class JMMapEditorForm : JMFormBase
 		return s_Instance != NULL;
 	}
 
-	private JMMapEditorModule m_Module;
+	protected JMMapEditorModule m_Module;
 
 	void JMMapEditorForm()
 	{
@@ -172,23 +172,23 @@ class JMMapEditorForm : JMFormBase
 		m_ModeScale  = MakeModeButton( modeRow, "Scale",  MAPEDITOR_MODE_SCALE,  "Scale the selected object (drag the cube)" );
 		m_ModeSpawn  = MakeModeButton( modeRow, "Spawn",  MAPEDITOR_MODE_SPAWN,  "Pick an asset in the sidebar, then click in the 3D viewport" );
 
-		m_Save = UIActionManager.CreateButton( modeRow, "Save", this, "OnClick_Save" );
+		m_Save = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_SAVE", this, "OnClick_Save" );
 		m_Save.SetWidth( 0.07 );
 		m_Save.SetTooltip( "Save the current layout to a preset file on disk (per server)" );
 
-		m_Load = UIActionManager.CreateButton( modeRow, "Load", this, "OnClick_Load" );
+		m_Load = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_LOAD", this, "OnClick_Load" );
 		m_Load.SetWidth( 0.07 );
 		m_Load.SetTooltip( "Load a saved layout preset from disk" );
 
-		m_Undo = UIActionManager.CreateButton( modeRow, "Undo", this, "OnClick_Undo" );
+		m_Undo = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_UNDO", this, "OnClick_Undo" );
 		m_Undo.SetWidth( 0.07 );
 		m_Undo.SetTooltip( "Undo the last pending mutation (client-side stack)" );
 
-		m_Redo = UIActionManager.CreateButton( modeRow, "Redo", this, "OnClick_Redo" );
+		m_Redo = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_REDO", this, "OnClick_Redo" );
 		m_Redo.SetWidth( 0.07 );
 		m_Redo.SetTooltip( "Redo a previously undone mutation" );
 
-		m_Refresh = UIActionManager.CreateButton( modeRow, "Refresh", this, "OnClick_Refresh" );
+		m_Refresh = UIActionManager.CreateButton( modeRow, "#STR_COT_MAPEDITOR_REFRESH", this, "OnClick_Refresh" );
 		m_Refresh.SetWidth( 0.07 );
 		m_Refresh.SetTooltip( "Reload the placed-object list from the server" );
 		// No SetIcon - toolbar buttons are text-only so the icon doesn't
@@ -197,13 +197,13 @@ class JMMapEditorForm : JMFormBase
 		// actions as plain text and put any icon hints in the tooltip.
 
 		Widget snapRow = UIActionManager.CreateWrapSpacer( topStack );
-		m_SnapTerrain = UIActionManager.CreateCheckbox( snapRow, "Snap to Terrain", this, "Click_SnapTerrain", false );
+		m_SnapTerrain = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_TERRAIN", this, "Click_SnapTerrain", false );
 		m_SnapTerrain.SetWidth( 0.33 );
 		m_SnapTerrain.SetTooltip( "Spawned/moved objects snap to the ground beneath them" );
-		m_SnapGrid    = UIActionManager.CreateCheckbox( snapRow, "Snap to Grid (1m)", this, "Click_SnapGrid", false );
+		m_SnapGrid    = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_GRID", this, "Click_SnapGrid", false );
 		m_SnapGrid.SetWidth( 0.33 );
 		m_SnapGrid.SetTooltip( "Round coordinates to 1 m increments" );
-		m_SnapSurface = UIActionManager.CreateCheckbox( snapRow, "Snap to Surface", this, "Click_SnapSurface", false );
+		m_SnapSurface = UIActionManager.CreateCheckbox( snapRow, "#STR_COT_MAPEDITOR_SNAP_SURFACE", this, "Click_SnapSurface", false );
 		m_SnapSurface.SetWidth( 0.33 );
 		m_SnapSurface.SetTooltip( "Align yaw to the surface normal" );
 
@@ -222,7 +222,7 @@ class JMMapEditorForm : JMFormBase
 		Widget right = layoutRoot.FindAnyWidget( "panel_right" );
 		Widget rightStack = UIActionManager.CreateGridSpacer( right, 7, 1 );
 
-		UIActionManager.CreateText( rightStack, "Properties", "" );
+		UIActionManager.CreateText( rightStack, "#STR_COT_MAPEDITOR_PROPERTIES", "" );
 
 		m_SelId = UIActionManager.CreateText( rightStack, "", "No selection" );
 		m_SelId.SetWidth( 1.0 );
@@ -253,58 +253,58 @@ class JMMapEditorForm : JMFormBase
 		m_Scale.SetTooltip( "Uniform scale multiplier" );
 
 		Widget actionRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_ApplyTransform = UIActionManager.CreateButton( actionRow, "Apply", this, "OnClick_ApplyTransform" );
+		m_ApplyTransform = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_APPLY", this, "OnClick_ApplyTransform" );
 		m_ApplyTransform.SetWidth( 0.32 );
 		m_ApplyTransform.SetTooltip( "Apply position / rotation / scale to the selected object" );
-		m_TeleportTo = UIActionManager.CreateButton( actionRow, "Teleport", this, "OnClick_TeleportTo" );
+		m_TeleportTo = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_TELEPORT", this, "OnClick_TeleportTo" );
 		m_TeleportTo.SetWidth( 0.32 );
 		m_TeleportTo.SetTooltip( "Teleport your player to the selected object" );
-		m_Delete = UIActionManager.CreateButton( actionRow, "Delete", this, "OnClick_Delete" );
+		m_Delete = UIActionManager.CreateButton( actionRow, "#STR_COT_MAPEDITOR_DELETE", this, "OnClick_Delete" );
 		m_Delete.SetColor( JMTheme.DANGER_FILL );
 		m_Delete.SetWidth( 0.32 );
 		m_Delete.SetTooltip( "Delete the selected object" );
 
 		Widget clearRow = UIActionManager.CreateGridSpacer( rightStack, 1, 1 );
-		m_ClearAll = UIActionManager.CreateButton( clearRow, "Clear All", this, "OnClick_ClearAll" );
+		m_ClearAll = UIActionManager.CreateButton( clearRow, "#STR_COT_MAPEDITOR_CLEAR_ALL", this, "OnClick_ClearAll" );
 		m_ClearAll.SetColor( JMTheme.DANGER_FILL );
 		m_ClearAll.SetWidth( 1.0 );
 		m_ClearAll.SetTooltip( "Delete every placed object (irreversible)" );
 
 		// ---- Bulk + clipboard + undo/undo rows ----
 		Widget bulkRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_BulkMove   = UIActionManager.CreateButton( bulkRow, "Bulk Move", this, "OnClick_BulkMove" );
+		m_BulkMove   = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_MOVE", this, "OnClick_BulkMove" );
 		m_BulkMove.SetWidth( 0.33 );
 		m_BulkMove.SetTooltip( "Apply X / Y / Z delta to the cursor (or use the pos fields above). Affects all selected objects" );
-		m_BulkRotate = UIActionManager.CreateButton( bulkRow, "Bulk Rotate", this, "OnClick_BulkRotate" );
+		m_BulkRotate = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_ROTATE", this, "OnClick_BulkRotate" );
 		m_BulkRotate.SetWidth( 0.33 );
 		m_BulkRotate.SetTooltip( "Add the yaw value (deg) above) to all selected objects" );
-		m_BulkScale  = UIActionManager.CreateButton( bulkRow, "Bulk Scale", this, "OnClick_BulkScale" );
+		m_BulkScale  = UIActionManager.CreateButton( bulkRow, "#STR_COT_MAPEDITOR_BULK_SCALE", this, "OnClick_BulkScale" );
 		m_BulkScale.SetWidth( 0.33 );
 		m_BulkScale.SetTooltip( "Multiply the current scale of every selected object by the scale value above" );
 
 		Widget clipRow = UIActionManager.CreateGridSpacer( rightStack, 1, 3 );
-		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "Copy", this, "OnClick_Copy" );
+		m_CopyBtn   = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_COPY", this, "OnClick_Copy" );
 		m_CopyBtn.SetWidth( 0.33 );
 		m_CopyBtn.SetTooltip( "Snapshot the currently-selected object into the clipboard" );
-		m_CutBtn    = UIActionManager.CreateButton( clipRow, "Cut", this, "OnClick_Cut" );
+		m_CutBtn    = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_CUT", this, "OnClick_Cut" );
 		m_CutBtn.SetWidth( 0.33 );
 		m_CutBtn.SetTooltip( "Snapshot + delete the currently-selected object" );
-		m_PasteBtn  = UIActionManager.CreateButton( clipRow, "Paste", this, "OnClick_Paste" );
+		m_PasteBtn  = UIActionManager.CreateButton( clipRow, "#STR_COT_MAPEDITOR_PASTE", this, "OnClick_Paste" );
 		m_PasteBtn.SetWidth( 0.33 );
 		m_PasteBtn.SetTooltip( "Spawn the clipboard at the cursor world position (snap-to-terrain on)" );
 
 		Widget undoRow = UIActionManager.CreateGridSpacer( rightStack, 1, 2 );
-		m_UndoBtn = UIActionManager.CreateButton( undoRow, "Undo", this, "OnClick_Undo" );
+		m_UndoBtn = UIActionManager.CreateButton( undoRow, "#STR_COT_MAPEDITOR_UNDO", this, "OnClick_Undo" );
 		m_UndoBtn.SetWidth( 0.49 );
 		m_UndoBtn.SetTooltip( "Revert the last server-side mutation" );
-		m_RedoBtn = UIActionManager.CreateButton( undoRow, "Redo", this, "OnClick_Redo" );
+		m_RedoBtn = UIActionManager.CreateButton( undoRow, "#STR_COT_MAPEDITOR_REDO", this, "OnClick_Redo" );
 		m_RedoBtn.SetWidth( 0.49 );
 		m_RedoBtn.SetTooltip( "Re-apply a reverted mutation" );
 
 		// ---- How to use ----
 		Widget helpRow = UIActionManager.CreateGridSpacer( rightStack, 1, 1 );
 		Widget help = UIActionManager.CreatePanel( helpRow, 0x00000000, 140 );
-		UIActionManager.CreateText( help, "How to use:", "1. Open the freecam (Camera module). 2. Click an object in the 3D world to select. 3. Shift-click to multi-select. 4. Use Bulk Move / Rotate / Scale to act on every selected. 5. Use Copy / Cut / Paste to clone. 6. Undo / Redo for history. 7. Snap to Terrain / Grid / Surface as needed." );
+		UIActionManager.CreateText( help, "#STR_COT_MAPEDITOR_HOW_TO_USE", "1. Open the freecam (Camera module). 2. Click an object in the 3D world to select. 3. Shift-click to multi-select. 4. Use Bulk Move / Rotate / Scale to act on every selected. 5. Use Copy / Cut / Paste to clone. 6. Undo / Redo for history. 7. Snap to Terrain / Grid / Surface as needed." );
 
 		// ---- Permissions ----
 		//! Mirrors exactly what JMMapEditorModule's own RPC handlers enforce, so

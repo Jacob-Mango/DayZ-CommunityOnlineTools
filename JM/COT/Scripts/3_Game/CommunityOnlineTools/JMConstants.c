@@ -16,6 +16,122 @@ class JMConstants
 	
 	static const string PERM_ROOT = "ROOT";
 
+	// Permissions
+	static const string PERM_PLAYER                               = "Admin.Player";
+	static const string PERM_PLAYER_VIEW                          = "Admin.Player.View";
+	static const string PERM_PLAYER_HEAL                          = "Admin.Player.Heal";
+	static const string PERM_PLAYER_GODMODE                       = "Admin.Player.GodMode";
+	static const string PERM_PLAYER_FREEZE                        = "Admin.Player.Freeze";
+	static const string PERM_PLAYER_INVISIBILITY                  = "Admin.Player.Invisibility";
+	static const string PERM_PLAYER_RAGDOLL                        = "Admin.Player.Ragdoll";
+	static const string PERM_PLAYER_TELEPORT_POSITION             = "Admin.Player.Teleport.Position";
+	static const string PERM_PLAYER_TELEPORT_SENDERTO             = "Admin.Player.Teleport.SenderTo";
+	static const string PERM_PLAYER_TELEPORT_LOCATION             = "Admin.Player.Teleport.Location";
+	static const string PERM_PLAYER_TELEPORT_LOCATION_CREATE      = "Admin.Player.Teleport.Location.Create";
+	static const string PERM_PLAYER_TELEPORT_LOCATION_EDIT        = "Admin.Player.Teleport.Location.Edit";
+	static const string PERM_PLAYER_TELEPORT_LOCATION_REMOVE      = "Admin.Player.Teleport.Location.Remove";
+	static const string PERM_PLAYER_KICK                          = "Admin.Player.Kick";
+	static const string PERM_PLAYER_BAN                           = "Admin.Player.Ban";
+	static const string PERM_PLAYER_STRIP                         = "Admin.Player.Strip";
+	static const string PERM_PLAYER_CLEARCARGO                    = "Admin.Player.ClearCargo";
+	static const string PERM_PLAYER_SPECTATE                      = "Admin.Player.Spectate";
+	static const string PERM_PLAYER_MESSAGE                       = "Admin.Player.Message";
+	static const string PERM_PLAYER_STATS                         = "Admin.Player.Stats";
+	static const string PERM_PLAYER_STATISTICS_VIEW                = "Admin.Player.Statistics.View";
+	static const string PERM_PLAYER_INVENTORY                     = "Admin.Player.Inventory";
+	static const string PERM_PLAYER_INJECTED_PANEL                = "Admin.Player.InjectedPanel";
+
+	static const string PERM_MAP_PLAYERS                          = "Admin.Map.Players";
+	static const string PERM_MAP_VIEW                             = "Admin.Map.View";
+
+	static const string PERM_WEATHER_VIEW                         = "Weather.View";
+	static const string PERM_WEATHER_QUICKACTION                  = "Weather.QuickAction";
+	static const string PERM_WEATHER_QUICKACTION_CLEAR            = "Weather.QuickAction.Clear";
+	static const string PERM_WEATHER_QUICKACTION_CLOUDY           = "Weather.QuickAction.Cloudy";
+	static const string PERM_WEATHER_QUICKACTION_STORM            = "Weather.QuickAction.Storm";
+	static const string PERM_WEATHER_QUICKACTION_DATE             = "Weather.QuickAction.Date";
+	static const string PERM_WEATHER_FREEZETIME                   = "Weather.FreezeTime";
+	static const string PERM_WEATHER_DATE                         = "Weather.Date";
+	static const string PERM_WEATHER_WIND                         = "Weather.Wind";
+	static const string PERM_WEATHER_WIND_FUNCPARAMS            = "Weather.Wind.FunctionParams";
+	static const string PERM_WEATHER_STORM                        = "Weather.Storm";
+	static const string PERM_WEATHER_SANDSTORM                    = "Weather.Sandstorm";
+	static const string PERM_WEATHER_OVERCAST                     = "Weather.Overcast";
+	static const string PERM_WEATHER_FOG                          = "Weather.Fog";
+	static const string PERM_WEATHER_FOG_DYNAMIC                  = "Weather.Fog.Dynamic";
+	static const string PERM_WEATHER_RAIN                         = "Weather.Rain";
+	static const string PERM_WEATHER_RAIN_THRESHOLDS              = "Weather.Rain.Thresholds";
+	static const string PERM_WEATHER_SNOW                         = "Weather.Snow";
+	static const string PERM_WEATHER_SNOW_THRESHOLDS              = "Weather.Snow.Thresholds";
+	static const string PERM_WEATHER_PRESET                       = "Weather.Preset";
+	static const string PERM_WEATHER_PRESET_USE                   = "Weather.Preset.Use";
+	static const string PERM_WEATHER_PRESET_CREATE                = "Weather.Preset.Create";
+	static const string PERM_WEATHER_PRESET_UPDATE                = "Weather.Preset.Update";
+	static const string PERM_WEATHER_PRESET_REMOVE                = "Weather.Preset.Remove";
+	static const string PERM_WEATHER_PRESET_DYNAMIC               = "Weather.Preset.Dynamic";
+
+	static const string PERM_VEHICLES_VIEW                        = "Vehicles.View";
+	static const string PERM_VEHICLES_DELETE                      = "Vehicles.Delete";
+	static const string PERM_VEHICLES_DELETE_ALL                  = "Vehicles.Delete.All";
+	static const string PERM_VEHICLES_DELETE_DESTROYED            = "Vehicles.Delete.Destroyed";
+	static const string PERM_VEHICLES_DELETE_UNCLAIMED            = "Vehicles.Delete.Unclaimed";
+	static const string PERM_VEHICLES_TELEPORT                    = "Vehicles.Teleport";
+	static const string PERM_VEHICLES_REPAIR                      = "Vehicles.Repair";
+	static const string PERM_VEHICLES_REFUEL                      = "Vehicles.Refuel";
+	static const string PERM_VEHICLES_UNSTUCK                     = "Vehicles.Unstuck";
+	static const string PERM_VEHICLES_COVER                       = "Vehicles.Cover";
+	static const string PERM_VEHICLES_LOCK                        = "Vehicles.Lock";
+	static const string PERM_VEHICLES_UNPAIR                      = "Vehicles.UnPair";
+	static const string PERM_VEHICLES_CLEARCARGO                  = "Vehicles.ClearCargo";
+	static const string PERM_VEHICLES_SPAWNKEY                    = "Vehicles.SpawnKey";
+
+	static const string PERM_ESP_VIEW                             = "ESP.View";
+	static const string PERM_ESP_OBJECT_MOVETOCURSOR              = "ESP.Object.MoveToCursor";
+	static const string PERM_ESP_OBJECT_DELETEALL                 = "ESP.Object.DeleteAll";
+	static const string PERM_ESP_OBJECT_DUPLICATEALL              = "ESP.Object.DuplicateAll";
+
+	static const string PERM_WEBHOOK_VIEW                         = "Webhook.View";
+	static const string PERM_WEBHOOK_MANAGE                       = "Webhook.Manage";
+	static const string PERM_WEBHOOK_MANAGE_URL                   = "Webhook.Manage.URL";
+	static const string PERM_WEBHOOK_MANAGE_URL_ADD               = "Webhook.Manage.URL.Add";
+	static const string PERM_WEBHOOK_MANAGE_URL_REMOVE            = "Webhook.Manage.URL.Remove";
+	static const string PERM_WEBHOOK_MANAGE_URL_EDIT              = "Webhook.Manage.URL.Edit";
+	static const string PERM_WEBHOOK_MANAGE_TYPE                  = "Webhook.Manage.Type";
+	static const string PERM_WEBHOOK_MANAGE_TYPE_ADD              = "Webhook.Manage.Type.Add";
+	static const string PERM_WEBHOOK_MANAGE_TYPE_REMOVE           = "Webhook.Manage.Type.Remove";
+	static const string PERM_WEBHOOK_MANAGE_TYPE_STATE            = "Webhook.Manage.Type.State";
+
+	static const string PERM_ITEMSPAWNER_VIEW                     = "ItemSpawner.View";
+	static const string PERM_ITEMSPAWNER_SPAWN                    = "ItemSpawner.Spawn";
+	static const string PERM_OBJECTSPAWNER_VIEW                   = "ObjectSpawner.View";
+	static const string PERM_OBJECTSPAWNER_SPAWN                  = "ObjectSpawner.Spawn";
+	static const string PERM_ROLEMANAGER_VIEW                     = "RoleManager.View";
+	static const string PERM_BANS_VIEW                            = "Bans.View";
+	static const string PERM_CAMERA_VIEW                          = "Camera.View";
+
+	static const string PERM_BAN_VIEW                             = "Admin.Ban.View";
+	static const string PERM_BAN_UNBAN                            = "Admin.Ban.Unban";
+
+	//! Per-event Start/Cancel permissions are built at runtime as
+	//! PERM_NAMALSK + "." + eventName + ".Start"/".Cancel" - there is no fixed
+	//! constant per event since the event list itself is data, not code.
+	static const string PERM_NAMALSK                              = "Namalsk";
+	static const string PERM_NAMALSK_VIEW                         = "Namalsk.View";
+
+	static const string PERM_ANTICHEAT_VIEW                       = "Admin.AntiCheat.View";
+	static const string PERM_ANTICHEAT_CLEAR                      = "Admin.AntiCheat.Clear";
+
+	static const string PERM_LOOTANALYSIS_VIEW                    = "Admin.LootAnalysis.View";
+	static const string PERM_LOOTANALYSIS_ITEMSCAN                = "Admin.LootAnalysis.ItemScan";
+	static const string PERM_LOOTANALYSIS_DISTRIBUTION            = "Admin.LootAnalysis.Distribution";
+	static const string PERM_LOOTANALYSIS_DELETE                  = "Admin.LootAnalysis.Delete";
+	static const string PERM_LOOTANALYSIS_EDIT                    = "Admin.LootAnalysis.Edit";
+
+	static const string PERM_ROLES_VIEW                           = "Admin.Roles.View";
+	static const string PERM_ROLES_CREATE                         = "Admin.Roles.Create";
+	static const string PERM_ROLES_DELETE                         = "Admin.Roles.Delete";
+	static const string PERM_ROLES_PERMISSIONS                    = "Admin.Roles.Permissions";
+
 	static const string DIR_COT = "$profile:CommunityOnlineTools\\";
 	static const string DIR_PF = "$profile:PermissionsFramework\\";
 
