@@ -10,7 +10,7 @@ enum JMWeatherTypes
 class JMWeatherModule: JMRenderableModuleBase
 {
 	private ref JMWeatherSerialize settings;
-	protected ref JMWeatherPreset m_CachedWeatherPreset;
+	protected ref JMWeatherPreset m_CachedWeatherPreset = new JMWeatherPreset;
 
 	protected bool m_bFreezeTime;
 
@@ -737,43 +737,23 @@ class JMWeatherModule: JMRenderableModuleBase
 	
 	private void Exec_FreezeTime( bool state, PlayerIdentity ident )
 	{
-		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Remove(Repeat_FreezeTime);
+		Weather weather = g_Game.GetWeather();
 
 		if (state)
 		{
-			//! Only the date is re-applied, so only the date is captured.
-			//! A full SetFromWorld() would also snapshot phenomena this never
-			//! writes back, and would read them on a path that has no reason
-			//! to touch the weather at all.
-			m_CachedWeatherPreset = new JMWeatherPreset;
-			m_CachedWeatherPreset.PDate.SetFromWorld();
-			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(Repeat_FreezeTime, 1000, true);
-		}
+			//! Step 1: Stop current phenomenon changes in progress (if any)
+			m_CachedWeatherPreset.SetFromWorld();
+			m_CachedWeatherPreset.StopCurrentChangesInProgress();
 
-		if ( IsMissionHost() )
+			//! Step 2: Need to set mission weather to false so weather update freeze actually does something
+			weather.MissionWeather(false);
+		}
+		else
 		{
-			string ftMsg;
-			if ( state ) ftMsg = "Froze time"; else ftMsg = "Unfroze time";
-			GetCommunityOnlineToolsBase().Log( ident, ftMsg );
-			JMPlayerInstance ftInst = GetPermissionsManager().GetPlayer( ident.GetId() );
-			SendWebhookColored( "SetTime", ftInst, ftMsg, JMConstants.WEBHOOK_COLOR_INFO );
+			m_CachedWeatherPreset.ResumeCurrentChangesInProgress();
 		}
-	}
 
-	//! The DATE only, not the whole preset.
-	//!
-	//! This used to call m_CachedWeatherPreset.Apply(), which re-writes storm,
-	//! overcast, fog, dynamic fog, rain, rain thresholds, snow, snow
-	//! thresholds, wind magnitude, wind direction and the wind function - all
-	//! of it, once a second, for as long as the clock was frozen. A control
-	//! labelled "Freeze Time" was in practice pinning the entire weather state
-	//! and continuously overwriting whatever the mission's weather controller
-	//! was doing, which is one of the ways cfgweather.xml appeared to be
-	//! ignored. Freezing the clock means re-stamping the clock.
-	protected void Repeat_FreezeTime()
-	{
-		if ( m_CachedWeatherPreset )
-			m_CachedWeatherPreset.PDate.Apply();
+		weather.SetWeatherUpdateFreeze(state);
 	}
 	
 	private void Exec_SetStorm( JMWeatherStorm wBase, PlayerIdentity ident )
