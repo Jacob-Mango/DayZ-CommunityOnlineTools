@@ -11,6 +11,8 @@ modded class MissionGameplay
 
 	protected JMPlayerInstance m_OfflineInstance;
 
+	protected bool m_COT_DebugMonitorWasVisible;
+
 	//! Global Ctrl+Z/Ctrl+Y - undoes/redoes the shared JMActionHistory stack
 	//! (delete, heal, teleport, ...) from anywhere in COT. Edge-detected so a
 	//! held key fires once, not every frame. Map Editor keeps its own
@@ -274,9 +276,17 @@ modded class MissionGameplay
 			if ( m_DebugMonitor )
 			{
 				if ( GetCommunityOnlineToolsBase().IsOpen() )
-					m_DebugMonitor.Hide();
-				else 
+				{
+					if (m_DebugMonitor.IsVisible())
+					{
+						m_COT_DebugMonitorWasVisible = true;
+						m_DebugMonitor.Hide();
+					}
+				}
+				else if (m_COT_DebugMonitorWasVisible)
+				{
 					m_DebugMonitor.Show();
+				}
 			}
 
 			PlayerBase player;
@@ -287,6 +297,14 @@ modded class MissionGameplay
 				player.COT_SimulationDisabled_OnFrame(timeslice);
 			}
 		}
+	}
+
+	override void HideDebugMonitor()
+	{
+		super.HideDebugMonitor();
+
+		if (!m_DebugMonitor || !m_DebugMonitor.IsVisible())
+			m_COT_DebugMonitorWasVisible = false;
 	}
 
 	//! Ctrl+Z/Ctrl+Y for the shared JMActionHistory stack. Skipped while
