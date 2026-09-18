@@ -547,15 +547,6 @@ class JMPermissionManager
 
 		bool allowed = instance.HasPermission( permission );
 
-		//! This overload is the single choke point every incoming COT RPC goes
-		//! through on the server, and a refusal here means a client asked for
-		//! something its own UI never offers it. That is close to the strongest
-		//! signal available from inside a mod: a legitimate client cannot
-		//! produce it by accident. Reported, not acted on - the anti-cheat
-		//! module decides whether a burst of these is worth a flag.
-		if ( !allowed )
-			JMAntiCheatSignals.ReportDeniedRpc( identity.GetId(), permission );
-
 		return allowed;
 	}
 
