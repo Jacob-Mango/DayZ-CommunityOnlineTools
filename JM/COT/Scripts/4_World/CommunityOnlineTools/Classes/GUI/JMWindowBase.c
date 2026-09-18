@@ -249,7 +249,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		g_Game.GetUpdateQueue( CALL_CATEGORY_GUI ).Insert( Update );
 
-		g_Game.GetInput().ChangeGameFocus( 1 );
+		g_Game.GetMission().AddActiveInputExcludes({"menu"});
 		g_Game.GetUIManager().ShowUICursor( true );
 
 		m_IsShown = true;
@@ -279,7 +279,7 @@ class JMWindowBase: COT_ScriptedWidgetEventHandler
 
 		if ( !GetCommunityOnlineToolsBase().IsOpen() && !GetCOTWindowManager().HasAnyActive() )
 		{
-			g_Game.GetInput().ResetGameFocus();
+			g_Game.GetMission().RemoveActiveInputExcludes({"menu"});
 			g_Game.GetUIManager().ShowUICursor( false );
 		}
 
