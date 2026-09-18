@@ -129,8 +129,7 @@ modded class Construction
 			GetParent().ProcessInvulnerabilityCheck(GetParent().GetInvulnerabilityTypeString());
 		}
 
-	#ifndef DAYZ_1_29
-		//! 1.30+
+	#ifdef DAYZ_1_29
 		if ( m_ConstructionBoxTrigger )
 			DestroyCollisionTrigger();
 	#endif
