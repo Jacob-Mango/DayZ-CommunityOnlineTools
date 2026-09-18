@@ -3412,7 +3412,7 @@ class JMESPModule: JMRenderableModuleBase
 		combo.m_CombinationLocked = code;
 		combo.SetCombination( code );
 
-#ifndef DAYZ_1_30
+#ifdef DAYZ_1_29
 		if ( wasLocked )
 			combo.ShuffleLock(); //! protected as of 1.30, dials just won't reshuffle visually there
 #endif

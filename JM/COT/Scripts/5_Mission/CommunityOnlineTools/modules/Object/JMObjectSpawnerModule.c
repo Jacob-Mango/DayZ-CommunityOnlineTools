@@ -989,7 +989,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 		ItemBase item;
 		CarScript car;
 		BoatScript boat;
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		MotorbikeScript bike;
 #endif
 		BuildingBase building;
@@ -1004,7 +1004,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			car.COT_OnDebugSpawn(player);
 		else if (Class.CastTo(boat, entity))
 			boat.COT_OnDebugSpawn(player);
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		//! CarScript/BoatScript both get COT_OnDebugSpawn (refuel, etc) via
 		//! their own modded-class override - Motorbike never got the same
 		//! branch here despite MotorbikeScript.c already defining its own

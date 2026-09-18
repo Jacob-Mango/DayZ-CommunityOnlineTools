@@ -1,4 +1,4 @@
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 //! Motorbike itself is the abstract vanilla base (3_Game); MotorbikeScript is
 //! the concrete vehicle actually placed/spawned in world (4_World), same
 //! relationship as Car -> CarScript and Boat -> BoatScript - so this mods

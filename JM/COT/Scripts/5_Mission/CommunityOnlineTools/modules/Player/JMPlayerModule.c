@@ -11,7 +11,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Heal.Cargo" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Godmode" );
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Freeze" );
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Ragdoll" );
 #endif
 		GetPermissionsManager().RegisterPermission( "Admin.Player.Invisibility" );
@@ -231,7 +231,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		case JMPlayerModuleRPC.SetFreeze:
 			RPC_SetFreeze( ctx, sender, target );
 			break;
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		case JMPlayerModuleRPC.SetRagdoll:
 			RPC_SetRagdoll( ctx, sender, target );
 			break;
@@ -1619,7 +1619,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		Exec_SetFreeze( value, guids, senderRPC, instance );
 	}
 
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 	void SetRagdoll( bool value, array< string > guids )
 	{
 		if ( IsMissionHost() )

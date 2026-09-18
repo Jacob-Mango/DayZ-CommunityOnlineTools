@@ -663,7 +663,7 @@ class CommunityOnlineToolsBase
 	{
 		CarScript car;
 		BoatScript boat;
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		MotorbikeScript bike;
 	#endif
 		if (Class.CastTo(car, obj))
@@ -674,7 +674,7 @@ class CommunityOnlineToolsBase
 		{
 			boat.COT_SetBoatFluid01(BoatFluid.FUEL, fraction);
 		}
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		else if (Class.CastTo(bike, obj))
 		{
 			bike.COT_SetBikeFluid01(MotorbikeFluid.FUEL, fraction);
@@ -740,7 +740,7 @@ class CommunityOnlineToolsBase
 			return;
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		MotorbikeScript bike;
 		if (Class.CastTo(bike, obj))
 		{
@@ -757,7 +757,7 @@ class CommunityOnlineToolsBase
 			return car.COT_AreWheelsLocked();
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		MotorbikeScript bike;
 		if (Class.CastTo(bike, obj))
 		{

@@ -383,7 +383,7 @@ modded class PlayerBase
 			}
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		//! COTSetRagdoll() only calls PhysicsSetRagdoll() where it runs - the
 		//! server. That correctly ragdolls the entity everywhere else (other
 		//! clients see it via normal object/physics replication), but the
@@ -826,7 +826,7 @@ modded class PlayerBase
 	//! Freeze already follow this cached pattern for the same reason.
 	void COTSetRagdoll( bool mode )
 	{
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		if ( g_Game.IsServer() )
 		{
 			PhysicsSetRagdoll( mode );
@@ -1410,7 +1410,7 @@ modded class PlayerBase
 			if (Class.CastTo(car, trans))
 			{
 				GetDayZGame().GetBacklit().OnLeaveCar();
-#ifndef DAYZ_1_30
+#ifdef DAYZ_1_29
 				if (g_Game.IsServer())
 				{
 					car.ForceUpdateLightsStart(); //! obsolete 1.30, no replacement

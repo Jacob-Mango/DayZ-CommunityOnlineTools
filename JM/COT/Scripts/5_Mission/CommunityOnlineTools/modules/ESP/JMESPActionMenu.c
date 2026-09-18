@@ -734,7 +734,7 @@ class JMESPActionMenu
 			AddPage( PAGE_COOLANT, "#STR_COT_ESP_MODULE_PAGE_COOLANT", JMConstants.Lucide( "thermometer" ), Perm( "ESP.Object.Car.Refuel" ) );
 
 		//! Trains run on rails and have nothing to be unstuck from.
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		if ( m_Meta.target.IsInherited( CarScript ) || m_Meta.target.IsInherited( BoatScript ) || m_Meta.target.IsInherited( Motorbike ) )
 	#else
 		if ( m_Meta.target.IsInherited( CarScript ) || m_Meta.target.IsInherited( BoatScript ) )
@@ -1173,7 +1173,7 @@ class JMESPActionMenu
 		AddToggle( PREFIX_ACTION + "uncon", "#STR_COT_ESP_MODULE_ACTION_UNCONSCIOUS", instance.IsUnconscious(), Perm( "Admin.Player.Set.Shock" ) );
 		AddToggle( PREFIX_ACTION + "freeze", "#STR_COT_ESP_MODULE_ACTION_FREEZE", instance.IsFrozen(), Perm( "Admin.Player.Freeze" ) );
 		AddToggle( PREFIX_ACTION + "legs", "#STR_COT_ESP_MODULE_ACTION_BROKEN_LEGS", instance.HasBrokenLegs(), Perm( "Admin.Player.BrokenLegs" ) );
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		AddToggle( PREFIX_ACTION + "ragdoll", "#STR_COT_PLAYER_MODULE_ACTION_RAGDOLL", instance.IsRagdoll(), Perm( "Admin.Player.Ragdoll" ) );
 #endif
 
@@ -1441,7 +1441,7 @@ class JMESPActionMenu
 			DoFreeze();
 		else if ( name == "legs" )
 			DoBrokenLegs();
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		else if ( name == "ragdoll" )
 			DoRagdoll();
 #endif
@@ -2235,7 +2235,7 @@ class JMESPActionMenu
 		playerModule.SetBrokenLegs( !instance.HasBrokenLegs(), { instance.GetGUID() } );
 	}
 
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 	protected void DoRagdoll()
 	{
 		JMPlayerModule playerModule = CF_Modules<JMPlayerModule>.Get();

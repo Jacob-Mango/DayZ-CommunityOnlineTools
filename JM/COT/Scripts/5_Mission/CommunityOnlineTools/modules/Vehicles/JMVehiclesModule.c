@@ -135,7 +135,7 @@ class JMVehicleMetaData
 			if ( boat && boat.m_JM_LastDriverUID != "" )
 				m_LastDriverUID = boat.m_JM_LastDriverUID;
 		}
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		else if ( entity.IsInherited( Motorbike ) )
 		{
 			m_VehicleType = JMVT_BIKE;
@@ -173,7 +173,7 @@ class JMVehicleMetaData
 		if ( Class.CastTo( liveBoat, entity ) )
 			m_FuelPct = liveBoat.GetFluidFraction( BoatFluid.FUEL );
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		//! No coolant read here - Motorbike has no coolant tank (see
 		//! MotorbikeScript.c's COT_Refuel note), so m_CoolantPct stays -1.
 		MotorbikeScript liveBike;
@@ -529,7 +529,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boat = boat.m_Next;
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bike = MotorbikeScript.s_JM_AllBikes.m_Head;
 		while ( bike )
 		{
@@ -781,7 +781,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 		if ( boat )
 			return JMVehicleMetaData.Create( boat );
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		MotorbikeScript bike = MotorbikeScript.Cast( obj );
 		if ( bike )
 			return JMVehicleMetaData.Create( bike );
@@ -1087,7 +1087,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikes = MotorbikeScript.s_JM_AllBikes.m_Head;
 		while ( bikes )
 		{
@@ -1160,7 +1160,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			boats = boatNext;
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		CF_DoublyLinkedNode_WeakRef<MotorbikeScript> bikes = MotorbikeScript.s_JM_AllBikes.m_Head;
 		while ( bikes )
 		{
@@ -1479,7 +1479,7 @@ class JMVehiclesModule: JMRenderableModuleBase
 			return;
 		}
 
-	#ifdef DAYZ_1_30
+	#ifndef DAYZ_1_29
 		MotorbikeScript bike = MotorbikeScript.Cast( obj );
 		if ( bike )
 		{

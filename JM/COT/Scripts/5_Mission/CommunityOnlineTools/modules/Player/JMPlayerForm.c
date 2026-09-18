@@ -3397,7 +3397,7 @@ class JMPlayerForm: JMFormBase
 		else
 			m_PlayerMenu.AddItem( ROW_MENU_FREEZE, "#STR_COT_PLAYER_MODULE_RIGHT_PLAYER_VARIABLES_FREEZE", JMConstants.Lucide( "snowflake" ) );
 
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		if ( instance.IsRagdoll() )
 			m_PlayerMenu.AddItem( ROW_MENU_RAGDOLL, "#STR_COT_PLAYER_MODULE_ACTION_UNRAGDOLL", JMConstants.Lucide( "bone" ) );
 		else
@@ -3439,7 +3439,7 @@ class JMPlayerForm: JMFormBase
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_KICK,       GetPermissionsManager().HasPermission( "Admin.Player.Kick" ) );
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_BAN,        GetPermissionsManager().HasPermission( "Admin.Player.Ban" ) );
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_FREEZE,   GetPermissionsManager().HasPermission( "Admin.Player.Freeze" ) );
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_RAGDOLL,  GetPermissionsManager().HasPermission( "Admin.Player.Ragdoll" ) );
 #endif
 		m_PlayerMenu.SetItemEnabled( ROW_MENU_SPECTATE, GetPermissionsManager().HasPermission( "Admin.Player.Spectate" ) );
@@ -3748,7 +3748,7 @@ class JMPlayerForm: JMFormBase
 			return;
 		}
 
-#ifdef DAYZ_1_30
+#ifndef DAYZ_1_29
 		if ( id == ROW_MENU_RAGDOLL )
 		{
 			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ragdoll" ) )
