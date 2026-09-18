@@ -4,6 +4,8 @@ modded class MissionGameplay
 
 	protected JMPlayerInstance m_OfflineInstance;
 
+	protected bool m_COT_DebugMonitorWasVisible;
+
 	void MissionGameplay()
 	{
 		if ( !g_cotBase )
@@ -228,9 +230,17 @@ modded class MissionGameplay
 			if ( m_DebugMonitor )
 			{
 				if ( GetCommunityOnlineToolsBase().IsOpen() )
-					m_DebugMonitor.Hide();
-				else 
+				{
+					if (m_DebugMonitor.IsVisible())
+					{
+						m_COT_DebugMonitorWasVisible = true;
+						m_DebugMonitor.Hide();
+					}
+				}
+				else if (m_COT_DebugMonitorWasVisible)
+				{
 					m_DebugMonitor.Show();
+				}
 			}
 
 			PlayerBase player;
@@ -241,6 +251,14 @@ modded class MissionGameplay
 				player.COT_SimulationDisabled_OnFrame(timeslice);
 			}
 		}
+	}
+
+	override void HideDebugMonitor()
+	{
+		super.HideDebugMonitor();
+
+		if (!m_DebugMonitor || !m_DebugMonitor.IsVisible())
+			m_COT_DebugMonitorWasVisible = false;
 	}
 
 	override void ShowInventory()
