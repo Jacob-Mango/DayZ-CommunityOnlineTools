@@ -376,7 +376,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 	{
 		#ifndef CF_WINDOWS
 		GetCOTWindowManager().ShowAllActive();
-		g_Game.GetInput().ChangeGameFocus( 1 );
+		g_Game.GetMission().AddActiveInputExcludes({"menu"});
 		g_Game.GetUIManager().ShowUICursor( true );
 		#endif
 	}
@@ -389,7 +389,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 		GetCOTWindowManager().HideAllActive();
 		if ( !GetCOTWindowManager().HasAnyUnpinnedActive() )
 		{
-			g_Game.GetInput().ResetGameFocus();
+			g_Game.GetMission().RemoveActiveInputExcludes({"menu"});
 			g_Game.GetUIManager().ShowUICursor( false );
 		}
 		#endif
