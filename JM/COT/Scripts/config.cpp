@@ -61,6 +61,20 @@ class CfgMods
 		
 		class defs
 		{
+			class imageSets
+			{
+				files[]=
+				{
+					"JM/COT/GUI/imagesets/cot_gui.imageset"
+				};
+			};
+			class widgetStyles
+			{
+				files[]=
+				{
+					"JM/COT/GUI/styles/cot.styles"
+				};
+			};
 			class engineScriptModule
 			{
 				value = "";
