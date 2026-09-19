@@ -16,7 +16,7 @@ class JMPermission : Managed
 
 	string Indent;
 
-	bool m_Sync;  //! This will be set to true if any added permission is not INHERIT
+	bool m_Sync;  //! This will be set to true on the root permission if any added permission is not INHERIT. NOTE: Once set to true, may NEVER be set to false in same session!
 	bool m_Sorted;
 
 	void JMPermission( string name, JMPermission parent = NULL )
