@@ -108,7 +108,7 @@ class JMESPForm: JMFormBase
 		m_ToggleButton.SetIcon( JMConstants.Lucide( "eye" ) );
 		m_ToggleButton.SetTooltip( "#STR_COT_ESP_MODULE_TT_TOGGLE_ESP" );
 		m_ToolbarRow.Add( m_ToggleButton );
-		RegisterPermission( m_ToggleButton, JMConstants.PERM_ESP_VIEW );
+		BindPermission( m_ToggleButton, JMConstants.PERM_ESP_VIEW );
 
 		//! UIActionSearchBox carries its own inline clear, so there is no
 		//! separate 'x' button beside it any more.

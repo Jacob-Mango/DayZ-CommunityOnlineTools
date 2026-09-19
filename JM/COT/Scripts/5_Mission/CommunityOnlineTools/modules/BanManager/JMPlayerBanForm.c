@@ -150,7 +150,7 @@ class JMBanForm : JMFormBase
         m_EditDurationBtn.Disable();
         m_EditDurationBtn.SetTooltip( "Change the duration of the selected ban(s)" );
 
-        RegisterPermission( m_UnbanBtn, JMConstants.PERM_BAN_UNBAN );
+        BindPermission( m_UnbanBtn, JMConstants.PERM_BAN_UNBAN );
     }
 
     protected void InitWidgetsBottom()

@@ -52,7 +52,7 @@ class JMWebhookForm: JMFormBase
 		//! Matches the key RPC_AddConnectionGroup enforces server-side. The
 		//! per-webhook controls are gated in JMWebhookSection, which rebuilds
 		//! them whenever the settings change.
-		RegisterPermission( addBtn, "Webhook.Manage.URL.Add" );
+		BindPermission( addBtn, "Webhook.Manage.URL.Add" );
 
 		// Scrollable content area
 		m_Panel         = layoutRoot.FindAnyWidget( "panel" );

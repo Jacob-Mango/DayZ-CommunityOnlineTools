@@ -55,15 +55,15 @@ class JMLootAnalysisFormTabItemScan
 		//! for every other destructive header action.
 		m_DeleteAllButton = mapCard.AddDeleteButton(this, "OnClick_DeleteAll", "Delete every world item matching the current filter");
 
-		m_Form.RegisterPermission(m_ShowOnMapButton, JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
-		m_Form.RegisterPermission(m_ClearMarkersButton, JMConstants.PERM_MAP_VIEW);
-		m_Form.RegisterPermission(m_DeleteAllButton, JMConstants.PERM_LOOTANALYSIS_DELETE);
+		m_Form.BindPermission(m_ShowOnMapButton, JMConstants.PERM_LOOTANALYSIS_ITEMSCAN);
+		m_Form.BindPermission(m_ClearMarkersButton, JMConstants.PERM_MAP_VIEW);
+		m_Form.BindPermission(m_DeleteAllButton, JMConstants.PERM_LOOTANALYSIS_DELETE);
 
 		//! A fixed height, not CreateMapFill - the card sizes ITSELF to its
 		//! content, so the map is told its height explicitly and Layout()
 		//! keeps it in step with the band on every resize.
 		m_ItemScanMap = UIActionManager.CreateMap(mapCard.GetContent(), m_Form, "OnClick_Map");
-		m_Form.RegisterPermission(m_ItemScanMap, JMConstants.PERM_MAP_VIEW);
+		m_Form.BindPermission(m_ItemScanMap, JMConstants.PERM_MAP_VIEW);
 
 		//! A real card, like the map above it, with its own title and a Copy
 		//! header action - and a key/value LIST inside, one row per stat.
@@ -71,7 +71,7 @@ class JMLootAnalysisFormTabItemScan
 		m_ScanStatsCard.AddCopyButton(this, "OnClick_CopyScanStats");
 		m_ScanReloadButton = m_ScanStatsCard.AddRefreshButton(this, "OnClick_ReloadTypeInfo", "Reload CE data for this item");
 		m_ScanSaveCEButton = m_ScanStatsCard.AddSaveButton(this, "OnClick_SaveScanCEData", "Save Nominal/Min/Lifetime/Restock to the source types.xml");
-		m_Form.RegisterPermission(m_ScanSaveCEButton, JMConstants.PERM_LOOTANALYSIS_EDIT);
+		m_Form.BindPermission(m_ScanSaveCEButton, JMConstants.PERM_LOOTANALYSIS_EDIT);
 
 		m_ScanStatsList = UIActionManager.CreateKeyValueList(m_ScanStatsCard.GetContent());
 		m_ScanCEEdit = new JMLootCEEditRow(m_ScanStatsCard.GetContent());

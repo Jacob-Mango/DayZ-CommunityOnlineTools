@@ -27,7 +27,7 @@ modded class JMPlayerForm
 		UIActionButton button = UIActionManager.CreateButton( cardBody, "Execute Panel Action", this, "OnClick_InjectedButton" );
 
 		// Bind custom permission constant to control
-		RegisterPermission( button, JMConstants.PERM_PLAYER_INJECTED_PANEL );
+		BindPermission( button, JMConstants.PERM_PLAYER_INJECTED_PANEL );
 
 		return parent;
 	}

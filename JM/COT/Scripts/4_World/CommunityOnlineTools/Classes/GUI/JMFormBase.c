@@ -165,7 +165,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	 *       // 1. Create widgets (UIActionManager calls, FindAnyWidget, etc.)
 	 *       InitWidgets();          // optional helper(s) - split by panel if large
 	 *
-	 *       // 2. Register permission bindings (after widgets exist).
+	 *       // 2. Bind permissions to widgets (after widgets exist).
 	 *       //    BindPermission() calls here; evaluated now and on every
 	 *       //    subsequent OnClientPermissionsUpdated().
 	 *       //    Only needed if you override OnClientPermissionsUpdated() with
@@ -331,7 +331,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 	//! Bind a control to a permission key and evaluate it immediately. From
 	//! here on the control is kept in step by OnClientPermissionsUpdated().
-	void RegisterPermission( COT_ScriptedWidgetEventHandler control, string permissionKey )
+	void BindPermission( COT_ScriptedWidgetEventHandler control, string permissionKey )
 	{
 		if ( !control || permissionKey == "" )
 			return;
@@ -345,13 +345,13 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 	}
 
 	//! Helper to register permission for a specific panel / card control.
-	void RegisterPanelPermission( COT_ScriptedWidgetEventHandler panel, string permissionKey )
+	void BindPanelPermission( COT_ScriptedWidgetEventHandler panel, string permissionKey )
 	{
-		RegisterPermission( panel, permissionKey );
+		BindPermission( panel, permissionKey );
 	}
 
 	//! Upstream COT's per-call helper, kept for third-party forms that modded
-	//! JMPlayerForm before RegisterPermission() existed - DayZ-Expansion's
+	//! JMPlayerForm before BindPermission() existed - DayZ-Expansion's
 	//! PersonalStorage, AI and Hardline modules each call this from their
 	//! OnClientPermissionsUpdated() override, and dropping it fails the whole
 	//! Mission script module. Takes the 3_Game base type because JMFormBase

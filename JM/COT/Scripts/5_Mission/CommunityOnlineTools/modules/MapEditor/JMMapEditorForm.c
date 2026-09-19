@@ -312,21 +312,21 @@ class JMMapEditorForm : JMFormBase
 		//! accepted. The module is already behind Admin.MapEditor.View via
 		//! HasAccess(), so read-only controls (Refresh, Copy, the snap toggles)
 		//! need nothing further.
-		RegisterPermission( m_ApplyTransform, "Admin.MapEditor.Transform" );
-		RegisterPermission( m_BulkMove,       "Admin.MapEditor.Transform" );
-		RegisterPermission( m_BulkRotate,     "Admin.MapEditor.Transform" );
-		RegisterPermission( m_BulkScale,      "Admin.MapEditor.Transform" );
-		RegisterPermission( m_Undo,           "Admin.MapEditor.Transform" );
-		RegisterPermission( m_Redo,           "Admin.MapEditor.Transform" );
-		RegisterPermission( m_UndoBtn,        "Admin.MapEditor.Transform" );
-		RegisterPermission( m_RedoBtn,        "Admin.MapEditor.Transform" );
+		BindPermission( m_ApplyTransform, "Admin.MapEditor.Transform" );
+		BindPermission( m_BulkMove,       "Admin.MapEditor.Transform" );
+		BindPermission( m_BulkRotate,     "Admin.MapEditor.Transform" );
+		BindPermission( m_BulkScale,      "Admin.MapEditor.Transform" );
+		BindPermission( m_Undo,           "Admin.MapEditor.Transform" );
+		BindPermission( m_Redo,           "Admin.MapEditor.Transform" );
+		BindPermission( m_UndoBtn,        "Admin.MapEditor.Transform" );
+		BindPermission( m_RedoBtn,        "Admin.MapEditor.Transform" );
 
-		RegisterPermission( m_Delete,         "Admin.MapEditor.Delete" );
-		RegisterPermission( m_ClearAll,       "Admin.MapEditor.Delete" );
-		RegisterPermission( m_CutBtn,         "Admin.MapEditor.Delete" );
+		BindPermission( m_Delete,         "Admin.MapEditor.Delete" );
+		BindPermission( m_ClearAll,       "Admin.MapEditor.Delete" );
+		BindPermission( m_CutBtn,         "Admin.MapEditor.Delete" );
 
-		RegisterPermission( m_PasteBtn,       "Admin.MapEditor.Spawn" );
-		RegisterPermission( m_Load,           "Admin.MapEditor.Spawn" );
+		BindPermission( m_PasteBtn,       "Admin.MapEditor.Spawn" );
+		BindPermission( m_Load,           "Admin.MapEditor.Spawn" );
 
 		// ---- Initial paint ----
 		RefreshModeButtons();

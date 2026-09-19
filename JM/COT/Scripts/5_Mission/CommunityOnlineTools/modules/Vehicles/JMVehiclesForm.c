@@ -271,9 +271,9 @@ class JMVehiclesForm: JMFormBase
 			m_DeleteDestroyedButton.SetTooltip( "Delete every destroyed / exploded vehicle" );
 			m_DeleteUnclaimedButton.SetTooltip( "Delete vehicles with no keys or registered owner" );
 
-		RegisterPermission( m_DeleteAllButton,       JMConstants.PERM_VEHICLES_DELETE_ALL );
-		RegisterPermission( m_DeleteDestroyedButton, JMConstants.PERM_VEHICLES_DELETE_DESTROYED );
-		RegisterPermission( m_DeleteUnclaimedButton, JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED );
+		BindPermission( m_DeleteAllButton,       JMConstants.PERM_VEHICLES_DELETE_ALL );
+		BindPermission( m_DeleteDestroyedButton, JMConstants.PERM_VEHICLES_DELETE_DESTROYED );
+		BindPermission( m_DeleteUnclaimedButton, JMConstants.PERM_VEHICLES_DELETE_UNCLAIMED );
 
 		// The roster itself. JMVehiclesListEntry parents into whatever widget it
 		// is handed, so the scroller's content widget is all it needs.
@@ -368,15 +368,15 @@ class JMVehiclesForm: JMFormBase
 			m_TeleportMeButton      = UIActionManager.CreateButton( gridOptA, "#STR_COT_VEHICLES_ACTION_TELEPORT_VEHICLE_TO_ME", this, "OnClick_TeleportVehicleToMe" );
 			m_TeleportMeButton.SetTooltip( "Move this vehicle to your current position" );
 
-		RegisterPermission( m_DeleteVehicleButton,   JMConstants.PERM_VEHICLES_DELETE );
-		RegisterPermission( m_RepairVehicleButton,   JMConstants.PERM_VEHICLES_REPAIR );
-		RegisterPermission( m_RefuelVehicleButton,   JMConstants.PERM_VEHICLES_REFUEL );
-		RegisterPermission( m_UnstuckVehicleButton,  JMConstants.PERM_VEHICLES_UNSTUCK );
-		RegisterPermission( m_CoverVehicleButton,    JMConstants.PERM_VEHICLES_COVER );
-		RegisterPermission( m_LockVehicleButton,     JMConstants.PERM_VEHICLES_LOCK );
-		RegisterPermission( m_UnPairVehicleButton,   JMConstants.PERM_VEHICLES_UNPAIR );
-		RegisterPermission( m_TeleportVehicleButton, JMConstants.PERM_VEHICLES_TELEPORT );
-		RegisterPermission( m_TeleportMeButton,      JMConstants.PERM_VEHICLES_TELEPORT );
+		BindPermission( m_DeleteVehicleButton,   JMConstants.PERM_VEHICLES_DELETE );
+		BindPermission( m_RepairVehicleButton,   JMConstants.PERM_VEHICLES_REPAIR );
+		BindPermission( m_RefuelVehicleButton,   JMConstants.PERM_VEHICLES_REFUEL );
+		BindPermission( m_UnstuckVehicleButton,  JMConstants.PERM_VEHICLES_UNSTUCK );
+		BindPermission( m_CoverVehicleButton,    JMConstants.PERM_VEHICLES_COVER );
+		BindPermission( m_LockVehicleButton,     JMConstants.PERM_VEHICLES_LOCK );
+		BindPermission( m_UnPairVehicleButton,   JMConstants.PERM_VEHICLES_UNPAIR );
+		BindPermission( m_TeleportVehicleButton, JMConstants.PERM_VEHICLES_TELEPORT );
+		BindPermission( m_TeleportMeButton,      JMConstants.PERM_VEHICLES_TELEPORT );
 
 	#ifndef EXPANSIONMODVEHICLE
 		// Cover, Lock, UnPair are Expansion-only - disable them when Expansion is not loaded

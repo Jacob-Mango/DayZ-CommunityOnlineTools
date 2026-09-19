@@ -67,17 +67,17 @@ class JMLootAnalysisFormTabDistribution
 		m_FindSpawnsButton = mapCard.AddCardHeaderAction(JMConstants.Lucide("search"), this, "OnClick_FindCESpawns", "Show every CE area that can spawn the selected item");
 		m_ClearDistMarkersButton = mapCard.AddCardHeaderAction(JMConstants.Lucide("eraser"), this, "OnClick_ClearDistMarkers", "Remove distribution markers from the map");
 
-		m_Form.RegisterPermission(m_FindSpawnsButton, JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION);
-		m_Form.RegisterPermission(m_ClearDistMarkersButton, JMConstants.PERM_MAP_VIEW);
+		m_Form.BindPermission(m_FindSpawnsButton, JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION);
+		m_Form.BindPermission(m_ClearDistMarkersButton, JMConstants.PERM_MAP_VIEW);
 
 		m_DistributionMap = UIActionManager.CreateMap(mapCard.GetContent(), m_Form, "OnClick_Map");
-		m_Form.RegisterPermission(m_DistributionMap, JMConstants.PERM_MAP_VIEW);
+		m_Form.BindPermission(m_DistributionMap, JMConstants.PERM_MAP_VIEW);
 
 		m_DistStatsCard = UIActionManager.CreateCard(m_DistStatsWrapper, "Item Info");
 		m_DistStatsCard.AddCopyButton(this, "OnClick_CopyDistStats");
 		m_DistReloadButton = m_DistStatsCard.AddRefreshButton(this, "OnClick_ReloadTypeInfo", "Reload CE data for this item");
 		m_DistSaveCEButton = m_DistStatsCard.AddSaveButton(this, "OnClick_SaveDistCEData", "Save Nominal/Min/Lifetime/Restock to the source types.xml");
-		m_Form.RegisterPermission(m_DistSaveCEButton, JMConstants.PERM_LOOTANALYSIS_EDIT);
+		m_Form.BindPermission(m_DistSaveCEButton, JMConstants.PERM_LOOTANALYSIS_EDIT);
 
 		m_DistStatsList = UIActionManager.CreateKeyValueList(m_DistStatsCard.GetContent());
 		m_DistCEEdit = new JMLootCEEditRow(m_DistStatsCard.GetContent());

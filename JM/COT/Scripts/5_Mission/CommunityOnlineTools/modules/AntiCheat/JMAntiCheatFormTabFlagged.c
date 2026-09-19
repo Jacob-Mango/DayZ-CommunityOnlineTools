@@ -612,7 +612,7 @@ class JMAntiCheatFormTabFlagged
 			clearBtn.SetFixedSize( JMFormBase.ICON_BUTTON_PX, JMFormBase.ICON_BUTTON_PX );
 			clearBtn.SetData( new JMAntiCheatClearData( guid ) );
 			clearBtn.SetTooltip( "Clear anti-cheat flags for this player" );
-			m_Form.RegisterPermission( clearBtn, JMConstants.PERM_ANTICHEAT_CLEAR );
+			m_Form.BindPermission( clearBtn, JMConstants.PERM_ANTICHEAT_CLEAR );
 
 			// -- Line 2: guid ---------------------------------------------------
 			Widget rowGuid = UIActionManager.CreatePanel( body, 0x00000000, ROW_GUID_PX );

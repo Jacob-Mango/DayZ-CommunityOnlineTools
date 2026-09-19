@@ -9,7 +9,7 @@ modded class JMPlayerForm
 		m_GatedButton = UIActionManager.CreateButton( parent, "Permission Gated Action", this, "OnClick_GatedAction" );
 
 		// Declarative permission binding: automates enabled/disabled state updates when permissions refresh
-		RegisterPermission( m_GatedButton, JMConstants.PERM_PLAYER_INJECTED_PANEL );
+		BindPermission( m_GatedButton, JMConstants.PERM_PLAYER_INJECTED_PANEL );
 	}
 
 	void OnClick_GatedAction( UIEvent eid, UIActionBase action )

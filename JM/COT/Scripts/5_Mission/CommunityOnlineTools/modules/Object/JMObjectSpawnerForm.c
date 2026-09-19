@@ -474,7 +474,7 @@ class JMObjectSpawnerForm: JMFormBase
 		m_DeleteCursorBtn.SetWidth( MODE_ROW_W2 );
 		m_DeleteCursorBtn.SetTooltip( "#STR_COT_OBJECT_MODULE_DELETE_DESC" );
 
-		RegisterPermission( m_DeleteCursorBtn, "Entity.Delete" );
+		BindPermission( m_DeleteCursorBtn, "Entity.Delete" );
 
 		// --- Export -----------------------------------------------------------
 		//! Its own card under Spawn. Copying a class list to the clipboard is

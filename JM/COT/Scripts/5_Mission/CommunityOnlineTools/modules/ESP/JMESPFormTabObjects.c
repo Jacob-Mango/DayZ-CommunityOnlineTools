@@ -80,12 +80,12 @@ class JMESPFormTabObjects
 		m_MoveToCursorButton = UIActionManager.CreateButton( rowMisc, "#STR_COT_ESP_MODULE_ACTION_MOVE_TO_CURSOR", this, "OnClick_MoveToCursor" );
 		m_MoveToCursorButton.SetIcon( JMConstants.Lucide( "mouse-pointer-click" ) );
 		m_MoveToCursorButton.SetTooltip( "#STR_COT_ESP_MODULE_TT_MOVE_TO_CURSOR" );
-		m_Form.RegisterPermission( m_MoveToCursorButton, JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR );
+		m_Form.BindPermission( m_MoveToCursorButton, JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR );
 
 		m_DeleteButton = UIActionManager.CreateConfirmInline( rowMisc, "#STR_COT_GENERIC_DELETE", this, "OnClick_DeleteSelected" );
 		UIActionIconGrid.ApplyDeletePreset( m_DeleteButton );
 		m_DeleteButton.SetTooltip( "#STR_COT_ESP_MODULE_TT_DELETE_SELECTED" );
-		m_Form.RegisterPermission( m_DeleteButton, JMConstants.PERM_ESP_OBJECT_DELETEALL );
+		m_Form.BindPermission( m_DeleteButton, JMConstants.PERM_ESP_OBJECT_DELETEALL );
 
 		//! Format first, then the button that acts on it - the row reads in the
 		//! order it is used.

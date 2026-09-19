@@ -112,7 +112,7 @@ class JMRoleManagerFormTabRoles
 		createRoleBtn.SetColor( JMTheme.SUCCESS_FILL );
 		createRoleBtn.SetTooltip( "#STR_COT_ROLEMANAGER_MODULE_NEW_ROLE_TOOLTIP" );
 
-		m_Form.RegisterPermission( createRoleBtn, JMConstants.PERM_ROLES_CREATE );
+		m_Form.BindPermission( createRoleBtn, JMConstants.PERM_ROLES_CREATE );
 
 		m_Form.m_LeftScroller.UpdateScroller();
 	}
@@ -136,7 +136,7 @@ class JMRoleManagerFormTabRoles
 		// Permission Configuration Card
 		UIActionCard permCard = UIActionManager.CreateCard( m_Form.m_EditorWrapper, Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_PERMISSION_CONFIG_TITLE" ) + ": " + m_SelectedRole );
 		m_SavePermBtn = permCard.AddSaveButton( this, "OnClick_SaveRolePermissions", Widget.TranslateString( "#STR_COT_ROLEMANAGER_MODULE_SAVE_PERMISSIONS_TOOLTIP" ) + ": " + m_SelectedRole );
-		m_Form.RegisterPermission( m_SavePermBtn, JMConstants.PERM_ROLES_PERMISSIONS );
+		m_Form.BindPermission( m_SavePermBtn, JMConstants.PERM_ROLES_PERMISSIONS );
 
 		if ( isDeletable )
 		{

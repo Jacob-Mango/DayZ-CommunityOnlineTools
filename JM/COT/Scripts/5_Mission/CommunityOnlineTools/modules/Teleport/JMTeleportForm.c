@@ -399,7 +399,7 @@ class JMTeleportForm: JMFormBase
 		BuildMapCard( m_MapBand );
 		BuildCoordinatesCard( m_CoordsBand );
 
-		RegisterRightPermissions();
+		BindRightPermissions();
 	}
 
 	protected void BuildMapCard( Widget parent )
@@ -2894,14 +2894,14 @@ class JMTeleportForm: JMFormBase
 	//  open has to reach the controls without a close and reopen.
 	// =========================================================================
 
-	protected void RegisterRightPermissions()
+	protected void BindRightPermissions()
 	{
-		RegisterPermission( m_InputCoords,    "Admin.Player.Teleport.Position" );
-		RegisterPermission( m_BtnUseMyPos,    "Admin.Player.Teleport.Position" );
-		RegisterPermission( m_BtnGoCoords,    "Admin.Player.Teleport.Position" );
-		RegisterPermission( m_BtnPasteCoords, "Admin.Player.Teleport.Position" );
+		BindPermission( m_InputCoords,    "Admin.Player.Teleport.Position" );
+		BindPermission( m_BtnUseMyPos,    "Admin.Player.Teleport.Position" );
+		BindPermission( m_BtnGoCoords,    "Admin.Player.Teleport.Position" );
+		BindPermission( m_BtnPasteCoords, "Admin.Player.Teleport.Position" );
 
-		RegisterPermission( m_BtnSaveHere,    "Admin.Player.Teleport.Location.Add" );
+		BindPermission( m_BtnSaveHere,    "Admin.Player.Teleport.Location.Add" );
 	}
 
 	// =========================================================================

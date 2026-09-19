@@ -32,7 +32,7 @@ modded class JMPlayerForm
 		UIActionButton actionBtn = UIActionManager.CreateButton( body, "Tab Action", this, "OnClick_CustomTabAction" );
 
 		// Bind permission constant
-		RegisterPermission( actionBtn, JMConstants.PERM_PLAYER_INJECTED_PANEL );
+		BindPermission( actionBtn, JMConstants.PERM_PLAYER_INJECTED_PANEL );
 	}
 
 	void OnClick_CustomTabAction( UIEvent eid, UIActionBase action )

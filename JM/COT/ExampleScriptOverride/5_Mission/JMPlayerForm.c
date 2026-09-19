@@ -40,7 +40,7 @@ modded class JMPlayerForm
 		UIActionButton btn = UIActionManager.CreateButton(content, "Execute Addon Action", this, "OnClick_InjectedAction");
 
 		// Bind permission directly to control
-		RegisterPermission(btn, "Admin.Player.InjectedPanel");
+		BindPermission(btn, "Admin.Player.InjectedPanel");
 
 		return parent;
 	}

@@ -207,7 +207,7 @@ class JMESPFormTabFilters
 			m_ESPTypeWidgetsByType[viewType.Type()] = rScript;
 			owner.GroupRows.Insert( rScript );
 
-			m_Form.RegisterPermission( rScript, JMConstants.PERM_ESP_VIEW + "." + viewType.Permission );
+			m_Form.BindPermission( rScript, JMConstants.PERM_ESP_VIEW + "." + viewType.Permission );
 		}
 
 		//! Living and Vehicles open, the long tails shut: those two are what an

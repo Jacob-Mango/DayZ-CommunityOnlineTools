@@ -6774,66 +6774,66 @@ class JMPlayerForm: JMFormBase
 
 		ShowUI();
 
-		RegisterPermission( m_PositionX,             "Admin.Player.Teleport.Position"     );
-		RegisterPermission( m_PositionY,             "Admin.Player.Teleport.Position"     );
-		RegisterPermission( m_PositionZ,             "Admin.Player.Teleport.Position"     );
-		RegisterPermission( m_Position,              "Admin.Player.Teleport.Position"     );
-		RegisterPermission( m_TeleportToMe,          "Admin.Player.Teleport.Position"     );
-		RegisterPermission( m_Health,                "Admin.Player.Set.Health"            );
-		RegisterPermission( m_Blood,                 "Admin.Player.Set.Blood"             );
-		RegisterPermission( m_Shock,                 "Admin.Player.Set.Shock"             );
-		RegisterPermission( m_Energy,                "Admin.Player.Set.Energy"            );
-		RegisterPermission( m_Water,                 "Admin.Player.Set.Water"             );
-		RegisterPermission( m_Stamina,               "Admin.Player.Set.Stamina"           );
-		RegisterPermission( m_HeatBuffer,            "Admin.Player.Set.HeatBuffer"        );
-		RegisterPermission( m_BloodyHands,           "Admin.Player.Set.BloodyHands"       );
-		RegisterPermission( m_GodMode,               "Admin.Player.Godmode"               );
-		RegisterPermission( m_Freeze,                "Admin.Player.Freeze"                );
-		RegisterPermission( m_Invisibility,          "Admin.Player.Invisibility"          );
+		BindPermission( m_PositionX,             "Admin.Player.Teleport.Position"     );
+		BindPermission( m_PositionY,             "Admin.Player.Teleport.Position"     );
+		BindPermission( m_PositionZ,             "Admin.Player.Teleport.Position"     );
+		BindPermission( m_Position,              "Admin.Player.Teleport.Position"     );
+		BindPermission( m_TeleportToMe,          "Admin.Player.Teleport.Position"     );
+		BindPermission( m_Health,                "Admin.Player.Set.Health"            );
+		BindPermission( m_Blood,                 "Admin.Player.Set.Blood"             );
+		BindPermission( m_Shock,                 "Admin.Player.Set.Shock"             );
+		BindPermission( m_Energy,                "Admin.Player.Set.Energy"            );
+		BindPermission( m_Water,                 "Admin.Player.Set.Water"             );
+		BindPermission( m_Stamina,               "Admin.Player.Set.Stamina"           );
+		BindPermission( m_HeatBuffer,            "Admin.Player.Set.HeatBuffer"        );
+		BindPermission( m_BloodyHands,           "Admin.Player.Set.BloodyHands"       );
+		BindPermission( m_GodMode,               "Admin.Player.Godmode"               );
+		BindPermission( m_Freeze,                "Admin.Player.Freeze"                );
+		BindPermission( m_Invisibility,          "Admin.Player.Invisibility"          );
 
 		// The identity chips are those same three toggles plus shock, so they
 		// answer to the same permissions - an admin who cannot set a flag must
 		// not be handed a second way to try.
-		RegisterPermission( m_BadgeGodMode,          "Admin.Player.Godmode"               );
-		RegisterPermission( m_BadgeFrozen,           "Admin.Player.Freeze"                );
-		RegisterPermission( m_BadgeInvisible,        "Admin.Player.Invisibility"          );
-		RegisterPermission( m_BadgeUnconscious,      "Admin.Player.Set.Shock"             );
-		RegisterPermission( m_UnlimitedAmmo,         "Admin.Player.UnlimitedAmmo"         );
-		RegisterPermission( m_AdminNVG,              "Admin.Player.AdminNVG"              );
-		RegisterPermission( m_UnlimitedStamina,      "Admin.Player.UnlimitedStamina"      );
-		RegisterPermission( m_BrokenLegs,            "Admin.Player.BrokenLegs"            );
-		RegisterPermission( m_ReceiveDmgDealt,       "Admin.Player.ReceiveDamageDealt"    );
-		RegisterPermission( m_CannotBeTargetedByAI,  "Admin.Player.CannotBeTargetedByAI"  );
-		RegisterPermission( m_RemoveCollision,       "Admin.Player.RemoveCollision"       );
-		RegisterPermission( m_HealPlayer,            "Admin.Player.Heal"                  );
-		RegisterPermission( m_RepairTransport,       "Admin.Transport.Repair"             );
-		RegisterPermission( m_DryPlayer,             "Admin.Player.Dry"                   );
-		RegisterPermission( m_SpectatePlayer,        "Admin.Player.Spectate"              );
-		RegisterPermission( m_VomitPlayer,           "Admin.Player.Vomit"                 );
-		RegisterPermission( m_SetScalePlayer,        "Admin.Player.Scale"                 );
-		RegisterPermission( m_KillPlayer,            "Admin.Player.Set.Health"            );
-		RegisterPermission( m_StripPlayer,           "Admin.Player.Strip"                 );
-		RegisterPermission( m_KickPlayer,            "Admin.Player.Kick"                  );
-		RegisterPermission( m_BanPlayer,             "Admin.Player.Ban"                   );
+		BindPermission( m_BadgeGodMode,          "Admin.Player.Godmode"               );
+		BindPermission( m_BadgeFrozen,           "Admin.Player.Freeze"                );
+		BindPermission( m_BadgeInvisible,        "Admin.Player.Invisibility"          );
+		BindPermission( m_BadgeUnconscious,      "Admin.Player.Set.Shock"             );
+		BindPermission( m_UnlimitedAmmo,         "Admin.Player.UnlimitedAmmo"         );
+		BindPermission( m_AdminNVG,              "Admin.Player.AdminNVG"              );
+		BindPermission( m_UnlimitedStamina,      "Admin.Player.UnlimitedStamina"      );
+		BindPermission( m_BrokenLegs,            "Admin.Player.BrokenLegs"            );
+		BindPermission( m_ReceiveDmgDealt,       "Admin.Player.ReceiveDamageDealt"    );
+		BindPermission( m_CannotBeTargetedByAI,  "Admin.Player.CannotBeTargetedByAI"  );
+		BindPermission( m_RemoveCollision,       "Admin.Player.RemoveCollision"       );
+		BindPermission( m_HealPlayer,            "Admin.Player.Heal"                  );
+		BindPermission( m_RepairTransport,       "Admin.Transport.Repair"             );
+		BindPermission( m_DryPlayer,             "Admin.Player.Dry"                   );
+		BindPermission( m_SpectatePlayer,        "Admin.Player.Spectate"              );
+		BindPermission( m_VomitPlayer,           "Admin.Player.Vomit"                 );
+		BindPermission( m_SetScalePlayer,        "Admin.Player.Scale"                 );
+		BindPermission( m_KillPlayer,            "Admin.Player.Set.Health"            );
+		BindPermission( m_StripPlayer,           "Admin.Player.Strip"                 );
+		BindPermission( m_KickPlayer,            "Admin.Player.Kick"                  );
+		BindPermission( m_BanPlayer,             "Admin.Player.Ban"                   );
 
 		//! Roles are edited in the Role Manager, so the jump is only offered to
 		//! an admin who can actually open it.
-		RegisterPermission( m_IdentityRoleEdit,      "Admin.Roles.View"                   );
+		BindPermission( m_IdentityRoleEdit,      "Admin.Roles.View"                   );
 
-		RegisterPermission( m_InventoryRefresh,      "Admin.Player.AccessInventory"       );
-		RegisterPermission( m_InventoryClearCargo,   "Admin.Player.ClearCargo"            );
+		BindPermission( m_InventoryRefresh,      "Admin.Player.AccessInventory"       );
+		BindPermission( m_InventoryClearCargo,   "Admin.Player.ClearCargo"            );
 
-		RegisterPermission( m_DiseaseAgent,          "Admin.Player.Disease.Add"           );
-		RegisterPermission( m_DiseaseAdd,            "Admin.Player.Disease.Add"           );
-		RegisterPermission( m_DiseaseRemove,         "Admin.Player.Disease.Remove"        );
-		RegisterPermission( m_DiseaseClear,          "Admin.Player.Disease.Remove"        );
-		RegisterPermission( m_BleedingPart,          "Admin.Player.Bleed.Add"             );
-		RegisterPermission( m_BleedApply,            "Admin.Player.Bleed.Add"             );
-		RegisterPermission( m_BleedClear,            "Admin.Player.StopBleeding"          );
+		BindPermission( m_DiseaseAgent,          "Admin.Player.Disease.Add"           );
+		BindPermission( m_DiseaseAdd,            "Admin.Player.Disease.Add"           );
+		BindPermission( m_DiseaseRemove,         "Admin.Player.Disease.Remove"        );
+		BindPermission( m_DiseaseClear,          "Admin.Player.Disease.Remove"        );
+		BindPermission( m_BleedingPart,          "Admin.Player.Bleed.Add"             );
+		BindPermission( m_BleedApply,            "Admin.Player.Bleed.Add"             );
+		BindPermission( m_BleedClear,            "Admin.Player.StopBleeding"          );
 
 		if ( JM_GetSelected().NumPlayers(false) == 1 )
 		{
-			RegisterPermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
+			BindPermission( m_TeleportMeTo, "Admin.Player.Teleport.SenderTo" );
 		} else if ( m_TeleportMeTo ) {
 			m_TeleportMeTo.Disable();
 		}

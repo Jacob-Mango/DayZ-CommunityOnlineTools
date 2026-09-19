@@ -134,7 +134,7 @@ class UIActionManager
 
 			if ( permission != "" && instance && instance.IsInherited( JMFormBase ) )
 			{
-				JMFormBase.Cast( instance ).RegisterPermission( action, permission );
+				JMFormBase.Cast( instance ).BindPermission( action, permission );
 			}
 
 			return action;

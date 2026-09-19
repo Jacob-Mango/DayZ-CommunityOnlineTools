@@ -47,8 +47,8 @@ class JMBanFormTabOffline
         // The ban itself is executed through JMPlayerModule.Ban, so it is that
         // module's permission that gates it - JMBanModule only registers View
         // and Unban.
-        m_Form.RegisterPermission( banSelBtn,  JMConstants.PERM_PLAYER_BAN );
-        m_Form.RegisterPermission( banByIDBtn, JMConstants.PERM_PLAYER_BAN );
+        m_Form.BindPermission( banSelBtn,  JMConstants.PERM_PLAYER_BAN );
+        m_Form.BindPermission( banByIDBtn, JMConstants.PERM_PLAYER_BAN );
 
         m_OfflineScroller.UpdateScroller();
     }
