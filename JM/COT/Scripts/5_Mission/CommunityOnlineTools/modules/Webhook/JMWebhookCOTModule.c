@@ -179,6 +179,9 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 	//! below, which re-requests once permissions actually arrive.
 	private void Server_Load( notnull PlayerIdentity ident )
 	{
+		if ( !GetPermissionsManager().GetPlayer( ident.GetId() ) )
+			return;
+
 		if ( !GetPermissionsManager().HasPermission( "Webhook.View", ident ) )
 			return;
 
