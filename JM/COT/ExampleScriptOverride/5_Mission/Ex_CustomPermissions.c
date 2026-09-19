@@ -4,14 +4,6 @@ modded class JMPlayerForm
 {
 	protected UIActionButton m_GatedButton;
 
-	override void OnInit()
-	{
-		super.OnInit();
-
-		// Register custom permission using JMConstants constant string
-		GetPermissionsManager().RegisterPermission( JMConstants.PERM_PLAYER_INJECTED_PANEL );
-	}
-
 	protected void InitCustomGatedControl( Widget parent )
 	{
 		m_GatedButton = UIActionManager.CreateButton( parent, "Permission Gated Action", this, "OnClick_GatedAction" );
