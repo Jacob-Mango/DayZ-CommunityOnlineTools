@@ -140,7 +140,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		//! activation that never happened - forged audit entries and a flooded
 		//! Discord endpoint in the same call.
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "COT.View", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "COT.View", senderRPC, instance ) )
 			return;
 
 		if ( !instance )
@@ -197,7 +197,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Read", senderRPC ) )
 			return;
 
 		if ( IsMissionHost() )
@@ -248,7 +248,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Position", senderRPC ) )
 			return;
 
 		if ( IsMissionHost() )
@@ -365,7 +365,7 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 			if ( !senderRPC )
 				return;
 
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Read", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Read", senderRPC ) )
 				return;
 
 			string guid;

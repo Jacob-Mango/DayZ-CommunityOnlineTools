@@ -195,7 +195,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	private void Server_Delete( string Loadout, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Delete", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Loadouts.Delete", ident, instance ) )
 			return;
 
 		JMLoadoutSettings.Delete(Loadout);
@@ -236,7 +236,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	private void Server_SpawnCursor( string Loadout, vector position, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.Cursor", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Loadouts.Spawn.Cursor", ident, instance ) )
 			return;
 
 	#ifdef DZ_Expansion_Core
@@ -321,7 +321,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	private void Server_SpawnPlayers( string Loadout, array< string > guids, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.SelectedPlayers", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Loadouts.Spawn.SelectedPlayers", ident, instance ) )
 			return;
 
 	#ifdef DZ_Expansion_Core
@@ -441,7 +441,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 	private void Server_SpawnTarget( string Loadout, EntityAI ent, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Spawn.Target", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Loadouts.Spawn.Target", ident, instance ) )
 			return;
 
 	#ifdef DZ_Expansion_Core
@@ -689,7 +689,7 @@ class JMLoadoutModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Loadouts.Create", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Loadouts.Create", senderRPC, instance ) )
 			return;
 		
 		string name;

@@ -193,7 +193,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 			return;
 
 		if ( !sender ) return;
-		if ( !JMPermissions.Has( JMConstants.PERM_ROLES_VIEW, sender ) )
+		if ( !JMPermissions.HasRPC( JMConstants.PERM_ROLES_VIEW, sender ) )
 			return;
 
 		SendRoleListToClient( sender );
@@ -206,7 +206,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_CREATE, sender, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_CREATE, sender, instance ) )
 			return;
 
 		string name;
@@ -223,7 +223,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_DELETE, sender, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_DELETE, sender, instance ) )
 			return;
 
 		string name;
@@ -240,7 +240,7 @@ class JMRoleManagerModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !sender ) return;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ROLES_PERMISSIONS, sender, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ROLES_PERMISSIONS, sender, instance ) )
 			return;
 
 		string roleName;

@@ -242,7 +242,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Add", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Add", senderRPC, instance ) )
 			return;
 
 		Exec_AddConnectionGroup( name, url );
@@ -281,7 +281,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Remove", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Remove", senderRPC, instance ) )
 			return;
 
 		Exec_RemoveConnectionGroup( name );
@@ -349,7 +349,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.URL.Edit", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.URL.Edit", senderRPC, instance ) )
 			return;
 
 		Exec_EditConnectionGroup( oldName, newName, newUrl, filterGUID, filterRole );
@@ -401,7 +401,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Add", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.Add", senderRPC, instance ) )
 			return;
 
 		Exec_AddType( name, group, enabled );
@@ -448,7 +448,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.Remove", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.Remove", senderRPC, instance ) )
 			return;
 
 		Exec_RemoveType( name, group );
@@ -500,7 +500,7 @@ class JMWebhookCOTModule: JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Webhook.Manage.Type.State", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Webhook.Manage.Type.State", senderRPC, instance ) )
 			return;
 
 		Exec_TypeState( name, group, enabled );

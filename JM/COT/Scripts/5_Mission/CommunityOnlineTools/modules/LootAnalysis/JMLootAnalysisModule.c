@@ -534,7 +534,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
+		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -579,7 +579,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
+		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance))
 			return;
 
 		Param1<string> data;
@@ -634,7 +634,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!JMPermissions.Has(JMConstants.PERM_LOOTANALYSIS_DELETE, senderRPC))
+		if (!JMPermissions.HasRPC(JMConstants.PERM_LOOTANALYSIS_DELETE, senderRPC))
 			return;
 
 		Param1<string> data;
@@ -665,7 +665,7 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		if (!GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
+		if (!GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_EDIT, senderRPC, instance))
 			return;
 
 		Param5<string, int, int, int, int> data;
@@ -704,8 +704,8 @@ class JMLootAnalysisModule: JMRenderableModuleBase
 		if (!senderRPC)
 			return;
 
-		bool canScan = GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
-		bool canDist = GetPermissionsManager().HasPermission(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
+		bool canScan = GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_ITEMSCAN, senderRPC, instance);
+		bool canDist = GetPermissionsManager().HasPermissionRPC(JMConstants.PERM_LOOTANALYSIS_DISTRIBUTION, senderRPC, instance);
 		if (!canScan && !canDist)
 			return;
 

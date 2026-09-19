@@ -17,6 +17,14 @@ class JMPermissions
 		return GetPermissionsManager().HasPermission( permission, ident );
 	}
 
+	static bool HasRPC( string permission, PlayerIdentity ident = null )
+	{
+		if ( !GetPermissionsManager() )
+			return false;
+
+		return GetPermissionsManager().HasPermissionRPC( permission, ident );
+	}
+
 	static bool HasAny( array< string > permissions, PlayerIdentity ident = null )
 	{
 		if ( !permissions )

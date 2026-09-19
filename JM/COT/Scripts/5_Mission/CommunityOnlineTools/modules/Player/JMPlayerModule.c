@@ -414,7 +414,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Message", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Message", senderRPC, instance ) )
 			return;
 
 		Exec_Message( guids, senderRPC, instance, messageText );
@@ -465,7 +465,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Notif", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Notif", senderRPC, instance ) )
 			return;
 
 		array< string > guids;
@@ -617,7 +617,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( StatPermission( type ), senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( StatPermission( type ), senderRPC, instance ) )
 			return;
 
 		Exec_SetStat( type, value, guids, senderRPC, instance );
@@ -682,7 +682,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Set.BloodyHands", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Set.BloodyHands", senderRPC, instance ) )
 			return;
 
 		Exec_SetBloodyHands( bloodyhands, guids, senderRPC, instance );
@@ -748,7 +748,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Transport.Repair", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Transport.Repair", senderRPC, instance ) )
 			return;
 
 		Exec_RepairTransport( guids, senderRPC, instance );
@@ -816,7 +816,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Position", senderRPC, instance ) )
 			return;
 
 		Exec_TeleportTo( position, guids, senderRPC, instance );
@@ -869,7 +869,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.SenderTo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.SenderTo", senderRPC, instance ) )
 			return;
 
 		Exec_TeleportSenderTo( guid, senderRPC, instance );
@@ -933,7 +933,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Previous", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Previous", senderRPC, instance ) )
 			return;
 
 		Exec_TeleportToPrevious( guids, senderRPC, instance );
@@ -1191,7 +1191,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Spectate", senderRPC ) )
 				return;
 
 			if (!target)
@@ -1400,7 +1400,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Spectate", senderRPC ) )
 				return;
 
 			Server_EndSpectating( senderRPC );
@@ -1427,7 +1427,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Spectate", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Spectate", senderRPC ) )
 			return;
 
 		g_Game.SelectPlayer(senderRPC, senderRPC.GetPlayer());
@@ -1557,7 +1557,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.GodMode", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.GodMode", senderRPC, instance ) )
 			return;
 
 		Exec_SetGodMode( value, guids, senderRPC, instance );
@@ -1613,7 +1613,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Freeze", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Freeze", senderRPC, instance ) )
 			return;
 
 		Exec_SetFreeze( value, guids, senderRPC, instance );
@@ -1670,7 +1670,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ragdoll", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Ragdoll", senderRPC, instance ) )
 			return;
 
 		Exec_SetRagdoll( value, guids, senderRPC, instance );
@@ -1727,7 +1727,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.ReceiveDamageDealt", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.ReceiveDamageDealt", senderRPC, instance ) )
 			return;
 
 		Exec_SetReceiveDamageDealt( value, guids, senderRPC, instance );
@@ -1804,7 +1804,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.CannotBeTargetedByAI", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.CannotBeTargetedByAI", senderRPC, instance ) )
 			return;
 
 		Exec_SetCannotBeTargetedByAI( value, guids, senderRPC, instance );
@@ -1880,7 +1880,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Invisibility", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Invisibility", senderRPC, instance ) )
 			return;
 
 		Exec_SetInvisible( value, guids, senderRPC, instance );
@@ -1989,7 +1989,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.RemoveCollision", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.RemoveCollision", senderRPC, instance ) )
 			return;
 
 		Exec_SetRemoveCollision( value, guids, senderRPC, instance );
@@ -2068,7 +2068,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.UnlimitedAmmo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.UnlimitedAmmo", senderRPC, instance ) )
 			return;
 
 		Exec_SetUnlimitedAmmo( value, guids, senderRPC, instance );
@@ -2147,7 +2147,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.AdminNVG", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.AdminNVG", senderRPC, instance ) )
 			return;
 
 		Exec_SetAdminNVG( value, guids, senderRPC, instance );
@@ -2226,7 +2226,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.UnlimitedStamina", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.UnlimitedStamina", senderRPC, instance ) )
 			return;
 
 		Exec_SetUnlimitedStamina( value, guids, senderRPC, instance );
@@ -2285,7 +2285,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Vomit", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Vomit", senderRPC, instance ) )
 			return;
 
 		Exec_Vomit(value, guids, senderRPC, instance );
@@ -2341,7 +2341,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Scale", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Scale", senderRPC, instance ) )
 			return;
 
 		Exec_SetScale( value, guids, senderRPC, instance );
@@ -2412,7 +2412,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.BrokenLegs", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.BrokenLegs", senderRPC, instance ) )
 			return;
 
 		Exec_SetBrokenLegs( value, guids, senderRPC, instance );
@@ -2584,7 +2584,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Heal", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Heal", senderRPC, instance ) )
 			return;
 
 		Exec_Heal( guids, senderRPC, instance );
@@ -2678,7 +2678,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Ban", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Ban", senderRPC, instance ) )
 			return;
 
 		Exec_Ban( guids, senderRPC, instance, messageText, duration );
@@ -2760,7 +2760,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Kick", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Kick", senderRPC, instance ) )
 			return;
 
 		Exec_Kick( guids, senderRPC, instance, messageText );
@@ -2861,7 +2861,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Strip", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Strip", senderRPC, instance ) )
 			return;
 
 		Exec_Strip( guids, senderRPC, instance );
@@ -2912,7 +2912,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.ClearCargo", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.ClearCargo", senderRPC, instance ) )
 			return;
 
 		Exec_ClearCargo( guids, senderRPC, instance );
@@ -2963,7 +2963,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Dry", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Dry", senderRPC, instance ) )
 			return;
 
 		Exec_Dry( guids, senderRPC, instance );
@@ -3014,7 +3014,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.StopBleeding", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.StopBleeding", senderRPC, instance ) )
 			return;
 
 		Exec_StopBleeding( guids, senderRPC, instance );
@@ -3077,7 +3077,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Permissions", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Permissions", senderRPC, instance ) )
 			return;
 
 		Exec_SetPermissions( permission, guids, senderRPC, instance );
@@ -3157,7 +3157,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Roles", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Roles", senderRPC, instance ) )
 			return;
 
 		Exec_SetRoles( roles, guids, senderRPC, instance, nameRestrictions );
@@ -3235,7 +3235,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Add", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Add", senderRPC, instance ) )
 			return;
 
 		Exec_AddDisease( agent, count, guids, senderRPC, instance );
@@ -3304,7 +3304,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Remove", senderRPC, instance ) )
 			return;
 
 		Exec_RemoveDisease( agent, guids, senderRPC, instance );
@@ -3377,7 +3377,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Add", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Add", senderRPC, instance ) )
 			return;
 
 		Exec_ActivateModifier( modifier_id, guids, senderRPC, instance );
@@ -3446,7 +3446,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Remove", senderRPC, instance ) )
 			return;
 
 		Exec_DeactivateModifier( modifier_id, guids, senderRPC, instance );
@@ -3510,7 +3510,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Remove", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Remove", senderRPC, instance ) )
 			return;
 
 		Exec_RemoveAllDiseases( guids, senderRPC, instance );
@@ -3546,7 +3546,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Disease.Add", senderRPC, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Disease.Add", senderRPC, instance ) )
 				return;
 
 			SendDiseaseMaskTo( senderRPC, guid );
@@ -3654,7 +3654,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View", senderRPC, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Statistics.View", senderRPC, instance ) )
 				return;
 
 			SendPlayerStatsTo( senderRPC, guid );
@@ -3781,7 +3781,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Statistics.View", senderRPC, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Statistics.View", senderRPC, instance ) )
 				return;
 
 			SendExpansionInfoTo( senderRPC, guid );
@@ -3930,7 +3930,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.AccessInventory", senderRPC, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.AccessInventory", senderRPC, instance ) )
 				return;
 
 			SendInventoryTo( senderRPC, guid );
@@ -4179,7 +4179,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		if ( !ctx.Read( netLow ) )   return NULL;
 		if ( !ctx.Read( netHigh ) )  return NULL;
 
-		if ( !GetPermissionsManager().HasPermission( permission, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( permission, senderRPC, instance ) )
 			return NULL;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
@@ -4355,7 +4355,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( GroupOpPermission( op ), senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( GroupOpPermission( op ), senderRPC, instance ) )
 			return;
 
 		array< JMPlayerInstance > players = GetPermissionsManager().GetPlayers( { guid } );
@@ -4736,7 +4736,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Bleed.Add", senderRPC, instance ) )
 			return;
 
 		Exec_AddBleedingPart( selectionName, guids, senderRPC );
@@ -4804,7 +4804,7 @@ class JMPlayerModule: JMRenderableModuleBase
 		JMPlayerInstance instance;
 		if ( !senderRPC )
 			return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Stop", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Bleed.Stop", senderRPC, instance ) )
 			return;
 
 		Exec_StopBleedingPart( guids, senderRPC );
@@ -4879,7 +4879,7 @@ class JMPlayerModule: JMRenderableModuleBase
 			JMPlayerInstance instance;
 			if ( !senderRPC )
 				return;
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Bleed.Add", senderRPC, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Bleed.Add", senderRPC, instance ) )
 				return;
 
 			SendBleedingStateTo( senderRPC, reqGuid );

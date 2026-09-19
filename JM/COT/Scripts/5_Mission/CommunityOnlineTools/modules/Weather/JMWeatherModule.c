@@ -292,7 +292,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !ident )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.View", ident ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.View", ident ) )
 			return;
 
 		bool sandstormActive = g_Game.GetWeather().GetSandstorm().IsActive();
@@ -1047,7 +1047,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Dynamic", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Preset.Dynamic", senderRPC ) )
 			return;
 
 		Exec_DynamicWeather( config, senderRPC );
@@ -1344,7 +1344,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.FreezeTime", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.FreezeTime", senderRPC ) )
 			return;
 
 		Exec_FreezeTime( state, senderRPC );
@@ -1362,7 +1362,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Storm", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Storm", senderRPC ) )
 			return;
 
 		Exec_SetStorm( p1, senderRPC );
@@ -1380,7 +1380,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Sandstorm", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Sandstorm", senderRPC ) )
 			return;
 
 		Exec_SetSandstorm( p1, senderRPC );
@@ -1398,7 +1398,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Fog", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Fog", senderRPC ) )
 			return;
 
 		Exec_SetFog( p1, senderRPC );
@@ -1416,7 +1416,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Fog.Dynamic", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Fog.Dynamic", senderRPC ) )
 			return;
 
 		Exec_SetDynamicFog( p1, senderRPC );
@@ -1434,7 +1434,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Rain", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Rain", senderRPC ) )
 			return;
 
 		Exec_SetRain( p1, senderRPC );
@@ -1452,7 +1452,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Rain.Thresholds", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Rain.Thresholds", senderRPC ) )
 			return;
 
 		Exec_SetRainThresholds( p1, senderRPC );
@@ -1470,7 +1470,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Snow", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Snow", senderRPC ) )
 			return;
 
 		Exec_SetSnow( p1, senderRPC );
@@ -1488,7 +1488,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Snow.Thresholds", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Snow.Thresholds", senderRPC ) )
 			return;
 
 		Exec_SetSnowThresholds( p1, senderRPC );
@@ -1506,7 +1506,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Overcast", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Overcast", senderRPC ) )
 			return;
 
 		Exec_SetOvercast( p1, senderRPC );
@@ -1524,7 +1524,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Wind", senderRPC ) )
 			return;
 
 		Exec_SetWindMagnitude( p1, senderRPC );
@@ -1542,7 +1542,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Wind", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Wind", senderRPC ) )
 			return;
 
 		Exec_SetWindDirection( p1, senderRPC );
@@ -1560,7 +1560,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Wind.FunctionParams", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Wind.FunctionParams", senderRPC ) )
 			return;
 
 		Exec_SetWindFunctionParams( p1, senderRPC );
@@ -1586,7 +1586,7 @@ class JMWeatherModule: JMRenderableModuleBase
 			return;
 		}
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Date", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Date", senderRPC ) )
 			return;
 
 		if (g_Game.IsDedicatedServer())
@@ -1610,7 +1610,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Use", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Preset.Use", senderRPC ) )
 			return;
 
 		Exec_UsePreset( p1, senderRPC );
@@ -1629,7 +1629,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Create", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Preset.Create", senderRPC ) )
 			return;
 
 		if ( g_Game.IsDedicatedServer() )
@@ -1649,7 +1649,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Update", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Preset.Update", senderRPC ) )
 			return;
 
 		if ( g_Game.IsDedicatedServer() )
@@ -1669,7 +1669,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !senderRPC )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( "Weather.Preset.Remove", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.Preset.Remove", senderRPC ) )
 			return;
 
 		if ( g_Game.IsDedicatedServer() )

@@ -293,7 +293,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.View", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.View", senderRPC, instance ) )
 			return;
 
 		SendListTo( senderRPC );
@@ -340,7 +340,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Spawn", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Spawn", senderRPC, instance ) )
 			return;
 
 		Exec_SpawnObject( className, pos, ori, scale, senderRPC );
@@ -413,7 +413,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
 			return;
 
 		Exec_TransformObject( id, pos, ori, scale, senderRPC );
@@ -477,7 +477,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
 			return;
 
 		Exec_DeleteObject( id, senderRPC );
@@ -520,7 +520,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
 			return;
 
 		Exec_ClearAll( senderRPC );
@@ -578,7 +578,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
 			return;
 
 		int count;
@@ -650,7 +650,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Delete", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Delete", senderRPC, instance ) )
 			return;
 
 		int count;
@@ -793,7 +793,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
 			return;
 		Exec_Undo( senderRPC );
 	}
@@ -802,7 +802,7 @@ class JMMapEditorModule : JMRenderableModuleBase
 	{
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Admin.MapEditor.Transform", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.MapEditor.Transform", senderRPC, instance ) )
 			return;
 		Exec_Redo( senderRPC );
 	}

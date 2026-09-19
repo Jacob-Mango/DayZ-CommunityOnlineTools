@@ -214,7 +214,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 	private void Server_SpawnCursor( string steamID, string timestamp, vector position, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Compensations.Spawn", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
 			return;
 
 		JMLoadout loadout = LoadCompensation( steamID, timestamp );
@@ -273,7 +273,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 	private void Server_SpawnTarget( string steamID, string timestamp, EntityAI ent, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Compensations.Spawn", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
 			return;
 
 		JMLoadout loadout = LoadCompensation( steamID, timestamp );
@@ -328,7 +328,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 	private void Server_Delete( string steamID, string timestamp, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Compensations.Delete", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Delete", ident, instance ) )
 			return;
 
 		string filepath = JMConstants.DIR_COMPENSATIONS + steamID + "\\" + timestamp + JMConstants.EXT_LOADOUT;
@@ -374,7 +374,7 @@ class JMCompensationsModule: JMRenderableModuleBase
 	private void Server_SpawnPlayers( string steamID, string timestamp, array< string > guids, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Compensations.Spawn", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Compensations.Spawn", ident, instance ) )
 			return;
 
 		JMLoadout loadout = LoadCompensation( steamID, timestamp );

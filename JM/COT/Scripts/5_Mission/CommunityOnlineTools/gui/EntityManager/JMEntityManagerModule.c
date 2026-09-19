@@ -219,7 +219,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		if ( !sender )
 			return;
 
-		if ( !GetPermissionsManager().HasPermission( m_Adapter.GetPermissionPrefix() + ".View", sender ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( m_Adapter.GetPermissionPrefix() + ".View", sender ) )
 			return;
 
 		UpdateEntitiesFromAdapter();
@@ -296,7 +296,7 @@ class JMEntityManagerModule: JMRenderableModuleBase
 		{
 			if ( a.m_Id != actionId )
 				continue;
-			if ( a.m_Permission != "" && !GetPermissionsManager().HasPermission( a.m_Permission, sender ) )
+			if ( a.m_Permission != "" && !GetPermissionsManager().HasPermissionRPC( a.m_Permission, sender ) )
 				return;
 			break;
 		}

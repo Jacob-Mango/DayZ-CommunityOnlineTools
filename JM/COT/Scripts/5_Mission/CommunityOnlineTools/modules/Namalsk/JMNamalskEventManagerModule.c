@@ -131,7 +131,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				if (!ctx.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Start", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermissionRPC("Namalsk." + evt + ".Start", sender, instance)) return;
 
 				GetCommunityOnlineToolsBase().Log( sender, "Started Namalsk event: " + evt );
 				SendWebhookColored( "StartEvent", instance, "Started Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
@@ -145,7 +145,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 			{
 				if (!ctx.Read(evt)) return;
 
-				if (!GetPermissionsManager().HasPermission("Namalsk." + evt + ".Cancel", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermissionRPC("Namalsk." + evt + ".Cancel", sender, instance)) return;
 
 				GetCommunityOnlineToolsBase().Log( sender, "Cancelled Namalsk event: " + evt );
 				SendWebhookColored( "CancelEvent", instance, "Cancelled Namalsk event: " + evt, JMConstants.WEBHOOK_COLOR_WARNING );
@@ -178,7 +178,7 @@ class JMNamalskEventManagerModule: JMRenderableModuleBase
 
 				if (!sender) return;
 
-				if (!GetPermissionsManager().HasPermission("Namalsk", sender, instance)) return;
+				if (!GetPermissionsManager().HasPermissionRPC("Namalsk", sender, instance)) return;
 
 				ScriptRPC rpc = new ScriptRPC();
 				rpc.Write(Events);

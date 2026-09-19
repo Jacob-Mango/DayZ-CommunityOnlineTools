@@ -550,6 +550,37 @@ class JMPermissionManager
 		return allowed;
 	}
 
+	/**
+	 * @brief check permission when it's related to an RPC received on server
+	 *
+	 * This overload is the single choke point every incoming COT RPC goes
+	 * through on the server, and a refusal here means a client asked for
+	 * something its own UI never offers it. That is close to the strongest
+	 * signal available from inside a mod: a legitimate client cannot
+	 * produce it by accident. Reported, not acted on - the anti-cheat
+	 * module decides whether a burst of these is worth a flag.
+	 */
+	bool HasPermissionRPC( string permission, PlayerIdentity ihp )
+	{
+		if ( IsMissionOffline() )
+			return true;
+
+		JMPlayerInstance instance;
+		return HasPermissionRPC( permission, ihp, instance );
+	}
+
+	bool HasPermissionRPC( string permission, PlayerIdentity identity, out JMPlayerInstance instance )
+	{
+		bool allowed = HasPermission(permission, identity, instance);
+
+	#ifdef SERVER
+		if ( !allowed )
+			JMAntiCheatSignals.ReportDeniedRpc( identity.GetId(), permission );
+	#endif
+
+		return allowed;
+	}
+
 	bool HasPermissions( TStringArray permissions, PlayerIdentity identity, out JMPlayerInstance instance, bool requireAll = true )
 	{
 		foreach (string permission: permissions)

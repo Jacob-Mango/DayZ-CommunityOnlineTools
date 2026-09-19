@@ -341,13 +341,13 @@ class JMTeleportModule: JMRenderableModuleBase
 		bool shouldLog = true;
 		if ( isCursor )
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", ident, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Cursor", ident, instance ) )
 				return;
 
 			shouldLog = !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor.NoLog", ident );
 		} else
 		{
-			if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Position", ident, instance ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Position", ident, instance ) )
 				return;
 		}
 
@@ -439,7 +439,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	#endif
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Cursor", player.GetIdentity(), instance ) )
 			return;
 
 		float distance = g_Game.ServerConfigGetInt("defaultVisibility");
@@ -517,7 +517,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_Location( string locName, array< string > guids, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Location", ident, instance ) )
 			return;
 
 		JMTeleportLocation location = NULL;
@@ -623,7 +623,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_AddLocation( string locName, string catName, vector playerpos, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Add", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Location.Add", ident, instance ) )
 			return;
 		
 		if (m_Settings.Types.Find(catName) == -1)
@@ -671,7 +671,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_RemoveLocation( JMTeleportLocation locName, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Remove", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Location.Remove", ident, instance ) )
 			return;
 
 		int id = -1;
@@ -768,7 +768,7 @@ class JMTeleportModule: JMRenderableModuleBase
 	private void Server_EditLocation( JMTeleportLocation target, string newName, string newCategory, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Admin.Player.Teleport.Location.Edit", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Admin.Player.Teleport.Location.Edit", ident, instance ) )
 			return;
 
 		if ( newName == "" )

@@ -1886,7 +1886,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetPosition", senderRPC, instance ) )
 			return;
 
 		Exec_RecordTransformHistory( previousPosition, previousOrientation, obj, senderRPC );
@@ -1933,7 +1933,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.View", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.View", senderRPC, instance ) )
 			return;
 
 		if ( !JMRPCThrottle.Allow( senderRPC.GetId(), "esp_log", LOG_MIN_INTERVAL_MS ) )
@@ -2047,7 +2047,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetPosition", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetPosition", senderRPC, instance ) )
 			return;
 
 		Exec_SetPosition( position, obj, senderRPC, instance );
@@ -2133,7 +2133,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetOrientation", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetOrientation", senderRPC ) )
 			return;
 
 		Exec_SetOrientation( orientation, obj, senderRPC, instance );
@@ -2214,7 +2214,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetHealth", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetHealth", senderRPC, instance ) )
 			return;
 
 		Exec_SetHealth( health, zone, obj, senderRPC, instance );
@@ -2285,7 +2285,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetAttachment", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetAttachment", senderRPC, instance ) )
 			return;
 
 		Exec_SetAttachment( slotId, className, obj, senderRPC, instance );
@@ -2305,7 +2305,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.SetAttachment", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.SetAttachment", senderRPC, instance ) )
 			return;
 
 		Exec_RemoveAttachment( slotId, obj, senderRPC, instance );
@@ -3473,7 +3473,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( permission, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( permission, senderRPC, instance ) )
 			return;
 
 		Exec_ObjectAction( action, ivalue, fvalue, obj, senderRPC, instance );
@@ -3555,7 +3555,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Delete", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.Delete", senderRPC, instance ) )
 			return;
 
 		Exec_DeleteObject( obj, senderRPC, instance );
@@ -3613,7 +3613,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Build", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.BaseBuilding.Build", senderRPC, instance ) )
 			return;
 
 		BaseBuildingBase bb;
@@ -3669,7 +3669,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Dismantle", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.BaseBuilding.Dismantle", senderRPC, instance ) )
 			return;
 
 		BaseBuildingBase bb;
@@ -3722,7 +3722,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.Repair", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.BaseBuilding.Repair", senderRPC, instance ) )
 			return;
 
 		BaseBuildingBase bb;
@@ -3806,7 +3806,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.BaseBuilding.SetHealth", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.BaseBuilding.SetHealth", senderRPC, instance ) )
 			return;
 
 		BaseBuildingBase bb;
@@ -3858,7 +3858,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.Car.Unstuck", senderRPC, instance ) )
 			return;
 
 		Exec_Vehicle_Unstuck( obj, senderRPC, instance );
@@ -3904,7 +3904,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Car.Refuel", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.Car.Refuel", senderRPC, instance ) )
 			return;
 
 		Exec_Vehicle_Refuel( obj, senderRPC, instance );
@@ -3978,7 +3978,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "ESP.Object.Heal", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "ESP.Object.Heal", senderRPC, instance ) )
 			return;
 
 		Exec_Heal( obj, senderRPC, instance );
@@ -4015,7 +4015,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Items.CreateSet", senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Items.CreateSet", senderRPC, instance ) )
 			return;
 		
 		string name;
@@ -4105,7 +4105,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_DUPLICATEALL, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ESP_OBJECT_DUPLICATEALL, senderRPC, instance ) )
 			return;
 
 		set< Object > objects = new set< Object >;
@@ -4148,14 +4148,14 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_DELETEALL, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ESP_OBJECT_DELETEALL, senderRPC, instance ) )
 			return;
 
 		set< Object > objects = new set< Object >;
 		if ( !JM_GetSelected().DeserializeObjects( ctx, objects ) )
 			return;
 
-		if ( GetPermissionsManager().HasPermission( "Loadouts.Backup", senderRPC, instance ) )
+		if ( GetPermissionsManager().HasPermissionRPC( "Loadouts.Backup", senderRPC, instance ) )
 		{
 			if (!m_LoadoutModule)
 				Class.CastTo(m_LoadoutModule, GetModuleManager().GetModule(JMLoadoutModule));
@@ -4223,7 +4223,7 @@ class JMESPModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ESP_OBJECT_MOVETOCURSOR, senderRPC, instance ) )
 			return;
 		
 		vector cursor;

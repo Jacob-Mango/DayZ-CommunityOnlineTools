@@ -423,7 +423,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
 				return;
 
 			vector position;
@@ -585,7 +585,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( IsMissionHost() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
 				return;
 
 			Server_Leave( senderRPC, target );
@@ -607,7 +607,7 @@ class JMCameraModule: JMRenderableModuleBase
 		auto trace = CF_Trace_2(this, "RPC_Leave_Finish").Add(senderRPC).Add(target);
 #endif
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
 			return;
 
 		PlayerBase player;
@@ -626,7 +626,7 @@ class JMCameraModule: JMRenderableModuleBase
 		if ( g_Game.IsDedicatedServer() )
 		{
 			if ( !senderRPC ) return;
-			if ( !GetPermissionsManager().HasPermission( "Camera.View", senderRPC ) )
+			if ( !GetPermissionsManager().HasPermissionRPC( "Camera.View", senderRPC ) )
 				return;
 
 			vector position;

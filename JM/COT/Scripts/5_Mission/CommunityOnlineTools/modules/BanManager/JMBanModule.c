@@ -295,7 +295,7 @@ class JMBanModule : JMRenderableModuleBase
             return;
 
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_VIEW, sender ) )
+        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_VIEW, sender ) )
             return;
 
         PruneExpired();
@@ -341,7 +341,7 @@ class JMBanModule : JMRenderableModuleBase
         //! own ban RPC and the ESP action menu already check.
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_PLAYER_BAN, sender, instance ) )
+        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_PLAYER_BAN, sender, instance ) )
             return;
 
         string steamID;
@@ -374,7 +374,7 @@ class JMBanModule : JMRenderableModuleBase
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
+        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;
@@ -473,7 +473,7 @@ class JMBanModule : JMRenderableModuleBase
 
         JMPlayerInstance instance;
         if ( !sender ) return;
-        if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
+        if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_BAN_UNBAN, sender, instance ) )
             return;
 
         string steamID;

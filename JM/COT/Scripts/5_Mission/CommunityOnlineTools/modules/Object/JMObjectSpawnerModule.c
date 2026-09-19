@@ -385,7 +385,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_DeleteEntity( notnull Object obj, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Entity.Delete", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Entity.Delete", ident, instance ) )
 			return;
 
 		PlayerBase player;
@@ -488,7 +488,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnEntity_Position( string className, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance instance;
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Position", ident, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Entity.Spawn.Position", ident, instance ) )
 			return;
 
 		SpawnEntity(className, null, position, quantity, health, temp, itemState, instance);
@@ -551,7 +551,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 			return;
 
 		JMPlayerInstance callerInstance;
-		if ( !GetPermissionsManager().HasPermission( "Entity.Spawn.Inventory", ident, callerInstance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( "Entity.Spawn.Inventory", ident, callerInstance ) )
 			return;
 
 		for ( int i = 0; i < players.Count(); i++ )
@@ -625,7 +625,7 @@ class JMObjectSpawnerModule: JMRenderableModuleBase
 	private void Server_SpawnEntity_TargetInventory( string className, EntityAI targetEnt, vector position, float quantity, float health, float temp, int itemState, PlayerIdentity ident )
 	{
 		JMPlayerInstance callerInstance;
-		if (!GetPermissionsManager().HasPermission("Entity.Spawn.Inventory", ident, callerInstance))
+		if (!GetPermissionsManager().HasPermissionRPC("Entity.Spawn.Inventory", ident, callerInstance))
 			return;
 
 		SpawnEntity(className, targetEnt, position, quantity, health, temp, itemState, callerInstance);

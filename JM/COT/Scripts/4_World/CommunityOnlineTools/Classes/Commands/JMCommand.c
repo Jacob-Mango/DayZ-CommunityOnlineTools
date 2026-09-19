@@ -20,7 +20,7 @@ class JMCommand
 		if (!sender) return;
 
 		JMPlayerInstance instance;
-		if (!GetPermissionsManager().HasPermission(m_Permission, sender, instance)) return;
+		if (!GetPermissionsManager().HasPermissionRPC(m_Permission, sender, instance)) return;
 
 		auto cmdParamList = new JMCommandParameterList(arguments);
 		auto params = new Param3<ref JMCommandParameterList, PlayerIdentity, JMPlayerInstance>(cmdParamList, sender, instance);

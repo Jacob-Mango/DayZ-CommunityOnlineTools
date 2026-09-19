@@ -120,7 +120,7 @@ class JMTerritoryModule: JMRenderableModuleBase
 			case JMTerritoryModuleRPC.RequestTerritories:
 			{
 				if (!sender) return;
-				if (!GetPermissionsManager().HasPermission("Expansion.Territory", sender, instance))
+				if (!GetPermissionsManager().HasPermissionRPC("Expansion.Territory", sender, instance))
 					return;
 
 				SendTerritoriesToClient(sender);
@@ -166,7 +166,7 @@ class JMTerritoryModule: JMRenderableModuleBase
 			case JMTerritoryModuleRPC.SetLevel:
 			{
 				if (!sender) return;
-				if (!GetPermissionsManager().HasPermission("Expansion.Territory.SetLevel", sender, instance))
+				if (!GetPermissionsManager().HasPermissionRPC("Expansion.Territory.SetLevel", sender, instance))
 					return;
 
 				int territoryID;

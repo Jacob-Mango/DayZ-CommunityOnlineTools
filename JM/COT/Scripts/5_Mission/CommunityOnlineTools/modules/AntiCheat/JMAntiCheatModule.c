@@ -935,7 +935,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ANTICHEAT_VIEW, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ANTICHEAT_VIEW, senderRPC, instance ) )
 			return;
 
 		ScriptRPC rpc = new ScriptRPC();
@@ -1115,7 +1115,7 @@ class JMAntiCheatModule : JMRenderableModuleBase
 
 		JMPlayerInstance instance;
 		if ( !senderRPC ) return;
-		if ( !GetPermissionsManager().HasPermission( JMConstants.PERM_ANTICHEAT_CLEAR, senderRPC, instance ) )
+		if ( !GetPermissionsManager().HasPermissionRPC( JMConstants.PERM_ANTICHEAT_CLEAR, senderRPC, instance ) )
 			return;
 
 		string guid;
