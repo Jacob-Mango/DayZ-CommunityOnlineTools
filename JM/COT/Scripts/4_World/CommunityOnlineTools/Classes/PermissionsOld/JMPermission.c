@@ -341,9 +341,12 @@ class JMPermission : Managed
 
 		foreach (auto child: Children)
 		{
-			#ifdef COT_DEBUGLOGS
-			CF_Log.Debug("Sending %1 %2", child.GetFullName(), child.Type.ToString());
+			#ifdef DIAG_DEVELOPER
+			#ifdef DZ_Expansion_Core
+			EXError.Info(this, string.Format("Sending permission %1 %2", child.GetFullName(), typename.EnumToString(JMPermissionType, child.Type)));
 			#endif
+			#endif
+
 			ctx.Write(child.Type);
 			child.OnSend(ctx);
 		}
@@ -356,26 +359,42 @@ class JMPermission : Managed
 
 		int count;
 		if (!ctx.Read(count))
+		{
+			CF.FormatError("Couldn't receive child permission count for %1", m_SerializedFullName);
 			return false;
+		}
 
 		if (count == -1)
 			return true;
 
 		if (count != Children.Count())
-			Error(string.Format("Received child count %1 for %2 does not match registered child count %3!", count, m_SerializedFullName, Children.Count()));
+		{
+			Error(string.Format("Received child permission count %1 for %2 does not match registered child count %3!", count, m_SerializedFullName, Children.Count()));
+			return false;
+		}
 
 		foreach (auto child: Children)
 		{
 			int type;
 			if (!ctx.Read(type))
+			{
+				CF.FormatError("Couldn't receive type for permission %1", child.GetFullName());
 				return false;
+			}
 
 			child.Type = type;
-			#ifdef COT_DEBUGLOGS
-			CF_Log.Debug("Received %1 %2", child.GetFullName(), child.Type.ToString());
+
+			#ifdef DIAG_DEVELOPER
+			#ifdef DZ_Expansion_Core
+			EXError.Info(this, string.Format("Received permission %1 %2", child.GetFullName(), typename.EnumToString(JMPermissionType, child.Type)));
 			#endif
+			#endif
+
 			if (!child.OnReceive(ctx))
+			{
+				CF.FormatError("Couldn't receive child permissions for %1 %2", child.GetFullName(), typename.EnumToString(JMPermissionType, child.Type));
 				return false;
+			}
 		}
 
 		return true;

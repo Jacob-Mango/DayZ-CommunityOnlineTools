@@ -584,7 +584,14 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		GetPermissionsManager().LoadRole( roleName, role );
 		if ( role )
 		{
-			role.RootPermission.OnReceive(ctx);
+			#ifdef DIAG_DEVELOPER
+			#ifdef DZ_Expansion_Core
+			EXError.Info(this, string.Format("Receiving permissions for role %1", roleName));
+			#endif
+			#endif
+
+			if (!role.RootPermission.OnReceive(ctx))
+				CF.FormatError("Couldn't receive permissions for role %1", roleName);
 		}
 
 		GetModuleManager().OnClientPermissionsUpdated();
@@ -599,6 +606,11 @@ class CommunityOnlineTools: CommunityOnlineToolsBase
 		if ( g_Game.IsServer() )
 		{
 			ScriptRPC rpc = new ScriptRPC();
+			#ifdef DIAG_DEVELOPER
+			#ifdef DZ_Expansion_Core
+			EXError.Info(this, string.Format("Sending permissions for role %1", role.Name));
+			#endif
+			#endif
 			rpc.Write( role.Name );
 			role.RootPermission.OnSend(rpc);
 			rpc.Send( NULL, JMRoleRPC.UpdateRole, true, toSendTo );

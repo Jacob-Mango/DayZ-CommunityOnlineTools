@@ -463,6 +463,49 @@ class JMPermissionManager
 			Error("Cannot register new permissions once mission is loaded!");
 		else
 			RootPermission.AddPermission( permission, permType, false );
+
+	#ifdef DIAG_DEVELOPER
+		//CF.FormatErrorEx("Registered permission %1 %2", ErrorExSeverity.INFO, permission, typename.EnumToString(JMPermissionType, permType));
+		FileHandle handle = OpenFile("$profile:COT_RegisteredPermissions.txt", FileMode.APPEND);
+		if (handle)
+		{
+			string stack;
+			DumpStackString(stack);
+
+			TStringArray lines = {};
+			stack.Split("\n", lines);
+
+			stack = "";
+
+			int lastIndex = lines.Count() - 1;
+			for (int i = lastIndex; i >= 0; --i)
+			{
+				if (i == lastIndex)
+				{
+					lines[i] = "";
+				}
+				else
+				{
+					string line = lines[i];
+					int a = line.IndexOf("#");
+					if (a > -1)
+					{
+						int b = line.IndexOf("(");
+						if (b > a)
+							lines[i] = line.Substring(0, a) + line.Substring(b, line.Length() - b - 1);
+					}
+				}
+			}
+
+			stack = string.Join("\n", lines);
+
+			FPrintln(handle, string.Format("Registered permission %1 %2", permission, typename.EnumToString(JMPermissionType, permType)));
+			FPrintln(handle, stack);
+			FPrintln(handle, "");
+
+			CloseFile(handle);
+		}
+	#endif
 	}
 
 	//! Mod-compat: DayZ-Expansion calls GetPermissionsManager().IsAdminToolsToggledOn()

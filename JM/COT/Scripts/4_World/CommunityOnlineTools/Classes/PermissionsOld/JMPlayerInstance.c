@@ -349,6 +349,11 @@ class JMPlayerInstance : Managed
 		ctx.Write( m_Steam64ID );
 		ctx.Write( m_Name );
 
+		#ifdef DIAG_DEVELOPER
+		#ifdef DZ_Expansion_Core
+		EXError.Info(this, string.Format("Sending permissions for player %1", m_Name));
+		#endif
+		#endif
 		m_RootPermission.OnSend( ctx );
 		ctx.Write( m_Roles );
 
@@ -368,6 +373,7 @@ class JMPlayerInstance : Managed
 		#ifdef JM_COT_DIAG_LOGGING
 		Print("OnRecievePermissions - GUID " + m_GUID + " update " + permissionsUpdate);
 		#endif
+
 		if ( !permissionsUpdate )
 			return;
 
@@ -376,8 +382,23 @@ class JMPlayerInstance : Managed
 
 		array< string > roles = new array< string >;
 
-		m_RootPermission.OnReceive( ctx );
-		ctx.Read( roles );
+		#ifdef DIAG_DEVELOPER
+		#ifdef DZ_Expansion_Core
+		EXError.Info(this, string.Format("Receiving permissions for player %1", m_Name));
+		#endif
+		#endif
+
+		if (!m_RootPermission.OnReceive( ctx ))
+		{
+			CF.FormatError("Couldn't receive permissions for player %1", m_Name);
+			return;
+		}
+
+		if (!ctx.Read( roles ))
+		{
+			CF.FormatError("Couldn't receive roles for player %1", m_Name);
+			return;
+		}
 
 		ClearRoles();
 		for ( int j = 0; j < roles.Count(); j++ )
