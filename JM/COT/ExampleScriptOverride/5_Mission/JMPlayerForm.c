@@ -11,9 +11,6 @@ modded class JMPlayerForm
 
 		// 1. Adding a new tab using clean 1-line dynamic tab registration
 		AddTab("Example", JMConstants.Lucide("star"), "BuildExampleTab");
-
-		// Register custom permission for injected panel control
-		GetPermissionsManager().RegisterPermission("Admin.Player.InjectedPanel");
 	}
 
 	// =========================================================================

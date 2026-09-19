@@ -8,6 +8,7 @@ class JMCustomExampleModule: JMRenderableModuleBase
 		GetPermissionsManager().RegisterPermission( JMConstants.PERM_CUSTOM_VIEW );
 		GetPermissionsManager().RegisterPermission( JMConstants.PERM_CUSTOM_ACTION );
 		GetPermissionsManager().RegisterPermission( JMConstants.PERM_RPC_EXECUTE );
+		GetPermissionsManager().RegisterPermission( JMConstants.PERM_PLAYER_INJECTED_PANEL );
 	}
 
 	override bool HasAccess()
