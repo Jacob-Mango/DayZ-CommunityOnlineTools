@@ -77,6 +77,8 @@ class JMWeatherFormTabSky
 		m_SliderStormLightning.SetCurrent( JMWeatherForm.DEFAULT_LIGHTNING_INTERVAL );
 		m_SliderStormLightning.SetTooltip( "#STR_COT_WEATHER_LIGHTNING_DESC" );
 
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		UIActionCard sandstormCard = UIActionManager.CreateCard( content, "#STR_COT_WEATHER_MODULE_SANDSTORM" );
 		sandstormCard.AddApplyButton( this, "OnClick_ApplySandstorm" );
 		Widget sandstormBody = UIActionManager.CreateGridSpacer( sandstormCard.GetContent(), 2, 1 );
@@ -105,6 +107,7 @@ class JMWeatherFormTabSky
 		m_SliderSandstormWindMagnitude.SetStepValue( 0.5 );
 		m_SliderSandstormWindMagnitude.SetCurrent( JMWeatherForm.DEFAULT_SANDSTORM_WINDMAGNITUDE );
 		m_SliderSandstormWindMagnitude.SetTooltip( "#STR_COT_WEATHER_SANDSTORM_WINDMAGNITUDE_DESC" );
+	#endif
 
 		m_ScrollerSky.UpdateScroller();
 	}

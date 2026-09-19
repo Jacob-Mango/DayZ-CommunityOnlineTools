@@ -141,9 +141,13 @@ modded class PlayerBase
 		if ( !isSick && GetModifiersManager() )
 		{
 			isSick = GetModifiersManager().IsModifierActive( eModifiers.MDF_CHOLERA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_INFLUENZA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SALMONELLA ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_POISONING ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_WOUND_INFECTION2 );
-			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE2 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE3 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE4 );
-			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_BREATH ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_EYES );
-			isSick = isSick || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_STATIC ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_DYNAMIC );
+
+		#ifndef DAYZ_1_29
+			//! 1.30+
+			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE1 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE2 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE3 ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_HEAT_STROKE4 );
+			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_BREATH ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_PARTICLES_EYES );
+			isSick |= GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_STATIC ) || GetModifiersManager().IsModifierActive( eModifiers.MDF_SANDSTORM_EXPOSURE_DYNAMIC );
+		#endif
 		}
 
 		playerVars[JMPlayerVariables.SICK] = isSick;

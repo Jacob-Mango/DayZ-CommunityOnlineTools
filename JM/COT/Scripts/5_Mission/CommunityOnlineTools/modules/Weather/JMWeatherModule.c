@@ -295,6 +295,8 @@ class JMWeatherModule: JMRenderableModuleBase
 		if ( !GetPermissionsManager().HasPermissionRPC( "Weather.View", ident ) )
 			return;
 
+	#ifndef DAYZ_1_29
+		//! 1.30+
 		bool sandstormActive = g_Game.GetWeather().GetSandstorm().IsActive();
 
 		bool evrActive;
@@ -306,6 +308,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Write( sandstormActive );
 		rpc.Write( evrActive );
 		rpc.Send( NULL, JMWeatherModuleRPC.SpecialWeatherStatus, true, ident );
+	#endif
 	}
 
 	private void RPC_SpecialWeatherStatus( ParamsReadContext ctx, PlayerIdentity senderRPC, Object target )
@@ -605,7 +608,7 @@ class JMWeatherModule: JMRenderableModuleBase
 		rpc.Write( wBase );
 		rpc.Send( NULL, JMWeatherModuleRPC.Storm, true, NULL );
 	}
-	
+
 	private void Send_SetSandstorm( JMWeatherSandstorm wBase )
 	{
 		ScriptRPC rpc = new ScriptRPC();

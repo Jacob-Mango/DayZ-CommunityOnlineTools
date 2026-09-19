@@ -81,6 +81,9 @@ class JMWeatherSandstorm: JMWeatherBase
 
 	override void Apply()
 	{
+	#ifndef DAYZ_1_29
+		//! 1.30+
+
 		if (Enabled == -1)
 			return;
 
@@ -121,6 +124,7 @@ class JMWeatherSandstorm: JMWeatherBase
 			if (sandstorm.IsActive())
 				sandstorm.Stop( clampedDuration, true );
 		}
+	#endif
 	}
 
 	//! Start/Stop have no forecast to read back, only the live on/off state -
@@ -129,6 +133,9 @@ class JMWeatherSandstorm: JMWeatherBase
 	//! the preset was authored with.
 	override void SetFromWorld()
 	{
+	#ifndef DAYZ_1_29
+		//! 1.30+
+
 		//! Unlike Fog/Rain/etc (JMWeatherPhenomenon, reading vanilla
 		//! WeatherPhenomenon forecasts the engine replicates to clients),
 		//! SandstormController's active flag is server-only state with no
@@ -147,6 +154,7 @@ class JMWeatherSandstorm: JMWeatherBase
 			Enabled = 1;
 		else
 			Enabled = 0;
+	#endif
 	}
 
 	override void Log( PlayerIdentity pidentLog )

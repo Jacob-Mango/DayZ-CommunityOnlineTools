@@ -153,12 +153,16 @@ class JMWorldConditions
 		if ( !weather )
 			return WEATHER_CLEAR;
 
+	#ifndef DAYZ_1_29
+		//! 1.30+
+
 		//! Sandstorm forces overcast/wind and zeroes rain while active, which
 		//! would otherwise misclassify it as plain overcast - the live/active
 		//! state (not the forecast, which has nothing to say about it) always
 		//! wins outright.
 		if ( weather.GetSandstorm() && weather.GetSandstorm().IsActive() )
 			return WEATHER_SANDSTORM;
+	#endif
 
 		float snow = ReadPhenomenon( weather.GetSnowfall(), forecast );
 

@@ -1,3 +1,5 @@
+#ifndef DAYZ_1_29
+//! 1.30+
 modded class PPERequester_SandstormEffect
 {
 	//! An admin inspecting players/events from the free spectator camera should
@@ -18,3 +20,4 @@ modded class PPERequester_SandstormEffect
 		super.SetTargetIntensity( intensity );
 	}
 }
+#endif
