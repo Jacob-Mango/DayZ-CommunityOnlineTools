@@ -508,18 +508,6 @@ class JMPermissionManager
 	#endif
 	}
 
-	//! Mod-compat: DayZ-Expansion calls GetPermissionsManager().IsAdminToolsToggledOn()
-	//! from ~25 sites across BaseBuilding / Core (recipes, user actions, territory).
-	//! Expansion supplies this via `modded class JMPermissionManager` when JM_COT is
-	//! defined, but defining it here means the symbol resolves even if Expansion's
-	//! modded class is absent, load-ordered differently, or its COT block is compiled
-	//! out. Expansion's modded override returns the same value, so behaviour is
-	//! identical whichever definition wins.
-	bool IsAdminToolsToggledOn()
-	{
-		return GetCommunityOnlineToolsBase().IsActive();
-	}
-
 	array< string > Serialize()
 	{
 		auto trace = CF_Trace_1(this, "Serialize").Add(RootPermission.Children.Count());
