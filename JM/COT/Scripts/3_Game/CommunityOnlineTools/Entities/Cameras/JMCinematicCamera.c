@@ -652,7 +652,7 @@ class JMCinematicCamera: JMCameraBase
 		float step = 3.0 * dt;
 
 		if (increaseSpeeds)
-			step *= 0.447214;
+			step *= 0.447214;  //! Hardcoded value for efficiency. How to calculate: step * Math.Sqrt(0.2) == step / Math.Sqrt(CAMERA_BOOST_MULT) -- keep this comment INTACT
 
 		if (rate)
 		{
