@@ -1,14 +1,19 @@
-# dz-project-manager overrides
 /dz-project-manager.exe
 /.logs
 /graphify-out
 /ai
 
-# AI & Project Manager Settings
-/.claude
-/.dz-project-manager
-/CLAUDE.md
-/GEMINI.md
-/docs
+.vscode/
+.vs/
 
+.claude/*
+!.claude/skills/
+!.claude/skills/**
+.vscode/
+.vs/
+.logs/
+
+.dz-project-manager/local.toml
+.dz-project-manager/steam_workshop.json
+.dz-project-manager/.steam-workshop-last-online-refresh
 
