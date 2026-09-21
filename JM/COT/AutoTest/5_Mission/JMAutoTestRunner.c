@@ -96,6 +96,10 @@ static void JMAutoTest_RunAll()
 	JMAutoTest_EndSuite("JMWeatherModule full RPC sweep", pB, fB);
 
 	pB = g_JMAutoTestPassCount; fB = g_JMAutoTestFailCount;
+	JMAutoTest_JMWeatherStateMachine();
+	JMAutoTest_EndSuite("JMWeatherStateMachine data logic", pB, fB);
+
+	pB = g_JMAutoTestPassCount; fB = g_JMAutoTestFailCount;
 	JMAutoTest_JMObjectSpawnerModule();
 	JMAutoTest_EndSuite("JMObjectSpawnerModule full RPC sweep", pB, fB);
 

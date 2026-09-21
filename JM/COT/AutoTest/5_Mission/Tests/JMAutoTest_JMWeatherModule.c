@@ -111,6 +111,14 @@ static void JMAutoTest_JMWeatherModule()
 	mod.OnRPC(NULL, NULL, JMWeatherModuleRPC.DynamicWeather, JMAutoTest_EmptyReadContext());
 	JMAutoTest_Canary("JMWeatherModuleRPC.DynamicWeather");
 
+	JMAutoTest_ExpectCanary();
+	mod.OnRPC(NULL, NULL, JMWeatherModuleRPC.DynamicControl, JMAutoTest_EmptyReadContext());
+	JMAutoTest_Canary("JMWeatherModuleRPC.DynamicControl");
+
+	JMAutoTest_ExpectCanary();
+	mod.OnRPC(NULL, NULL, JMWeatherModuleRPC.DynamicStatus, JMAutoTest_EmptyReadContext());
+	JMAutoTest_Canary("JMWeatherModuleRPC.DynamicStatus");
+
 	JMAutoTest_CanaryCheck("JMWeatherModule full RPC sweep");
 }
 
