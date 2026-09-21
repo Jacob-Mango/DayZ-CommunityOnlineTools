@@ -192,9 +192,7 @@ class UIActionSearchBox: UIActionBase
 
 	void SetSuggestions( notnull array<string> items )
 	{
-		m_Suggestions.Clear();
-		foreach ( string s: items )
-			m_Suggestions.Insert( s );
+		m_Suggestions.Copy(items);
 		m_SelectedIndex = -1;
 		RebuildList();
 	}
