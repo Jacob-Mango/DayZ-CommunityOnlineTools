@@ -430,10 +430,6 @@ class COTModule : JMModuleBase
 		if ( !g_Game )
 			return;
 
-		Widget focus = GetFocus();
-		if ( focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) ) && focus.IsVisible() )
-			return;
-
 		bool keyDown;
 		if (KeyState( KeyCode.KC_ESCAPE ) > 0)
 			keyDown = true;
