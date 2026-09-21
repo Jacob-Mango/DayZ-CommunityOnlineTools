@@ -152,7 +152,7 @@ class JMLootAnalysisHoverInfo
 		if (detail.m_AmmoCount >= 0)
 		{
 			if (m_QuantityLabel)
-				m_QuantityLabel.SetText("Ammo");
+				m_QuantityLabel.SetText("#STR_COT_LOOTANALYSIS_AMMO");
 
 			if (m_QuantityValue)
 			{
@@ -167,7 +167,7 @@ class JMLootAnalysisHoverInfo
 		else
 		{
 			if (m_QuantityLabel)
-				m_QuantityLabel.SetText("Quantity");
+				m_QuantityLabel.SetText("#STR_COT_LOOTANALYSIS_QUANTITY");
 
 			SetLevelField(m_QuantityValue, detail.m_QuantityPct);
 		}
@@ -176,7 +176,7 @@ class JMLootAnalysisHoverInfo
 		{
 			if (detail.m_LifetimeSeconds < 0)
 			{
-				m_LifetimeValue.SetText("N/A");
+				m_LifetimeValue.SetText("#STR_COT_GENERIC_NA");
 				m_LifetimeValue.SetColor(JMTheme.TEXT_DISABLED);
 			}
 			else
@@ -199,7 +199,7 @@ class JMLootAnalysisHoverInfo
 
 		if (fraction < 0)
 		{
-			widget.SetText("N/A");
+			widget.SetText("#STR_COT_GENERIC_NA");
 			widget.SetColor(JMTheme.TEXT_DISABLED);
 			return;
 		}

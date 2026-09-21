@@ -180,7 +180,7 @@ class JMCOTSideBar: COT_ScriptedWidgetEventHandler
 			// Set the category label and icon
 			TextWidget catTtl = TextWidget.Cast( catWidget.FindAnyWidget( "cat_ttl" ) );
 			if ( catTtl )
-				catTtl.SetText( catName );
+				catTtl.SetText( JMSideBarConfig.GetCategoryDisplayName( catName ) );
 
 			ImageWidget catIcon = ImageWidget.Cast( catWidget.FindAnyWidget( "cat_icon" ) );
 			if ( catIcon )

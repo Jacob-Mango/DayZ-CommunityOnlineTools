@@ -58,7 +58,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Health"
+   text "#STR_COT_VEHICLE_HEALTH"
    "exact text" 1
    "exact text size" 13
    "text halign" left
@@ -94,7 +94,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Fuel"
+   text "#STR_COT_VEHICLE_FUEL"
    "exact text" 1
    "exact text size" 13
    "text halign" left
@@ -130,7 +130,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Coolant"
+   text "#STR_COT_VEHICLE_COOLANT"
    "exact text" 1
    "exact text size" 13
    "text halign" left
@@ -166,7 +166,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Speed"
+   text "#STR_COT_VEHICLE_SPEED"
    "exact text" 1
    "exact text size" 13
    "text halign" left
@@ -202,7 +202,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Lock"
+   text "#STR_COT_VEHICLE_LOCK"
    "exact text" 1
    "exact text size" 13
    "text halign" left
@@ -238,7 +238,7 @@ PanelWidgetClass JMVehiclesHoverInfo {
    vexactsize 1
    style Light
    font "gui/fonts/sdf_MetronLight24"
-   text "Crew"
+   text "#STR_COT_VEHICLE_CREW"
    "exact text" 1
    "exact text size" 13
    "text halign" left

@@ -62,24 +62,24 @@ class JMVehiclesFormTabInfo: JMFormTab
 
 		UIActionCard infoCard = UIActionManager.CreateCard( infoContent, "#STR_COT_VEHICLE_INFORMATION_TITLE" );
 		Widget gridInfoA = UIActionManager.CreateGridSpacer( infoCard.GetContent(), 10, 1 );
-			m_VehicleName           = CreateCopyableText( gridInfoA, "Name:", "Value" );
-			m_VehicleClassName      = CreateCopyableText( gridInfoA, "ClassName:", "Value" );
-			m_VehicleStatus         = CreateCopyableText( gridInfoA, "Status:", "Value" );
-			m_VehicleType           = CreateCopyableText( gridInfoA, "Type:", "Value" );
-			m_VehicleID             = CreateCopyableText( gridInfoA, "ID:", "Value" );
+			m_VehicleName           = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_NAME", "Value" );
+			m_VehicleClassName      = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_CLASSNAME", "Value" );
+			m_VehicleStatus         = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_STATUS", "Value" );
+			m_VehicleType           = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_TYPE", "Value" );
+			m_VehicleID             = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_ID", "Value" );
 			m_VehiclePersistentIDAB = CreateCopyableText( gridInfoA, "ID AB:", "Value" );
 			m_VehiclePersistentIDCD = CreateCopyableText( gridInfoA, "ID CD:", "Value" );
-			m_VehiclePosition       = CreateCopyableText( gridInfoA, "Position:", "Value" );
-			m_VehicleRotation       = CreateCopyableText( gridInfoA, "Rotation:", "Value" );
-			m_VehicleCoolant        = CreateCopyableText( gridInfoA, "Coolant:", "Value" );
+			m_VehiclePosition       = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_POSITION", "Value" );
+			m_VehicleRotation       = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_ROTATION", "Value" );
+			m_VehicleCoolant        = CreateCopyableText( gridInfoA, "#STR_COT_VEHICLE_COOLANT", "Value" );
 
 		Widget gridInfoB = UIActionManager.CreateGridSpacer( infoCard.GetContent(), 7, 1 );
-			m_VehicleKeys            = CreateCopyableText( gridInfoB, "Keys:", "Value" );
-			m_VehicleInfoOwner       = CreateCopyableText( gridInfoB, "Owner:", "Value" );
-			m_VehicleLastDriverUID   = CreateCopyableText( gridInfoB, "Driver UID:", "N/A" );
-			m_VehicleLastDriverSteam = CreateCopyableText( gridInfoB, "Driver Steam:", "N/A" );
-			m_VehicleLastDriverGUID  = CreateCopyableText( gridInfoB, "Driver GUID:", "N/A" );
-			m_VehicleCovered         = CreateCopyableText( gridInfoB, "Covered:", "Value" );
+			m_VehicleKeys            = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_KEYS", "Value" );
+			m_VehicleInfoOwner       = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_OWNER", "Value" );
+			m_VehicleLastDriverUID   = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_DRIVER_UID", "#STR_COT_GENERIC_NA" );
+			m_VehicleLastDriverSteam = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_DRIVER_STEAM", "#STR_COT_GENERIC_NA" );
+			m_VehicleLastDriverGUID  = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_DRIVER_GUID", "#STR_COT_GENERIC_NA" );
+			m_VehicleCovered         = CreateCopyableText( gridInfoB, "#STR_COT_VEHICLE_COVERED", "Value" );
 			UIActionManager.CreateText( gridInfoB, "" );
 
 		m_VehicleInfoScroller.UpdateScroller();
@@ -109,7 +109,7 @@ class JMVehiclesFormTabInfo: JMFormTab
 		m_VehiclePosition.SetText( vehicle.m_Position.ToString() );
 		m_VehicleRotation.SetText( vehicle.m_Orientation.ToString() );
 
-		string coolantText = "N/A";
+		string coolantText = "#STR_COT_GENERIC_NA";
 		if ( vehicle.m_CoolantPct >= 0 )
 			coolantText = Math.Round( vehicle.m_CoolantPct * 100 ).ToString() + "%";
 		if ( m_VehicleCoolant )
@@ -117,33 +117,33 @@ class JMVehiclesFormTabInfo: JMFormTab
 
 		string hasKeys;
 		if ( vehicle.m_HasKeys )
-			hasKeys = "Yes";
+			hasKeys = "#STR_COT_GENERIC_YES";
 		else
-			hasKeys = "No";
+			hasKeys = "#STR_COT_GENERIC_NO";
 		m_VehicleKeys.SetText( hasKeys );
 		if ( vehicle.m_OwnerName != "" )
 			m_VehicleInfoOwner.SetText( vehicle.m_OwnerName + " (" + vehicle.m_OwnerUID + ")" );
 		else if ( vehicle.m_LastDriverSteam != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverSteam + " (last driver)" );
+			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverSteam + " (" + Widget.TranslateString( "#STR_COT_VEHICLE_LAST_DRIVER" ) + ")" );
 		else if ( vehicle.m_LastDriverUID != "" )
-			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverUID + " (last driver)" );
+			m_VehicleInfoOwner.SetText( vehicle.m_LastDriverUID + " (" + Widget.TranslateString( "#STR_COT_VEHICLE_LAST_DRIVER" ) + ")" );
 		else
-			m_VehicleInfoOwner.SetText( "Unknown" );
+			m_VehicleInfoOwner.SetText( "#STR_COT_GENERIC_UNKNOWN" );
 
 		if ( vehicle.m_LastDriverUID != "" )
 			m_VehicleLastDriverUID.SetText( vehicle.m_LastDriverUID );
 		else
-			m_VehicleLastDriverUID.SetText( "N/A" );
+			m_VehicleLastDriverUID.SetText( "#STR_COT_GENERIC_NA" );
 
 		if ( vehicle.m_LastDriverSteam != "" )
 			m_VehicleLastDriverSteam.SetText( vehicle.m_LastDriverSteam );
 		else
-			m_VehicleLastDriverSteam.SetText( "N/A" );
+			m_VehicleLastDriverSteam.SetText( "#STR_COT_GENERIC_NA" );
 
 		if ( vehicle.m_LastDriverGUID != "" )
 			m_VehicleLastDriverGUID.SetText( vehicle.m_LastDriverGUID );
 		else
-			m_VehicleLastDriverGUID.SetText( "N/A" );
+			m_VehicleLastDriverGUID.SetText( "#STR_COT_GENERIC_NA" );
 
 		string isCovered;
 		if ( vehicle.m_IsCover )

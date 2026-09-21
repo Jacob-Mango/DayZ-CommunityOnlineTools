@@ -208,7 +208,7 @@ class JMVehiclesHoverInfo
 
 		if ( fraction < 0 )
 		{
-			widget.SetText( "N/A" );
+			widget.SetText( "#STR_COT_GENERIC_NA" );
 			widget.SetColor( JMTheme.TEXT_DISABLED );
 			return;
 		}
@@ -235,16 +235,16 @@ class JMVehiclesHoverInfo
 	#ifdef EXPANSIONMODVEHICLE
 		if ( vehicle.m_IsLocked )
 		{
-			m_LockValue.SetText( "Locked" );
+			m_LockValue.SetText( "#STR_COT_VEHICLE_LOCKED" );
 			m_LockValue.SetColor( JMTheme.WARNING );
 		}
 		else
 		{
-			m_LockValue.SetText( "Unlocked" );
+			m_LockValue.SetText( "#STR_COT_VEHICLE_UNLOCKED" );
 			m_LockValue.SetColor( JMTheme.SUCCESS );
 		}
 	#else
-		m_LockValue.SetText( "N/A" );
+		m_LockValue.SetText( "#STR_COT_GENERIC_NA" );
 		m_LockValue.SetColor( JMTheme.TEXT_DISABLED );
 	#endif
 	}
@@ -304,7 +304,7 @@ class JMVehiclesHoverInfo
 			return;
 
 		int kph = Math.Round( vehicle.m_SpeedKph );
-		m_SpeedValue.SetText( kph.ToString() + " km/h" );
+		m_SpeedValue.SetText( kph.ToString() + " " + Widget.TranslateString( "#STR_COT_VEHICLE_KMH" ) );
 
 		if ( vehicle.m_SpeedKph >= SPEED_IDLE )
 			m_SpeedValue.SetColor( JMTheme.ACCENT_HOVER );

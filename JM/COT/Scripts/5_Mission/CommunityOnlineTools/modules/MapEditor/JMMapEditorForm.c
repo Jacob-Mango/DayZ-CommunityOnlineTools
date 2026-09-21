@@ -1038,8 +1038,8 @@ class JMMapEditorForm : JMFormBase
 		JMMapEditorEntry sel = FindEntry( m_SelectedId );
 		if ( sel )
 		{
-			m_SelId.SetText( "ID: " + m_SelectedId.ToString() );
-			m_SelClass.SetText( "Class: " + sel.ClassName );
+			m_SelId.SetText( Widget.TranslateString( "#STR_COT_MAPEDITOR_ID" ) + ": " + m_SelectedId.ToString() );
+			m_SelClass.SetText( Widget.TranslateString( "#STR_COT_MAPEDITOR_CLASS" ) + ": " + sel.ClassName );
 			m_PosX.SetText( sel.Position[0].ToString() );
 			m_PosY.SetText( sel.Position[1].ToString() );
 			m_PosZ.SetText( sel.Position[2].ToString() );
@@ -1106,7 +1106,7 @@ class JMMapEditorForm : JMFormBase
 			return;
 		m_Module.DeleteObject( m_SelectedId );
 		m_SelectedId = -1;
-		m_SelId.SetText( "No selection" );
+		m_SelId.SetText( "#STR_COT_MAPEDITOR_NO_SELECTION" );
 		m_SelClass.SetText( "" );
 	}
 

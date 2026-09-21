@@ -22,6 +22,21 @@ class JMSideBarConfig
 	static const string CATEGORY_EXPANSION = "Expansion";
 	static const string CATEGORY_OTHER     = "Other";
 
+	// Returns the localized display name for a given category id.
+	static string GetCategoryDisplayName( string catName )
+	{
+		if ( catName == CATEGORY_PLAYERS ) return "#STR_COT_CATEGORY_PLAYERS";
+		if ( catName == CATEGORY_WORLD ) return "#STR_COT_CATEGORY_WORLD";
+		if ( catName == CATEGORY_ITEMS ) return "#STR_COT_CATEGORY_ITEMS";
+		if ( catName == CATEGORY_VEHICLES ) return "#STR_COT_CATEGORY_VEHICLES";
+		if ( catName == CATEGORY_EVENTS ) return "#STR_COT_CATEGORY_EVENTS";
+		if ( catName == CATEGORY_SERVER ) return "#STR_COT_CATEGORY_SERVER";
+		if ( catName == CATEGORY_EXPANSION ) return "#STR_COT_CATEGORY_EXPANSION";
+		if ( catName == CATEGORY_OTHER ) return "#STR_COT_CATEGORY_OTHER";
+
+		return catName;
+	}
+
 	// Returns the icon path for a given category name.
 	// Unknown categories fall back to the settings icon.
 	static string GetCategoryIcon( string catName )
