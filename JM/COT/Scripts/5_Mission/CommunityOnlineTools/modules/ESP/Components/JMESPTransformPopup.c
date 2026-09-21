@@ -76,7 +76,7 @@ class JMESPTransformPopup: UIActionBase
 	//! the 10px popup_root insets the content sits in horizontally.
 	static const float CONTENT_BOTTOM_PAD = 10;
 
-	bool IsOpen()
+	override bool IsOpen()
 	{
 		return m_Open;
 	}

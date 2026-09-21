@@ -434,7 +434,9 @@ class COTModule : JMModuleBase
 		if ( focus && ( focus.IsInherited( EditBoxWidget ) || focus.IsInherited( MultilineEditBoxWidget ) ) && focus.IsVisible() )
 			return;
 
-		bool keyDown = KeyState( KeyCode.KC_ESCAPE ) > 0;
+		bool keyDown;
+		if (KeyState( KeyCode.KC_ESCAPE ) > 0)
+			keyDown = true;
 		bool isEdge = keyDown && !m_EscapeKeyDown;
 		m_EscapeKeyDown = keyDown;
 

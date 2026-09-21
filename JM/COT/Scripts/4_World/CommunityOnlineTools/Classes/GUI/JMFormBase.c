@@ -238,7 +238,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 
 		foreach ( COT_ScriptedWidgetEventHandler overlay : m_FloatingOverlays )
 		{
-			if ( overlay && overlay.IsVisible() )
+			if ( overlay && overlay.IsOpen() )
 				return true;
 		}
 
@@ -582,7 +582,7 @@ class JMFormBase: COT_ScriptedWidgetEventHandler
 		{
 			COT_ScriptedWidgetEventHandler overlay = m_FloatingOverlays[i];
 
-			if ( overlay && overlay.IsVisible() )
+			if ( overlay && overlay.IsOpen() )
 			{
 				overlay.Close();
 				closedAny = true;

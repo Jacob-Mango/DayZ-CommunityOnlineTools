@@ -153,7 +153,7 @@ class UIActionContextMenu: UIActionBase
 		return m_LastClickedId;
 	}
 
-	bool IsOpen()
+	override bool IsOpen()
 	{
 		return m_Open;
 	}

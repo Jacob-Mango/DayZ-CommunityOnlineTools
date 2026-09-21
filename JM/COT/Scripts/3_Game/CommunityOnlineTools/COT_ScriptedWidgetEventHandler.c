@@ -1,12 +1,16 @@
 class COT_ScriptedWidgetEventHandler: ScriptedWidgetEventHandler
 {
-	//! Whether this control is currently shown - used by the Escape priority
-	//! chain (JMFormBase.HasOpenOverlay/CloseOpenOverlays) to tell an open
-	//! popup from a closed-but-still-registered one. Same reasoning as
-	//! Close(): declared here so a form's overlay registry, typed to this
-	//! common ancestor, can ask any registered control without knowing its
-	//! concrete type. No-op/false on the base.
+	//! Is the (root) layout element visible?
 	bool IsVisible()
+	{
+		return false;
+	}
+
+	//! Is the control considered "open"? (i.e. a popup menu on a button)
+	//! @note not functionally the same as IsVisible
+	//! IsVisible can be true on controls registered as overlays while IsOpen can depend on control state
+	//! (i.e. search box with suggestion list)
+	bool IsOpen()
 	{
 		return false;
 	}

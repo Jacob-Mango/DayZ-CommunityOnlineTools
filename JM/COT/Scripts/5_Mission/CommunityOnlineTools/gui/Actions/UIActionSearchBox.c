@@ -76,6 +76,16 @@ class UIActionSearchBox: UIActionBase
 		return m_PreviewText;
 	}
 
+	override bool IsOpen()
+	{
+		return m_ListOpen;
+	}
+
+	override void Close()
+	{
+		SetListOpen( false );
+	}
+
 	protected bool IsListWidget( Widget widget )
 	{
 		if ( !widget || !m_ListPanel )
