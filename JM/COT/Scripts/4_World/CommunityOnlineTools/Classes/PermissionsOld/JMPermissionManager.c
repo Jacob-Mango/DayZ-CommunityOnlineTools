@@ -46,6 +46,11 @@ class JMPermissionManager
 		Assert_Null( Roles );
 		Assert_Null( SteamToGUID );
 		Assert_Null( RootPermission );
+
+	#ifdef DIAG_DEVELOPER
+		if (FileExist("$profile:COT_RegisteredPermissions.txt"))
+			DeleteFile("$profile:COT_RegisteredPermissions.txt");
+	#endif
 	}
 
 	string GetClientGUID()

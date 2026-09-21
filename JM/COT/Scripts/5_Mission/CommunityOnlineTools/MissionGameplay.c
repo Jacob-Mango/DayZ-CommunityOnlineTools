@@ -240,11 +240,6 @@ modded class MissionGameplay
 		
 		if ( IsMissionOffline() )
 			GetPermissionsManager().OnClientDisconnected( JMConstants.OFFLINE_GUID, m_OfflineInstance );
-
-	#ifdef DIAG_DEVELOPER
-		if (FileExist("$profile:COT_RegisteredPermissions.txt"))
-			DeleteFile("$profile:COT_RegisteredPermissions.txt");
-	#endif
 	}
 
 	override void OnUpdate( float timeslice )

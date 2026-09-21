@@ -64,11 +64,6 @@ modded class MissionServer
 		g_cotBase.OnFinish();
 
 		super.OnMissionFinish();
-
-	#ifdef DIAG_DEVELOPER
-		if (FileExist("$profile:COT_RegisteredPermissions.txt"))
-			DeleteFile("$profile:COT_RegisteredPermissions.txt");
-	#endif
 	}
 
 	override void OnUpdate( float timeslice )
