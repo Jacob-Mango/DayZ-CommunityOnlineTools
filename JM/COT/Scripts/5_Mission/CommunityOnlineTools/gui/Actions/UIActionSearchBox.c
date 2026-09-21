@@ -420,10 +420,17 @@ class UIActionSearchBox: UIActionBase
 		UpdatePlaceholder();
 		UpdatePreview();
 
-		if ( m_ListPanel && m_Suggestions.Count() > 0 )
+		if ( m_ListPanel )
 		{
-			RebuildList();
-			SetListOpen( true );
+			if (m_Suggestions.Count() > 0)
+			{
+				RebuildList();
+				SetListOpen( true );
+			}
+			else if (!current)
+			{
+				SetListOpen( false );
+			}
 		}
 
 		g_Game.GetCallQueue( CALL_CATEGORY_GUI ).Remove( FireChange );
