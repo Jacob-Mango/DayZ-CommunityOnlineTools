@@ -36,6 +36,12 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	protected string m_EditBoxValue;
 	string m_SelectedCallback;
 
+	//! The buttons are bare hit boxes over a fill and a ring, so a hover has to be
+	//! painted by hand: what each was before the pointer arrived, by button.
+	protected ref array<int> m_RestFill = { 0, 0, 0 };
+	protected ref array<int> m_RestRing = { 0, 0, 0 };
+
+
 	void JMConfirmation() 
 	{
 	#ifdef DIAG
@@ -69,6 +75,13 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	string GetEditBoxValue()
 	{
 		return m_EditBoxValue;
+	}
+
+	//! Start an EDIT prompt with text already in the box, for renaming something.
+	void SetEditBoxText( string text )
+	{
+		if ( m_EditBox )
+			m_EditBox.SetText( text );
 	}
 
 	//bool GetEditBoxValueFloat(out float value, float min = -float.MAX, float max = float.MAX)
@@ -366,6 +379,82 @@ class JMConfirmation: COT_ScriptedWidgetEventHandler
 	void OnHide() 
 	{
 		CommunityOnlineToolsBase.ForceDisableInputs(false);
+	}
+
+	protected int ButtonIndex( Widget w )
+	{
+		if ( w == NULL )
+			return -1;
+
+		if ( w == m_Button1 )
+			return 0;
+
+		if ( w == m_Button2 )
+			return 1;
+
+		if ( w == m_Button3 )
+			return 2;
+
+		return -1;
+	}
+
+	//! The lit fill for a button. The confirming button (the last one) is green and
+	//! stays green; every other button is the neutral grey.
+	protected int HoverFill( int index )
+	{
+		bool confirming = ( index == 2 );
+
+		if ( index == 1 && m_Buttons2Panel && m_Buttons2Panel.IsVisible() )
+			confirming = true;
+
+		if ( confirming )
+			return ARGB( 240, 16, 138, 100 );
+
+		return JMTheme.BUTTON_FILL_HOVER;
+	}
+
+	override bool OnMouseEnter( Widget w, int x, int y )
+	{
+		int index = ButtonIndex( w );
+
+		if ( index < 0 )
+			return false;
+
+		Widget fill = w.FindAnyWidget( "confirmation_button_fill" );
+		Widget ring = w.FindAnyWidget( "confirmation_button_ring" );
+
+		if ( fill )
+		{
+			m_RestFill[index] = fill.GetColor();
+			fill.SetColor( HoverFill( index ) );
+		}
+
+		if ( ring )
+		{
+			m_RestRing[index] = ring.GetColor();
+			ring.SetColor( JMTheme.BUTTON_OUTLINE_HOVER );
+		}
+
+		return true;
+	}
+
+	override bool OnMouseLeave( Widget w, Widget enterW, int x, int y )
+	{
+		int index = ButtonIndex( w );
+
+		if ( index < 0 )
+			return false;
+
+		Widget fill = w.FindAnyWidget( "confirmation_button_fill" );
+		Widget ring = w.FindAnyWidget( "confirmation_button_ring" );
+
+		if ( fill )
+			fill.SetColor( m_RestFill[index] );
+
+		if ( ring )
+			ring.SetColor( m_RestRing[index] );
+
+		return true;
 	}
 
 	protected void ShowEditBox( bool show )

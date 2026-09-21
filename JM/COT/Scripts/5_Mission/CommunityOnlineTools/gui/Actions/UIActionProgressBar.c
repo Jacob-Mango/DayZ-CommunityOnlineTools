@@ -9,6 +9,11 @@ class UIActionProgressBar: UIActionBase
 	protected int   m_FillColor;
 	static const float ANIM_SPEED = 3.0; // fraction per second
 
+	//! Text of the caller's own in place of the percentage, for a bar whose fill
+	//! means something a percentage would not say (a countdown: "12:30 / 30:00").
+	protected string m_BarText;
+	protected bool   m_HasBarText;
+
 	float GetProgress()
 	{
 		return m_TargetValue;
@@ -30,6 +35,24 @@ class UIActionProgressBar: UIActionBase
 	{
 		if ( m_Text )
 			m_Text.Show( show );
+	}
+
+	//! Show this text on the bar instead of the percentage.
+	void SetBarText( string text )
+	{
+		m_BarText    = text;
+		m_HasBarText = true;
+
+		if ( m_Text )
+			m_Text.SetText( text );
+	}
+
+	//! Back to the percentage.
+	void ClearBarText()
+	{
+		m_HasBarText = false;
+
+		ApplyFill();
 	}
 
 	override void OnInit()
@@ -93,7 +116,12 @@ class UIActionProgressBar: UIActionBase
 		if ( m_Fill )
 			SetWidgetWidth( m_Fill, m_Value );
 
-		if ( m_Text )
+		if ( !m_Text )
+			return;
+
+		if ( m_HasBarText )
+			m_Text.SetText( m_BarText );
+		else
 			m_Text.SetText( string.Format( "%1%%", Math.Round( m_TargetValue * 100 ) ) );
 	}
 }
